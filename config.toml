@@ -1,8 +1,9 @@
-# The URL the site will be built for
 base_url = "https://contextgeneric.dev"
 
+theme = "juice"
+
 # Whether to automatically compile all Sass files in the sass directory
-compile_sass = false
+compile_sass = true
 
 # Whether to build a search index to be used later on by a JavaScript library
 build_search_index = true
@@ -13,4 +14,5 @@ build_search_index = true
 highlight_code = true
 
 [extra]
-# Put all your custom variables here
+juice_logo_path = "juice.svg"
+juice_logo_name = "Logo"
