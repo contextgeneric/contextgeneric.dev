@@ -1,0 +1,54 @@
+{% extends "juice/templates/index.html" %}
+
+{% block hero %}
+    <section class="text-center">
+        <h1 class="heading-text" style="font-size: 40px">
+            A new programming paradigm for Rust
+        </h1>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> Modular
+        </h3>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> Expressive
+        </h3>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> Type-Safe
+        </h3>
+    </section>
+    <img class="hero-image" style="width: 50%" src="/rust-logo.svg">
+
+    <div class="explore-more text"
+        onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">
+        Explore More ⇩
+    </div>
+    <style>
+        .hero section {
+            padding: 0 5rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .hero section {
+                padding: 0 2rem;
+            }
+
+            .hero-image {
+                display: none
+            }
+        }
+    </style>
+{% endblock hero %}
+
+{% block sidebar %}
+{% endblock sidebar %}
+
+{% block favicon %}
+<link rel="icon" type="image/png" href="/favicon.png" />
+{% endblock favicon %}
+
+{% block footer %}
+<footer>
+    <small class="subtext">
+        <a href="https://maybevoid.com">Soares Chen</a> © 2024
+    </small>
+</footer>
+{% endblock footer %}
