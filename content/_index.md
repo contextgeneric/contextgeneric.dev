@@ -58,3 +58,52 @@ operating system kernels, or Wasm sandboxes.
 Since all CGP features work only at compile-time, it provides the same
 _zero-cost abstraction_ advantage as Rust. Applications do not have to sacrifice
 any runtime overhead for using CGP in the code base.
+
+# Current Status
+
+As of end of 2024, CGP is still in _early-stage_ development, with many
+rough edges in terms of documentation, tooling, debugging techniques,
+community support, and ecosystem.
+
+As a result, you are advised to proceed _at your own risk_ on using CGP in
+any serious project. Note that the current risk of CGP is _not_ technical,
+but rather the limited support you may get when encoutering any challenge
+or difficulty in learning or using CGP.
+
+Currently, the target audience for CGP are primarily early adopters and
+[contributors](#contribution), preferrably with strong background in
+_functional programming_.
+
+# Getting Started
+
+The best way to get started is to start reading the book
+[Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
+You can also learn about how CGP works by looking at real world projects
+such as [Hermes SDK](https://github.com/informalsystems/hermes-sdk/).
+
+Also check out the [Resources](/resources) page to find out more resources
+for learning CGP.
+
+# Contribution
+
+We are looking for any contributor who can help promote CGP to the wider
+Rust ecosystem. The core concepts and paradigms are stable enough for
+use in production, but we need contribution on improving documentation
+and tooling.
+
+You can also help promote CGP by writing tutorials, give feedback,
+ask questions, and share about CGP on social media.
+
+# Acknowledgement
+
+CGP is invented by [Soares Chen](https://maybevoid.com/), with learnings and
+inspirations taken from many related programming languages and paradigms,
+particularly Haskell.
+
+The development of CGP would not have been possible without strong support
+from my employer, [Informal Systems](https://informal.systems/). In particular,
+CGP was first introduced and evolved from the
+[Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project,
+which uses CGP to build a highly modular relayer for inter-blockchain communication.
+(p.s. we are also hiring [Rust engineers](https://informalsystems.bamboohr.com/careers/57)
+to work on Hermes SDK and CGP!)
