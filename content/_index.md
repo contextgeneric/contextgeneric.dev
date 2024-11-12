@@ -49,15 +49,36 @@ during application runtime.
 ## No-Std Friendly
 
 CGP makes it possible to build _fully-abstract programs_ that can be defined
-with _zero dependencies_. This allows such programs to be instantiated with
-specialized-dependencies in no-std environments, such as on embedded systems,
-operating system kernels, or Wasm sandboxes.
+with _zero concrete dependencies_ (aside from other abstract CGP components).
+What this means is that dependencies including I/O, runtime, cryptographic
+operations, encoding schemes, can all be abstracted away from the core logic
+of the application.
+
+This allows the application core logic to be instantiated with
+specialized dependencies in no-std environments, such as on embedded systems,
+operating system kernels, sandboxed environments like Wasm, and symbolic
+execution environments like Kani.
 
 ## Zero-Cost Abstraction
 
 Since all CGP features work only at compile-time, it provides the same
 _zero-cost abstraction_ advantage as Rust. Applications do not have to sacrifice
 any runtime overhead for using CGP in the code base.
+
+# Current Status
+
+As of end of 2024, CGP is still in _early-stage_ development, with many
+rough edges in terms of documentation, tooling, debugging techniques,
+community support, and ecosystem.
+
+As a result, you are advised to proceed _at your own risk_ on using CGP in
+any serious project. Note that the current risk of CGP is _not_ technical,
+but rather the limited support you may get when encoutering any challenge
+or difficulty in learning or using CGP.
+
+Currently, the target audience for CGP are primarily early adopters and
+[contributors](#contribution), preferrably with strong background in
+_functional programming_ and _type-level programming_.
 
 # Hello World Example
 
@@ -109,7 +130,7 @@ where
 }
 ```
 
-The provider `GreetHello` is implemented as a struct, and implements
+The provider `GreetHello` is defined as a struct, and implements
 the provider trait `Greeter`. It is implemented as a
 _context-generic provider_ that can work with any `Context` type,
 but with additional constraints (or dependencies) imposed on the
@@ -128,14 +149,14 @@ the struct.
 
 The `HasField` trait provides a `get_field` method,
 which can be used to access a field value. The type
-`PhantomData::<symbol!("name")>` is passed to `get_field` to infer
+`PhantomData::<symbol!("name")>` is passed to `get_field` to help infer
 which field we want to read, in case if there are more than one
 field in scope.
 
 Notice that with the separation of provider trait from consumer trait,
 multiple providers like `GreetHello` can _all_ have generic implementation
 over any `Context`, without causing any issue of overlapping implementation
-imposed by Rust's trait system.
+that is usually imposed by Rust's trait system.
 
 Additionally, the provider `GreetHello` can require additional
 constraints from `Context`, without those constraints bein present
@@ -220,6 +241,7 @@ is implemented by `Person` via `PersonComponents`, which implements
 `Greeter` via delegation of `GreeterComponent` to `GreetHello`,
 which implements `Greeter` given that `Person` implements
 `HasField<symbol!("name"), Field: Display>`.
+That is a lot of indirection going on!
 
 Hopefully by the end of this tutorial, you have gotten a sense of how
 it is like to program in CGP.
@@ -228,20 +250,119 @@ by CGP, and what else we can do with CGP.
 You can continue and find out more by reading the book
 [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
 
-# Current Status
+# Problems Solved
 
-As of end of 2024, CGP is still in _early-stage_ development, with many
-rough edges in terms of documentation, tooling, debugging techniques,
-community support, and ecosystem.
+Here are some example common problems in Rust that CGP helps to solve.
 
-As a result, you are advised to proceed _at your own risk_ on using CGP in
-any serious project. Note that the current risk of CGP is _not_ technical,
-but rather the limited support you may get when encoutering any challenge
-or difficulty in learning or using CGP.
+## Error Handling
 
-Currently, the target audience for CGP are primarily early adopters and
-[contributors](#contribution), preferrably with strong background in
-_functional programming_.
+Instead of choosing a specific error crate like `anyhow` or `eyre`, the
+CGP traits `HasErrorType` and `CanRaiseError` can be used to decouple
+the application core logic from error handling.
+Concrete applications can freely choose specific error library, as well as
+suitable strategies such as whether to include stack traces inside the error.
+
+## Async Runtime
+
+Instead of choosing a specific runtime crate like `tokio` or `async-std`,
+CGP allows application core logic to depend on an abstract runtime context
+that provide features that only the application requires.
+
+Compared to monolithic runtime traits, an abstract runtime context in
+CGP does _not_ require comprehensive or up front design of all possible
+runtime features application may need. As a result, CGP makes it easy
+to switch between concrete runtime implementations, depending on which
+runtime feature the application actually uses.
+
+## Overlapping Implementations
+
+A common frustration among Rust programmers is the restrictions on
+potentially overlapping implementations of traits.
+A common workaround for the limitation is to use newtype wrappers.
+However, the wrapping can become complicated, when there are multiple
+composite types that need to be extended.
+
+As Rust requires a crate to own either the type or the trait for a
+trait implementation, this often places significant burden on the
+author that defines a new type to implement all possible common traits
+their users may need. This often leads to type definitions accompanied
+by overly bloated implementations of traits such as `Eq`, `Clone`,
+`TryFrom`, `Hash`, and `Serialize`. But even with great care, the library
+could still get requests from users to implement one of the less common
+traits that only the owner of the type can implement.
+
+With the introduction of _provider traits_, CGP removes the restrictions
+on overlapping implementations altogether. Both owner and non-owners
+of a type can define a custom implementation for the type. When multiple
+provider implementations are available, users can choose one of them, and
+easily wire up the provider using CGP constructs.
+
+CGP also prefer the use of _abstract types_ over newtype wrappers. For
+example, a type like `f64` can be used directly to for both
+`Context::Distance` and `Context::Weight`, with the associated types
+still treated as different types inside the abstract code. CGP also
+makes it possible for specialized providers to be implemented, even
+if the crate do not own the primitive type `f64` or the provider trait.
+
+## Dynamic Dispatch
+
+A common attempt for newcomers to support polymorphism in Rust code is
+to use dynamic dispatch in the for of `dyn Trait` objects. However, this
+severely limits what can be done in the code to a limited subset of
+_object-safe_ features in Rust. Very often, this limitation can be
+infectious to the entire code base, and require non-trivial workaround
+on non-object-safe constructs such as `Clone`.
+
+Even when dynamic dispatch is not used, many Rust programmers also resort
+to ad-hoc polymorphism, by defining enums to represent all possible variants
+of types that may be used in the application. This leads to many `match`
+expressions scattered across the code base, making it challenging to
+decouple the code for each branch. Furthermore, this approach makes it
+very difficult to add new variants to the enum, as all branches have to
+be updated, even when the variant is only used in a small part of the code.
+
+CGP provides multiple ways to solve the dynamic dispatch problem, by leaving
+the "assembly" of the collection of variants to the concrete context.
+Meanwhile, the core application logic can be written to be generic over
+the context, together with the assocaited type that represents the abstract enum.
+CGP also enables powerful data-generic pattern that allows providers of
+each variant to be implemented separately, and then be combined to work
+with enums that contain any combination of the variants.
+
+## Monolithic Traits
+
+Even without CGP, Rust' trait system already provides powerful ways for
+programmers to build abstractions that would otherwise not be possible
+in other mainstream languages. One of the best practices is similar
+to CGP, which is to write abstract code that is generic over a context
+type, except that there is an implicit trait bound that is always
+tied to the generic context.
+
+Unlike CGP, the trait in this pattern is often designed as a monolithic
+trait that contains _all_ dependencies that the core application may need.
+This is because without CGP, an abstract caller would have to also include
+all the trait bounds that are specified by the generic functions it calls.
+This means that any extra generic trait bound would easily propagate to
+the entire code base. And when that happens, developers would just combine
+all trait bounds into one monolithic trait for convenience sake.
+
+Monolithic traits can easily become the bottleneck that prevents large projects
+from scaling further. It is not uncommon for monolithic traits to be bloated
+with dozens, if not hundreds, of methods and types. When that happens, it
+becomes increasingly difficult to introduce new implementations to such
+monolithic trait.
+With the current practices in Rust, it is also challenging to decouple or
+break down such monolithic trait to multiple smaller traits.
+
+CGP offers significant improvement over this original design pattern,
+and makes it possible to write abstract Rust code without the risk of
+introducing a giant monolithic trait.
+CGP makes it possible to to break monolithic traits down to many
+small traits, which in fact, could and _should_ be as small as _one_
+method or type per trait. This is made possible thanks to the
+dependency injection pattern used by CGP, which allows implementations
+only introduce the minimal trait bounds they need directly within the
+body of the implementation.
 
 # Getting Started
 
