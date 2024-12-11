@@ -22,7 +22,7 @@ The separation of provider traits from consumer traits allows multiple context-g
 provider implementations to be defined, bypassing Rust's trait system's original restriction
 that forbids overlapping implementations.
 
-## Expressive Ways to Write Code
+## Highly Expressive Code
 
 With CGP, one can easily write _abstract programs_ that is generic over
 a context, together with all its associated types and methods. CGP allows such
@@ -91,7 +91,11 @@ First, we would import `cgp` and define a greeter component as follows:
 ```rust
 use cgp::prelude::*;
 
-#[derive_component(GreeterComponent, Greeter<Context>)]
+#[cgp_component {
+    name: GreeterComponent,
+    provider: Greeter,
+    context: Context,
+}]
 pub trait CanGreet {
     fn greet(&self);
 }
@@ -119,7 +123,7 @@ pub struct GreetHello;
 
 impl<Context> Greeter<Context> for GreetHello
 where
-    Context: HasField<symbol!("name"), Field: Display>,
+    Context: HasField<symbol!("name"), Value: Display>,
 {
     fn greet(context: &Context) {
         println!(
@@ -137,14 +141,14 @@ but with additional constraints (or dependencies) imposed on the
 context.
 
 In this example case, the constraint
-`HasField<symbol!("name"), Field: Display>` means that `GreetHello`
+`HasField<symbol!("name"), Value: Display>` means that `GreetHello`
 expects `Context` to be a struct with a field named `name`, with
 the field type being any type that implements `Display`.
 
 The trait `HasField` is a CGP getter trait for accessing fields in a
 struct. The `symbol!` macro is used to convert any string literal
 into types, so that they can be used as type argument. The
-associated type `Field` is implemented as the type of the field in
+associated type `Value` is implemented as the type of the field in
 the struct.
 
 The `HasField` trait provides a `get_field` method,
@@ -165,7 +169,7 @@ _dependency injection_, as extra dependencies are "injected" into
 the provider through the context.
 
 Compared to other languages, CGP can not only inject methods into
-a provider, but also _types_, as we seen with the `Field` associated
+a provider, but also _types_, as we seen with the `Value` associated
 type in `HasField`.
 
 ## Person Context
@@ -194,7 +198,7 @@ delegate_components! {
 
 The `Person` context is defined to be a struct containing a `name` field,
 which is of type `String`. The CGP macro `derive(HasField)` is used to
-automatically implement `Person: HasField<symbol!("name"), Field = String>`,
+automatically implement `Person: HasField<symbol!("name"), Value = String>`,
 so that it can be used by `GreetHello`.
 
 Additionally, we also define an empty struct `PersonComponents`, which
@@ -240,7 +244,7 @@ The method `greet` is called from the consumer trait `CanGreet`, which
 is implemented by `Person` via `PersonComponents`, which implements
 `Greeter` via delegation of `GreeterComponent` to `GreetHello`,
 which implements `Greeter` given that `Person` implements
-`HasField<symbol!("name"), Field: Display>`.
+`HasField<symbol!("name"), Value: Display>`.
 That is a lot of indirection going on!
 
 Hopefully by the end of this tutorial, you have gotten a sense of how
