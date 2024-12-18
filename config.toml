@@ -20,6 +20,7 @@ juice_logo_path = "rust-logo.svg"
 juice_logo_name = "Context-Generic Programming"
 
 juice_extra_menu = [
+    { title = "Blog", link = "/blog"},
     { title = "Book", link = "https://patterns.contextgeneric.dev"},
     { title = "GitHub", link = "https://github.com/contextgeneric"},
 ]
