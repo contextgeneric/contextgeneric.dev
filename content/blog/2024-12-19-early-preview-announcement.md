@@ -249,5 +249,5 @@ I look forward to see you again in the future updates for CGP!
 
 Following are some links to the discussions on this blog post: (links to be updated)
 
-- [Hacker News](#)
-- [Reddit](#)
+- [Hacker News](https://news.ycombinator.com/item?id=42498176)
+- [Reddit](https://www.reddit.com/r/rust/comments/1hkzaiu/announcing_contextgeneric_programming_a_new/)
