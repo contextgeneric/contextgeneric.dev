@@ -2,13 +2,22 @@
 
 title = "Context-Generic Programming"
 
+insert_anchor_links = "heading"
+
 +++
+
+# Announcement
+
+Welcome to Context-Generic Programming! If you are new here, please read the
+[announcement blog post](/blog/early-preview-announcement/) about the launch of
+the project.
 
 # Introduction
 
 Context-generic programming (CGP) is a new programming paradigm for Rust that
 allows strongly-typed components to be implemented and composed in a modular,
-generic, and type-safe way.
+generic, and type-safe way. In this section, we will walk through some of the
+advantages CGP provides.
 
 ## Modular Component System
 
@@ -28,7 +37,6 @@ With CGP, one can easily write _abstract programs_ that is generic over
 a context, together with all its associated types and methods. CGP allows such
 generic code to be written without needing to explicitly specify a long list
 generic parameters in the type signatures.
-
 CGP also provides powerful _macros_ for defining component interfaces, as well
 as providing simple ways to wire up component implementations to be used with
 a concrete context.
@@ -77,8 +85,7 @@ but rather the limited support you may get when encoutering any challenge
 or difficulty in learning or using CGP.
 
 Currently, the target audience for CGP are primarily early adopters and
-[contributors](#contribution), preferrably with strong background in
-_functional programming_ and _type-level programming_.
+[contributors](#contribution).
 
 # Hello World Example
 
@@ -381,18 +388,54 @@ for learning CGP.
 # Contribution
 
 We are looking for any contributor who can help promote CGP to the wider
-Rust ecosystem. The core concepts and paradigms are stable enough for
-use in production, but we need contribution on improving documentation
-and tooling.
+Rust ecosystem. Regardless of your level of understanding in CGP and Rust,
+there are many ways you can help contribute to the project. This section
+covers some of the ways you can contribute to the CGP community.
 
-You can also help promote CGP by writing tutorials, give feedback,
-ask questions, and share about CGP on social media.
+## Read The Documentation
+
+You can read the documentation linked on this website, such as the
+[CGP book](https://patterns.contextgeneric.dev), and give feedback on how
+the content can be improved. If there is anything that is confusing or difficult
+to understand, do let us know so that we can improve upon it.
+
+## Participate in Discussions
+
+You can participate in online discussion forums on
+[GitHub](https://github.com/orgs/contextgeneric/discussions) or
+[Reddit](https://www.reddit.com/r/cgp/). If you have any questions about CGP,
+you can ask about them at the forum. If there is any specific topic or content
+that you would like to read about, you can also share the ideas at the forum.
+
+## Spread on Social Media
+
+You can help raise the awareness of CGP by talking about it on social media.
+We have an official BlueSky account
+[@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev), so do
+follow us to keep up to date on the development of CGP.
+
+## Write About It
+
+If you find CGP interesting, it would help a lot if you can write your own blog posts
+and share your progress in learning CGP. You could also write your own tutorial series
+to help others learn CGP. Since everyone has different ways of learning things, it is
+always good to have different ways to explain CGP, even if it is something that has
+already been explained on this official website.
+
+## Help in Design
+
+We do not yet have a logo for CGP, and the website is using a simple
+[Zola theme](https://juice.huhu.io/). If you are experienced in design and would
+like to contribute, it would be awesome if you can help improve the design of the website.
+
+We also have a limited (personal) budget to pay for any professional design work. So if you
+know of anyone who may be suitable for such work, we would like to hear your recommendation.
 
 # Acknowledgement
 
 CGP is invented by [Soares Chen](https://maybevoid.com/), with learnings and
 inspirations taken from many related programming languages and paradigms,
-particularly Haskell.
+particularly Haskell typeclasses.
 
 The development of CGP would not have been possible without strong support
 from my employer, [Informal Systems](https://informal.systems/). In particular,
