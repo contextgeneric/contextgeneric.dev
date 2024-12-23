@@ -43,7 +43,7 @@ project, the current status, and what to expect from here on.
 
 # How It All Started
 
-My name is [Soares Chen](https://maybevoid.com/soarschen), a.k.a. [MaybeVoid](https://maybevoid.com),
+My name is [Soares Chen](https://maybevoid.com/soareschen), a.k.a. [MaybeVoid](https://maybevoid.com),
 and I am the creator of CGP. Even though this project is still new to the public, it has been ongoing
 for a while. The work for CGP first started at around July 2022, when I was working on the
 [Hermes IBC Relayer](https://github.com/informalsystems/hermes) at [Informal Systems](https://informal.systems/).
