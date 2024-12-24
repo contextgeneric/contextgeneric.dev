@@ -247,7 +247,8 @@ If you are interested in CGP, the project homepage [lists many ways](/#contribut
 you can help me continue my development on CGP.
 I look forward to see you again in the future updates for CGP!
 
-Following are some links to the discussions on this blog post: (links to be updated)
+Following are some links to the discussions on this blog post:
 
-- [Hacker News](https://news.ycombinator.com/item?id=42498176)
 - [Reddit](https://www.reddit.com/r/rust/comments/1hkzaiu/announcing_contextgeneric_programming_a_new/)
+- [Lobsters](https://lobste.rs/s/a5wfid/context_generic_programming)
+- [Hacker News](https://news.ycombinator.com/item?id=42498176)
