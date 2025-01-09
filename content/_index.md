@@ -14,78 +14,54 @@ the project.
 
 # Introduction
 
-Context-generic programming (CGP) is a new programming paradigm for Rust that
-allows strongly-typed components to be implemented and composed in a modular,
-generic, and type-safe way. In this section, we will walk through some of the
-advantages CGP provides.
+Context-Generic Programming (CGP) is a new programming paradigm in Rust that enables the creation of strongly-typed components, which can be implemented and composed in a modular, generic, and type-safe manner. This approach brings several advantages to building robust and maintainable systems.
 
-## Modular Component System
-
-CGP makes use of Rust's trait system to define generic component _interfaces_
-that decouple code that _consumes_ an interface from code that _implements_ an interface.
-This is done by having _provider traits_ that are used for implementing a
-component interface, in addition to _consumer traits_ which are used for
-consuming a component interface.
-
-The separation of provider traits from consumer traits allows multiple context-generic
-provider implementations to be defined, bypassing Rust's trait system's original restriction
-that forbids overlapping implementations.
-
-## Highly Expressive Code
-
-With CGP, one can easily write _abstract programs_ that is generic over
-a context, together with all its associated types and methods. CGP allows such
-generic code to be written without needing to explicitly specify a long list
-generic parameters in the type signatures.
-CGP also provides powerful _macros_ for defining component interfaces, as well
-as providing simple ways to wire up component implementations to be used with
-a concrete context.
-
-CGP allows Rust code to be written with the same level of expressiveness,
-if not more, as other popular programming paradigms, including object-oriented programming
-and dynamic-typed programming.
-
-## Type-Safe Composition
-
-CGP makes use of Rust's strong type system to help ensure that all wiring
-of components is _type-safe_, catching any missing dependencies as compile-time
-errors. CGP works fully within safe Rust, and does not make use of
-any dynamic-typing techniques, e.g. `dyn` traits, `Any`, or reflection.
-As a result, developers can ensure that no CGP-specific errors can happen
-during application runtime.
-
-## No-Std Friendly
-
-CGP makes it possible to build _fully-abstract programs_ that can be defined
-with _zero concrete dependencies_ (aside from other abstract CGP components).
-What this means is that dependencies including I/O, runtime, cryptographic
-operations, encoding schemes, can all be abstracted away from the core logic
-of the application.
-
-This allows the application core logic to be instantiated with
-specialized dependencies in no-std environments, such as on embedded systems,
-operating system kernels, sandboxed environments like Wasm, and symbolic
-execution environments like Kani.
-
-## Zero-Cost Abstraction
-
-Since all CGP features work only at compile-time, it provides the same
-_zero-cost abstraction_ advantage as Rust. Applications do not have to sacrifice
-any runtime overhead for using CGP in the code base.
+On this homepage, we provide a quick overview and highlight the key features of CGP. For a deeper dive into the concepts and patterns of CGP, explore our comprehensive book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
 
 # Current Status
 
-As of end of 2024, CGP is still in _early-stage_ development, with many
-rough edges in terms of documentation, tooling, debugging techniques,
-community support, and ecosystem.
+As of the start of 2025, CGP remains in its _early stages_ of development. While promising, it still has several rough edges, particularly in areas such as documentation, tooling, debugging techniques, community support, and ecosystem maturity.
 
-As a result, you are advised to proceed _at your own risk_ on using CGP in
-any serious project. Note that the current risk of CGP is _not_ technical,
-but rather the limited support you may get when encoutering any challenge
-or difficulty in learning or using CGP.
+As such, adopting CGP for serious projects comes with inherent challenges, and users are advised to proceed _at their own risk_. The primary risk is not technical but stems from the limited support available when encountering difficulties in learning or applying CGP.
 
-Currently, the target audience for CGP are primarily early adopters and
-[contributors](#contribution).
+At this stage, CGP is best suited for early adopters and potential [contributors](#contribution) who are willing to experiment and help shape its future.
+
+# Key Features
+
+This section highlights some of the key advantages that Context-Generic Programming (CGP) offers.
+
+## Modular Component System
+
+CGP leverages Rust's powerful trait system to define generic component _interfaces_ that decouple the code that _consumes_ an interface from the code that _implements_ it. This is achieved by introducing:
+
+- **Provider traits**, which define the implementation of a component interface.
+- **Consumer traits**, which specify how a component interface is consumed.
+
+By separating provider traits from consumer traits, CGP enables multiple context-generic provider implementations to coexist. This approach circumvents Rust's usual limitation on overlapping or orphaned trait implementations, offering greater flexibility and modularity.
+
+## Highly Expressive Code
+
+CGP empowers developers to write _abstract programs_ that are generic over a context, including all its associated types and methods. This capability eliminates the need to explicitly specify an extensive list of generic parameters in type signatures, streamlining code structure and readability.
+
+Additionally, CGP offers powerful _macros_ for defining component interfaces and simplifies the process of wiring component implementations for use with a specific context.
+
+With CGP, Rust code can achieve a level of expressiveness comparable to, if not exceeding, that of other popular programming paradigms, such as object-oriented programming and dynamically typed programming.
+
+## Type-Safe Composition
+
+CGP leverages Rust's robust type system to guarantee that all component wiring is _type-safe_, ensuring that any missing dependencies are caught at compile time. It operates entirely within safe Rust, avoiding dynamic typing techniques such as `dyn traits`, `Any`, or runtime reflection.
+
+This strict adherence to type safety ensures that no CGP-specific errors can occur during application runtime, providing developers with greater confidence in their code's reliability.
+
+## No-Std Friendly
+
+CGP enables the creation of _fully abstract programs_ that can be defined without relying on any concrete dependencies — except for other abstract CGP components. This abstraction extends to dependencies such as I/O, runtime, cryptographic operations, and encoding schemes, allowing these concerns to be separated from the core application logic.
+
+As a result, the core logic of an application can be seamlessly instantiated with specialized dependencies, making it compatible with no-std environments. These include embedded systems, operating system kernels, sandboxed environments like WebAssembly, and symbolic execution platforms such as Kani.
+
+## Zero-Cost Abstraction
+
+CGP operates entirely at compile-time, leveraging Rust's type system to ensure correctness without introducing runtime overhead. This approach upholds Rust's hallmark of _zero-cost abstraction_, enabling developers to use CGP's features without sacrificing runtime performance.
 
 # Hello World Example
 
