@@ -2,6 +2,8 @@
 
 title = "Announcing Context-Generic Programming (Early Preview)"
 
+description = "Welcome everyone! This blog post marks the launch of the context-generic programming (CGP) project, to introduce a new modular programming paradigm for Rust."
+
 +++
 
 # The Beginning of a New Paradigm

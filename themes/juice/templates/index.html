@@ -5,8 +5,12 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{{ config.title }}{% endblock title %}</title>
-    <meta property="og:title" content="{{ config.title }}" />
-    <meta name="twitter:title" content="{{ config.title }}">
+    <meta property="og:title" content="{% block titlefb %}{{ config.title }}{% endblock titlefb %}" />
+    <meta property="og:description" content="{% block descfb %}Context-Generic Programming: A new modular programming paradim for Rust{% endblock descfb %}">
+    <meta property="og:image" content="https://contextgeneric.dev/greet-snippet.png">
+    <meta name="twitter:title" content="{% block titletw %}{{ config.title }}{% endblock titletw %}">
+    <meta name="twitter:description" content="{% block desctw %}Context-Generic Programming: A new modular programming paradim for Rust{% endblock desctw %}">
+    <meta name="twitter:image" content="https://contextgeneric.dev/greet-snippet.png">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% block favicon %}
     <link rel="icon" type="image/png" href="/favicon.ico">
