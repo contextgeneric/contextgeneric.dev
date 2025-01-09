@@ -206,184 +206,88 @@ By the end of this tutorial, you should have a high-level understanding of how p
 
 # Problems Solved
 
-Here are some example common problems in Rust that CGP helps to solve.
+Here are some common problems in Rust that CGP helps to address.
 
 ## Error Handling
 
-Instead of choosing a specific error crate like `anyhow` or `eyre`, the
-CGP traits `HasErrorType` and `CanRaiseError` can be used to decouple
-the application core logic from error handling.
-Concrete applications can freely choose specific error library, as well as
-suitable strategies such as whether to include stack traces inside the error.
+Rather than being tied to a specific error crate like `anyhow` or `eyre`, CGP's `HasErrorType` and `CanRaiseError` traits allow the decoupling of core application logic from error handling. This enables concrete applications to choose their preferred error library and select the error-handling strategy that best suits their needs, such as deciding whether or not to include stack traces in errors.
+
+For more detailed information on error handling, refer to the [error handling chapter](https://patterns.contextgeneric.dev/error-handling.html) in our book
 
 ## Async Runtime
 
-Instead of choosing a specific runtime crate like `tokio` or `async-std`,
-CGP allows application core logic to depend on an abstract runtime context
-that provide features that only the application requires.
+Rather than committing to a specific runtime crate like `tokio` or `async-std`, CGP enables the application core logic to rely on an abstract runtime context that provides only the features required by the application.
 
-Compared to monolithic runtime traits, an abstract runtime context in
-CGP does _not_ require comprehensive or up front design of all possible
-runtime features application may need. As a result, CGP makes it easy
-to switch between concrete runtime implementations, depending on which
-runtime feature the application actually uses.
+Unlike monolithic runtime traits, an abstract runtime context in CGP does _not_ require a comprehensive or upfront design of all possible runtime features any application might need. This flexibility allows easy switching between concrete runtime implementations, depending on the specific runtime features the application utilizes.
 
 ## Overlapping Implementations
 
-A common frustration among Rust programmers is the restrictions on
-potentially overlapping implementations of traits.
-A common workaround for the limitation is to use newtype wrappers.
-However, the wrapping can become complicated, when there are multiple
-composite types that need to be extended.
+A common frustration among Rust programmers is the restriction on overlapping trait implementations. A typical workaround is to use newtype wrappers, but this can become cumbersome when dealing with multiple composite types that need to be extended.
 
-As Rust requires a crate to own either the type or the trait for a
-trait implementation, this often places significant burden on the
-author that defines a new type to implement all possible common traits
-their users may need. This often leads to type definitions accompanied
-by overly bloated implementations of traits such as `Eq`, `Clone`,
-`TryFrom`, `Hash`, and `Serialize`. But even with great care, the library
-could still get requests from users to implement one of the less common
-traits that only the owner of the type can implement.
+Rust requires a crate to own either the type or the trait for a trait implementation, which often places a significant burden on the author of a new type to implement all the common traits their users might need. This can lead to bloated type definitions, with excessive trait implementations such as `Eq`, `Clone`, `TryFrom`, `Hash`, and `Serialize`. Despite careful design, libraries may still face requests from users to implement less common traits, which can only be implemented by the crate that owns the type.
 
-With the introduction of _provider traits_, CGP removes the restrictions
-on overlapping implementations altogether. Both owner and non-owners
-of a type can define a custom implementation for the type. When multiple
-provider implementations are available, users can choose one of them, and
-easily wire up the provider using CGP constructs.
+With the introduction of _provider traits_, CGP removes these restrictions on overlapping implementations. Both the owner and non-owners of a type can define custom implementations for that type. When multiple provider implementations are available, users can choose one and wire it up easily using CGP constructs.
 
-CGP also prefer the use of _abstract types_ over newtype wrappers. For
-example, a type like `f64` can be used directly to for both
-`Context::Distance` and `Context::Weight`, with the associated types
-still treated as different types inside the abstract code. CGP also
-makes it possible for specialized providers to be implemented, even
-if the crate do not own the primitive type `f64` or the provider trait.
+CGP also favors the use of _abstract types_ over newtype wrappers. For instance, a type like `f64` can be directly used for both `Context::Distance` and `Context::Weight`, with the associated types still treated as distinct within the abstract code. CGP also enables specialized provider implementations, even if the crate does not own the primitive type (e.g., `f64`) or the provider trait.
 
 ## Dynamic Dispatch
 
-A common attempt for newcomers to support polymorphism in Rust code is
-to use dynamic dispatch in the for of `dyn Trait` objects. However, this
-severely limits what can be done in the code to a limited subset of
-_object-safe_ features in Rust. Very often, this limitation can be
-infectious to the entire code base, and require non-trivial workaround
-on non-object-safe constructs such as `Clone`.
+A common approach for newcomers to support polymorphism in Rust is to use dynamic dispatch with `dyn Trait` objects. However, this severely limits the functionality to a restricted subset of _dyn-compatible_ (object-safe) features in Rust. Often, this limitation spreads throughout the entire codebase, requiring non-trivial workarounds for non-dyn-compatible constructs, such as `Clone`.
 
-Even when dynamic dispatch is not used, many Rust programmers also resort
-to ad-hoc polymorphism, by defining enums to represent all possible variants
-of types that may be used in the application. This leads to many `match`
-expressions scattered across the code base, making it challenging to
-decouple the code for each branch. Furthermore, this approach makes it
-very difficult to add new variants to the enum, as all branches have to
-be updated, even when the variant is only used in a small part of the code.
+Even when dynamic dispatch is not used, many Rust programmers rely on ad-hoc polymorphism, defining enums to represent all potential variants of types in the application. This results in numerous `match` expressions scattered across the codebase, making it difficult to decouple logic for each branch. Additionally, adding new variants to the enum becomes challenging, as every branch must be updated, even when the new variant is only used in a small portion of the code.
 
-CGP provides multiple ways to solve the dynamic dispatch problem, by leaving
-the "assembly" of the collection of variants to the concrete context.
-Meanwhile, the core application logic can be written to be generic over
-the context, together with the assocaited type that represents the abstract enum.
-CGP also enables powerful data-generic pattern that allows providers of
-each variant to be implemented separately, and then be combined to work
-with enums that contain any combination of the variants.
+CGP provides several solutions to address the dynamic dispatch problem by delegating the "assembly" of the variant collection to the concrete context. The core application logic can be written generically over the context and the associated type representing the abstract enum. CGP also facilitates powerful datatype-generic patterns that allow providers for each variant to be implemented separately and combined to work with enums that contain any combination of variants.
 
 ## Monolithic Traits
 
-Even without CGP, Rust' trait system already provides powerful ways for
-programmers to build abstractions that would otherwise not be possible
-in other mainstream languages. One of the best practices is similar
-to CGP, which is to write abstract code that is generic over a context
-type, except that there is an implicit trait bound that is always
-tied to the generic context.
+Even without CGP, Rust's trait system provides powerful mechanisms for building abstractions that would be difficult to achieve in other mainstream languages. One common best practice is to write abstract code that is generic over a context type, but this often involves an implicit trait bound tied directly to the generic context.
 
-Unlike CGP, the trait in this pattern is often designed as a monolithic
-trait that contains _all_ dependencies that the core application may need.
-This is because without CGP, an abstract caller would have to also include
-all the trait bounds that are specified by the generic functions it calls.
-This means that any extra generic trait bound would easily propagate to
-the entire code base. And when that happens, developers would just combine
-all trait bounds into one monolithic trait for convenience sake.
+Unlike CGP, traits in this pattern are typically designed as monolithic, encompassing all the dependencies that the core application might need. Without CGP, an abstract caller must also include all trait bounds required by the generic functions it invokes. As a result, any additional generic trait bounds tend to propagate throughout the codebase, leading developers to combine all these trait bounds into one monolithic trait for convenience.
 
-Monolithic traits can easily become the bottleneck that prevents large projects
-from scaling further. It is not uncommon for monolithic traits to be bloated
-with dozens, if not hundreds, of methods and types. When that happens, it
-becomes increasingly difficult to introduce new implementations to such
-monolithic trait.
-With the current practices in Rust, it is also challenging to decouple or
-break down such monolithic trait to multiple smaller traits.
+Monolithic traits can quickly become bottlenecks that prevent large projects from scaling. It's not uncommon for such traits to become bloated with dozens or even hundreds of methods and types. This overgrowth makes it increasingly difficult to introduce new implementations or modify existing ones. Additionally, with Rust's current practices, breaking down or decoupling these monolithic traits into smaller, more manageable traits can be challenging.
 
-CGP offers significant improvement over this original design pattern,
-and makes it possible to write abstract Rust code without the risk of
-introducing a giant monolithic trait.
-CGP makes it possible to to break monolithic traits down to many
-small traits, which in fact, could and _should_ be as small as _one_
-method or type per trait. This is made possible thanks to the
-dependency injection pattern used by CGP, which allows implementations
-only introduce the minimal trait bounds they need directly within the
-body of the implementation.
+CGP offers significant improvements over this traditional pattern, making it possible to write abstract Rust code without the risk of creating unwieldy, monolithic traits. CGP enables the decomposition of large traits into many small, focused traits, each ideally consisting of just a single method or type. This is made possible by the dependency injection pattern used in CGP, which allows implementations to introduce only the minimal trait bounds they need directly within the implementation, rather than bundling everything into a single, monolithic structure.
 
 # Getting Started
 
-The best way to get started is to start reading the book
-[Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
-You can also learn about how CGP works by looking at real world projects
-such as [Hermes SDK](https://github.com/informalsystems/hermes-sdk/).
+To get started with CGP, the best approach is to dive into our book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/). It provides a comprehensive guide to understanding and working with CGP.
 
-Also check out the [Resources](/resources) page to find out more resources
-for learning CGP.
+You can also explore real-world applications and projects that use CGP, such as [Hermes SDK](https://github.com/informalsystems/hermes-sdk/), to gain a deeper understanding of its practical uses.
+
+Additionally, be sure to check out the [Resources](/resources) page for more materials and learning tools to help you get up to speed with CGP.
 
 # Contribution
 
-We are looking for any contributor who can help promote CGP to the wider
-Rust ecosystem. Regardless of your level of understanding in CGP and Rust,
-there are many ways you can help contribute to the project. This section
-covers some of the ways you can contribute to the CGP community.
+We welcome contributors who are passionate about promoting CGP within the Rust ecosystem. Whether you're a beginner or an experienced Rust developer, there are numerous ways you can contribute to the project.
+
+In this section, we'll explore different ways you can get involved and help grow the CGP community. Your contributions, regardless of your level of expertise, are valuable and appreciated!
 
 ## Read The Documentation
 
-You can read the documentation linked on this website, such as the
-[CGP book](https://patterns.contextgeneric.dev), and give feedback on how
-the content can be improved. If there is anything that is confusing or difficult
-to understand, do let us know so that we can improve upon it.
+We encourage you to explore the documentation available on this website, including the [CGP Patterns](https://patterns.contextgeneric.dev) book. Your feedback is invaluable to us—if you encounter anything confusing or unclear, please let us know so we can improve the content and make it more accessible to everyone.
 
 ## Participate in Discussions
 
-You can participate in online discussion forums on
-[GitHub](https://github.com/orgs/contextgeneric/discussions) or
-[Reddit](https://www.reddit.com/r/cgp/). If you have any questions about CGP,
-you can ask about them at the forum. If there is any specific topic or content
-that you would like to read about, you can also share the ideas at the forum.
+Join the conversation on platforms like [GitHub](https://github.com/orgs/contextgeneric/discussions) or [Reddit](https://www.reddit.com/r/cgp/). Whether you have questions about CGP or ideas for new topics or content, these forums are great places to share your thoughts and engage with the community.
 
 ## Spread on Social Media
 
-You can help raise the awareness of CGP by talking about it on social media.
-We have an official BlueSky account
-[@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev), so do
-follow us to keep up to date on the development of CGP.
+Help raise awareness of CGP by sharing it on social media. Follow our official BlueSky account [@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) to stay updated on CGP’s development and latest news.
 
 ## Write About It
 
-If you find CGP interesting, it would help a lot if you can write your own blog posts
-and share your progress in learning CGP. You could also write your own tutorial series
-to help others learn CGP. Since everyone has different ways of learning things, it is
-always good to have different ways to explain CGP, even if it is something that has
-already been explained on this official website.
+If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is already covered on the official site, your perspective might make it clearer to others.
 
-## Help in Design
+## Contribute to Design
 
-We do not yet have a logo for CGP, and the website is using a simple
-[Zola theme](https://juice.huhu.io/). If you are experienced in design and would
-like to contribute, it would be awesome if you can help improve the design of the website.
+CGP currently lacks a logo, and our website uses a simple [Zola theme](https://juice.huhu.io/). If you have design experience and want to [contribute](https://github.com/contextgeneric/contextgeneric.dev), we would greatly appreciate your help in enhancing the website's design.
 
-We also have a limited (personal) budget to pay for any professional design work. So if you
-know of anyone who may be suitable for such work, we would like to hear your recommendation.
+Additionally, we have a limited personal budget for professional design work. If you know a designer who could assist us, please feel free to recommend them.
 
 # Acknowledgement
 
-CGP is invented by [Soares Chen](https://maybevoid.com/), with learnings and
-inspirations taken from many related programming languages and paradigms,
-particularly Haskell typeclasses.
+CGP was created by [Soares Chen](https://maybevoid.com/), with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.
 
-The development of CGP would not have been possible without strong support
-from my employer, [Informal Systems](https://informal.systems/). In particular,
-CGP was first introduced and evolved from the
-[Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project,
-which uses CGP to build a highly modular relayer for inter-blockchain communication.
-(p.s. we are also hiring [Rust engineers](https://informalsystems.bamboohr.com/careers/57)
-to work on Hermes SDK and CGP!)
+The development of CGP would not have been possible without the strong support of my employer, [Informal Systems](https://informal.systems/). CGP was initially introduced and refined as part of the [Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project, which leverages CGP to build a highly modular relayer for inter-blockchain communication.
+
+(p.s. We are hiring [Rust engineers](https://informalsystems.bamboohr.com/careers/57) to work on Hermes SDK and CGP!)
