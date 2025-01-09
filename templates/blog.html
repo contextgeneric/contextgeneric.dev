@@ -21,7 +21,7 @@
     <p><a href="{{ page.permalink }}">{{ page.title }}</a></p>
     {% if page.extra.lead %}
         <p class="lead">{{ page.extra.lead | safe }}</p>{% elif page.description %}<p class="lead">{{ page.description | safe }}</p>{% endif %}
-    </div>
+    </p>
 </div>
 {% endfor %}
 
