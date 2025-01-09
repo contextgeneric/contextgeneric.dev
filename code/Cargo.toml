@@ -1,0 +1,15 @@
+[package]
+name = "cgp-website-examples"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "hello"
+path = "bin/hello.rs"
+
+[[bin]]
+name = "abstract-name"
+path = "bin/abstract_name.rs"
+
+[dependencies]
+cgp = { version = "0.3.0" }
