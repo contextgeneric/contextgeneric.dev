@@ -8,9 +8,9 @@ insert_anchor_links = "heading"
 
 # Announcement
 
-Welcome to Context-Generic Programming! If you are new here, please read the
-[announcement blog post](/blog/early-preview-announcement/) about the launch of
-the project.
+We’re excited to announce the release of [v0.3.0](https://github.com/contextgeneric/cgp/releases/tag/v0.3.0) of the [`cgp`](https://docs.rs/cgp/0.3.0/cgp/) crate, along with several [new](https://patterns.contextgeneric.dev/error-handling.html) [chapters](https://patterns.contextgeneric.dev/field-accessors.html) of the [CGP Patterns](https://patterns.contextgeneric.dev/) book!
+
+Read the blog post for more details: [CGP Updates: v0.3.0 Release and New Chapters](/blog/v0-3-0-release/).
 
 # Introduction
 
