@@ -1,4 +1,4 @@
-use cgp::prelude::*;
+use cgp::prelude::*; // Import all CGP constructs
 
 // Derive CGP provider traits and blanket implementations
 #[cgp_component {
@@ -19,12 +19,13 @@ pub trait HasName {
 // A provider that implements `Greeter`
 pub struct GreetHello;
 
+// Implement `Greeter` that is generic over `Context`
 impl<Context> Greeter<Context> for GreetHello
-// The `Self` type is never used
 where
     Context: HasName, // Inject the `name` dependency from `Context`
 {
     fn greet(context: &Context) {
+        // `self` is replaced by `context` inside providers
         println!("Hello, {}!", context.name());
     }
 }
@@ -55,6 +56,6 @@ fn main() {
         name: "Alice".into(),
     };
 
-    // `CanGreet` is automatically implemented
+    // `CanGreet` is automatically implemented for `Person`
     person.greet();
 }
