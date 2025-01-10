@@ -14,7 +14,7 @@ Read the blog post for more details: [CGP Updates: v0.3.0 Release and New Chapte
 
 # Introduction
 
-Context-Generic Programming (CGP) is a new programming paradigm in Rust that enables the creation of strongly-typed components, which can be implemented and composed in a modular, generic, and type-safe manner. This approach brings several advantages to building robust and maintainable systems.
+Context-generic programming (CGP) is a new programming paradigm for Rust that allows strongly-typed components to be implemented and composed in a modular, generic, and type-safe way.
 
 On this homepage, we provide a quick overview and highlight the key features of CGP. For a deeper dive into the concepts and patterns of CGP, explore our comprehensive book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
 
