@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Context-Generic Programming</title>
+    <meta property="og:title" content="Context-Generic Programming" />
+    <meta property="og:description" content="Context-Generic Programming: A new modular programming paradim for Rust">
+    <meta property="og:image" content="https://contextgeneric.dev/greet-snippet.png">
+    <meta name="twitter:title" content="Context-Generic Programming">
+    <meta name="twitter:description" content="Context-Generic Programming: A new modular programming paradim for Rust">
+    <meta name="twitter:image" content="https://contextgeneric.dev/greet-snippet.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+<link rel="icon" type="image/png" href="/favicon.png" />
+
+    <style>
+  :root {
+    /* Primary theme color */
+    --primary-color: #f7e5c6;
+    /* Primary theme text color */
+    /* --primary-text-color: #543631; */
+    --primary-text-color: #000;
+    --primary-text-color-over: #000;
+    /* Primary theme link color */
+    --primary-link-color: #c27e08;
+    /* Secondary color: the background body color */
+    --secondary-color: #fcfaf6;
+    --secondary-text-color: #303030;
+    /* Highlight text color of table of content */
+    --toc-highlight-text-color: #c27e08;
+    --toc-background-color: white;
+    --shadow-color: #ddd;
+    /* Font used for headers (h1 & h2) */
+    --header-font-family: "Fira Sans", sans-serif;
+    /* Font used for text */
+    --text-font-family: "Fira Sans", sans-serif;
+  }
+</style>
+    
+    <link href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/normalize.css">
+    <link rel="stylesheet" href="https://www.contextgeneric.dev/juice.css">
+    
+    <link rel="stylesheet" href="https://www.contextgeneric.dev/carbon.css">
+    
+</head>
+
+<body>
+    
+
+    <header class="pos-absolute" style="background-color: transparent">
+        
+
+<a href="https://www.contextgeneric.dev/">
+    <div class="logo">
+        <img src="https://www.contextgeneric.dev/rust-logo.svg" alt="logo">
+        Context-Generic Programming
+    </div>
+</a>
+
+<nav>
+    
+    
+    
+    <a class="nav-item subtitle-text" href="https://www.contextgeneric.dev/resources/">Resources</a>
+    
+    
+    
+        
+        <a class="nav-item subtitle-text" href="/blog">Blog</a>
+        
+        <a class="nav-item subtitle-text" href="https://patterns.contextgeneric.dev">Book</a>
+        
+        <a class="nav-item subtitle-text" href="https://github.com/contextgeneric">GitHub</a>
+        
+    
+</nav>
+
+    </header>
+
+    <div class="hero">
+        
+    <section class="text-center">
+        <h1 class="heading-text" style="font-size: 40px">
+            A new programming paradigm for Rust
+        </h1>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> <i>Modular</i> component system
+        </h3>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> Highly <i>expressive</i> code
+        </h3>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> <i>Type-Safe</i> composition
+        </h3>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> <i>No-Std</i> friendly
+        </h3>
+        <h3 class="title-text">
+            <span style="color: rgb(8, 155, 8)">✓</span> <i>Zero-Cost</i> abstraction
+        </h3>
+    </section>
+    <img class="hero-image" style="width: 50%" src="/greet-snippet.png">
+
+    <div class="explore-more text"
+        onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">
+        Explore More ⇩
+    </div>
+    <style>
+        .hero section {
+            padding: 0 5rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .hero section {
+                padding: 0 2rem;
+            }
+
+            .hero-image {
+                display: none
+            }
+        }
+    </style>
+
+    </div>
+
+    
+
+    <main>
+        
+        
+        
+        
+        
+        <div class="toc">
+            <div class="toc-sticky">
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#announcement">Announcement</a>
+                </div>
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#introduction">Introduction</a>
+                </div>
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#current-status">Current Status</a>
+                </div>
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#hello-world-example">Hello World Example</a>
+                </div>
+                
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#greeter-component"><small>- Greeter Component</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#a-name-dependency"><small>- A Name Dependency</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#hello-greeter"><small>- Hello Greeter</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#person-context"><small>- Person Context</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#calling-greet"><small>- Calling Greet</small></a>
+                </div>
+                
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#key-features">Key Features</a>
+                </div>
+                
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#modular-component-system"><small>- Modular Component System</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#highly-expressive-code"><small>- Highly Expressive Code</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#type-safe-composition"><small>- Type-Safe Composition</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#no-std-friendly"><small>- No-Std Friendly</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#zero-cost-abstraction"><small>- Zero-Cost Abstraction</small></a>
+                </div>
+                
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#problems-solved">Problems Solved</a>
+                </div>
+                
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#error-handling"><small>- Error Handling</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#async-runtime"><small>- Async Runtime</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#overlapping-implementations"><small>- Overlapping Implementations</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#dynamic-dispatch"><small>- Dynamic Dispatch</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#monolithic-traits"><small>- Monolithic Traits</small></a>
+                </div>
+                
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#getting-started">Getting Started</a>
+                </div>
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#contribution">Contribution</a>
+                </div>
+                
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#read-the-documentation"><small>- Read The Documentation</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#participate-in-discussions"><small>- Participate in Discussions</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#spread-on-social-media"><small>- Spread on Social Media</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#write-about-it"><small>- Write About It</small></a>
+                </div>
+                
+                <div class="toc-item-child">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#contribute-to-design"><small>- Contribute to Design</small></a>
+                </div>
+                
+                
+                
+                <div class="toc-item">
+                    <a class="subtext" href="https://www.contextgeneric.dev/#acknowledgement">Acknowledgement</a>
+                </div>
+                
+                
+            </div>
+        </div>
+        
+        
+
+        <div class="content text">
+            
+            <h1 id="announcement"><a class="zola-anchor" href="#announcement" aria-label="Anchor link for: announcement">Announcement</a></h1>
+<p>We’re excited to announce the release of <a href="https://github.com/contextgeneric/cgp/releases/tag/v0.3.0">v0.3.0</a> of the <a href="https://docs.rs/cgp/0.3.0/cgp/"><code>cgp</code></a> crate, along with several <a href="https://patterns.contextgeneric.dev/error-handling.html">new</a> <a href="https://patterns.contextgeneric.dev/field-accessors.html">chapters</a> of the <a href="https://patterns.contextgeneric.dev/">CGP Patterns</a> book!</p>
+<p>Read the blog post for more details: <a href="/blog/v0-3-0-release/">CGP Updates: v0.3.0 Release and New Chapters</a>.</p>
+<h1 id="introduction"><a class="zola-anchor" href="#introduction" aria-label="Anchor link for: introduction">Introduction</a></h1>
+<p>Context-generic programming (CGP) is a new programming paradigm for Rust that allows strongly-typed components to be implemented and composed in a modular, generic, and type-safe way.</p>
+<p>On this homepage, we provide a quick overview and highlight the key features of CGP. For a deeper dive into the concepts and patterns of CGP, explore our comprehensive book, <a href="https://patterns.contextgeneric.dev/">Context-Generic Programming Patterns</a>.</p>
+<h1 id="current-status"><a class="zola-anchor" href="#current-status" aria-label="Anchor link for: current-status">Current Status</a></h1>
+<p>As of the start of 2025, CGP remains in its <em>early stages</em> of development. While promising, it still has several rough edges, particularly in areas such as documentation, tooling, debugging techniques, community support, and ecosystem maturity.</p>
+<p>As such, adopting CGP for serious projects comes with inherent challenges, and users are advised to proceed <em>at their own risk</em>. The primary risk is not technical but stems from the limited support available when encountering difficulties in learning or applying CGP.</p>
+<p>At this stage, CGP is best suited for early adopters and potential <a href="https://www.contextgeneric.dev/#contribution">contributors</a> who are willing to experiment and help shape its future.</p>
+<h1 id="hello-world-example"><a class="zola-anchor" href="#hello-world-example" aria-label="Anchor link for: hello-world-example">Hello World Example</a></h1>
+<p>We will demonstrate various concepts of CGP with a simple hello world example.</p>
+<h2 id="greeter-component"><a class="zola-anchor" href="#greeter-component" aria-label="Anchor link for: greeter-component">Greeter Component</a></h2>
+<p>To begin, we import the <code>cgp</code> crate and define a greeter component as follows:</p>
+<pre data-lang="rust" style="background-color:#383838;color:#e6e1dc;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#cc7833;">use </span><span>cgp::prelude::</span><span style="color:#cc7833;">*</span><span>;
+</span><span>
+</span><span>#[cgp_component {
+</span><span>    name: GreeterComponent,
+</span><span>    provider: Greeter,
+</span><span>}]
+</span><span style="color:#cc7833;">pub </span><span style="font-style:italic;color:#6e9cbe;">trait </span><span>CanGreet {
+</span><span>    </span><span style="font-style:italic;color:#6e9cbe;">fn </span><span style="color:#ffc66d;">greet</span><span>(</span><span style="color:#cc7833;">&amp;</span><span style="font-style:italic;color:#fd971f;">self</span><span>);
+</span><span>}
+</span></code></pre>
+<p>The <code>cgp</code> crate provides common constructs through its <code>prelude</code> module, which should be imported in most cases. The first CGP construct we use here is the <code>#[cgp_component]</code> macro. This macro generates additional CGP constructs for the greeter component.</p>
+<p>The target of this macro, <code>CanGreet</code>, is a <em>consumer trait</em> used similarly to regular Rust traits. However, unlike traditional traits, we won't implement anything directly on this trait.</p>
+<p>The <code>name</code> argument, <code>GreeterComponent</code>, specifies the name of the greeter component. The <code>provider</code> argument, <code>Greeter</code>, designates a <em>provider trait</em> for the component. The <code>Greeter</code> provider is used to define the actual implementations for the greeter component. It has a similar structure to <code>CanGreet</code>, but with the implicit <code>Self</code> type replaced by a generic <code>Context</code> type.</p>
+<h2 id="a-name-dependency"><a class="zola-anchor" href="#a-name-dependency" aria-label="Anchor link for: a-name-dependency">A Name Dependency</a></h2>
+<p>Next, let's introduce dependencies needed to implement an example provider for <code>Greeter</code>. We'll start by declaring an abstract <code>Name</code> type:</p>
+<pre data-lang="rust" style="background-color:#383838;color:#e6e1dc;" class="language-rust "><code class="language-rust" data-lang="rust"><span>cgp_type!( Name )
+</span></code></pre>
+<p>Here, the <code>cgp_type!</code> macro defines a CGP component for the abstract type <code>Name</code>. This macro is a concise alternative to using <code>#[cgp_component]</code>. It also derives additional implementations useful later. For now, it is enough to know that <code>cgp_type!</code> generates a <code>HasNameType</code> consumer trait, which includes an <em>associated type</em> called <code>Name</code>.</p>
+<p>Now, we'll define an <em>accessor trait</em> to retrieve the name value from a context:</p>
+<pre data-lang="rust" style="background-color:#383838;color:#e6e1dc;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[cgp_auto_getter]
+</span><span style="color:#cc7833;">pub </span><span style="font-style:italic;color:#6e9cbe;">trait </span><span>HasName: HasNameType {
+</span><span>    </span><span style="font-style:italic;color:#6e9cbe;">fn </span><span style="color:#ffc66d;">name</span><span>(</span><span style="color:#cc7833;">&amp;</span><span style="font-style:italic;color:#fd971f;">self</span><span>) -&gt; </span><span style="color:#cc7833;">&amp;</span><span style="font-style:italic;color:#6e9cbe;">Self::</span><span>Name;
+</span><span>}
+</span></code></pre>
+<p>The <code>HasName</code> trait inherits from <code>HasNameType</code> to access the abstract type <code>Self::Name</code>. It includes the method <code>name</code>, which returns a reference to a value of type <code>Self::Name</code>.</p>
+<p>The <code>#[cgp_auto_getter]</code> attribute macro applied to <code>HasName</code> automatically generates a blanket implementation. This enables any context containing a field named <code>name</code> of type <code>Self::Name</code> to automatically implement the <code>HasName</code> trait.</p>
+<h2 id="hello-greeter"><a class="zola-anchor" href="#hello-greeter" aria-label="Anchor link for: hello-greeter">Hello Greeter</a></h2>
+<p>The traits <code>CanGreet</code>, <code>HasNameType</code>, and <code>HasName</code> can be implemented independently across different modules or crates. However, we can import them into a single location and then implement a <code>Greeter</code> provider that uses <code>HasName</code> in its implementation:</p>
+<pre data-lang="rust" style="background-color:#383838;color:#e6e1dc;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="color:#cc7833;">pub </span><span style="font-style:italic;color:#6e9cbe;">struct </span><span>GreetHello;
+</span><span>
+</span><span style="font-style:italic;color:#6e9cbe;">impl</span><span>&lt;Context&gt; Greeter&lt;Context&gt; </span><span style="color:#cc7833;">for </span><span>GreetHello
+</span><span style="color:#cc7833;">where
+</span><span>    Context: HasName,
+</span><span>    </span><span style="font-style:italic;color:#6e9cbe;">Context::</span><span>Name: Display,
+</span><span>{
+</span><span>    </span><span style="font-style:italic;color:#6e9cbe;">fn </span><span style="color:#ffc66d;">greet</span><span>(</span><span style="font-style:italic;color:#fd971f;">context</span><span>: </span><span style="color:#cc7833;">&amp;</span><span>Context) {
+</span><span>        println!(</span><span style="color:#c1be91;">&quot;Hello, </span><span style="color:#6d9cbe;">{}</span><span style="color:#c1be91;">!&quot;</span><span>, context.</span><span style="color:#da4939;">name</span><span>());
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>Here, we define <code>GreetHello</code> as a struct, which will be used to implement the <code>Greeter</code> provider trait. Unlike the consumer trait, where <code>Self</code> refers to the implementing type, the <code>Greeter</code> provider trait uses an explicit generic type <code>Context</code>, which fulfills the role of <code>Self</code> from <code>CanGreet</code>. The <code>GreetHello</code> type will serve as the <code>Self</code> type for <code>Greeter</code>, but we don't reference <code>self</code> in the provider trait implementation.</p>
+<p>The implementation comes with two additional constraints:</p>
+<ul>
+<li><code>Context: HasName</code> ensures the context implements <code>HasName</code>.</li>
+<li><code>Context::Name: Display</code> allows the provider to work with any abstract <code>Name</code> type, as long as it implements <code>Display</code>.</li>
+</ul>
+<p>Notice that these constraints are specified only in the <code>impl</code> block, not in the trait bounds for <code>CanGreet</code> or <code>Greeter</code>. This design allows us to use <em>dependency injection</em> for both values and <em>types</em> through Rust’s trait system.</p>
+<p>In the <code>greet</code> method, we use <code>context: &amp;Context</code> as a parameter instead of the <code>&amp;self</code> argument used in <code>CanGreet::greet</code>. We then call <code>context.name()</code> to retrieve the name value from the context and print a greeting with <code>println!</code>.</p>
+<p>The <code>GreetHello</code> provider implementation is <em>generic</em> over any <code>Context</code> and <code>Context::Name</code> types, as long as they satisfy the corresponding constraints for <code>HasName</code> and <code>Display</code>. By separating the provider trait from the consumer trait, we can have multiple provider implementations like <code>GreetHello</code> that are all generic over any <code>Context</code>, without causing the overlapping implementation issues typically imposed by Rust's trait system.</p>
+<h2 id="person-context"><a class="zola-anchor" href="#person-context" aria-label="Anchor link for: person-context">Person Context</a></h2>
+<p>Next, we define a concrete context, <code>Person</code>, and wire it up to use <code>GreetHello</code> for implementing CanGreet:</p>
+<pre data-lang="rust" style="background-color:#383838;color:#e6e1dc;" class="language-rust "><code class="language-rust" data-lang="rust"><span>#[derive(HasField)]
+</span><span style="color:#cc7833;">pub </span><span style="font-style:italic;color:#6e9cbe;">struct </span><span>Person {
+</span><span>    </span><span style="color:#cc7833;">pub </span><span style="color:#d0d0ff;">name</span><span>: String,
+</span><span>}
+</span><span>
+</span><span style="color:#cc7833;">pub </span><span style="font-style:italic;color:#6e9cbe;">struct </span><span>PersonComponents;
+</span><span>
+</span><span style="font-style:italic;color:#6e9cbe;">impl </span><span>HasComponents </span><span style="color:#cc7833;">for </span><span>Person {
+</span><span>    </span><span style="font-style:italic;color:#6e9cbe;">type </span><span>Components </span><span style="color:#cc7833;">=</span><span> PersonComponents;
+</span><span>}
+</span><span>
+</span><span>delegate_components! {
+</span><span>    PersonComponents {
+</span><span>        NameTypeComponent: UseType&lt;</span><span style="font-style:italic;color:#6e9cbe;">String</span><span>&gt;,
+</span><span>        GreeterComponent: GreetHello,
+</span><span>    }
+</span><span>}
+</span></code></pre>
+<p>The <code>Person</code> context is defined as a struct containing a <code>name</code> field of type <code>String</code>. We use the <code>#[derive(HasField)]</code> macro to automatically derive <code>HasField</code> implementations for every field in <code>Person</code>. This works together with the blanket implementation generated by <code>#[cgp_auto_getter]</code> for <code>HasName</code>, allowing <code>HasName</code> to be automatically implemented for <code>Person</code> without requiring any additional code.</p>
+<p>Next, we declare a struct, <code>PersonComponents</code>, which is used to wire up the provider components for <code>Person</code>. We then implement <code>HasComponents</code> for <code>Person</code>, using <code>PersonComponents</code> to indicate that <code>Person</code> will utilize the providers specified in <code>PersonComponents</code>.</p>
+<p>We use the <code>delegate_components!</code> macro to wire up <code>PersonComponents</code> with the necessary components. The first mapping, <code>NameTypeComponent: UseType&lt;String&gt;</code>, is a shorthand to associate the abstract <code>Name</code> type with <code>String</code>. The second mapping, <code>GreeterComponent: GreetHello</code>, indicates that we want to use <code>GreetHello</code> as the implementation of the <code>CanGreet</code> consumer trait.</p>
+<p>The expressive use of <code>delegate_components!</code> makes it easy to rewire the components for <code>Person</code>. For instance, if we want to use a custom <code>FullName</code> struct for the name type, we can rewire <code>NameTypeComponent</code> to <code>UseType&lt;FullName&gt;</code>. Similarly, if there’s an alternative <code>Greeter</code> provider, <code>GreetLastName</code>, that implements <code>Greeter</code> with additional constraints, we can simply rewire <code>GreeterComponent</code> to use <code>GreetLastName</code> and add any necessary additional wiring to meet those constraints.</p>
+<p>It’s important to note that CGP allows component wiring to be done <em>lazily</em>, meaning any errors (such as unsatisfied constraints) will only be detected when a consumer trait is actually used.</p>
+<h2 id="calling-greet"><a class="zola-anchor" href="#calling-greet" aria-label="Anchor link for: calling-greet">Calling Greet</a></h2>
+<p>Now that the wiring is set up, we can construct a <code>Person</code> instance and call <code>greet</code> on it:</p>
+<pre data-lang="rust" style="background-color:#383838;color:#e6e1dc;" class="language-rust "><code class="language-rust" data-lang="rust"><span style="font-style:italic;color:#6e9cbe;">fn </span><span style="color:#ffc66d;">main</span><span>() {
+</span><span>    </span><span style="font-style:italic;color:#6e9cbe;">let</span><span> person </span><span style="color:#cc7833;">=</span><span> Person {
+</span><span>        name: </span><span style="color:#c1be91;">&quot;Alice&quot;</span><span>.</span><span style="color:#da4939;">into</span><span>(),
+</span><span>    };
+</span><span>
+</span><span>    </span><span style="color:#95815e;">// prints &quot;Hello, Alice!&quot;
+</span><span>    person.</span><span style="color:#da4939;">greet</span><span>();
+</span><span>}
+</span></code></pre>
+<p>This is made possible by a series of blanket implementations generated by CGP. Here's how the magic works:</p>
+<ul>
+<li>We can call <code>greet</code> because <code>CanGreet</code> is implemented for <code>Person</code>.</li>
+<li><code>PersonComponents</code> contains the wiring that uses <code>GreetHello</code> as the provider for <code>GreeterComponent</code>.</li>
+<li><code>GreetHello</code> implements <code>Greeter&lt;Person&gt;</code>.</li>
+<li><code>Person</code> implements <code>HasName</code> via the <code>HasField</code> implementation.</li>
+<li><code>Person::Name</code> is <code>String</code>, which implements <code>Display</code>.</li>
+</ul>
+<p>There’s quite a bit of indirection happening behind the scenes!</p>
+<p>By the end of this tutorial, you should have a high-level understanding of how programming in CGP works. There's much more to explore regarding how CGP handles the wiring behind the scenes, as well as the many features and capabilities CGP offers. To dive deeper, check out our book <a href="https://patterns.contextgeneric.dev/">Context-Generic Programming Patterns</a>.</p>
+<h1 id="key-features"><a class="zola-anchor" href="#key-features" aria-label="Anchor link for: key-features">Key Features</a></h1>
+<p>This section highlights some of the key advantages that Context-Generic Programming (CGP) offers.</p>
+<h2 id="modular-component-system"><a class="zola-anchor" href="#modular-component-system" aria-label="Anchor link for: modular-component-system">Modular Component System</a></h2>
+<p>CGP leverages Rust's powerful trait system to define generic component <em>interfaces</em> that decouple the code that <em>consumes</em> an interface from the code that <em>implements</em> it. This is achieved by introducing:</p>
+<ul>
+<li><strong>Provider traits</strong>, which define the implementation of a component interface.</li>
+<li><strong>Consumer traits</strong>, which specify how a component interface is consumed.</li>
+</ul>
+<p>By separating provider traits from consumer traits, CGP enables multiple context-generic provider implementations to coexist. This approach circumvents Rust's usual limitation on overlapping or orphaned trait implementations, offering greater flexibility and modularity.</p>
+<h2 id="highly-expressive-code"><a class="zola-anchor" href="#highly-expressive-code" aria-label="Anchor link for: highly-expressive-code">Highly Expressive Code</a></h2>
+<p>CGP empowers developers to write <em>abstract programs</em> that are generic over a context, including all its associated types and methods. This capability eliminates the need to explicitly specify an extensive list of generic parameters in type signatures, streamlining code structure and readability.</p>
+<p>Additionally, CGP offers powerful <em>macros</em> for defining component interfaces and simplifies the process of wiring component implementations for use with a specific context.</p>
+<p>With CGP, Rust code can achieve a level of expressiveness comparable to, if not exceeding, that of other popular programming paradigms, such as object-oriented programming and dynamically typed programming.</p>
+<h2 id="type-safe-composition"><a class="zola-anchor" href="#type-safe-composition" aria-label="Anchor link for: type-safe-composition">Type-Safe Composition</a></h2>
+<p>CGP leverages Rust's robust type system to guarantee that all component wiring is <em>type-safe</em>, ensuring that any missing dependencies are caught at compile time. It operates entirely within safe Rust, avoiding dynamic typing techniques such as <code>dyn traits</code>, <code>Any</code>, or runtime reflection.</p>
+<p>This strict adherence to type safety ensures that no CGP-specific errors can occur during application runtime, providing developers with greater confidence in their code's reliability.</p>
+<h2 id="no-std-friendly"><a class="zola-anchor" href="#no-std-friendly" aria-label="Anchor link for: no-std-friendly">No-Std Friendly</a></h2>
+<p>CGP enables the creation of <em>fully abstract programs</em> that can be defined without relying on any concrete dependencies — except for other abstract CGP components. This abstraction extends to dependencies such as I/O, runtime, cryptographic operations, and encoding schemes, allowing these concerns to be separated from the core application logic.</p>
+<p>As a result, the core logic of an application can be seamlessly instantiated with specialized dependencies, making it compatible with no-std environments. These include embedded systems, operating system kernels, sandboxed environments like WebAssembly, and symbolic execution platforms such as Kani.</p>
+<h2 id="zero-cost-abstraction"><a class="zola-anchor" href="#zero-cost-abstraction" aria-label="Anchor link for: zero-cost-abstraction">Zero-Cost Abstraction</a></h2>
+<p>CGP operates entirely at compile-time, leveraging Rust's type system to ensure correctness without introducing runtime overhead. This approach upholds Rust's hallmark of <em>zero-cost abstraction</em>, enabling developers to use CGP's features without sacrificing runtime performance.</p>
+<h1 id="problems-solved"><a class="zola-anchor" href="#problems-solved" aria-label="Anchor link for: problems-solved">Problems Solved</a></h1>
+<p>Here are some common problems in Rust that CGP helps to address.</p>
+<h2 id="error-handling"><a class="zola-anchor" href="#error-handling" aria-label="Anchor link for: error-handling">Error Handling</a></h2>
+<p>Rather than being tied to a specific error crate like <code>anyhow</code> or <code>eyre</code>, CGP's <code>HasErrorType</code> and <code>CanRaiseError</code> traits allow the decoupling of core application logic from error handling. This enables concrete applications to choose their preferred error library and select the error-handling strategy that best suits their needs, such as deciding whether or not to include stack traces in errors.</p>
+<p>For more detailed information on error handling, refer to the <a href="https://patterns.contextgeneric.dev/error-handling.html">error handling chapter</a> in our book</p>
+<h2 id="async-runtime"><a class="zola-anchor" href="#async-runtime" aria-label="Anchor link for: async-runtime">Async Runtime</a></h2>
+<p>Rather than committing to a specific runtime crate like <code>tokio</code> or <code>async-std</code>, CGP enables the application core logic to rely on an abstract runtime context that provides only the features required by the application.</p>
+<p>Unlike monolithic runtime traits, an abstract runtime context in CGP does <em>not</em> require a comprehensive or upfront design of all possible runtime features any application might need. This flexibility allows easy switching between concrete runtime implementations, depending on the specific runtime features the application utilizes.</p>
+<h2 id="overlapping-implementations"><a class="zola-anchor" href="#overlapping-implementations" aria-label="Anchor link for: overlapping-implementations">Overlapping Implementations</a></h2>
+<p>A common frustration among Rust programmers is the restriction on overlapping trait implementations. A typical workaround is to use newtype wrappers, but this can become cumbersome when dealing with multiple composite types that need to be extended.</p>
+<p>Rust requires a crate to own either the type or the trait for a trait implementation, which often places a significant burden on the author of a new type to implement all the common traits their users might need. This can lead to bloated type definitions, with excessive trait implementations such as <code>Eq</code>, <code>Clone</code>, <code>TryFrom</code>, <code>Hash</code>, and <code>Serialize</code>. Despite careful design, libraries may still face requests from users to implement less common traits, which can only be implemented by the crate that owns the type.</p>
+<p>With the introduction of <em>provider traits</em>, CGP removes these restrictions on overlapping implementations. Both the owner and non-owners of a type can define custom implementations for that type. When multiple provider implementations are available, users can choose one and wire it up easily using CGP constructs.</p>
+<p>CGP also favors the use of <em>abstract types</em> over newtype wrappers. For instance, a type like <code>f64</code> can be directly used for both <code>Context::Distance</code> and <code>Context::Weight</code>, with the associated types still treated as distinct within the abstract code. CGP also enables specialized provider implementations, even if the crate does not own the primitive type (e.g., <code>f64</code>) or the provider trait.</p>
+<h2 id="dynamic-dispatch"><a class="zola-anchor" href="#dynamic-dispatch" aria-label="Anchor link for: dynamic-dispatch">Dynamic Dispatch</a></h2>
+<p>A common approach for newcomers to support polymorphism in Rust is to use dynamic dispatch with <code>dyn Trait</code> objects. However, this severely limits the functionality to a restricted subset of <em>dyn-compatible</em> (object-safe) features in Rust. Often, this limitation spreads throughout the entire codebase, requiring non-trivial workarounds for non-dyn-compatible constructs, such as <code>Clone</code>.</p>
+<p>Even when dynamic dispatch is not used, many Rust programmers rely on ad-hoc polymorphism, defining enums to represent all potential variants of types in the application. This results in numerous <code>match</code> expressions scattered across the codebase, making it difficult to decouple logic for each branch. Additionally, adding new variants to the enum becomes challenging, as every branch must be updated, even when the new variant is only used in a small portion of the code.</p>
+<p>CGP provides several solutions to address the dynamic dispatch problem by delegating the "assembly" of the variant collection to the concrete context. The core application logic can be written generically over the context and the associated type representing the abstract enum. CGP also facilitates powerful datatype-generic patterns that allow providers for each variant to be implemented separately and combined to work with enums that contain any combination of variants.</p>
+<h2 id="monolithic-traits"><a class="zola-anchor" href="#monolithic-traits" aria-label="Anchor link for: monolithic-traits">Monolithic Traits</a></h2>
+<p>Even without CGP, Rust's trait system provides powerful mechanisms for building abstractions that would be difficult to achieve in other mainstream languages. One common best practice is to write abstract code that is generic over a context type, but this often involves an implicit trait bound tied directly to the generic context.</p>
+<p>Unlike CGP, traits in this pattern are typically designed as monolithic, encompassing all the dependencies that the core application might need. Without CGP, an abstract caller must also include all trait bounds required by the generic functions it invokes. As a result, any additional generic trait bounds tend to propagate throughout the codebase, leading developers to combine all these trait bounds into one monolithic trait for convenience.</p>
+<p>Monolithic traits can quickly become bottlenecks that prevent large projects from scaling. It's not uncommon for such traits to become bloated with dozens or even hundreds of methods and types. This overgrowth makes it increasingly difficult to introduce new implementations or modify existing ones. Additionally, with Rust's current practices, breaking down or decoupling these monolithic traits into smaller, more manageable traits can be challenging.</p>
+<p>CGP offers significant improvements over this traditional pattern, making it possible to write abstract Rust code without the risk of creating unwieldy, monolithic traits. CGP enables the decomposition of large traits into many small, focused traits, each ideally consisting of just a single method or type. This is made possible by the dependency injection pattern used in CGP, which allows implementations to introduce only the minimal trait bounds they need directly within the implementation, rather than bundling everything into a single, monolithic structure.</p>
+<h1 id="getting-started"><a class="zola-anchor" href="#getting-started" aria-label="Anchor link for: getting-started">Getting Started</a></h1>
+<p>To get started with CGP, the best approach is to dive into our book, <a href="https://patterns.contextgeneric.dev/">Context-Generic Programming Patterns</a>. It provides a comprehensive guide to understanding and working with CGP.</p>
+<p>You can also explore real-world applications and projects that use CGP, such as <a href="https://github.com/informalsystems/hermes-sdk/">Hermes SDK</a>, to gain a deeper understanding of its practical uses.</p>
+<p>Additionally, be sure to check out the <a href="/resources">Resources</a> page for more materials and learning tools to help you get up to speed with CGP.</p>
+<h1 id="contribution"><a class="zola-anchor" href="#contribution" aria-label="Anchor link for: contribution">Contribution</a></h1>
+<p>We welcome contributors who are passionate about promoting CGP within the Rust ecosystem. Whether you're a beginner or an experienced Rust developer, there are numerous ways you can contribute to the project.</p>
+<p>In this section, we'll explore different ways you can get involved and help grow the CGP community. Your contributions, regardless of your level of expertise, are valuable and appreciated!</p>
+<h2 id="read-the-documentation"><a class="zola-anchor" href="#read-the-documentation" aria-label="Anchor link for: read-the-documentation">Read The Documentation</a></h2>
+<p>We encourage you to explore the documentation available on this website, including the <a href="https://patterns.contextgeneric.dev">CGP Patterns</a> book. Your feedback is invaluable to us—if you encounter anything confusing or unclear, please let us know so we can improve the content and make it more accessible to everyone.</p>
+<h2 id="participate-in-discussions"><a class="zola-anchor" href="#participate-in-discussions" aria-label="Anchor link for: participate-in-discussions">Participate in Discussions</a></h2>
+<p>Join the conversation on platforms like <a href="https://github.com/orgs/contextgeneric/discussions">GitHub</a> or <a href="https://www.reddit.com/r/cgp/">Reddit</a>. Whether you have questions about CGP or ideas for new topics or content, these forums are great places to share your thoughts and engage with the community.</p>
+<h2 id="spread-on-social-media"><a class="zola-anchor" href="#spread-on-social-media" aria-label="Anchor link for: spread-on-social-media">Spread on Social Media</a></h2>
+<p>Help raise awareness of CGP by sharing it on social media. Follow our official BlueSky account <a href="https://bsky.app/profile/contextgeneric.dev">@contextgeneric.dev</a> to stay updated on CGP’s development and latest news.</p>
+<h2 id="write-about-it"><a class="zola-anchor" href="#write-about-it" aria-label="Anchor link for: write-about-it">Write About It</a></h2>
+<p>If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is already covered on the official site, your perspective might make it clearer to others.</p>
+<h2 id="contribute-to-design"><a class="zola-anchor" href="#contribute-to-design" aria-label="Anchor link for: contribute-to-design">Contribute to Design</a></h2>
+<p>CGP currently lacks a logo, and our website uses a simple <a href="https://juice.huhu.io/">Zola theme</a>. If you have design experience and want to <a href="https://github.com/contextgeneric/contextgeneric.dev">contribute</a>, we would greatly appreciate your help in enhancing the website's design.</p>
+<p>Additionally, we have a limited personal budget for professional design work. If you know a designer who could assist us, please feel free to recommend them.</p>
+<h1 id="acknowledgement"><a class="zola-anchor" href="#acknowledgement" aria-label="Anchor link for: acknowledgement">Acknowledgement</a></h1>
+<p>CGP was created by <a href="https://maybevoid.com/">Soares Chen</a>, with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.</p>
+<p>The development of CGP would not have been possible without the strong support of my employer, <a href="https://informal.systems/">Informal Systems</a>. CGP was initially introduced and refined as part of the <a href="https://github.com/informalsystems/hermes-sdk/">Hermes SDK</a> project, which leverages CGP to build a highly modular relayer for inter-blockchain communication.</p>
+<p>(p.s. We are hiring <a href="https://informalsystems.bamboohr.com/careers/57">Rust engineers</a> to work on Hermes SDK and CGP!)</p>
+
+            
+        </div>
+
+        
+
+    </main>
+
+    
+<footer>
+    <small class="subtext" style="text-align: center;">
+        <a href="https://maybevoid.com">MaybeVoid</a> © 2024
+        <br />
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">
+            CC BY-SA 4.0<img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/cc.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/by.svg?ref=chooser-v1" alt=""><img style="height:22px!important;margin-left:3px;vertical-align:text-bottom;" src="https://mirrors.creativecommons.org/presskit/icons/sa.svg?ref=chooser-v1" alt="">
+        </a>
+    </small>
+</footer>
+
+</body>
+<script>
+    const scrollHandler = entries => {
+        // Find the first entry which intersecting and ratio > 0.9 to highlight.
+        let entry = entries.find(entry => {
+            return entry.isIntersecting && entry.intersectionRatio > 0.9;
+        });
+        if (!entry) return;
+
+        document.querySelectorAll(".toc a").forEach((item) => {
+            item.classList.remove("active");
+        });
+
+        // let url = new URL(`#${entry.target.id}`);
+        let link = document.querySelector(`.toc a[href$="${decodeURIComponent(`#${entry.target.id}`)}"]`)
+        if (link) {
+            link.classList.add("active");
+            link.scrollIntoView({ behavior: "auto", block: "nearest" });
+        }
+    };
+    // Set -100px root margin to improve highlight experience.
+    const observer = new IntersectionObserver(scrollHandler, { threshold: 1 });
+    let items = document.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    items.forEach(item => observer.observe(item));
+</script>
+
+</html>
