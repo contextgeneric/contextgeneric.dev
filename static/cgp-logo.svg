@@ -2,16 +2,16 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="114.54742mm"
-   height="89.820404mm"
-   viewBox="0 0 114.54742 89.820404"
+   width="120mm"
+   height="120mm"
+   viewBox="0 0 120 120"
    version="1.1"
    id="svg1"
    inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
    sodipodi:docname="cgp-logo-20250209.svg"
-   inkscape:export-filename="cgp-logo-20250209.png"
-   inkscape:export-xdpi="371.57001"
-   inkscape:export-ydpi="371.57001"
+   inkscape:export-filename="cgp-logo-20250209-32px.png"
+   inkscape:export-xdpi="7.0999999"
+   inkscape:export-ydpi="7.0999999"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -27,8 +27,8 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="mm"
      inkscape:zoom="1.4823793"
-     inkscape:cx="218.90483"
-     inkscape:cy="174.38181"
+     inkscape:cx="176.0683"
+     inkscape:cy="245.88848"
      inkscape:window-width="1512"
      inkscape:window-height="916"
      inkscape:window-x="0"
@@ -124,7 +124,8 @@
      id="layer1"
      transform="translate(-62.501473,-121.39813)">
     <g
-       id="g1">
+       id="g1"
+       transform="translate(2.7262933,15.089794)">
       <path
          id="path375"
          d="m -9,0 c -4.763,-4.02 -8.71141,-5.944 -17.47641,-5.944 h -16.32 v 46.737 h 16.32 c 8.612,0 12.71341,-1.943 17.34341,-5.678 4.7629997,-3.849 6.9919997,-9.527 6.9919997,-17.243 C -2.1410003,9.832 -4.3700003,3.868 -9,0 m 27.551,36.753 c -2.248,5.24 -5.373,9.832 -9.6979996,13.414 -4.2880007,3.695 -9.50700061,6.535 -15.6240007,8.479 C -12.867,60.569 -17.40741,61.465 -25.29441,61.465 H -77.183 c 14.804,-16.404 23.816,-38.106 23.816,-61.941 0,-0.343 0,-0.667 -0.019,-1.009 0.019,-0.401 0.019,-0.782 0.019,-1.182 0,-14.062 -3.487,-27.341 -9.659,-38.963 -0.02,-0.058 -0.038,-0.096 -0.077,-0.152 -3.982,-7.984 -9.107,-15.3 -15.147,-21.759 h 35.45359 v 36.905 h 17.502 c 7.887,0 12.42741,1.048 18.5234097,2.991 6.11700009,2.058 11.336,5.049 15.6240007,8.765 C 13.178,-11.013 16.303,-6.249 18.551,-0.609 c 2.228,5.677 3.41,12.06 3.41,19.205 0,6.707 -1.182,12.785 -3.41,18.157"

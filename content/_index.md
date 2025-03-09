@@ -180,7 +180,7 @@ CGP leverages Rust's powerful trait system to define generic component _interfac
 
 By separating provider traits from consumer traits, CGP enables multiple context-generic provider implementations to coexist. This approach circumvents Rust's usual limitation on overlapping or orphaned trait implementations, offering greater flexibility and modularity.
 
-## Highly Expressive Code
+## Highly Expressive Macros
 
 CGP empowers developers to write _abstract programs_ that are generic over a context, including all its associated types and methods. This capability eliminates the need to explicitly specify an extensive list of generic parameters in type signatures, streamlining code structure and readability.
 
@@ -278,16 +278,8 @@ Help raise awareness of CGP by sharing it on social media. Follow our official B
 
 If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is already covered on the official site, your perspective might make it clearer to others.
 
-## Contribute to Design
-
-CGP currently lacks a logo, and our website uses a simple [Zola theme](https://juice.huhu.io/). If you have design experience and want to [contribute](https://github.com/contextgeneric/contextgeneric.dev), we would greatly appreciate your help in enhancing the website's design.
-
-Additionally, we have a limited personal budget for professional design work. If you know a designer who could assist us, please feel free to recommend them.
-
 # Acknowledgement
 
 CGP was created by [Soares Chen](https://maybevoid.com/), with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.
 
 The development of CGP would not have been possible without the strong support of my employer, [Informal Systems](https://informal.systems/). CGP was initially introduced and refined as part of the [Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project, which leverages CGP to build a highly modular relayer for inter-blockchain communication.
-
-(p.s. We are hiring [Rust engineers](https://informalsystems.bamboohr.com/careers/57) to work on Hermes SDK and CGP!)
