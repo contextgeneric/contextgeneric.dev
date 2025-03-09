@@ -15,7 +15,7 @@ highlight_theme = "kronuz"
 
 [extra]
 
-juice_logo_path = "rust-logo.svg"
+juice_logo_path = "cgp-logo.svg"
 
 juice_logo_name = "Context-Generic Programming"
 
