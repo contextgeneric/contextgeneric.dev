@@ -14,6 +14,10 @@ the project continues to develop.
 - [cgp](https://crates.io/crates/cgp) - The main Rust crate that provides the core constructs
   for programming using CGP.
 
+## Tutorials
+
+- [Hello World Tutorial](/tutorials/hello) - A hello-world-style introduction to CGP.
+
 ## Books
 
 - [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/) - The main
