@@ -2,11 +2,7 @@
 
 title = "Hello World Tutorial"
 
-insert_anchor_links = "heading"
-
 +++
-
-# Hello World Tutorial
 
 We will demonstrate various concepts of CGP with a simple hello world example.
 
@@ -17,10 +13,7 @@ To begin, we import the `cgp` crate and define a greeter component as follows:
 ```rust
 use cgp::prelude::*;
 
-#[cgp_component {
-    name: GreeterComponent,
-    provider: Greeter,
-}]
+#[cgp_component(Greeter)]
 pub trait CanGreet {
     fn greet(&self);
 }
@@ -30,19 +23,28 @@ The `cgp` crate provides common constructs through its `prelude` module, which s
 
 The target of this macro, `CanGreet`, is a _consumer trait_ used similarly to regular Rust traits. However, unlike traditional traits, we won't implement anything directly on this trait.
 
-The `name` argument, `GreeterComponent`, specifies the name of the greeter component. The `provider` argument, `Greeter`, designates a _provider trait_ for the component. The `Greeter` provider is used to define the actual implementations for the greeter component. It has a similar structure to `CanGreet`, but with the implicit `Self` type replaced by a generic `Context` type.
+In its simplified form, the argument to the macro, `Greeter`, designates a _provider trait_ for the component. The `Greeter` provider is used to define the actual implementations for the greeter component. It has a similar structure to `CanGreet`, but with the implicit `Self` type replaced by a generic `Context` type.
 
-## A Name Dependency
+The macro also generates an empty `GreeterComponent` struct, which is used as the _name_ of the greeter component which can be used for the component wiring later on.
+
+## Abstract Name Type
 
 Next, let's introduce dependencies needed to implement an example provider for `Greeter`. We'll start by declaring an abstract `Name` type:
 
 ```rust
-cgp_type!( Name )
+#[cgp_type]
+pub trait HasNameType {
+    type Name;
+}
 ```
 
-Here, the `cgp_type!` macro defines a CGP component for the abstract type `Name`. This macro is a concise alternative to using `#[cgp_component]`. It also derives additional implementations useful later. For now, it is enough to know that `cgp_type!` generates a `HasNameType` consumer trait, which includes an _associated type_ called `Name`.
+Here, the `#[cgp_type]` macro is used for abstract type traits that contain only one associated type. This macro is an extension to `#[cgp_component]`, and generates additional CGP constructs to work with abstract types.
 
-Now, we'll define an _accessor trait_ to retrieve the name value from a context:
+Similar to `#[cgp_component]`, `#[cgp_type]` also generates a provider trait called `NameTypeProvider`, and a component name type called `NameTypeProviderComponent`.
+
+## Name Getter
+
+Now, we will define an _getter trait_ to retrieve the name value from a context:
 
 ```rust
 #[cgp_auto_getter]
@@ -57,11 +59,10 @@ The `#[cgp_auto_getter]` attribute macro applied to `HasName` automatically gene
 
 ## Hello Greeter
 
-The traits `CanGreet`, `HasNameType`, and `HasName` can be implemented independently across different modules or crates. However, we can import them into a single location and then implement a `Greeter` provider that uses `HasName` in its implementation:
+The traits `CanGreet`, `HasNameType`, and `HasName` can be defined separately across different modules or crates. However, we can import them into a single location and then implement a `Greeter` provider that uses `HasName` in its implementation:
 
 ```rust
-pub struct GreetHello;
-
+#[cgp_new_provider]
 impl<Context> Greeter<Context> for GreetHello
 where
     Context: HasName,
@@ -73,7 +74,9 @@ where
 }
 ```
 
-Here, we define `GreetHello` as a struct, which will be used to implement the `Greeter` provider trait. Unlike the consumer trait, where `Self` refers to the implementing type, the `Greeter` provider trait uses an explicit generic type `Context`, which fulfills the role of `Self` from `CanGreet`. The `GreetHello` type will serve as the `Self` type for `Greeter`, but we don't reference `self` in the provider trait implementation.
+We use `#[cgp_new_provider]` to define a new provider, called `GreetHello`, which implements the `Greeter` provider trait. Unlike the consumer trait, where `Self` refers to the implementing type, the `Greeter` provider trait uses an explicit generic type `Context`, which fulfills the role of `Self` from `CanGreet`.
+
+Behind the scene, the macro generates an empty struct named `GreetHello`, which is used as the `Self` type for `Greeter`. However, the type is used as an identifier for wiring later, and we don't reference `self` in the provider trait implementation.
 
 The implementation comes with two additional constraints:
 
@@ -91,34 +94,39 @@ The `GreetHello` provider implementation is _generic_ over any `Context` and `Co
 Next, we define a concrete context, `Person`, and wire it up to use `GreetHello` for implementing CanGreet:
 
 ```rust
+#[cgp_context]
 #[derive(HasField)]
 pub struct Person {
     pub name: String,
 }
+```
 
-pub struct PersonComponents;
+The `Person` context is defined as a struct containing a `name` field of type `String`. We apply `#[cgp_macro]` on the `Person` context, which would generate a `PersonComponents` provider and some wirings to allow CGP components to be used with the context.
 
-impl HasComponents for Person {
-    type Components = PersonComponents;
-}
+We also use the `#[derive(HasField)]` macro to automatically derive `HasField` implementations for every field in `Person`. This works together with the blanket implementation generated by `#[cgp_auto_getter]` for `HasName`, allowing `HasName` to be automatically implemented for `Person` without requiring any additional code.
 
+## Delegate Components
+
+Next, we want to define some wirings to link up the `GreetHello` that we defined earlier, so that we can use it on the `Person` context. This is done by using the `delgate_components!` macro as follows:
+
+```rust
 delegate_components! {
     PersonComponents {
-        NameTypeComponent: UseType<String>,
-        GreeterComponent: GreetHello,
+        NameTypeProviderComponent:
+            UseType<String>,
+        GreeterComponent:
+            GreetHello,
     }
 }
 ```
 
-The `Person` context is defined as a struct containing a `name` field of type `String`. We use the `#[derive(HasField)]` macro to automatically derive `HasField` implementations for every field in `Person`. This works together with the blanket implementation generated by `#[cgp_auto_getter]` for `HasName`, allowing `HasName` to be automatically implemented for `Person` without requiring any additional code.
+We use the `delegate_components!` macro on the target provider `PersonComponents`, which was generated eariler by `#[cgp_context]`. For each entry in `delegate_components!`, we use the component name type as the key, and the chosen provider as the value.
 
-Next, we declare a struct, `PersonComponents`, which is used to wire up the provider components for `Person`. We then implement `HasComponents` for `Person`, using `PersonComponents` to indicate that `Person` will utilize the providers specified in `PersonComponents`.
+The first mapping, `NameTypeProviderComponent: UseType<String>`, makes use of the generic `UseType` provider to implement the provider trait `NameTypeProvider`. The `String` argument to `UseType` is used to implement the associated type `Name`.
 
-We use the `delegate_components!` macro to wire up `PersonComponents` with the necessary components. The first mapping, `NameTypeComponent: UseType<String>`, is a shorthand to associate the abstract `Name` type with `String`. The second mapping, `GreeterComponent: GreetHello`, indicates that we want to use `GreetHello` as the implementation of the `CanGreet` consumer trait.
+The second mapping, `GreeterComponent: GreetHello`, indicates that we want to use `GreetHello` as the implementation of the `CanGreet` consumer trait.
 
-The expressive use of `delegate_components!` makes it easy to rewire the components for `Person`. For instance, if we want to use a custom `FullName` struct for the name type, we can rewire `NameTypeComponent` to `UseType<FullName>`. Similarly, if there’s an alternative `Greeter` provider, `GreetLastName`, that implements `Greeter` with additional constraints, we can simply rewire `GreeterComponent` to use `GreetLastName` and add any necessary additional wiring to meet those constraints.
-
-It’s important to note that CGP allows component wiring to be done _lazily_, meaning any errors (such as unsatisfied constraints) will only be detected when a consumer trait is actually used.
+The expressive use of `delegate_components!` makes it easy to rewire the components for `Person`. For instance, if we want to use a custom `FullName` struct for the name type, we can rewire `NameTypeComponent` to `UseType<FullName>`. Similarly, if there’s an alternative `Greeter` provider, e.g. `GreetLastName`, that implements `Greeter` with additional constraints, we can simply rewire `GreeterComponent` to use `GreetLastName` and add any necessary additional wiring to meet those constraints.
 
 ## Calling Greet
 
