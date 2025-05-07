@@ -2,6 +2,8 @@
 
 title = "Overview"
 
+weight = 1
+
 +++
 
 # Overview
@@ -89,25 +91,3 @@ Unlike CGP, traits in this pattern are typically designed as monolithic, encompa
 Monolithic traits can quickly become bottlenecks that prevent large projects from scaling. It's not uncommon for such traits to become bloated with dozens or even hundreds of methods and types. This overgrowth makes it increasingly difficult to introduce new implementations or modify existing ones. Additionally, with Rust's current practices, breaking down or decoupling these monolithic traits into smaller, more manageable traits can be challenging.
 
 CGP offers significant improvements over this traditional pattern, making it possible to write abstract Rust code without the risk of creating unwieldy, monolithic traits. CGP enables the decomposition of large traits into many small, focused traits, each ideally consisting of just a single method or type. This is made possible by the dependency injection pattern used in CGP, which allows implementations to introduce only the minimal trait bounds they need directly within the implementation, rather than bundling everything into a single, monolithic structure.
-
-# Contribution
-
-We welcome contributors who are passionate about promoting CGP within the Rust ecosystem. Whether you're a beginner or an experienced Rust developer, there are numerous ways you can contribute to the project.
-
-In this section, we'll explore different ways you can get involved and help grow the CGP community. Your contributions, regardless of your level of expertise, are valuable and appreciated!
-
-## Read The Documentation
-
-We encourage you to explore the documentation available on this website, including the [CGP Patterns](https://patterns.contextgeneric.dev) book. Your feedback is invaluable to us—if you encounter anything confusing or unclear, please let us know so we can improve the content and make it more accessible to everyone.
-
-## Participate in Discussions
-
-Join the conversation on platforms like [GitHub](https://github.com/orgs/contextgeneric/discussions) or [Reddit](https://www.reddit.com/r/cgp/). Whether you have questions about CGP or ideas for new topics or content, these forums are great places to share your thoughts and engage with the community.
-
-## Spread on Social Media
-
-Help raise awareness of CGP by sharing it on social media. Follow our official BlueSky account [@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) to stay updated on CGP’s development and latest news.
-
-## Write About It
-
-If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is already covered on the official site, your perspective might make it clearer to others.

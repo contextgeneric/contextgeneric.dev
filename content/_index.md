@@ -4,6 +4,8 @@ title = "Context-Generic Programming"
 
 insert_anchor_links = "heading"
 
+sort_by = "weight"
+
 +++
 
 # Announcement
@@ -20,12 +22,11 @@ To learn more about the high level overview of CGP, check out the [overview](/ov
 
 # Current Status
 
-As of the start of 2025, CGP remains in its _early stages_ of development. While promising, it still has several rough edges, particularly in areas such as documentation, tooling, debugging techniques, community support, and ecosystem maturity.
+As of 2025, CGP remains in its _early stages_ of development. While promising, it still has several rough edges, particularly in areas such as documentation, tooling, debugging techniques, community support, and ecosystem maturity.
 
 As such, adopting CGP for serious projects comes with inherent challenges, and users are advised to proceed _at their own risk_. The primary risk is not technical but stems from the limited support available when encountering difficulties in learning or applying CGP.
 
 At this stage, CGP is best suited for early adopters and potential [contributors](/overview/#contribution) who are willing to experiment and help shape its future.
-
 
 # Getting Started
 

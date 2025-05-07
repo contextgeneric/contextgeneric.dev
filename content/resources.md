@@ -2,6 +2,8 @@
 
 title = "Resources"
 
+weight = 2
+
 +++
 
 # Resources
