@@ -35,3 +35,9 @@ Help raise awareness of CGP by sharing it on social media. Follow our official B
 ## Write About It
 
 If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is already covered on the official site, your perspective might make it clearer to others.
+
+# Acknowledgement
+
+CGP was created by [Soares Chen](https://maybevoid.com/), with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.
+
+The development of CGP would not have been possible without the strong support of my employer, [Informal Systems](https://informal.systems/). CGP was initially introduced and refined as part of the [Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project, which leverages CGP to build a highly modular relayer for inter-blockchain communication.
