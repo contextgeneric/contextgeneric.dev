@@ -3,7 +3,8 @@
   font-size: 32px;
   font-weight: 600;
   padding: 10px 0 25px 0;
-  color: var(--primary-text-color);
+  color: var(--primary-heading-color);
+  line-height: 1.2em;
 }
 
 h1, .title-text {
@@ -24,9 +25,9 @@ h2, .subtitle-text {
   font-family: var(--text-font-family);
   font-size: 18px;
   font-weight: 400;
-  line-height: 26px;
   letter-spacing: 0.2px;
   color: var(--primary-text-color);
+  line-height: 1.4em;
 }
 
 .subtext {

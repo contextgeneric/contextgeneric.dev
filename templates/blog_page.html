@@ -17,5 +17,6 @@
 {% block content %}
 <div class="heading-text">{{ page.title }}</div>
 <div style="text-align: right;"><i>Posted on {{ page.date }}</i></div>
+<div style="text-align: right;"><i>Authored by {{ page.authors | join(sep=", ") }}</i></div>
 <div>{{ page.content | safe }}</div>
 {% endblock content %}
