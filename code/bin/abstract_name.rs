@@ -45,9 +45,17 @@ pub struct Person {
 delegate_components! {
     PersonComponents {
         NameTypeProviderComponent:
-            UseType<String>,
+            UseType<String>, // Instantiate the `Name` type to `String`
         GreeterComponent:
             GreetHello, // Use `GreetHello` to provide `Greeter`
+    }
+}
+
+// Compile-time checks that all dependencies are wired correctly
+check_components! {
+    CanUsePerson for Person {
+        NameTypeProviderComponent,
+        GreeterComponent,
     }
 }
 
