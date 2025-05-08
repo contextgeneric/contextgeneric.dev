@@ -33,7 +33,8 @@ pub struct Person {
 }
 
 // Compile-time wiring of CGP components
-delegate_components! {
+delegate_and_check_components! {
+    CanUsePerson for Person;
     PersonComponents {
         GreeterComponent: GreetHello, // Use `GreetHello` to provide `Greeter`
     }
