@@ -32,7 +32,7 @@ pub struct Person {
     pub name: String,
 }
 
-// Compile-time wiring of CGP components
+// Compile-time wiring and checking of CGP components
 delegate_and_check_components! {
     CanUsePerson for Person;
     PersonComponents {
