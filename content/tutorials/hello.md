@@ -107,10 +107,11 @@ We also use the `#[derive(HasField)]` macro to automatically derive `HasField` i
 
 ## Delegate Components
 
-Next, we want to define some wirings to link up the `GreetHello` that we defined earlier, so that we can use it on the `Person` context. This is done by using the `delegate_components!` macro as follows:
+Next, we want to define some wirings to link up the `GreetHello` that we defined earlier, so that we can use it on the `Person` context. This is done by using the `delegate_and_check_components!` macro as follows:
 
 ```rust
-delegate_components! {
+delegate_and_check_components! {
+    CanUsePerson for Person;
     PersonComponents {
         NameTypeProviderComponent:
             UseType<String>,
@@ -120,32 +121,17 @@ delegate_components! {
 }
 ```
 
-We use the `delegate_components!` macro on the target provider `PersonComponents`, which was generated eariler by `#[cgp_context]`. For each entry in `delegate_components!`, we use the component name type as the key, and the chosen provider as the value.
+We use the `delegate_and_check_components!` macro to perform the wiring of `Person` context with the chosen providers for each component that we want to use with `Person`.
+
+The first line, `CanUsePerson for Person`, generates a `CanUsePerson` _check trait_, which is used for implementing checks that the `Person` context has correctly implemented the consumer traits for the components in the entries, i.e. `NameTypeProviderComponent` and `GreeterComponent`.
+
+The next line, we set the delegation target to `PersonComponents`, which was generated eariler by `#[cgp_context]`. For each entry in `delegate_components!`, we use the component name type as the key, and the chosen provider as the value.
 
 The first mapping, `NameTypeProviderComponent: UseType<String>`, makes use of the generic `UseType` provider to implement the provider trait `NameTypeProvider`. The `String` argument to `UseType` is used to implement the associated type `Name`.
 
 The second mapping, `GreeterComponent: GreetHello`, indicates that we want to use `GreetHello` as the implementation of the `CanGreet` consumer trait.
 
-## Check Components
-
-We have now declared the wirings for `PersonComponents` using `delegate_components!`. However, the implementation of the wiring is done _lazily_ in CGP. This means that invalid wiring will only raise compile errors the first time we try to use the concrete implementation.
-
-However, we can make use of `check_components!` to perform compile-time checks that our previous wiring is correct. This can be done as follows:
-
-```rust
-check_components! {
-    CanUsePerson for Person {
-        NameTypeProviderComponent,
-        GreeterComponent,
-    }
-}
-```
-
-The `check_components!` macro generates a `CanUsePerson` _check trait_, which is used for implementing checks that the `Person` context has correctly implemented the consumer traits for `NameTypeProviderComponent` and `GreeterComponent`.
-
-If there is any unsatisfied dependency, such as if `Person` does not contain the necessary `name: String` field, then such errors will be raised here.
-
-We can think of the use of `check_components!` as writing CGP tests that run at compile time. The reason this check is done separately from `delegate_components!`, is that we can use `check_components!` to define more advanced tests, such as when the CGP traits contain additional generic parameters.
+During the wiring, if there is any unsatisfied dependency, such as if `Person` does not contain the necessary `name: String` field, then the errors would be raised by the check trait at the first line.
 
 ## Calling Greet
 
@@ -225,21 +211,14 @@ pub struct Person {
     pub name: String,
 }
 
-// Compile-time wiring of CGP components
-delegate_components! {
+// Compile-time wiring and checks of CGP components
+delegate_and_check_components! {
+    CanUsePerson for Person;
     PersonComponents {
         NameTypeProviderComponent:
             UseType<String>, // Instantiate the `Name` type to `String`
         GreeterComponent:
             GreetHello, // Use `GreetHello` to provide `Greeter`
-    }
-}
-
-// Compile-time checks that all dependencies are wired correctly
-check_components! {
-    CanUsePerson for Person {
-        NameTypeProviderComponent,
-        GreeterComponent,
     }
 }
 
