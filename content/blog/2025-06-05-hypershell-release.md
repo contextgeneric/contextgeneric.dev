@@ -99,7 +99,7 @@ pub type Program = Pipe<Product![
 
 Compared to the prettified version, the raw syntax for Hypershell is slightly more verbose, but is still relatively readable. The first thing to notice is that the handlers that are chained together with `|` are now placed inside a `Pipe` wrapper. Furthermore, the `Product!` macro from CGP is used to construct a variable-length list at the _type-level_, so that `Pipe` can accept arbitrary number of handlers.
 
-We can also see that the syntax to `WithStaticArgs[...]` is desugared to `WithStaticArgs<Product![...]>`. With `hypershell!`, syntax that accept variable number of arguments can use the `[]` short hand to wrap the inner arguments around `Product!`. This leads to cleaner and more concise syntax and makes Hypershell programs more readable.
+We can also see that the syntax `WithStaticArgs[...]` is desugared to `WithStaticArgs<Product![...]>`. With `hypershell!`, syntax that accept variable number of arguments can use the `[]` short hand to wrap the inner arguments around `Product!`. This leads to cleaner and more concise syntax and makes Hypershell programs more readable.
 
 Finally, you may notice that all occurances of strings are wrapped inside the `symbol!` macro from CGP. This is because Hypershell programs are types, but string literals are value-level expressions. The `symbol!` macro can be used to turn string literals into _types_, so that we can now use them within type expressions.
 
@@ -146,9 +146,9 @@ The `MyApp` context is defined as a simple struct with a `name` field of type `S
 
 The first macro, `#[cgp_context]`, is used to enable wiring of CGP components to be used by the context. The first argument to the macro, `MyAppComponents`, is the name given to the _provider_ of the `MyApp` context. But since we don't include any additional wiring in this example, we can ignore it for now.
 
-The macro argument is then followed by `:`, and then `HypershellPreset`, indicating that the `MyAppComponents` provider is _inherited_ from `HypershellPreset`, which is provided by Hypershell. The syntax looks similar to _supertraits_ in Rust, and works a bit like OOP inheritance, but operates at the _type-level_.
+The macro argument is then followed by `:`, and then `HypershellPreset`, indicating that the `MyAppComponents` provider is _inherited_ from `HypershellPreset`, which is provided by Hypershell. The syntax looks similar to _supertraits_ in Rust, and works a bit like OOP prototypal inheritance, but operates only during compile-time at the _type-level_.
 
-For the purpose of this example, the main takeaway is that the context `MyApp` implements all supported Hypershell traits through the provider `MyAppComponents`, with the component wiring inherited from `HypershellPreset`. We will revisit later on how CGP presets can defined and customized towards the end of this blog post.
+For the purpose of this example, the main takeaway is that the context `MyApp` implements all supported Hypershell components through the provider `MyAppComponents`, with the component wiring inherited from `HypershellPreset`. We will revisit later on how CGP presets can defined and customized towards the end of this blog post.
 
 The second macro, `#[derive(HasField)]`, is used to implement the `HasField` trait for `MyContext`. With this, the `name` field in `MyContext` is exposed as a `HasField` implementation, which can then be accessed by the implementation of `FieldArg<"name">`.
 
@@ -192,3 +192,84 @@ The implementation for `FieldArg<"name">` makes use of this feature, to require 
 From this, we can also learn that the implementation wiring for CGP is done _lazily_. That is, both `HypershellCli` and `MyApp` are wired with the same abstract implementations from `HypershellPreset`, but only _some_ of the wirings are valid, depending on the additional capabilities provided by the concrete context.
 
 It is worth noting that it has always been possible to use dependency injection through Rust trait impls, even in vanilla Rust. But with CGP, we bring the use of dependency injection to the next level, enabling use cases such as the implementation of `FieldArg` in this example.
+
+## Streaming Handlers
+
+Now that we have gone through the basics of Hypershell, let's try defining more complex Hypershell programs. In the earlier example, we performed CLI execution using `SimpleExec`, which accepts inputs and produce outputs as raw bytes, i.e. `Vec<u8>`. This mode of execution gives simpler semantics to the execution, as we don't need to worry about cases when an `STDIN` or `STDOUT` stream being closed prematurely.
+
+However, one of the appeal of shell scripting is the ability to _stream_ the `STDOUT` of one program into the `STDIN` of another program, with both programs running in parallel. To support this execution, Hypershell also provides `StreamingExec`, which spawns the child process in the background and handles inputs and outputs as _streams_. Hypershell currently supports 3 kinds of streams: [`futures::Stream`](https://docs.rs/futures/latest/futures/prelude/trait.Stream.html), [`futures::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html), and [`tokio::io::AsyncRead`](https://docs.rs/tokio/latest/tokio/io/trait.AsyncRead.html). As we will see later, the modular design of Hypershell also makes it easy to build extended implementations to support other kinds of streams.
+
+To demonstrate streaming execution in action, we will define an example program that streams the HTTP response from a URL, and compute the SHA256 checksum of the web page. The program would be defined as follows:
+
+```rust
+pub type Program = hypershell! {
+    StreamingExec<
+        StaticArg<"curl">,
+        WithArgs [
+            FieldArg<"url">,
+        ],
+    >
+    |   StreamingExec<
+            StaticArg<"sha256sum">,
+            WithStaticArgs [],
+        >
+    |   StreamingExec<
+            StaticArg<"cut">,
+            WithStaticArgs [
+                "-d",
+                " ",
+                "-f",
+                "1",
+            ],
+        >
+    | StreamToStdout
+};
+```
+
+To put it simply, the above Hypershell program is roughly equivalent to the following bash command:
+
+```rust
+curl $url | sha256sum | cut -d ' ' -f 1
+```
+
+The first handler uses `curl` to fetch the HTTP response from a `url` value provided by the context. The second handler uses `sha256sum` to perform streaming computation of the checksum. The third handler uses `cut` to get the checksum value produced by `sha256sum`, ignoring the file name output in the second column.
+
+As with the earlier example, we define a new `MyApp` context to provide the `url` value:
+
+```rust
+#[cgp_context(MyAppComponents: HypershellPreset)]
+#[derive(HasField)]
+pub struct MyApp {
+    pub url: String,
+}
+```
+
+We can then call the program with `MyApp` in our main function:
+
+```rust
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let app = MyApp {
+        url: "https://nixos.org/manual/nixpkgs/unstable/".to_owned(),
+    };
+
+    app.handle(PhantomData::<Program>, Vec::new()).await?;
+
+    Ok(())
+}
+```
+
+For our example run, we want to choose a public web page that is relatively large for the effect of streaming to be more noticeable. So we pick the [Nix manual](https://nixos.org/manual/nixpkgs/unstable/) as the `url` value to construct `MyApp`.
+
+The example program is also available at the [Hypershell repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_cli.rs). If we run it, we would see the checksum produced such as follows:
+
+```bash
+$ cargo run --example http_checksum_cli
+c5ce4ff8fb2d768d4cbba8f5bee3d910c527deedec063a0aa436f4ae7005c713
+```
+
+Feel free to tweak the example with different CLI commands, to better observe that Hypershell is indeed streaming the handler inputs/outputs in parallel.
+
+## Native HTTP Request
+
+In the earlier example, we performed HTTP requests `curl` before streaming it to the `sha256sum` command. But since we are running the program inside Rust, a natural evolution would be to use native HTTP clients in Rust to submit the HTTP request.
