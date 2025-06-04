@@ -556,6 +556,6 @@ Although CGP shares similarity with OOP, particularly with prototype-based progr
 
 In particular, the strong type system provided by Rust, in addition to advanced features such as generics and traits, makes it possible to write highly advanced constructs that are otherwise not possible with OOP alone. Furthermore, the prototype-like lookup is performed by CGP at _compile-time_, and thus eliminates runtime overheads such as virtual tables and JIT compilation.
 
-In a way, we can think of CGP only taking the good parts from OOP, and enhance it by making it work seamlessly with the advanced type system in Rust.
+Through this comparison, I also hope to highlight that CGP is _not_ a totally novel concept that is impossible to understand. There are many more articles available that explains in depth how prototypal inheritance works, but there are virtually no third party articles that explain how CGP works. My hope is that the similarity comparison can help readers coming from OOP background to better understand how CGP works, by reusing existing concepts that you may have learned before.
 
 ## Abstract Syntax
