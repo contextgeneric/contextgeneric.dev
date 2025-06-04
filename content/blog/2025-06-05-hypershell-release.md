@@ -424,4 +424,138 @@ By now, hopefully the earlier examples are enough to convince you that the base 
 
 Now that I have pique your interest, hopefully it would also gave you sufficient motivation to learn about _how_ Hypershell is implemented, and how you can make use of CGP to build other domain-specific languages in similar ways as Hypershell.
 
+## Context-Generic Programming
+
+At its core, the modular implementation of Hypershell is made possible through _context-generic programming_ (CGP), a modular programming paradigm for Rust. A full introduction for CGP can be found on the [current website](/) that hosts this blog post. But for readers who are new here, I will try to give a short introduction to CGP in this section.
+
+As its name implies, CGP allows Hypershell to implement its core logic to be generic over any context, e.g. `HypershellCli`, `HypershellHttp`, `MyApp`. This means that every time we define a new concrete context, we can choose reuse _all_, or more importantly, _some_ of Hypershell's core implementation based on the needs of our application. Furthermore, external developers can also write their own context-generic implementations in the same way, which can be used to _replace_ or _extend_ the existing core implementation.
+
+At a high level, CGP makes it possible to bypass the _coherence_ restrictions in Rust traits, allowing us to define overlapping or orphan trait implementations. Everything else in CGP is built on the foundation of asking: what would Rust programs look like if there were no coherence restrictions? CGP works on _safe_, _stable_ version of Rust today, and all you have to do is include the [`cgp`](https://crates.io/crates/cgp) crate as a dependency.
+
+The basic idea of how CGP workaround coherence is pretty simple. We first start with an example `CanGreet` trait, that is implemented with CGP as follows:
+
+```rust
+use cgp::prelude::*;
+
+#[cgp_component(Greeter)]
+pub trait CanGreet {
+    fn greet(&self);
+}
+```
+
+The `CanGreet` trait that we defined is a classical Rust trait, which we now call a _consumer trait_ in CGP. With the `#[cgp_component]` macro, a _provider trait_ and a _name_ struct are also generated as follows:
+
+```rust
+pub trait Greeter<Context> {
+    fn greet(context: &Context);
+}
+
+pub struct GreeterComponent;
+```
+
+Compared to the consumer trait `CanGreet`, the provider trait `Greeter` has an additional generic `Context` parameter to refer to the original `Self` type in `CanGreet`. Similarly, all occurances of `Self`, i.e. `&self`, are replaced with the explicit `Context`, i.e. `context: &Context`.
+
+In CGP, each implementation of the provider trait `Greeter` would choose a _unique type_ for `Self`, i.e. by defining a dummy struct like `struct Provider;`, and then implementing the provider trait for that struct. The dummy struct that implements the provider trait is called a _provider_. Because the coherence restriction only applies mainly to the `Self` type, by choosing a unique `Self` type for each implementation, we essentially bypass the coherence restrictions, and can define multiple generic implementations that are overlapping over the `Context` type.
+
+The macro also generates a `GreeterComponent` struct, which is used as a _name_, or a _key_, for the underlying implementation to perform compile-time _look up_ when instantiating the implementation of the consumer trait from a provider trait implementation. We will revisit this in a moment.
+
+To demonstrate, we show two example provider implementations for `Greeter` as follows:
+
+```rust
+#[cgp_new_provider]
+impl<Context> Greeter<Context> for GreetHello {
+    fn greet(context: &Context) {
+        println!("Hello!");
+    }
+}
+
+#[cgp_new_provider]
+impl<Context> Greeter<Context> for GreetBonjour {
+    fn greet(context: &Context) {
+        println!("Bonjour!");
+    }
+}
+```
+
+The `#[cgp_new_provider]` macro automatically define new structs for `GreetHello` and `GreetBonjour`. As we can see, both implementations are generic over the `Context` type, but there is no error arise from overlapping instances.
+
+### Components Wiring
+
+Although multiple overlapping provider trait implementations can co-exist, they do not implement the original consumer trait `CanGreet`. To implement the consumer trait `CanGreet` for a specific concrete context, additional _wiring steps_ are needed to select _which_ provider implementation should be used for that concrete context.
+
+To demonstrate how the wiring works, we will define an example `MyApp` context as follows:
+
+```rust
+#[cgp_context(MyAppComponents)]
+pub struct MyApp;
+
+delegate_components! {
+    MyAppComponents {
+        GreeterComponent: GreetHello,
+    }
+}
+```
+
+In the example above, we define a concrete `MyApp` context using the `#[cgp_context]` macro, which generates a new `MyAppComponents` struct and wire it with the context. Following that, we use `delegate_components!` to essentially use `MyAppComponents` as a _type-level lookup table_, containing one entry with `GreeterComponent` as the "key", and `GreetHello` as the "value".
+
+With the wiring in place, the concrete context `MyApp` now automatically implements `CanGreet`, and we can now call `MyApp.greet()`. To understand how the magic works, we can visualize the underlying implementation with the following diagram:
+
+![Diagram](/blog/images/cgp-wiring.png)
+
+We start from the lower left corner, with the goal to implement `CanGreet` for `MyApp`. First of all, Rust trait system would notice that `MyApp` does not have an explicit implementation for `CanGreet`, but has a `HasProvider` implementation generated by `#[cgp_context]`, which points to `MyAppComponents`.
+
+Next, the trait system sees that `MyAppComponents` does not directly implement `Greeter<MyApp>`. So the system performs a type-level lookup on the `GreeterComponent` key stored in `MyAppComponents`. The lookup is implemented through the trait `DelegateComponent<GreeterComponent>`, which were generated by the `delegate_components!` macro. There, it sees that an entry for `GreeterComponent` is found, which points to `GreetHello`.
+
+Following that, the trait system sees that `GreetHello` has a valid implementation of `Greeter<MyApp>`. Through that, it generates a blanket implementation of `Greeter<MyApp>` for MyAppComponents, which simply forwards the call to `GreetHello`.
+
+Similarly, now that `Greeter<MyApp>` is implemented for `MyAppComponents`, the trait system generates a blanket implementation of `CanGreet` for `MyApp`. The blanket implementation forwards the call to the `Greeter<MyApp>` implementation of `MyAppComponents`, which is then forwarded to `GreetHello`.
+
+The blanket implementations for `CanGreet` and `Greeter` were generated by `#[cgp_components]` when the consumer trait is defined. What we have described earlier are the high level visualizations on how these blanket implementations work under the hood.
+
+### Prototypal Inheritance
+
+For readers who are familiar with JavaScript, you might notice that the wiring mechanics for CGP is very similar to how _prototypal inheritance_ works in JavaScript. Conceptually, the greet example earlier works similar to the following JavaScript code:
+
+```javascript
+// provider
+function greet_hello() {
+    console.log("Hello!")
+}
+
+// lookup table
+var MyAppComponents = {
+    greet: greet_hello,
+}
+
+// concrete context
+var MyApp = function() {}
+MyApp.prototype = MyAppComponents
+
+// context value
+var app = new MyApp()
+app.greet()
+```
+
+Since JavaScript is dynamic-typed, the concept of a trait or interface cannot be specified in the code. However, we can still conceptually think that a `CanGreet` interface exist with certain requirements on the method. The function `greet_hello` is the equivalent of a _provider_ that implements the `Greeter` interface.
+
+Similarly, `MyAppComponents` serves as a lookup table that maps the `greet` method to the `greet_hello` provider. We then define the `MyApp` context class, and set `MyAppComponents` as the _prototype_ of `MyApp`. This works similar to the `HasProvider` trait from CGP to link the consumer trait implementation the provider trait.
+
+Finally, we can instantiate an instance of `MyApp` using the `new` keyword, and there we can also find that the `app.greet()` method can be called.
+
+If we try to visualize the wiring of prototypes in our JavaScript example, we would get a similar diagram as what we have for CGP:
+
+![Diagram](/blog/images/prototypal-inheritance.png)
+
+We would navigate the implementation diagram from the top-left corner. In order for `app.greet()` to be implemented, its class `MyApp` needs to have a `prototype` field, which points to `MyAppComponents`. We then perform lookup on the `greet` key, and find the provider function `greet_hello` to be called.
+
+During runtime, the prototype `MyAppComponents` is attached to `app.__proto__`, which in turn enables `app.greet()` to be called.
+
+### Comparison to OOP
+
+Although CGP shares similarity with OOP, particularly with prototype-based programming, there are major differences with how it is implemented that makes CGP far better than existing systems.
+
+In particular, the strong type system provided by Rust, in addition to advanced features such as generics and traits, makes it possible to write highly advanced constructs that are otherwise not possible with OOP alone. Furthermore, the prototype-like lookup is performed by CGP at _compile-time_, and thus eliminates runtime overheads such as virtual tables and JIT compilation.
+
+In a way, we can think of CGP only taking the good parts from OOP, and enhance it by making it work seamlessly with the advanced type system in Rust.
+
 ## Abstract Syntax
