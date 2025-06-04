@@ -8,7 +8,7 @@ authors = ["Soares Chen"]
 
 +++
 
-## Summary
+# Summary
 
 I am thrilled to introduce [_Hypershell_](https://github.com/contextgeneric/hypershell), a compile-time domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [_context-generic programming_](/) (CGP), making it highly modular and extensible.
 
@@ -19,6 +19,8 @@ In this blog post, I will showcase some example Hypershell programs, and briefly
 Hypershell serves as an _experimental_, proof of concept, showcase of the capabilities of CGP. As such, its primary purpose is for demonstrating how CGP can be used to build highly modular DSLs in Rust.
 
 The example use case of shell scripting is primarily chosen because it is fun and approachable to programmers of all background. In practice, we may or may not want to use Hypershell to write serious™ shell scripts. But regardless of the future outcome, I hope Hypershell can serve as a _fun_ programming example, and for you to becoming interested in learning CGP.
+
+# An Overview of Hypershell
 
 ## Getting Started
 
@@ -273,3 +275,153 @@ Feel free to tweak the example with different CLI commands, to better observe th
 ## Native HTTP Request
 
 In the earlier example, we performed HTTP requests `curl` before streaming it to the `sha256sum` command. But since we are running the program inside Rust, a natural evolution would be to use native HTTP clients in Rust to submit the HTTP request.
+
+Hypershell provides native HTTP support with the implementation being a separate _extension_ on top of the base CLI implementation. The handlers `SimpleHttpRequest` and `StreamingHttpRequest` are provided as the HTTP equivalent of `SimpleExec` and `StreamingExec`.
+
+We can modify our earlier example to use `StreamingHttpRequest` in place of `curl` as follows:
+
+```rust
+pub type Program = hypershell! {
+    StreamingHttpRequest<
+        GetMethod,
+        FieldArg<"url">,
+        WithHeaders[ ],
+    >
+    |   StreamingExec<
+            StaticArg<"sha256sum">,
+            WithStaticArgs [],
+        >
+    |   StreamingExec<
+            StaticArg<"cut">,
+            WithStaticArgs [
+                "-d",
+                " ",
+                "-f",
+                "1",
+            ],
+        >
+    | StreamToStdout
+};
+```
+
+The `StreamingHttpRequest` handler accepts 3 arguments. The first argument, `GetMethod`, is used to indicate that we want to send with the GET method. The second argument, `FieldArg<"url">`, indicates that we want to send the HTTP request to the URL specified in the `url` field of the context. The third argument, `WithHeaders[ ]`, allows us to specify the HTTP headers, which is left empty for this example.
+
+As we can see, Hypershell allows streaming pipelines to be built seamlessly between native handlers and CLI handlers. In fact, all handlers are just CGP components that implement the `Handler` interface. So we can easily extend the DSL with new handler implementations that can interop with each others as long as the Rust types between the inputs and outputs matches.
+
+Behind the scene, Hypershell implements the native HTTP client using [`reqwest`](https://docs.rs/reqwest/). To run the program, the context needs to provide a `http` field with a [`reqwest::Client`](https://docs.rs/reqwest/latest/reqwest/struct.Client.html). Together with the `url` field, we would define a `MyApp` context as follows:
+
+```rust
+#[cgp_context(MyAppComponents: HypershellPreset)]
+#[derive(HasField)]
+pub struct MyApp {
+    pub http_client: Client,
+    pub url: String,
+}
+```
+
+We can then construct a `MyApp` context in our main function, and then call the Hypershell program:
+
+```rust
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let app = MyApp {
+        http_client: Client::new(),
+        url: "https://nixos.org/manual/nixpkgs/unstable/".to_owned(),
+    };
+
+    app.handle(PhantomData::<Program>, Vec::new()).await?;
+    Ok(())
+}
+```
+
+The same example is available at the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_client.rs). Running it should produce the same HTTP checksum as before:
+
+```bash
+$ cargo run --example http_checksum_client
+c5ce4ff8fb2d768d4cbba8f5bee3d910c527deedec063a0aa436f4ae7005c713
+```
+
+It is worth noting that aside from `reqwest`, it is possible to customize a context to use alternative HTTP client implementations to handle `SimpleHttpRequest` and `StreamingHttpRequest`. In such cases, we would be able to define contexts without the `http_client` field, if it is not required by the alternative implementation.
+
+## JSON Encoding
+
+As an embedded DSL, Hypershell programs have the ability to make full use of Rust to seamlessly integrate shell scripting with the remaining parts of the application. A good example to demonstrate this is to encode/decode native Rust types as part of the pipelines of a Hypershell program.
+
+Following is an example Hypershell program that submits a Rust code snippet to [Rust Playground](https://play.rust-lang.org/), and publish it as a GitHub Gist:
+
+```rust
+pub type Program = hypershell! {
+    EncodeJson
+    |   SimpleHttpRequest<
+            PostMethod,
+            StaticArg<"https://play.rust-lang.org/meta/gist">,
+            WithHeaders [
+                Header<
+                    StaticArg<"Content-Type">,
+                    StaticArg<"application/json">,
+                >
+            ],
+        >
+    |   DecodeJson<Response>
+};
+```
+
+The `EncodeJson` handler accepts any input that implements `Serialize`, and encode them into JSON bytes as the output. Next, we use `SimpleHttpRequest` to submit the HTTP request, as there is no need of streaming with small payloads. Inside `WithHeaders`, we also use `Header` to set the `Content-Type` header to `application/json`. Finally, the `DecodeJson` handler decodes its input bytes into the specified Rust type, which is expected to implement `Deserialize`.
+
+We would then define the input and output types as follows:
+
+```rust
+#[derive(Serialize)]
+pub struct Request {
+    pub code: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Response {
+    pub id: String,
+    pub url: String,
+    pub code: String,
+}
+```
+
+The `Request` and `Response` types are defined with the respective `Serialize` and `Deserialize` implementations, following the formats expected by Rust playground.
+
+With the program defined, we can now programmatically submit a code snippet to Rust Playground in our `main` function:
+
+```rust
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let app = HypershellHttp {
+        http_client: Client::new(),
+    };
+
+    let input = Request {
+        code: "fn main() { println!(\"Hello, world!\"); }".to_owned(),
+    };
+
+    let output = app.handle(PhantomData::<Program>, input).await?;
+
+    println!("Created new Rust playground gist with response: {output:#?}");
+
+    Ok(())
+}
+```
+
+When no additional field is required, Hypershell provides the pre-defined `HypershellHttp` context that can be used to run Hypershell programs with HTTP capabilities. The example code is also available at the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/rust_playground.rs). Running it should produce an output such as follows:
+
+```bash
+$ cargo run --example rust_playground
+Created new Rust playground gist with response: Response {
+    id: "ec90cbb6b3e797b15dd1eacbd51ffa8b",
+    url: "https://gist.github.com/rust-play/ec90cbb6b3e797b15dd1eacbd51ffa8b",
+    code: "fn main() { println!(\"Hello, world!\"); }",
+}
+```
+
+# Implementation Details
+
+By now, hopefully the earlier examples are enough to convince you that the base implementation of Hypershell is pretty powerful, and can be potentially useful to build real-world™ applications.
+
+Now that I have pique your interest, hopefully it would also gave you sufficient motivation to learn about _how_ Hypershell is implemented, and how you can make use of CGP to build other domain-specific languages in similar ways as Hypershell.
+
+## Abstract Syntax
