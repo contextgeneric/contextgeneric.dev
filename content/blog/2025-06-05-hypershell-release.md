@@ -574,8 +574,153 @@ A consequence for this strategy is that many advanced CGP patterns are introduce
 
 Nevertheless, I will try to stay as high level as possible when explaining the advanced CGP concepts, and omit the internal details similar to how the earlier explanation for CGP wiring is done. So I hope you would bear with me for now, and let's walk through together on how Hypershell is implemented with CGP.
 
-# Implementation Details
+# Implementation of Hypershell
+
+Now that we have equiped with some brief understanding of CGP, let's take a look at how the Hypershell DSL is implemented using CGP. The programming techniques that we are going to cover would not only work for Hypershell, but also more generally any kind of DSL.
+
+The main idea is that the programs for this family of DSLs would be written as _types_ that will be "interpreted" at compile time. The main strength of this approach is that the DSL can leverage the Rust compiler and zero-cost abstraction and be very performant. The main disadvantage is that the program for the DSL must be available at the same time as the Rust program is built. In other words, it is less suitable in scripting applications that require dynamic loading of programs, such as web browsers or plugin systems, unless the system also bundles the full Rust compiler to compile the DSL program.
+
+Nevertheless, this section will be especially useful for readers who are interested in building DSLs similar to Hypershell. For the remaining readers, I hope that the section would still be useful for you to understand more about CGP, and consider using it to build other kinds of modular applications.
 
 ## Handler Component
 
+The core component behind Hypershell is the `Handler` component, which is implemented by the handlers in a Hypershell pipeline. The consumer trait for the component, `CanHandle` is defined as follows:
+
+```rust
+#[cgp_component(Handler)]
+pub trait CanHandle<Code: Send, Input: Send>: HasAsyncErrorType {
+    type Output: Send;
+
+    async fn handle(
+        &self,
+        _tag: PhantomData<Code>,
+        input: Input,
+    ) -> Result<Self::Output, Self::Error>;
+}
+```
+
+The `CanHandle` trait is parameterized by two generic parameters, `Code` and `Input`. The `Code` type represents the DSL program that we want to "run" or "interpret". The `Input` is the main input data to be passed to the program, such as for the STDIN or the HTTP request body. The generic types have additional `Send` bound with them, as CGP requires async functions to implement `Send` by dfault, to allow them to be used in spawned tasks such as `tokio::spawn`.
+
+The trait also has an associated type `Output`, which represents the output type produced by the program, such as STDOUT or the HTTP response body. Being associated type, it means that for each combination of `Code` and `Input` parameters, there is a _unique_ `Output` type that is associated to that.
+
+The `handle` method is an async function with `&self` as the first argument, which means in addition to the `Input`, the handler also has access to the context that contains additional dependencies and the surrounding environment. The second parameter, `_tag`, has the type `PhantomData<Code>`, and is used to pass the `Code` program as a value to assist in type inference. Other than that, the value is expected to be ignored by the method body, since there is no runtime information carried by `PhantomData`.
+
+The `handle` method returns a `Result`, with `Self::Output` being the success result, and `Self::Error` if there is any error. `Self::Error` is an _abstract type_ defined by the `ErrorTypeProvider` component, which is defined in CGP as follows:
+
+```rust
+#[cgp_type]
+pub trait HasErrorType {
+    type Error: Debug;
+}
+```
+
+First, `HasErrorType` is a consumer trait that contains an associated `Error` type, which is required to always implement `Debug`. The macro `#[cgp_type]` is an extension to `#[cgp_component]`, and is used to define abstract type component with some additional derivations. The macro also generates an `ErrorTypeProvider` provider trait.
+
+To support the async method in `CanHandler`, the context and the `Error` type also needs to implement `Send`, which is provided by `HasAsyncErrorType` as a _trait alias_:
+
+```rust
+#[blanket_trait]
+pub trait HasAsyncErrorType:
+    Send + Sync + HasErrorType<Error: Send + Sync>
+{}
+```
+
+The `HasAsyncErrorType` trait is automatically implemented for all `Context` type that implements `HasErrorType`, with the additional constraints that `Context: Send + Sync` and `Context::Error: Send + Sync`. This would ensure that the `Future` returned from async functions that capture `Context` or `Context::Error` will always implement `Send`.
+
+The `#[blanket_trait]` macro is provided by CGP to help with shortening definitions of trait aliases. Behind the scene, it generates a trivial blanket implementation for `HasAsyncErrorType` that is implemented if all supertrait constraints are satisfied.
+
+Going back to `CanHandle`, the `#[cgp_component]` macro also generates the provider trait `Handler` as follows:
+
+```rust
+pub trait Handler<Context, Code: Send, Input: Send>
+where
+    Context: HasAsyncErrorType,
+{
+    type Output: Send;
+
+    async fn handle(
+        context: &Context,
+        _tag: PhantomData<Code>,
+        input: Input,
+    ) -> Result<Self::Output, Context::Error>;
+}
+```
+
+As we can see, the main difference between `Handler` and `CanHandle` is that the `Self` type is replaced with an explicit `Context` parameter. The supertrait `HasAsyncErrorType` now becomes a trait bound for `Context`.
+
 ## Abstract Syntax
+
+Now that we know about the interface for the handler component, let's take a look at how the `Handler` trait is implemented for a basic Hypershell command, `SimpleExec`. Recall from earlier that `SimpleExec` allows execution of shell command, with plain raw bytes as the input and output.
+
+If we try to navigate to the place that defines `SimpleExec`, all we see is the following definition:
+
+```rust
+pub struct SimpleExec<CommandPath, Args>(pub PhantomData<(CommandPath, Args)>);
+```
+
+_Wait, what?_ That's it? Yes, you see it right. There is no extra trait implementation that is directly tied to `SimpleExec`. In fact, all types that are used to "write" a Hypershell program are just dummy structs like the one defined for `SimpleExec`.
+
+**This implies that how a Hypershell program is "written" is completely _decoupled_ from how the program is "interpreted" or "executed" by the concrete context.**
+
+In other words, when we walked through our examples earlier, the use of `HypershellCli`, `HypershellHttp`, or `MyApp` are only few of the possible _choices_ that we can choose to run our Hypershell programs. More generally, since all the contexts so far only inherit from `HypershellPreset`, it implies that one can also build fully customized presets with different ways to run the programs, such as changing the way how `SimpleExec` should run.
+
+More formally, we can say that a type like `SimpleExec` is used to represent the _abstract syntax_ of the Hypershell DSL. We then make use of CGP and Rust's trait system to act as the "interpreter" for the DSL, to "dispatch" the handling of a program fragment to a specific CGP provider. When we define custom contexts, we are essentially building custom "interpreters" that are used for "executing" the Hypershell program at compile-time.
+
+It is also worth noting that the pattern introduced here is a highly advanced CGP programming technique. There are also simpler versions of the pattern, such as _higher order providers_, where traits like `Handler` would not contain the `Code` parameter, and types like `SimpleExec` would directly implement the `Handler` trait. In this simplified pattern, the execution of the program would be tightly coupled with a specific implementation, making it less modular.
+
+Both the higher order provider and DSL patterns are advanced CGP patterns that are not yet covered by the CGP patterns book. Such advanced techniques can sometimes be overkill for building simple applications, especially for beginners who just want to try out CGP to make their applications _slightly_ more modular. However, they are perfect for building DSLs, as it is a good practice to separate the _syntax_ from the _semantics_ of proramming languages.
+
+## Handler Implementation for `SimpleExec`
+
+For most of you who are new to CGP, at this point you would probably be completely loss on how to navigate your way to figure out _where_ is the actual implementation for `SimpleExec`. We will revisit the topic of how the wiring is actually done slightly later on. For now, let's go straight to the default provider used by Hypershell to implemented `SimpleExec`:
+
+```rust
+#[cgp_new_provider]
+impl<Context, CommandPath, Args, Input>
+    Handler<Context, SimpleExec<CommandPath, Args>, Input>
+    for HandleSimpleExec
+where
+    Context: CanExtractCommandArg<CommandPath>
+        + CanUpdateCommand<Args>
+        + CanRaiseAsyncError<std::io::Error>
+        + ...,
+    Context::CommandArg: AsRef<OsStr> + Send,
+    CommandPath: Send,
+    Args: Send,
+    Input: Send + AsRef<[u8]>,
+{
+    type Output = Vec<u8>;
+
+    async fn handle(
+        context: &Context,
+        _tag: PhantomData<SimpleExec<CommandPath, Args>>,
+        input: Input,
+    ) -> Result<Vec<u8>, Context::Error> {
+        ...
+    }
+}
+```
+
+If you search for the occurance of `SimpleExec` in the Hypershell code base, you will find `HandleSimpleExec`, which is a provider that implements `Handler` specifically to handle `SimpleExec`. Let's first look at how its trait signatures are defined.
+
+Looking at the generic parameters, you may notice that `SimpleExec<CommandPath, Args>` is used in place of where `Code` was. In other words, `HandleSimpleExec` implements `Handler` if `Code` is in the form `SimpleExec<CommandPath, Args>`. Essentially, we are using Rust generics to "pattern match" on a DSL code fragment, and extract the inner `CommandPath` and `Args` parameters.
+
+Inside the `where` clause, we make use of dependency injection to require other dependencies to be provided by the generic `Context`. The first trait, `CanExtractCommandArg`, is defined as follows:
+
+```rust
+#[cgp_component {
+    provider: CommandArgExtractor,
+}]
+pub trait CanExtractCommandArg<Arg>: HasCommandArgType {
+    fn extract_command_arg(&self, _phantom: PhantomData<Arg>) -> Self::CommandArg;
+}
+
+#[cgp_type]
+pub trait HasCommandArgType {
+    type CommandArg;
+}
+```
+
+The `CommandArgExtractor` component provides an `extract_command_arg` method to extract a command line argument from an `Arg` code. The method returns an abstract `CommandArg` type, which may be instantiated with types such as `PathBuf` or `String`.
+
+For an example code like `SimpleExec<StaticArg<symbol!("echo")>, ...>`, the `Arg` type that is passed to `CanExtractCommandArg` would be `StaticArg<symbol!("echo")>`. In other words, for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<symbol!("echo")>>`.
