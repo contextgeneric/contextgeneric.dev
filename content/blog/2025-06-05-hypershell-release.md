@@ -701,9 +701,15 @@ where
 }
 ```
 
-If you search for the occurance of `SimpleExec` in the Hypershell code base, you will find `HandleSimpleExec`, which is a provider that implements `Handler` specifically to handle `SimpleExec`. Let's first look at how its trait signatures are defined.
+If you search for the occurance of `SimpleExec` in the Hypershell code base, you will find `HandleSimpleExec`, which is a provider that implements `Handler` specifically to handle `SimpleExec`.
+
+The main method body for `HandleSimpleExec` is not very interesting, and looks mostly similar to regular Rust code. Essentially, it makes use of Tokio's [`Command`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html) to spawn a new child process with the specified arguments. It then make use of the returned [`Child`](https://docs.rs/tokio/latest/tokio/process/struct.Child.html) to write the input to the `STDIN` of the process, and then calls [`wait_with_output`](https://docs.rs/tokio/latest/tokio/process/struct.Child.html#method.wait_with_output) to get the result from `STDOUT`.
+
+Hence, to keep this blog post simple, we omit the method body, and instead focus on the trait signature to see how it is integrated with the rest of Hypershell.
 
 Looking at the generic parameters, you may notice that `SimpleExec<CommandPath, Args>` is used in place of where `Code` was. In other words, `HandleSimpleExec` implements `Handler` if `Code` is in the form `SimpleExec<CommandPath, Args>`. Essentially, we are using Rust generics to "pattern match" on a DSL code fragment, and extract the inner `CommandPath` and `Args` parameters.
+
+### Command Arg Extractor
 
 Inside the `where` clause, we make use of dependency injection to require other dependencies to be provided by the generic `Context`. The first trait, `CanExtractCommandArg`, is defined as follows:
 
@@ -723,4 +729,64 @@ pub trait HasCommandArgType {
 
 The `CommandArgExtractor` component provides an `extract_command_arg` method to extract a command line argument from an `Arg` code. The method returns an abstract `CommandArg` type, which may be instantiated with types such as `PathBuf` or `String`.
 
-For an example code like `SimpleExec<StaticArg<symbol!("echo")>, ...>`, the `Arg` type that is passed to `CanExtractCommandArg` would be `StaticArg<symbol!("echo")>`. In other words, for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<symbol!("echo")>>`.
+As an example, given a code like `SimpleExec<StaticArg<symbol!("echo")>, ...>`, the `Arg` type that is passed to `CanExtractCommandArg` would be `StaticArg<symbol!("echo")>`. In other words, for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<symbol!("echo")>>`.
+
+Since `extract_command_arg` returns an abstract `CommandArg` type, `HandleSimpleExec` also has an additional constraint `Context::CommandArg: AsRef<OsStr> + Send`. This means that the context may choose to instantiate `CommandArg` with any concrete type that implements `AsRef<OsStr> + Send`, such as `PathBuf` or `OsString`.
+
+This also shows that the dependency injection in CGP is more powerful than typical dependency injection frameworks in OOP, as we canuse it with not only the main `Context` type, but also all associated types provided by the context.
+
+### Command Updater
+
+Aside from `CanExtractCommandArg`, we can see that `HandleSimpleExec` also requires `Context: CanUpdateCommand<Args>` to handle the CLI arguments passed to the command. Let's take a look at how the trait is defined:
+
+```rust
+#[cgp_component(CommandUpdater)]
+pub trait CanUpdateCommand<Args> {
+    fn update_command(&self, _phantom: PhantomData<Args>, command: &mut Command);
+}
+```
+
+Similar to `CanExtractCommandArg`, `CanUpdateCommand` has a generic `Args` parameter to process the CLI arguments specified in the Hypershell program. But instead of returning something, the `update_command` method takes in a `mut` reference to a Tokio [`Command`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html) value.
+
+By passing a `&mut Command` directly, this allows the DSL to provide different kinds of argument syntaxes to configure the CLI excution in different ways. For example, the `WithArgs` syntax allows one to specify a list of CLI arguments, but we can also define new syntaxes such as `WithEnvsAndArgs` to allow specification of _both_ CLI arguments and environment variables for the process.
+
+To see how it works in action, consider the example code:
+
+```rust
+SimpleExec<
+    StaticArg<symbol!("echo")>,
+    WithStaticArgs<Product![
+        symbol!("hello"),
+        symbol!("world!"),
+    ]>,
+>
+```
+
+The `Args` type given to `HandleSimpleExec` would be `WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>`, which means the following constraint need to be satisfied:
+
+```rust
+Context: CanUpdateCommand<WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>>
+```
+
+To keep focus on the main implementation of `HandleSimpleExec`, we'll omit the details on how the argument updates work. At a high level, the main idea for the implementation is to perform a _type-level iteration_ on the list passed to `WithStaticArgs`. So the implementation would be broken down into two smaller constraints:
+
+```rust
+Context: CanUpdateCommand<StaticArg<symbol!("hello")>>
+    + CanUpdateCommand<StaticArg<symbol!("world!")>>
+```
+
+Once we reach each individual argument, we then make use of `CanExtractCommandArg` to extract the argument, and then call [`Command::arg`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.arg) to add the argument to the `Command`.
+
+It is also worth noting that the `CanUpdateCommand` trait is tightly coupled with the Tokio `Command` type. This would mean that the trait cannot be reused if there are alternative implementations that implement CLI execution without using Tokio. However, this is totally fine, and there is nothing in CGP that prevent us from defining less-abstract interfaces.
+
+Instead, the main advantage that CGP provides is that a trait like `CanUpdateCommand` can be included by specific providers that need it via dependency injection. This means that if the involved providers are not wired with the concrete context, then the context also don't need to implement a trait like `CanUpdateCommand`.
+
+In other words, a CGP trait like `CanUpdateCommand` may be tightly coupled with Tokio, but the trait itself is still fully decoupled from the remaining parts of Hypershell. And so, it would not prevent Hypershell from having alternative implementations that do not use Tokio at all.
+
+### Error Handling
+
+Inside the `where` clause for `HandleSimpleExec`, we can see that it also requires `Context` to implement `CanRaiseAsyncError<std::io::Error>`.
+
+### Input Format
+
+## Wiring for `SimpleExec`
