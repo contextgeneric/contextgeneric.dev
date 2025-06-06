@@ -935,7 +935,7 @@ As we know, aside from `SimpleExec`, there are also other Hypershell syntaxes su
 
 The pattern for provider dispatching based on generic parameters is common enough that CGP provides options to automatically derive them inside the `#[cgp_component]` macro. For the `Handler` component, a dispatcher called `UseDelegate` is provided to handle provider dispatching based on the `Code` parameter.
 
-In CGP, we can declare the dispatching logic in similar ways as normal provider delegation using the `delegate_components!` macro. Following shows a simplified wiring of the providers:
+In CGP, we can declare the dispatching logic in similar ways as normal provider delegation using the `delegate_components!` macro. Following shows a simplified wiring of the providers for `HypershellCli`:
 
 ```rust
 #[cgp_context(HypershellCliComponents)]
@@ -952,15 +952,43 @@ delegate_components! {
 pub struct HypershellHandlerComponents;
 
 delegate_components! {
-    <CommandPath, Args> SimpleExec<CommandPath, Args>:
-        HandleSimpleExec,
-    <CommandPath, Args> StreamingExec<CommandPath, Args>:
-        HandleStreamingExec,
-    ...
+    HypershellHandlerComponents {
+        <CommandPath, Args> SimpleExec<CommandPath, Args>:
+            HandleSimpleExec,
+        <CommandPath, Args> StreamingExec<CommandPath, Args>:
+            HandleStreamingExec,
+        ...
+    }
 }
 ```
 
+The first part of the wiring declaration is the same as the hello world example we had earlier. We define a `HypershellCli` struct, with `#[cgp_context]` to make it into a CGP context with `HypershellCliComponents` being the provider. We then use `delegate_components!` on `HypershellCliComponents` to set up the wiring for all providers used by the context. But for the wiring of `HandlerComponent`, we map it to `UseDelegate<HypershellHandlerComponents>` instead of directly to `HandleSimpleExec`.
+
+Following that, we define a new struct `HypershellHandlerComponents`, and then use `delegate_components!` to define some mappings on it. But this time, instead of mapping CGP component names, we map the Hypershell syntax types to their respective providers. In the first entry, we map `SimpleExec` to `HandleSimpleExec`, and then map `StreamingExec` to a `HandleStreamingExec` provider that is implemented separately in Hypershell.
+
+In the mappings for `HypershellHandlerComponents`, we can also see the key for `SimpleExec` being specified as `<CommandPath, Args> SimpleExec<CommandPath, Args>`. The first part, `<CommandPath, Args>` is used as additional _generic parameters_ for the mapping, since we want to map _all_ possible uses of `SimpleExec` to `HandleSimpleExec`. If they were not specified, Rust would instead try to find _specific_ concrete Rust types called `CommandPath` and `Args` imported within the module, and produce errors when failing to find them.
+
+Essentially, we are defining `HypershellHandlerComponents` purely as a key-value map at the _type-level_, and then use it as a _lookup table_ for `UseDelegate`. We can also see that with _types_ being the keys, we get additional expressivity to specify and capture generic parameters in the keys, which wouldn't be possible with value-level lookup tables.
+
+Now that we have walked through the wiring declaration, let's try to visualize how CGP actually implements a trait instance of `CanHandle<SimpleExec<Command, Args>, Input>` for the `HypershellCli` context:
+
+![Diagram](/blog/images/delegate-code.png)
+
+The first two parts of the diagram is similar to how the implementation is done for the example `Greeter` component earlier. For the `HypershellCli` context to implement `CanHandle<SimpleExec<Command, Args>, Input>`, Rust's trait system would first find out that `HypershellCli` implements `HasProvider`, which points to `HypershellCliComponents`.
+
+The trait system then tries to find an implementation of `Handler<HypershellCli, SimpleExec<Command, Args>, Input>` for `HypershellCliComponents`. Next, it sees that `HypershellCliComponents` implements `DelegateComponent<HandlerComponent>`, which points to `UseDelegate<HypershellHandlerComponents>`, and so it continues the implementation lookup there.
+
+This time, the trait system finds that `UseDelegate<HypershellHandlerComponents>` has a candidate implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. But for that to be implementated, `UseDelegate` requires `HypershellHandlerComponents` to contain a lookup entry for the `Code` parameter, i.e. that `HypershellHandlerComponents` should implement `DelegateComponent<SimpleExec<Command, Args>>`.
+
+Finally, the system finds that `HypershellHandlerComponents` contains the given entry, which points to `HandleSimpleExec`. It then finds that `HandleSimpleExec` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, and so the implementation is now completed.
+
+Compared to the earlier `Greeter` example, the delegation chain for `SimpleExec` handling goes 4 levels deep instead of 3. Aside from that, the underlying implementation for `UseDelegate` follows the same pattern as the blanket implementation of the `Handler` provider trait. However, instead of being a blanket implementation, `UseDelegate` is implemented as a _context-generic provider_ for `Handler`. Furthermore, aside from `Handler`, the same pattern has also been implemented by `UseDelegate` for many other CGP traits, such as `ErrorRaiser`, making it a _universal pattern_ that is applicable to any CGP trait that contains additional generic parameters.
+
+The implementation of `UseDelegate` also demonstrates the power of CGP, showing that once the coherence restriction is lifted, there are whole new categories of patterns that can be defined to work with many traits in the same way. Other than `UseDelegate`, there are many other CGP patterns that have been implemented as context-generic providers, such as `UseContext`, `UseType`, `UseField`, `WithProvider`, etc.
+
 ### Presets
+
+
 
 # Extending Hypershell
 
