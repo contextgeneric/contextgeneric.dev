@@ -828,6 +828,12 @@ Going back to the example, with the constraint `CanRaiseError<std::io::Error>` i
 let child = command.spawn().map_err(Context::raise_error)?;
 ```
 
+### Default Error Type
+
+In the default Hypershell contexts, such as `HypershellCli`, we use [`anyhow::Error`](https://docs.rs/anyhow/latest/anyhow/struct.Error.html) together with the providers from the [`cgp-error-anyhow`](https://docs.rs/cgp-error-anyhow/) crate to handle errors from different parts of the application.
+
+However, just as everything else, an application can choose different error providers, such as using [`eyre::Report`](https://docs.rs/eyre/latest/eyre/struct.Report.html) together with [`cgp-error-eyre`](https://docs.rs/cgp-error-eyre), to handle the errors from Hypershell programs. This would especially be useful, if users want to embed Hypershell programs within larger applications that use their own structured error types that are defined using [`thiserror`](https://docs.rs/thiserror).
+
 ### Error Wrappers
 
 In the `where` clause for `HandleSimpleExec`, we also sees a constraint `Context: for<'a> CanWrapAsyncError<CommandNotFound<'a>>`. Here we will walk through what that entails.
@@ -841,7 +847,7 @@ pub trait CanWrapError<Detail>: HasErrorType {
 }
 ```
 
-Using `CanWrapError`, we can for example add additional details on top of `std::io::Error` to explain that the error happened when we try to spawn the child process. A common frustration with the base error is that when an executable is not found at the specified command path, only a basic `NotFound` error is returned without additional details of _what_ is not found. Using `CanWrapAsyncError`, we can now add additional details to the error about that command that is not found:
+Using `CanWrapError`, we can for example add additional details on top of `std::io::Error` to explain that the error happened when we try to spawn the child process. A common frustration with the base error is that when an executable is not found at the specified command path, only a basic `NotFound` error is returned without additional details of _what_ is not found. Using `CanWrapAsyncError`, we can now add additional details to the error about the command that is not found:
 
 ```rust
 let child = command.spawn().map_err(|e| {
@@ -856,11 +862,69 @@ let child = command.spawn().map_err(|e| {
 })?;
 ```
 
-### Hypershell Errors
+In the example approach, we first check whether the error kind returned from `command.spawn()` is `ErrorKind::NotFound`. We then use `raise_error` to convert the error into `Context::Error`. After that, if the error kind was `NotFound`, we call `wrap_error` to wrap the error with a custom `CommandNotFound` detail, which is defined as follows:
 
-In Hypershell, we use `anyhow::Error` together with the providers from the [`cgp-error-anyhow`](https://docs.rs/cgp-error-anyhow/) crate to handle errors from different parts of the application.
+```rust
+pub struct CommandNotFound<'a> {
+    pub command: &'a Command,
+}
 
+impl<'a> Debug for CommandNotFound<'a> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
+            "command not found: {}",
+            self.command.as_std().get_program().to_string_lossy(),
+        )
+    }
+}
+```
 
-### Input Format
+The `CommandNotFound` struct contains a reference to the `Command` that we are running. We pass the full `Command` struct here, so that it allows potential `ErrorWrapper` implementation to show customized error about the failing command. We also provide a default `Debug` implementation for `CommandNotFound`, which prints out only the program path without additional details about the full command.
+
+Similar to `ErrorRaiser`, CGP allows the `ErrorWrapper` implementation to be chosen by the context to handle the error differently. For instance, the `HypershellCli` context uses the `DebugAnyhowError` provider from `cgp-error-anyhow`, which builds a string using the `Debug` implementation, and then call `anyhow::Error::context` with the formatted string. But if desired, a user of Hypershell is free to override this behavior, and make it print out the full command, or wrap the error in other ways.
+
+Since the `CommandNotFound` contains a lifetime, when we specify the constraint, we need to add a [higher-ranked trait bound](https://doc.rust-lang.org/nomicon/hrtb.html) (HRTB) `for<'a>` to the constraint, so that we can always wrap the error for all lifetime. While it is also possible to pass an owned `Command` value without a lifetime here, it may not be possible in general cases when the detail comes from argument references. Furthermore, having a reference encourages the wrapper handler to only extract essential details, and avoid bloating the error value with large values wrapped within it.
+
+### Input Type
+
+The `Handler` implementation for `HandleSimpleExec` shows that it can work with any generic `Input` type, as long as the constraint `Input: Send + AsRef<[u8]>` is satisfied. This means that aside from `Vec<u8>`, we can also pass to it other compatible types such as `String`, `Bytes`, or `&'a [u8]`.
+
+On the other hand, the constraint shows that `HandleSimpleExec` cannot accept inputs from stream types that implement traits like `AsyncRead`, at least not directly. Since Hypershell is stringly typed, if we want to form a pipeline such as `StreamingExec<...> | SimpleExec<...>`, it would result in a compile-time error.
+
+One way to workaround this is that we can make use of explicit _adapters_ provided by Hypershell, such as `StreamToBytes`, to be part of the pipeline to transform the output before passing as the next input:
+
+```
+StreamingExec<...> | StreamToBytes | SimpleExec<...>
+```
+
+The main takeaway here is that the supported `Input` and `Output` types in a Hypershell program is determined based on the chosen concrete provider, and _not_ based on the abstract syntax. A concrete context may choose to wire a different provider to handle `SimpleExec`, in which case the supported input/output types for `SimpleExec` may change.
+
+Nevertheless, just as with standard programming languages, it is possible to define a _standard_ around the language syntax to impose the expectations and requirements on how the program should behave. For example, the language specification may state that it should always be possible to pipe the output from `StreamingExec` to `SimpleExec`, and vice versa. In such cases, it would imply that `HandleSimpleExec` alone may not be sufficient to handle all valid Hypershell programs.
+
+But as we will learn later, it is also possible to use the _generic dispatcher_ pattern in CGP to perform _ad hoc dispatch_ to different handlers, based on the `Input` type. In such case, `HandleSimpleExec` would become part of a larger implementation that can be used to handle all possible `Input` types that will be encountered in a Hypershell program.
+
+### Modularity of `HandleSimpleExec`
+
+If we inspect the entire implementation of `HandleSimpleExec`, we would find that other than Tokio, CGP, and the Hypershell core traits, the implementation is fully _decoupled_ from the remaining parts of the application. In fact, we can move the implementation code to an entirely new crate and only include the 3 dependencies, and everything will still work.
+
+This shows that code written with CGP typically have _inverted_ structure in their dependency graphs. Instead of focusing on _concrete types_, CGP starts with _abstract implementations_ and only define the concrete types at the last stage of the process. This significantly reduce bloats in the dependency graph, as each sub-crate can be compiled with only the exact dependencies they need.
+
+To demonstrate the benefit in action, We can look at how Hypershell structures its crate dependencies:
+
+- `hypershell-components` - Defines DSL types and CGP component interfaces, and only depends on `cgp`.
+- `hypershell-tokio-components` - Implements Tokio-specific CLI providers and component interfaces. Depends on `cgp`, `hypershell-components`, and `tokio`.
+- `hypershell-reqwest-components` - Implements Reqwest-specific HTTP providers and component interfaces. Depends on `cgp` and `hypershell-components`, and `reqwest`.
+- `hypershell` - Defines concrete contexts and wiring. Depends on all other Hypershell crates.
+
+As we can see, even though the full Hypershell application uses both Tokio and Reqwest, the crate `hypershell-tokio-components` can be built without `reqwest` being in any part of its dependencies. This may look signficant given that there are only 2 crates. But consider when there is a large Rust application where there are hundreds of dependencies, CGP will make it much easier for the application to break down the dependencies, so that every part of the implementation only needs to be compiled with the exact dependencies they need.
+
+With this level of modularity, it also means that it is possible to build an alternative Hypershell implementations that fully remove `tokio` from its dependencies, and use a different crate to spawn CLI process, such as using [`async-process`](https://github.com/smol-rs/async-process) with [`smol`](https://docs.rs/smol/latest/smol/) as the runtime. Granted, if we want to fully remove `tokio`, we would also have to do the same for `hypershell-reqwest-components` and use an alternative HTTP library like [`isahc`](https://docs.rs/isahc).
+
+It is also worth highlighting that with CGP, there would be no need to use _feature flags_ to switch between underlying implementations. Because CGP providers can be implemented fully isolated from each others, we could just create new crates that do not depend on the original providers, and define new contexts that are wired with the alternative providers.
+
+The generic approach is also less error prone than feature flags, as _all_ alternative implementations can co-exist and be tested at the time, as compared to having multiple _variants_ of the code that must be tested separately for each combination of feature flags.
 
 ## Wiring for `SimpleExec`
+
+# Extending Hypershell
