@@ -683,6 +683,7 @@ where
     Context: CanExtractCommandArg<CommandPath>
         + CanUpdateCommand<Args>
         + CanRaiseAsyncError<std::io::Error>
+        + for<'a> CanWrapAsyncError<CommandNotFound<'a>>
         + ...,
     Context::CommandArg: AsRef<OsStr> + Send,
     CommandPath: Send,
@@ -785,7 +786,80 @@ In other words, a CGP trait like `CanUpdateCommand` may be tightly coupled with 
 
 ### Error Handling
 
-Inside the `where` clause for `HandleSimpleExec`, we can see that it also requires `Context` to implement `CanRaiseAsyncError<std::io::Error>`.
+Inside the `where` clause for `HandleSimpleExec`, we can see that it also requires `Context` to implement `CanRaiseAsyncError<std::io::Error>`. Here we will briefly explore how CGP offers a different and more modular approach on error handler.
+
+When calling upstream Tokio methods such as [`Command::spawn`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.spawn), the error `std::io::Error` is returned by the method. However, since the method signature requires an abstract `Context::Error` to be returned in case of errors, we need ways to convert, or "upcast", the `std::io::Error` into `Context::Error`.
+
+A naive approach to handle the error would be to require a _concrete_ error type to be used with the implementation. For example, we could modify the method signature of the `CanHandle` trait to return `anyhow::Error` instead of `Context::Error`. Or, we can add a constraint `Context: HasErrorType<Error = anyhow::Error>` to _force_ the context to use a specific error type, such as `anyhow::Error`. However, doing so would introduce unnecessary coupling between the provider implementation with the concrete error type, and make it impossible for the context to reuse the provider if it wanted to choose another error type for the application.
+
+### Error Raisers
+
+Instead, CGP provides the `ErrorRaiser` component as a way for context-generic implementations to handle errors without requiring access to the concrete error type. The trait is defined as follows:
+
+```rust
+#[cgp_component(ErrorRaiser)]
+pub trait CanRaiseError<SourceError>: HasErrorType {
+    fn raise_error(error: SourceError) -> Self::Error;
+}
+```
+
+We can think of `CanRaiseError` as a more flexible form of the `From` trait for error handling. In fact, if there exist a `From` instance for all `SourceError`s used by an application, then the provider can be trivially implemented as:
+
+```rust
+#[cgp_new_provider]
+impl<Context, SourceError> ErrorRaiser<Context, SourceError> for RaiseFrom
+where
+    Context: HasErrorType,
+    Context::Error: From<SourceError>,
+{
+    fn raise_error(e: SourceError) -> Context::Error {
+        e.into()
+    }
+}
+```
+
+When programming with CGP, it is preferred to use `CanRaiseError` instead of directly using `From` to convert a source error to the abstract `Context::Error`. This is because `From` is a plain Rust trait that is subject to the coherence rules in Rust, making it challenging to customize in case if no `From` instance is not implemented by a third party error type like `anyhow::Error`.
+
+On the other hand, using `CanRaiseError` gives us much more freedom to use anything as `SourceError` without worrying about compatibility. For instance, it is common for context-generic implementations to use `CanRaiseError<String>` or even `CanRaiseError<&'static str>`, at least during early prototyping phases. This would have caused issue if we instead require `Context::Error: From<String>`, as types like `anyhow::Error` do not implement `From<String>`.
+
+Going back to the example, with the constraint `CanRaiseError<std::io::Error>` in place, we can now call `Command::spawn()` inside `HandleSimpleExec`, and handle the error with `.map_err(Context::raise_error)`:
+
+```rust
+let child = command.spawn().map_err(Context::raise_error)?;
+```
+
+### Error Wrappers
+
+In the `where` clause for `HandleSimpleExec`, we also sees a constraint `Context: for<'a> CanWrapAsyncError<CommandNotFound<'a>>`. Here we will walk through what that entails.
+
+CGP also provides a supplementary error wrapper component, which provides similar functionality as the [`anyhow::Error::context`](https://docs.rs/anyhow/1.0.98/anyhow/struct.Error.html#method.context) method to add additional details about an error. The trait is defined as follows:
+
+```rust
+#[cgp_component(ErrorWrapper)]
+pub trait CanWrapError<Detail>: HasErrorType {
+    fn wrap_error(error: Self::Error, detail: Detail) -> Self::Error;
+}
+```
+
+Using `CanWrapError`, we can for example add additional details on top of `std::io::Error` to explain that the error happened when we try to spawn the child process. A common frustration with the base error is that when an executable is not found at the specified command path, only a basic `NotFound` error is returned without additional details of _what_ is not found. Using `CanWrapAsyncError`, we can now add additional details to the error about that command that is not found:
+
+```rust
+let child = command.spawn().map_err(|e| {
+    let is_not_found = e.kind() == ErrorKind::NotFound;
+    let e = Context::raise_error(e);
+
+    if is_not_found {
+        Context::wrap_error(e, CommandNotFound { command: &command })
+    } else {
+        e
+    }
+})?;
+```
+
+### Hypershell Errors
+
+In Hypershell, we use `anyhow::Error` together with the providers from the [`cgp-error-anyhow`](https://docs.rs/cgp-error-anyhow/) crate to handle errors from different parts of the application.
+
 
 ### Input Format
 
