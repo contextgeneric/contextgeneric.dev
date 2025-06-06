@@ -919,7 +919,7 @@ To demonstrate the benefit in action, We can look at how Hypershell structures i
 
 As we can see, even though the full Hypershell application uses both Tokio and Reqwest, the crate `hypershell-tokio-components` can be built without `reqwest` being in any part of its dependencies. This may look signficant given that there are only 2 crates. But consider when there is a large Rust application where there are hundreds of dependencies, CGP will make it much easier for the application to break down the dependencies, so that every part of the implementation only needs to be compiled with the exact dependencies they need.
 
-With this level of modularity, it also means that it is possible to build an alternative Hypershell implementations that fully remove `tokio` from its dependencies, and use a different crate to spawn CLI process, such as using [`async-process`](https://github.com/smol-rs/async-process) with [`smol`](https://docs.rs/smol/latest/smol/) as the runtime. Granted, if we want to fully remove `tokio`, we would also have to do the same for `hypershell-reqwest-components` and use an alternative HTTP library like [`isahc`](https://docs.rs/isahc).
+With this level of modularity, it also means that it is possible to build an alternative Hypershell implementations that fully remove `tokio` from its dependencies, and use a different crate to spawn CLI process, such as using [`async-process`](https://github.com/smol-rs/async-process) with [`smol`](https://docs.rs/smol/latest/smol/) as the runtime. Granted, since `reqwest` also depends on `tokio`, if we want to fully remove `tokio`, we would also have to do the same for `hypershell-reqwest-components` and use an alternative HTTP library like [`isahc`](https://docs.rs/isahc).
 
 It is also worth highlighting that with CGP, there would be no need to use _feature flags_ to switch between underlying implementations. Because CGP providers can be implemented fully isolated from each others, we could just create new crates that do not depend on the original providers, and define new contexts that are wired with the alternative providers.
 
@@ -927,4 +927,43 @@ The generic approach is also less error prone than feature flags, as _all_ alter
 
 ## Wiring for `SimpleExec`
 
+At this point, we have learned how `HandleSimpleExec` is implemented to handle the `SimpleExec` syntax. Next, we will look into how the `HandleSimpleExec` provider is wired up, so that it is accessible from concrete contexts like `HypershellCli`.
+
+### Generic Dispatcher
+
+As we know, aside from `SimpleExec`, there are also other Hypershell syntaxes such as `StreamingExec` and `SimpleHttpRequest`. But since `HandleSimpleExec` only implements `Handler` for `SimpleExec`, we cannot wire it directly as the provider for _all_ generic parameters of `Handler`. Instead, we need an intermediary provider, known as a _generic dispatcher_, to dispatch the handling logic to different providers based on the generic `Code` parameter.
+
+The pattern for provider dispatching based on generic parameters is common enough that CGP provides options to automatically derive them inside the `#[cgp_component]` macro. For the `Handler` component, a dispatcher called `UseDelegate` is provided to handle provider dispatching based on the `Code` parameter.
+
+In CGP, we can declare the dispatching logic in similar ways as normal provider delegation using the `delegate_components!` macro. Following shows a simplified wiring of the providers:
+
+```rust
+#[cgp_context(HypershellCliComponents)]
+pub struct HypershellCli;
+
+delegate_components! {
+    HypershellCliComponents {
+        HandlerComponent:
+            UseDelegate<HypershellHandlerComponents>,
+        ...
+    }
+}
+
+pub struct HypershellHandlerComponents;
+
+delegate_components! {
+    <CommandPath, Args> SimpleExec<CommandPath, Args>:
+        HandleSimpleExec,
+    <CommandPath, Args> StreamingExec<CommandPath, Args>:
+        HandleStreamingExec,
+    ...
+}
+```
+
+### Presets
+
 # Extending Hypershell
+
+## Checksum
+
+## WebSocket
