@@ -986,9 +986,117 @@ Compared to the earlier `Greeter` example, the delegation chain for `SimpleExec`
 
 The implementation of `UseDelegate` also demonstrates the power of CGP, showing that once the coherence restriction is lifted, there are whole new categories of patterns that can be defined to work with many traits in the same way. Other than `UseDelegate`, there are many other CGP patterns that have been implemented as context-generic providers, such as `UseContext`, `UseType`, `UseField`, `WithProvider`, etc.
 
-### Presets
+## Presets
 
+Earlier, we had a simplified wiring of `HandleSimpleExec` to be used by the `HypershellCli` context. But as we learned in the examples from the beginning, we want to reuse the same wirings also for other contexts, such as `HypershellHttp` and `MyApp`. Furthermore, with the modularity provided by Hypershell, we want to make it easy to extend or customize existing component wirings, and build new collection of wirings that can be shared with the community.
 
+CGP offers _presets_ as a powerful way to build these extensible component wiring, that allows an extensible collection of component wirings to be created. At a high level, a CGP preset is a _module_ that contains a _type-level_ key-value map, together with traits and macros that support _operations_ do be done on the key-value map.
+
+The operations that can be done on a preset shares some similarity to _inheritance_ from the OOP world, at least on the implementation side. Or, to be less buzzwordy, it allows _iteration_ over the _keys_ stored in the type-level key-value map of the preset. As we know from basic algorithm courses, if we can iterate over the keys of a map, we can then construct _new_ maps that shares the same keys as the original map. Or to put it even more simply, CGP presets allows us to perform the Rust equivalent of `map.iter().filter_map()` on a `HashMap`, except that we are doing it at the type level.
+
+Now that we understand how presets work at a high level, it should be clearer on how presets can be used to support inheritance like feature in CGP. There are two kinds of inheritance operations supported by CGP. The first is a simplified one-level single inheritance, which is implemented through Rust traits to allow a CGP context to implement traits like `DelegateComponent` based on all keys stored in one preset.
+
+The second form is a macro-based approach, which enables _nested_ levels of _multiple inheritance_ to be used when defining new presets. The macros work by expanding the preset keys as list _syntax_, e.g. `[KeyA, KeyB, KeyC, ...]`, and then work on the keys syntactically through a separate macro. This means that the macro approach may be less reliable, as we lose access to the precise type information, and that ambiguity may arise if the same identifier may refer to multiple types in scope, or when there are _aliases_ used. However, it is more flexible that we can make it work with more than one map, which is not possible with the trait-based approach due to coherence restrictions.
+
+## Hypershell Presets
+
+Thanks to presets, Hypershell is able to allow its core implementation to be customized easily. Hypershell defines all its component wirings as extensible presets, so that users can choose to extend, replace, or customize any one of the presets.
+
+The main preset that is provided by Hypershell is the `HypershellPreset`, which can be used directly by contexts like `HyperhellCli`. But underlying the main preset, Hypershell actually breaks the components down to a few smaller presets, including `HypershellTokioPreset` for the CLI components, and `HypershellReqwestPreset` for the HTTP components. This allows to one sub-part of the presets to be replaced entirely, while the other parts of the presets can be kept unmodified.
+
+Furthermore, Hypershell also defines the dispatch mappings for components like `HandlerComponent` as presets. With this, we can extend the handler component presets, rather than the main preset, to introduce new _syntaxes_ to the DSL, or customize the wiring for existing syntaxes like `SimpleExec`.
+
+We will now walk through how `HandleSimpleExec` is wired within the Hypershell presets. But before we start, let's look at the high level diagram on the level of indirections:
+
+![Diagram](/blog/images/preset-wiring.png)
+
+There are a lot of indirections going on with the above diagram. We will go through each of the steps one by one, together with the relevant code snippets, so that you can get a better understanding of what is going on.
+
+```rust
+#[cgp_context(HypershellCliComponents: HypershellPreset)]
+pub struct HypershellCli;
+```
+
+We start with the definition of the `HypershellCli` context, with the `HypershellPreset` specified as the preset to be inherited by the context's provider, `HypershellCliComponents`. The first part of the implementation stays the same as before, that `HypershellCli` has a blanket implementation for `CanHandle<SimpleExec<Command, Args>, Input>`, if `HypershellCliComponents` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`.
+
+Following that, in order for `HypershellCliComponents` to implement the provider trait, the trait system would look for its `DelegateComponent` entry with `HandlerComponent` being the key, which now points to `HypershellPreset`. The entry is found by the system, via a blanket implementation of `DelegateComponent` using a special `HypershellPreset::IsPreset` trait. This blanket implementation is generated by `#[cgp_context]`, which allows `HypershellCliComponents` to delegate all components from `HypershellPreset` without additional code written.
+
+`HypershellPreset` is defined as follows:
+
+```rust
+#[cgp::re_export_imports]
+mod preset {
+    ...
+
+    cgp_preset! {
+        HypershellPreset:
+            HypershellTokioPreset
+            + HypershellReqwestPreset
+            + ...
+        {
+            ...,
+            override HandlerComponent:
+                HypershellHandlerPreset::Provider,
+            ...,
+        }
+    }
+
+    ...
+}
+```
+
+First of all, when defining CGP presets, we need to wrap the code around a `mod preset` that is annotated with `#[cgp::re_export_imports]`. This macro captures all `use` statements within the module, and adds a hidden variant of the imports that become `pub use`. This hack is necessary for the macro-based preset operations to work, as we need to re-import all key identifiers at a child preset in order to bind the identifiers to their original types. The macro also re-exports everything in the inner module, so that we can import the preset as if the wrapper `preset` module is not preset.
+
+We then define `HypershellPreset` using the `cgp_preset!` macro. We can see that the preset makes use of multiple-inheritance to inherit from a number of presets, including `HypershellTokioPreset`, which contains all component wirings for implementing the Hypershell CLI features using `tokio`.
+
+In one of the entries in `HypershellPreset`, we can see that the entry for `HandlerComponent` is specified, but with an additional `override` keyword. An overridden preset entry is useful for handling conflicting entries that arise from multiple inheritance, as well as allowing the child preset to override parts of the component wiring provided by the parent preset.
+
+In the case for `HypershellPreset`, the `override` is used, as we want to define a new provider, `HypershellHandlerPreset`, that combines the handlers of different groups of syntaxes coming from different parent presets. When specifying the entry value, we use `HypershellHandlerPreset::Provider`, as `HypershellHandlerPreset` itself is really a module. When we need to refer to the preset as a type, we access the type through the `::Provider` item in the module.
+
+`HypershellHandlerPreset` is defined as follows:
+
+```rust
+cgp_preset! {
+    #[wrap_provider(UseDelegate)]
+    HypershellHandlerPreset:
+        TokioHandlerPreset
+        + ReqwestHandlerPreset
+        + ...
+    { }
+}
+```
+
+From above, we can see that `HypershellHandlerPreset` is defined as a separate preset within the same module. The preset has an empty body, and merely combines the handler wirings from parent presets such as `TokioHandlerPreset`.
+
+The preset is also annotated with `#[wrap_provider(UseDelegate)]`, which instructs `cgp_preset!` to wrap the `Preset::Provider` type in the preset module with `UseDelegate`. This is because the component entries themselves do not result in a blanket implementation of `Handler`, or any provider trait for that matter. But by wrapping the entry inside `UseDelegate`, the `Handler` trait becomes implemented by performing dispatch to the entries based on the `Code` type.
+
+When `#[wrap_provider(UseDelegate)]` is used, the raw component mappings are defined as the `Preset::Components`, with `Preset::Provider` defined as `UseDelegate<Preset::Components>`. While without it, both `Preset::Components` and `Preset::Provider` are then same, which both being just component mappings.
+
+Next, we will look at how `TokioHandlerPreset` is defined:
+
+```rust
+cgp_preset! {
+    #[wrap_provider(UseDelegate)]
+    TokioHandlerPreset {
+        <Path, Args> SimpleExec<Path, Args>:
+            HandleSimpleExec,
+        <Path, Args> StreamingExec<Path, Args>:
+            HandleStreamingExec,
+        ...
+    }
+}
+```
+
+As we can see, `TokioHandlerPreset` is defined in similar ways as `HypershellHandlerPreset`, and is also wrapped with `UseDelegate`. The preset now has a non-empty list of entries, with `SimpleExec` mapped to `HandleSimpleExec`, `StreamingExec` mapped to `HandleStreamingExec`, and so on.
+
+Given that `TokioHandlerPreset` implementing only the handlers for the Hypershell syntaxes, we can find the mappings for other syntaxes in other syntaxes, such as `ReqwestHandlerPreset` which provides mapping for `SimpleHttpRequest` and `StreamingHttpRequest`, etc. So when `HypershellHandlerPreset` inherits from both `TokioHandlerPreset` and `ReqwestHandlerPreset`, we are essentially "merging" the entries from both preset mappings to become a single mapping.
+
+Going back to the implementation diagram at the beginning, we can now trace the remaining implementation steps:
+
+- `HypershellPreset`, or more specifically `HypershellPreset::Provider`, has a blanket implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, because it has a `DelegateComponent` entry for `HandlerComponent`, which points to `HypershellHandlerPreset::Provider`, which is `UseDelegate<HypershellHandlerPreset::Components>`.
+- `UseDelegate<HypershellHandlerPreset::Components>` has a context-generic implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, because `HypershellHandlerPreset::Components` has a `DelegateComponent` entry for `SimpleExec<Command, Args>`, which points to `TokioHandlerPreset::Provider`, which is `UseDelegate<TokioHandlerPreset::Components>`
+- `UseDelegate<TokioHandlerPreset::Components>` has a context-generic implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, because `TokioHandlerPreset::Components` has a `DelegateComponent` entry for `SimpleExec<Command, Args>`, which points to `HandleSimpleExec`.
+- `HandleSimpleExec` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, and therefore the implementation chain completes, and the calls are ultimately forwarded to it.
 
 # Extending Hypershell
 
