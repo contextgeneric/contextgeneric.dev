@@ -1431,6 +1431,24 @@ On the other hand, I had done some rough experiments to test whether the _size_ 
 
 ## Related Work
 
+We will discuss briefly about some related work that are influential to the design of Hypershell and CGP. It would be impractical for me to list out all related work, so I will only talk about the topics that I find the most interesting.
+
+### Tagless Final
+
+First of all, the techniques used by CGP and Hypershell are closely related to the [_tagless final_](https://okmij.org/ftp/tagless-final/index.html) style of programming. In particular, we make heavy use of traits (typeclasses) to implement and compose each part of the DSL to become a full language.
+
+On the other hand, our approach is different enough from tagless final that I want to avoid people thinking that they are the same. In particular, CGP focuses on having an additional `Context` parameter that provides dependency injection, and provider traits with unique `Self` types. The original tagless final approach lack of such context type or provider type, making it less flexible in modularizing the DSL implementation.
+
+Furthermore, many DSL approaches, including tagless final, focus on defining the DSL program at the _term-level_, while Hypershell DSL programs are defined at the _type-level_.
+
+### Servant
+
+Our approach of defining DSL programs as types shares a lot of similarity with the type-level DSL techniques used by [Servant](https://www.servant.dev/posts/2018-07-12-servant-dsl-typelevel.html), which provides a DSL for defining server-side web APIs. Similar to Hypershell, Servant also defines abstract syntaxes as dummy types, and performs type-level interpretation using typeclasses.
+
+On the other hand, with CGP, Hypershell is able to achieve higher level of modularity than the original Servant design. In particular, CGP makes it possible to rewire and replace existing implementations of a syntax with an alternative provider. While with Servant, the DSL can only support language extension with new syntaxes, by directly implementing typeclass instances for that new syntax.
+
+Ergonomic-wise, Servant is heavily based on the `Handler` monad, while with CGP, the same functionality is provided by the `Handler` component without introducing monads. Essentially, while CGP and Hypershell may share some core concepts with Servant, I have tried my best to present them in more accessible ways so that Rust developers are not overwhelmed by the functional programming jargons that are commonly used by Haskell projects.
+
 ## Future DSLs
 
 ### Lambda Calculus
