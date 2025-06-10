@@ -1386,3 +1386,59 @@ As a hint, Hypershell provides a `Call` provider that you can use to implement a
 You may also need to make a decision to standardize on whether `Checksum` should produce the checksum as raw bytes or hex string. This is because `HandleStreamChecksum` currently implements `Checksum` by returning raw bytes.
 
 As a hint, if you want `Checksum` to return a hex string, then you should add `BytesToHex` after `HandleStreamChecksum` inside the pipeline for the wiring of `Checksum`. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` to become bytes.
+
+# Conclusion
+
+We have finally reach the end of this blog post. Thank you for your patience if you are still reading at this point! Although this is a very long read, I hope that the blog post has covered all essential topics for you to understand the strengths of Hypershell and CGP.
+
+Hopefully at this point, you have understood enough about CGP to be interested in learning more about it. If you are interested in the project, this section summarizes some of the follow up discussions, and the future work for CGP.
+
+## Background
+
+## Advantages
+
+First, we will discuss a bit on the pros and cons on using the approach outlined in this blogpost to implement a DSL in Rust using CGP.
+
+The biggest advantage of our approach is the extensibility and interoperability that can be achieved. With CGP being the base framework, the DSL can decouple its syntax from semantics, with language extensions implemented as new presets.
+
+Furthermore, the ease of extension makes it very easy for DSL programs to interop easily with Rust, without needing interop layers like FFI. CGP even makes it easy for _multplie_ DSLs to interop with each others, as by the end of the day, we are really just writing CGP programs that happen to look like DSLs.
+
+Additionally, by hosting the DSL programs as types and interpreting it at compile time, we are able to bypass any runtime overhead of hosting a DSL, and run the DSL at native speed.
+
+## Disadvantages
+
+### Steep Learning Curve
+
+The main advantage of building a CGP-based DSL is the potentially high learning curve, especially with the needs to learn CGP. Despite this very long blog post, we are barely scratching the surface of CGP, and have yet to dive into the actual _code_ that powers CGP. On the other hand, the learning curve barrier is more applicable to DSL _developers_, as compared to DSL _users_ who do not need to know too much about CGP in order to write programs for that DSL.
+
+That said, a main barrier from the DSL users perspective is the potential poor experience when encountering errors. A major problem is that whenever there is a type error, the user would only seen errors shown for the _entire_ DSL program. Furthermore, since there are many levels of indirections, even one mistake can cause dozens of error messages to be shown by the Rust compiler.
+
+There are potential ways that we can improve the Rust compiler to show more helpful error messages. However, the work may take a long time, and may require sufficiently large demand from people using CGP to justify the changes requested. In the short term, a potential short term solution is to train LLMs to decipher the error messages and help the user fix any mistake. In fact, I have a feeling that DSLs might be much better suited for vibe coding as compared to general purpose languages, as they are much closer to human languages and thus could much easier to work with by both humans and AIs.
+
+### Dynamic Loading
+
+Another disadvantage of our DSL approach is the flip side of its strength: since the DSL is hosted at compile time, it also means that we cannot easily use the technique to run DSL programs that are loaded into a host application during runtime. This means that at least for now, we cannot use the technique to build DSLs for use cases such as config files, plugins, or game mods. Although I have some ideas to blend together the static and dynamic approaches of building DSLs, that will probably only researched in further future.
+
+### Slow Compilation Time
+
+Lastly, there is a more general problem of having slow compile time for CGP-based programs, at least for when the final executable is built. Since CGP programs are written as highly generic code with minimal dependencies, most of the CGP crates can actually be compiled _much faster_ than regular Rust dependencies. However, as most of the abstract implementations are only instantiated _lazily_ at the end when a method is called on the concrete type, that is when compilation becomes very slow.
+
+In particular, compilation of CGP programs become slow when Rust is building the executables and tests that contain `main` functions. This is particularly problematic when there are multiple executables to be compiled. This is likely because each executable triggers their own generic instantiation that is not shared between other compilation units, and so nothing was used to speed up subsequent builds even when they are instantiated with the same generic parameters.
+
+When using CGP with DSLs, the slow compilation can potentially worsen, as each DSL program would trigger unique generic instantiations that need to be compiled separately. Additionally, even though we can define new CGP contexts that share the same preset easily, doing so would probably cause Rust to recompile all generic code with the new context, and thus slow down the compilation significantly.
+
+On the other hand, I had done some rough experiments to test whether the _size_ of a DSL program would affect the compilation time. It looks like doubling the size of the program result in relatively little increase in compile time, at least if the same set of features are used in the DSL. This means that the main penalty occurs on the first time a heavyweight dependency is loaded, such as when the provider that uses `reqwest` is loaded. After that, it matters less if our DSL program uses the provider once or many times.
+
+## Related Work
+
+## Future DSLs
+
+### Lambda Calculus
+
+### HTML
+
+### Model Checking
+
+## Non-DSL Use Cases
+
+## Support Me
