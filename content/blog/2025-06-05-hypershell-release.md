@@ -418,7 +418,7 @@ Created new Rust playground gist with response: Response {
 }
 ```
 
-## Conclusion
+## End of Overview
 
 By now, hopefully the earlier examples are enough to convince you that the base implementation of Hypershell is pretty powerful, and can be potentially useful to build real-world™ applications.
 
@@ -1147,13 +1147,13 @@ Everything we have described in this section is to explain the internal architec
 
 We now have a basic understanding of Hypershell structures and modularize its implementation. To see the kind of benefits it provides, we will try to extend the language to introduce new syntaxes to the DSL.
 
-## Checksum
+## Checksum Handler
 
 Recall that in the earlier example for [HTTP requests](#native-http-request), we try to fetch the web content of a URL, and then compute the HTTP checksum of that webpage using the `sha256sum` command. The approach allows us to iterate and get results quickly, but there are rooms for improvement once we get the initial prototype working.
 
 In particular, since we are inside Rust, an obvious optimization would be to use a native library like [`sha2`](https://docs.rs/sha2) to compute the checksum.
 
-### The `Checksum` Syntax
+## Syntax Extension
 
 Following the modular DSL design of Hypershell, we first wants to define an _abstract_ syntax that users can use in their Hypershell program. The abstract syntax would decouples the language extension from the concrete implementation, so that users may choose an alternative implementation, such as using the `sha256sum` command, to compute the checsum.
 
@@ -1163,7 +1163,21 @@ For the purpose of this demo, we will define an abstract `Checksum` syntax as fo
 pub struct Checksum<Hasher>(pub PhantomData<Hasher>);
 ```
 
-### `HandleStreamChecksum` Provider
+Instead of defining a syntax for SHA256, we define a general `Checksum` syntax that can be parameterized by a hasher, so that other hash algorithms can also be used with this syntax.
+
+In addition to the `Checksum` syntax, we also introduce a new `BytesToHex` syntax for conversion from bytes to hex strings:
+
+```rust
+pub struct BytesToHex;
+```
+
+The main idea is that we want to keep the native implementation of the checksum handler flexible for different use cases. Rust libraries like `sha2` outputs the checksums as raw bytes, which may be more efficient for operations such as comparison of two checksums. On the other hand, when we want to display the output of a Hypershell program, it may be better to show it as hex strings on the terminal.
+
+By providing explicit conversion, we allow the user to decide whether to convert the checksum bytes into hex within a Hypershell program, by adding it as part of the handler pipeline.
+
+## `HandleStreamChecksum` Provider
+
+With the `Checksum` syntax defined, let's look at how we can implement a provider for it:
 
 ```rust
 #[cgp_new_provider]
@@ -1192,4 +1206,183 @@ where
 }
 ```
 
-## WebSocket
+The code above defines a `HandleStreamChecksum` provider that implements `Handler` for the syntax `Checksum<Hasher>`, provided that `Hasher` implements [`Digest`](https://docs.rs/sha2/latest/sha2/trait.Digest.html).
+
+Additionally, to support streaming input, `HandleStreamChecksum` works on any `Input` type that implements [`TryStream`](https://docs.rs/futures/latest/futures/prelude/trait.TryStream.html), with the `Ok` type implementing `AsRef<[u8]>`. The provider also requires `Context` to implement `CanRaiseAsyncError<Input::Error>`, so that any error in the input stream will be handled by the context.
+
+The `Output` type is defined to be `GenericArray<u8, Hasher::OutputSize>`, which is the type that is returned by `Digest::finalize`. We choose to return this instead of `Vec<u8>`, as it allows the caller to be confident of the size of the checksum bytes is always fixed. It is also fine for the use case of `Hypershell`, as `GenericArray` is bytes-like and implements `AsRef<[u8]>`, and thus can interop with other handlers rather easily.
+
+In the method body, we can implement the hashing by creating a `Hasher` instance, iterating asynchronously over the `TryStream`, and call `update` on the incoming bytes. Finally, we call `finalize` to compute and return the checksum result.
+
+## `BytesToHex` Provider
+
+Similar to `HandleStreamChecksum`, we can also implement `Handler` provider for `BytesToHex` rather easily. In fact, the implementation is simpler, as we can work on a bytes value directly, instead of stream of bytes.
+
+```rust
+#[cgp_new_provider]
+impl<Context, Code, Input> Handler<Context, Code, Input> for HandleBytesToHex
+where
+    Context: HasAsyncErrorType,
+    Code: Send,
+    Input: Send + AsRef<[u8]>,
+{
+    type Output = String;
+
+    async fn handle(
+        _context: &Context,
+        _tag: PhantomData<Code>,
+        input: Input,
+    ) -> Result<String, Context::Error> {
+        let output = hex::encode(input);
+        Ok(output)
+    }
+}
+```
+
+The `HandleBytesToHex` provider is implemented to work with any `Input` type that implements `AsRef<[u8]>`. It has a `String` output type, and simply calls [`hex::encode`](https://docs.rs/hex/latest/hex/fn.encode.html) to encode the input bytes into hex string.
+
+Notice that `HandleBytesToHex` can be implemented with a generic `Code`, rather than specifically the `BytesToHex` syntax. We can do this, because we don't need to access any information from the `Code` to implement the provider. It is a common practice with CGP to implement providers as generically as possible, at least within some code bases. By doing so, we allow the provider to be more easily reused in other places, such as using it to handle other syntaxes.
+
+## Preset Extension
+
+We can now extend `HypershellPreset` to include the new syntaxes and providers that we have introduced. The extension to the preset require relatively minimal amount of code to be added:
+
+```rust
+#[cgp::re_export_imports]
+mod preset {
+    ...
+
+    cgp_preset! {
+        ExtendedHypershellPreset: HypershellPreset {
+            override HandlerComponent:
+                ExtendedHandlerPreset::Provider,
+        }
+    }
+
+    cgp_preset! {
+        #[wrap_provider(UseDelegate)]
+        ExtendedHandlerPreset: HypershellHandlerPreset {
+            BytesToHex:
+                HandleBytesToHex,
+            <Hasher> Checksum<Hasher>:
+                PipeHandlers<Product![
+                    FuturesToTokioAsyncRead,
+                    AsyncReadToStream,
+                    HandleStreamChecksum,
+                ]>,
+        }
+    }
+}
+```
+
+We first define `ExtendedHypershellPreset` to extend from `HypershellPreset`. In the body, we do not introduce new component wiring, except to override the wiring of `HandlerComponent` to use `ExtendedHandlerPreset`, which we defines next.
+
+We define `ExtendedHandlerPreset` to extend from `HypershellHandlerPreset`. Inside the body, we wire up the provider for `BytesToHex` to `HandleBytesToHex`. Following that, the wiring for `Checksum` actually consists of an _inner pipeline_ of handlers, rather than just `HandleStreamChecksum`.
+
+To understand what is going on, we first have to understand that `HandleStreamChecksum` can work with any `Input` type that implements `TryStream`. However, the output type returned by `HandleStreamingHttpRequest`, which we want to use with `Checksum` in our example, only implements [`futures::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html) instead of `TryStream`.
+
+To convert the output from `HandleStreamingHttpRequest` into `TryStream`, we need to peform two steps of conversion. First, we use the `FuturesToTokioAsyncRead` provided by Hypershell to convert a `futures::AsyncRead` into [`tokio::AsyncRead`](https://docs.rs/tokio/latest/tokio/io/trait.AsyncRead.html). We then use `AsyncReadToStream` provided by Hypershell to convert a `tokio::AsyncRead` into `TryStream`. The two levels of conversion is needed, as unfortunately there is no simple way to convert a `futures::AsyncRead` into `TryStream` directly.
+
+Finally, we use `PipeHandlers` to combine the 3 handler providers into a single `Handler` provider. Notice that while `Pipe` is an abstract _syntax_ that works with a list of inner handler _syntaxes_, `PipeHandlers` is a _provider_ for `Handler` that works with a list of inner handler _providers_.
+
+## Example Program
+
+With the new `ExtendedHypershellPreset` defined, we can now define an example Hypershell program that makes use of the new `Checksum` and `BytesToHex` syntax:
+
+```rust
+pub type Program = hypershell! {
+    StreamingHttpRequest<
+        GetMethod,
+        FieldArg<"url">,
+        WithHeaders[ ],
+    >
+    | Checksum<Sha256>
+    | BytesToHex
+    | StreamToStdout
+};
+```
+
+With the new syntaxes in place, our program becomes much simpler, as compared to having to call the shell commands explicitly. Next, we define a concrete context that uses our `ExtendedHypershellPreset` to run the program:
+
+```rust
+#[cgp_context(MyAppComponents: ExtendedHypershellPreset)]
+#[derive(HasField)]
+pub struct MyApp {
+    pub http_client: Client,
+    pub url: String,
+}
+```
+
+Instead of extending from `HypershellPreset`, our context provider `MyAppComponents` now instead extends from `ExtendedHypershellPreset`. With that, it is now able to support the new syntaxes that we have introduced in our Hypershell program.
+
+With everything defined, we just need to write a main function that builds a `MyApp` context, and calls the Hypershell program with it:
+
+```rust
+#[tokio::main]
+async fn main() -> Result<(), Error> {
+    let app = MyApp {
+        http_client: Client::new(),
+        url: "https://nixos.org/manual/nixpkgs/unstable/".to_owned(),
+    };
+
+    app.handle(PhantomData::<Program>, Vec::new()).await?;
+
+    Ok(())
+}
+```
+
+The full example code is available in the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_native.rs), together with the checksum implementation available as the [`hypershell-hash-components`](https://github.com/contextgeneric/hypershell/tree/main/crates/hypershell-hash-components) crate. We can run the example program, and it should produce the same output as the previous example that called the `sha256sum` command:
+
+```rust
+$ cargo run --example http_checksum_native
+c5ce4ff8fb2d768d4cbba8f5bee3d910c527deedec063a0aa436f4ae7005c713
+```
+
+## Language Extension Made Easy
+
+As we can see with the final example, with a dozens lines of code, we have managed to extend the Hypershell language, and add new syntaxes and features to it. Aside from the simple example of computing the checksum, we can imagine more complicated features being added in similar ways to Hypershell.
+
+The beauty of this approach is that _a language extension does not affect the core implementation of Hypershell, or require any upstream patches or coordination_. _Anyone_ can build a language extension for Hypershell without requiring permission from Hypershell or any need of forking the project.
+
+Furthermore, an application that do not need the extension can choose to remain using only the core implementation, and not get bloated by the dependencies introduced by the extensions. As a result, developers can freely experiment and extend the core language without worrying that it would negatively affect all users of the language.
+
+With the decoupling of the language syntax from the implementation, we are also able to separate the design of new syntaxes from the concrete implementation. For example, we could imagine that the `Checksum` syntax is hosted on a dedicated crate, together with RFC-like documentation that describe the expected behavior when using the new syntax. This would allow multiple alternative implementations to co-exist, and encourage community coordination beyond library APIs.
+
+For some readers, it may seem overkill to introduce a feature like checksum as an extension to a language like Hypershell. But our main goal here is for you to _imagine_ how to apply similar techniques to more complex languages and extensions, especially in problem domains where such decoupling could be very benefitial.
+
+## Future Exercises
+
+The example checksum extension that we have demonstrated is kept simplified, so that it can be more easily understood without being overloaded with too much details. As a result, there are few simple improvements that can be made on the example to improve the quality of the extension. I will leave it as an exercise to the readers to try and implement the improvements on their own, and use the exercises as the first step to get your hand dirty with Hypershell and CGP.
+
+### Abstract Hasher Syntax
+
+While the `Checksum<Hasher>` syntax is abstract, the implementation of `HandleStreamChecksum` requires the `Hasher` type to directly implement the `Digest` trait. As a result, users of `Checksum` are forced to include `sha2` as a dependency in their program, in order to use type like `Sha256` from the crate.
+
+As an exercise, try define your own structs, e.g. `struct Sha256;`, as abstract syntaxes in the crate to be used together with `Checksum`. Then make use of dependency injection `HandleStreamChecksum` to "convert" the abstract `Hasher` type into a type that implements `Digest`.
+
+As a hint, you might need to define an additional trait to provide the mapping, such as:
+
+```rust
+#[cgp_type]
+pub trait HasHashDigestType<Hasher> {
+    type HashDigest: Digest;
+}
+```
+
+### Input-Based Dispatch
+
+In the wiring of `ExtendedHandlerPreset`, we have defined a pipeline handler for `Checksum` to handle the input as a `futures::AsyncRead` stream. This would mean that we would get type errors when trying to use `Checksum` with the output from other handlers, such as `SimpleExec`.
+
+The `Handler` component from CGP also comes with a `UseInputDelegate` wrapper, that dispatches the implementation of `Handler` to inner providers based on the `Input` type instead of the `Code` type. Try and figure out of how we can use `UseInputDelegate` to define different input conversion pipelines depending on the `Input` type.
+
+You can look for example implementations in Hypershell, where we already make use of `UseInputDelegate` to support multiple input stream types.
+
+### Alternative Providers
+
+Our original examples performed the computation using the `sha256sum` command. This means that the syntax for `Checksum` can technically also be implemented using the `sha256sum` command. Try and think of a way to define a second extension preset that contains wiring that forwards the implementation of `Checksum<Sha256>` to `StreamingExec`.
+
+As a hint, Hypershell provides a `Call` provider that you can use to implement a provider that "calls" another Hypershell program to implement a given program. Look for how `Call` is used in the code base to find out how you can use it.
+
+You may also need to make a decision to standardize on whether `Checksum` should produce the checksum as raw bytes or hex string. This is because `HandleStreamChecksum` currently implements `Checksum` by returning raw bytes.
+
+As a hint, if you want `Checksum` to return a hex string, then you should add `BytesToHex` after `HandleStreamChecksum` inside the pipeline for the wiring of `Checksum`. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` to become bytes.
