@@ -1387,7 +1387,7 @@ You may also need to make a decision to standardize on whether `Checksum` should
 
 As a hint, if you want `Checksum` to return a hex string, then you should add `BytesToHex` after `HandleStreamChecksum` inside the pipeline for the wiring of `Checksum`. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` to become bytes.
 
-# Conclusion
+# Epilogue
 
 We have finally reach the end of this blog post. Thank you for your patience if you are still reading at this point! Although this is a very long read, I hope that the blog post has covered all essential topics for you to understand the strengths of Hypershell and CGP.
 
@@ -1445,18 +1445,66 @@ Furthermore, many DSL approaches, including tagless final, focus on defining the
 
 Our approach of defining DSL programs as types shares a lot of similarity with the type-level DSL techniques used by [Servant](https://www.servant.dev/posts/2018-07-12-servant-dsl-typelevel.html), which provides a DSL for defining server-side web APIs. Similar to Hypershell, Servant also defines abstract syntaxes as dummy types, and performs type-level interpretation using typeclasses.
 
-On the other hand, with CGP, Hypershell is able to achieve higher level of modularity than the original Servant design. In particular, CGP makes it possible to rewire and replace existing implementations of a syntax with an alternative provider. While with Servant, the DSL can only support language extension with new syntaxes, by directly implementing typeclass instances for that new syntax.
+Compared to Hypershell, Servant implements its traits directly on its syntax types. This is similar to a simpler programming pattern in CGP, called _higher order providers_. On the other hand, Hypershell decouples the implementation of provider traits from the definition of abstract syntax. This allows Hypershell users to replace the underlying implementation of a syntax with a different provider. With Servant, the DSL can only support language extension with new syntaxes, by directly implementing typeclass instances for that new syntax.
 
-Ergonomic-wise, Servant is heavily based on the `Handler` monad, while with CGP, the same functionality is provided by the `Handler` component without introducing monads. Essentially, while CGP and Hypershell may share some core concepts with Servant, I have tried my best to present them in more accessible ways so that Rust developers are not overwhelmed by the functional programming jargons that are commonly used by Haskell projects.
+Ergonomic-wise, Servant is heavily based on the `Handler` monad, while with Hypershell, the same functionality is provided by the `Handler` component without directly exposing monads to the users. Although this may be less powerful than using full blown monads, Hypershell's approach is better aligned with the ergonomics of Rust, and reduce the learning barrier for potential users who may be unfamiliar with functional programming jargons.
 
 ## Future DSLs
 
+As mentioned in the beginning, Hypershell is only the first DSL that will be built using CGP. Using the same DSL techniques, we can build other DSLs that would be potentially be more useful in solving practical real world™ problems. This section outlines some DSL ideas that I would like to see being developed in the near future, either by me, or perhaps by some of you in the community.
+
 ### Lambda Calculus
+
+One idea that I would like to try out after this blog post is to implement a simple _lambda calculus_ DSL using the same programming techniques outlined here. Although embedding lambda calculus itself is not very interesting, the groundwork of this experiment will explore the feasibility of embedding general-purpose languages as type-level DSLs in Rust.
+
+In particular, if we can show that it is possible to build a turing-complete DSL with CGP, it will open door new ways of implementing proramming langauges with CGP and Rust. A follow up of this experiment would also include mixing both static and dynamic interpretation of the language, together with some just-in-time optimization techniques to run a scripting language with CGP.
+
+This experiment will probably include a more complex proc macro that desugars a surface syntax that contains named variables into an abstract syntax that works with _De Bruijn index_, since we probably can't perform named field access over an _anonymous_ product type for closures.
 
 ### HTML
 
-### Model Checking
+An idea that I have been keen to work on is to use CGP to build a DSL for _HTML_, or more generally _web frontends_, so that I can rebuild this current website using CGP.
+
+The idea behind a HTML-based DSL is pretty simple: whether we are building a static webpage, server-side rendering, or client-side rendering, we are really just writing our front end code as an abstract DSL program that is interpreted by _different contexts_ based on the use case.
+
+A static webpage is then a simple program with minimal dependencies that can be run with all concrete contexts, just as how a Hypershell program that only use the CLI features can be run by both `HypershellCli` and `HypershellHttp`. On the other hand, a more complex program that makes use of more dependencies may only be run with a more feature-complete context, such as one that works with client-side rendering.
+
+Although I think there are potentials for solving front end development with CGP, I have opted to start with Hypershell as a proof of concept, as it has significantly less complexity than front end development. Furthermore, even if we have a proof-of-concept version of the HTML DSL, there may be a never-ending rabbit hole that needs to be filled until the prototype becomes production-ready™ enough to even rival React or Leptos.
+
+Aside from that, although I would love to explore developing front end applications using CGP, the future prospects of becoming a professional front end developer who needs to convince everyone else to use Rust/CGP does not align well with my long term career goals. As a result, I have personally try not to associate CGP too closely with web development to accidentally fall back into the wrong career track.
+
+### Parsers
+
+An idea that I am keen to work on is to build _parsers_ as a CGP DSL, in particular for parsing Rust's `TokenStream` as a starting point. The DSL approach we use here is pretty similar to _parser combinator_ techniques, but with further modularity for even more flexible parsing.
+
+The initial use case for this would be for dog-fooding purpose of implementing the CGP proc macros using CGP. Currently, the CGP macro implementation contains a lot of ad hoc parsing code implementing using `syn` and the `Parse` trait. As the surface syntax for CGP becomes more complex, there is an increasing need to take advantage of CGP its own proc macros to modularize macros like `delegate_components!` and `cgp_preset!` can be implemented.
+
+The implementation of this CGP-based parser DSL will share some similarity with the [`unsynn`](https://docs.rs/unsynn) crate, which already offers a more declarative approach to parsing as compared to `syn`. However with CGP, there should be less needs to declare the structs and syntax rules inside macros, as we can use CGP itself to perform the wiring and generic implementations.
+
+That said, there is still a feature lacking in CGP that I need to implement, which is the _builder pattern_, before we can implement modular parsing using CGP. In short, the CGP builder pattern involves the creation of _partial structs_ that may contain uninitialized fields, which will be filled in incrementally by different parser providers. Just as the CGP accessor pattern supports generic access of fields using `HasField`, the CGP builder pattern supports generic _construction_ of struct fields using new traits that will be introduced.
+
+As a result, we may need to wait until the next major version of CGP released, before we can start building a parser DSL with CGP.
+
+### Monadic Computation
+
+In a longer time horizon, once we have proven the feasibility of implementing lambda calculus with CGP, a potential avenue that I would like to explore is to enable _monadic computation_ as a DSL with CGP. The main use case for this is to better support property testing and model checking in Rust, but it may also be extended further to support full algebraic effects.
+
+The main idea for this is that we want to enable something similar to the `do`-notation in Haskell as a DSL, without requiring direct exposure of monads in Rust programs. This DSL is expected to be used only for writing very high level core logic, where method calls may return non-deterministic results. With that, a test context can make use of monads to perform non-deterministic computation on the logic, but a production context can run the same program without using monads at all.
+
+It is worth noting that we want to introduce monads as a DSL not for writing "fancy" functional programs, but out of necessacity for writing better tests in Rust. For instance, the `Arbitrary` monad used by property testing frameworks like QuickCheck is essential for writing property test code with cleaner syntax. Without monads, Rust crates like `proptest` need to resort to complex macros and ad hoc type signatures in order to emulate what could be done with monads and the `do` notation just for property testing.
+
+More generally, having support for non-deterministic monads will allow us to write some form of model checking code similar to TLA+, but directly within Rust. At the moment, similar functionality can also be achieved using [Kani](https://github.com/model-checking/kani), however that requires dedicated toolchains to compile the Rust code to run with external verifiers.
+
+On one hand, I think CGP has great potential to make Rust code play well with Kani, by making it possible to decouple application code from complex libraries that cannot run easily with Kani. On the other hand, I am also curious to explore how much of model checking we can do within Rust itself without external tools like Kani, if we had some form of access to the full power of monads in Rust.
 
 ## Non-DSL Use Cases
 
-## Support Me
+## Contribution and Support
+
+### Join the Community
+
+### Build Your Own DSL
+
+### Research Collaboration
+
+### Sponsor Me
