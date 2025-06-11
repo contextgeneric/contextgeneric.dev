@@ -1,6 +1,6 @@
 +++
 
-title = "Hypershell: A Compile-Time DSL for Shell-Scripting in Rust"
+title = "Hypershell: A Type-Level DSL for Shell-Scripting in Rust"
 
 description = ""
 
@@ -10,15 +10,15 @@ authors = ["Soares Chen"]
 
 # Summary
 
-I am thrilled to introduce [_Hypershell_](https://github.com/contextgeneric/hypershell), a compile-time domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [_context-generic programming_](/) (CGP), making it highly modular and extensible.
+I am thrilled to introduce [_Hypershell_](https://github.com/contextgeneric/hypershell), a type-level domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [_context-generic programming_](/) (CGP), making it highly modular and extensible.
 
-In this blog post, I will showcase some example Hypershell programs, and briefly explains how they are implemented using CGP. Towards the end, we will also discuss more about building DSLs in general, and how CGP can enable Rust to become a powerhouse for building new generation of domain specific languages.
+In this blog post, I will showcase example Hypershell programs and briefly explain their implementation using CGP. Towards the end, we will delve deeper into building DSLs in general, demonstrating how CGP can enable Rust to become a powerhouse for crafting a new generation of domain-specific languages.
 
 ## Disclaimer
 
-Hypershell serves as an _experimental_, proof of concept, showcase of the capabilities of CGP. As such, its primary purpose is for demonstrating how CGP can be used to build highly modular DSLs in Rust.
+Hypershell serves as an _experimental_ proof of concept, showcasing the capabilities of CGP. As such, its primary purpose is to demonstrate how CGP can be used to build highly modular DSLs in Rust.
 
-The example use case of shell scripting is primarily chosen because it is fun and approachable to programmers of all background. In practice, we may or may not want to use Hypershell to write serious™ shell scripts. But regardless of the future outcome, I hope Hypershell can serve as a _fun_ programming example, and for you to becoming interested in learning CGP.
+The example use case of shell scripting is primarily chosen because it is fun and approachable to programmers of all backgrounds. But regardless of the future outcome, I hope Hypershell can serve as a _fun_ programming example and inspire you to become interested in learning CGP.
 
 # An Overview of Hypershell
 
@@ -34,7 +34,7 @@ hypershell  = { version = "0.1.0" }
 
 ## Hello World
 
-We will begin learning Hypershell with a simple hello world example. Our hello world program would run the CLI command `echo hello world!`, and then stream the output to STDOUT. With Hypershell, our program would be written as follows:
+We will begin learning Hypershell with a simple hello world example. Our hello world program runs the CLI command `echo hello world!` and then streams the output to `STDOUT`. With Hypershell, our program is written as follows:
 
 ```rust
 use hypershell::prelude::*;
@@ -48,11 +48,11 @@ pub type Program = hypershell! {
 };
 ```
 
-We first import everything from `hypershell::prelude` to use common Hypershell constructs. Our hello program is then defnined as a Rust _type_ named `Program`. In the body, we use the `hypershell!` macro to define our program with shell-like syntactic sugar, such as the use of pipe operator (`|`). At a high level, a Hypershell program is consist of one or more _handlers_ that forms a connected _pipeline_.
+We first import everything from `hypershell::prelude` to use common Hypershell constructs. Our hello program is then **defined** as a Rust *type* named `Program`. In the body, we use the `hypershell!` macro to define our program with shell-like syntactic sugar, such as the use of the pipe operator (`|`). At a high level, a Hypershell program **consists** of one or more *handlers* that **form** a connected *pipeline*.
 
-In the first part of the program, we use the `SimpleExec` handler to perform a simplified execution of a CLI command. The first argument to `SimpleExec` is `StaticArg<"echo">`, meaning that the program would always execute the hardcoded `echo` command. The second argument to `SimpleExec` is `WithStaticArgs`, which accepts a _variable_ list of static arguments that would be passed to the `echo` command.
+In the first part of the program, we use the `SimpleExec` handler to perform a simplified execution of a CLI command. The first argument to `SimpleExec` is `StaticArg<"echo">`, meaning that the program always executes the hardcoded `echo` command. The second argument to `SimpleExec` is `WithStaticArgs`, which accepts a *variadic* list of static arguments that **are** passed to the `echo` command.
 
-In the second part of the program, we use the `|` operator to indicate that we want to pipe the result from `SimpleExec` to the next handler, `StreamToStdout`. The `StreamToStdout` handler would then stream the output to the STDOUT of the main Rust program, so that we can see the output when running the program.
+In the second part of the program, we use the `|` operator to indicate that we want to pipe the result from `SimpleExec` to the next handler, `StreamToStdout`. The `StreamToStdout` handler then streams the output to the `STDOUT` of the main Rust program so that we can see the output when running the program.
 
 Now that our program is defined, we can define a `main` function to call the Hypershell program inside our Rust program:
 
@@ -69,9 +69,9 @@ async fn main() -> Result<(), Error> {
 
 We use `#[tokio::main]` to define an async main function. Inside the function body, we make use of `HypershellCli`, which is a pre-defined context that can be used for running simple CLI-only Hypershell programs. The `HypershellCli` context is an empty struct, hence we are able to directly construct a value and call the `handle` method on it.
 
-The `handle` method comes from the `CanHandle` trait from `cgp`, and is automatically implemented by `HypershellCli` for any suppported program. We pass our program to the first argument of `handle` as `PhantomData::<Program>`, that is, the `Program` we defined earlier is purely a _type-level_ construct and has no meaningful representation at the value-level. Nevertheless, we use `PhantomData` to "pass" the type as a value parameter, as it leads to cleaner syntax as compared to passing it as a generic argument.
+The `handle` method comes from the `CanHandle` trait from `cgp`, and is automatically implemented by `HypershellCli` for any **supported** program. This blanket implementation is a key enabler of CGP's modularity, allowing `HypershellCli` to handle diverse Hypershell programs without explicit implementations for each. We pass our program to the first argument of `handle` as `PhantomData::<Program>`, that is, the `Program` we defined earlier is purely a *type-level* construct and has no meaningful representation at the value-level. Nevertheless, we use `PhantomData` to "pass" the type as a value parameter, as this leads to cleaner syntax compared to passing it as a generic argument.
 
-We then pass an empty `Vec<u8>` to the second argument to `handle`, which would be used as the input of `SimpleExec` to be passed to the `STDIN` of the `echo` command.
+We then pass an empty `Vec<u8>` to the second argument of `handle`; this `Vec<u8>` serves as the `STDIN` input for the executed command. In this specific `echo` example, it remains empty as `echo` operates directly on its arguments rather than `STDIN`.
 
 The full example program shown here is also available at our [GitHub repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/hello.rs). If you clone the repository, you can run the example program with `cargo run`, and we should see the familiar `hello world!` printed out:
 
@@ -82,9 +82,9 @@ hello world!
 
 ## Macro Desugaring
 
-The `hypershell!` macro is implemented as a simple proc macro the performs some basic syntax transformation to make Hypershell programs look slightly similar to shell scripts. However, it is completely optional, and we can also define Hypershell programs without using the `hypershell!` macro.
+The `hypershell!` macro is a straightforward procedural macro that performs basic syntax transformations, making Hypershell programs resemble shell scripts. However, its use is entirely **optional**; you can define Hypershell programs without it.
 
-For instance, the earlier hello world program can be rewritten as follows:
+For instance, the previous "hello world" program can be rewritten as follows:
 
 ```rust
 pub type Program = Pipe<Product![
@@ -99,19 +99,19 @@ pub type Program = Pipe<Product![
 ]>;
 ```
 
-Compared to the prettified version, the raw syntax for Hypershell is slightly more verbose, but is still relatively readable. The first thing to notice is that the handlers that are chained together with `|` are now placed inside a `Pipe` wrapper. Furthermore, the `Product!` macro from CGP is used to construct a variable-length list at the _type-level_, so that `Pipe` can accept arbitrary number of handlers.
+Compared to the "prettified" version, the raw Hypershell syntax is slightly more verbose but remains relatively readable. The first thing to notice is that handlers chained with `|` are now placed inside a **`Pipe`** wrapper. Furthermore, the **`Product!`** macro from CGP is used to construct a variable-length list at the _type-level_, enabling `Pipe` to accept an arbitrary number of handlers.
 
-We can also see that the syntax `WithStaticArgs[...]` is desugared to `WithStaticArgs<Product![...]>`. With `hypershell!`, syntax that accept variable number of arguments can use the `[]` short hand to wrap the inner arguments around `Product!`. This leads to cleaner and more concise syntax and makes Hypershell programs more readable.
+You can also see that the `WithStaticArgs[...]` syntax **desugars** to `WithStaticArgs<Product![...]>.` With `hypershell!`, syntax that accepts a variable number of arguments can use the `[]` shorthand to wrap the inner arguments within `Product!`. This results in cleaner, more concise syntax, making Hypershell programs more readable.
 
-Finally, you may notice that all occurances of strings are wrapped inside the `symbol!` macro from CGP. This is because Hypershell programs are types, but string literals are value-level expressions. The `symbol!` macro can be used to turn string literals into _types_, so that we can now use them within type expressions.
+Finally, you might notice that all occurrences of strings are wrapped inside the **`symbol!`** macro from CGP. This is because Hypershell programs are types, but string literals are value-level expressions. The `symbol!` macro allows you to turn string literals into _types_, enabling their use within type expressions.
 
-Behind the scene, `symbol!` works similar to _const-generics_ in Rust. However, since Rust do not yet support the use of `String` or `&str` as const-generic arguments, the macro desugars the string literal into a type-level list of `char`, which can be used with const-generic.
+Behind the scenes, `symbol!` functions similarly to **const-generics** in Rust. However, since Rust doesn't yet support using `String` or `&str` as const-generic arguments, the macro desugars the string literal into a type-level list of `char`, which *can* be used with const-generics.
 
-With the three syntax transformations described, we can now better understand how the `hypershell!` macro works. In the DSL architecture for Hypershell, the `hypershell!` macro provides the _surface syntax_ of the DSL, which is desugared to Rust types that serve as the _abstract syntax_.
+With these three syntax transformations, we can now better understand how the `hypershell!` macro works. In Hypershell's DSL architecture, the `hypershell!` macro provides the _surface syntax_ of the DSL, which is then desugared into Rust types that serve as the _abstract syntax_.
 
 ## Variable Parameters
 
-Now that we have a better understanding of Hypershell, let's move on to a slightly more complex hello world example. Supposed that we want to run `echo` with a _variable_ argument `name`, so that the program would print "Hello", followed by the value stored in `name`. To do that, we would re-define our program as follows:
+Now that we have a better understanding of Hypershell, let's move on to a slightly more complex "hello world" example. Suppose we want to run `echo` with a _variable_ argument `name`, so that the program prints "Hello", followed by the value stored in `name`. To do that, we would redefine our program as follows:
 
 ```rust
 pub type Program = hypershell! {
@@ -126,15 +126,15 @@ pub type Program = hypershell! {
 };
 ```
 
-In our new program, the second argument to `SimpleExec` is changed from `WithStaticArgs` to `WithArgs`. The main difference is that `WithStaticArg` accepts a list of static arguments, while `WithArgs` accepts a list of arguments with explicit specifiers.
+In our new program, the second argument to `SimpleExec` is changed from `WithStaticArgs` to `WithArgs`. The main difference is that `WithStaticArgs` accepts a list of static arguments, while `WithArgs` accepts a list of arguments with explicit specifiers.
 
-In the first argument for `WithArgs`, we specify `StaticArg<"Hello">` to indicate that we always want to print the string `"Hello"` in the first argument. Following that, we specify `FieldArg<"name">` to indicate that we want to use the value of the `name` field from the context as the second argument.
+For the first argument within `WithArgs`, we specify `StaticArg<"Hello">` to indicate that the string `"Hello"` should always be printed as the first argument. Following that, we specify `FieldArg<"name">` to indicate that the value of the `name` field from the context should be used as the second argument.
 
-Now that we have defined our program, a question that arise next is how can we "pass" in the `name` value to the program? Given that the program itself is only present at the type level, there is no place to hold the `name` value within the program. If we try to run the program using `HypershellCli`, we would encounter errors indicating that no `name` field is present inside the `HypershellCli` context.
+Now that we have defined our program, a question that arises next is: how can we "pass" in the `name` value to the program? Given that the program itself is only present at the type level, there is no place to hold the `name` value directly *within* the program type. If we try to run the program using `HypershellCli`, we will encounter errors indicating that no `name` field is present within the `HypershellCli` context.
 
 ### Custom Context
 
-What we would do instead is to define a _new_ context type, so that we can use it to run our program. We would define a `MyApp` context with a `name` field as follows:
+To resolve the problem of variable capture, we'll define a **new context type** for running our program. We'll define a `MyApp` context with a `name` field as follows:
 
 ```rust
 #[cgp_context(MyAppComponents: HypershellPreset)]
@@ -144,17 +144,17 @@ pub struct MyApp {
 }
 ```
 
-The `MyApp` context is defined as a simple struct with a `name` field of type `String`. But it also comes with two attribute macros that are used to automatically derive capabilities for running Hypershell programs.
+The `MyApp` context is a straightforward struct with a public `name` field of type `String`. What makes it special are the two attribute macros used to automatically derive the capabilities needed for running Hypershell programs.
 
-The first macro, `#[cgp_context]`, is used to enable wiring of CGP components to be used by the context. The first argument to the macro, `MyAppComponents`, is the name given to the _provider_ of the `MyApp` context. But since we don't include any additional wiring in this example, we can ignore it for now.
+The first macro, `#[cgp_context]`, enables the wiring of CGP components for use by this context. The argument `MyAppComponents` is the name given to the **provider** for the `MyApp` context. For this example, we can largely disregard it as we're not including any additional component wiring.
 
-The macro argument is then followed by `:`, and then `HypershellPreset`, indicating that the `MyAppComponents` provider is _inherited_ from `HypershellPreset`, which is provided by Hypershell. The syntax looks similar to _supertraits_ in Rust, and works a bit like OOP prototypal inheritance, but operates only during compile-time at the _type-level_.
+The macro argument is followed by a colon and then `HypershellPreset`, indicating that the `MyAppComponents` provider **inherits** from `HypershellPreset`, which Hypershell provides. This syntax might remind you of Rust's supertraits, operating somewhat like object-oriented prototypal inheritance but exclusively at compile-time and the **type-level**.
 
-For the purpose of this example, the main takeaway is that the context `MyApp` implements all supported Hypershell components through the provider `MyAppComponents`, with the component wiring inherited from `HypershellPreset`. We will revisit later on how CGP presets can defined and customized towards the end of this blog post.
+For the purpose of this example, the key takeaway is that the `MyApp` context implements all supported Hypershell components through its `MyAppComponents` provider, with the component wiring inherited from `HypershellPreset`. We'll explore how CGP presets are defined and customized later in this blog post.
 
-The second macro, `#[derive(HasField)]`, is used to implement the `HasField` trait for `MyContext`. With this, the `name` field in `MyContext` is exposed as a `HasField` implementation, which can then be accessed by the implementation of `FieldArg<"name">`.
+The second macro, `#[derive(HasField)]`, automatically implements the `HasField` trait for `MyApp`. This macro exposes the `name` field in `MyApp` via a `HasField` implementation, making it accessible by the `FieldArg<"name">` in our Hypershell program.
 
-Now that we have defined our custom context, we can construct a value for it inside our `main` function, and call it with our program:
+Now that our custom context is defined, we can construct an instance of it within our `main` function and use it to execute our program:
 
 ```rust
 #[tokio::main]
@@ -168,7 +168,7 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-The full example is available in the [Hypershell repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/hello_name.rs). Since we initialize the `MyApp` context with the value `"Alice"` set in the `name` field, we should see `"Hello, Alice"` printed out when running the program:
+The complete example is available in the [Hypershell repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/hello_name.rs). Since we initialize the `MyApp` context with the value `"Alice"` set in the `name` field, running the program should print `"Hello, Alice"`:
 
 ```bash
 $ cargo run --example hello_name
@@ -177,31 +177,31 @@ Hello, Alice
 
 ## Context-Generic Implementation
 
-The example code earlier shows that our custom `MyApp` context implements everything that `HypershellCli` has implemented, with only two lines of macro code added to it. This is all made possible, because the core implementation of Hypershell is fully _context-generic_. That is, _none_ of the implementation code for Hypershell had direct access to `HypershellCli`, or `MyApp` for that matter.
+The previous example demonstrates that our custom `MyApp` context implements all the same functionalities as `HypershellCli` with only two lines of macro code. This remarkable conciseness is entirely due to Hypershell's core implementation being fully **context-generic**. Crucially, none of Hypershell's underlying implementation code has direct access to specific concrete types like `HypershellCli` or `MyApp`.
 
-Since the Hypershell core implementation do not have access to the concrete contexts, they are implemented to be _generic_ over any context type that satisfies given conditions. This makes the Hypershell implementation highly customizable and extensible. CGP makes it very _cheap_ to define custom contexts like `MyApp`, and eliminates tight coupling between implementations and concrete types.
+Since the Hypershell core implementation lacks direct access to concrete contexts, it's designed to be **generic** over any context type that satisfies predefined conditions. This approach makes Hypershell's implementation highly customizable and extensible. CGP makes it incredibly **easy** to define custom contexts like `MyApp`, effectively eliminating tight coupling between implementations and concrete types.
 
-As a side note, in case if you are wondering, the macro `#[cgp_context]` does _not_ generate Hypershell implementation code that work specifically with `MyApp`. Instead, if you expand the macro, you will only see a few lines of trait implementations that link to the `HypershellPreset` provider.
+As a side note, if you're curious, the `#[cgp_context]` macro **does not** generate Hypershell implementation code specifically for `MyApp`. Instead, if you expand the macro, you'll find it generates only a few lines of trait implementations that link to the `HypershellPreset` provider.
 
-This puts CGP in stark contrast with alternative modular programming libraries in Rust, which tend to rely on heavy macro expansion to copy "template" code implementations to work with concrete types. Instead, CGP leverages traits, generics, and the Rust type system to ensure that all abstract implementations would always work reliability regardless of which concrete types they are instantiated with.
+This design puts CGP in stark contrast with alternative modular programming libraries in Rust, which often rely on heavy macro expansion to copy "template" code implementations to work with concrete types. In contrast, CGP leverages Rust's powerful traits, generics, and type system to ensure that all abstract implementations reliably function regardless of the concrete types they are instantiated with.
 
 ## Dependency Injection
 
-With CGP, a key feature that we get for free from Rust is the ability to perform _dependency injection_ inside context-generic implementations. Even though Hypershell core implementation is generic over the context type, we can introduce additional trait bounds in the `impl` block to impose additional constraints on the context.
+A key feature CGP provides, leveraging Rust's capabilities, is **dependency injection** within context-generic implementations. Even though Hypershell's core implementation is generic over the context type, we can introduce additional trait bounds in `impl` blocks to impose specific constraints on that context.
 
-The implementation for `FieldArg<"name">` makes use of this feature, to require the generic context to contain a `name` field. With this, we can automatically use `FieldArg<"name">` with `MyApp`, since it is able to get the `name` value via the `HasField` instance. On the other hand, if we try to use it with `HypershellCli`, the implementation would fail as the `name` field could not be found there.
+The implementation for `FieldArg<"name">` exemplifies this by requiring the generic context to contain a `name` field. Because `MyApp` exposes its `name` field via the `HasField` instance, `FieldArg<"name">` automatically works with `MyApp`. Conversely, attempting to use it with `HypershellCli` would result in a compilation error, as `HypershellCli` lacks the required `name` field.
 
-From this, we can also learn that the implementation wiring for CGP is done _lazily_. That is, both `HypershellCli` and `MyApp` are wired with the same abstract implementations from `HypershellPreset`, but only _some_ of the wirings are valid, depending on the additional capabilities provided by the concrete context.
+From this, we also learn that CGP's implementation wiring is performed **lazily**. Both `HypershellCli` and `MyApp` are wired with the same abstract implementations from `HypershellPreset`. However, only *some* of these wirings are valid, depending on the additional capabilities provided by the concrete context.
 
-It is worth noting that it has always been possible to use dependency injection through Rust trait impls, even in vanilla Rust. But with CGP, we bring the use of dependency injection to the next level, enabling use cases such as the implementation of `FieldArg` in this example.
+While it has always been possible to use dependency injection through Rust trait `impl`s, even in vanilla Rust, CGP elevates this pattern. It enables powerful use cases like the flexible implementation of `FieldArg` demonstrated in this example, pushing the boundaries of what's achievable with dependency injection in Rust.
 
 ## Streaming Handlers
 
-Now that we have gone through the basics of Hypershell, let's try defining more complex Hypershell programs. In the earlier example, we performed CLI execution using `SimpleExec`, which accepts inputs and produce outputs as raw bytes, i.e. `Vec<u8>`. This mode of execution gives simpler semantics to the execution, as we don't need to worry about cases when an `STDIN` or `STDOUT` stream being closed prematurely.
+Now that we've covered the basics of Hypershell, let's dive into defining more complex Hypershell programs. In our earlier examples, we executed CLI commands using `SimpleExec`, which handles inputs and outputs as raw bytes (`Vec<u8>`). This execution mode offers simpler semantics, as you don't need to worry about prematurely closed `STDIN` or `STDOUT` streams.
 
-However, one of the appeal of shell scripting is the ability to _stream_ the `STDOUT` of one program into the `STDIN` of another program, with both programs running in parallel. To support this execution, Hypershell also provides `StreamingExec`, which spawns the child process in the background and handles inputs and outputs as _streams_. Hypershell currently supports 3 kinds of streams: [`futures::Stream`](https://docs.rs/futures/latest/futures/prelude/trait.Stream.html), [`futures::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html), and [`tokio::io::AsyncRead`](https://docs.rs/tokio/latest/tokio/io/trait.AsyncRead.html). As we will see later, the modular design of Hypershell also makes it easy to build extended implementations to support other kinds of streams.
+However, a significant appeal of shell scripting is the ability to **stream** the `STDOUT` of one program directly into the `STDIN` of another, with both programs running in parallel. To support this, Hypershell provides **`StreamingExec`**, which spawns child processes in the background and manages inputs and outputs as **streams**. Hypershell currently supports three types of streams: [`futures::Stream`](https://docs.rs/futures/latest/futures/prelude/trait.Stream.html), [`futures::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html), and [`tokio::io::AsyncRead`](https://docs.rs/tokio/latest/tokio/io/trait.AsyncRead.html). As we'll see later, Hypershell's modular design also simplifies extending implementations to support other stream types.
 
-To demonstrate streaming execution in action, we will define an example program that streams the HTTP response from a URL, and compute the SHA256 checksum of the web page. The program would be defined as follows:
+To demonstrate streaming execution, let's define an example program that streams the HTTP response from a URL and computes the SHA256 checksum of the webpage. Our program would look like this:
 
 ```rust
 pub type Program = hypershell! {
@@ -228,15 +228,15 @@ pub type Program = hypershell! {
 };
 ```
 
-To put it simply, the above Hypershell program is roughly equivalent to the following bash command:
+Simply put, the Hypershell program above is roughly equivalent to the following bash command:
 
-```rust
+```bash
 curl $url | sha256sum | cut -d ' ' -f 1
 ```
 
-The first handler uses `curl` to fetch the HTTP response from a `url` value provided by the context. The second handler uses `sha256sum` to perform streaming computation of the checksum. The third handler uses `cut` to get the checksum value produced by `sha256sum`, ignoring the file name output in the second column.
+The first handler uses `curl` to fetch the HTTP response from a `url` value provided by the context. The second handler uses `sha256sum` to perform a streaming computation of the checksum. The third handler then uses `cut` to extract only the checksum value produced by `sha256sum`, effectively ignoring the filename output in the second column.
 
-As with the earlier example, we define a new `MyApp` context to provide the `url` value:
+As in the previous example, we'll define a new `MyApp` context to provide the `url` value:
 
 ```rust
 #[cgp_context(MyAppComponents: HypershellPreset)]
@@ -246,7 +246,7 @@ pub struct MyApp {
 }
 ```
 
-We can then call the program with `MyApp` in our main function:
+We can then call the program with our `MyApp` context in the `main` function:
 
 ```rust
 #[tokio::main]
@@ -261,24 +261,24 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-For our example run, we want to choose a public web page that is relatively large for the effect of streaming to be more noticeable. So we pick the [Nix manual](https://nixos.org/manual/nixpkgs/unstable/) as the `url` value to construct `MyApp`.
+For this example, we've chosen a relatively large public webpage — the [Nix manual](https://nixos.org/manual/nixpkgs/unstable/) — as the `url` value for `MyApp`, to make the effect of streaming more noticeable.
 
-The example program is also available at the [Hypershell repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_cli.rs). If we run it, we would see the checksum produced such as follows:
+The complete example program is also available in the [Hypershell repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_cli.rs). If you run it, you should see a checksum similar to this printed to your console:
 
 ```bash
 $ cargo run --example http_checksum_cli
 c5ce4ff8fb2d768d4cbba8f5bee3d910c527deedec063a0aa436f4ae7005c713
 ```
 
-Feel free to tweak the example with different CLI commands, to better observe that Hypershell is indeed streaming the handler inputs/outputs in parallel.
+Feel free to tweak the example with different CLI commands to better observe how Hypershell indeed streams handler inputs and outputs in parallel.
 
 ## Native HTTP Request
 
-In the earlier example, we performed HTTP requests `curl` before streaming it to the `sha256sum` command. But since we are running the program inside Rust, a natural evolution would be to use native HTTP clients in Rust to submit the HTTP request.
+In our previous example, we performed HTTP requests using the `curl` command before piping the output to `sha256sum`. But since we're already running our program in Rust, a natural progression is to use *native* Rust HTTP clients for these requests.
 
-Hypershell provides native HTTP support with the implementation being a separate _extension_ on top of the base CLI implementation. The handlers `SimpleHttpRequest` and `StreamingHttpRequest` are provided as the HTTP equivalent of `SimpleExec` and `StreamingExec`.
+Hypershell offers native HTTP support as a separate **extension** built on top of its base CLI implementation. This extension provides the `SimpleHttpRequest` and `StreamingHttpRequest` handlers, which are the HTTP equivalents of `SimpleExec` and `StreamingExec`.
 
-We can modify our earlier example to use `StreamingHttpRequest` in place of `curl` as follows:
+We can easily modify our earlier example to use `StreamingHttpRequest` instead of `curl`:
 
 ```rust
 pub type Program = hypershell! {
@@ -304,11 +304,13 @@ pub type Program = hypershell! {
 };
 ```
 
-The `StreamingHttpRequest` handler accepts 3 arguments. The first argument, `GetMethod`, is used to indicate that we want to send with the GET method. The second argument, `FieldArg<"url">`, indicates that we want to send the HTTP request to the URL specified in the `url` field of the context. The third argument, `WithHeaders[ ]`, allows us to specify the HTTP headers, which is left empty for this example.
+The `StreamingHttpRequest` handler accepts three arguments. The first, `GetMethod`, specifies that we want to send a `GET` HTTP request. The second argument, `FieldArg<"url">`, indicates that the request should be sent to the URL provided by the `url` field in our context. The third argument, `WithHeaders[]`, allows us to specify HTTP headers, which we've left empty for this example.
 
-As we can see, Hypershell allows streaming pipelines to be built seamlessly between native handlers and CLI handlers. In fact, all handlers are just CGP components that implement the `Handler` interface. So we can easily extend the DSL with new handler implementations that can interop with each others as long as the Rust types between the inputs and outputs matches.
+As you can see, Hypershell allows you to build seamless streaming pipelines that integrate both native and CLI handlers. In fact, all handlers are simply CGP components that implement the `Handler` interface. This design makes it incredibly easy to extend the DSL with new handler implementations that can interoperate, as long as the Rust types for their inputs and outputs match.
 
-Behind the scene, Hypershell implements the native HTTP client using [`reqwest`](https://docs.rs/reqwest/). To run the program, the context needs to provide a `http` field with a [`reqwest::Client`](https://docs.rs/reqwest/latest/reqwest/struct.Client.html). Together with the `url` field, we would define a `MyApp` context as follows:
+Behind the scenes, Hypershell's native HTTP client is implemented using [`reqwest`](https://docs.rs/reqwest/). To run the program, the context needs to provide an `http_client` field containing a [`reqwest::Client`](https://docs.rs/reqwest/latest/reqwest/struct.Client.html) instance.
+
+Combining this with the `url` field, we'll define our `MyApp` context like so:
 
 ```rust
 #[cgp_context(MyAppComponents: HypershellPreset)]
@@ -319,7 +321,7 @@ pub struct MyApp {
 }
 ```
 
-We can then construct a `MyApp` context in our main function, and then call the Hypershell program:
+We can then construct a `MyApp` context in our `main` function and call the Hypershell program:
 
 ```rust
 #[tokio::main]
@@ -334,20 +336,20 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-The same example is available at the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_client.rs). Running it should produce the same HTTP checksum as before:
+The full example is available in the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_client.rs). Running it should produce the same HTTP checksum as before:
 
 ```bash
 $ cargo run --example http_checksum_client
 c5ce4ff8fb2d768d4cbba8f5bee3d910c527deedec063a0aa436f4ae7005c713
 ```
 
-It is worth noting that aside from `reqwest`, it is possible to customize a context to use alternative HTTP client implementations to handle `SimpleHttpRequest` and `StreamingHttpRequest`. In such cases, we would be able to define contexts without the `http_client` field, if it is not required by the alternative implementation.
+It's also worth noting that, besides `reqwest`, it's possible to customize a context to use alternative HTTP client implementations for `SimpleHttpRequest` and `StreamingHttpRequest`. In such cases, you could define contexts without the `http_client` field if your alternative implementation doesn't require it.
 
 ## JSON Encoding
 
-As an embedded DSL, Hypershell programs have the ability to make full use of Rust to seamlessly integrate shell scripting with the remaining parts of the application. A good example to demonstrate this is to encode/decode native Rust types as part of the pipelines of a Hypershell program.
+As an embedded DSL, Hypershell programs seamlessly integrate shell scripting with the rest of your Rust application. A prime example of this capability is the ability to encode and decode native Rust types as part of a Hypershell program's pipeline.
 
-Following is an example Hypershell program that submits a Rust code snippet to [Rust Playground](https://play.rust-lang.org/), and publish it as a GitHub Gist:
+Here's an example Hypershell program that submits a Rust code snippet to the [Rust Playground](https://play.rust-lang.org/) and then publishes it as a GitHub Gist:
 
 ```rust
 pub type Program = hypershell! {
@@ -366,9 +368,9 @@ pub type Program = hypershell! {
 };
 ```
 
-The `EncodeJson` handler accepts any input that implements `Serialize`, and encode them into JSON bytes as the output. Next, we use `SimpleHttpRequest` to submit the HTTP request, as there is no need of streaming with small payloads. Inside `WithHeaders`, we also use `Header` to set the `Content-Type` header to `application/json`. Finally, the `DecodeJson` handler decodes its input bytes into the specified Rust type, which is expected to implement `Deserialize`.
+The **`EncodeJson`** handler accepts any input that implements `Serialize` and encodes it into JSON bytes as its output. Next, we use **`SimpleHttpRequest`** to submit the HTTP request; streaming isn't necessary for small payloads here. Within `WithHeaders`, we also use `Header` to set the `Content-Type` header to `application/json`. Finally, the **`DecodeJson`** handler decodes its input bytes into the specified Rust type, which is expected to implement `Deserialize`.
 
-We would then define the input and output types as follows:
+We define the input and output types as follows:
 
 ```rust
 #[derive(Serialize)]
@@ -384,9 +386,9 @@ pub struct Response {
 }
 ```
 
-The `Request` and `Response` types are defined with the respective `Serialize` and `Deserialize` implementations, following the formats expected by Rust playground.
+The `Request` and `Response` types are defined with their respective `Serialize` and `Deserialize` implementations, adhering to the formats expected by the Rust Playground API.
 
-With the program defined, we can now programmatically submit a code snippet to Rust Playground in our `main` function:
+With the program defined, we can now programmatically submit a code snippet to the Rust Playground in our `main` function:
 
 ```rust
 #[tokio::main]
@@ -407,7 +409,7 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-When no additional field is required, Hypershell provides the pre-defined `HypershellHttp` context that can be used to run Hypershell programs with HTTP capabilities. The example code is also available at the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/rust_playground.rs). Running it should produce an output such as follows:
+When no additional fields are required, Hypershell provides the predefined **`HypershellHttp`** context, which can be used to run Hypershell programs with HTTP capabilities. This example code is also available in the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/rust_playground.rs). Running it should produce an output similar to this:
 
 ```bash
 $ cargo run --example rust_playground
@@ -420,21 +422,23 @@ Created new Rust playground gist with response: Response {
 
 ## End of Overview
 
-By now, hopefully the earlier examples are enough to convince you that the base implementation of Hypershell is pretty powerful, and can be potentially useful to build real-world™ applications.
+By now, hopefully the preceding examples have sufficiently demonstrated the power of Hypershell's base implementation, suggesting its potential utility in building real-world™ applications.
 
-Now that I have pique your interest, hopefully it would also gave you sufficient motivation to learn about _how_ Hypershell is implemented, and how you can make use of CGP to build other domain-specific languages in similar ways as Hypershell.
+Now that I've piqued your interest, I hope these examples have also provided you with ample motivation to learn _how_ Hypershell is implemented, and how you can leverage CGP to build other domain-specific languages in a similar fashion.
 
 # Context-Generic Programming
 
-At its core, the modular implementation of Hypershell is made possible through _context-generic programming_ (CGP), a modular programming paradigm for Rust. A full introduction for CGP can be found on the [current website](/) that hosts this blog post. But for readers who are new here, I will try to give a short introduction to CGP in this section.
+At its core, Hypershell's modular implementation is made possible by **Context-Generic Programming (CGP)**, a powerful modular programming paradigm for Rust. You can find a comprehensive introduction to CGP on the [website](/) that hosts this blog post. However, for those new to CGP, I'll provide a brief overview in this section.
 
-As its name implies, CGP allows Hypershell to implement its core logic to be generic over any context, e.g. `HypershellCli`, `HypershellHttp`, `MyApp`. This means that every time we define a new concrete context, we can choose reuse _all_, or more importantly, _some_ of Hypershell's core implementation based on the needs of our application. Furthermore, external developers can also write their own context-generic implementations in the same way, which can be used to _replace_ or _extend_ the existing core implementation.
+As its name suggests, CGP allows Hypershell's core logic to be generic over *any* context type, such as `HypershellCli`, `HypershellHttp`, or `MyApp`. This means that whenever you define a new concrete context, you can choose to reuse **all**, or more importantly, **some** of Hypershell's core implementation based on your application's specific needs. Furthermore, external developers can write their own context-generic implementations in the same way, enabling them to **replace** or **extend** existing core implementations.
+
+At a high level, CGP makes it possible to bypass Rust's trait **coherence restrictions**, allowing you to define overlapping or "orphan" trait implementations. Everything else in CGP is built on the foundation of asking: what would Rust programs look like if there were no coherence restrictions? CGP works on **safe, stable** versions of Rust today, and all you need to do is include the [`cgp`](https://crates.io/crates/cgp) crate as a dependency.
 
 At a high level, CGP makes it possible to bypass the _coherence_ restrictions in Rust traits, allowing us to define overlapping or orphan trait implementations. Everything else in CGP is built on the foundation of asking: what would Rust programs look like if there were no coherence restrictions? CGP works on _safe_, _stable_ version of Rust today, and all you have to do is include the [`cgp`](https://crates.io/crates/cgp) crate as a dependency.
 
 ## Consumer and Provider Traits
 
-The basic idea of how CGP workaround coherence is pretty simple. We first start with an example `CanGreet` trait, that is implemented with CGP as follows:
+The basic idea of how CGP works around coherence is quite simple. Let's start with an example `CanGreet` trait, implemented with CGP as follows:
 
 ```rust
 use cgp::prelude::*;
@@ -445,7 +449,7 @@ pub trait CanGreet {
 }
 ```
 
-The `CanGreet` trait that we defined is a classical Rust trait, which we now call a _consumer trait_ in CGP. With the `#[cgp_component]` macro, a _provider trait_ and a _name_ struct are also generated as follows:
+The `CanGreet` trait we've defined is a classical Rust trait, which we refer to as a **consumer trait** in CGP. With the `#[cgp_component]` macro, a **provider trait** and a **name struct** are also generated, as shown below:
 
 ```rust
 pub trait Greeter<Context> {
@@ -455,13 +459,13 @@ pub trait Greeter<Context> {
 pub struct GreeterComponent;
 ```
 
-Compared to the consumer trait `CanGreet`, the provider trait `Greeter` has an additional generic `Context` parameter to refer to the original `Self` type in `CanGreet`. Similarly, all occurances of `Self`, i.e. `&self`, are replaced with the explicit `Context`, i.e. `context: &Context`.
+Compared to the `CanGreet` consumer trait, the `Greeter` provider trait has an additional generic `Context` parameter that refers to the original `Self` type from `CanGreet`. Similarly, all occurrences of `Self` (i.e., `&self`) are replaced with the explicit `Context` (i.e., `context: &Context`).
 
-In CGP, each implementation of the provider trait `Greeter` would choose a _unique type_ for `Self`, i.e. by defining a dummy struct like `struct Provider;`, and then implementing the provider trait for that struct. The dummy struct that implements the provider trait is called a _provider_. Because the coherence restriction only applies mainly to the `Self` type, by choosing a unique `Self` type for each implementation, we essentially bypass the coherence restrictions, and can define multiple generic implementations that are overlapping over the `Context` type.
+In CGP, each implementation of a provider trait like `Greeter` will choose a **unique type** for its `Self` parameter (e.g., by defining a dummy struct like `struct Provider;`). This dummy struct that implements the provider trait is called a **provider**. Because Rust's coherence restriction primarily applies to the `Self` type, by choosing a unique `Self` type for each implementation, we effectively bypass these restrictions. This allows us to define multiple generic implementations that might otherwise overlap on the `Context` type.
 
-The macro also generates a `GreeterComponent` struct, which is used as a _name_, or a _key_, for the underlying implementation to perform compile-time _look up_ when instantiating the implementation of the consumer trait from a provider trait implementation. We will revisit this in a moment.
+The macro also generates a `GreeterComponent` struct. This struct serves as a **name** or **key** for the underlying implementation, used to perform a type-level **lookup** when instantiating the consumer trait's implementation from a provider trait implementation. We'll revisit this concept shortly.
 
-To demonstrate, we show two example provider implementations for `Greeter` as follows:
+To demonstrate, here are two example provider implementations for `Greeter`:
 
 ```rust
 #[cgp_new_provider]
@@ -479,13 +483,13 @@ impl<Context> Greeter<Context> for GreetBonjour {
 }
 ```
 
-The `#[cgp_new_provider]` macro automatically define new structs for `GreetHello` and `GreetBonjour`. As we can see, both implementations are generic over the `Context` type, but there is no error arise from overlapping instances.
+The `#[cgp_new_provider]` macro automatically defines new structs for `GreetHello` and `GreetBonjour`. As you can see, both implementations are generic over the `Context` type, and no errors arise from overlapping instances.
 
 ## Components Wiring
 
-Although multiple overlapping provider trait implementations can co-exist, they do not implement the original consumer trait `CanGreet`. To implement the consumer trait `CanGreet` for a specific concrete context, additional _wiring steps_ are needed to select _which_ provider implementation should be used for that concrete context.
+While multiple overlapping provider trait implementations can coexist, they don't automatically implement the original consumer trait like `CanGreet`. To implement the consumer trait for a specific concrete context, **additional wiring steps** are needed to select *which* provider implementation should be used for that context.
 
-To demonstrate how the wiring works, we will define an example `MyApp` context as follows:
+To demonstrate how this wiring works, let's define an example `MyApp` context:
 
 ```rust
 #[cgp_context(MyAppComponents)]
@@ -498,25 +502,25 @@ delegate_components! {
 }
 ```
 
-In the example above, we define a concrete `MyApp` context using the `#[cgp_context]` macro, which generates a new `MyAppComponents` struct and wire it with the context. Following that, we use `delegate_components!` to essentially use `MyAppComponents` as a _type-level lookup table_, containing one entry with `GreeterComponent` as the "key", and `GreetHello` as the "value".
+In this example, we define a concrete `MyApp` context using the `#[cgp_context]` macro, which generates a new `MyAppComponents` struct and associates it with the context. Following this, we use `delegate_components!` to effectively make `MyAppComponents` a **type-level lookup table**. This table contains one entry where `GreeterComponent` acts as the "key" and `GreetHello` is the "value."
 
-With the wiring in place, the concrete context `MyApp` now automatically implements `CanGreet`, and we can now call `MyApp.greet()`. To understand how the magic works, we can visualize the underlying implementation with the following diagram:
+With this wiring in place, the concrete `MyApp` context now automatically implements `CanGreet`, allowing us to call `MyApp.greet()`. To understand how this "magic" happens, let's visualize the underlying implementation:
 
 ![Diagram](/blog/images/cgp-wiring.png)
 
-We start from the lower left corner, with the goal to implement `CanGreet` for `MyApp`. First of all, Rust trait system would notice that `MyApp` does not have an explicit implementation for `CanGreet`, but has a `HasProvider` implementation generated by `#[cgp_context]`, which points to `MyAppComponents`.
+Starting from the bottom left, our goal is to implement `CanGreet` for `MyApp`. First, the Rust trait system observes that `MyApp` lacks an explicit `CanGreet` implementation. However, it *does* have a `HasProvider` implementation generated by `#[cgp_context]`, which points to `MyAppComponents`.
 
-Next, the trait system sees that `MyAppComponents` does not directly implement `Greeter<MyApp>`. So the system performs a type-level lookup on the `GreeterComponent` key stored in `MyAppComponents`. The lookup is implemented through the trait `DelegateComponent<GreeterComponent>`, which were generated by the `delegate_components!` macro. There, it sees that an entry for `GreeterComponent` is found, which points to `GreetHello`.
+Next, the trait system sees that `MyAppComponents` doesn't directly implement `Greeter<MyApp>`. So, the system performs a type-level lookup using the `GreeterComponent` key stored in `MyAppComponents`. This lookup is facilitated by the `DelegateComponent<GreeterComponent>` trait, which is generated by the `delegate_components!` macro. Here, it discovers an entry for `GreeterComponent` that points to `GreetHello`.
 
-Following that, the trait system sees that `GreetHello` has a valid implementation of `Greeter<MyApp>`. Through that, it generates a blanket implementation of `Greeter<MyApp>` for MyAppComponents, which simply forwards the call to `GreetHello`.
+Subsequently, the trait system confirms that `GreetHello` has a valid implementation of `Greeter<MyApp>`. Through this, it generates a blanket implementation of `Greeter<MyApp>` for `MyAppComponents`, which simply forwards the call to `GreetHello`.
 
-Similarly, now that `Greeter<MyApp>` is implemented for `MyAppComponents`, the trait system generates a blanket implementation of `CanGreet` for `MyApp`. The blanket implementation forwards the call to the `Greeter<MyApp>` implementation of `MyAppComponents`, which is then forwarded to `GreetHello`.
+Similarly, now that `Greeter<MyApp>` is implemented for `MyAppComponents`, the trait system generates a blanket implementation of `CanGreet` for `MyApp`. This blanket implementation forwards the call to the `Greeter<MyApp>` implementation of `MyAppComponents`, which in turn forwards it to `GreetHello`.
 
-The blanket implementations for `CanGreet` and `Greeter` were generated by `#[cgp_components]` when the consumer trait is defined. What we have described earlier are the high level visualizations on how these blanket implementations work under the hood.
+These blanket implementations for `CanGreet` and `Greeter` were generated by `#[cgp_components]` when the consumer trait was defined. What we've described above is a high-level visualization of how these blanket implementations function under the hood.
 
 ## Prototypal Inheritance
 
-For readers who are familiar with JavaScript, you might notice that the wiring mechanics for CGP is very similar to how _prototypal inheritance_ works in JavaScript. Conceptually, the greet example earlier works similar to the following JavaScript code:
+For readers familiar with JavaScript, you might notice that CGP's wiring mechanics bear a striking resemblance to how **prototypal inheritance** works in JavaScript. Conceptually, our earlier `greet` example functions similarly to the following JavaScript code:
 
 ```javascript
 // provider
@@ -538,53 +542,53 @@ var app = new MyApp()
 app.greet()
 ```
 
-Since JavaScript is dynamic-typed, the concept of a trait or interface cannot be specified in the code. However, we can still conceptually think that a `CanGreet` interface exist with certain requirements on the method. The function `greet_hello` is the equivalent of a _provider_ that implements the `Greeter` interface.
+Since JavaScript is dynamically typed, the concept of a trait or interface can't be explicitly specified in the code. However, we can still *conceptually* think of a `CanGreet` interface with certain method requirements. The `greet_hello` function here is the equivalent of a **provider** that implements the imaginary `Greeter` interface.
 
-Similarly, `MyAppComponents` serves as a lookup table that maps the `greet` method to the `greet_hello` provider. We then define the `MyApp` context class, and set `MyAppComponents` as the _prototype_ of `MyApp`. This works similar to the `HasProvider` trait from CGP to link the consumer trait implementation the provider trait.
+Similarly, `MyAppComponents` acts as a lookup table, mapping the `greet` method to the `greet_hello` provider. We then define the `MyApp` context class and set `MyAppComponents` as `MyApp`'s **prototype**. This mirrors CGP's `HasProvider` trait, which links the consumer trait implementation to the provider trait.
 
-Finally, we can instantiate an instance of `MyApp` using the `new` keyword, and there we can also find that the `app.greet()` method can be called.
+Finally, we can instantiate `MyApp` using the `new` keyword, and as expected, the `app.greet()` method can be called.
 
-If we try to visualize the wiring of prototypes in our JavaScript example, we would get a similar diagram as what we have for CGP:
+If we visualize the prototype wiring in our JavaScript example, we get a diagram very similar to the one for CGP:
 
 ![Diagram](/blog/images/prototypal-inheritance.png)
 
-We would navigate the implementation diagram from the top-left corner. In order for `app.greet()` to be implemented, its class `MyApp` needs to have a `prototype` field, which points to `MyAppComponents`. We then perform lookup on the `greet` key, and find the provider function `greet_hello` to be called.
+We navigate this implementation diagram starting from the top-left corner. For `app.greet()` to be implemented, its class `MyApp` needs a `prototype` field pointing to `MyAppComponents`. We then perform a lookup on the `greet` key and find the `greet_hello` provider function to be called.
 
-During runtime, the prototype `MyAppComponents` is attached to `app.__proto__`, which in turn enables `app.greet()` to be called.
+During runtime, the `MyAppComponents` prototype is attached to `app.__proto__`, which in turn enables `app.greet()` to be called.
 
 ## Comparison to OOP
 
-Although CGP shares similarity with OOP, particularly with prototype-based programming, there are major differences with how it is implemented that makes CGP far better than existing systems.
+While CGP shares similarities with OOP, particularly prototype-based programming, its implementation differs significantly in ways that make CGP a far more powerful system.
 
-In particular, the strong type system provided by Rust, in addition to advanced features such as generics and traits, makes it possible to write highly advanced constructs that are otherwise not possible with OOP alone. Furthermore, the prototype-like lookup is performed by CGP at _compile-time_, and thus eliminates runtime overheads such as virtual tables and JIT compilation.
+Crucially, Rust's strong type system, combined with advanced features like generics and traits, enables the creation of highly sophisticated constructs that are simply not possible with OOP alone. Furthermore, CGP performs its prototype-like lookup at **compile-time**, thereby eliminating runtime overheads associated with virtual tables and JIT compilation.
 
-Through this comparison, I also hope to highlight that CGP is _not_ a totally novel concept that is impossible to understand. There are many more articles available that explains in depth how prototypal inheritance works, but there are virtually no third party articles that explain how CGP works. My hope is that the similarity comparison can help readers coming from OOP background to better understand how CGP works, by reusing existing concepts that you may have learned before.
+Through this comparison, I also hope to convey that CGP is **not** an entirely novel or incomprehensible concept. Many resources explain prototypal inheritance in depth, but there are virtually no third-party articles detailing how CGP works. My intention with this similarity comparison is to help readers from an OOP background better grasp CGP by connecting it to familiar concepts.
 
 ## Learn More
 
-We have now finished our quick introduction to CGP. So far, we have only explored CGP at very high level, with little technical details or code exploration to dive into how CGP actually works behind the scene.
+We've now concluded our brief introduction to CGP. So far, we've explored CGP at a high level, with minimal technical details or code exploration into its inner workings.
 
-If you would like to learn more about how CGP works, I recommend reading the in-progress book [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/), which walks through all the programming techniques used to build CGP from the ground up. Note, however, that if you _don't_ care about the internal details, and just want to quickly get started with programming _with_ CGP, then you might want to skip reading the book, at least for now.
+If you're eager to learn more about how CGP functions, I recommend reading the in-progress book, [**Context-Generic Programming Patterns**](https://patterns.contextgeneric.dev/). This book walks through all the programming techniques used to build CGP from the ground up. However, if you're not concerned with the internal details and simply want to start programming *with* CGP quickly, you might want to skip the book for now.
 
-Unfortunately, we don't yet have good tutorials available for readers to quickly get started on writing toy programs with CGP. This is partly because there is currently not sufficient motivation for readers to go through such tutorials. CGP is designed to solve the problems of highly complex applications with many cross-cutting concerns, and the benefits would only become apparent after writing at least 5,000 to 10,000 lines of code. As a result, if a tutorial shows only few hundreds lines of example code, some readers would inevitably feel confused of _why_ they should learn writing the example code with CGP, instead of using vanilla Rust patterns that they are already familiar with.
+Unfortunately, we don't yet have simple tutorials available for quickly getting started with CGP. This is partly because the benefits of CGP truly become apparent only in highly complex applications with many cross-cutting concerns, typically after writing 5,000 to 10,000 lines of code. Consequently, if a tutorial only showcases a few hundred lines of example code, some readers might inevitably feel confused about *why* they should learn to write that code with CGP, rather than using familiar vanilla Rust patterns.
 
-Instead, the current priority for the CGP project is to make use of the _full power_ of CGP to build powerful DSL frameworks, such as Hypershell, that demonstrate the full potential of CGP. The purpose is to show readers that CGP is demonstrably useful, at least in the showcased domains, and give them a reason to start _learning_ CGP.
+Instead, the current priority for the CGP project is to leverage its full power to build robust DSL frameworks, such as Hypershell. These frameworks aim to demonstrate CGP's full potential and undeniable usefulness in showcased domains, thereby giving readers a compelling reason to start *learning* CGP.
 
-A consequence for this strategy is that many advanced CGP patterns are introduced _all at once_, as will be covered in the next section. At lot of the advanced CGP patterns are not yet covered in the book, and there is currently no other documentation other than this blog post that talks about these patterns. As a result, if you are totally new to CGP, or if you are just starting to learn the basic concepts, it can potentially be overwhelming and confusing to continue reading to the next section.
+A consequence of this strategy is that many advanced CGP patterns are introduced all at once, as you'll see in the next section. Many of these advanced CGP patterns aren't yet covered in the book, and currently, there's no other documentation besides this blog post that discusses them. As a result, if you're entirely new to CGP or just starting to grasp its basic concepts, continuing to the next section might feel overwhelming and confusing.
 
-Nevertheless, I will try to stay as high level as possible when explaining the advanced CGP concepts, and omit the internal details similar to how the earlier explanation for CGP wiring is done. So I hope you would bear with me for now, and let's walk through together on how Hypershell is implemented with CGP.
+Nevertheless, I'll strive to explain these advanced CGP concepts at as high a level as possible, omitting internal details similar to how the earlier CGP wiring explanation was presented. So, I hope you'll bear with me for now as we walk through how Hypershell is implemented with CGP.
 
 # Implementation of Hypershell
 
-Now that we have equiped with some brief understanding of CGP, let's take a look at how the Hypershell DSL is implemented using CGP. The programming techniques that we are going to cover would not only work for Hypershell, but also more generally any kind of DSL.
+Now that we have a brief understanding of CGP, let's explore how the Hypershell DSL is implemented using it. The programming techniques we're about to cover aren't exclusive to Hypershell; they apply more generally to any kind of DSL.
 
-The main idea is that the programs for this family of DSLs would be written as _types_ that will be "interpreted" at compile time. The main strength of this approach is that the DSL can leverage the Rust compiler and zero-cost abstraction and be very performant. The main disadvantage is that the program for the DSL must be available at the same time as the Rust program is built. In other words, it is less suitable in scripting applications that require dynamic loading of programs, such as web browsers or plugin systems, unless the system also bundles the full Rust compiler to compile the DSL program.
+The core idea is that programs for this family of DSLs are written as **types** that are "interpreted" at compile time. The primary advantage of this approach is that the DSL can leverage the Rust compiler and zero-cost abstractions to be highly performant. The main drawback is that the DSL program must be available at the same time the Rust program is built. In other words, this approach is less suitable for scripting applications that require dynamic program loading, such as web browsers or plugin systems, unless the system also bundles the full Rust compiler to compile the DSL program.
 
-Nevertheless, this section will be especially useful for readers who are interested in building DSLs similar to Hypershell. For the remaining readers, I hope that the section would still be useful for you to understand more about CGP, and consider using it to build other kinds of modular applications.
+Nevertheless, this section will be especially useful for readers interested in building DSLs similar to Hypershell. For other readers, I hope this section will still enhance your understanding of CGP and encourage you to consider using it for other modular applications.
 
 ## Handler Component
 
-The core component behind Hypershell is the `Handler` component, which is implemented by the handlers in a Hypershell pipeline. The consumer trait for the component, `CanHandle` is defined as follows:
+The central component underpinning Hypershell is the **`Handler`** component, which is implemented by each handler in a Hypershell pipeline. The consumer trait for this component, **`CanHandle`**, is defined as follows:
 
 ```rust
 #[cgp_component(Handler)]
@@ -593,19 +597,19 @@ pub trait CanHandle<Code: Send, Input: Send>: HasAsyncErrorType {
 
     async fn handle(
         &self,
-        _tag: PhantomData<Code>,
+        _code: PhantomData<Code>,
         input: Input,
     ) -> Result<Self::Output, Self::Error>;
 }
 ```
 
-The `CanHandle` trait is parameterized by two generic parameters, `Code` and `Input`. The `Code` type represents the DSL program that we want to "run" or "interpret". The `Input` is the main input data to be passed to the program, such as for the STDIN or the HTTP request body. The generic types have additional `Send` bound with them, as CGP requires async functions to implement `Send` by dfault, to allow them to be used in spawned tasks such as `tokio::spawn`.
+The `CanHandle` trait is parameterized by two generic types: `Code` and `Input`. The `Code` type represents the DSL program that we want to "run" or "interpret," while `Input` is the primary input data passed to the program (e.g., `STDIN` or an HTTP request body). Both generic types carry an additional `Send` bound because CGP generally requires async functions to be `Send` by default, allowing them to be used in spawned tasks like those managed by `tokio::spawn`.
 
-The trait also has an associated type `Output`, which represents the output type produced by the program, such as STDOUT or the HTTP response body. Being associated type, it means that for each combination of `Code` and `Input` parameters, there is a _unique_ `Output` type that is associated to that.
+The trait also defines an associated type `Output`, which represents the data produced by the program (e.g., `STDOUT` or an HTTP response body). As an associated type, it signifies that for each unique combination of `Code` and `Input` parameters, there is a **unique** `Output` type associated with it.
 
-The `handle` method is an async function with `&self` as the first argument, which means in addition to the `Input`, the handler also has access to the context that contains additional dependencies and the surrounding environment. The second parameter, `_tag`, has the type `PhantomData<Code>`, and is used to pass the `Code` program as a value to assist in type inference. Other than that, the value is expected to be ignored by the method body, since there is no runtime information carried by `PhantomData`.
+The `handle` method is an `async` function with `&self` as its first argument. This means that in addition to the `Input`, the handler also has access to the context, which contains dependencies and environmental information. The second parameter, `_code`, is of type `PhantomData<Code>`. This is used to pass the `Code` program as a value to assist with type inference. Beyond that, the `_code` value is expected to be ignored by the method body, as `PhantomData` carries no runtime information.
 
-The `handle` method returns a `Result`, with `Self::Output` being the success result, and `Self::Error` if there is any error. `Self::Error` is an _abstract type_ defined by the `ErrorTypeProvider` component, which is defined in CGP as follows:
+The `handle` method returns a `Result`, with `Self::Output` representing the success value and `Self::Error` indicating an error. `Self::Error` is an **abstract type** defined by the `ErrorTypeProvider` component, which is defined in CGP as follows:
 
 ```rust
 #[cgp_type]
@@ -614,9 +618,9 @@ pub trait HasErrorType {
 }
 ```
 
-First, `HasErrorType` is a consumer trait that contains an associated `Error` type, which is required to always implement `Debug`. The macro `#[cgp_type]` is an extension to `#[cgp_component]`, and is used to define abstract type component with some additional derivations. The macro also generates an `ErrorTypeProvider` provider trait.
+First, `HasErrorType` is a consumer trait containing an associated `Error` type, which is always required to implement `Debug`. The `#[cgp_type]` macro is an *extension* of `#[cgp_component]`, used to define abstract type components with additional derivations. This macro also generates an `ErrorTypeProvider` provider trait.
 
-To support the async method in `CanHandler`, the context and the `Error` type also needs to implement `Send`, which is provided by `HasAsyncErrorType` as a _trait alias_:
+To support the `async` method in `CanHandle`, the context and the `Error` type also need to implement `Send`. This is provided by `HasAsyncErrorType` as a **trait alias**:
 
 ```rust
 #[blanket_trait]
@@ -625,11 +629,11 @@ pub trait HasAsyncErrorType:
 {}
 ```
 
-The `HasAsyncErrorType` trait is automatically implemented for all `Context` type that implements `HasErrorType`, with the additional constraints that `Context: Send + Sync` and `Context::Error: Send + Sync`. This would ensure that the `Future` returned from async functions that capture `Context` or `Context::Error` will always implement `Send`.
+The `HasAsyncErrorType` trait is automatically implemented for any `Context` type that implements `HasErrorType`, with the additional constraints that `Context: Send + Sync` and `Context::Error: Send + Sync`. This ensures that the `Future` returned by `async` functions that capture `Context` or `Context::Error` will always implement `Send`.
 
-The `#[blanket_trait]` macro is provided by CGP to help with shortening definitions of trait aliases. Behind the scene, it generates a trivial blanket implementation for `HasAsyncErrorType` that is implemented if all supertrait constraints are satisfied.
+The `#[blanket_trait]` macro is provided by CGP to shorten trait alias definitions. Behind the scenes, it generates a trivial blanket implementation for `HasAsyncErrorType` that is activated if all supertrait constraints are satisfied.
 
-Going back to `CanHandle`, the `#[cgp_component]` macro also generates the provider trait `Handler` as follows:
+Returning to `CanHandle`, the `#[cgp_component]` macro also generates the provider trait `Handler` as follows:
 
 ```rust
 pub trait Handler<Context, Code: Send, Input: Send>
@@ -646,33 +650,33 @@ where
 }
 ```
 
-As we can see, the main difference between `Handler` and `CanHandle` is that the `Self` type is replaced with an explicit `Context` parameter. The supertrait `HasAsyncErrorType` now becomes a trait bound for `Context`.
+As we can see, the main difference between `Handler` and `CanHandle` is that the `Self` type in `CanHandle` is replaced with an explicit `Context` parameter in `Handler`. The supertrait `HasAsyncErrorType` now becomes a trait bound for `Context`.
 
 ## Abstract Syntax
 
-Now that we know about the interface for the handler component, let's take a look at how the `Handler` trait is implemented for a basic Hypershell command, `SimpleExec`. Recall from earlier that `SimpleExec` allows execution of shell command, with plain raw bytes as the input and output.
+Now that we understand the interface for the handler component, let's look at how the `Handler` trait is implemented for a basic Hypershell code: `SimpleExec`. As you might recall, `SimpleExec` allows the execution of shell commands, using raw bytes for both input and output.
 
-If we try to navigate to the place that defines `SimpleExec`, all we see is the following definition:
+If you navigate to the definition of `SimpleExec`, all you'll find is this:
 
 ```rust
 pub struct SimpleExec<CommandPath, Args>(pub PhantomData<(CommandPath, Args)>);
 ```
 
-_Wait, what?_ That's it? Yes, you see it right. There is no extra trait implementation that is directly tied to `SimpleExec`. In fact, all types that are used to "write" a Hypershell program are just dummy structs like the one defined for `SimpleExec`.
+*Wait, what?* Is that it? Yes, you read that right. There are no extra trait implementations directly tied to `SimpleExec`. In fact, all types used to "write" a Hypershell program are just dummy structs like this one.
 
-**This implies that how a Hypershell program is "written" is completely _decoupled_ from how the program is "interpreted" or "executed" by the concrete context.**
+**This implies that how a Hypershell program is "written" is completely _decoupled_ from how the program is "interpreted" or "executed" by a concrete context.**
 
-In other words, when we walked through our examples earlier, the use of `HypershellCli`, `HypershellHttp`, or `MyApp` are only few of the possible _choices_ that we can choose to run our Hypershell programs. More generally, since all the contexts so far only inherit from `HypershellPreset`, it implies that one can also build fully customized presets with different ways to run the programs, such as changing the way how `SimpleExec` should run.
+In other words, when we explored our examples earlier, `HypershellCli`, `HypershellHttp`, or `MyApp` were just a few of the possible **choices** you could make to run your Hypershell programs. More generally, since all these contexts so far only inherit from `HypershellPreset`, it means you can also build fully customized presets with different ways to run the programs — for example, by changing how `SimpleExec` should behave.
 
-More formally, we can say that a type like `SimpleExec` is used to represent the _abstract syntax_ of the Hypershell DSL. We then make use of CGP and Rust's trait system to act as the "interpreter" for the DSL, to "dispatch" the handling of a program fragment to a specific CGP provider. When we define custom contexts, we are essentially building custom "interpreters" that are used for "executing" the Hypershell program at compile-time.
+More formally, a type like `SimpleExec` represents the **abstract syntax** of the Hypershell DSL. We then leverage CGP and Rust's trait system to act as the "interpreter" for the DSL, dispatching the handling of a program fragment to a specific CGP provider. When you define custom contexts, you're essentially building custom "interpreters" used for "executing" the Hypershell program at compile time.
 
-It is also worth noting that the pattern introduced here is a highly advanced CGP programming technique. There are also simpler versions of the pattern, such as _higher order providers_, where traits like `Handler` would not contain the `Code` parameter, and types like `SimpleExec` would directly implement the `Handler` trait. In this simplified pattern, the execution of the program would be tightly coupled with a specific implementation, making it less modular.
+It's also worth noting that the pattern introduced here is a highly advanced CGP programming technique. Simpler versions of this pattern exist, such as **higher-order providers**, where traits like `Handler` wouldn't contain the `Code` parameter, and types like `SimpleExec` would directly implement the `Handler` trait. In this simplified pattern, the program's execution would be tightly coupled with a specific implementation, making it less modular.
 
-Both the higher order provider and DSL patterns are advanced CGP patterns that are not yet covered by the CGP patterns book. Such advanced techniques can sometimes be overkill for building simple applications, especially for beginners who just want to try out CGP to make their applications _slightly_ more modular. However, they are perfect for building DSLs, as it is a good practice to separate the _syntax_ from the _semantics_ of proramming languages.
+Both higher-order providers and the DSL patterns are advanced CGP techniques not yet covered in the CGP patterns book. While such advanced techniques can sometimes be overkill for building simple applications — especially for beginners just trying to make their applications *slightly* more modular — they are perfect for building DSLs. This is because it's good practice to separate the **syntax** from the **semantics** of programming languages.
 
 ## Handler Implementation for `SimpleExec`
 
-For most of you who are new to CGP, at this point you would probably be completely loss on how to navigate your way to figure out _where_ is the actual implementation for `SimpleExec`. We will revisit the topic of how the wiring is actually done slightly later on. For now, let's go straight to the default provider used by Hypershell to implemented `SimpleExec`:
+For many new to CGP, it's likely unclear how to even begin finding the actual implementation for `SimpleExec` at this point. We'll delve into the wiring specifics later. For now, let's jump straight to the default provider Hypershell uses to implement `SimpleExec`:
 
 ```rust
 #[cgp_new_provider]
@@ -702,17 +706,17 @@ where
 }
 ```
 
-If you search for the occurance of `SimpleExec` in the Hypershell code base, you will find `HandleSimpleExec`, which is a provider that implements `Handler` specifically to handle `SimpleExec`.
+If you search for `SimpleExec` in the Hypershell codebase, you'll find `HandleSimpleExec`. This is a provider that implements `Handler` specifically for `SimpleExec`.
 
-The main method body for `HandleSimpleExec` is not very interesting, and looks mostly similar to regular Rust code. Essentially, it makes use of Tokio's [`Command`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html) to spawn a new child process with the specified arguments. It then make use of the returned [`Child`](https://docs.rs/tokio/latest/tokio/process/struct.Child.html) to write the input to the `STDIN` of the process, and then calls [`wait_with_output`](https://docs.rs/tokio/latest/tokio/process/struct.Child.html#method.wait_with_output) to get the result from `STDOUT`.
+The main method body for `HandleSimpleExec` isn't particularly complex; it largely resembles regular Rust code. It primarily uses Tokio's [`Command`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html) to spawn a new child process with the specified arguments. It then writes the `input` to the process's `STDIN` via the returned [`Child`](https://docs.rs/tokio/latest/tokio/process/struct.Child.html) and calls [`wait_with_output`](https://docs.rs/tokio/latest/tokio/process/struct.Child.html#method.wait_with_output) to retrieve the result from `STDOUT`.
 
-Hence, to keep this blog post simple, we omit the method body, and instead focus on the trait signature to see how it is integrated with the rest of Hypershell.
+Therefore, to keep this blog post focused, we've omitted the method body and will instead concentrate on the trait signature's integration within Hypershell.
 
-Looking at the generic parameters, you may notice that `SimpleExec<CommandPath, Args>` is used in place of where `Code` was. In other words, `HandleSimpleExec` implements `Handler` if `Code` is in the form `SimpleExec<CommandPath, Args>`. Essentially, we are using Rust generics to "pattern match" on a DSL code fragment, and extract the inner `CommandPath` and `Args` parameters.
+Looking at the generic parameters, you might notice that `SimpleExec<CommandPath, Args>` is used where `Code` was previously. In essence, `HandleSimpleExec` implements `Handler` if `Code` is specifically in the form `SimpleExec<CommandPath, Args>`. We're using Rust generics here to "pattern match" on a DSL code fragment and extract its inner `CommandPath` and `Args` parameters.
 
 ### Command Arg Extractor
 
-Inside the `where` clause, we make use of dependency injection to require other dependencies to be provided by the generic `Context`. The first trait, `CanExtractCommandArg`, is defined as follows:
+Within the `where` clause, we utilize dependency injection to require other dependencies from the generic `Context`. The first trait, `CanExtractCommandArg`, is defined as follows:
 
 ```rust
 #[cgp_component {
@@ -728,17 +732,17 @@ pub trait HasCommandArgType {
 }
 ```
 
-The `CommandArgExtractor` component provides an `extract_command_arg` method to extract a command line argument from an `Arg` code. The method returns an abstract `CommandArg` type, which may be instantiated with types such as `PathBuf` or `String`.
+The `CommandArgExtractor` component provides an `extract_command_arg` method to extract a command-line argument from an `Arg` code type. This method returns an abstract `CommandArg` type, which can be instantiated with concrete types like `PathBuf` or `String`.
 
-As an example, given a code like `SimpleExec<StaticArg<symbol!("echo")>, ...>`, the `Arg` type that is passed to `CanExtractCommandArg` would be `StaticArg<symbol!("echo")>`. In other words, for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<symbol!("echo")>>`.
+For example, given code like `SimpleExec<StaticArg<symbol!("echo")>, ...>`, the `Arg` type passed to `CanExtractCommandArg` would be `StaticArg<symbol!("echo")>`. This means that for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<symbol!("echo")>>`.
 
-Since `extract_command_arg` returns an abstract `CommandArg` type, `HandleSimpleExec` also has an additional constraint `Context::CommandArg: AsRef<OsStr> + Send`. This means that the context may choose to instantiate `CommandArg` with any concrete type that implements `AsRef<OsStr> + Send`, such as `PathBuf` or `OsString`.
+Since `extract_command_arg` returns an abstract `CommandArg` type, `HandleSimpleExec` also has an additional constraint: `Context::CommandArg: AsRef<OsStr> + Send`. This implies that the context can instantiate `CommandArg` with any concrete type that implements `AsRef<OsStr> + Send`, such as `PathBuf` or `OsString`.
 
-This also shows that the dependency injection in CGP is more powerful than typical dependency injection frameworks in OOP, as we canuse it with not only the main `Context` type, but also all associated types provided by the context.
+This also highlights how CGP's dependency injection is more powerful than typical OOP dependency injection frameworks. We can use it not only with the main `Context` type but also with all associated types provided by that context.
 
 ### Command Updater
 
-Aside from `CanExtractCommandArg`, we can see that `HandleSimpleExec` also requires `Context: CanUpdateCommand<Args>` to handle the CLI arguments passed to the command. Let's take a look at how the trait is defined:
+Beyond `CanExtractCommandArg`, `HandleSimpleExec` also requires `Context: CanUpdateCommand<Args>` to handle the CLI arguments passed to the command. Let's examine this trait's definition:
 
 ```rust
 #[cgp_component(CommandUpdater)]
@@ -747,11 +751,11 @@ pub trait CanUpdateCommand<Args> {
 }
 ```
 
-Similar to `CanExtractCommandArg`, `CanUpdateCommand` has a generic `Args` parameter to process the CLI arguments specified in the Hypershell program. But instead of returning something, the `update_command` method takes in a `mut` reference to a Tokio [`Command`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html) value.
+Similar to `CanExtractCommandArg`, `CanUpdateCommand` has a generic `Args` parameter to process the CLI arguments specified in the Hypershell program. However, instead of returning a value, the `update_command` method takes a mutable reference to a Tokio [`Command`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html) value.
 
-By passing a `&mut Command` directly, this allows the DSL to provide different kinds of argument syntaxes to configure the CLI excution in different ways. For example, the `WithArgs` syntax allows one to specify a list of CLI arguments, but we can also define new syntaxes such as `WithEnvsAndArgs` to allow specification of _both_ CLI arguments and environment variables for the process.
+By directly passing a `&mut Command`, the DSL can provide different argument syntaxes to configure CLI execution in various ways. For instance, `WithArgs` allows specifying a list of CLI arguments, but we could also define new syntaxes like `WithEnvsAndArgs` to allow specifying *both* CLI arguments and environment variables for the child process.
 
-To see how it works in action, consider the example code:
+To see this in action, consider the example code:
 
 ```rust
 SimpleExec<
@@ -763,38 +767,38 @@ SimpleExec<
 >
 ```
 
-The `Args` type given to `HandleSimpleExec` would be `WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>`, which means the following constraint need to be satisfied:
+The `Args` type given to `HandleSimpleExec` would be `WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>`. This means the following constraint needs to be satisfied:
 
 ```rust
 Context: CanUpdateCommand<WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>>
 ```
 
-To keep focus on the main implementation of `HandleSimpleExec`, we'll omit the details on how the argument updates work. At a high level, the main idea for the implementation is to perform a _type-level iteration_ on the list passed to `WithStaticArgs`. So the implementation would be broken down into two smaller constraints:
+To keep our focus on the core implementation of `HandleSimpleExec`, we'll omit the detailed workings of argument updates. At a high level, the main idea is to perform a **type-level iteration** on the list passed to `WithStaticArgs`. So, the implementation would be broken down into two smaller constraints:
 
 ```rust
 Context: CanUpdateCommand<StaticArg<symbol!("hello")>>
     + CanUpdateCommand<StaticArg<symbol!("world!")>>
 ```
 
-Once we reach each individual argument, we then make use of `CanExtractCommandArg` to extract the argument, and then call [`Command::arg`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.arg) to add the argument to the `Command`.
+Once we reach each individual argument, we then use `CanExtractCommandArg` to extract the argument and subsequently call [`Command::arg`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.arg) to add it to the `Command`.
 
-It is also worth noting that the `CanUpdateCommand` trait is tightly coupled with the Tokio `Command` type. This would mean that the trait cannot be reused if there are alternative implementations that implement CLI execution without using Tokio. However, this is totally fine, and there is nothing in CGP that prevent us from defining less-abstract interfaces.
+It's worth noting that the `CanUpdateCommand` trait is tightly coupled with the Tokio `Command` type. This means the trait cannot be reused if alternative implementations execute CLI commands without using Tokio. However, this is perfectly acceptable, and nothing in CGP prevents us from defining less-abstract interfaces.
 
-Instead, the main advantage that CGP provides is that a trait like `CanUpdateCommand` can be included by specific providers that need it via dependency injection. This means that if the involved providers are not wired with the concrete context, then the context also don't need to implement a trait like `CanUpdateCommand`.
+Instead, CGP's main advantage is that a trait like `CanUpdateCommand` can be included by specific providers that need it via dependency injection. This means that if the involved providers aren't wired with the concrete context, then the context doesn't need to implement a trait like `CanUpdateCommand` either.
 
-In other words, a CGP trait like `CanUpdateCommand` may be tightly coupled with Tokio, but the trait itself is still fully decoupled from the remaining parts of Hypershell. And so, it would not prevent Hypershell from having alternative implementations that do not use Tokio at all.
+In other words, a CGP trait like `CanUpdateCommand` might be tightly coupled with Tokio, but the trait itself remains fully decoupled from the rest of Hypershell. Consequently, it wouldn't prevent Hypershell from having alternative implementations that don't use Tokio at all.
 
 ### Error Handling
 
-Inside the `where` clause for `HandleSimpleExec`, we can see that it also requires `Context` to implement `CanRaiseAsyncError<std::io::Error>`. Here we will briefly explore how CGP offers a different and more modular approach on error handler.
+Within the `where` clause for `HandleSimpleExec`, you'll notice it also requires `Context` to implement `CanRaiseAsyncError<std::io::Error>`. Here, we'll briefly explore how CGP offers a distinct and more modular approach to error handling.
 
-When calling upstream Tokio methods such as [`Command::spawn`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.spawn), the error `std::io::Error` is returned by the method. However, since the method signature requires an abstract `Context::Error` to be returned in case of errors, we need ways to convert, or "upcast", the `std::io::Error` into `Context::Error`.
+When calling upstream Tokio methods, such as [`Command::spawn`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.spawn), the method returns a `std::io::Error`. However, since the method signature requires an abstract `Context::Error` to be returned in case of errors, we need a way to convert, or "upcast", the `std::io::Error` into `Context::Error`.
 
-A naive approach to handle the error would be to require a _concrete_ error type to be used with the implementation. For example, we could modify the method signature of the `CanHandle` trait to return `anyhow::Error` instead of `Context::Error`. Or, we can add a constraint `Context: HasErrorType<Error = anyhow::Error>` to _force_ the context to use a specific error type, such as `anyhow::Error`. However, doing so would introduce unnecessary coupling between the provider implementation with the concrete error type, and make it impossible for the context to reuse the provider if it wanted to choose another error type for the application.
+A naive approach to error handling would be to require a **concrete error type** for the implementation. For example, we could modify `CanHandle`'s method signature to return `anyhow::Error` instead of `Context::Error`. Alternatively, we could add a constraint `Context: HasErrorType<Error = anyhow::Error>` to *force* the context to provide a specific error type, such as `anyhow::Error`. However, doing so would introduce unnecessary *coupling* between the provider implementation and the concrete error type, preventing the context from reusing the provider if it wished to choose a different error type for the application.
 
 ### Error Raisers
 
-Instead, CGP provides the `ErrorRaiser` component as a way for context-generic implementations to handle errors without requiring access to the concrete error type. The trait is defined as follows:
+Instead, CGP provides the **`ErrorRaiser` component** as a way for context-generic implementations to handle errors without requiring access to the concrete error type. The trait is defined as follows:
 
 ```rust
 #[cgp_component(ErrorRaiser)]
@@ -803,7 +807,7 @@ pub trait CanRaiseError<SourceError>: HasErrorType {
 }
 ```
 
-We can think of `CanRaiseError` as a more flexible form of the `From` trait for error handling. In fact, if there exist a `From` instance for all `SourceError`s used by an application, then the provider can be trivially implemented as:
+You can think of `CanRaiseError` as a more flexible form of Rust's `From` trait for error handling. In fact, if a `From` instance exists for all `SourceError`s used by an application, the provider can be trivially implemented:
 
 ```rust
 #[cgp_new_provider]
@@ -818,11 +822,11 @@ where
 }
 ```
 
-When programming with CGP, it is preferred to use `CanRaiseError` instead of directly using `From` to convert a source error to the abstract `Context::Error`. This is because `From` is a plain Rust trait that is subject to the coherence rules in Rust, making it challenging to customize in case if no `From` instance is not implemented by a third party error type like `anyhow::Error`.
+When programming with CGP, it's generally preferred to use `CanRaiseError` rather than directly using `From` to convert a source error to the abstract `Context::Error`. This is because `From` is a plain Rust trait subject to coherence rules, making it challenging to customize if a `From` instance isn't implemented by a third-party error type like `anyhow::Error`.
 
-On the other hand, using `CanRaiseError` gives us much more freedom to use anything as `SourceError` without worrying about compatibility. For instance, it is common for context-generic implementations to use `CanRaiseError<String>` or even `CanRaiseError<&'static str>`, at least during early prototyping phases. This would have caused issue if we instead require `Context::Error: From<String>`, as types like `anyhow::Error` do not implement `From<String>`.
+Conversely, using `CanRaiseError` grants significantly more freedom to use anything as a `SourceError` without worrying about compatibility. For instance, it's common for context-generic implementations to use `CanRaiseError<String>` or even `CanRaiseError<&'static str>`, especially during early prototyping phases. This would cause issues if we instead required `Context::Error: From<String>`, as types like `anyhow::Error` do not implement `From<String>`.
 
-Going back to the example, with the constraint `CanRaiseError<std::io::Error>` in place, we can now call `Command::spawn()` inside `HandleSimpleExec`, and handle the error with `.map_err(Context::raise_error)`:
+Returning to our example, with the `CanRaiseError<std::io::Error>` constraint in place, we can now call `Command::spawn()` inside `HandleSimpleExec` and handle the error using `.map_err(Context::raise_error)`:
 
 ```rust
 let child = command.spawn().map_err(Context::raise_error)?;
@@ -830,15 +834,15 @@ let child = command.spawn().map_err(Context::raise_error)?;
 
 ### Default Error Type
 
-In the default Hypershell contexts, such as `HypershellCli`, we use [`anyhow::Error`](https://docs.rs/anyhow/latest/anyhow/struct.Error.html) together with the providers from the [`cgp-error-anyhow`](https://docs.rs/cgp-error-anyhow/) crate to handle errors from different parts of the application.
+In the default Hypershell contexts, such as `HypershellCli`, we use [`anyhow::Error`](https://docs.rs/anyhow/latest/anyhow/struct.Error.html) along with providers from the [`cgp-error-anyhow`](https://docs.rs/cgp-error-anyhow/) crate to handle errors from different parts of the application.
 
-However, just as everything else, an application can choose different error providers, such as using [`eyre::Report`](https://docs.rs/eyre/latest/eyre/struct.Report.html) together with [`cgp-error-eyre`](https://docs.rs/cgp-error-eyre), to handle the errors from Hypershell programs. This would especially be useful, if users want to embed Hypershell programs within larger applications that use their own structured error types that are defined using [`thiserror`](https://docs.rs/thiserror).
+However, just like almost everything else in CGP, an application can choose different error providers. For example, it could use [`eyre::Report`](https://docs.rs/eyre/latest/eyre/struct.Report.html) with [`cgp-error-eyre`](https://docs.rs/cgp-error-eyre) to handle errors from Hypershell programs. This is especially useful if users want to embed Hypershell programs within larger applications that use their own structured error types defined with [`thiserror`](https://docs.rs/thiserror).
 
 ### Error Wrappers
 
-In the `where` clause for `HandleSimpleExec`, we also sees a constraint `Context: for<'a> CanWrapAsyncError<CommandNotFound<'a>>`. Here we will walk through what that entails.
+In the `where` clause for `HandleSimpleExec`, we also see a constraint `Context: for<'a> CanWrapAsyncError<CommandNotFound<'a>>`. Let's explore what this entails.
 
-CGP also provides a supplementary error wrapper component, which provides similar functionality as the [`anyhow::Error::context`](https://docs.rs/anyhow/1.0.98/anyhow/struct.Error.html#method.context) method to add additional details about an error. The trait is defined as follows:
+CGP also provides a supplementary **`ErrorWrapper` component**, which offers similar functionality to [`anyhow::Error::context`](https://docs.rs/anyhow/1.0.98/anyhow/struct.Error.html#method.context) for adding additional details to an error. The trait is defined as follows:
 
 ```rust
 #[cgp_component(ErrorWrapper)]
@@ -847,7 +851,7 @@ pub trait CanWrapError<Detail>: HasErrorType {
 }
 ```
 
-Using `CanWrapError`, we can for example add additional details on top of `std::io::Error` to explain that the error happened when we try to spawn the child process. A common frustration with the base error is that when an executable is not found at the specified command path, only a basic `NotFound` error is returned without additional details of _what_ is not found. Using `CanWrapAsyncError`, we can now add additional details to the error about the command that is not found:
+Using `CanWrapError`, we can, for instance, add extra details on top of a `std::io::Error` to explain that the error occurred while attempting to spawn the child process. A common frustration with the base I/O error is that when an executable isn't found at the specified command path, only a generic `NotFound` error is returned without details about *what* wasn't found. Using `CanWrapAsyncError`, we can now add specific information about the missing command to the error:
 
 ```rust
 let child = command.spawn().map_err(|e| {
@@ -862,7 +866,7 @@ let child = command.spawn().map_err(|e| {
 })?;
 ```
 
-In the example approach, we first check whether the error kind returned from `command.spawn()` is `ErrorKind::NotFound`. We then use `raise_error` to convert the error into `Context::Error`. After that, if the error kind was `NotFound`, we call `wrap_error` to wrap the error with a custom `CommandNotFound` detail, which is defined as follows:
+In this example, we first check if the error kind returned from `command.spawn()` is `ErrorKind::NotFound`. We then use `raise_error` to convert the error into `Context::Error`. After that, if the error kind was `NotFound`, we call `wrap_error` to wrap the error with a custom `CommandNotFound` detail, defined as follows:
 
 ```rust
 pub struct CommandNotFound<'a> {
@@ -880,62 +884,62 @@ impl<'a> Debug for CommandNotFound<'a> {
 }
 ```
 
-The `CommandNotFound` struct contains a reference to the `Command` that we are running. We pass the full `Command` struct here, so that it allows potential `ErrorWrapper` implementation to show customized error about the failing command. We also provide a default `Debug` implementation for `CommandNotFound`, which prints out only the program path without additional details about the full command.
+The `CommandNotFound` struct holds a reference to the `Command` we're trying to run. We pass the full `Command` struct here so that a potential `ErrorWrapper` implementation can display customized error messages about the failing command. We also provide a default `Debug` implementation for `CommandNotFound`, which prints only the program path without additional details about the full command.
 
-Similar to `ErrorRaiser`, CGP allows the `ErrorWrapper` implementation to be chosen by the context to handle the error differently. For instance, the `HypershellCli` context uses the `DebugAnyhowError` provider from `cgp-error-anyhow`, which builds a string using the `Debug` implementation, and then call `anyhow::Error::context` with the formatted string. But if desired, a user of Hypershell is free to override this behavior, and make it print out the full command, or wrap the error in other ways.
+Similar to `ErrorRaiser`, CGP allows the `ErrorWrapper` implementation to be chosen by the context to handle errors differently. For instance, the `HypershellCli` context uses the `DebugAnyhowError` provider from `cgp-error-anyhow`. This provider builds a string using the `Debug` implementation and then calls `anyhow::Error::context` with the formatted string. However, if desired, a user of Hypershell is free to override this behavior, such as printing the full command or wrapping the error in other ways.
 
-Since the `CommandNotFound` contains a lifetime, when we specify the constraint, we need to add a [higher-ranked trait bound](https://doc.rust-lang.org/nomicon/hrtb.html) (HRTB) `for<'a>` to the constraint, so that we can always wrap the error for all lifetime. While it is also possible to pass an owned `Command` value without a lifetime here, it may not be possible in general cases when the detail comes from argument references. Furthermore, having a reference encourages the wrapper handler to only extract essential details, and avoid bloating the error value with large values wrapped within it.
+Since `CommandNotFound` contains a lifetime, when we specify the constraint, we need to add a [**higher-ranked trait bound (HRTB)**]((https://doc.rust-lang.org/nomicon/hrtb.html) (`for<'a>`) to the constraint. This ensures we can always wrap the error for any lifetime. While it's possible to pass an owned `Command` value without a lifetime here, this isn't always feasible when the detail originates from argument references. Furthermore, using a reference encourages the wrapper handler to extract only essential details, avoiding the bloating of the error value with large wrapped values.
 
 ### Input Type
 
-The `Handler` implementation for `HandleSimpleExec` shows that it can work with any generic `Input` type, as long as the constraint `Input: Send + AsRef<[u8]>` is satisfied. This means that aside from `Vec<u8>`, we can also pass to it other compatible types such as `String`, `Bytes`, or `&'a [u8]`.
+The `Handler` implementation for `HandleSimpleExec` is designed to work with any generic `Input` type, provided it satisfies the `Input: Send + AsRef<[u8]>` constraint. This means that besides `Vec<u8>`, you can also pass in compatible types like `String`, `Bytes`, or `&'a [u8]`.
 
-On the other hand, the constraint shows that `HandleSimpleExec` cannot accept inputs from stream types that implement traits like `AsyncRead`, at least not directly. Since Hypershell is stringly typed, if we want to form a pipeline such as `StreamingExec<...> | SimpleExec<...>`, it would result in a compile-time error.
+However, this constraint also implies that `HandleSimpleExec` cannot directly accept inputs from stream types that implement traits like `AsyncRead`. If you try to form a pipeline like `StreamingExec<...> | SimpleExec<...>`, it would result in a compile-time error due to Hypershell's strongly typed nature.
 
-One way to workaround this is that we can make use of explicit _adapters_ provided by Hypershell, such as `StreamToBytes`, to be part of the pipeline to transform the output before passing as the next input:
+One way to work around this is to incorporate explicit **adapters** provided by Hypershell into your pipeline, transforming the output before it's passed as the next input:
 
 ```
 StreamingExec<...> | StreamToBytes | SimpleExec<...>
 ```
 
-The main takeaway here is that the supported `Input` and `Output` types in a Hypershell program is determined based on the chosen concrete provider, and _not_ based on the abstract syntax. A concrete context may choose to wire a different provider to handle `SimpleExec`, in which case the supported input/output types for `SimpleExec` may change.
+The key takeaway here is that the supported `Input` and `Output` types in a Hypershell program are determined by the chosen **concrete provider**, not by the abstract syntax itself. A concrete context can choose to wire a different provider to handle `SimpleExec`, in which case the supported input/output types for `SimpleExec` might change.
 
-Nevertheless, just as with standard programming languages, it is possible to define a _standard_ around the language syntax to impose the expectations and requirements on how the program should behave. For example, the language specification may state that it should always be possible to pipe the output from `StreamingExec` to `SimpleExec`, and vice versa. In such cases, it would imply that `HandleSimpleExec` alone may not be sufficient to handle all valid Hypershell programs.
+Nevertheless, just as with standard programming languages, it's possible to define a **standard** around the language syntax to impose expectations and requirements on how the program should behave. For example, a language specification for Hypershell might state that it should always be possible to pipe the output from `StreamingExec` to `SimpleExec`, and vice versa. In such scenarios, `HandleSimpleExec` alone might not suffice to handle all valid Hypershell programs.
 
-But as we will learn later, it is also possible to use the _generic dispatcher_ pattern in CGP to perform _ad hoc dispatch_ to different handlers, based on the `Input` type. In such case, `HandleSimpleExec` would become part of a larger implementation that can be used to handle all possible `Input` types that will be encountered in a Hypershell program.
+But as we'll learn later, it's also possible to use CGP's **generic dispatcher** pattern to perform **ad hoc dispatch** to different handlers, based on the `Input` type. In such cases, `HandleSimpleExec` would become part of a larger implementation capable of handling all possible `Input` types encountered in a Hypershell program.
 
 ### Modularity of `HandleSimpleExec`
 
-If we inspect the entire implementation of `HandleSimpleExec`, we would find that other than Tokio, CGP, and the Hypershell core traits, the implementation is fully _decoupled_ from the remaining parts of the application. In fact, we can move the implementation code to an entirely new crate and only include the 3 dependencies, and everything will still work.
+If you examine the entire implementation of `HandleSimpleExec`, you'll find that, apart from its dependencies on Tokio, CGP, and Hypershell's core traits, the implementation is completely **decoupled** from the rest of the application. In fact, you could move this implementation code to an entirely new crate, include only these three dependencies, and everything would still function correctly.
 
-This shows that code written with CGP typically have _inverted_ structure in their dependency graphs. Instead of focusing on _concrete types_, CGP starts with _abstract implementations_ and only define the concrete types at the last stage of the process. This significantly reduce bloats in the dependency graph, as each sub-crate can be compiled with only the exact dependencies they need.
+This illustrates how code written with CGP typically has an **inverted structure** in its dependency graphs. Instead of focusing on **concrete types**, CGP begins with **abstract implementations** and only defines the concrete types at the final stage of the process. This significantly reduces bloat in the dependency graph, as each sub-crate can be compiled with only the exact dependencies it needs.
 
-To demonstrate the benefit in action, We can look at how Hypershell structures its crate dependencies:
+To demonstrate this benefit in action, let's look at how Hypershell structures its crate dependencies:
 
-- `hypershell-components` - Defines DSL types and CGP component interfaces, and only depends on `cgp`.
-- `hypershell-tokio-components` - Implements Tokio-specific CLI providers and component interfaces. Depends on `cgp`, `hypershell-components`, and `tokio`.
-- `hypershell-reqwest-components` - Implements Reqwest-specific HTTP providers and component interfaces. Depends on `cgp` and `hypershell-components`, and `reqwest`.
-- `hypershell` - Defines concrete contexts and wiring. Depends on all other Hypershell crates.
+* **`hypershell-components`**: Defines DSL types and CGP component interfaces, depending solely on `cgp`.
+* **`hypershell-tokio-components`**: Implements Tokio-specific CLI providers and component interfaces. Depends on `cgp`, `hypershell-components`, and `tokio`.
+* **`hypershell-reqwest-components`**: Implements Reqwest-specific HTTP providers and component interfaces. Depends on `cgp`, `hypershell-components`, and `reqwest`.
+* **`hypershell`**: Defines concrete contexts and wiring, depending on all other Hypershell crates.
 
-As we can see, even though the full Hypershell application uses both Tokio and Reqwest, the crate `hypershell-tokio-components` can be built without `reqwest` being in any part of its dependencies. This may look signficant given that there are only 2 crates. But consider when there is a large Rust application where there are hundreds of dependencies, CGP will make it much easier for the application to break down the dependencies, so that every part of the implementation only needs to be compiled with the exact dependencies they need.
+As you can see, even though the full Hypershell application uses both Tokio and Reqwest, the `hypershell-tokio-components` crate can be built without `reqwest` being part of its dependencies. While this might seem minor with only two crates, consider a large Rust application with hundreds of dependencies: CGP makes it much easier to break down dependencies, ensuring that each part of the implementation is compiled with only the precise dependencies it requires.
 
-With this level of modularity, it also means that it is possible to build an alternative Hypershell implementations that fully remove `tokio` from its dependencies, and use a different crate to spawn CLI process, such as using [`async-process`](https://github.com/smol-rs/async-process) with [`smol`](https://docs.rs/smol/latest/smol/) as the runtime. Granted, since `reqwest` also depends on `tokio`, if we want to fully remove `tokio`, we would also have to do the same for `hypershell-reqwest-components` and use an alternative HTTP library like [`isahc`](https://docs.rs/isahc).
+This level of modularity also means it's possible to build alternative Hypershell implementations that completely remove `tokio` from their dependencies. For example, you could use [`async-process`](https://github.com/smol-rs/async-process) with [`smol`](https://docs.rs/smol/latest/smol/) as the runtime to spawn CLI processes. Of course, since `reqwest` also depends on `tokio`, fully removing `tokio` would also require substituting `hypershell-reqwest-components` with an alternative HTTP library like [`isahc`](https://docs.rs/isahc).
 
-It is also worth highlighting that with CGP, there would be no need to use _feature flags_ to switch between underlying implementations. Because CGP providers can be implemented fully isolated from each others, we could just create new crates that do not depend on the original providers, and define new contexts that are wired with the alternative providers.
+It's also worth highlighting that with CGP, there's no need to use **feature flags** to switch between underlying implementations. Because CGP providers can be implemented in complete isolation from one another, you can simply create new crates that don't depend on the original providers and define new contexts wired with the alternative providers.
 
-The generic approach is also less error prone than feature flags, as _all_ alternative implementations can co-exist and be tested at the time, as compared to having multiple _variants_ of the code that must be tested separately for each combination of feature flags.
+This generic approach is also less error-prone than feature flags, as *all* alternative implementations can coexist and be tested simultaneously, unlike having multiple *variants* of the code that must be tested separately for each combination of feature flags.
 
 ## Wiring for `SimpleExec`
 
-At this point, we have learned how `HandleSimpleExec` is implemented to handle the `SimpleExec` syntax. Next, we will look into how the `HandleSimpleExec` provider is wired up, so that it is accessible from concrete contexts like `HypershellCli`.
+At this point, we've learned how `HandleSimpleExec` is implemented to handle the `SimpleExec` syntax. Next, let's look into how the `HandleSimpleExec` provider is wired up so that it's accessible from concrete contexts like `HypershellCli`.
 
 ### Generic Dispatcher
 
-As we know, aside from `SimpleExec`, there are also other Hypershell syntaxes such as `StreamingExec` and `SimpleHttpRequest`. But since `HandleSimpleExec` only implements `Handler` for `SimpleExec`, we cannot wire it directly as the provider for _all_ generic parameters of `Handler`. Instead, we need an intermediary provider, known as a _generic dispatcher_, to dispatch the handling logic to different providers based on the generic `Code` parameter.
+As we know, besides `SimpleExec`, there are other Hypershell syntaxes such as `StreamingExec` and `SimpleHttpRequest`. However, since `HandleSimpleExec` only implements `Handler` for `SimpleExec`, we can't directly wire it as the provider for *all* generic parameters of `Handler`. Instead, we need an intermediary provider, known as a **generic dispatcher**, to route the handling logic to different providers based on the generic `Code` parameter.
 
-The pattern for provider dispatching based on generic parameters is common enough that CGP provides options to automatically derive them inside the `#[cgp_component]` macro. For the `Handler` component, a dispatcher called `UseDelegate` is provided to handle provider dispatching based on the `Code` parameter.
+The pattern for provider dispatching based on generic parameters is common enough that CGP offers options to automatically derive them within the `#[cgp_component]` macro. For the `Handler` component, a dispatcher called **`UseDelegate`** is provided to manage provider dispatching based on the `Code` parameter.
 
-In CGP, we can declare the dispatching logic in similar ways as normal provider delegation using the `delegate_components!` macro. Following shows a simplified wiring of the providers for `HypershellCli`:
+In CGP, we can declare the dispatching logic in a similar way to normal provider delegation using the `delegate_components!` macro. The following shows a simplified wiring of providers for `HypershellCli`:
 
 ```rust
 #[cgp_context(HypershellCliComponents)]
@@ -962,57 +966,59 @@ delegate_components! {
 }
 ```
 
-The first part of the wiring declaration is the same as the hello world example we had earlier. We define a `HypershellCli` struct, with `#[cgp_context]` to make it into a CGP context with `HypershellCliComponents` being the provider. We then use `delegate_components!` on `HypershellCliComponents` to set up the wiring for all providers used by the context. But for the wiring of `HandlerComponent`, we map it to `UseDelegate<HypershellHandlerComponents>` instead of directly to `HandleSimpleExec`.
+The first part of the wiring declaration is identical to the hello world example we saw earlier. We define a `HypershellCli` struct using `#[cgp_context]` to make it a CGP context with `HypershellCliComponents` as its provider. We then use `delegate_components!` on `HypershellCliComponents` to set up the wiring for all providers used by the context. However, for the `HandlerComponent` wiring, we map it to `UseDelegate<HypershellHandlerComponents>` instead of directly to `HandleSimpleExec`.
 
-Following that, we define a new struct `HypershellHandlerComponents`, and then use `delegate_components!` to define some mappings on it. But this time, instead of mapping CGP component names, we map the Hypershell syntax types to their respective providers. In the first entry, we map `SimpleExec` to `HandleSimpleExec`, and then map `StreamingExec` to a `HandleStreamingExec` provider that is implemented separately in Hypershell.
+Following that, we define a new struct `HypershellHandlerComponents` and use `delegate_components!` to define some mappings on it. But this time, instead of mapping CGP component names, we map the Hypershell syntax types to their respective providers. In the first entry, we map `SimpleExec` to `HandleSimpleExec`, and then map `StreamingExec` to a `HandleStreamingExec` provider, which is implemented separately in Hypershell.
 
-In the mappings for `HypershellHandlerComponents`, we can also see the key for `SimpleExec` being specified as `<CommandPath, Args> SimpleExec<CommandPath, Args>`. The first part, `<CommandPath, Args>` is used as additional _generic parameters_ for the mapping, since we want to map _all_ possible uses of `SimpleExec` to `HandleSimpleExec`. If they were not specified, Rust would instead try to find _specific_ concrete Rust types called `CommandPath` and `Args` imported within the module, and produce errors when failing to find them.
+In the mappings for `HypershellHandlerComponents`, you'll also notice the key for `SimpleExec` specified as `<CommandPath, Args> SimpleExec<CommandPath, Args>`. The initial part, `<CommandPath, Args>`, is used as additional **generic parameters** for the mapping. This is because we want to map *all* possible uses of `SimpleExec` to `HandleSimpleExec`. If these weren't specified, Rust would instead try to find *specific* concrete Rust types named `CommandPath` and `Args` imported within the module, leading to errors if it couldn't find them.
 
-Essentially, we are defining `HypershellHandlerComponents` purely as a key-value map at the _type-level_, and then use it as a _lookup table_ for `UseDelegate`. We can also see that with _types_ being the keys, we get additional expressivity to specify and capture generic parameters in the keys, which wouldn't be possible with value-level lookup tables.
+Essentially, we're defining `HypershellHandlerComponents` purely as a **type-level key-value map**, and then using it as a **lookup table** for `UseDelegate`. We can also see that with *types* as keys, we gain additional expressivity to specify and capture generic parameters in the keys, which wouldn't be possible with value-level lookup tables.
 
-Now that we have walked through the wiring declaration, let's try to visualize how CGP actually implements a trait instance of `CanHandle<SimpleExec<Command, Args>, Input>` for the `HypershellCli` context:
+Now that we've walked through the wiring declaration, let's visualize how CGP actually implements a trait instance of `CanHandle<SimpleExec<Command, Args>, Input>` for the `HypershellCli` context:
 
 ![Diagram](/blog/images/delegate-code.png)
 
-The first two parts of the diagram is similar to how the implementation is done for the example `Greeter` component earlier. For the `HypershellCli` context to implement `CanHandle<SimpleExec<Command, Args>, Input>`, Rust's trait system would first find out that `HypershellCli` implements `HasProvider`, which points to `HypershellCliComponents`.
+The first two parts of this diagram are similar to how the implementation was done for the `Greeter` component example earlier. For the `HypershellCli` context to implement `CanHandle<SimpleExec<Command, Args>, Input>`, Rust's trait system would first determine that `HypershellCli` implements `HasProvider`, which points to `HypershellCliComponents`.
 
-The trait system then tries to find an implementation of `Handler<HypershellCli, SimpleExec<Command, Args>, Input>` for `HypershellCliComponents`. Next, it sees that `HypershellCliComponents` implements `DelegateComponent<HandlerComponent>`, which points to `UseDelegate<HypershellHandlerComponents>`, and so it continues the implementation lookup there.
+The trait system then attempts to find an implementation of `Handler<HypershellCli, SimpleExec<Command, Args>, Input>` for `HypershellCliComponents`. Next, it sees that `HypershellCliComponents` implements `DelegateComponent<HandlerComponent>`, which points to `UseDelegate<HypershellHandlerComponents>`, and so the implementation lookup continues there.
 
-This time, the trait system finds that `UseDelegate<HypershellHandlerComponents>` has a candidate implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. But for that to be implementated, `UseDelegate` requires `HypershellHandlerComponents` to contain a lookup entry for the `Code` parameter, i.e. that `HypershellHandlerComponents` should implement `DelegateComponent<SimpleExec<Command, Args>>`.
+This time, the trait system finds that `UseDelegate<HypershellHandlerComponents>` has a candidate implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. However, for that to be implemented, `UseDelegate` requires `HypershellHandlerComponents` to contain a lookup entry for the `Code` parameter. That is, `HypershellHandlerComponents` should implement `DelegateComponent<SimpleExec<Command, Args>>`.
 
-Finally, the system finds that `HypershellHandlerComponents` contains the given entry, which points to `HandleSimpleExec`. It then finds that `HandleSimpleExec` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, and so the implementation is now completed.
+Finally, the system finds that `HypershellHandlerComponents` contains the specified entry, which points to `HandleSimpleExec`. It then confirms that `HandleSimpleExec` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, thus completing the implementation.
 
-Compared to the earlier `Greeter` example, the delegation chain for `SimpleExec` handling goes 4 levels deep instead of 3. Aside from that, the underlying implementation for `UseDelegate` follows the same pattern as the blanket implementation of the `Handler` provider trait. However, instead of being a blanket implementation, `UseDelegate` is implemented as a _context-generic provider_ for `Handler`. Furthermore, aside from `Handler`, the same pattern has also been implemented by `UseDelegate` for many other CGP traits, such as `ErrorRaiser`, making it a _universal pattern_ that is applicable to any CGP trait that contains additional generic parameters.
+Compared to the earlier `Greeter` example, the delegation chain for `SimpleExec` handling goes four levels deep instead of three. Aside from that, the underlying implementation for `UseDelegate` follows the same pattern as the blanket implementation of the `Handler` provider trait. However, instead of being a blanket implementation, `UseDelegate` is implemented as a **context-generic provider** for `Handler`.
 
-The implementation of `UseDelegate` also demonstrates the power of CGP, showing that once the coherence restriction is lifted, there are whole new categories of patterns that can be defined to work with many traits in the same way. Other than `UseDelegate`, there are many other CGP patterns that have been implemented as context-generic providers, such as `UseContext`, `UseType`, `UseField`, `WithProvider`, etc.
+Furthermore, beyond `Handler`, the same pattern has been implemented by `UseDelegate` for many other CGP traits, such as `ErrorRaiser`, making it a **universal pattern** applicable to any CGP trait that contains additional generic parameters.
+
+The implementation of `UseDelegate` also demonstrates CGP's power, showing that once coherence restrictions are lifted, entirely new categories of patterns can be defined to work consistently across many traits. In addition to `UseDelegate`, many other CGP patterns have been implemented as context-generic providers, such as `UseContext`, `UseType`, `UseField`, `WithProvider`, and more.
 
 ## CGP Presets
 
-Earlier, we had a simplified wiring of `HandleSimpleExec` to be used by the `HypershellCli` context. But as we learned in the examples from the beginning, we want to reuse the same wirings also for other contexts, such as `HypershellHttp` and `MyApp`. Furthermore, with the modularity provided by Hypershell, we want to make it easy to extend or customize existing component wirings, and build new collection of wirings that can be shared with the community.
+Earlier, we saw a simplified way to wire `HandleSimpleExec` for the `HypershellCli` context. However, as the initial examples showed, we want to reuse these same wirings for other contexts like `HypershellHttp` and `MyApp`. Moreover, given Hypershell's modularity, we want to easily extend or customize existing component wirings and create new collections of wirings that can be shared within the community.
 
-CGP offers _presets_ as a powerful way to build these extensible component wiring, that allows an extensible collection of component wirings to be created. At a high level, a CGP preset is a _module_ that contains a _type-level_ key-value map, together with traits and macros that support _operations_ do be done on the key-value map.
+CGP offers **presets** as a powerful mechanism to build these extensible component wirings. At a high level, a CGP preset is a **module** that contains a **type-level key-value map**, along with traits and macros that support **operations** on this map.
 
-The operations that can be done on a preset shares some similarity to _inheritance_ from the OOP world, at least on the implementation side. Or, to be less buzzwordy, it allows _iteration_ over the _keys_ stored in the type-level key-value map of the preset. As we know from basic algorithm courses, if we can iterate over the keys of a map, we can then construct _new_ maps that shares the same keys as the original map. Or to put it even more simply, CGP presets allows us to perform the Rust equivalent of `map.iter().filter_map()` on a `HashMap`, except that we are doing it at the type level.
+The operations possible on a preset share some conceptual similarities with **inheritance** in object-oriented programming (OOP), at least from an implementation perspective. More plainly, it allows for **iteration** over the **keys** stored in the preset's type-level key-value map. As we know from basic algorithm courses, if we can iterate over a map's keys, we can then construct *new* maps that share the same keys as the original. To put it even more simply, CGP presets allow us to perform the Rust equivalent of `map.iter().filter_map()` on a `HashMap` value, but at the type level.
 
-Now that we understand how presets work at a high level, it should be clearer on how presets can be used to support inheritance like feature in CGP. There are two kinds of inheritance operations supported by CGP. The first is a simplified one-level single inheritance, which is implemented through Rust traits to allow a CGP context to implement traits like `DelegateComponent` based on all keys stored in one preset.
+Now that we understand how presets work at a high level, it should be clearer how they support inheritance-like features in CGP. CGP supports two kinds of inheritance operations. The first is a simplified one-level, single inheritance, implemented through Rust traits. This allows a CGP context to implement traits like `DelegateComponent` based on all keys stored in a single preset.
 
-The second form is a macro-based approach, which enables _nested_ levels of _multiple inheritance_ to be used when defining new presets. The macros work by expanding the preset keys as list _syntax_, e.g. `[KeyA, KeyB, KeyC, ...]`, and then work on the keys syntactically through a separate macro. This means that the macro approach may be less reliable, as we lose access to the precise type information, and that ambiguity may arise if the same identifier may refer to multiple types in scope, or when there are _aliases_ used. However, it is more flexible that we can make it work with more than one map, which is not possible with the trait-based approach due to coherence restrictions.
+The second form is a macro-based approach, which enables **nested levels of multiple inheritance** when defining new presets. These macros work by expanding the preset keys as list **syntax** (e.g., `[KeyA, KeyB, KeyC, ...]`) and then processing these keys syntactically through a separate macro. This means the macro approach can be less reliable, as we lose access to precise type information, and ambiguity can arise if the same identifier refers to multiple types in scope or when **aliases** are used. However, it's more flexible, allowing us to work with more than one map, which isn't possible with the trait-based approach due to coherence restrictions.
 
 ## Hypershell Presets
 
-Thanks to presets, Hypershell is able to allow its core implementation to be customized easily. Hypershell defines all its component wirings as extensible presets, so that users can choose to extend, replace, or customize any one of the presets.
+Thanks to presets, Hypershell's core implementation is highly customizable. Hypershell defines all its component wirings as extensible presets, allowing users to **extend, replace, or customize** any of them.
 
-The main preset that is provided by Hypershell is the `HypershellPreset`, which can be used directly by contexts like `HyperhellCli`. But underlying the main preset, Hypershell actually breaks the components down to a few smaller presets, including `HypershellTokioPreset` for the CLI components, and `HypershellReqwestPreset` for the HTTP components. This allows to one sub-part of the presets to be replaced entirely, while the other parts of the presets can be kept unmodified.
+The primary preset provided by Hypershell is **`HypershellPreset`**, which can be directly used by contexts like `HypershellCli`. However, beneath this main preset, Hypershell actually breaks down its components into several smaller presets, including **`HypershellTokioPreset`** for CLI components and **`HypershellReqwestPreset`** for HTTP components. This granular approach allows one sub-part of the presets to be entirely replaced while keeping other parts unmodified.
 
-Furthermore, Hypershell also defines the dispatch mappings for components like `HandlerComponent` as presets. With this, we can extend the handler component presets, rather than the main preset, to introduce new _syntaxes_ to the DSL, or customize the wiring for existing syntaxes like `SimpleExec`.
+Furthermore, Hypershell also defines the dispatch tables for components like `HandlerComponent` as presets. This design enables us to extend the handler component presets, rather than the main preset, to introduce new **syntaxes** to the DSL or customize the wiring for existing syntaxes like `SimpleExec`.
 
 ### High Level Diagram
 
-We will now walk through how `HandleSimpleExec` is wired within the Hypershell presets. But before we start, let's look at the high level diagram on the level of indirections:
+Let's now walk through how `HandleSimpleExec` is wired within the Hypershell presets. But before we start, here's a high-level diagram illustrating the levels of indirection involved:
 
 ![Diagram](/blog/images/preset-wiring.png)
 
-There are a lot of indirections going on with the above diagram. We will go through each of the steps one by one, together with the relevant code snippets, so that you can get a better understanding of what is going on.
+As you can see, there's quite a bit of indirection in that diagram! We'll go through each step one by one, along with the relevant code snippets, to give you a clearer understanding of what's happening.
 
 ### Definition of `HypershellCli`
 
@@ -1021,9 +1027,9 @@ There are a lot of indirections going on with the above diagram. We will go thro
 pub struct HypershellCli;
 ```
 
-We start with the definition of the `HypershellCli` context, with the `HypershellPreset` specified as the preset to be inherited by the context's provider, `HypershellCliComponents`. The first part of the implementation stays the same as before, that `HypershellCli` has a blanket implementation for `CanHandle<SimpleExec<Command, Args>, Input>`, if `HypershellCliComponents` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`.
+We begin with the definition of the `HypershellCli` context, where `HypershellPreset` is specified as the preset to be inherited by the context's provider, `HypershellCliComponents`. The initial part of the implementation remains the same: `HypershellCli` receives a blanket implementation for `CanHandle<SimpleExec<Command, Args>, Input>` if `HypershellCliComponents` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`.
 
-Following that, in order for `HypershellCliComponents` to implement the provider trait, the trait system would look for its `DelegateComponent` entry with `HandlerComponent` being the key, which now points to `HypershellPreset`. The entry is found by the system, via a blanket implementation of `DelegateComponent` using a special `HypershellPreset::IsPreset` trait. This blanket implementation is generated by `#[cgp_context]`, which allows `HypershellCliComponents` to delegate all components from `HypershellPreset` without additional code written.
+Following this, for `HypershellCliComponents` to implement the provider trait, the trait system will look for its `DelegateComponent` entry with `HandlerComponent` as the key, which now points to `HypershellPreset`. The system finds this entry via a blanket implementation of `DelegateComponent` using a special `HypershellPreset::IsPreset` trait. This blanket implementation is generated by `#[cgp_context]`, allowing `HypershellCliComponents` to delegate all components from `HypershellPreset` without any additional code.
 
 ### Definition of `HypershellPreset`
 
@@ -1051,13 +1057,13 @@ mod preset {
 }
 ```
 
-First of all, when defining CGP presets, we need to wrap the code around a `mod preset` that is annotated with `#[cgp::re_export_imports]`. This macro captures all `use` statements within the module, and adds a hidden variant of the imports that become `pub use`. This hack is necessary for the macro-based preset operations to work, as we need to re-import all key identifiers at a child preset in order to bind the identifiers to their original types. The macro also re-exports everything in the inner module, so that we can import the preset as if the wrapper `preset` module is not preset.
+First, when defining CGP presets, we need to wrap the code within a `mod preset` annotated with `#[cgp::re_export_imports]`. This macro captures all `use` statements within the module and creates a hidden `pub use` variant of these imports. This "hack" is necessary for the macro-based preset operations to work, as we need to re-import all key identifiers in a child preset to bind them to their original types. The macro also re-exports everything in the inner module, so you can import the preset as if the `preset` wrapper module isn't present.
 
-We then define `HypershellPreset` using the `cgp_preset!` macro. We can see that the preset makes use of multiple-inheritance to inherit from a number of presets, including `HypershellTokioPreset`, which contains all component wirings for implementing the Hypershell CLI features using `tokio`.
+We then define `HypershellPreset` using the `cgp_preset!` macro. You can see that this preset leverages **multiple inheritance** to inherit from several other parent presets, including `HypershellTokioPreset`, which contains all component wirings for implementing Hypershell's CLI features using `tokio`.
 
-In one of the entries in `HypershellPreset`, we can see that the entry for `HandlerComponent` is specified, but with an additional `override` keyword. An overridden preset entry is useful for handling conflicting entries that arise from multiple inheritance, i.e. the diamond problem, as well as allowing the child preset to override parts of the component wiring provided by the parent preset.
+In one of `HypershellPreset`'s entries, we see that `HandlerComponent` is specified with an additional `override` keyword. An overridden preset entry is useful for handling conflicting entries that arise from multiple inheritance (i.e., the [diamond problem](https://en.wikipedia.org/wiki/Diamond_problem)), as well as allowing the child preset to override parts of the component wiring provided by a parent preset.
 
-In the case for `HypershellPreset`, the `override` is used, as we want to define a new provider, `HypershellHandlerPreset`, that combines the handlers of different groups of syntaxes coming from different parent presets. When specifying the entry value, we use `HypershellHandlerPreset::Provider`, as `HypershellHandlerPreset` itself is really a module. When we need to refer to the preset as a type, we access the type through the `::Provider` item in the module.
+In the case of `HypershellPreset`, `override` is used because we want to define a new provider, `HypershellHandlerPreset`, that combines handlers for different groups of syntaxes coming from various parent presets. When specifying the entry value, we use `HypershellHandlerPreset::Provider` because `HypershellHandlerPreset` itself is actually a module. When we need to refer to the preset as a type, we access it through the `::Provider` item within that module.
 
 ### Definition of `HypershellHandlerPreset`
 
@@ -1074,13 +1080,13 @@ cgp_preset! {
 }
 ```
 
-From above, we can see that `HypershellHandlerPreset` is defined as a separate preset within the same module. The preset has an empty body, and merely combines the handler wirings from parent presets such as `TokioHandlerPreset`.
+From the code above, we can see that `HypershellHandlerPreset` is defined as a separate preset within the same module. This preset has an empty body; it merely combines the handler wirings from parent presets like `TokioHandlerPreset`.
 
-The preset is also annotated with `#[wrap_provider(UseDelegate)]`, which instructs `cgp_preset!` to wrap the `Preset::Provider` type in the preset module with `UseDelegate`. This is because the component entries themselves do not result in a blanket implementation of `Handler`, or any provider trait for that matter. But by wrapping the entry inside `UseDelegate`, the `Handler` trait becomes implemented by performing dispatch to the entries based on the `Code` type.
+The preset is also annotated with `#[wrap_provider(UseDelegate)]`. This instructs `cgp_preset!` to wrap the `Preset::Provider` type in the preset module with `UseDelegate`. This is crucial because the component entries themselves don't result in a blanket implementation of `Handler` (or any provider trait). However, by wrapping the entry inside `UseDelegate`, the `Handler` trait becomes implemented by performing dispatch to the entries based on the `Code` type.
 
 ### Expansion of `cgp_preset!`
 
-Altogether, the the call to `cgp_preset!` roughly expands into the following:
+When all is said and done, the call to `cgp_preset!` roughly expands into the following:
 
 ```rust
 pub mod HypershellHandlerPreset {
@@ -1103,13 +1109,13 @@ pub mod HypershellHandlerPreset {
 }
 ```
 
-First, `cgp_preset!` defines a module called `HypershellHandlerPreset`. Inside the module, a `Components` struct is defined, with `delegate_components!` called with the mappings defined within the body of `cgp_preset!`. Additionally, `delegate_components!` is also applied with all the keys in the super presets, with the delegate target set to the super preset's `Provider` type. We use some pseudocode in the above example for better understanding of what actually happened, as the actual syntax looks more verbose and confusing.
+First, `cgp_preset!` defines a module called `HypershellHandlerPreset`. Inside this module, a `Components` struct is defined, and `delegate_components!` is called with the mappings specified within the `cgp_preset!` macro's body. Additionally, `delegate_components!` is also applied to all keys in the super presets, with the delegate target set to the super preset's `Provider` type. We've used pseudocode in the example above for clarity, as the actual underlying syntax is more verbose and potentially confusing.
 
-When `#[wrap_provider(UseDelegate)]` is used, the macro defines `Provider` to be a type aliase to `UseDelegate<Components>`. When there is no `#[wrap_provider]` specified, such as when we defined `HypershellPreset` earlier, then `Provider` is just a type alias to `Components`.
+When `#[wrap_provider(UseDelegate)]` is used, the macro defines `Provider` as a type alias to `UseDelegate<Components>`. If `#[wrap_provider]` is not specified, as when we defined `HypershellPreset` earlier, `Provider` is simply a type alias to `Components`.
 
 ### Definition of `TokioHandlerPreset`
 
-Next, we will look at how `TokioHandlerPreset` is defined:
+Next, let's look at how `TokioHandlerPreset` is defined:
 
 ```rust
 cgp_preset! {
@@ -1124,56 +1130,57 @@ cgp_preset! {
 }
 ```
 
-As we can see, `TokioHandlerPreset` is defined in similar ways as `HypershellHandlerPreset`, and is also wrapped with `UseDelegate`. The preset now has a non-empty list of entries, with `SimpleExec` mapped to `HandleSimpleExec`, `StreamingExec` mapped to `HandleStreamingExec`, and so on.
+As you can see, `TokioHandlerPreset` is defined similarly to `HypershellHandlerPreset` and is also wrapped with `UseDelegate`. This preset now contains a non-empty list of entries, with `SimpleExec` mapped to `HandleSimpleExec`, `StreamingExec` mapped to `HandleStreamingExec`, and so on.
 
-Given that `TokioHandlerPreset` implementing only the handlers for the Hypershell syntaxes, we can find the mappings for other syntaxes in other syntaxes, such as `ReqwestHandlerPreset` which provides mapping for `SimpleHttpRequest` and `StreamingHttpRequest`, etc. So when `HypershellHandlerPreset` inherits from both `TokioHandlerPreset` and `ReqwestHandlerPreset`, we are essentially "merging" the entries from both preset mappings to become a single mapping.
+Given that `TokioHandlerPreset` implements only the handlers for Hypershell's CLI syntaxes, you'll find mappings for other syntaxes in other presets, such as `ReqwestHandlerPreset`, which provides mappings for `SimpleHttpRequest` and `StreamingHttpRequest`. So, when `HypershellHandlerPreset` inherits from both `TokioHandlerPreset` and `ReqwestHandlerPreset`, we are essentially "merging" the entries from both preset mappings into a single mapping.
 
 ### Full Trace of Preset Delegations
 
-Going back to the implementation diagram at the beginning, we can now trace the remaining implementation steps:
+Returning to the implementation diagram at the beginning, we can now trace the remaining implementation steps:
 
-- `HypershellPreset`, or more specifically `HypershellPreset::Provider`, has a blanket implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, because it has a `DelegateComponent` entry for `HandlerComponent`, which points to `HypershellHandlerPreset::Provider`, which is `UseDelegate<HypershellHandlerPreset::Components>`.
-- `UseDelegate<HypershellHandlerPreset::Components>` has a context-generic implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, because `HypershellHandlerPreset::Components` has a `DelegateComponent` entry for `SimpleExec<Command, Args>`, which points to `TokioHandlerPreset::Provider`, which is `UseDelegate<TokioHandlerPreset::Components>`
-- `UseDelegate<TokioHandlerPreset::Components>` has a context-generic implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, because `TokioHandlerPreset::Components` has a `DelegateComponent` entry for `SimpleExec<Command, Args>`, which points to `HandleSimpleExec`.
-- `HandleSimpleExec` implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`, and therefore the implementation chain completes, and the calls are ultimately forwarded to it.
 
-At this point, you may feel that it is overly complicated to define so many levels of indirections just to wire up a single handler like `HandleSimpleExec`. However, each level of indirection is essential in enabling additional flexibility for customizing Hypershell. This section also serves as the background for understanding of the next section, which we will walk through how to make use of the presets defined here to add new language extensions to the Hypershell DSL. After that, hopefully you will better appreciate the level of modularity introduced in this section.
+* **`HypershellPreset`** (or more specifically, `HypershellPreset::Provider`) has a blanket implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. This is because it has a `DelegateComponent` entry for `HandlerComponent`, which points to `HypershellHandlerPreset::Provider`, which is `UseDelegate<HypershellHandlerPreset::Components>`.
+* **`UseDelegate<HypershellHandlerPreset::Components>`** has a context-generic implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. This is because `HypershellHandlerPreset::Components` has a `DelegateComponent` entry for `SimpleExec<Command, Args>`, which points to `TokioHandlerPreset::Provider`, which is `UseDelegate<TokioHandlerPreset::Components>`.
+* **`UseDelegate<TokioHandlerPreset::Components>`** has a context-generic implementation for `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. This is because `TokioHandlerPreset::Components` has a `DelegateComponent` entry for `SimpleExec<Command, Args>`, which points to `HandleSimpleExec`.
+* Finally, **`HandleSimpleExec`** implements `Handler<HypershellCli, SimpleExec<Command, Args>, Input>`. This completes the implementation chain, and calls are ultimately forwarded to it.
 
-It is also worth noting that this is not necessarily a recommendation of how _you_ should write CGP code in your own application. In fact, you may not even need presets at all if your initial application only has one concrete context with no further need of customization.
+At this point, you might feel that defining so many levels of indirection just to wire up a single handler like `HandleSimpleExec` is overly complicated. However, each level of indirection is essential for enabling additional flexibility in customizing Hypershell. This section also lays the groundwork for understanding the next section, where we'll explore how to leverage these defined presets to add new language extensions to the Hypershell DSL. After that, you'll hopefully better appreciate the level of modularity introduced here.
 
-Everything we have described in this section is to explain the internal architecture of Hypershell, which is _not_ required to be understood by end users who want to just use Hypershell without additional customization. Instead, the section is mainly useful for developers who are interested in _extending_ Hypershell, or want to build similar modular DSLs.
+It's also worth noting that this is not necessarily a recommendation for how *you* should write CGP code in your own applications. In fact, you may not even need presets at all if your initial application has only one concrete context with no further customization needs.
+
+Everything we've described in this section is to explain the internal architecture of Hypershell, which is *not* required knowledge for end-users who simply want to use Hypershell without additional customization. Instead, this section is primarily useful for developers interested in *extending* Hypershell or building similar modular DSLs.
 
 # Extending Hypershell
 
-We now have a basic understanding of Hypershell structures and modularize its implementation. To see the kind of benefits it provides, we will try to extend the language to introduce new syntaxes to the DSL.
+We now have a basic understanding of Hypershell's structure and how its implementation is modularized. To fully grasp the benefits this provides, let's try extending the language by introducing new syntaxes to the DSL.
 
 ## Checksum Handler
 
-Recall that in the earlier example for [HTTP requests](#native-http-request), we try to fetch the web content of a URL, and then compute the HTTP checksum of that webpage using the `sha256sum` command. The approach allows us to iterate and get results quickly, but there are rooms for improvement once we get the initial prototype working.
+Recall that in an earlier example for [HTTP requests](#native-http-request), we fetched web content from a URL and then computed its HTTP checksum using the `sha256sum` command. While this approach allows for quick iteration and results, there's room for improvement once the initial prototype is working.
 
-In particular, since we are inside Rust, an obvious optimization would be to use a native library like [`sha2`](https://docs.rs/sha2) to compute the checksum.
+Specifically, since we're within Rust, an obvious optimization would be to use a native library like [`sha2`](https://docs.rs/sha2) to compute the checksum.
 
 ## Syntax Extension
 
-Following the modular DSL design of Hypershell, we first wants to define an _abstract_ syntax that users can use in their Hypershell program. The abstract syntax would decouples the language extension from the concrete implementation, so that users may choose an alternative implementation, such as using the `sha256sum` command, to compute the checsum.
+Following Hypershell's modular DSL design, we first want to define an **abstract syntax** that users can employ in their Hypershell programs. This abstract syntax decouples the language extension from its concrete implementation, allowing users to choose an alternative implementation, such as using the `sha256sum` command, to compute the checksum.
 
-For the purpose of this demo, we will define an abstract `Checksum` syntax as follows:
+For this demonstration, we'll define an abstract `Checksum` syntax as follows:
 
 ```rust
 pub struct Checksum<Hasher>(pub PhantomData<Hasher>);
 ```
 
-Instead of defining a syntax for SHA256, we define a general `Checksum` syntax that can be parameterized by a hasher, so that other hash algorithms can also be used with this syntax.
+Instead of defining a specific SHA256 syntax, we've created a general `Checksum` syntax that can be parameterized by a hasher. This design allows other hash algorithms to be used with this syntax as well.
 
-In addition to the `Checksum` syntax, we also introduce a new `BytesToHex` syntax for conversion from bytes to hex strings:
+In addition to the `Checksum` syntax, we'll also introduce a new `BytesToHex` syntax for converting bytes to hexadecimal strings:
 
 ```rust
 pub struct BytesToHex;
 ```
 
-The main idea is that we want to keep the native implementation of the checksum handler flexible for different use cases. Rust libraries like `sha2` outputs the checksums as raw bytes, which may be more efficient for operations such as comparison of two checksums. On the other hand, when we want to display the output of a Hypershell program, it may be better to show it as hex strings on the terminal.
+The main idea here is to keep the native implementation of the checksum handler flexible for different use cases. Rust libraries like `sha2` output checksums as raw bytes, which can be more efficient for operations like comparing two checksums. On the other hand, when we want to display the output of a Hypershell program, it might be better to show it as hex strings on the terminal.
 
-By providing explicit conversion, we allow the user to decide whether to convert the checksum bytes into hex within a Hypershell program, by adding it as part of the handler pipeline.
+By providing explicit conversion, we allow the user to decide whether to convert the checksum bytes into hexadecimal within a Hypershell program, simply by adding it as part of the handler pipeline.
 
 ## `HandleStreamChecksum` Provider
 
@@ -1206,17 +1213,17 @@ where
 }
 ```
 
-The code above defines a `HandleStreamChecksum` provider that implements `Handler` for the syntax `Checksum<Hasher>`, provided that `Hasher` implements [`Digest`](https://docs.rs/sha2/latest/sha2/trait.Digest.html).
+The code above defines a `HandleStreamChecksum` provider that implements `Handler` for the `Checksum<Hasher>` syntax, provided that `Hasher` implements [`Digest`](https://docs.rs/sha2/latest/sha2/trait.Digest.html).
 
-Additionally, to support streaming input, `HandleStreamChecksum` works on any `Input` type that implements [`TryStream`](https://docs.rs/futures/latest/futures/prelude/trait.TryStream.html), with the `Ok` type implementing `AsRef<[u8]>`. The provider also requires `Context` to implement `CanRaiseAsyncError<Input::Error>`, so that any error in the input stream will be handled by the context.
+Additionally, to support streaming input, `HandleStreamChecksum` works on any `Input` type that implements [`TryStream`](https://docs.rs/futures/latest/futures/prelude/trait.TryStream.html), with its `Ok` type implementing `AsRef<[u8]>`. The provider also requires `Context` to implement `CanRaiseAsyncError<Input::Error>`, ensuring that any error in the input stream will be handled by the context.
 
-The `Output` type is defined to be `GenericArray<u8, Hasher::OutputSize>`, which is the type that is returned by `Digest::finalize`. We choose to return this instead of `Vec<u8>`, as it allows the caller to be confident of the size of the checksum bytes is always fixed. It is also fine for the use case of `Hypershell`, as `GenericArray` is bytes-like and implements `AsRef<[u8]>`, and thus can interop with other handlers rather easily.
+The `Output` type is defined as `GenericArray<u8, Hasher::OutputSize>`, which is the type returned by `Digest::finalize`. We choose this over `Vec<u8>` because it assures the caller that the size of the checksum bytes will always be fixed. This is also fine for Hypershell's use case, as `GenericArray` is byte-like and implements `AsRef<[u8]>`, allowing it to interoperate easily with other handlers that accept bytes-like input.
 
-In the method body, we can implement the hashing by creating a `Hasher` instance, iterating asynchronously over the `TryStream`, and call `update` on the incoming bytes. Finally, we call `finalize` to compute and return the checksum result.
+Within the method body, we implement the hashing by creating a `Hasher` instance, asynchronously iterating over the `TryStream`, and calling `update` on the incoming bytes. Finally, we call `finalize` to compute and return the checksum result.
 
 ## `BytesToHex` Provider
 
-Similar to `HandleStreamChecksum`, we can also implement `Handler` provider for `BytesToHex` rather easily. In fact, the implementation is simpler, as we can work on a bytes value directly, instead of stream of bytes.
+Similar to `HandleStreamChecksum`, we can also implement the `Handler` provider for `BytesToHex` quite easily. In fact, this implementation is simpler, as it works directly on a byte slice instead of a stream of bytes.
 
 ```rust
 #[cgp_new_provider]
@@ -1239,13 +1246,13 @@ where
 }
 ```
 
-The `HandleBytesToHex` provider is implemented to work with any `Input` type that implements `AsRef<[u8]>`. It has a `String` output type, and simply calls [`hex::encode`](https://docs.rs/hex/latest/hex/fn.encode.html) to encode the input bytes into hex string.
+The `HandleBytesToHex` provider is implemented to work with any `Input` type that implements `AsRef<[u8]>`. It produces a `String` output type and simply calls [`hex::encode`](https://docs.rs/hex/latest/hex/fn.encode.html) to encode the input bytes into a hexadecimal string.
 
-Notice that `HandleBytesToHex` can be implemented with a generic `Code`, rather than specifically the `BytesToHex` syntax. We can do this, because we don't need to access any information from the `Code` to implement the provider. It is a common practice with CGP to implement providers as generically as possible, at least within some code bases. By doing so, we allow the provider to be more easily reused in other places, such as using it to handle other syntaxes.
+Notice that `HandleBytesToHex` can be implemented with a generic `Code`, rather than specifically the `BytesToHex` syntax. We can do this because we don't need to access any information from the `Code` to implement the provider. It's common practice with CGP to implement providers as generically as possible, at least within certain codebases. By doing so, we allow the provider to be more easily reused in other places, such as handling other syntaxes.
 
 ## Preset Extension
 
-We can now extend `HypershellPreset` to include the new syntaxes and providers that we have introduced. The extension to the preset require relatively minimal amount of code to be added:
+We can now extend `HypershellPreset` to include the new syntaxes and providers we've introduced. Extending the preset requires a relatively minimal amount of code:
 
 ```rust
 #[cgp::re_export_imports]
@@ -1275,19 +1282,19 @@ mod preset {
 }
 ```
 
-We first define `ExtendedHypershellPreset` to extend from `HypershellPreset`. In the body, we do not introduce new component wiring, except to override the wiring of `HandlerComponent` to use `ExtendedHandlerPreset`, which we defines next.
+We first define `ExtendedHypershellPreset` to extend from `HypershellPreset`. In its body, we don't introduce new component wiring, except to override the wiring of `HandlerComponent` to use `ExtendedHandlerPreset`, which we define next.
 
-We define `ExtendedHandlerPreset` to extend from `HypershellHandlerPreset`. Inside the body, we wire up the provider for `BytesToHex` to `HandleBytesToHex`. Following that, the wiring for `Checksum` actually consists of an _inner pipeline_ of handlers, rather than just `HandleStreamChecksum`.
+We define `ExtendedHandlerPreset` to extend from `HypershellHandlerPreset`. Inside its body, we wire up the provider for `BytesToHex` to `HandleBytesToHex`. Following that, the wiring for `Checksum` actually consists of an **inner pipeline** of handlers, rather than just `HandleStreamChecksum`.
 
-To understand what is going on, we first have to understand that `HandleStreamChecksum` can work with any `Input` type that implements `TryStream`. However, the output type returned by `HandleStreamingHttpRequest`, which we want to use with `Checksum` in our example, only implements [`futures::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html) instead of `TryStream`.
+To understand what's happening here, we first need to recognize that `HandleStreamChecksum` can work with any `Input` type that implements `TryStream`. However, the output type returned by `HandleStreamingHttpRequest`, which we want to use with `Checksum` in our example, only implements [`futures::AsyncRead`](https://docs.rs/futures/latest/futures/io/trait.AsyncRead.html) instead of `TryStream`.
 
-To convert the output from `HandleStreamingHttpRequest` into `TryStream`, we need to peform two steps of conversion. First, we use the `FuturesToTokioAsyncRead` provided by Hypershell to convert a `futures::AsyncRead` into [`tokio::AsyncRead`](https://docs.rs/tokio/latest/tokio/io/trait.AsyncRead.html). We then use `AsyncReadToStream` provided by Hypershell to convert a `tokio::AsyncRead` into `TryStream`. The two levels of conversion is needed, as unfortunately there is no simple way to convert a `futures::AsyncRead` into `TryStream` directly.
+To convert the output from `HandleStreamingHttpRequest` into a `TryStream`, we need to perform two conversion steps. First, we use `FuturesToTokioAsyncRead` (provided by `hypershell-tokio-components`) to convert a `futures::AsyncRead` into [`tokio::AsyncRead`](https://docs.rs/tokio/latest/tokio/io/trait.AsyncRead.html). Then, we use `AsyncReadToStream` (also provided by Hypershell) to convert a `tokio::AsyncRead` into a `TryStream`. These two levels of conversion are necessary because, unfortunately, there's no simple direct way to convert a `futures::AsyncRead` into a `TryStream`.
 
-Finally, we use `PipeHandlers` to combine the 3 handler providers into a single `Handler` provider. Notice that while `Pipe` is an abstract _syntax_ that works with a list of inner handler _syntaxes_, `PipeHandlers` is a _provider_ for `Handler` that works with a list of inner handler _providers_.
+Finally, we use `PipeHandlers` to combine the three handler providers into a single `Handler` provider. Notice that while `Pipe` is an abstract **syntax** that works with a list of inner handler **syntaxes**, `PipeHandlers` is a **provider** for `Handler` that works with a list of inner handler **providers**.
 
 ## Example Program
 
-With the new `ExtendedHypershellPreset` defined, we can now define an example Hypershell program that makes use of the new `Checksum` and `BytesToHex` syntax:
+With the new `ExtendedHypershellPreset` defined, we can now define an example Hypershell program that utilizes the new `Checksum` and `BytesToHex` syntaxes:
 
 ```rust
 pub type Program = hypershell! {
@@ -1302,7 +1309,7 @@ pub type Program = hypershell! {
 };
 ```
 
-With the new syntaxes in place, our program becomes much simpler, as compared to having to call the shell commands explicitly. Next, we define a concrete context that uses our `ExtendedHypershellPreset` to run the program:
+With the new syntaxes in place, our program becomes much simpler compared to having to explicitly call shell commands. Next, we define a concrete context that uses our `ExtendedHypershellPreset` to run the program:
 
 ```rust
 #[cgp_context(MyAppComponents: ExtendedHypershellPreset)]
@@ -1313,9 +1320,9 @@ pub struct MyApp {
 }
 ```
 
-Instead of extending from `HypershellPreset`, our context provider `MyAppComponents` now instead extends from `ExtendedHypershellPreset`. With that, it is now able to support the new syntaxes that we have introduced in our Hypershell program.
+Instead of extending from `HypershellPreset`, our context provider `MyAppComponents` now extends from `ExtendedHypershellPreset`. With this change, it can now support the new syntaxes we've introduced into our Hypershell program.
 
-With everything defined, we just need to write a main function that builds a `MyApp` context, and calls the Hypershell program with it:
+With everything defined, we just need to write a `main` function that builds a `MyApp` context and calls the Hypershell program with it:
 
 ```rust
 #[tokio::main]
@@ -1331,7 +1338,7 @@ async fn main() -> Result<(), Error> {
 }
 ```
 
-The full example code is available in the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_native.rs), together with the checksum implementation available as the [`hypershell-hash-components`](https://github.com/contextgeneric/hypershell/tree/main/crates/hypershell-hash-components) crate. We can run the example program, and it should produce the same output as the previous example that called the `sha256sum` command:
+The full example code is available in the [project repository](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/http_checksum_native.rs), and the checksum implementation is available as the [`hypershell-hash-components`](https://github.com/contextgeneric/hypershell/tree/main/crates/hypershell-hash-components) crate. We can run the example program, and it should produce the same output as the previous example that called the `sha256sum` command:
 
 ```rust
 $ cargo run --example http_checksum_native
@@ -1340,27 +1347,27 @@ c5ce4ff8fb2d768d4cbba8f5bee3d910c527deedec063a0aa436f4ae7005c713
 
 ## Language Extension Made Easy
 
-As we can see with the final example, with a dozens lines of code, we have managed to extend the Hypershell language, and add new syntaxes and features to it. Aside from the simple example of computing the checksum, we can imagine more complicated features being added in similar ways to Hypershell.
+As we've seen with the final example, with just a few dozen lines of code, we've successfully extended the Hypershell language and added new syntaxes and features. Beyond this simple checksum example, we can imagine more complex features being added to Hypershell in similar ways.
 
-The beauty of this approach is that _a language extension does not affect the core implementation of Hypershell, or require any upstream patches or coordination_. _Anyone_ can build a language extension for Hypershell without requiring permission from Hypershell or any need of forking the project.
+The real beauty of this approach is that **a language extension doesn't affect Hypershell's core implementation or require any upstream patches or coordination.** *Anyone* can build a language extension for Hypershell without needing permission from the Hypershell project or having to fork it.
 
-Furthermore, an application that do not need the extension can choose to remain using only the core implementation, and not get bloated by the dependencies introduced by the extensions. As a result, developers can freely experiment and extend the core language without worrying that it would negatively affect all users of the language.
+Furthermore, an application that doesn't need the extension can choose to continue using only the core implementation, avoiding bloat from the extension's dependencies. As a result, developers can freely experiment with and extend the core language without worrying about negatively affecting all users of the language.
 
-With the decoupling of the language syntax from the implementation, we are also able to separate the design of new syntaxes from the concrete implementation. For example, we could imagine that the `Checksum` syntax is hosted on a dedicated crate, together with RFC-like documentation that describe the expected behavior when using the new syntax. This would allow multiple alternative implementations to co-exist, and encourage community coordination beyond library APIs.
+With the decoupling of the language syntax from its implementation, we're also able to separate the design of new syntaxes from their concrete implementation. For example, we could imagine the `Checksum` syntax being hosted in a dedicated crate, complete with RFC-like documentation describing its expected behavior. This would allow multiple alternative implementations to coexist and encourage community coordination beyond just library APIs.
 
-For some readers, it may seem overkill to introduce a feature like checksum as an extension to a language like Hypershell. But our main goal here is for you to _imagine_ how to apply similar techniques to more complex languages and extensions, especially in problem domains where such decoupling could be very benefitial.
+For some readers, it might seem like overkill to introduce a feature like a checksum as an extension to a language like Hypershell. However, our main goal here is for you to **imagine** how to apply similar techniques to more complex languages and extensions, especially in problem domains where such decoupling could be highly beneficial.
 
 ## Future Exercises
 
-The example checksum extension that we have demonstrated is kept simplified, so that it can be more easily understood without being overloaded with too much details. As a result, there are few simple improvements that can be made on the example to improve the quality of the extension. I will leave it as an exercise to the readers to try and implement the improvements on their own, and use the exercises as the first step to get your hand dirty with Hypershell and CGP.
+The checksum extension example we demonstrated was intentionally simplified to avoid overwhelming you with too many details. As a result, there are a few straightforward improvements that could enhance the extension's quality. I'll leave these as exercises for you to implement, serving as a practical first step to getting hands-on with Hypershell and CGP.
 
 ### Abstract Hasher Syntax
 
-While the `Checksum<Hasher>` syntax is abstract, the implementation of `HandleStreamChecksum` requires the `Hasher` type to directly implement the `Digest` trait. As a result, users of `Checksum` are forced to include `sha2` as a dependency in their program, in order to use type like `Sha256` from the crate.
+While the `Checksum<Hasher>` syntax itself is abstract, the `HandleStreamChecksum` implementation currently requires the `Hasher` type to directly implement the `Digest` trait. Consequently, users of `Checksum` are forced to include `sha2` as a dependency in their program to use types like `Sha256` from that crate.
 
-As an exercise, try define your own structs, e.g. `struct Sha256;`, as abstract syntaxes in the crate to be used together with `Checksum`. Then make use of dependency injection `HandleStreamChecksum` to "convert" the abstract `Hasher` type into a type that implements `Digest`.
+As an exercise, try to define your own structs (e.g., `struct Sha256;`) as abstract syntaxes in the crate to be used with `Checksum`. Then, utilize dependency injection in `HandleStreamChecksum` to "convert" the abstract `Hasher` type into a type that implements `Digest`.
 
-As a hint, you might need to define an additional trait to provide the mapping, such as:
+As a hint, you might need to define an additional trait to provide this mapping, such as:
 
 ```rust
 #[cgp_type]
@@ -1371,21 +1378,21 @@ pub trait HasHashDigestType<Hasher> {
 
 ### Input-Based Dispatch
 
-In the wiring of `ExtendedHandlerPreset`, we have defined a pipeline handler for `Checksum` to handle the input as a `futures::AsyncRead` stream. This would mean that we would get type errors when trying to use `Checksum` with the output from other handlers, such as `SimpleExec`.
+In the wiring of `ExtendedHandlerPreset`, we defined a pipeline handler for `Checksum` to process input as a `futures::AsyncRead` stream. This design means you would encounter type errors when trying to use `Checksum` with the output from other handlers, such as `SimpleExec`.
 
-The `Handler` component from CGP also comes with a `UseInputDelegate` wrapper, that dispatches the implementation of `Handler` to inner providers based on the `Input` type instead of the `Code` type. Try and figure out of how we can use `UseInputDelegate` to define different input conversion pipelines depending on the `Input` type.
+The `Handler` component from CGP also provides a `UseInputDelegate` wrapper. This wrapper dispatches the `Handler` implementation to inner providers based on the **`Input` type** rather than the `Code` type. Try to figure out how you can use `UseInputDelegate` to define different input conversion pipelines depending on the `Input` type.
 
-You can look for example implementations in Hypershell, where we already make use of `UseInputDelegate` to support multiple input stream types.
+You can look for example implementations within Hypershell itself, where `UseInputDelegate` is already used to support multiple input stream types.
 
 ### Alternative Providers
 
-Our original examples performed the computation using the `sha256sum` command. This means that the syntax for `Checksum` can technically also be implemented using the `sha256sum` command. Try and think of a way to define a second extension preset that contains wiring that forwards the implementation of `Checksum<Sha256>` to `StreamingExec`.
+Our original examples performed the checksum computation using the `sha256sum` command. This implies that the `Checksum` syntax could technically also be implemented using the `sha256sum` command. Try to devise a way to define a second extension preset that contains wiring to forward the `Checksum<Sha256>` implementation to `StreamingExec`.
 
-As a hint, Hypershell provides a `Call` provider that you can use to implement a provider that "calls" another Hypershell program to implement a given program. Look for how `Call` is used in the code base to find out how you can use it.
+As a hint, Hypershell provides a `Call` provider that you can use to implement a provider that "calls" another Hypershell program to implement a given program. Look for how `Call` is used in the codebase to understand its usage.
 
-You may also need to make a decision to standardize on whether `Checksum` should produce the checksum as raw bytes or hex string. This is because `HandleStreamChecksum` currently implements `Checksum` by returning raw bytes.
+You may also need to decide whether `Checksum` should produce the checksum as raw bytes or a hex string. This is because `HandleStreamChecksum` currently implements `Checksum` by returning raw bytes.
 
-As a hint, if you want `Checksum` to return a hex string, then you should add `BytesToHex` after `HandleStreamChecksum` inside the pipeline for the wiring of `Checksum`. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` to become bytes.
+As a hint, if you want `Checksum` to return a hex string, you should add `BytesToHex` after `HandleStreamChecksum` within the pipeline for the `Checksum`'s wiring. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` into bytes.
 
 # Epilogue
 
