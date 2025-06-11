@@ -1395,9 +1395,17 @@ Hopefully at this point, you have understood enough about CGP to be interested i
 
 ## Background
 
+Here is just some background story about the name "Hypershell". Many years ago, around 2012, I came up with a project called Hypershell, which sparked from the idea of what if we designed HTTP APIs to become pipeable similar to CLI applications. The idea didn't last for long, as I eventually found better levels of abstractions than the raw HTTP protocol that can be used to construct similar shell-like pipelines.
+
+Nevertheless, the ideas behind Hypershell and the learning experience is what eventually led to the development of CGP. Compared to my initial idea, CGP is much more general and supports more than just constructing pipelines between shell-like applications.
+
+More recently, while I was looking for suitable examples for CGP, I remembered Hypershell, and I just thought that it serves as a good homage to the original project that I started at the beginning.
+
+With many years passed, the word "Hypershell" has become much more popular than I first came up with the name, and it has been used for various products and projects. Nevertheless, I still like to reuse the name for this project, as it holds meaning to my personal programming journey.
+
 ## Advantages
 
-First, we will discuss a bit on the pros and cons on using the approach outlined in this blogpost to implement a DSL in Rust using CGP.
+We will discuss a bit on the pros and cons on using the approach outlined in this blogpost to implement a DSL in Rust using CGP.
 
 The biggest advantage of our approach is the extensibility and interoperability that can be achieved. With CGP being the base framework, the DSL can decouple its syntax from semantics, with language extensions implemented as new presets.
 
@@ -1499,12 +1507,60 @@ On one hand, I think CGP has great potential to make Rust code play well with Ka
 
 ## Non-DSL Use Cases
 
+Aside from building DSLs, it is totally feasible to build modular applications with only CGP without turning them into DSLs. Although this blog post focus on the specific usage pattern of DSLs, we will also come back to normal application development with CGP in future blog posts.
+
+The CGP project is pivoting to put more focus in DSL development, at least in this early phase. This is because DSL is a niche in Rust that is not explored much, making it easier to gain attraction, as compared to the negative connotation that is often associated to the term "framework". Furthermore, DSLs have a clearer separation between two groups of people: the designer or implementor of the DSL, and the users of the DSL.
+
+On the other hand, there are less boundary in the world of normal application development, thus reducing the appeal of modular application development. Technically speaking, there are [clear benefits](https://www.youtube.com/watch?v=mfdVAyA443Q) of using CGP even for single-party software, such as improving maintainability and testability. However, such technical benefits are often neglected by most software development teams, as they don't offer short term benefits to the businesses. As a result, CGP could only really shine in use cases where developers want to build reusable components for _other_ developers to use, i.e. when there is a split between one group of developers who care about modularity, and another group of developers who consume modular code from others but _don't_ care about writing modular code themselves.
+
+An obvious use case for CGP is to use it to build modular web frameworks, with reusable components for cross-cutting concerns such as authentication, caching, and logging. However, just as the case of the HTML DSL, the space for web framework is too crowded and competitive, and I wanted to avoid associating CGP or my career to be too close to web development. Thus this will probably only be prioritized later on, after CGP gains its foot hold in other areas such as DSL development.
+
+CGP may also be well suited in specialized problem domains, such as database design, game development, or machine learning. However, since I am not an expert in these problem domains, it may be challenging for me to build sufficiently advanced solutions for these problem domains, while also continue developing on CGP using my limited free time.
+
+All that being said, it just means that it might be too much expectations on me as an _individual_ to implement solutions to every problems that could potentially be solved by CGP. But this is where _you_ and the _early adopter community_ can step in to help.
+
 ## Contribution and Support
+
+As mentioned in the last section, I see my own role as the _enabler_ for developers who care about modularity to _produce_ modular components for other developers (or machines) to _consume_ these components without needing to care about CGP or modularity. This way, _everyone_ can benefit from CGP regardless of their world view on software development.
+
+As much as I would love to build every potential solutions offered by CGP on my own, I unfortunately do not have the capacity, expertise, or motivation to build them myself, at least not when I still have to worry about paying bills. As a result, my goal is build enough examples to show _you_ the potentials of CGP, and build up a community of developers for CGP.
+
+At this point, you are convinced of the potentials of CGP and want to help out, I have listed out some of the things you can do next.
 
 ### Join the Community
 
-### Build Your Own DSL
+We now have a [community Discord](https://discord.gg/Hgk3rCw6pQ) for CGP! This will probably be a very small community at the start, so please feel free to not worry about noise and start any discussion you have about CGP. In particular, since many of the CGP concepts are still new and undocumented, I encourage you to ask anything you don't understand about CGP in the Discord, no matter how stupid it might sound.
+
+Aside from the community Discord, we also have a [GitHub Discussions](https://github.com/orgs/contextgeneric/discussions) forum and a [Reddit](https://www.reddit.com/r/cgp/) community. So if you would like to have more formalized public discussions, you could post them there.
+
+### Build Your Own DSL and Libraries
+
+In the earlier section, I have outlined some potential project ideas for CGP. Please feel free to steal any of the project ideas, or come out with your own ideas and start a project using CGP. Please note that since the available resources are not comprehensive enough, I encourage you to ask as many questions in the community Discord when you get stuck in understanding any concepts.
 
 ### Research Collaboration
 
+Prior to CGP and Hypershell, I have worked on and published a paper on [Ferrite](https://arxiv.org/abs/2009.13619), an session type EDSL for Rust. I think many of the programming techniques I have developed for CGP and Hypershell may be worthy of publishing at functional programming conferences like ICFP.
+
+I have also previously considered pursuing a PhD in programming languages, but unfortunately for financial reasons I have decided to stay in the tech industry. As a result, I don't have the personal capacity of witholding publicizing my work on CGP for the sake of writing polished and novel research papers.
+
+That said, if you are a PL researcher and is interested to publish PL research work about CGP, I am happy to collaborate if someone else is willing to be the main author of the paper.
+
 ### Sponsor Me
+
+If you really enjoy my work, and want to see CGP gain more adoption some day in the future, the best way to do so is to _sponsor_ me, no matter how small the amount. I have set up sponsorship pages on [Github Sponsor](#), [Ko-Fi](#), and [Patreon](#).
+
+_As with most open source projects_, I do not expect any amount of sponsorship to be sufficient for me to quit my job and work full time on CGP, or even _with_ CGP. _However_, any amount of financial sponsorship will give me significant confidence that my work is _valuable_, and that it is worthy for me to continue pouring hundreds of hours of my free time on this instead of doing something else.
+
+I do wish to eventually spend a year or two to work full time on CGP with my _personal savings_, even if the sponsorships are not enough to support my living expenses. _However_, exponential curves are important, and if I could gain at least 1,000 EUR worth of monthly sponsorship, it would at least clear up some risk assessments and informs me that I might have a slightly higher chance of making CGP a self-sustaining project.
+
+### Hire Me
+
+If you are a company reading this, and in the small chance that you think CGP can be useful to solve business or technical problems for you, please [contact me](mailto:soares.chen@maybevoid.com) to discuss about any potential freelancing arrangement.
+
+That said, I already have a full time job starting August 2025, and I will probably have very limited capacity to take up side gigs or consider another job offer. I have considered, but refrained, from selling CGP as a consulting service or job application, because it is not _fun_ for me personally, and I know that it will likely _fail_ no matter how polished I make it look at this stage. But I _want_ to continue working on CGP, even at my own personal expense, and not get too stressed and disappointed by the fact that it will probably take _years_ before I can see any possibility of this project becomes financially self-sustaining.
+
+So as an alternative, I am just adding this section as a low-effort for-hire advertisement that I know will likely never hear back from. At least, this is the maximal effort that I am willing to put in to not risk being disappointed by the result. And as for the rest of the readers, I hope that at least this brings you more clarity on the financial status of the project, and my personal commitment to it regardless of how much I will gain personally.
+
+### Learn More
+
+Finally, thank you all who made it to the end of this blog post. Please visit the [project homepage](/) to learn more about CGP, and let's all start writing context-generic code!
