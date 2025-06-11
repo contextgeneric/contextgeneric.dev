@@ -1394,180 +1394,187 @@ You may also need to decide whether `Checksum` should produce the checksum as ra
 
 As a hint, if you want `Checksum` to return a hex string, you should add `BytesToHex` after `HandleStreamChecksum` within the pipeline for the `Checksum`'s wiring. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` into bytes.
 
-# Epilogue
+# Discussions
 
-We have finally reach the end of this blog post. Thank you for your patience if you are still reading at this point! Although this is a very long read, I hope that the blog post has covered all essential topics for you to understand the strengths of Hypershell and CGP.
 
-Hopefully at this point, you have understood enough about CGP to be interested in learning more about it. If you are interested in the project, this section summarizes some of the follow up discussions, and the future work for CGP.
+We've finally reached the end of this blog post. Thank you for your patience if you're still reading! Although this was a lengthy read, I hope it has covered all essential topics, helping you understand the strengths of Hypershell and CGP.
+
+Hopefully, by now, you've grasped enough about CGP to be interested in learning more. If you're intrigued by the project, this section summarizes some follow-up discussions and future work for CGP.
 
 ## Background
 
-Here is just some background story about the name "Hypershell". Many years ago, around 2012, I came up with a project called Hypershell, which sparked from the idea of what if we designed HTTP APIs to become pipeable similar to CLI applications. The idea didn't last for long, as I eventually found better levels of abstractions than the raw HTTP protocol that can be used to construct similar shell-like pipelines.
+Here's a little backstory about the name "Hypershell". Many years ago, around 2012, I started a project called Hypershell, sparked by the idea of designing HTTP APIs to be pipeable, similar to CLI applications. The idea didn't last long, as I eventually discovered better levels of abstraction than the raw HTTP protocol that could achieve similar shell-like pipelines.
 
-Nevertheless, the ideas behind Hypershell and the learning experience is what eventually led to the development of CGP. Compared to my initial idea, CGP is much more general and supports more than just constructing pipelines between shell-like applications.
+Nevertheless, the concepts behind Hypershell and the learning experience ultimately led to the development of CGP. Compared to my initial idea, CGP is far more general and supports more than just constructing pipelines between shell-like applications.
 
-More recently, while I was looking for suitable examples for CGP, I remembered Hypershell, and I just thought that it serves as a good homage to the original project that I started at the beginning.
+More recently, while searching for suitable examples for CGP, I remembered Hypershell and thought it would serve as a fitting homage to the original project I started.
 
-With many years passed, the word "Hypershell" has become much more popular than I first came up with the name, and it has been used for various products and projects. Nevertheless, I still like to reuse the name for this project, as it holds meaning to my personal programming journey.
+Many years have passed since then, and the word "Hypershell" has become much more popular than when I first came up with the name, now used for various products and projects. Nonetheless, I still like to reuse the name for this project, as it holds personal meaning for my programming journey.
 
 ## Advantages
 
-We will discuss a bit on the pros and cons on using the approach outlined in this blogpost to implement a DSL in Rust using CGP.
+Let's discuss the pros and cons of using the approach outlined in this blog post to implement a DSL in Rust with CGP.
 
-The biggest advantage of our approach is the extensibility and interoperability that can be achieved. With CGP being the base framework, the DSL can decouple its syntax from semantics, with language extensions implemented as new presets.
+The greatest advantage of our approach is the *extensibility and interoperability* it offers. With CGP as the base framework, the DSL can decouple its syntax from its semantics, allowing language extensions to be implemented as new presets.
 
-Furthermore, the ease of extension makes it very easy for DSL programs to interop easily with Rust, without needing interop layers like FFI. CGP even makes it easy for _multplie_ DSLs to interop with each others, as by the end of the day, we are really just writing CGP programs that happen to look like DSLs.
+Furthermore, the ease of extension makes it very straightforward for DSL programs to interoperate seamlessly with Rust, without needing interoperability layers like FFI. CGP even facilitates interoperability between *multiple* DSLs, as, at the end of the day, we're simply writing CGP programs that happen to resemble DSLs.
 
-Additionally, by hosting the DSL programs as types and interpreting it at compile time, we are able to bypass any runtime overhead of hosting a DSL, and run the DSL at native speed.
+Additionally, by hosting the DSL programs as types and interpreting them at compile time, we can bypass any runtime overhead associated with hosting a DSL, allowing it to run at native speed.
 
 ## Disadvantages
 
 ### Steep Learning Curve
 
-The main advantage of building a CGP-based DSL is the potentially high learning curve, especially with the needs to learn CGP. Despite this very long blog post, we are barely scratching the surface of CGP, and have yet to dive into the actual _code_ that powers CGP. On the other hand, the learning curve barrier is more applicable to DSL _developers_, as compared to DSL _users_ who do not need to know too much about CGP in order to write programs for that DSL.
+The primary drawback of building a CGP-based DSL is the potentially **high learning curve**, especially due to the need to learn CGP itself. Despite this lengthy blog post, we've only scratched the surface of CGP and haven't even delved into the actual *code* that powers it. However, this learning curve barrier is more applicable to DSL *developers* than to DSL *users*, who generally don't need extensive CGP knowledge to write programs for that DSL.
 
-That said, a main barrier from the DSL users perspective is the potential poor experience when encountering errors. A major problem is that whenever there is a type error, the user would only seen errors shown for the _entire_ DSL program. Furthermore, since there are many levels of indirections, even one mistake can cause dozens of error messages to be shown by the Rust compiler.
+### Poor Error Messages
 
-There are potential ways that we can improve the Rust compiler to show more helpful error messages. However, the work may take a long time, and may require sufficiently large demand from people using CGP to justify the changes requested. In the short term, a potential short term solution is to train LLMs to decipher the error messages and help the user fix any mistake. In fact, I have a feeling that DSLs might be much better suited for vibe coding as compared to general purpose languages, as they are much closer to human languages and thus could much easier to work with by both humans and AIs.
+That said, a significant barrier for DSL users is the potentially poor experience when encountering errors. A major problem is that when a type error occurs, users would see errors displayed for the *entire* DSL program. Furthermore, with many levels of indirection, even a single mistake can trigger dozens of error messages from the Rust compiler.
+
+There are potential ways to improve the Rust compiler to show more helpful error messages. However, this work could take a long time and might require sufficient demand from CGP users to justify the requested changes.
+
+In the short term, a potential solution is to train LLMs to decipher error messages and help users fix mistakes. In fact, I have a feeling that DSLs might be much better suited for "vibe coding" compared to general-purpose languages, as they are closer to human languages and thus easier for both humans and AI to work with.
 
 ### Dynamic Loading
 
-Another disadvantage of our DSL approach is the flip side of its strength: since the DSL is hosted at compile time, it also means that we cannot easily use the technique to run DSL programs that are loaded into a host application during runtime. This means that at least for now, we cannot use the technique to build DSLs for use cases such as config files, plugins, or game mods. Although I have some ideas to blend together the static and dynamic approaches of building DSLs, that will probably only researched in further future.
+Another disadvantage of our DSL approach is the flip side of its strength: since the DSL is hosted at compile time, this technique cannot be easily used to run DSL programs loaded into a host application during runtime. This means that, at least for now, we cannot use this technique to build DSLs for use cases such as configuration files, plugins, or game mods.
+
+While I have some ideas to blend static and dynamic approaches for building DSLs, that research will likely only occur in the distant future.
 
 ### Slow Compilation Time
 
-Lastly, there is a more general problem of having slow compile time for CGP-based programs, at least for when the final executable is built. Since CGP programs are written as highly generic code with minimal dependencies, most of the CGP crates can actually be compiled _much faster_ than regular Rust dependencies. However, as most of the abstract implementations are only instantiated _lazily_ at the end when a method is called on the concrete type, that is when compilation becomes very slow.
+Lastly, there's a more general problem of slow compile times for CGP-based programs, especially when the final executable is built. Since CGP programs are written as highly generic code with minimal dependencies, most CGP crates can actually compile *much faster* than regular Rust dependencies. However, as most abstract implementations are only instantiated *lazily* at the end when a method is called on the concrete type, that's when compilation becomes very slow.
 
-In particular, compilation of CGP programs become slow when Rust is building the executables and tests that contain `main` functions. This is particularly problematic when there are multiple executables to be compiled. This is likely because each executable triggers their own generic instantiation that is not shared between other compilation units, and so nothing was used to speed up subsequent builds even when they are instantiated with the same generic parameters.
+In particular, CGP program compilation becomes slow when Rust builds executables and tests that contain `main` functions. This is especially problematic when multiple executables need to be compiled. This is likely because each executable triggers its own generic instantiation that isn't shared between other compilation units, so nothing speeds up subsequent builds even when they're instantiated with the same generic parameters.
 
-When using CGP with DSLs, the slow compilation can potentially worsen, as each DSL program would trigger unique generic instantiations that need to be compiled separately. Additionally, even though we can define new CGP contexts that share the same preset easily, doing so would probably cause Rust to recompile all generic code with the new context, and thus slow down the compilation significantly.
+When using CGP with DSLs, slow compilation can potentially worsen, as each DSL program would trigger unique generic instantiations that need to be compiled separately. Additionally, even though we can easily define new CGP contexts that share the same preset, doing so would likely cause Rust to recompile all generic code with the new context, significantly slowing down compilation.
 
-On the other hand, I had done some rough experiments to test whether the _size_ of a DSL program would affect the compilation time. It looks like doubling the size of the program result in relatively little increase in compile time, at least if the same set of features are used in the DSL. This means that the main penalty occurs on the first time a heavyweight dependency is loaded, such as when the provider that uses `reqwest` is loaded. After that, it matters less if our DSL program uses the provider once or many times.
+On the other hand, I've conducted some rough experiments to test whether the *size* of a DSL program affects compilation time. It appears that doubling the program size results in relatively little increase in compile time, at least if the same set of features are used in the program. This suggests that the main penalty occurs the first time a heavyweight dependency is loaded, such as when the provider that uses `reqwest` is loaded. After that, it matters less whether our DSL program uses the same provider once or many times.
 
 ## Related Work
 
-We will discuss briefly about some related work that are influential to the design of Hypershell and CGP. It would be impractical for me to list out all related work, so I will only talk about the topics that I find the most interesting.
+Let's briefly discuss some related work that influenced the design of Hypershell and CGP. It would be impractical to list all related work, so I'll only cover the topics I find most interesting.
 
 ### Tagless Final
 
-First of all, the techniques used by CGP and Hypershell are closely related to the [_tagless final_](https://okmij.org/ftp/tagless-final/index.html) style of programming. In particular, we make heavy use of traits (typeclasses) to implement and compose each part of the DSL to become a full language.
+First and foremost, the techniques used by CGP and Hypershell are closely related to the **tagless final** style of programming. In particular, we make extensive use of traits (typeclasses) to implement and compose each part of the DSL into a full language.
 
-On the other hand, our approach is different enough from tagless final that I want to avoid people thinking that they are the same. In particular, CGP focuses on having an additional `Context` parameter that provides dependency injection, and provider traits with unique `Self` types. The original tagless final approach lack of such context type or provider type, making it less flexible in modularizing the DSL implementation.
+However, our approach differs enough from tagless final that I want to avoid people thinking they're identical. Specifically, CGP focuses on having an additional `Context` parameter that provides dependency injection, and provider traits with unique `Self` types. The original tagless final approach lacks such a context type or provider type, making it less flexible in modularizing the DSL implementation.
 
-Furthermore, many DSL approaches, including tagless final, focus on defining the DSL program at the _term-level_, while Hypershell DSL programs are defined at the _type-level_.
+Furthermore, many DSL approaches, including tagless final, focus on defining the DSL program at the *term-level*, whereas Hypershell DSL programs are defined at the *type-level*.
 
 ### Servant
 
-Our approach of defining DSL programs as types shares a lot of similarity with the type-level DSL techniques used by [Servant](https://www.servant.dev/posts/2018-07-12-servant-dsl-typelevel.html), which provides a DSL for defining server-side web APIs. Similar to Hypershell, Servant also defines abstract syntaxes as dummy types, and performs type-level interpretation using typeclasses.
+Our approach of defining DSL programs as types shares many similarities with the type-level DSL techniques used by [Servant](https://www.servant.dev/posts/2018-07-12-servant-dsl-typelevel.html), which provides a DSL for defining server-side web APIs. Similar to Hypershell, Servant also defines abstract syntaxes as dummy types and performs type-level interpretation using typeclasses.
 
-Compared to Hypershell, Servant implements its traits directly on its syntax types. This is similar to a simpler programming pattern in CGP, called _higher order providers_. On the other hand, Hypershell decouples the implementation of provider traits from the definition of abstract syntax. This allows Hypershell users to replace the underlying implementation of a syntax with a different provider. With Servant, the DSL can only support language extension with new syntaxes, by directly implementing typeclass instances for that new syntax.
+Compared to Hypershell, Servant implements its traits directly on its syntax types. This is similar to a simpler CGP programming pattern called **higher-order providers**. On the other hand, Hypershell decouples the implementation of provider traits from the definition of abstract syntax. This allows Hypershell users to replace a syntax's underlying implementation with a different provider. With Servant, the DSL can only support language extension with new syntaxes by directly implementing typeclass instances for that new syntax.
 
-Ergonomic-wise, Servant is heavily based on the `Handler` monad, while with Hypershell, the same functionality is provided by the `Handler` component without directly exposing monads to the users. Although this may be less powerful than using full blown monads, Hypershell's approach is better aligned with the ergonomics of Rust, and reduce the learning barrier for potential users who may be unfamiliar with functional programming jargons.
+Ergonomically, Servant is heavily based on the `Handler` monad, while Hypershell provides the same functionality through the `Handler` trait without directly exposing monads to users. Although this might be less powerful than using full-blown monads, Hypershell's approach aligns better with Rust's ergonomics and reduces the learning barrier for potential users who may be unfamiliar with functional programming jargon.
 
 ## Future DSLs
 
-As mentioned in the beginning, Hypershell is only the first DSL that will be built using CGP. Using the same DSL techniques, we can build other DSLs that would be potentially be more useful in solving practical real world™ problems. This section outlines some DSL ideas that I would like to see being developed in the near future, either by me, or perhaps by some of you in the community.
+As mentioned earlier, Hypershell is only the first DSL built using CGP. Using the same DSL techniques, we can build other DSLs that could potentially be more useful in solving practical real-world problems. This section outlines some DSL ideas that I'd like to see developed in the near future, either by me or perhaps by some of you in the community.
 
 ### Lambda Calculus
 
-One idea that I would like to try out after this blog post is to implement a simple _lambda calculus_ DSL using the same programming techniques outlined here. Although embedding lambda calculus itself is not very interesting, the groundwork of this experiment will explore the feasibility of embedding general-purpose languages as type-level DSLs in Rust.
+One idea I'd like to try after this blog post is to implement a simple **lambda calculus** DSL using the same programming techniques outlined here. While embedding lambda calculus itself isn't particularly interesting, the groundwork of this experiment will explore the feasibility of embedding general-purpose languages as type-level DSLs in Rust.
 
-In particular, if we can show that it is possible to build a turing-complete DSL with CGP, it will open door new ways of implementing proramming langauges with CGP and Rust. A follow up of this experiment would also include mixing both static and dynamic interpretation of the language, together with some just-in-time optimization techniques to run a scripting language with CGP.
+In particular, if we can demonstrate that it's possible to build a Turing-complete DSL with CGP, it will open doors to new ways of implementing programming languages with CGP and Rust. A follow-up to this experiment would also include mixing both static and dynamic interpretation of the language, along with some just-in-time optimization techniques to run a scripting language with CGP.
 
-This experiment will probably include a more complex proc macro that desugars a surface syntax that contains named variables into an abstract syntax that works with _De Bruijn index_, since we probably can't perform named field access over an _anonymous_ product type for closures.
+This experiment will probably involve a more complex procedural macro that desugars a surface syntax containing named variables into an abstract syntax that works with **De Bruijn indices**, since we likely can't perform generic named field access over an *anonymous* product type for closures due to coherence restrictions.
 
 ### HTML
 
-An idea that I have been keen to work on is to use CGP to build a DSL for _HTML_, or more generally _web frontends_, so that I can rebuild this current website using CGP.
+An idea I've been keen to work on is to use CGP to build a DSL for **HTML**, or more generally, **web frontends**, so I can rebuild this current website using CGP.
 
-The idea behind a HTML-based DSL is pretty simple: whether we are building a static webpage, server-side rendering, or client-side rendering, we are really just writing our front end code as an abstract DSL program that is interpreted by _different contexts_ based on the use case.
+The idea behind an HTML-based DSL is quite simple: whether we're building a static webpage, performing server-side rendering, or client-side rendering, we're essentially writing our frontend code as an abstract DSL program that is interpreted by *different contexts* based on the use case.
 
-A static webpage is then a simple program with minimal dependencies that can be run with all concrete contexts, just as how a Hypershell program that only use the CLI features can be run by both `HypershellCli` and `HypershellHttp`. On the other hand, a more complex program that makes use of more dependencies may only be run with a more feature-complete context, such as one that works with client-side rendering.
+A static webpage would then be a simple program with minimal dependencies that can run with all concrete contexts, just as a Hypershell program that only uses CLI features can be run by both `HypershellCli` and `HypershellHttp`. On the other hand, a more complex program that utilizes more dependencies might only run with a more feature-complete context, such as one that works with client-side rendering.
 
-Although I think there are potentials for solving front end development with CGP, I have opted to start with Hypershell as a proof of concept, as it has significantly less complexity than front end development. Furthermore, even if we have a proof-of-concept version of the HTML DSL, there may be a never-ending rabbit hole that needs to be filled until the prototype becomes production-ready™ enough to even rival React or Leptos.
+While I believe there's potential for solving frontend development with CGP, I've opted to start with Hypershell as a proof of concept, as it has significantly less complexity than frontend development. Furthermore, even if we had a proof-of-concept version of the HTML DSL, there might be never-ending rabbit holes to fill before the prototype becomes "production-ready" enough to rival React or Leptos.
 
-Aside from that, although I would love to explore developing front end applications using CGP, the future prospects of becoming a professional front end developer who needs to convince everyone else to use Rust/CGP does not align well with my long term career goals. As a result, I have personally try not to associate CGP too closely with web development to accidentally fall back into the wrong career track.
+Aside from that, although I would love to explore developing frontend applications using CGP, the future prospects of becoming a professional frontend developer who needs to convince everyone else to use Rust/CGP don't align well with my long-term career goals. As a result, I've personally tried not to associate CGP too closely with web development to avoid accidentally falling back into the wrong career track.
 
 ### Parsers
 
-An idea that I am keen to work on is to build _parsers_ as a CGP DSL, in particular for parsing Rust's `TokenStream` as a starting point. The DSL approach we use here is pretty similar to _parser combinator_ techniques, but with further modularity for even more flexible parsing.
+Another idea I'm keen to work on is building **parsers** as a CGP DSL, particularly for parsing Rust's `TokenStream` as a starting point. The DSL approach we use here is quite similar to **parser combinator** techniques but with further modularity for even more flexible parsing.
 
-The initial use case for this would be for dog-fooding purpose of implementing the CGP proc macros using CGP. Currently, the CGP macro implementation contains a lot of ad hoc parsing code implementing using `syn` and the `Parse` trait. As the surface syntax for CGP becomes more complex, there is an increasing need to take advantage of CGP its own proc macros to modularize macros like `delegate_components!` and `cgp_preset!` can be implemented.
+The initial use case for this would be for dog-fooding — implementing the CGP procedural macros using CGP itself. Currently, the CGP macro implementation contains a lot of ad-hoc parsing code implemented using `syn` and the `Parse` trait. As CGP's surface syntax becomes more complex, there's an increasing need to leverage CGP in its own procedural macros to modularize how macros like `delegate_components!` and `cgp_preset!` are implemented.
 
-The implementation of this CGP-based parser DSL will share some similarity with the [`unsynn`](https://docs.rs/unsynn) crate, which already offers a more declarative approach to parsing as compared to `syn`. However with CGP, there should be less needs to declare the structs and syntax rules inside macros, as we can use CGP itself to perform the wiring and generic implementations.
+The implementation of this CGP-based parser DSL will share some similarities with the [`unsynn`](https://docs.rs/unsynn) crate, which already offers a more declarative parsing approach compared to `syn`. However, with CGP, there should be less need to declare structs and syntax rules inside macros, as we can use CGP itself to perform the wiring and generic implementations.
 
-That said, there is still a feature lacking in CGP that I need to implement, which is the _builder pattern_, before we can implement modular parsing using CGP. In short, the CGP builder pattern involves the creation of _partial structs_ that may contain uninitialized fields, which will be filled in incrementally by different parser providers. Just as the CGP accessor pattern supports generic access of fields using `HasField`, the CGP builder pattern supports generic _construction_ of struct fields using new traits that will be introduced.
+That said, there's still a feature lacking in CGP that I need to implement first: the **builder pattern**. In short, the CGP builder pattern involves defining *partial structs* that may contain uninitialized fields, which will be filled incrementally by different parser providers. Just as the CGP accessor pattern supports generic access to fields using `HasField`, the CGP builder pattern will support generic *construction* of struct fields using new traits that will be introduced.
 
-As a result, we may need to wait until the next major version of CGP released, before we can start building a parser DSL with CGP.
+As a result, we may need to wait until the next major version of CGP is released before we can start building a parser DSL with CGP.
 
 ### Monadic Computation
 
-In a longer time horizon, once we have proven the feasibility of implementing lambda calculus with CGP, a potential avenue that I would like to explore is to enable _monadic computation_ as a DSL with CGP. The main use case for this is to better support property testing and model checking in Rust, but it may also be extended further to support full algebraic effects.
+In a longer time horizon, once we've proven the feasibility of implementing lambda calculus with CGP, a potential avenue I'd like to explore is enabling **monadic computation** as a DSL with CGP. The main use case for this is to better support property testing and model checking in Rust, but it could also be extended further to support full algebraic effects.
 
-The main idea for this is that we want to enable something similar to the `do`-notation in Haskell as a DSL, without requiring direct exposure of monads in Rust programs. This DSL is expected to be used only for writing very high level core logic, where method calls may return non-deterministic results. With that, a test context can make use of monads to perform non-deterministic computation on the logic, but a production context can run the same program without using monads at all.
+The main idea here is to enable something similar to Haskell's `do`-notation as a DSL, without directly exposing monads in Rust programs. This DSL is expected to be used only for writing very high-level core logic, where method calls may return non-deterministic results. With this, a test context can use monads to perform non-deterministic computation on the logic, while a production context can run the same program without using monads at all.
 
-It is worth noting that we want to introduce monads as a DSL not for writing "fancy" functional programs, but out of necessacity for writing better tests in Rust. For instance, the `Arbitrary` monad used by property testing frameworks like QuickCheck is essential for writing property test code with cleaner syntax. Without monads, Rust crates like `proptest` need to resort to complex macros and ad hoc type signatures in order to emulate what could be done with monads and the `do` notation just for property testing.
+It's worth noting that we aim to introduce monads as a DSL not for writing "fancy" functional programs, but out of necessity for writing better tests in Rust. For instance, the `Arbitrary` monad used by property testing frameworks like QuickCheck is essential for writing property test code with cleaner syntax. Without monads, Rust crates like `proptest` resort to complex macros and ad-hoc type signatures to emulate what could easily be done with monads and the `do` notation.
 
-More generally, having support for non-deterministic monads will allow us to write some form of model checking code similar to TLA+, but directly within Rust. At the moment, similar functionality can also be achieved using [Kani](https://github.com/model-checking/kani), however that requires dedicated toolchains to compile the Rust code to run with external verifiers.
+More generally, having support for non-deterministic monads will allow us to write some form of model checking code similar to TLA+, but directly within Rust. At the moment, similar functionality can also be achieved using [Kani](https://github.com/model-checking/kani); however, that requires dedicated toolchains to compile the Rust code to run with external verifiers.
 
-On one hand, I think CGP has great potential to make Rust code play well with Kani, by making it possible to decouple application code from complex libraries that cannot run easily with Kani. On the other hand, I am also curious to explore how much of model checking we can do within Rust itself without external tools like Kani, if we had some form of access to the full power of monads in Rust.
+On one hand, I think CGP has great potential to make Rust code play well with Kani by decoupling application code from complex libraries that cannot run easily with Kani. On the other hand, I'm also curious to explore how much model checking we can do within Rust itself without external tools like Kani, if we had some form of access to the full power of monads in Rust.
 
 ## Non-DSL Use Cases
 
-Aside from building DSLs, it is totally feasible to build modular applications with only CGP without turning them into DSLs. Although this blog post focus on the specific usage pattern of DSLs, we will also come back to normal application development with CGP in future blog posts.
+While this blog post focuses on building DSLs, it's entirely feasible to create modular applications using only CGP, without turning them into DSLs. We'll explore normal application development with CGP in future posts.
 
-The CGP project is pivoting to put more focus in DSL development, at least in this early phase. This is because DSL is a niche in Rust that is not explored much, making it easier to gain attraction, as compared to the negative connotation that is often associated to the term "framework". Furthermore, DSLs have a clearer separation between two groups of people: the designer or implementor of the DSL, and the users of the DSL.
+The CGP project is currently prioritizing DSL development, mainly because it's a relatively unexplored niche in Rust, making it easier to gain traction, as compared to the negative connotation that is often associated to the term "framework". Furthermore, DSLs have a clearer separation between two groups of people: the implementor of the DSL and its users.
 
-On the other hand, there are less boundary in the world of normal application development, thus reducing the appeal of modular application development. Technically speaking, there are [clear benefits](https://www.youtube.com/watch?v=mfdVAyA443Q) of using CGP even for single-party software, such as improving maintainability and testability. However, such technical benefits are often neglected by most software development teams, as they don't offer short term benefits to the businesses. As a result, CGP could only really shine in use cases where developers want to build reusable components for _other_ developers to use, i.e. when there is a split between one group of developers who care about modularity, and another group of developers who consume modular code from others but _don't_ care about writing modular code themselves.
+In contrast, normal application development has less defined boundaries, reducing the appeal of modularity. While there are [clear technical benefits](https://www.youtube.com/watch?v=mfdVAyA443Q) of modularity even for single-party software, such as improved maintainability and testability, these are often overlooked by development teams focused on short-term business gains. Therefore, CGP shines best when developers build reusable components for *other* developers, creating a separation between those who value modularity and those who simply consume it.
 
-An obvious use case for CGP is to use it to build modular web frameworks, with reusable components for cross-cutting concerns such as authentication, caching, and logging. However, just as the case of the HTML DSL, the space for web framework is too crowded and competitive, and I wanted to avoid associating CGP or my career to be too close to web development. Thus this will probably only be prioritized later on, after CGP gains its foot hold in other areas such as DSL development.
+A potential use case for CGP is building modular web frameworks with reusable components for cross-cutting concerns like authentication, caching, and logging. However, similar to the HTML DSL, the web framework space is crowded and competitive, and I want to avoid associating CGP or my career too closely with web development. This will likely be a lower priority until after CGP establishes itself in areas like DSL development.
 
-CGP may also be well suited in specialized problem domains, such as database design, game development, or machine learning. However, since I am not an expert in these problem domains, it may be challenging for me to build sufficiently advanced solutions for these problem domains, while also continue developing on CGP using my limited free time.
+CGP could also be well-suited for specialized domains like database design, game development, or machine learning. However, my limited expertise in these areas and the demands of developing CGP in my free time make it challenging to build sufficiently advanced solutions for these problem domains.
 
-All that being said, it just means that it might be too much expectations on me as an _individual_ to implement solutions to every problems that could potentially be solved by CGP. But this is where _you_ and the _early adopter community_ can step in to help.
+Ultimately, it's unrealistic for one *individual* to address every problem that CGP could solve. This is where *you* and the *early adopter community* can contribute.
 
 ## Contribution and Support
 
-As mentioned in the last section, I see my own role as the _enabler_ for developers who care about modularity to _produce_ modular components for other developers (or machines) to _consume_ these components without needing to care about CGP or modularity. This way, _everyone_ can benefit from CGP regardless of their world view on software development.
+As mentioned, I see my role as *enabling* developers who value modularity to *produce* reusable components for other developers (or machines) to *consume* without needing to value CGP or modularity. This way, *everyone* benefits from CGP, regardless of their views on software development.
 
-As much as I would love to build every potential solutions offered by CGP on my own, I unfortunately do not have the capacity, expertise, or motivation to build them myself, at least not when I still have to worry about paying bills. As a result, my goal is build enough examples to show _you_ the potentials of CGP, and build up a community of developers for CGP.
+While I'd love to build every potential solution offered by CGP myself, I lack the capacity, expertise, and motivation, especially given my need to earn a living through other means. My goal is to provide enough examples to demonstrate CGP's potential and foster a community of developers around it.
 
-At this point, you are convinced of the potentials of CGP and want to help out, I have listed out some of the things you can do next.
+If you're convinced of CGP's potential and want to help, here are some ways to get involved:
 
 ### Join the Community
 
-We now have a [community Discord](https://discord.gg/Hgk3rCw6pQ) for CGP! This will probably be a very small community at the start, so please feel free to not worry about noise and start any discussion you have about CGP. In particular, since many of the CGP concepts are still new and undocumented, I encourage you to ask anything you don't understand about CGP in the Discord, no matter how stupid it might sound.
+We now have a [community Discord](https://discord.gg/Hgk3rCw6pQ) for CGP! It's likely to be small initially, so feel free to start discussions about CGP without worrying about noise. Since many CGP concepts are new and undocumented, please ask any questions you have in the Discord, no matter how basic they seem.
 
-Aside from the community Discord, we also have a [GitHub Discussions](https://github.com/orgs/contextgeneric/discussions) forum and a [Reddit](https://www.reddit.com/r/cgp/) community. So if you would like to have more formalized public discussions, you could post them there.
+Besides the Discord, we also have a [GitHub Discussions](https://github.com/orgs/contextgeneric/discussions) forum and a [Reddit](https://www.reddit.com/r/cgp/) community for more formalized public discussions.
 
 ### Build Your Own DSL and Libraries
 
-In the earlier section, I have outlined some potential project ideas for CGP. Please feel free to steal any of the project ideas, or come out with your own ideas and start a project using CGP. Please note that since the available resources are not comprehensive enough, I encourage you to ask as many questions in the community Discord when you get stuck in understanding any concepts.
+Feel free to use the project ideas I outlined earlier, or develop your own and start a CGP project. Given the limited available resources, please ask questions in the Discord if you encounter any difficulties understanding the concepts.
 
 ### Research Collaboration
 
-Prior to CGP and Hypershell, I have worked on and published a paper on [Ferrite](https://arxiv.org/abs/2009.13619), an session type EDSL for Rust. I think many of the programming techniques I have developed for CGP and Hypershell may be worthy of publishing at functional programming conferences like ICFP.
+Before CGP and Hypershell, I worked on and published a paper on [Ferrite](https://arxiv.org/abs/2009.13619), a session type EDSL for Rust. With my research experience, I believe that many of the programming techniques developed for CGP and Hypershell could be worthy of publication at functional programming conferences like ICFP.
 
-I have also previously considered pursuing a PhD in programming languages, but unfortunately for financial reasons I have decided to stay in the tech industry. As a result, I don't have the personal capacity of witholding publicizing my work on CGP for the sake of writing polished and novel research papers.
+I previously considered pursuing a PhD in programming languages but chose to remain in the tech industry for financial reasons. Therefore, I lack the capacity to withhold publicizing my work on CGP to write polished and novel research papers.
 
-That said, if you are a PL researcher and is interested to publish PL research work about CGP, I am happy to collaborate if someone else is willing to be the main author of the paper.
+However, if you're a PL researcher interested in publishing research on CGP, I'm happy to collaborate if you're willing to be the main author.
 
 ### Sponsor Me
 
-If you really enjoy my work, and want to see CGP gain more adoption some day in the future, the best way to do so is to _sponsor_ me, no matter how small the amount. I have set up sponsorship pages on [Github Sponsor](#), [Ko-Fi](#), and [Patreon](#).
+If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](#), [Ko-Fi](#), and [Patreon](#).
 
-_As with most open source projects_, I do not expect any amount of sponsorship to be sufficient for me to quit my job and work full time on CGP, or even _with_ CGP. _However_, any amount of financial sponsorship will give me significant confidence that my work is _valuable_, and that it is worthy for me to continue pouring hundreds of hours of my free time on this instead of doing something else.
+*As with most open-source projects*, I don't expect sponsorship to be enough to allow me to quit my job and work full-time on CGP, or even *with* CGP. *However*, any financial support will significantly boost my confidence in the *value* of my work and encourage me to continue dedicating hundreds of hours of my free time to it instead of other pursuits.
 
-I do wish to eventually spend a year or two to work full time on CGP with my _personal savings_, even if the sponsorships are not enough to support my living expenses. _However_, exponential curves are important, and if I could gain at least 1,000 EUR worth of monthly sponsorship, it would at least clear up some risk assessments and informs me that I might have a slightly higher chance of making CGP a self-sustaining project.
+I do hope to eventually spend a year or two working full-time on CGP using my *personal savings*, even if sponsorships don't cover my living expenses. *However*, exponential growth is important, and if I could secure at least 1,000 EUR in monthly sponsorship, it would reduce some risk and suggest a higher chance of CGP becoming self-sustaining later on.
 
 ### Hire Me
 
-If you are a company reading this, and in the small chance that you think CGP can be useful to solve business or technical problems for you, please [contact me](mailto:soares.chen@maybevoid.com) to discuss about any potential freelancing arrangement.
+If your company believes CGP could help solve business or technical problems, please [contact me](mailto:soares.chen@maybevoid.com) to discuss potential freelance arrangements.
 
-That said, I already have a full time job starting August 2025, and I will probably have very limited capacity to take up side gigs or consider another job offer. I have considered, but refrained, from selling CGP as a consulting service or job application, because it is not _fun_ for me personally, and I know that it will likely _fail_ no matter how polished I make it look at this stage. But I _want_ to continue working on CGP, even at my own personal expense, and not get too stressed and disappointed by the fact that it will probably take _years_ before I can see any possibility of this project becomes financially self-sustaining.
+However, I already have a full-time job starting in August 2025 and will have limited capacity for side gigs or other job offers non-related to CGP. I've refrained from selling CGP as a consulting service or job ads because it's not personally *enjoyable*, and I know it's likely to *fail* at this stage, regardless of how polished I make it. I *want* to continue working on CGP, even at my own expense, and avoid being stressed and disappointed by the fact that it will probably take *years* before it becomes financially self-sustaining.
 
-So as an alternative, I am just adding this section as a low-effort for-hire advertisement that I know will likely never hear back from. At least, this is the maximal effort that I am willing to put in to not risk being disappointed by the result. And as for the rest of the readers, I hope that at least this brings you more clarity on the financial status of the project, and my personal commitment to it regardless of how much I will gain personally.
+Therefore, I'm including this section as a low-effort advertisement that I don't expect to generate any leads. At least, this represents the maximum effort I'm willing to expend to avoid disappointment. For the rest of you, I hope this clarifies the project's financial status and my personal commitment to it, regardless of my personal gain.
 
 ### Learn More
 
-Finally, thank you all who made it to the end of this blog post. Please visit the [project homepage](/) to learn more about CGP, and let's all start writing context-generic code!
+Finally, thank you to everyone who reached the end of this blog post. Please visit the [project homepage](/) to learn more about CGP, and let's start writing context-generic code!
