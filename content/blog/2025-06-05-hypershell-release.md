@@ -14,6 +14,22 @@ I am thrilled to introduce [_Hypershell_](https://github.com/contextgeneric/hype
 
 In this blog post, I will showcase example Hypershell programs and briefly explain their implementation using CGP. Towards the end, we will delve deeper into building DSLs in general, demonstrating how CGP can enable Rust to become a powerhouse for crafting a new generation of domain-specific languages.
 
+## Table of Contents
+
+**Estimated reading time:** 1~2 hours (≈16 500 words).
+
+This is a very long blog post, so I have included this section to give you an overview of the content, and know what to expect for each section.
+
+The first section, [**An Overview of Hypershell**](#an-overview-of-hypershell), gives a high level overview of the Hypershell DSL, together with example programs that we can write with it.
+
+Next, [**Context-Generic Programming**](#context-generic-programming) gives a quick tour on the high level concepts of CGP, so that readers who are new to CGP can quickly onboard to understanding the rest of the blog post.
+
+Following that, [**Implementation of Hypershell**](#implementation-of-hypershell) goes into the details of how Hypershell is implemented using CGP.
+
+After that, [**Extending Hypershell**](#extending-hypershell) walks through how CGP makes it possible to easily extend Hypershell with new language features.
+
+Finally, [**Discussions**](#discussions) talks about the work related to Hypershell, the pros and cons of our DSL approach, and how readers can get involved or support the project.
+
 ## Disclaimer
 
 Hypershell serves as an _experimental_ proof of concept, showcasing the capabilities of CGP. As such, its primary purpose is to demonstrate how CGP can be used to build highly modular DSLs in Rust.
