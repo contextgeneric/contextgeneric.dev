@@ -1551,29 +1551,13 @@ Besides the Discord, we also have a [GitHub Discussions](https://github.com/orgs
 
 Feel free to use the project ideas I outlined earlier, or develop your own and start a CGP project. Given the limited available resources, please ask questions in the Discord if you encounter any difficulties understanding the concepts.
 
-### Research Collaboration
-
-Before CGP and Hypershell, I worked on and published a paper on [Ferrite](https://arxiv.org/abs/2009.13619), a session type EDSL for Rust. With my research experience, I believe that many of the programming techniques developed for CGP and Hypershell could be worthy of publication at functional programming conferences like ICFP.
-
-I previously considered pursuing a PhD in programming languages but chose to remain in the tech industry for financial reasons. Therefore, I lack the capacity to withhold publicizing my work on CGP to write polished and novel research papers.
-
-However, if you're a PL researcher interested in publishing research on CGP, I'm happy to collaborate if you're willing to be the main author.
-
 ### Sponsor Me
 
 If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](#), [Ko-Fi](#), and [Patreon](#).
 
 *As with most open-source projects*, I don't expect sponsorship to be enough to allow me to quit my job and work full-time on CGP, or even *with* CGP. *However*, any financial support will significantly boost my confidence in the *value* of my work and encourage me to continue dedicating hundreds of hours of my free time to it instead of other pursuits.
 
-I do hope to eventually spend a year or two working full-time on CGP using my *personal savings*, even if sponsorships don't cover my living expenses. *However*, exponential growth is important, and if I could secure at least 1,000 EUR in monthly sponsorship, it would reduce some risk and suggest a higher chance of CGP becoming self-sustaining later on.
-
-### Hire Me
-
-If your company believes CGP could help solve business or technical problems, please [contact me](mailto:soares.chen@maybevoid.com) to discuss potential freelance arrangements.
-
-However, I already have a full-time job starting in August 2025 and will have limited capacity for side gigs or other job offers non-related to CGP. I've refrained from selling CGP as a consulting service or job ads because it's not personally *enjoyable*, and I know it's likely to *fail* at this stage, regardless of how polished I make it. I *want* to continue working on CGP, even at my own expense, and avoid being stressed and disappointed by the fact that it will probably take *years* before it becomes financially self-sustaining.
-
-Therefore, I'm including this section as a low-effort advertisement that I don't expect to generate any leads. At least, this represents the maximum effort I'm willing to expend to avoid disappointment. For the rest of you, I hope this clarifies the project's financial status and my personal commitment to it, regardless of my personal gain.
+I do hope to eventually spend a year or two working full-time on CGP using my *personal savings*, even if sponsorships don't cover my living expenses. *However*, exponential growth is important, and if I could secure around a quarter of my living expenses through monthly sponsorship, it would reduce some risk and suggest a higher chance of CGP becoming self-sustaining later on.
 
 ### Learn More
 
