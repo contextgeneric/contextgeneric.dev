@@ -30,7 +30,7 @@
 <body>
     {% block header %}
 
-    <header style="background-color: transparent">
+    <header class="pos-absolute" style="background-color: transparent">
         {{ macros::render_header() }}
     </header>
 
@@ -105,9 +105,11 @@
         {% endblock toc %}
 
         <div class="content text">
-            {% block content %}
-            {{ section.content | safe }}
-            {% endblock content %}
+            <div>
+                {% block content %}
+                {{ section.content | safe }}
+                {% endblock content %}
+            </div>
         </div>
 
         {% block sidebar %}

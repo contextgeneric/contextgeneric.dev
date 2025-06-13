@@ -10,9 +10,7 @@ authors = ["Soares Chen"]
 
 # Summary
 
-I am thrilled to introduce [_Hypershell_](https://github.com/contextgeneric/hypershell), a type-level domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [_context-generic programming_](/) (CGP), making it highly modular and extensible.
-
-In this blog post, I will showcase example Hypershell programs and briefly explain their implementation using CGP. Towards the end, we will delve deeper into building DSLs in general, demonstrating how CGP can enable Rust to become a powerhouse for crafting a new generation of domain-specific languages.
+I am thrilled to introduce [**Hypershell**](https://github.com/contextgeneric/hypershell), a modular, *type-level* domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [**context-generic programming**](/) (CGP), which makes it possible for users to *extend* or *modify* both the language syntax and semantics.
 
 ## Table of Contents
 
@@ -1411,7 +1409,6 @@ You may also need to decide whether `Checksum` should produce the checksum as ra
 As a hint, if you want `Checksum` to return a hex string, you should add `BytesToHex` after `HandleStreamChecksum` within the pipeline for the `Checksum`'s wiring. Otherwise, you should implement a `HexToBytes` handler to convert the hex string returned from `sha256sum` into bytes.
 
 # Discussions
-
 
 We've finally reached the end of this blog post. Thank you for your patience if you're still reading! Although this was a lengthy read, I hope it has covered all essential topics, helping you understand the strengths of Hypershell and CGP.
 
