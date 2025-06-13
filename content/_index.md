@@ -10,9 +10,9 @@ sort_by = "weight"
 
 # Announcement
 
-I'm excited to announce the release of [v0.4.0](https://github.com/contextgeneric/cgp/releases/tag/v0.4.0) of the [`cgp`](https://docs.rs/cgp/0.4.0/cgp/) crate. This update includes significantly improved developer experience, improved debuggability, and many more new features!
+I am thrilled to announce the release of `cgp` [v0.4.1](/blog/v0-4-1-release), along with the release of [**Hypershell**](/blog/hypershell-release), a modular, *type-level* domain-specific language (DSL) for writing shell-script-like programs in Rust.
 
-Read the blog post for more details: [CGP v0.4.0 is Here: Unlocking Easier Debugging, Extensible Presets, and More!](/blog/v0-4-0-release/).
+Read the blog post for more details: [**Hypershell: A Type-Level DSL for Shell-Scripting in Rust**](/blog/hypershell-release).
 
 # Overview
 

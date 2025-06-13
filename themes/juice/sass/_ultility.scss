@@ -2,10 +2,13 @@
   text-align: center;
 }
 
-.pos-absolute {
-  right: 0;
-  left: 0;
-  position: absolute;
+
+@media screen and (min-width: 920px) {
+  .pos-absolute {
+    right: 0;
+    left: 0;
+    position: absolute;
+  }
 }
 
 .box-shadow {
