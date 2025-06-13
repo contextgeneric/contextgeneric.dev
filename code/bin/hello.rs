@@ -10,7 +10,7 @@ pub trait CanGreet // Name of the consumer trait
 // A getter trait representing a dependency for `name` value
 #[cgp_auto_getter] // Derive blanket implementation
 pub trait HasName {
-    fn name(&self) -> &String;
+    fn name(&self) -> &str;
 }
 
 // Implement `Greeter` that is generic over `Context`

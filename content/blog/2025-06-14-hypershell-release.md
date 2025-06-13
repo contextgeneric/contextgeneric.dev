@@ -64,9 +64,9 @@ pub type Program = hypershell! {
 };
 ```
 
-We first import everything from `hypershell::prelude` to use common Hypershell constructs. Our hello program is then **defined** as a Rust *type* named `Program`. In the body, we use the `hypershell!` macro to define our program with shell-like syntactic sugar, such as the use of the pipe operator (`|`). At a high level, a Hypershell program **consists** of one or more *handlers* that **form** a connected *pipeline*.
+We first import everything from `hypershell::prelude` to use common Hypershell constructs. Our hello program is then defined as a Rust *type* named `Program`. In the body, we use the `hypershell!` macro to define our program with shell-like syntactic sugar, such as the use of the pipe operator (`|`). At a high level, a Hypershell program consists of one or more *handlers* that form a connected *pipeline*.
 
-In the first part of the program, we use the `SimpleExec` handler to perform a simplified execution of a CLI command. The first argument to `SimpleExec` is `StaticArg<"echo">`, meaning that the program always executes the hardcoded `echo` command. The second argument to `SimpleExec` is `WithStaticArgs`, which accepts a *variadic* list of static arguments that **are** passed to the `echo` command.
+In the first part of the program, we use the `SimpleExec` handler to perform a simplified execution of a CLI command. The first argument to `SimpleExec` is `StaticArg<"echo">`, meaning that the program always executes the hardcoded `echo` command. The second argument to `SimpleExec` is `WithStaticArgs`, which accepts a *variadic* list of static arguments that are passed to the `echo` command.
 
 In the second part of the program, we use the `|` operator to indicate that we want to pipe the result from `SimpleExec` to the next handler, `StreamToStdout`. The `StreamToStdout` handler then streams the output to the `STDOUT` of the main Rust program so that we can see the output when running the program.
 
@@ -85,7 +85,7 @@ async fn main() -> Result<(), Error> {
 
 We use `#[tokio::main]` to define an async main function. Inside the function body, we make use of `HypershellCli`, which is a pre-defined context that can be used for running simple CLI-only Hypershell programs. The `HypershellCli` context is an empty struct, hence we are able to directly construct a value and call the `handle` method on it.
 
-The `handle` method comes from the `CanHandle` trait from `cgp`, and is automatically implemented by `HypershellCli` for any **supported** program. This blanket implementation is a key enabler of CGP's modularity, allowing `HypershellCli` to handle diverse Hypershell programs without explicit implementations for each. We pass our program to the first argument of `handle` as `PhantomData::<Program>`, that is, the `Program` we defined earlier is purely a *type-level* construct and has no meaningful representation at the value-level. Nevertheless, we use `PhantomData` to "pass" the type as a value parameter, as this leads to cleaner syntax compared to passing it as a generic argument.
+The `handle` method comes from the `CanHandle` trait from `cgp`, and is automatically implemented by `HypershellCli` for any supported program. This blanket implementation is a key enabler of CGP's modularity, allowing `HypershellCli` to handle diverse Hypershell programs without explicit implementations for each. We pass our program to the first argument of `handle` as `PhantomData::<Program>`, that is, the `Program` we defined earlier is purely a *type-level* construct and has no meaningful representation at the value-level. Nevertheless, we use `PhantomData` to "pass" the type as a value parameter, as this leads to cleaner syntax compared to passing it as a generic argument.
 
 We then pass an empty `Vec<u8>` to the second argument of `handle`; this `Vec<u8>` serves as the `STDIN` input for the executed command. In this specific `echo` example, it remains empty as `echo` operates directly on its arguments rather than `STDIN`.
 
@@ -1449,7 +1449,9 @@ That said, a significant barrier for DSL users is the potentially poor experienc
 
 There are potential ways to improve the Rust compiler to show more helpful error messages. However, this work could take a long time and might require sufficient demand from CGP users to justify the requested changes.
 
-In the short term, a potential solution is to train LLMs to decipher error messages and help users fix mistakes. In fact, I have a feeling that DSLs might be much better suited for "vibe coding" compared to general-purpose languages, as they are closer to human languages and thus easier for both humans and AI to work with.
+As an alternative, some preliminary experiments have shown AI editors like Cursor are getting pretty good at deciphering the error messages and give the right intuitions on how to fix the errors.
+
+In fact, I have a feeling that DSLs might be much better suited for "vibe coding" compared to general-purpose languages, as they are closer to human languages and thus easier for both humans and AI to work with.
 
 ### Dynamic Loading
 
@@ -1569,7 +1571,7 @@ Feel free to use the project ideas I outlined earlier, or develop your own and s
 
 ### Sponsor Me
 
-If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](#), [Ko-Fi](#), and [Patreon](#).
+If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](https://github.com/sponsors/soareschen/), [Patreon](www.patreon.com/c/maybevoid/about), and [Ko-Fi](https://ko-fi.com/maybevoid).
 
 *As with most open-source projects*, I don't expect sponsorship to be enough to allow me to quit my job and work full-time on CGP, or even *with* CGP. *However*, any financial support will significantly boost my confidence in the *value* of my work and encourage me to continue dedicating hundreds of hours of my free time to it instead of other pursuits.
 
