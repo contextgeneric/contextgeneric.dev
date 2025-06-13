@@ -1568,7 +1568,7 @@ Feel free to use the project ideas I outlined earlier, or develop your own and s
 
 ### Sponsor Me
 
-If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](https://github.com/sponsors/soareschen/), [Patreon](www.patreon.com/c/maybevoid/about), and [Ko-Fi](https://ko-fi.com/maybevoid).
+If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](https://github.com/sponsors/soareschen/), [Patreon](https://www.patreon.com/c/maybevoid/about), and [Ko-Fi](https://ko-fi.com/maybevoid).
 
 *As with most open-source projects*, I don't expect sponsorship to be enough to allow me to quit my job and work full-time on CGP, or even *with* CGP. *However*, any financial support will significantly boost my confidence in the *value* of my work and encourage me to continue dedicating hundreds of hours of my free time to it instead of other pursuits.
 
