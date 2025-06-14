@@ -450,8 +450,6 @@ As its name suggests, CGP allows Hypershell's core logic to be generic over *any
 
 At a high level, CGP makes it possible to bypass Rust's trait **coherence restrictions**, allowing you to define overlapping or "orphan" trait implementations. Everything else in CGP is built on the foundation of asking: what would Rust programs look like if there were no coherence restrictions? CGP works on **safe, stable** versions of Rust today, and all you need to do is include the [`cgp`](https://crates.io/crates/cgp) crate as a dependency.
 
-At a high level, CGP makes it possible to bypass the _coherence_ restrictions in Rust traits, allowing us to define overlapping or orphan trait implementations. Everything else in CGP is built on the foundation of asking: what would Rust programs look like if there were no coherence restrictions? CGP works on _safe_, _stable_ version of Rust today, and all you have to do is include the [`cgp`](https://crates.io/crates/cgp) crate as a dependency.
-
 ## Consumer and Provider Traits
 
 The basic idea of how CGP works around coherence is quite simple. Let's start with an example `CanGreet` trait, implemented with CGP as follows:
