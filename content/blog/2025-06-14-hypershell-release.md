@@ -733,9 +733,7 @@ Looking at the generic parameters, you might notice that `SimpleExec<CommandPath
 Within the `where` clause, we utilize dependency injection to require other dependencies from the generic `Context`. The first trait, `CanExtractCommandArg`, is defined as follows:
 
 ```rust
-#[cgp_component {
-    provider: CommandArgExtractor,
-}]
+#[cgp_component(CommandArgExtractor)]
 pub trait CanExtractCommandArg<Arg>: HasCommandArgType {
     fn extract_command_arg(&self, _phantom: PhantomData<Arg>) -> Self::CommandArg;
 }
@@ -902,7 +900,7 @@ The `CommandNotFound` struct holds a reference to the `Command` we're trying to 
 
 Similar to `ErrorRaiser`, CGP allows the `ErrorWrapper` implementation to be chosen by the context to handle errors differently. For instance, the `HypershellCli` context uses the `DebugAnyhowError` provider from `cgp-error-anyhow`. This provider builds a string using the `Debug` implementation and then calls `anyhow::Error::context` with the formatted string. However, if desired, a user of Hypershell is free to override this behavior, such as printing the full command or wrapping the error in other ways.
 
-Since `CommandNotFound` contains a lifetime, when we specify the constraint, we need to add a [**higher-ranked trait bound (HRTB)**]((https://doc.rust-lang.org/nomicon/hrtb.html) (`for<'a>`) to the constraint. This ensures we can always wrap the error for any lifetime. While it's possible to pass an owned `Command` value without a lifetime here, this isn't always feasible when the detail originates from argument references. Furthermore, using a reference encourages the wrapper handler to extract only essential details, avoiding the bloating of the error value with large wrapped values.
+Since `CommandNotFound` contains a lifetime, when we specify the constraint, we need to add a [**higher-ranked trait bound (HRTB)**](https://doc.rust-lang.org/nomicon/hrtb.html) (`for<'a>`) to the constraint. This ensures we can always wrap the error for any lifetime. While it's possible to pass an owned `Command` value without a lifetime here, this isn't always feasible when the detail originates from argument references. Furthermore, using a reference encourages the wrapper handler to extract only essential details, avoiding the bloating of the error value with large wrapped values.
 
 ### Input Type
 
