@@ -8,6 +8,8 @@ authors = ["Soares Chen"]
 
 +++
 
+Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1lb296n/announcing_hypershell_a_typelevel_dsl_for/), [Lobsters](https://lobste.rs/s/1swikb/hypershell_type_level_dsl_for_shell), and [Hacker News](https://news.ycombinator.com/item?id=44274767).
+
 # Summary
 
 I am thrilled to introduce [**Hypershell**](https://github.com/contextgeneric/hypershell), a modular, *type-level* domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [**context-generic programming**](/) (CGP), which makes it possible for users to *extend* or *modify* both the language syntax and semantics.
