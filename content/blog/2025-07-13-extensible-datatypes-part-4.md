@@ -19,6 +19,8 @@ This duality is not just theoretical — it has practical implications for softw
 
 With this in mind, we’ll now explore the CGP constructs that support extensible variants. As you go through the examples and implementation details, we encourage you to look for the parallels and contrasts with extensible records.
 
+# Base Implementation
+
 ## `FromVariant` Trait
 
 Just as extensible records use the `HasField` trait to extract values from a struct, extensible variants in CGP use the `FromVariant` trait to *construct* an enum from a single variant value. The trait is defined as follows:
@@ -33,7 +35,7 @@ pub trait FromVariant<Tag> {
 
 Like `HasField`, the `FromVariant` trait is parameterized by a `Tag`, which identifies the name of the variant. It also defines an associated `Value` type, representing the data associated with that variant. Unlike `HasField`, which extracts a value, `from_variant` takes in a `Value` and returns an instance of the enum.
 
-### Example: Deriving `FromVariant`
+## Example: Deriving `FromVariant`
 
 To see how this works in practice, consider the following enum:
 
@@ -67,7 +69,7 @@ impl FromVariant<symbol!("Bar")> for FooBar {
 
 This allows the `FooBar` enum to be constructed generically using just the tag and value.
 
-### Limitations on Enum Shape
+## Limitations on Enum Shape
 
 To ensure ergonomics and consistency, CGP restricts the kinds of enums that can derive `FromVariant`. Specifically, supported enums must follow the **sums of products** pattern—each variant must contain *exactly one unnamed field*.
 
@@ -94,3 +96,5 @@ pub enum FooBar {
 These more complex variants are not supported because they would make it harder to represent variant fields as simple types, which would, in turn, lead to less ergonomic APIs. By limiting each variant to a single unnamed field, CGP ensures that types like `FromVariant::Value` remain straightforward and intuitive.
 
 If you need to represent more complex data in a variant, we recommend wrapping that data in a dedicated struct. This way, you can still take advantage of CGP's extensible variant system while maintaining type clarity and composability.
+
+# Conclusion

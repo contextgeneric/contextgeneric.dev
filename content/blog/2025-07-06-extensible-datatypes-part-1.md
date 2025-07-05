@@ -26,14 +26,6 @@ For readers coming from more advanced programming languages, this development ef
 
 In addition, CGP v0.4.2 introduces support for safe **upcasting and downcasting between enums** that share a common subset of variants. This provides a foundation for writing extensible and evolvable APIs that remain compatible across different layers of abstraction or across independently maintained modules.
 
----
-
-# Table of Contents
-
-In this post, we will go through a high level overview of each feature introduced, together with some practical examples of how they can be used.
-
----
-
 # Feature Highlighs
 
 ## Safe Enum Upcasting
@@ -323,6 +315,9 @@ CGP now supports **modular, extensible struct builders** that can be composed fr
 This opens the door to a new style of constructor logic: one that is **modular**, **composable**, and **context-generic**. You can define builders for individual subsystems (e.g., database, HTTP client, AI agent), and combine them to build any compatible application context.
 
 In the next section, we’ll revisit the constructor examples we’ve already seen — and show how to rewrite them using CGP’s new builder pattern to achieve clean, modular, and reusable construction logic.
+
+# Modular Builders
+
 ## A Modular SQLite Builder
 
 Let’s now explore how to implement modular construction of the `App` context using multiple CGP providers. We’ll start by defining a default SQLite builder provider using CGP's `Handler` component:
@@ -693,13 +688,13 @@ Rather than writing custom constructor functions that take numerous arguments, w
 
 By embracing this modular builder approach, our code becomes not only more extensible, but also easier to read, test, and maintain.
 
-## More Builder Examples
+# More Builder Examples
 
 At this point, some readers may still be skeptical about the value of modularity offered by CGP builders. Since we’ve only shown a **single** application context and **one** corresponding builder context so far, it might not be obvious why we couldn’t just use a simple `new` constructor function like the one defined at the beginning.
 
 To truly demonstrate the power of modular builders, it’s helpful to explore how CGP makes it easy to define **multiple** contexts that are similar but have slight differences. However, if you're an **advanced reader** already familiar with the benefits of modular design, feel free to [**skip ahead**](#conclusion) to the conclusion.
 
-### Default Builder
+## Default Builder
 
 Earlier, we introduced default builders like `BuildDefaultSqliteClient`, which can construct an `App` with default configuration values. These defaults can be combined to define a minimal builder for `App`:
 
@@ -727,7 +722,7 @@ delegate_components! {
 
 In this context, the only required configuration is the `db_path`, simplifying the process of constructing an `App`, especially for use cases like unit testing or demos.
 
-### Postgres App
+## Postgres App
 
 Now suppose we want an enterprise version of the app that uses **Postgres** instead of SQLite. We can define a new `App` context that swaps in `PgPool`:
 
@@ -812,7 +807,7 @@ This example highlights a key advantage of CGP over traditional **feature flags*
 
 By enabling different configurations to exist side-by-side, CGP improves testability and reduces the likelihood of missing edge cases caused by untested feature combinations.
 
-### Anthropic App
+## Anthropic App
 
 Just as we swapped SQLite for Postgres earlier, we can also substitute the AI model used in the application—such as replacing ChatGPT with **Claude**. With CGP, this becomes straightforward: we simply define a new `AnthropicApp` that uses the Anthropic client and agent:
 
@@ -903,7 +898,7 @@ This example shows how effortlessly CGP supports variation and customization. Th
 
 In fact, the process becomes so systematic that it’s easy to imagine an AI tool like **Claude Code** automating the entire setup given the right prompt and documentation.
 
-### Anthropic and ChatGPT Builder
+## Anthropic and ChatGPT Builder
 
 It’s impressive that CGP lets us easily swap ChatGPT for Claude. But what’s even better is that we don’t have to choose at all—we can include **both** AI agents in the same application.
 
@@ -965,7 +960,7 @@ It’s also worth noting that the `llm_preamble` field is reused by both the Cla
 
 This kind of seamless reuse and composition is where CGP truly shines: giving you fine-grained control over how your application is assembled, while keeping your code modular and maintainable.
 
-### Multi-Context Builder
+## Multi-Context Builder
 
 Looking closely at the `AnthropicAndChatGptAppBuilder` that we previously defined, we can observe that it already includes all the necessary fields required to construct the Claude-only and ChatGPT-only applications as well. This means we can reuse the same builder to construct **all three** versions of our application contexts, simply by changing how the builder is wired.
 

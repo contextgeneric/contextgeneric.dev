@@ -82,7 +82,7 @@ Because of this, extending or experimenting with the enum often becomes burdenso
 
 In the next section, we’ll explore how CGP's extensible visitor pattern addresses this problem — by **decoupling** the implementation of each variant from the concrete enum definition.
 
-## Evaluator Computer
+# Evaluator Computer
 
 To demonstrate how CGP enables extensible and decoupled evaluation logic, we will now walk through how to implement a small part of the `eval` function — specifically, the logic for handling the `Plus` operator. Rather than tying ourselves to a fixed `Expr` enum, we begin by defining `Plus` as an independent struct:
 
@@ -289,13 +289,13 @@ This is a significant benefit over traditional macro-based approaches, which are
 
 In short, `DispatchEval` and `MatchWithValueHandlers` together make it possible to evaluate complex enums in a clean, declarative, and extensible way — without writing repetitive boilerplate or giving up compile-time guarantees. It’s another example of how CGP turns what would normally be painful and manual trait implementations into something elegant and maintainable.
 
-## Converting to a Lisp Expression
+# Converting to a Lisp Expression
 
 At this point, we’ve implemented a basic arithmetic evaluator using CGP. But interpreting expressions is only one of many possible operations we might want to perform. Often, we want to **transform** the syntax tree — say, converting it into a string, generating code, or emitting tokens for macro expansion.
 
 Although a plain `to_string` implementation could be a compelling use case on its own, it might seem too trivial to justify CGP’s involvement (spoiler: it’s not). So instead, to make things a little more illustrative and practical, we’ll convert our arithmetic expressions into **Lisp expressions** — specifically, into a form inspired by [S-expressions](https://en.wikipedia.org/wiki/S-expression).
 
-### Why Lisp?
+## Why Lisp?
 
 The motivation here is similar to the real-world task of converting a Rust syntax tree (like [`syn::Expr`](https://docs.rs/syn/latest/syn/enum.Expr.html)) into a [`TokenStream`](https://docs.rs/proc-macro2/latest/proc_macro2/struct.TokenStream.html). That task typically requires walking a rich enum structure and transforming it into a stream of tokens. Rather than deal with the full complexity of `TokenStream`, we’ll use a simplified representation based on Lisp syntax — concise, nested, and familiar to anyone who’s seen prefix notation.
 
@@ -336,7 +336,7 @@ This demonstrates the basic structure. But the real point is this: converting fr
 
 So how do we solve it modularly?
 
-### The `ComputerRef` Component
+## The `ComputerRef` Component
 
 To implement this modular conversion, we’ll use a slightly different CGP trait: `ComputerRef`.
 
@@ -355,7 +355,7 @@ While we *could* clone the input or use higher-ranked trait bounds to handle ref
 
 For the example, we used `Computer` to implement evaluation, but `ComputerRef` for to-Lisp transformation, to demonstrate the use of both traits. In practice, you might want to use `ComputerRef` for evaluation as well, so that the same expression can still be reused after evaluation.
 
-### Implementing `PlusToLisp`
+## Implementing `PlusToLisp`
 
 With our expression types and Lisp target representation in place, we can now implement a CGP provider that transforms a `Plus` expression into its corresponding Lisp representation. Here's what the provider looks like:
 
@@ -397,7 +397,7 @@ pub trait HasLispExprType {
 
 By relying on this trait, we avoid hardcoding the `LispExpr` type directly into the provider. Instead, the actual type can be supplied later when we wire everything together.
 
-### Constructing Variants with Sub-Enums
+## Constructing Variants with Sub-Enums
 
 While we want to construct a `LispExpr` as the final result, we do not necessarily need access to all of its variants inside this provider. In fact, for converting a `Plus` node, we only need to construct two specific kinds of `LispExpr`: a `List`, and an `Ident` representing `"+"`.
 
@@ -421,7 +421,7 @@ This pattern demonstrates how CGP’s upcasting mechanism makes it easy to const
 
 In essence, `LispSubExpr` plays a role similar to what `#[cgp_auto_getter]` do for structs in CGP. Just as `#[cgp_auto_getter]` lets you **read** fields from a struct through a derived trait without knowing the whole type, `CanUpcast` lets you **construct** parts of an enum using only the variants you care about — without being tied to the entire definition of the enum.
 
-### Implementing `LiteralToLisp`
+## Implementing `LiteralToLisp`
 
 The implementation of `TimesToLisp` follows the same pattern as `PlusToLisp`, differing only in that it constructs the `"*"` identifier instead of `"+"`. Since the structure is nearly identical, we will focus instead on a more interesting case: converting literal values into their Lisp representation.
 
@@ -527,9 +527,9 @@ The `MatchWithValueHandlersRef` dispatcher is just one example of CGP’s modula
 
 With both evaluation and Lisp transformation now wired into the same interpreter context, the system is able to evaluate expressions to numeric results or convert them into Lisp-style syntax trees, all from the same `MathExpr` type. The modularity, reusability, and compile-time guarantees of this architecture make CGP a powerful and scalable tool for building language runtimes and transformation pipelines in Rust.
 
-## Advanced Techniques
+# Advanced Techniques
 
-### Binary Operator Provider
+## Binary Operator Provider
 
 When examining the implementations of `PlusToLisp` and `TimesToLisp`, it quickly becomes clear that they follow nearly identical patterns. Aside from the specific operator symbol and the input types, the transformation logic is the same. This duplication presents a perfect opportunity for *further abstraction*.
 
@@ -613,7 +613,7 @@ Here, we map `Plus<MathExpr>` and `Times<MathExpr>` to the same `BinaryOpToLisp`
 
 Thanks to CGP’s expressive delegation system and powerful match-based dispatching via `MatchWithValueHandlersRef`, this setup allows us to write reusable, composable transformation logic. Rather than duplicating the same structure across multiple providers, we define it once in a generic form and let the type system handle the rest.
 
-### Code-Based Dispatching
+## Code-Based Dispatching
 
 Earlier, we explored the difference between the `Computer` and `ComputerRef` traits and saw how `ComputerRef` offers a cleaner and more efficient interface for computations that don’t require ownership of the input. This naturally applies to our evaluation logic as well — after all, an evaluator only needs to borrow the expression, not consume it.
 
@@ -736,7 +736,7 @@ Importantly, the dispatch ordering is entirely compile-time and has **no impact 
 
 This layered dispatch model is one of CGP’s superpowers. It enables you to write simple, focused components and compose them in flexible, scalable ways — without macros, runtime reflection, or boilerplate.
 
-## Extending `MathExpr`
+# Extending `MathExpr`
 
 With the basic interpreter in place, supporting addition and multiplication, it’s natural to explore how we can extend the language further. To demonstrate the modularity and flexibility of CGP, let’s add two new features: *subtraction* and *negation*. These are simple but meaningful enhancements that allow us to test how well our interpreter handles incremental language growth.
 
@@ -746,7 +746,7 @@ This kind of design decision mirrors broader discussions in language evolution. 
 
 In fact, if Rust were implemented using CGP from the start, it would be much easier to extend the language with features like CGP itself. There would be no need to fork the compiler or jump through macro-related hoops. Extensions could be introduced as structured additions to the language, just as we are now extending our interpreter with new syntax.
 
-### Defining the `MathPlusExpr` Expression Type
+## Defining the `MathPlusExpr` Expression Type
 
 To see how CGP enables modular language extension, let’s define a new expression type — `MathPlusExpr` — that expands on our original `MathExpr`. Crucially, this new enum does not replace the old one. Instead, it lives *alongside* it, allowing us to demonstrate how CGP supports language variants and extensions without duplicating logic or entangling implementations.
 
@@ -776,7 +776,7 @@ pub struct Minus<Expr> {
 pub struct Negate<Expr>(pub Box<Expr>);
 ```
 
-### Implementing Eval Providers
+## Implementing Eval Providers
 
 With our extended expression language in place, the next step is to implement evaluation logic for the new constructs. We begin with subtraction. The evaluator for `Minus` is straightforward and closely mirrors what we’ve already done for addition and multiplication. The only real difference is that we now use the `Sub` trait to handle the subtraction operation.
 
@@ -823,7 +823,7 @@ where
 }
 ```
 
-### Wiring of `InterpreterPlus`
+## Wiring of `InterpreterPlus`
 
 To complete the extension, we define a new context called `InterpreterPlus`. This context wires together the evaluation logic for our extended expression language, including subtraction and negation.
 
@@ -863,7 +863,7 @@ impl ComputerRef<InterpreterPlus, Eval, MathPlusExpr> for DispatchEval {
 
 Thanks to CGP’s modular design, implementing `InterpreterPlus` requires only a few dozen lines of code. The core task here is to dispatch each sub-expression type to its corresponding provider. We also define a context-specific wrapper implementation that enables recursive evaluation through `MatchWithValueHandlersRef`. This approach highlights how CGP makes it easy to extend and organize language features cleanly and efficiently.
 
-### Omitting To-Lisp Implementations
+## Omitting To-Lisp Implementations
 
 At this stage, you might assume that supporting to-Lisp conversion for `MathPlusExpr` is necessary before proceeding further. However, when rapidly prototyping new language extensions, it is often desirable to *skip* implementing less critical features like to-Lisp conversion and focus solely on the core logic, such as evaluation.
 
@@ -874,3 +874,5 @@ This stands in stark contrast to typical Rust designs that rely on **heavyweight
 With CGP, the minimal trait design and lazy wiring mean that components are only checked for implementation when they are actually *used*. As a result, you can safely defer adding to-Lisp conversion for `Minus` and `Negate` without worrying about subtle runtime panics or crashes caused by missing implementations.
 
 Thanks to CGP’s flexibility and strong compile-time guarantees, once your code compiles, you can trust that missing non-essential features won’t break your core functionality — allowing you to focus on what matters most in early development.
+
+# Conclusion
