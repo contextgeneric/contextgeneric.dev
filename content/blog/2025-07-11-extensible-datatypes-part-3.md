@@ -880,9 +880,9 @@ Moreover, this approach enables us to easily define other dispatcher variants, s
 
 ## Hiding Constraints with `delegate_components!`
 
-Although it is possible define `BuildAndMergeOutputs` as a type alias, doing so would break the ergonomics of CGP when it is used with a *generic* `Handlers` type by its caller.
+While it's possible to define `BuildAndMergeOutputs` as a simple type alias, doing so introduces ergonomic issues when it’s used with a *generic* `Handlers` type provided by the caller.
 
-For example, let's say we want to implement a provider that *wraps* around `BuildAndMergeOutputs` that *validates* the build output before returning the result, we might want to implement it as follows:
+Consider a situation where we want to implement a provider that wraps around `BuildAndMergeOutputs` in order to perform validation on the result before returning it. We might write something like this:
 
 ```rust
 #[cgp_new_provider]
@@ -899,13 +899,13 @@ where
 }
 ```
 
-In the example above, `BuildAndValidateOutput` has a *static* dependency on `BuildAndMergeOutputs` by directly requiring it to implement `Computer` in its `where` clause. However, if we try to compile the code above, we will encounter an error on the use of `BuildAndMergeOutputs`.
+Here, `BuildAndValidateOutput` *statically* depends on `BuildAndMergeOutputs` by requiring that it implements `Computer`. However, this code won’t compile as-is. The problem is that `BuildAndMergeOutputs` is defined as a type alias that internally relies on a hidden constraint: `Handlers: MapFields<ToBuildAndMergeHandler>`. Since this constraint is not visible at the site of usage, the compiler now demands that we explicitly provide proof that `Handlers` satisfies this requirement.
 
-This is because the type alias `BuildAndMergeOutputs` contains a hidden constraint `Handler: MapFields<ToBuildAndMergeHandler>`. But when we try to implement `BuildAndValidateOutput` with a generic `Handlers`, the compiler now requires us to explicitly provide the *evidence* that `Handlers` implements `MapFields<ToBuildAndMergeHandler>`.
+While we could add the missing constraint to the `where` clause of `BuildAndValidateOutput`, this reduces the ergonomics and composability of the abstraction. It requires callers to understand the internal structure of `BuildAndMergeOutputs`, which goes against one of the core strengths of CGP — *hiding internal constraints* so they don't leak into user code.
 
-Although we can add the given constraint to the `where` clause of `BuildAndValidateOutput`, this approach is not ergonomic, as the user now needs to be aware of the hidden constraints behind `BuildAndMergeOutputs`. On the other hand, the key strength of programming in CGP is the ability to *hide* the constraints that would typically need to be explicitly propagated in normal generic code. So let's also try and also *hide* the constraints used in `BuildAndMergeOutputs`.
+Fortunately, we can solve this by turning `BuildAndMergeOutputs` into a regular provider struct, and using the `delegate_components!` macro to forward the `Computer` implementation to `BuildWithHandlers`, while keeping the necessary constraints encapsulated.
 
-As it turns out, we can achieve this quite easily by defining `BuildAndMergeOutputs` as a *regular provider struct*, and then use `delegate_components!` to delegate the actual `Computer` implementation to `BuildWithHandlers` as follows:
+Here’s how:
 
 ```rust
 delegate_components! {
@@ -917,32 +917,32 @@ delegate_components! {
 }
 ```
 
-Here, we use `delegate_components!` on a new `BuildAndMergeOutputs` provider, with generic `Output` and `Handlers` that contain *additional constraints*. Effectively, we are doing a *conditional* component delegation with the additional constraint present in the `DelegateComponent` implementation.
-
-When expanded, the above code will generate the following `DelegateComponent` implementation:
+This macro creates a new `BuildAndMergeOutputs` provider that wraps `BuildWithHandlers`, while adding the required constraint on `Handlers` behind the scenes. Internally, the macro expands into a `DelegateComponent` implementation like the following:
 
 ```rust
-impl<Output, Handlers: MapFields<ToBuildAndMergeHandler>, Output, Handlers>
-    DelegateComponent<ComputerComponent> for BuildAndMergeOutputs<Output, Handlers>
+impl<Output, Handlers> DelegateComponent<ComputerComponent>
+    for BuildAndMergeOutputs<Output, Handlers>
+where
+    Handlers: MapFields<ToBuildAndMergeHandler>,
 {
     type Delegate = BuildWithHandlers<Output, Handlers::Mapped>;
 }
 ```
 
-With this technique, we can once again use `BuildAndMergeOutputs` ergonomically as a plain Rust type without additional constraints, just like all other CGP provider types.
+With this setup, `BuildAndMergeOutputs` can now be used like any other CGP provider — without needing to manually restate its internal type constraints. This keeps client code clean and focused, and allows CGP abstractions to remain composable and extensible.
 
-The main advantage of this approach is that we can significantly reduce the boilerplate code that would otherwise required to implement `BuildAndMergeOutputs` as a full provider for `Computer`.
-
-When the implementation of a provider is to just forward the implementation to another provider with some additional constraints, it can be simpler to use `DelegateComponent` with the additional constraints specified in it.
+The key benefit of this pattern is that it avoids boilerplate while preserving type safety. Whenever a provider's implementation is simply a thin wrapper around another provider with some added constraints, it's much more convenient to use `DelegateComponent` via `delegate_components!` than to implement the provider trait manually.
 
 ## Type-Level CGP Metaprogramming
 
-The presented technique can also be thought of as a form of **metaprogramming** in CGP - we are directly using type-level programming *outside* of the base CGP component system, i.e. `DelegateComponent`, to *programmatically* define the CGP component wiring through the generic parameters.
+The technique we just explored — wrapping providers and using `delegate_components!` — can be seen as a form of **metaprogramming** in CGP. Here, we’re leveraging **type-level programming** not just within CGP’s core component abstractions like `DelegateComponent`, but also as a tool for *programmatically defining component wiring* through the use of generic parameters and trait constraints.
 
-This also demonstrates the deeper power that CGP provides with its seamless integration with the rest of Rust's type system. Instead of implementing an entirely new component system from scratch, CGP simply leverages Rust's type and trait systems and works *with* them to implement a powerful component system. As a result, the "escape hatch" to program with CGP at the "meta" level is simply type-level programming.
+This highlights a deeper design philosophy behind CGP: rather than inventing a new meta-language or macro system, CGP embraces Rust’s existing type system and trait machinery as the foundation for composability and abstraction. Type-level programming in CGP isn’t an escape hatch — it is the underlying mechanism that *makes escape hatches unnecessary*.
 
-Granted, some readers may already be turned off by the idea of type-level programming, and not pleased with the use of it for CGP metaprogramming. However, think for a moment about the alternative forms of metaprogramming that exist in other languages, such as Ruby, Python, or JavaScript.
+Some readers may find the phrase "type-level programming" intimidating, especially if they associate it with obscure or overly abstract code. But consider the alternatives: in many dynamic languages like Ruby, Python, or JavaScript, metaprogramming is accomplished through bespoke syntax, reflection, or runtime patching — approaches that can be powerful but often come with poor tooling, fragile semantics, and hard-to-debug behavior.
 
-While these other languages have to come up with ad hoc constructs and rules to support metaprogramming, type-level programming is a well-established paradigm with a strong foundation in type theory. Hence, it is a better choice for CGP to support metaprogramming through an existing foundation, as compared to coming up with its own ad hoc system.
+In contrast, type-level programming offers a principled and well-typed foundation for metaprogramming. Constraints are checked at compile time, tooling support remains robust, and the abstractions remain composable. Instead of inventing ad hoc metaprogramming constructs, CGP relies on the well-established theory and practice of type-level computation.
+
+By doing so, CGP achieves a rare combination of power and predictability. Developers who embrace this pattern gain access to highly expressive abstractions, while staying within the familiar boundaries of Rust's type system.
 
 # Conclusion
