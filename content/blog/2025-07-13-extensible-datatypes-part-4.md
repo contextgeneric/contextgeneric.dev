@@ -299,7 +299,7 @@ pub enum Either<A, B> {
 
 In this way, we represent the enum's variants as a nested sum, with `Void` as the terminating type to signify the end of the variant choices.
 
-## `CanUpcast` Trait
+## `CanUpcast` Implementation
 
 With `HasFields` implemented, we are ready to define the `CanUpcast` trait. This trait allows an enum to be upcast to another enum that includes a subset of its variants:
 
@@ -398,8 +398,8 @@ To better understand how the `FieldsExtractor` operation is done, we will try an
 #[derive(HasFields, FromVariant, ExtractField)]
 pub enum ShapePlus {
     Triangle(Triangle),
-    Circle(Circle),
     Rectangle(Rectangle),
+    Circle(Circle),
 }
 ```
 
@@ -439,6 +439,68 @@ Behind the scene, this is what happens:
 
 As we can see, what `Upcast` really does is to go through each variant in `Shape`, try and match the variant, and then re-insert the value as a variant in `ShapePlus`. After we finish the extraction from all fields in `Shape`, the result remainder should have all variants becoming `Void`, and thus we can safely discharge it with `FinalizeExtract`.
 
-By deconstructing the upcast operation into the various extensible variants traits, we are able to generically implement `Upcast` entirely in safe Rust to support casting between *any* compatible enums. In particular, we get the operation almost for *free*, as almost all of the implementation are not tied specifically to make `Upcast` work, and can be reused to support other extensible variants operations like `Downcast`.
+By deconstructing the upcast operation into the various extensible variants traits, we are able to generically implement `Upcast` entirely in safe Rust to support casting between *any* compatible enums. In particular, we get the upcast operation almost for *free*, as almost all of the implementation are not tied specifically to make `Upcast` work, and can be reused to support other extensible variants operations like `Downcast`.
+
+## `CanDowncast` Implementation
+
+With `Upcast` implemented, we can then look into the implementation of `CanDowncast`. The trait is defined as follows:
+
+```rust
+pub trait CanDowncast<Target> {
+    type Remainder;
+
+    fn downcast(self, _tag: PhantomData<Target>) -> Result<Target, Self::Remainder>;
+}
+```
+
+`CanDowncast` can be used with a `Target` enum that contain a *subset* of the variants in `Self`. Compared to `CanUpcast`, `CanDowncast` has an additional `Remainder` type to represent the remaining unextracted variants from the source. The `downcast` method returns a `Result`, with the remainder returned if the downcast fails.
+
+Similar to `CanUpcast`, we have a blanket implementation for `CanDowncast` as follows:
+
+```rust
+impl<Context, Source, Target, Remainder> CanDowncast<Target> for Context
+where
+    Context: HasExtractor<Extractor = Source>,
+    Target: HasFields,
+    Target::Fields: FieldsExtractor<Source, Target, Remainder = Remainder>,
+{
+    type Remainder = Remainder;
+
+    fn downcast(self, _tag: PhantomData<Target>) -> Result<Target, Self::Remainder> {
+        Target::Fields::extract_from(self.to_extractor())
+    }
+}
+```
+
+With all the supporting constructs for `CanUpcast` in place, the implementation of `CanDowncast` is surprisingly simple. Instead of getting the `HasFields` instance from the source `Context`, we require `Target` to implement `HasFields`. We follow the same way to get the partial variants from the context using `HasExtractor`. But after that, we use `Target::Fields` to iterate over the target fields, using `FieldsExtractor` with the same `Source` and `Target` as in `CanUpcast`. With the `Remainder` potentially non-empty, we also return it as the `Result` without finalizing it using `FinalizeExtract`.
+
+As we can see, the only difference between `CanUpcast` and `CanDowncast` is that one iterates over the source fields, while the other iterates over the target fields. Aside from that, we are able to reuse everything else, including `FieldsExtractor` to implement `CanDowncast`.
+
+## Example Use of Downcast
+
+With `CanDowncast` implemented, we can take a look at an example use of `CanDowncast`:
+
+```rust
+let shape_plus = ShapePlus::Triangle(Triangle {
+    base: 3.0,
+    height: 4.0,
+});
+
+let area = match shape_plus.downcast(PhantomData::<Shape>) {
+    Ok(shape) => match shape {
+        Shape::Circle(circle) => PI * circle.radius * circle.radius,
+        Shape::Rectangle(rectangle) => rectangle.width * rectangle.height,
+    },
+    // PartialShapePlus<IsPresent, IsVoid, IsVoid>
+    Err(remainder) => match remainder.extract_field(PhantomData::<symbol!("Triangle")>) {
+        Ok(triangle) => triangle.base * triangle.height / 2.0,
+    },
+};
+```
+
+In the example above, we try to downcast a value from `ShapePlus` to `Shape`. When downcast is called, it uses `Shape::Fields` to iterate over the fields in `Shape`, and try to extract them from `ShapePlus`. In the success case of the returned result, we can match on the extracted `Shape` and calculate the area accordingly. In the error case, we get the remainder from the partial variants, which is `PartialShapePlus<IsPresent, IsVoid, IsVoid>`. Since there is only one remaining variant, we can use `extract_field` on `Triangle` to calculate the triangle's area, and then there is no more variant left to handle.
+
+
+Remarkably, both our upcast and downcast implementations can work even when the source and target enums have their variants defined in *different ordering*. Thanks to the generalized implementation of traits such as `ExtractField`, our casting operation can work with any field ordering, and the end result would remain the same.
 
 # Conclusion
