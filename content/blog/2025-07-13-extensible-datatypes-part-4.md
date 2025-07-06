@@ -98,9 +98,9 @@ If you need to represent more complex data in a variant, we recommend wrapping t
 
 ## Partial Variants
 
-Just as we used *partial records* to support partially *constructed* structs, CGP also defines **partial variants** to support partially **extracted** enums. Partial variants allow us to pattern match on each variant in an enum one at a time, while safely ruling out cases that have been *previously matched* before.
+Just as CGP supports partially constructed structs through *partial records*, it also enables *partial variants* to work with enums in a similarly flexible way. Partial variants allow you to pattern match on each variant of an enum incrementally, while safely excluding any variants that have already been handled. This makes it possible to build exhaustive and type-safe match chains that evolve over time.
 
-For example, the `Shape` example earlier would have a `PartialShape` enum defined as its partial variants:
+Consider the `Shape` enum we explored earlier. CGP would generate a corresponding `PartialShape` enum that represents the partial variant form of `Shape`:
 
 ```rust
 pub enum PartialShape<F0: MapType, F1: MapType> {
@@ -111,7 +111,7 @@ pub enum PartialShape<F0: MapType, F1: MapType> {
 
 ## `HasExtractor` trait
 
-To support the conversion from an enum to its partial variants, CGP provides the `HasExtractor` trait, which is defined as follows:
+To enable the transformation from a regular enum into its partial variant form, CGP provides the `HasExtractor` trait. This trait defines an associated type named `Extractor`, which represents the full set of partial variants for a given enum, and a method `to_extractor`, which performs the conversion:
 
 ```rust
 pub trait HasExtractor {
@@ -121,9 +121,7 @@ pub trait HasExtractor {
 }
 ```
 
-The `HasExtractor` trait contains an `Extractor` associated type representing the partial variants with all cases present. It also provides a `to_extractor` method to convert the enum into its partial variants.
-
-Following is the example implementation of `HasExtractor` for the `Shape` enum:
+For the `Shape` enum, an implementation of `HasExtractor` would look like the following:
 
 ```rust
 impl HasExtractor for Shape {
@@ -138,9 +136,11 @@ impl HasExtractor for Shape {
 }
 ```
 
+This implementation makes it possible to work with a `Shape` value as a `PartialShape`, where each variant is wrapped in an `IsPresent` marker, indicating that the variant is still available to be matched.
+
 ## `IsVoid` Type Mapper
 
-The main difference between partial records and partial variants is that we use the `IsVoid` type mapper to represent an *extracted variant*:
+The key distinction between partial records and partial variants lies in how we represent the absence of data. For partial variants, CGP introduces the `IsVoid` type mapper to indicate that a variant has already been extracted and is no longer available:
 
 ```rust
 pub enum Void {}
@@ -151,35 +151,32 @@ impl MapType for IsVoid {
 }
 ```
 
-The `Void` type is simply defined as an enum with *zero* variant. As a result, `Void` can *never be constructed*, since there is no valid variant to construct it from. It also means that if we have a value of type `Void`, we can use `match value {}` to match it to *anything* we want, since there is no valid case to match in the `match` body.
+The `Void` type is defined as an empty enum with no variants. This means that it is impossible to construct a value of type `Void`, and any code that attempts to match on a `Void` value will be statically unreachable. This makes it a safe and expressive way to model a variant that no longer exists in a given context.
 
-The `Void` type is conceptually equivalent to the [**never type**](https://doc.rust-lang.org/reference/types/never.html) or [`Infallible`](https://doc.rust-lang.org/std/convert/enum.Infallible.html) in Rust. We mainly define it as a distinct type to distinguish its special use in CGP.
+Conceptually, `Void` serves the same purpose as Rust’s built-in [**never type**](https://doc.rust-lang.org/reference/types/never.html) or the [`Infallible`](https://doc.rust-lang.org/std/convert/enum.Infallible.html) type from the standard library. However, CGP defines `Void` explicitly to distinguish its special role in the context of extensible variants.
 
-We use `IsVoid` instead of `IsNothing` to represent the **absence** of a variant, as it means that a valid value can never be found for that variant.
+While `IsNothing` is used for absent fields in partial records, we use `IsVoid` to represent removed or matched variants in partial enums. This ensures that once a variant has been extracted, it cannot be matched again — preserving both soundness and safety in CGP’s type-driven pattern matching.
 
 ## `ExtractField` Trait
 
-Once we convert an enum to its partial variants, we can perform *partial* pattern matching on it, one variant at a time, through the `ExtractField` trait, which is defined as follows:
+Once an enum has been converted into its partial variant form, we can begin incrementally pattern matching on each variant using the `ExtractField` trait. This trait enables safe, step-by-step extraction of variant values, and is defined as follows:
 
 ```rust
 pub trait ExtractField<Tag> {
     type Value;
-
     type Remainder;
 
     fn extract_field(self, _tag: PhantomData<Tag>) -> Result<Self::Value, Self::Remainder>;
 }
 ```
 
-Similar to `FromVariant` and `HasField`, `ExtractField` has a `Tag` type for the variant name, and a `Value` associated type for the variant's type. Additionally, there is a `Remainder` associated type representing the *remaining* of the partial variants that have not yet been matched on.
+Just like `FromVariant` and `HasField`, the `ExtractField` trait takes a `Tag` type to identify the variant, and includes an associated `Value` type representing the variant’s inner data. Additionally, it defines a `Remainder` type, which represents the remaining variants that have not yet been matched.
 
-The `extract_field` method takes a `self` value, and returns a `Result` of *either* the `Value` when the variant is matched, or the `Remainder` when the match fails.
-
-It is worth noting that even though we used `Result` here, the `Remainder` is not really an error, but rather the remaining parts that need to be handled similar to how we handle errors.
+The `extract_field` method consumes the value and returns a `Result`, where a successful match yields the extracted `Value`, and a failed match returns the `Remainder`. Although this uses the `Result` type, the `Err` case is not really an error in the traditional sense — rather, it represents the remaining variants yet to be handled, much like how errors represent alternative outcomes in Rust.
 
 ### Example Implementation of `ExtractField`
 
-To understand how `ExtractField` works, let's look at the implementation of `ExtractField` for the `Circle` variant of `Shape`:
+To understand how `ExtractField` works in practice, let’s look at an implementation for extracting the `Circle` variant from a `PartialShape`:
 
 ```rust
 impl<F1: MapType> ExtractField<symbol!("Circle")> for PartialShape<IsPresent, F1> {
@@ -197,19 +194,15 @@ impl<F1: MapType> ExtractField<symbol!("Circle")> for PartialShape<IsPresent, F1
 }
 ```
 
-The `ExtractField` implementation works with a `PartialShape`, with `IsPresent` used on indicate that we can extract the `Circle` variant from `PartialShape` if it is not yet extracted.
+In this implementation, we are working with a `PartialShape` in which the `Circle` variant is still marked as present. The trait is also generic over `F1: MapType`, which corresponds to the `Rectangle` variant, allowing the code to remain flexible regardless of whether the rectangle has already been extracted or not.
 
-Similar to the implementation of `BuildField`, the `ExtractField` implementation is parameterized by `F1: MapType` for the `Rectangle` variant, to indicate that our code works regardless of whether `Rectangle` has previously been extracted or not.
+The associated `Remainder` type updates the `Circle` variant from `IsPresent` to `IsVoid`, signifying that it has been extracted and should no longer be considered valid. The use of the `Void` type ensures that this variant cannot be constructed again, making it safe to ignore in further matches.
 
-The `Remainder` type of the implementation updates the `Circle` variant status from `IsPresent` to `IsVoid`, to indicate that the `Circle` variant has been extracted. The `Void` type makes it no longer possible to construct the `Circle` variant, thus making it an "invalid" case that can be skipped later.
-
-In the `extract_field` method body, we perform a `match` on `self`. If the `Circle` variant is matched, we simply return `Ok(circle)` to indicate a successful extraction. For every other cases like `Rectangle`, we return an `Err` case with the original variant reconstructed.
-
-It is worth noting that due to the type safety of `Void`, it is not possible to safely implement `extract_field` in any other way. For example, we cannot accidentally return the `Circle` variant back as an `Err` case, because it is impossible to construct the variant with a value of type `Void`.
+Within the method body, we match on `self`. If the value is a `Circle`, we return it in the `Ok` case. Otherwise, we return the remaining `PartialShape`, reconstructing it with the other variant. Due to the type system’s enforcement, it is impossible to incorrectly return a `Circle` as part of the remainder once it has been marked as `IsVoid`. The compiler ensures that this branch is unreachable, preserving correctness by construction.
 
 ### Example Use of `ExtractField`
 
-Using `ExtractField`, we can now extract the variants from `Shape` in multiple steps, and perform incremental matching such as follows:
+With `ExtractField`, we can now incrementally extract and match against variants in a safe and ergonomic way. Here’s an example of computing the area of a shape using this approach:
 
 ```rust
 let shape = Shape::Circle(Circle { radius: 5.0 });
@@ -228,12 +221,10 @@ let area = match shape
 };
 ```
 
-The above code shows an example of how to calculate the area of a shape through `ExtractField`. We first call `to_extractor` to convert the shape into a `PartialShape` with all variants present. We then call `extract_field` with the `Circle` variant, and calculate the circle's area in the success case `Ok`.
+In this example, we begin by converting the `Shape` value into a `PartialShape` with all variants present using `to_extractor`. We then call `extract_field` to try extracting the `Circle` variant. If successful, we compute the circle's area. If not, we receive a remainder value where the `Circle` variant is now marked as `IsVoid`. This remainder is then used to attempt extracting the `Rectangle` variant. If that succeeds, we compute the area accordingly.
 
-In case the matching failed, we get the remainder in the `Err` case, with the remainder partial variants having the type `PartialShape<IsVoid, IsPresent>`. We then call `extract_field` on the remainder again with the `Rectangle` variant, and once again match against the result.
+By the time we reach the second `Err` case, the remainder has the type `PartialShape<IsVoid, IsVoid>`, which cannot contain any valid variant. Because of this, we can safely omit any further pattern matching, and the compiler guarantees that there are no unreachable or unhandled cases.
 
-This time, for the `Ok` case, we get a `Rectangle` value and use it to calculate the rectangle's area. For the `Err` case, the remainder this time has the type `PartialShape<IsVoid, IsVoid>`, indicating that all possible variants have been extracted. Since the type does not contain any valid value, we can safely *omit the entire branch* and the code will still compile.
-
-As we can see, the Rust compiler is smart enough to know that a type like `PartialShape<IsVoid, IsVoid>` cannot have any valid value, and allows us to skip ahead without having to manually prove that each variant is in fact impossible. Thanks to this, we are able to leverage the type system to safely diverge after all possible variants are ruled out, without needing runtime exceptions to assert that the case cannot be reached.
+What makes this approach so powerful is that the Rust type system can statically verify that it is impossible to construct a valid value for `PartialShape<IsVoid, IsVoid>`. We no longer need to write boilerplate `_ => unreachable!()` code or use runtime assertions. The type system ensures exhaustiveness and soundness entirely at compile time, enabling safer and more maintainable implementation of extensible variants.
 
 # Conclusion
