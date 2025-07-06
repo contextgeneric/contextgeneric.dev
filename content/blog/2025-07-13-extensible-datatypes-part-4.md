@@ -253,4 +253,188 @@ Here, we use an empty `match` expression on `self`, which works because the comp
 
 By leveraging the `Void` type in this way, CGP allows us to exhaustively extract every variant from a partial enum and confidently conclude that no cases remain. This eliminates the need for runtime assertions, unreachable branches, or panics. Instead, the type system itself guarantees that all variants have been handled, enabling a clean and fully type-safe approach to enum decomposition.
 
+# Implementation of Casts
+
+With the basic traits for extensible variants implemented, we will next look at how to implement the `CanUpcast` and `CanDowncast` traits to support upcasting and downcasting between enums with compatible variants.
+
+## `HasFields` Implementation
+
+Similar to the record merging operation in extensible records, we need to also implement `HasFields` for enums, so that the our generic implementation can iterate over each variant in the enum.
+
+The `HasFields` implementation for our example `Shape` is as follows:
+
+```rust
+impl HasFields for Shape {
+    type Fields = Sum![
+        Field<symbol!("Circle"), Circle>,
+        Field<symbol!("Rectangle"), Rectangle>,
+    ];
+}
+```
+
+Instead of using the `Product!` macro to construct a type-level list, we use the `Sum!` macro to construct a *type-level sum* of all variants in the enum. The `Sum!` macro desugars to follows:
+
+```rust
+impl HasFields for Shape {
+    type Fields = Either<
+        Field<symbol!("Circle"), Circle>,
+        Either<
+            Field<symbol!("Rectangle"), Rectangle>,
+            Void,
+        >,
+    >;
+}
+```
+
+While `Product!` desugars to a chain of `Cons` that ends with `Nil`, `Sum!` desugars to a chain of `Either` that ends with `Void`. The `Either` type is defined to be structurally the same as `Result`, just with different variant names:
+
+```rust
+pub enum Either<A, B> {
+    Left(A),
+    Right(B),
+}
+```
+
+## `CanUpcast` Trait
+
+With the `HasFields` implementation for enums, we can now implement `CanUpcast` as follows:
+
+```rust
+pub trait CanUpcast<Target> {
+    fn upcast(self, _tag: PhantomData<Target>) -> Target;
+}
+```
+
+The `CanUpcast` trait is parameterized by a `Target` type that we want to upcast to. The `upcast` method takes in `self` and converts it to the `Target` value, and the extra `PhantomData` parameter is used to help the compiler infer the `Target` type.
+
+The trait is automatically implemented with the following blanket implementation:
+
+```rust
+impl<Context, Source, Target, Remainder> CanUpcast<Target> for Context
+where
+    Context: HasFields + HasExtractor<Extractor = Source>,
+    Context::Fields: FieldsExtractor<Source, Target, Remainder = Remainder>,
+    Remainder: FinalizeExtract,
+{
+    fn upcast(self, _tag: PhantomData<Target>) -> Target {
+        match Context::Fields::extract_from(self.to_extractor()) {
+            Ok(target) => target,
+            Err(remainder) => remainder.finalize_extract(),
+        }
+    }
+}
+```
+
+The way `CanUpcast` works is as follows. It first requires the source `Context` type to implement `HasFields` and `HasExtractor`. It then require the context `Fields` to implement a helper trait `FieldsExtractor`, which performs the actual extraction of variants from the source partial variants to the `Target` type. Finally, it requires the `Remainder` returned from the field extraction operation to implement `FinalizeExtract`, to ensure that all variants in the source enum are exhaustively extracted.
+
+In the body for `upcast`, we first call `self.extractor()` to convert the source enum to its partial variants. We then use `Fields::extract_from` to extract the variants to the target enum. Finally, we handle the remainder case by calling `finalize_extract()`, as we expect there to be no remaining variant left in the source after extraction has completed.
+
+## `FieldsExtractor` Trait
+
+The helper `FieldsExtractor` trait is defined as follows:
+
+```rust
+pub trait FieldsExtractor<Source, Target> {
+    type Remainder;
+
+    fn extract_from(source: Source) -> Result<Target, Self::Remainder>;
+}
+```
+
+The trait is parameterized by a `Source` type, which is the partial variants for the source enum, and a `Target` type which is the *non-partial* target enum. It has a `Remainder` type to represent any remaining variant that has not been extracted.
+
+The `extract_from` method accepts a `Source` partial variants, and conditionally either returns the `Target` if the extraction is successful, or the `Remainder` for any unextracted variant that remains in `Source`.
+
+We then have a blanket implementation of `FieldsExtractor` for the head of the `Sum!` fields:
+
+```rust
+impl<Source, Target, Tag, Value, RestFields, Remainder> FieldsExtractor<Source, Target>
+    for Either<Field<Tag, Value>, RestFields>
+where
+    Source: ExtractField<Tag, Value = Value>,
+    Target: FromVariant<Tag, Value = Value>,
+    RestFields: FieldsExtractor<Source::Remainder, Target, Remainder = Remainder>,
+{
+    type Remainder = Remainder;
+
+    fn extract_from(source: Source) -> Result<Target, Remainder> {
+        match source.extract_field(PhantomData) {
+            Ok(field) => Ok(Target::from_variant(PhantomData, field)),
+            Err(remainder) => RestFields::extract_from(remainder),
+        }
+    }
+}
+```
+
+We first pattern match the head of the sum as `Field<Tag, Value>`. We then require that the `Source` partial variants to implement `ExtractField<Tag>`, and the `Target` enum to implement `FromVariant<Tag>`. Additionally, the `Value` type for both `ExtractField` and `FromVariant` must be the same as `Value`.
+
+The implementation then requires the remaining fields to also implement `FieldsExtractor`, with the remainder of `Source` being the new source. The final `Remainder` after all field extraction is completed is then returned as the `Remainder` type.
+
+In the implementation for `extract_from`, we call `extract_field` on the `source` value. If the field extraction is successful, we then call `Target::from_variant` to convert the extracted value into `Target`. Otherwise, we take the remainder of `source`, and recursively call `extract_from` with the remaining fields.
+
+When we reach the end of the sum, the field extraction operation ends with an implementation of `Void`:
+
+```rust
+impl<Source, Target> FieldsExtractor<Source, Target> for Void {
+    type Remainder = Source;
+
+    fn extract_from(source: Source) -> Result<Target, Source> {
+        Err(source)
+    }
+}
+```
+
+The `Void` implementation simply sets the final remainder of `Source` as the `Remainder` type, and returns its source as the remainder to indicate that the extraction has failed.
+
+## Example Use of `Upcast`
+
+To better understand how the `FieldsExtractor` operation is done, we will try and navigate through an example upcast operation. Suppose we have a `ShapePlus` enum that is a *superset* of the original `Shape` type:
+
+```rust
+#[derive(HasFields, FromVariant, ExtractField)]
+pub enum ShapePlus {
+    Triangle(Triangle),
+    Circle(Circle),
+    Rectangle(Rectangle),
+}
+```
+
+We can perform an upcast from `Shape` to `ShapePlus` as follows:
+
+```rust
+let shape = Shape::Circle(Circle { radius: 5.0 });
+let shape_plus = shape.upcast(PhantomData::<ShapePlus>);
+```
+
+Behind the scene, this is what happens:
+
+- The blanket implementation of `CanUpcast` checks the following:
+  - The source `Shape` implements `HasFields`, with the `Fields` type being:
+    ```rust
+    Sum![
+        Field<symbol!("Circle"), Circle>,
+        Field<symbol!("Rectangle"), Rectangle>,
+    ]
+    ```
+  - The source `Shape` implements `HasExtractor`, with the extractor type being `PartialShape<IsPresent, IsPresent>`.
+  - `Fields` implements `FieldsExtractor` for `PartialShape<IsPresent, IsPresent>` as the source, and `ShapePlus` as the target.
+  - The `Remainder` type returned is `PartialShape<IsVoid, IsVoid>`, which implements `FinalizeExtract`.
+- The head implementation of `FieldsExtractor` is matched with the following:
+  - The current `Tag` is `symbol!("Circle")`, and the current `Value` is `Circle`.
+  - The current `Source` is `PartialShape<IsPresent, IsPresent>`, and the current `Target` is `ShapePlus`.
+  - `PartialShape<IsPresent, IsPresent>` implements `ExtractField<symbol!("Circle")>`.
+    - The `Value` matches `Circle`, and the `Remainder` is `PartialShape<IsVoid, IsPresent>`.
+  - `ShapePlus` implements `FromVariant<symbol!("Circle")>`, with the `Value` matching `Circle`.
+- The tail `Either<Field<symbol!("Rectangle"), Rectangle>, Void>` implements `FieldsExtractor` as follows:
+  - The current `Tag` is `symbol!("Rectangle")`, and the current `Value` is `Rectangle`.
+  - The current `Source` is `PartialShape<IsVoid, IsPresent>`, and the current `Target` is `ShapePlus`.
+  - `PartialShape<IsVoid, IsPresent>` implements `ExtractField<symbol!("Rectangle")>`.
+    - The `Value` matches `Rectangle`, and the `Remainder` is `PartialShape<IsVoid, IsVoid>`.
+  - `ShapePlus` implements `FromVariant<symbol!("Rectangle")>`, with the `Value` matching `Rectangle`.
+- The tail `Void` implements `FieldExtractor` by returning the source `PartialShape<IsVoid, IsVoid>` as the `Remainder`.
+
+As we can see, what `Upcast` really does is to go through each variant in `Shape`, try and match the variant, and then re-insert the value as a variant in `ShapePlus`. After we finish the extraction from all fields in `Shape`, the result remainder should have all variants becoming `Void`, and thus we can safely discharge it with `FinalizeExtract`.
+
+By deconstructing the upcast operation into the various extensible variants traits, we are able to generically implement `Upcast` entirely in safe Rust to support casting between *any* compatible enums. In particular, we get the operation almost for *free*, as almost all of the implementation are not tied specifically to make `Upcast` work, and can be reused to support other extensible variants operations like `Downcast`.
+
 # Conclusion
