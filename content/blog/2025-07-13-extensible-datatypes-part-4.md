@@ -227,4 +227,30 @@ By the time we reach the second `Err` case, the remainder has the type `PartialS
 
 What makes this approach so powerful is that the Rust type system can statically verify that it is impossible to construct a valid value for `PartialShape<IsVoid, IsVoid>`. We no longer need to write boilerplate `_ => unreachable!()` code or use runtime assertions. The type system ensures exhaustiveness and soundness entirely at compile time, enabling safer and more maintainable implementation of extensible variants.
 
+## `FinalizeExtract` Trait
+
+Even though Rust can infer that a type like `PartialShape<IsVoid, IsVoid>` is inhabitable, it can only do so when the concrete type is accessible. In order to handle the case in the generic implementation of extensible variants, CGP defines the `FinalizeExtract` trait, which *discharges* an empty partial variant after all cases have been handled:
+
+```rust
+pub trait FinalizeExtract {
+    fn finalize_extract<T>(self) -> T;
+}
+```
+
+The trait contains a `finalize_extract` method that may look simple but unintuitive: given a `self` value, we can return a value of *any* type `T`. This might seem impossible at first glance, but we can in fact safely implement it in Rust, but only in the case when `Self` is *uninhabited*, such as for the case of `Void` and `PartialShape<IsVoid, IsVoid>`.
+
+The implementation is straightforward and is as follows:
+
+```rust
+impl FinalizeExtract for PartialShape<IsVoid, IsVoid> {
+    fn finalize_extract<T>(self) -> T {
+        match self {}
+    }
+}
+```
+
+Inside the method body, we simply use `match self {}` to assert that there is no possible value for `self`, and so if we have such a value, then *anything* is possible. Rust would type check that it is in fact the case that the code is unreachable, and allows the code to be compiled.
+
+By leveraging the `Void` type, we can safely and generically extract the variants in a partial variants, and ensure that all cases are exhaustively handled without needing to rely on runtime assertions to ensure that the impossible cases cannot occur.
+
 # Conclusion
