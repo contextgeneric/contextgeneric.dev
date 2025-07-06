@@ -255,13 +255,13 @@ By leveraging the `Void` type in this way, CGP allows us to exhaustively extract
 
 # Implementation of Casts
 
-With the basic traits for extensible variants implemented, we will next look at how to implement the `CanUpcast` and `CanDowncast` traits to support upcasting and downcasting between enums with compatible variants.
+With the foundational traits for extensible variants in place, we can now explore how to implement the `CanUpcast` and `CanDowncast` traits. These traits enable safe and generic upcasting and downcasting between enums that share compatible variants.
 
 ## `HasFields` Implementation
 
-Similar to the record merging operation in extensible records, we need to also implement `HasFields` for enums, so that the our generic implementation can iterate over each variant in the enum.
+Just as extensible records rely on `HasFields` for iterating over their fields, extensible variants use a similar mechanism to iterate over their variants. This allows the generic casting implementation to iterate over each variant of an enum.
 
-The `HasFields` implementation for our example `Shape` is as follows:
+For example, the `HasFields` implementation for the `Shape` enum is defined as follows:
 
 ```rust
 impl HasFields for Shape {
@@ -272,7 +272,9 @@ impl HasFields for Shape {
 }
 ```
 
-Instead of using the `Product!` macro to construct a type-level list, we use the `Sum!` macro to construct a *type-level sum* of all variants in the enum. The `Sum!` macro desugars to follows:
+Here, instead of using the `Product!` macro (which is used for structs), we use the `Sum!` macro to build a *type-level sum* representing all variants in the enum. The `Sum!` macro expands to a nested structure of `Either`, similar to how `Product!` expands into a chain of `Cons`.
+
+For example, the `Sum!` expression above desugars to:
 
 ```rust
 impl HasFields for Shape {
@@ -286,7 +288,7 @@ impl HasFields for Shape {
 }
 ```
 
-While `Product!` desugars to a chain of `Cons` that ends with `Nil`, `Sum!` desugars to a chain of `Either` that ends with `Void`. The `Either` type is defined to be structurally the same as `Result`, just with different variant names:
+Where `Either` is defined in a similar fashion to Rust's standard `Result` type, but with variant names that reflect the sum type structure:
 
 ```rust
 pub enum Either<A, B> {
@@ -295,9 +297,11 @@ pub enum Either<A, B> {
 }
 ```
 
+In this way, we represent the enum's variants as a nested sum, with `Void` as the terminating type to signify the end of the variant choices.
+
 ## `CanUpcast` Trait
 
-With the `HasFields` implementation for enums, we can now implement `CanUpcast` as follows:
+With `HasFields` implemented, we are ready to define the `CanUpcast` trait. This trait allows an enum to be upcast to another enum that includes a subset of its variants:
 
 ```rust
 pub trait CanUpcast<Target> {
@@ -305,9 +309,9 @@ pub trait CanUpcast<Target> {
 }
 ```
 
-The `CanUpcast` trait is parameterized by a `Target` type that we want to upcast to. The `upcast` method takes in `self` and converts it to the `Target` value, and the extra `PhantomData` parameter is used to help the compiler infer the `Target` type.
+The trait is generic over the `Target` type we wish to upcast to. The `upcast` method takes the original enum and converts it into the target enum, using `PhantomData` to assist with type inference.
 
-The trait is automatically implemented with the following blanket implementation:
+The implementation is provided generically through a blanket implementation:
 
 ```rust
 impl<Context, Source, Target, Remainder> CanUpcast<Target> for Context
@@ -325,9 +329,9 @@ where
 }
 ```
 
-The way `CanUpcast` works is as follows. It first requires the source `Context` type to implement `HasFields` and `HasExtractor`. It then require the context `Fields` to implement a helper trait `FieldsExtractor`, which performs the actual extraction of variants from the source partial variants to the `Target` type. Finally, it requires the `Remainder` returned from the field extraction operation to implement `FinalizeExtract`, to ensure that all variants in the source enum are exhaustively extracted.
+Here’s how it works. First, the `Context` type (the source enum) must implement both `HasFields` and `HasExtractor`. The `HasFields` trait provides a type-level sum of variants, and `HasExtractor` converts the enum into its corresponding partial variants. Next, the associated `Fields` type must implement the helper trait `FieldsExtractor`, which handles the actual extraction of variants into the target type. The `Remainder` returned by this operation must then implement `FinalizeExtract`, which guarantees that all source variants have been accounted for.
 
-In the body for `upcast`, we first call `self.extractor()` to convert the source enum to its partial variants. We then use `Fields::extract_from` to extract the variants to the target enum. Finally, we handle the remainder case by calling `finalize_extract()`, as we expect there to be no remaining variant left in the source after extraction has completed.
+In the method body, we begin by calling `self.to_extractor()` to convert the source enum into a value with partial variants. We then use `Fields::extract_from` to extract the relevant variants into the target enum. Finally, we call `finalize_extract()` on the remainder.
 
 ## `FieldsExtractor` Trait
 
