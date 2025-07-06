@@ -24,19 +24,21 @@ For readers coming from more advanced programming languages, this development ef
 
 In addition, CGP v0.4.2 introduces support for safe **upcasting and downcasting between enums** that share a common subset of variants. This provides a foundation for writing extensible and evolvable APIs that remain compatible across different layers of abstraction or across independently maintained modules.
 
+Here is a revised version of your “Content Organization” section, rewritten for clarity, flow, and consistency in tone and style. It maintains full sentences and should read naturally for Rust developers new to CGP:
+
 # Content Organization
 
-This is the first out of 5-part series to walk through the examples and implementation of extensible data types in CGP. Here is a summary of the content presented in each part:
+This article is the first in a five-part series exploring the examples and implementation of extensible data types in CGP. Below is an overview of what each part covers:
 
-**Part 1: Highlights and Extensible Records Demo** - In this first part of the series, we will cover some quick highlights on the high level features that extensible data types provide, followed by a comprehensive demonstration of using extensible records to implement and compose modular builders for real world applications.
+**Part 1: Highlights and Extensible Records Demo** – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
 
-**Part 2: Extensible Variants Demo** - This part covers a follow up demonstration of using extensible variants to solve the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), by implementing reusable interpreter components for a toy language.
+**Part 2: Extensible Variants Demo** – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
 
-**Part 3: Implementing Extensible Records** - This part walks through the internal implementation of extensible records, and show how CGP enables the modular builder pattern used in the part 1 demo.
+**Part 3: Implementing Extensible Records** – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 
-**Part 4: Implementing Extensible Variants** - This part walks through the internal implementation of extensible variants, and show how CGP enables the modular builder pattern used in the part 2 demo.
+**Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
-**Part 5: Handler Hierarchy and Conclusion** - This part walks through the implementation of extensible data types through other parts of the CGP handler hierarchy, from `Computer` to `Handler`, to support its usage in all forms of computation. We will also end the series here with an overall conclusion.
+**Part 5: Handler Hierarchy and Conclusion** – In the final part, we explore how extensible data types integrate into the broader CGP handler hierarchy — from `Computer` to `Handler` — to support all forms of programs from pure computations to async I/O with failures. We conclude the series with a summary of key takeaways and the design philosophy behind CGP.
 
 # Feature Highlighs
 
