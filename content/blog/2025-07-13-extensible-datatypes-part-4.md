@@ -229,7 +229,7 @@ What makes this approach so powerful is that the Rust type system can statically
 
 ## `FinalizeExtract` Trait
 
-Even though Rust can infer that a type like `PartialShape<IsVoid, IsVoid>` is inhabitable, it can only do so when the concrete type is accessible. In order to handle the case in the generic implementation of extensible variants, CGP defines the `FinalizeExtract` trait, which *discharges* an empty partial variant after all cases have been handled:
+While Rust’s type system can infer that a type like `PartialShape<IsVoid, IsVoid>` is uninhabitable, this inference only works when the compiler has access to the fully concrete type. To support this behavior more generically within CGP’s extensible variant system, the `FinalizeExtract` trait is introduced. This trait provides a mechanism to *discharge* an empty partial variant after all possible cases have been matched:
 
 ```rust
 pub trait FinalizeExtract {
@@ -237,9 +237,9 @@ pub trait FinalizeExtract {
 }
 ```
 
-The trait contains a `finalize_extract` method that may look simple but unintuitive: given a `self` value, we can return a value of *any* type `T`. This might seem impossible at first glance, but we can in fact safely implement it in Rust, but only in the case when `Self` is *uninhabited*, such as for the case of `Void` and `PartialShape<IsVoid, IsVoid>`.
+At first glance, the `finalize_extract` method might appear misleading. It accepts a `self` value and claims to return a value of *any* type `T`. This may seem unsound, but the key detail is that it is only ever implemented for types that are *uninhabited* — in other words, types that can never actually exist at runtime. Examples include `Void` and a fully exhausted partial variant like `PartialShape<IsVoid, IsVoid>`.
 
-The implementation is straightforward and is as follows:
+The implementation is both safe and surprisingly simple:
 
 ```rust
 impl FinalizeExtract for PartialShape<IsVoid, IsVoid> {
@@ -249,8 +249,8 @@ impl FinalizeExtract for PartialShape<IsVoid, IsVoid> {
 }
 ```
 
-Inside the method body, we simply use `match self {}` to assert that there is no possible value for `self`, and so if we have such a value, then *anything* is possible. Rust would type check that it is in fact the case that the code is unreachable, and allows the code to be compiled.
+Here, we use an empty `match` expression on `self`, which works because the compiler knows that `PartialShape<IsVoid, IsVoid>` has no possible value. Since it is impossible to construct such a value, the match is guaranteed to be unreachable. Rust verifies this at compile time, ensuring both safety and correctness.
 
-By leveraging the `Void` type, we can safely and generically extract the variants in a partial variants, and ensure that all cases are exhaustively handled without needing to rely on runtime assertions to ensure that the impossible cases cannot occur.
+By leveraging the `Void` type in this way, CGP allows us to exhaustively extract every variant from a partial enum and confidently conclude that no cases remain. This eliminates the need for runtime assertions, unreachable branches, or panics. Instead, the type system itself guarantees that all variants have been handled, enabling a clean and fully type-safe approach to enum decomposition.
 
 # Conclusion
