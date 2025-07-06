@@ -30,33 +30,33 @@ In addition, CGP v0.4.2 introduces support for safe **upcasting and downcasting 
 
 ## Safe Enum Upcasting
 
-Let’s begin by looking at how CGP enables safe upcasting between enums. Imagine you have the following enum definition:
+Let’s begin by looking at how CGP enables safe upcasting between enums. Imagine you have the following enum definition called `Shape`:
 
 ```rust
-#[derive(HasFields, ExtractField, FromVariant)]
-pub enum FooBarBaz {
-    Foo(u64),
-    Bar(String),
-    Baz(bool),
+#[derive(HasFields, FromVariant, ExtractField)]
+pub enum Shape {
+    Circle(Circle),
+    Rectangle(Rectangle),
 }
 ```
 
-You may also have a different enum, defined elsewhere, that represents only a subset of the variants:
+You may also have a different `ShapePlus` enum, defined elsewhere, that represents a *superset* of the variants in `Shape`:
 
 ```rust
-#[derive(HasFields, ExtractField, FromVariant)]
-pub enum FooBar {
-    Foo(u64),
-    Bar(String),
+#[derive(HasFields, FromVariant, ExtractField)]
+pub enum ShapePlus {
+    Triangle(Triangle),
+    Rectangle(Rectangle),
+    Circle(Circle),
 }
 ```
 
-With CGP v0.4.2, it is now possible to *upcast* a `FooBar` value into a `FooBarBaz` value in fully safe Rust:
+With CGP v0.4.2, it is now possible to *upcast* a `Shape` value into a `ShapePlus` value in fully safe Rust:
 
 ```rust
-let foo_bar: FooBar = FooBar::Foo(1);
-let foo_bar_baz: FooBarBaz = foo_bar.upcast(PhantomData::<FooBarBaz>);
-assert_eq!(foo_bar_baz, FooBarBaz::Foo(1));
+let shape = Shape::Circle(Circle { radius: 5.0 });
+let shape_plus = shape.upcast(PhantomData::<ShapePlus>);
+assert_eq!(shape_plus, ShapePlus::Circle(Circle { radius: 5.0 }));
 ```
 
 This operation works by leveraging the derived CGP traits `HasFields`, `ExtractField`, and `FromVariant`. As long as the source enum’s variants are a subset of the target enum’s, CGP can automatically generate the logic required to lift the smaller enum into the larger one.
@@ -65,109 +65,110 @@ A particularly powerful aspect of this design is that the two enums do not need 
 
 ## Safe Enum Downcasting
 
-In the reverse direction, CGP also supports *safe downcasting* from a larger enum to a smaller one that contains only a subset of its variants. Using the same `FooBarBaz` and `FooBar` enums, the following example demonstrates how this works:
+In the reverse direction, CGP also supports *safe downcasting* from a larger enum to a smaller one that contains only a subset of its variants. Using the same `Shape` and `ShapePlus` enums, the following example demonstrates how this works:
 
 ```rust
-let foo_bar_baz: FooBarBaz = FooBarBaz::Bar("hello".to_owned());
-let foo_bar: Result<FooBar, _> = foo_bar_baz.downcast(PhantomData::<FooBar>);
-assert_eq!(foo_bar.ok(), Some(FooBar::Bar("hello".to_owned())));
+let shape = ShapePlus::Circle(Circle { radius: 5.0 });
+
+assert_eq!(
+    shape.downcast(PhantomData::<Shape>).ok(),
+    Some(Shape::Circle(Circle { radius: 5.0 }))
+);
 ```
 
 Like `upcast`, this `downcast` method relies on the same set of derived CGP traits and works for any pair of compatible enums. The operation returns a `Result`, where the `Ok` variant contains the downcasted value, and the `Err` variant carries the unhandled remainder of the original enum.
 
-In the example above, we use `.ok()` to simplify the comparison, but in practice, the `Err` case contains useful data that can be further examined or downcasted again, which leads us to one of the most innovative aspects of CGP’s enum handling.
+In the example above, we use `.ok()` to simplify the comparison, but in practice, the `Err` case contains useful remainder value that can be further examined or downcasted again.
 
 ### Safe Exhaustive Downcasting
 
 One of the unique capabilities CGP provides is the ability to *exhaustively downcast* an enum, step by step, until all possible variants are handled. This pattern becomes especially useful when working with generic enums in extensible APIs, where the concrete enum definition is unknown or evolving.
 
-To demonstrate this, suppose we define another enum to represent the remaining `Baz` variant:
+To demonstrate this, suppose we define another enum to represent the remaining `Triangle` variant:
 
 ```rust
 #[derive(HasFields, ExtractField, FromVariant)]
-pub enum Baz {
-    Baz(bool),
+pub enum TriangleOnly {
+    Triangle(Triangle),
 }
 ```
 
-Now, the combination of `FooBar` and `Baz` covers the entire set of variants from `FooBarBaz`. We can use this setup to exhaustively handle all possible cases, while staying entirely within the bounds of safe Rust:
+Now, the combination of `Shape` and `TriangleOnly` covers the entire set of variants from `ShapePlus`. We can use this setup to exhaustively handle all possible cases, while staying entirely within the bounds of safe Rust:
 
 ```rust
-let foo_bar_baz: FooBarBaz = FooBarBaz::Foo(1);
+let shape_plus = ShapePlus::Triangle(Triangle {
+    base: 3.0,
+    height: 4.0,
+});
 
-let result: String = match foo_bar_baz.downcast(PhantomData::<FooBar>) {
-    Ok(foo_bar) => {
-        format!("downcasted to FooBar: {:?}", foo_bar)
-    }
-    Err(remainder) => match remainder.downcast_fields(PhantomData::<Baz>) {
-        Ok(baz) => {
-            format!("downcasted to Baz: {:?}", baz)
-        }
-        Err(remainder) => remainder.finalize_extract(),
+let area = match shape_plus.downcast(PhantomData::<Shape>) {
+    Ok(shape) => match shape {
+        Shape::Circle(circle) => PI * circle.radius * circle.radius,
+        Shape::Rectangle(rectangle) => rectangle.width * rectangle.height,
+    },
+    Err(remainder) => match remainder.downcast_fields(PhantomData::<TriangleOnly>) {
+        Ok(TriangleOnly::Triangle(triangle)) => triangle.base * triangle.height / 2.0,
     },
 };
 ```
 
-In this example, we first attempt to downcast into `FooBar`. If that fails, the remainder is passed to `downcast_fields`, which attempts to extract the `Baz` variant. Finally, if all known variants have been handled and nothing remains, we call `finalize_extract`, which is only valid on an "empty" enum. This indicates that all variants have been successfully matched, and the code is guaranteed to be exhaustive.
-
-The `downcast_fields` method is intended for intermediary or "partial" enums that contain only the unhandled variants, while `finalize_extract` is used when no variants are left. This closely models the behavior of Rust’s `!` (never) type and ensures that every path in your code is covered without panics or unsafe code.
+In this example, we first attempt to downcast into `Shape`. If that fails, the remainder is passed to `downcast_fields`, which attempts to further downcast to `TriangleOnly`. When all variants are properly handled, Rust automatically knows that there is no variant left to be handled, and we can safely omit the final `Err` case.
 
 At first glance, this approach may appear more complex than simply matching against the original enum directly. However, its true strength lies in its **generality**. With CGP’s downcasting mechanism, you can pattern match over generic enum types without knowing their full structure in advance. This enables highly extensible and type-safe designs where variants can be added or removed modularly, without breaking existing logic.
-
 
 ## Safe Struct Building
 
 Just as CGP enables safe, composable deconstruction of enums, it also brings **extensible construction** to structs. This is achieved through a form of structural merging, where smaller structs can be incrementally combined into larger ones. The result is a flexible and modular approach to building complex data types, well-suited for highly decoupled or plugin-style architectures.
 
-To illustrate this, let’s take the example of a `FooBarBaz` struct:
+To illustrate this, let’s take the example of a `Employee` struct:
 
 ```rust
 #[derive(HasFields, BuildField)]
-pub struct FooBarBaz {
-    pub foo: u64,
-    pub bar: String,
-    pub baz: bool,
+pub struct Employee {
+    pub employee_id: u64,
+    pub first_name: String,
+    pub last_name: String,
 }
 ```
 
-Suppose we also define two smaller structs—`FooBar` and `Baz`—each containing a subset of the fields in `FooBarBaz`:
+Suppose we also define two smaller structs — `Person` and `EmployeeId` — each containing a subset of the fields in `Employee`:
 
 ```rust
 #[derive(HasFields, BuildField)]
-pub struct FooBar {
-    pub foo: u64,
-    pub bar: String,
+pub struct Person {
+    pub first_name: String,
+    pub last_name: String,
 }
 
 #[derive(HasFields, BuildField)]
-pub struct Baz {
-    pub baz: bool,
+pub struct EmployeeId {
+    pub employee_id: u64,
 }
 ```
 
-With CGP, we can now construct a `FooBarBaz` value in a modular and extensible way, by composing these smaller building blocks:
+With CGP, we can now construct a `Employee` value in a modular and extensible way, by composing these smaller building blocks:
 
 ```rust
-let foo_bar = FooBar {
-    foo: 1,
-    bar: "bar".to_owned(),
+let person = Person {
+    first_name: "John".to_owned(),
+    last_name: "Smith".to_owned(),
 };
 
-let baz = Baz { baz: true };
+let employee_id = EmployeeId { employee_id: 1 };
 
-let foo_bar_baz: FooBarBaz = FooBarBaz::builder()
-    .build_from(foo_bar)
-    .build_from(baz)
+let employee = Employee::builder()
+    .build_from(person)
+    .build_from(employee_id)
     .finalize_build();
 ```
 
-Here’s what’s happening: The `builder()` method on `FooBarBaz` initiates a *partial builder*, an intermediate structure that initially contains none of the target fields. Each call to `build_from` takes a struct that contributes one or more of the remaining fields and returns a new builder with those fields filled in. Once all required fields have been supplied, the `finalize_build()` method consumes the builder and produces a fully constructed `FooBarBaz` instance.
+Here’s what’s happening: The `builder()` method on `Employee` initiates a *partial record* builder, an intermediate structure that initially contains none of the target fields. Each call to `build_from` takes a struct that contributes one or more of the remaining fields and returns a new builder with those fields filled in. Once all required fields have been supplied, the `finalize_build()` method consumes the builder and produces a fully constructed `FooBarBaz` instance.
 
 Just like enum upcasting and downcasting, the struct builder is implemented entirely in **safe**, **panic-free** Rust. There’s no runtime reflection or unsafe code involved. The only requirement is that the participating structs must have compatible fields and derive the CGP-provided traits `HasFields` and `BuildField`.
 
-Moreover, this system is completely decoupled from specific struct definitions. The individual component structs—`FooBar`, `Baz`, and `FooBarBaz`—can be defined in separate crates, with no awareness of each other. Once the CGP traits are derived, they become interoperable through structural field compatibility alone.
+Moreover, this system is completely decoupled from specific struct definitions. The individual component structs — `Person`, `EmployeeId`, and `Employee` — can be defined in separate crates, with no awareness of each other. Once the CGP traits are derived, they become interoperable through structural field compatibility alone.
 
-While this example may seem trivial—after all, constructing `FooBarBaz` directly is straightforward—it serves as a foundation for much more powerful generic abstractions. As you’ll see in the upcoming sections, the builder pattern opens the door to writing highly reusable, type-safe logic that can construct **generic structs** without ever referencing their concrete types. This makes it possible to write libraries or plugins that contribute data to a shared structure without tight coupling or dependency on a central type definition.
+While this example may seem trivial — after all, constructing `Employee` directly is straightforward — it serves as a foundation for much more powerful generic abstractions. As you’ll see in the upcoming sections, the builder pattern opens the door to writing highly reusable, type-safe logic that can construct **generic types** without ever referencing their concrete types. This makes it possible to write libraries or plugins that contribute data to a shared structure without tight coupling or dependency on a central type definition.
 
 # Extensible Records Demo
 
