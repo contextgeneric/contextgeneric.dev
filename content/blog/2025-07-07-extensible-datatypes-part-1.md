@@ -1,6 +1,6 @@
 +++
 
-title = "Programming Extensible Data Types in Rust with CGP - Part 1: Highlights and Extensible Records Demo"
+title = "Programming Extensible Data Types in Rust with CGP - Part 1: Modular App Construction and Extensible Builders"
 
 authors = ["Soares Chen"]
 
@@ -30,9 +30,9 @@ Here is a revised version of your “Content Organization” section, rewritten 
 
 This article is the first in a five-part series exploring the examples and implementation of extensible data types in CGP. Below is an overview of what each part covers:
 
-**Part 1: Highlights and Extensible Records Demo** (this post) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
+**Part 1: Modular App Construction and Extensible Builders** (this post) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
 
-**Part 2: Extensible Variants Demo** – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
+**Part 2: Modular Interpreters and Extensible Visitors** – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
 
 **Part 3: Implementing Extensible Records** – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 

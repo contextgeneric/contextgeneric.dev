@@ -10,9 +10,9 @@ sort_by = "weight"
 
 # Announcement
 
-I am thrilled to announce the release of `cgp` [v0.4.2](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), along with full support for using [**extensible records and variants**](https://contextgeneric.dev/blog/extensible-datatypes-part-1/) in Rust!
+I am thrilled to announce the release of `cgp` [v0.4.2](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), along with full support for using [**extensible records and variants**](/blog/extensible-datatypes-part-1/) in Rust!
 
-Read the blog post for more details: [**Programming Extensible Data Types in Rust with CGP - Part 1: Highlights and Extensible Records Demo**](https://contextgeneric.dev/blog/extensible-datatypes-part-1/).
+Read the blog post for more details: [**Programming Extensible Data Types in Rust with CGP - Part 1: Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1/).
 
 # Overview
 

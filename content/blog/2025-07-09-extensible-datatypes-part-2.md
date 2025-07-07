@@ -1,6 +1,6 @@
 +++
 
-title = "Programming Extensible Data Types in Rust with CGP - Part 2: Extensible Variants Demo"
+title = "Programming Extensible Data Types in Rust with CGP - Part 2: Modular Interpreters and Extensible Visitors"
 
 description = ""
 
