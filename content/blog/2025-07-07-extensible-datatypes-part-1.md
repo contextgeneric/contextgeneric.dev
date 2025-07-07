@@ -8,7 +8,7 @@ authors = ["Soares Chen"]
 
 # Overview
 
-I’m excited to announce the release of **CGP v0.4.2**, a major milestone that significantly expands the expressive power of generic programming in Rust. With this release, CGP introduces full support for **extensible records and variants**, unlocking a range of new capabilities for developers working with highly modular and reusable code.
+I’m excited to announce the release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), a major milestone that significantly expands the expressive power of generic programming in Rust. With this release, CGP introduces full support for **extensible records and variants**, unlocking a range of new capabilities for developers working with highly modular and reusable code.
 
 Extensible records and variants allow developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, regardless of their complete definition. This makes it possible to write truly generic and flexible logic that is decoupled from rigid type definitions.
 
@@ -30,7 +30,7 @@ Here is a revised version of your “Content Organization” section, rewritten 
 
 This article is the first in a five-part series exploring the examples and implementation of extensible data types in CGP. Below is an overview of what each part covers:
 
-**Part 1: Highlights and Extensible Records Demo** – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
+**Part 1: Highlights and Extensible Records Demo** (this post) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
 
 **Part 2: Extensible Variants Demo** – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
 
@@ -176,7 +176,7 @@ let employee = Employee::builder()
     .finalize_build();
 ```
 
-Here’s what’s happening: The `builder()` method on `Employee` initiates a *partial record* builder, an intermediate structure that initially contains none of the target fields. Each call to `build_from` takes a struct that contributes one or more of the remaining fields and returns a new builder with those fields filled in. Once all required fields have been supplied, the `finalize_build()` method consumes the builder and produces a fully constructed `FooBarBaz` instance.
+Here’s what’s happening: The `builder()` method on `Employee` initiates a *partial record* builder, an intermediate structure that initially contains none of the target fields. Each call to `build_from` takes a struct that contributes one or more of the remaining fields and returns a new builder with those fields filled in. Once all required fields have been supplied, the `finalize_build()` method consumes the builder and produces a fully constructed `Employee` instance.
 
 Just like enum upcasting and downcasting, the struct builder is implemented entirely in **safe**, **panic-free** Rust. There’s no runtime reflection or unsafe code involved. The only requirement is that the participating structs must have compatible fields and derive the CGP-provided traits `HasFields` and `BuildField`.
 
@@ -331,7 +331,7 @@ This opens the door to a new style of constructor logic: one that is **modular**
 
 # Extensible Builders
 
-In this section, we’ll revisit the constructor examples we’ve already seen — and show how to rewrite them using CGP’s new builder pattern to achieve clean, modular, and reusable construction logic.
+In this section, we’ll revisit the constructor examples we’ve already seen — and show how to rewrite them using CGP’s new builder pattern to achieve clean, modular, and reusable construction logic. A full version of the example code covered in this section is available on our [GitHub repository](https://github.com/contextgeneric/cgp-examples/tree/main/builder)
 
 ## Modular SQLite Builder
 
