@@ -10,9 +10,9 @@ sort_by = "weight"
 
 # Announcement
 
-I am thrilled to announce the release of `cgp` [v0.4.1](/blog/v0-4-1-release), along with the release of [**Hypershell**](/blog/hypershell-release), a modular, *type-level* domain-specific language (DSL) for writing shell-script-like programs in Rust.
+I am thrilled to announce the release of `cgp` [v0.4.2](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), along with full support for using [**extensible records and variants**](https://contextgeneric.dev/blog/extensible-datatypes-part-1/) in Rust!
 
-Read the blog post for more details: [**Hypershell: A Type-Level DSL for Shell-Scripting in Rust**](/blog/hypershell-release).
+Read the blog post for more details: [**Programming Extensible Data Types in Rust with CGP - Part 1: Highlights and Extensible Records Demo**](https://contextgeneric.dev/blog/extensible-datatypes-part-1/).
 
 # Overview
 
