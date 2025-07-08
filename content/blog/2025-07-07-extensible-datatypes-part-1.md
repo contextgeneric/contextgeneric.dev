@@ -6,6 +6,8 @@ authors = ["Soares Chen"]
 
 +++
 
+Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1ltu9nl/programming_extensible_data_types_in_rust_with/), [Lobsters](https://lobste.rs/s/piugxk/programming_extensible_data_types_rust), [Hacker News](https://news.ycombinator.com/item?id=44497815), and [GitHub](https://github.com/orgs/contextgeneric/discussions/12).
+
 # Overview
 
 I’m excited to announce the release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), a major milestone that significantly expands the expressive power of generic programming in Rust. With this release, CGP introduces full support for **extensible records and variants**, unlocking a range of new capabilities for developers working with highly modular and reusable code.
