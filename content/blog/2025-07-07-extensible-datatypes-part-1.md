@@ -6,7 +6,7 @@ authors = ["Soares Chen"]
 
 +++
 
-Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1ltu9nl/programming_extensible_data_types_in_rust_with/), [Lobsters](https://lobste.rs/s/piugxk/programming_extensible_data_types_rust), [Hacker News](https://news.ycombinator.com/item?id=44497815), and [GitHub](https://github.com/orgs/contextgeneric/discussions/12).
+Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1ltu9nl/programming_extensible_data_types_in_rust_with/), [Lobsters](https://lobste.rs/s/piugxk/programming_extensible_data_types_rust), [Hacker News](https://news.ycombinator.com/item?id=44497815), [GitHub](https://github.com/orgs/contextgeneric/discussions/12), or [Discord](https://discord.gg/Hgk3rCw6pQ).
 
 # Overview
 
