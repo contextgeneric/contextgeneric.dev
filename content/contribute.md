@@ -2,7 +2,7 @@
 
 title = "Contribute"
 
-weight = 3
+weight = 4
 
 +++
 
@@ -10,7 +10,11 @@ weight = 3
 
 We welcome contributors who are passionate about promoting CGP within the Rust ecosystem. Whether you're a beginner or an experienced Rust developer, there are numerous ways you can contribute to the project.
 
-In this section, we'll explore different ways you can get involved and help grow the CGP community. Your contributions, regardless of your level of expertise, are valuable and appreciated!
+In this page, we'll explore different ways you can get involved and help grow the CGP community. Your contributions, regardless of your level of expertise, are valuable and appreciated!
+
+## Participate in Discussions
+
+Join the conversation on platforms like [**Discord**](https://discord.gg/Hgk3rCw6pQ), [**GitHub**](https://github.com/orgs/contextgeneric/discussions) or [**Reddit**](https://www.reddit.com/r/cgp/). Whether you have questions about CGP or ideas for new topics or content, these forums are great places to share your thoughts and engage with the community.
 
 ## Read The Documentation
 
@@ -24,17 +28,13 @@ When that happens, it would become possible for CGP to be used by anyone, withou
 
 If you _care_ about modularity and would like to contribute, the best way is to start publishing context-generic components, and help build up an ecosystem that benefits the rest of developers.
 
-## Participate in Discussions
-
-Join the conversation on platforms like [GitHub](https://github.com/orgs/contextgeneric/discussions) or [Reddit](https://www.reddit.com/r/cgp/). Whether you have questions about CGP or ideas for new topics or content, these forums are great places to share your thoughts and engage with the community.
-
 ## Spread on Social Media
 
 Help raise awareness of CGP by sharing it on social media. Follow our official BlueSky account [@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) to stay updated on CGP’s development and latest news.
 
 ## Write About It
 
-If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is 
+If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is
 already covered on the official site, your perspective might make it clearer to others.
 
 ## Sponsor Me

@@ -2,7 +2,7 @@
 
 title = "Resources"
 
-weight = 2
+weight = 5
 
 +++
 
@@ -13,7 +13,7 @@ the project continues to develop.
 
 ## Crates
 
-- [cgp](https://crates.io/crates/cgp) - The main Rust crate that provides the core constructs
+- [`cgp`](https://crates.io/crates/cgp) - The main Rust crate that provides the core constructs
   for programming using CGP.
 
 ## Tutorials
@@ -27,5 +27,6 @@ the project continues to develop.
 
 ## Projects
 
+- [Hypershell](github.com/contextgeneric/hypershell) - A type-level DSL for shell-scripting in Rust.
 - [Hermes SDK](https://github.com/informalsystems/hermes-sdk/) - The first project that
   uses CGP for real world applications.

@@ -10,7 +10,7 @@ weight = 2
 
 ## Who I Am
 
-Hi! 👋  I’m **Soares Chen** (a.k.a. [@MaybeVoid](#)), the **creator of Context-Generic Programming (CGP)** and a passionate **Rust Engineer**. I'm currently looking for **new opportunities** to contribute to impactful software projects. You can view my [CV](/cv-soareschen-2025-07.pdf) and contact me at [soares.chen@maybevoid.com](mailto:soares.chen@maybevoid.com).
+Hi! 👋  I’m **Soares Chen** (a.k.a. [@MaybeVoid](https://maybevoid.com)), the **creator of Context-Generic Programming (CGP)** and a passionate **Rust Engineer**. I'm currently looking for **new opportunities** to contribute to impactful software projects. You can view my [CV](/cv-soareschen-2025-07.pdf) and contact me at [soares.chen@maybevoid.com](mailto:soares.chen@maybevoid.com).
 
 My expertise lies in:
 
