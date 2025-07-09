@@ -8,7 +8,7 @@ authors = ["Soares Chen"]
 
 +++
 
-Discuss on [GitHub](https://github.com/orgs/contextgeneric/discussions/13) or [Discord](https://discord.gg/Hgk3rCw6pQ).
+Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1lvgyre/building_modular_interpreters_and_visitors_in/), [GitHub](https://github.com/orgs/contextgeneric/discussions/13) or [Discord](https://discord.gg/Hgk3rCw6pQ).
 
 # Recap
 
