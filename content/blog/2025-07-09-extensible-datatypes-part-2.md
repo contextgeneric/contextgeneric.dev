@@ -34,7 +34,7 @@ In this second part of the series, we will explore the use of **extensible varia
 
 # Extending the Visitor Pattern
 
-Earlier, we explored how CGP uses the extensible builder pattern to enable modular construction of context structs. In this section, we will see how a similar approach can be applied to context **enums**, allowing each variant to be destructured and handled by a flexible, composable set of handlers.
+Earlier, we explored how CGP uses the extensible builder pattern to enable modular construction of context structs. In this article, we will see how a similar approach can be applied to context **enums**, allowing each variant to be destructured and handled by a flexible, composable set of handlers.
 
 In Rust and many object-oriented languages, this pattern is commonly referred to as the [**visitor pattern**](https://rust-unofficial.github.io/patterns/patterns/behavioural/visitor.html). However, Rust’s powerful `enum` and `match` features often reduce the need for the visitor pattern, especially when the concrete enum type is known. In such cases, developers can simply use `match` expressions to handle each variant explicitly and concisely.
 
@@ -84,7 +84,7 @@ pub fn eval(expr: MathExpr) -> u64 {
 
 This works well for small examples. But real-world interpreters quickly grow in complexity. Each evaluation case might span dozens — or hundreds — of lines of code. Additionally, the enum itself might have many more variants. For example, [`syn::Expr`](https://docs.rs/syn/latest/syn/enum.Expr.html), a real-world expression type for Rust, defines over *40 variants*.
 
-Let’s assume our toy `Expr` is similarly complex. Now imagine that alongside `eval`, we also want to define other operations, like pretty-printing:
+Let’s assume our toy `MathExpr` is similarly complex. Now imagine that alongside `eval`, we also want to define other operations, like pretty-printing:
 
 ```rust
 pub fn expr_to_string(expr: &MathExpr) -> String {
@@ -96,7 +96,7 @@ pub fn expr_to_string(expr: &MathExpr) -> String {
 }
 ```
 
-Here lies the crux of the expression problem: as the language evolves, we frequently need to *add* new expression variants or *remove* old ones. But any modification to the `Expr` enum forces us to update *all* pattern-matching functions like `eval`, `expr_to_string`, and others. The enum becomes **tightly coupled** to every function that consumes it.
+Here lies the crux of the expression problem: as the language evolves, we frequently need to *add* new expression variants or *remove* old ones. But any modification to the `MathExpr` enum forces us to update *all* pattern-matching functions like `eval`, `expr_to_string`, and others. The enum becomes **tightly coupled** to every function that consumes it.
 
 Worse, this coupling is not easy to break. The recursive nature of `MathExpr` — where variants like `Plus` contain other `MathExpr` values — means even modular helper functions (e.g., `eval_plus`) must still operate on `MathExpr`, perpetuating the tight dependency.
 
@@ -108,7 +108,7 @@ In the next section, we’ll explore how CGP's extensible visitor pattern addres
 
 # Evaluator Computer
 
-To demonstrate how CGP enables extensible and decoupled evaluation logic, we will now walk through how to implement a small part of the `eval` function — specifically, the logic for handling the `Plus` operator. Rather than tying ourselves to a fixed `Expr` enum, we begin by defining `Plus` as an independent struct:
+To demonstrate how CGP enables extensible and decoupled evaluation logic, we will now walk through how to implement a small part of the `eval` function — specifically, the logic for handling the `Plus` operator. Rather than tying ourselves to a fixed `MathExpr` enum, we begin by defining `Plus` as an independent struct:
 
 ```rust
 pub struct Plus<Expr> {
@@ -267,7 +267,7 @@ Because `UseInputDelegate` operates at the type level, the entire dispatch proce
 
 ## Dispatching Eval
 
-With the components for evaluating individual sub-expressions in place, we now turn our attention to the final piece of the puzzle: evaluating the main `Expr` enum itself. To accomplish this, we delegate the `MathExpr` type to a special provider named `DispatchEval`, which is defined alongside the `Interpreter` context like so:
+With the components for evaluating individual sub-expressions in place, we now turn our attention to the final piece of the puzzle: evaluating the main `MathExpr` enum itself. To accomplish this, we delegate the `MathExpr` type to a special provider named `DispatchEval`, which is defined alongside the `Interpreter` context like so:
 
 ```rust
 #[cgp_new_provider]
@@ -280,13 +280,13 @@ impl<Code> Computer<Interpreter, Code, MathExpr> for DispatchEval {
 }
 ```
 
-Here, `DispatchEval` is implemented as a *context-specific* provider. That means it only applies when we are evaluating expressions in the `Interpreter` context, and it handles the concrete `Expr` enum as input. Rather than directly writing out how each variant of the enum is evaluated, we delegate that responsibility to a special **visitor dispatcher** called `MatchWithValueHandlers`.
+Here, `DispatchEval` is implemented as a *context-specific* provider. That means it only applies when we are evaluating expressions in the `Interpreter` context, and it handles the concrete `MathExpr` enum as input. Rather than directly writing out how each variant of the enum is evaluated, we delegate that responsibility to a special **visitor dispatcher** called `MatchWithValueHandlers`.
 
 This dispatcher is one of the key tools provided by CGP. It automatically maps each enum variant to the appropriate computation provider we registered earlier in `EvalComponents`. In effect, `MatchWithValueHandlers` performs dispatch on the matching of variants at compile time. The implementation of `DispatchEval` is simply a wrapper around this dispatcher, but that wrapper plays a crucial role.
 
-So why do we need this wrapper in the first place? It comes down to a subtle limitation in Rust’s trait resolution system. If we try to directly wire the `Computer` handler for `Expr` to `MatchWithValueHandlers`, the compiler runs into a cyclic dependency: to implement the trait, it needs to evaluate the variant-specific providers like `EvalAdd`, which themselves rely on `MatchWithValueHandlers`. The result is a cryptic “overflowing requirements” error.
+So why do we need this wrapper in the first place? It comes down to a subtle limitation in Rust’s trait resolution system. If we try to directly wire the `Computer` handler for `MathExpr` to `MatchWithValueHandlers`, the compiler runs into a cyclic dependency: to implement the trait, it needs to evaluate the variant-specific providers like `EvalAdd`, which themselves rely on `MatchWithValueHandlers`. The result is a cryptic “overflowing requirements” error.
 
-By inserting this wrapper layer with `DispatchEval`, we sidestep that issue. Rust is able to mark the trait as implemented before diving into the body of the method, effectively breaking the cycle. It’s a well-known trick in the world of advanced Rust trait design, and CGP uses it elegantly to keep everything modular and composable.
+By inserting this wrapper layer with `DispatchEval`, we sidestep that issue. Rust is able to mark the trait as implemented before diving into the body of the method, effectively breaking the cycle.
 
 To understand what `MatchWithValueHandlers` is doing under the hood, imagine manually writing out the dispatch logic like this:
 
@@ -340,7 +340,7 @@ pub struct Ident(pub String);
 pub struct Literal<T>(pub T);
 ```
 
-This `LispExpr` enum is broader than our original `Expr` — it can represent not just arithmetic but more general symbolic forms. Each `List` is a vector of boxed sub-expressions; `Literal` holds numeric values; and `Ident` wraps identifiers like `"+"` or `"*"`. For simplicity, we use a `Vec` instead of a linked list, though conceptually they’re equivalent in Lisp.
+This `LispExpr` enum is broader than our original `MathExpr` — it can represent not just arithmetic but more general symbolic forms. Each `List` is a vector of boxed sub-expressions; `Literal` holds numeric values; and `Ident` wraps identifiers like `"+"` or `"*"`. For simplicity, we use a `Vec` instead of a linked list.
 
 We can manually construct the equivalent of `(+ 1 (* 2 3))` like this:
 
@@ -437,7 +437,7 @@ enum LispSubExpr<LispExpr> {
 
 This `LispSubExpr` enum includes only the subset of variants required to construct a `Plus` expression in Lisp form. It excludes other variants like `Literal`, which may be needed by other parts of the transformation but are not relevant here. Even though `LispSubExpr` is a reduced version of `LispExpr`, it is still parameterized by the full `LispExpr` type, so that the elements in the list can recursively represent complete expressions.
 
-To use `LispSubExpr` in our transformation, we need a way to convert — or more precisely, *upcast* — from this smaller enum into the full `LispExpr`. This is made possible by implementing the `CanUpcast` trait we [introduced earlier](/blog/extensible-datatypes-part-1#safe-enum-upcasting), which CGP derives automatically when we annotate the enum with `#[derive(HasFields, ExtractField, FromVariant)]`. This gives us a safe and type-checked way to promote the constructed value into the broader type expected by the rest of the system.
+To use `LispSubExpr` in our transformation, we need a way to convert — or more precisely, *upcast* — from this smaller enum into the full `LispExpr`. This is made possible by implementing the `CanUpcast` trait we [introduced earlier](/blog/extensible-datatypes-part-1#safe-enum-upcasting), which is implemented automatically when we annotate the enum with `#[derive(HasFields, ExtractField, FromVariant)]`. This gives us a safe and type-checked way to promote the constructed value into the broader type expected by the rest of the system.
 
 Inside the method body, we first compute the Lisp representations of the two sub-expressions. Then we create an identifier for the `"+"` symbol and upcast it to `LispExpr`. Finally, we build a `List` containing the operator followed by the two operands, and upcast that list into the final `LispExpr` result.
 
@@ -480,9 +480,9 @@ enum LispSubExpr<T> {
 }
 ```
 
-What makes this pattern especially powerful is that the `LispSubExpr` enum is completely parameterized over the literal type `T`. This means that the transformation logic does not need to know or care about what kind of value the literal holds. As long as `T` can be cloned, the provider works uniformly for all supported literal types — whether they are numbers, strings, or other values.
+What makes this pattern especially powerful is that the `LispSubExpr` and `Literal` enums are completely parameterized over the literal type `T`. This means that the transformation logic does not need to know or care about what kind of value the literal holds. As long as `T` can be cloned, the provider works uniformly for all supported literal types — whether they are numbers, strings, or other values.
 
-There is another subtle but important aspect to this design: the `Literal` type used here is exactly the same as the one used in our arithmetic expression tree. In other words, the same data structure is reused across both the source language (`MathExpr`) and the target language (`LispExpr`). This isn’t just a convenience — it opens the door to reusing logic across very different parts of a system.
+There is another subtle but important aspect to this design: the `Literal` type used here is exactly the same as the one used in our arithmetic expression tree. In other words, the same data structure is reused across both the source language (`MathExpr`) and the target language (`LispExpr`). This isn’t just a convenience — it opens the door to reusing logic across very different language expressions.
 
 ### Wiring To-Lisp Handlers
 
@@ -541,13 +541,13 @@ impl<Code> ComputerRef<Interpreter, Code, MathExpr> for DispatchToLisp {
 }
 ```
 
-This implementation mirrors the earlier `DispatchEval`, but with one key distinction: it uses `MatchWithValueHandlersRef`, a visitor-style dispatcher designed specifically for reference-based operations. Rather than consuming the input, it operates on borrowed values and dispatches calls to providers that implement the `ComputerRef` trait.
+This implementation mirrors the earlier `DispatchEval`, but with one key distinction: it uses `MatchWithValueHandlersRef`, a visitor dispatcher designed specifically for reference-based operations. Rather than consuming the input, it operates on borrowed values and dispatches calls to providers that implement the `ComputerRef` trait.
 
 One of the major advantages of this approach is that it is entirely driven by the type system. Because the dispatcher is implemented generically — as a regular Rust `impl` rather than a macro — it benefits fully from the compiler’s ability to check lifetime correctness, trait bounds, and input-output consistency. Mistakes such as passing the wrong reference type, using incompatible trait bounds, or violating borrowing rules are caught immediately at compile time, often with clear and actionable error messages.
 
 If this logic had instead been implemented using traditional Rust macros, many of these issues would only surface later during macro expansion or execution, making them harder to trace and debug. CGP’s generic dispatchers, by contrast, offer the same level of automation while remaining transparent and fully type-checked.
 
-The `MatchWithValueHandlersRef` dispatcher is just one example of CGP’s modular dispatching infrastructure. CGP provides a *family* of such dispatchers, each tuned for a particular use case—whether by value, by reference, or with more specialized patterns. These dispatchers are designed to be extensible and interchangeable, giving you fine-grained control over how your logic is routed while preserving flexibility.
+The `MatchWithValueHandlers` and `MatchWithValueHandlersRef` dispatchers are just two examples of CGP’s modular dispatching infrastructure. CGP provides a *family* of such dispatchers, each tuned for a particular use case — whether by value, by reference, or with more specialized patterns. These dispatchers are designed to be extensible and interchangeable, giving you fine-grained control over how your logic is routed while preserving flexibility.
 
 With both evaluation and Lisp transformation now wired into the same interpreter context, the system is able to evaluate expressions to numeric results or convert them into Lisp-style syntax trees, all from the same `MathExpr` type. The modularity, reusability, and compile-time guarantees of this architecture make CGP a powerful and scalable tool for building language runtimes and transformation pipelines in Rust.
 
@@ -633,7 +633,7 @@ delegate_components! {
 }
 ```
 
-Here, we map `Plus<MathExpr>` and `Times<MathExpr>` to the same `BinaryOpToLisp` provider, each with a different `symbol!` type-level string. The `symbol!` macro allows us to embed these operator strings as compile-time values, making the provider fully generic while preserving strong type guarantees.
+Here, we map `Plus<MathExpr>` and `Times<MathExpr>` to the same `BinaryOpToLisp` provider, each with a different `symbol!` type-level string.
 
 Thanks to CGP’s expressive delegation system and powerful match-based dispatching via `MatchWithValueHandlersRef`, this setup allows us to write reusable, composable transformation logic. Rather than duplicating the same structure across multiple providers, we define it once in a generic form and let the type system handle the rest.
 
@@ -901,7 +901,9 @@ Thanks to CGP’s flexibility and strong compile-time guarantees, once your code
 
 # Conclusion
 
-By now, we’ve seen how extensible variants and the CGP visitor pattern open up a new frontier in modular interpreter design. Rather than tying our logic to rigid enums or bloated visitor traits, we’ve been able to deconstruct and evaluate expressions with reusable, decoupled components — all backed by strong compile-time guarantees. Whether we’re evaluating arithmetic, transforming into Lisp, or handling richer variants down the line, each operation remains isolated, composable, and safe.
+By now, we’ve seen how extensible variants and the CGP visitor pattern open up a new frontier in modular interpreter design. You can find the full source code of the examples in this article at our [GitHub repository](https://github.com/contextgeneric/cgp-examples/tree/main/expression).
+
+Rather than tying our logic to rigid enums or bloated visitor traits, we’ve been able to deconstruct and evaluate expressions with reusable, decoupled components — all backed by strong compile-time guarantees. Whether we’re evaluating arithmetic, transforming into Lisp, or handling richer variants down the line, each operation remains isolated, composable, and safe.
 
 This is more than a workaround for the expression problem — it’s a foundational shift in how we think about data structures and operations in Rust. With CGP, you no longer need to trade off between extensibility and type safety. You can add new variants without touching existing code, and build interpreters or transformers that evolve organically with your domain.
 
