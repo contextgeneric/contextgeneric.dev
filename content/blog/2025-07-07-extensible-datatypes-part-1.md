@@ -12,7 +12,7 @@ Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1ltu9nl/programming_e
 
 I’m excited to announce the release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), a major milestone that significantly expands the expressive power of generic programming in Rust. With this release, CGP introduces full support for **extensible records and variants**, unlocking a range of new capabilities for developers working with highly modular and reusable code.
 
-Extensible records and variants allow developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, regardless of their complete definition. This makes it possible to write truly generic and flexible logic that is decoupled from rigid type definitions.
+Extensible records and variants allow developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition. This makes it possible to write truly generic and flexible logic that is decoupled from rigid type definitions.
 
 In earlier versions, CGP already offered a foundational feature through the `HasField` trait, which made it possible to *read* a field from any struct that included it. With version 0.4.2, this functionality is dramatically extended. Not only can you now read fields, but you can also *construct* values onto these fields in a type-safe manner. More importantly, the same level of extensibility is now available for enums, enabling operations over variants in a similarly generic fashion.
 
@@ -28,13 +28,13 @@ In addition, CGP v0.4.2 introduces support for safe **upcasting and downcasting 
 
 Here is a revised version of your “Content Organization” section, rewritten for clarity, flow, and consistency in tone and style. It maintains full sentences and should read naturally for Rust developers new to CGP:
 
-# Content Organization
+# Series Overview
 
 This article is the first in a five-part series exploring the examples and implementation of extensible data types in CGP. Below is an overview of what each part covers:
 
 **Part 1: Modular App Construction and Extensible Builders** (this post) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
 
-**Part 2: Modular Interpreters and Extensible Visitors** – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
+[**Part 2: Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/) – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
 
 **Part 3: Implementing Extensible Records** – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 
@@ -1064,7 +1064,7 @@ In this first installment, we explored how CGP v0.4.2 empowers Rust developers t
 
 This approach dramatically simplifies configuration management, promotes code reuse, and opens the door to highly flexible, plugin-style architectures in Rust. Whether you're building minimal test contexts or full-featured production systems, CGP gives you the tools to scale your logic modularly and safely.
 
-In the next part of this series, we’ll shift gears to look at **extensible variants**, where CGP tackles the expression problem with a modular visitor pattern. If you've ever wanted to define interpreters, pattern match over generic enums, or evolve your data types without breaking existing logic — you won’t want to miss what’s coming next.
+In [Part 2 of this series, **Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/), we’ll shift gears to look at **extensible variants**, where CGP tackles the expression problem with a modular visitor pattern. If you've ever wanted to define interpreters, pattern match over generic enums, or evolve your data types without breaking existing logic — you won’t want to miss what’s coming next.
 
 Stay tuned!
 
