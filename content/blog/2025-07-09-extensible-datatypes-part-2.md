@@ -8,7 +8,7 @@ authors = ["Soares Chen"]
 
 +++
 
-Discuss on [Discord](https://discord.gg/Hgk3rCw6pQ).
+Discuss on [GitHub](https://github.com/orgs/contextgeneric/discussions/13) or [Discord](https://discord.gg/Hgk3rCw6pQ).
 
 # Recap
 
