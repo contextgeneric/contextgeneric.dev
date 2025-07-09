@@ -14,7 +14,7 @@ draft = true
 
 In the **Extensible Records** section, we explored how the modular builder pattern enables us to decompose the construction of systems—such as a database client, an HTTP client, and AI agents—into independent builder providers. Similarly, in the **Extensible Variants** section, we saw how the modular visitor pattern allows us to implement evaluation and to-Lisp conversion for each variant of a language expression enum using separate visitor providers.
 
-At this point, you’ve likely seen how these patterns can make real-world applications more modular and maintainable. If these examples have convinced you of CGP’s practical value, that’s great. But if you still feel the examples are not grounded enough in production use cases, you are welcome to pause here and revisit CGP later. The following sections are aimed at readers who want to go deeper—those interested in how CGP implements extensible data types under the hood and who might even want to contribute to CGP itself by helping to build the real-world examples you’re looking for.
+At this point, you’ve likely seen how these patterns can make real-world applications more modular and maintainable. If these examples have convinced you of CGP’s practical value, that’s great. But if you still feel the examples are not grounded enough in production use cases, you are welcome to pause here and revisit CGP later. The following sections are aimed at readers who want to go deeper — those interested in how CGP implements extensible data types under the hood and who might even want to contribute to CGP itself by helping to build the real-world examples you’re looking for.
 
 # Related Work
 

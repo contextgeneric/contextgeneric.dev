@@ -900,3 +900,15 @@ With CGP, the minimal trait design and lazy wiring mean that components are only
 Thanks to CGP’s flexibility and strong compile-time guarantees, once your code compiles, you can trust that missing non-essential features won’t break your core functionality — allowing you to focus on what matters most in early development.
 
 # Conclusion
+
+By now, we’ve seen how extensible variants and the CGP visitor pattern open up a new frontier in modular interpreter design. Rather than tying our logic to rigid enums or bloated visitor traits, we’ve been able to deconstruct and evaluate expressions with reusable, decoupled components — all backed by strong compile-time guarantees. Whether we’re evaluating arithmetic, transforming into Lisp, or handling richer variants down the line, each operation remains isolated, composable, and safe.
+
+This is more than a workaround for the expression problem — it’s a foundational shift in how we think about data structures and operations in Rust. With CGP, you no longer need to trade off between extensibility and type safety. You can add new variants without touching existing code, and build interpreters or transformers that evolve organically with your domain.
+
+In Part 3 of this series, **Implementing Extensible Records**, we will dive into the *underlying* implementation details of **extensible records**, and how the extensible builder pattern is built on top of it. We will cover the concepts of **partial records**, and the use of traits such as `BuildField` and `FinalizeField` to represent *row constraints*.
+
+Stay tuned!
+
+## Hire Me
+
+P.S. Btw, [I am available for hire](/hire)!
