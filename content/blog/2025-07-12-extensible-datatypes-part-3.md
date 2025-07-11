@@ -2,29 +2,27 @@
 
 title = "Programming Extensible Data Types in Rust with CGP - Part 3: Implementing Extensible Records"
 
-description = ""
-
 authors = ["Soares Chen"]
-
-draft = true
 
 +++
 
-# Implementation of Extensible Records
+# Recap
 
-In the **Extensible Records** section, we explored how the modular builder pattern enables us to decompose the construction of systems—such as a database client, an HTTP client, and AI agents—into independent builder providers. Similarly, in the **Extensible Variants** section, we saw how the modular visitor pattern allows us to implement evaluation and to-Lisp conversion for each variant of a language expression enum using separate visitor providers.
+In [Part 1](/blog/extensible-datatypes-part-1), we explored how the modular builder pattern enables us to decompose the construction of systems — such as a database client, an HTTP client, and AI agents — into independent builder providers. Similarly, in [Part 2](/blog/extensible-datatypes-part-2), we saw how the modular visitor pattern allows us to implement evaluation and to-Lisp conversion for each variant of a language expression enum using separate visitor providers.
 
-At this point, you’ve likely seen how these patterns can make real-world applications more modular and maintainable. If these examples have convinced you of CGP’s practical value, that’s great. But if you still feel the examples are not grounded enough in production use cases, you are welcome to pause here and revisit CGP later. The following sections are aimed at readers who want to go deeper — those interested in how CGP implements extensible data types under the hood and who might even want to contribute to CGP itself by helping to build the real-world examples you’re looking for.
+At this point, you’ve likely seen how these patterns can make real-world applications more modular and maintainable. If these examples have convinced you of CGP’s practical value, that’s great. But if you still feel the examples are not grounded enough in production use cases, you are welcome to pause here and revisit CGP later. The next 2 parts of the series are aimed at readers who want to go deeper — those interested in how CGP implements extensible data types under the hood and who might even want to contribute to CGP itself by helping to build the real-world examples you’re looking for.
 
-# Related Work
+# Underlying Theory
 
 The design of extensible data types in CGP is inspired by a rich body of research in the programming languages community. In particular, CGP draws heavily from the implementation techniques found in [**datatype-generic programming in Haskell**](https://wiki.haskell.org/index.php?title=Generics), as well as ideas presented in the paper [**Abstracting extensible data types: or, rows by any other name**](https://dl.acm.org/doi/10.1145/3290325). Concepts similar to CGP’s have also appeared in other languages under names like **row polymorphism** and **polymorphic variants**.
 
-While it might be too academic—or simply too dry—for this post to delve into all the theoretical differences between CGP and these approaches, it’s worth highlighting one essential distinction: CGP’s seamless integration of extensible data types with the CGP system itself. This tight integration sets CGP apart by making the extensibility not just a design principle, but a native part of how you build and scale software in Rust.
+While it might be too academic — or simply too dry — for this post to delve into all the theoretical differences between CGP and these approaches, it’s worth highlighting one essential distinction: CGP’s seamless integration of extensible data types with the CGP system itself. This tight integration sets CGP apart by making the extensibility not just a design principle, but a native part of how you build and scale software in Rust.
 
 ## Constraint Propagation Problem
 
-At the heart of CGP lies a powerful solution to a common challenge: how can we compose two generic functions that each rely on their own row-like constraints, and automatically propagate those constraints into the resulting composed function?
+At the heart of CGP lies a powerful solution to a common challenge:
+
+*how can we compose two generic functions that each rely on their own row constraints, and automatically propagate those constraints into the resulting composed function?*
 
 To illustrate this problem, consider the following simple example:
 
@@ -88,11 +86,18 @@ where
 }
 ```
 
-This works within the body of a function, but it prevents us from defining the composed function as a top-level value. In other words, we cannot simply write `let full_name_to_string = concate_outputs(first_name_to_string, last_name_to_string)` and then export that directly from a module. The constraints must still be manually declared somewhere, limiting the expressiveness and reusability of our composition.
+This works within the body of a function, but it prevents us from defining the composed function as a top-level value. In other words, we cannot simply write something like:
+
+```rust
+// Invalid export
+pub let full_name_to_string = concate_outputs(first_name_to_string, last_name_to_string);
+```
+
+and then export that directly from a module. The constraints must still be manually declared somewhere, limiting the expressiveness and reusability of our composition.
 
 ## Type-Level Composition
 
-In many programming languages research, solving the problem of constraint-aware function composition typically requires advanced language features like **constraint kinds** or **row kinds**. These features allow constraints to be expressed and manipulated at the type level, enabling functions with different requirements to be composed seamlessly. However, languages like Rust do not yet support these advanced capabilities. This limitation has been one of the major reasons why extensible data types have not seen broader adoption in the Rust and other mainstream languages.
+In many programming languages research, solving the problem of constraint-aware function composition typically requires advanced language features like **constraint kinds**. These features allow constraints to be expressed and manipulated at the type level, enabling functions with different requirements to be composed seamlessly. However, languages like Rust do not yet support these advanced capabilities. This limitation has been one of the major reasons why extensible data types have not seen broader adoption in the Rust and other mainstream languages.
 
 The breakthrough that CGP introduces is the ability to perform this kind of composition in Rust today — without waiting for the language to evolve. The key insight is to **represent functions as types**, and then use CGP's system of traits and type-level programming to manage composition and constraint propagation.
 
@@ -148,7 +153,7 @@ where
 
 `ConcatOutputs` acts as a **higher-order provider**: it composes two other providers and returns a new one that computes both and combines their results. This is conceptually similar to a higher-order function that takes two closures and returns a new closure, except that it operates entirely at the type level. It requires that both inner providers implement `ComputerRef` and produce outputs that implement `Display`, ensuring that both results can be formatted into a string.
 
-The real power of this approach becomes evident when we compose the two providers with a simple type alias:
+The real power of this approach becomes evident when we compose the two providers with a simple **type alias**:
 
 ```rust
 pub type FullNameToString = ConcatOutputs<FirstNameToString, LastNameToString>;
@@ -176,7 +181,7 @@ pub trait HasField<Tag> {
 
 This trait provides **read-only access** to individual fields of a struct, using `Tag` as the field identifier. The tag indicates which field we want to access, and can take one of two forms depending on the struct: `symbol!("first_name")` for named fields, or `Index<0>` for tuple-style fields. The associated type `Value` represents the type of the field being accessed, and the `get_field` method returns a reference to that field.
 
-The use of `PhantomData<Tag>` as an argument may look unusual at first, but it plays a critical role in allowing Rust to infer which field is being requested. When multiple `HasField` implementations are available for a type, this allows the compiler to resolve the correct one based on context.
+The use of `PhantomData<Tag>` as an argument may look unusual at first, but it plays a critical role in allowing Rust to infer which field is being requested. When multiple `HasField` implementations are available for a type, this allows the compiler to resolve the correct one.
 
 Consider the following struct:
 
@@ -230,8 +235,8 @@ When we derive the `BuildField` trait for this struct, CGP automatically generat
 
 ```rust
 pub struct PartialPerson<F0: MapType, F1: MapType> {
-    pub first_name: F0::Mapped<String>,
-    pub last_name: F1::Mapped<String>,
+    pub first_name: F0::Map<String>,
+    pub last_name: F1::Map<String>,
 }
 ```
 
@@ -241,11 +246,11 @@ The `MapType` trait is defined as follows:
 
 ```rust
 pub trait MapType {
-    type Mapped<T>;
+    type Map<T>;
 }
 ```
 
-This trait uses a *generic associated type* (GAT) called `Mapped` to determine how the original field types should be transformed. In particular, `Mapped<T>` will either be `T` itself (if the field is present) or a placeholder type `()` (if the field is missing).
+This trait uses a *generic associated type* (GAT) called `Map` to determine how the original field types should be transformed. In particular, `Map<T>` will either be `T` itself (if the field is present) or a placeholder type `()` (if the field is missing).
 
 To support this, CGP provides two implementations of the `MapType` trait. The first is `IsPresent`, which maps a type to itself to indicate that a field is included:
 
@@ -253,7 +258,7 @@ To support this, CGP provides two implementations of the `MapType` trait. The fi
 pub struct IsPresent;
 
 impl MapType for IsPresent {
-    type Mapped<T> = T;
+    type Map<T> = T;
 }
 ```
 
@@ -263,7 +268,7 @@ The second is `IsNothing`, which maps every type to `()` to indicate that the fi
 pub struct IsNothing;
 
 impl MapType for IsNothing {
-    type Mapped<T> = ();
+    type Map<T> = ();
 }
 ```
 
@@ -381,7 +386,7 @@ Person::builder() // PartialPerson<IsNothing, IsNothing>
     .build_field(PhantomData::<symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsPresent, IsPresent>
 ```
 
-Notably, the order in which fields are built does not matter. The type transformations ensure correctness regardless of sequencing, so the builder also works if we construct the `last_name` field first:
+Notably, the **order** in which fields are built does not matter. The type transformations ensure correctness regardless of sequencing, so the builder also works if we construct the `last_name` field first:
 
 ```rust
 Person::builder() // PartialPerson<IsNothing, IsNothing>
@@ -437,7 +442,7 @@ let person = Person::builder() // PartialPerson<IsNothing, IsNothing>
     .finalize_build(); // Person
 ```
 
-Together, the partial record struct and the traits `HasBuilder`, `BuildField`, and `FinalizeBuild` form a solid and ergonomic foundation for supporting extensible records in CGP. All of these pieces are automatically generated by the `#[derive(BuildField)]` macro. This derive macro not only provides convenience but also ensures consistency and correctness, eliminating the possibility of compilation failures due to missing trait implementations.
+Together, the partial record struct and the traits `HasBuilder`, `BuildField`, and `FinalizeBuild` form a solid and ergonomic foundation for supporting extensible records in CGP. All of these pieces are automatically generated by the `#[derive(BuildField)]` macro. We do not use multiple derive macros here, so as to ensure consistency and correctness, eliminating the possibility of compilation failures due to the user missing to derive one of these traits.
 
 # Implementation of Record Merges
 
@@ -447,7 +452,7 @@ Before we can implement `build_from`, we first need a few more supporting constr
 
 ## `IntoBuilder` Trait
 
-In typical usage, partial records begin in an empty state and are gradually populated with field values until they can be finalized into a complete struct. However, we can also go in the opposite direction by converting a fully constructed struct *into* a partial record where all fields are present, and then progressively *remove* fields from it, one by one, until none remain.
+In typical usage, partial records begin in an empty state and are gradually populated with field values until they can be finalized into a complete struct. However, we can also go in the **opposite** direction by converting a fully constructed struct *into* a partial record where all fields are present, and then progressively *remove* fields from it, one by one, until none remain.
 
 This reverse direction is particularly important for the merging process, where we need to *move* fields out of a source struct and insert them into a target partial record, field by field.
 
@@ -480,7 +485,7 @@ impl IntoBuilder for Person {
 
 If you compare this to the implementation of the earlier `FinalizeBuild` trait, you’ll see that they are nearly identical in structure. The only difference is the direction of conversion — `IntoBuilder` transforms a `Person` into a `PartialPerson<IsPresent, IsPresent>`, while `FinalizeBuild` does the reverse.
 
-Even though these implementations are symmetrical, we define `IntoBuilder` and `FinalizeBuild` as separate traits. This distinction is valuable because it makes the intent of each trait clear and prevents accidental misuse. Each trait captures a specific stage in the lifecycle of a partial record, whether we are constructing it from scratch, building it up field by field, or tearing it down for merging.
+Even though these interfaces are similar, we define `IntoBuilder` and `FinalizeBuild` as separate traits. This distinction is valuable because it makes the intent of each trait clear and prevents accidental misuse. Each trait captures a specific stage in the lifecycle of a partial record, whether we are constructing it from scratch, building it up field by field, or tearing it down for merging.
 
 ## `TakeField` Trait
 
@@ -489,7 +494,6 @@ Now that we have the `IntoBuilder` trait to help convert a struct into a fully p
 ```rust
 pub trait TakeField<Tag> {
     type Value;
-
     type Remainder;
 
     fn take_field(self, _tag: PhantomData<Tag>) -> (Self::Value, Self::Remainder);
@@ -698,7 +702,7 @@ If any part of this explanation remains unclear, it might be helpful to paste th
 
 With the `BuildFrom` trait in place, we can now explore how CGP implements generalized **builder dispatchers** that enable flexible and reusable ways to assemble struct fields from various sources.
 
-In earlier examples, we used a utility called `BuildAndMergeOutputs` to combine outputs from multiple builder providers such as `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`. Under the hood, `BuildAndMergeOutputs` is built upon a more fundamental dispatcher named `BuildWithHandlers`. The implementation of this dispatcher looks like the following:
+In [earlier examples](/blog/extensible-datatypes-part-1/#builder-dispatcher), we used a utility called `BuildAndMergeOutputs` to combine outputs from multiple builder providers such as `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`. Under the hood, `BuildAndMergeOutputs` is built upon a more fundamental dispatcher named `BuildWithHandlers`. The implementation of this dispatcher looks like the following:
 
 ```rust
 #[cgp_provider]
@@ -725,7 +729,7 @@ Once the empty builder is obtained, it is passed as input to `PipeHandlers<Handl
 
 And yes, if you're wondering whether this `PipeHandlers` is the same one used in [Hypershell](/blog/hypershell-release) to build shell-like command pipelines — the answer is absolutely yes. `BuildWithHandlers` operates by initializing an empty partial record, passing it through a chain of handlers using `PipeHandlers`, and then finalizing the result into a complete struct. It’s the same elegant piping mechanism, just applied to a different domain.
 
-This reuse of core abstractions like `Pipe` and `Handler` across different systems is one of the most powerful aspects of CGP. These components weren’t designed just for shell-style command execution — they were built to support general-purpose [function composition](https://en.wikipedia.org/wiki/Function_composition_%28computer_science%29), a core concept in functional programming.
+This reuse of core abstractions like `Pipe` and `Handler` across different systems is one of the most powerful aspects of CGP. These components weren’t designed just for piping shell commands — they were built to support general-purpose [function composition](https://en.wikipedia.org/wiki/Function_composition_%28computer_science%29), a core concept in functional programming.
 
 ## Example Use of `BuildWithHandlers`
 
@@ -796,7 +800,7 @@ where
 }
 ```
 
-`BuildAndMerge` wraps an inner provider (such as `BuildPerson`) and expects the current `Builder` — a partial record for the target struct — as input. The inner provider is invoked with a reference to this builder, allowing it to inspect any fields that may already be set. This feature enables more advanced scenarios where intermediate results influence later ones.
+`BuildAndMerge` wraps an inner provider (such as `BuildPerson`) and expects the current `Builder` — a partial record for the target struct — as input. The inner provider is invoked with a **reference** to this builder as its inner input, allowing it to inspect any fields that may already be set. This feature enables more advanced scenarios where intermediate results influence later ones.
 
 After the inner provider returns a value, `BuildAndMerge` uses the `BuildFrom` trait to merge the result into the existing builder. The merged builder is then returned as output.
 
@@ -835,7 +839,7 @@ Since the pattern of wrapping a list of handlers is so common, CGP provides the 
 
 ```rust
 pub trait MapFields<Mapper> {
-    type Mapped;
+    type Map;
 }
 
 impl<Mapper, Current, Rest> MapFields<Mapper> for Cons<Current, Rest>
@@ -843,11 +847,11 @@ where
     Mapper: MapType,
     Rest: MapFields<Mapper>,
 {
-    type Mapped = Cons<Mapper::Mapped<Current>, Rest::Mapped>;
+    type Map = Cons<Mapper::Map<Current>, Rest::Map>;
 }
 
 impl<Mapper> MapFields<Mapper> for Nil {
-    type Mapped = Nil;
+    type Map = Nil;
 }
 ```
 
@@ -863,7 +867,7 @@ We start by defining a simple type mapper called `ToBuildAndMergeHandler`, which
 pub struct ToBuildAndMergeHandler;
 
 impl MapType for ToBuildAndMergeHandler {
-    type Mapped<Handler> = BuildAndMerge<Handler>;
+    type Map<Handler> = BuildAndMerge<Handler>;
 }
 ```
 
@@ -871,7 +875,7 @@ With that, we can define `BuildAndMergeOutputs` simply as a *type alias*. It tak
 
 ```rust
 pub type BuildAndMergeOutputs<Output, Handlers> =
-    BuildWithHandlers<Output, <Handlers as MapFields<ToBuildAndMergeHandler>>::Mapped>;
+    BuildWithHandlers<Output, <Handlers as MapFields<ToBuildAndMergeHandler>>::Map>;
 ```
 
 This implementation showcases the power of type-level composition in CGP. By combining smaller, reusable components like `BuildWithHandlers`, `BuildAndMerge`, and `MapFields`, we can construct higher-level abstractions like `BuildAndMergeOutputs` with minimal boilerplate and high flexibility.
@@ -905,7 +909,7 @@ Here, `BuildAndValidateOutput` *statically* depends on `BuildAndMergeOutputs` by
 
 While we could add the missing constraint to the `where` clause of `BuildAndValidateOutput`, this reduces the ergonomics and composability of the abstraction. It requires callers to understand the internal structure of `BuildAndMergeOutputs`, which goes against one of the core strengths of CGP — *hiding internal constraints* so they don't leak into user code.
 
-Fortunately, we can solve this by turning `BuildAndMergeOutputs` into a regular provider struct, and using the `delegate_components!` macro to forward the `Computer` implementation to `BuildWithHandlers`, while keeping the necessary constraints encapsulated.
+Fortunately, we can solve this by turning `BuildAndMergeOutputs` into a regular provider struct, and using the `delegate_components!` macro to **delegate** the `Computer` implementation to `BuildWithHandlers`, while keeping the necessary constraints encapsulated.
 
 Here’s how:
 
@@ -914,7 +918,7 @@ delegate_components! {
     <Output, Handlers: MapFields<ToBuildAndMergeHandler>>
     new BuildAndMergeOutputs<Output, Handlers> {
         ComputerComponent:
-            BuildWithHandlers<Output, Handlers::Mapped>
+            BuildWithHandlers<Output, Handlers::Map>
     }
 }
 ```
@@ -927,7 +931,7 @@ impl<Output, Handlers> DelegateComponent<ComputerComponent>
 where
     Handlers: MapFields<ToBuildAndMergeHandler>,
 {
-    type Delegate = BuildWithHandlers<Output, Handlers::Mapped>;
+    type Delegate = BuildWithHandlers<Output, Handlers::Map>;
 }
 ```
 
