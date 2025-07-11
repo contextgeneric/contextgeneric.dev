@@ -2,8 +2,6 @@
 
 title = "Programming Extensible Data Types in Rust with CGP - Part 2: Modular Interpreters and Extensible Visitors"
 
-description = ""
-
 authors = ["Soares Chen"]
 
 +++
@@ -12,7 +10,7 @@ Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1lvgyre/building_modu
 
 # Recap
 
-This is the second part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first part here](/blog/extensible-datatypes-part-1).
+This is the **second** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first part here](/blog/extensible-datatypes-part-1).
 
 As a recap, we have covered the new release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2) which now supports the use of **extensible records and variants**, allowing developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition.
 
@@ -26,11 +24,9 @@ In this second part of the series, we will explore the use of **extensible varia
 
 **Part 2: Modular Interpreters and Extensible Visitors** (this post) – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
 
-**Part 3: Implementing Extensible Records** – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
+[**Part 3: Implementing Extensible Records**](/blog/extensible-datatypes-part-3) – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 
 **Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
-
-**Part 5: Handler Hierarchy and Conclusion** – In the final part, we explore how extensible data types integrate into the broader CGP handler hierarchy — from `Computer` to `Handler` — to support all forms of programs from pure computations to async I/O with failures. We conclude the series with a summary of key takeaways and the design philosophy behind CGP.
 
 # Extending the Visitor Pattern
 
@@ -907,9 +903,8 @@ Rather than tying our logic to rigid enums or bloated visitor traits, we’ve be
 
 This is more than a workaround for the expression problem — it’s a foundational shift in how we think about data structures and operations in Rust. With CGP, you no longer need to trade off between extensibility and type safety. You can add new variants without touching existing code, and build interpreters or transformers that evolve organically with your domain.
 
-In Part 3 of this series, **Implementing Extensible Records**, we will dive into the *underlying* implementation details of **extensible records**, and how the extensible builder pattern is built on top of it. We will cover the concepts of **partial records**, and the use of traits such as `BuildField` and `FinalizeField` to represent *row constraints*.
+In [Part 3 of this series, **Implementing Extensible Records**](/blog/extensible-datatypes-part-3), we will dive into the *underlying* implementation details of **extensible records**, and how the extensible builder pattern is built on top of it. We will cover the concepts of **partial records**, and the use of traits such as `BuildField` and `FinalizeField` to represent *row constraints*.
 
-Stay tuned!
 
 ## Hire Me
 
