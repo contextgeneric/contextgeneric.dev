@@ -34,9 +34,9 @@ This article is the first in a five-part series exploring the examples and imple
 
 **Part 1: Modular App Construction and Extensible Builders** (this post) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
 
-[**Part 2: Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/) – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
+[**Part 2: Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2) – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
 
-**Part 3: Implementing Extensible Records** – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
+[**Part 3: Implementing Extensible Records**](/blog/extensible-datatypes-part-3) – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 
 **Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
