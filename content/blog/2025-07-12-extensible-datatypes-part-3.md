@@ -33,9 +33,6 @@ We will first explore the implementation of extensible records in this part, fol
 
 **Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
-**Part 5: Handler Hierarchy and Conclusion** – In the final part, we explore how extensible data types integrate into the broader CGP handler hierarchy — from `Computer` to `Handler` — to support all forms of programs from pure computations to async I/O with failures. We conclude the series with a summary of key takeaways and the design philosophy behind CGP.
-
-
 # Underlying Theory
 
 The design of extensible data types in CGP is inspired by a rich body of research in the programming languages community. In particular, CGP draws heavily from the implementation techniques found in [**datatype-generic programming in Haskell**](https://wiki.haskell.org/index.php?title=Generics), as well as ideas presented in the paper [**Abstracting extensible data types: or, rows by any other name**](https://dl.acm.org/doi/10.1145/3290325). Concepts similar to CGP’s have also appeared in other languages under names like **row polymorphism** and **polymorphic variants**.
@@ -726,6 +723,8 @@ If any part of this explanation remains unclear, it might be helpful to paste th
 
 With the `BuildFrom` trait in place, we can now explore how CGP implements generalized **builder dispatchers** that enable flexible and reusable ways to assemble struct fields from various sources.
 
+## `BuildWithHandlers` Trait
+
 In [earlier examples](/blog/extensible-datatypes-part-1/#builder-dispatcher), we used a utility called `BuildAndMergeOutputs` to combine outputs from multiple builder providers such as `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`. Under the hood, `BuildAndMergeOutputs` is built upon a more fundamental dispatcher named `BuildWithHandlers`. The implementation of this dispatcher looks like the following:
 
 ```rust
@@ -976,3 +975,39 @@ In contrast, type-level programming offers a principled and well-typed foundatio
 By doing so, CGP achieves a rare combination of power and predictability. Developers who embrace this pattern gain access to highly expressive abstractions, while staying within the familiar boundaries of Rust's type system.
 
 # Conclusion
+
+By now, hopefully you have gained a better understanding of how extensible records is supported by CGP. Check out the [GitHub repository](https://github.com/contextgeneric/cgp), particularly the `cgp-field` and `cgp-dispatch` crates, for the source code of the full implementation.
+
+Using partial records and field traits such as `HasField`, `BuildField`, and `TakeField`, we are able to implement generic operations such as `BuildFrom` to merge the contents of one smaller struct into a larger struct.
+
+We then implement the extensible builder pattern by introducing the `BuildWithHandlers` dispatcher, which composes multiple builder handlers to build and merge the outputs produced by each handler. This is implemented elegantly by simply forming a build pipeline using `PipeHandlers`.
+
+Finally, we implement the high-level `BuildAndMergeOutputs` dispatcher by defining a conditional component delegation to `BuildWithHandlers`, by first wrapping each handler with the `BuildAndMerge` adapter.
+
+## Future Extensions
+
+With the modular implementation of extensible records and extensible builders, we will be able to reuse the same constructs introduced here to support customized implementation of the builder pattern in the future.
+
+For example, the current implementation of extensible builder requires a source struct to be an exact match for the target struct, but we may also want to allow some fields to be **dropped** without merging them into the target struct.
+
+We may also want to allow existing fields in a partial record to be **overridden**, if the same field exists in multiple sources.
+
+Finally, we may want to support ways to finalize a partial record by filling in the missing fields with **default values**.
+
+We plan to support all of these extensions in the future versions of CGP. However, even if we don't, the existing modular abstractions are already there for *anyone* to implement such extensions easily.
+
+Thanks to the flexibility of type-level composition, the implementation of these extensions is not only straightforward, but also correct by construction. Furthermore, these extensions can be *optional*, and do not affect the complexity of the core implementation introduced here.
+
+This level of extensibility wouldn't have been possible if we were to implement extensible builders in a more ad hoc approach, such as through macros or code generation. That would have required the core logic together with all possible extensions to be implemented in the same monolithic code base, which increases the complexity and reduces the customizability of the pattern.
+
+If you are still not convinced, we will cover the implementation of these builder extensions in a future blog post, to better demonstrate how that will actually work.
+
+## Next Part
+
+In the final Part 4 of this series, **Implementing Extensible Variants**, we walk through similar steps to learn about the implementation of extensible variants in CGP. Don't forget the constructs that we have learned here for extensible records, because you might be surprised how much similarity can be found in the implementation of extensible variants, despite the two being seemingly very different.
+
+Stay tuned!
+
+## Hire Me
+
+P.S. Btw, [I am available for hire](/hire)!

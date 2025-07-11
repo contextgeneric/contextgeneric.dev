@@ -40,8 +40,6 @@ This article is the first in a five-part series exploring the examples and imple
 
 **Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
-**Part 5: Handler Hierarchy and Conclusion** – In the final part, we explore how extensible data types integrate into the broader CGP handler hierarchy — from `Computer` to `Handler` — to support all forms of programs from pure computations to async I/O with failures. We conclude the series with a summary of key takeaways and the design philosophy behind CGP.
-
 # Feature Highlighs
 
 ## Safe Enum Upcasting
