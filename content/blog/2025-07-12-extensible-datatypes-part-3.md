@@ -8,9 +8,33 @@ authors = ["Soares Chen"]
 
 # Recap
 
-In [Part 1](/blog/extensible-datatypes-part-1), we explored how the modular builder pattern enables us to decompose the construction of systems — such as a database client, an HTTP client, and AI agents — into independent builder providers. Similarly, in [Part 2](/blog/extensible-datatypes-part-2), we saw how the modular visitor pattern allows us to implement evaluation and to-Lisp conversion for each variant of a language expression enum using separate visitor providers.
+This is the **third** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1) and [second](/blog/extensible-datatypes-part-2) parts here.
 
-At this point, you’ve likely seen how these patterns can make real-world applications more modular and maintainable. If these examples have convinced you of CGP’s practical value, that’s great. But if you still feel the examples are not grounded enough in production use cases, you are welcome to pause here and revisit CGP later. The next 2 parts of the series are aimed at readers who want to go deeper — those interested in how CGP implements extensible data types under the hood and who might even want to contribute to CGP itself by helping to build the real-world examples you’re looking for.
+As a recap, we have covered the new release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2) which now supports the use of **extensible records and variants**, allowing developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition.
+
+In the first part of the series, [**Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1), we demonstrated an example use of the **extensible builder pattern**, which uses **extensible records** to support modular construction of an application context.
+
+Similarly, in the second part of the series, [**Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2), we saw how the modular visitor pattern allows us to implement evaluation and to-Lisp conversion for each variant of a language expression enum using separate visitor providers.
+
+At this point, you’ve likely seen how these patterns can make real-world applications more modular and maintainable. If these examples have convinced you of CGP’s practical value, that’s great. But if you still feel the examples are not grounded enough in production use cases, you are welcome to pause here and revisit CGP later.
+
+The next 2 parts of the series are aimed at readers who want to go deeper — those interested in how CGP implements extensible data types under the hood and who might even want to contribute to CGP itself by helping to build the real-world examples you’re looking for.
+
+We will first explore the implementation of extensible records in this part, followed by the implementation of extensible variants in the coming Part 4.
+
+
+# Series Overview
+
+[**Part 1: Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
+
+[**Part 2: Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2) – This part continues the demonstration by introducing extensible variants. We use them to address the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem), implementing a set of reusable interpreter components for a small toy language.
+
+**Part 3: Implementing Extensible Records** (this post) – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
+
+**Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
+
+**Part 5: Handler Hierarchy and Conclusion** – In the final part, we explore how extensible data types integrate into the broader CGP handler hierarchy — from `Computer` to `Handler` — to support all forms of programs from pure computations to async I/O with failures. We conclude the series with a summary of key takeaways and the design philosophy behind CGP.
+
 
 # Underlying Theory
 

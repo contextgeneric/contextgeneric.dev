@@ -1066,8 +1066,6 @@ This approach dramatically simplifies configuration management, promotes code re
 
 In [Part 2 of this series, **Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/), we’ll shift gears to look at **extensible variants**, where CGP tackles the expression problem with a modular visitor pattern. If you've ever wanted to define interpreters, pattern match over generic enums, or evolve your data types without breaking existing logic — you won’t want to miss what’s coming next.
 
-Stay tuned!
-
 ## Hire Me
 
 P.S. Btw, [I am available for hire](/hire)!
