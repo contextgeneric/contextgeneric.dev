@@ -6,6 +6,9 @@ authors = ["Soares Chen"]
 
 +++
 
+
+Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1lxv6zr/the_design_and_implementation_of_extensible/), [GitHub](https://github.com/orgs/contextgeneric/discussions/14) or [Discord](https://discord.gg/Hgk3rCw6pQ).
+
 # Recap
 
 This is the **third** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1) and [second](/blog/extensible-datatypes-part-2) parts here.
