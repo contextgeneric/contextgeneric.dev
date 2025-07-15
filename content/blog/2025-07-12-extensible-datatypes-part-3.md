@@ -726,7 +726,7 @@ If any part of this explanation remains unclear, it might be helpful to paste th
 
 With the `BuildFrom` trait in place, we can now explore how CGP implements generalized **builder dispatchers** that enable flexible and reusable ways to assemble struct fields from various sources.
 
-## `BuildWithHandlers` Trait
+## `BuildWithHandlers` Provider
 
 In [earlier examples](/blog/extensible-datatypes-part-1/#builder-dispatcher), we used a utility called `BuildAndMergeOutputs` to combine outputs from multiple builder providers such as `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`. Under the hood, `BuildAndMergeOutputs` is built upon a more fundamental dispatcher named `BuildWithHandlers`. The implementation of this dispatcher looks like the following:
 

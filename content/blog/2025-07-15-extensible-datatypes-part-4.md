@@ -13,9 +13,9 @@ draft = true
 
 # Implementation of Extensible Variants
 
-Now that we've covered how extensible records work in CGP, we can turn our attention to **extensible variants**. At first glance, it might seem like a completely different mechanism — but surprisingly, the approach used to implement extensible variants is very similar to that of extensible records. In fact, many of the same principles apply, just in the “opposite” direction.
+Now that we've covered how extensible records work in CGP, we can turn our attention to **extensible variants**. At first glance, it might seem like a completely different mechanism — but surprisingly, the approach used to implement extensible variants is very similar to that of extensible records. In fact, many of the same principles apply, just in the “opposite direction”.
 
-This close relationship between records and variants is rooted in **category theory**. In that context, records are known as **products**, while variants (or enums) are referred to as **sums** or **coproducts**. These terms highlight a deep **duality** between the two: just as products combine values, coproducts represent a choice among alternatives. CGP embraces this theoretical foundation and leverages it to create a unified design for both extensible records and extensible variants.
+This close relationship between records and variants is rooted in **category theory**. In that context, records are known as **products**, while variants (or enums) are referred to as **sums** or **coproducts**. These terms highlight a deep **duality** between the two: just as products *combine* values, coproducts represent a *choice* among alternatives. CGP embraces this theoretical foundation and leverages it to create a unified design for both extensible records and extensible variants.
 
 This duality is not just theoretical — it has practical implications for software architecture. Our design in CGP builds directly on prior research into **extensible data types**, particularly in the context of functional programming and type systems. For more on the background, see the paper on [Extensible Data Types](https://dl.acm.org/doi/10.1145/3290325), as well as this excellent [intro to category theory](https://bartoszmilewski.com/2015/01/07/products-and-coproducts/) by Bartosz Milewski.
 
@@ -100,7 +100,7 @@ If you need to represent more complex data in a variant, we recommend wrapping t
 
 ## Partial Variants
 
-Just as CGP supports partially constructed structs through *partial records*, it also enables *partial variants* to work with enums in a similarly flexible way. Partial variants allow you to pattern match on each variant of an enum incrementally, while safely excluding any variants that have already been handled. This makes it possible to build exhaustive and type-safe match chains that evolve over time.
+Just as CGP supports partially constructed structs through *partial records*, it also enables **partial variants** to work with **partially deconstructed** enums in a similarly flexible way. Partial variants allow you to pattern match on each variant of an enum incrementally, while safely excluding any variants that have already been handled. This makes it possible to build exhaustive and type-safe match chains that evolve over time.
 
 Consider the `Shape` enum we explored earlier. CGP would generate a corresponding `PartialShape` enum that represents the partial variant form of `Shape`:
 
@@ -142,7 +142,7 @@ This implementation makes it possible to work with a `Shape` value as a `Partial
 
 ## `IsVoid` Type Mapper
 
-The key distinction between partial records and partial variants lies in how we represent the absence of data. For partial variants, CGP introduces the `IsVoid` type mapper to indicate that a variant has already been extracted and is no longer available:
+The key distinction between partial records and partial variants lies in how we represent the **absence** of data. For partial variants, CGP introduces the `IsVoid` type mapper to indicate that a variant has already been extracted and is no longer available:
 
 ```rust
 pub enum Void {}
@@ -153,7 +153,7 @@ impl MapType for IsVoid {
 }
 ```
 
-The `Void` type is defined as an empty enum with no variants. This means that it is impossible to construct a value of type `Void`, and any code that attempts to match on a `Void` value will be statically unreachable. This makes it a safe and expressive way to model a variant that no longer exists in a given context.
+The `Void` type is defined as an empty enum with no variants. This means that it is **impossible** to construct a value of type `Void`, and any code that attempts to match on a `Void` value will be statically unreachable. This makes it a safe and expressive way to model a variant that no longer exists in a given context.
 
 Conceptually, `Void` serves the same purpose as Rust’s built-in [**never type**](https://doc.rust-lang.org/reference/types/never.html) or the [`Infallible`](https://doc.rust-lang.org/std/convert/enum.Infallible.html) type from the standard library. However, CGP defines `Void` explicitly to distinguish its special role in the context of extensible variants.
 
@@ -172,7 +172,7 @@ pub trait ExtractField<Tag> {
 }
 ```
 
-Just like `FromVariant` and `HasField`, the `ExtractField` trait takes a `Tag` type to identify the variant, and includes an associated `Value` type representing the variant’s inner data. Additionally, it defines a `Remainder` type, which represents the remaining variants that have not yet been matched.
+Just like `FromVariant` and `HasField`, the `ExtractField` trait takes a `Tag` type to identify the variant, and includes an associated `Value` type representing the variant’s inner data. Additionally, it defines a `Remainder` type, which represents the **remaining** variants that have not yet been matched.
 
 The `extract_field` method consumes the value and returns a `Result`, where a successful match yields the extracted `Value`, and a failed match returns the `Remainder`. Although this uses the `Result` type, the `Err` case is not really an error in the traditional sense — rather, it represents the remaining variants yet to be handled, much like how errors represent alternative outcomes in Rust.
 
@@ -207,20 +207,20 @@ Within the method body, we match on `self`. If the value is a `Circle`, we retur
 With `ExtractField`, we can now incrementally extract and match against variants in a safe and ergonomic way. Here’s an example of computing the area of a shape using this approach:
 
 ```rust
-let shape = Shape::Circle(Circle { radius: 5.0 });
-
-let area = match shape
-    .to_extractor() // PartialShape<IsPresent, IsPresent>
-    .extract_field(PhantomData::<symbol!("Circle")>)
-{
-    Ok(circle) => PI * circle.radius * circle.radius,
-    // PartialShape<IsVoid, IsPresent>
-    Err(remainder) => match remainder.extract_field(PhantomData::<symbol!("Rectangle")>) {
-        Ok(rectangle) => rectangle.width * rectangle.height,
-        // PartialShape<IsVoid, IsVoid>
-        // No need to match on `Err`
-    },
-};
+pub fn compute_area(shape: Shape) -> f64 {
+    match shape
+        .to_extractor() // PartialShape<IsPresent, IsPresent>
+        .extract_field(PhantomData::<symbol!("Circle")>)
+    {
+        Ok(circle) => PI * circle.radius * circle.radius,
+        // PartialShape<IsVoid, IsPresent>
+        Err(remainder) => match remainder.extract_field(PhantomData::<symbol!("Rectangle")>) {
+            Ok(rectangle) => rectangle.width * rectangle.height,
+            // PartialShape<IsVoid, IsVoid>
+            // No need to match on `Err`
+        },
+    }
+}
 ```
 
 In this example, we begin by converting the `Shape` value into a `PartialShape` with all variants present using `to_extractor`. We then call `extract_field` to try extracting the `Circle` variant. If successful, we compute the circle's area. If not, we receive a remainder value where the `Circle` variant is now marked as `IsVoid`. This remainder is then used to attempt extracting the `Rectangle` variant. If that succeeds, we compute the area accordingly.
@@ -228,6 +228,23 @@ In this example, we begin by converting the `Shape` value into a `PartialShape` 
 By the time we reach the second `Err` case, the remainder has the type `PartialShape<IsVoid, IsVoid>`, which cannot contain any valid variant. Because of this, we can safely omit any further pattern matching, and the compiler guarantees that there are no unreachable or unhandled cases.
 
 What makes this approach so powerful is that the Rust type system can statically verify that it is impossible to construct a valid value for `PartialShape<IsVoid, IsVoid>`. We no longer need to write boilerplate `_ => unreachable!()` code or use runtime assertions. The type system ensures exhaustiveness and soundness entirely at compile time, enabling safer and more maintainable implementation of extensible variants.
+
+## Short Circuiting Remainder
+
+```rust
+pub fn compute_area(shape: Shape) -> Result<f64, Infallible> {
+    let remainder = shape
+        .to_extractor()
+        .extract_field(PhantomData::<symbol!("Circle")>)
+        .map(|circle| PI * circle.radius * circle.radius)⸮;
+
+    let remainder = remainder
+        .extract_field(PhantomData::<symbol!("Rectangle")>)
+        .map(|rectangle| rectangle.width * rectangle.height)⸮;
+
+    match remainder {}
+}
+```
 
 ## `FinalizeExtract` Trait
 
@@ -440,12 +457,11 @@ The extractor then proceeds to the next variant in the sum:
 * The updated `Source` is now `PartialShape<IsVoid, IsPresent>`, and the `Target` remains `ShapePlus`.
 * This source implements `ExtractField<symbol!("Rectangle")>`, yielding `Rectangle` as the value and `PartialShape<IsVoid, IsVoid>` as the final remainder.
 * The target once again supports `FromVariant<symbol!("Rectangle")>` using the matching `Rectangle` type.
-
-At the end of the chain, the `Void` variant is reached. The `FieldsExtractor` implementation for `Void` simply returns the remainder, which in this case is `PartialShape<IsVoid, IsVoid>`.
+* At the end of the chain, the `Void` variant is reached. The `FieldsExtractor` implementation for `Void` simply returns the remainder, which in this case is `PartialShape<IsVoid, IsVoid>`.
 
 What this process shows is that the `Upcast` operation works by examining each variant in the source type `Shape`, extracting each present value, and reinserting it into the target type `ShapePlus`. Once all fields have been processed, the remaining variants are guaranteed to be uninhabited. At that point, we can safely discharge the remainder using the `FinalizeExtract` trait.
 
-By breaking down the upcast into individual trait-driven steps over extensible variants, we can implement upcasting entirely in safe Rust. Even more importantly, this implementation is fully generic and reusable. We are not writing code solely for the purpose of supporting `Upcast` — instead, we are building a reusable foundation that also supports operations like `Downcast` and other generic manipulations over extensible variants.
+By breaking down the upcast into individual type-driven steps over extensible variants, we can implement upcasting entirely in safe Rust. Even more importantly, this implementation is fully generic and reusable. We are not writing code solely for the purpose of supporting `Upcast` — instead, we are building a reusable foundation that also supports operations like `Downcast` and other generic manipulations over extensible variants.
 
 ## `CanDowncast` Implementation
 
@@ -459,7 +475,7 @@ pub trait CanDowncast<Target> {
 }
 ```
 
-This trait is used to convert a value of an enum type into another enum that represents a *subset* of its variants. Unlike `CanUpcast`, which guarantees success by moving into a larger enum, `CanDowncast` may fail if the source contains variants not present in the target. To account for this, the trait includes an associated `Remainder` type to capture any unmatched variants, and the `downcast` method returns a `Result` that either yields the successfully downcasted value or the remainder.
+This trait is used to convert a value of an enum type into another enum that represents a *subset* of its variants. Unlike `CanUpcast`, which guarantees success by moving into a larger enum, `CanDowncast` may *fail* if the source contains variants not present in the target. To account for this, the trait includes an associated `Remainder` type to capture any unmatched variants, and the `downcast` method returns a `Result` that either yields the successfully downcasted value or the remainder.
 
 As with `CanUpcast`, we can define `CanDowncast` using a blanket implementation:
 
@@ -509,5 +525,49 @@ In this example, we start with a `ShapePlus` value that holds a `Triangle`. We t
 However, when the actual variant in this case is `Triangle`, which is not part of `Shape`, the downcast fails and we receive the remainder of the partial variant structure. This remainder, of type `PartialShapePlus<IsPresent, IsVoid, IsVoid>`, contains only the `Triangle` variant. We then use `extract_field` to retrieve the triangle and compute its area. At this point, no other variants remain to be handled.
 
 One of the most impressive aspects of both upcast and downcast is that they work seamlessly even when the source and target enums define their variants in entirely different orders. Because the trait implementations, such as `ExtractField`, operate in a generic and order-independent way, the correctness and behavior of casting are preserved regardless of variant ordering. This level of flexibility makes the CGP approach to extensible variants both powerful and practical for real-world use.
+
+# Visitor Dispatcher
+
+## `MatchWithHandlers` Provider
+
+```rust
+#[cgp_provider]
+impl<Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, Input>
+    for MatchWithHandlers<Handlers>
+where
+    Input: HasExtractor,
+    DispatchMatchers<Handlers>:
+        Computer<Context, Code, Input::Extractor, Output = Result<Output, Remainder>>,
+    Remainder: FinalizeExtract,
+{
+    type Output = Output;
+
+    fn compute(_context: &Context, code: PhantomData<Code>, input: Input) -> Output {
+        let res = DispatchMatchers::compute(_context, code, input.to_extractor());
+
+        match res {
+            Ok(output) => output,
+            Err(remainder) => remainder.finalize_extract(),
+        }
+    }
+}
+```
+
+```rust
+pub type DispatchMatchers<Providers> = PipeMonadic<OkMonadic, Providers>;
+```
+
+## Example Use of `MatchWithHandlers`
+
+```rust
+let circle = Shape::Circle(Circle { radius: 5.0 });
+
+let area = MatchWithHandlers::<
+    Product![
+        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
+        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
+    ],
+>::compute(&(), PhantomData::<()>, circle);
+```
 
 # Conclusion
