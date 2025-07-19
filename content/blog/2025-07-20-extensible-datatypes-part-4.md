@@ -528,7 +528,11 @@ One of the most impressive aspects of both upcast and downcast is that they work
 
 # Visitor Dispatcher
 
+With the traits for extensible variants defined, we can now turn our attention to how CGP implements generalized **visitor dispatchers**, similar to how the [builder dispatchers](/blog/extensible-datatypes-part-3/#builder-dispatcher) in our previous blog post was implemented.
+
 ## `MatchWithHandlers` Provider
+
+In the [examples in part 2](/blog/extensible-datatypes-part-2/#dispatching-eval), we have used dispatchers like `MatchWithValueHandlers` and `MatchWithValueHandlersRef` to dispatch the handling of variant values to different handlers based on the `Input` type. Under the hood, these dispatchers are built upon a more fundamental dispatcher called `MatchWithHandlers`, which is implemented as follows:
 
 ```rust
 #[cgp_provider]
@@ -553,9 +557,40 @@ where
 }
 ```
 
+The `MatchWithHandlers` provider is parameterized by a `Handlers` type, which represents a type-level list of visitor handlers that will process the variants from a generic `Input` type. Inside the `Computer` implementation, it requires `Input` to be an enum that implements `HasExtractor`.
+
+Inside the method body for `compute`, it first calls `input.to_extractor` to convert the input into partial variants, and then pass it to a lower level `DispatchMatchers<Handlers>` handler, which performs the actual dispatching logic and returns `Result<Output, Remainder>` as the output. The implementation then expects the `Remainder` that is returned to be inhabitable through `FinalizeExtract`. With that, it simply match on the return result to return the `Output`, and in the error case, it uses `finalize_extract()` to assert that the case cannot be reached.
+
+
+## `DispatchMatchers` Provider
+
+Recall that in the extensible builder implementation of `BuildWithHandlers`, we used `PipeHandlers` to form a pipeline of builders to gradually fill in the partial records returned by the previous builder handler. For the case of extensible visitors, the pipeline implementation is slightly different, but is still elegantly defined as follows:
+
 ```rust
 pub type DispatchMatchers<Providers> = PipeMonadic<OkMonadic, Providers>;
 ```
+
+What this means is that `DispatchMatchers` forms a **monadic** pipeline of visitor handlers, that is based on the monad implementation provided by `OkMonadic`.
+
+## What is a Monad?!
+
+At this point, most of the readers coming from Rust background would probably be confused on *what the heck is a [monad](https://wiki.haskell.org/Monad)*, and what does it have to do with implementing extensible visitors. So in this section, I will try to explain monads in much more simplified and less intimidating ways, using existing Rust concepts.
+
+To put it simply, a monad `M` is typically a container types that "contains" some value type `T` in the form of `M<T>`. We have in fact commonly used various monadic types in Rust, including `Option<T>`, `Result<T, E>`, and `impl Futures<Output = T>`.
+
+In addition to "containing" values, a monad provide a "bind" operation to "extract" the values out of it. In Rust, we have also frequently used this operation through the use of `?`, `.await`, or `.await?`.
+
+Learning all these, we can now understand `PipeMonadic` as simply asking CGP to automatically "apply" operators like `?`, `.await`, or `.await?` to the previous handler in the pipeline, to "extract" the result before passing it as an input to the next handler.
+
+The main strength of the monadic implementation is that we can not only use existing operators like `?`, but also perform similar operation on other types that have similar properties. This includes a composition of the existing types that we are already familiar with, such as `impl Futures<Output = Result<Result<Option<T>, E1>, E2>>`. With monads, you can imagine that we can now implement an operator that is roughly equivalent to `.await???` to "extract" the `T` value out of the nested container.
+
+For the case of `DispatchMatchers`, the "monad provider" we used is called `OkMonadic`. Essentially, this is the `⸮` operator that we have used in the pseudocode in the [`compute_area` example](#short-circuiting-remainder) to short circuit on the `Ok` variant and have a changing remainder type inside `Err`.
+
+So what we are really saying here is that, to implement `DispatchMatchers`, we just need to form a pipeline of handlers, where we use `⸮` to early return an `Ok(output)` from the returned `Result<Output, Remainder>` from the previous handler. Otherwise, we get back `Remainder` from `⸮`, and feed it as the input to the next handler.
+
+Thanks to `PipeMonadic` and `OkMonadic`, we do not need to implement this extraction manually. Instead, we just use the existing facilities provided by CGP to automatically implement this monadic pipeline for us.
+
+If you are still confused at this point, don't worry, as we will walk through a concrete example next. We will also have a blog post in the near future to explain about how CGP implements monads in Rust to support operations like `PipeMonadic`.
 
 ## Example Use of `MatchWithHandlers`
 
