@@ -6,8 +6,6 @@ description = ""
 
 authors = ["Soares Chen"]
 
-draft = true
-
 +++
 
 
@@ -71,7 +69,7 @@ impl FromVariant<symbol!("Rectangle")> for Shape {
 
 This allows the `Shape` enum to be constructed generically using just the tag and value.
 
-## Limitations on Enum Shape
+## Restrictions on Enum Shape
 
 To ensure ergonomics and consistency, CGP restricts the kinds of enums that can derive `FromVariant`. Specifically, supported enums must follow the **sums of products** pattern—each variant must contain *exactly one unnamed field*.
 
@@ -94,7 +92,7 @@ pub enum Shape {
 }
 ```
 
-These more complex variants are not supported because they would make it harder to represent variant fields as simple types, which would, in turn, lead to less ergonomic APIs. By limiting each variant to a single unnamed field, CGP ensures that types like `FromVariant::Value` remain straightforward and intuitive.
+These more complex variants are not supported because they would make it harder to represent variant fields as simple types, which would, in turn, lead to less ergonomic APIs. By restricting each variant to a single unnamed field, CGP ensures that types like `FromVariant::Value` remain straightforward and intuitive.
 
 If you need to represent more complex data in a variant, we recommend wrapping that data in a dedicated struct. This way, you can still take advantage of CGP's extensible variant system while maintaining type clarity and composability.
 
@@ -231,6 +229,12 @@ What makes this approach so powerful is that the Rust type system can statically
 
 ## Short Circuiting Remainder
 
+The earlier implementation of `compute_area` involves the use of nested `match` on the `Result` returned from `extract_field`. If you are familiar with the use of `?` on `Result`, you might wonder why don't we use it in the method implementation.
+
+The main reason `?` wouldn't work with our example is because we want to short circuit and return the `Ok` variant early, while the remainder type in the `Err` variant changes in each call to `extract_field`. This is the *inverse* of how we usually expect `Result` to be used, where the `Err` variant is returned early, while the type in the `Ok` variant changes with each method call.
+
+To really simplify the code, we can imagine it to be written as the following pseudocode:
+
 ```rust
 pub fn compute_area(shape: Shape) -> Result<f64, Infallible> {
     let remainder = shape
@@ -245,6 +249,18 @@ pub fn compute_area(shape: Shape) -> Result<f64, Infallible> {
     match remainder {}
 }
 ```
+
+In the above pseudocode, we *invent* a new operator `⸮`, which behaves in the opposite way as `?`. It short circuits and return the `Ok` variant early, or binds the remainder value in the `Err` variant to the `remainder` variable in the `let` binding.
+
+In the example, we use `.map` to map the `Ok` variant from the shape to the `f64` area result, and return early through `⸮`. Otherwise, the `remainder` variable gradually shrinks, until it becomes inhabitable in the end. We then use `match remainder {}` to statically assert that the case cannot be reach.
+
+In other words, our new `compute_area` function don't really "return" anything in the `Err` variant. But to complete the type signature, we use `Result<f64, Infallible>` as the return type, with `Infallible` representing that the operation can never fail with an `Err` variant.
+
+At this point, some readers may point out that there are other ways to simplify the Rust code without introducing the `⸮` operator. For example, we could make `extract_field` return `Result<Remainder, Value>` so that we can short circuit `Err(Value)` through `?`. However, doing so may be confusing, as it makes more sense that `Remainder` is the "exceptional" case here.
+
+Furthermore, we introduce `⸮` as an exercise for you to think about how it relates to other existing operators such as `?`, `.await`, and `.await?`. In practice, we won't need Rust to officially support `⸮`, nor would we need to manually implement functions like `compute_area`. Instead, the extensible visitor pattern would apply something like `⸮` for us in the implementation to automatically implement `compute_area` for us.
+
+We will revisit this topic in the later section about the implementation of extensible visitor. For now, let's move on to how we finalize an empty remainder.
 
 ## `FinalizeExtract` Trait
 
