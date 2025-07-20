@@ -610,15 +610,72 @@ If you are still confused at this point, don't worry, as we will walk through a 
 
 ## Example Use of `MatchWithHandlers`
 
+To see how we can use `MatchWithHandlers` directly, let's revisit the earlier example of computing the area of `Shape`. We first define two separate `Computer` providers to compute the `Circle` and `Rectangle` variants of shape as follows:
+
 ```rust
-let circle = Shape::Circle(Circle { radius: 5.0 });
+#[cgp_computer]
+fn circle_area(circle: Circle) -> f64 {
+    PI * circle.radius * circle.radius
+}
+
+#[cgp_computer]
+fn rectangle_area(rectangle: Rectangle) -> f64 {
+    rectangle.width * rectangle.height
+}
+```
+
+We use the `#[cgp_computer]` macro to turn our pure functions into context-generic providers that can be referenced as types. Behind the scene, `#[cgp_computer]` generates a `Computer` implementation that looks like:
+
+```rust
+#[cgp_provider]
+impl<Context, Code> Computer<Context, Code, Circle> for CircleArea {
+    type Output = f64;
+
+    fn compute(_context: &Context, _code: PhantomData<Code>, input: Circle) -> f64 {
+        circle_area(input)
+    }
+}
+```
+
+As we can see, `#[cgp_computer]` gives us the convenience that we can define pure `Computer` instances more easily, by just writing them as functions. Since we ignore that `Context` and `Code` types, we can instantiate the provider to work with any `Context` or `Code` that we provide to it.
+
+We can then pass `CircleArea` and `RectangleArea` to `MatchWithHandlers` to compute the area of `Shape` as follows:
+
+```rust
+let shape = Shape::Circle(Circle { radius: 5.0 });
 
 let area = MatchWithHandlers::<
     Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
+        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<CircleArea>>,
+        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<RectangleArea>>,
     ],
->::compute(&(), PhantomData::<()>, circle);
+>::compute(&(), PhantomData::<()>, shape);
 ```
+
+Instead of passing the providers to `MatchWithHandlers` directly, they are wrapped by some other constructs. First, the `ExtractFieldAndHandle` handler extracts the variant value from the specified tag, e.g. `symbol!("Circle")`, and pass it to the inner handler `HandleFieldValue<CircleArea>`.
+
+The inner input is given in the form `Field<symbol("Circle"), Circle>`, and the `HandleFieldValue` handler extracts the `Circle` value from `Field`, and passes it as the input to `CircleArea`.
+
+As a whole, we expect the instantiated `MatchWithHandlers` implements the `Computer` trait, and we call `compute` on it with `()` as the `Context` type and also the `Code` type. This works, because the `Computer` instances that we have defined earlier with `#[cgp_computer]` could work with any `Context` and `Code` type.
+
+Behind the scene, `MatchWithHandlers` desugars the call to roughly something like the following pseudocode:
+
+```rust
+let remainder = shape.to_extractor();
+
+let remainder = remainder
+    .extract_field(symbol!("Circle"))
+    .map(|circle| CircleArea::compute(&(), PhantomData::<()>, circle))⸮;
+
+let remainder = remainder
+    .extract_field(symbol!("Rectangle"))
+    .map(|rectangle| Rectangle::compute(&(), PhantomData::<()>, rectangle))⸮;
+
+remainder.finalize_extract();
+```
+
+That is, `MatchwithHandlers` now performs the same `⸮` [short circuit operation](#short-circuiting-remainder) that we hand-implemented earlier. And for each mapping of the `Ok` result in the extraction, we instead use the `Computer` providers to perform the area calculations.
+
+From the expansion, we can see the amount of boilerplate code that `MatchWithHandlers` has implemented for us. This in turn is implemented simply as a monadic pipeline through `PipeMonadic`, with `OkMonadic` being "passed" as the `⸮` operator that we have used in this pseudocode expansion.
 
 # Conclusion
