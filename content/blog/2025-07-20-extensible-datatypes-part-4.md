@@ -1048,4 +1048,81 @@ impl HasAreaRef for ShapePlus {
 
 With the example, it may seem trivial to support reference-based visitor dispatch using `MatchWithValueHandlersRef`. In fact, as we will see next, this is indeed mostly true, aside from some additional complexities in handling generic lifetimes.
 
+## PartialRef Variants
+
+While most of the higher level implementations of reference-based extensible visitor is straightforward, we first need to also derive reference-based partial variants inside of `#[derive(ExtractField)]`. For instance, the following reference-based partial variants for `Shape` will be generated:
+
+```rust
+pub enum PartialRefShape<'a, F0: MapType, F1: MapType> {
+    Circle(F0::Map<&'a Circle>),
+    Rectangle(F0::Map<&'a Rectangle>),
+}
+```
+
+Compared to `PartialShape`, the definition of `PartialRefShape` contains an additional lifetime parameter `'a`, with each of its partial fields containing a `&'a` reference to the field value.
+
+The reason we need to define `PartialRefShape` in addition to `PartialShape` is because there is currently no easy way to express that a Rust value may "optionally" be a reference depending on the generic condition. As a result, it is more straightforward to have a separate enum that is parameterized by a lifetime. Furthermore, since the type is generated from macros and only used internally, this should not introduce too much overhead to the final implementation.
+
+### `HasExtractorRef` Trait
+
+Aside from the partial-ref variants, we also need a new `HasExtractorRef` trait to extract from a reference to the full enum:
+
+```rust
+pub trait HasExtractorRef {
+    type ExtractorRef<'a>
+    where
+        Self: 'a;
+
+    fn extractor_ref<'a>(&'a self) -> Self::ExtractorRef<'a>;
+}
+```
+
+Compared to `HasExtractor`, `HasExtractorRef` has a generic associated type `ExtractorRef` that is parameterized by a lifetime `'a`, and with an additional constraint that `Self: 'a`. It also provides an `extractor_ref` method that takes a `&'a self` reference, and returns the partial-ref variants as `ExtractorRef<'a>`.
+
+Aside from the additional lifetime, the `HasExtractorRef` implementation for `Shape` is rather straightforwardly implemented as follows:
+
+```rust
+impl HasExtractorRef for Shape {
+    type ExtractorRef<'a> = PartialRefShape<'a, IsPresent, IsPresent>
+    where Self: 'a;
+
+    fn extractor_ref<'a>(&'a self) -> Self::ExtractorRef<'a> {
+        match self {
+            Self::Circle(value) => PartialRefShape::Circle(value),
+            Self::Rectangle(value) => PartialRefShape::Rectangle(value),
+        }
+    }
+}
+```
+
+Using `extractor_ref`, we can now extract from a borrowed `Shape`, without needing to perform cloning on each of its variant.
+
+### `ExtractField` Implementation
+
+Fortunately, aside from the partial-ref variants and the `HasExtractorRef` trait, we can mostly reuse all other traits and use them as if we are interacting with owned values. This is because `PartialRefShape` technically contains "owned" variant values that are in the form `&'a Circle`, `&'a Rectangle`, etc. For instance, we can implement `ExtractField` for `PartialRefShape` as follows:
+
+```rust
+impl<'a, F1: MapType> ExtractField<symbol!("Circle")> for PartialRefShape<'a, IsPresent, F1> {
+    type Value = &'a Circle;
+    type Remainder = PartialShape<'a, IsVoid, F1>;
+
+
+    fn extract_field(
+        self,
+        _tag: PhantomData<symbol!("Circle")>,
+    ) -> Result<Self::Value, Self::Remainder> {
+        match self {
+            PartialRefShape::Circle(value) => Ok(value),
+            PartialRefShape::Rectangle(value) => Err(PartialRefShape::Rectangle(value)),
+        }
+    }
+}
+```
+
+The reason we can reuse traits like `ExtractField` is because the associated types like `Value` do not necessarily need to be the actual value from the original trait, and can also be a *reference* to the original value. So with this, we are pretending that the extensible variants contain reference for all its fields, and then manipulate them the same way as owned values.
+
+## `PromoteRef`
+
+
+
 # Conclusion
