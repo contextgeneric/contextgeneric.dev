@@ -988,17 +988,17 @@ Although some boilerplate still remains, this approach is significantly simpler 
 
 ---
 
-# Visitor Dispatcher By Reference
+# Visitor Dispatcher by Reference
 
-In the earlier examples, some dilligent readers may notice a serious flaw in the function signatures for the area computation of shapes, such as `HasArea::area` - the methods require *owned* values of the shape variants, rather than just reference to them. This means that a shape value is *consumed* every time we try to calculate its area, which is not exactly efficient!
+In the earlier examples, some careful readers may have noticed a significant flaw in the function signatures for computing the area of shapes, such as in `HasArea::area`. These methods require *owned* values of the shape variants, meaning that each time we compute the area, we must consume the shape entirely. This is not ideal, especially when we only need a reference and want to preserve the original value.
 
-However, the reason we demonstrate the owned version of visitor dispatcher first is because they are simpler to understand, especially since we don't need to worry about dealing with lifetimes. Furthermore, we will demonstrate in this section that the reference-based visitor dispatcher can be implemented *on top* of the existing ownership-based visitor dispatcher. In other words, the reference-based implementation is simply a *special case* of the ownership-based implementation.
+We started with the ownership-based visitor dispatcher because it is conceptually simpler. It avoids the need to reason about lifetimes, making it easier to understand the overall implementation of extensible visitor. However, in this section, we will show how a reference-based visitor dispatcher can be built *on top of* the ownership-based version. Rather than requiring a separate mechanism, the reference-based version is actually a *specialization* of the existing system.
 
-In this section, we will walk through the detailed implementation of the reference-based visitor dispatcher. After this, you will hopefully appreciate how Rust's type system allows us to easily and safely extend the ownership-based visitor dispatcher to support references, all while making sure that there is no violation of lifetime constraints.
+We will now walk through how to implement the reference-based visitor dispatcher in detail. By the end, you will see how Rust’s type system enables us to safely and cleanly extend the original approach to support references, without compromising lifetime safety or clarity.
 
 ## Reference-Based Area Computation
 
-To demonstrate how reference-based visitor dispatching would work, let's define a new `HasAreaRef` trait that calculates the area with a `&self` reference:
+To demonstrate how reference-based visitor dispatch works, let’s define a new trait `HasAreaRef` that computes the area using a shared reference:
 
 ```rust
 pub trait HasAreaRef {
@@ -1015,9 +1015,9 @@ impl HasAreaRef for Rectangle { ... }
 impl HasAreaRef for Triangle { ... }
 ```
 
-In practice, there is probably no use to keep both `HasArea` and `HasAreaRef`. But to avoid confusion, we will name this version differently so that it is clear which version of area computation we are using.
+In practice, you probably wouldn’t need both `HasArea` and `HasAreaRef`, but for clarity we use a separate trait here to clearly distinguish between ownership-based and reference-based computations.
 
-Similarly, we use `#[cgp_computer]` to define a proxy `ComputeAreaRef` provider that implements `ComputerRef` using `HasAreaRef`:
+Next, we define a new provider `ComputeAreaRef` using `#[cgp_computer]`, which implements `ComputerRef` by calling `HasAreaRef`:
 
 ```rust
 #[cgp_computer]
@@ -1026,7 +1026,7 @@ fn compute_area_ref<T: HasAreaRef>(shape: &T) -> f64 {
 }
 ```
 
-With the reference-based area implementations in place, we can now implement `HasAreaRef` for `Shape` by simply using `MatchWithValueHandlersRef` instead of `MatchWithValueHandlers`:
+With this in place, we can now implement `HasAreaRef` for `Shape` by using `MatchWithValueHandlersRef`, the reference-based counterpart to `MatchWithValueHandlers`:
 
 ```rust
 impl HasAreaRef for Shape {
@@ -1036,7 +1036,7 @@ impl HasAreaRef for Shape {
 }
 ```
 
-Similarly, we can implement `HasAreaRef` for `ShapePlus` as easily with the same pattern:
+Likewise, the implementation for `ShapePlus` follows the same pattern:
 
 ```rust
 impl HasAreaRef for ShapePlus {
@@ -1046,26 +1046,28 @@ impl HasAreaRef for ShapePlus {
 }
 ```
 
-With the example, it may seem trivial to support reference-based visitor dispatch using `MatchWithValueHandlersRef`. In fact, as we will see next, this is indeed mostly true, aside from some additional complexities in handling generic lifetimes.
+At first glance, using `MatchWithValueHandlersRef` to enable reference-based dispatch may seem straightforward — and in many ways, it is. As we’ll see next, the core logic mirrors the ownership-based version closely, with only a few additional considerations around generic lifetimes.
 
-## PartialRef Variants
+## `PartialRef` Variants
 
-While most of the higher level implementations of reference-based extensible visitor is straightforward, we first need to also derive reference-based partial variants inside of `#[derive(ExtractField)]`. For instance, the following reference-based partial variants for `Shape` will be generated:
+Although most of the higher-level support for reference-based extensible visitors is relatively straightforward, we first need to generate reference-aware partial variants within `#[derive(ExtractField)]`. For example, for the `Shape` enum, the macro generates the following reference-based partial variants:
 
 ```rust
 pub enum PartialRefShape<'a, F0: MapType, F1: MapType> {
     Circle(F0::Map<&'a Circle>),
-    Rectangle(F0::Map<&'a Rectangle>),
+    Rectangle(F1::Map<&'a Rectangle>),
 }
 ```
 
-Compared to `PartialShape`, the definition of `PartialRefShape` contains an additional lifetime parameter `'a`, with each of its partial fields containing a `&'a` reference to the field value.
+Compared to the owned version `PartialShape`, the `PartialRefShape` definition introduces a lifetime parameter `'a`, and each of its fields now contains a reference with that lifetime. This allows us to safely operate on borrowed variants without taking ownership.
 
-The reason we need to define `PartialRefShape` in addition to `PartialShape` is because there is currently no easy way to express that a Rust value may "optionally" be a reference depending on the generic condition. As a result, it is more straightforward to have a separate enum that is parameterized by a lifetime. Furthermore, since the type is generated from macros and only used internally, this should not introduce too much overhead to the final implementation.
+We need a distinct `PartialRefShape` type rather than reusing `PartialShape` because Rust currently has no native mechanism to generically express a value that is either owned or borrowed based on some type-level condition. For instance, if Rust had a concept like a special `'owned` lifetime where `&'owned T` could be treated as just `T`, then it might be possible to unify the two representations. But such a feature does not exist, and arguably shouldn't.
+
+Given that limitation, the cleanest solution is to define a separate enum that introduces a lifetime parameter and holds references explicitly. Since these types are generated by macros and used internally within CGP's dispatching infrastructure, the added complexity is well-contained and does not burden the end user.
 
 ### `HasExtractorRef` Trait
 
-Aside from the partial-ref variants, we also need a new `HasExtractorRef` trait to extract from a reference to the full enum:
+In addition to the partial-ref variants, we need a new trait called `HasExtractorRef` that extracts data from a reference to the full enum:
 
 ```rust
 pub trait HasExtractorRef {
@@ -1077,9 +1079,9 @@ pub trait HasExtractorRef {
 }
 ```
 
-Compared to `HasExtractor`, `HasExtractorRef` has a generic associated type `ExtractorRef` that is parameterized by a lifetime `'a`, and with an additional constraint that `Self: 'a`. It also provides an `extractor_ref` method that takes a `&'a self` reference, and returns the partial-ref variants as `ExtractorRef<'a>`.
+Compared to the `HasExtractor` trait, `HasExtractorRef` introduces a generic associated type `ExtractorRef` that is parameterized by a lifetime `'a` and requires the constraint `Self: 'a`. It also defines an `extractor_ref` method that takes a `&'a self` reference and returns the corresponding partial-ref variants as `ExtractorRef<'a>`.
 
-Aside from the additional lifetime, the `HasExtractorRef` implementation for `Shape` is rather straightforwardly implemented as follows:
+Other than the addition of the lifetime parameter, implementing `HasExtractorRef` for `Shape` is straightforward, as shown below:
 
 ```rust
 impl HasExtractorRef for Shape {
@@ -1095,17 +1097,16 @@ impl HasExtractorRef for Shape {
 }
 ```
 
-Using `extractor_ref`, we can now extract from a borrowed `Shape`, without needing to perform cloning on each of its variant.
+With `extractor_ref`, it is now possible to extract data from a borrowed `Shape` without cloning each variant, enabling efficient reference-based dispatching.
 
 ### `ExtractField` Implementation
 
-Fortunately, aside from the partial-ref variants and the `HasExtractorRef` trait, we can mostly reuse all other traits and use them as if we are interacting with owned values. This is because `PartialRefShape` technically contains "owned" variant values that are in the form `&'a Circle`, `&'a Rectangle`, etc. For instance, we can implement `ExtractField` for `PartialRefShape` as follows:
+Fortunately, beyond the partial-ref variants and the `HasExtractorRef` trait, most other traits can be reused as if we were working with owned values. This works because `PartialRefShape` holds what are effectively "owned" variant values in the form of references like `&'a Circle` and `&'a Rectangle`. For example, we can implement `ExtractField` for `PartialRefShape` like this:
 
 ```rust
 impl<'a, F1: MapType> ExtractField<symbol!("Circle")> for PartialRefShape<'a, IsPresent, F1> {
     type Value = &'a Circle;
     type Remainder = PartialShape<'a, IsVoid, F1>;
-
 
     fn extract_field(
         self,
@@ -1119,7 +1120,7 @@ impl<'a, F1: MapType> ExtractField<symbol!("Circle")> for PartialRefShape<'a, Is
 }
 ```
 
-The reason we can reuse traits like `ExtractField` is because the associated types like `Value` do not necessarily need to be the actual value from the original trait, and can also be a *reference* to the original value. So with this, we are pretending that the extensible variants contain reference for all its fields, and then manipulate them the same way as owned values.
+We can reuse traits like `ExtractField` because the associated types such as `Value` do not need to be the owned values themselves — they can be references to those values instead. This lets us treat extensible variants as if they contain references to their fields, allowing us to manipulate them just like owned values.
 
 ## `PromoteRef`
 
