@@ -965,7 +965,7 @@ With this setup, `BuildAndMergeOutputs` can now be used like any other CGP provi
 
 The key benefit of this pattern is that it avoids boilerplate while preserving type safety. Whenever a provider's implementation is simply a thin wrapper around another provider with some added constraints, it's much more convenient to use `DelegateComponent` via `delegate_components!` than to implement the provider trait manually.
 
-## Type-Level CGP Metaprogramming
+## Type-Level Metaprogramming
 
 The technique we just explored — wrapping providers and using `delegate_components!` — can be seen as a form of **metaprogramming** in CGP. Here, we’re leveraging **type-level programming** not just within CGP’s core component abstractions like `DelegateComponent`, but also as a tool for *programmatically defining component wiring* through the use of generic parameters and trait constraints.
 
