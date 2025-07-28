@@ -986,4 +986,66 @@ impl HasArea for ShapePlus {
 
 Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic layers on top of this pattern, making common use cases like `HasArea` even easier to express.
 
+---
+
+# Visitor Dispatcher By Reference
+
+In the earlier examples, some dilligent readers may notice a serious flaw in the function signatures for the area computation of shapes, such as `HasArea::area` - the methods require *owned* values of the shape variants, rather than just reference to them. This means that a shape value is *consumed* every time we try to calculate its area, which is not exactly efficient!
+
+However, the reason we demonstrate the owned version of visitor dispatcher first is because they are simpler to understand, especially since we don't need to worry about dealing with lifetimes. Furthermore, we will demonstrate in this section that the reference-based visitor dispatcher can be implemented *on top* of the existing ownership-based visitor dispatcher. In other words, the reference-based implementation is simply a *special case* of the ownership-based implementation.
+
+In this section, we will walk through the detailed implementation of the reference-based visitor dispatcher. After this, you will hopefully appreciate how Rust's type system allows us to easily and safely extend the ownership-based visitor dispatcher to support references, all while making sure that there is no violation of lifetime constraints.
+
+## Reference-Based Area Computation
+
+To demonstrate how reference-based visitor dispatching would work, let's define a new `HasAreaRef` trait that calculates the area with a `&self` reference:
+
+```rust
+pub trait HasAreaRef {
+    fn area(&self) -> f64;
+}
+
+impl HasAreaRef for Circle {
+    fn area(&self) -> f64 {
+        PI * self.radius * self.radius
+    }
+}
+
+impl HasAreaRef for Rectangle { ... }
+impl HasAreaRef for Triangle { ... }
+```
+
+In practice, there is probably no use to keep both `HasArea` and `HasAreaRef`. But to avoid confusion, we will name this version differently so that it is clear which version of area computation we are using.
+
+Similarly, we use `#[cgp_computer]` to define a proxy `ComputeAreaRef` provider that implements `ComputerRef` using `HasAreaRef`:
+
+```rust
+#[cgp_computer]
+fn compute_area_ref<T: HasAreaRef>(shape: &T) -> f64 {
+    shape.area()
+}
+```
+
+With the reference-based area implementations in place, we can now implement `HasAreaRef` for `Shape` by simply using `MatchWithValueHandlersRef` instead of `MatchWithValueHandlers`:
+
+```rust
+impl HasAreaRef for Shape {
+    fn area(&self) -> f64 {
+        MatchWithValueHandlersRef::<ComputeAreaRef>::compute_ref(&(), PhantomData::<()>, self)
+    }
+}
+```
+
+Similarly, we can implement `HasAreaRef` for `ShapePlus` as easily with the same pattern:
+
+```rust
+impl HasAreaRef for ShapePlus {
+    fn area(&self) -> f64 {
+        MatchWithValueHandlersRef::<ComputeAreaRef>::compute_ref(&(), PhantomData::<()>, self)
+    }
+}
+```
+
+With the example, it may seem trivial to support reference-based visitor dispatch using `MatchWithValueHandlersRef`. In fact, as we will see next, this is indeed mostly true, aside from some additional complexities in handling generic lifetimes.
+
 # Conclusion
