@@ -71,7 +71,7 @@ This allows the `Shape` enum to be constructed generically using just the tag an
 
 ## Restrictions on Enum Shape
 
-To ensure ergonomics and consistency, CGP restricts the kinds of enums that can derive `FromVariant`. Specifically, supported enums must follow the **sums of products** pattern—each variant must contain *exactly one unnamed field*.
+To ensure ergonomics and consistency, CGP restricts the kinds of enums that can derive `FromVariant`. Specifically, supported enums must follow the **sums of products** pattern — each variant must contain *exactly one unnamed field*.
 
 The following forms, for example, are **not** supported:
 
@@ -155,7 +155,7 @@ The `Void` type is defined as an empty enum with no variants. This means that it
 
 Conceptually, `Void` serves the same purpose as Rust’s built-in [**never type**](https://doc.rust-lang.org/reference/types/never.html) or the [`Infallible`](https://doc.rust-lang.org/std/convert/enum.Infallible.html) type from the standard library. However, CGP defines `Void` explicitly to distinguish its special role in the context of extensible variants.
 
-While `IsNothing` is used for absent fields in partial records, we use `IsVoid` to represent removed or matched variants in partial enums. This ensures that once a variant has been extracted, it cannot be matched again — preserving both soundness and safety in CGP’s type-driven pattern matching.
+While `IsNothing` is used for absent fields in partial records, we use `IsVoid` to represent removed or matched variants in partial variants. This ensures that once a variant has been extracted, it cannot be matched again — preserving both soundness and safety in CGP’s type-driven pattern matching.
 
 ## `ExtractField` Trait
 
@@ -226,14 +226,13 @@ In this example, we begin by converting the `Shape` value into a `PartialShape` 
 By the time we reach the second `Err` case, the remainder has the type `PartialShape<IsVoid, IsVoid>`, which cannot contain any valid variant. Because of this, we can safely omit any further pattern matching, and the compiler guarantees that there are no unreachable or unhandled cases.
 
 What makes this approach so powerful is that the Rust type system can statically verify that it is impossible to construct a valid value for `PartialShape<IsVoid, IsVoid>`. We no longer need to write boilerplate `_ => unreachable!()` code or use runtime assertions. The type system ensures exhaustiveness and soundness entirely at compile time, enabling safer and more maintainable implementation of extensible variants.
-
 ## Short Circuiting Remainder
 
-The earlier implementation of `compute_area` involves the use of nested `match` on the `Result` returned from `extract_field`. If you are familiar with the use of `?` on `Result`, you might wonder why don't we use it in the method implementation.
+In our earlier implementation of `compute_area`, we used nested `match` expressions to handle the `Result` returned from each call to `extract_field`. If you are familiar with the `?` operator in Rust, you might be wondering why we didn’t use it here to simplify the logic.
 
-The main reason `?` wouldn't work with our example is because we want to short circuit and return the `Ok` variant early, while the remainder type in the `Err` variant changes in each call to `extract_field`. This is the *inverse* of how we usually expect `Result` to be used, where the `Err` variant is returned early, while the type in the `Ok` variant changes with each method call.
+The reason is that we want to short circuit and return the `Ok` variant as soon as a match succeeds, while the `Err` case contains a remainder type that changes with each call to `extract_field`. This behavior is the inverse of how `Result` is typically used in Rust, where the `Err` variant is the one that gets returned early, and the `Ok` type changes as the computation progresses.
 
-To really simplify the code, we can imagine it to be written as the following pseudocode:
+To better understand what we are trying to achieve, consider the following pseudocode that illustrates the intent more clearly:
 
 ```rust
 pub fn compute_area(shape: Shape) -> Result<f64, Infallible> {
@@ -250,17 +249,17 @@ pub fn compute_area(shape: Shape) -> Result<f64, Infallible> {
 }
 ```
 
-In the above pseudocode, we *invent* a new operator `⸮`, which behaves in the opposite way as `?`. It short circuits and return the `Ok` variant early, or binds the remainder value in the `Err` variant to the `remainder` variable in the `let` binding.
+In this pseudocode, we introduce a fictional operator `⸮`, which behaves like the opposite of `?`. Instead of short circuiting on `Err`, it short circuits on `Ok`, returning the value immediately. If the result is `Err`, it binds the remainder to the `remainder` variable and continues.
 
-In the example, we use `.map` to map the `Ok` variant from the shape to the `f64` area result, and return early through `⸮`. Otherwise, the `remainder` variable gradually shrinks, until it becomes inhabitable in the end. We then use `match remainder {}` to statically assert that the case cannot be reach.
+In this setup, each call to `extract_field` uses `.map` to transform a successful match into the final `f64` result. If the match succeeds, `⸮` returns early. Otherwise, we continue with the remainder, which gradually becomes more constrained until it is fully uninhabited. Once all variants have been tried, the final `match remainder {}` statically asserts that no remaining case is possible.
 
-In other words, our new `compute_area` function don't really "return" anything in the `Err` variant. But to complete the type signature, we use `Result<f64, Infallible>` as the return type, with `Infallible` representing that the operation can never fail with an `Err` variant.
+This highlights a subtle but important point: the `compute_area` function never actually returns an `Err` in practice. To satisfy the function’s signature, we return a `Result<f64, Infallible>`, where `Infallible` indicates that failure is not possible.
 
-At this point, some readers may point out that there are other ways to simplify the Rust code without introducing the `⸮` operator. For example, we could make `extract_field` return `Result<Remainder, Value>` so that we can short circuit `Err(Value)` through `?`. However, doing so may be confusing, as it makes more sense that `Remainder` is the "exceptional" case here.
+Some readers may suggest alternative approaches, such as flipping the result to `Result<Remainder, Value>` so that the `?` operator could be used to return the value directly. While that might make the surface syntax cleaner, it reverses the intuitive meaning of the result. In this case, `Remainder` is the exceptional path, and `Value` is what we expect when the extraction succeeds.
 
-Furthermore, we introduce `⸮` as an exercise for you to think about how it relates to other existing operators such as `?`, `.await`, and `.await?`. In practice, we won't need Rust to officially support `⸮`, nor would we need to manually implement functions like `compute_area`. Instead, the extensible visitor pattern would apply something like `⸮` for us in the implementation to automatically implement `compute_area` for us.
+The introduction of `⸮` is not meant to advocate for a new language feature. Rather, it serves to clarify the control flow and encourage you to think about how this pattern relates to existing Rust constructs like `?`, `.await`, and combinations such as `.await?`. In practice, we do not need to manually write functions like `compute_area` or invent new operators. The extensible visitor pattern we will explore later provides a mechanism that effectively captures this logic for us.
 
-We will revisit this topic in the later section about the implementation of extensible visitor. For now, let's move on to how we finalize an empty remainder.
+We will revisit this idea when we discuss how the visitor pattern automates this process. For now, let’s continue by looking at how to finalize an empty remainder.
 
 ## `FinalizeExtract` Trait
 
@@ -456,7 +455,7 @@ First, the blanket implementation of `CanUpcast` verifies several conditions:
       Field<symbol!("Rectangle"), Rectangle>,
   ]
   ```
-* `Shape` must also implement `HasExtractor`, with its associated extractor being `PartialShape<IsPresent, IsPresent>`.
+* `Shape` must also implement `HasExtractor`, with its associated `Extractor` type being `PartialShape<IsPresent, IsPresent>`.
 * The `Fields` type must implement `FieldsExtractor`, with `PartialShape<IsPresent, IsPresent>` as the source and `ShapePlus` as the target.
 * The result of the extraction yields a remainder of type `PartialShape<IsVoid, IsVoid>`, which in turn implements `FinalizeExtract`.
 
@@ -465,7 +464,7 @@ Next, the `FieldsExtractor` implementation for the head of the sum begins proces
 * The current `Tag` is `symbol!("Circle")`, and the associated `Value` is of type `Circle`.
 * The `Source` is `PartialShape<IsPresent, IsPresent>`, and the `Target` is `ShapePlus`.
 * The source implements `ExtractField<symbol!("Circle")>`, which succeeds with `Circle` as the extracted value and `PartialShape<IsVoid, IsPresent>` as the remainder.
-* The target `ShapePlus` implements `FromVariant<symbol!("Circle")>`, again using the `Circle` type.
+* The target `ShapePlus` implements `FromVariant<symbol!("Circle")>`, again with `Circle` being the `Value` type.
 
 The extractor then proceeds to the next variant in the sum:
 
@@ -542,13 +541,15 @@ However, when the actual variant in this case is `Triangle`, which is not part o
 
 One of the most impressive aspects of both upcast and downcast is that they work seamlessly even when the source and target enums define their variants in entirely different orders. Because the trait implementations, such as `ExtractField`, operate in a generic and order-independent way, the correctness and behavior of casting are preserved regardless of variant ordering. This level of flexibility makes the CGP approach to extensible variants both powerful and practical for real-world use.
 
-# Visitor Dispatcher
+---
 
-With the traits for extensible variants defined, we can now turn our attention to how CGP implements generalized **visitor dispatchers**, similar to how the [builder dispatchers](/blog/extensible-datatypes-part-3/#builder-dispatcher) in our previous blog post was implemented.
+# Implementation of Visitor Dispatcher
 
-## `MatchWithHandlers` Provider
+With the traits for extensible variants now in place, we can turn our attention to how CGP implements generalized **visitor dispatchers**, similar to the [builder dispatchers](/blog/extensible-datatypes-part-3/#builder-dispatcher) described in the previous part of this series.
 
-In the [examples in part 2](/blog/extensible-datatypes-part-2/#dispatching-eval), we have used dispatchers like `MatchWithValueHandlers` and `MatchWithValueHandlersRef` to dispatch the handling of variant values to different handlers based on the `Input` type. Under the hood, these dispatchers are built upon a more fundamental dispatcher called `MatchWithHandlers`, which is implemented as follows:
+## `MatchWithHandlers`
+
+In the [examples from Part 2](/blog/extensible-datatypes-part-2/#dispatching-eval), we introduced dispatchers such as `MatchWithValueHandlers` and `MatchWithValueHandlersRef`, which delegate the handling of enum variants to different visitor handlers based on the `Input` type. These dispatchers are built on top of a more fundamental dispatcher called `MatchWithHandlers`, whose implementation is shown below:
 
 ```rust
 #[cgp_provider]
@@ -573,46 +574,49 @@ where
 }
 ```
 
-The `MatchWithHandlers` provider is parameterized by a `Handlers` type, which represents a type-level list of visitor handlers that will process the variants from a generic `Input` type. Inside the `Computer` implementation, it requires `Input` to be an enum that implements `HasExtractor`.
+The `MatchWithHandlers` provider is parameterized by a `Handlers` type, which represents a type-level list of visitor handlers responsible for processing the variants of a generic `Input` enum. The implementation requires `Input` to implement the `HasExtractor` trait, which provides access to its partial variants.
 
-Inside the method body for `compute`, it first calls `input.to_extractor()` to convert the input into partial variants, and then pass it to a lower level `DispatchMatchers<Handlers>` handler, which performs the actual dispatching logic and returns `Result<Output, Remainder>` as the output. The implementation then expects the `Remainder` that is returned to be inhabitable through `FinalizeExtract`. With that, it simply match on the return result to return the `Output`, and in the error case, it uses `finalize_extract()` to assert that the case cannot be reached.
+Within the `compute` method, we first convert the input into its extractor form using `input.to_extractor()`. This partial variant is then passed to the lower-level dispatcher `DispatchMatchers<Handlers>`, which attempts to match and handle each variant. It returns a `Result<Output, Remainder>`, where a successful match produces an `Output`, and an unmatched remainder is returned otherwise.
 
+If the result is `Ok`, the output is returned directly. If the result is `Err`, we call `finalize_extract()` on the remainder to assert that it is uninhabited, ensuring that all variants have been exhaustively handled. This makes the case both safe and unreachable, as guaranteed by the type system.
 
-## `DispatchMatchers` Provider
+### `DispatchMatchers`
 
-Recall that in the extensible builder implementation of `BuildWithHandlers`, we used `PipeHandlers` to form a pipeline of builders to gradually fill in the partial records returned by the previous builder handler. For the case of extensible visitors, the pipeline implementation is slightly different, but is still elegantly defined as follows:
+In our earlier implementation of extensible builders via `BuildWithHandlers`, we [used `PipeHandlers`](/blog/extensible-datatypes-part-3/#buildwithhandlers-provider) to compose a pipeline of builder handlers that successively filled in partial records. For extensible visitors, we follow a similar pattern with a slight variation that reflects the different control flow.
+
+The dispatcher `DispatchMatchers` is defined as follows:
 
 ```rust
 pub type DispatchMatchers<Providers> = PipeMonadic<OkMonadic, Providers>;
 ```
 
-What this means is that `DispatchMatchers` forms a **monadic** pipeline of visitor handlers, that is based on the monad implementation provided by `OkMonadic`.
+This definition constructs a **monadic pipeline** of visitor handlers, using `OkMonadic` as the monad implementation.
 
 ## What is a Monad?!
 
-At this point, most of the readers coming from Rust background would probably be confused on *what the heck is a [monad](https://wiki.haskell.org/Monad)*, and what does it have to do with implementing extensible visitors. So in this section, I will try to explain monads in much more simplified and less intimidating ways, using existing Rust concepts.
+At this point, many readers coming from a Rust background may be wondering what exactly a [monad](https://wiki.haskell.org/Monad) is, and how it relates to implementing extensible visitors. In this section, we will break down the concept in simplified terms using familiar Rust patterns and constructs.
 
-To put it simply, a monad `M` is typically a container types that "contains" some value type `T` in a "shape" that looks like `M<T>`. We have in fact commonly used various monadic types in Rust, including `Option<T>`, `Result<T, E>`, and `impl Futures<Output = T>`.
+A monad, often written as `M`, is a type that acts as a container for another value `T`, and it typically appears in the form `M<T>`. If you have worked with `Option<T>`, `Result<T, E>`, or asynchronous code using `impl Future<Output = T>`, then you have already used monadic types in Rust.
 
-In addition to "containing" values, a monad provide a "bind" operation to "extract" the values out of it. In Rust, we have also frequently used this operation through the use of `?`, `.await`, or `.await?`.
+Monads are not just containers. They also provide a way to operate on the values they contain, typically through an operation known as "bind." In Rust, this concept appears through the use of operators like `?`, `.await`, and `.await?`, all of which allow you to "extract" or "unwrap" the value inside a container and propagate control based on the result.
 
-Learning all these, we can now understand `PipeMonadic` as simply asking CGP to automatically "apply" operators like `?`, `.await`, or `.await?` to the previous handler in the pipeline, to "extract" the result before passing it as an input to the next handler.
+With this understanding, we can think of `PipeMonadic` in CGP as a mechanism that automatically applies these unwrapping operations between steps in a pipeline. It takes the result from one handler and, using a monadic operator, unwraps it before passing it along as input to the next handler. This is how CGP builds a pipeline of computations where each step can short-circuit or continue depending on its output.
 
-The main strength of the monadic implementation is that we can not only use existing operators like `?`, but also perform similar operation on other types that have similar properties. This includes a composition of the existing types that we are already familiar with, such as `impl Futures<Output = Result<Result<Option<T>, E1>, E2>>`. With monads, you can imagine that we can now implement an operator that is roughly equivalent to `.await???` to "extract" the `T` value out of the nested container.
+The real strength of this approach is that it generalizes well. You are not limited to a specific type like `Result`; you can apply the same logic to any monad-like type, including more complex combinations such as `impl Future<Output = Result<Result<Option<T>, E1>, E2>>`. In principle, you could imagine applying something like `.await???` to extract the inner value, and with monads, this can be abstracted and automated.
 
 ### `OkMonadic` Monad Provider
 
-For the case of `DispatchMatchers`, the "monad provider" we used is called `OkMonadic`. Essentially, this is the `⸮` operator that we have used in the pseudocode in the [`compute_area` example](#short-circuiting-remainder) to short circuit on the `Ok` variant and have a changing remainder type inside `Err`.
+In the case of `DispatchMatchers`, the monad provider we use is called `OkMonadic`. This corresponds to the custom operator `⸮` we introduced in the pseudocode in the [`compute_area` example](#short-circuiting-remainder), which short-circuits on the `Ok` variant and passes along the changing `Err` remainder.
 
-So what we are really saying here is that, to implement `DispatchMatchers`, we just need to form a pipeline of handlers, where we use `⸮` to early return an `Ok(output)` from the returned `Result<Output, Remainder>` from the previous handler. Otherwise, we get back `Remainder` from `⸮`, and feed it as the input to the next handler.
+When we say that `DispatchMatchers` is defined using `PipeMonadic<OkMonadic, Providers>`, we mean that CGP should build a handler pipeline where each step uses the `⸮` operator to either return early with `Ok(output)` or continue processing the `Err(remainder)` with the next handler.
 
-Thanks to `PipeMonadic` and `OkMonadic`, we do not need to implement this extraction manually. Instead, we just use the existing facilities provided by CGP to automatically implement this monadic pipeline for us.
+Because of `PipeMonadic` and `OkMonadic`, we do not need to write this logic ourselves. CGP handles the monadic control flow automatically, allowing us to focus on the behavior of each handler without worrying about wiring them together manually.
 
-If you are still confused at this point, don't worry, as we will walk through a concrete example next. We will also have a blog post in the near future to explain about how CGP implements monads in Rust to support operations like `PipeMonadic`.
+If any of this still feels unclear, do not worry. We will walk through a concrete example next to clarify how it works in practice. We also plan to publish a separate blog post that dives deeper into how CGP implements monads in Rust, including the internals of `PipeMonadic` and related abstractions.
 
 ## Example Use of `MatchWithHandlers`
 
-To see how we can use `MatchWithHandlers` directly, let's revisit the earlier example of computing the area of `Shape`. We first define two separate `Computer` providers to compute the `Circle` and `Rectangle` variants of shape as follows:
+To understand how to use `MatchWithHandlers` directly, let's revisit the example of computing the area of a `Shape`. We start by defining two separate `Computer` providers that calculate the area for the `Circle` and `Rectangle` variants:
 
 ```rust
 #[cgp_computer]
@@ -628,7 +632,7 @@ fn rectangle_area(rectangle: Rectangle) -> f64 {
 
 ### `#[cgp_computer]` Macro
 
-We use the `#[cgp_computer]` macro to turn our pure functions into context-generic providers that can be referenced as types. Behind the scene, `#[cgp_computer]` generates a `Computer` implementation that looks like:
+The `#[cgp_computer]` macro allows us to transform these pure functions into context-generic providers that can be referenced as types. Behind the scenes, this macro generates a `Computer` implementation similar to the following:
 
 ```rust
 #[cgp_provider]
@@ -641,11 +645,11 @@ impl<Context, Code> Computer<Context, Code, Circle> for CircleArea {
 }
 ```
 
-As we can see, `#[cgp_computer]` gives us the convenience that we can define pure `Computer` instances more easily, by just writing them as functions. Since we ignore that `Context` and `Code` types, we can instantiate the provider to work with any `Context` or `Code` that we provide to it.
+This macro simplifies the process of defining `Computer` instances by letting us write them as plain functions. Because the macro ignores the `Context` and `Code` types, the generated provider works with any `Context` and `Code` you supply.
 
 ### `ComputeShapeArea` Handler
 
-With `CircleArea` and `RectangleArea` defined, we can now define a `ComputeShapeArea` handler as a type alias that uses `MatchWithHandlers` as follows:
+With `CircleArea` and `RectangleArea` defined, we can create a `ComputeShapeArea` handler by using `MatchWithHandlers` as a type alias:
 
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers::<
@@ -656,20 +660,20 @@ pub type ComputeShapeArea = MatchWithHandlers::<
 >;
 ```
 
-Instead of passing the providers to `MatchWithHandlers` directly, they are wrapped by some other constructs. First, the `ExtractFieldAndHandle` handler extracts the variant value from the specified tag, e.g. `symbol!("Circle")`, and pass it to the inner handler `HandleFieldValue<CircleArea>`.
+Rather than passing providers directly to `MatchWithHandlers`, we wrap them with helper handlers. The `ExtractFieldAndHandle` handler extracts the variant value associated with a specific tag, such as `symbol!("Circle")`, and forwards it to the inner handler `HandleFieldValue<CircleArea>`.
 
-Next, the inner input is given in the form `Field<symbol("Circle"), Circle>`, and the `HandleFieldValue` handler extracts the `Circle` value from `Field`, and passes it as the input to `CircleArea`. We will walk through the implementation of `ExtractFieldAndHandle` and `HandleFieldValue` right after this, but first, let's take a look at how `ComputeShapeArea` can be used.
+The inner handler `HandleFieldValue` receives the input as `Field<symbol!("Circle"), Circle>`, extracts the `Circle` value, and passes it to `CircleArea`. We will explore the implementations of `ExtractFieldAndHandle` and `HandleFieldValue` shortly, but first, let's see how `ComputeShapeArea` is used.
 
-As a whole, we expect the instantiated `MatchWithHandlers` implements the `Computer` trait, and we call `compute` on it with `()` as the `Context` type and also the `Code` type as follows:
+As a whole, the instantiated `MatchWithHandlers` implements the `Computer` trait. We can call `compute` on it using `()` for both the `Context` and `Code` types like this:
 
 ```rust
 let shape = Shape::Circle(Circle { radius: 5.0 });
 let area = ComputeShapeArea::compute(&(), PhantomData::<()>, shape);
 ```
 
-This works, because the `Computer` instances that we have defined earlier with `#[cgp_computer]` could work with any `Context` and `Code` type.
+This works because the `Computer` instances defined with `#[cgp_computer]` are generic over any `Context` and `Code`.
 
-Behind the scene, `MatchWithHandlers` implements `ComputeShapeArea` roughly as something like the following pseudocode:
+Under the hood, `MatchWithHandlers` implements `ComputeShapeArea` roughly as the following pseudocode:
 
 ```rust
 let remainder = shape.to_extractor();
@@ -680,18 +684,18 @@ let remainder = remainder
 
 let remainder = remainder
     .extract_field(symbol!("Rectangle"))
-    .map(|rectangle| Rectangle::compute(&(), PhantomData::<()>, rectangle))⸮;
+    .map(|rectangle| RectangleArea::compute(&(), PhantomData::<()>, rectangle))⸮;
 
 remainder.finalize_extract();
 ```
 
-That is, `MatchwithHandlers` now performs the same `⸮` [short circuit operation](#short-circuiting-remainder) that we hand-implemented earlier. And for each mapping of the `Ok` result in the extraction, we instead use the `Computer` providers to perform the area calculations.
+Here, `MatchWithHandlers` performs the same `⸮` short-circuit operation described earlier in the [short-circuiting remainder](#short-circuiting-remainder) section. For each `Ok` value returned by extraction, the corresponding `Computer` provider computes the area.
 
-From the expansion, we can see the amount of boilerplate code that `MatchWithHandlers` has implemented for us. This in turn is implemented simply as a monadic pipeline through `PipeMonadic`, with `OkMonadic` being "passed" as the `⸮` operator that we have used in this pseudocode expansion.
+This example highlights how much boilerplate `MatchWithHandlers` abstracts away for us. Its implementation is essentially a monadic pipeline built using `PipeMonadic`, where `OkMonadic` provides the behavior of the `⸮` operator used in this pseudocode.
 
 ## `ExtractFieldAndHandle`
 
-To understand better how the `MatchWithHandlers` example earlier works, we will take a look at how the `ExtractFieldAndHandle` provider is implemented:
+To better understand how the earlier `MatchWithHandlers` example works, let's examine the implementation of the `ExtractFieldAndHandle` provider:
 
 ```rust
 #[cgp_provider]
@@ -716,9 +720,9 @@ where
 }
 ```
 
-The type signature for `ExtractFieldAndHandle` may look complicated, but what is does is pretty simple. Given some partial variants `Input`, the handler tries to use `ExtractField` to extract a variant with the specified `Tag` from the partial variants. If the variant extraction is successful, it feeds the tagged field value `Field<Tag, Value>` to the inner `Provider` to process the variant. Otherwise, it returns the remainder as an `Err`, so that it will be handled by the next handler in the monadic pipeline.
+While the type signature may seem complex, the behavior is straightforward. Given some partial variants `Input`, this handler attempts to extract a variant with the specified `Tag` using `ExtractField`. If extraction succeeds, it wraps the extracted variant as a tagged field `Field<Tag, Value>` and passes it to the inner `Provider` for processing. If extraction fails, it returns the remainder as an `Err`, allowing the next handler in the monadic pipeline to try.
 
-It is worth noting that we pass a tagged `Field<Tag, Value>` to the inner `Provider`, instead of a bare `Value`, so that the provider is given an option to handle multiple variants with the same `Value` type based on the variant `Tag`. As an example, consider the following enum:
+Note that the inner `Provider` receives a tagged `Field<Tag, Value>` rather than a bare `Value`. This allows the provider to differentiate variants that share the same `Value` type but differ in their variant `Tag`. For example, consider:
 
 ```rust
 pub enum FooBar {
@@ -727,11 +731,11 @@ pub enum FooBar {
 }
 ```
 
-Even though both the `Foo` and `Bar` variants have `u64` as the `Value` type, they will be passed from `ExtractFieldAndHandle` as `Field<symbol!("Foo"), u64>` and `Field<symbol!("Bar"), u64>` to the inner provider. This means that the inner provider may choose to handle the `Foo` and `Bar` variants differently, by matching on the field `Tag`.
+Here, both `Foo` and `Bar` hold `u64` values. `ExtractFieldAndHandle` will pass these as `Field<symbol!("Foo"), u64>` and `Field<symbol!("Bar"), u64>` respectively, so the provider can handle them differently by matching on the `Tag`.
 
 ### `HandleFieldValue`
 
-The tagged `Field` input from `ExtractFieldAndHandle` is useful for cases when there are multiple variants with the same `Value` type. However, in simpler cases such as `Shape`, we often don't care about the variant `Tag` and would like to process the value directly. To simplify the process, we can use the `HandleFieldValue` wrapper to "peel" off the `Field` wrapper from the `Input`, and get the `Value` directly as an input to the inner provider. The `HandleFieldValue` is implemented as follows:
+The tagged `Field` input from `ExtractFieldAndHandle` is useful when multiple variants share the same `Value` type. However, in simpler cases like our `Shape` example, we often just want to handle the contained value directly, ignoring the tag. The `HandleFieldValue` wrapper simplifies this by “peeling off” the `Field` wrapper and passing only the inner value to the inner provider:
 
 ```rust
 #[cgp_provider]
@@ -752,11 +756,11 @@ where
 }
 ```
 
-As we can see, `HandleFieldValue` simply works with any input type in the form `Field<Tag, Input>`, unwrap the input value from `Field`, and then pass it to the inner provider.
+As shown, `HandleFieldValue` simply unwraps the input from `Field<Tag, Input>` and forwards the contained `Input` value to the inner provider.
 
 ### Revisiting `ComputeShapeArea`
 
-Now that we have understood how `ExtractFieldAndHandle` and `HandleFieldValue` are implemented, let's walk through again what really happens when we use `MatchWithHandlers` in `ComputeShapeArea`:
+Now that we've understood `ExtractFieldAndHandle` and `HandleFieldValue`, let’s review what happens inside `ComputeShapeArea`:
 
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers::<
@@ -767,23 +771,22 @@ pub type ComputeShapeArea = MatchWithHandlers::<
 >;
 ```
 
-- `MatchWithHandlers` uses `HasExtractor` to convert `Shape` into `PartialShape<IsPresent, IsPresent>`, and passes it to `ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<CircleArea>>`.
-- `ExtractFieldAndHandle` uses `ExtractField<symbol("Circle")>` to extract the `Circle` variant from `PartialShape<IsPresent, IsPresent>`.
-    - If successful, the value is passed as `Field<symbol("Circle"), Circle>` to `HandleFieldValue<CircleArea>`.
-        - `HandleFieldValue<CircleArea>` extracts the `Circle` value from `Field<symbol("Circle"), Circle>`, and passes it to `CircleArea`.
-    - Otherwise, the remainder `PartialShape<IsVoid, IsPresent>` is returned as error.
-- `ExtractFieldAndHandle` uses `ExtractField<symbol("Rectangle")>` to extract the `Rectangle` variant from `PartialShape<IsVoid, IsPresent>`.
-    - If successful, the value is passed as `Field<symbol("Rectangle"), Rectangle>` to `HandleFieldValue<RectangleArea>`.
-        - `HandleFieldValue<RectangleArea>` extracts the `Circle` value from `Field<symbol("Rectangle"), Rectangle>`, and passes it to `RectangleArea`.
-    - Otherwise, the remainder `PartialShape<IsVoid, IsVoid>` is returned as error.
-- `MatchWithHandlers` uses `FinalizeExtract` on `PartialShape<IsVoid, IsVoid>` to discharge the impossible remainder.
-
+* `MatchWithHandlers` uses `HasExtractor` to convert `Shape` into `PartialShape<IsPresent, IsPresent>`, then passes it to `ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<CircleArea>>`.
+* `ExtractFieldAndHandle` attempts to extract the `Circle` variant from `PartialShape<IsPresent, IsPresent>`:
+  * If successful, the extracted value is passed as `Field<symbol!("Circle"), Circle>` to `HandleFieldValue<CircleArea>`.
+    * `HandleFieldValue<CircleArea>` unwraps the `Circle` value and passes it to `CircleArea`.
+  * Otherwise, the remainder `PartialShape<IsVoid, IsPresent>` is returned as an error.
+* Next, `ExtractFieldAndHandle` tries to extract the `Rectangle` variant from `PartialShape<IsVoid, IsPresent>`:
+  * If successful, the extracted value is passed as `Field<symbol!("Rectangle"), Rectangle>` to `HandleFieldValue<RectangleArea>`.
+    * `HandleFieldValue<RectangleArea>` unwraps the `Rectangle` and passes it to `RectangleArea`.
+  * Otherwise, the remainder `PartialShape<IsVoid, IsVoid>` is returned as an error.
+* Finally, `MatchWithHandlers` calls `FinalizeExtract` on `PartialShape<IsVoid, IsVoid>` to assert that the remainder is empty and discharge the impossible case.
 
 ## Unifying Variant Value Handlers
 
-At this point, we have seen how `MatchWithHandlers` can be used as a low-level construct for implementing extensible visitors. However, `MatchWithHandlers` requires the handler of each variant to be explicitly provided in the list of handlers given to it. We will now look at how higher-level handlers like `MatchWithValueHandlers` can be implemented to automatically derive the list of variant handlers to be passed to `MatchWithHandlers`.
+So far, we have seen how `MatchWithHandlers` can serve as a powerful low-level tool to implement extensible visitors. However, it requires explicitly listing a handler for each variant in the provided handler list. To make this process more ergonomic, we can build higher-level abstractions like `MatchWithValueHandlers`, which automatically derives the list of variant handlers passed to `MatchWithHandlers`.
 
-But before we can implement `MatchWithValueHandlers`, we first need to slightly modify the variant handler for all entries in `MatchWithHandlers`, such that the same handler is used for all variants:
+Before implementing `MatchWithValueHandlers`, we first need to unify the variant handlers used in `MatchWithHandlers`. Instead of specifying separate handlers for each variant, we modify the variant handlers so that the same handler is used for all variants. For example:
 
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers<
@@ -794,9 +797,9 @@ pub type ComputeShapeArea = MatchWithHandlers<
 >;
 ```
 
-In the updated definition, we use `ComputeArea` instead of `CircleArea` and `RectangleArea` to compute the area for *both* `Circle` and `Rectangle`. By doing so, we can see that `ComputeShapeArea` now has a unified pattern of `ExtractFieldAndHandle<Tag, HandleFieldValue<ComputeArea>>` for each of its entry. And we can now build further abstraction to simplify the repeating patterns.
+Here, rather than using distinct `CircleArea` and `RectangleArea` handlers, we use a single handler, `ComputeArea`, for both variants. This creates a unified pattern of `ExtractFieldAndHandle<Tag, HandleFieldValue<ComputeArea>>` for each entry. Recognizing this repetition allows us to build further abstractions that simplify these common patterns.
 
-But before we do that, let's look at how `ComputeArea` can be implemented. For the case of `Shape`, as well of for many use cases of extensible variants, we can just define a regular Rust trait for computing the area of each shape variant:
+To understand this better, let's explore how `ComputeArea` itself can be implemented. For many extensible variants such as `Shape`, a straightforward approach is to define a regular Rust trait that computes the area for each variant:
 
 ```rust
 pub trait HasArea {
@@ -816,9 +819,9 @@ impl HasArea for Rectangle {
 }
 ```
 
-The definition and implementation of `HasArea` is pretty straightforward, with it providing an `area` method to compute the area for each shape variant. Crucially, we do *not* manually implement `HasArea` for `Shape`, as the point of extensible variants is to allow us to skip the boilerplate required to manually call the `area` method for each of the variant in `Shape`.
+This `HasArea` trait is simple and intuitive. Each variant implements the `area` method in the usual Rust way. Notice that we do not hand-implement `HasArea` for the overall `Shape` type, we will do this later on, by using `MatchWithValueHandlers` to help us perform the dispatching.
 
-Although `HasArea` is a vanilla Rust trait, we can pretty easily implement a `Computer` provider for it as follows:
+Although `HasArea` is a plain Rust trait, it is easy to wrap it as a `Computer` provider using the `#[cgp_computer]` macro:
 
 ```rust
 #[cgp_computer]
@@ -827,11 +830,11 @@ fn compute_area<T: HasArea>(shape: T) -> f64 {
 }
 ```
 
-Here, we use `#[cgp_computer]` on a `compute_area` function that is generic over any type that implements `HasArea`, and the implementation simply calls the `area` method. With this wrapper function, we now also have `ComputeArea` generated, which can be used in `ComputeShapeArea`.
+This generic function works for any type implementing `HasArea` and simply calls the `area` method. Applying `#[cgp_computer]` here generates the `ComputeArea` provider type that can then be used within `ComputeShapeArea`.
 
 ### `ToFieldsHandler`
 
-To simplify the implementation of `ComputeShapeArea`, we first need to figure a way to automatically generate the extractors given to `MatchWithHandlers`, which is:
+To simplify `ComputeShapeArea` further, we need a way to automatically generate the list of extractors passed to `MatchWithHandlers`. Concretely, we want to generate this:
 
 ```rust
 Product![
@@ -840,7 +843,7 @@ Product![
 ]
 ```
 
-Recall that `Shape` also implements [`HasFields`](#hasfields-implementation), which is in the form:
+Recall that `Shape` implements the `HasFields` trait, which exposes its variants as a type-level sum:
 
 ```rust
 Sum![
@@ -849,7 +852,7 @@ Sum![
 ]
 ```
 
-This means that all we have to do is to extract the tags from `Shape::Fields`, and replace each entry with `ExtractFieldAndHandle`. We can perform this transformation at the type level, by using a helper trait `ToFieldHandlers` that is defined as follows:
+This means we can programmatically extract the tags from `Shape::Fields` and replace each variant with an `ExtractFieldAndHandle` wrapper. We can perform this transformation entirely at the type level using a helper trait, `ToFieldHandlers`, defined as:
 
 ```rust
 pub trait ToFieldHandlers<Provider> {
@@ -869,9 +872,9 @@ impl<Provider> ToFieldHandlers<Provider> for Void {
 }
 ```
 
-At a high level, `ToFieldHandlers` works by iterating through each entry in a type-level sum, replace each entry that is in the shape `Field<Tag, Value>` with `ExtractFieldAndHandle<Tag, Provider>`, and convert the result to a type-level list.
+In essence, `ToFieldHandlers` recursively walks through each entry in a type-level sum, replacing `Field<Tag, Value>` with `ExtractFieldAndHandle<Tag, Provider>`, and converts the entire structure into a type-level list.
 
-Using `ToFieldHandlers`, we can now generate the arguments to `MatchWithHandlers` as something like follows:
+Using `ToFieldHandlers`, we can now write the `ComputeShapeArea` type as:
 
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers<
@@ -881,11 +884,11 @@ pub type ComputeShapeArea = MatchWithHandlers<
 >;
 ```
 
-Although this version of `ComputeShapeArea` may look confusing, we won't be writing something like this in practice. Instead, the example definition is to demonstrate the transformation that is happening behind the scene to automatically generate the list of variant handlers from `Shape` to be given to `MatchWithHandlers`.
+This definition may look complex at first glance. However, it demonstrates the powerful behind-the-scenes transformation that automatically generates the list of variant handlers from `Shape` to be passed to `MatchWithHandlers`.
 
 ### `HasFieldHandlers`
 
-Using `ToFieldHandlers`, there is a two-step process to generate the variant handlers from `Shape` - first, we need to get `Shape`'s fields from `HasFields`, and then we need to apply `ToFieldHandlers` to the `Fields` type. We can further simplify the use through another helper trait called `HasFieldHandlers`, which is defined as follows:
+The process to generate variant handlers from `Shape` involves two steps: obtaining `Shape`’s fields from `HasFields`, and then applying `ToFieldHandlers` to those fields. To streamline this, we define another helper trait, `HasFieldHandlers`, that combines these steps:
 
 ```rust
 pub trait HasFieldHandlers<Provider> {
@@ -901,7 +904,7 @@ where
 }
 ```
 
-Essentially, `HasFieldHandlers` combines both the constraints for `HasFields` and `ToFieldHandlers`, so that we can use it as one non-nested constraint definition:
+`HasFieldHandlers` unifies the requirements of `HasFields` and `ToFieldHandlers` into a single, convenient trait. This lets us simplify the definition of `ComputeShapeArea` even further:
 
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers<
@@ -909,17 +912,16 @@ pub type ComputeShapeArea = MatchWithHandlers<
 >;
 ```
 
-Using `HasFieldHandlers`, the definition of `ComputeShapeArea` becomes significantly simplified. We just need to use `HasFieldHandlers` to generate the variant handlers for `Shape`, and then pass that to `MatchWithHandlers`.
+With `HasFieldHandlers`, the definition of `ComputeShapeArea` becomes much more concise. Instead of manually combining `HasFields` and `ToFieldHandlers`, we simply rely on `HasFieldHandlers` to generate them from `Shape` and pass the result to `MatchWithHandlers`.
 
-In fact, if we look at the definition more carefully, we can apply the same pattern to be used on any `Input` type other than `Shape`, and any `Computer` provider other than `ComputeArea`.
-
+More importantly, this pattern is entirely general: it can be applied to any input type that implements `HasFields`, not just `Shape`, and to any `Computer` provider, not just `ComputeArea`.
 
 ## `MatchWithValueHandlers`
 
 The traits `HasFieldHandlers` and `ToFieldHandlers` serve as the helpers for us to perform *type-level metaprogramming* for us to implement high-level visitor dispatchers such as `MatchWithValueHandlers`, which is defined as follows:
 
 ```rust
-pub type MatchWithValueHandlers<Provider = UseContext> =
+pub type MatchWithValueHandlers<Provider> =
     UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<Provider>>>;
 
 delegate_components! {
@@ -930,39 +932,37 @@ delegate_components! {
 }
 ```
 
-The way we implement `MatchWithValueHandlers` is similar to how we implemented the builder dispatchers using [type-level metaprogramming in part 3](/blog/extensible-datatypes-part-3/#type-level-cgp-metaprogramming). The way it works is as follows: first, `MatchWithValueHandlers` is parameterized by a `Provider` that is expected to implement `Computer`, such as `ComputeArea`. The `Provider` parameter has a default `UseContext` value, which uses `CanCompute` from the context to perform the computation if no explicit `Computer` is provided.
+The design of `MatchWithValueHandlers` is similar to how we implemented the builder dispatchers using [type-level metaprogramming in part 3](/blog/extensible-datatypes-part-3/#type-level-cgp-metaprogramming). In this case, `MatchWithValueHandlers` is parameterized by a `Provider` that is expected to implement `Computer`, such as `ComputeArea`. The implementation of `MatchWithValueHandlers` is simply a type alias to use `UseInputDelegate` to dispatch the `Input` type given through `Computer` to `MatchWithFieldHandlersInputs`.
 
-The implementation of `MatchWithValueHandlers` is simply a type alias to use `UseInputDelegate` to dispatch the `Input` type given in `Computer` to `MatchWithFieldHandlersInputs`, which contains a *generic* type-level map from `Input` to `MatchWithHandlers`.
-
-The implementation of `MatchWithFieldHandlersInputs` is defined through `delegate_components!`, with it having a generic entry for any `Input` that implements `HasFieldHandlers<Provider>`. It then simply delegates the provider for that input to `MatchWithHandlers<Input::Handlers>`.
+The implementation of `MatchWithFieldHandlersInputs` is defined through `delegate_components!`, with it having a generic mapping for any `Input` that implements `HasFieldHandlers<Provider>`. It then simply delegates the provider for that input to `MatchWithHandlers<Input::Handlers>`.
 
 ### Example Instantiation of `MatchWithValueHandlers`
 
-Due to the advanced use of type-level metaprogramming, it may be challenging to understand how `MatchWithValueHandlers` and `MatchWithFieldHandlersInputs` works, especially when you read it for the first time. We will try to ease the understanding by looking at how this is used with `Shape`. First, the `ComputeShapeArea` definition can now be simplified to:
+Because `MatchWithValueHandlers` and `MatchWithFieldHandlersInputs` rely on type-level metaprogramming, it can be difficult to grasp exactly how they work on first encounter. To make things more concrete, let’s walk through how this abstraction is applied to `Shape`. With the machinery we’ve built, the definition of `ComputeShapeArea` becomes as simple as:
 
 ```rust
 pub type ComputeShapeArea = MatchWithValueHandlers<ComputeArea>;
 ```
 
-As we can see, `ComputeShapeArea` becomes simply a use of `MatchWithValueHandlers` with `ComputeArea`. The definition does not even include any reference of `Shape`, because it can now work with *any* compatible input type, including `Shape` and `ShapePlus`.
+This version of `ComputeShapeArea` is remarkably concise. It no longer mentions `Shape` directly, because it works with *any* compatible input type, including both `Shape` and extensions like `ShapePlus`.
 
-Behind the scene, the implementation of `ComputeShapeArea` is now redirected to `MatchWithHandlers` with the following steps:
+Under the hood, this type alias resolves to `MatchWithHandlers` through the following steps:
 
-- The type alias `MatchWithValueHandlers<ComputeArea>` is expanded to `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>`.
-- When the `Input` type is `Shape`, `UseInputDeleate` looks up the `DelegateComponent` entry for `Shape` in `MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>`.
-- `MatchWithFieldHandlersInputs` contains an entry for `Shape`, given that `Shape` implements `HasFieldHandlers<HandleFieldValue<ComputeArea>>`.
-- As demonstrated earlier, the `HasFieldHandlers` implementation for `Shape` expands to:
-    ```rust
-    Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
-    ]
-    ```
-- This expanded type is now passed to `MatchWithHandlers`, which implements the visitor dispatch as we have walked through in earlier sections.
+* `MatchWithValueHandlers<ComputeArea>` expands to `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>`.
+* When the `Input` is `Shape`, `UseInputDelegate` locates the corresponding `DelegateComponent` mapping for `Shape` in `MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>`.
+* That mapping exists because `Shape` implements `HasFieldHandlers<HandleFieldValue<ComputeArea>>`.
+* As we saw earlier, this expands to:
+  ```rust
+  Product![
+      ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
+      ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
+  ]
+  ```
+* This type-level list is then passed to `MatchWithHandlers`, which performs the variant dispatch using the logic we’ve already explored.
 
 ## Implementing `HasArea` for `Shape`
 
-Using `MatchWithValueHandlers`, it becomes trivial to implement `HasArea` for `Shape` as follows:
+With `MatchWithValueHandlers`, implementing the `HasArea` trait for `Shape` becomes straightforward:
 
 ```rust
 impl HasArea for Shape {
@@ -972,9 +972,9 @@ impl HasArea for Shape {
 }
 ```
 
-Just as with the earlier example, since `ComputeArea` is generic over any `Context` and `Code` type, we use `()` for both the arguments in `compute`. Aside from the boilerplate, the provider `MatchWithValueHandlers<ComputeArea>` performs the automatic variant dispatching of `ComputeArea` through `MatchWithHandlers`.
+As in earlier examples, we use `()` for both the context and code parameters, since `ComputeArea` is generic over any `Context` and `Code`. Aside from this boilerplate, `MatchWithValueHandlers<ComputeArea>` takes care of automatically dispatching to the correct variant handler through `MatchWithHandlers`.
 
-Even though `Shape` only has two variant, a key strength of dispatchers like `MatchWithValueHandlers` is that it would scale to enums with arbitrary number of variants, with any kind of variant computation. For example, we can as easily implement `HasArea` for `ShapePlus` as follows:
+While `Shape` only has two variants, one of the major advantages of `MatchWithValueHandlers` is that it scales effortlessly to enums with many variants and more complex computations. For example, implementing `HasArea` for `ShapePlus` is just as simple:
 
 ```rust
 impl HasArea for ShapePlus {
@@ -984,6 +984,6 @@ impl HasArea for ShapePlus {
 }
 ```
 
-Although there are still a bit of boilerplate remains, the implementation is much simpler than having to manually match and dispatch the variants by hand, and more reliable than performing the same operation using macros. It is also possible that CGP will offer more ergonomic abstractions on the final usage, so that simple use cases like the implementation of `HasArea` can be further streamlined and simplified.
+Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic layers on top of this pattern, making common use cases like `HasArea` even easier to express.
 
 # Conclusion
