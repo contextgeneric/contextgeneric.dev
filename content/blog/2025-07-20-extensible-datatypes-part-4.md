@@ -1124,6 +1124,86 @@ We can reuse traits like `ExtractField` because the associated types such as `Va
 
 ## `PromoteRef`
 
+Just as we can make traits like `ExtractField` to work with borrowed fields, we can also make `Computer` works with borrowed inputs. In fact, the `#[cgp_computer]` macro expansion of the `compute_area_ref` function result in the following `Computer` implementation:
 
+```rust
+impl<Context, Code, T: HasAreaRef> Computer<Context, Code, &T> for ComputeAreaRef {
+    type Output = f64;
+
+    fn compute(_context: &Context, _code: PhantomData<Code>, shape: &T) -> f64 {
+        compute_area_ref(shape)
+    }
+}
+```
+
+As we can see, in the `Computer` implementation for `ComputeAreaRef`, our implementation works with any reference `&T` instead of owned `T` as the input type, given that `T` implements `HasAreaRef`.
+
+This shows that technically, the `Computer` trait alone is sufficient to support all kinds of inputs, including borrowed inputs. However, to improve developer ergonomics, CGP also provides the `ComputerRef` trait so that the user don't need to worry about specifying `&T` in the input type parameter. Furthermore, `ComputerRef` can save us from using higher-ranked trait bounds inside where clauses and input-based delegation. As a result, it is much better suited when we want to work with borrowed inputs.
+
+CGP also provides a `PromoteRef` adapter, to convert a `Computer` provider to/from a `ComputerRef` provider. For example, the `ComputerRef` implementation for `ComputeAreaRef` is simply defined as:
+
+```rust
+delegate_components! {
+    ComputeAreaRef {
+        ComputerRefComponent: PromoteRef<Self>,
+    }
+}
+```
+
+What this means is that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`. Behind the scene, `PromoteRef` is implemented as follows:
+
+```rust
+#[cgp_provider]
+impl<Context, Code, Input, Provider, Output> ComputerRef<Context, Code, Input>
+    for PromoteRef<Provider>
+where
+    Provider: for<'a> Computer<Context, Code, &'a Input, Output = Output>,
+{
+    type Output = Output;
+
+    fn compute_ref(context: &Context, tag: PhantomData<Code>, input: &Input) -> Self::Output {
+        Provider::compute(context, tag, input)
+    }
+}
+```
+
+In the implementation above, we can see that `PromoteRef` implements `ComputerRef` for a `Provider`, if the provider has a higher-ranked trait bound `for<'a>` that implements `Computer` for all `&'a Input` reference. Through `PromoteRef`, this higher-ranked trait bound is hidden away so that the end users don't need to be aware of their existence.
+
+`PromoteRef` also implements `Computer` by wrapping a `Provider` that implements `ComputerRef`, shown as follows:
+
+```rust
+#[cgp_provider]
+impl<Context, Code, Input, Provider> Computer<Context, Code, &Input> for PromoteRef<Provider>
+where
+    Provider: ComputerRef<Context, Code, Input>,
+{
+    type Output = Provider::Output;
+
+    fn compute(context: &Context, tag: PhantomData<Code>, input: &Input) -> Self::Output {
+        Provider::compute_ref(context, tag, input)
+    }
+}
+```
+
+Here, `PromoteRef` implements `Computer` that works with any `&Input` reference, provided that the inner `Provider` implements `ComputerRef` for `Input`.
+
+With both implementations in place, `PromoteRef` offers bidirectional transformation between `Computer` and `ComputerRef`. This allows us to easily convert the computer providers, depending on which form of interface we want to use.
+
+## `MatchWithValueHandlersRef`
+
+To support reference-based dispatching, aside from the few reference-specific constructs that we have introduced earlier, the remaining implementation of `MatchWithValueHandlersRef` is remarkably almost as simple as the original implementation of `MatchWithValueHandlers`:
+
+```rust
+pub type MatchWithValueHandlersRef<Provider> =
+    UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<PromoteRef<Provider>>>>;
+
+delegate_components! {
+    <Input: HasFieldHandlers<Provider>, Provider>
+    new MatchWithFieldHandlersInputsRef<Provider> {
+        Input:
+            PromoteRef<MatchWithHandlersRef<Input::Handlers>>
+    }
+}
+```
 
 # Conclusion
