@@ -1030,6 +1030,76 @@ impl HasArea for ShapePlus {
 
 Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic layers on top of this pattern, making common use cases like `HasArea` even easier to express.
 
+## Dispatch to Context
+
+In the earlier definition of `MatchWithValueHandlers`, we omitted a minor detail which is that it has a *default parameter* for `Provider`:
+
+```rust
+pub type MatchWithValueHandlers<Provider = UseContext> =
+    UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<Provider>>>;
+```
+
+When no generic parameter is specified, `MatchWithValueHandlers` will by default use `UseContext` as the provider for `Computer`. If you have read earlier blog posts, you might recall that `UseContext` is a generic provider that implements the provider trait by using the consumer trait implementation from the context. For instance, the `UseContext` implementation for `Computer` is as follows:
+
+```rust
+#[cgp_provider]
+impl<Context, Code, Input> Computer<Context, Code, Input> for UseContext
+where
+    Context: CanCompute<Code, Input>,
+{
+    type Output = Context::Output;
+
+    fn compute(context: &Context, code: PhantomData<Code>, input: Input) -> Self::Output {
+        context.compute(code, input)
+    }
+}
+```
+
+It is useful to use `UseContext` as the provider for visitor dispatchers like `MatchWithValueHandlers`, as we can let the concrete context decide on how to handle each variant differently. With it, we can for example implement an `App` context that implements `Computer` for `Shape` and `ShapePlus` as follows:
+
+```rust
+#[cgp_context]
+pub struct App;
+
+delegate_components! {
+    AppComponents {
+        ComputerComponent: UseInputDelegate<new AreaComputers {
+            [
+                Circle,
+                Rectangle,
+                Triangle,
+            ]:
+                ComputeArea,
+            [
+                Shape,
+                ShapePlus,
+            ]: MatchWithValueHandlers,
+        }>
+    }
+}
+```
+
+In our example `App` implementation, we implement `Computer` through `UseInputDelegate`, with the variants `Circle`, `Rectangle`, and `Triangle` being handled by `ComputeArea`. As for `Shape` and `ShapePlus`, we use `MatchWithValueHandlers` without specifying any `Provider` parameter, and thus defaulting it to `UseContext`.
+
+With this configuration, when `MatchWithValueHandlers` attempts to dispatch the handling of each variant, it will try to do that via `App` instead of directly calling `ComputeArea`. This indirection allows us to customize the handling of each variant much more easily. For example, suppose that we have an optimized way of computing the area of `Circle` with less multiplication, we can easily switch to that implementation by updating the wiring in `AppComponents`.
+
+```rust
+delegate_components! {
+    AppComponents {
+        ComputerComponent: UseInputDelegate<new AreaComputers {
+            Circle: OptimizedCircleArea,
+            ...
+        }>
+    }
+}
+```
+
+This kind of customization is much harder to achieve, if we tightly couple the dispatcher with non-CGP traits such as `HasArea`, such as in `MatchWithValueHandlers<ComputeArea>`. In this case, the only way to customize the implementation is to directly modify the `HasArea` implementation of `Circle`, which would require ownership to either the `Circle` type or the `HasArea` trait.
+
+Granted, this level of modularity is probably not needed for this simple example of calculating the area of a shape. But as we have seen in the examples in [part 2](/blog/extensible-datatypes-part-2), this is essential for more complex use cases such as building modular interpreters.
+
+On the other hand, by proxying the handling of variant through `UseContext`, we are able to override the parameter to `MatchWithValueHandlers`, so that we can use a custom provider with it, such as with `ComputeArea`. In other words, this optional parameter allows us to *both* delegate the variant handling to the context, and also to custom providers when we don't want to go through the context. This flexibility allows us to also use `MatchWithValueHandlers` without any additional wiring to the context, such as when we use `()` as the context with `MatchWithValueHandlers<ComputeArea>`.
+
 ---
 
 # Visitor Dispatcher by Reference
