@@ -19,6 +19,8 @@ This duality is not just theoretical — it has practical implications for softw
 
 With this in mind, we’ll now explore the CGP constructs that support extensible variants. As you go through the examples and implementation details, we encourage you to look for the parallels and contrasts with extensible records.
 
+---
+
 # Base Implementation
 
 ## `FromVariant` Trait
@@ -287,6 +289,58 @@ Here, we use an empty `match` expression on `self`, which works because the comp
 
 By leveraging the `Void` type in this way, CGP allows us to exhaustively extract every variant from a partial enum and confidently conclude that no cases remain. This eliminates the need for runtime assertions, unreachable branches, or panics. Instead, the type system itself guarantees that all variants have been handled, enabling a clean and fully type-safe approach to enum decomposition.
 
+### `FinalizeExtractResult` Trait
+
+When we have a result type in the form `Result<Output, Remainder>`, with the `Remainder` being inhabitable, it would be convenient if we have a helper method for us to directly take the `Output` out from the `Result`. To do this, we define the `FinalizeExtractResult` helper trait, which is defined with a blanket implementation as follows:
+
+```rust
+pub trait FinalizeExtractResult {
+    type Output;
+
+    fn finalize_extract_result(self) -> Self::Output;
+}
+
+impl<T, E> FinalizeExtractResult for Result<T, E>
+where
+    E: FinalizeExtract,
+{
+    type Output = T;
+
+    fn finalize_extract_result(self) -> T {
+        match self {
+            Ok(value) => value,
+            Err(remainder) => remainder.finalize_extract(),
+        }
+    }
+}
+```
+
+With `FinalizeExtractResult`, we can call `result.finalize_extract_result()` to get the output, if the remainder implements `FinalizeExtract`. With this, we can for example simplify the implementation of the `compute_area` function earlier to:
+
+```rust
+pub fn compute_area(shape: Shape) -> f64 {
+    match shape
+        .to_extractor()
+        .extract_field(PhantomData::<symbol!("Circle")>)
+    {
+        Ok(circle) => PI * circle.radius * circle.radius,
+        Err(remainder) => {
+            let rectangle = remainder
+                .extract_field(PhantomData::<symbol!("Rectangle")>)
+                .finalize_extract_result();
+
+            rectangle.width * rectangle.height
+        }
+    }
+}
+```
+
+When handling the remainder after the `Circle` variant was extracted, we use `finalize_extract_result` after calling `extract_field` to get the `Rectangle` variant.
+
+This small ergonomic improvement can be useful when we perform generic finalization later on, so that we don't need to manually match and call `finalize_result` on a generic remainder.
+
+---
+
 # Implementation of Casts
 
 With the foundational traits for extensible variants in place, we can now explore how to implement the `CanUpcast` and `CanDowncast` traits. These traits enable safe and generic upcasting and downcasting between enums that share compatible variants.
@@ -355,17 +409,14 @@ where
     Remainder: FinalizeExtract,
 {
     fn upcast(self, _tag: PhantomData<Target>) -> Target {
-        match Context::Fields::extract_from(self.to_extractor()) {
-            Ok(target) => target,
-            Err(remainder) => remainder.finalize_extract(),
-        }
+        Context::Fields::extract_from(self.to_extractor()).finalize_extract_result()
     }
 }
 ```
 
 Here’s how it works. First, the `Context` type (the source enum) must implement both `HasFields` and `HasExtractor`. The `HasFields` trait provides a type-level sum of variants, and `HasExtractor` converts the enum into its corresponding partial variants. Next, the associated `Fields` type must implement the helper trait `FieldsExtractor`, which handles the actual extraction of variants into the target type. The `Remainder` returned by this operation must then implement `FinalizeExtract`, which guarantees that all source variants have been accounted for.
 
-In the method body, we begin by calling `self.to_extractor()` to convert the source enum into a value with partial variants. We then use `Fields::extract_from` to extract the relevant variants into the target enum. Finally, we call `finalize_extract()` on the remainder.
+In the method body, we begin by calling `self.to_extractor()` to convert the source enum into a value with partial variants. We then use `Fields::extract_from` to extract the relevant variants into the target enum. Finally, we call `finalize_extract_result()` to discharge the remainder in `Err`, and return the `Target` result in `Ok`.
 
 ## `FieldsExtractor` Trait
 
@@ -563,22 +614,15 @@ where
 {
     type Output = Output;
 
-    fn compute(_context: &Context, code: PhantomData<Code>, input: Input) -> Output {
-        let res = DispatchMatchers::compute(_context, code, input.to_extractor());
-
-        match res {
-            Ok(output) => output,
-            Err(remainder) => remainder.finalize_extract(),
-        }
+    fn compute(context: &Context, code: PhantomData<Code>, input: Input) -> Output {
+        DispatchMatchers::compute(context, code, input.to_extractor()).finalize_extract_result()
     }
 }
 ```
 
 The `MatchWithHandlers` provider is parameterized by a `Handlers` type, which represents a type-level list of visitor handlers responsible for processing the variants of a generic `Input` enum. The implementation requires `Input` to implement the `HasExtractor` trait, which provides access to its partial variants.
 
-Within the `compute` method, we first convert the input into its extractor form using `input.to_extractor()`. This partial variant is then passed to the lower-level dispatcher `DispatchMatchers<Handlers>`, which attempts to match and handle each variant. It returns a `Result<Output, Remainder>`, where a successful match produces an `Output`, and an unmatched remainder is returned otherwise.
-
-If the result is `Ok`, the output is returned directly. If the result is `Err`, we call `finalize_extract()` on the remainder to assert that it is uninhabited, ensuring that all variants have been exhaustively handled. This makes the case both safe and unreachable, as guaranteed by the type system.
+Within the `compute` method, we first convert the input into its extractor form using `input.to_extractor()`. This partial variant is then passed to the lower-level dispatcher `DispatchMatchers<Handlers>`, which attempts to match and handle each variant. It returns a `Result<Output, Remainder>`, where a successful match produces an `Output`, and an unmatched remainder is returned otherwise. But since `Remainder` is expected to implement `FinalizeExtract`, we can call `finalize_extract_result()` to return the `Output` directly.
 
 ### `DispatchMatchers`
 
@@ -1121,6 +1165,32 @@ impl<'a, F1: MapType> ExtractField<symbol!("Circle")> for PartialRefShape<'a, Is
 ```
 
 We can reuse traits like `ExtractField` because the associated types such as `Value` do not need to be the owned values themselves — they can be references to those values instead. This lets us treat extensible variants as if they contain references to their fields, allowing us to manipulate them just like owned values.
+
+## `MatchWithHandlersRef`
+
+Since reference-based dispatching requires the use of `HasExtractorRef`, we also need to implement variations of downstream handlers like `MatchWithHandlers` to use `HasExtractorRef` instead of `HasExtractor`. This is implemented as `MatchWithHandlersRef` as follows:
+
+```rust
+#[cgp_provider]
+impl<'a, Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, &'a Input>
+    for MatchWithHandlersRef<Handlers>
+where
+    Input: HasExtractorRef,
+    DispatchMatchers<Handlers>:
+        Computer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
+    Remainder: FinalizeExtract,
+{
+    type Output = Output;
+
+    fn compute(context: &Context, code: PhantomData<Code>, input: &'a Input) -> Output {
+        DispatchMatchers::compute(context, code, input.extractor_ref()).finalize_extract_result()
+    }
+}
+```
+
+`MatchWithHandlersRef` implements `Computer` with a reference `&'a Input`. To perform the extraction, it requires `Input` to implement `HasExtractorRef`. It then pass `Input::ExtractorRef<'a>` as the input to `DispatchMatchers`, which performs the same monadic pipeline computation as before. Finally, we expect the `Remainder` returned to implement `FinalizeExtract`, and use `finalize_extract_result` to extract the `Output`.
+
+It is worth noticing that despite working with references, `MatchWithHandlersRef` implements `Computer` and not `ComputerRef`. Similarly, when `DispatchMatchers` is used, the monadic pipeline also expects each handler to implement `Computer` and not `ComputerRef`. This means that in order to work with reference-based visitor dispatching, we need to first "convert" all providers that implement `ComputerRef`, turn them into providers that implement `Computer`, and finally "convert" `MatchWithHandlersRef` back to implementing `ComputerRef`.
 
 ## `PromoteRef`
 
