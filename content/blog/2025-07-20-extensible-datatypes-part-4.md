@@ -1222,7 +1222,7 @@ delegate_components! {
 
 What this means is that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`.
 
-### Promotion from `ComputerRef` to `Computer`
+### Promotion from `Computer` to `ComputerRef`
 
 Behind the scene, `PromoteRef` is implemented as follows:
 
@@ -1247,7 +1247,7 @@ It is worth noticing that `PromoteRef` also requires the inner `Computer` provid
 
 This restriction follows from the design of `ComputerRef`, which has a singular `Output` type that is independent of the lifetime of the input reference in the `compute_ref` method. In some sense, this means that `ComputerRef` is more restrictive and cannot represent all computations that could be implemented through `Computer`. Nevertheless, in case if the user really needs to return `Output` that depends on the input lifetime, they can always revert to using `Computer` directly for such use cases.
 
-### Promotion from `Computer` to `ComputerRef`
+### Promotion from `ComputerRef` to `Computer`
 
 `PromoteRef` also implements `Computer` by wrapping a `Provider` that implements `ComputerRef`, shown as follows:
 
@@ -1285,5 +1285,51 @@ delegate_components! {
     }
 }
 ```
+
+If we compare the definition with `MatchWithValueHandlers`, we could notice that the main difference is that `MatchWithFieldHandlersInputsRef` is used, in addition to some wrapping and unwrapping using `PromoteRef`.
+
+### Example use of `MatchWithValueHandlersRef`
+
+To understand what is really happening, let's try to trace the computation flow of what happens when we call `MatchWithValueHandlersRef<ComputeAreaRef>` on `Shape`:
+
+```rust
+impl HasAreaRef for Shape {
+    fn area(&self) -> f64 {
+        MatchWithValueHandlersRef::<ComputeAreaRef>::compute_ref(&(), PhantomData::<()>, self)
+    }
+}
+```
+
+- The `Provider` argument to `MatchWithHandlers` is `ComputeAreaRef`. This is expanded into `HandleFieldValue<PromoteRef<ComputeAreaRef>>` when passed to `MatchWithFieldHandlersInputsRef`.
+- `UseInputDelegate` is expected to implement `ComputerRef` with `Input` being `Shape`, which is dispatched to `MatchWithFieldHandlersInputsRef`.
+- `MatchWithFieldHandlersInputsRef` is called with `Input` being `Shape`, and `Provider` being `HandleFieldValue<PromoteRef<ComputeAreaRef>>`.
+- `Shape` is expected to implement `HasFieldHandlers<HandleFieldValue<PromoteRef<ComputeAreaRef>>>`, with `Shape::Handlers` expanding into:
+    ```rust
+    Product![
+        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ]
+    ```
+- The delegate entry maps to `PromoteRef<MatchWithHandlersRef<Input::Handlers>>`, which expands into:
+    ```rust
+    PromoteRef<MatchWithHandlersRef<Product![
+        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ]>
+    ```
+- To implement `ComputerRef`, `PromoteRef<MatchWithHandlersRef<Input::Handlers>>` requires `MatchWithHandlersRef<Input::Handlers>` to implement `Computer`.
+- To implement `Computer`, `MatchWithHandlersRef<Input::Handlers>` requires `HandleFieldValue<PromoteRef<ComputeAreaRef>>` to implement the following constraints:
+    - `Computer<(), (), Field<symbol!("Circle"), &Circle>>`
+    - `Computer<(), (), Field<symbol!("Rectangle"), &Rectangle>>`
+- After unwrapping the field value by `HandleFieldValue`, the inner provider `PromoteRef<ComputeAreaRef>` needs to implement the following constraints:
+    - `Computer<(), (), &Circle>`
+    - `Computer<(), (), &Rectangle>`
+- To implement `Computer`, `PromoteRef` requires `ComputeAreaRef` to implement the following constraints:
+    - `ComputerRef<(), (), Circle>`
+    - `ComputerRef<(), (), Rectangle>`
+
+As we can see, the crucial difference in the implementation of `MatchWithValueHandlersRef` is that we need to know when is the right time to use `Computer` vs `ComputerRef`, and how to use `PromoteRef` at the right place to facilitate the conversion between `Computer` and `ComputerRef`.
+
+If this is still confusing to you, don't worry too much, as the implementation details are mostly shielded away from how it is used. The main takeaway from this exercise that aside from a few reference-specific definitions, most of the work of reference-based extensible visitor shares the same underlying implementation as the ownership-based implementation.
 
 # Conclusion
