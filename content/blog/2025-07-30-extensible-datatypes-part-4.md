@@ -288,10 +288,9 @@ impl FinalizeExtract for PartialShape<IsVoid, IsVoid> {
 Here, we use an empty `match` expression on `self`, which works because the compiler knows that `PartialShape<IsVoid, IsVoid>` has no possible value. Since it is impossible to construct such a value, the match is guaranteed to be unreachable. Rust verifies this at compile time, ensuring both safety and correctness.
 
 By leveraging the `Void` type in this way, CGP allows us to exhaustively extract every variant from a partial enum and confidently conclude that no cases remain. This eliminates the need for runtime assertions, unreachable branches, or panics. Instead, the type system itself guarantees that all variants have been handled, enabling a clean and fully type-safe approach to enum decomposition.
-
 ### `FinalizeExtractResult` Trait
 
-When we have a result type in the form `Result<Output, Remainder>`, with the `Remainder` being inhabitable, it would be convenient if we have a helper method for us to directly take the `Output` out from the `Result`. To do this, we define the `FinalizeExtractResult` helper trait, which is defined with a blanket implementation as follows:
+When working with results of type `Result<Output, Remainder>`, where the `Remainder` type is guaranteed to be inhabitable, it is often useful to have a convenient way to directly extract the `Output` value. To achieve this, CGP defines the `FinalizeExtractResult` trait, which provides a helper method to finalize and unwrap such results. Its definition includes a blanket implementation for all `Result` types where the error type implements `FinalizeExtract`:
 
 ```rust
 pub trait FinalizeExtractResult {
@@ -315,7 +314,7 @@ where
 }
 ```
 
-With `FinalizeExtractResult`, we can call `result.finalize_extract_result()` to get the output, if the remainder implements `FinalizeExtract`. With this, we can for example simplify the implementation of the `compute_area` function earlier to:
+With `FinalizeExtractResult`, any result value can call `finalize_extract_result()` to obtain the `Output` directly, as long as the remainder type implements `FinalizeExtract`. This allows functions that work with extractable variants to become simpler and more readable. For example, the implementation of `compute_area` can be written as:
 
 ```rust
 pub fn compute_area(shape: Shape) -> f64 {
@@ -335,9 +334,9 @@ pub fn compute_area(shape: Shape) -> f64 {
 }
 ```
 
-When handling the remainder after the `Circle` variant was extracted, we use `finalize_extract_result` after calling `extract_field` to get the `Rectangle` variant.
+When handling the remainder after the `Circle` variant was extracted, we use `finalize_extract_result` after calling `remainder.extract_field()` to get the `Rectangle` variant.
 
-This small ergonomic improvement can be useful when we perform generic finalization later on, so that we don't need to manually match and call `finalize_result` on a generic remainder.
+This trait provides a small but valuable ergonomic improvement, especially when performing generic extractions and finalizations. It allows developers to avoid repetitive pattern matching and ensures that the final output can be obtained with a single, clear method call.
 
 ---
 
@@ -1030,16 +1029,16 @@ impl HasArea for ShapePlus {
 
 Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic layers on top of this pattern, making common use cases like `HasArea` even easier to express.
 
-## Dispatch to Context
+## Dispatching to Context
 
-In the earlier definition of `MatchWithValueHandlers`, we omitted a minor detail which is that it has a *default parameter* for `Provider`:
+In the earlier definition of `MatchWithValueHandlers`, we omitted one detail that it has a default type parameter for `Provider`:
 
 ```rust
 pub type MatchWithValueHandlers<Provider = UseContext> =
     UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<Provider>>>;
 ```
 
-When no generic parameter is specified, `MatchWithValueHandlers` will by default use `UseContext` as the provider for `Computer`. If you have read earlier blog posts, you might recall that `UseContext` is a generic provider that implements the provider trait by using the consumer trait implementation from the context. For instance, the `UseContext` implementation for `Computer` is as follows:
+This means that if no generic parameter is specified, `MatchWithValueHandlers` will default to using `UseContext` as the provider for `Computer`. If you’ve read the earlier blog posts, you may recall that `UseContext` is a generic provider that delegates its behavior to the consumer trait implementation from the given context. For example, the implementation of `Computer` for `UseContext` looks like this:
 
 ```rust
 #[cgp_provider]
@@ -1055,7 +1054,7 @@ where
 }
 ```
 
-It is useful to use `UseContext` as the provider for visitor dispatchers like `MatchWithValueHandlers`, as we can let the concrete context decide on how to handle each variant differently. With it, we can for example implement an `App` context that implements `Computer` for `Shape` and `ShapePlus` as follows:
+Using `UseContext` as the provider for dispatchers like `MatchWithValueHandlers` is especially useful because it enables the concrete context to define how each variant should be handled. For example, we can implement an `App` context that provides `Computer` implementations for various shapes like `Shape` and `ShapePlus`:
 
 ```rust
 #[cgp_context]
@@ -1079,9 +1078,9 @@ delegate_components! {
 }
 ```
 
-In our example `App` implementation, we implement `Computer` through `UseInputDelegate`, with the variants `Circle`, `Rectangle`, and `Triangle` being handled by `ComputeArea`. As for `Shape` and `ShapePlus`, we use `MatchWithValueHandlers` without specifying any `Provider` parameter, and thus defaulting it to `UseContext`.
+In this example, the `App` context uses `UseInputDelegate` to define how to compute areas. Variants like `Circle`, `Rectangle`, and `Triangle` are directly handled by `ComputeArea`. For `Shape` and `ShapePlus`, we use `MatchWithValueHandlers` without specifying a `Provider`, which means it defaults to `UseContext`.
 
-With this configuration, when `MatchWithValueHandlers` attempts to dispatch the handling of each variant, it will try to do that via `App` instead of directly calling `ComputeArea`. This indirection allows us to customize the handling of each variant much more easily. For example, suppose that we have an optimized way of computing the area of `Circle` with less multiplication, we can easily switch to that implementation by updating the wiring in `AppComponents`.
+With this setup, when `MatchWithValueHandlers` dispatches to the individual variants, it delegates to `App` itself instead of calling `ComputeArea` directly. This allows us to override the behavior of individual variants easily. For instance, if we want to replace the implementation for `Circle` with an optimized version, we can simply change the wiring in `AppComponents`:
 
 ```rust
 delegate_components! {
@@ -1094,11 +1093,15 @@ delegate_components! {
 }
 ```
 
-This kind of customization is much harder to achieve, if we tightly couple the dispatcher with non-CGP traits such as `HasArea`, such as in `MatchWithValueHandlers<ComputeArea>`. In this case, the only way to customize the implementation is to directly modify the `HasArea` implementation of `Circle`, which would require ownership to either the `Circle` type or the `HasArea` trait.
+### The Flexibility of `UseContext`
 
-Granted, this level of modularity is probably not needed for this simple example of calculating the area of a shape. But as we have seen in the examples in [part 2](/blog/extensible-datatypes-part-2), this is essential for more complex use cases such as building modular interpreters.
+This kind of customization would be much harder to achieve if the dispatcher were tightly coupled to a concrete trait implementation, such as using `MatchWithValueHandlers<ComputeArea>` directly. In that case, the only way to change the behavior would be to modify the `HasArea` implementation for `Circle`, which would require ownership of either the `Circle` type or the `HasArea` trait.
 
-On the other hand, by proxying the handling of variant through `UseContext`, we are able to override the parameter to `MatchWithValueHandlers`, so that we can use a custom provider with it, such as with `ComputeArea`. In other words, this optional parameter allows us to *both* delegate the variant handling to the context, and also to custom providers when we don't want to go through the context. This flexibility allows us to also use `MatchWithValueHandlers` without any additional wiring to the context, such as when we use `()` as the context with `MatchWithValueHandlers<ComputeArea>`.
+While this level of indirection may seem unnecessary for a simple example like computing the area of a shape, it becomes crucial in more complex scenarios, such as the modular interpreter design discussed in [part 2](/blog/extensible-datatypes-part-2).
+
+By routing the variant handling through `UseContext`, we also retain the flexibility to override the provider entirely. That means we can use `MatchWithValueHandlers<ComputeArea>` in cases where we don’t want to go through a `Context` at all, such as using `()` as the context. This optional `Provider` parameter gives us the best of both worlds: we can let the context provide the necessary wiring when needed, or directly specify a concrete provider when that makes more sense.
+
+This pattern of using a provider parameter that defaults to `UseContext` is a recurring design strategy in CGP. It offers a powerful level of control, letting developers customize behavior in a modular and extensible way depending on their use case.
 
 ---
 
@@ -1238,7 +1241,7 @@ We can reuse traits like `ExtractField` because the associated types such as `Va
 
 ## `MatchWithHandlersRef`
 
-Since reference-based dispatching requires the use of `HasExtractorRef`, we also need to implement variations of downstream handlers like `MatchWithHandlers` to use `HasExtractorRef` instead of `HasExtractor`. This is implemented as `MatchWithHandlersRef` as follows:
+Because reference-based dispatching relies on `HasExtractorRef`, we also need to adapt downstream constructs like `MatchWithHandlers` to work with references instead of owned values. This adaptation is provided by `MatchWithHandlersRef`, which uses `HasExtractorRef` in place of `HasExtractor`:
 
 ```rust
 #[cgp_provider]
@@ -1258,13 +1261,15 @@ where
 }
 ```
 
-`MatchWithHandlersRef` implements `Computer` with a reference `&'a Input`. To perform the extraction, it requires `Input` to implement `HasExtractorRef`. It then pass `Input::ExtractorRef<'a>` as the input to `DispatchMatchers`, which performs the same monadic pipeline computation as before. Finally, we expect the `Remainder` returned to implement `FinalizeExtract`, and use `finalize_extract_result` to extract the `Output`.
+In this implementation, `MatchWithHandlersRef` handles `Computer` over a borrowed input `&'a Input`. It requires the input type to implement `HasExtractorRef` so it can extract the appropriate partial-ref variant. The extracted value, which is of type `Input::ExtractorRef<'a>`, is then passed to `DispatchMatchers`, which processes it using the same monadic pipeline as in the owned-value case. After dispatching to the handlers, the `Output` from `Result<Output, Remainder>` is extracted by calling `finalize_extract_result`, which relies on the `Remainder` type to implement `FinalizeExtract`.
 
-It is worth noticing that despite working with references, `MatchWithHandlersRef` implements `Computer` and not `ComputerRef`. Similarly, when `DispatchMatchers` is used, the monadic pipeline also expects each handler to implement `Computer` and not `ComputerRef`. This means that in order to work with reference-based visitor dispatching, we need to first "convert" all providers that implement `ComputerRef`, turn them into providers that implement `Computer`, and finally "convert" `MatchWithHandlersRef` back to implementing `ComputerRef`.
+One subtle but important point is that `MatchWithHandlersRef` still implements `Computer` rather than `ComputerRef`. The same is true for the handlers invoked through `DispatchMatchers`, which also expect `Computer` implementations. As a result, reference-based visitor dispatching requires an intermediate conversion step. Variant handlers that originally implement `ComputerRef` must first be "lifted" into providers implementing `Computer`.
+
+After constructing the reference-based pipeline, `MatchWithHandlersRef` can then unlift the entire pipeline to implement `ComputerRef`. This layered approach ensures that reference-based dispatching reuses the same infrastructure as the ownership-based version, while preserving type safety and proper lifetime handling.
 
 ## `PromoteRef`
 
-Just as we can make traits like `ExtractField` to work with borrowed fields, we can also make `Computer` works with borrowed inputs. In fact, the `#[cgp_computer]` macro expansion of the `compute_area_ref` function result in the following `Computer` implementation:
+In the same way that traits like `ExtractField` can operate on borrowed fields, the `Computer` trait can also work with borrowed inputs. In fact, the `#[cgp_computer]` macro expansion for the `compute_area_ref` function produces the following `Computer` implementation:
 
 ```rust
 impl<Context, Code, T: HasAreaRef> Computer<Context, Code, &T> for ComputeAreaRef {
@@ -1276,11 +1281,11 @@ impl<Context, Code, T: HasAreaRef> Computer<Context, Code, &T> for ComputeAreaRe
 }
 ```
 
-As we can see, in the `Computer` implementation for `ComputeAreaRef`, our implementation works with any reference `&T` instead of owned `T` as the input type, given that `T` implements `HasAreaRef`.
+Here, the `Computer` implementation for `ComputeAreaRef` accepts any reference `&T` as the input type, as long as `T` implements `HasAreaRef`. This demonstrates that the `Computer` trait itself is flexible enough to handle borrowed inputs directly, without the need for additional traits.
 
-This shows that technically, the `Computer` trait alone is sufficient to support all kinds of inputs, including borrowed inputs. However, to improve developer ergonomics, CGP also provides the `ComputerRef` trait so that the user don't need to worry about specifying `&T` in the input type parameter. Furthermore, `ComputerRef` can save us from using higher-ranked trait bounds inside where clauses and input-based delegation. As a result, it is much better suited when we want to work with borrowed inputs.
+However, to make development more ergonomic, CGP provides the `ComputerRef` trait. Using `ComputerRef` eliminates the need to explicitly write `&T` in input type parameters and avoids the complexity of higher-ranked trait bounds in where clauses or input delegation. This makes `ComputerRef` better suited for working with borrowed inputs in a clean and consistent way.
 
-CGP also provides a `PromoteRef` adapter, to convert a `Computer` provider to/from a `ComputerRef` provider. For example, the `ComputerRef` implementation for `ComputeAreaRef` is simply defined as:
+To bridge `Computer` and `ComputerRef`, CGP offers the `PromoteRef` adapter. This adapter converts a provider that implements `Computer` for borrowed inputs into a `ComputerRef` provider. For example, the `ComputerRef` implementation for `ComputeAreaRef` is defined as follows:
 
 ```rust
 delegate_components! {
@@ -1290,11 +1295,11 @@ delegate_components! {
 }
 ```
 
-What this means is that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`.
+This means that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`, automatically lifting its `Computer` implementation for `&T` into a `ComputerRef` implementation.
 
 ### Promotion from `Computer` to `ComputerRef`
 
-Behind the scene, `PromoteRef` is implemented as follows:
+The `PromoteRef` adapter allows a provider that implements `Computer` for borrowed inputs to become a provider that implements `ComputerRef`. Its implementation is as follows:
 
 ```rust
 #[cgp_provider]
@@ -1311,15 +1316,13 @@ where
 }
 ```
 
-In the implementation above, we can see that `PromoteRef` implements `ComputerRef` for a `Provider`, if the provider has a higher-ranked trait bound `for<'a>` that implements `Computer` for all `&'a Input` reference. Through `PromoteRef`, this higher-ranked trait bound is hidden away so that the end users don't need to be aware of their existence.
+Here, `PromoteRef` implements `ComputerRef` as long as the inner `Provider` supports a higher-ranked trait bound, meaning it can implement `Computer` for all lifetimes `'a` of `&'a Input`. This pattern hides the complexity of higher-ranked trait bounds, so end users do not need to think about them when using `ComputerRef`.
 
-It is worth noticing that `PromoteRef` also requires the inner `Computer` provider to always have the same `Output` type, regardless of which lifetime `'a` is used for the input. This has an important implication that the `ComputerRef` promotion would *not* work if the `Output` type *borrows* some value within `&'a Input`.
-
-This restriction follows from the design of `ComputerRef`, which has a singular `Output` type that is independent of the lifetime of the input reference in the `compute_ref` method. In some sense, this means that `ComputerRef` is more restrictive and cannot represent all computations that could be implemented through `Computer`. Nevertheless, in case if the user really needs to return `Output` that depends on the input lifetime, they can always revert to using `Computer` directly for such use cases.
+One important detail is that `PromoteRef` requires the inner `Computer` provider to always produce the same `Output` type for any lifetime `'a`. This means that `PromoteRef` cannot be used if the `Output` type borrows from the input reference, because `ComputerRef` defines a single `Output` type that is independent of the lifetime of the input. This limitation follows naturally from the design of `ComputerRef`. When the output must borrow from the input, the user should implement `Computer` directly instead of using `ComputerRef`.
 
 ### Promotion from `ComputerRef` to `Computer`
 
-`PromoteRef` also implements `Computer` by wrapping a `Provider` that implements `ComputerRef`, shown as follows:
+`PromoteRef` also works in the opposite direction, allowing a provider that implements `ComputerRef` to become a provider that implements `Computer` for borrowed inputs:
 
 ```rust
 #[cgp_provider]
@@ -1335,13 +1338,13 @@ where
 }
 ```
 
-Here, `PromoteRef` implements `Computer` that works with any `&Input` reference, provided that the inner `Provider` implements `ComputerRef` for `Input`.
+In this implementation, `PromoteRef` wraps a `Provider` that implements `ComputerRef` and forwards the call to `compute_ref`. As a result, it produces a `Computer` implementation that works with `&Input`.
 
-With both implementations in place, `PromoteRef` offers bidirectional transformation between `Computer` and `ComputerRef`. This allows us to easily convert the computer providers, depending on which form of interface we want to use.
+With these two implementations, `PromoteRef` provides a bidirectional bridge between `Computer` and `ComputerRef`. This flexibility allows a single provider to adapt to whichever trait is more convenient for the task, whether the interface expects `Computer` or `ComputerRef`.
 
 ## `MatchWithValueHandlersRef`
 
-To support reference-based dispatching, aside from the few reference-specific constructs that we have introduced earlier, the remaining implementation of `MatchWithValueHandlersRef` is almost as simple as the original implementation of `MatchWithValueHandlers`:
+To support reference-based dispatching in CGP, we only need to introduce a few reference-specific constructs while keeping most of the implementation very similar to the original `MatchWithValueHandlers`. The definition of `MatchWithValueHandlersRef` is shown below:
 
 ```rust
 pub type MatchWithValueHandlersRef<Provider> =
@@ -1356,11 +1359,11 @@ delegate_components! {
 }
 ```
 
-If we compare the definition with `MatchWithValueHandlers`, we could notice that the main difference is that `MatchWithFieldHandlersInputsRef` is used, in addition to some wrapping and unwrapping using `PromoteRef`.
+When comparing this definition to `MatchWithValueHandlers`, the most notable differences are the use of `MatchWithFieldHandlersInputsRef` and the additional wrapping with `PromoteRef` to facilitate conversions between `Computer` and `ComputerRef`.
 
 ### Example use of `MatchWithValueHandlersRef`
 
-To understand what is really happening, let's try to trace the computation flow of what happens when we call `MatchWithValueHandlersRef<ComputeAreaRef>` on `Shape`:
+To better understand how `MatchWithValueHandlersRef` works in practice, let us walk through what happens when we call `MatchWithValueHandlersRef<ComputeAreaRef>` on `Shape`:
 
 ```rust
 impl HasAreaRef for Shape {
@@ -1370,36 +1373,43 @@ impl HasAreaRef for Shape {
 }
 ```
 
-- The `Provider` argument to `MatchWithHandlers` is `ComputeAreaRef`. This is expanded into `HandleFieldValue<PromoteRef<ComputeAreaRef>>` when passed to `MatchWithFieldHandlersInputsRef`.
-- `UseInputDelegate` is expected to implement `ComputerRef` with `Input` being `Shape`, which is dispatched to `MatchWithFieldHandlersInputsRef`.
-- `MatchWithFieldHandlersInputsRef` is called with `Input` being `Shape`, and `Provider` being `HandleFieldValue<PromoteRef<ComputeAreaRef>>`.
-- `Shape` is expected to implement `HasFieldHandlers<HandleFieldValue<PromoteRef<ComputeAreaRef>>>`, with `Shape::Handlers` expanding into:
-    ```rust
-    Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
-    ]
-    ```
-- The delegate entry maps to `PromoteRef<MatchWithHandlersRef<Input::Handlers>>`, which expands into:
-    ```rust
-    PromoteRef<MatchWithHandlersRef<Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
-    ]>
-    ```
-- To implement `ComputerRef`, `PromoteRef<MatchWithHandlersRef<Input::Handlers>>` requires `MatchWithHandlersRef<Input::Handlers>` to implement `Computer`.
-- To implement `Computer`, `MatchWithHandlersRef<Input::Handlers>` requires `HandleFieldValue<PromoteRef<ComputeAreaRef>>` to implement the following constraints:
-    - `Computer<(), (), Field<symbol!("Circle"), &Circle>>`
-    - `Computer<(), (), Field<symbol!("Rectangle"), &Rectangle>>`
-- After unwrapping the field value by `HandleFieldValue`, the inner provider `PromoteRef<ComputeAreaRef>` needs to implement the following constraints:
-    - `Computer<(), (), &Circle>`
-    - `Computer<(), (), &Rectangle>`
-- To implement `Computer`, `PromoteRef` requires `ComputeAreaRef` to implement the following constraints:
-    - `ComputerRef<(), (), Circle>`
-    - `ComputerRef<(), (), Rectangle>`
+The `Provider` argument to `MatchWithHandlers` is `ComputeAreaRef`, which is expanded into `HandleFieldValue<PromoteRef<ComputeAreaRef>>` when passed to `MatchWithFieldHandlersInputsRef`. The `UseInputDelegate` type is expected to implement `ComputerRef` for `Input = Shape`, and it delegates the work to `MatchWithFieldHandlersInputsRef`.
 
-As we can see, the crucial difference in the implementation of `MatchWithValueHandlersRef` is that we need to know when is the right time to use `Computer` vs `ComputerRef`, and how to use `PromoteRef` at the right place to facilitate the conversion between `Computer` and `ComputerRef`.
+Next, `MatchWithFieldHandlersInputsRef` is invoked with `Input` as `Shape` and `Provider` as `HandleFieldValue<PromoteRef<ComputeAreaRef>>`. The `Shape` type must implement `HasFieldHandlers<HandleFieldValue<PromoteRef<ComputeAreaRef>>>`, and its `Handlers` expand to:
 
-If this is still confusing to you, don't worry too much, as the implementation details are mostly shielded away from how it is used. The main takeaway from this exercise that aside from a few reference-specific definitions, most of the work of reference-based extensible visitor shares the same underlying implementation as the ownership-based implementation.
+```rust
+Product![
+    ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+]
+```
+
+The delegate entry maps to `PromoteRef<MatchWithHandlersRef<Input::Handlers>>`, which becomes:
+
+```rust
+PromoteRef<MatchWithHandlersRef<Product![
+    ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+]>>
+```
+
+In order to implement `ComputerRef`, `PromoteRef<MatchWithHandlersRef<Input::Handlers>>` requires `MatchWithHandlersRef<Input::Handlers>` to implement `Computer`. For `MatchWithHandlersRef<Input::Handlers>` to implement `Computer`, its inner provider `HandleFieldValue<PromoteRef<ComputeAreaRef>>` must satisfy the following constraints:
+
+* `Computer<(), (), Field<symbol!("Circle"), &Circle>>`
+* `Computer<(), (), Field<symbol!("Rectangle"), &Rectangle>>`
+
+After `HandleFieldValue` unwraps the actual field values, the inner provider `PromoteRef<ComputeAreaRef>` must implement:
+
+* `Computer<(), (), &Circle>`
+* `Computer<(), (), &Rectangle>`
+
+Finally, `PromoteRef` requires `ComputeAreaRef` to implement:
+
+* `ComputerRef<(), (), Circle>`
+* `ComputerRef<(), (), Rectangle>`
+
+This example shows that the key to implementing `MatchWithValueHandlersRef` lies in understanding when to use `Computer` versus `ComputerRef`, and where to apply `PromoteRef` to bridge the two. While the type expansion can appear intimidating, most of the complexity is hidden behind these abstractions.
+
+In practice, the usage of `MatchWithValueHandlersRef` feels almost identical to the ownership-based version, and the underlying implementation shares the same structure aside from a few reference-specific details.
 
 # Conclusion
