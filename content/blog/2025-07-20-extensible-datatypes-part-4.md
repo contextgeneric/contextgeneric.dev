@@ -1220,7 +1220,11 @@ delegate_components! {
 }
 ```
 
-What this means is that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`. Behind the scene, `PromoteRef` is implemented as follows:
+What this means is that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`.
+
+### Promotion from `ComputerRef` to `Computer`
+
+Behind the scene, `PromoteRef` is implemented as follows:
 
 ```rust
 #[cgp_provider]
@@ -1238,6 +1242,12 @@ where
 ```
 
 In the implementation above, we can see that `PromoteRef` implements `ComputerRef` for a `Provider`, if the provider has a higher-ranked trait bound `for<'a>` that implements `Computer` for all `&'a Input` reference. Through `PromoteRef`, this higher-ranked trait bound is hidden away so that the end users don't need to be aware of their existence.
+
+It is worth noticing that `PromoteRef` also requires the inner `Computer` provider to always have the same `Output` type, regardless of which lifetime `'a` is used for the input. This has an important implication that the `ComputerRef` promotion would *not* work if the `Output` type *borrows* some value within `&'a Input`.
+
+This restriction follows from the design of `ComputerRef`, which has a singular `Output` type that is independent of the lifetime of the input reference in the `compute_ref` method. In some sense, this means that `ComputerRef` is more restrictive and cannot represent all computations that could be implemented through `Computer`. Nevertheless, in case if the user really needs to return `Output` that depends on the input lifetime, they can always revert to using `Computer` directly for such use cases.
+
+### Promotion from `Computer` to `ComputerRef`
 
 `PromoteRef` also implements `Computer` by wrapping a `Provider` that implements `ComputerRef`, shown as follows:
 
@@ -1261,7 +1271,7 @@ With both implementations in place, `PromoteRef` offers bidirectional transforma
 
 ## `MatchWithValueHandlersRef`
 
-To support reference-based dispatching, aside from the few reference-specific constructs that we have introduced earlier, the remaining implementation of `MatchWithValueHandlersRef` is remarkably almost as simple as the original implementation of `MatchWithValueHandlers`:
+To support reference-based dispatching, aside from the few reference-specific constructs that we have introduced earlier, the remaining implementation of `MatchWithValueHandlersRef` is almost as simple as the original implementation of `MatchWithValueHandlers`:
 
 ```rust
 pub type MatchWithValueHandlersRef<Provider> =
