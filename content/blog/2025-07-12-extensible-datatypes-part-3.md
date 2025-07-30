@@ -34,7 +34,7 @@ We will first explore the implementation of extensible records in this part, fol
 
 **Part 3: Implementing Extensible Records** (this post) – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 
-**Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
+[**Part 4: Implementing Extensible Variants**](/blog/extensible-datatypes-part-4) – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
 # Underlying Theory
 
@@ -726,7 +726,7 @@ If any part of this explanation remains unclear, it might be helpful to paste th
 
 With the `BuildFrom` trait in place, we can now explore how CGP implements generalized **builder dispatchers** that enable flexible and reusable ways to assemble struct fields from various sources.
 
-## `BuildWithHandlers` Trait
+## `BuildWithHandlers` Provider
 
 In [earlier examples](/blog/extensible-datatypes-part-1/#builder-dispatcher), we used a utility called `BuildAndMergeOutputs` to combine outputs from multiple builder providers such as `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`. Under the hood, `BuildAndMergeOutputs` is built upon a more fundamental dispatcher named `BuildWithHandlers`. The implementation of this dispatcher looks like the following:
 
@@ -965,7 +965,7 @@ With this setup, `BuildAndMergeOutputs` can now be used like any other CGP provi
 
 The key benefit of this pattern is that it avoids boilerplate while preserving type safety. Whenever a provider's implementation is simply a thin wrapper around another provider with some added constraints, it's much more convenient to use `DelegateComponent` via `delegate_components!` than to implement the provider trait manually.
 
-## Type-Level CGP Metaprogramming
+## Type-Level Metaprogramming
 
 The technique we just explored — wrapping providers and using `delegate_components!` — can be seen as a form of **metaprogramming** in CGP. Here, we’re leveraging **type-level programming** not just within CGP’s core component abstractions like `DelegateComponent`, but also as a tool for *programmatically defining component wiring* through the use of generic parameters and trait constraints.
 
