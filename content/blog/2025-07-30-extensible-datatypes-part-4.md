@@ -1412,27 +1412,13 @@ This example shows that the key to implementing `MatchWithValueHandlersRef` lies
 
 In practice, the usage of `MatchWithValueHandlersRef` feels almost identical to the ownership-based version, and the underlying implementation shares the same structure aside from a few reference-specific details.
 
-# Conclusion
+# Future Work
 
-## Recap
+The modular design of extensible variants makes it straightforward to extend the pattern for new use cases. There are several scenarios that are not yet supported in this initial version. While none of these are technically difficult to implement, the focus for this release has been on the core functionality and the writing of these blog posts. The following areas are planned for future work.
 
-We have finally covered everything essential on the implementation details of extensible variants and extensible visitors. To give a quick recap, we started with defining the `FromVariant` trait for constructing an enum from one of its variant. We then introduced the concept of partial variants, which follows similar structure as partial records, but uses `IsVoid` to represent the absence of an extracted variant.
+## Additional Arguments
 
-We then introduced the `HasExtractor` trait for converting an enum into its partial variants, and the `ExtractField` trait for extracting a single variant out of the partial variants. We then learned about the remainders of a partial variants after extraction, and the use of `FinalizeExtract` to discharge a remainder once all variants in it are already extracted.
-
-We then went through the implementation of upcasting and downcasting operations for enums. We learned about the `HasFields` implementation for enums correspond to a type-level sum of fields. We then walked through the implementation of `FieldExtractor` to help extract and move the fields between a source and a target partial variants. We then juxtapose the differences between `CanUpcast` and `CanDowncast` being a matter of choosing the `HasFields` implementation from either the source or the target enum.
-
-Next, we dived deeper into the implementation of extensible visitors, starting with the implementation of `MatchWithHandlers` and `DispatchMatchers`. We then showed that `DispatchMatchers` is implemented as a monadic pipeline that short circuits on the `Ok` variant. We then explored the use of the field adapters `ExtractFieldAndHandle` and `HandleFieldValue`, and the use of `#[cgp_computer]` to convert a regular trait method into a `Computer` provider. We then learned about how `ToFieldsHandler` and `HasFieldHandlers` are used to transform the tags in the `HasFields` instance of an enum to the appropriate providers to be used with `MatchWithHandlers`. Finally, we seen how the top-level dispatcher `MatchWithValueHandlers` is implemented through type-level metaprogramming by combining all the constructs that have been covered earlier.
-
-Finally, we went through the reference-based implementation of extensible visitor, with reference-specific constructs such as the partial-ref variants and the `HasExtractorRef` trait. We then looked at the implementation of `MatchWithHandlersRef`, which uses `HasExtractorRef` to extract the borrowed variants. We learned about the use of `PromoteRef` to convert between `Computer` and `ComputerRef` providers. Finally, we have seen how `MatchWithValueHandlersRef` is implemented with a minimal difference being the use of `MatchWithHandlersRef` and `PromoteRef` to interleave between the `Computer` and `ComputerRef` implementations.
-
-## Future Work
-
-Thanks to the modular design of extensible variants, it becomes straightforward to extend further use of the pattern to support new use cases. In fact, there are a few use cases that are not yet supported by this initial version of extensible variants. While they are not technically challenging to implement, I have opted to defer the implementation to a later release, to focus on the core implementation and the writing of these blog posts.
-
-### Additional Arguments
-
-Currently, the implementation of extensible visitors do not support additional arguments to be supplied to each visitor handler. This means that we cannot support traits that require additional arguments, such as:
+At present, extensible visitors do not support forwarding additional arguments to individual visitor handlers. This limitation prevents traits that require extra arguments, such as:
 
 ```rust
 pub trait HasArea {
@@ -1440,13 +1426,11 @@ pub trait HasArea {
 }
 ```
 
-In the above example, the `area` method requires an additional `scale_factor` argument, which should be passed through the visitor dispatcher and forwarded to the individual variant handlers.
+Here, the `area` method needs a `scale_factor` argument that must be passed through the visitor dispatcher to the variant handlers. To support this, we can create adapters similar to `ExtractFieldAndHandle` that bundle the extra arguments into the `Input`. We would then define alternative dispatchers, similar to `MatchWithValueHandlers`, which operate on these bundled inputs.
 
-To support the pass through of additional arguments, we only need to define other kinds of adapters similar to `ExtractFieldAndHandle`, but allow the extra arguments to be bundled inside the `Input`. Similarly, we will define alternative dispatchers similar to `MatchWithValueHandlers`, but dispatches based on a bundled `Input` that contains additional arguments.
+## `&mut` References
 
-### `&mut` References
-
-The current reference-based dispatch implementation is hard-coded with the use of `&` references. This means that it is currently not possible to dispatch `&mut` references to update a mutable enum. For example:
+The current reference-based dispatch system is hard-coded to use shared references (`&`). As a result, it does not support `&mut` references for mutable operations such as:
 
 ```rust
 pub trait CanScale {
@@ -1454,17 +1438,15 @@ pub trait CanScale {
 }
 ```
 
-To support mutable references, we need to further generalize the design of partial-ref variants such that they can be *generic* over either `&` or `&mut`. This may require additional abstraction similar to `MapType`, but works on mapping the "kind" of references in the fields.
+To support mutable references, the design of partial-ref variants needs to be generalized to work with both `&` and `&mut`. This likely requires an abstraction similar to `MapType`, but for mapping the type of reference used for each field.
 
 ### Simpler Dispatchers
 
-Extensible visitors is well suited for tackling complex use cases such as building modular interpreters. However, it is also equally well suited to solve much simpler use cases, such as simplifying the dispatch implementation of plain Rust traits such as `HasArea`.
+Although extensible visitors were designed with complex use cases like modular interpreters in mind, they are equally powerful for simpler needs, such as implementing plain Rust traits like `HasArea`. While this is already possible with the current infrastructure, the ergonomics leave much to be desired.
 
-Although we have demonstrated in this article the feasibility to do so, the current ergonomic of using extensible visitors for this use case is less than idea. First, the user needs to understand how to use `#[cgp_computer]` to implement helper providers like `ComputeArea`. After that, the user still needs to manually implement `Area` for `Shape`, by calling `MatchWithValueHandlers::<ComputeArea>::compute()` with a dummy context and code.
+Users must first understand and use the `#[cgp_computer]` macro to define helper providers like `ComputeArea`, and then manually implement the trait by invoking `MatchWithValueHandlers::<ComputeArea>::compute()` with dummy context and code. For those unfamiliar with CGP, these steps impose unnecessary friction and cognitive load.
 
-For users who are unfamiliar with CGP, the manual steps that they need to learn in order to use extensible visitors requires too much cognitive load. To streamline this use case, CGP needs to make the whole experience much more magical, so that it can be used by anyone without needing to understand CGP.
-
-A rough idea of how we could achieve this would be to introduce a proc macro that can be used to parse the plain Rust trait, such as:
+To improve usability, CGP could offer a procedural macro to automate this boilerplate. For instance, a trait could be annotated as follows:
 
 ```rust
 #[cgp_dispatch]
@@ -1473,9 +1455,9 @@ pub trait HasArea {
 }
 ```
 
-With a proc macro like `#[cgp_dispatch]`, we can parse the `HasArea` trait and generate the appropriate implementations that are required by extensible visitors. The interesting with this macro is that it also generates a blanket implementation for `HasArea`, so that the trait is *automatically* implemented for compatible enums like `Shape` and `ShapePlus`.
+The `#[cgp_dispatch]` macro would parse the trait definition and generate the necessary code to integrate it with the extensible visitor framework. This includes generating a blanket implementation for the trait so that it is automatically implemented for compatible enums like `Shape` or `ShapePlus`.
 
-The generated blanket implementation would roughly looks something like follows:
+The generated implementation would resemble:
 
 ```rust
 impl<Context> HasArea for Context
@@ -1489,13 +1471,33 @@ where
 }
 ```
 
-Once we have implemented such a macro, the entire experience of using extensible visitors with simple Rust traits would hopefully become as magical as simply adding `#[cgp_dispatch]` on the relevant traits.
+With such a macro in place, using extensible visitors to implement common traits would become as easy as annotating the trait with `#[cgp_dispatch]`, removing the need to understand the inner workings of CGP for simple use cases.
 
-### Custom Partial Records Updater
+## Custom Partial Records Updater
 
-For partial records, only a number of methods such as `TakeField` and `BuildField` that are derived with it. This makes it challenging to customize the behavior of the partial record, such as to allow overriding existing field values, filling empty fields with default values, or "taking" a default value from an empty field.
+Currently, partial records only support a small set of operations like `TakeField` and `BuildField`. This makes it difficult to customize behavior, such as overriding existing field values, filling empty fields with defaults, or taking a default value from an empty field.
 
-To support these operations, we need to provide more generalized interfaces for interacting with the partial records, so that we don't need to derive specialized traits for each use case. An idea that I have floating around is to make use of *natural transformation* to implement generic field transformers to manipulate the fields. For example, a builder transformer is one that transforms `IsNothing` fields to `IsPresent` fields, but an overrider transformer would be one that transforms *either* `IsNothing` or `IsPresent` fields to `IsPresent` fields.
+To support these scenarios, more generalized interfaces for interacting with partial records are needed. A promising approach is to use *natural transformations* to implement generic field transformers. For example, a builder transformer would convert `IsNothing` fields into `IsPresent` fields, while an overrider transformer would convert either `IsNothing` or `IsPresent` fields into `IsPresent` fields. This would allow for flexible and reusable field manipulation strategies.
+
+## Explanation for Computation Hierarchy
+
+Aside from `Computer`, `ComputerRef`, and `Handler`, CGP also defines various other traits for different kinds of computations. For example, there is `TryComputer` for running computation that may fail, and `TryComputerRef` for fallable computation with reference input.
+
+There are various constructs, such as `Promote`, that can be used to convert between different kinds of computation providers. There are also multiple ways to compose these computation providers, such as using `PipeHandlers` or `PipeMonadic`. In particular, the monadic composition of these handlers would require delicate explanation, especially since the monad implementation in CGP is not quite the same as the monads in Haskell.
+
+Originally, I had a plan for a *fifth* part of the series to explain the hierarchy for the computation traits in CGP. However, I have decided to split it out to its own dedicated blog post (or series), since I have already written too much just to cover the topic of extensible data types.
+
+# Conclusion
+
+We have now reached the end of our deep dive into the implementation details of extensible variants and extensible visitors. To recap the journey, we began by defining the `FromVariant` trait, which allows constructing an enum from one of its variants. We then introduced partial variants, which mirror the structure of partial records but use `IsVoid` to indicate the absence of a variant.
+
+From there, we defined the `HasExtractor` trait to convert an enum into its partial variants, followed by the `ExtractField` trait to extract a single variant from those partial variants. This led to the concept of remainders, representing what is left after a variant is extracted, and the `FinalizeExtract` trait, which finalizes a remainder once all its variants have been handled.
+
+We then examined how upcasting and downcasting for enums are implemented. We explored how the `HasFields` implementation for enums represents a type-level sum of fields and how `FieldExtractor` is used to move fields between source and target partial variants. The difference between `CanUpcast` and `CanDowncast` boils down to choosing whether the `HasFields` implementation comes from the source or the target enum.
+
+Next, we delved into the implementation of extensible visitors, beginning with `MatchWithHandlers` and `DispatchMatchers`. We saw that `DispatchMatchers` is structured as a monadic pipeline that short-circuits when it encounters an `Ok` value. We examined the role of field adapters like `ExtractFieldAndHandle` and `HandleFieldValue`, and we explored how `#[cgp_computer]` transforms a regular trait method into a `Computer` provider. We then discussed how `ToFieldsHandler` and `HasFieldHandlers` convert the tags in an enum’s `HasFields` implementation into the appropriate providers for use with `MatchWithHandlers`. Finally, we looked at how the top-level dispatcher `MatchWithValueHandlers` is assembled through type-level metaprogramming, combining all the earlier components into a cohesive system.
+
+We concluded with the reference-based implementation of extensible visitors. This introduced reference-specific constructs such as partial-ref variants and the `HasExtractorRef` trait. We examined how `MatchWithHandlersRef` uses `HasExtractorRef` to extract borrowed variants, and how `PromoteRef` bridges between `Computer` and `ComputerRef` providers. We then saw that `MatchWithValueHandlersRef` is implemented with only minimal differences from its ownership-based counterpart, relying on `MatchWithHandlersRef` and `PromoteRef` to interleave `Computer` and `ComputerRef` computations.
 
 ## End of Series
 
@@ -1504,3 +1506,13 @@ We have reached the end of the final part of this series on extensible data type
 While the implementation details may be challenging to comprehend, I hope that at least it gives you a better sense of how extensible data types are implemented, and the advantages of our type-driven approach to keep the system modular and extensible.
 
 More importantly, I also hope that the articles have given you a better sense of the various design patterns used in CGP, which you can learn and apply to other areas when writing CGP code.
+
+The design and implementation of extensible data types stretches the limits of how CGP can be used to implement advanced language features that typically need to be implemented natively within the Rust compiler itself. However, in everyday development, you are likely not going to need to use all the advanced programming techniques that have been presented in this series.
+
+I hope that even if you don't understand everything that have been presented here, it would still given you sufficient motivation to start learning CGP *from the basics*. The key points that I hope you'd understand is that even if many of the basic CGP patterns may seem "superflous" or "overengineered" while you learn them, they are very essential in enabling the kinds of advanced design patterns that we have seen in extensible data types and [Hypershell](/blog/hypershell-release/).
+
+Furthermore, you don't need to build entirely new language features or DSLs for CGP to be useful. As we will see in future blog posts, there are many more basic and intermediary CGP patterns that can be used to help you build practical applications. Thank you for your support and attention given to the CGP project, and stay tuned for more exciting development coming to CGP!
+
+## Hire Me
+
+P.S. Btw, [I am available for hire](/hire)!
