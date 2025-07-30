@@ -26,7 +26,7 @@ In this second part of the series, we will explore the use of **extensible varia
 
 [**Part 3: Implementing Extensible Records**](/blog/extensible-datatypes-part-3) – Here, we walk through the internal mechanics behind extensible records. We show how CGP supports the modular builder pattern demonstrated in Part 1 through its underlying type and trait machinery.
 
-**Part 4: Implementing Extensible Variants** – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
+[**Part 4: Implementing Extensible Variants**](/blog/extensible-datatypes-part-4) – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
 # Extending the Visitor Pattern
 

@@ -1427,6 +1427,8 @@ This example shows that the key to implementing `MatchWithValueHandlersRef` lies
 
 In practice, the usage of `MatchWithValueHandlersRef` feels almost identical to the ownership-based version, and the underlying implementation shares the same structure aside from a few reference-specific details.
 
+---
+
 # Future Work
 
 The modular design of extensible variants makes it straightforward to extend the pattern for new use cases. There are several scenarios that are not yet supported in this initial version. While none of these are technically difficult to implement, the focus for this release has been on the core functionality and the writing of these blog posts. The following areas are planned for future work.
@@ -1501,6 +1503,8 @@ Beyond `Computer`, `ComputerRef`, and `Handler`, CGP defines several other trait
 CGP also provides constructs such as `Promote` that allow seamless conversion between different types of computation providers. In addition, it supports multiple ways to compose these providers. Two notable examples are `PipeHandlers` and `PipeMonadic`. Monadic composition in particular requires delicate explanation, because CGP’s approach to monads does not behave exactly like the familiar monads in Haskell. Understanding how these monadic pipelines operate is essential for developers who want to create more sophisticated and composable computation flows.
 
 My original plan was to dedicate a fifth part of this series to explain the complete hierarchy of computation traits in CGP. However, the implementation details for extensible data types have already required extensive coverage, and attempting to include computation hierarchy in the same series would make it overwhelming. As a result, I have decided to split that discussion into its own dedicated post, or potentially a separate series, to provide the depth and clarity it deserves.
+
+---
 
 # Conclusion
 

@@ -17,6 +17,7 @@ Read the blog series **Programming Extensible Data Types in Rust with CGP** for 
 - [**Part 1: Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1/)
 - [**Part 2: Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/)
 - [**Part 3: Implementing Extensible Records**](/blog/extensible-datatypes-part-3/)
+- [**Part 4: Implementing Extensible Variants**](/blog/extensible-datatypes-part-4/)
 
 # Overview
 
