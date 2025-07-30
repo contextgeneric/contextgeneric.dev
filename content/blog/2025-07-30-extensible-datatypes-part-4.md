@@ -8,6 +8,21 @@ authors = ["Soares Chen"]
 
 +++
 
+# Recap
+
+This is the **fourth** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1), [second](/blog/extensible-datatypes-part-2) and [third](/blog/extensible-datatypes-part-3) parts here.
+
+As a recap, we have covered the new release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2) which now supports the use of **extensible records and variants**, allowing developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition.
+
+In the first part of the series, [**Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1), we demonstrated an example use of the **extensible builder pattern**, which uses **extensible records** to support modular construction of an application context.
+
+Similarly, in the second part of the series, [**Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2), we saw how the modular visitor pattern allows us to implement evaluation and to-Lisp conversion for each variant of a language expression enum using separate visitor providers.
+
+In the third part of the series, [**Implementing Extensible Records**](/blog/extensible-datatypes-part-3), we have walked through the internal implementation of extensible records, and learned about concepts such as partial records and builder dispatchers.
+
+In this final fourth part of the series, we will have the same walk through for the internal implementation details for **extensible variants**.
+
+---
 
 # Implementation of Extensible Variants
 
