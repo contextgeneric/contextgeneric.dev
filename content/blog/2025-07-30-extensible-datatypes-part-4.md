@@ -2,8 +2,6 @@
 
 title = "Programming Extensible Data Types in Rust with CGP - Part 4: Implementing Extensible Variants"
 
-description = ""
-
 authors = ["Soares Chen"]
 
 +++
@@ -243,7 +241,8 @@ In this example, we begin by converting the `Shape` value into a `PartialShape` 
 By the time we reach the second `Err` case, the remainder has the type `PartialShape<IsVoid, IsVoid>`, which cannot contain any valid variant. Because of this, we can safely omit any further pattern matching, and the compiler guarantees that there are no unreachable or unhandled cases.
 
 What makes this approach so powerful is that the Rust type system can statically verify that it is impossible to construct a valid value for `PartialShape<IsVoid, IsVoid>`. We no longer need to write boilerplate `_ => unreachable!()` code or use runtime assertions. The type system ensures exhaustiveness and soundness entirely at compile time, enabling safer and more maintainable implementation of extensible variants.
-## Short Circuiting Remainder
+
+## Short-Circuiting Remainder
 
 In our earlier implementation of `compute_area`, we used nested `match` expressions to handle the `Result` returned from each call to `extract_field`. If you are familiar with the `?` operator in Rust, you might be wondering why we didn’t use it here to simplify the logic.
 
@@ -690,7 +689,7 @@ fn rectangle_area(rectangle: Rectangle) -> f64 {
 
 ### `#[cgp_computer]` Macro
 
-The `#[cgp_computer]` macro allows us to transform these pure functions into context-generic providers that can be referenced as types. Behind the scenes, this macro generates a `Computer` implementation similar to the following:
+The `#[cgp_computer]` macro allows us to transform these pure functions into context-generic providers that can be referenced as types. Behind the scenes, this macro generates `Computer` implementations similar to the following:
 
 ```rust
 #[cgp_provider]
@@ -703,7 +702,7 @@ impl<Context, Code> Computer<Context, Code, Circle> for CircleArea {
 }
 ```
 
-This macro simplifies the process of defining `Computer` instances by letting us write them as plain functions. Because the macro ignores the `Context` and `Code` types, the generated provider works with any `Context` and `Code` you supply.
+This macro simplifies the process of defining `Computer` providers by letting us write them as plain functions. Because the macro ignores the `Context` and `Code` types, the generated provider works with any `Context` and `Code` you supply.
 
 ### `ComputeShapeArea` Handler
 
@@ -1008,8 +1007,7 @@ Under the hood, this type alias resolves to `MatchWithHandlers` through the foll
 
 * `MatchWithValueHandlers<ComputeArea>` expands to `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>`.
 * When the `Input` is `Shape`, `UseInputDelegate` locates the corresponding `DelegateComponent` mapping for `Shape` in `MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>`.
-* That mapping exists because `Shape` implements `HasFieldHandlers<HandleFieldValue<ComputeArea>>`.
-* As we saw earlier, this expands to:
+* That mapping exists because `Shape` implements `HasFieldHandlers<HandleFieldValue<ComputeArea>>`. As we saw earlier, this expands to:
   ```rust
   Product![
       ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
@@ -1042,7 +1040,7 @@ impl HasArea for ShapePlus {
 }
 ```
 
-Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic layers on top of this pattern, making common use cases like `HasArea` even easier to express.
+Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic abstractions on top of this pattern, making common use cases like `HasArea` even easier to express.
 
 ## Dispatching to Context
 
@@ -1502,7 +1500,7 @@ Beyond `Computer`, `ComputerRef`, and `Handler`, CGP defines several other trait
 
 CGP also provides constructs such as `Promote` that allow seamless conversion between different types of computation providers. In addition, it supports multiple ways to compose these providers. Two notable examples are `PipeHandlers` and `PipeMonadic`. Monadic composition in particular requires delicate explanation, because CGP’s approach to monads does not behave exactly like the familiar monads in Haskell. Understanding how these monadic pipelines operate is essential for developers who want to create more sophisticated and composable computation flows.
 
-My original plan was to dedicate a fifth part of this series to explain the complete hierarchy of computation traits in CGP. However, the implementation details for extensible data types have already required extensive coverage, and attempting to include computation hierarchy in the same series would make it overwhelming. As a result, I have decided to split that discussion into its own dedicated post, or potentially a separate series, to provide the depth and clarity it deserves.
+My original plan was to dedicate a fifth part of this series to explain the complete hierarchy of computation traits in CGP. However, the implementation details for extensible data types have already required extensive coverage, and attempting to include computation hierarchy in the same series would make it overwhelming. As a result, I have decided to split that explanation into its own dedicated post, or potentially a separate series, to provide the depth and clarity it deserves.
 
 ---
 
@@ -1522,7 +1520,7 @@ We concluded with the reference-based implementation of extensible visitors. Thi
 
 We have reached the conclusion of this series on extensible data types. By now, you should have a clearer understanding of the design patterns that extensible data types make possible and how they can be applied to solve real-world problems in Rust.
 
-Although some of the implementation details can be challenging, I hope this series has given you a solid sense of how extensible data types are structured, and why a type-driven approach allows your system to remain both modular and flexible as it grows.
+Although some of the implementation details can be challenging, I hope this series has given you a solid sense of how extensible data types are structured, and why a type-driven approach allows our system to remain both modular and flexible as it grows.
 
 More importantly, I hope these articles have helped you recognize the design patterns that underpin CGP. Learning to identify and apply these patterns will make your own CGP code more effective and give you tools you can use well beyond this particular topic.
 
