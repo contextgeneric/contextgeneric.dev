@@ -1481,11 +1481,11 @@ To support these scenarios, more generalized interfaces for interacting with par
 
 ## Explanation for Computation Hierarchy
 
-Aside from `Computer`, `ComputerRef`, and `Handler`, CGP also defines various other traits for different kinds of computations. For example, there is `TryComputer` for running computation that may fail, and `TryComputerRef` for fallable computation with reference input.
+Beyond `Computer`, `ComputerRef`, and `Handler`, CGP defines several other traits that represent different kinds of computations. For example, `TryComputer` supports computations that may fail, and `TryComputerRef` handles fallible computations that operate on reference inputs. These traits make it possible to model a wide range of behaviors, from straightforward value computations to error-aware or reference-based processing.
 
-There are various constructs, such as `Promote`, that can be used to convert between different kinds of computation providers. There are also multiple ways to compose these computation providers, such as using `PipeHandlers` or `PipeMonadic`. In particular, the monadic composition of these handlers would require delicate explanation, especially since the monad implementation in CGP is not quite the same as the monads in Haskell.
+CGP also provides constructs such as `Promote` that allow seamless conversion between different types of computation providers. In addition, it supports multiple ways to compose these providers. Two notable examples are `PipeHandlers` and `PipeMonadic`. Monadic composition in particular requires delicate explanation, because CGP’s approach to monads does not behave exactly like the familiar monads in Haskell. Understanding how these monadic pipelines operate is essential for developers who want to create more sophisticated and composable computation flows.
 
-Originally, I had a plan for a *fifth* part of the series to explain the hierarchy for the computation traits in CGP. However, I have decided to split it out to its own dedicated blog post (or series), since I have already written too much just to cover the topic of extensible data types.
+My original plan was to dedicate a fifth part of this series to explain the complete hierarchy of computation traits in CGP. However, the implementation details for extensible data types have already required extensive coverage, and attempting to include computation hierarchy in the same series would make it overwhelming. As a result, I have decided to split that discussion into its own dedicated post, or potentially a separate series, to provide the depth and clarity it deserves.
 
 # Conclusion
 
@@ -1501,17 +1501,17 @@ We concluded with the reference-based implementation of extensible visitors. Thi
 
 ## End of Series
 
-We have reached the end of the final part of this series on extensible data types. Hopefully by now, you have gained a better understanding on the design patterns that are enabled by extensible data types, and how to use them to solve real world problems.
+We have reached the conclusion of this series on extensible data types. By now, you should have a clearer understanding of the design patterns that extensible data types make possible and how they can be applied to solve real-world problems in Rust.
 
-While the implementation details may be challenging to comprehend, I hope that at least it gives you a better sense of how extensible data types are implemented, and the advantages of our type-driven approach to keep the system modular and extensible.
+Although some of the implementation details can be challenging, I hope this series has given you a solid sense of how extensible data types are structured, and why a type-driven approach allows your system to remain both modular and flexible as it grows.
 
-More importantly, I also hope that the articles have given you a better sense of the various design patterns used in CGP, which you can learn and apply to other areas when writing CGP code.
+More importantly, I hope these articles have helped you recognize the design patterns that underpin CGP. Learning to identify and apply these patterns will make your own CGP code more effective and give you tools you can use well beyond this particular topic.
 
-The design and implementation of extensible data types stretches the limits of how CGP can be used to implement advanced language features that typically need to be implemented natively within the Rust compiler itself. However, in everyday development, you are likely not going to need to use all the advanced programming techniques that have been presented in this series.
+The design and implementation of extensible data types push the boundaries of what CGP can achieve. They show how CGP can model advanced language features that are often only possible through direct integration into the Rust compiler. In day-to-day development, you may not need to reach for every advanced technique demonstrated here, but understanding that these patterns exist will broaden your perspective on what is possible.
 
-I hope that even if you don't understand everything that have been presented here, it would still given you sufficient motivation to start learning CGP *from the basics*. The key points that I hope you'd understand is that even if many of the basic CGP patterns may seem "superflous" or "overengineered" while you learn them, they are very essential in enabling the kinds of advanced design patterns that we have seen in extensible data types and [Hypershell](/blog/hypershell-release/).
+Even if you have not fully absorbed every concept presented, I hope this series has inspired you to begin learning CGP from the fundamentals. It is important to realize that many of the basic CGP patterns may initially seem unnecessary or overengineered, yet they are the foundation that makes advanced patterns like extensible data types and [Hypershell](/blog/hypershell-release/) achievable.
 
-Furthermore, you don't need to build entirely new language features or DSLs for CGP to be useful. As we will see in future blog posts, there are many more basic and intermediary CGP patterns that can be used to help you build practical applications. Thank you for your support and attention given to the CGP project, and stay tuned for more exciting development coming to CGP!
+Finally, you do not need to create entirely new language features or DSLs for CGP to prove valuable. In upcoming posts, we will explore more foundational and intermediate CGP patterns that can help you build practical and maintainable Rust applications. Thank you for following this series and for your support of the CGP project. Exciting developments are on the horizon, and I look forward to sharing them with you.
 
 ## Hire Me
 
