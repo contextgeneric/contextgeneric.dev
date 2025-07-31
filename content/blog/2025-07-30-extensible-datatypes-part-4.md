@@ -6,6 +6,8 @@ authors = ["Soares Chen"]
 
 +++
 
+Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1md3emg/the_design_and_implementation_of_extensible/), [GitHub](https://github.com/orgs/contextgeneric/discussions/16) or [Discord](https://discord.gg/Hgk3rCw6pQ).
+
 # Recap
 
 This is the **fourth** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1), [second](/blog/extensible-datatypes-part-2) and [third](/blog/extensible-datatypes-part-3) parts here.
@@ -20,9 +22,13 @@ In the third part of the series, [**Implementing Extensible Records**](/blog/ext
 
 In this final fourth part of the series, we will have the same walk through for the internal implementation details for **extensible variants**.
 
+## Acknowledgement
+
+Thank you April Gonçalves for your generous donation support on [Ko-fi](https://ko-fi.com/maybevoid)! ☺️
+
 ---
 
-# Implementation of Extensible Variants
+# The Design and Implementation of Extensible Variants
 
 Now that we've covered how extensible records work in CGP, we can turn our attention to **extensible variants**. At first glance, it might seem like a completely different mechanism — but surprisingly, the approach used to implement extensible variants is very similar to that of extensible records. In fact, many of the same principles apply, just in the “opposite direction”.
 
