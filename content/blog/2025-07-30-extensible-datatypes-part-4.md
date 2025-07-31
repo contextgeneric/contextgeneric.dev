@@ -408,7 +408,7 @@ In this way, we represent the enum's variants as a nested sum, with `Void` as th
 
 ## `CanUpcast` Implementation
 
-With `HasFields` implemented, we are ready to define the `CanUpcast` trait. This trait allows an enum to be upcast to another enum that includes a subset of its variants:
+With `HasFields` implemented, we are ready to define the `CanUpcast` trait. This trait allows a source enum to be upcast to a target enum that is a superset of the source:
 
 ```rust
 pub trait CanUpcast<Target> {
