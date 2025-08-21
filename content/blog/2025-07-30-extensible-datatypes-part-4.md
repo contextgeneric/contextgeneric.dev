@@ -1535,7 +1535,3 @@ The design and implementation of extensible data types push the boundaries of wh
 Even if you have not fully absorbed every concept presented, I hope this series has inspired you to begin learning CGP from the fundamentals. It is important to realize that many of the basic CGP patterns may initially seem unnecessary or overengineered, yet they are the foundation that makes advanced patterns like extensible data types and [Hypershell](/blog/hypershell-release/) achievable.
 
 Finally, you do not need to create entirely new language features or DSLs for CGP to prove valuable. In upcoming posts, we will explore more foundational and intermediate CGP patterns that can help you build practical and maintainable Rust applications. Thank you for following this series and for your support of the CGP project. Exciting developments are on the horizon, and I look forward to sharing them with you.
-
-## Hire Me
-
-P.S. Btw, [I am available for hire](/hire)!

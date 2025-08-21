@@ -1004,7 +1004,3 @@ If you're still unsure how all of this comes together, a future blog post will w
 ## Next Part
 
 In the final [Part 4 of this series, **Implementing Extensible Variants**](/blog/extensible-datatypes-part-4), we will follow a similar path to explore how CGP implements extensible variants. Keep in mind the concepts we covered for extensible records — you may be surprised to discover just how much of the same logic carries over, despite the differences between records and variants.
-
-## Hire Me
-
-P.S. Btw, [I am available for hire](/hire)!

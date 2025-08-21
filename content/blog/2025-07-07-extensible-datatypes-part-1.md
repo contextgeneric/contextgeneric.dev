@@ -1063,7 +1063,3 @@ In this first installment, we explored how CGP v0.4.2 empowers Rust developers t
 This approach dramatically simplifies configuration management, promotes code reuse, and opens the door to highly flexible, plugin-style architectures in Rust. Whether you're building minimal test contexts or full-featured production systems, CGP gives you the tools to scale your logic modularly and safely.
 
 In [Part 2 of this series, **Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/), we’ll shift gears to look at **extensible variants**, where CGP tackles the expression problem with a modular visitor pattern. If you've ever wanted to define interpreters, pattern match over generic enums, or evolve your data types without breaking existing logic — you won’t want to miss what’s coming next.
-
-## Hire Me
-
-P.S. Btw, [I am available for hire](/hire)!

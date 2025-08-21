@@ -904,8 +904,3 @@ Rather than tying our logic to rigid enums or bloated visitor traits, we’ve be
 This is more than a workaround for the expression problem — it’s a foundational shift in how we think about data structures and operations in Rust. With CGP, you no longer need to trade off between extensibility and type safety. You can add new variants without touching existing code, and build interpreters or transformers that evolve organically with your domain.
 
 In [Part 3 of this series, **Implementing Extensible Records**](/blog/extensible-datatypes-part-3), we will dive into the *underlying* implementation details of **extensible records**, and how the extensible builder pattern is built on top of it. We will cover the concepts of **partial records**, and the use of traits such as `BuildField` and `FinalizeField` to represent *row constraints*.
-
-
-## Hire Me
-
-P.S. Btw, [I am available for hire](/hire)!
