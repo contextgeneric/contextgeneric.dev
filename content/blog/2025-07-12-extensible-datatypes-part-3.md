@@ -53,28 +53,28 @@ To illustrate this problem, consider the following simple example:
 ```rust
 pub fn first_name_to_string<Context>(context: &Context) -> String
 where
-    Context: HasField<symbol!("first_name"), Value: Display>,
+    Context: HasField<Symbol!("first_name"), Value: Display>,
 {
     context.get_field(PhantomData).to_string()
 }
 
 pub fn last_name_to_string<Context>(context: &Context) -> String
 where
-    Context: HasField<symbol!("last_name"), Value: Display>,
+    Context: HasField<Symbol!("last_name"), Value: Display>,
 {
     context.get_field(PhantomData).to_string()
 }
 ```
 
-In this example, we define two functions that extract the `first_name` and `last_name` fields from a generic `Context` type and convert them to strings. The trait `HasField` is used to represent a **row constraint**, where field names are expressed as type-level strings using `symbol!`.
+In this example, we define two functions that extract the `first_name` and `last_name` fields from a generic `Context` type and convert them to strings. The trait `HasField` is used to represent a **row constraint**, where field names are expressed as type-level strings using `Symbol!`.
 
 Now, suppose we want to combine the output of these two functions into a full name string. We can write a function that explicitly concatenates the two results, like so:
 
 ```rust
 pub fn full_name_to_string<Context>(context: &Context) -> String
 where
-    Context: HasField<symbol!("first_name"), Value: Display>
-        + HasField<symbol!("last_name"), Value: Display>,
+    Context: HasField<Symbol!("first_name"), Value: Display>
+        + HasField<Symbol!("last_name"), Value: Display>,
 {
     format!(
         "{} {}",
@@ -102,8 +102,8 @@ Here, `concate_outputs` takes two functions and returns a new one that calls bot
 ```rust
 pub fn full_name_to_string<Context>(context: &Context) -> String
 where
-    Context: HasField<symbol!("first_name"), Value: Display>
-        + HasField<symbol!("last_name"), Value: Display>,
+    Context: HasField<Symbol!("first_name"), Value: Display>
+        + HasField<Symbol!("last_name"), Value: Display>,
 {
     let composed = concate_outputs(first_name_to_string, last_name_to_string);
     composed(context)
@@ -131,7 +131,7 @@ To see how this works, let’s begin by transforming two basic functions into CG
 #[cgp_new_provider]
 impl<Context, Code, Input> ComputerRef<Context, Code, Input> for FirstNameToString
 where
-    Context: HasField<symbol!("first_name"), Value: Display>,
+    Context: HasField<Symbol!("first_name"), Value: Display>,
 {
     type Output = String;
 
@@ -143,7 +143,7 @@ where
 #[cgp_new_provider]
 impl<Context, Code, Input> ComputerRef<Context, Code, Input> for LastNameToString
 where
-    Context: HasField<symbol!("last_name"), Value: Display>,
+    Context: HasField<Symbol!("last_name"), Value: Display>,
 {
     type Output = String;
 
@@ -203,7 +203,7 @@ pub trait HasField<Tag> {
 }
 ```
 
-This trait provides **read-only access** to individual fields of a struct, using `Tag` as the field identifier. The tag indicates which field we want to access, and can take one of two forms depending on the struct: `symbol!("first_name")` for named fields, or `Index<0>` for tuple-style fields. The associated type `Value` represents the type of the field being accessed, and the `get_field` method returns a reference to that field.
+This trait provides **read-only access** to individual fields of a struct, using `Tag` as the field identifier. The tag indicates which field we want to access, and can take one of two forms depending on the struct: `Symbol!("first_name")` for named fields, or `Index<0>` for tuple-style fields. The associated type `Value` represents the type of the field being accessed, and the `get_field` method returns a reference to that field.
 
 The use of `PhantomData<Tag>` as an argument may look unusual at first, but it plays a critical role in allowing Rust to infer which field is being requested. When multiple `HasField` implementations are available for a type, this allows the compiler to resolve the correct one.
 
@@ -220,18 +220,18 @@ pub struct Person {
 When the `HasField` macro is derived, it automatically generates implementations for both fields as follows.
 
 ```rust
-impl HasField<symbol!("first_name")> for Person {
+impl HasField<Symbol!("first_name")> for Person {
     type Value = String;
 
-    fn get_field(&self, _tag: PhantomData<symbol!("first_name")>) -> &Self::Value {
+    fn get_field(&self, _tag: PhantomData<Symbol!("first_name")>) -> &Self::Value {
         &self.first_name
     }
 }
 
-impl HasField<symbol!("last_name")> for Person {
+impl HasField<Symbol!("last_name")> for Person {
     type Value = String;
 
-    fn get_field(&self, _tag: PhantomData<symbol!("last_name")>) -> &Self::Value {
+    fn get_field(&self, _tag: PhantomData<Symbol!("last_name")>) -> &Self::Value {
         &self.last_name
     }
 }
@@ -367,11 +367,11 @@ The `build_field` method takes ownership of the current builder and consumes the
 To see how this works in practice, consider the implementation of `BuildField` for the `first_name` field of the `PartialPerson` struct:
 
 ```rust
-impl<F1: MapType> BuildField<symbol!("first_name")> for PartialPerson<IsNothing, F1> {
+impl<F1: MapType> BuildField<Symbol!("first_name")> for PartialPerson<IsNothing, F1> {
     type Value = String;
     type Output = PartialPerson<IsPresent, F1>;
 
-    fn build_field(self, _tag: PhantomData<symbol!("first_name")>, value: Self::Value) -> Self::Output {
+    fn build_field(self, _tag: PhantomData<Symbol!("first_name")>, value: Self::Value) -> Self::Output {
         PartialPerson {
             first_name: value,
             last_name: self.last_name,
@@ -380,18 +380,18 @@ impl<F1: MapType> BuildField<symbol!("first_name")> for PartialPerson<IsNothing,
 }
 ```
 
-In this implementation, we define `BuildField<symbol!("first_name")>` for a `PartialPerson` where the `first_name` field is absent (`IsNothing`) and the `last_name` field is parameterized generically as `F1`. This means the implementation will work regardless of whether `last_name` is present or not. We specify the `Value` as `String`, which matches the type of `first_name`, and set the `Output` type to a new `PartialPerson` where the first parameter has been updated to `IsPresent`. The second parameter remains unchanged to preserve the existing state of `last_name`.
+In this implementation, we define `BuildField<Symbol!("first_name")>` for a `PartialPerson` where the `first_name` field is absent (`IsNothing`) and the `last_name` field is parameterized generically as `F1`. This means the implementation will work regardless of whether `last_name` is present or not. We specify the `Value` as `String`, which matches the type of `first_name`, and set the `Output` type to a new `PartialPerson` where the first parameter has been updated to `IsPresent`. The second parameter remains unchanged to preserve the existing state of `last_name`.
 
 The method body constructs a new `PartialPerson` where the `first_name` field is now set to the given value, while the `last_name` field is carried over from the original builder.
 
 Similarly, we can define `BuildField` for the `last_name` field:
 
 ```rust
-impl<F0: MapType> BuildField<symbol!("last_name")> for PartialPerson<F0, IsNothing> {
+impl<F0: MapType> BuildField<Symbol!("last_name")> for PartialPerson<F0, IsNothing> {
     type Value = String;
     type Output = PartialPerson<F0, IsPresent>;
 
-    fn build_field(self, _tag: PhantomData<symbol!("last_name")>, value: Self::Value) -> Self::Output {
+    fn build_field(self, _tag: PhantomData<Symbol!("last_name")>, value: Self::Value) -> Self::Output {
         PartialPerson {
             first_name: self.first_name,
             last_name: value,
@@ -406,16 +406,16 @@ With these implementations in place, we can now use the `HasBuilder` and `BuildF
 
 ```rust
 Person::builder() // PartialPerson<IsNothing, IsNothing>
-    .build_field(PhantomData::<symbol!("first_name")>, "John".to_string()) // PartialPerson<IsPresent, IsNothing>
-    .build_field(PhantomData::<symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsPresent, IsPresent>
+    .build_field(PhantomData::<Symbol!("first_name")>, "John".to_string()) // PartialPerson<IsPresent, IsNothing>
+    .build_field(PhantomData::<Symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsPresent, IsPresent>
 ```
 
 Notably, the **order** in which fields are built does not matter. The type transformations ensure correctness regardless of sequencing, so the builder also works if we construct the `last_name` field first:
 
 ```rust
 Person::builder() // PartialPerson<IsNothing, IsNothing>
-    .build_field(PhantomData::<symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsNothing, IsPresent>
-    .build_field(PhantomData::<symbol!("first_name")>, "John".to_string()) // PartialPerson<IsPresent, IsPresent>
+    .build_field(PhantomData::<Symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsNothing, IsPresent>
+    .build_field(PhantomData::<Symbol!("first_name")>, "John".to_string()) // PartialPerson<IsPresent, IsPresent>
 ```
 
 This gives developers the freedom to build up records in any order while maintaining type safety.
@@ -461,8 +461,8 @@ With this in place, the build process becomes complete by appending a call to `f
 
 ```rust
 let person = Person::builder() // PartialPerson<IsNothing, IsNothing>
-    .build_field(PhantomData::<symbol!("first_name")>, "John".to_string()) // PartialPerson<IsPresent, IsNothing>
-    .build_field(PhantomData::<symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsPresent, IsPresent>
+    .build_field(PhantomData::<Symbol!("first_name")>, "John".to_string()) // PartialPerson<IsPresent, IsNothing>
+    .build_field(PhantomData::<Symbol!("last_name")>, "Smith".to_string()) // PartialPerson<IsPresent, IsPresent>
     .finalize_build(); // Person
 ```
 
@@ -529,11 +529,11 @@ The `Tag` and `Value` types in `TakeField` behave just like they do in `BuildFie
 As an example, here is the `TakeField` implementation for extracting the `first_name` field from a `PartialPerson`:
 
 ```rust
-impl<F1> TakeField<symbol!("first_name")> for PartialPerson<IsPresent, F1> {
+impl<F1> TakeField<Symbol!("first_name")> for PartialPerson<IsPresent, F1> {
     type Value = String;
     type Remainder = PartialPerson<IsNothing, F1>;
 
-    fn take_field(self, _tag: PhantomData<symbol!("first_name")>) -> (Self::Value, Self::Remainder) {
+    fn take_field(self, _tag: PhantomData<Symbol!("first_name")>) -> (Self::Value, Self::Remainder) {
         let value = self.first_name;
         let remainder = PartialPerson {
             first_name: (),
@@ -566,8 +566,8 @@ The `HasFields` trait includes a single associated type called `Fields`, which h
 ```rust
 impl HasFields for Person {
     type Fields = Product![
-        Field<symbol!("first_name"), String>,
-        Field<symbol!("last_name"), String>,
+        Field<Symbol!("first_name"), String>,
+        Field<Symbol!("last_name"), String>,
     ];
 }
 ```
@@ -682,7 +682,7 @@ let person = Person {
 
 let employee = Employee::builder() // PartialEmployee<IsNothing, IsNothing, IsNothing>
     .build_from(person) // PartialEmployee<IsNothing, IsPresent, IsPresent>
-    .build_field(PhantomData::<symbol!("employee_id")>, 1) // PartialEmployee<IsPresent, IsPresent, IsPresent>
+    .build_field(PhantomData::<Symbol!("employee_id")>, 1) // PartialEmployee<IsPresent, IsPresent, IsPresent>
     .finalize_build(); // Person
 ```
 
@@ -692,28 +692,28 @@ When we call `build_from`, several steps take place behind the scenes:
   * The `Person` type implements `HasFields::Fields` as:
     ```rust
     Product![
-        Field<symbol!("first_name"), String>,
-        Field<symbol!("last_name"), String>,
+        Field<Symbol!("first_name"), String>,
+        Field<Symbol!("last_name"), String>,
     ]
     ```
   * `Person` also implements `IntoBuilder`, producing `PartialPerson<IsPresent, IsPresent>` as its `Builder`.
 * `Person::Fields` must then implement `FieldsBuilder<PartialPerson<IsPresent, IsPresent>, PartialEmployee<IsNothing, IsNothing, IsNothing>>`.
   * The first `Cons` in the list matches:
-    * `Tag` is `symbol!("first_name")`
+    * `Tag` is `Symbol!("first_name")`
     * `Value` is `String`
-    * `RestFields` is `Cons<Field<symbol!("last_name"), String>, Nil>`
-  * `PartialPerson<IsPresent, IsPresent>` implements `TakeField<symbol!("first_name"), Value = String>`, resulting in:
+    * `RestFields` is `Cons<Field<Symbol!("last_name"), String>, Nil>`
+  * `PartialPerson<IsPresent, IsPresent>` implements `TakeField<Symbol!("first_name"), Value = String>`, resulting in:
     * A `Remainder` of `PartialPerson<IsNothing, IsPresent>`
-  * `PartialEmployee<IsNothing, IsNothing, IsNothing>` implements `BuildField<symbol!("first_name"), Value = String>`, producing:
+  * `PartialEmployee<IsNothing, IsNothing, IsNothing>` implements `BuildField<Symbol!("first_name"), Value = String>`, producing:
     * An `Output` of `PartialEmployee<IsNothing, IsPresent, IsNothing>`
-* The remaining fields, `Cons<Field<symbol!("last_name"), String>, Nil>`, must now implement `FieldsBuilder<PartialPerson<IsNothing, IsPresent>, PartialEmployee<IsNothing, IsPresent, IsNothing>>`.
+* The remaining fields, `Cons<Field<Symbol!("last_name"), String>, Nil>`, must now implement `FieldsBuilder<PartialPerson<IsNothing, IsPresent>, PartialEmployee<IsNothing, IsPresent, IsNothing>>`.
   * This matches:
-    * `Tag` is `symbol!("last_name")`
+    * `Tag` is `Symbol!("last_name")`
     * `Value` is `String`
     * `RestFields` is `Nil`
-  * `PartialPerson<IsNothing, IsPresent>` implements `TakeField<symbol!("last_name"), Value = String>`, giving:
+  * `PartialPerson<IsNothing, IsPresent>` implements `TakeField<Symbol!("last_name"), Value = String>`, giving:
     * A `Remainder` of `PartialPerson<IsNothing, IsNothing>`
-  * `PartialEmployee<IsNothing, IsPresent, IsNothing>` implements `BuildField<symbol!("last_name"), Value = String>`, yielding:
+  * `PartialEmployee<IsNothing, IsPresent, IsNothing>` implements `BuildField<Symbol!("last_name"), Value = String>`, yielding:
     * An `Output` of `PartialEmployee<IsNothing, IsPresent, IsPresent>`
 * Finally, the `Nil` case implements `FieldsBuilder<PartialPerson<IsNothing, IsNothing>, PartialEmployee<IsNothing, IsPresent, IsPresent>>`, which concludes by returning:
   * `PartialEmployee<IsNothing, IsPresent, IsPresent>` as the final `Output`.
@@ -791,7 +791,7 @@ let employee = BuildWithHandlers::<
     Employee,
     Product![
         BuildAndMerge<BuildPerson>,
-        BuildAndSetField<symbol!("employee_id"), BuildEmployeeId>
+        BuildAndSetField<Symbol!("employee_id"), BuildEmployeeId>
     ],
 >::compute(&(), PhantomData::<()>, ());
 ```
@@ -799,7 +799,7 @@ let employee = BuildWithHandlers::<
 In this example, we tell `BuildWithHandlers` that the final struct we want to build is `Employee`. We then provide a list of two builder handlers:
 
 1. `BuildAndMerge<BuildPerson>` wraps the `BuildPerson` provider. It first calls the provider to build a `Person`, then uses `BuildFrom` to merge the resulting fields into the `PartialEmployee` builder.
-2. `BuildAndSetField<symbol!("employee_id"), BuildEmployeeId>` wraps the `BuildEmployeeId` provider. It calls the provider to get the `u64` value and then uses `BuildField` to assign that value to the `employee_id` field.
+2. `BuildAndSetField<Symbol!("employee_id"), BuildEmployeeId>` wraps the `BuildEmployeeId` provider. It calls the provider to get the `u64` value and then uses `BuildField` to assign that value to the `employee_id` field.
 
 We invoke `compute` on the specialized `BuildWithHandlers`, using unit types `()` as dummy arguments for `Context`, `Code`, and `Input`. In real-world applications, these types would typically carry contextual information such as configurations or runtime.
 

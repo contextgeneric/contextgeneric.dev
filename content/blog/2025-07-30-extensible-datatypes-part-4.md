@@ -71,18 +71,18 @@ pub enum Shape {
 Using the `#[derive(FromVariant)]` macro, the following trait implementations will be automatically generated:
 
 ```rust
-impl FromVariant<symbol!("Circle")> for Shape {
+impl FromVariant<Symbol!("Circle")> for Shape {
     type Value = Circle;
 
-    fn from_variant(_tag: PhantomData<symbol!("Circle")>, value: Self::Value) -> Self {
+    fn from_variant(_tag: PhantomData<Symbol!("Circle")>, value: Self::Value) -> Self {
         Shape::Circle(value)
     }
 }
 
-impl FromVariant<symbol!("Rectangle")> for Shape {
+impl FromVariant<Symbol!("Rectangle")> for Shape {
     type Value = Rectangle;
 
-    fn from_variant(_tag: PhantomData<symbol!("Rectangle")>, value: Self::Value) -> Self {
+    fn from_variant(_tag: PhantomData<Symbol!("Rectangle")>, value: Self::Value) -> Self {
         Shape::Rectangle(value)
     }
 }
@@ -200,11 +200,11 @@ The `extract_field` method consumes the value and returns a `Result`, where a su
 To understand how `ExtractField` works in practice, let’s look at an implementation for extracting the `Circle` variant from a `PartialShape`:
 
 ```rust
-impl<F1: MapType> ExtractField<symbol!("Circle")> for PartialShape<IsPresent, F1> {
+impl<F1: MapType> ExtractField<Symbol!("Circle")> for PartialShape<IsPresent, F1> {
     type Value = Circle;
     type Remainder = PartialShape<IsVoid, F1>;
 
-    fn extract_field(self, _tag: PhantomData<symbol!("Circle")>) ->
+    fn extract_field(self, _tag: PhantomData<Symbol!("Circle")>) ->
         Result<Self::Value, Self::Remainder>
     {
         match self {
@@ -229,11 +229,11 @@ With `ExtractField`, we can now incrementally extract and match against variants
 pub fn compute_area(shape: Shape) -> f64 {
     match shape
         .to_extractor() // PartialShape<IsPresent, IsPresent>
-        .extract_field(PhantomData::<symbol!("Circle")>)
+        .extract_field(PhantomData::<Symbol!("Circle")>)
     {
         Ok(circle) => PI * circle.radius * circle.radius,
         // PartialShape<IsVoid, IsPresent>
-        Err(remainder) => match remainder.extract_field(PhantomData::<symbol!("Rectangle")>) {
+        Err(remainder) => match remainder.extract_field(PhantomData::<Symbol!("Rectangle")>) {
             Ok(rectangle) => rectangle.width * rectangle.height,
             // PartialShape<IsVoid, IsVoid>
             // No need to match on `Err`
@@ -260,11 +260,11 @@ To better understand what we are trying to achieve, consider the following pseud
 pub fn compute_area(shape: Shape) -> Result<f64, Infallible> {
     let remainder = shape
         .to_extractor()
-        .extract_field(PhantomData::<symbol!("Circle")>)
+        .extract_field(PhantomData::<Symbol!("Circle")>)
         .map(|circle| PI * circle.radius * circle.radius)⸮;
 
     let remainder = remainder
-        .extract_field(PhantomData::<symbol!("Rectangle")>)
+        .extract_field(PhantomData::<Symbol!("Rectangle")>)
         .map(|rectangle| rectangle.width * rectangle.height)⸮;
 
     match remainder {}
@@ -340,12 +340,12 @@ With `FinalizeExtractResult`, any result value can call `finalize_extract_result
 pub fn compute_area(shape: Shape) -> f64 {
     match shape
         .to_extractor()
-        .extract_field(PhantomData::<symbol!("Circle")>)
+        .extract_field(PhantomData::<Symbol!("Circle")>)
     {
         Ok(circle) => PI * circle.radius * circle.radius,
         Err(remainder) => {
             let rectangle = remainder
-                .extract_field(PhantomData::<symbol!("Rectangle")>)
+                .extract_field(PhantomData::<Symbol!("Rectangle")>)
                 .finalize_extract_result();
 
             rectangle.width * rectangle.height
@@ -373,8 +373,8 @@ For example, the `HasFields` implementation for the `Shape` enum is defined as f
 ```rust
 impl HasFields for Shape {
     type Fields = Sum![
-        Field<symbol!("Circle"), Circle>,
-        Field<symbol!("Rectangle"), Rectangle>,
+        Field<Symbol!("Circle"), Circle>,
+        Field<Symbol!("Rectangle"), Rectangle>,
     ];
 }
 ```
@@ -386,9 +386,9 @@ For example, the `Sum!` expression above desugars to:
 ```rust
 impl HasFields for Shape {
     type Fields = Either<
-        Field<symbol!("Circle"), Circle>,
+        Field<Symbol!("Circle"), Circle>,
         Either<
-            Field<symbol!("Rectangle"), Rectangle>,
+            Field<Symbol!("Rectangle"), Rectangle>,
             Void,
         >,
     >;
@@ -521,8 +521,8 @@ First, the blanket implementation of `CanUpcast` verifies several conditions:
 * The source type `Shape` must implement `HasFields`, with the `Fields` type resolving to:
   ```rust
   Sum![
-      Field<symbol!("Circle"), Circle>,
-      Field<symbol!("Rectangle"), Rectangle>,
+      Field<Symbol!("Circle"), Circle>,
+      Field<Symbol!("Rectangle"), Rectangle>,
   ]
   ```
 * `Shape` must also implement `HasExtractor`, with its associated `Extractor` type being `PartialShape<IsPresent, IsPresent>`.
@@ -531,17 +531,17 @@ First, the blanket implementation of `CanUpcast` verifies several conditions:
 
 Next, the `FieldsExtractor` implementation for the head of the sum begins processing:
 
-* The current `Tag` is `symbol!("Circle")`, and the associated `Value` is of type `Circle`.
+* The current `Tag` is `Symbol!("Circle")`, and the associated `Value` is of type `Circle`.
 * The `Source` is `PartialShape<IsPresent, IsPresent>`, and the `Target` is `ShapePlus`.
-* The source implements `ExtractField<symbol!("Circle")>`, which succeeds with `Circle` as the extracted value and `PartialShape<IsVoid, IsPresent>` as the remainder.
-* The target `ShapePlus` implements `FromVariant<symbol!("Circle")>`, again with `Circle` being the `Value` type.
+* The source implements `ExtractField<Symbol!("Circle")>`, which succeeds with `Circle` as the extracted value and `PartialShape<IsVoid, IsPresent>` as the remainder.
+* The target `ShapePlus` implements `FromVariant<Symbol!("Circle")>`, again with `Circle` being the `Value` type.
 
 The extractor then proceeds to the next variant in the sum:
 
-* The current `Tag` is `symbol!("Rectangle")`, with `Rectangle` as the `Value`.
+* The current `Tag` is `Symbol!("Rectangle")`, with `Rectangle` as the `Value`.
 * The updated `Source` is now `PartialShape<IsVoid, IsPresent>`, and the `Target` remains `ShapePlus`.
-* This source implements `ExtractField<symbol!("Rectangle")>`, yielding `Rectangle` as the value and `PartialShape<IsVoid, IsVoid>` as the final remainder.
-* The target once again supports `FromVariant<symbol!("Rectangle")>` using the matching `Rectangle` type.
+* This source implements `ExtractField<Symbol!("Rectangle")>`, yielding `Rectangle` as the value and `PartialShape<IsVoid, IsVoid>` as the final remainder.
+* The target once again supports `FromVariant<Symbol!("Rectangle")>` using the matching `Rectangle` type.
 * At the end of the chain, the `Void` variant is reached. The `FieldsExtractor` implementation for `Void` simply returns the remainder, which in this case is `PartialShape<IsVoid, IsVoid>`.
 
 What this process shows is that the `Upcast` operation works by examining each variant in the source type `Shape`, extracting each present value, and reinserting it into the target type `ShapePlus`. Once all fields have been processed, the remaining variants are guaranteed to be uninhabited. At that point, we can safely discharge the remainder using the `FinalizeExtract` trait.
@@ -599,7 +599,7 @@ let area = match shape_plus.downcast(PhantomData::<Shape>) {
         Shape::Rectangle(rectangle) => rectangle.width * rectangle.height,
     },
     // PartialShapePlus<IsPresent, IsVoid, IsVoid>
-    Err(remainder) => match remainder.extract_field(PhantomData::<symbol!("Triangle")>) {
+    Err(remainder) => match remainder.extract_field(PhantomData::<Symbol!("Triangle")>) {
         Ok(triangle) => triangle.base * triangle.height / 2.0,
     },
 };
@@ -717,15 +717,15 @@ With `CircleArea` and `RectangleArea` defined, we can create a `ComputeShapeArea
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers::<
     Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<CircleArea>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<RectangleArea>>,
+        ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<CircleArea>>,
+        ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<RectangleArea>>,
     ],
 >;
 ```
 
-Rather than passing providers directly to `MatchWithHandlers`, we wrap them with helper handlers. The `ExtractFieldAndHandle` handler extracts the variant value associated with a specific tag, such as `symbol!("Circle")`, and forwards it to the inner handler `HandleFieldValue<CircleArea>`.
+Rather than passing providers directly to `MatchWithHandlers`, we wrap them with helper handlers. The `ExtractFieldAndHandle` handler extracts the variant value associated with a specific tag, such as `Symbol!("Circle")`, and forwards it to the inner handler `HandleFieldValue<CircleArea>`.
 
-The inner handler `HandleFieldValue` receives the input as `Field<symbol!("Circle"), Circle>`, extracts the `Circle` value, and passes it to `CircleArea`. We will explore the implementations of `ExtractFieldAndHandle` and `HandleFieldValue` shortly, but first, let's see how `ComputeShapeArea` is used.
+The inner handler `HandleFieldValue` receives the input as `Field<Symbol!("Circle"), Circle>`, extracts the `Circle` value, and passes it to `CircleArea`. We will explore the implementations of `ExtractFieldAndHandle` and `HandleFieldValue` shortly, but first, let's see how `ComputeShapeArea` is used.
 
 As a whole, the instantiated `MatchWithHandlers` implements the `Computer` trait. We can call `compute` on it using `()` for both the `Context` and `Code` types like this:
 
@@ -742,11 +742,11 @@ Under the hood, `MatchWithHandlers` implements `ComputeShapeArea` roughly as the
 let remainder = shape.to_extractor();
 
 let remainder = remainder
-    .extract_field(symbol!("Circle"))
+    .extract_field(Symbol!("Circle"))
     .map(|circle| CircleArea::compute(&(), PhantomData::<()>, circle))⸮;
 
 let remainder = remainder
-    .extract_field(symbol!("Rectangle"))
+    .extract_field(Symbol!("Rectangle"))
     .map(|rectangle| RectangleArea::compute(&(), PhantomData::<()>, rectangle))⸮;
 
 remainder.finalize_extract();
@@ -794,7 +794,7 @@ pub enum FooBar {
 }
 ```
 
-Here, both `Foo` and `Bar` hold `u64` values. `ExtractFieldAndHandle` will pass these as `Field<symbol!("Foo"), u64>` and `Field<symbol!("Bar"), u64>` respectively, so the provider can handle them differently by matching on the `Tag`.
+Here, both `Foo` and `Bar` hold `u64` values. `ExtractFieldAndHandle` will pass these as `Field<Symbol!("Foo"), u64>` and `Field<Symbol!("Bar"), u64>` respectively, so the provider can handle them differently by matching on the `Tag`.
 
 ### `HandleFieldValue`
 
@@ -828,19 +828,19 @@ Now that we've understood `ExtractFieldAndHandle` and `HandleFieldValue`, let’
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers::<
     Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<CircleArea>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<RectangleArea>>,
+        ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<CircleArea>>,
+        ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<RectangleArea>>,
     ],
 >;
 ```
 
-* `MatchWithHandlers` uses `HasExtractor` to convert `Shape` into `PartialShape<IsPresent, IsPresent>`, then passes it to `ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<CircleArea>>`.
+* `MatchWithHandlers` uses `HasExtractor` to convert `Shape` into `PartialShape<IsPresent, IsPresent>`, then passes it to `ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<CircleArea>>`.
 * `ExtractFieldAndHandle` attempts to extract the `Circle` variant from `PartialShape<IsPresent, IsPresent>`:
-  * If successful, the extracted value is passed as `Field<symbol!("Circle"), Circle>` to `HandleFieldValue<CircleArea>`.
+  * If successful, the extracted value is passed as `Field<Symbol!("Circle"), Circle>` to `HandleFieldValue<CircleArea>`.
     * `HandleFieldValue<CircleArea>` unwraps the `Circle` value and passes it to `CircleArea`.
   * Otherwise, the remainder `PartialShape<IsVoid, IsPresent>` is returned as an error.
 * Next, `ExtractFieldAndHandle` tries to extract the `Rectangle` variant from `PartialShape<IsVoid, IsPresent>`:
-  * If successful, the extracted value is passed as `Field<symbol!("Rectangle"), Rectangle>` to `HandleFieldValue<RectangleArea>`.
+  * If successful, the extracted value is passed as `Field<Symbol!("Rectangle"), Rectangle>` to `HandleFieldValue<RectangleArea>`.
     * `HandleFieldValue<RectangleArea>` unwraps the `Rectangle` and passes it to `RectangleArea`.
   * Otherwise, the remainder `PartialShape<IsVoid, IsVoid>` is returned as an error.
 * Finally, `MatchWithHandlers` calls `FinalizeExtract` on `PartialShape<IsVoid, IsVoid>` to assert that the remainder is empty and discharge the impossible case.
@@ -854,8 +854,8 @@ Before implementing `MatchWithValueHandlers`, we first need to unify the variant
 ```rust
 pub type ComputeShapeArea = MatchWithHandlers<
     Product![
-        ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
-        ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
+        ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<ComputeArea>>,
+        ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
     ],
 >;
 ```
@@ -901,8 +901,8 @@ To simplify `ComputeShapeArea` further, we need a way to automatically generate 
 
 ```rust
 Product![
-    ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
-    ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
+    ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<ComputeArea>>,
+    ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
 ]
 ```
 
@@ -910,8 +910,8 @@ Recall that `Shape` implements the `HasFields` trait, which exposes its variants
 
 ```rust
 Sum![
-    Field<symbol!("Circle"), Circle>,
-    Field<symbol!("Rectangle"), Rectangle>,
+    Field<Symbol!("Circle"), Circle>,
+    Field<Symbol!("Rectangle"), Rectangle>,
 ]
 ```
 
@@ -1016,8 +1016,8 @@ Under the hood, this type alias resolves to `MatchWithHandlers` through the foll
 * That mapping exists because `Shape` implements `HasFieldHandlers<HandleFieldValue<ComputeArea>>`. As we saw earlier, this expands to:
   ```rust
   Product![
-      ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<ComputeArea>>,
-      ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
+      ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<ComputeArea>>,
+      ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
   ]
   ```
 * This type-level list is then passed to `MatchWithHandlers`, which performs the variant dispatch using the logic we’ve already explored.
@@ -1240,13 +1240,13 @@ With `extractor_ref`, it is now possible to extract data from a borrowed `Shape`
 Fortunately, beyond the partial-ref variants and the `HasExtractorRef` trait, most other traits can be reused as if we were working with owned values. This works because `PartialRefShape` holds what are effectively "owned" variant values in the form of references like `&'a Circle` and `&'a Rectangle`. For example, we can implement `ExtractField` for `PartialRefShape` like this:
 
 ```rust
-impl<'a, F1: MapType> ExtractField<symbol!("Circle")> for PartialRefShape<'a, IsPresent, F1> {
+impl<'a, F1: MapType> ExtractField<Symbol!("Circle")> for PartialRefShape<'a, IsPresent, F1> {
     type Value = &'a Circle;
     type Remainder = PartialShape<'a, IsVoid, F1>;
 
     fn extract_field(
         self,
-        _tag: PhantomData<symbol!("Circle")>,
+        _tag: PhantomData<Symbol!("Circle")>,
     ) -> Result<Self::Value, Self::Remainder> {
         match self {
             PartialRefShape::Circle(value) => Ok(value),
@@ -1398,8 +1398,8 @@ Next, `MatchWithFieldHandlersInputsRef` is invoked with `Input` as `Shape` and `
 
 ```rust
 Product![
-    ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
-    ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
 ]
 ```
 
@@ -1407,15 +1407,15 @@ The delegate entry maps to `PromoteRef<MatchWithHandlersRef<Input::Handlers>>`, 
 
 ```rust
 PromoteRef<MatchWithHandlersRef<Product![
-    ExtractFieldAndHandle<symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
-    ExtractFieldAndHandle<symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
+    ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<PromoteRef<ComputeAreaRef>>>,
 ]>>
 ```
 
 In order to implement `ComputerRef`, `PromoteRef<MatchWithHandlersRef<Input::Handlers>>` requires `MatchWithHandlersRef<Input::Handlers>` to implement `Computer`. For `MatchWithHandlersRef<Input::Handlers>` to implement `Computer`, its inner provider `HandleFieldValue<PromoteRef<ComputeAreaRef>>` must satisfy the following constraints:
 
-* `Computer<(), (), Field<symbol!("Circle"), &Circle>>`
-* `Computer<(), (), Field<symbol!("Rectangle"), &Rectangle>>`
+* `Computer<(), (), Field<Symbol!("Circle"), &Circle>>`
+* `Computer<(), (), Field<Symbol!("Rectangle"), &Rectangle>>`
 
 After `HandleFieldValue` unwraps the actual field values, the inner provider `PromoteRef<ComputeAreaRef>` must implement:
 

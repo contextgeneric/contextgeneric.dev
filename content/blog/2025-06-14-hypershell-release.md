@@ -105,10 +105,10 @@ For instance, the previous "hello world" program can be rewritten as follows:
 ```rust
 pub type Program = Pipe<Product![
     SimpleExec<
-        StaticArg<symbol!("echo")>,
+        StaticArg<Symbol!("echo")>,
         WithStaticArgs<Product![
-            symbol!("hello"),
-            symbol!("world!"),
+            Symbol!("hello"),
+            Symbol!("world!"),
         ]>,
     >,
     StreamToStdout,
@@ -119,9 +119,9 @@ Compared to the "prettified" version, the raw Hypershell syntax is slightly more
 
 You can also see that the `WithStaticArgs[...]` syntax **desugars** to `WithStaticArgs<Product![...]>.` With `hypershell!`, syntax that accepts a variable number of arguments can use the `[]` shorthand to wrap the inner arguments within `Product!`. This results in cleaner, more concise syntax, making Hypershell programs more readable.
 
-Finally, you might notice that all occurrences of strings are wrapped inside the **`symbol!`** macro from CGP. This is because Hypershell programs are types, but string literals are value-level expressions. The `symbol!` macro allows you to turn string literals into _types_, enabling their use within type expressions.
+Finally, you might notice that all occurrences of strings are wrapped inside the **`Symbol!`** macro from CGP. This is because Hypershell programs are types, but string literals are value-level expressions. The `Symbol!` macro allows you to turn string literals into _types_, enabling their use within type expressions.
 
-Behind the scenes, `symbol!` functions similarly to **const-generics** in Rust. However, since Rust doesn't yet support using `String` or `&str` as const-generic arguments, the macro desugars the string literal into a type-level list of `char`, which *can* be used with const-generics.
+Behind the scenes, `Symbol!` functions similarly to **const-generics** in Rust. However, since Rust doesn't yet support using `String` or `&str` as const-generic arguments, the macro desugars the string literal into a type-level list of `char`, which *can* be used with const-generics.
 
 With these three syntax transformations, we can now better understand how the `hypershell!` macro works. In Hypershell's DSL architecture, the `hypershell!` macro provides the _surface syntax_ of the DSL, which is then desugared into Rust types that serve as the _abstract syntax_.
 
@@ -746,7 +746,7 @@ pub trait HasCommandArgType {
 
 The `CommandArgExtractor` component provides an `extract_command_arg` method to extract a command-line argument from an `Arg` code type. This method returns an abstract `CommandArg` type, which can be instantiated with concrete types like `PathBuf` or `String`.
 
-For example, given code like `SimpleExec<StaticArg<symbol!("echo")>, ...>`, the `Arg` type passed to `CanExtractCommandArg` would be `StaticArg<symbol!("echo")>`. This means that for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<symbol!("echo")>>`.
+For example, given code like `SimpleExec<StaticArg<Symbol!("echo")>, ...>`, the `Arg` type passed to `CanExtractCommandArg` would be `StaticArg<Symbol!("echo")>`. This means that for `HandleSimpleExec` to implement `Handler<Context, SimpleExec<StaticArg<Symbol!("echo")>, ...>, Input>`, it requires `Context` to implement `CanExtractCommandArg<StaticArg<Symbol!("echo")>>`.
 
 Since `extract_command_arg` returns an abstract `CommandArg` type, `HandleSimpleExec` also has an additional constraint: `Context::CommandArg: AsRef<OsStr> + Send`. This implies that the context can instantiate `CommandArg` with any concrete type that implements `AsRef<OsStr> + Send`, such as `PathBuf` or `OsString`.
 
@@ -771,25 +771,25 @@ To see this in action, consider the example code:
 
 ```rust
 SimpleExec<
-    StaticArg<symbol!("echo")>,
+    StaticArg<Symbol!("echo")>,
     WithStaticArgs<Product![
-        symbol!("hello"),
-        symbol!("world!"),
+        Symbol!("hello"),
+        Symbol!("world!"),
     ]>,
 >
 ```
 
-The `Args` type given to `HandleSimpleExec` would be `WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>`. This means the following constraint needs to be satisfied:
+The `Args` type given to `HandleSimpleExec` would be `WithStaticArgs<Product![Symbol!("hello"), Symbol!("world!")]>`. This means the following constraint needs to be satisfied:
 
 ```rust
-Context: CanUpdateCommand<WithStaticArgs<Product![symbol!("hello"), symbol!("world!")]>>
+Context: CanUpdateCommand<WithStaticArgs<Product![Symbol!("hello"), Symbol!("world!")]>>
 ```
 
 To keep our focus on the core implementation of `HandleSimpleExec`, we'll omit the detailed workings of argument updates. At a high level, the main idea is to perform a **type-level iteration** on the list passed to `WithStaticArgs`. So, the implementation would be broken down into two smaller constraints:
 
 ```rust
-Context: CanUpdateCommand<StaticArg<symbol!("hello")>>
-    + CanUpdateCommand<StaticArg<symbol!("world!")>>
+Context: CanUpdateCommand<StaticArg<Symbol!("hello")>>
+    + CanUpdateCommand<StaticArg<Symbol!("world!")>>
 ```
 
 Once we reach each individual argument, we then use `CanExtractCommandArg` to extract the argument and subsequently call [`Command::arg`](https://docs.rs/tokio/latest/tokio/process/struct.Command.html#method.arg) to add it to the `Command`.

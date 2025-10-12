@@ -621,15 +621,15 @@ delegate_components! {
                 new ToLispComponents {
                     MathExpr: DispatchToLisp,
                     Literal<Value>: LiteralToLisp,
-                    Plus<MathExpr>: BinaryOpToLisp<symbol!("+")>,
-                    Times<MathExpr>: BinaryOpToLisp<symbol!("*")>,
+                    Plus<MathExpr>: BinaryOpToLisp<Symbol!("+")>,
+                    Times<MathExpr>: BinaryOpToLisp<Symbol!("*")>,
                 }
             >,
     }
 }
 ```
 
-Here, we map `Plus<MathExpr>` and `Times<MathExpr>` to the same `BinaryOpToLisp` provider, each with a different `symbol!` type-level string.
+Here, we map `Plus<MathExpr>` and `Times<MathExpr>` to the same `BinaryOpToLisp` provider, each with a different `Symbol!` type-level string.
 
 Thanks to CGP’s expressive delegation system and powerful match-based dispatching via `MatchWithValueHandlersRef`, this setup allows us to write reusable, composable transformation logic. Rather than duplicating the same structure across multiple providers, we define it once in a generic form and let the type system handle the rest.
 
@@ -658,13 +658,13 @@ delegate_components! {
         ComputerRefComponent: UseDelegate<
             new PlusHandlers {
                 Eval: EvalAdd,
-                ToLisp: BinaryOpToLisp<symbol!("+")>,
+                ToLisp: BinaryOpToLisp<Symbol!("+")>,
             }>
     }
 }
 ```
 
-Here, we use `delegate_components!` to define a new provider called `HandlePlus`. Inside it, we delegate the `ComputerRefComponent` implementation to `UseDelegate`, which performs `Code`-based dispatching based on the newly created dispatch table `PlusHandlers`. If the `Code` is `Eval`, it uses `EvalAdd`. If it’s `ToLisp`, it uses `BinaryOpToLisp<symbol!("+")>`.
+Here, we use `delegate_components!` to define a new provider called `HandlePlus`. Inside it, we delegate the `ComputerRefComponent` implementation to `UseDelegate`, which performs `Code`-based dispatching based on the newly created dispatch table `PlusHandlers`. If the `Code` is `Eval`, it uses `EvalAdd`. If it’s `ToLisp`, it uses `BinaryOpToLisp<Symbol!("+")>`.
 
 Thanks to CGP’s blanket implementations, `HandlePlus` automatically becomes a valid `ComputerRef` provider for `Plus<Expr>` — delegating to the appropriate providers based on `Code`.
 
@@ -696,7 +696,7 @@ delegate_components! {
         ComputerRefComponent: UseDelegate<
             new TimesHandlers {
                 Eval: EvalMultiply,
-                ToLisp: BinaryOpToLisp<symbol!("*")>,
+                ToLisp: BinaryOpToLisp<Symbol!("*")>,
             }>
     }
 }
