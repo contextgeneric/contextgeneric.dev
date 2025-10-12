@@ -10,14 +10,9 @@ sort_by = "weight"
 
 # Announcement
 
-I am thrilled to announce the release of `cgp` [v0.4.2](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), along with full support for using [**extensible records and variants**](/blog/extensible-datatypes-part-1/) in Rust!
+I am thrilled to announce the release of [**CGP v0.5.0**](/blog/v0-5-0-release/)! This new release includes many exciting features and improvements, including auto dispatchers with `#[cgp_auto_dispatch]`, extensible datatype improvements, monadic computation, emulation of return type notation (RTN), sneak preview of `cgp-serde`, and more.
 
-Read the blog series **Programming Extensible Data Types in Rust with CGP** for more details:
-
-- [**Part 1: Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1/)
-- [**Part 2: Modular Interpreters and Extensible Visitors**](/blog/extensible-datatypes-part-2/)
-- [**Part 3: Implementing Extensible Records**](/blog/extensible-datatypes-part-3/)
-- [**Part 4: Implementing Extensible Variants**](/blog/extensible-datatypes-part-4/)
+[Read the announcement blog post](/blog/v0-5-0-release/) to find out more.
 
 # Overview
 
