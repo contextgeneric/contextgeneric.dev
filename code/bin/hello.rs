@@ -14,28 +14,25 @@ pub trait HasName {
 }
 
 // Implement `Greeter` that is generic over `Context`
-#[cgp_new_provider]
-impl<Context> Greeter<Context> for GreetHello
+#[cgp_impl(new GreetHello)]
+impl<Context> Greeter for Context
 where
     Context: HasName, // Inject the `name` dependency from `Context`
 {
-    fn greet(context: &Context) {
-        // `self` is replaced by `context` inside providers
-        println!("Hello, {}!", context.name());
+    fn greet(&self) {
+        println!("Hello, {}!", self.name());
     }
 }
 
 // A concrete context that uses CGP components
-#[cgp_context]
 #[derive(HasField)] // Deriving `HasField` automatically implements `HasName`
 pub struct Person {
     pub name: String,
 }
 
-// Compile-time wiring and checking of CGP components
-delegate_and_check_components! {
-    CanUsePerson for Person;
-    PersonComponents {
+// Compile-time wiring of CGP components
+delegate_components! {
+    Person {
         GreeterComponent: GreetHello, // Use `GreetHello` to provide `Greeter`
     }
 }
