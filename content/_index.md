@@ -10,9 +10,12 @@ sort_by = "weight"
 
 # Announcement
 
-I am thrilled to announce the release of [**CGP v0.5.0**](/blog/v0-5-0-release/)! This new release includes many exciting features and improvements, including auto dispatchers with `#[cgp_auto_dispatch]`, extensible datatype improvements, monadic computation, emulation of return type notation (RTN), sneak preview of `cgp-serde`, and more.
+I’m excited to announce the release of [**CGP v0.6.0**](/blog/v0-6-0-release/)!
+This version introduces major ergonomic improvements that make provider and context implementations simpler and more intuitive to write.
 
-[Read the announcement blog post](/blog/v0-5-0-release/) to find out more.
+The new `#[cgp_impl]` and `#[cgp_inherit]` macros replace `#[cgp_provider]` and `#[cgp_context]`, offering cleaner syntax and greatly improving the readability of CGP code.
+
+[Read the announcement blog post](/blog/v0-6-0-release/) to find out more.
 
 # Overview
 
