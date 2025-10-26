@@ -556,3 +556,48 @@ where
 ```
 
 Essentially, `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`. Aside from the difference in the lookup "key", the implementation is similar to the earlier blanket implementation for `CanSerializeValue`.
+
+# Capabilities-Enabled Deserialization Demo
+
+Now that we have demonstrated how `cgp-serde` enables modular serialization, let's also look at how `cgp-serde` enables the use case explained in the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. In particular, we will demonstrate how we can implement a deserializer for `&'a T` using an arena allocator that is retrieved via **dependency injection** from the context.
+
+## Arena Deserializer
+
+To demonstrate the use of arena allocator, we will make use of the [`typed-arena`](https://docs.rs/typed-arena/latest/typed_arena/) crate to allocate memory using the [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) trait.
+
+We will first define an *auto getter* trait to retrieve an `Arena` from the context:
+
+```rust
+#[cgp_auto_getter]
+pub trait HasArena<'a, T: 'a> {
+    fn arena(&self) -> &&'a Arena<T>;
+}
+```
+
+The `HasArena` trait is automatically implemented for any `Context` type, if it derives `HasField` and contains an `arena` field with the field type being `&'a Arena<T>`. The nested reference is used here, because we need an explicit lifetime to work with the `Arena` type provided by `typed-arena`.
+
+Next, we can make use of `HasArena` to retrieve the arena value from a generic context in our implementation of `ValueDeserializer`:
+
+```rust
+#[cgp_impl(new DeserializeAndAllocate)]
+impl<'de, 'a, Context, Value> ValueDeserializer<'de, &'a Value> for Context
+where
+    Context: HasArena<'a, Value> + CanDeserializeValue<'de, Value>,
+{
+    fn deserialize<D>(&self, deserializer: D) -> Result<&'a Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = self.deserialize(deserializer)?;
+        let value = self.arena().alloc(value);
+
+        Ok(value)
+    }
+}
+```
+
+We define a new `DeserializeAndAllocate` that implements `ValueDeserializer` for any `&'a Value` type. To support that, it requires the `Context` to implement `HasArena<'a, Value>`, in addition to requiring the context to implement `CanDeserializeValue` for the owned `Value` type.
+
+Inside the method body, we first use the `context` to deserialize an owned version of the value. We then call `self.arena()` to get the arena allocator, and use `alloc` to allocate the value on the arena.
+
+As we can see, with the generalized dependency injection capability provided by CGP, we are able to retrieve any value or type from the context during deserialization. This effectively allows us to emulate the `with` clause in the Context and Capabilities proposal and provide any capability that is needed during deserialization.
