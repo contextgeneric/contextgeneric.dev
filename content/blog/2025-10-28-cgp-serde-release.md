@@ -327,6 +327,89 @@ delegate_components! {
 }
 ```
 
+And similarly, we will implement `AppB` to perform the serialization for application B as follows:
+
+```rust
+pub struct AppB;
+
+delegate_components! {
+    AppB {
+        ValueSerializerComponent:
+            UseDelegate<new SerializerComponentsB {
+                <'a, T> &'a T:
+                    SerializeDeref,
+                [
+                    i64,
+                    u64,
+                    String,
+                ]:
+                    UseSerde,
+                Vec<u8>:
+                    SerializeBase64,
+                DateTime<Utc>:
+                    SerializeTimestamp,
+                [
+                    Vec<EncryptedMessage>,
+                    Vec<MessagesByTopic>,
+                ]:
+                    SerializeIterator,
+                [
+                    MessagesArchive,
+                    MessagesByTopic,
+                    EncryptedMessage,
+                ]:
+                    SerializeFields,
+            }>
+    }
+}
+```
+
+If we compare the `delegate_components!` entries in both `AppA` and `AppB`, we will find out that the only differences are in the following:
+
+- The serialization for `Vec<u8>` is handled by `SerializeHex` in `AppA`, but `SerializeBase64` in `AppB`.
+- The serialization for `DateTime<Utc>` is handled by `SerializeRfc3339Date` in `AppA`, but `SerializeTimestamp` in `AppB`.
+- A serialization entry for `i64` is added for `AppB` to handle the serialization of Unix timestamps in `i64` format.
+
+As we can see, the wiring configuration between `AppA` and `AppB` only require a few lines of changes, to have the change of serialization format. In practice, there are further CGP patterns available for `AppA` and `AppB` to share their common entries through a *preset*. But we will omit the details for brievity.
+
+## Serialization with `serde_json`
+
+`cgp-serde` remains backward compatible with the existing Serde ecosystem. This means that we can reuse existing libraries such as `serde_json` to serialize our encrypted message archive payloads into JSON.
+
+However, since `serde_json` works only with `Serialize`, `cgp-serde` provides the `SerializeWithContext` wrapper to wrap the serialize value with the application context to provide a context-aware implementation of `Serialize`. With it, we can serialize our data to JSON as follows:
+
+```rust
+let app_a = AppA { ... };
+let archive = MessagesArchive { ... };
+
+let serialized_a = serde_json::to_string(&SerializeWithContext::new(&app_a, &archive)).unwrap()
+```
+
+We first use `SerializeWithContext::new` to wrap both the application context and the target value together. We then pass it to `serde_json::to_string`, which accepts `SerializeWithContext` that provides a wrapped `Serialize` implementation.
+
+Similarly, we can get a different JSON output by using `AppB` as the application context:
+
+
+```rust
+let app_b = AppB { ... };
+
+let serialized_b = serde_json::to_string(&SerializeWithContext::new(&app_b, &archive)).unwrap()
+```
+
+As we can see, `cgp-serde` makes it easy to customize the serialization of any field nested within other data types. By changing the application context, we are able to generate JSON output in different formats with minimal effort.
+
+## Derive-free serialization with `#[derive(CgpData)]`
+
+Aside from the deep customization provided by `cgp-serde`, another key feature to highlight is that there is no need to use derive macros to generate any serialize implementation for custom data types. If you look back at the definition of the types like `EncryptedMessage`, you will see that the it only uses a general `#[derive(CgpData)]` macro provided by CGP.
+
+Behind the scene, `#[derive(CgpData)]` generates the support traits for [extensible data types](https://contextgeneric.dev/blog/extensible-datatypes-part-1/), and enables our data types to work with CGP traits like `CanSerializeValue` without requiring custom derivation. Instead, `cgp-serde` provides a `SerializeFields` provider that can work with any struct that derives `CgpData`.
+
+This shows that `cgp-serde` also solves the orphan implementation problem, by not requiring libraries to derive library-specific implementations on their data types. For instance, our encrypted messaging library do not even need to include `cgp-serde` as its dependency. As long as the library uses the base `cgp` crate to derive `CgpData`, we will be able to serialize its data types through `SerializeFields`.
+
+Further more, the use of extensible data types applies not only to the traits in `cgp-serde`. Instead, a general derivation of `CgpData` will enable the library data types to work with other CGP traits in similar ways as `cgp-serde`. Because of this, CGP can shield library authors from external requests to use derive macros for all popular traits, just to work around the orphan rules in Rust.
+
+## Type-Level Lookup Tables
+
 Behind the scene, the code above are conceptually equivalent to constructing the following type-level lookup table on `AppA`:
 
 | Name | Value |
@@ -347,3 +430,12 @@ and a new type-level lookup table called `SerializerComponentsA`:
 | `MessagesArchive` | `SerializeFields` |
 | `MessagesByTopic` | `SerializeFields` |
 | `EncryptedMessage` | `SerializeFields` |
+
+When the trait system needs to look up for a trait implementation, such as `Vec<EncryptedMessage>`, it would perform the following lookup:
+
+- `AppA` needs to implement `CanSerializeValue<Vec<EncryptedMessage>>`. To do so, we need to look up the type-level table in `AppA` with `ValueSerializerComponent` as the lookup key.
+- `AppA`'s table contains an entry for `ValueSerializerComponent`, with the value being `UseDelegate<SerializerComponentsA>`. We would need the value `UseDelegate<SerializerComponentsA>` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
+- `UseDelegate` implements `ValueSerializer` by performing a further lookup on the `SerializerComponentsA` table, with `Vec<EncryptedMessage>` being the key.
+- `SerializerComponentsA` contains an entry for `Vec<EncryptedMessage>`, with the value being `SerializeIterator`. So we need `SerializeIterator` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
+- For `SerializeIterator` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`, it needs `AppA` to implement `CanSerializeValue<EncryptedMessage>`.
+- The whole lookup process is repeated from the top again, until it reaches the `EncryptedMessage` entry in `SerializerComponentsA`, which points to `SerializeFields`.
