@@ -47,6 +47,6 @@ I do hope to eventually spend a year or two working full-time on CGP using my *p
 
 # Acknowledgement
 
-CGP was created by [Soares Chen](https://maybevoid.com/), with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.
+CGP is created by [Soares Chen](https://maybevoid.com/), with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.
 
 The development of CGP would not have been possible without the strong support of my employer, [Informal Systems](https://informal.systems/). CGP was initially introduced and refined as part of the [Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project, which leverages CGP to build a highly modular relayer for inter-blockchain communication.
