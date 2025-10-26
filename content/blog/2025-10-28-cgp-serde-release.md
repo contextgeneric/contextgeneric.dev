@@ -56,6 +56,24 @@ The `provider` argument to `#[cgp_component]` generates for us the **provider tr
 
 On the other hand, in CGP we call the original trait `CanSerializeValue` and `CanDeserializeValue` as the **consumer traits**. In CGP, we will use a CGP trait through its consumer trait, but implement them using its provider trait.
 
+Behind the scene, the provider trait `ValueSerializer` is generated as follows:
+
+```rust
+pub trait ValueSerializer<Context, Value: ?Sized> {
+    fn serialize<S>(
+        context: &Context,
+        value: &Value,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer;
+}
+```
+
+Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` moves the original `Self` type to a new `Context` generic parameter. All references to `self` and `Self` are also replaced with `context` and `Context`.
+
+The `Self` type in a provider trait are used as the *provider type*, which is essentially dummy structs that are owned by the defining module. Essentially, CGP works around Rust's coherence restrictions by allowing us to always own a unique provider type when implementing a provider trait. We will see later how the provider trait is implemented.
+
 ## `UseDelegate` Provider
 
 Our CGP trait definitions also contain a second `derive_delegate` entry in `#[cgp_component]`. This generates a special `UseDelegate` provider that can be used for **static dispatch** of provider implementations based on the `Value` type. The use of `UseDelegate` will be explained later in this article.
@@ -144,7 +162,35 @@ Crucially, if you have some experience in Rust traits, you might notice that it 
 
 On the other hand, both `UseSerde` and `SerializeWithDisplay` contains **overlapping** implementations of `ValueSerializer` for *both* the `Context` and `Value` types. In vanilla Rust, this would have been rejected, as it is for example possible to have a `Value` type that both implements `Serialize` and `Display`. However, this is made possible in CGP with the use of the provider trait `ValueSerializer` and the macro `#[cgp_impl]`. We will explain in later sections on how this really works.
 
-For this particular use case of string serialization, it might not look remarkable that we need to look up from the context on how to serialize `String`, since Serde already have an efficient implementation of `Serialize` for `String`. However, this demonstrates a *potential* for us to replace the serialization implementation of `String` with something else. We will see next how this override can be useful for the case of serializing `Vec<u8>` bytes.
+For this particular use case of string serialization, it might not look remarkable that we need to look up from the context on how to serialize `String`, since Serde already have an efficient implementation of `Serialize` for `String`. However, this demonstrates a *potential* for us to replace the serialization implementation of `String` with something else. We will see later how this override can be useful for the case of serializing `Vec<u8>` bytes.
+
+## Desugaring of `#[cgp_impl]`
+
+Behind the scene, the overlapping implementations of `UseSerde` and `SerializeWithDisplay` are made possible through the use of the `ValueSerializer` provider trait. Although they look like blanket implementations, behind the scene, a provider implementation like `SerializeWithDisplay` is desugared by `#[cgp_impl]` into the following:
+
+```rust
+impl<Context, Value> ValueSerializer<Context, Value> for SerializeWithDisplay
+where
+    Context: CanSerializeValue<String>,
+    Value: Display,
+{
+    fn serialize<S>(
+        context: &Context,
+        value: &Value,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let str_value = value.to_string();
+        context.serialize(&str_value, serializer)
+    }
+}
+```
+
+As we can see, `#[cgp_impl]` moves the `Context` parameter from the `Self` position to become the first generic parameter in `ValueSerializer`. The `Self` type instead becomes `SerializeWithDisplay`, which is the dummy struct that we have just defined.
+
+Because we own the `Self` type `SerializeWithDisplay`, Rust allows us to define the provider trait implementation, even if it is overlapping with other implementations on `Context` and `Value`. This is the core mechanism of how CGP enables overlapping and orphan implementations to be defined. Later, we will also look at how the provider implementations are *wired* with a concrete context.
 
 ## Serialize Bytes
 
@@ -439,3 +485,74 @@ When the trait system needs to look up for a trait implementation, such as `Vec<
 - `SerializerComponentsA` contains an entry for `Vec<EncryptedMessage>`, with the value being `SerializeIterator`. So we need `SerializeIterator` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
 - For `SerializeIterator` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`, it needs `AppA` to implement `CanSerializeValue<EncryptedMessage>`.
 - The whole lookup process is repeated from the top again, until it reaches the `EncryptedMessage` entry in `SerializerComponentsA`, which points to `SerializeFields`.
+
+The table lookup process may seem complicated, but it actually works very similar to how [vtable lookups](https://en.wikipedia.org/wiki/Virtual_method_table) are performed in [`dyn` traits in Rust](https://www.youtube.com/watch?v=pNA-XAIrDTk) and also in object-oriented laguages like Java.
+
+The main difference is that CGP's lookup tables are implemented at the type-level, meaning that the tables don't exist at runtime and thus have **no runtime overhead**.
+
+## Implementation of Lookup Tables
+
+Behind the scene, the `delegate_components!` macro constructs the type-level lookup tables using the `DelegateComponent` trait, which is defined by `CGP` as follows:
+
+```rust
+pub trait DelegateComponent<Name: ?Sized> {
+    type Delegate;
+}
+```
+
+Essentially, `DelegateComponent` allows us to use any type as a table, and set a "value" on the "key" of the table by implementing the trait. For example, the `ValueSerializerComponent` entry in `AppA` is set through the following implementation:
+
+```rust
+impl DelegateComponent<ValueSerializerComponent> for AppA {
+    type Delegate = UseDelegate<SerializerComponentsA>;
+}
+```
+
+And similarly, the `Vec<EncryptedMessage>` entry in `SerializerComponentsA` is set through the following implementation:
+
+```rust
+impl DelegateComponent<Vec<EncryptedMessage>> for SerializerComponentsA {
+    type Delegate = SerializeIterator;
+}
+```
+
+CGP also generates *blanket implementations* on the consumer and provider traits that make use of the lookup table entries in `DelegateComponent` to figure out how to lookup for a provider implementation at compile time.
+
+For example, the lookup mechanism for `CanSerializeValue` is implemented as follows:
+
+```rust
+impl<Context, Value: ?Sized> CanSerializeValue<Value> for Context
+where
+    Context: DelegateComponent<ValueSerializerComponent>,
+    Context::Delegate: ValueSerializer<Context, Value>,
+{
+    fn serialize<S>(&self, value: &Value, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        Context::Delegate::serialize(self, value, serializer)
+    }
+}
+```
+
+Essentially, the consumer trait `CanSerializeValue` is implemented for a context like `AppA`, if `AppA` contains a lookup table entry with `ValueSerializerComponent` being the key, and the `Delegate` "value" in the lookup entry implements `ValueSerializer`.
+
+Similarly, the lookup mechanism for `UseDelegate` is implemented as follows:
+
+```rust
+#[cgp_impl(UseDelegate<Components>)]
+impl<Context, Value> ValueSerializer<Value> for Context
+where
+    Components: DelegateComponent<Value>,
+    Components::Delegate: ValueSerializer<Context, Value>,
+{
+    fn serialize<S>(&self, value: &Value, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        Components::Delegate::serialize(self, value, serializer)
+    }
+}
+```
+
+Essentially, `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`. Aside from the difference in the lookup "key", the implementation is similar to the earlier blanket implementation for `CanSerializeValue`.
