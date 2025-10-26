@@ -192,3 +192,158 @@ We omit the method body of `SerializeIterator` for brievity. Behind the scene, i
 The key to note here is that the serialization of the iterator's `Item`s is done through the consumer trait `CanSerializeValue` provided by `Context`. This means that we will be able to deeply customize how the `Item` is serialized, without being restricted to a specific `Serialize` implementation.
 
 Another key observation is that both `SerializeBytes` and `SerializeIterator` are **overlapping** on `Vec<u8>`. This shows that how `Vec<u8>` is serialized depends on which provider is wired in a CGP context. We will revisit this in later sections.
+
+# Modular Serialization Demo
+
+To demonstrate the modular serialization capabilities provided by `cgp-serde`, we will set up an example use case of serializing encrypted messages.
+
+Suppose that we are building a naive encrypted messaging library, and we define the following data types:
+
+```rust
+#[derive(CgpData)]
+pub struct EncryptedMessage {
+    pub message_id: u64,
+    pub author_id: u64,
+    pub date: DateTime<Utc>,
+    pub encrypted_data: Vec<u8>,
+}
+
+#[derive(CgpData)]
+pub struct MessagesByTopic {
+    pub encrypted_topic: Vec<u8>,
+    pub messages: Vec<EncryptedMessage>,
+}
+
+#[derive(CgpData)]
+pub struct MessagesArchive {
+    pub decryption_key: Vec<u8>,
+    pub messages_by_topics: Vec<MessagesByTopic>,
+}
+```
+
+We first have an `EncryptedMessage` struct that contains some encrypted message data. The messages are grouped in a `MessagesByTopic` struct, which also contains an encrypted topic about the group of messages. Finally, we have a `MessagesArchive` struct that contains messages grouped by multiple topics, as well as a password-protected decryption key.
+
+The key challenge that we want to address here is how can we serialize our message archive in different JSON formats, depending on the application. In particular, we want to support the following two formats:
+
+- Application A: Bytes as hex strings and date as RFC 3339 format
+  <details>
+    <summary>Click here for example serialization for App A</summary>
+
+  ```json
+  {
+    "decryption_key": "746f702d736563726574",
+    "messages_by_topics": [
+      {
+        "encrypted_topic": "416c6c2061626f757420434750",
+        "messages": [
+          {
+            "message_id": 1,
+            "author_id": 2,
+            "date": "2025-11-03T14:15:00+00:00",
+            "encrypted_data": "48656c6c6f2066726f6d20527573744c616221"
+          },
+          {
+            "message_id": 4,
+            "author_id": 8,
+            "date": "2025-12-19T23:45:00+00:00",
+            "encrypted_data": "4f6e65207965617220616e6e697665727361727921"
+          }
+        ]
+      }
+    ]
+  }
+  ```
+  </details>
+
+- Application B: Bytes as base64 strings and date as Unix timestamps
+  <details>
+    <summary>Click here for example serialization for App B</summary>
+
+  ```json
+  {
+    "decryption_key": "dG9wLXNlY3JldA==",
+    "messages_by_topics": [
+      {
+        "encrypted_topic": "QWxsIGFib3V0IENHUA==",
+        "messages": [
+          {
+            "message_id": 1,
+            "author_id": 2,
+            "date": 1762179300,
+            "encrypted_data": "SGVsbG8gZnJvbSBSdXN0TGFiIQ=="
+          },
+          {
+            "message_id": 4,
+            "author_id": 8,
+            "date": 1766187900,
+            "encrypted_data": "T25lIHllYXIgYW5uaXZlcnNhcnkh"
+          }
+        ]
+      }
+    ]
+  }
+  ```
+  </details>
+
+In practice, there may be more than two applications that use our library, and there may be more data types in our library, with more fields that need to be customized.
+
+With the original design of Serde, it would be pretty challenging to provide this level of deep customization of how our data types can be serialized. Typically, a type like `EncryptedMessage` would have a unique `Serialize` implementation that cannot be further customized. Even if we use the [remote derive](https://serde.rs/remote-derive.html) feature in Serde, it would require ad hoc serialization definition for all data types involved.
+
+## Wiring of serializer components
+
+With `cgp-serde`, it is rather straightforward to define custom application contexts that can deeply customize how each field in our data structures is serialized. For example, we can define an `AppA` context for application A as follows:
+
+```rust
+pub struct AppA;
+
+delegate_components! {
+    AppA {
+        ValueSerializerComponent:
+            UseDelegate<new SerializerComponentsA {
+                <'a, T> &'a T:
+                    SerializeDeref,
+                [
+                    u64,
+                    String,
+                ]:
+                    UseSerde,
+                Vec<u8>:
+                    SerializeHex,
+                DateTime<Utc>:
+                    SerializeRfc3339Date,
+                [
+                    Vec<EncryptedMessage>,
+                    Vec<MessagesByTopic>,
+                ]:
+                    SerializeIterator,
+                [
+                    MessagesArchive,
+                    MessagesByTopic,
+                    EncryptedMessage,
+                ]:
+                    SerializeFields,
+            }>
+    }
+}
+```
+
+Behind the scene, the code above are conceptually equivalent to constructing the following type-level lookup table on `AppA`:
+
+| Name | Value |
+|----|----|
+| `ValueSerializerComponent` | `UseDelegate<SerializerComponentsA>` |
+
+and a new type-level lookup table called `SerializerComponentsA`:
+
+| Name | Value |
+|----|----|
+| `&'a T` | `SerializeDeref` |
+| `u64` | `UseSerde` |
+| `String` | `UseSerde` |
+| `Vec<u8>` | `SerializeHex` |
+| `DateTime<Utc>` | `SerializeRfc3339Date` |
+| `Vec<EncryptedMessage>` | `SerializeIterator` |
+| `Vec<MessagesByTopic>` | `SerializeIterator` |
+| `MessagesArchive` | `SerializeFields` |
+| `MessagesByTopic` | `SerializeFields` |
+| `EncryptedMessage` | `SerializeFields` |
