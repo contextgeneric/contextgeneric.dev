@@ -56,24 +56,6 @@ The `provider` argument to `#[cgp_component]` generates for us the **provider tr
 
 On the other hand, in CGP we call the original trait `CanSerializeValue` and `CanDeserializeValue` as the **consumer traits**. In CGP, we will use a CGP trait through its consumer trait, but implement them using its provider trait.
 
-Behind the scene, the provider trait `ValueSerializer` is generated as follows:
-
-```rust
-pub trait ValueSerializer<Context, Value: ?Sized> {
-    fn serialize<S>(
-        context: &Context,
-        value: &Value,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer;
-}
-```
-
-Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` moves the original `Self` type to a new `Context` generic parameter. All references to `self` and `Self` are also replaced with `context` and `Context`.
-
-The `Self` type in a provider trait are used as the *provider type*, which is essentially dummy structs that are owned by the defining module. Essentially, CGP works around Rust's coherence restrictions by allowing us to always own a unique provider type when implementing a provider trait. We will see later how the provider trait is implemented.
-
 ## `UseDelegate` Provider
 
 Our CGP trait definitions also contain a second `derive_delegate` entry in `#[cgp_component]`. This generates a special `UseDelegate` provider that can be used for **static dispatch** of provider implementations based on the `Value` type. The use of `UseDelegate` will be explained later in this article.
@@ -163,34 +145,6 @@ Crucially, if you have some experience in Rust traits, you might notice that it 
 On the other hand, both `UseSerde` and `SerializeWithDisplay` contains **overlapping** implementations of `ValueSerializer` for *both* the `Context` and `Value` types. In vanilla Rust, this would have been rejected, as it is for example possible to have a `Value` type that both implements `Serialize` and `Display`. However, this is made possible in CGP with the use of the provider trait `ValueSerializer` and the macro `#[cgp_impl]`. We will explain in later sections on how this really works.
 
 For this particular use case of string serialization, it might not look remarkable that we need to look up from the context on how to serialize `String`, since Serde already have an efficient implementation of `Serialize` for `String`. However, this demonstrates a *potential* for us to replace the serialization implementation of `String` with something else. We will see later how this override can be useful for the case of serializing `Vec<u8>` bytes.
-
-## Desugaring of `#[cgp_impl]`
-
-Behind the scene, the overlapping implementations of `UseSerde` and `SerializeWithDisplay` are made possible through the use of the `ValueSerializer` provider trait. Although they look like blanket implementations, behind the scene, a provider implementation like `SerializeWithDisplay` is desugared by `#[cgp_impl]` into the following:
-
-```rust
-impl<Context, Value> ValueSerializer<Context, Value> for SerializeWithDisplay
-where
-    Context: CanSerializeValue<String>,
-    Value: Display,
-{
-    fn serialize<S>(
-        context: &Context,
-        value: &Value,
-        serializer: S,
-    ) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        let str_value = value.to_string();
-        context.serialize(&str_value, serializer)
-    }
-}
-```
-
-As we can see, `#[cgp_impl]` moves the `Context` parameter from the `Self` position to become the first generic parameter in `ValueSerializer`. The `Self` type instead becomes `SerializeWithDisplay`, which is the dummy struct that we have just defined.
-
-Because we own the `Self` type `SerializeWithDisplay`, Rust allows us to define the provider trait implementation, even if it is overlapping with other implementations on `Context` and `Value`. This is the core mechanism of how CGP enables overlapping and orphan implementations to be defined. Later, we will also look at how the provider implementations are *wired* with a concrete context.
 
 ## Serialize Bytes
 
@@ -373,7 +327,13 @@ delegate_components! {
 }
 ```
 
-And similarly, we will implement `AppB` to perform the serialization for application B as follows:
+In the code above, we use `delegate_components!` on to effectively create **type-level lookup tables** that configure the provider implementations used by `AppA`. The first key, `ValueSerializerComponent`, indicates that we are configuring the providers of `CanSerializeValue` for `AppA`.
+
+The value of that entry is `UseDelegate`, followed by an *inner* table called `SerializerComponentsA` that performs **static dispatch** of the provider implementation based on the `Value` type. For example, we have the key `Vec<u8>` with the value `SerializeHex`, indicating that the `SerializeHex` provider is used when the `Vec<u8>` is being serialized.
+
+The `delegate_components!` macro also allows shorthands for specifying multiple keys with the same value. For example, both `u64` and `String` are dispatched to the `UseSerde` provider, so we can group the keys using an array syntax. We can also have *generic* keys to be set in the table, such as the case of mapping all `&'a T` references to the `SerializeDeref` provider.
+
+We will cover more details about how the type-level lookup table works in later sections. For now, let's look at how we implement `AppB` to perform the serialization for application B:
 
 ```rust
 pub struct AppB;
@@ -416,11 +376,13 @@ If we compare the `delegate_components!` entries in both `AppA` and `AppB`, we w
 - The serialization for `DateTime<Utc>` is handled by `SerializeRfc3339Date` in `AppA`, but `SerializeTimestamp` in `AppB`.
 - A serialization entry for `i64` is added for `AppB` to handle the serialization of Unix timestamps in `i64` format.
 
-As we can see, the wiring configuration between `AppA` and `AppB` only require a few lines of changes, to have the change of serialization format. In practice, there are further CGP patterns available for `AppA` and `AppB` to share their common entries through a *preset*. But we will omit the details for brievity.
+As we can see, the wiring configuration between `AppA` and `AppB` only require a **few lines of changes**, to have the change of serialization format. This demonstrates the flexibility of CGP to make application implementation highly configurable.
+
+In practice, there are further CGP patterns available for `AppA` and `AppB` to share their common entries through a **preset**. But we will omit the details for brievity.
 
 ## Serialization with `serde_json`
 
-`cgp-serde` remains backward compatible with the existing Serde ecosystem. This means that we can reuse existing libraries such as `serde_json` to serialize our encrypted message archive payloads into JSON.
+`cgp-serde` remains **backward compatible** with the existing Serde ecosystem. This means that we can reuse existing libraries such as `serde_json` to serialize our encrypted message archive payloads into JSON.
 
 However, since `serde_json` works only with `Serialize`, `cgp-serde` provides the `SerializeWithContext` wrapper to wrap the serialize value with the application context to provide a context-aware implementation of `Serialize`. With it, we can serialize our data to JSON as follows:
 
@@ -428,7 +390,9 @@ However, since `serde_json` works only with `Serialize`, `cgp-serde` provides th
 let app_a = AppA { ... };
 let archive = MessagesArchive { ... };
 
-let serialized_a = serde_json::to_string(&SerializeWithContext::new(&app_a, &archive)).unwrap()
+let serialized_a = serde_json::to_string(
+    &SerializeWithContext::new(&app_a, &archive)
+).unwrap()
 ```
 
 We first use `SerializeWithContext::new` to wrap both the application context and the target value together. We then pass it to `serde_json::to_string`, which accepts `SerializeWithContext` that provides a wrapped `Serialize` implementation.
@@ -439,7 +403,9 @@ Similarly, we can get a different JSON output by using `AppB` as the application
 ```rust
 let app_b = AppB { ... };
 
-let serialized_b = serde_json::to_string(&SerializeWithContext::new(&app_b, &archive)).unwrap()
+let serialized_b = serde_json::to_string(
+    &SerializeWithContext::new(&app_b, &archive)
+).unwrap()
 ```
 
 As we can see, `cgp-serde` makes it easy to customize the serialization of any field nested within other data types. By changing the application context, we are able to generate JSON output in different formats with minimal effort.
@@ -453,6 +419,229 @@ Behind the scene, `#[derive(CgpData)]` generates the support traits for [extensi
 This shows that `cgp-serde` also solves the orphan implementation problem, by not requiring libraries to derive library-specific implementations on their data types. For instance, our encrypted messaging library do not even need to include `cgp-serde` as its dependency. As long as the library uses the base `cgp` crate to derive `CgpData`, we will be able to serialize its data types through `SerializeFields`.
 
 Further more, the use of extensible data types applies not only to the traits in `cgp-serde`. Instead, a general derivation of `CgpData` will enable the library data types to work with other CGP traits in similar ways as `cgp-serde`. Because of this, CGP can shield library authors from external requests to use derive macros for all popular traits, just to work around the orphan rules in Rust.
+
+## Full Example
+
+The full example of the customized serialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/messages.rs).
+
+# Capabilities-Enabled Deserialization Demo
+
+Now that we have demonstrated how `cgp-serde` enables modular serialization, let's also look at how `cgp-serde` enables the use case explained in the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. In particular, we will demonstrate how we can implement a deserializer for `&'a T` using an arena allocator that is retrieved via **dependency injection** from the context.
+
+## Arena Deserializer
+
+To demonstrate the use of arena allocator, we will make use of the [`typed-arena`](https://docs.rs/typed-arena/latest/typed_arena/) crate to allocate memory using the [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) trait.
+
+We will first define an *auto getter* trait to retrieve an `Arena` from the context:
+
+```rust
+#[cgp_auto_getter]
+pub trait HasArena<'a, T: 'a> {
+    fn arena(&self) -> &&'a Arena<T>;
+}
+```
+
+The `HasArena` trait is automatically implemented for any `Context` type, if it derives `HasField` and contains an `arena` field with the field type being `&'a Arena<T>`. The nested reference is used here, because we need an explicit lifetime to work with the `Arena` type provided by `typed-arena`.
+
+Next, we can make use of `HasArena` to retrieve the arena value from a generic context in our implementation of `ValueDeserializer`:
+
+```rust
+#[cgp_impl(new DeserializeAndAllocate)]
+impl<'de, 'a, Context, Value> ValueDeserializer<'de, &'a Value> for Context
+where
+    Context: HasArena<'a, Value> + CanDeserializeValue<'de, Value>,
+{
+    fn deserialize<D>(&self, deserializer: D) -> Result<&'a Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value = self.deserialize(deserializer)?;
+        let value = self.arena().alloc(value);
+
+        Ok(value)
+    }
+}
+```
+
+We define a new `DeserializeAndAllocate` that implements `ValueDeserializer` for any `&'a Value` type. To support that, it requires the `Context` to implement `HasArena<'a, Value>`, in addition to requiring the context to implement `CanDeserializeValue` for the owned `Value` type.
+
+Inside the method body, we first use the `context` to deserialize an owned version of the value. We then call `self.arena()` to get the arena allocator, and use `alloc` to allocate the value on the arena.
+
+As we can see, with the generalized dependency injection capability provided by CGP, we are able to retrieve any value or type from the context during deserialization. This effectively allows us to emulate the `with` clause in the [Context and Capabilities](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal and provide any capability that is needed during deserialization.
+
+## Coordinate Arena
+
+With our arena deserializer defined, let's come up with an example application of how we could use it. Let's suppose that we want to store a large quantity of 3D coordinates, such as for rendering 3D graphics. We could define a `Coord` struct as follows:
+
+```rust
+#[derive(CgpData)]
+pub struct Coord {
+    pub x: u64,
+    pub y: u64,
+    pub z: u64,
+}
+```
+
+In this demo, the `Coord` struct only have 3 `u64` fields, but let's pretend that its actual size is much larger. If we use `Box<Coord>` to allocate the coordinates on the heap, it might lead to very high memory pressure with the frequent call to `Box::new(coord)`. Instead, we might want to use an [**arena allocator**](https://manishearth.github.io/blog/2021/03/15/arenas-in-rust/) to allocate the coordinates in a fixed memory region, with all the coordinates being deallocated easily at the end of the function.
+
+When using arena allocators, we will get `&'a Coord` as the base coordinate value, which we can store in other data structures, such as a cluster of coordinates:
+
+```rust
+#[derive(CgpData)]
+pub struct Cluster<'a> {
+    pub id: u64,
+    pub coords: Vec<&'a Coord>,
+}
+```
+
+With our data structures defined, a challenge that comes next is: how can we deserialize a cluster of coordinates from formats such as JSON, and allocate the coordinates using a custom arena allocator that we provide?
+
+## Deserialization Context
+
+Using `cgp-serde`, it is straightforward to define a deserializer context that includes an arena allocator. We would first define the context as follows:
+
+```rust
+#[derive(HasField)]
+pub struct App<'a> {
+    pub arena: &'a Arena<Coord>,
+}
+```
+
+Our `App` context is parameterized by a lifetime `'a`, and contains an `arena` field that contains a reference to a [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) with the lifetime `'a`, and the object type `Coord`.
+
+The lifetime `'a` is necessary here, because the [`alloc`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html#method.alloc) method returns a `&'a Coord` value that has the same `'a` lifetime. By being explicit, we can better inform the Rust compiler that the coordinates would live as long as `'a`.
+
+We also derive `HasField` on `App`, so that `App` would automatically implement the `HasArena` trait that we defined in the earlier section.
+
+With the `App` context defined, let's take a look at the component wiring for the `ValueDeserializer` providers:
+
+```rust
+delegate_components! {
+    <'s> App<'s> {
+        ValueDeserializerComponent:
+            UseDelegate<new DeserializeComponents {
+                u64: UseSerde,
+                [
+                    Coord,
+                    <'a> Cluster<'a>,
+                ]:
+                    DeserializeRecordFields,
+                <'a> &'a Coord:
+                    DeserializeAndAllocate,
+                <'a> Vec<&'a Coord>:
+                    DeserializeExtend,
+            }>,
+        ErrorTypeProviderComponent:
+            UseAnyhowError,
+        ErrorRaiserComponent:
+            RaiseAnyhowError,
+    }
+}
+```
+
+Similar to the type-level lookup tables earlier, this time we are configuring the `ValueDeserializer` providers for `App` through the `ValueDeserializerComponent` key, and the `UseDelegate` dispatcher. In this table, we have a lot of keys with generic `<'a>` lifetimes, since we are working with structs that contain explicit lifetimes.
+
+As we can see from the table, for the value types `Coord` and `Cluster<'a>`, we use `DeserializeRecordFields` to deserialize the structs using the **extensible data types** facilities derived from `#[derive(CgpData)]`. But for `&'a Coord`, we choose the `DeserializeAndAllocate` provider that we have defined in the previous section.
+
+## Error Handling
+
+Aside from `ValueDeserializerComponent`, our `App` is also configured with **error handling** components provided by CGP. This is necessary, because we want to use `serde_json` to deserialize the value, which may return errors.
+
+For simplicity, we opt to use the `cgp-error-anyhow` crate to handle errors using [`anyhow`](https://crates.io/crates/anyhow). In the entry for `ErrorTypeProviderComponent`, we use the `UseAnyhowError` provider to use the type [`anyhow::Error`](https://docs.rs/anyhow/latest/anyhow/struct.Error.html) as the error type for `App`.
+
+Following that, in the entry for `ErrorRaiserComponent`, we use `RaiseAnyhowError` to raise [`serde_json::Error`](https://docs.rs/serde_json/latest/serde_json/struct.Error.html) into `anyhow::Error` using its `From` implementation.
+
+This demonstrates the flexibility provided by CGP on error handling - the concrete error type can be chosen by the application context, and it can also customize how each source error is handled.
+
+## Deserializing JSON
+
+Now that we have finished the component wiring for `App`, let's try to use `serde_json` to deserialize a JSON string. First, we will create a mock JSON string and the application context as follows:
+
+```rust
+let serialized = r#"
+{
+    "id": 8,
+    "coords": [
+        { "x": 1, "y": 2, "z": 3 },
+        { "x": 4, "y": 5, "z": 6 }
+    ]
+}
+"#;
+
+let arena = Arena::new();
+let app = App { arena: &arena };
+```
+
+For the case of deserialization, there are some complication involved, in that we cannot directly use the [`serde_json::from_str`](https://docs.rs/serde_json/latest/serde_json/fn.from_str.html) to deserialize a JSON string with our `App` context. Instead, `cgp-serde` also works with the lower-level [`Deserializer`](https://docs.rs/serde_json/latest/serde_json/de/struct.Deserializer.html) implementation in `serde_json`, so that we can pass `serde_json`'s deserializer directly to `CanDeserializeValue::deserialize`.
+
+Fortunately, this implementation details are abstracted away by `cgp-serde`, and all we have to do is to call the `deserialize_json_string` method on our `App` context:
+
+```rust
+let deserialized: Cluster<'_> = app
+    .deserialize_json_string(&serialized)
+    .unwrap();
+```
+
+As we can see, we have now successfully make use of the custom arena allocator provided by our `App` context to perform deserialization.
+
+## Full Example
+
+The full example of the arena allocator deserialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/arena_simplified.rs).
+
+<!-- This is because unlike the `serialize` method which contains a `value` argument, there is no where that we can "wrap" our context in the `deserialize` method.
+
+Instead, `cgp-serde` wraps the context throughout the deserialization process by using the [`DeserializeSeed`](https://docs.rs/serde/latest/serde/de/trait.DeserializeSeed.html) trait, which accepts an additional `self` argument that we can use to wrap the context type.   -->
+
+# Implementation Details
+
+## Provider Traits
+
+
+Behind the scene, the provider trait `ValueSerializer` is generated as follows:
+
+```rust
+pub trait ValueSerializer<Context, Value: ?Sized> {
+    fn serialize<S>(
+        context: &Context,
+        value: &Value,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer;
+}
+```
+
+Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` moves the original `Self` type to a new `Context` generic parameter. All references to `self` and `Self` are also replaced with `context` and `Context`.
+
+The `Self` type in a provider trait are used as the *provider type*, which is essentially dummy structs that are owned by the defining module. Essentially, CGP works around Rust's coherence restrictions by allowing us to always own a unique provider type when implementing a provider trait. We will see later how the provider trait is implemented.
+
+## Desugaring of `#[cgp_impl]`
+
+Behind the scene, the overlapping implementations of `UseSerde` and `SerializeWithDisplay` are made possible through the use of the `ValueSerializer` provider trait. Although they look like blanket implementations, behind the scene, a provider implementation like `SerializeWithDisplay` is desugared by `#[cgp_impl]` into the following:
+
+```rust
+impl<Context, Value> ValueSerializer<Context, Value> for SerializeWithDisplay
+where
+    Context: CanSerializeValue<String>,
+    Value: Display,
+{
+    fn serialize<S>(
+        context: &Context,
+        value: &Value,
+        serializer: S,
+    ) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let str_value = value.to_string();
+        context.serialize(&str_value, serializer)
+    }
+}
+```
+
+As we can see, `#[cgp_impl]` moves the `Context` parameter from the `Self` position to become the first generic parameter in `ValueSerializer`. The `Self` type instead becomes `SerializeWithDisplay`, which is the dummy struct that we have just defined.
+
+Because we own the `Self` type `SerializeWithDisplay`, Rust allows us to define the provider trait implementation, even if it is overlapping with other implementations on `Context` and `Value`. This is the core mechanism of how CGP enables overlapping and orphan implementations to be defined. Later, we will also look at how the provider implementations are *wired* with a concrete context.
 
 ## Type-Level Lookup Tables
 
@@ -556,48 +745,3 @@ where
 ```
 
 Essentially, `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`. Aside from the difference in the lookup "key", the implementation is similar to the earlier blanket implementation for `CanSerializeValue`.
-
-# Capabilities-Enabled Deserialization Demo
-
-Now that we have demonstrated how `cgp-serde` enables modular serialization, let's also look at how `cgp-serde` enables the use case explained in the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. In particular, we will demonstrate how we can implement a deserializer for `&'a T` using an arena allocator that is retrieved via **dependency injection** from the context.
-
-## Arena Deserializer
-
-To demonstrate the use of arena allocator, we will make use of the [`typed-arena`](https://docs.rs/typed-arena/latest/typed_arena/) crate to allocate memory using the [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) trait.
-
-We will first define an *auto getter* trait to retrieve an `Arena` from the context:
-
-```rust
-#[cgp_auto_getter]
-pub trait HasArena<'a, T: 'a> {
-    fn arena(&self) -> &&'a Arena<T>;
-}
-```
-
-The `HasArena` trait is automatically implemented for any `Context` type, if it derives `HasField` and contains an `arena` field with the field type being `&'a Arena<T>`. The nested reference is used here, because we need an explicit lifetime to work with the `Arena` type provided by `typed-arena`.
-
-Next, we can make use of `HasArena` to retrieve the arena value from a generic context in our implementation of `ValueDeserializer`:
-
-```rust
-#[cgp_impl(new DeserializeAndAllocate)]
-impl<'de, 'a, Context, Value> ValueDeserializer<'de, &'a Value> for Context
-where
-    Context: HasArena<'a, Value> + CanDeserializeValue<'de, Value>,
-{
-    fn deserialize<D>(&self, deserializer: D) -> Result<&'a Value, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let value = self.deserialize(deserializer)?;
-        let value = self.arena().alloc(value);
-
-        Ok(value)
-    }
-}
-```
-
-We define a new `DeserializeAndAllocate` that implements `ValueDeserializer` for any `&'a Value` type. To support that, it requires the `Context` to implement `HasArena<'a, Value>`, in addition to requiring the context to implement `CanDeserializeValue` for the owned `Value` type.
-
-Inside the method body, we first use the `context` to deserialize an owned version of the value. We then call `self.arena()` to get the arena allocator, and use `alloc` to allocate the value on the arena.
-
-As we can see, with the generalized dependency injection capability provided by CGP, we are able to retrieve any value or type from the context during deserialization. This effectively allows us to emulate the `with` clause in the Context and Capabilities proposal and provide any capability that is needed during deserialization.
