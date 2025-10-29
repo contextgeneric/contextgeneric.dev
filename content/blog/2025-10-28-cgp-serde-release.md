@@ -641,11 +641,11 @@ The full example of the arena allocator deserialization is available on [GitHub]
 
 # Implementation Details
 
-In this section, we are going to explore some of the implementation details of CGP that enables the level of modularity for `cgp-serde`. For audiences who are new to CGP, you can use this section to quickly learn about the basic concepts of CGP that are relevant to be used with `cgp-serde`.
+In this section, we will delve into the underlying implementation details of CGP that make the impressive level of modularity in `cgp-serde` possible. For audiences who are new to Context-Generic Programming, this is your chance to quickly grasp the essential concepts of CGP required to confidently use `cgp-serde`.
 
 ## Provider Traits
 
-When the `#[cgp_component]` macro is used on a consumer trait like `CanSerializeValue`, it generates a companion provider trait `ValueSerializer` as follows:
+When the `#[cgp_component]` macro is applied to a consumer trait, such as `CanSerializeValue`, it automatically generates a companion **provider trait** called `ValueSerializer`. This generated trait looks like the following:
 
 ```rust
 pub trait ValueSerializer<Context, Value: ?Sized> {
@@ -659,13 +659,11 @@ pub trait ValueSerializer<Context, Value: ?Sized> {
 }
 ```
 
-Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` moves the original `Self` type to a new `Context` generic parameter. All references to `self` and `Self` are also replaced with `context` and `Context`.
-
-The `Self` type in a provider trait are used as the *provider type*, which is essentially dummy structs that are owned by the defining module. Essentially, CGP works around Rust's coherence restrictions by allowing us to always own a unique provider type when implementing a provider trait. We will see later how the provider trait is implemented.
+Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` shifts the original `Self` type into a new `Context` generic parameter. Consequently, all references to `self` and `Self` are appropriately replaced with `context` and `Context`. The `Self` type in a provider trait is instead used as the *provider type*, which are the unique, dummy structs - like `UseSerde` or `SerializeHex` - that are defined and owned by the library module. This is the core trick: CGP circumvents Rust’s coherence restrictions by guaranteeing that we always own a unique provider type when implementing a provider trait.
 
 ## Desugaring of `#[cgp_impl]`
 
-The overlapping implementations of providers like `UseSerde` and `SerializeWithDisplay` are made possible through the use of the `ValueSerializer` provider trait. Although they look like blanket implementations, behind the scene, a provider implementation like `SerializeWithDisplay` is desugared by `#[cgp_impl]` into the following:
+The ability to define overlapping provider implementations, such as `UseSerde` and `SerializeWithDisplay`, is achieved through the clever use of the `ValueSerializer` provider trait. While these implementations look like forbidden blanket implementations, a provider implementation like `SerializeWithDisplay` is actually **desugared** by the `#[cgp_impl]` macro into this form:
 
 ```rust
 impl<Context, Value> ValueSerializer<Context, Value> for SerializeWithDisplay
@@ -687,19 +685,17 @@ where
 }
 ```
 
-As we can see, `#[cgp_impl]` moves the `Context` parameter from the `Self` position to become the first generic parameter in `ValueSerializer`. The `Self` type instead becomes `SerializeWithDisplay`, which is the dummy struct that we have just defined.
-
-Because we own the `Self` type `SerializeWithDisplay`, Rust allows us to define the provider trait implementation, even if it is overlapping with other implementations on `Context` and `Value`. This is the core mechanism of how CGP enables overlapping and orphan implementations to be defined. Later, we will also look at how the provider implementations are *wired* with a concrete context.
+As clearly shown, `#[cgp_impl]` shifts the `Context` parameter away from the `Self` position to become the first generic parameter of `ValueSerializer`. The `Self` type for the implementation instead becomes `SerializeWithDisplay`, the unique dummy struct that we defined. Because the implementing library owns this `Self` type, `SerializeWithDisplay`, the Rust compiler permits the trait implementation even if it is otherwise overlapping on the `Context` and `Value` types. This is the central mechanism that allows CGP to define both overlapping and orphan implementations. Next, we will examine how these provider implementations are dynamically *wired* to a concrete application context.
 
 ## Type-Level Lookup Tables
 
-When `delegate_components!` is used on a context like `AppA`, it generates constructs that are conceptually equivalent to constructing the following type-level lookup table on `AppA`:
+When the `delegate_components!` macro is invoked on an application context like `AppA`, it is conceptually equivalent to building a **type-level lookup table** for that context. This table effectively configures the dispatch mechanism at compile time:
 
 | Name | Value |
 |----|----|
 | `ValueSerializerComponent` | `UseDelegate<SerializerComponentsA>` |
 
-and a new type-level lookup table called `SerializerComponentsA`:
+This entry points to an inner table, `SerializerComponentsA`, which holds the concrete logic providers:
 
 | Name | Value |
 |----|----|
@@ -714,22 +710,21 @@ and a new type-level lookup table called `SerializerComponentsA`:
 | `MessagesByTopic` | `SerializeFields` |
 | `EncryptedMessage` | `SerializeFields` |
 
-When the trait system needs to look up for a trait implementation, such as `Vec<EncryptedMessage>`, it would perform the following lookup:
+When the trait system must look up an implementation, such as for serializing `Vec<EncryptedMessage>`, it follows a precise, recursive path:
 
-- `AppA` needs to implement `CanSerializeValue<Vec<EncryptedMessage>>`. To do so, we need to look up the type-level table in `AppA` with `ValueSerializerComponent` as the lookup key.
-- `AppA`'s table contains an entry for `ValueSerializerComponent`, with the value being `UseDelegate<SerializerComponentsA>`. We would need the value `UseDelegate<SerializerComponentsA>` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
-- `UseDelegate` implements `ValueSerializer` by performing a further lookup on the `SerializerComponentsA` table, with `Vec<EncryptedMessage>` being the key.
-- `SerializerComponentsA` contains an entry for `Vec<EncryptedMessage>`, with the value being `SerializeIterator`. So we need `SerializeIterator` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
-- For `SerializeIterator` to implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`, it needs `AppA` to implement `CanSerializeValue<EncryptedMessage>`.
-- The whole lookup process is repeated from the top again, until it reaches the `EncryptedMessage` entry in `SerializerComponentsA`, which points to `SerializeFields`.
 
-The table lookup process may seem complicated, but it actually works very similar to how [vtable lookups](https://en.wikipedia.org/wiki/Virtual_method_table) are performed in [`dyn` traits in Rust](https://www.youtube.com/watch?v=pNA-XAIrDTk) and also in object-oriented laguages like Java.
+  * The system begins by checking if `AppA` implements `CanSerializeValue<Vec<EncryptedMessage>>`. This requires looking up the `ValueSerializerComponent` key in the `AppA` table.
+  * `AppA`'s table returns `UseDelegate<SerializerComponentsA>`. This value must now implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
+  * `UseDelegate` implements `ValueSerializer` by performing a secondary lookup on the `SerializerComponentsA` table, using `Vec<EncryptedMessage>` as the key.
+  * `SerializerComponentsA` returns the value `SerializeIterator`. This means `SerializeIterator` must now implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
+  * For `SerializeIterator` to satisfy this requirement, it introduces a new constraint: `AppA` must implement `CanSerializeValue<EncryptedMessage>`.
+  * The entire lookup process is repeated from the beginning for the inner type, `EncryptedMessage`, until it eventually points to the concrete provider `SerializeFields`.
 
-The main difference is that CGP's lookup tables are implemented at the type-level, meaning that the tables don't exist at runtime and thus has **no runtime overhead**.
+This table lookup process, while abstract, works conceptually similarly to how [vtable lookups](https://en.wikipedia.org/wiki/Virtual_method_table) are performed for [`dyn` traits in Rust](https://www.youtube.com/watch?v=pNA-XAIrDTk) and in object-oriented languages like Java. The fundamental difference, and a major selling point, is that CGP’s lookup tables are fully implemented at the **type level**. This means the tables are resolved entirely at compile time, resulting in **zero runtime overhead**.
 
 ## Implementation of Lookup Tables
 
-Behind the scene, the `delegate_components!` macro constructs the type-level lookup tables using the `DelegateComponent` trait, which is defined by `CGP` as follows:
+Behind the scenes, the `delegate_components!` macro constructs these type-level lookup tables using the `DelegateComponent` trait, which is defined by the base `cgp` crate as follows:
 
 ```rust
 pub trait DelegateComponent<Name: ?Sized> {
@@ -737,7 +732,7 @@ pub trait DelegateComponent<Name: ?Sized> {
 }
 ```
 
-Essentially, `DelegateComponent` allows us to use any type as a table, and set a "value" on the "key" of the table by implementing the trait. For example, the `ValueSerializerComponent` entry in `AppA` is set through the following implementation:
+In essence, `DelegateComponent` allows any type to serve as a table. By implementing the trait, we effectively set a "value" (`Delegate`) for a specific "key" (`Name`) in that table. For instance, the `ValueSerializerComponent` entry in `AppA` is set through this implementation:
 
 ```rust
 impl DelegateComponent<ValueSerializerComponent> for AppA {
@@ -745,7 +740,7 @@ impl DelegateComponent<ValueSerializerComponent> for AppA {
 }
 ```
 
-And similarly, the `Vec<EncryptedMessage>` entry in `SerializerComponentsA` is set through the following implementation:
+Similarly, the `Vec<EncryptedMessage>` entry in the `SerializerComponentsA` table is defined through the following implementation:
 
 ```rust
 impl DelegateComponent<Vec<EncryptedMessage>> for SerializerComponentsA {
@@ -753,9 +748,9 @@ impl DelegateComponent<Vec<EncryptedMessage>> for SerializerComponentsA {
 }
 ```
 
-CGP also generates **blanket implementations** on the consumer and provider traits that make use of the lookup table entries in `DelegateComponent` to figure out how to lookup for a provider implementation at compile time.
+CGP then generates essential **blanket implementations** on the consumer and provider traits. These implementations utilize the `DelegateComponent` entries to resolve the correct provider implementation at compile time.
 
-For example, the lookup mechanism for `CanSerializeValue` is implemented as follows:
+For example, the initial lookup mechanism for the consumer trait `CanSerializeValue` is implemented via this blanket trait:
 
 ```rust
 impl<Context, Value: ?Sized> CanSerializeValue<Value> for Context
@@ -772,9 +767,9 @@ where
 }
 ```
 
-Essentially, the consumer trait `CanSerializeValue` is implemented for a context like `AppA`, if `AppA` contains a lookup table entry with `ValueSerializerComponent` being the key, and the `Delegate` "value" in the lookup entry implements `ValueSerializer`.
+The consumer trait `CanSerializeValue` is thus implemented for a context like `AppA` if `AppA` contains a lookup table entry where `ValueSerializerComponent` is the key and the resulting `Delegate` "value" successfully implements `ValueSerializer`.
 
-Similarly, the lookup mechanism for `UseDelegate` is implemented as follows:
+Following that, the recursive lookup mechanism for `UseDelegate` itself is implemented through this provider:
 
 ```rust
 #[cgp_impl(UseDelegate<Components>)]
@@ -792,64 +787,54 @@ where
 }
 ```
 
-Essentially, `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`. Aside from the difference in the lookup "key", the implementation is similar to the earlier blanket implementation for `CanSerializeValue`.
+This implementation shows that `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`. Aside from this difference in the lookup key, the mechanism is structurally similar to the blanket implementation for `CanSerializeValue`.
 
 ---
 
 # Future Work
 
-The initial release of `cgp-serde` serves as a proof of concept showcase of how CGP can be used to solve the coherence problem in Rust. In principle, you can already experiment on using `cgp-serde` today for modular serialization of data types in your applications. However, there are still some rough edges that need to be polished up, before `cgp-serde` can reach the level of quality that is suitable for production use.
+The initial release of `cgp-serde` serves as a compelling proof of concept, demonstrating exactly how CGP can be used to solve the pervasive coherence problem in Rust. While you can certainly begin experimenting with `cgp-serde` today for modular serialization in your applications, there are still a few rough edges that need polishing before it reaches the quality level suitable for mission-critical production use.
 
-This section highlights some of the work that you might want to wait for before using `cgp-serde` for mission critical applications.
+This section highlights the areas we plan to address, and what you might want to wait for before fully committing to `cgp-serde` for your main projects.
 
 ## Serialization providers for extensible variants
 
-Currently, `cgp-serde` provides providers such as `SerializeFields` and `DeserializeRecordFields` to support datatype-generic serialization of any struct that use `#[derive(CgpData)]`. This allows the serialization logic to be fully decoupled from the data type definitions, and reduce the derive bloats caused by orphan rules restrictions.
+Currently, `cgp-serde` provides essential providers like `SerializeFields` and `DeserializeRecordFields` to enable datatype-generic serialization for any struct that uses `#[derive(CgpData)]`. This decoupling of serialization logic from data type definitions is key to reducing the derive bloat caused by orphan rule restrictions.
 
-However, I have not yet implemented the equivalent providers for *enums* and *extensible variants*. This means that you cannot yet use the modular serialization provided by `cgp-serde` to serialize enum types in your application.
-
-Note that this limitation is simply due to time constraints, as I couldn't find enough time to finish the implementation for extensible variants in time for this initial release.
+However, the equivalent providers for Rust *enums* and *extensible variants* have not yet been implemented. This means that you cannot currently use the modular serialization features of `cgp-serde` to serialize enum types in your application. This limitation is purely due to time constraints; I was unable to dedicate enough time to finish the implementation for extensible variants before this initial release.
 
 ## Helpers for JSON deserialization
 
-Currently, `cgp-serde` only provide the `deserialize_json_string` helper method to deserialize JSON string with a deserialization context. However, I haven't implemented the other helper methods, such as `from_slice` and `from_value`. This means that if you want to use the equivalent of these methods, you would have to read into the internals of `deserialize_json_string` and write your own deserialization wrappers.
+At the moment, `cgp-serde` only provides the `deserialize_json_string` helper method to deserialize a JSON string using a context. Crucially, I have not yet implemented other common helper methods, such as `from_slice` and `from_value`. If you need the functionality equivalent to these methods, you would currently have to study the internals of `deserialize_json_string` and write your own deserialization wrappers.
 
-The main reason why additional wrappers are needed for deserialization is because there is no `self` argument in the original `deserialize` method in `serde::Deserialize`. So instead, we need to work around that by explicitly constructing a library-specific [`Deserializer`](https://docs.rs/serde_json/latest/serde_json/struct.Deserializer.html), and then pass it to the `deserialize` method in `CanDeserializeValue` together with the context.
+The need for additional wrappers during deserialization arises because the original `serde::Deserialize::deserialize` method lacks a `self` argument. We must explicitly work around this by constructing a library-specific [`Deserializer`](https://docs.rs/serde_json/latest/serde_json/struct.Deserializer.html) and then passing it along with the context to the `CanDeserializeValue::deserialize` method.
 
-Fortunately, since library functions like `serde::from_str` are just lightweight wrappers around the library-specific deserializers, we can re-create similar helpers for `cgp-serde` without much problems.
-
-Nevertheless, the challenge here is just a matter of time constraint, as I have to first properly survey the common deserialization methods that are used in the wild, and try to support as many of them as I could.
-
-On the plus side, the wrapper implementations are low hanging fruits that should be simple enough for newcomers to contribute to the project. So do submit a [pull request](https://github.com/contextgeneric/cgp-serde/pulls) if you are interested in contributing!
+Fortunately, library functions like `serde::from_str` are generally lightweight wrappers around library-specific deserializers. This makes re-creating similar, easy-to-use helpers for `cgp-serde` a relatively straightforward task. The challenge here is simply a matter of time: I need to properly survey the common deserialization methods used in the wild and aim to support as many as possible. On the plus side, these wrapper implementations are low-hanging fruit and represent simple tasks for newcomers to contribute to the project. If you are interested in helping, please do submit a [pull request](https://github.com/contextgeneric/cgp-serde/pulls)!
 
 ## Helpers for other serialization formats
 
-Just as deserialization wrappers are needed for `serde_json`, we will probably also need deserialization wrappers for other popular serialization formats, such as [`toml`](https://docs.rs/toml/latest/toml/).
+Just as custom deserialization wrappers are required for `serde_json`, we will likely need similar wrappers for other popular serialization formats, such as [`toml`](https://docs.rs/toml/latest/toml/).
 
-In principle, support for serialization from `cgp-serde` should work out of the box, if you use the `SerializeWithContext` wrapper with any serialization format. However, I have not yet thouroughly tested it, and so more verification is required.
-
-If serialization just work, then the main work that is required to support other serialization formats would be to implement similar deserialization wrappers as what we have done for `serde_json`.
+In principle, serialization *from* `cgp-serde` should work almost immediately. If you use the `SerializeWithContext` wrapper with any serialization format, it should, theoretically, integrate seamlessly. However, this has not yet been thoroughly tested, so more verification is required. Assuming serialization works out of the box, the main task needed to support other formats will be implementing deserialization wrappers similar to what we have done for `serde_json`.
 
 ## Documentation
 
-Both CGP and `cgp-serde` are currently severly lacking in documentation. To make `cgp-serde` usable to the broader community, we will likely need to write a lot more documentation and tutorials on how to use `cgp-serde` for modular serialization.
+A significant area for improvement is documentation. Both CGP and `cgp-serde` are currently severely lacking in comprehensive documentation. To make `cgp-serde` truly usable for the broader community, we will need to write far more documentation and tutorials explaining how to effectively use it for modular serialization.
 
-On the other hand, since my time is very limited, I will likely only prioritize documenting `cgp-serde` over developing CGP if there is a real demand of developers wanting to use `cgp-serde` for their applications. While I do believe that the modular serialization provided by `cgp-serde` is going to be very useful, my experience of developing CGP also tells me that perhaps the community do not care as much about modular serialization as I do.
-
-So if the use cases presented by `cgp-serde` is important enough for you to care, please do communicate your feedback so that I can properly prioritize my work!
+With my time being extremely limited, I will likely only prioritize documenting `cgp-serde` over further developing CGP if there is real, demonstrable demand from developers wanting to use it for their applications. While I strongly believe the modular serialization provided by `cgp-serde` will be incredibly useful, my experience with developing CGP suggests the community may not yet fully grasp or care about modular serialization as much as I do. Therefore, if the use cases presented by `cgp-serde` are important to you, please communicate your feedback so I can properly prioritize my development efforts!
 
 ## Performance benchmark
 
-Since `cgp-serde` exclusively uses only static dispatch, I am pretty confident that the serialization performance should be very close to the original `serde` implementation. However, I haven't have the time yet to do proper benchmark. So we don't have concrete evidence that `cgp-serde` is highly performant.
+Since `cgp-serde` exclusively employs static dispatch, I am highly confident that the serialization performance should align closely with the original `serde` implementation. However, I have not yet had the time to conduct a proper benchmark, so we currently lack concrete evidence of `cgp-serde`'s performance characteristics.
 
-Additionally, there are some potential optimizations that could be done to further improve the performance of `cgp-serde`. So as proper benchmark is being done, I might also apply some further optimization in case if I can properly identify the slow paths.
+In addition to validation, there are potential optimizations that could further boost `cgp-serde`'s speed. Once proper benchmarking is done, I can apply targeted optimizations if any performance bottlenecks are clearly identified.
 
-In particular, the main contention point in the benchmark would likely be on the serialization and deserialization performance of the struct fields. This is because `cgp-serde` uses extensible data types to have a **generic** implementation of serialize and deserialize for any struct. On the other hand, `serde` makes use of derive macros to generate **specific** implementation of `Serialize` and `Deserialize` for each struct. Because of this, the main question is that can the generic implementation of serialize and deserialize run as fast as the macro-generated implementations.
+The primary point of contention in benchmarking will likely be the serialization and deserialization performance of struct fields. This is because `cgp-serde` uses extensible data types to provide a **generic** implementation of serialize and deserialize for any struct. In contrast, `serde` uses derive macros to generate **specific** implementations of `Serialize` and `Deserialize` tailored to each struct. The critical question, then, is whether our generic implementation can run as fast as the macro-generated, highly specific implementations.
 
-There are a few reasons why the macro-generated implementation by `serde` could run faster than `cgp-serde`, particularly during deserialization. This is because `serde` generates `match` statement on *string literals* to determine which field it needs to serialize. On the other hand, `cgp-serde` needs to perform sequential string comparison of an incoming field key with each string tag, and choose a specific branch if the string value matches. As a result, the Rust compiler can probably generate much more efficient string-based pattern matching to determine the field that needs to be deserialized.
+There are a few reasons why the macro-generated implementation by `serde` might be faster, particularly during deserialization. `serde` generates a `match` statement on *string literals* to determine which field it needs to deserialize. Conversely, `cgp-serde` must perform a sequential string comparison of an incoming field key against each field's string tag and then choose the correct branch if a match is found. The Rust compiler can likely generate much more efficient, string-based pattern matching for `serde`.
 
-We can only know if that is the case by doing proper benchmark, and do comparison like whether having many struct fields with similar prefixes could significantly worsen the deserialization performance of `cgp-serde`. If the performance difference is big enough, I will probably spend some time to try optimizing it. But if the difference is not too significant, it may be good enough to leave the current implementation as-is.
+We can only confirm if this gap exists by conducting a proper benchmark, specifically comparing scenarios like deserializing structs with many fields or fields with similar prefixes, to see if `cgp-serde`'s performance significantly worsens. If the performance difference is substantial, I will dedicate time to optimizing it. If the difference is negligible, the current implementation is likely good enough.
 
-A potential optimization that I have in mind is that we can probably build similar fast string matching table lazily using `LazyLock` when the first deserialization is called. The reason we need to build the table at runtime is because our generic code can only look at one field at a time, and thus cannot generate something that is equivalent to a match statement with multiple string literals.
+One potential optimization I have considered is building a similar fast string matching table lazily using `LazyLock` when the first deserialization call occurs. We would need to build this table at runtime because our generic code can only inspect one field at a time, making it impossible to generate the same multi-string-literal `match` statement as a macro.
 
-In any case, if you are interested in benchmarking or optimizing `cgp-serde`, you are also very welcome to contribute to the project!
+In any case, if you are interested in benchmarking or optimizing `cgp-serde`, your contributions to the project are highly welcome!
