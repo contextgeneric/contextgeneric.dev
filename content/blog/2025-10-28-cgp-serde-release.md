@@ -14,11 +14,48 @@ In a nutshell, `cgp-serde` extends the original [`Serialize`](https://docs.rs/se
 
 Additionally, `cgp-serde` enables us to use the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) concepts in stable Rust today. This makes it possible for us write context-dependent implementations of `Deserialize`, such as one that uses an arena allocator to deserialize a `&'a T` value that is described in the proposal article.
 
-## Introduction to Context-Generic Programming
+## Quick intro to Context-Generic Programming
+
+For readers who are new to the project, here is a quick introduction: Context-Generic Programming (CGP) is a modular programming paradigm that allows you to bypass the **coherence** restrictions in Rust traits, and write **overlapping** and **orphan** implementations for any CGP trait.
+
+You can use CGP with almost any existing Rust trait today, by applying the `#[cgp_component]` macro on the trait. After that, you can write **named** implementation of the trait using `#[cgp_impl]`, which can be written without the coherence restrictions. Then, you can choose to use the named implementation for your type using the `delegate_components!` macro.
+
+For example, in principle it is now possible to annotate the standard library’s [`Hash`](https://doc.rust-lang.org/std/hash/trait.Hash.html) trait with `#[cgp_component]`:
+
+```rust
+#[cgp_component(HashProvider)]
+pub trait Hash { ... }
+```
+
+This does not affect existing code that uses or implements `Hash`, but it allows new overlapping implementations, such as one that works for any type that implements `Display`:
+
+```rust
+#[cgp_impl(HashWithDisplay)]
+impl<T: Display> HashProvider for T { ... }
+```
+
+You can then reuse this implementation on any type using `delegate_components!`:
+
+```rust
+pub struct MyData { ... }
+impl Display for MyData { ... }
+
+delegate_components! {
+    MyData {
+        HashProviderComponent: HashWithDisplay,
+    }
+}
+```
+
+The example `MyContext` above implements the `Hash` trait by using `delegate_components!` to delegate the implementation to the `HashWithDisplay` provider, through the specified key `HashProviderComponent`. Because `MyData` already implements `Display`, the `Hash` trait is now also automatically implemented through CGP.
+
+If you would like to learn more about CGP, check out the [project homepage](/) for more details. For now, let's head back and look at the new features introduced in `cgp-serde`.
+
+---
 
 # Context-Generic Serialization Traits
 
-At its core, `cgp-serde` introduces context-generic versions of the Serde traits. First, the [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) trait is redefined as follows:
+The key highlight for `cgp-serde` is that it introduces context-generic versions of the Serde traits. First, the [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) trait is redefined as follows:
 
 ```rust
 #[cgp_component {
