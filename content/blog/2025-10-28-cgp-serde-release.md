@@ -8,33 +8,33 @@ authors = ["Soares Chen"]
 
 # Overview
 
-I am excited to announce the release of [**`cgp-serde`**](https://github.com/contextgeneric/cgp-serde), a modular serialization library for [Serde](https://serde.rs/) that is powered by [**Context-Generic Programming**](/) (CGP).
+I am excited to announce the release of [**`cgp-serde`**](https://github.com/contextgeneric/cgp-serde), a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
 
-In a nutshell, `cgp-serde` extends the original [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) and [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) traits of Serde, and makes it possible for anyone to bypass the **coherence restrictions** in Rust and write **overlapping** or **orphaned** implementations of these traits.
+In short, `cgp-serde` extends Serde’s original [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) and [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) traits with CGP, making it possible to write **overlapping** or **orphaned** implementations of these traits and thus bypass the standard Rust **coherence restrictions**.
 
-Additionally, `cgp-serde` enables us to use the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) concepts in stable Rust today. This makes it possible for us write context-dependent implementations of `Deserialize`, such as one that uses an arena allocator to deserialize a `&'a T` value that is described in the proposal article.
+Furthermore, `cgp-serde` allows us to leverage the powerful [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) concepts in stable Rust today. This unlocks the ability to write context-dependent implementations of `Deserialize`, such as one that uses an arena allocator to deserialize a `'a T` value, a concept detailed in the proposal article.
 
 ## Quick intro to Context-Generic Programming
 
-For readers who are new to the project, here is a quick introduction: Context-Generic Programming (CGP) is a modular programming paradigm that allows you to bypass the **coherence** restrictions in Rust traits, and write **overlapping** and **orphan** implementations for any CGP trait.
+For those readers new to the project, here is a quick introduction: Context-Generic Programming (CGP) is a modular programming paradigm that enables you to bypass the **coherence** restrictions in Rust traits, allowing for **overlapping** and **orphan** implementations of any CGP trait.
 
-You can use CGP with almost any existing Rust trait today, by applying the `#[cgp_component]` macro on the trait. After that, you can write **named** implementation of the trait using `#[cgp_impl]`, which can be written without the coherence restrictions. Then, you can choose to use the named implementation for your type using the `delegate_components!` macro.
+You can adapt almost any existing Rust trait to use CGP today by applying the `#[cgp_component]` macro to the trait definition. After this annotation, you can write **named** implementations of the trait using `#[cgp_impl]`, which can be defined without being constrained by the coherence rules. You can then selectively enable and reuse the named implementation for your type using the `delegate_components!` macro.
 
-For example, in principle it is now possible to annotate the standard library’s [`Hash`](https://doc.rust-lang.org/std/hash/trait.Hash.html) trait with `#[cgp_component]`:
+For instance, we can, in principle, annotate the standard library’s [`Hash`]([https://doc.rust-lang.org/std/hash/trait.Hash.html]\(https://doc.rust-lang.org/std/hash/trait.Hash.html\)) trait with `#[cgp_component]` like this:
 
 ```rust
 #[cgp_component(HashProvider)]
 pub trait Hash { ... }
 ```
 
-This does not affect existing code that uses or implements `Hash`, but it allows new overlapping implementations, such as one that works for any type that implements `Display`:
+This change does not affect existing code that uses or implements `Hash`, but it allows for new, potentially overlapping implementations, such as one that works for any type that also implements `Display`:
 
 ```rust
 #[cgp_impl(HashWithDisplay)]
 impl<T: Display> HashProvider for T { ... }
 ```
 
-You can then reuse this implementation on any type using `delegate_components!`:
+You can then apply and reuse this implementation on any type by using the `delegate_components!` macro:
 
 ```rust
 pub struct MyData { ... }
@@ -47,15 +47,15 @@ delegate_components! {
 }
 ```
 
-The example `MyContext` above implements the `Hash` trait by using `delegate_components!` to delegate the implementation to the `HashWithDisplay` provider, through the specified key `HashProviderComponent`. Because `MyData` already implements `Display`, the `Hash` trait is now also automatically implemented through CGP.
+In this example, `MyData` implements the `Hash` trait by using `delegate_components!` to delegate its implementation to the `HashWithDisplay` provider, identified by the key `HashProviderComponent`. Because `MyData` already implements `Display`, the `Hash` trait is now automatically implemented through CGP via this delegation.
 
-If you would like to learn more about CGP, check out the [project homepage](/) for more details. For now, let's head back and look at the new features introduced in `cgp-serde`.
+If you are eager to learn more about CGP, please check out the [project homepage](/) for all the details. For now, let us return to examine the new features introduced in `cgp-serde`.
 
 ---
 
 # Context-Generic Serialization Traits
 
-The key highlight for `cgp-serde` is that it introduces context-generic versions of the Serde traits. First, the [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) trait is redefined as follows:
+The key highlight of `cgp-serde` is its introduction of context-generic versions of the Serde traits. First, the [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) trait is redefined as follows:
 
 ```rust
 #[cgp_component {
@@ -69,9 +69,9 @@ pub trait CanSerializeValue<Value: ?Sized> {
 }
 ```
 
-Compared to the original `Serialize` trait, `cgp-serde` provides a `CanSerializeValue` CGP trait that has the `Self` type in `Serialize` moved to an explicit generic parameter called `Value`. The `Self` type in `CanSerializeValue` instead represents a *context* type, that can be used to provide *dependency injection*. The `serialize` method also accepts an extra `&self` value, which can be used to retrieve additional runtime dependencies from the context.
+Compared to the original `Serialize` trait, `cgp-serde` provides the `CanSerializeValue` CGP trait, which moves the original `Self` type from `Serialize` to an explicit generic parameter named `Value`. The `Self` type in `CanSerializeValue` now represents a **context** type, which can be used for **dependency injection**. The `serialize` method also accepts an extra `&self` value, making it possible to retrieve additional runtime dependencies from this context.
 
-Similarly, `cgp-serde` defines a context-generic version of the [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) trait as follows:
+In a similar manner, `cgp-serde` defines a context-generic version of the [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) trait as follows:
 
 ```rust
 #[cgp_component {
@@ -85,19 +85,19 @@ pub trait CanDeserializeValue<'de, Value> {
 }
 ```
 
-Similar to `CanSerializeValue`, the trait `CanDeserializeValue` moves the original `Self` type in `Deserialize` to become the `Value` generic paramter. The `deserialize` method also accepts an additional `&self` value, that can be used to provide runtime dependencies such as an arena allocator.
+Analogous to `CanSerializeValue`, the `CanDeserializeValue` trait moves the original `Self` type in `Deserialize` to become the `Value` generic parameter. This `deserialize` method similarly accepts an additional `&self` value, which can be utilized to supply runtime dependencies, such as an arena allocator.
 
 ## Provider Traits
 
-In addition to having an additional `Context` parameter as the `Self` type, both `CanSerializeValue` and `CanDeserializeValue` are annotated with the `#[cgp_component]` macro, which unlocks additional CGP capabilities on the traits.
+In addition to having the additional `Context` parameter as the `Self` type, both `CanSerializeValue` and `CanDeserializeValue` are annotated with the `#[cgp_component]` macro, which is the mechanism that unlocks additional CGP capabilities on these traits.
 
-The `provider` argument to `#[cgp_component]` generates for us the **provider traits** that are called `ValueSerializer` and `ValueDeserializer`. These traits will be used for implementing *named* implementations of the serialization traits that can bypass the coherence restrictions.
+The `provider` argument to `#[cgp_component]` automatically generates the **provider traits** called `ValueSerializer` and `ValueDeserializer`. These traits are the ones you will use for implementing **named** serialization implementations that can bypass the coherence restrictions.
 
-On the other hand, in CGP we call the original trait `CanSerializeValue` and `CanDeserializeValue` as the **consumer traits**. In CGP, we will use a CGP trait through its consumer trait, but implement them using its provider trait.
+Conversely, in CGP, we refer to the original traits `CanSerializeValue` and `CanDeserializeValue` as the **consumer traits**. The general rule in CGP is that a CGP component is used through its consumer trait but implemented using its provider trait.
 
 ## `UseDelegate` Provider
 
-Our CGP trait definitions also contain a second `derive_delegate` entry in `#[cgp_component]`. This generates a special `UseDelegate` provider that can be used for **static dispatch** of provider implementations based on the `Value` type. The use of `UseDelegate` will be explained later in this article.
+Our CGP trait definitions also include a second `derive_delegate` entry within the `#[cgp_component]` macro. This entry generates a specialized `UseDelegate` provider that enables **static dispatch** of provider implementations based on the specific `Value` type. The practical application and use of `UseDelegate` will be explained in greater detail later in this article.
 
 ---
 
