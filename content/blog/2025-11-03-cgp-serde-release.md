@@ -8,7 +8,7 @@ authors = ["Soares Chen"]
 
 # Overview
 
-I am excited to announce the release of [**`cgp-serde`**](https://github.com/contextgeneric/cgp-serde), a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
+I am excited to announce the release of **[`cgp-serde`](https://github.com/contextgeneric/cgp-serde)**, a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
 
 In short, `cgp-serde` extends Serde’s original [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) and [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) traits with CGP, making it possible to write **overlapping** or **orphaned** implementations of these traits and thus bypass the standard Rust **coherence restrictions**.
 
@@ -16,7 +16,7 @@ Furthermore, `cgp-serde` allows us to leverage the powerful [**context and capab
 
 ## Quick intro to Context-Generic Programming
 
-For those readers new to the project, here is a quick introduction: Context-Generic Programming (CGP) is a modular programming paradigm that enables you to bypass the **coherence** restrictions in Rust traits, allowing for **overlapping** and **orphan** implementations of any CGP trait.
+For those readers new to the project, here is a quick introduction: Context-Generic Programming (CGP) is a modular programming paradigm that enables you to bypass the **coherence restrictions** in Rust traits, allowing for **overlapping** and **orphan** implementations of any CGP trait.
 
 You can adapt almost any existing Rust trait to use CGP today by applying the `#[cgp_component]` macro to the trait definition. After this annotation, you can write **named** implementations of the trait using `#[cgp_impl]`, which can be defined without being constrained by the coherence rules. You can then selectively enable and reuse the named implementation for your type using the `delegate_components!` macro.
 
@@ -89,7 +89,7 @@ Analogous to `CanSerializeValue`, the `CanDeserializeValue` trait moves the orig
 
 ## Provider Traits
 
-In addition to having the additional `Context` parameter as the `Self` type, both `CanSerializeValue` and `CanDeserializeValue` are annotated with the `#[cgp_component]` macro, which is the mechanism that unlocks additional CGP capabilities on these traits.
+In addition to having the extra `Context` parameter as the `Self` type, both `CanSerializeValue` and `CanDeserializeValue` are annotated with the `#[cgp_component]` macro, which is the mechanism that unlocks additional CGP capabilities on these traits.
 
 The `provider` argument to `#[cgp_component]` automatically generates the **provider traits** called `ValueSerializer` and `ValueDeserializer`. These traits are the ones you will use for implementing **named** serialization implementations that can bypass the coherence restrictions.
 
@@ -103,7 +103,7 @@ Our CGP trait definitions also include a second `derive_delegate` entry within t
 
 # Overlapping Provider Implementations
 
-Compared to the original Serde definitions of `Serialize` and `Deserialize`, the greatest improvement offered by `CanSerializeValue` and `CanDeserializeValue` is the ability to define **overlapping** and even **orphan** implementations of the trait. Let us now examine a few concrete examples of how this crucial feature works.
+Compared to the original Serde definitions of `Serialize` and `Deserialize`, the greatest improvement offered by `CanSerializeValue` and `CanDeserializeValue` is the ability to define **overlapping** and **orphan** implementations of the trait. Let us now examine a few concrete examples of how this crucial feature works.
 
 ## Serialize with Serde
 
@@ -132,7 +132,7 @@ Following this, we define our implementation on the `ValueSerializer` provider t
 
 While this implementation itself is not remarkable, it crucially highlights that `cgp-serde` is fully compatible with the standard Serde crate. Consequently, if we wish to reuse an existing `Serialize` implementation for a given value type, we can simply utilize `UseSerde` to serialize that type through `CanSerializeValue`.
 
-Another important detail to notice is that our blanket implementation for `UseSerde` works universally for *any* `Context` and `Value` types satisfying the bounds. As we will soon see, we can define more than one such blanket implementation using CGP.
+Another important detail to notice is that our blanket implementation for `UseSerde` works universally for *any* `Context` and `Value` types satisfying the bounds. As we will soon see, we can define **more than one** such blanket implementation using CGP.
 
 ## Serialize with `Display`
 
@@ -155,13 +155,13 @@ where
 }
 ```
 
-In the very first line, the inclusion of the `new` keyword in `#[cgp_impl]` instructs the macro to automatically generate the necessary provider struct definition for us:
+In the very first line, the inclusion of the `new` keyword in `#[cgp_impl]` instructs the macro to automatically generate the necessary provider struct definition for us, so that we don't have to define them manually:
 
 ```rust
 struct SerializeWithDisplay;
 ```
 
-Our blanket implementation for `SerializeWithDisplay` works with any `Value` type that implements `Display`. Crucially, this implementation also requires any `Context` type that implements `CanSerializeValue<String>`. This means we use the `Context` to *look up* the serialization implementation for `String` and then employ it within our current provider implementation.
+Our blanket implementation for `SerializeWithDisplay` works with any `Value` type that implements `Display`. Crucially, this implementation also requires the `Context` type to implement `CanSerializeValue<String>`. This means we use the `Context` to *look up* the serialization implementation for `String` and then employ it within our current provider implementation.
 
 Inside the method body, we first use `to_string` to convert our value into a standard string, and then we call `self.serialize` to serialize that string value using the context's `CanSerializeValue<String>` implementation.
 
@@ -181,7 +181,7 @@ where
 }
 ```
 
-If you have any experience with Rust traits, you will immediately recognize that it is practically impossible to define this blanket `Serialize` implementation in Serde. More accurately, you are restricted to having at most one such blanket implementation of `Serialize`. Because of this restriction, it is extremely difficult to justify why this version, which uses the `Value: Display` bound, should be the *chosen* global implementation for `Serialize`.
+If you have any experience with Rust traits, you will immediately recognize that it is practically impossible to define this blanket `Serialize` implementation in Serde. More accurately, you are **restricted** to having **at most one** such blanket implementation of `Serialize`. Because of this restriction, it is extremely difficult to justify why this version, which uses the `Value: Display` bound, should be the *chosen* global implementation for `Serialize`.
 
 In stark contrast, both `UseSerde` and `SerializeWithDisplay` contain **overlapping** implementations of `ValueSerializer` across *both* the `Context` and `Value` types. In vanilla Rust, this would be outright rejected, as it is perfectly possible, for instance, to have a `Value` type that implements both `Serialize` and `Display`. However, this overlapping is seamlessly enabled in CGP by utilizing the provider trait `ValueSerializer` and the powerful `#[cgp_impl]` macro. We will elaborate on the underlying mechanism in later sections.
 
@@ -332,7 +332,7 @@ In a real-world scenario, you might have many more applications using your libra
 
 ## Wiring of serializer components
 
-With `cgp-serde`, defining custom application contexts that can deeply customize how each field in our data structures is serialized becomes remarkably straightforward. For instance, we can define an `AppA` context for Application A like this:
+With `cgp-serde`, it is straightforward to define custom application contexts that can deeply customize how each field in our data structures is serialized. For instance, we can define an `AppA` context for Application A like this:
 
 ```rust
 pub struct AppA;
@@ -368,11 +368,11 @@ delegate_components! {
 }
 ```
 
-In the code above, we use the `delegate_components!` macro to create effective **type-level lookup tables** that configure the specific provider implementations used by `AppA`. The primary key, `ValueSerializerComponent`, tells the compiler that we are configuring the providers for the `CanSerializeValue` trait within `AppA`.
+In the code above, we use the `delegate_components!` macro to create effective **type-level lookup tables** that configure the specific provider implementations used by `AppA`. The **component key**, `ValueSerializerComponent`, tells the compiler that we are configuring the provider for the `CanSerializeValue` trait within `AppA`.
 
-The value assigned to this entry is `UseDelegate`, followed by an *inner* table named `SerializerComponentsA`. This inner table performs **static dispatch** of the provider implementation based on the `Value` type being serialized. For example, the key `Vec<u8>` is mapped to the value `SerializeHex`, indicating that the `SerializeHex` provider is used whenever `Vec<u8>` needs to be serialized.
+The value assigned to this entry is `UseDelegate`, followed by an *inner* table named `SerializerComponentsA`. This inner table is used for **static dispatch** of the provider implementation based on the `Value` type being serialized. For example, the key `Vec<u8>` is mapped to the value `SerializeHex`, indicating that the `SerializeHex` provider is used whenever `Vec<u8>` needs to be serialized.
 
-The `delegate_components!` macro also includes shorthands for mapping multiple keys to the same value. For instance, both `u64` and `String` are dispatched to the generic `UseSerde` provider, which is neatly grouped using an array syntax. We can also set *generic* keys in the table, such as mapping all `&'a T` references to the `SerializeDeref` provider.
+The `delegate_components!` macro also includes shorthands for mapping multiple keys to the same value. For instance, both `u64` and `String` are dispatched to the generic `UseSerde` provider, which is neatly grouped using an array syntax. We can also set **generic keys** in the table, such as mapping all `&'a T` references to the `SerializeDeref` provider.
 
 We will cover more details about the mechanics of this type-level lookup table in later sections. For now, let us look at how we implement `AppB` to perform the serialization required for Application B:
 
@@ -420,13 +420,13 @@ If we meticulously compare the `delegate_components!` entries in both `AppA` and
 
 As we can clearly observe, changing the serialization format only required a **few lines of configuration changes** in the wiring. This dramatically demonstrates the flexibility of CGP to make application implementations highly configurable and easily adaptable.
 
-In practice, there are further CGP patterns available for `AppA` and `AppB` to share their common `delegate_components!` entries through a powerful **preset** mechanism. However, we will omit those details here for brevity.
+In practice, there are further CGP patterns available for `AppA` and `AppB` to share their *common* `delegate_components!` entries through a powerful **preset** mechanism. However, we will omit those details here for brevity.
 
 ## Serialization with `serde_json`
 
 A key feature of `cgp-serde` is its continued **backward compatibility** with the existing Serde ecosystem. This means we can effortlessly reuse established libraries like `serde_json` to serialize our encrypted message archive payloads into JSON.
 
-However, since `serde_json` strictly operates on types that implement the original `Serialize` trait, `cgp-serde` provides the `SerializeWithContext` wrapper. This wrapper takes the serialization value and the application context, providing a context-aware implementation of `Serialize`. Using it, we can serialize our data to JSON like this:
+However, since `serde_json` strictly operates on types that implement the original `Serialize` trait, `cgp-serde` provides the `SerializeWithContext` wrapper. This wrapper wraps the value to be serialized together with the application context, providing a context-aware implementation of `Serialize`. Using it, we can serialize our data to JSON like this:
 
 ```rust
 let app_a = AppA { ... };
@@ -453,13 +453,13 @@ As illustrated, `cgp-serde` makes it remarkably easy to customize the serializat
 
 ## Derive-free serialization with `#[derive(CgpData)]`
 
-Beyond the deep customization we have just explored, another critical feature to highlight is that there is virtually no need to use derive macros to generate any serialization implementation for custom data types. If you look back at the definition of types like `EncryptedMessage`, you will notice that it only uses the general `#[derive(CgpData)]` macro provided by the base CGP library.
+Beyond the deep customization we have just explored, another critical feature to highlight is that there is virtually no need to use derive macros to generate any serialization-specific implementation for custom data types. If you look back at the definition of types like `EncryptedMessage`, you will notice that it only uses the general `#[derive(CgpData)]` macro provided by the base CGP library.
 
-Behind the scenes, `#[derive(CgpData)]` generates the necessary support traits for [extensible data types](https://contextgeneric.dev/blog/extensible-datatypes-part-1/), which enables our data types to naturally work with CGP traits like `CanSerializeValue` without requiring library-specific derivation. Instead, `cgp-serde` provides a generic `SerializeFields` provider that can work with any struct that derives `CgpData`.
+Behind the scenes, `#[derive(CgpData)]` generates the necessary support traits for [extensible data types](https://contextgeneric.dev/blog/extensible-datatypes-part-1/), which enables our data types to naturally work with CGP traits like `CanSerializeValue` without requiring library-specific derivation. This is made possible, because CGP enables `cgp-serde` to implement a generic `SerializeFields` provider that can work with any struct that derives `CgpData`, without being restricted by the overlapping constraints.
 
-This mechanism shows how `cgp-serde` fundamentally solves the orphan implementation problem: it avoids requiring library authors to derive library-specific implementations on their data types at all. For instance, our encrypted messaging library does not even need to include `cgp-serde` as a dependency. As long as the library uses the base `cgp` crate to derive `CgpData`, we can serialize its data types using the `SerializeFields` provider.
+This mechanism shows how `cgp-serde` fundamentally solves the orphan implementation problem: it avoids requiring library authors to derive library-specific implementations on their data types at all. For instance, our encrypted messaging library does not even need to include `cgp-serde` or `serde` as a dependency. As long as the library uses the base `cgp` crate to derive `CgpData`, we can serialize its data types using the `SerializeFields` provider.
 
-Furthermore, the use of extensible data types applies not only to the traits in `cgp-serde`. A general derivation of `CgpData` will automatically enable the library’s data types to work with *other* CGP traits in the same way they work with `cgp-serde`. Because of this universal applicability, CGP can shield library authors from endless external requests to use derive macros for every popular trait, simply to work around the archaic orphan rules in Rust.
+Furthermore, the use of extensible data types applies not only to the traits in `cgp-serde`. A general derivation of `CgpData` will automatically enable the library’s data types to work with *other* CGP traits in the same way they work with `cgp-serde`. Because of this universal applicability, CGP can shield library authors from endless external requests to apply derive macros for every popular trait on their data types, simply to work around the archaic orphan rules in Rust.
 
 ## Full Example
 
@@ -469,7 +469,7 @@ The complete working example of this customized serialization is available on [G
 
 # Capabilities-Enabled Deserialization Demo
 
-Now that we have demonstrated how `cgp-serde` enables highly modular serialization, let us turn our attention to its deserialization powers. Specifically, we will show how `cgp-serde` enables the use case explained in the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. We will demonstrate implementing a deserializer for the borrowed type `&'a T` using an arena allocator that is retrieved via **dependency injection** from the context itself.
+Now that we have demonstrated how `cgp-serde` enables highly modular serialization, let us turn our attention to how it unlocks new use cases for deserialization. Specifically, we will show how `cgp-serde` enables the use case explained in the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. We will demonstrate implementing a deserializer for the borrowed type `&'a T` using an arena allocator that is retrieved via **dependency injection** from the context itself.
 
 ## Coordinate Arena
 
@@ -511,7 +511,7 @@ pub trait HasArena<'a, T: 'a> {
 }
 ```
 
-The `HasArena` trait is automatically implemented for any `Context` type, provided it derives `HasField` and contains an `arena` field of the type `&'a Arena<T>`. The necessary nested reference (`&&'a`) is required here to manage the explicit lifetime when working with the `Arena` type provided by `typed-arena`.
+The `HasArena` trait is automatically implemented for any `Context` type, provided it derives `HasField` and contains an `arena` field of the type `&'a Arena<T>`. The nested reference (`&&'a`) is required here, since `#[cgp_auto_getter]` by default returns a reference to a field value in the context, but our field value itself is an explicit reference `&'a Arena<T>`.
 
 Next, we leverage `HasArena` to retrieve the arena allocator from a generic context within our `ValueDeserializer` implementation:
 
@@ -525,17 +525,17 @@ where
     where
         D: serde::Deserializer<'de>,
     {
-        let value = self.deserialize(deserializer)?;
-        let value = self.arena().alloc(value);
+        let owned_value = self.deserialize(deserializer)?;
+        let borrowed_value = self.arena().alloc(owned_value);
 
-        Ok(value)
+        Ok(borrowed_value)
     }
 }
 ```
 
-We define a new provider, `DeserializeAndAllocate`, which implements `ValueDeserializer` specifically for the borrowed `&'a Value` type. To support this, it requires the `Context` to implement `HasArena<'a, Value>` (to fetch the allocator) and `CanDeserializeValue` for the *owned* `Value` type (to perform the initial deserialization).
+We define a new provider, `DeserializeAndAllocate`, which implements `ValueDeserializer` specifically for the borrowed `&'a Value` type. To support this, it requires the `Context` to implement `HasArena<'a, Value>` to get the allocator `&'a Arena`. Additionally, it also requires `Context` to implement `CanDeserializeValue` for the *owned* `Value` type, to perform the initial deserialization on the stack before moving it into the arena.
 
-Inside the method body, we first use the context to deserialize an owned version of the value. We then call `self.arena()` to retrieve the arena allocator and use its `alloc` method to move and allocate the value onto the arena.
+Inside the method body, we first use the context to deserialize an owned version of the value on the stack. We then call `self.arena()` to retrieve the arena allocator and use its `alloc` method to move and allocate the value onto the arena.
 
 As you can see, with the generalized dependency injection capability provided by CGP, we are able to retrieve any necessary value or type from the context during deserialization. This effectively allows us to emulate the `with` clause in the seminal [Context and Capabilities](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal and provide any required capability during the deserialization process.
 
@@ -550,11 +550,11 @@ pub struct App<'a> {
 }
 ```
 
-Our `App` context is deliberately parameterized by a lifetime `'a`. It contains an `arena` field that holds a reference to an [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) that lives for the duration of `'a`, and is specialized for the object type `Coord`.
+Our `App` context is explicitly parameterized by a lifetime `'a`. It contains an `arena` field that holds a reference to an [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) that lives for the duration of `'a`, and is specialized for the object type `Coord`.
 
 The explicit lifetime `'a` is necessary here because the `alloc` method returns a `&'a Coord` value that shares this same lifetime. By being explicit, we accurately inform the Rust compiler that the allocated coordinates will live exactly as long as `'a`, which may outlive `App` itself.
 
-We also derive `HasField` on `App`, which automatically ensures that `App` implements the `HasArena` trait we defined in the previous section.
+We also derive `HasField` on `App`, which enables `App` to automatically implement `HasArena<'a, Coord>`. This is made possible, because the `arena` field in `App` matches the format expected by the blanket implementation generated by `#[cgp_auto_getter]`.
 
 With the `App` context defined, let us examine the component wiring for the `ValueDeserializer` providers:
 
@@ -584,7 +584,7 @@ delegate_components! {
 
 Similar to the serialization lookup tables, here we are configuring the `ValueDeserializer` providers for `App` via the `ValueDeserializerComponent` key and the `UseDelegate` dispatcher. Notice that this table contains several keys with generic lifetimes, `<'a>`, reflecting the use of structs with explicit lifetimes.
 
-As evident in the table, for the value types `Coord` and `Cluster<'a>`, we use `DeserializeRecordFields` to deserialize the structs using the **extensible data types** facility derived from `#[derive(CgpData)]`. Crucially, for `&'a Coord`, we select the `DeserializeAndAllocate` provider we defined earlier.
+As evident in the table, for the value types `Coord` and `Cluster<'a>`, we use a special provider called `DeserializeRecordFields` to deserialize the structs using the **extensible data types** facility derived from `#[derive(CgpData)]`. Crucially, for `&'a Coord`, we select the `DeserializeAndAllocate` provider we defined earlier.
 
 ## Error Handling
 
@@ -619,7 +619,7 @@ let arena = Arena::new();
 let app = App { arena: &arena };
 ```
 
-In the case of deserialization, there is a minor complication: we cannot directly use the simple [`serde_json::from_str`](https://docs.rs/serde_json/latest/serde_json/fn.from_str.html) with our `App` context. Instead, `cgp-serde` works with the lower-level [`Deserializer`](https://docs.rs/serde_json/latest/serde_json/de/struct.Deserializer.html) implementation in `serde_json`, allowing us to pass `serde_json`'s deserializer directly to the `CanDeserializeValue::deserialize` method.
+In the case of deserialization, there is a minor complication: we cannot directly use the simple [`serde_json::from_str`](https://docs.rs/serde_json/latest/serde_json/fn.from_str.html) with our `App` context. This is because unlike serialization, `serde_json::from_str` doesn't accept additional parameters that we can use to "pass" around the `app` value. Instead, `cgp-serde` works with the lower-level [`Deserializer`](https://docs.rs/serde_json/latest/serde_json/de/struct.Deserializer.html) implementation in `serde_json`, allowing us to pass `serde_json`'s deserializer directly to the `CanDeserializeValue::deserialize` method, together with the `app` context.
 
 Fortunately, these low-level implementation details are neatly abstracted away by `cgp-serde`, and all we need to do is call the convenient `deserialize_json_string` method on our `App` context:
 
@@ -634,8 +634,6 @@ As we can see, we have successfully utilized the custom arena allocator provided
 ## Full Example
 
 The full working example of the arena allocator deserialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/arena_simplified.rs).
-
-The full example of the arena allocator deserialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/arena_simplified.rs).
 
 ---
 
@@ -659,7 +657,7 @@ pub trait ValueSerializer<Context, Value: ?Sized> {
 }
 ```
 
-Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` shifts the original `Self` type into a new `Context` generic parameter. Consequently, all references to `self` and `Self` are appropriately replaced with `context` and `Context`. The `Self` type in a provider trait is instead used as the *provider type*, which are the unique, dummy structs - like `UseSerde` or `SerializeHex` - that are defined and owned by the library module. This is the core trick: CGP circumvents Rust’s coherence restrictions by guaranteeing that we always own a unique provider type when implementing a provider trait.
+Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` shifts the original `Self` type into a new `Context` generic parameter. Consequently, all references to `self` and `Self` are appropriately replaced with `context` and `Context`. The `Self` type in a provider trait is instead used as the **provider name**, which are the unique, dummy structs - like `UseSerde` or `SerializeHex` - that are defined and owned by the library module. This is the core trick: CGP circumvents Rust’s coherence restrictions by guaranteeing that we always own a unique provider type when implementing a provider trait.
 
 ## Desugaring of `#[cgp_impl]`
 
@@ -685,17 +683,19 @@ where
 }
 ```
 
-As clearly shown, `#[cgp_impl]` shifts the `Context` parameter away from the `Self` position to become the first generic parameter of `ValueSerializer`. The `Self` type for the implementation instead becomes `SerializeWithDisplay`, the unique dummy struct that we defined. Because the implementing library owns this `Self` type, `SerializeWithDisplay`, the Rust compiler permits the trait implementation even if it is otherwise overlapping on the `Context` and `Value` types. This is the central mechanism that allows CGP to define both overlapping and orphan implementations. Next, we will examine how these provider implementations are dynamically *wired* to a concrete application context.
+As clearly shown, `#[cgp_impl]` shifts the `Context` parameter away from the `Self` position to become the first generic parameter of `ValueSerializer`. The `Self` type for the implementation instead becomes `SerializeWithDisplay`, the unique dummy struct that we defined. Because the implementing library owns `SerializeWithDisplay`, the Rust compiler permits the trait implementation even if it is otherwise overlapping on the `Context` and `Value` types. This is the central mechanism that allows CGP to define both overlapping and orphan implementations. Next, we will examine how these provider implementations are statically *wired* to a concrete application context.
 
 ## Type-Level Lookup Tables
 
-When the `delegate_components!` macro is invoked on an application context like `AppA`, it is conceptually equivalent to building a **type-level lookup table** for that context. This table effectively configures the dispatch mechanism at compile time:
+In the [serialization example](#wiring-of-serializer-components) for `AppA`, when the `delegate_components!` macro is invoked, it is conceptually equivalent to building a **type-level lookup table** for that context. This table effectively configures the dispatch mechanism at compile time:
 
 | Name | Value |
 |----|----|
 | `ValueSerializerComponent` | `UseDelegate<SerializerComponentsA>` |
 
-This entry points to an inner table, `SerializerComponentsA`, which holds the concrete logic providers:
+In the example, the type-level table for `AppA` only contains one entry, with `ValueSerializerComponent` as the key. This entry is used by the `CanSerializeValue` trait to look up for the provider implementation.
+
+In the entry value, the use of the `new SerializerComponentsA { ... }` constructs an **inner table**, `SerializerComponentsA`, which holds further mapping of providers based on the serialization value type:
 
 | Name | Value |
 |----|----|
@@ -710,6 +710,8 @@ This entry points to an inner table, `SerializerComponentsA`, which holds the co
 | `MessagesByTopic` | `SerializeFields` |
 | `EncryptedMessage` | `SerializeFields` |
 
+This table is passed as the `SerializerComponentsA` type to `UseDelegate`, which performs the actual dispatch based on the value type.
+
 When the trait system must look up an implementation, such as for serializing `Vec<EncryptedMessage>`, it follows a precise, recursive path:
 
 
@@ -717,10 +719,10 @@ When the trait system must look up an implementation, such as for serializing `V
   * `AppA`'s table returns `UseDelegate<SerializerComponentsA>`. This value must now implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
   * `UseDelegate` implements `ValueSerializer` by performing a secondary lookup on the `SerializerComponentsA` table, using `Vec<EncryptedMessage>` as the key.
   * `SerializerComponentsA` returns the value `SerializeIterator`. This means `SerializeIterator` must now implement `ValueSerializer<AppA, Vec<EncryptedMessage>>`.
-  * For `SerializeIterator` to satisfy this requirement, it introduces a new constraint: `AppA` must implement `CanSerializeValue<EncryptedMessage>`.
+  * For `SerializeIterator` to satisfy this requirement, it requests a new constraint: that `AppA` must implement `CanSerializeValue<EncryptedMessage>`.
   * The entire lookup process is repeated from the beginning for the inner type, `EncryptedMessage`, until it eventually points to the concrete provider `SerializeFields`.
 
-This table lookup process, while abstract, works conceptually similarly to how [vtable lookups](https://en.wikipedia.org/wiki/Virtual_method_table) are performed for [`dyn` traits in Rust](https://www.youtube.com/watch?v=pNA-XAIrDTk) and in object-oriented languages like Java. The fundamental difference, and a major selling point, is that CGP’s lookup tables are fully implemented at the **type level**. This means the tables are resolved entirely at compile time, resulting in **zero runtime overhead**.
+This table lookup process, while seem complicated, works conceptually similarly to how [vtable lookups](https://en.wikipedia.org/wiki/Virtual_method_table) are performed for [`dyn` traits in Rust](https://www.youtube.com/watch?v=pNA-XAIrDTk) and in object-oriented languages like Java. The fundamental difference, and a major selling point, is that CGP’s lookup tables are fully implemented at the **type level**. This means the tables are resolved entirely at compile time, resulting in **zero runtime overhead**.
 
 ## Implementation of Lookup Tables
 
@@ -750,7 +752,7 @@ impl DelegateComponent<Vec<EncryptedMessage>> for SerializerComponentsA {
 
 CGP then generates essential **blanket implementations** on the consumer and provider traits. These implementations utilize the `DelegateComponent` entries to resolve the correct provider implementation at compile time.
 
-For example, the initial lookup mechanism for the consumer trait `CanSerializeValue` is implemented via this blanket trait:
+For example, the initial lookup mechanism for the consumer trait `CanSerializeValue` is implemented via this blanket implementation:
 
 ```rust
 impl<Context, Value: ?Sized> CanSerializeValue<Value> for Context
@@ -769,7 +771,27 @@ where
 
 The consumer trait `CanSerializeValue` is thus implemented for a context like `AppA` if `AppA` contains a lookup table entry where `ValueSerializerComponent` is the key and the resulting `Delegate` "value" successfully implements `ValueSerializer`.
 
-Following that, the recursive lookup mechanism for `UseDelegate` itself is implemented through this provider:
+Similarly, a blanket implementation is generated for `ValueSerializer` as follows:
+
+```rust
+#[cgp_impl(Provider)]
+impl<Context, Value: ?Sized, Provider> ValueSerializer<Value> for Context
+where
+    Provider: DelegateComponent<ValueSerializerComponent>,
+    Provider::Delegate: ValueSerializer<Context, Value>,
+{
+    fn serialize<S>(&self, value: &Value, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        Provider::Delegate::serialize(self, value, serializer)
+    }
+}
+```
+
+The blanket implementation above looks almost identical as before, except that the delegation lookup is done on the `Provider` type. This essentially allows a provider to delegate its provider implementation to *another* provider.
+
+Following that, the special provider `UseDelegate` has the following blanket implementation:
 
 ```rust
 #[cgp_impl(UseDelegate<Components>)]
@@ -787,7 +809,9 @@ where
 }
 ```
 
-This implementation shows that `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`. Aside from this difference in the lookup key, the mechanism is structurally similar to the blanket implementation for `CanSerializeValue`.
+This implementation shows that `UseDelegate` uses the `Value` type as the lookup "key" in a given components table, such as `SerializerComponentsA`.
+
+If we carefully compare the three versions of the blanket implementations, we would observe that the key differences lie in which type is used as the type-level lookup table, and which type is used as the key for the lookup.
 
 ---
 
