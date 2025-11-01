@@ -866,3 +866,13 @@ We can only confirm if this gap exists by conducting a proper benchmark, specifi
 One potential optimization I have considered is building a similar fast string matching table lazily using `LazyLock` when the first deserialization call occurs. We would need to build this table at runtime because our generic code can only inspect one field at a time, making it impossible to generate the same multi-string-literal `match` statement as a macro.
 
 In any case, if you are interested in benchmarking or optimizing `cgp-serde`, your contributions to the project are highly welcome!
+
+---
+
+# Conclusion
+
+In this article, we have given a sneak preview of the modular serialization features that could be unlocked by `cgp-serde`. The best part of all is that almost none of the design of `cgp-serde` is specifically catered for `serde` nor serialization. Instead, everything you have learned here is the result of the general design patterns offered by CGP for building any kind of application or library. This means that you can easily take the design patterns used in `cgp-serde` and re-apply them on other traits in your project.
+
+If this article has pique your interest in learning more about CGP, do check out our [project homepage](/). In particular, check out our articles on how CGP can be used to solve the [**expression problem**](https://en.wikipedia.org/wiki/Expression_problem) enables the use of [**extensible records and variants**](/blog/extensible-datatypes-part-1/) in Rust. You can also learn about how CGP can be used to implement [**type-level DSLs**](/blog/hypershell-release/), with shell scripting as the example language.
+
+CGP is still in the early stage of development, so do keep an eye on the updates and development of the project!
