@@ -59,7 +59,11 @@ At this stage, CGP is best suited for early adopters and potential [contributors
 
 # Getting Started
 
-There are several places where you can get started learning and using CGP.
+Even though CGP is officially still less than one year old, some of the documentation and resources available already become outdated, or get obsoleted by more intuitive patterns. Nevertheless, this section attempts to provide you with the best guidance on how to learn more about CGP.
+
+## Blog Posts
+
+The most up-to-date resources about CGP is available in the form of [blog posts](/blog). In particular, the blog posts from [v0.6.0 onward](/blog/v0-6-0-release/) give a more concise explanation of what CGP is about.
 
 ## Hello World Tutorial
 
@@ -67,11 +71,9 @@ The [Hello World Tutorial](/tutorials/hello) gives a high level walkthrough of v
 
 ## Book
 
-To better understand CGP, the best approach is to dive into our book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/). It provides a comprehensive guide to understanding and working with CGP.
+If you would like to understand CGP from first principles, without relying on the [`cgp` crate](https://github.com/contextgeneric/cgp), the best approach is to dive into our book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/). It provides a comprehensive guide to understanding the inner working CGP.
 
-## Applications
-
-You can also explore real-world applications and projects that use CGP, such as [Hermes SDK](https://github.com/informalsystems/hermes-sdk/), to gain a deeper understanding of its practical uses.
+Note that the book has not been updated for a while, and you might want to skip the book if you only want to start using CGP quickly with minimal learning curve!
 
 ## Resources
 
