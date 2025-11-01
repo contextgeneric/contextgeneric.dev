@@ -6,6 +6,10 @@ authors = ["Soares Chen"]
 
 +++
 
+# Preface
+
+This is a companion blog post for my [RustLab presentation](https://rustlab.it/talks/how-to-stop-fighting-with-coherence-and-start-writing-context-generic-trait-impls) titled **How to Stop Fighting with Coherence and Start Writing Context-Generic Trait Impls**.
+
 # Overview
 
 I am excited to announce the release of **[`cgp-serde`](https://github.com/contextgeneric/cgp-serde)**, a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
@@ -817,13 +821,13 @@ If we carefully compare the three versions of the blanket implementations, we wo
 
 # Future Work
 
-The initial release of `cgp-serde` serves as a compelling proof of concept, demonstrating exactly how CGP can be used to solve the pervasive coherence problem in Rust. While you can certainly begin experimenting with `cgp-serde` today for modular serialization in your applications, there are still a few rough edges that need polishing before it reaches the quality level suitable for mission-critical production use.
+The initial release of `cgp-serde` serves as a compelling proof of concept, demonstrating how CGP can be used to solve the coherence problem in Rust. While you can certainly begin experimenting with `cgp-serde` today for modular serialization in your applications, there are still a few rough edges that need polishing before it reaches the quality level suitable for mission-critical production use.
 
 This section highlights the areas we plan to address, and what you might want to wait for before fully committing to `cgp-serde` for your main projects.
 
 ## Serialization providers for extensible variants
 
-Currently, `cgp-serde` provides essential providers like `SerializeFields` and `DeserializeRecordFields` to enable datatype-generic serialization for any struct that uses `#[derive(CgpData)]`. This decoupling of serialization logic from data type definitions is key to reducing the derive bloat caused by orphan rule restrictions.
+Currently, `cgp-serde` has implemented providers like `SerializeFields` and `DeserializeRecordFields` to enable datatype-generic serialization for any struct that uses `#[derive(CgpData)]`. This decoupling of serialization logic from data type definitions is key to reducing the derive bloat caused by orphan rule restrictions.
 
 However, the equivalent providers for Rust *enums* and *extensible variants* have not yet been implemented. This means that you cannot currently use the modular serialization features of `cgp-serde` to serialize enum types in your application. This limitation is purely due to time constraints; I was unable to dedicate enough time to finish the implementation for extensible variants before this initial release.
 
@@ -831,7 +835,7 @@ However, the equivalent providers for Rust *enums* and *extensible variants* hav
 
 At the moment, `cgp-serde` only provides the `deserialize_json_string` helper method to deserialize a JSON string using a context. Crucially, I have not yet implemented other common helper methods, such as `from_slice` and `from_value`. If you need the functionality equivalent to these methods, you would currently have to study the internals of `deserialize_json_string` and write your own deserialization wrappers.
 
-The need for additional wrappers during deserialization arises because the original `serde::Deserialize::deserialize` method lacks a `self` argument. We must explicitly work around this by constructing a library-specific [`Deserializer`](https://docs.rs/serde_json/latest/serde_json/struct.Deserializer.html) and then passing it along with the context to the `CanDeserializeValue::deserialize` method.
+The need for additional wrappers during deserialization arises because functions like `serde_json::from_str` do not accept any argument where we can "pass" around the deserialization context. Therefore we must explicitly work around this by constructing library-specific deserializers like [`serde_json::Deserializer`](https://docs.rs/serde_json/latest/serde_json/struct.Deserializer.html) and then passing it along with the context to the `CanDeserializeValue::deserialize` method.
 
 Fortunately, library functions like `serde::from_str` are generally lightweight wrappers around library-specific deserializers. This makes re-creating similar, easy-to-use helpers for `cgp-serde` a relatively straightforward task. The challenge here is simply a matter of time: I need to properly survey the common deserialization methods used in the wild and aim to support as many as possible. On the plus side, these wrapper implementations are low-hanging fruit and represent simple tasks for newcomers to contribute to the project. If you are interested in helping, please do submit a [pull request](https://github.com/contextgeneric/cgp-serde/pulls)!
 
@@ -845,7 +849,7 @@ In principle, serialization *from* `cgp-serde` should work almost immediately. I
 
 A significant area for improvement is documentation. Both CGP and `cgp-serde` are currently severely lacking in comprehensive documentation. To make `cgp-serde` truly usable for the broader community, we will need to write far more documentation and tutorials explaining how to effectively use it for modular serialization.
 
-With my time being extremely limited, I will likely only prioritize documenting `cgp-serde` over further developing CGP if there is real, demonstrable demand from developers wanting to use it for their applications. While I strongly believe the modular serialization provided by `cgp-serde` will be incredibly useful, my experience with developing CGP suggests the community may not yet fully grasp or care about modular serialization as much as I do. Therefore, if the use cases presented by `cgp-serde` are important to you, please communicate your feedback so I can properly prioritize my development efforts!
+With my time being extremely limited, I will likely only prioritize documenting `cgp-serde` over further developing CGP if there is real, demonstrable demand from developers wanting to use it for their applications. While I strongly believe the modular serialization provided by `cgp-serde` will be incredibly useful, my experience with developing CGP suggests that the community may not yet fully grasp or care about modular serialization as much as I do. Therefore, if the use cases presented by `cgp-serde` are important to you, please communicate your feedback so I can properly prioritize my development efforts!
 
 ## Performance benchmark
 
@@ -857,7 +861,7 @@ The primary point of contention in benchmarking will likely be the serialization
 
 There are a few reasons why the macro-generated implementation by `serde` might be faster, particularly during deserialization. `serde` generates a `match` statement on *string literals* to determine which field it needs to deserialize. Conversely, `cgp-serde` must perform a sequential string comparison of an incoming field key against each field's string tag and then choose the correct branch if a match is found. The Rust compiler can likely generate much more efficient, string-based pattern matching for `serde`.
 
-We can only confirm if this gap exists by conducting a proper benchmark, specifically comparing scenarios like deserializing structs with many fields or fields with similar prefixes, to see if `cgp-serde`'s performance significantly worsens. If the performance difference is substantial, I will dedicate time to optimizing it. If the difference is negligible, the current implementation is likely good enough.
+We can only confirm if this gap exists by conducting a proper benchmark, specifically comparing scenarios like deserializing structs with many fields or fields with similar prefixes, to see if `cgp-serde`'s performance significantly worsens. If the performance difference is substantial, I will dedicate time to optimizing it. But if the difference is negligible, the current implementation is likely good enough.
 
 One potential optimization I have considered is building a similar fast string matching table lazily using `LazyLock` when the first deserialization call occurs. We would need to build this table at runtime because our generic code can only inspect one field at a time, making it impossible to generate the same multi-string-literal `match` statement as a macro.
 
