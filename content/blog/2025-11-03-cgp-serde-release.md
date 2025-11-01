@@ -12,7 +12,7 @@ This is a companion blog post for my [RustLab presentation](https://rustlab.it/t
 
 # Overview
 
-I am excited to announce the release of **[`cgp-serde`](https://github.com/contextgeneric/cgp-serde)**, a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
+I am excited to announce the release of [**cgp-serde**](https://github.com/contextgeneric/cgp-serde), a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
 
 In short, `cgp-serde` extends Serde’s original [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) and [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) traits with CGP, making it possible to write **overlapping** or **orphaned** implementations of these traits and thus bypass the standard Rust **coherence restrictions**.
 

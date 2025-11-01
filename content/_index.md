@@ -10,24 +10,50 @@ sort_by = "weight"
 
 # Announcement
 
-I’m excited to announce the release of [**CGP v0.6.0**](/blog/v0-6-0-release/)!
-This version introduces major ergonomic improvements that make provider and context implementations simpler and more intuitive to write.
+I am excited to announce the release of [**cgp-serde**](/blog/cgp-serde-release/), a modular serialization library for Serde that leverages the power of [**Context-Generic Programming**](/).
 
-The new `#[cgp_impl]` and `#[cgp_inherit]` macros replace `#[cgp_provider]` and `#[cgp_context]`, offering cleaner syntax and greatly improving the readability of CGP code.
+[Read the announcement blog post](/blog/cgp-serde-release/) to find out more.
 
-[Read the announcement blog post](/blog/v0-6-0-release/) to find out more.
+# Quick Introduction
 
-# Overview
+Context-Generic Programming (CGP) is a modular programming paradigm that enables you to bypass the **coherence restrictions** in Rust traits, allowing for **overlapping** and **orphan** implementations of any CGP trait.
 
-Context-generic programming (CGP) is a new programming paradigm for Rust that allows strongly-typed components to be implemented and composed in a modular, generic, and type-safe way.
+You can adapt almost any existing Rust trait to use CGP today by applying the `#[cgp_component]` macro to the trait definition. After this annotation, you can write **named** implementations of the trait using `#[cgp_impl]`, which can be defined without being constrained by the coherence rules. You can then selectively enable and reuse the named implementation for your type using the `delegate_components!` macro.
 
-To learn more about the high level overview of CGP, check out the [overview](/overview) page.
+For instance, we can, in principle, annotate the standard library’s [`Hash`]([https://doc.rust-lang.org/std/hash/trait.Hash.html]\(https://doc.rust-lang.org/std/hash/trait.Hash.html\)) trait with `#[cgp_component]` like this:
+
+```rust
+#[cgp_component(HashProvider)]
+pub trait Hash { ... }
+```
+
+This change does not affect existing code that uses or implements `Hash`, but it allows for new, potentially overlapping implementations, such as one that works for any type that also implements `Display`:
+
+```rust
+#[cgp_impl(HashWithDisplay)]
+impl<T: Display> HashProvider for T { ... }
+```
+
+You can then apply and reuse this implementation on any type by using the `delegate_components!` macro:
+
+```rust
+pub struct MyData { ... }
+impl Display for MyData { ... }
+
+delegate_components! {
+    MyData {
+        HashProviderComponent: HashWithDisplay,
+    }
+}
+```
+
+In this example, `MyData` implements the `Hash` trait by using `delegate_components!` to delegate its implementation to the `HashWithDisplay` provider, identified by the key `HashProviderComponent`. Because `MyData` already implements `Display`, the `Hash` trait is now automatically implemented through CGP via this delegation.
 
 # Current Status
 
 As of 2025, CGP remains in its _early stages_ of development. While promising, it still has several rough edges, particularly in areas such as documentation, tooling, debugging techniques, community support, and ecosystem maturity.
 
-As such, adopting CGP for serious projects comes with inherent challenges, and users are advised to proceed _at their own risk_. The primary risk is not technical but stems from the limited support available when encountering difficulties in learning or applying CGP.
+As such, adopting CGP for serious projects comes with inherent challenges, and you are advised to proceed _at your own risk_. The primary risk is not technical but stems from the limited support available when encountering difficulties in learning or applying CGP.
 
 At this stage, CGP is best suited for early adopters and potential [contributors](/overview/#contribution) who are willing to experiment and help shape its future.
 
