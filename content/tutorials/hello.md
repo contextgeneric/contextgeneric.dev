@@ -21,9 +21,9 @@ pub trait CanGreet {
 
 The `cgp` crate provides common constructs through its `prelude` module, which should be imported in most cases. The first CGP construct we use here is the `#[cgp_component]` macro. This macro generates additional CGP constructs for the greeter component.
 
-The target of this macro, `CanGreet`, is a _consumer trait_ used similarly to regular Rust traits. However, unlike traditional traits, we won't implement anything directly on this trait.
+The target of this macro, `CanGreet`, is a **consumer trait** used similarly to regular Rust traits. However, unlike traditional traits, we won't implement anything directly on this trait.
 
-In its simplified form, the argument to the macro, `Greeter`, designates a _provider trait_ for the component. The `Greeter` provider is used to define the actual implementations for the greeter component. It has a similar structure to `CanGreet`, but with the implicit `Self` type replaced by a generic `Context` type.
+In its simplified form, the argument to the macro, `Greeter`, designates a **provider trait** for the component. The `Greeter` provider is used to define the actual implementations for the greeter component. It has a similar structure to `CanGreet`, but with the implicit `Self` type replaced by a generic `Context` type.
 
 The macro also generates an empty `GreeterComponent` struct, which is used as the _name_ of the greeter component which can be used for the component wiring later on.
 
