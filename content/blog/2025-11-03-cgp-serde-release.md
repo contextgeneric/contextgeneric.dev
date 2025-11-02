@@ -24,7 +24,7 @@ For those readers new to the project, here is a quick introduction: Context-Gene
 
 You can adapt almost any existing Rust trait to use CGP today by applying the `#[cgp_component]` macro to the trait definition. After this annotation, you can write **named** implementations of the trait using `#[cgp_impl]`, which can be defined without being constrained by the coherence rules. You can then selectively enable and reuse the named implementation for your type using the `delegate_components!` macro.
 
-For instance, we can, in principle, annotate the standard library’s [`Hash`]([https://doc.rust-lang.org/std/hash/trait.Hash.html]\(https://doc.rust-lang.org/std/hash/trait.Hash.html\)) trait with `#[cgp_component]` like this:
+For instance, we can, in principle, annotate the standard library’s [`Hash`](https://doc.rust-lang.org/std/hash/trait.Hash.html) trait with `#[cgp_component]` like this:
 
 ```rust
 #[cgp_component(HashProvider)]
@@ -73,7 +73,7 @@ pub trait CanSerializeValue<Value: ?Sized> {
 }
 ```
 
-Compared to the original `Serialize` trait, `cgp-serde` provides the `CanSerializeValue` CGP trait, which moves the original `Self` type from `Serialize` to an explicit generic parameter named `Value`. The `Self` type in `CanSerializeValue` now represents a **context** type, which can be used for **dependency injection**. The `serialize` method also accepts an extra `&self` value, making it possible to retrieve additional runtime dependencies from this context.
+Compared to the original `Serialize` trait, `cgp-serde` provides the `CanSerializeValue` CGP trait, which moves the original `Self` type from `Serialize` to an explicit generic parameter called `Value`. The `Self` type in `CanSerializeValue` now represents a **context** type, which can be used for **dependency injection**. The `serialize` method also accepts an extra `&self` value, making it possible to retrieve additional runtime dependencies from this context.
 
 In a similar manner, `cgp-serde` defines a context-generic version of the [`Deserialize`](https://docs.rs/serde/latest/serde/trait.Deserialize.html) trait as follows:
 

@@ -10,7 +10,7 @@ sort_by = "weight"
 
 # Announcement
 
-I am excited to announce the release of [**cgp-serde**](/blog/cgp-serde-release/), a modular serialization library for Serde that leverages the power of [**Context-Generic Programming**](/).
+I am excited to announce the release of [**cgp-serde**](/blog/cgp-serde-release/), a modular serialization library for Serde that leverages the power of **Context-Generic Programming**.
 
 [Read the announcement blog post](/blog/cgp-serde-release/) to find out more.
 
@@ -22,7 +22,7 @@ Context-Generic Programming (CGP) is a modular programming paradigm that enables
 
 You can adapt almost any existing Rust trait to use CGP today by applying the `#[cgp_component]` macro to the trait definition. After this annotation, you can write **named** implementations of the trait using `#[cgp_impl]`, which can be defined without being constrained by the coherence rules. You can then selectively enable and reuse the named implementation for your type using the `delegate_components!` macro.
 
-For instance, we can, in principle, annotate the standard library’s [`Hash`]([https://doc.rust-lang.org/std/hash/trait.Hash.html]\(https://doc.rust-lang.org/std/hash/trait.Hash.html\)) trait with `#[cgp_component]` like this:
+For instance, we can, in principle, annotate the standard library’s [`Hash`](https://doc.rust-lang.org/std/hash/trait.Hash.html) trait with `#[cgp_component]` like this:
 
 ```rust
 #[cgp_component(HashProvider)]
@@ -69,7 +69,7 @@ Even though the CGP project is officially still less than one year old, some of 
 
 ## Blog Posts
 
-The most accurate and up-to-date resources concerning CGP are currently available in the form of our insightful [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.6.0 release onward**](/blog/v0-6-0-release/)  will give you a significantly more concise and modern explanation of precisely what CGP is all about.
+The most accurate and up-to-date resources concerning CGP are currently available in the form of our [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.6.0 release onward**](/blog/v0-6-0-release/)  will give you a significantly more concise and modern explanation of what CGP is all about.
 
 ## Hello World Tutorial
 
