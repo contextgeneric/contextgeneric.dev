@@ -101,7 +101,7 @@ Conversely, in CGP, we refer to the original traits `CanSerializeValue` and `Can
 
 ## `UseDelegate` Provider
 
-Our CGP trait definitions also include a second `derive_delegate` entry within the `#[cgp_component]` macro. This entry generates a specialized `UseDelegate` provider that enables **static dispatch** of provider implementations based on the specific `Value` type. The practical application and use of `UseDelegate` will be explained in greater detail later in this article.
+Our CGP trait definitions also include a second `derive_delegate` entry within the `#[cgp_component]` macro. This entry generates a generic `UseDelegate` provider that enables **static dispatch** of provider implementations based on the specific `Value` type. The practical application and use of `UseDelegate` will be explained in greater detail later in this article.
 
 ---
 
@@ -130,7 +130,7 @@ where
 }
 ```
 
-First, we define a unit struct named `UseSerde`, which acts as the *name* for our specific provider implementation. We then define a blanket trait implementation annotated with `#[cgp_impl]`, explicitly setting `UseSerde` as the provider type.
+First, we define a unit struct named `UseSerde`, which acts as the **name** for our provider implementation. We then define a blanket trait implementation annotated with `#[cgp_impl]`, explicitly setting `UseSerde` as the provider type.
 
 Following this, we define our implementation on the `ValueSerializer` provider trait, rather than the `CanSerializeValue` consumer trait. This implementation is defined to work with any `Context` and `Value` types, provided that the target `Value` implements the original `Serialize` trait. Inside our `serialize` implementation, we ignore the `&self` context and simply call `Serialize::serialize` on the value.
 
@@ -165,7 +165,7 @@ In the very first line, the inclusion of the `new` keyword in `#[cgp_impl]` inst
 struct SerializeWithDisplay;
 ```
 
-Our blanket implementation for `SerializeWithDisplay` works with any `Value` type that implements `Display`. Crucially, this implementation also requires the `Context` type to implement `CanSerializeValue<String>`. This means we use the `Context` to *look up* the serialization implementation for `String` and then employ it within our current provider implementation.
+Our blanket implementation for `SerializeWithDisplay` works with any `Value` type that implements `Display`. Crucially, this implementation also requires the `Context` type to implement `CanSerializeValue<String>`. This means we use the `Context` to **look up** the serialization implementation for `String` and then employ it within our current provider implementation.
 
 Inside the method body, we first use `to_string` to convert our value into a standard string, and then we call `self.serialize` to serialize that string value using the context's `CanSerializeValue<String>` implementation.
 
@@ -185,7 +185,7 @@ where
 }
 ```
 
-If you have any experience with Rust traits, you will immediately recognize that it is practically impossible to define this blanket `Serialize` implementation in Serde. More accurately, you are **restricted** to having **at most one** such blanket implementation of `Serialize`. Because of this restriction, it is extremely difficult to justify why this version, which uses the `Value: Display` bound, should be the *chosen* global implementation for `Serialize`.
+If you have any experience with Rust traits, you will immediately recognize that it is practically impossible to define this blanket `Serialize` implementation in Serde. More accurately, you are **restricted** to having **at most one** such blanket implementation of `Serialize`. Because of this restriction, it is extremely difficult to justify why this version, which uses the `Value: Display` bound, should be the *chosen* blanket implementation for `Serialize`.
 
 In stark contrast, both `UseSerde` and `SerializeWithDisplay` contain **overlapping** implementations of `ValueSerializer` across *both* the `Context` and `Value` types. In vanilla Rust, this would be outright rejected, as it is perfectly possible, for instance, to have a `Value` type that implements both `Serialize` and `Display`. However, this overlapping is seamlessly enabled in CGP by utilizing the provider trait `ValueSerializer` and the powerful `#[cgp_impl]` macro. We will elaborate on the underlying mechanism in later sections.
 
