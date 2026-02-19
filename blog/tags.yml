@@ -1,19 +1,14 @@
-facebook:
-  label: Facebook
-  permalink: /facebook
-  description: Facebook tag description
+release:
+  label: Release
+  permalink: /release
+  description: Project releases
 
-hello:
-  label: Hello
-  permalink: /hello
-  description: Hello tag description
+deepdive:
+  label: Deep Dive
+  permalink: /deepdive
+  description: In-depth articles and analyses
 
-docusaurus:
-  label: Docusaurus
-  permalink: /docusaurus
-  description: Docusaurus tag description
-
-hola:
-  label: Hola
-  permalink: /hola
-  description: Hola tag description
+walkthrough:
+  label: Walkthrough
+  permalink: /walkthrough
+  description: Step-by-step guides and tutorials
