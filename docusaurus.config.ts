@@ -15,7 +15,8 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://contextgeneric.dev',
+  url: 'http://localhost:3000',
+  // url: 'https://contextgeneric.dev',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
@@ -37,7 +38,7 @@ const config: Config = {
 
   presets: [
     [
-      'classic',
+      '@docusaurus/preset-classic',
       {
         docs: {
           sidebarPath: './sidebars.ts',
@@ -64,6 +65,9 @@ const config: Config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        pages: {},
+        sitemap: {},
+        svgr: {},
       } satisfies Preset.Options,
     ],
   ],
