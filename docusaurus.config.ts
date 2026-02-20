@@ -84,7 +84,7 @@ const config: Config = {
         src: 'img/cgp-logo.svg',
       },
       items: [
-        {to: '/docs/intro', label: 'Tutorial', position: 'left'},
+        {to: '/docs/tutorials/hello', label: 'Tutorial', position: 'left'},
         {to: '/docs', label: 'Docs', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {
@@ -101,8 +101,12 @@ const config: Config = {
           title: 'Docs',
           items: [
             {
-              label: 'Tutorial',
-              to: '/docs/intro',
+              label: 'Introduction',
+              to: '/docs',
+            },
+            {
+              label: 'Tutorials',
+              to: '/docs/category/tutorials',
             },
           ],
         },

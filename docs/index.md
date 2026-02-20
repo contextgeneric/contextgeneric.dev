@@ -20,7 +20,10 @@ This change does not affect existing code that uses or implements `Hash`, but it
 
 ```rust
 #[cgp_impl(HashWithDisplay)]
-impl<T: Display> HashProvider for T { ... }
+impl HashProvider
+where
+    Self: Display,
+{ ... }
 ```
 
 You can then apply and reuse this implementation on any type by using the `delegate_components!` macro:
