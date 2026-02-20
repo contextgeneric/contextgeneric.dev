@@ -84,12 +84,7 @@ const config: Config = {
         src: 'img/cgp-logo.svg',
       },
       items: [
-        {
-          type: 'docSidebar',
-          sidebarId: 'tutorialSidebar',
-          position: 'left',
-          label: 'Tutorial',
-        },
+        {to: '/docs/intro', label: 'Tutorial', position: 'left'},
         {to: '/docs', label: 'Docs', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {
