@@ -6,6 +6,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
+import CodeBlock from '@theme/CodeBlock';
 
 import styles from './index.module.css';
 
@@ -17,7 +18,7 @@ function HeroBanner() {
           <img
             alt="Context-Generic Programming"
             className={styles.heroLogo}
-            src={useBaseUrl('/img/docusaurus.png')}
+            src={useBaseUrl('/img/cgp-logo.svg')}
             width="200"
             height="200"
           />
@@ -69,7 +70,7 @@ function CodeExampleSection() {
           </div>
           <div className="col col--6">
             <div className={styles.codeExample}>
-              <pre>
+              <CodeBlock language="rust">
 {`#[cgp_component(HashProvider)]
 pub trait Hash { ... }
 
@@ -84,7 +85,7 @@ delegate_components! {
         HashProviderComponent: HashWithDisplay,
     }
 }`}
-              </pre>
+              </CodeBlock>
             </div>
           </div>
         </div>
