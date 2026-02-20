@@ -5,14 +5,14 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
   title: string;
-  Svg: React.ComponentType<React.ComponentProps<'svg'>>;
+  image: string;
   description: ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
   {
     title: 'Modular Component System',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    image: '/img/features/modular-component-system.png',
     description: (
       <>
         Decouple interface definitions from implementations using provider traits.
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Highly Expressive Macros',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    image: '/img/features/highly-expressive-macros.png',
     description: (
       <>
         Write abstract programs generic over contexts without managing long lists
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Type-Safe Composition',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    image: '/img/features/type-safe-composition.png',
     description: (
       <>
         All component wiring is verified at compile time. Missing dependencies are
@@ -42,7 +42,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'No-Std Friendly',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    image: '/img/features/no-std-friendly.png',
     description: (
       <>
         Build fully abstract programs without concrete dependencies. Deploy to
@@ -52,7 +52,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Zero-Cost Abstraction',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    image: '/img/features/zero-cost-abstraction.png',
     description: (
       <>
         All CGP operations happen at compile time using Rust's type system.
@@ -62,7 +62,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Bypass Coherence Rules',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    image: '/img/features/bypass-coherence-rules.png',
     description: (
       <>
         Enable overlapping and orphan trait implementations without restriction.
@@ -72,11 +72,11 @@ const FeatureList: FeatureItem[] = [
   },
 ];
 
-function Feature({title, Svg, description}: FeatureItem) {
+function Feature({title, image, description}: FeatureItem) {
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        <img className={styles.featureSvg} src={image} alt={title} />
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
