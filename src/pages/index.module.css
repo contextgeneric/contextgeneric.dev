@@ -103,6 +103,11 @@
   gap: 0.5rem;
 }
 
+.getStartedButton {
+  --ifm-button-background-color: var(--ifm-color-primary-darkest);
+  --ifm-button-border-color: var(--ifm-color-primary-darkest);
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 996px) {
   .hero {

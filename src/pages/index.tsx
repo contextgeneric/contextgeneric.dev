@@ -27,7 +27,7 @@ function HeroBanner() {
           </span>
         </Heading>
         <div className={styles.indexCtas}>
-          <Link className="button button--primary button--lg" to="/docs">
+          <Link className={clsx("button button--primary button--lg", styles.getStartedButton)} to="/docs">
             Get Started
           </Link>
           <Link
