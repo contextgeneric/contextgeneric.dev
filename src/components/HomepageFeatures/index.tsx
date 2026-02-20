@@ -11,32 +11,62 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
+    title: 'Modular Component System',
     Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        Decouple interface definitions from implementations using provider traits.
+        Write multiple context-generic providers that can coexist without conflicts.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
+    title: 'Highly Expressive Macros',
     Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        Write abstract programs generic over contexts without managing long lists
+        of generic parameters. Achieve expressiveness rivaling dynamic languages.
       </>
     ),
   },
   {
-    title: 'Powered by React',
+    title: 'Type-Safe Composition',
     Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        All component wiring is verified at compile time. Missing dependencies are
+        caught early, with no runtime errors possible from CGP constructs.
+      </>
+    ),
+  },
+  {
+    title: 'No-Std Friendly',
+    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    description: (
+      <>
+        Build fully abstract programs without concrete dependencies. Deploy to
+        embedded systems, kernels, WebAssembly, or symbolic execution platforms.
+      </>
+    ),
+  },
+  {
+    title: 'Zero-Cost Abstraction',
+    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    description: (
+      <>
+        All CGP operations happen at compile time using Rust's type system.
+        No runtime overhead, upholding Rust's zero-cost abstraction guarantee.
+      </>
+    ),
+  },
+  {
+    title: 'Bypass Coherence Rules',
+    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    description: (
+      <>
+        Enable overlapping and orphan trait implementations without restriction.
+        Define implementations for types you don't own and traits you don't control.
       </>
     ),
   },
@@ -60,6 +90,9 @@ export default function HomepageFeatures(): ReactNode {
   return (
     <section className={styles.features}>
       <div className="container">
+        <Heading as="h2" className={clsx(styles.featuresTitle, 'text--center')}>
+          Why Context-Generic Programming?
+        </Heading>
         <div className="row">
           {FeatureList.map((props, idx) => (
             <Feature key={idx} {...props} />
