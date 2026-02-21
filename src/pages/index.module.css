@@ -4,7 +4,7 @@
  */
 
 .hero {
-  background-color: #e87567;
+  background-color: #fcefe1;
 }
 
 .heroInner {
@@ -18,7 +18,7 @@
 }
 
 .heroProjectTagline {
-  color: #fff;
+  color: var(--ifm-color-primary-dark);
   font-size: 3rem;
   margin: 0;
 }
@@ -36,7 +36,7 @@
 }
 
 .heroTitleTextHtml b {
-  color: var(--ifm-color-primary-light);
+  color: #911f1c;
 }
 
 .indexCtas {
@@ -106,8 +106,15 @@
 }
 
 .getStartedButton {
-  --ifm-button-background-color: var(--ifm-color-primary-darkest);
+  --ifm-button-background-color: var(--ifm-color-primary-dark);
   --ifm-button-border-color: var(--ifm-color-primary-darkest);
+
+  color: white;
+}
+
+.tutorialButton {
+  --ifm-button-background-color: var(--ifm-color-primary-lighter);
+  --ifm-button-border-color: var(--ifm-color-primary-lighter);
 }
 
 /* Responsive adjustments */

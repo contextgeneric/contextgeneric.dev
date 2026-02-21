@@ -12,7 +12,7 @@ import styles from './index.module.css';
 
 function HeroBanner() {
   return (
-    <div className={styles.hero} data-theme="dark">
+    <div className={styles.hero} data-theme="light">
       <div className={styles.heroOuter}>
         <img
           alt="Context-Generic Programming"
@@ -32,7 +32,7 @@ function HeroBanner() {
               Get Started
             </Link>
             <Link
-              className="button button--secondary button--lg margin-left--md"
+              className={clsx("button button--secondary button--lg margin-left--md", styles.tutorialButton)}
               to="/docs/tutorials/hello">
               Tutorial - 10 min ⏱️
             </Link>
