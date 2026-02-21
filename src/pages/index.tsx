@@ -13,37 +13,39 @@ import styles from './index.module.css';
 function HeroBanner() {
   return (
     <div className={styles.hero} data-theme="dark">
-      <div className={styles.heroInner}>
-        <Heading as="h1" className={styles.heroProjectTagline}>
-          <img
-            alt="Context-Generic Programming"
-            className={styles.heroLogo}
-            src={useBaseUrl('/img/cgp-logo.svg')}
-            width="200"
-            height="200"
-          />
-          <span className={styles.heroTitleTextHtml}>
-            Build <b>modular</b> Rust applications with <b>zero-cost</b> abstractions
-          </span>
-        </Heading>
-        <div className={styles.indexCtas}>
-          <Link className={clsx("button button--primary button--lg", styles.getStartedButton)} to="/docs">
-            Get Started
-          </Link>
-          <Link
-            className="button button--secondary button--lg margin-left--md"
-            to="/docs/tutorials/hello">
-            Tutorial - 10 min ⏱️
-          </Link>
-          <span className={styles.indexCtasGitHubButtonWrapper}>
-            <iframe
-              className={styles.indexCtasGitHubButton}
-              src="https://ghbtns.com/github-btn.html?user=contextgeneric&amp;repo=cgp&amp;type=star&amp;count=true&amp;size=large"
-              width={160}
-              height={30}
-              title="GitHub Stars"
-            />
-          </span>
+      <div className={styles.heroOuter}>
+        <img
+          alt="Context-Generic Programming"
+          className={styles.heroLogo}
+          src={useBaseUrl('/img/cgp-hero.png')}
+          width="300"
+          height="300"
+        />
+        <div className={styles.heroInner}>
+          <Heading as="h1" className={styles.heroProjectTagline}>
+            <span className={styles.heroTitleTextHtml}>
+              Build <b>modular</b> Rust applications with <b>zero-cost</b> abstractions
+            </span>
+          </Heading>
+          <div className={styles.indexCtas}>
+            <Link className={clsx("button button--primary button--lg", styles.getStartedButton)} to="/docs">
+              Get Started
+            </Link>
+            <Link
+              className="button button--secondary button--lg margin-left--md"
+              to="/docs/tutorials/hello">
+              Tutorial - 10 min ⏱️
+            </Link>
+            <span className={styles.indexCtasGitHubButtonWrapper}>
+              <iframe
+                className={styles.indexCtasGitHubButton}
+                src="https://ghbtns.com/github-btn.html?user=contextgeneric&amp;repo=cgp&amp;type=star&amp;count=true&amp;size=large"
+                width={160}
+                height={30}
+                title="GitHub Stars"
+              />
+            </span>
+          </div>
         </div>
       </div>
     </div>
