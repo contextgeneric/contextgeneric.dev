@@ -5,52 +5,48 @@ tags: [release]
 
 # CGP has a new website, and why we moved from Zola to Docusaurus
 
-If you have visited our website before, you might have noticed that the CGP project website has gone through an overhaul redesign with a fresh look. This is because we have now migrated away from [Zola](https://www.getzola.org/) to [Docusaurus](https://docusaurus.io/)!
+If you have visited our website before, you might have noticed that the CGP project website has received a beautiful overhaul redesign with a fresh look and feel. This transformation comes from our migration away from [Zola](https://www.getzola.org/) to [Docusaurus](https://docusaurus.io/), a move driven by our commitment to significantly expand and improve the documentation for CGP.
 
 <!-- truncate -->
 
-## Why not Zola
+## The journey to a better documentation home
 
-It is a bit unfortunate that the CGP project has moved on from a Rust project (Zola) and is now relying on a TypeScript project (Docusaurus) for its website. But there is a simple reason behind this: we are expanding our effort to significantly improve the documentation for CGP. And to do that, we need to use a website builder tool that can support much larger scale documentation out of the box, and Docusaurus seems to fit all the requirements.
+As the CGP project continues to grow, we recognized that our documentation needs have evolved substantially. A comprehensive documentation website needs to support [many kinds of documentation](https://diataxis.fr/), including tutorials, guides, explanations, and references. These different documentation types often benefit from being organized into deeply nested levels that group related pages together.
 
-Although Zola is highly customizable, I (the CGP project maintainer) simply do not have enough time to work on improving the design by tweaking custom themes and templates. Furthermore, any time I spend on tweaking the website are missed opportunity of time that could be spent writing Rust code or documentation for CGP.
+While Zola is certainly a capable and highly customizable static site generator, it comes with some practical limitations for large-scale documentation projects. One key challenge is that Zola lacks a built-in way to automatically discover and list all pages in a sidebar, which meant I had to manually create and maintain links across different pages to help users navigate the documentation.
 
-As I was planning to add more documentation to the website, I faced a tough choice of whether to continue using Zola to host the documentation. At a high level, a proper documentation website would need to support [many kinds of documentation](https://diataxis.fr/), such as tutorials, guides, explanation, and references. Within each kind of documentation, there would need to be further nested levels that can group multiple pages together.
+Additionally, customizing Zola's appearance requires significant investment in theme selection and template editing. Although many themes are available, I found that achieving the desired look and feel often required forking a theme and directly modifying its templates. This approach consumed considerable time that would have been better spent writing Rust code and documentation content for CGP.
 
-With Zola, although it is possible to create deeply nested pages, there lacks a builtin way to automatically discover and list all pages in a sidebar. As a result, I often had to manually introduce links across different pages to show users what pages they can visit.
+## Discovering Docusaurus
 
-Furthermore, the default Zola theme is not very appealing. To make the project website look better, I had to manually search through the list of themes and choose a theme. But the worse is that regardless of which theme I chose, I eventually had to fork the theme and edit the theme templates directly to tweak the look of website. This not only wasted a lot of time, but it also introduced very tight coupling with the particular Zola theme that I had chosen.
+Docusaurus offers a refreshing alternative with an excellent out-of-the-box experience that is specifically designed for large-scale documentation websites. Running `npx create-docusaurus` provides an immediately usable platform with all the essential features that CGP needed.
 
-## Why Docusaurus
+The customization I applied was intentionally minimal. I created a custom front page and adjusted the CSS to select custom colors for the website. Beyond these focused changes, everything simply works as intended right from the start.
 
-On the other hand, Docusaurus provides exellent out of the box experience that is specifically designed for large-scale documentation websites. I just need to follow the instruction to run `npx create-docusaurus`, and I have gotten a default website that exactly has all the needs for CGP's website.
+My approach with Docusaurus is deliberately streamlined. I have no plans to install additional plugins or write React or JSX code. The default experience is genuinely pleasant, and the page rendering performance is good enough. Most importantly, Docusaurus allows me to concentrate my energy on creating and refining Markdown documentation files without worrying about customization or design challenges.
 
-The main customization I did after creating the Docusaurus website is to create a custom front page, and tweak the CSS to choose custom colors for the website. Aside from that, everything you see just works out of the box.
+## The future possibilities of Rust-based documentation tools
 
-I don't plan to install any additional plugins, nor do I plan to tweak the website by writing React or JSX code. Aside from that, the default experience of using Docusaurus is pretty pleasant, and the time for rendering the HTML pages are pretty reasonable. So to me, the main value that Docusaurus provides is that from now on, I can pretty much focus all my time writing .md documentation files without having to worry about customizing or designing the project website.
+Although we have adopted Docusaurus for our documentation platform today, I remain optimistic about the future of Rust-based website building tools. Rust has tremendous potential for creating powerful and efficient documentation websites that could eventually rival or exceed what we have today.
 
-## Moving back to Rust in the future
+However, building such tools requires developers who possess both deep expertise in Rust and genuine experience in creating beautiful, user-friendly website designs. The reality is that most frontend developers work with JavaScript or TypeScript, while many Rust developers have not yet focused on building polished web experiences. A website's impact ultimately depends on how good it looks and feels, so it will take time to develop the necessary talent pool.
 
-Although we have moved to Docusaurus for now, I am hopeful that eventually one day in the future, the CGP project will be able to move back to a Rust-based website building tool.
+We can observe this dynamic by looking at GitHub contribution activity. Projects like Zola are primarily maintained by volunteers who contribute in their spare time, while tools like Docusaurus benefit from sustained funding and dedicated contributors. This difference in resources directly translates to the user experience and feature completeness.
 
-There are a lot of potentials of how Rust would work better than JavaScript or TypeScript for building websites. But a significant barrier is that most of the frontend developers do not use Rust, and many Rust developers including myself lack expertise in building good looking websites.
+Perhaps one day a Rust-based tool will emerge that matches Docusaurus in features, design, and community support. And perhaps, when CGP becomes mature enough, we could even use CGP itself to build such a tool. Right now, our focus remains on making CGP itself the best context-generic programming library it can be. Building web design tools and frameworks falls outside our current priorities.
 
-Since the most important thing about a website is how good it looks, it will probably take time until we have developers who have both the expertise *and* also the time or funding required to build such tooling. By just looking at the GitHub contribution activity, it can show pretty clearly why projects like Zola lag so far behind Docusaurus: Zola is mainly worked on by volunteers, while Docusaurus has at least one contributor fully funded by Facebook, and do not have to worry about generating revenue.
+## Leveraging AI to accelerate progress
 
-Perhaps one day there will be a Rust project that offers the same good design and features similar to Docusaurus. And perhaps one day when CGP becomes mature enough, we can use CGP to build such tool. But for now, the CGP project's priority is not on web designs and building front end frameworks. So we will live with whatever that is necessary for the project to move on.
+One exciting aspect of developing this new website has been incorporating LLM assistance throughout the design and documentation process. This approach has allowed us to expand our website capabilities while working with the limited human resources available to the project.
 
-## AI-Assisted design and documentation
+You will notice that the design, text, and images on the [CGP front page](/) were largely created with the help of Claude Haiku and Gemini. Even the color theme was selected through LLM collaboration. While the results may not be perfect, they represent a substantial quality improvement over what I could have designed on my own.
 
-A big part of the new website development effort will incorporate LLM assistance, so that we can expand the website with the limited human resource available.
+This AI-assisted approach enabled us to build this new website in just 3 days, a timeline that would be difficult to achieve when working with a human designer. The asynchronous nature of LLM collaboration eliminated communication delays that typically slow down design work. Cost-wise, a few months of LLM subscriptions are far more economical than hiring a professional designer.
 
-You might notice that the design, text, and images of the [CGP front page](/) are largely produced by Claude Haiku and Gemini. The color theme of the website is also chosen by the LLM. Although the designs might not be perfect, I'd say that they are still significantly better than how I could have designed them on my own.
+I want to be transparent about the trade-offs here. A professional human web designer would almost certainly create a more refined and cohesive website than what LLMs can produce today. However, since I was handling the design work myself before, the LLM assistance represents a genuine step forward in quality. Should the CGP project grow and achieve greater success, we would absolutely welcome the opportunity to collaborate with a skilled human designer to further elevate the website.
 
-The AI-assisted design also allows me to quickly setup this new website in just 3 days. The communication delay of working with a human designer would probably take much longer, much less to say that the cost would probably be enough for a few months worth of LLM subscription.
+Beyond visual design, the text content throughout this website, including this blog post, has been reviewed and refined by LLMs to produce more polished and professional writing. This collaborative approach has helped transform my initial drafts into content that I believe better serves our audience.
 
-That said, I certainly won't deny that a human professional web designer could probably produce a much better and consistent website design than the LLM. It is just that what I am replacing here is myself as the designer, so obviously the LLM fares much better. If the CGP project grows and become more successful, I'm certainly open to getting a human designer to help further improve the website design.
+## What comes next
 
-Aside from this, the text on this website, including this blog post have all gone through reviews and revisions by LLM. This help me produce much more professional writing that I could have written on my own.
-
-## Up next: CGP v0.6.2 release
-
-With the website redesign over, here is a sneak preview of what is coming in the next few days: CGP v0.6.2 will be adding support for using [**implicit parameters** in plain Rust function syntax](https://github.com/contextgeneric/cgp/issues/194). So stay tuned on this website and watch out for the coming release!
+With the website redesign now complete, we are excited about what lies ahead for the CGP project. CGP v0.6.2 will introduce support for using [**implicit parameters** in plain Rust function syntax](https://github.com/contextgeneric/cgp/issues/194), a feature that bridges the gap between plain Rust functions and fully context-generic code. Keep watching this website for the upcoming release announcement!
