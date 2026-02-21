@@ -67,6 +67,10 @@ function CodeExampleSection() {
               with <code>#[cgp_impl]</code>, and selectively enable them using{' '}
               <code>delegate_components!</code>.
             </p>
+
+            <Link className="button button--primary button--lg" to="/docs">
+              Learn More
+            </Link>
           </div>
           <div className="col col--6">
             <div className={styles.codeExample}>
