@@ -93,7 +93,7 @@ const config: Config = {
         src: 'img/cgp-logo.svg',
       },
       items: [
-        {to: '/docs/tutorials/hello', label: 'Tutorial', position: 'left'},
+        {to: '/docs/tutorials/hello', label: 'Tutorials', position: 'left'},
         {to: '/docs', label: 'Docs', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
         {
