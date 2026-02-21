@@ -15,11 +15,10 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://contextgeneric.github.io',
-  // url: 'https://contextgeneric.dev',
+  url: 'https://contextgeneric.dev',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/cgp-website/',
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
