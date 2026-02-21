@@ -13,7 +13,7 @@ Furthermore, `cgp-serde` allows us to leverage the powerful [**context and capab
 
 <!-- truncate -->
 
-# Preface
+## Preface
 
 This is a companion blog post for my [RustLab presentation](https://rustlab.it/talks/how-to-stop-fighting-with-coherence-and-start-writing-context-generic-trait-impls) titled **How to Stop Fighting with Coherence and Start Writing Context-Generic Trait Impls**.
 
@@ -56,7 +56,7 @@ If you are eager to learn more about CGP, please check out the [project homepage
 
 ---
 
-# Context-Generic Serialization Traits
+## Context-Generic Serialization Traits
 
 The key highlight of `cgp-serde` is its introduction of context-generic versions of the Serde traits. First, the [`Serialize`](https://docs.rs/serde/latest/serde/trait.Serialize.html) trait is redefined as follows:
 
@@ -90,7 +90,7 @@ pub trait CanDeserializeValue<'de, Value> {
 
 Analogous to `CanSerializeValue`, the `CanDeserializeValue` trait moves the original `Self` type in `Deserialize` to become the `Value` generic parameter. This `deserialize` method similarly accepts an additional `&self` value, which can be utilized to supply runtime dependencies, such as an arena allocator.
 
-## Provider Traits
+### Provider Traits
 
 In addition to having the extra `Context` parameter as the `Self` type, both `CanSerializeValue` and `CanDeserializeValue` are annotated with the `#[cgp_component]` macro, which is the mechanism that unlocks additional CGP capabilities on these traits.
 
@@ -98,17 +98,17 @@ The `provider` argument to `#[cgp_component]` automatically generates the **prov
 
 Conversely, in CGP, we refer to the original traits `CanSerializeValue` and `CanDeserializeValue` as the **consumer traits**. The general rule of thumb is that a CGP component is **used** through its consumer trait but **implemented** using its provider trait.
 
-## `UseDelegate` Provider
+### `UseDelegate` Provider
 
 Our CGP trait definitions also include a second `derive_delegate` entry within the `#[cgp_component]` macro. This entry generates a generic `UseDelegate` provider that enables **static dispatch** of provider implementations based on the specific `Value` type. The practical application and use of `UseDelegate` will be explained in greater detail later in this article.
 
 ---
 
-# Overlapping Provider Implementations
+## Overlapping Provider Implementations
 
 Compared to the original Serde definitions of `Serialize` and `Deserialize`, the greatest improvement offered by `CanSerializeValue` and `CanDeserializeValue` is the ability to define **overlapping** and **orphan** implementations of the trait. Let us now examine a few concrete examples of how this crucial feature works.
 
-## Serialize with Serde
+### Serialize with Serde
 
 To maintain full backward compatibility with the existing Serde ecosystem, the most straightforward implementation of `ValueSerializer` utilizes Serde’s own `Serialize` trait to perform serialization. This is implemented within `cgp-serde` as shown below:
 
@@ -137,7 +137,7 @@ While this implementation itself is not remarkable, it crucially highlights that
 
 Another important detail to notice is that our blanket implementation for `UseSerde` works universally for *any* `Context` and `Value` types satisfying the bounds. As we will soon see, we can define **more than one** such blanket implementation using CGP.
 
-## Serialize with `Display`
+### Serialize with `Display`
 
 Just as we can implement `ValueSerializer` for any `Value` type that implements `Serialize`, we can also implement `ValueSerializer` for any `Value` type that implements the `Display` trait. This alternative behavior is implemented by `cgp-serde` as follows:
 
@@ -190,7 +190,7 @@ In stark contrast, both `UseSerde` and `SerializeWithDisplay` contain **overlapp
 
 Regarding the specific use case of string serialization, it might not seem remarkable that we must look up how to serialize `String` from the context, given that Serde already has an efficient `Serialize` implementation for `String`. Nevertheless, this successfully demonstrates the *potential* to replace the serialization implementation of `String` with a custom one. We will later see how this override capability is highly useful for serializing `Vec<u8>` bytes.
 
-## Serialize Bytes
+### Serialize Bytes
 
 Just as we can serialize any `Value` that implements `Display`, we can also define a way to serialize any `Value` that contains a byte slice directly into bytes. This behavior is implemented by `cgp-serde` as follows:
 
@@ -211,7 +211,7 @@ where
 
 Our `SerializeBytes` provider can successfully work with any `Value` type that implements `AsRef<[u8]>`. Crucially, this includes `Vec<u8>`, which also implements `AsRef<[u8]>`. This is significant because, unlike the constraints imposed by the standard `Serialize` trait, we can now potentially **override** the serialization implementation of `Vec<u8>` to explicitly use `SerializeBytes`, ensuring it is serialized as raw bytes instead of a list of `u8` values.
 
-## Serialize Iterator
+### Serialize Iterator
 
 Similar to how we implemented `SerializeWithDisplay`, we can define a `SerializeIterator` provider that works with any `Value` type that implements [`IntoIterator`](https://doc.rust-lang.org/std/iter/trait.IntoIterator.html):
 
@@ -239,7 +239,7 @@ Another critical observation is that both `SerializeBytes` and `SerializeIterato
 
 ---
 
-# Modular Serialization Demo
+## Modular Serialization Demo
 
 To fully demonstrate the modular serialization capabilities provided by `cgp-serde`, we will set up a practical example involving the serialization of encrypted messages. This is where you see the power of CGP in action.
 
@@ -333,7 +333,7 @@ The key technical challenge we aim to solve is how to serialize this message arc
 
 In a real-world scenario, you might have many more applications using your library, and your data types could have numerous fields requiring customization. With the original design of Serde, achieving this deep level of customization across nested data types would be quite challenging. Typically, a type like `EncryptedMessage` would have a single, fixed `Serialize` implementation. Even Serde’s powerful [remote derive](https://serde.rs/remote-derive.html) feature would require defining ad-hoc serialization for every data type involved.
 
-## Wiring of serializer components
+### Wiring of serializer components
 
 With `cgp-serde`, it is straightforward to define custom application contexts that can deeply customize how each field in our data structures is serialized. For instance, we can define an `AppA` context for Application A like this:
 
@@ -425,7 +425,7 @@ As we can clearly observe, changing the serialization format only required a **f
 
 In practice, there are further CGP patterns available for `AppA` and `AppB` to share their *common* `delegate_components!` entries through a powerful **preset** mechanism. However, we will omit those details here for brevity.
 
-## Serialization with `serde_json`
+### Serialization with `serde_json`
 
 A key feature of `cgp-serde` is its continued **backward compatibility** with the existing Serde ecosystem. This means we can effortlessly reuse established libraries like `serde_json` to serialize our encrypted message archive payloads into JSON.
 
@@ -454,7 +454,7 @@ let serialized_b = serde_json::to_string(
 
 As illustrated, `cgp-serde` makes it remarkably easy to customize the serialization of *any* field, regardless of how deeply it is nested within other data types. By merely changing the application context, we are able to generate JSON output in fundamentally different formats with minimal effort.
 
-## Derive-free serialization with `#[derive(CgpData)]`
+### Derive-free serialization with `#[derive(CgpData)]`
 
 Beyond the deep customization we have just explored, another critical feature to highlight is that there is virtually no need to use derive macros to generate any serialization-specific implementation for custom data types. If you look back at the definition of types like `EncryptedMessage`, you will notice that it only uses the general `#[derive(CgpData)]` macro provided by the base CGP library.
 
@@ -464,17 +464,17 @@ This mechanism shows how `cgp-serde` fundamentally solves the orphan implementat
 
 Furthermore, the use of extensible data types applies not only to the traits in `cgp-serde`. A general derivation of `CgpData` will automatically enable the library’s data types to work with *other* CGP traits in the same way they work with `cgp-serde`. Because of this universal applicability, CGP can shield library authors from endless external requests to apply derive macros for every popular trait on their data types, simply to work around the archaic orphan rules in Rust.
 
-## Full Example
+### Full Example
 
 The complete working example of this customized serialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/messages.rs).
 
 ---
 
-# Capabilities-Enabled Deserialization Demo
+## Capabilities-Enabled Deserialization Demo
 
 Now that we have demonstrated how `cgp-serde` enables highly modular serialization, let us turn our attention to how it unlocks new use cases for deserialization. Specifically, we will show how `cgp-serde` enables the use case explained in the [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. We will demonstrate implementing a deserializer for the borrowed type `&'a T` using an arena allocator that is retrieved via **dependency injection** from the context itself.
 
-## Coordinate Arena
+### Coordinate Arena
 
 To illustrate the use of an arena deserializer, let us devise an example application: storing a massive quantity of 3D coordinates, perhaps for rendering complex 3D graphics. We can define our basic coordinate structure as follows:
 
@@ -501,7 +501,7 @@ pub struct Cluster<'a> {
 
 With our data structures defined, a major challenge emerges: how do we deserialize a cluster of coordinates from a format like JSON and ensure the coordinates are allocated using a custom arena allocator provided by us?
 
-## Arena Deserializer
+### Arena Deserializer
 
 To tackle the arena allocator use case, we will utilize the popular [`typed-arena`](https://docs.rs/typed-arena/latest/typed_arena/) crate, specifically leveraging its [`Arena`](https://docs.rs/typed-arena/latest/typed_arena/struct.Arena.html) type for memory allocation.
 
@@ -542,7 +542,7 @@ Inside the method body, we first use the context to deserialize an owned version
 
 As you can see, with the generalized dependency injection capability provided by CGP, we are able to retrieve any necessary value or type from the context during deserialization. This effectively allows us to emulate the `with` clause in the seminal [Context and Capabilities](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal and provide any required capability during the deserialization process.
 
-## Deserialization Context
+### Deserialization Context
 
 Using `cgp-serde`, defining a deserializer context that includes an arena allocator is refreshingly straightforward. We begin by defining the context structure as follows:
 
@@ -589,7 +589,7 @@ Similar to the serialization lookup tables, here we are configuring the `ValueDe
 
 As evident in the table, for the value types `Coord` and `Cluster<'a>`, we use a special provider called `DeserializeRecordFields` to deserialize the structs using the **extensible data types** facility derived from `#[derive(CgpData)]`. Crucially, for `&'a Coord`, we select the `DeserializeAndAllocate` provider we defined earlier.
 
-## Error Handling
+### Error Handling
 
 Besides the `ValueDeserializerComponent`, our `App` context is also configured with **error handling** components provided by CGP. This is essential because we plan to use `serde_json` to deserialize the value, which may naturally return errors.
 
@@ -599,7 +599,7 @@ Subsequently, in the entry for `ErrorRaiserComponent`, we use `RaiseAnyhowError`
 
 This clearly demonstrates the flexibility afforded by CGP in error handling: the concrete error type is chosen by the application context, and it can also customize how each source error is gracefully handled.
 
-## Deserializing JSON
+### Deserializing JSON
 
 Now that the component wiring for `App` is complete, let us attempt to use `serde_json` to deserialize a JSON string. First, we create a mock JSON string representing a cluster of coordinates:
 
@@ -634,17 +634,17 @@ let deserialized: Cluster<'_> = app
 
 As we can see, we have successfully utilized the custom arena allocator provided by our `App` context to perform the deserialization, resulting in a borrowed `Cluster` where the coordinates live in the arena.
 
-## Full Example
+### Full Example
 
 The full working example of the arena allocator deserialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/arena_simplified.rs).
 
 ---
 
-# Implementation Details
+## Implementation Details
 
 In this section, we will delve into the underlying implementation details of CGP that make the impressive level of modularity in `cgp-serde` possible. For audiences who are new to Context-Generic Programming, this is your chance to quickly grasp the essential concepts of CGP required to confidently use `cgp-serde`.
 
-## Provider Traits
+### Provider Traits
 
 When the `#[cgp_component]` macro is applied to a consumer trait, such as `CanSerializeValue`, it automatically generates a companion **provider trait** called `ValueSerializer`. This generated trait looks like the following:
 
@@ -662,7 +662,7 @@ pub trait ValueSerializer<Context, Value: ?Sized> {
 
 Compared to the consumer trait `CanSerializeValue`, the provider trait `ValueSerializer` shifts the original `Self` type into a new `Context` generic parameter. Consequently, all references to `self` and `Self` are appropriately replaced with `context` and `Context`. The `Self` type in a provider trait is instead used as the **provider name**, which are the unique, dummy structs - like `UseSerde` or `SerializeHex` - that are defined and owned by the library module. This is the core trick: CGP circumvents Rust’s coherence restrictions by guaranteeing that we always own a unique provider type when implementing a provider trait.
 
-## Desugaring of `#[cgp_impl]`
+### Desugaring of `#[cgp_impl]`
 
 The ability to define overlapping provider implementations, such as `UseSerde` and `SerializeWithDisplay`, is achieved through the clever use of the `ValueSerializer` provider trait. While these implementations look like forbidden blanket implementations, a provider implementation like `SerializeWithDisplay` is actually **desugared** by the `#[cgp_impl]` macro into this form:
 
@@ -688,7 +688,7 @@ where
 
 As clearly shown, `#[cgp_impl]` shifts the `Context` parameter away from the `Self` position to become the first generic parameter of `ValueSerializer`. The `Self` type for the implementation instead becomes `SerializeWithDisplay`, the unique dummy struct that we defined. Because the implementing library owns `SerializeWithDisplay`, the Rust compiler permits the trait implementation even if it is otherwise overlapping on the `Context` and `Value` types. This is the central mechanism that allows CGP to define both overlapping and orphan implementations. Next, we will examine how these provider implementations are statically *wired* to a concrete application context.
 
-## Type-Level Lookup Tables
+### Type-Level Lookup Tables
 
 In the [serialization example](#wiring-of-serializer-components) for `AppA`, when the `delegate_components!` macro is invoked, it is conceptually equivalent to building a **type-level lookup table** for that context. This table effectively configures the dispatch mechanism at compile time:
 
@@ -727,7 +727,7 @@ When the trait system must look up an implementation, such as for serializing `V
 
 This table lookup process, while seem complicated, works conceptually similarly to how [vtable lookups](https://en.wikipedia.org/wiki/Virtual_method_table) are performed for [`dyn` traits in Rust](https://www.youtube.com/watch?v=pNA-XAIrDTk) and in object-oriented languages like Java. The fundamental difference, and a major selling point, is that CGP’s lookup tables are fully implemented at the **type level**. This means the tables are resolved entirely at compile time, resulting in **zero runtime overhead**.
 
-## Implementation of Lookup Tables
+### Implementation of Lookup Tables
 
 Behind the scenes, the `delegate_components!` macro constructs these type-level lookup tables using the `DelegateComponent` trait, which is defined by the base `cgp` crate as follows:
 
@@ -818,19 +818,19 @@ If we carefully compare the three versions of the blanket implementations, we wo
 
 ---
 
-# Future Work
+## Future Work
 
 The initial release of `cgp-serde` serves as a compelling proof of concept, demonstrating how CGP can be used to solve the coherence problem in Rust. While you can certainly begin experimenting with `cgp-serde` today for modular serialization in your applications, there are still a few rough edges that need polishing before it reaches the quality level suitable for mission-critical production use.
 
 This section highlights the areas we plan to address, and what you might want to wait for before fully committing to `cgp-serde` for your main projects.
 
-## Serialization providers for extensible variants
+### Serialization providers for extensible variants
 
 Currently, `cgp-serde` has implemented providers like `SerializeFields` and `DeserializeRecordFields` to enable datatype-generic serialization for any struct that uses `#[derive(CgpData)]`. This decoupling of serialization logic from data type definitions is key to reducing the derive bloat caused by orphan rule restrictions.
 
 However, the equivalent providers for Rust *enums* and *extensible variants* have not yet been implemented. This means that you cannot currently use the modular serialization features of `cgp-serde` to serialize enum types in your application. This limitation is purely due to time constraints; I was unable to dedicate enough time to finish the implementation for extensible variants before this initial release.
 
-## Helpers for JSON deserialization
+### Helpers for JSON deserialization
 
 At the moment, `cgp-serde` only provides the `deserialize_json_string` helper method to deserialize a JSON string using a context. Crucially, I have not yet implemented other common helper methods, such as `from_slice` and `from_value`. If you need the functionality equivalent to these methods, you would currently have to study the internals of `deserialize_json_string` and write your own deserialization wrappers.
 
@@ -838,19 +838,19 @@ The need for additional wrappers during deserialization arises because functions
 
 Fortunately, library functions like `serde::from_str` are generally lightweight wrappers around library-specific deserializers. This makes re-creating similar, easy-to-use helpers for `cgp-serde` a relatively straightforward task. The challenge here is simply a matter of time: I need to properly survey the common deserialization methods used in the wild and aim to support as many as possible. On the plus side, these wrapper implementations are low-hanging fruit and represent simple tasks for newcomers to contribute to the project. If you are interested in helping, please do submit a [pull request](https://github.com/contextgeneric/cgp-serde/pulls)!
 
-## Helpers for other serialization formats
+### Helpers for other serialization formats
 
 Just as custom deserialization wrappers are required for `serde_json`, we will likely need similar wrappers for other popular serialization formats, such as [`toml`](https://docs.rs/toml/latest/toml/).
 
 In principle, serialization *from* `cgp-serde` should work almost immediately. If you use the `SerializeWithContext` wrapper with any serialization format, it should, theoretically, integrate seamlessly. However, this has not yet been thoroughly tested, so more verification is required. Assuming serialization works out of the box, the main task needed to support other formats will be implementing deserialization wrappers similar to what we have done for `serde_json`.
 
-## Documentation
+### Documentation
 
 A significant area for improvement is documentation. Both CGP and `cgp-serde` are currently severely lacking in comprehensive documentation. To make `cgp-serde` truly usable for the broader community, we will need to write far more documentation and tutorials explaining how to effectively use it for modular serialization.
 
 With my time being extremely limited, I will likely only prioritize documenting `cgp-serde` over further developing CGP if there is real, demonstrable demand from developers wanting to use it for their applications. While I strongly believe the modular serialization provided by `cgp-serde` will be incredibly useful, my experience with developing CGP suggests that the community may not yet fully grasp or care about modular serialization as much as I do. Therefore, if the use cases presented by `cgp-serde` are important to you, please communicate your feedback so I can properly prioritize my development efforts!
 
-## Performance benchmark
+### Performance benchmark
 
 Since `cgp-serde` exclusively employs static dispatch, I am highly confident that the serialization performance should align closely with the original `serde` implementation. However, I have not yet had the time to conduct a proper benchmark, so we currently lack concrete evidence of `cgp-serde`'s performance characteristics.
 
@@ -868,7 +868,7 @@ In any case, if you are interested in benchmarking or optimizing `cgp-serde`, yo
 
 ---
 
-# Conclusion
+## Conclusion
 
 In this article, we have provided a comprehensive preview of the powerful modular serialization features unlocked by `cgp-serde`. The most exciting part of this entire design is that almost nothing in `cgp-serde` is specifically engineered just for Serde or for serialization. Instead, everything you have learned here — from custom overlapping implementations to capabilities-enabled deserialization — is a direct result of the general design patterns offered by Context-Generic Programming for building any kind of application or library. This means you can easily take the same patterns used in `cgp-serde` and re-apply them to other traits and challenges within your own projects.
 

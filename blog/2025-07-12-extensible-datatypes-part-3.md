@@ -27,7 +27,7 @@ Similarly, in the second part of the series, [**Modular Interpreters and Extensi
 
 Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1lxv6zr/the_design_and_implementation_of_extensible/), [GitHub](https://github.com/orgs/contextgeneric/discussions/14) or [Discord](https://discord.gg/Hgk3rCw6pQ).
 
-# Series Overview
+## Series Overview
 
 [**Part 1: Modular App Construction and Extensible Builders**](/blog/extensible-datatypes-part-1) – In this introductory part, we present a high-level overview of the key features enabled by extensible data types. We then dive into a hands-on demonstration showing how extensible records can be used to build and compose modular builders for real-world applications.
 
@@ -37,13 +37,13 @@ Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1lxv6zr/the_design_an
 
 [**Part 4: Implementing Extensible Variants**](/blog/extensible-datatypes-part-4) – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
-# Underlying Theory
+## Underlying Theory
 
 The design of extensible data types in CGP is inspired by a rich body of research in the programming languages community. In particular, CGP draws heavily from the implementation techniques found in [**datatype-generic programming in Haskell**](https://wiki.haskell.org/index.php?title=Generics), as well as ideas presented in the paper [**Abstracting extensible data types: or, rows by any other name**](https://dl.acm.org/doi/10.1145/3290325). Concepts similar to CGP’s have also appeared in other languages under names like **row polymorphism** and **polymorphic variants**.
 
 While it might be too academic — or simply too dry — for this post to delve into all the theoretical differences between CGP and these approaches, it’s worth highlighting one essential distinction: CGP’s seamless integration of extensible data types with the CGP system itself. This tight integration sets CGP apart by making the extensibility not just a design principle, but a native part of how you build and scale software in Rust.
 
-## Constraint Propagation Problem
+### Constraint Propagation Problem
 
 At the heart of CGP lies a powerful solution to a common challenge:
 
@@ -120,7 +120,7 @@ pub let full_name_to_string = concate_outputs(first_name_to_string, last_name_to
 
 and then export that directly from a module. The constraints must still be manually declared somewhere, limiting the expressiveness and reusability of our composition.
 
-## Type-Level Composition
+### Type-Level Composition
 
 In many programming languages research, solving the problem of constraint-aware function composition typically requires advanced language features like **constraint kinds**. These features allow constraints to be expressed and manipulated at the type level, enabling functions with different requirements to be composed seamlessly. However, languages like Rust do not yet support these advanced capabilities. This limitation has been one of the major reasons why extensible data types have not seen broader adoption in the Rust and other mainstream languages.
 
@@ -188,9 +188,9 @@ With this definition, `FullNameToString` behaves like a single provider that com
 
 This programming model effectively introduces **lazy type-level computation**. The logic for computing outputs is driven by trait implementations at the type level, but the actual evaluation only occurs when the provider is invoked. This allows CGP to perform complex, constraint-aware compositions without requiring language-level support.
 
-# Base Implementation
+## Base Implementation
 
-## `HasField` Trait
+### `HasField` Trait
 
 Now that we have a clearer understanding of how CGP builds on extensible data types, it is time to take a closer look at the key field-related traits that CGP introduces to support this functionality. We begin with the simplest and most foundational trait: `HasField`.
 
@@ -242,7 +242,7 @@ This allows generic code to access either field in a type-safe way without requi
 
 With `HasField`, we can write code that reads from a subset of fields on a struct, enabling a flexible and reusable programming model. However, if we want to *construct* such subsets — as is required for the extensible builder pattern — we will first need to introduce a few additional building blocks.
 
-## Partial Records
+### Partial Records
 
 One of the core limitations of Rust’s struct system is that when constructing a value, you must provide values for *all* of its fields. This rigidity makes it difficult to build structs in a piecemeal fashion. To overcome this, CGP introduces the idea of **partial records** — a way to represent a struct with some fields intentionally left out.
 
@@ -315,7 +315,7 @@ let partial_person = PartialPerson::<IsPresent, IsNothing> {
 };
 ```
 
-## `HasBuilder` Trait
+### `HasBuilder` Trait
 
 Once we have defined a partial record struct, we can introduce the `HasBuilder` trait. This trait allows us to initialize a partial record where *all fields are absent* by default:
 
@@ -346,7 +346,7 @@ impl HasBuilder for Person {
 
 In this implementation, the initial `Builder` is simply a `PartialPerson` type where both field parameters use the `IsNothing` type mapper. To construct the empty builder, we initialize each field with its mapped type, which for `IsNothing` is always the unit type `()`. This gives us a clean and predictable starting point for incrementally building up a complete `Person` instance.
 
-## `BuildField` Trait
+### `BuildField` Trait
 
 With the initial builder in place, the next step is to define the `BuildField` trait, which enables us to incrementally populate fields in the partial record. This trait is defined as follows:
 
@@ -421,7 +421,7 @@ Person::builder() // PartialPerson<IsNothing, IsNothing>
 
 This gives developers the freedom to build up records in any order while maintaining type safety.
 
-## `FinalizeBuild` Trait
+### `FinalizeBuild` Trait
 
 The previous example demonstrated how the `builder` and `build_field` methods can be used to construct values in the style of a fluent builder pattern. However, it is important to note that the result of the final `build_field` call is still a `PartialPerson<IsPresent, IsPresent>`, not a fully constructed `Person`.
 
@@ -469,13 +469,13 @@ let person = Person::builder() // PartialPerson<IsNothing, IsNothing>
 
 Together, the partial record struct and the traits `HasBuilder`, `BuildField`, and `FinalizeBuild` form a solid and ergonomic foundation for supporting extensible records in CGP. All of these pieces are automatically generated by the `#[derive(BuildField)]` macro. We do not use multiple derive macros here, so as to ensure consistency and correctness, eliminating the possibility of compilation failures due to the user missing to derive one of these traits.
 
-# Implementation of Record Merges
+## Implementation of Record Merges
 
 With the field builder traits in place, we can now explore how the earlier [struct building](/blog/extensible-datatypes-part-1#safe-struct-building) method `build_from` can be implemented to support merging a `Person` struct into a superset struct such as `Employee`.
 
 Before we can implement `build_from`, we first need a few more supporting constructs to enable the merging operation.
 
-## `IntoBuilder` Trait
+### `IntoBuilder` Trait
 
 In typical usage, partial records begin in an empty state and are gradually populated with field values until they can be finalized into a complete struct. However, we can also go in the **opposite** direction by converting a fully constructed struct *into* a partial record where all fields are present, and then progressively *remove* fields from it, one by one, until none remain.
 
@@ -512,7 +512,7 @@ If you compare this to the implementation of the earlier `FinalizeBuild` trait, 
 
 Even though these interfaces are similar, we define `IntoBuilder` and `FinalizeBuild` as separate traits. This distinction is valuable because it makes the intent of each trait clear and prevents accidental misuse. Each trait captures a specific stage in the lifecycle of a partial record, whether we are constructing it from scratch, building it up field by field, or tearing it down for merging.
 
-## `TakeField` Trait
+### `TakeField` Trait
 
 Now that we have the `IntoBuilder` trait to help convert a struct into a fully populated partial record, we also need a way to extract individual fields from that partial record. This is where the `TakeField` trait comes in. It serves as the *opposite* of `BuildField`, allowing us to take a field value *out* of a partial record:
 
@@ -550,7 +550,7 @@ As shown, this implementation is defined for a `PartialPerson` where the first g
 
 This setup provides the building blocks needed to flexibly extract and transfer fields, which is essential for safely merging one struct into another.
 
-## `HasFields` Trait
+### `HasFields` Trait
 
 With `IntoBuilder` available, we can now begin transferring fields from a source struct into a target partial record by peeling them off one at a time. To enable this process generically, we need a mechanism to *enumerate* the fields of a struct so that generic code can discover which fields are available for transfer.
 
@@ -575,7 +575,7 @@ impl HasFields for Person {
 
 Once the fields of a struct are made available as a type-level list, this list can be used to drive *type-level iteration* for field-wise operations such as merging. This lays the foundation for generically moving fields between records in a structured and type-safe way.
 
-## `BuildFrom` Trait
+### `BuildFrom` Trait
 
 The `build_from` method is defined within the `CanBuildFrom` trait, which uses a blanket implementation to support merging fields from one struct into another:
 
@@ -605,7 +605,7 @@ The blanket implementation of `CanBuildFrom` imposes several trait bounds. First
 
 The implementation of `build_from` begins by converting the source into its partial form using `into_builder`, then delegates the merge logic to `FieldsBuilder::build_fields`, which handles transferring each field in sequence.
 
-## `FieldsBuilder` Trait
+### `FieldsBuilder` Trait
 
 The `FieldsBuilder` trait is a *private* helper used exclusively by the `CanBuildFrom` trait. It is defined as follows:
 
@@ -658,7 +658,7 @@ impl<Source, Target> FieldsBuilder<Source, Target> for Nil {
 
 In this final implementation, the `Source` partial record is now fully depleted — all fields have been taken out — so we simply return the `Target`, which now contains all the merged fields.
 
-## Example Use of `BuildFrom`
+### Example Use of `BuildFrom`
 
 The implementation of `FieldsBuilder` can appear intimidating at first, particularly for readers unfamiliar with type-level programming. To make the process more approachable, let’s walk through a concrete example using `BuildFrom` to illustrate what actually happens under the hood.
 
@@ -723,11 +723,11 @@ Although these steps may seem complex at first glance, a closer look reveals tha
 
 If any part of this explanation remains unclear, it might be helpful to paste this blog post — or just this sub-section — into your favorite LLM and ask it to explain the process in simpler terms. Hopefully, the explanation provided here is already clear enough for an LLM to understand, so that it can in turn help make this pattern more accessible to developers who are still learning the intricacies of type-level programming.
 
-# Builder Dispatcher
+## Builder Dispatcher
 
 With the `BuildFrom` trait in place, we can now explore how CGP implements generalized **builder dispatchers** that enable flexible and reusable ways to assemble struct fields from various sources.
 
-## `BuildWithHandlers` Provider
+### `BuildWithHandlers` Provider
 
 In [earlier examples](/blog/extensible-datatypes-part-1/#builder-dispatcher), we used a utility called `BuildAndMergeOutputs` to combine outputs from multiple builder providers such as `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`. Under the hood, `BuildAndMergeOutputs` is built upon a more fundamental dispatcher named `BuildWithHandlers`. The implementation of this dispatcher looks like the following:
 
@@ -758,7 +758,7 @@ And yes, if you're wondering whether this `PipeHandlers` is the same one used in
 
 This reuse of core abstractions like `Pipe` and `Handler` across different systems is one of the most powerful aspects of CGP. These components weren’t designed just for piping shell commands — they were built to support general-purpose [function composition](https://en.wikipedia.org/wiki/Function_composition_%28computer_science%29), a core concept in functional programming.
 
-## Example Use of `BuildWithHandlers`
+### Example Use of `BuildWithHandlers`
 
 The `BuildWithHandlers` trait serves as the foundational builder dispatcher in CGP. It is the low-level mechanism behind higher-level dispatchers like `BuildAndMergeOutputs`, and understanding it provides valuable insight into how CGP composes complex data construction pipelines.
 
@@ -806,7 +806,7 @@ We invoke `compute` on the specialized `BuildWithHandlers`, using unit types `()
 
 This example demonstrates the flexibility of `BuildWithHandlers`. You’re not limited to merging entire record subsets — you can also work with providers that produce individual field values, then insert them into specific fields using composable builder logic.
 
-## `BuildAndMerge`
+### `BuildAndMerge`
 
 The `BuildAndMerge` adapter is relatively simple and is defined as follows:
 
@@ -833,7 +833,7 @@ After the inner provider returns a value, `BuildAndMerge` uses the `BuildFrom` t
 
 In simpler cases like `BuildPerson`, the input builder is ignored, so the trait bounds are trivially satisfied. But the mechanism still works the same way: take a value and merge its fields into the partial record.
 
-## `BuildAndSetField`
+### `BuildAndSetField`
 
 The `BuildAndSetField` adapter works similarly but focuses on setting a single field rather than merging a full record:
 
@@ -858,7 +858,7 @@ Instead of calling `BuildFrom`, this adapter uses the `BuildField` trait to assi
 
 This adapter is ideal for cases where you have an individual value (such as `u64`) and want to insert it into a specific field (like `employee_id`).
 
-## `MapFields` Trait
+### `MapFields` Trait
 
 In the previous example, we saw how to use `BuildWithHandlers` with a list of individual providers — each wrapped in `BuildAndMerge` or `BuildAndSetField` — to build a composite struct. This same pattern is what powers higher-level dispatchers like `BuildAndMergeOutputs`.
 
@@ -884,7 +884,7 @@ impl<Mapper> MapFields<Mapper> for Nil {
 
 The `MapFields` trait enables type-level mapping over a type-level list — very similar to how `.iter().map()` works on value-level lists in Rust. You pass in a `Mapper` that implements the `MapType` trait, and it is applied to each element in the list. This is the same `MapType` trait we’ve seen used earlier in other utilities, like `IsPresent` and `IsNothing`.
 
-## `BuildAndMergeOutputs`
+### `BuildAndMergeOutputs`
 
 Now that we have the pieces in place, we can implement `BuildAndMergeOutputs` as a composition of `BuildWithHandlers` and `BuildAndMerge`.
 
@@ -911,7 +911,7 @@ This modular, composable design stands in contrast to traditional macro-based ap
 
 Moreover, this approach enables us to easily define other dispatcher variants, such as those that use `BuildAndSetField` instead of `BuildAndMerge`, without having to rewrite or duplicate core logic.
 
-## Hiding Constraints with `delegate_components!`
+### Hiding Constraints with `delegate_components!`
 
 While it's possible to define `BuildAndMergeOutputs` as a simple type alias, doing so introduces ergonomic issues when it’s used with a *generic* `Handlers` type provided by the caller.
 
@@ -966,7 +966,7 @@ With this setup, `BuildAndMergeOutputs` can now be used like any other CGP provi
 
 The key benefit of this pattern is that it avoids boilerplate while preserving type safety. Whenever a provider's implementation is simply a thin wrapper around another provider with some added constraints, it's much more convenient to use `DelegateComponent` via `delegate_components!` than to implement the provider trait manually.
 
-## Type-Level Metaprogramming
+### Type-Level Metaprogramming
 
 The technique we just explored — wrapping providers and using `delegate_components!` — can be seen as a form of **metaprogramming** in CGP. Here, we’re leveraging **type-level programming** not just within CGP’s core component abstractions like `DelegateComponent`, but also as a tool for *programmatically defining component wiring* through the use of generic parameters and trait constraints.
 
@@ -978,7 +978,7 @@ In contrast, type-level programming offers a principled and well-typed foundatio
 
 By doing so, CGP achieves a rare combination of power and predictability. Developers who embrace this pattern gain access to highly expressive abstractions, while staying within the familiar boundaries of Rust's type system.
 
-# Conclusion
+## Conclusion
 
 By this point, I hope you have a clearer understanding of how CGP supports extensible records. If you are interested in exploring the implementation further, take a look at the [GitHub repository](https://github.com/contextgeneric/cgp), especially the `cgp-field` and `cgp-dispatch` crates, which contain the full source code.
 
@@ -988,7 +988,7 @@ To implement the extensible builder pattern, we introduced the `BuildWithHandler
 
 On top of this, we implemented the high-level `BuildAndMergeOutputs` dispatcher by defining a conditional delegation to `BuildWithHandlers`, after first wrapping each handler using the `BuildAndMerge` adapter. This design preserves composability while allowing for customized construction logic.
 
-## Future Extensions
+### Future Extensions
 
 Because extensible records and builders are implemented modularly, it is easy to extend the system further without rewriting the core. For instance, the current builder pattern requires the source struct to match the target struct exactly, but we may want to allow certain fields to be **dropped** rather than merged.
 
@@ -1002,6 +1002,6 @@ This level of flexibility would be difficult to achieve with more ad hoc approac
 
 If you're still unsure how all of this comes together, a future blog post will walk through the implementation of these extensions in detail to show exactly how they work.
 
-## Next Part
+### Next Part
 
 In the final [Part 4 of this series, **Implementing Extensible Variants**](/blog/extensible-datatypes-part-4), we will follow a similar path to explore how CGP implements extensible variants. Keep in mind the concepts we covered for extensible records — you may be surprised to discover just how much of the same logic carries over, despite the differences between records and variants.

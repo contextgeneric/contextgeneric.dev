@@ -13,7 +13,7 @@ In this final fourth part of the series, we will have the same walk through for 
 
 <!-- truncate -->
 
-# Recap
+## Recap
 
 As a recap, we have covered the new release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2) which now supports the use of **extensible records and variants**, allowing developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition.
 
@@ -34,7 +34,7 @@ Thank you April Gonçalves for your generous donation support on [Ko-fi](https:/
 
 ---
 
-# The Design and Implementation of Extensible Variants
+## The Design and Implementation of Extensible Variants
 
 Now that we've covered how extensible records work in CGP, we can turn our attention to **extensible variants**. At first glance, it might seem like a completely different mechanism — but surprisingly, the approach used to implement extensible variants is very similar to that of extensible records. In fact, many of the same principles apply, just in the “opposite direction”.
 
@@ -46,9 +46,9 @@ With this in mind, we’ll now explore the CGP constructs that support extensibl
 
 ---
 
-# Base Implementation
+## Base Implementation
 
-## `FromVariant` Trait
+### `FromVariant` Trait
 
 Just as extensible records use the `HasField` trait to extract values from a struct, extensible variants in CGP use the `FromVariant` trait to *construct* an enum from a single variant value. The trait is defined as follows:
 
@@ -62,7 +62,7 @@ pub trait FromVariant<Tag> {
 
 Like `HasField`, the `FromVariant` trait is parameterized by a `Tag`, which identifies the name of the variant. It also defines an associated `Value` type, representing the data associated with that variant. Unlike `HasField`, which extracts a value, `from_variant` takes in a `Value` and returns an instance of the enum.
 
-## Example: Deriving `FromVariant`
+### Example: Deriving `FromVariant`
 
 To see how this works in practice, consider the following `Shape` enum:
 
@@ -96,7 +96,7 @@ impl FromVariant<Symbol!("Rectangle")> for Shape {
 
 This allows the `Shape` enum to be constructed generically using just the tag and value.
 
-## Restrictions on Enum Shape
+### Restrictions on Enum Shape
 
 To ensure ergonomics and consistency, CGP restricts the kinds of enums that can derive `FromVariant`. Specifically, supported enums must follow the **sums of products** pattern — each variant must contain *exactly one unnamed field*.
 
@@ -123,7 +123,7 @@ These more complex variants are not supported because they would make it harder 
 
 If you need to represent more complex data in a variant, we recommend wrapping that data in a dedicated struct. This way, you can still take advantage of CGP's extensible variant system while maintaining type clarity and composability.
 
-## Partial Variants
+### Partial Variants
 
 Just as CGP supports partially constructed structs through *partial records*, it also enables **partial variants** to work with **partially deconstructed** enums in a similarly flexible way. Partial variants allow you to pattern match on each variant of an enum incrementally, while safely excluding any variants that have already been handled. This makes it possible to build exhaustive and type-safe match chains that evolve over time.
 
@@ -136,7 +136,7 @@ pub enum PartialShape<F0: MapType, F1: MapType> {
 }
 ```
 
-## `HasExtractor` trait
+### `HasExtractor` trait
 
 To enable the transformation from a regular enum into its partial variant form, CGP provides the `HasExtractor` trait. This trait defines an associated type named `Extractor`, which represents the full set of partial variants for a given enum, and a method `to_extractor`, which performs the conversion:
 
@@ -165,7 +165,7 @@ impl HasExtractor for Shape {
 
 This implementation makes it possible to work with a `Shape` value as a `PartialShape`, where each variant is wrapped in an `IsPresent` marker, indicating that the variant is still available to be matched.
 
-## `IsVoid` Type Mapper
+### `IsVoid` Type Mapper
 
 The key distinction between partial records and partial variants lies in how we represent the **absence** of data. For partial variants, CGP introduces the `IsVoid` type mapper to indicate that a variant has already been extracted and is no longer available:
 
@@ -184,7 +184,7 @@ Conceptually, `Void` serves the same purpose as Rust’s built-in [**never type*
 
 While `IsNothing` is used for absent fields in partial records, we use `IsVoid` to represent removed or matched variants in partial variants. This ensures that once a variant has been extracted, it cannot be matched again — preserving both soundness and safety in CGP’s type-driven pattern matching.
 
-## `ExtractField` Trait
+### `ExtractField` Trait
 
 Once an enum has been converted into its partial variant form, we can begin incrementally pattern matching on each variant using the `ExtractField` trait. This trait enables safe, step-by-step extraction of variant values, and is defined as follows:
 
@@ -201,7 +201,7 @@ Just like `FromVariant` and `HasField`, the `ExtractField` trait takes a `Tag` t
 
 The `extract_field` method consumes the value and returns a `Result`, where a successful match yields the extracted `Value`, and a failed match returns the `Remainder`. Although this uses the `Result` type, the `Err` case is not really an error in the traditional sense — rather, it represents the remaining variants yet to be handled, much like how errors represent alternative outcomes in Rust.
 
-### Example Implementation of `ExtractField`
+#### Example Implementation of `ExtractField`
 
 To understand how `ExtractField` works in practice, let’s look at an implementation for extracting the `Circle` variant from a `PartialShape`:
 
@@ -227,7 +227,7 @@ The associated `Remainder` type updates the `Circle` variant from `IsPresent` to
 
 Within the method body, we match on `self`. If the value is a `Circle`, we return it in the `Ok` case. Otherwise, we return the remaining `PartialShape`, reconstructing it with the other variant. Due to the type system’s enforcement, it is impossible to incorrectly return a `Circle` as part of the remainder once it has been marked as `IsVoid`. The compiler ensures that this branch is unreachable, preserving correctness by construction.
 
-### Example Use of `ExtractField`
+#### Example Use of `ExtractField`
 
 With `ExtractField`, we can now incrementally extract and match against variants in a safe and ergonomic way. Here’s an example of computing the area of a shape using this approach:
 
@@ -254,7 +254,7 @@ By the time we reach the second `Err` case, the remainder has the type `PartialS
 
 What makes this approach so powerful is that the Rust type system can statically verify that it is impossible to construct a valid value for `PartialShape<IsVoid, IsVoid>`. We no longer need to write boilerplate `_ => unreachable!()` code or use runtime assertions. The type system ensures exhaustiveness and soundness entirely at compile time, enabling safer and more maintainable implementation of extensible variants.
 
-## Short-Circuiting Remainder
+### Short-Circuiting Remainder
 
 In our earlier implementation of `compute_area`, we used nested `match` expressions to handle the `Result` returned from each call to `extract_field`. If you are familiar with the `?` operator in Rust, you might be wondering why we didn’t use it here to simplify the logic.
 
@@ -289,7 +289,7 @@ The introduction of `⸮` is not meant to advocate for a new language feature. R
 
 We will revisit this idea when we discuss how the visitor pattern automates this process. For now, let’s continue by looking at how to finalize an empty remainder.
 
-## `FinalizeExtract` Trait
+### `FinalizeExtract` Trait
 
 While Rust’s type system can infer that a type like `PartialShape<IsVoid, IsVoid>` is uninhabitable, this inference only works when the compiler has access to the fully concrete type. To support this behavior more generically within CGP’s extensible variant system, the `FinalizeExtract` trait is introduced. This trait provides a mechanism to *discharge* an empty partial variant after all possible cases have been matched:
 
@@ -314,7 +314,7 @@ impl FinalizeExtract for PartialShape<IsVoid, IsVoid> {
 Here, we use an empty `match` expression on `self`, which works because the compiler knows that `PartialShape<IsVoid, IsVoid>` has no possible value. Since it is impossible to construct such a value, the match is guaranteed to be unreachable. Rust verifies this at compile time, ensuring both safety and correctness.
 
 By leveraging the `Void` type in this way, CGP allows us to exhaustively extract every variant from a partial enum and confidently conclude that no cases remain. This eliminates the need for runtime assertions, unreachable branches, or panics. Instead, the type system itself guarantees that all variants have been handled, enabling a clean and fully type-safe approach to enum decomposition.
-### `FinalizeExtractResult` Trait
+#### `FinalizeExtractResult` Trait
 
 When working with results of type `Result<Output, Remainder>`, where the `Remainder` type is guaranteed to be inhabitable, it is often useful to have a convenient way to directly extract the `Output` value. To achieve this, CGP defines the `FinalizeExtractResult` trait, which provides a helper method to finalize and unwrap such results. Its definition includes a blanket implementation for all `Result` types where the error type implements `FinalizeExtract`:
 
@@ -366,11 +366,11 @@ This trait provides a small but valuable ergonomic improvement, especially when 
 
 ---
 
-# Implementation of Casts
+## Implementation of Casts
 
 With the foundational traits for extensible variants in place, we can now explore how to implement the `CanUpcast` and `CanDowncast` traits. These traits enable safe and generic upcasting and downcasting between enums that share compatible variants.
 
-## `HasFields` Implementation
+### `HasFields` Implementation
 
 Just as extensible records rely on `HasFields` for iterating over their fields, extensible variants use a similar mechanism to iterate over their variants. This allows the generic casting implementation to iterate over each variant of an enum.
 
@@ -412,7 +412,7 @@ pub enum Either<A, B> {
 
 In this way, we represent the enum's variants as a nested sum, with `Void` as the terminating type to signify the end of the variant choices.
 
-## `CanUpcast` Implementation
+### `CanUpcast` Implementation
 
 With `HasFields` implemented, we are ready to define the `CanUpcast` trait. This trait allows a source enum to be upcasted to a target enum that is a superset of the source:
 
@@ -443,7 +443,7 @@ Here’s how it works. First, the `Context` type (the source enum) must implemen
 
 In the method body, we begin by calling `self.to_extractor()` to convert the source enum into a value with partial variants. We then use `Fields::extract_from` to extract the relevant variants into the target enum. Finally, we call `finalize_extract_result()` to discharge the remainder in `Err`, and return the `Target` result in `Ok`.
 
-## `FieldsExtractor` Trait
+### `FieldsExtractor` Trait
 
 The `FieldsExtractor` trait serves as a helper for casting between enums. It is defined as follows:
 
@@ -500,7 +500,7 @@ In this final case, the trait simply sets the entire `Source` as the `Remainder`
 
 This pattern allows us to generically extract variants from an extensible enum, one field at a time, while safely and efficiently handling any unmatched cases using Rust’s powerful type system.
 
-## Example Use of `Upcast`
+### Example Use of `Upcast`
 
 To better understand how the `FieldsExtractor` operation works, let’s walk through a concrete example of an upcast. Suppose we define a new enum `ShapePlus` that extends the original `Shape` type by including an additional variant:
 
@@ -554,7 +554,7 @@ What this process shows is that the `Upcast` operation works by examining each v
 
 By breaking down the upcast into individual type-driven steps over extensible variants, we can implement upcasting entirely in safe Rust. Even more importantly, this implementation is fully generic and reusable. We are not writing code solely for the purpose of supporting `Upcast` — instead, we are building a reusable foundation that also supports operations like `Downcast` and other generic manipulations over extensible variants.
 
-## `CanDowncast` Implementation
+### `CanDowncast` Implementation
 
 With the upcast operation in place, we can now turn to the implementation of `CanDowncast`. The `CanDowncast` trait is defined as follows:
 
@@ -589,7 +589,7 @@ With all the foundational components from `CanUpcast` already in place, the impl
 
 This difference highlights the key distinction between upcasting and downcasting in this model. The `Upcast` operation extracts from all fields in the source and expects the remainder to be empty, whereas `Downcast` extracts only those variants present in the target and leaves the unmatched remainder intact. Yet aside from this inversion of roles between source and target, the two implementations share the same reusable machinery — including `FieldsExtractor` — demonstrating the flexibility and composability of the CGP approach to extensible variants.
 
-## Example Use of Downcast
+### Example Use of Downcast
 
 With `CanDowncast` in place, we can now explore how to use it in practice. Consider the following example, where we attempt to downcast from a `ShapePlus` enum to a `Shape` enum:
 
@@ -619,11 +619,11 @@ One of the most impressive aspects of both upcast and downcast is that they work
 
 ---
 
-# Implementation of Visitor Dispatcher
+## Implementation of Visitor Dispatcher
 
 With the traits for extensible variants now in place, we can turn our attention to how CGP implements generalized **visitor dispatchers**, similar to the [builder dispatchers](/blog/extensible-datatypes-part-3/#builder-dispatcher) described in the previous part of this series.
 
-## `MatchWithHandlers`
+### `MatchWithHandlers`
 
 In the [examples from Part 2](/blog/extensible-datatypes-part-2/#dispatching-eval), we introduced dispatchers such as `MatchWithValueHandlers` and `MatchWithValueHandlersRef`, which delegate the handling of enum variants to different visitor handlers based on the `Input` type. These dispatchers are built on top of a more fundamental dispatcher called `MatchWithHandlers`, whose implementation is shown below:
 
@@ -649,7 +649,7 @@ The `MatchWithHandlers` provider is parameterized by a `Handlers` type, which re
 
 Within the `compute` method, we first convert the input into its extractor form using `input.to_extractor()`. This partial variant is then passed to the lower-level dispatcher `DispatchMatchers<Handlers>`, which attempts to match and handle each variant. It returns a `Result<Output, Remainder>`, where a successful match produces an `Output`, and an unmatched remainder is returned otherwise. But since `Remainder` is expected to implement `FinalizeExtract`, we can call `finalize_extract_result()` to return the `Output` directly.
 
-### `DispatchMatchers`
+#### `DispatchMatchers`
 
 In our earlier implementation of extensible builders via `BuildWithHandlers`, we [used `PipeHandlers`](/blog/extensible-datatypes-part-3/#buildwithhandlers-provider) to compose a pipeline of builder handlers that successively filled in partial records. For extensible visitors, we follow a similar pattern with a slight variation that reflects the different control flow.
 
@@ -661,7 +661,7 @@ pub type DispatchMatchers<Providers> = PipeMonadic<OkMonadic, Providers>;
 
 This definition constructs a **monadic pipeline** of visitor handlers, using `OkMonadic` as the monad implementation.
 
-## What is a Monad?!
+### What is a Monad?!
 
 At this point, many readers coming from a Rust background may be wondering what exactly a [monad](https://wiki.haskell.org/Monad) is, and how it relates to implementing extensible visitors. In this section, we will break down the concept in simplified terms using familiar Rust patterns and constructs.
 
@@ -673,7 +673,7 @@ With this understanding, we can think of `PipeMonadic` in CGP as a mechanism tha
 
 The real strength of this approach is that it generalizes well. You are not limited to a specific type like `Result`; you can apply the same logic to any monad-like type, including more complex combinations such as `impl Future<Output = Result<Result<Option<T>, E1>, E2>>`. In principle, you could imagine applying something like `.await???` to extract the inner value, and with monads, this can be abstracted and automated.
 
-### `OkMonadic` Monad Provider
+#### `OkMonadic` Monad Provider
 
 In the case of `DispatchMatchers`, the monad provider we use is called `OkMonadic`. This corresponds to the custom operator `⸮` we introduced in the pseudocode in the [`compute_area` example](#short-circuiting-remainder), which short-circuits on the `Ok` variant and passes along the changing `Err` remainder.
 
@@ -683,7 +683,7 @@ Because of `PipeMonadic` and `OkMonadic`, we do not need to write this logic our
 
 If any of this still feels unclear, do not worry. We will walk through a concrete example next to clarify how it works in practice. We also plan to publish a separate blog post that dives deeper into how CGP implements monads in Rust, including the internals of `PipeMonadic` and related abstractions.
 
-## Example Use of `MatchWithHandlers`
+### Example Use of `MatchWithHandlers`
 
 To understand how to use `MatchWithHandlers` directly, let's revisit the example of computing the area of a `Shape`. We start by defining two separate `Computer` providers that calculate the area for the `Circle` and `Rectangle` variants:
 
@@ -699,7 +699,7 @@ fn rectangle_area(rectangle: Rectangle) -> f64 {
 }
 ```
 
-### `#[cgp_computer]` Macro
+#### `#[cgp_computer]` Macro
 
 The `#[cgp_computer]` macro allows us to transform these pure functions into context-generic providers that can be referenced as types. Behind the scenes, this macro generates `Computer` implementations similar to the following:
 
@@ -716,7 +716,7 @@ impl<Context, Code> Computer<Context, Code, Circle> for CircleArea {
 
 This macro simplifies the process of defining `Computer` providers by letting us write them as plain functions. Because the macro ignores the `Context` and `Code` types, the generated provider works with any `Context` and `Code` you supply.
 
-### `ComputeShapeArea` Handler
+#### `ComputeShapeArea` Handler
 
 With `CircleArea` and `RectangleArea` defined, we can create a `ComputeShapeArea` handler by using `MatchWithHandlers` as a type alias:
 
@@ -762,7 +762,7 @@ Here, `MatchWithHandlers` performs the same `⸮` short-circuit operation descri
 
 This example highlights how much boilerplate `MatchWithHandlers` abstracts away for us. Its implementation is essentially a monadic pipeline built using `PipeMonadic`, where `OkMonadic` provides the behavior of the `⸮` operator used in this pseudocode.
 
-## `ExtractFieldAndHandle`
+### `ExtractFieldAndHandle`
 
 To better understand how the earlier `MatchWithHandlers` example works, let's examine the implementation of the `ExtractFieldAndHandle` provider:
 
@@ -802,7 +802,7 @@ pub enum FooBar {
 
 Here, both `Foo` and `Bar` hold `u64` values. `ExtractFieldAndHandle` will pass these as `Field<Symbol!("Foo"), u64>` and `Field<Symbol!("Bar"), u64>` respectively, so the provider can handle them differently by matching on the `Tag`.
 
-### `HandleFieldValue`
+#### `HandleFieldValue`
 
 The tagged `Field` input from `ExtractFieldAndHandle` is useful when multiple variants share the same `Value` type. However, in simpler cases like our `Shape` example, we often just want to handle the contained value directly, ignoring the tag. The `HandleFieldValue` wrapper simplifies this by “peeling off” the `Field` wrapper and passing only the inner value to the inner provider:
 
@@ -827,7 +827,7 @@ where
 
 As shown, `HandleFieldValue` simply unwraps the input from `Field<Tag, Input>` and forwards the contained `Input` value to the inner provider.
 
-### Revisiting `ComputeShapeArea`
+#### Revisiting `ComputeShapeArea`
 
 Now that we've understood `ExtractFieldAndHandle` and `HandleFieldValue`, let’s review what happens inside `ComputeShapeArea`:
 
@@ -851,7 +851,7 @@ pub type ComputeShapeArea = MatchWithHandlers::<
   * Otherwise, the remainder `PartialShape<IsVoid, IsVoid>` is returned as an error.
 * Finally, `MatchWithHandlers` calls `FinalizeExtract` on `PartialShape<IsVoid, IsVoid>` to assert that the remainder is empty and discharge the impossible case.
 
-## Unifying Variant Value Handlers
+### Unifying Variant Value Handlers
 
 So far, we have seen how `MatchWithHandlers` can serve as a powerful low-level tool to implement extensible visitors. However, it requires explicitly listing a handler for each variant in the provided handler list. To make this process more ergonomic, we can build higher-level abstractions like `MatchWithValueHandlers`, which automatically derives the list of variant handlers passed to `MatchWithHandlers`.
 
@@ -901,7 +901,7 @@ fn compute_area<T: HasArea>(shape: T) -> f64 {
 
 This generic function works for any type implementing `HasArea` and simply calls the `area` method. Applying `#[cgp_computer]` here generates the `ComputeArea` provider type that can then be used within `ComputeShapeArea`.
 
-### `ToFieldsHandler`
+#### `ToFieldsHandler`
 
 To simplify `ComputeShapeArea` further, we need a way to automatically generate the list of extractors passed to `MatchWithHandlers`. Concretely, we want to generate this:
 
@@ -955,7 +955,7 @@ pub type ComputeShapeArea = MatchWithHandlers<
 
 This definition may look complex at first glance. However, it demonstrates the powerful behind-the-scenes transformation that automatically generates the list of variant handlers from `Shape` to be passed to `MatchWithHandlers`.
 
-### `HasFieldHandlers`
+#### `HasFieldHandlers`
 
 The process to generate variant handlers from `Shape` involves two steps: obtaining `Shape`’s fields from `HasFields`, and then applying `ToFieldHandlers` to those fields. To streamline this, we define another helper trait, `HasFieldHandlers`, that combines these steps:
 
@@ -985,7 +985,7 @@ With `HasFieldHandlers`, the definition of `ComputeShapeArea` becomes much more 
 
 More importantly, this pattern is entirely general: it can be applied to any input type that implements `HasFields`, not just `Shape`, and to any `Computer` provider, not just `ComputeArea`.
 
-## `MatchWithValueHandlers`
+### `MatchWithValueHandlers`
 
 The traits `HasFieldHandlers` and `ToFieldHandlers` serve as the helpers for us to perform *type-level metaprogramming* for us to implement high-level visitor dispatchers such as `MatchWithValueHandlers`, which is defined as follows:
 
@@ -1001,11 +1001,11 @@ delegate_components! {
 }
 ```
 
-The design of `MatchWithValueHandlers` is similar to how we implemented the builder dispatchers using [type-level metaprogramming in part 3](/blog/extensible-datatypes-part-3/#type-level-cgp-metaprogramming). In this case, `MatchWithValueHandlers` is parameterized by a `Provider` that is expected to implement `Computer`, such as `ComputeArea`. The implementation of `MatchWithValueHandlers` is simply a type alias to use `UseInputDelegate` to dispatch the `Input` type given through `Computer` to `MatchWithFieldHandlersInputs`.
+The design of `MatchWithValueHandlers` is similar to how we implemented the builder dispatchers using [type-level metaprogramming in part 3](/blog/extensible-datatypes-part-3/#type-level-metaprogramming). In this case, `MatchWithValueHandlers` is parameterized by a `Provider` that is expected to implement `Computer`, such as `ComputeArea`. The implementation of `MatchWithValueHandlers` is simply a type alias to use `UseInputDelegate` to dispatch the `Input` type given through `Computer` to `MatchWithFieldHandlersInputs`.
 
 The implementation of `MatchWithFieldHandlersInputs` is defined through `delegate_components!`, with it having a generic mapping for any `Input` that implements `HasFieldHandlers<Provider>`. It then simply delegates the provider for that input to `MatchWithHandlers<Input::Handlers>`.
 
-### Example Instantiation of `MatchWithValueHandlers`
+#### Example Instantiation of `MatchWithValueHandlers`
 
 Because `MatchWithValueHandlers` and `MatchWithFieldHandlersInputs` rely on type-level metaprogramming, it can be difficult to grasp exactly how they work on first encounter. To make things more concrete, let’s walk through how this abstraction is applied to `Shape`. With the machinery we’ve built, the definition of `ComputeShapeArea` becomes as simple as:
 
@@ -1028,7 +1028,7 @@ Under the hood, this type alias resolves to `MatchWithHandlers` through the foll
   ```
 * This type-level list is then passed to `MatchWithHandlers`, which performs the variant dispatch using the logic we’ve already explored.
 
-## Implementing `HasArea` for `Shape`
+### Implementing `HasArea` for `Shape`
 
 With `MatchWithValueHandlers`, implementing the `HasArea` trait for `Shape` becomes straightforward:
 
@@ -1054,7 +1054,7 @@ impl HasArea for ShapePlus {
 
 Although some boilerplate still remains, this approach is significantly simpler than manually matching each variant or relying on procedural macros. It also brings more flexibility and type safety. In the future, CGP may provide more ergonomic abstractions on top of this pattern, making common use cases like `HasArea` even easier to express.
 
-## Dispatching to Context
+### Dispatching to Context
 
 In the earlier definition of `MatchWithValueHandlers`, we omitted one detail that it has a default type parameter for `Provider`:
 
@@ -1118,7 +1118,7 @@ delegate_components! {
 }
 ```
 
-### The Flexibility of `UseContext`
+#### The Flexibility of `UseContext`
 
 This kind of customization would be much harder to achieve if the dispatcher were tightly coupled to a concrete trait implementation, such as using `MatchWithValueHandlers<ComputeArea>` directly. In that case, the only way to change the behavior would be to modify the `HasArea` implementation for `Circle`, which would require ownership of either the `Circle` type or the `HasArea` trait.
 
@@ -1130,7 +1130,7 @@ This pattern of using a provider parameter that defaults to `UseContext` is a re
 
 ---
 
-# Visitor Dispatcher by Reference
+## Visitor Dispatcher by Reference
 
 In the earlier examples, some careful readers may have noticed a significant flaw in the function signatures for computing the area of shapes, such as in `HasArea::area`. These methods require *owned* values of the shape variants, meaning that each time we compute the area, we must consume the shape entirely. This is not ideal, especially when we only need a reference and want to preserve the original value.
 
@@ -1138,7 +1138,7 @@ We started with the ownership-based visitor dispatcher because it is conceptuall
 
 We will now walk through how to implement the reference-based visitor dispatcher in detail. By the end, you will see how Rust’s type system enables us to safely and cleanly extend the original approach to support references, without compromising lifetime safety or clarity.
 
-## Reference-Based Area Computation
+### Reference-Based Area Computation
 
 To demonstrate how reference-based visitor dispatch works, let’s define a new trait `HasAreaRef` that computes the area using a shared reference:
 
@@ -1190,7 +1190,7 @@ impl HasAreaRef for ShapePlus {
 
 At first glance, using `MatchWithValueHandlersRef` to enable reference-based dispatch may seem straightforward — and in many ways, it is. As we’ll see next, the core logic mirrors the ownership-based version closely, with only a few additional considerations around generic lifetimes.
 
-## `PartialRef` Variants
+### `PartialRef` Variants
 
 Although most of the higher-level support for reference-based extensible visitors is relatively straightforward, we first need to generate reference-aware partial variants within `#[derive(ExtractField)]`. For example, for the `Shape` enum, the macro generates the following reference-based partial variants:
 
@@ -1207,7 +1207,7 @@ We need a distinct `PartialRefShape` type rather than reusing `PartialShape` bec
 
 Given that limitation, the cleanest solution is to define a separate enum that introduces a lifetime parameter and holds references explicitly. Since these types are generated by macros and used internally within CGP's dispatching infrastructure, the added complexity is well-contained and does not burden the end user.
 
-### `HasExtractorRef` Trait
+#### `HasExtractorRef` Trait
 
 In addition to the partial-ref variants, we need a new trait called `HasExtractorRef` that extracts data from a reference to the full enum:
 
@@ -1241,7 +1241,7 @@ impl HasExtractorRef for Shape {
 
 With `extractor_ref`, it is now possible to extract data from a borrowed `Shape` without cloning each variant, enabling efficient reference-based dispatching.
 
-### `ExtractField` Implementation
+#### `ExtractField` Implementation
 
 Fortunately, beyond the partial-ref variants and the `HasExtractorRef` trait, most other traits can be reused as if we were working with owned values. This works because `PartialRefShape` holds what are effectively "owned" variant values in the form of references like `&'a Circle` and `&'a Rectangle`. For example, we can implement `ExtractField` for `PartialRefShape` like this:
 
@@ -1264,7 +1264,7 @@ impl<'a, F1: MapType> ExtractField<Symbol!("Circle")> for PartialRefShape<'a, Is
 
 We can reuse traits like `ExtractField` because the associated types such as `Value` do not need to be the owned values themselves — they can be references to those values instead. This lets us treat extensible variants as if they contain references to their fields, allowing us to manipulate them just like owned values.
 
-## `MatchWithHandlersRef`
+### `MatchWithHandlersRef`
 
 Because reference-based dispatching relies on `HasExtractorRef`, we also need to adapt downstream constructs like `MatchWithHandlers` to work with references instead of owned values. This adaptation is provided by `MatchWithHandlersRef`, which uses `HasExtractorRef` in place of `HasExtractor`:
 
@@ -1292,7 +1292,7 @@ One subtle but important point is that `MatchWithHandlersRef` still implements `
 
 After constructing the reference-based pipeline, `MatchWithHandlersRef` can then unlift the entire pipeline to implement `ComputerRef`. This layered approach ensures that reference-based dispatching reuses the same infrastructure as the ownership-based version, while preserving type safety and proper lifetime handling.
 
-## `PromoteRef`
+### `PromoteRef`
 
 In the same way that traits like `ExtractField` can operate on borrowed fields, the `Computer` trait can also work with borrowed inputs. In fact, the `#[cgp_computer]` macro expansion for the `compute_area_ref` function produces the following `Computer` implementation:
 
@@ -1322,7 +1322,7 @@ delegate_components! {
 
 This means that `ComputeAreaRef` implements `ComputerRef` through `PromoteRef<ComputeAreaRef>`, automatically lifting its `Computer` implementation for `&T` into a `ComputerRef` implementation.
 
-### Promotion from `Computer` to `ComputerRef`
+#### Promotion from `Computer` to `ComputerRef`
 
 The `PromoteRef` adapter allows a provider that implements `Computer` for borrowed inputs to become a provider that implements `ComputerRef`. Its implementation is as follows:
 
@@ -1345,7 +1345,7 @@ Here, `PromoteRef` implements `ComputerRef` as long as the inner `Provider` supp
 
 One important detail is that `PromoteRef` requires the inner `Computer` provider to always produce the same `Output` type for any lifetime `'a`. This means that `PromoteRef` cannot be used if the `Output` type borrows from the input reference, because `ComputerRef` defines a single `Output` type that is independent of the lifetime of the input. This limitation follows naturally from the design of `ComputerRef`. When the output must borrow from the input, the user should implement `Computer` directly instead of using `ComputerRef`.
 
-### Promotion from `ComputerRef` to `Computer`
+#### Promotion from `ComputerRef` to `Computer`
 
 `PromoteRef` also works in the opposite direction, allowing a provider that implements `ComputerRef` to become a provider that implements `Computer` for borrowed inputs:
 
@@ -1367,7 +1367,7 @@ In this implementation, `PromoteRef` wraps a `Provider` that implements `Compute
 
 With these two implementations, `PromoteRef` provides a bidirectional bridge between `Computer` and `ComputerRef`. This flexibility allows a single provider to adapt to whichever trait is more convenient for the task, whether the interface expects `Computer` or `ComputerRef`.
 
-## `MatchWithValueHandlersRef`
+### `MatchWithValueHandlersRef`
 
 To support reference-based dispatching in CGP, we only need to introduce a few reference-specific constructs while keeping most of the implementation very similar to the original `MatchWithValueHandlers`. The definition of `MatchWithValueHandlersRef` is shown below:
 
@@ -1386,7 +1386,7 @@ delegate_components! {
 
 When comparing this definition to `MatchWithValueHandlers`, the most notable differences are the use of `MatchWithFieldHandlersInputsRef` and the additional wrapping with `PromoteRef` to facilitate conversions between `Computer` and `ComputerRef`.
 
-### Example use of `MatchWithValueHandlersRef`
+#### Example use of `MatchWithValueHandlersRef`
 
 To better understand how `MatchWithValueHandlersRef` works in practice, let us walk through what happens when we call `MatchWithValueHandlersRef<ComputeAreaRef>` on `Shape`:
 
@@ -1439,11 +1439,11 @@ In practice, the usage of `MatchWithValueHandlersRef` feels almost identical to 
 
 ---
 
-# Future Work
+## Future Work
 
 The modular design of extensible variants makes it straightforward to extend the pattern for new use cases. There are several scenarios that are not yet supported in this initial version. While none of these are technically difficult to implement, the focus for this release has been on the core functionality and the writing of these blog posts. The following areas are planned for future work.
 
-## Additional Arguments
+### Additional Arguments
 
 At present, extensible visitors do not support forwarding additional arguments to individual visitor handlers. This limitation prevents traits that require extra arguments, such as:
 
@@ -1455,7 +1455,7 @@ pub trait HasArea {
 
 Here, the `area` method needs a `scale_factor` argument that must be passed through the visitor dispatcher to the variant handlers. To support this, we can create adapters similar to `ExtractFieldAndHandle` that bundle the extra arguments into the `Input`. We would then define alternative dispatchers, similar to `MatchWithValueHandlers`, which operate on these bundled inputs.
 
-## `&mut` References
+### `&mut` References
 
 The current reference-based dispatch system is hard-coded to use shared references (`&`). As a result, it does not support `&mut` references for mutable operations such as:
 
@@ -1467,7 +1467,7 @@ pub trait CanScale {
 
 To support mutable references, the design of partial-ref variants needs to be generalized to work with both `&` and `&mut`. This likely requires an abstraction similar to `MapType`, but for mapping the type of reference used for each field.
 
-### Simpler Dispatchers
+#### Simpler Dispatchers
 
 Although extensible visitors were designed with complex use cases like modular interpreters in mind, they are equally powerful for simpler needs, such as implementing plain Rust traits like `HasArea`. While this is already possible with the current infrastructure, the ergonomics leave much to be desired.
 
@@ -1500,13 +1500,13 @@ where
 
 With such a macro in place, using extensible visitors to implement common traits would become as easy as annotating the trait with `#[cgp_dispatch]`, removing the need to understand the inner workings of CGP for simple use cases.
 
-## Custom Partial Records Updater
+### Custom Partial Records Updater
 
 Currently, partial records only support a small set of operations like `TakeField` and `BuildField`. This makes it difficult to customize behavior, such as overriding existing field values, filling empty fields with defaults, or taking a default value from an empty field.
 
 To support these scenarios, more generalized interfaces for interacting with partial records are needed. A promising approach is to use *natural transformations* to implement generic field transformers. For example, a builder transformer would convert `IsNothing` fields into `IsPresent` fields, while an overrider transformer would convert either `IsNothing` or `IsPresent` fields into `IsPresent` fields. This would allow for flexible and reusable field manipulation strategies.
 
-## Explanation for Computation Hierarchy
+### Explanation for Computation Hierarchy
 
 Beyond `Computer`, `ComputerRef`, and `Handler`, CGP defines several other traits that represent different kinds of computations. For example, `TryComputer` supports computations that may fail, and `TryComputerRef` handles fallible computations that operate on reference inputs. These traits make it possible to model a wide range of behaviors, from straightforward value computations to error-aware or reference-based processing.
 
@@ -1516,7 +1516,7 @@ My original plan was to dedicate a fifth part of this series to explain the comp
 
 ---
 
-# Conclusion
+## Conclusion
 
 We have now reached the end of our deep dive into the implementation details of extensible variants and extensible visitors. To recap the journey, we began by defining the `FromVariant` trait, which allows constructing an enum from one of its variants. We then introduced partial variants, which mirror the structure of partial records but use `IsVoid` to indicate the absence of a variant.
 
@@ -1528,7 +1528,7 @@ Next, we delved into the implementation of extensible visitors, beginning with `
 
 We concluded with the reference-based implementation of extensible visitors. This introduced reference-specific constructs such as partial-ref variants and the `HasExtractorRef` trait. We examined how `MatchWithHandlersRef` uses `HasExtractorRef` to extract borrowed variants, and how `PromoteRef` bridges between `Computer` and `ComputerRef` providers. We then saw that `MatchWithValueHandlersRef` is implemented with only minimal differences from its ownership-based counterpart, relying on `MatchWithHandlersRef` and `PromoteRef` to interleave `Computer` and `ComputerRef` computations.
 
-## End of Series
+### End of Series
 
 We have reached the conclusion of this series on extensible data types. By now, you should have a clearer understanding of the design patterns that extensible data types make possible and how they can be applied to solve real-world problems in Rust.
 

@@ -10,7 +10,7 @@ to introduce a new modular programming paradigm for Rust.
 
 <!-- truncate -->
 
-# A Quick Overview of Context-Generic Programming
+## A Quick Overview of Context-Generic Programming
 
 As its name implied, CGP makes it possible to write _context-generic_ programs that can work
 with any context type in Rust, i.e. the type that we typically refer to as `Self`.
@@ -42,7 +42,7 @@ If you are new here, you should check out the [CGP homepage](/) for a proper int
 Instead of rehearsing the full introduction, this blog post will cover some background about the
 project, the current status, and what to expect from here on.
 
-# How It All Started
+## How It All Started
 
 My name is [Soares Chen](https://maybevoid.com/soareschen), a.k.a. [MaybeVoid](https://maybevoid.com),
 and I am the creator of CGP. Even though this project is still new to the public, it has been ongoing
@@ -77,7 +77,7 @@ Compared to my previous attempts, I am hopeful that Rust serves as a sweetspot t
 programming language for modular design patterns, thanks to its advanced type systems as well as
 its rapidly expanding ecosystem.
 
-# Current Status
+## Current Status
 
 This blog post serves as an early preview announcement, and kickstarts many efforts that are
 still needed before we can be ready for a full release.
@@ -97,13 +97,13 @@ Depending on my time availability, it may take a year or more before I am ready 
 of CGP. But in the meanwhile, I will start posting regular updates on my development process,
 which may be of interest for some of you reading this blog post.
 
-# Plans for 2025
+## Plans for 2025
 
 In the upcoming new year 2025, I have many plans laid out to prepare for an official release of
 CGP. This section is less about making promises, but more about making you aware of how much work
 is still needed before you should consider using CGP seriously.
 
-## Finish the CGP Book
+### Finish the CGP Book
 
 The most important goal I have for CGP is to finish writing my first book,
 [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev).
@@ -112,7 +112,7 @@ My hope is that the book will help reduce the bus factor of CGP, so that even if
 unavailable to continue working on CGP, someone could still use the book as a basis
 to continue the work.
 
-## Improve Error Diagnostics
+### Improve Error Diagnostics
 
 A critical blocker that makes it challenging for me to teach about CGP is the poor error
 reporting returned from the Rust compiler, when there is any error arise from unsatisfied constraints.
@@ -137,7 +137,7 @@ The progress on improving the error messages is tracked on CGP's GitHub issue
 the forked compiler is documented in the
 [CGP book](https://patterns.contextgeneric.dev/debugging-techniques.html#improving-the-compiler-error-message).
 
-## Document the `cgp` Crate
+### Document the `cgp` Crate
 
 I have done quite a bit of writing about CGP on the project website and the book. But if you
 look at the Cargo documentation for the [`cgp` crate](https://docs.rs/cgp/), you would see
@@ -151,7 +151,7 @@ about relevant concepts.
 That said, I do plan to provide at least minimal documentation inside the `cgp` crate,
 to help onboarding programmers to projects that use the `cgp` crate.
 
-## Public Speaking
+### Public Speaking
 
 An effective way to spread the awareness of CGP is for me to speak about it at Rust conferences.
 I plan to apply to speak at major Rust conferences located in Europe, and hopefully I will get
@@ -163,7 +163,7 @@ by organizing online meetups. However, this would subject to my time availabilit
 from the community, as producing tech videos is not exactly my area of expertise.
 But in case if you are interested in such content, do let me know what you would like to see produced.
 
-## Improve the CGP Macros
+### Improve the CGP Macros
 
 The proc macros provided by the `cgp` crate were written in haste as quick proof of concepts
 to simplify the syntax for writing CGP programs. As a result, they are not that high in quality,
@@ -179,7 +179,7 @@ When I have the time, I plan to learn more about how to properly implement the p
 and implement them correctly with proper test coverage. This is important to provide good
 user experience, as developers will use the macros all the time when programming in CGP.
 
-## Developer Tooling
+### Developer Tooling
 
 For CGP to gain mainstream adoption, it is not sufficient to just make CGP powerful enough
 to solve difficult programming problems. In addition to that, we also need to make CGP
@@ -202,7 +202,7 @@ the cognitive burden of wiring CGP components can be automated by the IDE. But i
 much longer than one year for me to implement such features. In the meanwhile, I will probably
 explore on simpler options, such as building simple CLI tools for CGP.
 
-## Implement Advanced CGP features
+### Implement Advanced CGP features
 
 Aside from improving CGP macros, there are a few more advanced core constructs that I need to
 implement in the `cgp` crate to enable CGP to solve more use cases.
@@ -217,7 +217,7 @@ In case if you have interest in topics such as row polymorphism, datatype-generi
 and category theory, you might be interested to follow my progress on how I make use of these
 advanced concepts in CGP.
 
-## More Documentation
+### More Documentation
 
 It would be a big milestone if I am able to finish the first CGP book and document the `cgp`
 crate by the end of 2025. But I also hope to write more documentation in other forms, to
@@ -241,10 +241,10 @@ problem that you think CGP may help solving, I would love to hear more about it.
 This can help inform me what kind of topics is popular, and allows me to better
 prepared to produce content for those topics.
 
-# How You Can Help
+## How You Can Help
 
 If you have read till the end of this blog post, thank you for taking your time!
-If you are interested in CGP, the project homepage [lists many ways](/#contribution)
+If you are interested in CGP, the project homepage [lists many ways](/docs/contribute)
 you can help me continue my development on CGP.
 I look forward to see you again in the future updates for CGP!
 

@@ -49,7 +49,7 @@ As of 2025, it is important to note that CGP remains in its **formative, early s
 
 Consequently, embracing CGP for your mission-critical, serious projects comes with inherent challenges, and you should be advised to proceed **at your own discretion and risk**. The primary risk you face is not strictly technical, but rather stems from the current limited support available when you inevitably encounter difficulties while learning or attempting to apply CGP in production.
 
-At this pioneering stage, CGP is an ideal fit for [**early adopters and enthusiastic potential contributors**](/contribute/)  who are eager to experiment with the paradigm and actively help to shape its powerful future.
+At this pioneering stage, CGP is an ideal fit for [**early adopters and enthusiastic potential contributors**](/docs/contribute/)  who are eager to experiment with the paradigm and actively help to shape its powerful future.
 
 ---
 
@@ -59,7 +59,7 @@ Even though the CGP project is officially still less than one year old, some of 
 
 ## Blog Posts
 
-The most accurate and up-to-date resources concerning CGP are currently available in the form of our [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.6.2 release onward**](/blog/v0-6-2-release/)  will give you a significantly more concise and modern explanation of what CGP is all about.
+The most accurate and up-to-date resources concerning CGP are currently available in the form of our [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.6.2 release onward**](/blog/v0-6-1-release/)  will give you a significantly more concise and modern explanation of what CGP is all about.
 
 ## Hello World Tutorial
 
@@ -73,4 +73,4 @@ Please note that this book has not been updated for a while, and you might consi
 
 ## Resources
 
-Make sure to check out the dedicated [Resources](/resources) page, which contains more supplementary materials and various learning tools to help you get up to speed with CGP.
+Make sure to check out the dedicated [Resources](/docs/resources) page, which contains more supplementary materials and various learning tools to help you get up to speed with CGP.

@@ -23,12 +23,12 @@ For readers coming from more advanced programming languages, this development ef
 
 In addition, CGP v0.4.2 introduces support for safe **upcasting and downcasting between enums** that share a common subset of variants. This provides a foundation for writing extensible and evolvable APIs that remain compatible across different layers of abstraction or across independently maintained modules.
 
-## Discussion
+### Discussion
 
 Discuss on [Reddit](https://www.reddit.com/r/rust/comments/1ltu9nl/programming_extensible_data_types_in_rust_with/), [Lobsters](https://lobste.rs/s/piugxk/programming_extensible_data_types_rust), [Hacker News](https://news.ycombinator.com/item?id=44497815), [GitHub](https://github.com/orgs/contextgeneric/discussions/12), or [Discord](https://discord.gg/Hgk3rCw6pQ).
 
 
-# Series Overview
+## Series Overview
 
 This article is the first in a five-part series exploring the examples and implementation of extensible data types in CGP. Below is an overview of what each part covers:
 
@@ -40,9 +40,9 @@ This article is the first in a five-part series exploring the examples and imple
 
 [**Part 4: Implementing Extensible Variants**](/blog/extensible-datatypes-part-4) – This part mirrors Part 3, but for extensible variants. We examine how extensible variants are implemented, and compare the differences and similarities between extensible records and variants.
 
-# Feature Highlighs
+## Feature Highlighs
 
-## Safe Enum Upcasting
+### Safe Enum Upcasting
 
 Let’s begin by looking at how CGP enables safe upcasting between enums. Imagine you have the following enum definition called `Shape`:
 
@@ -77,7 +77,7 @@ This operation works by leveraging the derived CGP traits `HasFields`, `ExtractF
 
 A particularly powerful aspect of this design is that the two enums do not need to know about each other. They can be defined in entirely separate crates, and the trait derivations are completely general. You don’t need to define any enum-specific conversion traits. This makes it possible to build libraries of reusable variant groups and compose them freely in application code.
 
-## Safe Enum Downcasting
+### Safe Enum Downcasting
 
 In the reverse direction, CGP also supports *safe downcasting* from a larger enum to a smaller one that contains only a subset of its variants. Using the same `Shape` and `ShapePlus` enums, the following example demonstrates how this works:
 
@@ -94,7 +94,7 @@ Like `upcast`, this `downcast` method relies on the same set of derived CGP trai
 
 In the example above, we use `.ok()` to simplify the comparison, but in practice, the `Err` case contains useful remainder value that can be further examined or downcasted again.
 
-### Safe Exhaustive Downcasting
+#### Safe Exhaustive Downcasting
 
 One of the unique capabilities CGP provides is the ability to *exhaustively downcast* an enum, step by step, until all possible variants are handled. This pattern becomes especially useful when working with generic enums in extensible APIs, where the concrete enum definition is unknown or evolving.
 
@@ -130,7 +130,7 @@ In this example, we first attempt to downcast into `Shape`. If that fails, the r
 
 At first glance, this approach may appear more complex than simply matching against the original enum directly. However, its true strength lies in its **generality**. With CGP’s downcasting mechanism, you can pattern match over generic enum types without knowing their full structure in advance. This enables highly extensible and type-safe designs where variants can be added or removed modularly, without breaking existing logic.
 
-## Safe Struct Building
+### Safe Struct Building
 
 Just as CGP enables safe, composable deconstruction of enums, it also brings **extensible construction** to structs. This is achieved through a form of structural merging, where smaller structs can be incrementally combined into larger ones. The result is a flexible and modular approach to building complex data types, well-suited for highly decoupled or plugin-style architectures.
 
@@ -184,7 +184,7 @@ Moreover, this system is completely decoupled from specific struct definitions. 
 
 While this example may seem trivial — after all, constructing `Employee` directly is straightforward — it serves as a foundation for much more powerful generic abstractions. As you’ll see in the upcoming sections, the builder pattern opens the door to writing highly reusable, type-safe logic that can construct **generic types** without ever referencing their concrete types. This makes it possible to write libraries or plugins that contribute data to a shared structure without tight coupling or dependency on a central type definition.
 
-# Motivation for Extensible Builders
+## Motivation for Extensible Builders
 
 To understand how extensible records enable modular builders, let’s explore a practical use case: constructing an application context from configuration inputs.
 
@@ -216,7 +216,7 @@ impl App {
 
 This constructor is asynchronous and returns a `Result<App, Error>`. It creates a default `Client` using `reqwest`, connects to the database using the provided path, and assembles both into an `App` struct.
 
-## Adding AI Capabilities to `App`
+### Adding AI Capabilities to `App`
 
 At this point, the constructor looks simple. But in a real-world setting, it’s rarely that clean. Suppose the product team now wants to integrate AI capabilities into the application. To support this, we decide to use an LLM service like ChatGPT and extend the `App` struct accordingly:
 
@@ -254,7 +254,7 @@ impl App {
 
 Here, we initialize the OpenAI client using environment variables, and then build an agent configured for the `gpt-4o` model. These values are added alongside the existing HTTP and database clients.
 
-## From Simple to Complex
+### From Simple to Complex
 
 Even with these additions, our constructor remains relatively manageable. However, as often happens in production, the requirements grow—and so does the configuration logic. Let’s imagine a more realistic version of this `new` function:
 
@@ -299,7 +299,7 @@ This constructor now handles *five* separate input parameters, each contributing
 
 While none of these steps are especially difficult on their own, the function is starting to grow in complexity. It’s also becoming more **fragile**, as all responsibilities are bundled into one place. Every change to a single subsystem — whether it’s database, HTTP, or AI — requires editing the same constructor.
 
-## Why Modular Constructor Matters
+### Why Modular Constructor Matters
 
 As we've seen in the previous example, even modest configurability can cause a constructor's complexity to grow rapidly. With just a few additional fields or customization options, the function becomes harder to maintain, test, and reason about.
 
@@ -307,7 +307,7 @@ In many cases, there's no single “correct” way to construct an application c
 
 To manage this complexity, Rust developers often reach for the [*builder pattern*](https://rust-unofficial.github.io/patterns/patterns/creational/builder.html). This involves creating a separate builder struct, typically with optional or defaultable fields and fluent setter methods. The builder is used to gradually assemble values before producing the final struct.
 
-## Challenges for Modular Builders
+### Challenges for Modular Builders
 
 The traditional builder pattern works, but it comes with serious limitations — especially when extensibility and modularity are important.
 
@@ -319,7 +319,7 @@ The root cause of these problems is that struct construction in Rust typically r
 
 This rigidity makes it difficult to define reusable, composable building blocks—especially in large or evolving codebases.
 
-## Modular Builders with CGP
+### Modular Builders with CGP
 
 Earlier versions of CGP also ran into these limitations. When writing *context-generic* code, we wanted to construct structs in a way that didn’t require knowing their concrete types ahead of time. But because Rust structs require all field values to be present simultaneously at construction time, we couldn’t easily implement flexible or reusable context-generic constructors.
 
@@ -329,11 +329,11 @@ CGP now supports **modular, extensible struct builders** that can be composed fr
 
 This opens the door to a new style of constructor logic: one that is **modular**, **composable**, and **context-generic**. You can define builders for individual subsystems (e.g., database, HTTP client, AI agent), and combine them to build any compatible application context.
 
-# Extensible Builders
+## Extensible Builders
 
 In this section, we’ll revisit the constructor examples we’ve already seen — and show how to rewrite them using CGP’s new builder pattern to achieve clean, modular, and reusable construction logic. A full version of the example code covered in this section is available on our [GitHub repository](https://github.com/contextgeneric/cgp-examples/tree/main/builder)
 
-## Modular SQLite Builder
+### Modular SQLite Builder
 
 Let’s now explore how to implement modular construction of the `App` context using multiple CGP providers. We’ll start by defining a default SQLite builder provider using CGP's `Handler` component:
 
@@ -433,7 +433,7 @@ This example illustrates the key advantage of modular builders: the builder logi
 
 Thanks to this decoupling, we can easily swap in different builder providers depending on the needs of the environment — be it development, testing, or production — without rewriting the entire construction logic. This modularity makes CGP builders highly scalable and adaptable to real-world applications.
 
-## HTTP Client Builder
+### HTTP Client Builder
 
 Just as we modularized the construction of the SQLite client, we can also define a modular builder for an HTTP client using CGP. In this case, we will construct a custom `reqwest` client with specific configuration options. To keep the focus on advanced use cases, we will skip the simpler version and go directly to the more complex construction logic.
 
@@ -491,7 +491,7 @@ The `handle` method creates a new `reqwest::Client` using the client builder fro
 
 Although this example remains relatively simple, it illustrates how each field or component in a context can be modularly constructed using dedicated builder logic. Each builder is independently defined, type-safe, and reusable. If the way we configure our HTTP client changes — for example, if we want to support proxies or TLS settings — we can define a new provider that implements a different construction strategy, without needing to change any of the other components in our application context.
 
-## Combined SQLite and HTTP Client Builder
+### Combined SQLite and HTTP Client Builder
 
 Before we move on, it is important to emphasize that CGP does **not** require you to break down the construction logic of every component in your application context into separate builders. While the modular approach can offer more flexibility and reuse, you are entirely free to combine multiple construction tasks into a single provider if that better suits your needs.
 
@@ -535,7 +535,7 @@ That said, the choice of whether to combine or separate builders is **entirely u
 
 For the remainder of this article, we will continue to use the fully modular approach, breaking construction logic down into smaller, independent units. Our goal is to illustrate the full extent of flexibility and reusability that CGP enables. However, if you prefer a different organizational structure, you are free to structure your builders in whatever way best suits your project.
 
-## ChatGPT Client Builder
+### ChatGPT Client Builder
 
 Regardless of whether you prefer to split or combine the construction of components such as the SQLite and HTTP clients, there are many situations where it makes sense to separate construction logic into smaller, more focused units. For instance, you might want to offer two versions of your application — one standard version and one "smart" version that includes AI capabilities. In such cases, it is useful to define a separate builder provider for the ChatGPT client, so that AI-related logic can be included only when necessary.
 
@@ -595,7 +595,7 @@ pub struct OpenAiClient {
 
 By defining this logic in a standalone builder provider, we can easily opt in or out of ChatGPT support in our application context.
 
-## Builder Context
+### Builder Context
 
 Now that we have implemented builder providers for SQLite, HTTP, and ChatGPT clients, we can demonstrate how to combine them in a complete builder context that constructs the final `App` instance. Defining this context is surprisingly concise and requires only a few lines of code:
 
@@ -637,7 +637,7 @@ delegate_components! {
 
 This macro allows us to delegate the implementation of various components of the builder context. First, we configure error handling by using the `cgp-anyhow-error` library. The `UseAnyhowError` provider specifies that our abstract `Error` type will be instantiated to `anyhow::Error`, and the `RaiseAnyhowError` provider allows conversion from error types implementing `core::error::Error`, like `sqlx::Error` and `reqwest::Error`, into `anyhow::Error`.
 
-## Builder Dispatcher
+### Builder Dispatcher
 
 In the example above, we used a special **builder dispatcher** called `BuildAndMergeOutputs` to implement the `HandlerComponent`. This dispatcher allows us to construct the final `App` type by sequentially combining the outputs of multiple builder providers. We specify the target `App` type as the output of the build process, and then pass in a _type-level list_ of builder providers using the `Product!` macro. In this case, we used `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient`, all of which we implemented previously.
 
@@ -670,7 +670,7 @@ While the manual implementation of `BuildApp` is relatively easy to follow, it i
 
 Aside from this reduction in verbosity, the behavior remains conceptually the same as what is shown in the manual example.
 
-## Building the App
+### Building the App
 
 With the builder context defined, we can now construct the full `App` by simply instantiating the builder and calling its `handle` method:
 
@@ -701,13 +701,13 @@ Rather than writing custom constructor functions that take numerous arguments, w
 
 By embracing this modular builder approach, our code becomes not only more extensible, but also easier to read, test, and maintain.
 
-# More Builder Examples
+## More Builder Examples
 
 At this point, some readers may still be skeptical about the value of modularity offered by CGP builders. Since we’ve only shown a **single** application context and **one** corresponding builder context so far, it might not be obvious why we couldn’t just use a simple `new` constructor function like the one defined at the beginning.
 
 To truly demonstrate the power of modular builders, it’s helpful to explore how CGP makes it easy to define **multiple** contexts that are similar but have slight differences. However, if you're an **advanced reader** already familiar with the benefits of modular design, feel free to [**skip ahead**](#conclusion) to the conclusion.
 
-## Default Builder
+### Default Builder
 
 Earlier, we introduced default builders like `BuildDefaultSqliteClient`, which can construct an `App` with default configuration values. These defaults can be combined to define a minimal builder for `App`:
 
@@ -735,7 +735,7 @@ delegate_components! {
 
 In this context, the only required configuration is the `db_path`, simplifying the process of constructing an `App`, especially for use cases like unit testing or demos.
 
-## Postgres App
+### Postgres App
 
 Now suppose we want an enterprise version of the app that uses **Postgres** instead of SQLite. We can define a new `App` context that swaps in `PgPool`:
 
@@ -820,7 +820,7 @@ This example highlights a key advantage of CGP over traditional **feature flags*
 
 By enabling different configurations to exist side-by-side, CGP improves testability and reduces the likelihood of missing edge cases caused by untested feature combinations.
 
-## Anthropic App
+### Anthropic App
 
 Just as we swapped SQLite for Postgres earlier, we can also substitute the AI model used in the application — such as replacing ChatGPT with **Claude**. With CGP, this becomes straightforward: we simply define a new `AnthropicApp` that uses the Anthropic client and agent:
 
@@ -911,7 +911,7 @@ This example shows how effortlessly CGP supports variation and customization. Th
 
 In fact, the process becomes so systematic that it’s easy to imagine an AI tool like **Claude Code** automating the entire setup given the right prompt and documentation.
 
-## Anthropic and ChatGPT Builder
+### Anthropic and ChatGPT Builder
 
 It’s impressive that CGP lets us easily swap ChatGPT for Claude. But what’s even better is that we don’t have to choose at all — we can include **both** AI agents in the same application.
 
@@ -973,7 +973,7 @@ It’s also worth noting that the `llm_preamble` field is reused by both the Cla
 
 This kind of seamless reuse and composition is where CGP truly shines: giving you fine-grained control over how your application is assembled, while keeping your code modular and maintainable.
 
-## Multi-Context Builder
+### Multi-Context Builder
 
 Looking closely at the `AnthropicAndChatGptAppBuilder` that we previously defined, we can observe that it already includes all the necessary fields required to construct the Claude-only and ChatGPT-only applications as well. This means we can reuse the same builder to construct **all three** versions of our application contexts, simply by changing how the builder is wired.
 
@@ -1056,7 +1056,7 @@ This example highlights how CGP's DSL features are not limited to building full-
 
 In essence, we are still constructing a mini-DSL, albeit one composed of simple symbolic "statements" without complex language constructs. This approach not only brings expressive power to your builder logic, but also lays the groundwork for future extensions — such as richer abstract syntaxes — using the same techniques introduced by Hypershell.
 
-# Conclusion
+## Conclusion
 
 In this first installment, we explored how CGP v0.4.2 empowers Rust developers to construct application contexts using modular, extensible builders. You’ve seen how individual providers like `BuildSqliteClient`, `BuildHttpClient`, and `BuildOpenAiClient` can be composed to build complex types without tight coupling or boilerplate. We’ve also demonstrated how the same context can be reused across multiple application variants — from SQLite to Postgres, from ChatGPT to Claude — all through declarative builder composition.
 

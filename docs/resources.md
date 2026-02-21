@@ -13,7 +13,7 @@ This page lists some resources related to CGP. More resources will be added as t
 
 ## Tutorials
 
-- [Hello World Tutorial](/tutorials/hello) - A hello-world-style introduction to CGP.
+- [Hello World Tutorial](/docs/tutorials/hello) - A hello-world-style introduction to CGP.
 
 ## Books
 
