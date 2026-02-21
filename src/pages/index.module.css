@@ -27,6 +27,7 @@
   display: block;
   margin: 1em 0 auto 1.5rem;
   float: right;
+  width: 300px;
 }
 
 .heroTitleTextHtml {
@@ -119,8 +120,8 @@
 
 /* Responsive adjustments */
 @media screen and (max-width: 996px) {
-  .hero {
-    padding: 2rem 1rem;
+  .heroInner {
+    padding: 0.5rem 1rem;
   }
 
   .heroProjectTagline {
@@ -128,8 +129,9 @@
   }
 
   .heroLogo {
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    float: none;
+    margin: 0 auto;
   }
 
   .section {

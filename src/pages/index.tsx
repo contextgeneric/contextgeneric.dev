@@ -18,8 +18,6 @@ function HeroBanner() {
           alt="Context-Generic Programming"
           className={styles.heroLogo}
           src={useBaseUrl('/img/cgp-hero.png')}
-          width="300"
-          height="300"
         />
         <div className={styles.heroInner}>
           <Heading as="h1" className={styles.heroProjectTagline}>
