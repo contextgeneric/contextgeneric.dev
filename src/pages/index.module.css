@@ -12,9 +12,12 @@
 }
 
 .heroOuter {
+  display: flex;
+  align-items: center;
   margin: 0 auto;
   max-width: 1100px;
   padding: 0 0.5rem;
+  gap: 1.5rem;
 }
 
 .heroProjectTagline {
@@ -25,9 +28,10 @@
 
 .heroLogo {
   display: block;
-  margin: 1em 0 auto 1.5rem;
-  float: right;
+  margin: 0;
+  margin-left: auto;
   width: 300px;
+  flex-shrink: 0;
 }
 
 .heroTitleTextHtml {
@@ -128,9 +132,12 @@
     font-size: 2rem;
   }
 
+  .heroOuter {
+    display: block;
+  }
+
   .heroLogo {
     width: 200px;
-    float: none;
     margin: 0 auto;
   }
 
