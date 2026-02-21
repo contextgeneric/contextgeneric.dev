@@ -40,6 +40,7 @@ const config: Config = {
       '@docusaurus/preset-classic',
       {
         docs: {
+          showLastUpdateTime: true,
           sidebarPath: './sidebars.ts',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
@@ -47,6 +48,7 @@ const config: Config = {
             'https://github.com/contextgeneric/contextgeneric.dev/tree/main/',
         },
         blog: {
+          showLastUpdateTime: true,
           showReadingTime: true,
           feedOptions: {
             type: ['rss', 'atom'],
@@ -75,6 +77,14 @@ const config: Config = {
     image: 'img/cgp-logo.png',
     colorMode: {
       respectPrefersColorScheme: true,
+    },
+    announcementBar: {
+      id: 'announcement',
+      content:
+        '🎉 <a href="/blog/2026/02/21/new-website">CGP now have a new website!</a> 🎉',
+      backgroundColor: '#fcefe1',
+      textColor: '#5D0705',
+      isCloseable: true,
     },
     navbar: {
       title: 'Context-Generic Programming',

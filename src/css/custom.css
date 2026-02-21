@@ -22,6 +22,10 @@
   --ifm-link-color: #FCF7E9;
 }
 
+.theme-announcement-bar {
+  font-size: 1.2em;
+}
+
 [data-theme='light'] {
   --ifm-color-primary: #5D0705;
   --ifm-color-primary-dark: #4A0504;
