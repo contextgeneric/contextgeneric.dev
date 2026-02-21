@@ -4,8 +4,11 @@ sidebar_position: 1
 
 # CGP Skills
 
+## Using Agent Skills to Learn CGP
 
+This section provides [agent skills](https://agentskills.io/) for [Context-Generic Programming (CGP)](https://contextgeneric.dev/) in Rust. These skills are designed to teach LLM-based coding agents about CGP concepts and best practices, enabling them to provide better assistance when writing CGP code.
 
+You can use the skills from the [cgp-skills repository](https://github.com/contextgeneric/cgp-skills) to enhance your LLM coding assistant with comprehensive knowledge of CGP. The skill content is provided inline throughout the rest of this document for your reference, allowing you to understand the concepts that are taught to the LLM agent.
 
 ---
 
