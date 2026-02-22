@@ -6,176 +6,165 @@ sidebar_position: 2
 
 We will demonstrate various concepts of CGP with a simple hello world example.
 
-## Greeter Component
+## Using the `cgp` crate
 
-To begin, we import the `cgp` crate and define a greeter component as follows:
+To get started, first include the latest version of [`cgp` crate](https://crates.io/crates/cgp) as your dependency in `Cargo.toml`:
+
+```toml title="Cargo.toml"
+cgp = "0.6.2"
+```
+
+## The CGP Prelude
+
+To use CGP features, we would first need to import the CGP prelude in the Rust module that uses CGP features:
 
 ```rust
 use cgp::prelude::*;
+```
 
-#[cgp_component(Greeter)]
-pub trait CanGreet {
-    fn greet(&self);
+With the setup done, we are now ready to write context-generic code.
+
+## CGP Functions
+
+The simplest CGP feature that you can use is to write a context-generic method, such as the `greet` function as follows:
+
+```rust title="greet.rs"
+#[cgp_fn]
+pub fn greet(&self, #[implicit] name: &str) {
+    println!("Hello, {name}!");
 }
 ```
 
-The `cgp` crate provides common constructs through its `prelude` module, which should be imported in most cases. The first CGP construct we use here is the `#[cgp_component]` macro. This macro generates additional CGP constructs for the `Greeter` trait.
+The `greet` function looks almost the same as how we would write it in plain Rust, except the following differences:
 
-The target of this macro, `CanGreet`, is a **consumer trait** used similarly to regular Rust traits. However, unlike traditional traits, we won't usually implement anything directly on this trait. The argument to the macro, `Greeter`, designates a **provider trait** for the component. The `Greeter` trait is used to define the actual implementations for the greeter component. It has a similar structure to `CanGreet`, but with the implicit `Self` type replaced by a generic `Context` type.
+- We annotate the function with `#[cgp_fn]` to turn it into a context-generic *method* that would work with multiple context types.
+- We include `&self` so that it can be used to access other context-generic methods for more complex examples.
+- The `name` argument is annotated with an `#[implicit]` attribute. Meaning that it is an **implicit argument** that is automatically retrieved from the `Self` context.
 
-The macro also generates an empty `GreeterComponent` struct, which is used as the **name** of the greeter component which can be used for the component wiring later on.
+With the CGP function defined, let's define a concrete context and call `greet` on it.
 
-## Name Getter
+## `Person` Context
 
-Now, we will define an **auto getter trait** to retrieve the name value from a context:
+The simplest way we can call a CGP function is to define a context that contains all the required implicit arguments, such as the `Person` struct below:
 
-```rust
-#[cgp_auto_getter]
-pub trait HasName {
-    fn name(&self) -> &str;
-}
-```
-
-The `HasName` trait contains the getter method `name`, which returns a `&str` string value.
-
-The `#[cgp_auto_getter]` attribute macro applied to `HasName` automatically generates a blanket implementation. This enables any context containing a field named `name` of type `String` to automatically implement the `HasName` trait, if it also derives the `HasField` trait.
-
-## Hello Greeter
-
-The traits `CanGreet` and `HasName` can be defined separately across different modules or crates. However, we can import them into a single location and then implement a `Greeter` provider that uses `HasName` in its implementation:
-
-```rust
-#[cgp_impl(new GreetHello)]
-impl<Context> Greeter for Context
-where
-    Context: HasName,
-{
-    fn greet(&self) {
-        println!("Hello, {}!", self.name());
-    }
-}
-```
-
-We use `#[cgp_impl]` to define a new provider, called `GreetHello`, which implements the `Greeter` provider trait. The implementation is written to be **generic** over any `Context` type that implements `HasName`.
-
-Normally, it would not be possible to write a blanket implementation like this in vanilla Rust, due to it violating the **overlapping** and **orphan** rules of Rust traits. However, the use of `#[cgp_impl]` and the `Greeter` provider trait allows us to **bypass** this restriction.
-
-Behind the scene, the macro generates an empty struct named `GreetHello`, which is used as an **identifier** of the provider that implements the `Greeter` trait.
-
-Notice that the constraint `HasName` is specified only in the `impl` block, *not* in the trait bounds for `CanGreet` or `Greeter`. This design allows us to use **dependency injection** through Rust’s trait system.
-
-## Person Context
-
-Next, we define a concrete context, `Person`, and wire it up to use `GreetHello` for implementing CanGreet:
-
-```rust
+```rust title="person.rs"
 #[derive(HasField)]
 pub struct Person {
     pub name: String,
 }
 ```
 
-The `Person` context is defined as a struct containing a `name` field of type `String`.
+To enable CGP functions to access the fields in a context, we use `#[derive(HasField)]` to derive the necessary CGP traits that empower generic field access machinery.
 
-We use the `#[derive(HasField)]` macro to automatically derive `HasField` implementations for every field in `Person`. This works together with the blanket implementation generated by `#[cgp_auto_getter]` for `HasName`, allowing `HasName` to be **automatically implemented** for `Person` without requiring any additional code.
+With the `Person` struct defined, we can simply call the `greet` method on it with no further action required:
 
-## Delegate Components
+```rust title="main.rs"
+let person = Person {
+    name: "Alice".to_owned(),
+};
 
-Next, we want to define some wirings to link up the `GreetHello` that we defined earlier, so that we can use it on the `Person` context. This is done by using the `delegate_components!` macro as follows:
+person.greet();
+```
+
+And that's it! There is no need for us to manually pass the `name` field to `greet`. CGP can automatically extract the corresponding field from the `Person` struct and pass it `greet`.
+
+## `PersonWithAge` Context
+
+With an example as simple as hello world, it might not be clear why we would want to define `greet` as a context-generic method, instead of a concrete method on `Person`.
+
+One way to think of it is that the `greet` method only needs to access the `name` field in `Person`. But an actual `Person` struct for real world applications may contain many other fields. Furthermore, what fields should a `Person` struct has depends on the kind of applications being built.
+
+Since `greet` is defined as a context-generic method, it means that the method can work *generically* across any *context* type that satisfies the requirements. With this, we effectively *decouples* the implementation of `greet` from the `Person` struct. This allows the function to be reused across different person contexts, such as the `PersonWithAge` struct below:
 
 ```rust
-delegate_components! {
-    Person {
-        GreeterComponent:
-            GreetHello,
-    }
+#[derive(HasField)]
+pub struct PersonWithAge {
+    pub name: String,
+    pub age: u8,
 }
 ```
 
-We use the `delegate_components!` macro to perform the wiring of `Person` context with the chosen providers for each CGP component that we want to use with `Person`. For each entry in `delegate_components!`, we use the component name type as the key, and the chosen provider as the value.
+Both the original `Person` struct and the new `PersonWithAge` struct can co-exist. And both structs can call `greet` easily:
 
-The mapping `GreeterComponent: GreetHello` indicates that we want to use `GreetHello` as the implementation of the `CanGreet` consumer trait.
+```rust title="main.rs"
+let alice = Person {
+    name: "Alice".to_owned(),
+};
 
-## Calling Greet
+alice.greet();
 
-Now that the wiring is set up, we can construct a `Person` instance and call `greet` on it:
 
-```rust
-fn main() {
-    let person = Person {
-        name: "Alice".into(),
-    };
+let bob = PersonWithAge {
+    name: "Bob".to_owned(),
+    age: 32,
+};
 
-    // prints "Hello, Alice!"
-    person.greet();
-}
+bob.greet();
 ```
 
-This is made possible by a series of blanket implementations generated by CGP. Here's how the magic works:
+The benefits of decoupling methods from contexts will become clearer as we explore more complex examples in further tutorials and documentation.
 
-- We can call `greet` because `CanGreet` is implemented for `Person`.
-- `Person` contains the `delegate_components!` mapping that uses `GreetHello` as the provider for `GreeterComponent`.
-- `GreetHello` implements `Greeter` for `Person`.
-- `Person` implements `HasName` via the `HasField` implementation.
+## Behind the scenes
 
-There’s quite a bit of indirection happening behind the scenes!
+The hello world example here demonstrates how CGP unlocks new capabilities for us to easily write new forms of context-generic constructs in Rust. But you might wonder how the underlying machinery works, and whether CGP employs some magic that requires unsafe code or runtime overhead.
 
-## Conclusion
-
-By the end of this tutorial, you should have a high-level understanding of how programming in CGP works. There's much more to explore regarding how CGP handles the wiring behind the scenes, as well as the many features and capabilities CGP offers. To dive deeper, check out our book [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
-
-## Full Example Code
-
-Below, we show the full hello world example code, so that you can walk through them again without the text.
-
+A full explanation of how CGP works is beyond this tutorial, but you can think of the `greet` function being roughly equivalent to the following plain Rust definition:
 
 ```rust
-use cgp::prelude::*; // Import all CGP constructs
-
-// Derive CGP provider traits and blanket implementations
-#[cgp_component(Greeter)]
-pub trait CanGreet // Name of the consumer trait
-{
-    fn greet(&self);
-}
-
-// A getter trait representing a dependency for `name` value
-#[cgp_auto_getter] // Derive blanket implementation
 pub trait HasName {
     fn name(&self) -> &str;
 }
 
-// Implement `Greeter` that is generic over `Context`
-#[cgp_impl(new GreetHello)]
-impl<Context> Greeter for Context
+pub trait Greet {
+    fn greet(&self);
+}
+
+impl<T> Greet for T
 where
-    Context: HasName, // Inject the `name` dependency from `Context`
+    T: HasName,
 {
     fn greet(&self) {
         println!("Hello, {}!", self.name());
     }
 }
+```
 
-// A concrete context that uses CGP components
-#[derive(HasField)] // Deriving `HasField` automatically implements `HasName`
+The plain-Rust version of the code look a lot more verbose, but it can be understood with some straightforward explanation: `HasName` is a *getter trait* that would be implemented by a context to get the `name` value. `Greet` is defined as a trait with a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) that works with any context type `T` that implements `HasName`.
+
+When we use `#[derive(HasField)]` on a context like `Person`, we are effectively automatically implementing the `HasName` trait:
+
+```rust
 pub struct Person {
-    pub name: String,
+    pub name: String;
 }
 
-// Compile-time wiring of CGP components
-delegate_components! {
-    Person {
-        GreeterComponent: GreetHello, // Use `GreetHello` to provide `Greeter`
+impl HasName for Person {
+    fn name(&self) -> &str {
+        &self.name
     }
 }
-
-fn main() {
-    let person = Person {
-        name: "Alice".into(),
-    };
-
-    // `CanGreet` is automatically implemented for `Person`
-    person.greet();
-}
-
 ```
+
+There are more advanced machinery that are involved with the desugared CGP code. But the generated code are *semantically* roughly equals to the manually implemented plain Rust constructs above.
+
+### Zero Cost Abstractions
+
+The plain Rust expansion demonstrates a few key properties of CGP. Firstly, CGP makes heavy use of the existing machinery provided by Rust's trait system to implement context-generic abstractions. It is also worth understanding that CGP macros like `#[cgp_fn]` and `#[derive(HasField)]` mainly act as **syntactic sugar** that perform simple desugaring of CGP code into plain Rust constructs like we shown above.
+
+This means that there is **no hidden logic at both compile time and runtime** used by CGP to resolve dependencies like `name`. The main complexity of CGP lies in how it introduces new language syntax and leverages Rust's trait system to enable new language features. But you don't need to understand new machinery beyond the trait system to understand how CGP works.
+
+Furthermore, implicit arguments like `#[implicit] name: &str` are automatically desugared by CGP to use getter traits similar to `HasName`. And contexts like `Person` implement `HasName` by simply returning a *reference* to the field value. This means that implicit argument access are **zero cost** and are as cheap as direct field access from a concrete context.
+
+The important takeaway from this is that CGP follows the same **zero cost abstraction** philosophy of Rust, and enables us to write highly modular Rust programs without any runtime overhead.
+
+### Generalized Getter Fields
+
+When we walk through the desugared Rust code, you might wonder: since `Greet` requires the context to implement `HasName`, does this means that a context type like `Person` must know about it beforehand and explicitly implement `HasName` before it can use `Greet`?
+
+The answer is yes for the simplified desugared code that we have shown earlier. But CGP actually employs a more generalized trait called `HasField` that can work generally for all possible structs. This means that there is **no need** to specifically generate a `HasName` trait to be used by `Greet`, or implemented by `Person`.
+
+The full explanation of how `HasField` works is beyond the scope of this tutorial. But the general idea is that an instance of `HasField` is implemented for every field inside a struct that uses `#[derive(HasField)]`. This is then used by traits like `Greet` to access a specific field by its field name.
+
+In practice, this means that both `Greet` and `Person` can be defined in totally different crate without knowing each other. They can then be imported inside a third crate, and `Greet` would still be automatically implemented for `Person`.
+
+## Conclusion
