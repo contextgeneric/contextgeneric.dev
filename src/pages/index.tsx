@@ -75,20 +75,27 @@ function CodeExampleSection() {
           <div className="col col--6">
             <div className={styles.codeExample}>
               <CodeBlock language="rust">
-{`#[cgp_component(HashProvider)]
+{
+`#[cgp_component(HashProvider)]
 pub trait Hash { ... }
 
+// Named overlappable implementation with provider trait
 #[cgp_impl(HashWithDisplay)]
 impl HashProvider
 where
     Self: Display,
 { ... }
 
+pub struct MyData { ... }
+impl Display for MyData { ... }
+
 delegate_components! {
     MyData {
+        // Implements Hash automatically
         HashProviderComponent: HashWithDisplay,
     }
-}`}
+}`
+}
               </CodeBlock>
             </div>
           </div>

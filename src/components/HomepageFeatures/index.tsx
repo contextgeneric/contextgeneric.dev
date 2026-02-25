@@ -12,7 +12,7 @@ type FeatureItem = {
 const FeatureList: FeatureItem[] = [
   {
     title: 'Modular Component System',
-    image: '/img/features/modular-component-system.png',
+    image: '/img/features/modular-component-system-480p.png',
     description: (
       <>
         Decouple interface definitions from implementations using provider traits.
@@ -22,7 +22,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Highly Expressive Macros',
-    image: '/img/features/highly-expressive-macros.png',
+    image: '/img/features/highly-expressive-macros-480p.png',
     description: (
       <>
         Write abstract programs generic over contexts without managing long lists
@@ -32,7 +32,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Type-Safe Composition',
-    image: '/img/features/type-safe-composition.png',
+    image: '/img/features/type-safe-composition-480p.png',
     description: (
       <>
         All component wiring is verified at compile time. Missing dependencies are
@@ -42,7 +42,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'No-Std Friendly',
-    image: '/img/features/no-std-friendly.png',
+    image: '/img/features/no-std-friendly-480p.png',
     description: (
       <>
         Build fully abstract programs without concrete dependencies. Deploy to
@@ -52,7 +52,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Zero-Cost Abstraction',
-    image: '/img/features/zero-cost-abstraction.png',
+    image: '/img/features/zero-cost-abstraction-480p.png',
     description: (
       <>
         All CGP operations happen at compile time using Rust's type system.
@@ -62,7 +62,7 @@ const FeatureList: FeatureItem[] = [
   },
   {
     title: 'Bypass Coherence Rules',
-    image: '/img/features/bypass-coherence-rules.png',
+    image: '/img/features/bypass-coherence-rules-480p.png',
     description: (
       <>
         Enable overlapping and orphan trait implementations without restriction.
