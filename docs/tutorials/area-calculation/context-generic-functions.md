@@ -143,7 +143,11 @@ This way, `print_rectangle_area` would automatically implemented on any context 
 
 ## How it works
 
-*This section explores the internals of `#[cgp_fn]` and is supplementary to the tutorial. If you are comfortable with what you have built so far and would like to continue to the next concepts, feel free to skip ahead — a detailed understanding of these mechanics is not required to use CGP functions effectively.*
+:::note
+
+This section explores the internals of `#[cgp_fn]` and is supplementary to the tutorial. If you are comfortable with what you have built so far and would like to continue to the next concepts, feel free to skip ahead — a detailed understanding of these mechanics is not required to use CGP functions effectively.
+
+:::
 
 Now that we have gotten a taste of the power unlocked by `#[cgp_fn]`, let's take a sneak peek of how it works under the hood. Behind the scene, a CGP function like `rectangle_area` is roughly desugared to the following plain Rust code:
 
@@ -272,129 +276,3 @@ Compared to `rectangle_area`, the desugared code for `scaled_rectangle_area` con
 It is also worth noting that trait bounds like `RectangleField` only appear in the `impl` block but not on the trait definition. This implies that they are *impl-side dependencies* that hide the dependencies behind a trait impl without revealing it in the trait interface.
 
 Aside from that, `ScaledRectangleArea` also depends on field access traits that are equivalent to `ScaleFactorField` to retrieve the `scale_factor` field from the context. In actual, it also uses `HasField` to retrieve the `scale_factor` field value, and there is no extra getter trait generated.
-
-## Using CGP functions with Rust traits
-
-Now that we have understood how to write context-generic functions with `#[cgp_fn]`, let's look at some more advanced use cases.
-
-Suppose that in addition to `rectangle_area`, we also want to define a context-generic `circle_area` function using `#[cgp_fn]`. We can easily write it as follows:
-
-```rust
-use core::f64::consts::PI;
-
-#[cgp_fn]
-pub fn circle_area(&self, #[implicit] radius: f64) -> f64 {
-    PI * radius * radius
-}
-```
-
-But suppose that we also want to implement a *scaled* version of `circle_area`, we now have to implement another `scaled_circle_area` function as follows:
-
-```rust
-#[cgp_fn]
-#[uses(CircleArea)]
-pub fn scaled_circle_area(&self, #[implicit] scale_factor: f64) -> f64 {
-    self.circle_area() * scale_factor * scale_factor
-}
-```
-
-We can see that both `scaled_circle_area` and `scaled_rectangle_area` share the same structure. The only difference is that `scaled_circle_area` depends on `CircleArea`, but `scaled_rectangle_area` depends on `RectangleArea`.
-
-This repetition of scaled area computation can become tedious if there are many more shapes that we want to support in our application. Ideally, we would like to be able to define an area calculation trait as the common interface to calculate the area of all shapes, such as the following `CanCalculateArea` trait:
-
-```rust
-pub trait CanCalculateArea {
-    fn area(&self) -> f64;
-}
-```
-
-Now we can try to implement the `CanCalculateArea` trait on our contexts. For example, suppose that we have the following contexts defined:
-
-```rust
-#[derive(HasField)]
-pub struct PlainRectangle {
-    pub width: f64,
-    pub height: f64,
-}
-
-#[derive(HasField)]
-pub struct ScaledRectangle {
-    pub width: f64,
-    pub height: f64,
-    pub scale_factor: f64,
-}
-
-#[derive(HasField)]
-pub struct ScaledRectangleIn2dSpace {
-    pub width: f64,
-    pub height: f64,
-    pub scale_factor: f64,
-    pub pos_x: f64,
-    pub pos_y: f64,
-}
-
-#[derive(HasField)]
-pub struct PlainCircle {
-    pub radius: f64,
-}
-
-#[derive(HasField)]
-pub struct ScaledCircle {
-    pub radius: f64,
-    pub scale_factor: f64,
-}
-```
-
-We can implement `CanCalculateArea` for each context as follows:
-
-```rust
-impl CanCalculateArea for PlainRectangle {
-    fn area(&self) -> f64 {
-        self.rectangle_area()
-    }
-}
-
-impl CanCalculateArea for ScaledRectangle {
-    fn area(&self) -> f64 {
-        self.rectangle_area()
-    }
-}
-
-impl CanCalculateArea for ScaledRectangleIn2dSpace {
-    fn area(&self) -> f64 {
-        self.rectangle_area()
-    }
-}
-
-impl CanCalculateArea for PlainCircle {
-    fn area(&self) -> f64 {
-        self.circle_area()
-    }
-}
-
-impl CanCalculateArea for ScaledCircle {
-    fn area(&self) -> f64 {
-        self.circle_area()
-    }
-}
-```
-
-There are quite a lot of boilerplate implementation that we need to make! If we keep multiple rectangle contexts in our application, like `PlainRectangle`, `ScaledRectangle`, and `ScaledRectangleIn2dSpace`, then we need to implement `CanCalculateArea` for all of them. But fortunately, the existing CGP functions like `rectangle_area` and `circle_area` help us simplify the the implementation body of `CanCalculateArea`, as we only need to forward the call.
-
-Next, let's look at how we can define a unified `scaled_area` CGP function:
-
-```rust
-#[cgp_fn]
-#[uses(CanCalculateArea)]
-pub fn scaled_area(&self, #[implicit] scale_factor: f64) -> f64 {
-    self.area() * scale_factor * scale_factor
-}
-```
-
-Now we can call `scaled_area` on any context that contains a `scale_factor` field, *and* also implements `CanCalculateArea`. That is, we no longer need separate scaled area calculation functions for rectangles and circles!
-
-## Summary
-
-In this tutorial, we introduced `#[cgp_fn]` and defined several context-generic functions: `rectangle_area`, `scaled_rectangle_area`, `circle_area`, and `scaled_area`. We saw how `#[implicit]` arguments are automatically extracted from any conforming context, and how `#[uses]` lets one CGP function call another without threading dependencies manually. We also expanded the example to cover multiple shape types and introduced `CanCalculateArea` as a unified interface — though implementing it for each context still requires a separate `impl` block.
-
-In the next tutorial, [Configurable Static Dispatch](static-dispatch), we will see how CGP’s component system eliminates this boilerplate. Instead of writing explicit trait implementations for every context, we will use `#[cgp_component]` and `delegate_components!` to configure the wiring between contexts and providers in a concise, table-driven way.

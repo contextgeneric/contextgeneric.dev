@@ -2,11 +2,125 @@
 sidebar_position: 2
 ---
 
-# Configurable Static Dispatch
+## Using CGP functions with Rust traits
 
-In the previous part of the tutorial, we grew our set of context-generic functions to cover both rectangle and circle shapes, and we introduced `CanCalculateArea` as a unified trait for computing the area of any shape. However, making `CanCalculateArea` work on our shape contexts required a separate `impl` block for each one — a boilerplate cost that grows with every new context we add.
+Now that we have understood how to write context-generic functions with `#[cgp_fn]`, let's look at some more advanced use cases.
 
-In this tutorial, we will eliminate that boilerplate by turning `CanCalculateArea` into a **CGP component**. This will allow us to define named, reusable implementations called **providers**, and wire them to specific contexts through a concise lookup table. We will also see how providers can be composed and parameterized, enabling higher-order abstractions that work across all shapes without duplication.
+Suppose that in addition to `rectangle_area`, we also want to define a context-generic `circle_area` function using `#[cgp_fn]`. We can easily write it as follows:
+
+```rust
+use core::f64::consts::PI;
+
+#[cgp_fn]
+pub fn circle_area(&self, #[implicit] radius: f64) -> f64 {
+    PI * radius * radius
+}
+```
+
+But suppose that we also want to implement a *scaled* version of `circle_area`, we now have to implement another `scaled_circle_area` function as follows:
+
+```rust
+#[cgp_fn]
+#[uses(CircleArea)]
+pub fn scaled_circle_area(&self, #[implicit] scale_factor: f64) -> f64 {
+    self.circle_area() * scale_factor * scale_factor
+}
+```
+
+We can see that both `scaled_circle_area` and `scaled_rectangle_area` share the same structure. The only difference is that `scaled_circle_area` depends on `CircleArea`, but `scaled_rectangle_area` depends on `RectangleArea`.
+
+This repetition of scaled area computation can become tedious if there are many more shapes that we want to support in our application. Ideally, we would like to be able to define an area calculation trait as the common interface to calculate the area of all shapes, such as the following `CanCalculateArea` trait:
+
+```rust
+pub trait CanCalculateArea {
+    fn area(&self) -> f64;
+}
+```
+
+Now we can try to implement the `CanCalculateArea` trait on our contexts. For example, suppose that we have the following contexts defined:
+
+```rust
+#[derive(HasField)]
+pub struct PlainRectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(HasField)]
+pub struct ScaledRectangle {
+    pub width: f64,
+    pub height: f64,
+    pub scale_factor: f64,
+}
+
+#[derive(HasField)]
+pub struct ScaledRectangleIn2dSpace {
+    pub width: f64,
+    pub height: f64,
+    pub scale_factor: f64,
+    pub pos_x: f64,
+    pub pos_y: f64,
+}
+
+#[derive(HasField)]
+pub struct PlainCircle {
+    pub radius: f64,
+}
+
+#[derive(HasField)]
+pub struct ScaledCircle {
+    pub radius: f64,
+    pub scale_factor: f64,
+}
+```
+
+We can implement `CanCalculateArea` for each context as follows:
+
+```rust
+impl CanCalculateArea for PlainRectangle {
+    fn area(&self) -> f64 {
+        self.rectangle_area()
+    }
+}
+
+impl CanCalculateArea for ScaledRectangle {
+    fn area(&self) -> f64 {
+        self.rectangle_area()
+    }
+}
+
+impl CanCalculateArea for ScaledRectangleIn2dSpace {
+    fn area(&self) -> f64 {
+        self.rectangle_area()
+    }
+}
+
+impl CanCalculateArea for PlainCircle {
+    fn area(&self) -> f64 {
+        self.circle_area()
+    }
+}
+
+impl CanCalculateArea for ScaledCircle {
+    fn area(&self) -> f64 {
+        self.circle_area()
+    }
+}
+```
+
+There are quite a lot of boilerplate implementation that we need to make! If we keep multiple rectangle contexts in our application, like `PlainRectangle`, `ScaledRectangle`, and `ScaledRectangleIn2dSpace`, then we need to implement `CanCalculateArea` for all of them. But fortunately, the existing CGP functions like `rectangle_area` and `circle_area` help us simplify the the implementation body of `CanCalculateArea`, as we only need to forward the call.
+
+Next, let's look at how we can define a unified `scaled_area` CGP function:
+
+```rust
+#[cgp_fn]
+#[uses(CanCalculateArea)]
+pub fn scaled_area(&self, #[implicit] scale_factor: f64) -> f64 {
+    self.area() * scale_factor * scale_factor
+}
+```
+
+Now we can call `scaled_area` on any context that contains a `scale_factor` field, *and* also implements `CanCalculateArea`. That is, we no longer need separate scaled area calculation functions for rectangles and circles!
 
 ## Overlapping implementations with CGP components
 
