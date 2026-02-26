@@ -566,9 +566,7 @@ If we want to support scaled area *provider implementations* for all possible sh
 #[use_provider(InnerCalculator: AreaCalculator)]
 impl<InnerCalculator> AreaCalculator {
     fn area(&self, #[implicit] scale_factor: f64) -> f64 {
-        let base_area = InnerCalculator::area(self);
-
-        base_area * scale_factor * scale_factor
+        InnerCalculator::area(self) * scale_factor * scale_factor
     }
 }
 ```
