@@ -4,7 +4,7 @@ In this tutorial series, we will explore CGP — Context-Generic Programming —
 
 ## Plain Functions and Explicit Dependencies
 
-To make the walkthrough approacheable to Rust programmers of all programming levels, we will use a simple use case of calculating the area of different shape types. For example, if we want to calculate the area of a rectangle, we might write a `rectangle_area` function as follows:
+To make the walkthrough approachable to Rust programmers of all programming levels, we will use a simple use case of calculating the area of different shape types. For example, if we want to calculate the area of a rectangle, we might write a `rectangle_area` function as follows:
 
 ```rust
 pub fn rectangle_area(width: f64, height: f64) -> f64 {
@@ -54,7 +54,7 @@ impl Rectangle {
 }
 ```
 
-With a unified context, the method signatures of `rectangle_area` and `scaled_rectangle_area` become significantly cleaner. They both only need to accept a `&self` parameter. `scaled_rectangle` area also no longer need to know which fields are accessed by `rectangle_area`. All it needs to call `self.rectangle_area()`, and then apply the `scale_factor` field to the result.
+With a unified context, the method signatures of `rectangle_area` and `scaled_rectangle_area` become significantly cleaner. They both only need to accept a `&self` parameter. `scaled_rectangle_area` also no longer needs to know which fields are accessed by `rectangle_area`. All it needs to do is call `self.rectangle_area()`, and then apply the `scale_factor` field to the result.
 
 The use of a common `Rectangle` context struct can result in cleaner method signatures, but it also introduces *tight coupling* between the individual methods and the context. As the application grows, the context type may become increasingly complex, and simple functions like `rectangle_area` would become increasingly coupled with unrelated dependencies.
 
@@ -73,7 +73,7 @@ pub struct ComplexRectangle {
 
 As the context grows, it becomes significantly more tedious to call a method like `rectangle_area`, even if we don't care about using other methods. We would still need to first construct a `ComplexRectangle` with most of the fields having default value, before we can call `rectangle_area`.
 
-Furthermore, a concrete context definition also limits how it can be extended. Suppose that a third party application now wants to use the provided methods like `scaled_rectangle_area`, but also wants to store the rectangles in a *3D space*, it would be tough ask the upstream project to introduce a new `pos_z` field, which can potentially break many existing code. In the worst case, the last resort for extending the context is to fork the entire project to make the changes.
+Furthermore, a concrete context definition also limits how it can be extended. Suppose that a third party application now wants to use the provided methods like `scaled_rectangle_area`, but also wants to store the rectangles in a *3D space*, it would be tough to ask the upstream project to introduce a new `pos_z` field, which can potentially break many existing code. In the worst case, the last resort for extending the context is to fork the entire project to make the changes.
 
 Ideally, what we really want is to have some ways to pass around the fields in a context *implicitly* to functions like `rectangle_area` and `scaled_rectangle_area`. As long as a context type contains the required fields, e.g. `width` and `height`, we should be able to call `rectangle_area` on it without needing to implement it for the specific context.
 
@@ -81,4 +81,6 @@ Ideally, what we really want is to have some ways to pass around the fields in a
 
 We have now identified the two core limitations of conventional Rust approaches: explicit parameter threading becomes unwieldy as the call stack grows deeper, and concrete context methods create tight coupling between implementations and a specific struct.
 
-In the first tutorial, [Context-Generic Functions](context-generic-functions), we will see how the `#[cgp_fn]` macro and `#[implicit]` arguments address both of these limitations at once, allowing us to write a single `rectangle_area` function that works cleanly across any context that provides the required fields.
+In the first tutorial, Context-Generic Functions, we will see how the `#[cgp_fn]` macro and `#[implicit]` arguments address both of these limitations at once, allowing us to write a single `rectangle_area` function that works cleanly across any context that provides the required fields. We will also explore how CGP functions can import each other via `#[uses]`, and take an optional look at how the macro desugars into plain Rust traits under the hood.
+
+In the second tutorial, Static Dispatch, we will introduce a second shape — the circle — and define a unified `CanCalculateArea` trait as a common interface across all shapes. We will run into Rust's coherence restrictions when trying to provide blanket implementations, and then resolve this with CGP's `#[cgp_component]` macro and named providers. Finally, we will see how `delegate_components!` wires contexts to providers at compile time, and how higher-order providers allow provider implementations to compose generically, with zero runtime overhead.

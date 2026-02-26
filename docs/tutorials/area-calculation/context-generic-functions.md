@@ -4,9 +4,9 @@ sidebar_position: 1
 
 # Context-Generic Functions
 
-In the previous part of this tutorial, we identified two problems with plain Rust code: explicit function parameters accumulate quickly as call chains grow longer, and grouping fields into a concrete context struct creates tight coupling between implementations and a specific type. In this tutorial, we will address both of these problems at once using `#[cgp_fn]` — CGP’s mechanism for defining functions that accept **implicit arguments** extracted automatically from any conforming context.
+In the previous part of this tutorial, we identified two problems with plain Rust code: explicit function parameters accumulate quickly as call chains grow longer, and grouping fields into a concrete context struct creates tight coupling between implementations and a specific type. In this tutorial, we will address both of these problems at once using `#[cgp_fn]` — CGP's mechanism for defining functions that accept **implicit arguments** extracted automatically from any conforming context.
 
-By the end of this tutorial, we will have defined `rectangle_area`, `scaled_rectangle_area`, and `circle_area` as context-generic functions, tested them on multiple context types, and introduced the `CanCalculateArea` trait as a unified interface for area calculation across different shapes.
+By the end of this tutorial, we will have defined `rectangle_area`, `scaled_rectangle_area`, and `print_rectangle_area` as context-generic functions, and seen how `#[cgp_fn]` and `#[implicit]` arguments work together to let a single function definition run cleanly on any context that contains the required fields — without any manual forwarding or boilerplate.
 
 ## Introducing `#[cgp_fn]` and `#[implicit]` arguments
 
@@ -119,7 +119,7 @@ impl PlainRectangle {
 }
 ```
 
-This works, but if we also want to use `print_scaled_rectangle_area` on another context like `ScaledRectangle`, we would have to rewrite the same method on it:
+This works, but if we also want to use `print_rectangle_area` on another context like `ScaledRectangle`, we would have to rewrite the same method on it:
 
 ```rust
 impl ScaledRectangle {
@@ -139,7 +139,7 @@ pub fn print_rectangle_area(&self) {
 }
 ```
 
-This way, `print_rectangle_area` would automatically implemented on any context type where `rectangle_area` is also automatically implemented.
+This way, `print_rectangle_area` would automatically be implemented on any context type where `rectangle_area` is also automatically implemented.
 
 ## How it works
 
@@ -183,13 +183,13 @@ Secondly, a *getter trait* that resembles the `RectangleFields` above is used to
 
 Finally, a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) of `RectangleArea` is defined to work with any `Context` type that contains both the `width` and `height` fields. This means that there is no need for any context type to implement `RectangleArea` manually.
 
-Inside the function body, the macro desugars the implicit arguments into local `let` bindings that calls the getter methods and bind the field values to local variables. After that, the remaining function body follows the original function definition.
+Inside the function body, the macro desugars the implicit arguments into local `let` bindings that call the getter methods and bind the field values to local variables. After that, the remaining function body follows the original function definition.
 
 :::note
 
 ### Borrowed vs owned implicit arguments
 
-The `width()` and and `height()` methods on `RectangleFields` return a borrowed `&f64`. This is because all field access are by default done through borrowing the field value from `&self`. However, when the implicit argument is an *owned value*, CGP will automatically call `.clone()` on the field value and require that the `Clone` bound of the type is satisfied.
+The `width()` and `height()` methods on `RectangleFields` return a borrowed `&f64`. This is because all field access are by default done through borrowing the field value from `&self`. However, when the implicit argument is an *owned value*, CGP will automatically call `.clone()` on the field value and require that the `Clone` bound of the type is satisfied.
 
 We can rewrite the `rectangle_area` to accept the implicit `width` and `height` arguments as *borrowed* references, such as:
 
@@ -222,7 +222,7 @@ impl RectangleFields for PlainRectangle {
 }
 ```
 
-With the getter traits implemented, the requirements for the blanket implementation of `RectangleArea` is satisfied. And thus we can now call call `rectangle_area()` on a `PlainRectangle` value.
+With the getter traits implemented, the requirements for the blanket implementation of `RectangleArea` are satisfied. And thus we can now call `rectangle_area()` on a `PlainRectangle` value.
 
 ### Zero cost field access
 
@@ -236,15 +236,23 @@ The important takeaway from this is that CGP follows the same **zero cost abstra
 
 ### Auto getter fields
 
-When we walk through the desugared Rust code, you might wonder: since `RectangleArea` requires the context to implement `RectangleFields`, does this means that a context type like `PlainRectangle` must know about it beforehand and explicitly implement `RectangleFields` before we can use `RectangleArea` on it?
+When we walk through the desugared Rust code, you might wonder: since `RectangleArea` requires the context to implement `RectangleFields`, does this mean that a context type like `PlainRectangle` must know about it beforehand and explicitly implement `RectangleFields` before we can use `RectangleArea` on it?
 
 The answer is yes for the simplified desugared code that we have shown earlier. But CGP actually employs a more generalized trait called `HasField` that can work generally for all possible structs. This means that there is **no need** to specifically generate a `RectangleFields` trait to be used by `RectangleArea`, or implemented by `PlainRectangle`.
 
 The full explanation of how `HasField` works is beyond the scope of this tutorial. But the general idea is that an instance of `HasField` is implemented for every field inside a struct that uses `#[derive(HasField)]`. This is then used by implementations like `RectangleArea` to access a specific field by its field name.
 
-In practice, this means that both `RectangleArea` and `PlainRectangle` can be defined in totally different crate without knowing each other. They can then be imported inside a third crate, and `RectangleArea` would still be automatically implemented for `PlainRectangle`.
+In practice, this means that both `RectangleArea` and `PlainRectangle` can be defined in totally different crates without knowing each other. They can then be imported inside a third crate, and `RectangleArea` would still be automatically implemented for `PlainRectangle`.
 
 ### Comparison to Scala implicit parameters
+
+Readers who are familiar with Scala may notice a resemblance between CGP's `#[implicit]` arguments and Scala's implicit parameters. Both mechanisms allow function arguments to be supplied automatically by the compiler, eliminating the need for callers to thread values through every level of the call stack. In both cases, the resolution happens entirely at compile time, with no runtime overhead.
+
+The key difference lies in *how* and *where* the implicit value is sourced. In Scala, implicit parameters are resolved by the compiler from any value of the matching type that is in the implicit scope at the call site — this can be a locally defined implicit value, an implicit object imported from a module, or a type class instance. The resolution is driven by the *type* of the parameter and the lexical scope of the caller.
+
+In CGP, `#[implicit]` arguments are always resolved in a single, uniform way: the compiler fetches the value from a *named field* on the `&self` context, using the `HasField` trait. There is no scope-based resolution, and there are no implicit values floating in the environment. This makes the origin of every implicit value entirely predictable — if a function requires `#[implicit] width: f64`, you know exactly that `width` must be a field on the context struct.
+
+This design also means that CGP implicit arguments compose naturally with Rust's trait system. A function that requires a `width` field simply adds a `HasField` bound to its blanket implementation. The need for the `width` field propagates automatically through the call chain via trait bounds, without any caller needing to explicitly pass the value or name it.
 
 ### Desugaring `scaled_rectangle_area`
 
@@ -273,6 +281,14 @@ where
 
 Compared to `rectangle_area`, the desugared code for `scaled_rectangle_area` contains an additional trait bound `Self: RectangleArea`, which is generated from the `#[uses(RectangleArea)]` attribute. This also shows that importing a CGP construct is equivalent to applying it as a trait bound on `Self`.
 
-It is also worth noting that trait bounds like `RectangleField` only appear in the `impl` block but not on the trait definition. This implies that they are *impl-side dependencies* that hide the dependencies behind a trait impl without revealing it in the trait interface.
+It is also worth noting that trait bounds like `RectangleFields` only appear in the `impl` block but not on the trait definition. This implies that they are *impl-side dependencies* that hide the dependencies behind a trait impl without revealing it in the trait interface.
 
 Aside from that, `ScaledRectangleArea` also depends on field access traits that are equivalent to `ScaleFactorField` to retrieve the `scale_factor` field from the context. In actual, it also uses `HasField` to retrieve the `scale_factor` field value, and there is no extra getter trait generated.
+
+## Summary
+
+In this tutorial, we have introduced `#[cgp_fn]` and the `#[implicit]` attribute as CGP's core mechanism for writing context-generic functions. By marking arguments as implicit, we expressed dependencies purely through field names and let CGP wire them automatically via the `HasField` trait. We also saw how `#[uses]` imports CGP traits as hidden impl-side dependencies, how `#[derive(HasField)]` enables a context to satisfy those dependencies without any manual boilerplate, and how multiple independent context types can co-exist and each benefit from the same function definitions without interfering with each other.
+
+Throughout, all of this happened through ordinary Rust traits and blanket implementations. The `#[cgp_fn]` macro is purely syntactic sugar — the desugared code it generates is straightforward Rust that follows the zero-cost abstraction principle.
+
+In the next tutorial, Static Dispatch, we will extend the area calculation example to support a second shape — the circle — and introduce the `CanCalculateArea` trait as a unified interface for all shapes. We will encounter Rust's coherence restrictions when trying to write blanket implementations for overlapping cases, and see how CGP's `#[cgp_component]` macro and named providers resolve this problem cleanly, enabling configurable static dispatch with `delegate_components!`.

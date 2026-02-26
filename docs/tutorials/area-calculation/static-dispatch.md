@@ -2,6 +2,12 @@
 sidebar_position: 2
 ---
 
+# Static Dispatch
+
+In the previous tutorial, we learned how `#[cgp_fn]` and `#[implicit]` arguments let us define context-generic functions that extract field values automatically from any conforming context. We came away with `rectangle_area` and `scaled_rectangle_area` working cleanly across multiple rectangle contexts, all without any manual forwarding or per-context implementation.
+
+In this tutorial, we will introduce a second shape — the circle — and motivate the need for a unified `CanCalculateArea` interface that works across all shapes. We will then run into one of Rust's most well-known limitations when trying to generalize this: the coherence problem. After examining why plain blanket implementations fall short, we will see how CGP's `#[cgp_component]` macro and named providers resolve the problem. Finally, we will wire everything together using `delegate_components!` for concise, compile-time static dispatch, and generalize further with higher-order providers that compose behavior without duplication.
+
 ## Using CGP functions with Rust traits
 
 Now that we have understood how to write context-generic functions with `#[cgp_fn]`, let's look at some more advanced use cases.
@@ -108,7 +114,7 @@ impl CanCalculateArea for ScaledCircle {
 }
 ```
 
-There are quite a lot of boilerplate implementation that we need to make! If we keep multiple rectangle contexts in our application, like `PlainRectangle`, `ScaledRectangle`, and `ScaledRectangleIn2dSpace`, then we need to implement `CanCalculateArea` for all of them. But fortunately, the existing CGP functions like `rectangle_area` and `circle_area` help us simplify the the implementation body of `CanCalculateArea`, as we only need to forward the call.
+There are quite a lot of boilerplate implementations that we need to make! If we keep multiple rectangle contexts in our application, like `PlainRectangle`, `ScaledRectangle`, and `ScaledRectangleIn2dSpace`, then we need to implement `CanCalculateArea` for all of them. But fortunately, the existing CGP functions like `rectangle_area` and `circle_area` help us simplify the implementation body of `CanCalculateArea`, as we only need to forward the call.
 
 Next, let's look at how we can define a unified `scaled_area` CGP function:
 
@@ -124,7 +130,7 @@ Now we can call `scaled_area` on any context that contains a `scale_factor` fiel
 
 ## Overlapping implementations with CGP components
 
-The earlier implementation of `CanCalculateArea` by our shape contexts introduce quite a bit of boilerplate. It would be nice if we can automatically implement the traits for our contexts, if the context contains the required fields.
+The earlier implementation of `CanCalculateArea` by our shape contexts introduces quite a bit of boilerplate. It would be nice if we could automatically implement the traits for our contexts, if the context contains the required fields.
 
 For example, a naive attempt might be to write something like the following blanket implementations:
 
@@ -156,7 +162,7 @@ conflicting implementations of trait `CanCalculateArea`
 
 In short, we have run into the infamous [**coherence problem**](https://github.com/Ixrec/rust-orphan-rules) in Rust, which forbids us to write multiple trait implementations that may *overlap* with each other.
 
-The reason for this restriction is pretty simple to understand. For example, suppose that we define a context that contains the fields `width`, `height`, but *also* `radius`, which implementation should we expect the Rust compiler to choose?
+The reason for this restriction is pretty simple to understand. For example, suppose that we define a context that contains the fields `width`, `height`, but *also* `radius` — which implementation should we expect the Rust compiler to choose?
 
 ```rust
 #[derive(HasField)]
@@ -169,7 +175,7 @@ pub struct IsThisRectangleOrCircle {
 
 Although there are solid reasons why Rust disallows overlapping and orphan implementations, in practice it has fundamentally shaped the mindset of Rust developers to avoid a whole universe of design patterns just to work around the coherence restrictions.
 
-CGP provides ways to partially workaround the coherence restrictions, and enables overlapping implementations through **named** implementation. The ways to do so is straightforward. First, we apply the `#[cgp_component]` macro to our `CanCalculateArea` trait:
+CGP provides ways to partially work around the coherence restrictions, and enables overlapping implementations through **named** implementation. The way to do so is straightforward. First, we apply the `#[cgp_component]` macro to our `CanCalculateArea` trait:
 
 ```rust
 #[cgp_component(AreaCalculator)]
@@ -206,9 +212,9 @@ where
 
 Compared to the vanilla Rust implementation, we change the trait name to use the provider trait `AreaCalculator` instead of the consumer trait `CanCalculateArea`. Additionally, we use the `#[cgp_impl]` macro to give the implementation a **name**, `RectangleAreaCalculator`. The `new` keyword in front denotes that we are defining a new provider of that name for the first time.
 
-CGP providers like `RectangleAreaCalculator` are essentially **named implementation** of provider traits like `AreaCalculator`. Unlike regular Rust traits, each provider can freely implement the trait **without any coherence restriction**.
+CGP providers like `RectangleAreaCalculator` are essentially **named implementations** of provider traits like `AreaCalculator`. Unlike regular Rust traits, each provider can freely implement the trait **without any coherence restriction**.
 
-Additionally, the `#[cgp_impl]` macro also provides additional syntactic sugar, so we can simplify our implementation to follows:
+Additionally, the `#[cgp_impl]` macro also provides additional syntactic sugar, so we can simplify our implementation as follows:
 
 ```rust
 #[cgp_impl(new RectangleAreaCalculator)]
@@ -230,10 +236,9 @@ impl AreaCalculator {
 
 When we write blanket implementations that are generic over the context type, we can omit the generic parameter and just refer to the generic context as `Self`.
 
-`#[cgp_impl]` also support the same short hand as `#[cgp_fn]`, so we can use `#[uses]` to import the CGP functions `RectangleArea` and `CircleArea` to be used in our implementations.
+`#[cgp_impl]` also supports the same shorthand as `#[cgp_fn]`, so we can use `#[uses]` to import the CGP functions `RectangleArea` and `CircleArea` to be used in our implementations.
 
 In fact, with `#[cgp_impl]`, we can skip defining the CGP functions altogether, and inline the function bodies directly:
-
 
 ```rust
 #[cgp_impl(new RectangleAreaCalculator)]
@@ -255,7 +260,7 @@ Similar to `#[cgp_fn]`, we can use implicit arguments through the `#[implicit]` 
 
 ### Calling providers directly
 
-Although we have defined the providers `RectangleArea` and `CircleArea`, they are not automatically applied to our shape contexts. Because the coherence restrictions are still enforced by Rust, we still need to do some manual steps to implement the consumer trait on our shape contexts.
+Although we have defined the providers `RectangleAreaCalculator` and `CircleAreaCalculator`, they are not automatically applied to our shape contexts. Because the coherence restrictions are still enforced by Rust, we still need to do some manual steps to implement the consumer trait on our shape contexts.
 
 But before we do that, we can use a provider by directly calling it on a context. For example:
 
@@ -269,7 +274,7 @@ let area = RectangleAreaCalculator::area(&rectangle);
 assert_eq!(area, 6.0);
 ```
 
-Because at this point we haven't implemented CanCalculateArea for `PlainRectangle`, we can't use the method call syntax `rectangle.area()` to calculate the area just yet. But we can use the explicit syntax `RectangleAreaCalculator::area(&rectangle)` to specifically *choose* `RectangleAreaCalculator` to calculate the area of `rectangle`.
+Because at this point we haven't implemented `CanCalculateArea` for `PlainRectangle`, we can't use the method call syntax `rectangle.area()` to calculate the area just yet. But we can use the explicit syntax `RectangleAreaCalculator::area(&rectangle)` to specifically *choose* `RectangleAreaCalculator` to calculate the area of `rectangle`.
 
 The explicit nature of providers means that we can explicitly choose to use multiple providers on a context, even if they are overlapping. For example, we can use both `RectangleAreaCalculator` and `CircleAreaCalculator` on the `IsThisRectangleOrCircle` context that we have defined earlier:
 
@@ -294,7 +299,6 @@ The reason we can do so without Rust complaining is that we are explicitly choos
 To ensure consistency on the chosen provider for a particular context, we can **bind** a provider with the context by implementing the consumer trait *using* the chosen provider. One way to do so is for us to manually implement the consumer trait.
 
 It is worth noting that even though we have annotated the `CanCalculateArea` trait with `#[cgp_component]`, the original trait is still there, and we can still use it like any regular Rust trait. So we can implement the trait manually to forward the implementation to the providers we want to use, like:
-
 
 ```rust
 impl CanCalculateArea for PlainRectangle {
@@ -330,7 +334,7 @@ impl CanCalculateArea for ScaledCircle {
 
 If we compare to before, the boilerplate is still there, and we are only replacing the original calls like `self.rectangle_area()` with the explicit provider calls. The syntax `RectangleAreaCalculator::area(self)` is used, because we are explicitly using the `area` implementation from `RectangleAreaCalculator`, which is not yet bound to `self` at the time of implementation.
 
-Through the unique binding of provider through consumer trait implementation, we have effectively recovered the coherence requirement of Rust traits. This binding forces us to make a **choice** of which provider we want to use for a context, and that choice cannot be changed on the consumer trait after the binding is done.
+Through the unique binding of a provider through a consumer trait implementation, we have effectively recovered the coherence requirement of Rust traits. This binding forces us to make a **choice** of which provider we want to use for a context, and that choice cannot be changed on the consumer trait after the binding is done.
 
 For example, we may choose to treat the `IsThisRectangleOrCircle` context as a circle, by forwarding the implementation to `CircleAreaCalculator`:
 
@@ -361,7 +365,7 @@ let circle_area = CircleAreaCalculator::area(&rectangle_or_circle);
 assert_eq!(circle_area, 16.0 * PI);
 ```
 
-It is also worth noting that even though we have bound the `CircleAreaCalculator` provider with `IsThisRectangleOrCircle`, we can still explicitly use a different provider like `RectangleAreaCalculator` to calculate the area. There is no violation of coherence rules here, because an explict provider call works the same as an explicit CGP function call, such as:
+It is also worth noting that even though we have bound the `CircleAreaCalculator` provider with `IsThisRectangleOrCircle`, we can still explicitly use a different provider like `RectangleAreaCalculator` to calculate the area. There is no violation of coherence rules here, because an explicit provider call works the same as an explicit CGP function call, such as:
 
 ```rust
 let rectangle_area = rectangle_or_circle.rectangle_area();
@@ -419,12 +423,11 @@ What the above code effectively does is to build **lookup tables** at **compile 
 | `PlainCircle` | `AreaCalculatorComponent` | `CircleAreaCalculator` |
 | `ScaledCircle` | `AreaCalculatorComponent` | `CircleAreaCalculator` |
 
-
 The type `AreaCalculatorComponent` is called a **component name**, and it is used as a key in the table to identify the CGP trait `CanCalculateArea` that we have defined earlier. By default, the component name of a CGP trait uses the provider trait name followed by a `Component` suffix.
 
 Behind the scenes, `#[cgp_component]` generates a blanket implementation for the consumer trait, which it will automatically use to perform lookup on the tables we defined. If an entry is found and the requirements are satisfied, Rust would automatically implement the trait for us by forwarding it to the corresponding provider.
 
-Using `delegate_component!`, we no longer need to implement the consumer traits manually on our context. Instead, we just need to specify key value pairs to map trait implementations to the providers that we have chosen for the context.
+Using `delegate_components!`, we no longer need to implement the consumer traits manually on our context. Instead, we just need to specify key-value pairs to map trait implementations to the providers that we have chosen for the context.
 
 :::note
 If you prefer explicit implementation over using `delegate_components!`, you can always choose to implement the consumer trait explicitly like we did earlier.
@@ -434,7 +437,7 @@ Keep in mind that `#[cgp_component]` keeps the original `CanCalculateArea` trait
 
 ### No change to `scaled_area`
 
-Now that we have turned `CanCalculateArea` into a CGP component, you might wonder: what do we need to change to use `CanCalculateArea` from `scaled_area`? And the answer is **nothing changes** and `scaled_area` stays the same as before:
+Now that we have turned `CanCalculateArea` into a CGP component, you might wonder: what do we need to change to use `CanCalculateArea` from `scaled_area`? And the answer is **nothing changes** — `scaled_area` stays exactly the same as before:
 
 ```rust
 #[cgp_fn]
@@ -444,21 +447,23 @@ pub fn scaled_area(&self, #[implicit] scale_factor: f64) -> f64 {
 }
 ```
 
-### Zero-cost and safe static dispatch
+This is an important property of the CGP design. Functions that depend on a consumer trait like `CanCalculateArea` through `#[uses]` do not need to know how the trait is implemented — they remain unchanged whether the underlying implementation is a manual `impl`, an explicit forwarding call, or a `delegate_components!` entry. The choice of provider is exclusively a concern of the context, not of the functions that call it.
 
-It is worth noting that the automatic implementation of CGP traits through `delegate_components!` are entirely safe and does not incur any runtime overhead. Behind the scene, the code generated by `delegate_components!` are *semantically equivalent* to the manual implementation of `CanCalculateArea` traits that we have shown in the earlier example.
+## Zero-cost and safe static dispatch
 
-CGP does **not** use any extra machinery like vtables to lookup the implementation at runtime - all the wirings happen only at compile time. Furthermore, the static dispatch is done entirely in **safe Rust**, and there is **no unsafe** operations like pointer casting or type erasure. When there is any missing dependency, you get a compile error immediately, and you will never need to debug any unexpected CGP error at runtime.
+It is worth noting that the automatic implementation of CGP traits through `delegate_components!` is entirely safe and does not incur any runtime overhead. Behind the scene, the code generated by `delegate_components!` is *semantically equivalent* to the manual implementation of `CanCalculateArea` traits that we have shown in the earlier example.
 
-Furthermore, the compile-time resolution of the wiring happens *entirely within Rust's trait system*. CGP does **not** run any external compile-time processing or resolution algorithm through its macros. As a result, there is **no noticeable** compile-time performance difference between CGP code and vanilla Rust code that use plain Rust traits.
+CGP does **not** use any extra machinery like vtables to look up the implementation at runtime — all the wirings happen only at compile time. Furthermore, the static dispatch is done entirely in **panic-free and safe Rust**, and there are **no unsafe** operations like pointer casting or type erasure. When there is any missing dependency, you get a compile error immediately, and you will never need to debug any unexpected CGP error at runtime.
 
-These properties are what makes CGP stands out compared to other programming frameworks. Essentially, CGP strongly follows Rust's zero-cost abstraction principles. We strive to provide the best-in-class modular programming framework that does not introduce performance overhead at both runtime and compile time. And we strive to enable highly modular code in low-level and safety critical systems, all while guaranteeing safety at compile time.
+Furthermore, the compile-time resolution of the wiring happens *entirely within Rust's trait system*. CGP does **not** run any external compile-time processing or resolution algorithm through its macros. As a result, there is **no noticeable** compile-time performance difference between CGP code and vanilla Rust code that uses plain Rust traits.
+
+These properties are what makes CGP stand out compared to other programming frameworks. CGP strongly follows Rust's zero-cost abstraction principles. We strive to provide the best-in-class modular programming framework that does not introduce performance overhead at both runtime and compile time. And we strive to enable highly modular code in low-level and safety-critical systems, all while guaranteeing safety at compile time.
 
 ## Importing providers with `#[use_provider]`
 
 Earlier, we have defined a general `CanCalculateArea` component that can be used by CGP functions like `scaled_area` to calculate the scaled area of any shape that contains a `scale_factor` field. But this means that if someone calls the `area` method, they would always get the unscaled version of the area.
 
-What if we want to configure it such that shapes that contain a `scale_factor` would always apply the scale factor as `area` is called? One approach is that we could implement separate scaled area providers for each inner shape provider, such as:
+What if we want to configure it such that shapes that contain a `scale_factor` would always apply the scale factor when `area` is called? One approach is that we could implement separate scaled area providers for each inner shape provider, such as:
 
 ```rust
 #[cgp_impl(new ScaledRectangleAreaCalculator)]
@@ -484,9 +489,9 @@ To implement the provider trait `AreaCalculator` for `ScaledRectangleAreaCalcula
 
 Similarly, the implementation of `ScaledCircleAreaCalculator` depends on `CircleAreaCalculator` to implement `AreaCalculator`.
 
-By importing other providers, `ScaledRectangleAreaCalculator` and `ScaledCircleAreaCalculator` can skip the need to understand what are the internal requirements for the imported providers to implement the provider traits. We can focus on just applying the `scale_factor` argument to the resulting base area, and then return the result.
+By importing other providers, `ScaledRectangleAreaCalculator` and `ScaledCircleAreaCalculator` can skip the need to understand what the internal requirements are for the imported providers to implement their provider traits. We can focus on just applying the `scale_factor` argument to the resulting base area, and then return the result.
 
-We can now wire the `ScaledRectangle` and `ScaledCircle` to use the new scaled area calculator providers, while leaving `PlainRectangle` and `PlainCircle` use the base area calculators:
+We can now wire the `ScaledRectangle` and `ScaledCircle` contexts to use the new scaled area calculator providers, while leaving `PlainRectangle` and `PlainCircle` to use the base area calculators:
 
 ```rust
 delegate_components! {
@@ -518,7 +523,7 @@ delegate_components! {
 }
 ```
 
-With that, we can write some basic tests, and verify that calling `.area()` on scaled shapes now return the scaled area:
+With that, we can write some basic tests, and verify that calling `.area()` on scaled shapes now returns the scaled area:
 
 ```rust
 let rectangle = PlainRectangle {
@@ -534,13 +539,13 @@ let scaled_rectangle = ScaledRectangle {
     height: 4.0,
 };
 
+assert_eq!(scaled_rectangle.area(), 48.0);
+
 let circle = PlainCircle {
     radius: 3.0,
 };
 
 assert_eq!(circle.area(), 9.0 * PI);
-
-assert_eq!(scaled_rectangle.area(), 48.0);
 
 let scaled_circle = ScaledCircle {
     scale_factor: 2.0,
@@ -552,9 +557,9 @@ assert_eq!(scaled_circle.area(), 36.0 * PI);
 
 ## Higher-order providers
 
-In the previous section, we have defined two separate providers `ScaledRectangleAreaCalculator` and `ScaledCircleAreaCalculator` to calculate the scaled area of rectangles and circles. The duplication shows the same issue as we had in the beginning with separate `scaled_rectangle` and `scaled_circle` CGP functions defined.
+In the previous section, we have defined two separate providers `ScaledRectangleAreaCalculator` and `ScaledCircleAreaCalculator` to calculate the scaled area of rectangles and circles. The duplication shows the same issue as we had in the beginning with separate `scaled_rectangle_area` and `scaled_circle_area` CGP functions defined.
 
-If we want to support scaled area *provider implementation* for all possible shapes, we'd need define a generalized `ScaledAreaCalculator` as a **higher order provider** to work with all inner `AreaCalculator` providers. This can be done as follows:
+If we want to support scaled area *provider implementations* for all possible shapes, we can define a generalized `ScaledAreaCalculator` as a **higher-order provider** that works with any inner `AreaCalculator` provider. This can be done as follows:
 
 ```rust
 #[cgp_impl(new ScaledAreaCalculator<InnerCalculator>)]
@@ -572,7 +577,7 @@ Compared to the concrete `ScaledRectangleAreaCalculator` and `ScaledCircleAreaCa
 
 Aside from the generic `InnerCalculator` type, everything else in `ScaledAreaCalculator` stays the same as before. We use `#[use_provider]` to require `InnerCalculator` to implement the `AreaCalculator` provider trait, and then use it to calculate the base area before applying the scale factors.
 
-We can now update the `ScaledRectangle` and `ScaledCircle` contexts to use the `ScaledAreaCalculator` that is composed with the respective base area calculator providers:
+We can now update the `ScaledRectangle` and `ScaledCircle` contexts to use the `ScaledAreaCalculator` composed with the respective base area calculator providers:
 
 ```rust
 delegate_components! {
@@ -590,7 +595,7 @@ delegate_components! {
 }
 ```
 
-If specifying the combined providers are too mouthful, we also have the option to define **type aliases** to give the composed providers shorter names:
+If specifying the combined providers is too verbose, we also have the option to define **type aliases** to give the composed providers shorter names:
 
 ```rust
 pub type ScaledRectangleAreaCalculator =
@@ -600,7 +605,7 @@ pub type ScaledCircleAreaCalculator =
     ScaledAreaCalculator<CircleAreaCalculator>;
 ```
 
-This also shows that CGP providers are just plain Rust types. By leveraging generics, we can “pass” a provider as a type argument to a higher provider to produce new providers that have the composed behaviors.
+This also shows that CGP providers are just plain Rust types. By leveraging generics, we can "pass" a provider as a type argument to a higher-order provider to produce new providers that have the composed behaviors.
 
 ## Summary
 
@@ -612,4 +617,4 @@ In the first tutorial, we addressed those limitations with `#[cgp_fn]`, which le
 
 In this tutorial, we resolved the remaining boilerplate using CGP components. We annotated `CanCalculateArea` with `#[cgp_component]` to generate a provider trait, defined named provider implementations with `#[cgp_impl]`, and wired them to contexts using `delegate_components!`. We then saw how `#[use_provider]` enables providers to compose with other providers, and how higher-order providers like `ScaledAreaCalculator` use Rust generics to work across all inner calculators without duplication.
 
-Every step of this process is safe, zero-cost Rust: all wiring happens at compile time through the trait system, with no runtime overhead and no unsafe code. To continue exploring CGP, the [Hello World tutorial](../hello) offers a broader introduction to CGP’s capabilities across a wider range of features.
+Every step of this process is safe, zero-cost Rust: all wiring happens at compile time through the trait system, with no runtime overhead and no unsafe code.
