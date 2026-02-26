@@ -4,6 +4,10 @@ sidebar_position: 2
 
 # Configurable Static Dispatch
 
+In the previous part of the tutorial, we grew our set of context-generic functions to cover both rectangle and circle shapes, and we introduced `CanCalculateArea` as a unified trait for computing the area of any shape. However, making `CanCalculateArea` work on our shape contexts required a separate `impl` block for each one — a boilerplate cost that grows with every new context we add.
+
+In this tutorial, we will eliminate that boilerplate by turning `CanCalculateArea` into a **CGP component**. This will allow us to define named, reusable implementations called **providers**, and wire them to specific contexts through a concise lookup table. We will also see how providers can be composed and parameterized, enabling higher-order abstractions that work across all shapes without duplication.
+
 ## Overlapping implementations with CGP components
 
 The earlier implementation of `CanCalculateArea` by our shape contexts introduce quite a bit of boilerplate. It would be nice if we can automatically implement the traits for our contexts, if the context contains the required fields.
@@ -482,4 +486,16 @@ pub type ScaledCircleAreaCalculator =
     ScaledAreaCalculator<CircleAreaCalculator>;
 ```
 
-This also shows that CGP providers are just plain Rust types. By leveraging generics, we can "pass" a provider as a type argument to a higher provider to produce new providers that have the composed behaviors.
+This also shows that CGP providers are just plain Rust types. By leveraging generics, we can “pass” a provider as a type argument to a higher provider to produce new providers that have the composed behaviors.
+
+## Summary
+
+Over the course of this tutorial series, we have worked through the full arc from plain Rust code to configurable static dispatch with CGP.
+
+In the introduction, we identified the two fundamental limitations of conventional Rust approaches: explicit parameter threading and tight coupling between methods and concrete context structs.
+
+In the first tutorial, we addressed those limitations with `#[cgp_fn]`, which lets us write context-generic functions that extract implicit arguments from any conforming context. We also introduced `CanCalculateArea` as a unified interface for area calculation, and showed that implementing it manually for every context introduces its own boilerplate.
+
+In this tutorial, we resolved the remaining boilerplate using CGP components. We annotated `CanCalculateArea` with `#[cgp_component]` to generate a provider trait, defined named provider implementations with `#[cgp_impl]`, and wired them to contexts using `delegate_components!`. We then saw how `#[use_provider]` enables providers to compose with other providers, and how higher-order providers like `ScaledAreaCalculator` use Rust generics to work across all inner calculators without duplication.
+
+Every step of this process is safe, zero-cost Rust: all wiring happens at compile time through the trait system, with no runtime overhead and no unsafe code. To continue exploring CGP, the [Hello World tutorial](../hello) offers a broader introduction to CGP’s capabilities across a wider range of features.

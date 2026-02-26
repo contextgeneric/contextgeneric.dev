@@ -4,6 +4,10 @@ sidebar_position: 1
 
 # Context-Generic Functions
 
+In the previous part of this tutorial, we identified two problems with plain Rust code: explicit function parameters accumulate quickly as call chains grow longer, and grouping fields into a concrete context struct creates tight coupling between implementations and a specific type. In this tutorial, we will address both of these problems at once using `#[cgp_fn]` — CGP’s mechanism for defining functions that accept **implicit arguments** extracted automatically from any conforming context.
+
+By the end of this tutorial, we will have defined `rectangle_area`, `scaled_rectangle_area`, and `circle_area` as context-generic functions, tested them on multiple context types, and introduced the `CanCalculateArea` trait as a unified interface for area calculation across different shapes.
+
 ## Introducing `#[cgp_fn]` and `#[implicit]` arguments
 
 CGP v0.6.2 introduces a new `#[cgp_fn]` macro, which we can apply to plain Rust functions and turn them into *context-generic* methods that accept *implicit arguments*. With that, we can rewrite the example `rectangle_area` function as follows:
@@ -139,7 +143,9 @@ This way, `print_rectangle_area` would automatically implemented on any context 
 
 ## How it works
 
-Now that we have gotten a taste of the power unlocked by `#[cgp_fn]`, let's take a sneak peak of how it works under the hood. Behind the scene, a CGP function like `rectangle_area` is roughly desugared to the following plain Rust code:
+*This section explores the internals of `#[cgp_fn]` and is supplementary to the tutorial. If you are comfortable with what you have built so far and would like to continue to the next concepts, feel free to skip ahead — a detailed understanding of these mechanics is not required to use CGP functions effectively.*
+
+Now that we have gotten a taste of the power unlocked by `#[cgp_fn]`, let's take a sneak peek of how it works under the hood. Behind the scene, a CGP function like `rectangle_area` is roughly desugared to the following plain Rust code:
 
 ```rust
 pub trait RectangleArea {
@@ -386,3 +392,9 @@ pub fn scaled_area(&self, #[implicit] scale_factor: f64) -> f64 {
 ```
 
 Now we can call `scaled_area` on any context that contains a `scale_factor` field, *and* also implements `CanCalculateArea`. That is, we no longer need separate scaled area calculation functions for rectangles and circles!
+
+## Summary
+
+In this tutorial, we introduced `#[cgp_fn]` and defined several context-generic functions: `rectangle_area`, `scaled_rectangle_area`, `circle_area`, and `scaled_area`. We saw how `#[implicit]` arguments are automatically extracted from any conforming context, and how `#[uses]` lets one CGP function call another without threading dependencies manually. We also expanded the example to cover multiple shape types and introduced `CanCalculateArea` as a unified interface — though implementing it for each context still requires a separate `impl` block.
+
+In the next tutorial, [Configurable Static Dispatch](static-dispatch), we will see how CGP’s component system eliminates this boilerplate. Instead of writing explicit trait implementations for every context, we will use `#[cgp_component]` and `delegate_components!` to configure the wiring between contexts and providers in a concise, table-driven way.
