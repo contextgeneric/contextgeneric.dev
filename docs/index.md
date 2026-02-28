@@ -59,7 +59,7 @@ Even though the CGP project is officially still less than one year old, some of 
 
 ## Blog Posts
 
-The most accurate and up-to-date resources concerning CGP are currently available in the form of our [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.6.2 release onward**](/blog/v0-6-1-release/)  will give you a significantly more concise and modern explanation of what CGP is all about.
+The most accurate and up-to-date resources concerning CGP are currently available in the form of our [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.7.0 release onward**](/blog/v0.7.0-release)  will give you a significantly more concise and modern explanation of what CGP is all about.
 
 ## Hello World Tutorial
 

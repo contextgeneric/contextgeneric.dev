@@ -32,7 +32,7 @@ function HeroBanner() {
             <Link
               className={clsx("button button--secondary button--lg margin-left--md", styles.tutorialButton)}
               to="/docs/tutorials/hello">
-              Tutorial - 10 min ⏱️
+              Tutorial - 5 min ⏱️
             </Link>
             <span className={styles.indexCtasGitHubButtonWrapper}>
               <iframe

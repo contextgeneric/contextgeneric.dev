@@ -81,7 +81,7 @@ const config: Config = {
     announcementBar: {
       id: 'announcement',
       content:
-        '🎉 <a href="/blog/2026/02/21/new-website">CGP now have a new website!</a> 🎉',
+        '🚀 <b>New Release:</b> <a href="/blog/v0.7.0-release">Supercharge Rust functions with implicit arguments using CGP v0.7.0</a> 🚀',
       backgroundColor: '#fcefe1',
       textColor: '#5D0705',
       isCloseable: true,
