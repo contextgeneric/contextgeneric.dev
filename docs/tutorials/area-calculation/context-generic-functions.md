@@ -167,8 +167,8 @@ where
     Self: RectangleFields,
 {
     fn rectangle_area(&self) -> f64 {
-        let width = self.width().clone();
-        let height = self.height().clone();
+        let width = *self.width();
+        let height = *self.height();
 
         width * height
     }
@@ -189,7 +189,7 @@ Inside the function body, the macro desugars the implicit arguments into local `
 
 ### Borrowed vs owned implicit arguments
 
-The `width()` and `height()` methods on `RectangleFields` return a borrowed `&f64`. This is because all field access are by default done through borrowing the field value from `&self`. However, when the implicit argument is an *owned value*, CGP will automatically call `.clone()` on the field value and require that the `Clone` bound of the type is satisfied.
+The `width()` and `height()` methods on `RectangleFields` return a borrowed `&f64`. This is because all field access are by default done through borrowing the field value from `&self`. However, when the implicit argument is an *owned value*, CGP will automatically copy on the field value and require that the `Copy` bound of the type is satisfied.
 
 We can rewrite the `rectangle_area` to accept the implicit `width` and `height` arguments as *borrowed* references, such as:
 
@@ -204,7 +204,7 @@ pub fn rectangle_area(
 }
 ```
 
-This way, the field access of the implicit arguments will be **zero copy** and not involve any cloning of values. It is just that in this case, we still need to dereference the `&f64` values to perform multiplication on them. And since `f64` can be cloned cheaply, we just opt for implicitly cloning the arguments to become owned values.
+This way, the field access of the implicit arguments will be **zero copy** and not involve any cloning of values. It is just that in this case, we still need to dereference the `&f64` values to perform multiplication on them. And since `f64` can be copied cheaply, we just opt for implicitly cloning the arguments to become owned values.
 
 :::
 
@@ -272,7 +272,7 @@ where
     Self: RectangleArea + ScaleFactorField,
 {
     fn scaled_rectangle_area(&self) -> f64 {
-        let scale_factor = self.scale_factor().clone();
+        let scale_factor = *self.scale_factor();
 
         self.rectangle_area() * scale_factor * scale_factor
     }
