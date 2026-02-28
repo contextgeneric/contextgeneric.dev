@@ -10,7 +10,7 @@ By the end of this tutorial, we will have defined `rectangle_area`, `scaled_rect
 
 ## Introducing `#[cgp_fn]` and `#[implicit]` arguments
 
-CGP v0.6.2 introduces a new `#[cgp_fn]` macro, which we can apply to plain Rust functions and turn them into *context-generic* methods that accept *implicit arguments*. With that, we can rewrite the example `rectangle_area` function as follows:
+CGP v0.7.0 introduces a new `#[cgp_fn]` macro, which we can apply to plain Rust functions and turn them into *context-generic* methods that accept *implicit arguments*. With that, we can rewrite the example `rectangle_area` function as follows:
 
 ```rust
 #[cgp_fn]

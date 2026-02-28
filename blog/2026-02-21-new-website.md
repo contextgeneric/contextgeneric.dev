@@ -49,4 +49,4 @@ Beyond visual design, the text content throughout this website, including this b
 
 ## What comes next
 
-With the website redesign now complete, we are excited about what lies ahead for the CGP project. CGP v0.6.2 will introduce support for using [**implicit parameters** in plain Rust function syntax](https://github.com/contextgeneric/cgp/issues/194), a feature that bridges the gap between plain Rust functions and fully context-generic code. Keep watching this website for the upcoming release announcement!
+With the website redesign now complete, we are excited about what lies ahead for the CGP project. CGP v0.7.0 will introduce support for using [**implicit parameters** in plain Rust function syntax](https://github.com/contextgeneric/cgp/issues/194), a feature that bridges the gap between plain Rust functions and fully context-generic code. Keep watching this website for the upcoming release announcement!
