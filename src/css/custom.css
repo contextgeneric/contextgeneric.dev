@@ -24,7 +24,6 @@
 
 .theme-announcement-bar {
   font-size: 1.2em;
-  --docusaurus-announcement-bar-height: 2em;
 }
 
 [data-theme='light'] {
