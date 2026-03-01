@@ -73,7 +73,7 @@ pub struct ComplexRectangle {
 
 As the context grows, it becomes significantly more tedious to call a method like `rectangle_area`, even if we don't care about using other methods. We would still need to first construct a `ComplexRectangle` with most of the fields having default value, before we can call `rectangle_area`.
 
-Furthermore, a concrete context definition also limits how it can be extended. Suppose that a third party application now wants to use the provided methods like `scaled_rectangle_area`, but also wants to store the rectangles in a *3D space*, it would be tough to ask the upstream project to introduce a new `pos_z` field, which can potentially break many existing code. In the worst case, the last resort for extending the context is to fork the entire project to make the changes.
+Furthermore, a concrete context definition also limits how it can be extended. Suppose that a third party application now wants to use the provided methods like `scaled_rectangle_area`, but also wants to store the rectangles in a *3D space*, it would be tough to ask the upstream project to introduce a new `pos_z` field, which can potentially break a lot of existing code. In the worst case, the last resort for extending the context is to fork the entire project to make the changes.
 
 Ideally, what we really want is to have some ways to pass around the fields in a context *implicitly* to functions like `rectangle_area` and `scaled_rectangle_area`. As long as a context type contains the required fields, e.g. `width` and `height`, we should be able to call `rectangle_area` on it without needing to implement it for the specific context.
 
