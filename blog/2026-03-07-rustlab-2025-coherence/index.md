@@ -11,7 +11,9 @@ authors: [soares]
 </center>
 </p>
 
-This blog post contains the slides and transcript for my presentation of Context-Generic Programming at [**RustLab 2025**](https://rustlab.it/talks/how-to-stop-fighting-with-coherence-and-start-writing-context-generic-trait-impls). You can also watch the video recording of my presentation on [YouTube](https://www.youtube.com/watch?v=gXIfP-W9074).
+This blog post contains the slides and transcript for my presentation of Context-Generic Programming at [**RustLab 2025**](https://rustlab.it/talks/how-to-stop-fighting-with-coherence-and-start-writing-context-generic-trait-impls).
+
+You can also read the [**PDF slides**](./cgp-rustlab-2025-slides.pdf) or watch the video recording of my presentation on [YouTube](https://www.youtube.com/watch?v=gXIfP-W9074).
 
 <!-- truncate -->
 
