@@ -468,7 +468,7 @@ I also want to give credit to the fact that context-generic programming is built
 
 ![Slide 65](./slide-65.png)
 
-And before we end, I want to share that I am [releasing `cgp-serde`](github.com/contextgeneric/cgp-serde) today, with a [companion article](https://contextgeneric.dev/blog/cgp-serde-release) to this talk. So do check out the blog post after this, and help spread the word on social media.
+And before we end, I want to share that I am [releasing `cgp-serde`](https://github.com/contextgeneric/cgp-serde) today, with a [companion article](https://contextgeneric.dev/blog/cgp-serde-release) to this talk. So do check out the blog post after this, and help spread the word on social media.
 
 ## 66 - Thank You for Listening
 
