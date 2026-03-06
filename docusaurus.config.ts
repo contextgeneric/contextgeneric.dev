@@ -96,6 +96,7 @@ const config: Config = {
         {to: '/docs/tutorials/hello', label: 'Tutorials', position: 'left'},
         {to: '/docs', label: 'Docs', position: 'left'},
         {to: '/blog', label: 'Blog', position: 'left'},
+        {to: '/docs/ai-assisted-development/skills/', label: 'AI', position: 'left'},
         {
           href: 'https://github.com/contextgeneric/cgp',
           label: 'GitHub',
