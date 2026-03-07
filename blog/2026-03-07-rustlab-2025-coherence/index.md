@@ -17,9 +17,15 @@ You can also read the [**PDF slides**](./cgp-rustlab-2025-slides.pdf) or watch t
 
 <!-- truncate -->
 
+## Discussion
+
+Discuss on [GitHub](https://github.com/orgs/contextgeneric/discussions/22), [Reddit](https://www.reddit.com/r/rust/comments/1rn9vii/how_to_stop_fighting_with_coherence_and_start/), [Lobsters](https://lobste.rs/s/jreugl/how_stop_fighting_with_coherence_start), and [Hacker News](https://news.ycombinator.com/item?id=47287502).
+
 ## Abstract
 
-Rust offers a powerful trait system that allows us to write highly polymorphic and reusable code. However, the restrictions of coherence and orphan rules have been a long standing problem and a source of confusion, limiting us from writing trait implementations that are more generic than they could have been. But what if we can overcome these limitations and write generic trait implementations without violating any coherence restrictions? **Context-Generic Programming** (CGP) is a new modular programming paradigm in Rust that explores new possibilities of how generic code can be written as if Rust had no coherence restrictions.
+Rust offers a powerful trait system that allows us to write highly polymorphic and reusable code. However, the restrictions of coherence and orphan rules have been a long standing problem and a source of confusion, limiting us from writing trait implementations that are more generic than they could have been.
+
+But what if we can overcome these limitations and write generic trait implementations without violating any coherence restrictions? **Context-Generic Programming** (CGP) is a new modular programming paradigm in Rust that explores new possibilities of how generic code can be written as if Rust had no coherence restrictions.
 
 In this talk, I will explain how coherence works and why its restrictions are necessary in Rust. I will then demonstrate how to workaround coherence by using an explicit generic parameter for the usual Self type in a provider trait. We will then walk through how to leverage coherence and blanket implementations to restore the original experience of using Rust traits through a consumer trait. Finally, we will take a brief tour of context-generic programming, which builds on this foundation to introduce new design patterns for writing highly modular components.
 
