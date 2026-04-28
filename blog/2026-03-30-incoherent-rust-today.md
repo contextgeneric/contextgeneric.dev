@@ -1394,6 +1394,92 @@ pub type Program = Pipe<Product![
 
 Which corresponds to the shell command `echo hello world!`. If Incoherent Rust treats named implementations differently from regular Rust types, it would be much more difficult to implement such type-level DSLs through named impls.
 
+### Incoherent Functions
+
+One notable CGP feature that we have seen earlier is CGP functions annotated with `#[cgp_fn]`, which can be considered as a new concept that I call **incoherent functions**.
+
+The core idea behind incoherent functions is that they can use an incoherent trait without knowing which implementation is actually chosen. Instead, the choice of implementation is deferred to a coherent caller.
+
+For example, with the `do_stuff` CGP function from earlier:
+
+```rust title="CGP"
+#[cgp_fn]
+#[uses(Name<T>)]
+pub fn do_stuff<T>(&self, foo: &Foo<T>) {
+    println!("{}", Self::NAME);
+}
+```
+
+We can think of it as being equivalent to the following incoherent Rust function:
+
+```rust title="Incoherent Rust"
+pub incoherent fn do_stuff<T>(foo: &Foo<T>)
+where
+    impl NameImpl: Name<T>,
+{
+    println!("{}", Name::<T>::NAME);
+}
+```
+
+The key thing to notice is that `do_stuff` can use an incoherent trait like `Name<T>` without knowing which implementation is being used. Beyond that, it also allows other incoherent functions to call `do_stuff` without requiring the caller to explicitly specify the `where` bound. For example:
+
+```rust title="Incoherent Rust"
+pub incoherent fn do_more_stuff<T>(foo: &Foo<T>) {
+    // no need to specify `where impl NameImpl: Name<T>`
+    do_stuff(foo);
+}
+```
+
+which is equivalent to the CGP function:
+
+```rust title="CGP"
+#[cgp_fn]
+#[uses(DoStuff<T>)]
+pub fn do_more_stuff<T>(&self, foo: &Foo<T>) {
+    do_stuff(foo);
+}
+```
+
+The core idea here is that incoherent functions can call other incoherent functions without needing to specify all transitive incoherent trait bounds required by the inner functions. Instead, all incoherent trait bounds are gathered and resolved all at once when we exit the incoherent world and call it from a coherent function.
+
+This effectively introduces an incoherent world that is isolated from the coherent world, where all existing Rust code lives. This has a similar function coloring property to async functions: incoherent traits and functions can freely call other coherent or incoherent traits and functions, but coherent traits and functions cannot call incoherent traits and functions without explicitly binding all the required incoherent trait implementations.
+
+This separation between the incoherent and coherent worlds is essential, because it simplifies the semantics and creates a clear boundary for where the bindings for incoherent implementations can be specified.
+
+In CGP, the incoherent world is simply any code that works with a generic context. The earlier functions, for instance, desugar into blanket implementations as follows:
+
+```rust title="Rust"
+pub trait DoStuff<T> {
+    fn do_stuff(&self, foo: &Foo<T>);
+}
+
+impl<Context, T> DoStuff<T> for Context
+where
+    Context: Name<T>,
+{
+    fn do_stuff(&self, foo: &Foo<T>) {
+        println!("{}", Self::NAME);
+    }
+}
+
+pub trait DoMoreStuff<T> {
+    fn do_more_stuff(&self, foo: &Foo<T>);
+}
+
+impl<Context, T> DoMoreStuff<T> for Context
+where
+    Context: DoStuff<T>,
+{
+    fn do_more_stuff(&self, foo: &Foo<T>) {
+        Self::do_stuff(foo);
+    }
+}
+```
+
+As we can see, incoherent functions desugar into traits that have blanket implementations over a generic context. By making use of impl-side dependencies, we can hide the dependencies of other CGP functions behind the trait interface. In CGP, the boundary between the incoherent and coherent worlds is determined by where a top-level context type is defined. Once that context type is defined, all incoherent implementation bindings are finalized, and we return to the coherent world that does not require the use of a generic context.
+
+As mentioned earlier, this clean separation between the incoherent and coherent worlds is only possible in the absence of dynamic-scoped impls and capabilities. A full version of Incoherent Rust may not preserve such a clear boundary, which would lead to quite different semantics compared to CGP.
+
 ### 0-arity traits
 
 CGP provides a desugaring of incoherent Rust traits into CGP traits that have an additional `Context` type, with the original `Self` type moved to an explicit generic parameter. For example, given the incoherent trait:
