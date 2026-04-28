@@ -757,8 +757,8 @@ struct Deserialize<'de, Context, T> {
     pub deserialize:
         for<D> fn(
             &Context,
-            deserializer: D,
-            deserializer_dictionary: &serde::Deserializer<'de, Context, T>,
+            D,
+            &serde::Deserializer<'de, Context, T>,
         ),
 }
 
@@ -912,23 +912,23 @@ where
 }
 ```
 
-One possible workaround is to support some form of static currying at compile time using `const` functions. This would allow us to define curried closures with static allocation. For example:
+One possible workaround is to support some form of const currying at compile time using `const` functions. This would allow us to define curried closures with static allocation. For example:
 
 ```rust title="TIR"
 pub const fn clone_vec_fn<T>(
-    clone_value_fn: &'static fn(&T) -> T,
-) -> &'static fn(&Vec<T>) -> Vec<T> {
+    clone_value_fn: fn(&T) -> T,
+) -> fn(&Vec<T>) -> Vec<T> {
     ...
 }
 ```
 
-The key change here is that `clone_vec_fn` now accepts a `&'static fn`, which acts as a static function pointer, and returns a new `&'static fn` pointer. This would require some compiler support to capture the given `clone_value_fn` pointer at compile time and define a new Rust function at the call site during compilation.
+The key change here is that `clone_vec_fn` now accepts a `fn` function pointer, and returns a new `fn` pointer. This would require some compiler support to capture the given `clone_value_fn` pointer at compile time and define a new Rust function at the call site during compilation.
 
 Such compile-time currying might not be too difficult to implement in Rust. If it could be done, we could simplify trait dictionaries to use function pointers again:
 
 ```rust title="TIR"
 pub struct Clone<T> {
-    pub clone: &'static fn(&T) -> T,
+    pub clone: fn(&T) -> T,
 }
 ```
 
@@ -951,9 +951,9 @@ It is worth noting that the curried `const fn` described here works similarly to
 ```rust title="TIR"
 pub const CLONE_VEC_FN<
     T,
-    const CLONE_VALUE_FN: &'static fn(&T) -> T,
->: &'static fn(&Vec<T>) -> Vec<T> =
-    fn(values: &Vec<T>) -> Vec<T> {…};
+    const CLONE_VALUE_FN: fn(&T) -> T,
+>: fn(&Vec<T>) -> Vec<T> =
+    fn(values: &Vec<T>) -> Vec<T> { ... };
 
 pub const CLONE_VEC_DICTIONARY<
     T,
@@ -981,7 +981,7 @@ Since the `deserialize` function accepts a generic `D` parameter, we would need 
 ```rust title="TIR"
 pub struct Deserialize<'de> {
     pub deserialize:
-        &'static for<D> fn(
+        for<D> fn(
             deserializer: D,
             deserializer_dictionary: &Deserializer<'de>,
         ) -> Result<Self, D::Error>;
@@ -990,7 +990,7 @@ pub struct Deserialize<'de> {
 
 Since Rust does not currently support the use of higher-ranked `for<D>` in `fn` pointer types, it is challenging to define such a `Deserialize` dictionary.
 
-One potential workaround is to add limited support for generics inside valid `&'static fn` pointers. After all, if the Rust compiler already has all metadata about a `&'static fn` pointer at compile time, it may be able to recover that information and perform the necessary monomorphization when a generic `&'static fn` pointer is called.
+One potential workaround is to add limited support for generics inside valid `fn` pointers. After all, if the Rust compiler already has all metadata about a `fn` pointer at compile time, it may be able to recover that information and perform the necessary monomorphization when a generic `fn` pointer is called.
 
 #### Dependent types or type families
 
@@ -1006,7 +1006,7 @@ pub struct Deserializer<'de> {
 
 pub struct Deserialize<'de> {
     pub deserialize:
-        &'static for<D> fn(
+        for<D> fn(
             deserializer: D,
             deserializer_dictionary: &Deserializer<'de>,
         ) -> Result<Self, deserializer_dictionary.Error>;
@@ -1028,16 +1028,16 @@ pub struct Deserialize<'de> {
         for<D> const fn(
             deserializer_dictionary: &'static Deserializer<'de>,
         ) ->
-            &'static fn(deserializer: D) ->
+            fn(deserializer: D) ->
                 Result<Self, deserializer_dictionary.Error>;
 }
 ```
 
-In the above example, the `deserialize` field becomes a curried `const fn` pointer that can not only use generics, but also return `&'static fn` pointers that contain types depending on its arguments. We also introduce a new `const struct` type for defining trait dictionaries, which allows `Type` fields to be present in the struct but only usable at compile time.
+In the above example, the `deserialize` field becomes a curried `const fn` pointer that can not only use generics, but also return `fn` pointers that contain types depending on its arguments. We also introduce a new `const struct` type for defining trait dictionaries, which allows `Type` fields to be present in the struct but only usable at compile time.
 
 There would still be many unknowns around whether we can truly implement something like `const fn` in Rust that supports currying, higher-ranked types, and dependent types. The challenges may be too significant to make it worthwhile, but from a programming language theory perspective, it is likely at least theoretically possible.
 
-It is also worth noting that something like the `const fn` concept shown here could be useful for the current work on [compile-time reflection](https://rust-lang.github.io/rust-project-goals/2025h2/reflection-and-comptime.html). It might even be possible for Rust to support the full `comptime` concept through `const fn`. In that sense, support for `const fn` could be valuable not only for dictionary-passing style but also for reflection and comptime in Rust.
+It is also worth noting that something like the `const fn` concept shown here could be useful for the current work on [compile-time reflection](https://rust-lang.github.io/rust-project-goals/2025h2/reflection-and-comptime.html). It might even be possible for Rust to support the full `comptime` concept through `const fn`. In that sense, support for curried `const fn` could be valuable not only for dictionary-passing style but also for reflection and comptime in Rust.
 
 #### Ownership and lifetime
 
@@ -1090,13 +1090,13 @@ We can then desugar `sum_u64` to accept `TypeEq` as a type equality proof, in ad
 ```rust title="TIR"
 pub struct Iterator<I> {
     pub Item: Type,
-    pub next: &'static fn(&mut I) -> Option<self.Item>; // a little bit of self-reference magic
+    pub next: fn(&mut I) -> Option<self.Item>; // a little bit of self-reference magic
 }
 
 pub const fn sum_u64<I>(
     iterator_dictionary: Iterator<I>,
     item_eq_u64: TypeEq<iterator_dictionary.Item, u64>,
-) -> &'static fn(I) -> u64
+) -> fn(I) -> u64
 {
     |mut values| {
         let mut acc: u64 = 0;
@@ -1217,7 +1217,7 @@ The desugared `cast` function becomes:
 
 ```rust title="TIR"
 pub const fn cast<T>(local_refl: Refl<T>) ->
-    &'static fn(T) -> local_refl.Refl
+    fn(T) -> local_refl.Refl
 {
     | t | {
         // Type mismatch: requires local_refl === global_refl::<T>()
@@ -1249,7 +1249,7 @@ Using `TypeEq`, we can implement `cast` as something like the following:
 
 ```rust title="TIR"
 pub const fn cast<T>(local_refl: Refl<T>) ->
-    &'static fn(T) -> local_refl.Refl
+    fn(T) -> local_refl.Refl
 {
     // pattern matches and bring the equality proof into scope
     let TypeEq(_) = coherent_refl(local_refl);
