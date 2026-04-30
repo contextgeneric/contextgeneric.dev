@@ -1480,6 +1480,19 @@ As we can see, incoherent functions desugar into traits that have blanket implem
 
 As mentioned earlier, this clean separation between the incoherent and coherent worlds is only possible in the absence of dynamic-scoped impls and capabilities. A full version of Incoherent Rust may not preserve such a clear boundary, which would lead to quite different semantics compared to CGP.
 
+#### Incoherence as coeffect
+
+For readers who are familiar with the concept of monads and algebraic effects, the incoherent world with generic context can be understood as a form of effect, or more precisely, a [**coeffect**](https://tomasp.net/coeffects/).
+
+In CGP, each incoherent trait definition can be thought of as defining a new kind of effect, and each CGP provider implementation can be thought of as an effect handler for that effect. The definition of concrete contexts and the binding of incoherent implementations through `delegate_components!` plays the same role as defining concrete monads and configuring effect handlers in algebraic effects systems found in functional languages like Haskell. The CGP bindings effectively handle the incoherence effects by delegating them to CGP providers, and the result is code that operates coherently within a fixed context, analogous to returning a pure value once all effects have been handled.
+
+That said, the effect system implied by CGP is considerably more limited than a full algebraic effects system. In particular, CGP effects only support linear continuations, because Rust does not have support for delimited continuations.
+
+There is also an important way in which CGP diverges from traditional algebraic effects. CGP supports the injection of *abstract types* through associated types in trait definitions. Traditional algebraic effects have no equivalent notion of passing a type through an effect handler, unless the system also incorporates dependent types that allow types to be treated as ordinary values. This gives CGP a character that is genuinely distinct from the algebraic effects model.
+
+These observations point toward a better fit in the [**coeffects**](https://tomasp.net/coeffects/) framework, which studies how contextual requirements flow through a computation rather than how computational effects flow out of it. Where effects describe what a computation produces or performs, coeffects describe what a computation requires from its environment. The generic context in CGP serves precisely this role: it carries the implementation choices and capabilities that a computation depends on, and those dependencies are resolved all at once when a concrete context is defined. A full introduction to coeffects is beyond the scope of this blog post, but the connection is worth noting for readers interested in the theoretical foundations of what CGP is doing.
+
+
 ### 0-arity traits
 
 CGP provides a desugaring of incoherent Rust traits into CGP traits that have an additional `Context` type, with the original `Self` type moved to an explicit generic parameter. For example, given the incoherent trait:
