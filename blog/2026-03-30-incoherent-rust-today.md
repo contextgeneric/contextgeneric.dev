@@ -983,7 +983,7 @@ pub struct Deserialize<'de> {
     pub deserialize:
         for<D> fn(
             deserializer: D,
-            deserializer_dictionary: &Deserializer<'de>,
+            deserializer_dictionary: &Deserializer<'de, D>,
         ) -> Result<Self, D::Error>;
 }
 ```
@@ -1008,7 +1008,7 @@ pub struct Deserialize<'de> {
     pub deserialize:
         for<D> fn(
             deserializer: D,
-            deserializer_dictionary: &Deserializer<'de>,
+            deserializer_dictionary: &Deserializer<'de, D>,
         ) -> Result<Self, deserializer_dictionary.Error>;
 }
 ```
@@ -1026,7 +1026,7 @@ pub const struct Deserializer<'de> {
 pub struct Deserialize<'de> {
     pub deserialize:
         for<D> const fn(
-            deserializer_dictionary: &'static Deserializer<'de>,
+            deserializer_dictionary: &'static Deserializer<'de, D>,
         ) ->
             fn(deserializer: D) ->
                 Result<Self, deserializer_dictionary.Error>;
