@@ -9,7 +9,7 @@ This is the **second** part of the blog series on **Programming Extensible Data 
 
 In this second part of the series, we will explore the use of **extensible variants**, by examining how it can be used in an **extensible visitor pattern** to build a modular interpreter for a toy math expression language.
 
-<!-- truncate -->
+{/* truncate */}
 
 ## Recap
 

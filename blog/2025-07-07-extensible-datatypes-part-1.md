@@ -9,7 +9,7 @@ I’m excited to announce the release of [**CGP v0.4.2**](https://github.com/con
 
 Extensible records and variants allow developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition. This makes it possible to write truly generic and flexible logic that is decoupled from rigid type definitions.
 
-<!-- truncate -->
+{/* truncate */}
 
 In earlier versions, CGP already offered a foundational feature through the `HasField` trait, which made it possible to *read* a field from any struct that included it. With version 0.4.2, this functionality is dramatically extended. Not only can you now read fields, but you can also *construct* values onto these fields in a type-safe manner. More importantly, the same level of extensibility is now available for enums, enabling operations over variants in a similarly generic fashion.
 

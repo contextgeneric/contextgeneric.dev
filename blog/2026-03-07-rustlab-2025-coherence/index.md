@@ -15,7 +15,7 @@ This blog post contains the slides and transcript for my presentation of Context
 
 You can also read the [**PDF slides**](./cgp-rustlab-2025-slides.pdf) or watch the video recording of my presentation on [YouTube](https://www.youtube.com/watch?v=gXIfP-W9074).
 
-<!-- truncate -->
+{/* truncate */}
 
 ## Discussion
 
@@ -460,7 +460,7 @@ There are many new possibilities that are enabled by CGP, which I unfortunately 
 
 ![Slide 63](./slide-63.png)
 
-But although it is easy to get started with CGP, there are some challenges I should warn you about before you get started. Because of how the trait system is used, any unsatisfied dependency will result in some very **verbose and difficult-to-understand error messages**. In the long term, we would need to make changes to the Rust compiler itself to produce better error messages for CGP, but for now, I have found that [**large language models**](https://contextgeneric.dev/docs/ai-assisted-development/skills/) can be used to help you understand the root cause more quickly.
+But although it is easy to get started with CGP, there are some challenges I should warn you about before you get started. Because of how the trait system is used, any unsatisfied dependency will result in some very **verbose and difficult-to-understand error messages**. In the long term, we would need to make changes to the Rust compiler itself to produce better error messages for CGP, but for now, I have found that [**large language models**](https://contextgeneric.dev/docs/ai/skills/) can be used to help you understand the root cause more quickly.
 
 Most importantly, the biggest challenge for CGP is that it has a **steep learning curve**. Programming in CGP can almost feel like programming in a new language of its own. We are also still in the early stages of development, so the community and ecosystem support may be weak. On the plus side, this means that there are plenty of opportunities for you to get involved, and make CGP better in many ways.
 

@@ -8,7 +8,7 @@ tags: [release]
 Welcome everyone! This blog post marks the launch of the _context-generic programming_ (CGP) project,
 to introduce a new modular programming paradigm for Rust.
 
-<!-- truncate -->
+{/* truncate */}
 
 ## A Quick Overview of Context-Generic Programming
 

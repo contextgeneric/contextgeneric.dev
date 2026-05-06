@@ -13,7 +13,7 @@ The next 2 parts of the series are aimed at readers who want to go deeper — th
 
 We will first explore the implementation of extensible records in this part, followed by the implementation of extensible variants in the coming Part 4.
 
-<!-- truncate -->
+{/* truncate */}
 
 ## Recap
 
