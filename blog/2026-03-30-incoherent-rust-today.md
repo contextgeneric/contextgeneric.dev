@@ -698,8 +698,6 @@ impl<'de, 'a, Value> ValueDeserializer<'de, &'a Foo> {
         // Capabilities are "passed" as implicit arguments through the context.
         // The double reference (&&) arises because implicit arguments always
         // borrow from `&self`, and the capability type is itself already a reference.
-        // The outer & comes from the borrow of self; the inner &'a comes from the
-        // capability type being &'a BasicArena.
         #[implicit] arena: &&'a BasicArena,
         deserializer: D,
     ) -> Result<&'a Foo, D::Error>
@@ -748,61 +746,7 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-The advantage of passing an additional context through `&self` becomes clear once we consider that the `Context` type can carry runtime values alongside trait implementations. We can further desugar the CGP code into TIR to see how everything reduces to dictionary-passing style:
-
-```rust title="TIR"
-struct Deserialize<'de, Context, T> {
-    // Spoiler: dictionary-passing style requires Rust to also support
-    // higher-ranked types.
-    pub deserialize:
-        for<D> fn(
-            &Context,
-            D,
-            &serde::Deserializer<'de, Context, T>,
-        ),
-}
-
-const fn deserialize_foo_ref<'de, 'a, Context, T>(
-    get_arena: fn(&Context) -> &&'a BasicArena,
-) -> Deserialize<'de, Context, &'a Foo> {
-    Deserialize {
-        deserialize: ...,
-    }
-}
-
-fn main() -> Result<(), Error> {
-    let bytes = read_some_bytes()?;
-
-    struct Context<'de, 'a> {
-        arena: &'a BasicArena,
-        deserialize_foo_ref:
-            Deserialize<'de, Context<'de, 'a>, &'a Foo>,
-        deserialize_vec_foo_ref:
-            Deserialize<'de, Context<'de, 'a>, Vec<&'a Foo>>,
-    }
-
-    let arena = arena::BasicArena::new();
-
-    // Context value now has to be constructed at runtime.
-    let context = Context {
-        arena: &arena,
-        deserialize_foo_ref:
-            deserialize_foo_ref(|context| &context.arena),
-        deserialize_vec_foo_ref:
-            deserialize_extend(...),
-    };
-
-    let foos: Vec<&Foo> = context.deserialize_json_bytes(
-        &bytes,
-        // Pass getter for the dictionary for Deserialize<.., Vec<&'a Foo>>
-        |context| &context.deserialize_vec_foo_ref,
-    )?;
-
-    println!("foos: {:?}", foos);
-
-    Ok(())
-}
-```
+The advantage of passing an additional context through `&self` becomes clear once we consider that the `Context` type can carry runtime values alongside trait implementations.
 
 ---
 
@@ -814,9 +758,7 @@ By using the `Context` type as a top-level dictionary for other trait dictionari
 
 That said, there are several limitations that may prevent the single-context approach from working in the general case.
 
-### Limitations of CGP's single-context approach
-
-#### Mutable or owned value access
+### Mutable or owned value access
 
 The biggest limitation of the single-context approach is that the `Context` type is not able to easily supply mutable or owned values to trait implementations. Since the trait methods are desugared to always accept a `&self` parameter, we cannot get mutable or owned values out of the borrowed context value.
 
@@ -828,7 +770,7 @@ A simple way to work around this is to simply disallow the use of `&mut` or owne
 
 However, in case the Rust compiler team decides to also support `&mut` or owned values as capabilities, then it may be necessary to explicitly pass everything as separate parameters, without grouping them through a single context.
 
-#### Nested dynamic-scoped bindings
+### Nested dynamic-scoped bindings
 
 Another key limitation of CGP's approach is that all bindings of runtime values and trait implementations must be done at one place where the concrete context type is defined. This can severely limit the expressiveness of where one can call an incoherent trait implementation.
 
@@ -868,402 +810,6 @@ Readers coming from Scala may also notice that this kind of code strongly resemb
 Due to these limitations, it may be worth considering whether it is worth allowing the user to bind capabilities or incoherent trait implementations anywhere in the code. Although it may be possible to desugar such code into dictionary-passing style in other ways, it may significantly complicate how we could reason about Incoherent Rust code.
 
 On the other hand, the restricted version of Incoherent Rust provided by CGP may result in more disciplined Incoherent Rust code being written. Because all bindings have to be done at the same place as where a `Context` type is defined, CGP code usually has centralized locations for the reader to find out which implementations are used for that context. This results in a relatively simple semantics for reasoning about how context-generic code would behave within a specific context type.
-
-### Challenges for implementing dictionary-passing style in Rust
-
-It is worth getting excited about desugaring Rust traits into dictionary-passing style. However, there are some inherent challenges in implementing dictionary-passing style in Rust, due to it lacking some functional programming constructs that are common in languages like Haskell.
-
-One reason that many people tend to overlook is just how powerful Rust traits really are. For most developers, Rust traits are conceptually similar to interfaces in OOP languages, and they most often encounter them in the context of `dyn` traits. For these basic use cases, it is easy to imagine how they could be desugared to dictionary-passing style with just vanilla Rust.
-
-However, as demonstrated by CGP, Rust traits are powerful enough to almost rival advanced functional language features such as ML modules. With const generics, it is even possible to use the trait system to write type-level code that resembles dependent types. As such, it is natural that if we want to desugar traits into a simpler language, that simpler language would still need to offer equally powerful capabilities as what traits provide.
-
-:::note
-The main goal of this section is just to give a better understanding of the challenges involved in implementing dictionary-passing style in Rust, and to explore some potential solutions to those challenges.
-
-The ideas presented in this section are entirely speculative. We are mainly exploring what kind of features might be needed in Rust to make it feasible to support dictionary-passing style. It is entirely possible that not all of these features are truly necessary. There may be other approaches not mentioned here that could also work.
-
-For example, the use of dictionary-passing style could be significantly simplified if we disregard type safety and simply use `unsafe` and raw pointers to implement and use the dictionaries. That said, if the main goal of TIR is to implement dictionary-passing style in a type-safe manner, then the challenges described in this section might still be relevant.
-:::
-
-#### Currying and first-class closures
-
-The first challenge is the lack of currying and first-class closure types in Rust. If you examine the conceptual desugaring of dictionary-passing style in Rust, you will notice that we are essentially writing functions that return other functions, or more accurately, closures.
-
-This style of programming is natural through currying in languages like Haskell. But in Rust, it requires fairly heavy syntax such as the following:
-
-```rust title="TIR"
-pub const fn clone_vec_fn<T>(
-    clone_value_fn: impl Fn(&T) -> T,
-) -> impl Fn(&Vec<T>) -> Vec<T> {
-    ...
-}
-```
-
-The main issue with this approach is that `Fn` is still a trait in Rust. So if the main goal is to eliminate generic traits in an intermediate representation, we cannot keep the `Fn` trait in its current form either.
-
-Furthermore, since each Rust closure has its own unique type, trait dictionaries would technically need to contain generic parameters to accommodate those closures. For example, the `Clone` dictionary would technically need to be defined as:
-
-```rust title="TIR"
-pub struct Clone<CloneFn, T>
-where
-    CloneFn: Fn(&T) -> T,
-{
-    pub clone: CloneFn,
-}
-```
-
-One possible workaround is to support some form of const currying at compile time using `const` functions. This would allow us to define curried closures with static allocation. For example:
-
-```rust title="TIR"
-pub const fn clone_vec_fn<T>(
-    clone_value_fn: fn(&T) -> T,
-) -> fn(&Vec<T>) -> Vec<T> {
-    ...
-}
-```
-
-The key change here is that `clone_vec_fn` now accepts a `fn` function pointer, and returns a new `fn` pointer. This would require some compiler support to capture the given `clone_value_fn` pointer at compile time and define a new Rust function at the call site during compilation.
-
-Such compile-time currying might not be too difficult to implement in Rust. If it could be done, we could simplify trait dictionaries to use function pointers again:
-
-```rust title="TIR"
-pub struct Clone<T> {
-    pub clone: fn(&T) -> T,
-}
-```
-
-We can then define a generic `const fn` that builds a `Clone` dictionary for `Vec<T>` by accepting a `Clone<T>` dictionary and returning a new `Clone<Vec<T>>` dictionary:
-
-```rust title="TIR"
-pub const fn clone_vec_dictionary<T>(
-    clone_value_dictionary: Clone<T>,
-) -> Clone<Vec<T>> {
-    Clone {
-        clone: clone_vec_fn::<T>(clone_value_dictionary),
-    }
-}
-```
-
-##### Const-generic syntax for compile-time currying
-
-It is worth noting that the curried `const fn` described here works similarly to Nadri's use of const generics to curry dictionary constructor functions. For example, we could redefine `clone_vec_fn` and `clone_vec_dictionary` to become constants that accept their parameters through const generics:
-
-```rust title="TIR"
-pub const CLONE_VEC_FN<
-    T,
-    const CLONE_VALUE_FN: fn(&T) -> T,
->: fn(&Vec<T>) -> Vec<T> =
-    fn(values: &Vec<T>) -> Vec<T> { ... };
-
-pub const CLONE_VEC_DICTIONARY<
-    T,
-    CLONE_VALUE_DICTIONARY: Clone<T>,
->: Clone<Vec<T>> = Clone {
-    clone: CLONE_VEC_FN::<T, CLONE_VALUE_DICTIONARY.clone>,
-}
-```
-
-Regardless of whether we use const generics or curried const functions, the two approaches are almost semantically equivalent. We could desugar almost all uses of const values parameterized by const generics into curried const functions, or vice versa. As a result, this is more a matter of syntactic preference for the desugaring strategy. In this blog post, we use curried const functions, since their syntax is closer to functional programming and makes the use of compile-time currying more explicit.
-
-#### Higher-ranked types
-
-Aside from the lack of curried functions, Rust also lacks support for higher-ranked types, which would be required to properly support generic functions in trait dictionaries. We have already seen this issue when trying to desugar the `Deserialize` trait into a dictionary:
-
-```rust title="Rust"
-pub trait Deserialize<'de> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where D: Deserializer<'de>;
-}
-```
-
-Since the `deserialize` function accepts a generic `D` parameter, we would need higher-ranked types to desugar it to something like:
-
-```rust title="TIR"
-pub struct Deserialize<'de> {
-    pub deserialize:
-        for<D> fn(
-            deserializer: D,
-            deserializer_dictionary: &Deserializer<'de, D>,
-        ) -> Result<Self, D::Error>;
-}
-```
-
-Since Rust does not currently support the use of higher-ranked `for<D>` in `fn` pointer types, it is challenging to define such a `Deserialize` dictionary.
-
-One potential workaround is to add limited support for generics inside valid `fn` pointers. After all, if the Rust compiler already has all metadata about a `fn` pointer at compile time, it may be able to recover that information and perform the necessary monomorphization when a generic `fn` pointer is called.
-
-#### Dependent types or type families
-
-Another key issue is the lack of type families to support the desugaring of associated types in traits. If we carefully examine the desugared `Deserialize` struct, we would notice that the `D::Error` type is technically `<D as Deserializer<'de>>::Error`, which still refers to the `Deserializer` trait that is supposed to have been turned into a dictionary value.
-
-If we were to extract the `Error` type from `deserializer_dictionary`, that would effectively require some kind of dependent type support in Rust:
-
-```rust title="TIR"
-pub struct Deserializer<'de> {
-    pub Error: Type, // type as value
-    ...
-}
-
-pub struct Deserialize<'de> {
-    pub deserialize:
-        for<D> fn(
-            deserializer: D,
-            deserializer_dictionary: &Deserializer<'de, D>,
-        ) -> Result<Self, deserializer_dictionary.Error>;
-}
-```
-
-Notice that the returned error type is now `Result<Self, deserializer_dictionary.Error>`, indicating that the `Error` type depends on the value of `deserializer_dictionary`.
-
-Supporting even a subset of dependent types in Rust would be a significant undertaking. But if we were to go down this path, one possibility is to have limited support for dependent types through a new `const fn` pointer such as:
-
-```rust title="TIR"
-pub const struct Deserializer<'de> {
-    pub Error: Type, // type as value
-    ...
-}
-
-pub struct Deserialize<'de> {
-    pub deserialize:
-        for<D> const fn(
-            deserializer_dictionary: &'static Deserializer<'de, D>,
-        ) ->
-            fn(deserializer: D) ->
-                Result<Self, deserializer_dictionary.Error>;
-}
-```
-
-In the above example, the `deserialize` field becomes a curried `const fn` pointer that can not only use generics, but also return `fn` pointers that contain types depending on its arguments. We also introduce a new `const struct` type for defining trait dictionaries, which allows `Type` fields to be present in the struct but only usable at compile time.
-
-There would still be many unknowns around whether we can truly implement something like `const fn` in Rust that supports currying, higher-ranked types, and dependent types. The challenges may be too significant to make it worthwhile, but from a programming language theory perspective, it is likely at least theoretically possible.
-
-It is also worth noting that something like the `const fn` concept shown here could be useful for the current work on [compile-time reflection](https://rust-lang.github.io/rust-project-goals/2025h2/reflection-and-comptime.html). It might even be possible for Rust to support the full `comptime` concept through `const fn`. In that sense, support for curried `const fn` could be valuable not only for dictionary-passing style but also for reflection and comptime in Rust.
-
-#### Ownership and lifetime
-
-As mentioned earlier, Rust's borrow checker makes it challenging to pass runtime dependencies through a common `&Context` reference. This limitation is unique to Rust. Functional languages like Haskell only have immutable values that are reference counted, and this makes dictionary-passing style relatively straightforward to implement.
-
-However, it is worth noting that with the recent introduction of linear types, even Haskell's approach to dictionary-passing style faces similar issues, in that it cannot fully support linear values. For example, it is not possible to bind linear values to implicit parameters. To support constraints that can only be used exactly once, Haskell requires even more advanced features such as [linear constraints](https://www.tweag.io/blog/2023-01-26-linear-constraints-freeze/) to be implemented in GHC.
-
-This shows that features like linear or affine types can significantly complicate the implementation strategy for both the surface language and the desugared dictionary-passing code.
-
-#### Type equalities
-
-Nadri's blog post also mentioned the challenges with desugaring type equalities. Suppose that we want to write a `sum_u64` function that can sum over any `Iterator` implementation with the `Item` type being `u64`. We can easily implement this in Rust today as:
-
-```rust title="Rust"
-pub trait Iterator {
-    type Item;
-    fn next(&mut self) -> Option<Self::Item>;
-}
-
-pub fn sum_u64<I>(
-    values: I,
-) -> u64
-where
-    I: Iterator<Item = u64>,
-{
-    let mut acc: u64 = 0;
-    acc
-}
-```
-
-The key thing to note here is that `sum_u64` works with a generic `I` type implementing `Iterator`, with the requirement that `<I as Iterator>::Item === u64`. The challenge is how to desugar this type equality into TIR.
-
-One potential solution is to introduce a new primitive like `T: TypeEq<u64>`, to allow us to encode the type equality relationship without using the associated type equality syntax:
-
-```rust title="Incoherent Rust"
-pub fn sum_u64<I>(
-    values: I,
-) -> u64
-where
-    I: Iterator,
-    I::Item: TypeEq<u64>, // New TypeEq primitive
-{
-    let mut acc: u64 = 0;
-    acc
-}
-```
-
-We can then desugar `sum_u64` to accept `TypeEq` as a type equality proof, in addition to the `Iterator` dictionary:
-
-```rust title="TIR"
-pub struct Iterator<I> {
-    pub Item: Type,
-    pub next: fn(&mut I) -> Option<self.Item>; // a little bit of self-reference magic
-}
-
-pub const fn sum_u64<I>(
-    iterator_dictionary: Iterator<I>,
-    item_eq_u64: TypeEq<iterator_dictionary.Item, u64>,
-) -> fn(I) -> u64
-{
-    |mut values| {
-        let mut acc: u64 = 0;
-
-        while let Some(value) = iterator_dictionary.next(&mut values) {
-            acc += value
-        }
-
-        acc
-    }
-}
-```
-
-The key thing to notice here is that `TypeEq` becomes a built-in Rust construct that allows the compiler to treat `iterator_dictionary.Item` and `u64` as being the same type. With the type equality proof in scope, the expression `acc += value` can be type checked successfully.
-
-It is worth noting that today's Rust does not have any equivalent to the `TypeEq` construct. For example, it is impossible to define something like the following in Rust:
-
-```rust title="Rust"
-pub fn transmute<T, U>(
-    value: T,
-) -> U
-where
-    // Not possible in Rust today
-    T: TypeEq<U>,
-{
-    value
-}
-```
-
-In today's Rust it is impossible to specify a constraint that two generic types are equal. Instead, Rust provides a more restrictive form of type equality, where at least one side of the equality must be an associated type. A main reason for this restriction is that a fully generalized type equality constraint could significantly complicate the type checker. If we want to desugar the type equality constraints in TIR, then Rust would need to support fully generalized type equality that can handle not only equality between two generic types, but also value-dependent equality between generic types and type fields in dictionary items.
-
-#### Dictionary equality
-
-In addition to how to desugar type equalities, Nadri's blog post also mentioned the challenges of asserting the equality of associated types in trait dictionaries. This is particularly an issue when trait dictionaries are generated from different sources, such as through blanket implementations as compared to being passed explicitly.
-
-One subtle challenge with mixing coherent and incoherent traits in dictionary-passing style is this problem of dictionary equality. To understand it concretely, we will use a trait that makes the issue visible.
-
-Consider the following trait, renamed here from Nadri's original example to make the concept more vivid:
-
-```rust title="Rust"
-trait Refl {
-    type Refl;
-}
-
-impl<T> Refl for T {
-    type Refl = T;
-}
-```
-
-The `Refl` trait contains a `Refl` associated type, and it has a blanket implementation for all `T` by setting `Refl` to be the same as `T`. This means that `T === <T as Refl>::Refl` for all types.
-
-With the coherence rules, it must always be the case that `T === <T as Refl>::Refl`, because it is impossible to define a conflicting implementation that overrides the associated type:
-
-```rust title="Rust"
-// Error: conflicting implementations of trait `Refl` for type `u32`
-impl Refl for u32 {
-    type Refl = u64;
-}
-```
-
-With this guarantee in place, Rust allows us to define a function like the following:
-
-```rust title="Rust"
-// No `T: Refl` bound
-pub fn reflect<T>(t: T) -> <T as Refl>::Refl {
-    t
-}
-```
-
-The `reflect` function takes any value of type `T` and returns that value as the type `<T as Refl>::Refl`. Since Rust knows this must always be the case through the blanket implementation, it allows the code to compile successfully. It is worth noting that there is no trait bound in `reflect` that requires `T` to implement `Refl`. Despite that, we are still able to use the `Refl` trait in `<T as Refl>::Refl` through the blanket implementation.
-
-Now let's see what happens if we add the `T: Refl` trait bound explicitly:
-
-```rust title="Rust"
-pub fn cast<T: Refl>(t: T) -> <T as Refl>::Refl {
-    // Error: mismatched types
-    t
-}
-```
-
-When the local `T: Refl` trait bound is added, Rust essentially shadows the global blanket implementation and assumes that this `Refl` implementation could differ from the blanket one. Because of that, we can no longer treat `T === T::Refl` and return `t` here.
-
-Interestingly, implementing `cast` by calling `reflect` works fine:
-
-```rust title="Rust"
-pub fn cast<T: Refl>(t: T) -> <T as Refl>::Refl {
-    reflect(t) // It works!
-}
-```
-
-The reason this works is that Rust sees `reflect` returns a `<T as Refl>::Refl`, but it does not check that this `<T as Refl>::Refl` uses the global `impl<T> Refl for T` implementation rather than the local `T: Refl` implementation given to `cast`. Intuitively, this makes sense because the coherence rules already enforce that there can never be two overlapping implementations. So if there are two uses of `<T as Refl>::Refl` from different places, they must always be equal.
-
-The issue Nadri mentioned arises when we try to desugar the Rust code into dictionary-passing style:
-
-```rust title="TIR"
-pub const struct Refl<T> {
-    pub Refl: Type,
-}
-
-pub const fn global_refl<T>() -> Refl<T> {
-    Refl {
-        Refl: T,
-    }
-}
-```
-
-First, `Refl` becomes a dictionary struct containing a `Refl` type field. We then have a `global_refl` dictionary constructor that returns a `Refl<T>` for all `T`, with the `Refl` field being `T`.
-
-When desugaring `reflect`, it becomes:
-
-```rust title="TIR"
-pub fn reflect<T>(t: T) -> global_refl::<T>().Refl {
-    t
-}
-```
-
-The desugared `cast` function becomes:
-
-```rust title="TIR"
-pub const fn cast<T>(local_refl: Refl<T>) ->
-    fn(T) -> local_refl.Refl
-{
-    | t | {
-        // Type mismatch: requires local_refl === global_refl::<T>()
-        // Or: local_refl.Refl === global_refl::<T>().Refl
-        reflect::<T>()
-    }
-}
-```
-
-It now becomes clear that the desugared `cast` accepts a `local_refl` dictionary for `Refl` and uses `local_refl.Refl` as the return type. But since there is no evidence that `local_refl` must always be the same as `global_refl::<T>()`, type checking would fail here.
-
-Thinking of this from the context of Incoherent Rust makes a lot of sense. If `Refl` were an incoherent trait, the assumption that `local_refl` is always the same as `global_refl` would be invalidated, since someone could implement a local impl of `Refl` with a different `Refl::Refl` type.
-
-However, if we want coherent and incoherent traits to coexist in Rust, there needs to be some way to allow dictionary-passing style to still work correctly for coherent traits.
-
-As Nadri mentioned, finding a robust solution to the problem of dictionary equality remains an open research problem. One speculative idea is that Rust could generate axioms about coherence properties when desugaring high-level Rust code into TIR. The axiom would look something like:
-
-```rust title="TIR"
-pub const fn coherent_refl::<T>(
-    local_refl: Refl<T>,
-) -> TypeEq<local_refl.Refl, global_refl::<T>().Refl> {
-    // built-in implementation
-}
-```
-
-The syntax starts to break down here. But essentially, we are asserting that for any `local_refl` value of type `Refl<T>`, there is a proof that the type `local_refl.Refl` must be identical to the type in `global_refl::<T>().Refl`.
-
-Using `TypeEq`, we can implement `cast` as something like the following:
-
-```rust title="TIR"
-pub const fn cast<T>(local_refl: Refl<T>) ->
-    fn(T) -> local_refl.Refl
-{
-    // pattern matches and bring the equality proof into scope
-    let TypeEq(_) = coherent_refl(local_refl);
-
-    | t | {
-        // the compiler now considers `local_refl.Refl === global_refl::<T>().Refl`
-        reflect::<T>()
-    }
-}
-```
-
-Using some equality machinery that does not currently exist in Rust, we would allow these equality constraints to be present in the type checker and allow the code to compile.
-
-An axiom like `coherent_refl` would only be generated for coherent traits. This means that for incoherent traits, these axioms would not be present in TIR, making it impossible to accidentally mix up associated types from incoherent traits.
 
 ---
 
@@ -1777,9 +1323,15 @@ Both approaches have trade-offs, and the right choice may depend on the specific
 
 ### ML Modules
 
-In the desugaring of traits into dictionary-passing style in TIR, the presence of types and functions inside a dictionary struct bears a strong resemblance to ML modules. Similarly, defining a `const fn` that accepts a dictionary struct and returns a new dictionary struct works much like how ML functors work.
+The structural resemblance between dictionary-passing style and ML modules is deeper than it might initially appear. In ML-family languages such as Standard ML and OCaml, a module is a first-class construct that bundles types, values, and functions together behind a named signature. The signature specifies what a module must provide, playing a role analogous to a Rust trait: it describes an interface without committing to any particular implementation. When Rust traits are desugared into dictionaries in TIR, each dictionary struct closely mirrors an ML module record. Both contain function fields, both can encode associated types through additional type parameters, and both can be composed with other dictionaries or modules to form more complex structures.
 
-Given how closely TIR resembles ML modules, a key question for the implementors is whether they are effectively building an ML-module-like system inside Rust. That would certainly unlock capabilities well beyond dictionary-passing style, but it also comes with significant technical challenges that would need careful evaluation before committing to the approach.
+The parallel extends to generic implementations as well. A Rust impl block that takes other trait bounds as dependencies is the dictionary-passing analogue of an ML functor: a function that accepts one or more modules as arguments and produces a new module as output. The TIR version of `impl<T: Clone> Clone for Vec<T>`, for example, is a function that accepts a `Clone<T>` dictionary and returns a `Clone<Vec<T>>` dictionary, which is precisely the structure of a functor in OCaml. These parallels suggest that the Rust compiler team, when pursuing a traitless IR based on dictionary-passing style, will be working on territory that ML has already explored. The compilation strategies, normalization algorithms, and typing rules developed for ML functors may offer useful guidance.
+
+The connection to OCaml's [**modular implicits**](https://arxiv.org/abs/1512.01895) proposal is especially relevant for Incoherent Rust. Modular implicits extend OCaml with the ability to pass modules implicitly at call sites, with the compiler inferring which module to use by searching the modules currently in scope and selecting one that matches the required signature. This mechanism is structurally identical to how Rust today resolves trait implementations during monomorphization: a generic function is called with a concrete type, and the compiler selects the appropriate impl based on what is defined and visible. Where modular implicits depart from Rust's coherence model is that they permit multiple implementations of the same signature to coexist, and the call site determines which one is selected based on import scope. This is precisely the behavior that Incoherent Rust is trying to achieve through named impls and scoped impls.
+
+OCaml's experience with modular implicits offers concrete lessons for the design of Incoherent Rust. The original proposal handles the ambiguity problem by requiring the programmer to provide an explicit module argument whenever multiple matching modules are in scope simultaneously, rather than applying an implicit priority order. This avoids the situation where a change in import order silently changes which implementation is selected. The proposal also restricts implicit resolution to modules that have been explicitly declared `implicit`, which limits the search space and prevents unintended interactions between unrelated modules. These design choices reflect lessons learned from Haskell's typeclass system and Scala implicits, and they are worth considering when designing the scoped impl resolution mechanism in Incoherent Rust.
+
+CGP's approach sits at a different point in this design space. Rather than resolving implementations at each call site by scanning an ambient scope, CGP collects all implementation choices into a single concrete context type that is defined once and applied uniformly. The context type plays the role that an assembled module plays for a particular program instantiation: it is the place where all implementation decisions are finalized. For any given context type, it is always clear which provider is wired to which component, because the entire configuration is written in one `delegate_components!` block. This predictability is the main advantage CGP has over scope-based resolution, and it is worth asking whether Incoherent Rust should offer a similar high-level context mechanism as a first-class concept, alongside the lower-level scoped impl machinery.
 
 ### Scala Implicits
 
@@ -1815,11 +1367,13 @@ CGP's support for implicit arguments and field-carrying context types also provi
 
 As shown in the desugaring of the `Deserialize` with arena example, this approach handles the core use case of capabilities cleanly. The context struct acts as a typed, locally scoped carrier for both trait implementations and runtime values, and provider code can access those values without needing to know the concrete context type in advance.
 
-#### An alternative implementation strategy to dictionary-passing style
+#### An intermediate implementation toward dictionary-passing style
 
-As we have explored, desugaring Incoherent Rust into dictionary-passing style in TIR comes with significant challenges that may require many advanced language features to be added to Rust. Even though TIR is technically an IR and thus has fewer restrictions than the surface Rust language, it may still face challenges that require as much complexity as adding some of these features to surface Rust itself.
+The goal of dictionary-passing style in TIR is ultimately to provide a formal foundation for the Rust trait system, one that is precise enough to support soundness proofs and compiler correctness arguments. When formalization is the primary goal, languages like Rocq and Agda are natural choices for the metatheory, because their dependent type systems make it straightforward to state and verify the properties that such a lowering must satisfy. However, implementing a full dictionary-passing TIR inside the Rust compiler is a different and considerably harder problem. To accurately represent all of Rust's trait system, including higher-ranked types, associated type equality, and the interaction between lifetime bounds and dictionary construction, the IR would likely need to support a form of dependent types itself. Even setting aside the technical challenges, stabilizing a new IR of that complexity inside the Rust compiler is a long-term undertaking, and it would be challenging to expect Incoherent Rust to wait for TIR to be fully developed before shipping any of its features.
 
-In comparison, CGP's approach provides a viable alternative implementation strategy for Incoherent Rust that can be implemented in stable Rust today, without requiring significant changes to the existing trait system or type checker.
+CGP offers a more pragmatic path. Because CGP is built entirely on top of stable Rust using existing language features, the incoherence patterns it enables are available today without any changes to the compiler. The desugaring from Incoherent Rust surface syntax into CGP-style code could be implemented as a syntactic transformation in the compiler front end, well before a full TIR is in place. This would allow programmers to use incoherent traits and named impls through the new surface syntax while the compiler handles the translation into provider traits and `delegate_components!` wirings under the hood. The result is a path to shipping Incoherent Rust incrementally, collecting real-world feedback on the feature while the deeper TIR work proceeds on its own timeline.
+
+This staged approach also reduces the risk of locking in design decisions prematurely. TIR is a research-level undertaking, and the exact shape of the IR may shift as the formalization work matures. If Incoherent Rust is implemented on top of CGP patterns in the interim, the surface language semantics can be stabilized and refined independently of the TIR design. When a full dictionary-passing TIR eventually becomes available, the CGP-based implementation can be replaced wholesale with a lowering that targets TIR directly, without requiring any changes to the surface syntax or the programmer-visible semantics. The intermediate implementation would have served its purpose, having proven out the design in practice and bought time for the more ambitious formalization work to catch up.
 
 ### What CGP partially solves
 
