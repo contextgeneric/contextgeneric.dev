@@ -12,7 +12,7 @@ In this blog post, I will explain how **Context-Generic Programming** (CGP) rela
 
 ## Outline
 
-This post is organized as follows. We first introduce CGP's approach to incoherence, then show how several features of Incoherent Rust desugar into CGP code, and examine how CGP's context type corresponds to the dictionaries described in the dictionary-passing style work. We then discuss what this desugaring reveals about the challenges of implementing dictionary-passing style in Rust at the compiler level, and where CGP's model diverges from the full vision of Incoherent Rust.
+This post is organized as follows. We first introduce CGP's approach to incoherence, then show how several features of Incoherent Rust desugar into CGP code, and examine how CGP's context type corresponds to the dictionaries described in the dictionary-passing style work. We then discuss where CGP's model diverges from the full vision of Incoherent Rust.
 
 In summary, CGP:
 
@@ -678,7 +678,7 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-As explained in my `cgp-serde` blog post, CGP incoherent traits already support passing runtime values alongside trait implementations through the `Context` type. The recent introduction of **implicit arguments** in CGP makes accessing those field values considerably more ergonomic.
+As explained in my [`cgp-serde` blog post](/blog/cgp-serde-release), CGP incoherent traits already support passing runtime values alongside trait implementations through the `Context` type. The recent introduction of **implicit arguments** in CGP makes accessing those field values considerably more ergonomic.
 
 With that, the example above can be desugared into the following CGP code:
 
@@ -692,7 +692,7 @@ pub trait Deserialize<'de, T> {
 }
 
 #[cgp_impl(new DeserializeFooRef)]
-impl<'de, 'a, Value> ValueDeserializer<'de, &'a Foo> {
+impl<'de, 'a> DeserializeImpl<'de, &'a Foo> {
     fn deserialize<D>(
         &self,
         // Capabilities are "passed" as implicit arguments through the context.
@@ -782,10 +782,10 @@ For example, a user may want to freely introduce new bindings across different f
 fn deserialize_and_print_foo(json_string: &str) {
     let foo: Vec<&Foo> =
         with arena = &arena::BasicArena::new() {
-            serde_json::deserialize(json_string).unwrap();
+            serde_json::deserialize(json_string).unwrap()
         };
 
-    println!("foos: {:?}", foos);
+    println!("foos: {:?}", foo);
 }
 
 fn deserialize_and_print_upper_foo(json_string: &str) {
@@ -1393,7 +1393,7 @@ That question is a separate challenge that applies regardless of whether CGP or 
 
 The primary motivation for the dictionary-passing style work described in Nadri's blog posts is to create a formal model of Rust's trait system that can be used to prove soundness and avoid compiler bugs. CGP does not contribute to this goal. CGP is a library-level pattern built on top of the existing trait system. It relies on coherence to function correctly, and it cannot be used to replace or formalize the trait solver itself.
 
-For the purpose of building a formal model of Rust, dictionary-passing style in TIR remains the right direction. The challenges we discussed, such as higher-ranked types, dependent types, and type equality axioms, are real obstacles that need to be addressed independently of what CGP can offer.
+For the purpose of building a formal model of Rust, dictionary-passing style in TIR remains the right direction. On the other hand, implementing dictionary-passing style in Rust may require TIR to be implemented with advanced language features such as higher-ranked types, dependent types, and type equality. These are implementation challenges that need to be addressed independently of what CGP can offer.
 
 #### Fully dynamic-scoped impls and capabilities
 
