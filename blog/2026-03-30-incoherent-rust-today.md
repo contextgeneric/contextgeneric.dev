@@ -1039,7 +1039,7 @@ There is also an important way in which CGP diverges from traditional algebraic 
 These observations point toward a better fit in the [**coeffects**](https://tomasp.net/coeffects/) framework, which studies how contextual requirements flow through a computation rather than how computational effects flow out of it. Where effects describe what a computation produces or performs, coeffects describe what a computation requires from its environment. The generic context in CGP serves precisely this role: it carries the implementation choices and capabilities that a computation depends on, and those dependencies are resolved all at once when a concrete context is defined. A full introduction to coeffects is beyond the scope of this blog post, but the connection is worth noting for readers interested in the theoretical foundations of what CGP is doing.
 
 
-### 0-arity traits
+### Zero-arity traits
 
 CGP provides a desugaring of incoherent Rust traits into CGP traits that have an additional `Context` type, with the original `Self` type moved to an explicit generic parameter. For example, given the incoherent trait:
 
@@ -1084,7 +1084,7 @@ With incoherence and capabilities, a useful design pattern that emerges is the u
 ```rust title="Incoherent Rust"
 impl GreetHello = Greet for !
 with
-    name: String,
+    name: &String,
 {
     fn greet() {
         println!("Hello, {}!", name);
@@ -1099,12 +1099,279 @@ With CGP, since the context type is explicit, zero-arity incoherent traits becom
 impl GreetImpl {
     fn greet(
         &self,
-        #[implicit] name: String,
+        #[implicit] name: &String,
     ) {
         println!("Hello, {}!", name);
     }
 }
 ```
+
+### Abstract types
+
+Using associated types within zero-arity traits introduces a concept I call **abstract types**. For example, we can introduce an abstract type called `Name` with the following trait:
+
+
+```rust title="CGP"
+#[cgp_type]
+pub trait HasNameType {
+    type Name: Display;
+}
+```
+
+
+The key property of an abstract type is that it is not tied to any particular value type. Its concrete form is chosen by the ambient context. We can modify the earlier `GreetHello` implementation to use the abstract `Name` type:
+
+
+```rust title="CGP"
+#[cgp_impl(new GreetHello)]
+#[use_type(HasNameType::Name)]
+impl GreetImpl {
+    fn greet(
+        &self,
+        #[implicit] name: &Name,
+    ) {
+        println!("Hello, {}!", name);
+    }
+}
+```
+
+In this updated implementation, the hardcoded `String` type for the `name` parameter is replaced by the abstract type `HasNameType::Name`. This allows the same provider to be reused across different name types, whichever the context chooses to wire in.
+
+For example, we can define a `FullName` type and use it as the concrete `Name`:
+
+```rust
+pub struct FullName {
+    pub first_name: String,
+    pub last_name: String,
+}
+
+impl Display for FullName {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{} {}", self.first_name, self.last_name)
+    }
+}
+
+pub struct Context {
+    pub name: FullName,
+}
+
+delegate_components! {
+    Context {
+        NameTypeProviderComponent:
+            UseType<FullName>,
+        GreeterComponent:
+            GreetHello,
+    }
+}
+
+fn main() {
+    let context = Context {
+        name: FullName {
+            first_name: "John".to_owned(),
+            last_name: "Smith".to_owned(),
+        },
+    };
+
+    // Prints "Hello, John Smith!"
+    context.greet();
+}
+```
+
+The `Context` type wires `FullName` as the concrete `Name` through `NameTypeProviderComponent`, and wires `GreetHello` as the greeting implementation. Because `GreetHello` uses `HasNameType::Name` rather than a hardcoded `String`, it adapts automatically to the `FullName` type without any changes to the provider itself.
+
+#### Abstract types in Incoherent Rust
+
+To see how abstract types might look in Incoherent Rust, we would start by defining `HasNameType` as a zero-arity trait:
+
+```rust title="Incoherent Rust"
+pub trait HasNameType for ! {
+    type Name: Display;
+}
+```
+
+Since abstract types are built on top of zero-arity traits, using them requires new syntax to bind and reference the abstract type:
+
+```rust title="Incoherent Rust"
+impl GreetHello = Greet for !
+where
+    impl NameType: HasNameType,
+with
+    name: &NameType::Name,
+{
+    fn greet() {
+        println!("Hello, {}!", name);
+    }
+}
+```
+
+Here, we require the context to provide an implementation of `HasNameType` and bind it to the local identifier `NameType`. The abstract type is then referenced as `NameType::Name` when specifying the type of the `name` capability.
+
+With the implementation in place, we can set up the wiring and call `GreetHello::greet()` as follows:
+
+```rust title="Incoherent Rust"
+impl UseFullNameType = HasNameType {
+    type Name = FullName;
+}
+
+fn main() {
+    with
+        UseFullNameType,
+        name = FullName {
+            first_name: "John".to_owned(),
+            last_name: "Smith".to_owned(),
+        }
+    {
+        // Prints "Hello, John Smith!"
+        GreetHello::greet();
+    }
+}
+```
+
+Here, we choose `UseFullNameType` as the incoherent implementation for `HasNameType`, and then bind the capability `name` with a `FullName` value. When `GreetHello` is called, both the type implementation and the name value are provided through the trait system, and the greeting is printed.
+
+#### Using abstract types across incoherent traits
+
+With the earlier abstract `Name` type as background, it might not be obvious why defining an associated type through a zero-arity trait is preferable to implementing everything with normal unary traits. Thus we will show a more concrete example of how zero-arity traits provide uniform access across multiple unary trait implementations that have different `Self` types.
+
+Suppose we want to implement a generic `touch` function that retrieves the current system time and updates the `last_modified` field of any type that supports it. We might start with a straightforward trait definition:
+
+```rust title="Rust"
+use std::time::SystemTime;
+
+pub trait UpdateLastModified {
+    fn update_last_modified(&mut self, time: SystemTime);
+}
+```
+
+The `UpdateLastModified` trait accepts a `&mut self` and a [`SystemTime`](https://doc.rust-lang.org/stable/std/time/struct.SystemTime.html), and updates the time field in `self` to the given value. With it, the `touch` function can be written as follows:
+
+```rust title="Rust"
+pub fn touch<T: UpdateLastModified>(value: &mut T) {
+    let time = SystemTime::now();
+    value.update_last_modified(time);
+}
+```
+
+While this works, it ties the implementation to a specific concrete time type. If we want to support other time representations, such as [`std::time::Instant`](https://doc.rust-lang.org/std/time/struct.Instant.html), [`time::UtcDatetime`](https://docs.rs/time/latest/time/struct.UtcDateTime.html), or [`chrono::DateTime`](https://docs.rs/chrono/latest/chrono/struct.DateTime.html), we need a way to abstract over the `Time` type.
+
+One approach is to add `Time` as an explicit generic parameter:
+
+```rust title="Rust"
+pub trait UpdateLastModified<Time> {
+    fn update_last_modified(
+        &mut self,
+        time: Time,
+    );
+}
+
+pub fn touch<Time, T: UpdateLastModified<Time>>(
+    value: &mut T,
+)
+where
+    Time: From<SystemTime>,
+{
+    let time = SystemTime::now();
+    value.update_last_modified(time);
+}
+```
+
+Now `UpdateLastModified` is parameterized by a generic `Time` type, and `touch` must also accept `Time` as an extra parameter. Even so, the implementation still relies on `SystemTime::now()` internally and requires a `From` conversion from `SystemTime`, so the abstraction is only partial.
+
+Another option is to make `Time` an associated type:
+
+```rust title="Rust"
+pub CurrentTime {
+    fn current_time() -> Self;
+}
+
+pub trait UpdateLastModified {
+    type Time: CurrentTime;
+
+    fn update_last_modified(
+        &self,
+        time: Self::Time,
+    );
+}
+
+pub fn touch<T: UpdateLastModified>(value: &mut T) {
+    let time = T::Time::current_time();
+
+    value.update_last_modified(time);
+}
+```
+
+This version is cleaner, but it has a structural problem. Because `Time` is an associated type of `UpdateLastModified`, every type `T` that implements the trait carries its own independent `Time` type. There is no guarantee that two different value types share the same time representation, and `CurrentTime` is tightly coupled to the concrete `Time` type in each implementation. This makes it difficult to swap in a mock clock for testing, and makes it harder to reason about whether different types are using the same time and clock.
+
+With zero-arity traits and Incoherent Rust, we can write the following instead:
+
+```rust title="Incoherent Rust"
+// An abstract type trait is a zero-arity trait with an associated type
+pub trait HasTimeType for ! {
+    type Time;
+}
+
+// The current time is provided by with ambient context using a zero-arity trait
+pub trait CurrentTime for !
+where
+    impl TimeImpl: HasTimeType,
+{
+    fn current_time() -> TimeImpl::Time
+}
+
+// The `Time` type does not depend on `Self`
+pub trait UpdateLastModified
+where
+    impl TimeImpl: HasTimeType,
+{
+    fn update_last_modified(
+        &mut self,
+        time: TimeImpl::Time,
+    );
+}
+
+// The time type and current time implementations are not bound to `T`
+pub incoherent fn touch<T: UpdateLastModified>(
+    value: &mut T,
+)
+where
+    impl TimeImpl: HasTimeType + CurrentTime,
+{
+    let time = TimeImpl::current_time();
+    value.update_last_modified(time);
+}
+```
+
+Zero-arity traits allow us to define implementations that are not bound to any particular `Self` type or generic parameter. When two different value types, such as `Folder` and `File`, both need `touch` to be called on them, they can share the same time implementation through the ambient context rather than each carrying their own independent copy.
+
+The same example can be expressed in CGP today as:
+
+```rust title="CGP"
+#[cgp_type]
+pub trait HasTimeType {
+    type Time;
+}
+
+#[cgp_component(CurrentTimeImpl)]
+pub trait CurrentTime: HasTimeType {
+    fn current_time(&self) -> Self::Time;
+}
+
+#[cgp_component(UpdateLastModifiedImpl)]
+#[use_type(HasTimeType::Time)]
+pub trait UpdateLastModified<T> {
+    fn update_last_modified(value: &mut T, time: Time);
+}
+
+#[cgp_fn]
+#[uses(CurrentTime)]
+pub fn touch<T>(&self, value: &mut T) {
+    let time = self.current_time();
+    value.update_last_modified(time);
+}
+```
+
+CGP converts zero-arity traits into single-arity traits that are bound to the generic context, while the original `Self` type from the Incoherent Rust version becomes an explicit generic parameter `T`. With this structure, traits like `HasTimeType` and `CurrentTime` are clearly bound to the context rather than to any particular value type. This example makes concrete the benefit of abstract types anchored to the ambient context: they allow multiple value types to share a consistent, interchangeable abstraction without requiring each one to carry its own copy.
+
 
 ### Contexts as explicit types
 
