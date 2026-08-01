@@ -40,6 +40,15 @@ A published page may link only to public resources: other pages on this site, th
 [docs.rs](https://docs.rs/cgp), [crates.io](https://crates.io/crates/cgp), the
 [CGP Patterns book](https://patterns.contextgeneric.dev/), and ordinary external sources.
 
+**One published page is a sanctioned exception, and only one.** `docs/ai/disclaimer.md` links to the
+knowledge base repository, because the base is the subject it discloses: the page's argument is that
+CGP's documentation is written against a public record whose rules and history a reader can go and
+check, and that argument cannot be made while hiding the record. Neither reason behind the rule applies
+there — the link is a public GitHub URL that resolves for anyone, and exposing the material is the
+point rather than an accident. The exception covers the repository's front door only, never a path into
+a particular file, since a reader following a deep link lands in prose written for agents. Do not
+"correct" that page's link, and do not extend the exception to any other page.
+
 This file is the exception, because it is not published — Docusaurus renders `docs/`, `blog/`, and
 `src/pages/`, and a repository-root Markdown file is never part of the built site. So it may point at
 internal material freely, and that is precisely its job.
