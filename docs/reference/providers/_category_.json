@@ -1,0 +1,8 @@
+{
+  "label": "Providers",
+  "position": 5,
+  "link": {
+    "type": "generated-index",
+    "description": "The zero-sized provider types that appear in wiring tables. They carry no runtime value and exist only at the type level."
+  }
+}

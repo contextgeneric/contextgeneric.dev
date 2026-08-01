@@ -1,0 +1,8 @@
+{
+  "label": "Derives",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "description": "The `#[derive(...)]` macros that generate field access and the extensible-data machinery for your structs and enums."
+  }
+}
