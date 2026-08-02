@@ -66,9 +66,10 @@ delegate_components! {
 This is how you build an **aggregate provider**: a zero-sized provider whose only job is to hold a
 table dispatching each component to a sub-provider, so that other contexts can delegate a whole group
 of components to it as one unit. An aggregate provider is a *provider*, not a context — it forwards
-each component's provider trait onward and never implements one with itself in the context position.
-That is why it must be wired with plain `delegate_components!` and never with
-[`delegate_and_check_components!`](./delegate_and_check_components.md).
+each component's provider trait onward, and no call ever resolves with the bundle in the context
+position. That is why it must be wired with plain `delegate_components!` and never with
+[`delegate_and_check_components!`](./delegate_and_check_components.md), whose check asks whether the
+bundle can use each component *as* a context and so proves nothing either way.
 
 ### One provider for several components
 

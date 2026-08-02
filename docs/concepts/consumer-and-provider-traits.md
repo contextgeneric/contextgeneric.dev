@@ -7,7 +7,7 @@ sidebar_position: 2
 
 One trait definition in CGP becomes two traits: a **consumer trait** that callers use, and a
 **provider trait** that implementations target. This page explains why the split exists, what each
-half is for, and how a plain method call finds its way from one to the other. It ends with what the
+half is for, and how a plain method call finds its way from one to the other. It closes on what the
 arrangement costs, which is the part worth reading before adopting it.
 
 ## What an ordinary Rust trait does, and where it stops
@@ -182,11 +182,13 @@ what carries those bounds back down the chain — so when a context is missing s
 requires, the compiler can name the missing requirement instead of reporting only that the provider
 trait is not implemented. It is generated, never written by hand.
 
-Two cosmetic liberties in the listings above are worth knowing before you read a real error message.
-The generated type parameters carry reserved names — the context is `__Context__` and the provider
+Three liberties in the listings above are worth knowing before you read a real error message. The
+generated type parameters carry reserved names — the context is `__Context__` and the provider
 `__Provider__` — and the delegate is spelled out in full as
 `<__Provider__ as DelegateComponent<EmailSenderComponent>>::Delegate`. `Context`, `Provider`, and
-`Provider::Delegate` here are for legibility; `cargo cgp expand` will show you the real thing.
+`Provider::Delegate` here are for legibility. And the provider trait printed earlier on this page omitted
+its `IsProviderFor` supertrait, which the real `EmailSender<__Context__>` carries. `cargo cgp expand` will
+show you all of it as the macros actually emit it.
 
 ## Writing it
 
@@ -259,7 +261,8 @@ capability is finally used, and the error can be long. This is real, and it has 
 [`check_components!`](/docs/reference/macros/check_components) forces the check at the wiring line so
 the error names the actual gap, and
 [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reshapes the recognized failures to
-lead with the root cause. Neither makes the raw diagnostics pleasant — see
+lead with the root cause, though it is a `v0.1.0-alpha` and covers the core wiring errors rather than
+every class. Neither makes the raw diagnostics pleasant — see
 [Checking your wiring](./check-traits.md) for what to expect.
 
 **There is a hop between the call and the code that runs.** `app.send_email(..)` no longer points at

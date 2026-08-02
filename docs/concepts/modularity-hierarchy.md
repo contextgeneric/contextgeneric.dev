@@ -8,10 +8,10 @@ sidebar_position: 18
 The ladder from a plain trait to fully wired components, and how to settle at the lowest rung that solves
 the problem in front of you.
 
-This page is a decision guide rather than an explanation, so it is short and meant to be acted on. It gives
-one rule of thumb, works through the alternatives you are actually choosing between, names the cases where
-CGP is simply the wrong tool, and ends with which of its shapes to reach for. If you are still deciding
-whether CGP is for you at all, this is the page to read.
+This page is a decision guide rather than an explanation, so it is written to be acted on rather than read
+straight through: a rule of thumb first, then the alternatives you are actually choosing between, the cases
+where CGP is simply the wrong tool, which of its shapes to reach for, and how far to go once you are inside
+it. If you are still deciding whether CGP is for you at all, this is the page to read.
 
 ## The rule of thumb
 
@@ -145,13 +145,14 @@ response to something you have already hit, not a level to reach.
    [wiring table](/docs/reference/macros/delegate_components) — when a second implementation is real, not
    anticipated. Add [`check_components!`](/docs/reference/macros/check_components) at the same time; the
    wiring is checked lazily and an unchecked table is the main source of confusing errors.
-3. **Per-type dispatch.** The `open` statement, when one component needs a different provider per value of a
-   type parameter. This is the point at which the target moves out of `Self`, so it arrives with the
-   fully-modular shape rather than before it.
-4. **Providers composed from providers.**
-   [Higher-order providers](/docs/reference/attributes/use_provider) — when one implementation should be
-   expressed in terms of another rather than chosen alongside it. Genuinely useful, and the step most often
-   taken too early: if nothing is being wrapped, there is nothing for it to do.
+3. **Per-type dispatch.** The [`open` statement](/docs/reference/macros/delegate_components), when one
+   component needs a different provider per value of a type parameter. A type has moved out of `Self` into
+   a parameter by this point, so it usually arrives with the fully-modular shape rather than before it.
+4. **Providers composed from providers.** A provider that takes another provider as a parameter and builds
+   on it, declared with [`#[use_provider]`](/docs/reference/attributes/use_provider) — when one
+   implementation should be expressed in terms of another rather than chosen alongside it. Genuinely
+   useful, and the step most often taken too early: if nothing is being wrapped, there is nothing for it to
+   do.
 5. **Reusable wiring.** An [aggregate provider](/docs/reference/macros/delegate_components) for a small
    bundle several contexts delegate to, or [`cgp_namespace!`](/docs/reference/macros/cgp_namespace) when
    wiring repeats across many contexts or a table has outgrown reading. Both add a hop between a component

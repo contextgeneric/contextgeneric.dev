@@ -9,7 +9,7 @@ This section explains the ideas behind CGP: why it is built the way it is, what 
 actually does, and where the boundaries of each one lie. It is written to be read away from a
 keyboard — there is nothing here to follow along with, and nothing to install first.
 
-It sits between the other two halves of the documentation. The [tutorials](/docs/tutorials/hello)
+It sits alongside the other two parts of the documentation. The [tutorials](/docs/tutorials/hello)
 teach by building something, so they show a construct at the moment it is needed and move on. The
 [reference](/docs/reference/) explains one construct completely, for a reader who already knows the
 name of the thing they want. A concept page answers the question neither of those is shaped for:

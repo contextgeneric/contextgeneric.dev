@@ -9,9 +9,9 @@ Rust allows one implementation of a trait per type. Why that rule exists, what i
 writes many implementations and lets each context pick the one it wants.
 
 This page answers *why can't Rust do this already?* It builds up what the trait system gives you, shows
-what that costs when you want two implementations of one thing, and ends on the move CGP makes — which is
-smaller than it first appears, and does not throw the rule away. It is the longest page in this section,
-and everything else here is downstream of it.
+what that costs when you want two implementations of one thing, works through the move CGP makes — which
+is smaller than it first appears, and does not throw the rule away — and closes on what that move costs in
+turn. It is a long page, and it is the one everything else in this section is downstream of.
 
 ## The trait system is already a dependency-injection mechanism
 
@@ -100,8 +100,8 @@ type your callers now have to know about.
 
 These are felt sharply enough that Rust developers build their own escape. The pattern is to stop
 implementing the trait for the interesting type and implement it for a marker type you own instead, with a
-helper trait tying the two together — three or four extra lines of plumbing, arrived at independently and
-written up by developers working around the overlap rule on their own. **If you have written that, you have
+helper trait tying the two together — three or four extra lines of plumbing, arrived at and written up
+independently by a Rust developer working around the overlap rule. **If you have written that, you have
 written CGP's central mechanism by hand**, and the rest of this page is about what it looks like made
 first-class.
 
@@ -110,9 +110,10 @@ first-class.
 CGP's first move is to take the type coherence ranges over — the `Self` of the implementation — and make
 it something the implementing crate always owns.
 
-One trait definition becomes two. The **consumer trait** keeps the original shape, so callers write
-`app.encode(&value)` as before. The **provider trait** is the same interface with `Self` moved out into an
-explicit parameter, and an implementation targets a small named type of its own:
+One trait definition becomes two. The **consumer trait** is the caller's view, keeping the ordinary `self`
+receiver so that calling the capability is still a method call. The **provider trait** is the same
+interface with `Self` moved out into an explicit parameter, and an implementation targets a small named
+type of its own:
 
 ```rust
 #[cgp_component(Encoder)]
@@ -120,7 +121,7 @@ pub trait CanEncodeValue<Value> {
     fn encode(&self, value: &Value) -> Vec<u8>;
 }
 
-#[cgp_impl(new EncodeWithDisplay)]
+#[cgp_impl(new EncodeAsText)]
 impl<Value> Encoder<Value>
 where
     Value: Display,
@@ -137,15 +138,21 @@ where
 }
 ```
 
-**Both compile.** They are the same two bodies the compiler rejected a moment ago, with the same
-overlapping bounds, and there is no conflict — because each one's `Self` is a different type
-(`EncodeWithDisplay`, `EncodeAsHex`) that this crate declared for the purpose. Any number more would also
-compile. The orphan rule does not enter either, since that `Self` is always local, which is how a crate
-adds a capability to a type it did not define.
+**Both compile.** They carry the same two overlapping bounds the compiler rejected a moment ago —
+`Display` and `AsRef<[u8]>`, still overlapping on `String` — and there is no conflict, because each one's
+`Self` is now a different type (`EncodeAsText`, `EncodeAsHex`) that this crate declared for the purpose.
+Any number more would also compile. The orphan rule does not enter either, since that `Self` is always
+local, which is how a crate adds a capability to a type it did not define.
 
 Neither rule was repealed. The implementations simply stopped being the kind of thing the rules are
 about. [Consumer and provider traits](./consumer-and-provider-traits.md) works through the mechanics of
 the split and how a call finds its way across it.
+
+One other thing changed in that listing, and it is worth naming rather than leaving you to spot it: the
+value being encoded moved out of `Self` and into a `Value` parameter, so the trait is now
+`CanEncodeValue<Value>` rather than `CanEncode`. That is a second move, not part of the first, and it is
+what leaves `Self` free to be something other than the data. What it is free to be, and why that turns
+out to matter more than the parameter does, is the next two sections.
 
 ## Coherence comes back, one context at a time
 
@@ -160,7 +167,7 @@ small table:
 delegate_components! {
     ApiServer {
         open EncoderComponent;
-        @EncoderComponent.String: EncodeWithDisplay,
+        @EncoderComponent.String: EncodeAsText,
     }
 }
 
@@ -192,12 +199,12 @@ Here is the part most easily misread, and it is worth slowing down for: **the es
 becomes a type you own, not when a parameter appears.**
 
 A scope is one context type, so the number of independent choices a program can make is the number of
-context types it can define. Wire a capability onto `Vec<u8>` — data, and not yours — and you get exactly
-one answer for the whole program, because there is one `Vec<u8>`. Coherence was narrowed, not removed.
+context types it can define. Wire a capability onto `String` — data, and not yours — and you get exactly
+one answer for the whole program, because there is one `String`. Coherence was narrowed, not removed.
 Wire it onto `ApiServer` and `Firmware`, types you declared, and you get as many answers as you care to
 declare types.
 
-Which is why the two contexts above are `ApiServer` and `Firmware` rather than `Vec<u8>` wired twice. The
+Which is why the two contexts above are `ApiServer` and `Firmware` rather than `String` wired twice. The
 second is impossible; the first is the point.
 
 ### The shape this depends on
@@ -205,8 +212,8 @@ second is impossible; the first is the point.
 That leaves one thing to build, because it is a shape vanilla Rust gives you no reason to have imagined:
 **a type whose whole job is to stand for an application.**
 
-Start from the fact that it is perfectly ordinary Rust. Two application types, one value type, two
-encodings, no CGP anywhere:
+Start from the fact that it is perfectly ordinary Rust. It is the arrangement from two sections ago with
+the CGP taken back out: two application types, one value type, two encodings, and nothing exotic.
 
 ```rust
 pub trait CanEncodeValue<Value> {
@@ -216,20 +223,19 @@ pub trait CanEncodeValue<Value> {
 pub struct ApiServer;
 pub struct Firmware;
 
-impl CanEncodeValue<Vec<u8>> for ApiServer {
-    fn encode(&self, v: &Vec<u8>) -> Vec<u8> { /* one encoding */ }
+impl CanEncodeValue<String> for ApiServer {
+    fn encode(&self, value: &String) -> Vec<u8> { /* as text */ }
 }
 
-impl CanEncodeValue<Vec<u8>> for Firmware {
-    fn encode(&self, v: &Vec<u8>) -> Vec<u8> { /* another */ }
+impl CanEncodeValue<String> for Firmware {
+    fn encode(&self, value: &String) -> Vec<u8> { /* as hexadecimal */ }
 }
 ```
 
-This compiles, and it already does something useful — per-application encoding of the same type, with
-nothing exotic involved. Note that both structs have **no fields at all**. `struct ApiServer;` is a
-complete and legitimate type here, because its entire purpose is to be a name the implementations hang
-off. An empty struct with traits on it is otherwise close to unreadable, which is why it is worth saying
-outright.
+This compiles, and it already does something useful: per-application encoding of the same type. Note that
+both structs have **no fields at all**. `struct ApiServer;` is a complete and legitimate type here,
+because its entire purpose is to be a name the implementations hang off. An empty struct with traits on it
+is otherwise close to unreadable, which is why it is worth saying outright.
 
 Now try to make it scale. Add a third value type, then a fourth, and you are hand-writing a body per
 `(application, type)` pair. So you do the obvious thing and factor the shared logic into a blanket
@@ -253,21 +259,25 @@ this shape — it makes it not worth building.** CGP's contribution is therefore
 permissive: it does not merely escape a rule, it makes an available shape worth using. Named providers
 replace the hand-written bodies, and a per-pair decision becomes a line in a table.
 
-### Two shifts worth marking
+### Naming the two shapes
 
-Reading this page you have crossed two lines that nothing in the code announces, and both are worth
-naming, since they are where readers most often lose track of what a context is.
+Two distinctions have been doing quiet work above, and naming them is what keeps "context" from becoming a
+word you cannot pin down — it is where readers most often lose track.
 
-The first is the one with no signal at all. Until the application example, the wired type was **the data**
-— the `String` being encoded, the `Vec<u8>`. From there it became a type you define to stand for your
-application. No signature changed and no parameter appeared, yet `Self` stopped being data. That change
-alone is what escapes coherence, because you can define as many application types as you like and only one
-`String`. The vocabulary for the two is a **value context** and an **environmental context**.
+The first crossing had no signal at all. In the `CanEncode` listing further up, the wired type was **the
+data**: `impl CanEncode for T` puts the thing being encoded in `Self`, exactly as `impl Display for String`
+does, and that is the shape essentially every Rust trait is in. From *The move* onward the wired type has
+been `ApiServer` or `Firmware` — types you define, holding no data, existing to carry choices. No signature
+announced the change and no parameter marked it, yet `Self` stopped being data. The vocabulary is a
+**value context** for the first and an **environmental context** for the second, and this is the crossing
+that escapes coherence: you can define as many application types as you like, and there is only one
+`String`.
 
-The second is visible in the code. An environmental context can already decide for itself; to let it decide
-for a type you *do not own*, the value moves out of `Self` and becomes a parameter — which is exactly what
-`CanEncodeValue<Value>` did. A capability about `Self` is **self-targeted**; one about a parameter that
-`Self` merely decides for is **parameter-targeted**.
+The second crossing is visible in the code. A capability about `Self` is **self-targeted** — `CanEncode`,
+as first written here. Moving the value into a parameter makes it **parameter-targeted**:
+`CanEncodeValue<Value>` is about the `Value`, and `Self` only decides for it. An environmental context can
+already choose for itself without that parameter; what the parameter adds is the ability to choose for a
+type you *do not own*.
 
 ## What it costs
 
@@ -290,7 +300,8 @@ compiles; the failure appears later, where the capability is used, and can be lo
 [`check_components!`](/docs/reference/macros/check_components) forces it to the wiring line and names the
 actual missing requirement, and
 [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) leads with the root cause for the classes
-it recognizes. [Checking your wiring](./check-traits.md) is the fuller account.
+it recognizes — a `v0.1.0-alpha` that reshapes the core wiring errors rather than all of them.
+[Checking your wiring](./check-traits.md) is the fuller account.
 
 ## Where to go next
 
