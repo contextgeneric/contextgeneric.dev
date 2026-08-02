@@ -11,7 +11,9 @@ thing you need.
 
 If you are still learning CGP, the [tutorials](/docs/tutorials/hello) are the better starting point.
 This section assumes you know what a component and a provider are, and it explains constructs one at a
-time rather than building an idea up.
+time rather than building an idea up. When a page here tells you *what* a construct does and you want
+to know *why* CGP works that way, the [concepts](/docs/concepts/) are where each idea is explained on
+its own.
 
 ## Start with these six
 

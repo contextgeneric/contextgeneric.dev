@@ -37,9 +37,15 @@ blanket implementations, or type-level field names. All of that stays behind an
 
 ## Using it
 
-Apply the attribute to a free function whose first parameter is `self`. The function name becomes the
-method name, and its PascalCase form becomes the trait name — `rectangle_area` generates a
-`RectangleArea` trait with a `rectangle_area` method.
+Apply the attribute to a free function. The function name becomes the method name, and its PascalCase
+form becomes the trait name — `rectangle_area` generates a `RectangleArea` trait with a
+`rectangle_area` method.
+
+Almost every `#[cgp_fn]` takes `self` as its first parameter, because reading a field from the context
+is most of what these functions do, and a receiver is *required* the moment any parameter is
+`#[implicit]`. Omitting it is accepted, and produces a trait whose item is an associated function
+rather than a method; it is rarely what you want here, since a function that reads nothing from its
+context computes the same answer for every context that gets it.
 
 Pass an identifier to override the trait name, which is useful when a verb-style name reads better
 than the function's:

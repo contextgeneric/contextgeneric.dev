@@ -155,7 +155,8 @@ whatever the entry names:
 ```rust
 impl<Context, Provider> EmailSender<Context> for Provider
 where
-    Provider: DelegateComponent<EmailSenderComponent>,
+    Provider: DelegateComponent<EmailSenderComponent>
+        + IsProviderFor<EmailSenderComponent, Context, ()>,
     Provider::Delegate: EmailSender<Context>,
 {
     fn send_email(context: &Context, to: &str, body: &str) {
@@ -171,11 +172,18 @@ because its table maps `EmailSenderComponent` to `SendViaSmtp`; and `SendViaSmtp
 `SendViaSmtp::send_email` — no lookup happens while the program runs, and a provider no context uses
 never reaches the binary.
 
-The real generated code carries one more piece: the provider trait has
-[`IsProviderFor`](/docs/reference/traits/is_provider_for) as a supertrait, and every provider
-implements it under the same bounds it needs. That marker exists solely so that when a context is
-missing something a provider requires, the compiler can name the missing requirement instead of
-reporting that the provider trait is not implemented. It is never written by hand.
+The one piece of that listing not yet explained is
+[`IsProviderFor`](/docs/reference/traits/is_provider_for), which also rides on the provider trait as a
+supertrait. Every provider implements it under exactly the bounds it needs, and requiring it here is
+what carries those bounds back down the chain — so when a context is missing something a provider
+requires, the compiler can name the missing requirement instead of reporting only that the provider
+trait is not implemented. It is generated, never written by hand.
+
+Two cosmetic liberties in the listings above are worth knowing before you read a real error message.
+The generated type parameters carry reserved names — the context is `__Context__` and the provider
+`__Provider__` — and the delegate is spelled out in full as
+`<__Provider__ as DelegateComponent<EmailSenderComponent>>::Delegate`. `Context`, `Provider`, and
+`Provider::Delegate` here are for legibility; `cargo cgp expand` will show you the real thing.
 
 ## Writing it
 
