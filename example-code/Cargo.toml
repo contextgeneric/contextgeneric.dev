@@ -1,0 +1,11 @@
+[package]
+name = "cgp-website-example-code"
+version = "0.0.0"
+edition = "2021"
+publish = false
+description = "Compiled counterparts of the code shown on contextgeneric.dev. Not part of the site."
+
+[dependencies]
+cgp = "0.8.0-alpha"
+
+[workspace]
