@@ -49,7 +49,8 @@ The macro performs the rewrite for you. **This is the form to write**; the insid
 desugars to and what you will meet in generated code.
 
 One fact the convenience must not hide: **inside a `#[cgp_impl]` block, `self` and `Self` mean the
-context — the type this implementation runs against — and not the provider.** The provider is a
+context — the type the capability runs against, which supplies the values it needs as its fields —
+and not the provider.** The provider is a
 type-level name with no fields and no value: it is never constructed, and there is nothing in it to
 read. The macro rewrites `self` to the context value and `Self` to the context type precisely because
 the context is the only thing that exists when the method runs.
@@ -75,7 +76,7 @@ where
 |---|---|
 | `new` | Optional. Also emits `pub struct RectangleArea;`, so you need not declare the provider separately. |
 | provider name | Required. The type that takes the `Self` position in the generated provider impl. |
-| `: ComponentType` | Optional. Overrides the component used in the generated [`IsProviderFor`](../traits/is_provider_for.md) impl. Defaults to the provider trait's name plus `Component`. |
+| `: ComponentType` | Optional. Overrides which component this provider is registered as implementing. Defaults to the provider trait's name plus `Component`. |
 
 Without `new`, the provider struct must already exist — a wiring entry naming a struct nothing
 declares is a common and confusing first error.
@@ -172,21 +173,26 @@ fn print_area(rect: &Rectangle) {
 
 ## When to reach for it, and when not
 
-**Write providers with `#[cgp_impl]`.** It is the recommended form, and the two constructs that could
-replace it are narrower than they look — one is the raw shape it desugars to, the other is for
-capabilities that need no provider at all.
+**Write providers with `#[cgp_impl]`.** It is the recommended form for every provider, and the cases
+that call for something else are narrower than they look.
 
 Prefer the unqualified header `impl AreaCalculator`, with no `for Context`, and let the macro insert
 the context parameter. That is what makes a provider read like an ordinary trait impl. Name the context
 explicitly — `impl<Context> AreaCalculator for Context` — only when you actually need to say something
 about it that the sugar cannot express, such as a lifetime or a higher-ranked bound.
 
+That named context may be a *concrete* type rather than a parameter — `impl AreaCalculator for Rectangle`
+— which writes a provider serving only that one context. Keep it distinct from the
+[`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which looks similar and does
+something else: this one still produces a named provider that a context wires like any other, and that
+one produces no provider at all.
+
 Reach for something else in three cases.
 
-- **You need the inside-out shape itself.** [`#[cgp_provider]`](./cgp_provider.md) and
-  `#[cgp_new_provider]` are the raw forms. Write one when you must state a bound the sugar cannot, or
-  when implementing a provider trait on a concrete type rather than a generic one. Otherwise, read
-  them and write `#[cgp_impl]`.
+- **The provider struct has to be declared separately.** [`#[cgp_provider]`](./cgp_provider.md) is the
+  raw form for that case, and `new` is what you drop: a struct carrying a default generic parameter,
+  such as `pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`, cannot be declared by the
+  attribute, and neither can one shared by several impls. Write the struct, then annotate each impl.
 - **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
   function with no component, no provider, and no wiring.
 - **You want to implement the consumer trait directly on one concrete type.** Use the

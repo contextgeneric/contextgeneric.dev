@@ -123,7 +123,9 @@ an input or not. [`Computer`](./components/computer.md) is the plain synchronous
 [`Handler`](./components/handler.md) is the general async and fallible case, and
 [`Producer`](./components/producer.md) is the input-free one.
 [`CanRun`](./components/runner.md) runs tasks and [`HasRuntime`](./components/has_runtime.md) supplies
-the runtime they run on.
+the runtime they run on. Each of those four has by-reference and, where it applies, async siblings —
+`ComputerRef`, `AsyncComputer`, `HandlerRef`, and the rest — documented on the page for the component
+they vary.
 
 Providers in this family are written from plain functions with
 [`#[cgp_computer]`](./macros/cgp_computer.md) and [`#[cgp_producer]`](./macros/cgp_producer.md), and
@@ -136,13 +138,15 @@ dispatching handler from a per-type trait.
 ### Work with a type's structure
 
 These let generic code build and read structs and enums by their fields and variants without naming
-the concrete type. [`#[derive(CgpData)]`](./derives/derive_cgp_data.md) is the umbrella derive, and its
-individual slices are [`HasFields`](./derives/derive_has_fields.md),
-[`BuildField`](./derives/derive_build_field.md),
-[`ExtractField`](./derives/derive_extract_field.md), and
-[`FromVariant`](./derives/derive_from_variant.md).
+the concrete type. What a type opts in with is a derive:
+[`#[derive(CgpData)]`](./derives/derive_cgp_data.md) is the umbrella one, and its individual slices are
+[`#[derive(HasFields)]`](./derives/derive_has_fields.md),
+[`#[derive(BuildField)]`](./derives/derive_build_field.md),
+[`#[derive(ExtractField)]`](./derives/derive_extract_field.md), and
+[`#[derive(FromVariant)]`](./derives/derive_from_variant.md).
 
-The traits behind them are [`HasFields`](./traits/has_fields.md), the builder family in
+Each of those generates a trait, and the traits are where the operations live: the whole-shape view in
+[`HasFields`](./traits/has_fields.md), the builder family in
 [`HasBuilder`](./traits/has_builder.md), the extractor family in
 [`ExtractField`](./traits/extract_field.md), [`FromVariant`](./traits/from_variant.md), the presence
 markers of [`MapType`](./traits/map_type.md), the list algebra of
@@ -189,6 +193,9 @@ these names, this is where it lives.
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
 | `#[derive(CgpRecord)]`, `#[derive(CgpVariant)]` | [`#[derive(CgpData)]`](./derives/derive_cgp_data.md) |
 | `UseFieldRef`, `UseFields` | [`UseField`](./providers/use_field.md) |
+| `CanSendRun` | [`CanRun`](./components/runner.md) |
+| `CanWrapError` | [`CanRaiseError`](./components/can_raise_error.md) |
+| `HasRuntimeType` | [`HasRuntime`](./components/has_runtime.md) |
 | `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
 | `Cons`, `Nil`, `Either`, `Void`, `Chars`, `PathCons` | [Type-level spines](./types/type_level_spines.md) |
 | `HasFieldMut`, `FieldGetter` | [`HasField`](./traits/has_field.md) |

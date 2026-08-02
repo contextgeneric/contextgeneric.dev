@@ -21,6 +21,8 @@ The consequence is that a trait offers one implementation per type, and that lim
 than it sounds. Consider an application that sends email, with a test harness that must not:
 
 ```rust
+use core::cell::RefCell;
+
 pub trait CanSendEmail {
     fn send_email(&self, to: &str, body: &str);
 }
@@ -122,8 +124,9 @@ method runs.
 Two pieces connect the halves: a table on the context that names its choice, and a pair of generated
 implementations that follow it.
 
-The table is what a context writes. It maps each component to the provider that should implement it,
-and it is the one place a choice is recorded:
+The table is what a context writes. It maps each **component** — one capability, defined once, that
+implementations can be wired for — to the provider that should supply it, and it is the one place a
+choice is recorded:
 
 ```rust
 delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
@@ -254,8 +257,9 @@ capability from a function with no component and no wiring at all.
 requirements the context cannot meet, still compiles; the failure surfaces later, wherever the
 capability is finally used, and the error can be long. This is real, and it has an answer:
 [`check_components!`](/docs/reference/macros/check_components) forces the check at the wiring line so
-the error names the actual gap, and `cargo cgp check` reshapes the recognized failures to lead with
-the root cause. Neither makes the raw diagnostics pleasant — see
+the error names the actual gap, and
+[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reshapes the recognized failures to
+lead with the root cause. Neither makes the raw diagnostics pleasant — see
 [Checking your wiring](./check-traits.md) for what to expect.
 
 **There is a hop between the call and the code that runs.** `app.send_email(..)` no longer points at

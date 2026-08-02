@@ -202,16 +202,33 @@ fn print_area(rect: &Rectangle) {
 }
 ```
 
-The payoff is what happens when you change one line. Wiring a second context to a different provider
-gives two types that answer `area()` differently, with no change to any code that calls it:
+The payoff is what happens when a second context wants the same capability answered differently. It
+writes its own provider and its own table entry, and no code that calls `area()` changes:
 
 ```rust
+#[cgp_impl(new SquareArea)]
+impl AreaCalculator {
+    fn area(&self, #[implicit] side: f64) -> f64 {
+        side * side
+    }
+}
+
+#[derive(HasField)]
+pub struct Square {
+    pub side: f64,
+}
+
 delegate_components! {
     Square {
         AreaCalculatorComponent: SquareArea,
     }
 }
 ```
+
+`Rectangle` and `Square` now both implement `CanCalculateArea`, through different providers reading
+different fields — and a function generic over `CanCalculateArea` serves both without knowing that any
+of it happened. Each context's choice stays one greppable line, which is the whole of what a reader has
+to find to know which implementation runs.
 
 ## When to reach for it, and when not
 

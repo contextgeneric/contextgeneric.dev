@@ -14,10 +14,11 @@ trait. That default is what keeps a capability's requirements out of sight of it
 almost always.
 
 What it costs is that an unsatisfiable requirement becomes invisible. A bound on the implementation only
-decides *where the implementation applies*, so naming the capability for a type that can never satisfy it
-is not an error — it is a bound nobody can prove, accepted quietly, and the complaint arrives later and
-somewhere else. `#[extend_where]` moves the predicate onto the trait, where it becomes a condition of
-naming the trait at all:
+decides which **contexts** the implementation covers — a context being the type the capability runs
+against, which supplies the values it needs as its fields — so naming the capability for a type that can
+never satisfy it is not an error. It is a bound nobody can prove, accepted quietly, and the complaint
+arrives later and somewhere else. `#[extend_where]` moves the predicate onto the trait, where it becomes a
+condition of naming the trait at all:
 
 ```rust
 #[extend_where(Scalar: Clone)]

@@ -19,15 +19,16 @@ choosing at the point of use.
 `#[cgp_component]` splits that one trait into two, so that *using* a capability and *implementing* it
 stop being the same act:
 
-- The **consumer trait** is what callers write — `context.area()`. It keeps the name and shape you
-  gave it.
+- The **consumer trait** is what callers write — `rect.area()`. It keeps the name and shape you gave
+  it.
 - The **provider trait** is what implementations target. It is the same interface with `Self` moved
   into an explicit type parameter, so an implementation is written for a small named type of its own
   rather than for the type the capability is about.
 
 Because each implementation now targets its own name, any number of them can coexist. A **provider**
 is one of those names — a zero-sized type such as `RectangleArea` that exists only to identify an
-implementation. A concrete type then picks the provider it wants through
+implementation. A **context** — the type the capability runs against, which supplies the values it
+needs as its fields — then picks the provider it wants through
 [`delegate_components!`](./delegate_components.md), and generated glue routes calls on the consumer
 trait to the provider that was picked. The whole choice is resolved during compilation and compiles
 down to a direct call.

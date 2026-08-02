@@ -246,7 +246,10 @@ The usual cause is putting the attribute on a component that has no type paramet
 there is nothing for it to do.
 
 **One component gets one dispatch mechanism.** Wiring the same component both with `open` and with a
-`UseDelegate` table is a coherence conflict, because each produces its own table entry for that key:
+`UseDelegate` table is a coherence conflict, because each produces its own table entry for that key. A
+wiring entry expands to two impls, and both of them collide, so the conflict is reported twice — once
+for `IsProviderFor` and once for `DelegateComponent`. The second is the readable one, since its trait
+argument names the component at issue:
 
 ```text
 error[E0119]: conflicting implementations of trait `DelegateComponent<AreaCalculatorComponent>`
@@ -254,6 +257,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<AreaCalcul
    |
    |         open AreaCalculatorComponent;
    |              ----------------------- first implementation here
+   |
+   |         AreaCalculatorComponent:
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `App`
 ```
 
 Pick one per component. The related restriction is that `open` does not combine with a joined namespace
