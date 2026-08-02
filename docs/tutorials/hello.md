@@ -50,7 +50,7 @@ pub struct Person {
 }
 ```
 
-To enable CGP functions to access the fields of a context, we use `#[derive(HasField)]` to derive the necessary CGP traits that power the generic field access machinery. In practice, this means the `greet` function will be able to find the `name` field automatically, without any further wiring on our part.
+To enable CGP functions to access the fields of a context, we use [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) to derive the necessary CGP traits that power the generic field access machinery. In practice, this means the `greet` function will be able to find the `name` field automatically, without any further wiring on our part.
 
 With the `Person` struct defined, we can call the `greet` method on it with no additional work:
 
@@ -170,7 +170,7 @@ When walking through the desugared Rust code, you might wonder: since `Greet` re
 
 The answer is yes for the simplified desugared code shown above. But CGP actually employs a more generalized trait called `HasField` that works universally across all possible structs. This means there is **no need** to specifically generate a `HasName` trait to be used by `Greet`, or to implement it manually for `Person`.
 
-The full explanation of how `HasField` works is beyond the scope of this tutorial. The general idea, however, is that a `HasField` instance is implemented for every field inside a struct that uses `#[derive(HasField)]`. Traits like `Greet` then use this to access a specific field by its field name. In practice, this means that `Greet` and `Person` can be defined in entirely different crates without knowing anything about each other. When they are imported together in a third crate, `Greet` will still be automatically implemented for `Person`.
+The full explanation of how `HasField` works is beyond the scope of this tutorial — the [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) reference page covers it in full. The general idea, however, is that a `HasField` instance is implemented for every field inside a struct that uses `#[derive(HasField)]`. Traits like `Greet` then use this to access a specific field by its field name. In practice, this means that `Greet` and `Person` can be defined in entirely different crates without knowing anything about each other. When they are imported together in a third crate, `Greet` will still be automatically implemented for `Person`.
 
 ## Conclusion
 

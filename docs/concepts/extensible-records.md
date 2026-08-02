@@ -35,8 +35,9 @@ field of `App` is code that names `App`.
 
 ## A struct as a list of named fields
 
-The move is to give the shape a type. `#[derive(CgpData)]` gives a struct a description of itself that
-generic code can read:
+The move is to give the shape a type.
+[`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) gives a struct a description of itself
+that generic code can read:
 
 ```rust
 #[derive(CgpData)]
@@ -128,7 +129,10 @@ what runs a handler per field and assembles the result, and is the page that mak
 above concrete.
 
 For the constructs, [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) is the umbrella
-derive, [`HasFields`](/docs/reference/traits/has_fields) is the whole-shape view,
+derive and its slices are [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) for reading
+one field, [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) for the whole shape, and
+[`#[derive(BuildField)]`](/docs/reference/derives/derive_build_field) for the builder.
+[`HasFields`](/docs/reference/traits/has_fields) is the whole-shape view those produce,
 [`HasBuilder`](/docs/reference/traits/has_builder) is the builder family, and
 [`Field`](/docs/reference/types/field) and [`Symbol!`](/docs/reference/macros/symbol) are the pieces a
 shape is made of.

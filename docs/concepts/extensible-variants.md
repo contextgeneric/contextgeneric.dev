@@ -30,7 +30,8 @@ decouple each variant's handling from the enum itself so that both are additions
 
 ## An enum as a list of named variants
 
-The move is the same as for a record: give the shape a type. Where a record is a *product* of named
+The move is the same as for a record: give the shape a type with
+[`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data). Where a record is a *product* of named
 fields, an enum is a *sum* of named variants:
 
 ```rust
@@ -119,7 +120,11 @@ getter — code touching part of a shape without naming the whole.
 **One unnamed field per variant.** A derivable enum must be a sum of products: each variant holds
 exactly one unnamed payload. A richer variant wraps its data in a dedicated struct — which is why the
 example above is `Circle(Circle)` rather than `Circle { radius: u64 }`. It is a real constraint on how
-the enum is written, and it is the first thing anyone hits.
+the enum is written, and it is the first thing anyone hits. The constraint comes from constructing and
+deconstructing rather than from the shape itself:
+[`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) accepts every variant shape, so an
+enum that cannot take the full family can still have a structural representation — just no generic
+constructor and no extractor.
 
 **Only types that opted in**, as with records. An enum from a crate that has not derived the shape is
 invisible to all of this.
@@ -140,8 +145,11 @@ variant, and [Type-level DSLs](./type-level-dsls.md) is the largest thing this p
 language whose terms are types and whose interpreter is the trait system.
 
 For the constructs, [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) is the umbrella
-derive, [`ExtractField`](/docs/reference/traits/extract_field) is the extractor family behind the
-narrowing, [`FromVariant`](/docs/reference/traits/from_variant) constructs a variant generically, and
+derive and its slices are [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) for the
+whole shape, [`#[derive(ExtractField)]`](/docs/reference/derives/derive_extract_field) for the
+narrowing, and [`#[derive(FromVariant)]`](/docs/reference/derives/derive_from_variant) for construction
+by name. [`ExtractField`](/docs/reference/traits/extract_field) is the extractor family those produce,
+[`FromVariant`](/docs/reference/traits/from_variant) constructs a variant generically, and
 [the casts](/docs/reference/traits/cast) are `CanUpcast` and `CanDowncast`.
 
 ---

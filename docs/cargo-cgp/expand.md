@@ -66,8 +66,10 @@ impl __CheckRectangle<AreaCalculatorComponent, ()> for Rectangle {}
 ```
 
 Everything a reader needs in order to follow a wiring error is visible there: the field accessors
-`#[derive(HasField)]` produced, the one-line table entry `delegate_components!` produced, the
-forwarding impl that carries the provider's requirements, and the assertion `check_components!` added.
+[`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) produced, the one-line table entry
+[`delegate_components!`](/docs/reference/macros/delegate_components) produced, the forwarding impl that
+carries the provider's requirements, and the assertion
+[`check_components!`](/docs/reference/macros/check_components) added.
 
 ## Narrowing with `--item`
 
