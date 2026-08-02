@@ -15,6 +15,16 @@ time rather than building an idea up. When a page here tells you *what* a constr
 to know *why* CGP works that way, the [concepts](/docs/concepts/) are where each idea is explained on
 its own.
 
+:::info
+
+### Still being written
+
+The construct list below is complete — every construct the `cgp` crate exports has a page, or a named
+place on a page it shares — so nothing is missing from this index. Most of the pages behind it are
+placeholders for now, and each one says so when you open it.
+
+:::
+
 ## Start with these six
 
 Most CGP code uses a small number of constructs over and over. If you read nothing else here, read
@@ -193,8 +203,6 @@ these names, this is where it lives.
 | `#[default_impl(...)]` | [`DefaultNamespace`](./traits/default_namespace.md) |
 | `#[check_providers(...)]`, `#[check_params(...)]` | [`check_components!`](./macros/check_components.md) |
 
-## This reference is still being written
+---
 
-Most pages here are placeholders at present, and each one says so. The construct list is complete —
-every construct the `cgp` crate exports has a page, or a named place on a page it shares — so nothing
-is missing from this index even where the page behind it is not yet filled in.
+*This page was written by an AI agent from the CGP knowledge base and verified against the library's source — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

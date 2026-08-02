@@ -49,10 +49,10 @@ The macro performs the rewrite for you. **This is the form to write**; the insid
 desugars to and what you will meet in generated code.
 
 One fact the convenience must not hide: **inside a `#[cgp_impl]` block, `self` and `Self` mean the
-context, not the provider.** The provider is a type-level name with no fields and no value — it is
-never constructed, and there is nothing in it to read. The macro rewrites `self` to the context value
-and `Self` to the context type precisely because the context is the only thing that exists when the
-method runs.
+context — the type this implementation runs against — and not the provider.** The provider is a
+type-level name with no fields and no value: it is never constructed, and there is nothing in it to
+read. The macro rewrites `self` to the context value and `Self` to the context type precisely because
+the context is the only thing that exists when the method runs.
 
 ## Using it
 
@@ -295,7 +295,7 @@ provider supplies them in the `#[cgp_impl]` block as usual — but `Self::LIMIT`
 The error reads:
 
 ```text
-error[E0599]: no associated function or constant named `LIMIT` found for type parameter `__Context__`
+error[E0599]: no associated function or constant named `LIMIT` found for type parameter `__Context__` in the current scope
 ```
 
 Name it through the provider trait instead, which the rewrite turns into the correct qualified path:

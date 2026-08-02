@@ -194,6 +194,7 @@ shape — keeping `self` and the original signatures — and rewrites it into th
 
 ```rust
 use cgp::prelude::*;
+use core::cell::RefCell;
 
 #[cgp_component(EmailSender)]
 pub trait CanSendEmail {

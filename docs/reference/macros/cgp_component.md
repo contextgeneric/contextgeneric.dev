@@ -316,9 +316,15 @@ arguments inside are parsed.
 
 ## Gotchas
 
-**A const generic parameter on the trait is rejected**, with a compile error. A component's extra
-parameters are recorded as a tuple of *types* in the `IsProviderFor` supertrait, and CGP's wiring
-dispatches on types rather than values, so a const value has nowhere to live in that machinery.
+**A const generic parameter on the trait is rejected**, by the macro rather than by the compiler:
+
+```text
+error: const generic parameters are not supported on CGP component traits
+```
+
+A component's extra parameters are recorded as a tuple of *types* in the `IsProviderFor` supertrait, and
+CGP's wiring dispatches on types rather than values, so a const value has nowhere to live in that
+machinery.
 
 An associated `const` *item* is unaffected — `const LIMIT: u64;` as a trait member is an
 [associated const](https://doc.rust-lang.org/reference/items/associated-items.html), not a generic

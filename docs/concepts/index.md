@@ -72,3 +72,7 @@ as it goes, turning a small language into types the compiler interprets.
 gap in stable Rust rather than a CGP idea, and it matters as soon as an async CGP task is spawned.
 [How much CGP to use](./modularity-hierarchy.md) is a decision guide rather than an explanation, and
 it is the page to reach for when the question is how far to go.
+
+---
+
+*This page was written by an AI agent from the CGP knowledge base and verified against the library's source — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

@@ -9,8 +9,9 @@ Define a single-implementation capability as a blanket-impl trait, straight from
 ## What it's for
 
 `#[cgp_fn]` is the smallest amount of CGP that does anything useful. You write a plain function, mark
-the values it needs from the context, and the macro turns it into a capability that every type with
-those fields gets automatically:
+the values it needs from the **context** — the type the capability runs against, which supplies those
+values as its fields — and the macro turns it into a capability that every type with those fields gets
+automatically:
 
 ```rust
 #[cgp_fn]
@@ -20,8 +21,9 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 ```
 
 Any struct with a `width` and a `height` can now call `.rectangle_area()`. There is no component to
-define, no provider to name, and no wiring table anywhere — the macro emits a trait and one blanket
-implementation covering every context that satisfies the field requirements.
+define, no provider to name, and no wiring table anywhere — the macro emits a trait and one
+[blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
+covering every context that satisfies the field requirements.
 
 That is the trade it makes, and it is worth being explicit about. A
 [`#[cgp_component]`](./cgp_component.md) supports many interchangeable implementations, one chosen per
@@ -328,10 +330,16 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 
 **An `#[impl_generics]` parameter cannot appear in the capability's own signature.** Only the generated
 impl declares it, so naming it in a return type or an explicit parameter leaves it unresolved in the
-trait. The spelling decides which error you get, which is why the same mistake shows up two ways: a
-bare `Db` gives `error[E0425]: cannot find type 'Db' in this scope`, and a path such as `Db::Row` gives
-`error[E0433]: use of undeclared type 'Db'`. Both mean the same thing — either the type belongs out of
-the signature, or it needs to be an [abstract type](./cgp_type.md) rather than an inferred impl
+trait. Both spellings report the same headline:
+
+```text
+error[E0425]: cannot find type `Db` in this scope
+```
+
+What differs is the code, and that is the part worth noticing, since it is what you are likely to search
+for. A bare `Db` reports `E0425` as above; a qualified path such as `Db::Row` reports `E0433`, whose span
+is labelled *use of undeclared type `Db`* instead. Both mean the same thing — either the type belongs out
+of the signature, or it needs to be an [abstract type](./cgp_type.md) rather than an inferred impl
 parameter.
 
 ## Related constructs
