@@ -244,6 +244,12 @@ per component.
 Each generated provider impl is paired with a matching
 [`IsProviderFor`](../traits/is_provider_for.md) impl carrying the same bounds, as everywhere else.
 
+A bound that names the type it constrains is rewritten rather than refused. Declaring
+`type Scalar: Mul<Output = Self::Scalar> + Clone;` leaves the bound as written on the two traits, where
+`Self::Scalar` still means what it says — but the copy landing on the `UseType` and `WithProvider` impls
+becomes `Scalar: Mul<Output = Scalar> + Clone`, with every `Self::Scalar` replaced by the free parameter.
+Copied unchanged it would have named an associated type of the wrong `Self`.
+
 <details>
 <summary>Formal grammar</summary>
 
@@ -319,6 +325,11 @@ headline, so read downward. **Without a check the mistake is silent**, which is 
 - [`WithProvider`](../providers/with_provider.md) — the adapter the second generated impl is for.
 - [`#[cgp_getter]`](./cgp_getter.md) — the value-level counterpart, using `UseField` where this uses
   `UseType`.
+
+The ideas behind it:
+
+- [Abstract types](/docs/concepts/abstract-types) — why a context choosing its own type propagates
+  nowhere, unlike a parameter.
 
 ## Source
 

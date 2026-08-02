@@ -342,6 +342,19 @@ entry of the table named after `in`, and emits one mapping per entry; its body a
 and its optional `where` clause is merged into every impl the loop generates. Like
 `delegate_components!`, the body accepts **no attributes** on any entry and rejects any it finds.
 
+The `#[prefix(...)]` attribute, which registers a component into a namespace and is written on a
+[`#[cgp_component]`](./cgp_component.md) trait, has a grammar of its own:
+
+```ebnf
+PrefixArgs    -> Path `in` NamespacePath
+
+NamespacePath -> TypePath GenericArgs?
+```
+
+`Path` is [`Path!`](./path.md)'s own `@`-prefixed dotted production, so its segments take no generics and
+neither grouping form is accepted — one attribute registers under exactly one prefix, and the attribute
+is repeated to register into several namespaces. `NamespacePath` may itself be parameterized.
+
 </details>
 
 ## Gotchas
@@ -411,6 +424,11 @@ the context.
 - [`#[cgp_component]`](./cgp_component.md) — the host of the `#[prefix(...)]` attribute.
 - [`DelegateComponent`](../traits/delegate_component.md) — the per-key table a redirect finally walks.
 - [`check_components!`](./check_components.md) — the only thing that catches a route bound to nothing.
+
+The ideas behind it:
+
+- [Namespaces](/docs/concepts/namespaces) — the idea in full, including why presets need no separate
+  construct.
 
 ## Source
 

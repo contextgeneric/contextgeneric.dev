@@ -90,6 +90,30 @@ needs.
 The attribute belongs on a [`#[cgp_component]`](../macros/cgp_component.md) trait and only makes sense for
 one that has generic parameters.
 
+<details>
+<summary>Formal grammar</summary>
+
+The attribute argument is a wrapper name and the parameters to key on, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+DeriveDelegateArgs -> Wrapper `<` KeyParams `>`
+
+Wrapper            -> IDENTIFIER
+
+KeyParams          -> IDENTIFIER
+                    | `(` IDENTIFIER ( `,` IDENTIFIER )* `,`? `)`
+```
+
+Both parts are required. `Wrapper` is a bare identifier rather than a path, so a wrapper reached through a
+module path has to be imported first. `KeyParams` are **identifiers**, not types: each must name a generic
+parameter the trait declares, and a type expression such as `Vec<u8>` in that position does not parse. The
+parenthesized form must list at least one parameter — an empty `()` is rejected with *expect non-empty
+tuple list of identifiers in use_delegate_spec* — and a single parameter written bare is keyed the same way
+a one-element tuple would be. The attribute may be repeated, once per dispatcher.
+
+</details>
+
 ## Examples
 
 A dispatching component, two implementations, and a context that routes each shape to its own:
@@ -275,6 +299,11 @@ per-type entries have to be written with the full prefixed path instead.
 - [`#[cgp_component]`](../macros/cgp_component.md) — the host, and the source of the provider trait.
 - [`DelegateComponent`](../traits/delegate_component.md) — the table trait the lookup reads.
 - [`cgp_namespace!`](../macros/cgp_namespace.md) — the full form of the mechanism `open` is a special case of.
+
+The ideas behind it:
+
+- [Dispatching](/docs/concepts/dispatching) — the per-type routing this attribute is the legacy
+  mechanism for.
 
 ## Source
 

@@ -188,6 +188,11 @@ struct: the variant's payload type has to be a single nameable type for the sum 
   taking apart a variant generically.
 - [`CanUpcast`](../traits/cast.md) — converting between two enums that share variants.
 
+The ideas behind it:
+
+- [Extensible variants](/docs/concepts/extensible-variants) — the variant representation this list
+  is the spine of.
+
 ## Source
 
 - Entry point: [`sum.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/sum.rs)

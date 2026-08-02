@@ -196,6 +196,23 @@ Here the result is exactly what `pub trait CanGreet: HasName` would have produce
 reason given above: it presents the bound as an import rather than as inheritance, and it keeps the
 `use`/`pub use` pairing with `#[uses]` reading consistently across both macros.
 
+<details>
+<summary>Formal grammar</summary>
+
+The attribute argument is a comma-separated list of bounds, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+ExtendArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
+```
+
+This is the same production [`#[uses]`](uses.md) accepts — the Rust grammar's own bound, so a lifetime, a
+`?Sized`, or an associated-type equality parses as readily as a plain trait name. The list may be empty,
+and the attribute may be repeated, with every occurrence's entries collected together. What differs
+between the two attributes is not the grammar but where the bounds land.
+
+</details>
+
 ## Gotchas
 
 **On a `#[cgp_impl]` the attribute is not recognized at all**, rather than being accepted and ignored.
@@ -222,6 +239,11 @@ is the practical reason to default to `#[uses]`.
 - [`#[cgp_fn]`](../macros/cgp_fn.md) — where `#[extend]` is the only way to declare a supertrait.
 - [`#[cgp_component]`](../macros/cgp_component.md) — where it is preferred over native `:` syntax.
 - [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — defines the getter capabilities most often extended.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the distinction between a
+  requirement callers see and one they do not.
 
 ## Source
 

@@ -293,6 +293,11 @@ short-circuits.
 - [`#[cgp_new_provider]`](./cgp_provider.md) — what the generated impl is emitted through.
 - [`#[cgp_auto_dispatch]`](./cgp_auto_dispatch.md) — generates per-variant computers from a trait.
 
+The ideas behind it:
+
+- [Handlers](/docs/concepts/handlers) — the computation family this provider joins, across its sync,
+  fallible, and input-free axes.
+
 ## Source
 
 - Entry point: [`entrypoints/cgp_computer.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-extra-macro-lib/src/entrypoints/cgp_computer.rs)

@@ -206,10 +206,20 @@ these names, this is where it lives.
 | `MatchWithHandlers`, `ExtractFieldAndHandle` | [Dispatch combinators](./providers/dispatch_combinators.md) |
 | `PipeMonadic`, `BindOk`, `BindErr` | [Monad providers](./providers/monad_providers.md) |
 | `RaiseFrom`, `ReturnError`, `DebugError`, `DisplayError` | [Error providers](./providers/error_providers.md) |
+| `UseDelegatedType`, `WithDelegatedType` | [`UseDelegatedType`](./providers/use_delegated_type.md) and [`WithProvider`](./providers/with_provider.md) |
+| `UseInputDelegate` | [Handler combinators](./providers/handler_combinators.md) |
+| `RaiseInfallible`, `DiscardDetail`, `PanicOnError` | [Error providers](./providers/error_providers.md) |
+| `ComputerRef`, `AsyncComputer`, `TryComputerRef`, `HandlerRef` | the page for the component they vary — [`Computer`](./components/computer.md), [`TryComputer`](./components/try_computer.md), [`Handler`](./components/handler.md) |
+| `BuildField`, `UpdateField`, `FinalizeBuild` | [`HasBuilder`](./traits/has_builder.md) |
+| `HasExtractor`, `FinalizeExtract` | [`ExtractField`](./traits/extract_field.md) |
+| `IsPresent`, `IsNothing` | [`MapType`](./traits/map_type.md) |
+| `MonadicTrans`, `MonadicBind`, `LiftValue`, `ContainsValue` | [Monad traits](./traits/monad.md) |
+| `product!` (the value-level form) | [`Product!`](./macros/product.md) |
 | `#[impl_generics(...)]` | [`#[cgp_fn]`](./macros/cgp_fn.md) |
 | `#[prefix(...)]` | [`cgp_namespace!`](./macros/cgp_namespace.md) |
 | `#[default_impl(...)]` | [`DefaultNamespace`](./traits/default_namespace.md) |
-| `#[check_providers(...)]`, `#[check_params(...)]` | [`check_components!`](./macros/check_components.md) |
+| `#[check_trait(...)]`, `#[check_providers(...)]` | [`check_components!`](./macros/check_components.md) |
+| `#[check_params(...)]`, `#[skip_check]` | [`delegate_and_check_components!`](./macros/delegate_and_check_components.md) |
 
 ---
 

@@ -70,14 +70,22 @@ the stored field. This is the whole of the mapping:
 | `&mut [T]` | anything `AsMut<[T]>` | `.as_mut()` |
 | `Option<&mut T>` | `Option<T>` | `.as_mut()` |
 | `Option<&mut str>` | `Option<String>` | `.as_deref_mut()` |
+| [`MRef<'a, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
 
-Two of those rows are worth reading twice. `&str` is the case most often wanted and least obvious: the
-field is a `String`, and the argument borrows from it, so a context never has to store a `&str`. And an
+Three of those rows are worth reading twice. `&str` is the case most often wanted and least obvious: the
+field is a `String`, and the argument borrows from it, so a context never has to store a `&str`. An
 owned parameter *clones* — cheap for an `f64`, less so for a large `String`, which is a reason to take
-`&str` or `&T` wherever the body only needs to read.
+`&str` or `&T` wherever the body only needs to read. And `MRef` is the owned-or-borrowed form: it reads a
+plain `T` field, hands the body a value that may be either, and is the one reference-shaped row with no
+mutable counterpart.
 
 Mutability follows the *argument's* type rather than the receiver's. An argument carrying a `&mut` reads
-mutably; every other argument reads through a shared borrow, even on a `&mut self` method.
+mutably; every other argument — an `MRef` included — reads through a shared borrow, even on a `&mut self`
+method.
+
+The `MRef` row is matched by *shape* rather than by resolving the name: a single-segment `MRef` with one
+lifetime argument and one type argument. Anything else spelled `MRef` falls into the owned row and is
+cloned, which is the one place a small change to the type silently changes the read.
 
 The same rules govern the getter traits, so learning them once covers everywhere CGP reads a field.
 
@@ -212,7 +220,10 @@ as the accessor: `&mut u64` emits `HasFieldMut<Symbol!("counter"), Value = u64>`
 `get_field_mut`.
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) block the rewrite is the same, with the bounds joining
-that provider's `where` clause instead.
+that provider's `where` clause instead — and with one addition that only a multi-method block can show:
+the bounds are collected across *every* method and de-duplicated, so two methods each taking
+`#[implicit] name: &str` add one `HasField<Symbol!("name"), Value = String>` bound rather than two. The
+`let` bindings are still emitted per method, since each body needs its own.
 
 ## Gotchas
 
@@ -258,6 +269,11 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 - [`#[uses]`](uses.md) — imports a capability rather than a value.
 - [`#[use_type]`](use_type.md) — imports a type rather than a value; the third of the three.
 - [`Symbol!`](../macros/symbol.md) — the type-level field name the bounds are keyed on.
+
+The ideas behind it:
+
+- [Implicit arguments](/docs/concepts/implicit-arguments) — the idea in full, and why it is the
+  default way to reach a context's field.
 
 ## Source
 

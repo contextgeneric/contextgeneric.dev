@@ -255,9 +255,16 @@ does not apply.
 
 Its three trait arguments are assembled from the provider trait's own. The first is the **component**
 (`ComputerRefComponent`, the default derived from the trait name, or whatever the attribute argument
-said). The second is the **context**, taken from the provider trait's leading argument. The third is a
-**tuple of every remaining parameter** — `(Code, Input)` here, and the empty `()` for a provider trait
-that takes nothing but a context.
+said). The second is the **context**. The third is a **tuple of everything left over** — `(Code, Input)`
+here, and the empty `()` for a provider trait that takes nothing but a context.
+
+Two rules decide that split, and they only become visible on a provider trait that carries a
+[lifetime](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html). The context is the first
+*type* argument rather than the first argument, because Rust puts lifetime arguments first and a
+lifetime cannot be a context. And a lifetime is lifted into [`Life<'a>`](../types/life.md) to occupy
+its slot in the tuple, which holds types. A provider for `ReferenceGetter<'a, Context, T>` therefore
+derives `IsProviderFor<ReferenceGetterComponent, Context, (Life<'a>, T)>`, keeping the order the
+arguments were written in.
 
 **One bound is rewritten rather than copied**, and it is the mechanism that makes a nested provider
 stack diagnosable. A bound naming *this component's provider trait* — the inner-provider bound of a
@@ -290,6 +297,16 @@ of any other kind — an ordinary `Context: Clone`, a consumer-trait bound such 
 `#[cgp_new_provider]` emits the same two items plus the struct, whose shape follows the `Self` type as
 described [above](#the-struct-cgp_new_provider-declares).
 
+### Input the macros refuse
+
+Four shapes are rejected at expansion rather than lowered into code that fails later, and both macros
+reject the same four. An **inherent impl**, with no trait, has no provider trait to read the component
+and context from. A **provider trait with no type argument** leaves nothing to be the context. A
+**const argument** in the provider trait's argument list has nowhere to live in the type-only params
+tuple — this is about the *trait's* arguments, not about a const generic on the provider struct, which
+passes through untouched. And an item that is not an `impl` is refused outright. Each message names
+what was missing.
+
 <details>
 <summary>Formal grammar</summary>
 
@@ -317,6 +334,19 @@ one macro to the other and forgetting to delete the declaration:
 ```text
 error[E0428]: the name `RectangleArea` is defined multiple times
 ```
+
+**`new` is not part of this attribute's grammar.** `#[cgp_provider(new RectangleArea)]` does not
+declare the struct — it fails to parse, because the argument holds a component type and nothing else.
+Which macro you invoke is what decides whether the struct is declared, so use
+`#[cgp_new_provider]`. The `new` keyword you may have seen belongs to
+[`#[cgp_impl]`](./cgp_impl.md#using-it).
+
+**A higher-order provider over a lifetime-carrying component loses the inner marker bound.** The
+rewrite above finds the context by reading the inner bound's first argument, and on a component with a
+lifetime that argument is the lifetime — so no counterpart is built and the bound is copied as-is. The
+stack compiles and runs correctly; what is lost is the propagation, so a dependency unmet inside the
+inner provider no longer surfaces at the outer one, and `#[check_providers(...)]` cannot say which
+layer of such a stack is at fault. Components without lifetime parameters are unaffected.
 
 **The component argument is not checked against the trait.** Passing a component that does not belong
 to the provider trait you are implementing produces a marker impl for the wrong key, so the provider
@@ -357,6 +387,13 @@ the consumer side is unaffected: a wired context reads `<App as CanRateLimit>::L
   counterpart the macro adds.
 - [`UseContext`](../providers/use_context.md) — the usual default for a hand-written provider struct's
   inner parameter.
+
+The ideas behind it:
+
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the shape these two
+  macros write out longhand.
+- [Higher-order providers](/docs/concepts/higher-order-providers) — the stacks whose inner bound the
+  marker derivation augments.
 
 ## Source
 

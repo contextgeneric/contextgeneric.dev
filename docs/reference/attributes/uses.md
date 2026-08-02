@@ -190,6 +190,25 @@ appended to that provider's `where` clause — which is also where they are pick
 [`IsProviderFor`](../traits/is_provider_for.md) impl, so an unmet import is reported by name rather than
 as a bare missing implementation.
 
+<details>
+<summary>Formal grammar</summary>
+
+The attribute argument is a comma-separated list of bounds, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+UsesArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
+```
+
+`TypeParamBound` is the Rust grammar's own bound production, which is wider than the plain `Trait<Args>`
+this attribute is normally written with: a lifetime, a `?Sized`, and an associated-type equality such as
+`HasErrorType<Error = AppError>` all parse. The list may be empty, and the attribute may be repeated —
+entries from every occurrence are collected into one `Self:` predicate. The commas separate *bounds*, so
+`#[uses(A, B)]` and `#[uses(A)] #[uses(B)]` are the same thing; the single-attribute form is the one to
+write.
+
+</details>
+
 ## Gotchas
 
 **Naming a provider trait instead of a consumer trait does not work**, and this is the most likely way to
@@ -219,6 +238,11 @@ and it will supply the missing argument.
 - [`#[use_provider]`](use_provider.md) — imports an inner provider, filling in its context argument.
 - [`#[implicit]`](implicit.md) — imports a value from a field rather than a capability.
 - [`#[cgp_component]`](../macros/cgp_component.md) — defines the capabilities most often imported.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — what an imported capability
+  becomes, and why callers never see it.
 
 ## Source
 

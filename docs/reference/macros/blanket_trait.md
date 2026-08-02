@@ -283,7 +283,12 @@ Add `use cgp::core::macros::blanket_trait;`. This is the one macro on this page'
 
 **A method without a default body is an error.** The macro forwards defaults into the impl, so a bare
 declaration leaves it nothing to emit. This is the opposite of an ordinary trait, where a bodiless method is
-the normal case.
+the normal case. The same holds for a constant, and the two say so distinctly — *function item require
+implementation block* and *const item require implementation expression*.
+
+**Only methods, associated types, and associated constants are accepted.** A trait item of any other kind —
+a macro invocation in the body, say — is refused with *unsupported trait item*, because the macro has to
+mirror each item into the impl and knows only those three shapes.
 
 **The trait keeps its default bodies.** The expansion does not strip them, so each body appears both on the
 trait and in the impl. Harmless, but worth knowing when reading an expansion and wondering whether the macro
@@ -302,6 +307,13 @@ Where a type needs different behaviour, the trait wants to be a [component](./cg
 - [`HasField`](../traits/has_field.md) — what value-level dependency injection is built on.
 - [`#[uses]`](../attributes/uses.md) — how a CGP provider declares the trait dependencies a supertrait
   declares here.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the idea this macro automates —
+  requirements that live on the impl rather than the interface.
+- [How much CGP to use](/docs/concepts/modularity-hierarchy) — where a blanket trait sits between a
+  plain trait and a full component.
 
 ## Source
 

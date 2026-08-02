@@ -106,7 +106,44 @@ delegate_and_check_components! {
 }
 ```
 
-The two per-entry attributes are **mutually exclusive**, and at most one may appear on a given key.
+The two per-entry attributes are **mutually exclusive**, and at most one may appear on a given key. A
+second one is rejected, as is any other attribute, and `#[skip_check]` takes no arguments.
+
+### Attributes on a list key merge
+
+A bracketed key may carry a check attribute of its own *and* have attributes on the names inside it, and
+the two are combined per element rather than one winning. An absent attribute defers to the present one,
+two `#[check_params]` lists concatenate, and two `#[skip_check]`s stay a skip:
+
+```rust
+delegate_and_check_components! {
+    MyApp {
+        #[check_params(Rectangle)]
+        [
+            #[check_params(Circle)]
+            AreaCalculatorComponent,
+            RotatorComponent,
+        ]: ShapeProvider,
+    }
+}
+```
+
+`AreaCalculatorComponent` is checked against `Rectangle` and `Circle`; `RotatorComponent` against
+`Rectangle` alone. The one combination refused is a `#[skip_check]` merged with a `#[check_params]`, since
+they ask for opposite things:
+
+```text
+error: cannot combine #[skip_check] with #[check_params]
+```
+
+### Two forms that quietly check nothing
+
+An **empty** `#[check_params()]` has no parameters to iterate over, so it skips the entry exactly as
+`#[skip_check]` would, without saying so. Write `#[skip_check]` when that is what you mean.
+
+A key carrying **only generics** is the opposite case and is easy to assume away: it *is* still checked,
+with its generics bound on the check impl and unit parameters. `<I> FooKey<I>: FooProvider` derives
+`impl<I> __CanUseContext<FooKey<I>, ()> for Context {}`, which is what keeps `I` from appearing unbound.
 
 ### What is wired, and what is checked
 
@@ -372,6 +409,11 @@ derivation only produces checks for entries keyed on a component name — so a t
 - [`cgp_namespace!`](./cgp_namespace.md) — inherited wiring, which the derivation does not cover.
 - [`UseField`](../providers/use_field.md) and [`UseType`](../providers/use_type.md) — the providers the
   examples wire.
+
+The ideas behind it:
+
+- [Checking your wiring](/docs/concepts/check-traits) — the lazy-wiring problem this macro exists to
+  make unforgettable.
 
 ## Source
 

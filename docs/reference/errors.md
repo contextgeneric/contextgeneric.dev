@@ -11,6 +11,6 @@ The errors CGP produces after macro expansion, grouped by what went wrong: a dep
 
 ### Not written yet
 
-This page is still being written. In the meantime, run [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) in place of `cargo check`: it un-hides the root cause the default trait solver suppresses and leads with it, for the error classes it recognizes.
+This page is still being written. In the meantime, run [`cargo cgp check`](/docs/cargo-cgp/check) in place of `cargo check`: it un-hides the root cause the default trait solver suppresses and leads with it, for the error classes it recognizes.
 
 :::

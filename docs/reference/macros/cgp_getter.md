@@ -37,9 +37,12 @@ want neither. The [When to reach for it](#when-to-reach-for-it-and-when-not) sec
 ## Using it
 
 Apply the attribute to a getter trait, exactly as with [`#[cgp_auto_getter]`](./cgp_auto_getter.md). The
-same method forms are accepted — `&self` and `&mut self` receivers, and the `&str`, `&[T]`, `Option<&T>`,
-`Option<&str>`, owned, and associated-type return shorthands, with their
-[access rules](./cgp_auto_getter.md#how-the-return-type-decides-the-read) unchanged:
+same method forms are accepted — every receiver shape, including a
+[typed reference to another type](./cgp_auto_getter.md#reading-a-field-of-another-type) in place of
+`self` and an [optional `PhantomData` argument](./cgp_auto_getter.md#an-optional-phantomdata-argument);
+and the `&str`, `&[T]`, `Option<&T>`, `Option<&str>`, `MRef<'_, T>`, owned, and associated-type return
+shorthands, with their [access rules](./cgp_auto_getter.md#how-the-return-type-decides-the-read)
+unchanged. The two macros share one parser, so a method the one accepts the other does too:
 
 ```rust
 #[cgp_getter]
@@ -314,6 +317,11 @@ the tag is what tells you which field the mismatch is about.
 - [`Symbol!`](./symbol.md) — the type-level field name a wiring entry supplies.
 - [`WithProvider`](../providers/with_provider.md) — the adapter for a value that does not come from a field.
 - [`#[cgp_type]`](./cgp_type.md) — the same idea for a type rather than a value.
+
+The ideas behind it:
+
+- [Implicit arguments](/docs/concepts/implicit-arguments) — the default way to read a field, and why
+  this is the advanced fallback.
 
 ## Source
 

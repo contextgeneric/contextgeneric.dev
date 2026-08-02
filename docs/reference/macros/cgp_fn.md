@@ -289,8 +289,18 @@ where
 The companion attributes layer into these same two items. `#[uses(Trait)]` adds a `Self: Trait`
 predicate to the impl; `#[extend(Trait)]` adds it to the impl *and* to the trait's supertraits;
 `#[extend_where(P)]` adds `P` to both `where` clauses; `#[impl_generics(T: Bound)]` inserts `T: Bound`
-into the impl's generic list alone; and `#[use_type(Trait.Type)]` adds the supertrait and rewrites
-every bare mention of the type into its fully qualified form.
+into the impl's generic list alone — its argument is a comma-separated list of ordinary generic
+parameters, so a lifetime or a const parameter is accepted there too; and
+`#[use_type(Trait.Type)]` adds the supertrait and rewrites every bare mention of the type into its
+fully qualified form. The implicit-argument bounds are appended
+last, after whatever the attributes contributed.
+
+Two smaller placements are worth knowing because neither is visible in the source you wrote. **The
+function's visibility becomes the trait's**, and the method inside the impl is left inherited — so
+`pub fn rectangle_area` yields `pub trait RectangleArea`, and a private `fn` yields a private trait
+usable only in its own module. And **an attribute the macro does not recognize is copied onto both
+items**, which is what lets `#[allow(...)]`, `#[doc]`, or a doc comment ride through and apply to the
+trait and the impl alike.
 
 <details>
 <summary>Formal grammar</summary>
@@ -353,6 +363,13 @@ parameter.
 - [`#[cgp_impl]`](./cgp_impl.md) — shares the `#[implicit]` mechanism, for writing a component's provider.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — what a context derives to satisfy the bounds.
 - [`#[async_trait]`](./async_trait.md) — how an `async fn` capability is declared.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the `where`-clause injection
+  this macro is built on.
+- [How much CGP to use](/docs/concepts/modularity-hierarchy) — the ladder this sits at the bottom
+  of.
 
 ## Source
 

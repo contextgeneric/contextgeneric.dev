@@ -229,6 +229,33 @@ where
 Note that the body is untouched in both. The call stays `InnerCalculator::area(__context__)`, passing the
 context as the first argument, because that is the shape the provider trait's method has.
 
+<details>
+<summary>Formal grammar</summary>
+
+The attribute argument is one provider and the provider traits it must satisfy, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+UseProviderArgs -> ProviderType `:` ProviderBound ( `+` ProviderBound )*
+
+ProviderType    -> Type
+ProviderBound   -> TypePath GenericArgs?
+```
+
+Both parts are required. `ProviderType` names the generic parameter the inner provider occupies, and each
+`ProviderBound` is the provider trait to require of it — written *without* its leading context argument,
+which the attribute inserts.
+
+Two restrictions follow from those productions and account for every parse failure this attribute
+produces. **`ProviderBound` is a path with plain generic arguments**, not a full `TypeParamBound`, so a
+turbofish or an associated-type binding in that position does not parse; a bound of that shape belongs in
+the block's own `where` clause. And **the argument holds exactly one provider**, because the `+`-separated
+bound list runs to the end of the attribute — a comma after the first pair lands where a `+` was expected.
+That makes this attribute the one exception to the comma-separated convention its siblings follow: bind
+several inner providers by stacking one attribute each. See [Gotchas](#gotchas).
+
+</details>
+
 ## Gotchas
 
 **A comma-separated list of pairs is not accepted.** Writing two providers in one attribute is a parse
@@ -269,6 +296,11 @@ intent is to use the inner implementation, spell out the associated-function cal
 - [`delegate_components!`](../macros/delegate_components.md) — where a composed wrapper is wired.
 - [`check_components!`](../macros/check_components.md) — its `#[check_providers(...)]` form checks each
   layer of a nested stack separately, which is how a broken layer is localized.
+
+The ideas behind it:
+
+- [Higher-order providers](/docs/concepts/higher-order-providers) — the pattern this attribute
+  exists to make writable.
 
 ## Source
 

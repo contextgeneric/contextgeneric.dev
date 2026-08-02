@@ -213,6 +213,11 @@ the order *is* the execution order.
 - [Handler combinators](../providers/handler_combinators.md) — where `Product!` is written by hand, as a
   pipeline.
 
+The ideas behind it:
+
+- [Extensible records](/docs/concepts/extensible-records) — the record representation this list is
+  the spine of.
+
 ## Source
 
 - Entry points: [`product.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/product.rs)

@@ -235,6 +235,11 @@ the check rather than at the definition.
 - [`Product!`](./product.md) and [`Sum!`](./sum.md) — the sibling construction macros, sharing the fold shape.
 - [`DelegateComponent`](../traits/delegate_component.md) — the per-key table a resolved path finally reads.
 
+The ideas behind it:
+
+- [Namespaces](/docs/concepts/namespaces) — where paths are actually written, and what a route is
+  for.
+
 ## Source
 
 - Entry point: [`path.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/path.rs)

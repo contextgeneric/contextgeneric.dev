@@ -273,6 +273,13 @@ hand for some other type without colliding with it.
 - [`#[cgp_component]`](./cgp_component.md) — the better starting point when contexts should configure the
   operation.
 
+The ideas behind it:
+
+- [Dispatching](/docs/concepts/dispatching) — routing an extensible-data input to a handler per
+  variant.
+- [Extensible variants](/docs/concepts/extensible-variants) — the enum representation the dispatch
+  walks.
+
 ## Source
 
 - Entry point: [`entrypoints/cgp_auto_dispatch.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-extra-macro-lib/src/entrypoints/cgp_auto_dispatch.rs)

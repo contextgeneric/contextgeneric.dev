@@ -231,6 +231,10 @@ type argument rather than the value.
   tags.
 - [`StaticFormat`](../traits/static_format.md) — recovering runtime text from a type-level string.
 
+The ideas behind it:
+
+- [Extensible records](/docs/concepts/extensible-records) — where field-name tags are used at scale.
+
 ## Source
 
 - Entry point: [`symbol.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/symbol.rs)

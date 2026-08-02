@@ -601,18 +601,20 @@ SingleKey     -> Generics? Type
 MultiKey      -> `[` SingleKey ( `,` SingleKey )* `,`? `]`
 PathKey       -> Generics? `@` PathHead
 
-PathHead      -> PathSegment ( `.` PathHead )?
-               | `[` PathSegment ( `,` PathSegment )* `,`? `]` ( `.` PathHead )?
+PathHead      -> KeySegment ( `.` PathHead )?
+               | `[` KeySegment ( `,` KeySegment )* `,`? `]` ( `.` PathHead )?
                | `{` PathHead ( `,` PathHead )* `,`? `}`
 
-PathSegment   -> Generics? Type
+KeySegment    -> Generics? PathSegment
 
 PathValue     -> `@` PathSegment ( `.` PathSegment )*
+
+PathSegment   -> Type
 
 ProviderValue -> Type
                | IDENTIFIER `<` `new` InnerTable `>`
 
-InnerTable    -> IDENTIFIER GenericArgs? `{` TableBody `}`
+InnerTable    -> IDENTIFIER BoundFreeGenerics? `{` TableBody `}`
 ```
 
 A leading `Generics` list makes the table generic over the target; `new` additionally emits the target
@@ -623,18 +625,26 @@ separately because a `ForStmt` body admits only that form.
 The two grouping forms inside a `PathHead` differ in what they group and in whether the path may
 continue. A bracketed group holds alternative segments for one position and may be followed by `.` and
 more path; a braced group holds alternative whole remainders and terminates the path, which is why only
-the braced form can nest. Both fan out to the cartesian product with the rest of the path. A `PathValue`
-— the right-hand side of a `=>` — admits no groups and is [`Path!`](./path.md)'s own production.
+the braced form can nest. Both fan out to the cartesian product with the rest of the path.
+
+The three segment productions differ in what they permit, which is why they are named apart. A
+`KeySegment` — inside a `PathKey` — may carry its own generic list, and the parameters of every segment
+along one path are merged onto that entry's impls. A `PathSegment` — inside a `PathValue`, the
+right-hand side of a `=>` — carries none, and admits no groups; it is [`Path!`](./path.md)'s own
+production, which is what keeps the two in step. And every `Generics` list on a key is an impl-position
+list, so a bound is accepted (`<T: Clone> BazKey<T>: BazProvider`) and a parameter *default* is not —
+`<T = u32>` fails with `invalid impl generics syntax`.
 
 A `ProviderValue`'s nested-table form carries a full `TableBody`, so an inner table accepts every form
 an outer one does. An `InnerTable` is an identifier with an optional generic list rather than a full
-`TargetType` — a nested table always names a fresh struct the macro declares — and that list is
-bound-free; put the bound on the entry's own generics instead. A bound written on the inner table is
-rejected as `expected ','`, because the value parser tries the nested-table form speculatively and then
-falls back to reading the whole value as a plain type. An `OpenStmt` may omit its braces when opening exactly one component. Every
-`Statement` precedes every `Mapping`. `NamespaceStmt` and `ForStmt` are described under
-[`cgp_namespace!`](./cgp_namespace.md). The macro accepts no attributes anywhere and rejects any it
-finds.
+`TargetType` — a nested table always names a fresh struct the macro declares — and its
+`BoundFreeGenerics` is a definition-position list: no bounds, no defaults, and a `const` parameter
+written as the bare name. Put a bound on the entry's own generics instead. A bound written on the inner
+table is rejected as `expected ','`, because the value parser tries the nested-table form speculatively
+and then falls back to reading the whole value as a plain type. An `OpenStmt` may omit its braces when
+opening exactly one component. Every `Statement` precedes every `Mapping`. `NamespaceStmt` and
+`ForStmt` are described under [`cgp_namespace!`](./cgp_namespace.md). The macro accepts no attributes
+anywhere and rejects any it finds.
 
 </details>
 
@@ -644,7 +654,7 @@ finds.
 unmet, still compiles. The failure appears later, at the place the capability is used, often as a long
 error naming types you did not write. This is the single most common source of confusion with CGP, and
 the answer is to check the table — see [`check_components!`](./check_components.md) — and to run
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) in place of `cargo check`, which leads
+[`cargo cgp check`](/docs/cargo-cgp/check) in place of `cargo check`, which leads
 with the root cause for the classes it recognizes.
 
 **Statements must lead the block**, and getting it wrong produces a misleading message. Once the
@@ -696,6 +706,14 @@ The same applies to a direct entry for a path a joined namespace itself binds �
 - [`cgp_namespace!`](./cgp_namespace.md) — reusable tables, for wiring that outgrows one context; it
   reuses this macro's whole body grammar.
 - [`UseField`](../providers/use_field.md) — the usual value for a field-backed getter.
+
+The ideas behind it:
+
+- [Bypassing coherence](/docs/concepts/coherence) — why a context chooses its providers through a
+  table rather than through impls.
+- [Aggregate providers](/docs/concepts/aggregate-providers) — the `new`-keyword bundle, and why it
+  is a provider rather than a context.
+- [Checking your wiring](/docs/concepts/check-traits) — what makes an unchecked table a problem.
 
 ## Source
 

@@ -109,7 +109,19 @@ they are how an idiomatic provider states what it needs.
 - [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound in a
   higher-order provider.
 - [`#[default_impl(...)]`](../traits/default_namespace.md) registers the provider as a namespace's
-  per-type default.
+  per-type default, for use with [`cgp_namespace!`](./cgp_namespace.md).
+
+Each may be repeated. All except `#[use_provider]` also take a comma-separated list inside one
+attribute, which is the form to prefer — `#[uses(HasName, CanRaiseError<String>)]` reads as one
+dependency list. `#[use_provider]` is the exception because its own argument already ends in a bound
+list, so a second pair after a comma has nowhere to go; write one attribute per inner provider.
+
+Three attributes that appear on other CGP macros are not read here. `#[extend]`, `#[extend_where]`,
+and `#[impl_generics]` all act on a *generated trait definition*, which a provider impl does not have,
+so they belong to [`#[cgp_fn]`](./cgp_fn.md) and — for `#[extend]` —
+[`#[cgp_component]`](./cgp_component.md). Writing one here leaves a name nothing resolves; see
+[Gotchas](#gotchas). An impl-side bound that really is impl-side goes in the block's own `where`
+clause, which passes through untouched.
 
 ### Implementing the consumer trait directly
 
@@ -266,6 +278,13 @@ arguments are the component name, the context, and a tuple of any remaining prov
 so a provider for `ComputerRef<Context, Code, Input>` gets
 `IsProviderFor<ComputerRefComponent, Context, (Code, Input)>`.
 
+**An associated type the block declares is exempt.** `Self::Output` in a provider that supplies
+`type Output` is left alone, because the macro gathers the block's own associated-type names first and
+skips any `Self::` path starting with one. That is what it has to do: in the emitted impl `Self` is the
+provider struct, which is the type that declares `Output`, so the path resolves as written. Every
+other `Self` in the block is still rewritten — including one naming an abstract type the *context*
+supplies. Associated consts are not covered by the exemption; see [Gotchas](#gotchas).
+
 **The rewrite is scoped to the block's own method bodies.** An item nested *inside* a body — a local
 `struct` with its own impl, a helper `fn`, an inline `trait` — introduces a fresh `self`/`Self` that
 belongs to that item, exactly as in ordinary Rust, and the macro leaves it alone. Closures, which
@@ -294,11 +313,10 @@ defaulting to the provider trait's name plus `Component`. Both are Rust `Type` p
 
 ## Gotchas
 
-**A provider's own associated const or type is awkward to name inside its body**, and this follows
-directly from the rewrite. A component may declare associated items alongside its methods, and a
-provider supplies them in the `#[cgp_impl]` block as usual — but `Self::LIMIT` in a method body does
-*not* resolve to the const the block just defined, because `Self` has been rewritten to the context.
-The error reads:
+**A provider's own associated const is awkward to name inside its body**, and this follows directly
+from the rewrite. The exemption described above covers associated *types* only, so a provider that
+declares `const LIMIT: u64 = 100;` cannot then write `Self::LIMIT` in a method body: that `Self` is
+rewritten to the context, which has no such const. The error reads:
 
 ```text
 error[E0599]: no associated function or constant named `LIMIT` found for type parameter `__Context__` in the current scope
@@ -314,7 +332,13 @@ The consumer side is unaffected — a wired context reads the same const as `<Ap
 
 **One nesting case escapes the scoping rule.** An item written inside a `macro!( … )` invocation has
 its `self`/`Self` rewritten too, because a token-level rewrite cannot see the scope the macro will
-eventually create.
+eventually create. A `self::` *module* path inside a macro invocation is safe: the trailing `::` is
+what tells the two meanings of `self` apart, and only the value form is rewritten.
+
+**A misplaced companion attribute is reported by the compiler, not by the macro.** An attribute
+`#[cgp_impl]` does not recognize is re-attached to the generated provider impl — which is what lets
+`#[allow(...)]` ride through — so a stray `#[extend(HasName)]` produces a *cannot find attribute*
+resolution error pointing at the impl, with no mention of `#[cgp_impl]`.
 
 ## Related constructs
 
@@ -326,6 +350,13 @@ eventually create.
 - [`#[implicit]`](../attributes/implicit.md), [`#[uses]`](../attributes/uses.md),
   [`#[use_type]`](../attributes/use_type.md), [`#[use_provider]`](../attributes/use_provider.md),
   [`#[default_impl]`](../traits/default_namespace.md) — the companion attributes.
+
+The ideas behind it:
+
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the inside-out shape
+  this macro hides.
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — what the block's `where` clause
+  is really doing.
 
 ## Source
 

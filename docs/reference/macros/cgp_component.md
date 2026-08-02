@@ -78,13 +78,22 @@ setting it alone.
 The `context` default is deliberately unusual so that it cannot collide with a type parameter of your
 own.
 
-### Supertraits, and importing an abstract type
+### Companion attributes
+
+Four attributes may be written above the trait, beside `#[cgp_component]`, and each changes what the
+macro generates. Any of them may be repeated, and the first three also accept a comma-separated list
+inside one attribute.
+
+| Attribute | What it adds |
+|---|---|
+| [`#[use_type(Trait.Type)]`](../attributes/use_type.md) | Imports an abstract type: adds the supertrait *and* rewrites the bare name in your signatures |
+| [`#[extend(Trait)]`](../attributes/extend.md) | Adds a supertrait with no type to import |
+| [`#[derive_delegate(...)]`](../attributes/derive_delegate.md) | Generates dispatch impls for a component generic over a parameter |
+| [`#[prefix(@path in Namespace)]`](./cgp_namespace.md) | Registers the component into a namespace under a type-level path |
 
 When a component depends on a type another component supplies — most often the error type from
-[`HasErrorType`](../components/has_error_type.md) — import it with
-[`#[use_type]`](../attributes/use_type.md) rather than writing the supertrait and the qualified path by
-hand. The attribute adds the supertrait *and* rewrites a bare `Error` in your signatures to its fully
-qualified form:
+[`HasErrorType`](../components/has_error_type.md) — import it with `#[use_type]` rather than writing
+the supertrait and the qualified path by hand:
 
 ```rust
 #[cgp_component(Loader)]
@@ -94,15 +103,27 @@ pub trait CanLoad {
 }
 ```
 
-For a supertrait with no associated type to import, use [`#[extend(...)]`](../attributes/extend.md) in
-preference to native `: Supertrait` syntax — `#[extend(HasName)]` reads as importing a capability,
-where `pub trait CanGreet: HasName` reads as inheritance, which is not what a CGP supertrait is. An
+One form of `#[use_type]` is refused here. The equality form
+`#[use_type(HasScalarType.{Scalar = f64})]`, which pins an imported type to a concrete one, belongs to
+a provider that has decided the type rather than to the definition every provider has to satisfy, so
+the macro rejects it with *Type equality constraints cannot be used in component trait definition*.
+Every other form of the attribute works on a component exactly as it does elsewhere.
+
+For a supertrait with no associated type to import, use `#[extend(...)]` in preference to native
+`: Supertrait` syntax — `#[extend(HasName)]` reads as importing a capability, where
+`pub trait CanGreet: HasName` reads as inheritance, which is not what a CGP supertrait is. An
 associated type the trait declares *itself* is not imported and stays written as `Self::Output`.
 
-One further companion attribute exists: [`#[derive_delegate(...)]`](../attributes/derive_delegate.md)
-generates dispatch impls for a component generic over a parameter. It is superseded by the `open`
-statement of [`delegate_components!`](./delegate_components.md) and is mostly something you read in
-existing code rather than write.
+`#[derive_delegate(...)]` is superseded by the `open` statement of
+[`delegate_components!`](./delegate_components.md) and is mostly something you read in existing code
+rather than write.
+
+Three attributes that look like they belong here do not, and the error is confusing enough to be worth
+naming: `#[uses(...)]`, `#[extend_where(...)]`, and `#[use_provider(...)]` are read by
+[`#[cgp_impl]`](./cgp_impl.md) and [`#[cgp_fn]`](./cgp_fn.md) but not by `#[cgp_component]`. None of
+them is an attribute in its own right, so writing one here leaves a name nothing can resolve — see
+[Gotchas](#gotchas). The equivalent of `#[uses]` on a component is a supertrait, written with
+`#[extend]`.
 
 ## Examples
 
@@ -232,6 +253,40 @@ pub trait AreaCalculator<Context>:
 }
 ```
 
+`IsProviderFor` *replaces* the supertrait list rather than joining it. Any supertrait the consumer
+trait had — written natively, or added by `#[extend]` or `#[use_type]` — becomes a `where` predicate
+on the context instead, which follows from the `Self`-to-`Context` move: a supertrait constrains the
+type the capability is about, and on the provider side that type is the context parameter. So
+`#[extend(HasName)]` on a `CanGreet` component produces:
+
+```rust
+pub trait Greeter<Context>: IsProviderFor<GreeterComponent, Context, ()>
+where
+    Context: HasName,
+{
+    fn greet(context: &Context);
+}
+```
+
+That predicate is added to every emitted item that mentions the context — the two blanket impls below and
+the `UseContext` and `RedirectLookup` impls further down each gain their own `Context: HasName` — since
+none of them can apply where the supertrait does not hold.
+
+**A method may carry a default body, and the body moves to the provider trait.** This is the other thing
+the `Self`-to-`Context` move reaches, and it is worth knowing because it is what lets a provider inherit a
+default at all. Given `fn greet(&self) -> String { format!("Hello, {}!", self.name()) }` on the consumer
+trait, the provider trait gets `fn greet(context: &Context) -> String { format!("Hello, {}!", context.name()) }`
+— rewritten, and still a default. The consumer trait keeps its copy too, so the body appears twice in an
+expansion.
+
+That is what makes an **empty provider impl** meaningful, and it is how
+[`UseDefault`](../providers/use_default.md) works:
+
+```rust
+#[cgp_impl(UseDefault)]
+impl<Context: HasName> Greeter for Context {}
+```
+
 Third, the **consumer blanket impl**, the bridge that lets callers write `context.area()`: any context
 implementing the provider trait *for itself* gets the consumer trait.
 
@@ -272,20 +327,47 @@ Fifth, the **component marker**, the key wiring uses:
 pub struct AreaCalculatorComponent;
 ```
 
-Beyond those five, the macro emits the standard provider impls that let the component participate in
-CGP's usual patterns: a [`UseContext`](../providers/use_context.md) impl, so the provider trait can be
-satisfied by routing back through the context's own implementation; a
-[`RedirectLookup`](../providers/redirect_lookup.md) impl, which is what the `open` statement and
-[namespaces](./cgp_namespace.md) resolve through; and a
-[`UseDelegate`](../providers/use_delegate.md) impl for each
-[`#[derive_delegate(...)]`](../attributes/derive_delegate.md) attribute present.
+Those five are emitted in the order consumer trait, consumer impl, provider trait, provider impl,
+marker — the listings above pair each trait with the impl that routes to it, which reads better than
+the order they actually appear in.
+
+Beyond the five, the macro emits the provider impls that let the component participate in CGP's usual
+patterns. Two are always emitted, and two are one per attribute:
+
+- A [`UseContext`](../providers/use_context.md) impl, so the provider trait can be satisfied by
+  routing back through the context's own implementation. Its only bound is
+  `Context: CanCalculateArea`, and each method forwards to the consumer method.
+- A [`RedirectLookup`](../providers/redirect_lookup.md) impl, which is what the `open` statement and
+  [namespaces](./cgp_namespace.md) resolve through.
+- One [`UseDelegate`](../providers/use_delegate.md) impl per
+  [`#[derive_delegate(...)]`](../attributes/derive_delegate.md) attribute.
+- One namespace impl per [`#[prefix(@path in Namespace)]`](./cgp_namespace.md) attribute, binding the
+  component's key inside that namespace to a redirect down the given path.
+
+The `RedirectLookup` impl is where a component's own type parameters earn a place in a path, and it is
+what makes `@AreaCalculatorComponent.Rectangle` resolve. For a component with type parameters the
+impl does not look the incoming path up directly: it appends the parameters to it first, so a lookup
+that arrives at `AreaCalculatorComponent` carrying no path ends up looking for `Rectangle`. Only
+*type* parameters take part — a lifetime or a const parameter cannot key a path and is left out.
 
 Two details of the real output differ from the listings above, and both trip people up when reading an
 error. The generated parameters carry **reserved names** — the context is literally `__Context__`
 unless you override it, and the provider parameter is `__Provider__`; the readable `Context` and
-`Provider` here are for legibility only. And a component with its own type parameters, such as
-`CanCalculateArea<Shape>`, appends them *after* the context in the provider trait and groups them into
-the `IsProviderFor` parameter tuple: `IsProviderFor<AreaCalculatorComponent, __Context__, (Shape)>`.
+`Provider` here are for legibility only. And a component with parameters of its own appends them
+*after* the context in the provider trait — except lifetimes, which Rust requires to lead — and groups
+them into the `IsProviderFor` parameter tuple. That tuple holds types, so a lifetime is lifted into
+[`Life<'a>`](../types/life.md):
+
+| Component | Provider trait | `IsProviderFor` params |
+|---|---|---|
+| `CanCalculateArea` | `AreaCalculator<__Context__>` | `()` |
+| `CanCalculateArea<Shape>` | `AreaCalculator<__Context__, Shape>` | `(Shape)` |
+| `CanEncode<Value, Format>` | `Encoder<__Context__, Value, Format>` | `(Value, Format)` |
+| `HasReference<'a, T>` | `ReferenceGetter<'a, __Context__, T>` | `(Life<'a>, T)` |
+
+Bounds and defaults are dropped from the tuple, which names the parameters positionally and nothing
+more. A const parameter has no place in it at all, which is why the macro rejects one — see
+[Gotchas](#gotchas).
 
 <details>
 <summary>Formal grammar</summary>
@@ -333,6 +415,18 @@ parameter, and a provider supplies it in the ordinary way. Naming your own assoc
 *inside* a [`#[cgp_impl]`](./cgp_impl.md) body has a wrinkle of its own, covered in that page's
 Gotchas.
 
+**The attribute must be applied to a trait.** A struct, an enum, or a free function is refused at
+parse time with an error naming the trait the macro expected, rather than being lowered into code that
+fails to compile later.
+
+**A misplaced companion attribute is reported by the compiler, not by the macro — and reported several
+times.** An attribute `#[cgp_component]` does not recognize rides through onto *every* item the macro
+generates: the consumer trait, the provider trait, and the impls built from each. For `#[allow(...)]` or
+a doc comment that is exactly what you want. For `#[uses(HasName)]` written above a component trait it
+means one *cannot find attribute* resolution error per generated item, none of which mentions
+`#[cgp_component]`. Read the repetition as the signal: it is the same error a typo in an attribute name
+gives, so the fix is to move the attribute rather than to add an import.
+
 ## Related constructs
 
 - [`#[cgp_impl]`](./cgp_impl.md) — the idiomatic way to write a provider for a component.
@@ -344,6 +438,14 @@ Gotchas.
 - [`#[cgp_getter]`](./cgp_getter.md) — the specialized form for a component that reads a field.
 - [`#[use_type]`](../attributes/use_type.md), [`#[extend]`](../attributes/extend.md), and
   [`#[derive_delegate]`](../attributes/derive_delegate.md) — attributes that change what it generates.
+
+The ideas behind it:
+
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the trait split this
+  macro creates, developed at length.
+- [Bypassing coherence](/docs/concepts/coherence) — why the split exists at all.
+- [How much CGP to use](/docs/concepts/modularity-hierarchy) — when a component is the right rung,
+  and when it is more than the problem needs.
 
 ## Source
 

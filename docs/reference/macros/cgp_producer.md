@@ -267,6 +267,11 @@ import.
 - [`#[cgp_new_provider]`](./cgp_provider.md) — what the generated impl is emitted through.
 - [`HasErrorType`](../components/has_error_type.md) — what the fallible forms require of a context.
 
+The ideas behind it:
+
+- [Handlers](/docs/concepts/handlers) — the computation family, and where the input-free member
+  fits.
+
 ## Source
 
 - Entry point: [`entrypoints/cgp_producer.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-extra-macro-lib/src/entrypoints/cgp_producer.rs)

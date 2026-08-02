@@ -263,6 +263,13 @@ provider needed it; it did not, and removing it changes nothing.
 - [Handler combinators](../providers/handler_combinators.md) — the promotions that lift a synchronous provider
   into an async one.
 
+The ideas behind it:
+
+- [Recovering `Send` bounds](/docs/concepts/send-bounds) — why the future this rewrite produces
+  carries no `Send` bound, and how to get one back.
+- [Handlers](/docs/concepts/handlers) — the component family whose async members are declared this
+  way.
+
 ## Source
 
 - Entry point: [`cgp-async-macro/src/lib.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-async-macro/src/lib.rs)

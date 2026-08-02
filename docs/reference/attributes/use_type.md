@@ -362,6 +362,11 @@ Pin the type on the provider with [`#[cgp_impl]`](../macros/cgp_impl.md) instead
 - [`#[cgp_fn]`](../macros/cgp_fn.md), [`#[cgp_impl]`](../macros/cgp_impl.md), and
   [`#[cgp_component]`](../macros/cgp_component.md) — the three hosts.
 
+The ideas behind it:
+
+- [Abstract types](/docs/concepts/abstract-types) — the idea behind the types this attribute
+  imports.
+
 ## Source
 
 - Parsing: [`types/attributes/use_type/attribute.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/use_type/attribute.rs)

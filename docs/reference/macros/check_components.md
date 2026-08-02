@@ -256,6 +256,11 @@ delegates the component and that its delegate satisfies [`IsProviderFor`](../tra
 unmet one is reported specifically rather than as a bare missing implementation. The generic parameters are
 literally `__Component__` and `__Params__` in the emitted code.
 
+`__Params__` carries a `?Sized` bound, and that is load-bearing rather than defensive: a component's
+parameter may be an unsized type, so a table checking a component declared over `str` —
+`ReferenceGetterComponent: (Life<'a>, str)` — would be rejected before the assertion was even evaluated
+without it.
+
 Generic parameters land in the `__Params__` slot — one directly, several as a tuple:
 
 ```rust
@@ -305,19 +310,27 @@ CheckEntries    -> ( CheckEntry ( `,` CheckEntry )* `,`? )?
 CheckEntry      -> CheckKey ( `:` CheckValue )?
 
 CheckKey        -> Type
-                 | `[` Type ( `,` Type )* `,`? `]`
+                 | `[` ( Type ( `,` Type )* `,`? )? `]`
 
 CheckValue      -> CheckParam
-                 | `[` CheckParam ( `,` CheckParam )* `,`? `]`
+                 | `[` ( CheckParam ( `,` CheckParam )* `,`? )? `]`
 
 CheckParam      -> Generics? Type
 ```
 
-One invocation may carry several `CheckTable`s. `#[check_trait(...)]` overrides the derived
+One invocation may carry several `CheckTable`s, written one after another with no separator — which is how
+a module checks two contexts from one block. Both `TableAttr`s are optional, each may appear at most once,
+and any other attribute is rejected by name rather than ignored. `#[check_trait(...)]` overrides the derived
 `__Check{Context}` name, and `#[check_providers(...)]` switches the assertion to the listed providers. A
 `CheckEntry`'s value is omitted for a component with no generic parameters; when present, a bracketed
-`CheckKey` or `CheckValue` expands to the cartesian product. `Generics`, `WhereClause`, and `Type` are Rust
+`CheckKey` or `CheckValue` expands to the cartesian product. A `CheckParam` may carry its own generic list,
+which is merged with the table's before the impl is emitted. `Generics`, `WhereClause`, and `Type` are Rust
 grammar productions.
+
+Both bracketed lists accept **zero** elements, and the two empty forms behave differently. An empty value
+list — `FooComponent: []` — falls back to the no-parameter check, exactly as omitting the colon would. An
+empty *key* list — `[]: Rectangle` — produces no entries at all, so the line silently checks nothing; there
+is no diagnostic, and it is worth a second look if a table appears to pass without doing anything.
 
 </details>
 
@@ -383,6 +396,11 @@ provider was found and its dependencies are satisfiable — not that the provide
 - [`#[cgp_component]`](./cgp_component.md) — defines the components a table names.
 - [`#[use_provider]`](../attributes/use_provider.md) — builds the nested stacks `#[check_providers]` exists
   to localize.
+
+The ideas behind it:
+
+- [Checking your wiring](/docs/concepts/check-traits) — why wiring is lazy, and one broken context
+  followed through three stages of diagnosis.
 
 ## Source
 

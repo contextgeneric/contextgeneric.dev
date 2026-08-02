@@ -173,6 +173,25 @@ reading a long `where` clause in an expansion, since it tells you where each bou
 The context parameter is literally `__Context__` in the emitted code and appears as `Self` inside the
 implementation.
 
+<details>
+<summary>Formal grammar</summary>
+
+The attribute argument is a comma-separated list of `where` predicates, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+ExtendWhereArgs -> WherePredicate ( `,` WherePredicate )* `,`?
+```
+
+`WherePredicate` is the Rust grammar's own production — the thing that appears between the commas of a
+`where` clause — which is what separates this attribute from [`#[uses]`](uses.md) and
+[`#[extend]`](extend.md). Those take a *bound* and always attach it to `Self`; a predicate names its own
+subject, so `#[extend_where(Self::Output: Clone)]` and `#[extend_where(for<'a> &'a T: IntoIterator)]` are
+both expressible here and neither is expressible there. The list may be empty and the attribute may be
+repeated.
+
+</details>
+
 ## Gotchas
 
 **A promoted predicate does not reach callers as a guarantee.** This is the mistake the attribute most
@@ -210,6 +229,11 @@ has the effect this attribute exists to produce elsewhere.
 - [`#[use_type]`](use_type.md) — for pinning an abstract type, which this could express but should not.
 - [`#[cgp_fn]`](../macros/cgp_fn.md) — the only host, and the reason the attribute exists.
 - [`#[implicit]`](implicit.md) — contributes the bounds that always sort last.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — why a `#[cgp_fn]`'s own `where`
+  clause stays off its trait by default.
 
 ## Source
 

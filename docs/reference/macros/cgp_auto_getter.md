@@ -72,6 +72,7 @@ natural. The field's type is inferred from what you return:
 | `&[T]` | anything `AsRef<[T]>` | `.as_ref()` |
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
 | `Option<&str>` | `Option<String>` | `.as_deref()` |
+| [`MRef<'_, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
 | An owned type — `f64`, `String`, a tuple, an array | the same type | by reference, then `.clone()` |
 
 A `&mut self` receiver reads mutably, and each reference form has a mutable mirror: `&mut T`, `&mut [T]`
@@ -80,7 +81,45 @@ through `AsMut<[T]>`, `Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` v
 The `&str` row is the one most often wanted and least obvious: the context stores a `String` and the
 getter hands out a borrow of it, so no context ever has to hold a `&str`. **These are the same rules an
 [`#[implicit]`](../attributes/implicit.md) argument follows**, so learning them once covers everywhere CGP
-reads a field.
+reads a field — with one difference worth holding onto. A getter takes its mutability from the
+**receiver**, while an implicit argument takes it from the *argument's type*. So
+`fn name(&mut self) -> &mut String` reads mutably because of the `&mut self`, whereas
+`#[implicit] name: &String` on a `&mut self` method still reads through a shared borrow.
+
+### Reading a field of another type
+
+The first argument need not be `self`. A typed reference stands in for it, which is how a getter reaches
+a field on something the context only *names*:
+
+```rust
+#[cgp_auto_getter]
+pub trait HasFooBar: HasFooType + HasBarType {
+    fn foo_bar(foo: &Self::Foo) -> &Self::Bar;
+}
+```
+
+The generated bound now falls on `Self::Foo` rather than on the context, and the method is called as an
+associated function — `App::foo_bar(&foo)`. `Self` inside the argument and return types is rewritten to
+the context, and `&` versus `&mut` decides the access mode exactly as a receiver would.
+
+**This is the one getter shape an [`#[implicit]`](../attributes/implicit.md) argument cannot reach**,
+because there is no `self` field to read — which makes it the clearest case for declaring a getter at
+all.
+
+### An optional `PhantomData` argument
+
+A getter method may take one further argument, and it must be a `PhantomData`:
+
+```rust
+#[cgp_auto_getter]
+pub trait HasFoo {
+    fn foo(&self, _tag: PhantomData<Foo>) -> &Foo;
+}
+```
+
+It is forwarded to the generated method untouched and plays no part in the field lookup; it is there so a
+getter can carry a type-level argument in its signature. Anything else in that position is rejected with
+*only PhantomData is allowed as second argument*, and a third argument is rejected outright.
 
 ### A type inferred from the field
 
@@ -312,6 +351,13 @@ found rather than the trait as not imported.
 - [`#[uses]`](../attributes/uses.md) — how a provider depends on a getter by name.
 - [`#[cgp_type]`](./cgp_type.md) — for an abstract type standing on its own rather than inferred from a
   field.
+
+The ideas behind it:
+
+- [Implicit arguments](/docs/concepts/implicit-arguments) — the lighter way to read a field, and why
+  a getter is the exception.
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — why the field requirement stays
+  off the trait interface.
 
 ## Source
 
