@@ -111,7 +111,10 @@ matching an enum variant is a chain of attempts where the first success ends it.
 
 For the constructs, [monad providers](/docs/reference/providers/monad_providers) carries `PipeMonadic`,
 the three markers, and the per-step `BindOk` / `BindErr` forms, and
-[the monad traits](/docs/reference/traits/monad) is the layer defining what a monad is here.
+the four monad traits — [`MonadicBind`](/docs/reference/traits/monadic_bind),
+[`ContainsValue`](/docs/reference/traits/contains_value),
+[`LiftValue`](/docs/reference/traits/lift_value), and
+[`MonadicTrans`](/docs/reference/traits/monadic_trans) — are the layer defining what a monad is here.
 
 ---
 

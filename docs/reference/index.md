@@ -132,28 +132,38 @@ Providers in this family are written from plain functions with
 [`#[cgp_computer]`](./macros/cgp_computer.md) and [`#[cgp_producer]`](./macros/cgp_producer.md), and
 composed with the [handler combinators](./providers/handler_combinators.md), the
 [dispatch combinators](./providers/dispatch_combinators.md), and the
-[monad providers](./providers/monad_providers.md) built on the
-[monad traits](./traits/monad.md). [`#[cgp_auto_dispatch]`](./macros/cgp_auto_dispatch.md) generates a
-dispatching handler from a per-type trait.
+[monad providers](./providers/monad_providers.md) built on the monad traits —
+[`MonadicBind`](./traits/monadic_bind.md), [`ContainsValue`](./traits/contains_value.md),
+[`LiftValue`](./traits/lift_value.md), and [`MonadicTrans`](./traits/monadic_trans.md).
+[`#[cgp_auto_dispatch]`](./macros/cgp_auto_dispatch.md) generates a dispatching handler from a per-type
+trait.
 
 ### Work with a type's structure
 
 These let generic code build and read structs and enums by their fields and variants without naming
 the concrete type. What a type opts in with is a derive:
-[`#[derive(CgpData)]`](./derives/derive_cgp_data.md) is the umbrella one, and its individual slices are
-[`#[derive(HasFields)]`](./derives/derive_has_fields.md),
+[`#[derive(CgpData)]`](./derives/derive_cgp_data.md) is the umbrella one, with
+[`#[derive(CgpRecord)]`](./derives/derive_cgp_record.md) and
+[`#[derive(CgpVariant)]`](./derives/derive_cgp_variant.md) as its struct and enum faces, and its
+individual slices are [`#[derive(HasFields)]`](./derives/derive_has_fields.md),
 [`#[derive(BuildField)]`](./derives/derive_build_field.md),
 [`#[derive(ExtractField)]`](./derives/derive_extract_field.md), and
 [`#[derive(FromVariant)]`](./derives/derive_from_variant.md).
 
-Each of those generates a trait, and the traits are where the operations live: the whole-shape view in
-[`HasFields`](./traits/has_fields.md), the builder family in
-[`HasBuilder`](./traits/has_builder.md), the extractor family in
-[`ExtractField`](./traits/extract_field.md), [`FromVariant`](./traits/from_variant.md), the presence
-markers of [`MapType`](./traits/map_type.md), the list algebra of
-[`AppendProduct`](./traits/product_ops.md), the structural
-[casts](./traits/cast.md), and the [optional-field extensions](./traits/optional_fields.md). Each entry
-in a shape is a [`Field`](./types/field.md).
+Each of those generates traits, and the traits are where the operations live. The whole-shape view is
+[`HasFields`](./traits/has_fields.md) with its conversions [`ToFields`](./traits/to_fields.md) and
+[`FromFields`](./traits/from_fields.md); the builder family runs from
+[`HasBuilder`](./traits/has_builder.md) through [`BuildField`](./traits/build_field.md) to
+[`FinalizeBuild`](./traits/finalize_build.md); the extractor family runs from
+[`HasExtractor`](./traits/has_extractor.md) through [`ExtractField`](./traits/extract_field.md) to
+[`FinalizeExtract`](./traits/finalize_extract.md), with
+[`FromVariant`](./traits/from_variant.md) constructing rather than deconstructing. Underneath sit the
+presence markers of [`MapType`](./traits/map_type.md), the list algebra of
+[`AppendProduct`](./traits/append_product.md), the structural casts
+[`CanUpcast`](./traits/can_upcast.md) and [`CanBuildFrom`](./traits/can_build_from.md), and the
+optional-field extensions starting at
+[`HasOptionalBuilder`](./traits/has_optional_builder.md). Each entry in a shape is a
+[`Field`](./types/field.md).
 
 ### Keep large wiring manageable
 
@@ -174,8 +184,8 @@ sugar — [`Symbol!`](./macros/symbol.md) for a field name, [`Product!`](./macro
 [`Sum!`](./macros/sum.md) for its dual, [`Path!`](./macros/path.md) for a route — and only need to
 recognize [what they expand into](./types/type_level_spines.md) when it appears in an error message.
 [`Index`](./types/index.md) tags a tuple field and [`Life`](./types/life.md) lifts a lifetime into a
-type, while [`StaticFormat`](./traits/static_format.md) turns type-level strings back into runtime
-data.
+type, while [`StaticString`](./traits/static_string.md) turns a type-level string back into runtime
+data and [`ConcatPath`](./traits/concat_path.md) joins two paths.
 
 When wiring fails, three traits are what you will see named:
 [`DelegateComponent`](./traits/delegate_component.md),
@@ -192,17 +202,12 @@ these names, this is where it lives.
 | Looking for | It's on |
 |---|---|
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
-| `#[derive(CgpRecord)]`, `#[derive(CgpVariant)]` | [`#[derive(CgpData)]`](./derives/derive_cgp_data.md) |
 | `UseFieldRef`, `UseFields` | [`UseField`](./providers/use_field.md) |
 | `CanSendRun` | [`CanRun`](./components/runner.md) |
 | `CanWrapError` | [`CanRaiseError`](./components/can_raise_error.md) |
 | `HasRuntimeType` | [`HasRuntime`](./components/has_runtime.md) |
 | `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
 | `Cons`, `Nil`, `Either`, `Void`, `Chars`, `PathCons` | [Type-level spines](./types/type_level_spines.md) |
-| `HasFieldMut`, `FieldGetter` | [`HasField`](./traits/has_field.md) |
-| `ConcatProduct`, `MapFields` | [`AppendProduct`](./traits/product_ops.md) |
-| `CanDowncast`, `CanBuildFrom` | [`CanUpcast`](./traits/cast.md) |
-| `StaticString`, `ConcatPath` | [`StaticFormat`](./traits/static_format.md) |
 | `ComposeHandlers`, `PipeHandlers`, `ReturnInput`, `Promote*` | [Handler combinators](./providers/handler_combinators.md) |
 | `MatchWithHandlers`, `ExtractFieldAndHandle` | [Dispatch combinators](./providers/dispatch_combinators.md) |
 | `PipeMonadic`, `BindOk`, `BindErr` | [Monad providers](./providers/monad_providers.md) |
@@ -211,14 +216,11 @@ these names, this is where it lives.
 | `UseInputDelegate` | [Handler combinators](./providers/handler_combinators.md) |
 | `RaiseInfallible`, `DiscardDetail`, `PanicOnError` | [Error providers](./providers/error_providers.md) |
 | `ComputerRef`, `AsyncComputer`, `TryComputerRef`, `HandlerRef` | the page for the component they vary — [`Computer`](./components/computer.md), [`TryComputer`](./components/try_computer.md), [`Handler`](./components/handler.md) |
-| `BuildField`, `UpdateField`, `FinalizeBuild` | [`HasBuilder`](./traits/has_builder.md) |
-| `HasExtractor`, `FinalizeExtract` | [`ExtractField`](./traits/extract_field.md) |
-| `IsPresent`, `IsNothing` | [`MapType`](./traits/map_type.md) |
-| `MonadicTrans`, `MonadicBind`, `LiftValue`, `ContainsValue` | [Monad traits](./traits/monad.md) |
+| `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/map_type.md) |
+| `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/map_type_ref.md) |
 | `product!` (the value-level form) | [`Product!`](./macros/product.md) |
 | `#[impl_generics(...)]` | [`#[cgp_fn]`](./macros/cgp_fn.md) |
 | `#[prefix(...)]` | [`cgp_namespace!`](./macros/cgp_namespace.md) |
-| `#[default_impl(...)]` | [`DefaultNamespace`](./traits/default_namespace.md) |
 | `#[check_trait(...)]`, `#[check_providers(...)]` | [`check_components!`](./macros/check_components.md) |
 | `#[check_params(...)]`, `#[skip_check]` | [`delegate_and_check_components!`](./macros/delegate_and_check_components.md) |
 

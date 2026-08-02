@@ -343,8 +343,8 @@ one letter and the outputs do not overlap.
 - [`Symbol!`](../macros/symbol.md) and [`Index`](../types/index.md) — the tags that name an entry.
 - [Type-level spines](../types/type_level_spines.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
   sugar expands to.
-- [`AppendProduct`](../traits/product_ops.md) — operations over a shape once you have one.
-- [`CanUpcast`](../traits/cast.md) — converting between two types whose shapes overlap.
+- [`AppendProduct`](../traits/append_product.md) — operations over a shape once you have one.
+- [`CanUpcast`](../traits/can_upcast.md) — converting between two types whose shapes overlap.
 
 The ideas behind it:
 

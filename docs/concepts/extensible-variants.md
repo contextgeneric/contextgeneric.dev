@@ -150,7 +150,7 @@ whole shape, [`#[derive(ExtractField)]`](/docs/reference/derives/derive_extract_
 narrowing, and [`#[derive(FromVariant)]`](/docs/reference/derives/derive_from_variant) for construction
 by name. [`ExtractField`](/docs/reference/traits/extract_field) is the extractor family those produce,
 [`FromVariant`](/docs/reference/traits/from_variant) constructs a variant generically, and
-[the casts](/docs/reference/traits/cast) are `CanUpcast` and `CanDowncast`.
+[the casts](/docs/reference/traits/can_upcast) are `CanUpcast` and [`CanDowncast`](/docs/reference/traits/can_downcast).
 
 ---
 

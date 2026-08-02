@@ -1,10 +1,8 @@
-//! Code from `docs/reference/derives/derive_cgp_data.md` — *`#[derive(CgpData)]`, `CgpRecord` &
-//! `CgpVariant`*.
+//! Code from `docs/reference/derives/derive_cgp_data.md` — *`#[derive(CgpData)]`*.
 //!
-//! The page's *Under the hood* section shows the impls and companion types the derives generate;
-//! those are not repeated here, since re-declaring them beside the derive would be a coherence
-//! conflict and `cargo cgp expand` is the check on that section. What this file pins is the accepted
-//! and rejected shapes, and that the two worked examples run.
+//! The umbrella page's own snippets. Its *Under the hood* section defers the two expansions to the
+//! shape pages, so what this file pins is the accepted and rejected shapes, that the umbrella and the
+//! two shape-specific faces agree on their output, and that the degenerate shapes compile.
 
 /// ## Using it
 ///
@@ -115,105 +113,3 @@ pub mod using_it {
 /// }
 /// ```
 pub mod rejected_struct_style_variant {}
-
-/// ## Examples
-///
-/// The record half: `promote`, which merges one record into another's builder.
-pub mod examples_record {
-    use cgp::core::field::impls::CanBuildFrom;
-    use cgp::prelude::*;
-
-    #[derive(CgpData)]
-    #[derive(Debug, Eq, PartialEq)]
-    pub struct Person {
-        pub first_name: String,
-        pub last_name: String,
-    }
-
-    #[derive(CgpData)]
-    #[derive(Debug, Eq, PartialEq)]
-    pub struct Employee {
-        pub employee_id: u64,
-        pub first_name: String,
-        pub last_name: String,
-    }
-
-    pub fn promote(person: Person, id: u64) -> Employee {
-        Employee::builder()
-            .build_from(person)
-            .build_field(PhantomData::<Symbol!("employee_id")>, id)
-            .finalize_build()
-    }
-
-    #[test]
-    fn test_promote() {
-        let person = Person {
-            first_name: "Alice".to_owned(),
-            last_name: "Anderson".to_owned(),
-        };
-
-        assert_eq!(
-            promote(person, 1),
-            Employee {
-                employee_id: 1,
-                first_name: "Alice".to_owned(),
-                last_name: "Anderson".to_owned(),
-            }
-        );
-    }
-}
-
-/// ## Examples
-///
-/// The variant half: `area`, an extraction chain closed with no wildcard arm. The page names `Circle`
-/// and `Rectangle` without declaring them, so they are declared here.
-pub mod examples_variant {
-    use cgp::core::field::traits::FinalizeExtractResult;
-    use cgp::prelude::*;
-
-    pub struct Circle {
-        pub radius: f64,
-    }
-
-    pub struct Rectangle {
-        pub width: f64,
-        pub height: f64,
-    }
-
-    #[derive(CgpData)]
-    pub enum Shape {
-        Circle(Circle),
-        Rectangle(Rectangle),
-    }
-
-    pub fn area(shape: Shape) -> f64 {
-        match shape
-            .to_extractor()
-            .extract_field(PhantomData::<Symbol!("Circle")>)
-        {
-            Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
-            Err(remainder) => {
-                let rect = remainder
-                    .extract_field(PhantomData::<Symbol!("Rectangle")>)
-                    .finalize_extract_result();
-                rect.width * rect.height
-            }
-        }
-    }
-
-    #[test]
-    fn test_area_of_each_variant() {
-        assert_eq!(
-            area(Shape::Circle(Circle { radius: 1.0 })),
-            core::f64::consts::PI
-        );
-
-        assert_eq!(
-            area(Shape::Rectangle(Rectangle {
-                width: 3.0,
-                height: 4.0,
-            })),
-            12.0
-        );
-    }
-}

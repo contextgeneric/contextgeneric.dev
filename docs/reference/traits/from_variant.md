@@ -108,7 +108,7 @@ let ident = LispSubExpr::Ident(Ident("+".to_owned())).upcast(PhantomData::<LispE
 The upcast always succeeds, because every variant of the smaller enum has a home in the larger one — and it is
 `FromVariant` that rebuilds each variant into the target. That is the construction-side counterpart of reading
 a field through a getter: the implementation names only what it needs, and the widening is checked.
-Upcasting is documented with the other [structural casts](./cast.md).
+Upcasting is documented with the other [structural casts](./can_upcast.md).
 
 ## When to reach for it, and when not
 
@@ -198,7 +198,7 @@ struct.
 - [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) — bundles this with the extractor and the shape.
 - [`HasBuilder`](./has_builder.md) — the struct analogue: setting one field rather than choosing one variant.
 - [`Symbol!`](../macros/symbol.md) — the tag that names a variant.
-- [`CanUpcast`](./cast.md) — widening a narrow enum into a wider one, built on these constructors.
+- [`CanUpcast`](./can_upcast.md) — widening a narrow enum into a wider one, built on these constructors.
 - [`HasFields`](./has_fields.md) — the variant shape a cast walks while rebuilding.
 - [Dispatch combinators](../providers/dispatch_combinators.md) — where variant construction meets routing.
 

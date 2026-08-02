@@ -209,7 +209,7 @@ the order *is* the execution order.
 - [`Symbol!`](./symbol.md) — the name half of a `Field` entry.
 - [`HasFields`](../traits/has_fields.md) — the trait that exposes a struct's shape as one of these lists.
 - [`#[derive(HasFields)]`](../derives/derive_has_fields.md) — generates that list for you.
-- [`AppendProduct`](../traits/product_ops.md) — the operations that combine and transform these lists.
+- [`AppendProduct`](../traits/append_product.md) — the operations that combine and transform these lists.
 - [Handler combinators](../providers/handler_combinators.md) — where `Product!` is written by hand, as a
   pipeline.
 

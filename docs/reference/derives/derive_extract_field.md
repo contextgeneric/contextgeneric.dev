@@ -364,7 +364,7 @@ enum's own variant list rather than repeating it at each site.
   `FinalizeExtract`, and `FinalizeExtractResult`.
 - [`MapType`](../traits/map_type.md) — the `IsPresent`/`IsVoid` markers the companion enums are parameterized
   by.
-- [`CanUpcast`](../traits/cast.md) — upcasting and downcasting between enums, which reuse this recursion.
+- [`CanUpcast`](../traits/can_upcast.md) — upcasting and downcasting between enums, which reuse this recursion.
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain an enum's shape is built
   from.
 - [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that build an extraction chain

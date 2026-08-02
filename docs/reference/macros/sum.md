@@ -186,7 +186,7 @@ struct: the variant's payload type has to be a single nameable type for the sum 
   machinery.
 - [`FromVariant`](../traits/from_variant.md) and [`ExtractField`](../traits/extract_field.md) — constructing and
   taking apart a variant generically.
-- [`CanUpcast`](../traits/cast.md) — converting between two enums that share variants.
+- [`CanUpcast`](../traits/can_upcast.md) — converting between two enums that share variants.
 
 The ideas behind it:
 

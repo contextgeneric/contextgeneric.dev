@@ -114,13 +114,15 @@ about, then widening it. A routine that only produces two of a large enum's vari
 enum, constructs into that, and lifts the result into the full type with an upcast:
 
 ```rust
+use cgp::core::field::impls::CanUpcast;   // not in the prelude
+
 let expr = LispSubExpr::Ident(Ident("+".to_owned())).upcast(PhantomData::<LispExpr>);
 ```
 
 The upcast always succeeds, because every variant of the smaller enum has a home in the larger one. That is
 the construction-side counterpart of reading a field through a getter: the implementation names only what it
 needs, and the widening is checked. Upcasting is documented with the other
-[structural casts](../traits/cast.md), and it is built on the same per-variant machinery as this derive.
+[structural casts](../traits/can_upcast.md), and it is built on the same per-variant machinery as this derive.
 
 ## When to reach for it, and when not
 
@@ -238,7 +240,7 @@ and, as with the other empty shapes, means a mistake shows up later rather than 
   choosing one variant.
 - [`FromVariant`](../traits/from_variant.md) — the trait this generates impls of.
 - [`Symbol!`](../macros/symbol.md) — the tag that names a variant.
-- [`CanUpcast`](../traits/cast.md) — widening a smaller enum into a larger one, built on these constructors.
+- [`CanUpcast`](../traits/can_upcast.md) — widening a smaller enum into a larger one, built on these constructors.
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain the constructed variants
   correspond to.
 
