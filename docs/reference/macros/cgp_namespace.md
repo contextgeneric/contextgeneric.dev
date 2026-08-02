@@ -86,8 +86,10 @@ is why the two forms in the table above are the ones worth writing, and why the 
   occasionally a convenient spelling for rooting a component's route at its own name.
 - **`namespace Other;`** is accepted, but inheritance is written with the `: ParentNamespace` header
   above. That is the form overriding and the cycle diagnostics are defined in terms of.
-- **A nested table value** — `UseDelegate<new Inner { … }>` — parses and then fails to compile. See
-  [Gotchas](#gotchas).
+- **A nested table value** — `UseDelegate<new Inner { … }>` — works, and is the one legacy form with a
+  reason to live in a namespace: the macro lifts the inner table out into its own struct and impls, so
+  every context joining the namespace inherits the per-type dispatch without restating it. It still
+  needs [`#[derive_delegate]`](../attributes/derive_delegate.md) on the component, as it does anywhere.
 
 ### Inheriting from a parent
 
@@ -383,31 +385,6 @@ error[E0207]: the type parameter `__Value__` is not constrained by the impl trai
 ```
 
 Both mean the inheritance chain is not acyclic, but only the first says so recognizably.
-
-**A nested table inside a namespace entry parses and then fails to compile.** The
-[`UseDelegate<new Inner { … }>`](./delegate_components.md#the-two-value-forms) value is accepted by the
-parser, but `cgp_namespace!` — unlike `delegate_components!` — never lifts the inner table out into its own
-struct and impls, so the entry ends up naming a type nothing declares:
-
-```rust
-cgp_namespace! {
-    new NestedNs {
-        FooProviderComponent:
-            UseDelegate<new FooTable {
-                String: DummyFoo,
-            }>,
-    }
-}
-```
-
-```text
-error[E0425]: cannot find type `FooTable` in this scope
-```
-
-The message names the missing table rather than the unsupported form, so it reads like a typo. Declare the
-table in its own `delegate_components! { new FooTable { … } }` block and bind the key to
-`UseDelegate<FooTable>` — or, since the nested form is legacy anyway, leave per-type dispatch to the
-context and its [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement).
 
 **A registered component with no provider bound anywhere still compiles.** If a `#[prefix]` routes a component
 into a namespace and nothing ever binds a provider at its path, the redirect lands on an empty slot and the
