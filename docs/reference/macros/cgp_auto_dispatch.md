@@ -6,7 +6,9 @@ sidebar_label: '#[cgp_auto_dispatch]'
 
 Generate a handler that dispatches over an extensible-data input from a per-type trait.
 
-:::info Not written yet
+:::info
+
+### Not written yet
 
 This reference page is still being written. Until it lands, the
 [`cgp` source](https://github.com/contextgeneric/cgp) is the authority on this construct,

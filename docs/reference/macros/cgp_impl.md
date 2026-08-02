@@ -54,29 +54,6 @@ never constructed, and there is nothing in it to read. The macro rewrites `self`
 and `Self` to the context type precisely because the context is the only thing that exists when the
 method runs.
 
-## When to reach for it, and when not
-
-**Write providers with `#[cgp_impl]`.** It is the recommended form, and the two constructs that could
-replace it are narrower than they look — one is the raw shape it desugars to, the other is for
-capabilities that need no provider at all.
-
-Prefer the unqualified header `impl AreaCalculator`, with no `for Context`, and let the macro insert
-the context parameter. That is what makes a provider read like an ordinary trait impl. Name the context
-explicitly — `impl<Context> AreaCalculator for Context` — only when you actually need to say something
-about it that the sugar cannot express, such as a lifetime or a higher-ranked bound.
-
-Reach for something else in three cases.
-
-- **You need the inside-out shape itself.** [`#[cgp_provider]`](./cgp_provider.md) and
-  `#[cgp_new_provider]` are the raw forms. Write one when you must state a bound the sugar cannot, or
-  when implementing a provider trait on a concrete type rather than a generic one. Otherwise, read
-  them and write `#[cgp_impl]`.
-- **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
-  function with no component, no provider, and no wiring.
-- **You want to implement the consumer trait directly on one concrete type.** Use the
-  [`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly) below, which keeps the
-  companion attributes while emitting an ordinary impl.
-
 ## Using it
 
 Apply the attribute to an `impl` block. Its argument names the provider, and has three parts of which
@@ -193,9 +170,34 @@ fn print_area(rect: &Rectangle) {
 }
 ```
 
+## When to reach for it, and when not
+
+**Write providers with `#[cgp_impl]`.** It is the recommended form, and the two constructs that could
+replace it are narrower than they look — one is the raw shape it desugars to, the other is for
+capabilities that need no provider at all.
+
+Prefer the unqualified header `impl AreaCalculator`, with no `for Context`, and let the macro insert
+the context parameter. That is what makes a provider read like an ordinary trait impl. Name the context
+explicitly — `impl<Context> AreaCalculator for Context` — only when you actually need to say something
+about it that the sugar cannot express, such as a lifetime or a higher-ranked bound.
+
+Reach for something else in three cases.
+
+- **You need the inside-out shape itself.** [`#[cgp_provider]`](./cgp_provider.md) and
+  `#[cgp_new_provider]` are the raw forms. Write one when you must state a bound the sugar cannot, or
+  when implementing a provider trait on a concrete type rather than a generic one. Otherwise, read
+  them and write `#[cgp_impl]`.
+- **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
+  function with no component, no provider, and no wiring.
+- **You want to implement the consumer trait directly on one concrete type.** Use the
+  [`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which keeps the companion
+  attributes while emitting an ordinary impl.
+
 ## Under the hood
 
-:::note Advanced
+:::note
+
+### Advanced
 
 This section shows what the macro generates. You do not need it to write a provider, but the rewrite is
 worth seeing once — most confusing errors in a provider body are explained by it. `cargo cgp expand`

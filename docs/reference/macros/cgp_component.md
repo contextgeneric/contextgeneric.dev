@@ -36,49 +36,6 @@ The macro also emits a **component name** — a marker type such as `AreaCalcula
 the key wiring uses. You will see it in every `delegate_components!` entry and in most compiler
 errors, so it is worth recognizing even though you never write its definition.
 
-## When to reach for it, and when not
-
-Reach for `#[cgp_component]` when a capability genuinely needs **more than one implementation, and the
-choice belongs to the type using it.** That is the case it exists for, and its machinery is not free:
-a component is a trait, a second trait, a marker type, and a line of wiring per type.
-
-Prefer something simpler when you can.
-
-- **One implementation, ever.** Use [`#[cgp_fn]`](./cgp_fn.md) instead. It builds the capability
-  straight from a function, needs no wiring at all, and keeps working unchanged if a second
-  implementation ever arrives — so it is the right starting point rather than a lesser one.
-- **One implementation per type, chosen globally.** That is what a plain Rust trait already does well.
-  Reach for a component when two *different* applications must make different choices for the same
-  type, or when the implementations must overlap in a way the compiler rejects.
-- **A closed set of variants with fixed operations.** An `enum` and a `match` are clearer than any
-  machinery.
-
-There is also a finer line worth knowing: a capability may genuinely need several implementations
-while each individual implementation serves exactly one type. In that case you can implement the
-consumer trait directly on each concrete type, as you would any Rust trait, and skip providers
-entirely. Named providers earn their place once a second type wants the *same* implementation, or once
-an implementation should compose with a wrapper.
-
-### How many items should a component have?
-
-A component trait is an ordinary trait. It takes as many methods, associated types, and associated
-consts as any other, and every one of them is reproduced on the provider trait — CGP's own
-[`CanCompute`](../components/computer.md) declares an associated `Output` beside its method. There is
-no cap.
-
-What to group is a judgement rather than a rule, and the useful question is: **everything in one
-component is answered by one provider choice.** Items a single choice settles belong together — a
-method and the associated type it returns, or several field reads one getter provider answers by name.
-Items that separate choices settle are better apart, because grouping them costs reuse: every provider
-then carries the union of the dependencies of all the methods, a wrapper must forward the methods it
-has no opinion about, and a type that needs only part of the surface must still supply the rest.
-
-The usual sign of a component that has grown past one decision is a consumer trait named after a noun
-rather than a verb — `Shape` carrying `area`, `perimeter`, `scale`, and `rotate`. It compiles, but very
-little of it is reusable. A good check before committing: could a second type plausibly reuse one of
-this trait's providers *whole*? If not, implement the trait directly on the concrete type and skip the
-machinery.
-
 ## Using it
 
 Apply the attribute to a trait definition and give it the provider trait's name. The simplest form is
@@ -187,9 +144,54 @@ table, which maps `AreaCalculatorComponent` to `RectangleArea`, and `RectangleAr
 fields to compute the result. Swapping the provider in that one wiring line changes what `rect.area()`
 does, and nothing else in the program changes.
 
+## When to reach for it, and when not
+
+Reach for `#[cgp_component]` when a capability genuinely needs **more than one implementation, and the
+choice belongs to the type using it.** That is the case it exists for, and its machinery is not free:
+a component is a trait, a second trait, a marker type, and a line of wiring per type.
+
+Prefer something simpler when you can.
+
+- **One implementation, ever.** Use [`#[cgp_fn]`](./cgp_fn.md) instead. It builds the capability
+  straight from a function, needs no wiring at all, and keeps working unchanged if a second
+  implementation ever arrives — so it is the right starting point rather than a lesser one.
+- **One implementation per type, chosen globally.** That is what a plain Rust trait already does well.
+  Reach for a component when two *different* applications must make different choices for the same
+  type, or when the implementations must overlap in a way the compiler rejects.
+- **A closed set of variants with fixed operations.** An `enum` and a `match` are clearer than any
+  machinery.
+
+There is also a finer line worth knowing: a capability may genuinely need several implementations
+while each individual implementation serves exactly one type. In that case you can implement the
+consumer trait directly on each concrete type, as you would any Rust trait, and skip providers
+entirely. Named providers earn their place once a second type wants the *same* implementation, or once
+an implementation should compose with a wrapper.
+
+### How many items should a component have?
+
+A component trait is an ordinary trait. It takes as many methods, associated types, and associated
+consts as any other, and every one of them is reproduced on the provider trait — CGP's own
+[`CanCompute`](../components/computer.md) declares an associated `Output` beside its method. There is
+no cap.
+
+What to group is a judgement rather than a rule, and the useful question is: **everything in one
+component is answered by one provider choice.** Items a single choice settles belong together — a
+method and the associated type it returns, or several field reads one getter provider answers by name.
+Items that separate choices settle are better apart, because grouping them costs reuse: every provider
+then carries the union of the dependencies of all the methods, a wrapper must forward the methods it
+has no opinion about, and a type that needs only part of the surface must still supply the rest.
+
+The usual sign of a component that has grown past one decision is a consumer trait named after a noun
+rather than a verb — `Shape` carrying `area`, `perimeter`, `scale`, and `rotate`. It compiles, but very
+little of it is reusable. A good check before committing: could a second type plausibly reuse one of
+this trait's providers *whole*? If not, implement the trait directly on the concrete type and skip the
+machinery.
+
 ## Under the hood
 
-:::note Advanced
+:::note
+
+### Advanced
 
 This section shows the code the macro generates. You do not need it to use `#[cgp_component]`, but
 CGP's constructs are macros, and reading what one produces is the fastest way to understand a compiler

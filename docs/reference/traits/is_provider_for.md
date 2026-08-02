@@ -6,7 +6,9 @@ sidebar_label: 'IsProviderFor'
 
 The marker supertrait that makes a provider's missing dependency show up by name.
 
-:::info Not written yet
+:::info
+
+### Not written yet
 
 This reference page is still being written. Until it lands, the
 [`cgp` source](https://github.com/contextgeneric/cgp) is the authority on this construct,

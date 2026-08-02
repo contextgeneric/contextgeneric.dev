@@ -6,7 +6,9 @@ sidebar_label: '#[cgp_fn]'
 
 Define a single-implementation capability as a blanket-impl trait, straight from a function.
 
-:::info Not written yet
+:::info
+
+### Not written yet
 
 This reference page is still being written. Until it lands, the
 [`cgp` source](https://github.com/contextgeneric/cgp) is the authority on this construct,

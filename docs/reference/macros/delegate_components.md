@@ -39,27 +39,6 @@ A macro is worth having here because each entry expands to two impls rather than
 dependencies back through the table — which is what makes a missing transitive requirement produce a
 usable error instead of a dead end.
 
-## When to reach for it, and when not
-
-Use `delegate_components!` whenever a context needs to choose providers, which is any time you use
-[`#[cgp_component]`](./cgp_component.md) at all. The real decision is not whether to wire but **how to
-check the wiring**, because CGP's wiring is *lazy*: a table with a missing or wrong entry still
-compiles, and the failure only surfaces later, where the capability is used.
-
-- **Pair it with [`check_components!`](./check_components.md)** for anything beyond simple wiring. A
-  separate check gives you full control over what is asserted — concrete parameters for generic keys,
-  per-provider layers, and opened or namespaced wiring — which is why larger codebases keep the two
-  macros apart.
-- **Use [`delegate_and_check_components!`](./delegate_and_check_components.md)** when you are getting
-  started or the wiring is plain `Component: Provider` entries. It fuses the two so the check cannot be
-  forgotten.
-- **Use plain `delegate_components!` with no check** for an **aggregate provider** — the
-  `new`-keyword form below. That target is a provider other contexts delegate to rather than a context
-  in its own right, so the fused macro's check would fail spuriously on it.
-
-The one thing not to do is leave a context's wiring unchecked. Which macro you use to check it scales
-with how complicated the wiring is; that it is checked somehow does not.
-
 ## Using it
 
 The macro takes a target type and a brace-delimited list of `Key: Value` entries.
@@ -151,7 +130,9 @@ generates. It is a lightweight special case of the full [namespace](./cgp_namesp
 to a context wiring its own components directly, and it does not combine with a joined namespace where
 the component carries a `#[prefix(...)]`.
 
-:::info Legacy — read, don't write
+:::info
+
+### Legacy — read, don't write
 
 Older code dispatches the same way by nesting a table inside a
 [`UseDelegate`](../providers/use_delegate.md) value:
@@ -233,9 +214,33 @@ delegate_components! {
 }
 ```
 
+## When to reach for it, and when not
+
+Use `delegate_components!` whenever a context needs to choose providers, which is any time you use
+[`#[cgp_component]`](./cgp_component.md) at all. The real decision is not whether to wire but **how to
+check the wiring**, because CGP's wiring is *lazy*: a table with a missing or wrong entry still
+compiles, and the failure only surfaces later, where the capability is used.
+
+- **Pair it with [`check_components!`](./check_components.md)** for anything beyond simple wiring. A
+  separate check gives you full control over what is asserted — concrete parameters for generic keys,
+  per-provider layers, and opened or namespaced wiring — which is why larger codebases keep the two
+  macros apart.
+- **Use [`delegate_and_check_components!`](./delegate_and_check_components.md)** when you are getting
+  started or the wiring is plain `Component: Provider` entries. It fuses the two so the check cannot be
+  forgotten.
+- **Use plain `delegate_components!` with no check** for an **aggregate provider** — the
+  [`new`-keyword form](#defining-the-target-at-the-same-time). That target is a provider other contexts
+  delegate to rather than a context in its own right, so the fused macro's check would fail spuriously
+  on it.
+
+The one thing not to do is leave a context's wiring unchecked. Which macro you use to check it scales
+with how complicated the wiring is; that it is checked somehow does not.
+
 ## Under the hood
 
-:::note Advanced
+:::note
+
+### Advanced
 
 This section shows the impls each entry expands to. You do not need them to wire a context, but they
 are what a wiring error names, so reading one makes those errors much easier to follow.
