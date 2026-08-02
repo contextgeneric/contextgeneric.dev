@@ -246,8 +246,9 @@ compiles, and the failure only surfaces later, where the capability is used.
   forgotten.
 - **Use plain `delegate_components!` with no check** for an **aggregate provider** — the
   [`new`-keyword form](#defining-the-target-at-the-same-time). That target is a provider other contexts
-  delegate to rather than a context in its own right, so the fused macro's check would fail spuriously
-  on it.
+  delegate to rather than a context in its own right, so a context-side check on it asks the wrong
+  question: it either passes vacuously or blames the bundle for requirements a real context would have
+  met. Verify it through a context that delegates to it instead.
 
 The one thing not to do is leave a context's wiring unchecked. Which macro you use to check it scales
 with how complicated the wiring is; that it is checked somehow does not.

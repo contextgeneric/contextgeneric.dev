@@ -6,12 +6,350 @@ sidebar_label: 'delegate_and_check_components!'
 
 Wire a context and check that wiring in one macro.
 
-:::info
+## What it's for
 
-### Not written yet
+CGP's wiring is [lazy](./delegate_components.md#gotchas): a
+[`delegate_components!`](./delegate_components.md) entry is accepted without verifying that the provider it
+names can actually satisfy the component, so a **context** — the type the capability runs against, which
+supplies the values it needs as its fields — can compile while being broken. The fix is a
+[`check_components!`](./check_components.md) block, and the problem with the fix is that keeping it in step
+with the wiring is manual. Add a delegation, remember to add its check.
 
-This reference page is still being written. Until it lands, the
-[`cgp` source](https://github.com/contextgeneric/cgp) is the authority on this construct,
-and `cargo cgp expand` will show you what it generates in your own code.
+`delegate_and_check_components!` removes that bookkeeping by deriving the checks from the delegations:
+
+```rust
+delegate_and_check_components! {
+    MyContext {
+        NameTypeProviderComponent: UseType<String>,
+        NameGetterComponent: UseField<Symbol!("name")>,
+    }
+}
+```
+
+Every entry is wired *and* proven, in one place, with nothing to keep in sync. What it emits is exactly what
+writing both macros by hand would emit.
+
+**It is aimed at simple wiring and at getting started, not at being the default everywhere.** Its value is
+that a newcomer cannot forget the check and then meet the confusing errors lazy wiring produces. The
+derivation understands only the plain `Component: Provider` form, though, so a codebase whose wiring grows
+past that keeps the two macros separate — the reasons are in
+[When to reach for it](#when-to-reach-for-it-and-when-not).
+
+## Using it
+
+The macro takes the same table shape as [`delegate_components!`](./delegate_components.md) — an optional
+generic list and `new` keyword, a target type, and brace-delimited `Key: Value` entries — plus a few
+attributes governing the checking half:
+
+```rust
+delegate_and_check_components! {
+    ScaledRectangle {
+        AreaCalculatorComponent: ScaledArea<RectangleArea>,
+    }
+}
+```
+
+Every delegated component is checked unless explicitly opted out, so the default is "wire it and prove it
+works".
+
+### Naming the check trait
+
+The derived trait is named `__CanUse{Context}` — `__CanUseScaledRectangle`. That deliberately differs from
+the `__Check{Context}` name [`check_components!`](./check_components.md) derives, so both macros can be used
+once each in the same module without colliding. Override it with a table-level `#[check_trait(Name)]`:
+
+```rust
+delegate_and_check_components! {
+    #[check_trait(TestScaledRectangle)]
+    ScaledRectangle {
+        AreaCalculatorComponent: ScaledArea<RectangleArea>,
+    }
+}
+```
+
+### Components with generic parameters
+
+A component with type parameters needs `#[check_params(...)]` on its entry. The delegation half does not
+need them — its impl is generic over them — but the check half must name something concrete, and the macro
+cannot infer what from the delegation alone:
+
+```rust
+delegate_and_check_components! {
+    MyApp {
+        #[check_params(
+            Rectangle,
+            Circle,
+        )]
+        AreaCalculatorComponent:
+            UseDelegate<new AreaCalculatorComponents {
+                Rectangle: RectangleArea,
+                Circle: CircleArea,
+            }>,
+    }
+}
+```
+
+The same single-versus-tuple convention as `check_components!` applies: one parameter bare, several as a
+tuple.
+
+### Skipping one entry's check
+
+`#[skip_check]` wires an entry and generates no check for it, for a component verified elsewhere. It saves
+splitting out a second plain `delegate_components!` block just to leave one component unchecked:
+
+```rust
+delegate_and_check_components! {
+    ScaledRectangle {
+        #[skip_check]
+        AreaCalculatorComponent: ScaledArea<RectangleArea>,
+    }
+}
+```
+
+The two per-entry attributes are **mutually exclusive**, and at most one may appear on a given key.
+
+## Examples
+
+The intended use — a straightforward context, wired and proven together:
+
+```rust
+use cgp::prelude::*;
+
+#[cgp_getter]
+pub trait HasName {
+    fn name(&self) -> &str;
+}
+
+#[derive(HasField)]
+pub struct MyContext {
+    pub name: String,
+}
+
+delegate_and_check_components! {
+    MyContext {
+        NameGetterComponent: UseField<Symbol!("name")>,
+    }
+}
+```
+
+If `MyContext` were missing the `name` field, the derived check would fail here, naming the missing field,
+rather than letting the gap survive to some later call to `name()`.
+
+Mixing checked and skipped entries lets a nested delegation be verified more precisely elsewhere while the
+rest is checked inline:
+
+```rust
+delegate_and_check_components! {
+    ScaledRectangle {
+        AreaCalculatorComponent:
+            ScaledArea<RectangleArea>,
+
+        #[skip_check]
+        TransformCalculatorComponent:
+            ComplexTransform<RectangleArea>,
+    }
+}
+
+check_components! {
+    #[check_providers(RectangleArea, ComplexTransform<RectangleArea>)]
+    ScaledRectangle {
+        TransformCalculatorComponent,
+    }
+}
+```
+
+That pairing is the usual reason to reach for `#[skip_check]`: the fused derivation can only check the
+context, and a nested stack is better checked per layer.
+
+## When to reach for it, and when not
+
+**Reach for it while getting started, and for tables that are plain `Component: Provider` entries.** It is
+the form that makes forgetting a check impossible, which is worth more than the control it gives up when the
+wiring is simple.
+
+**Keep the two macros separate once the wiring is not simple.** The derivation reads delegation keys, so
+there are three things it cannot do, and each is a reason a larger codebase writes
+[`delegate_components!`](./delegate_components.md) and [`check_components!`](./check_components.md) apart:
+
+- **Per-layer checks.** Only a standalone block can use `#[check_providers(...)]`, which is what localizes a
+  broken layer of a nested provider stack.
+- **Generic-parameter dispatch.** The `open` statement and `@`-path keys wire a provider per type; the
+  derivation cannot tell which concrete types to check, so those entries need a standalone block naming them.
+- **[Namespaces](./cgp_namespace.md).** A `namespace` header brings in components the table never names, so a
+  derived check covers only the entries written directly and says nothing about what was inherited.
+
+**One case makes this macro wrong rather than merely unnecessary: an
+[aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time).** A `new`-keyword bundle
+is a provider other contexts delegate *to*, never a context itself — it has no fields and never stands in the
+context position — so the derived context-side check asks a question that does not apply to it. Wire a bundle
+with plain `delegate_components!`. The [Gotchas](#gotchas) show what the failure looks like, and why it is
+easy to misread.
+
+The invariant across all of this is that a context's wiring is checked *somehow*. This macro is the
+beginner-proof way to guarantee that for simple contexts; the two separate macros are the way that scales.
+
+## Under the hood
+
+:::note
+
+### Advanced
+
+This section shows both halves of what the macro emits. You do not need it to use the macro, but seeing that
+the output is literally the two macros concatenated is what makes a later move to separate blocks
+uneventful. `cargo cgp expand` prints the same thing for your own code.
 
 :::
+
+The macro emits the delegation impls exactly as [`delegate_components!`](./delegate_components.md) would,
+then appends a check trait and one impl per non-skipped entry exactly as
+[`check_components!`](./check_components.md) would. From this input:
+
+```rust
+delegate_and_check_components! {
+    #[check_trait(CheckMyContext)]
+    MyContext {
+        NameTypeProviderComponent: UseType<String>,
+        NameGetterComponent: UseField<Symbol!("name")>,
+    }
+}
+```
+
+the wiring half is a [`DelegateComponent`](../traits/delegate_component.md) impl plus an
+[`IsProviderFor`](../traits/is_provider_for.md) forwarding impl per entry:
+
+```rust
+impl DelegateComponent<NameTypeProviderComponent> for MyContext {
+    type Delegate = UseType<String>;
+}
+impl<__Context__, __Params__>
+    IsProviderFor<NameTypeProviderComponent, __Context__, __Params__> for MyContext
+where
+    UseType<String>: IsProviderFor<NameTypeProviderComponent, __Context__, __Params__>,
+{}
+```
+
+and the same pair again for `NameGetterComponent`. Then the checking half — a marker trait aliasing
+[`CanUseComponent`](../traits/can_use_component.md), with one empty impl per delegated component:
+
+```rust
+trait CheckMyContext<__Component__, __Params__: ?Sized>:
+    CanUseComponent<__Component__, __Params__>
+{}
+
+impl CheckMyContext<NameTypeProviderComponent, ()> for MyContext {}
+impl CheckMyContext<NameGetterComponent, ()> for MyContext {}
+```
+
+Without the `#[check_trait(...)]` override the trait would be `__CanUseMyContext`. The whole output is
+identical to a `delegate_components!` block followed by a `check_components!` block whose trait carries the
+`__CanUse{Context}` name — which is why moving to separate blocks later changes nothing about what is
+checked.
+
+A `#[check_params(...)]` entry expands its parameters into the `__Params__` slot, one check impl per listed
+parameter, while its single delegation impl stays generic over them:
+
+```rust
+impl __CanUseMyApp<AreaCalculatorComponent, Rectangle> for MyApp {}
+impl __CanUseMyApp<AreaCalculatorComponent, Circle> for MyApp {}
+```
+
+A `#[skip_check]` entry contributes its delegation impls and no check impl — present in the first half,
+absent from the second.
+
+A generic table threads its generics through both halves, so `<T> MyContext<T> { … }` yields
+`impl<T> DelegateComponent<…> for MyContext<T>` alongside
+`impl<T> __CanUseMyContext<…, ()> for MyContext<T> {}`. A key carrying its own generics is bound on the
+derived check the same way, so `<I> BarGetterAtComponent<I>: UseField<Symbol!("dummy")>` checks as
+`impl<I> __CanUse…<BarGetterAtComponent<I>, ()> for MyContext {}`.
+
+<details>
+<summary>Formal grammar</summary>
+
+The body is [`delegate_components!`](./delegate_components.md)'s table shape plus the check attributes, in the
+Rust Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+DelegateAndCheck -> TableAttr* Generics? `new`? TargetType `{` TableBody `}`
+
+TableAttr        -> `#` `[` `check_trait` `(` IDENTIFIER `)` `]`
+
+TableBody        -> Statement* ( CheckedMapping ( `,` CheckedMapping )* `,`? )?
+
+CheckedMapping   -> EntryAttr? Mapping    // Mapping, Key, ProviderValue, Statement
+                                          // — see delegate_components!
+
+EntryAttr        -> `#` `[` `check_params` `(` Type ( `,` Type )* `,`? `)` `]`
+                  | `#` `[` `skip_check` `]`
+```
+
+The `Mapping`, `Key`, `ProviderValue`, and `Statement` productions are exactly
+[`delegate_components!`](./delegate_components.md)'s; only the attributes differ. The table-level
+`#[check_trait(...)]` overrides the derived `__CanUse{Context}` name. Each mapping may carry at most one
+`EntryAttr`, and the two are mutually exclusive: `#[check_params(...)]` supplies the parameters a generic
+component's check needs, and `#[skip_check]` wires the entry with no check at all.
+
+</details>
+
+## Gotchas
+
+**Used on an aggregate provider, this macro reports a failure that describes nothing real.** A `new`-keyword
+bundle is not a context, so the derived check asks whether the *bundle* satisfies the leaf provider's
+dependencies. When the bundled provider needs nothing, the check passes and proves nothing; when it needs
+anything from its context, the check fails and blames the bundle:
+
+```text
+error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>`
+              is not satisfied
+note: required for `RectangleArea` to implement
+      `IsProviderFor<AreaCalculatorComponent, GeometryComponents>`
+```
+
+Neither outcome is informative, and neither says the target was never meant to be a context. Use plain
+[`delegate_components!`](./delegate_components.md) for a bundle.
+
+**The two per-entry attributes cannot be combined**, and the macro says so rather than picking one:
+
+```text
+error: Expected at most one `#[check_params]` or `#[skip_check]` attribute
+```
+
+**A generic component without `#[check_params(...)]` cannot be checked, and the error does not say so.** The
+delegation succeeds; the derived check is emitted with an empty parameter tuple, which a component expecting a
+type parameter can never satisfy. What surfaces is an ordinary unsatisfied-marker complaint against the
+provider:
+
+```text
+error[E0277]: the trait bound `RectArea: IsProviderFor<AreaCalculatorComponent, App2>` is not satisfied
+```
+
+Nothing in it mentions the missing parameters, so it reads like a broken provider rather than an incomplete
+check. Add `#[check_params(...)]`, or move the entry to a standalone
+[`check_components!`](./check_components.md).
+
+**An inherited or opened component is not covered.** A `namespace` header or an `open` statement is accepted
+in the table, but the derivation only produces checks for entries it can read as `Component: Provider` — so a
+table using either is *partly* checked, with no warning about the rest. Add a standalone
+[`check_components!`](./check_components.md) for those.
+
+## Related constructs
+
+- [`delegate_components!`](./delegate_components.md) — the wiring half, and what to use alone for a bundle.
+- [`check_components!`](./check_components.md) — the checking half, and the form to use once wiring grows.
+- [`CanUseComponent`](../traits/can_use_component.md) — the assertion the derived check makes.
+- [`DelegateComponent`](../traits/delegate_component.md) and
+  [`IsProviderFor`](../traits/is_provider_for.md) — the impls each entry expands into.
+- [`#[cgp_component]`](./cgp_component.md) — defines the components a table wires.
+- [`cgp_namespace!`](./cgp_namespace.md) — inherited wiring, which the derivation does not cover.
+- [`UseField`](../providers/use_field.md) and [`UseType`](../providers/use_type.md) — the providers the
+  examples wire.
+
+## Source
+
+- Entry point: [`delegate_and_check_components.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/delegate_and_check_components.rs)
+- Implementation: [`types/delegate_and_check_components/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/delegate_and_check_components/)
+- The two reused tables: [`types/delegate_component/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/delegate_component/)
+  and [`types/check_components/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/check_components/)
+
+---
+
+*This page was written by an AI agent from the CGP knowledge base and verified against the library's source — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
