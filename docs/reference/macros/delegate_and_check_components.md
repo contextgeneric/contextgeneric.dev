@@ -31,7 +31,7 @@ writing both macros by hand would emit.
 
 **It is aimed at simple wiring and at getting started, not at being the default everywhere.** Its value is
 that a newcomer cannot forget the check and then meet the confusing errors lazy wiring produces. The
-derivation understands only the plain `Component: Provider` form, though, so a codebase whose wiring grows
+derivation understands only a mapping keyed on a component *name*, though, so a codebase whose wiring grows
 past that keeps the two macros separate — the reasons are in
 [When to reach for it](#when-to-reach-for-it-and-when-not).
 
@@ -107,6 +107,34 @@ delegate_and_check_components! {
 ```
 
 The two per-entry attributes are **mutually exclusive**, and at most one may appear on a given key.
+
+### What is wired, and what is checked
+
+**The wiring half accepts every form [`delegate_components!`](./delegate_components.md) accepts** — all
+three operators, all three key forms including grouped `@`-paths, per-key generics, nested table values,
+and the `open`, `namespace`, and `for` statements. Read that page for the grammar; the delegation is
+literally the same evaluation.
+
+**The checking half reads only some of it, and the gap is silent.** Check entries come from the delegation
+*keys*, and only a key that names a component can become one:
+
+| Form | Wired | Checked |
+|---|---|---|
+| `Component: Provider` | yes | yes |
+| `Component -> Table` | yes | yes |
+| `[A, B]: Provider` | yes | yes, one per name |
+| `@path.Key: Provider` | yes | **no** |
+| `Component => @path` | yes | **no** |
+| `open` / `namespace` / `for` | yes | **no** |
+
+Nothing warns about the rows that are not checked: the block compiles, the wiring is correct, and those
+components simply go unverified. That silence is the practical reason to split the macros once a table uses
+more than plain entries — a standalone [`check_components!`](./check_components.md) block can name the
+concrete parameters an opened component needs and cover what a namespace brought in.
+
+Attributes are accepted only where they mean something. `#[check_params(...)]` and `#[skip_check]` attach
+to the table's single and list keys; on an `@`-path key, or inside a `for` loop, they are rejected outright
+rather than read and ignored.
 
 ## Examples
 
@@ -326,10 +354,12 @@ Nothing in it mentions the missing parameters, so it reads like a broken provide
 check. Add `#[check_params(...)]`, or move the entry to a standalone
 [`check_components!`](./check_components.md).
 
-**An inherited or opened component is not covered.** A `namespace` header or an `open` statement is accepted
-in the table, but the derivation only produces checks for entries it can read as `Component: Provider` — so a
-table using either is *partly* checked, with no warning about the rest. Add a standalone
-[`check_components!`](./check_components.md) for those.
+**An inherited, opened, or redirected component is not covered.** A `namespace` header, an `open`
+statement, an `@`-path key, and a `=>` redirect are all accepted in the table and all wired, but the
+derivation only produces checks for entries keyed on a component name — so a table using any of them is
+*partly* checked, with no warning about the rest. The
+[coverage table above](#what-is-wired-and-what-is-checked) says which is which; add a standalone
+[`check_components!`](./check_components.md) for the rest.
 
 ## Related constructs
 

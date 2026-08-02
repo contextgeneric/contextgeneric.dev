@@ -68,6 +68,27 @@ inherited one. Paths are written with the `@` sigil as dotted sequences — `@My
 `@app.ErrorRaiserComponent`, `@cgp.core.error` — where lowercase segments become type-level strings and
 capitalized segments name types. [`Path!`](./path.md) covers the syntax in full.
 
+### The rest of the body grammar
+
+**A namespace body is parsed by the same code as a
+[`delegate_components!`](./delegate_components.md) table**, so everything that macro accepts parses here:
+all three operators, all three key forms — including bracketed list keys and `@`-path keys with their
+`[…]` and `{…}` groups — per-key generics, and the leading `open`, `namespace`, and `for` statements. That
+page documents each of them; what follows is only what differs here.
+
+What differs is what an entry becomes. A `delegate_components!` entry records a choice *for a context*; a
+namespace entry records where a lookup for a key should *go next*, for any context that later joins. That
+is why the two forms in the table above are the ones worth writing, and why the others are mostly not:
+
+- **`->` direct delegation** still projects through the *value's* own table, so it names a concrete table
+  inside a definition that is meant to be table-generic.
+- **`open Component;`** is accepted and generates exactly what `Component => @Component,` generates —
+  occasionally a convenient spelling for rooting a component's route at its own name.
+- **`namespace Other;`** is accepted, but inheritance is written with the `: ParentNamespace` header
+  above. That is the form overriding and the cycle diagnostics are defined in terms of.
+- **A nested table value** — `UseDelegate<new Inner { … }>` — parses and then fails to compile. See
+  [Gotchas](#gotchas).
+
 ### Inheriting from a parent
 
 Name a parent after a colon in the header, and the child resolves everything the parent does plus its own
@@ -305,27 +326,19 @@ ParentNamespace -> TypePath GenericArgs?
 NamespaceBody   -> Statement* ( Mapping ( `,` Mapping )* `,`? )?
 ```
 
-The `Mapping` production is [`delegate_components!`](./delegate_components.md)'s — most often `=>` to an
-`@`-`Path`, or `:` to a provider. The `:` between `NamespaceName` and `ParentNamespace` is the inheritance
-colon, distinct from a mapping's. `NamespaceName` becomes both a trait and, with `new`, a struct.
+`NamespaceBody` is [`delegate_components!`](./delegate_components.md)'s `TableBody` production unchanged,
+so its `Statement` and `Mapping` rules — every operator, every key form, every value form — are defined on
+that page rather than restated here. The two a namespace normally uses are `=>` to an `@`-path and `:` to a
+provider. The `:` between `NamespaceName` and `ParentNamespace` is the inheritance colon, distinct from a
+mapping's. `NamespaceName` becomes both a trait and, with `new`, a struct.
 
-This macro also owns the two statement forms a context's table uses to join a namespace:
-
-```ebnf
-Statement     -> NamespaceStmt | ForStmt
-
-NamespaceStmt -> `namespace` IDENTIFIER `;`
-
-ForStmt       -> `for` `<` IDENTIFIER `,` IDENTIFIER `>` `in` TypePath WhereClause?
-                 `{` ( NormalMapping ( `,` NormalMapping )* `,`? )? `}`
-
-NormalMapping -> Key `:` ProviderValue
-```
-
-A `NamespaceStmt` forwards every unwired lookup through the named namespace. A `ForStmt` binds a key variable
-and a provider variable, reads each entry of the table named after `in`, and emits one mapping per entry; its
-optional `WhereClause` is merged into every impl the loop generates. Like `delegate_components!`, the body
-accepts **no attributes** on any entry and rejects any it finds.
+Two of the three statement forms in that shared production exist for this macro, because their job is
+joining a context's table to a namespace. A `NamespaceStmt` — `namespace SomeNamespace;` — forwards every
+unwired lookup through the named namespace. A `ForStmt` —
+`for <T, Provider> in SomeTable where … { … }` — binds a key variable and a provider variable, reads each
+entry of the table named after `in`, and emits one mapping per entry; its body admits only the `:` form,
+and its optional `where` clause is merged into every impl the loop generates. Like
+`delegate_components!`, the body accepts **no attributes** on any entry and rejects any it finds.
 
 </details>
 
@@ -370,6 +383,31 @@ error[E0207]: the type parameter `__Value__` is not constrained by the impl trai
 ```
 
 Both mean the inheritance chain is not acyclic, but only the first says so recognizably.
+
+**A nested table inside a namespace entry parses and then fails to compile.** The
+[`UseDelegate<new Inner { … }>`](./delegate_components.md#the-two-value-forms) value is accepted by the
+parser, but `cgp_namespace!` — unlike `delegate_components!` — never lifts the inner table out into its own
+struct and impls, so the entry ends up naming a type nothing declares:
+
+```rust
+cgp_namespace! {
+    new NestedNs {
+        FooProviderComponent:
+            UseDelegate<new FooTable {
+                String: DummyFoo,
+            }>,
+    }
+}
+```
+
+```text
+error[E0425]: cannot find type `FooTable` in this scope
+```
+
+The message names the missing table rather than the unsupported form, so it reads like a typo. Declare the
+table in its own `delegate_components! { new FooTable { … } }` block and bind the key to
+`UseDelegate<FooTable>` — or, since the nested form is legacy anyway, leave per-type dispatch to the
+context and its [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement).
 
 **A registered component with no provider bound anywhere still compiles.** If a `#[prefix]` routes a component
 into a namespace and nothing ever binds a provider at its path, the redirect lands on an empty slot and the
