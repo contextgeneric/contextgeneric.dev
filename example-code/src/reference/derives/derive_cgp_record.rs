@@ -6,7 +6,7 @@
 /// ## Examples
 ///
 /// The record half: `promote`, which merges one record into another's builder.
-pub mod examples_record {
+pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
     use cgp::prelude::*;
 

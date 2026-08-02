@@ -13,7 +13,7 @@ The transform marker that makes every field optional.
 **You are not expected to name `TransformOptional` directly.** It is the
 marker [`ToOptional`](./to_optional.md) and [`HasOptionalBuilder`](./has_optional_builder.md) drive, and
 calling one of those is what you write. This page explains the conversion behind them, and why it needs
-less of a field's type than its defaulting counterpart does.
+less of a field's type than its defaulting counterpart does. The one case for naming it is writing a capability of your own that drives the optional conversion.
 
 :::
 

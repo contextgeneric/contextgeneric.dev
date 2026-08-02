@@ -14,7 +14,7 @@ Rewriting every entry of a type-level list through one marker.
 behind a partial record's shape, computed by the machinery
 [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) generates. You will most likely meet it in an error
 message; this page explains what it produces, and how it differs from the two similarly-named traits
-beside it.
+beside it. The one case for naming it is generic code that must describe a uniformly re-wrapped shape.
 
 :::
 

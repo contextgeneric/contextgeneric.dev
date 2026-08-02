@@ -14,7 +14,7 @@ Naming the concrete type a partial value is on its way to becoming.
 [`#[derive(BuildField)]`](../derives/derive_build_field.md) and
 [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) emit it for every companion type they
 generate. What you meet is the projection `Self::Target` in another trait's signature; this page explains
-where that projection comes from.
+where that projection comes from. The one case for bounding on it is generic code that needs the destination type before the value is complete.
 
 :::
 

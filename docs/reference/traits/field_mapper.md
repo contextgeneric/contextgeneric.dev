@@ -12,7 +12,7 @@ The provider-side mirror of `MapField`.
 
 **You will not call `map_field` yourself.** It is a blanket impl over every
 [`FieldGetter`](./field_getter.md), and [`ChainGetters`](../providers/chain_getters.md) is its only
-caller in practice. This page explains the mechanism a chained getter is built from.
+caller in practice. This page explains the mechanism a chained getter is built from. The one case for calling it directly is writing a getter provider of your own that has to descend.
 
 :::
 

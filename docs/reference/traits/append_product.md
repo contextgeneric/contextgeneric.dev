@@ -13,7 +13,7 @@ Adding one entry to the end of a type-level product list.
 **You are not expected to use `AppendProduct` directly.** It is a type-level
 operation the extensible-data machinery computes with — the builder and merge recursions are its callers
 in practice. You will most likely meet it in an error message from code that walks a shape; this page
-explains what it produces so that message is legible.
+explains what it produces so that message is legible. The one case for naming it is generic code that must describe in a signature the shape it *will* produce.
 
 :::
 

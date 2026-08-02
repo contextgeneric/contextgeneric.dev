@@ -14,7 +14,7 @@ Joining two type-level paths.
 [`cgp_namespace!`](../macros/cgp_namespace.md) and [`RedirectLookup`](../providers/redirect_lookup.md)
 use it to extend a route one segment at a time, and [`ChainGetters`](../providers/chain_getters.md) to
 descend into a nested context. This page explains the operation, so that a composed path in an
-expansion or an error message is legible.
+expansion or an error message is legible. The one case for naming it is generic code that composes paths rather than writing one out.
 
 :::
 
@@ -99,13 +99,25 @@ the path spine.
 
 :::
 
-Two impls, one per spine node. Each node keeps its head segment and concatenates onto the tail; the
-terminator becomes the other path outright:
+Two impls, one per spine node. Each node keeps its head segment and rebuilds the tail; the terminator
+becomes the other path outright:
 
 ```rust
-// at the terminator, the whole second path is substituted
-// at a node, the head is kept and the tail recurses
+impl<Head: ?Sized, Tail: ?Sized, Other: ?Sized> ConcatPath<Other> for PathCons<Head, Tail>
+where
+    Tail: ConcatPath<Other>,
+{
+    type Output = PathCons<Head, <Tail as ConcatPath<Other>>::Output>;
+}
+
+impl<Other: ?Sized> ConcatPath<Other> for Nil {
+    type Output = Other;   // the second path is substituted whole
+}
 ```
+
+Note the `?Sized` on every parameter, including the associated type — that is what lets both operands
+be the unsized markers a path is built from, and it is the one way this recursion differs from
+[`ConcatProduct`](./concat_product.md)'s otherwise identical shape.
 
 So the result is the first path's segments followed by the second's, in order, with the cost of
 resolution proportional to the first path's length.

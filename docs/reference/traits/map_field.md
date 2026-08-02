@@ -13,7 +13,7 @@ Reading through a field without forcing its type to be `'static`.
 **You will not call `map_field` yourself.** It is a blanket impl that every
 [`HasField`](./has_field.md) already has, and [`ChainGetters`](../providers/chain_getters.md) is what
 uses it to descend into a nested context. This page explains the lifetime problem it exists to solve,
-which is why reaching a nested field is a provider rather than two chained reads.
+which is why reaching a nested field is a provider rather than two chained reads. The one case for calling it directly is writing a getter provider of your own that has to descend.
 
 :::
 

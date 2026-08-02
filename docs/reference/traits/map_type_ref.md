@@ -13,7 +13,7 @@ The marker trait deciding how a borrowed partial type holds its payloads.
 **You are not expected to implement `MapTypeRef`.** Its three markers are supplied
 by CGP, and [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) generates the borrowed
 companion that carries one. What you do with this trait is recognize its markers in an error; this page
-explains what each one means and how it composes with the per-field markers.
+explains what each one means and how it composes with the per-field markers. The one case for bounding on the trait is generic code of your own over a borrowed partial type's outer marker.
 
 :::
 

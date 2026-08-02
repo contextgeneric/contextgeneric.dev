@@ -13,7 +13,7 @@ The provider-side mirror of `HasFieldMut` — wired field access that can mutate
 **You are not expected to implement `MutFieldGetter`.**
 [`#[cgp_getter]`](../macros/cgp_getter.md) generates it alongside its supertrait, and
 [`UseField`](../providers/use_field.md) satisfies both. What you write is the wiring entry; this page
-explains what the mutable half of that entry provides.
+explains what the mutable half of that entry provides. The one case for implementing it by hand is a provider whose mutable access is not a plain field read.
 
 :::
 

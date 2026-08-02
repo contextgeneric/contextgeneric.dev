@@ -13,7 +13,7 @@ The provider-side mirror of `HasField` — field access that gets wired.
 **You are not expected to implement `FieldGetter`.**
 [`#[cgp_getter]`](../macros/cgp_getter.md) generates it as the getter's provider trait, and
 [`UseField`](../providers/use_field.md) is the provider you wire to satisfy it. What you write is the
-wiring entry; this page explains the shape that entry resolves through.
+wiring entry; this page explains the shape that entry resolves through. The one case for implementing it by hand is a getter whose value is computed rather than stored.
 
 :::
 

@@ -113,3 +113,43 @@ pub mod using_it {
 /// }
 /// ```
 pub mod rejected_struct_style_variant {}
+
+/// ## Examples
+///
+/// The umbrella page's own snippet: one derive covering both halves of a program.
+pub mod examples {
+    use cgp::prelude::*;
+
+    #[derive(CgpData)]
+    pub struct Circle {
+        pub radius: f64,
+    }
+
+    #[derive(CgpData)]
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    #[derive(CgpData)]
+    pub enum Shape {
+        Circle(Circle),
+        Rectangle(Rectangle),
+    }
+
+    #[test]
+    fn test_the_structs_gain_a_builder_and_the_enum_an_extractor() {
+        let circle: Circle = Circle::builder()
+            .build_field(PhantomData::<Symbol!("radius")>, 1.0)
+            .finalize_build();
+
+        assert_eq!(circle.radius, 1.0);
+
+        let shape = Shape::Circle(circle);
+
+        assert!(shape
+            .to_extractor()
+            .extract_field(PhantomData::<Symbol!("Circle")>)
+            .is_ok());
+    }
+}

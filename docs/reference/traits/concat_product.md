@@ -13,7 +13,7 @@ Splicing one type-level product list onto the end of another.
 **You are not expected to use `ConcatProduct` directly.** It is a type-level
 operation the extensible-data machinery computes with, and you will most likely meet it in an error
 message from code that walks a shape rather than in code you wrote. This page explains what it
-produces.
+produces. The one case for naming it is generic code that must describe the shape produced by combining two others.
 
 :::
 

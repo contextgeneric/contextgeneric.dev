@@ -13,7 +13,7 @@ Applying one per-field transform across a whole partial record.
 **You are not expected to call `transform_map_fields` directly.** It is the
 recursion the optional-field layer is built from, and
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) and [`ToOptional`](./to_optional.md) are what
-you call. This page explains the walk, which is what makes those two behave so symmetrically.
+you call. This page explains the walk, which is what makes those two behave so symmetrically. The one case for bounding on it is writing a capability of your own that re-marks a whole record.
 
 :::
 
