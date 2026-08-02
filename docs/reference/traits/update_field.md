@@ -6,6 +6,18 @@ sidebar_label: 'UpdateField'
 
 The primitive that moves one field of a partial record between states.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to call `update_field` directly.** It is the per-field
+primitive [`#[derive(BuildField)]`](../derives/derive_build_field.md) emits, and
+[`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are the two directions you actually
+call. This page explains the primitive, because it is what makes build order free and what the
+optional-field layer reaches for when neither direction fits.
+
+:::
+
 ## What it's for
 
 Everything in the [builder family](./has_builder.md) reduces to one operation: change one field's storage

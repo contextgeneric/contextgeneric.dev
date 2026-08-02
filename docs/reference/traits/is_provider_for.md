@@ -6,6 +6,17 @@ sidebar_label: 'IsProviderFor'
 
 The marker supertrait that makes a provider's missing dependency show up by name.
 
+:::info
+
+### Generated machinery
+
+**You never write `IsProviderFor` yourself.** The provider macros —
+[`#[cgp_impl]`](../macros/cgp_impl.md) and [`#[cgp_provider]`](../macros/cgp_provider.md), which also
+covers `#[cgp_new_provider]` — derive it from the same `where` clause you already wrote. This page explains what they emit, because this trait is what a missing-dependency error
+names, and reading that error is the reason to know it exists.
+
+:::
+
 ## What it's for
 
 An implementation in CGP states what it needs from its **context** — the type the capability runs against —

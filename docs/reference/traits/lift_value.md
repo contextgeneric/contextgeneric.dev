@@ -6,6 +6,18 @@ sidebar_label: 'LiftValue'
 
 Putting a value back into a monad's output type, on either branch.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `LiftValue`.** The
+[bind providers](../providers/monad_providers.md) use it while running a step, and the monad markers CGP
+ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
+page is here to explain how a step produces its output — and why that takes two methods rather than
+one.
+
+:::
+
 ## What it's for
 
 A bind step in a [monadic pipeline](/docs/concepts/monadic-handlers) unwraps a value, runs a

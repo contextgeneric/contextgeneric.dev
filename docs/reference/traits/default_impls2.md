@@ -6,6 +6,17 @@ sidebar_label: 'DefaultImpls2'
 
 Resolving a namespace default keyed on a component and *two* types.
 
+:::info
+
+### Generated machinery
+
+**You do not implement `DefaultImpls2`.**
+[`#[default_impl(...)]`](../attributes/default_impl.md) emits the impls and a `for … in` statement
+consumes them, exactly as for its one-type sibling. You name the trait in those two places only; this
+page explains what they emit.
+
+:::
+
 ## What it's for
 
 [`DefaultImpls1`](./default_impls1.md) keys a namespace default on a component plus one type, which is

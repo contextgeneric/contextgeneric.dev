@@ -6,6 +6,17 @@ sidebar_label: 'HasFieldsRef'
 
 A type's whole shape, with every value borrowed.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to implement `HasFieldsRef`.**
+[`#[derive(HasFields)]`](../derives/derive_has_fields.md) emits it alongside the owned shape. What
+generic code writes is a bound; this page explains the type the derive produces, including the reserved
+lifetime name that shows up in an error message.
+
+:::
+
 ## What it's for
 
 [`HasFields`](./has_fields.md) describes a type as a list of named entries holding owned values. Code

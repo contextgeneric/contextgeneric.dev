@@ -6,6 +6,17 @@ sidebar_label: 'StaticFormat'
 
 Writing a type-level string into a formatter — the trait behind `Display` on `Symbol`.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `StaticFormat`.** It backs the `Display` impls on
+`Symbol` and `Chars`, which is how a type-level string prints at all — so reach for `Display`, or for
+[`StaticString`](./static_string.md) when you want a constant. This page explains the trait behind them,
+and the narrow case where bounding on it is the answer.
+
+:::
+
 ## What it's for
 
 CGP encodes field and variant names as *types*, so a name can drive trait resolution. Printing one means

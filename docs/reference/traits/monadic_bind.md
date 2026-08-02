@@ -6,6 +6,17 @@ sidebar_label: 'MonadicBind'
 
 Turning a continuation into one bind step of a monadic pipeline.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `MonadicBind`.**
+[`PipeMonadic`](../providers/monad_providers.md) bounds on it while folding a pipeline, and the monad
+markers CGP ships already implement it. The one case for naming it is defining a monad of your own;
+otherwise this page is here to explain how a pipeline is assembled.
+
+:::
+
 ## What it's for
 
 A [monadic pipeline](/docs/concepts/monadic-handlers) chains steps where each may either continue or

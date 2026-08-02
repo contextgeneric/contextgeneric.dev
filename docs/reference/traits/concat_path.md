@@ -6,6 +6,18 @@ sidebar_label: 'ConcatPath'
 
 Joining two type-level paths.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to call `ConcatPath` directly.**
+[`cgp_namespace!`](../macros/cgp_namespace.md) and [`RedirectLookup`](../providers/redirect_lookup.md)
+use it to extend a route one segment at a time, and [`ChainGetters`](../providers/chain_getters.md) to
+descend into a nested context. This page explains the operation, so that a composed path in an
+expansion or an error message is legible.
+
+:::
+
 ## What it's for
 
 A [`Path!`](../macros/path.md) is a type-level list of segments — the route a namespaced component

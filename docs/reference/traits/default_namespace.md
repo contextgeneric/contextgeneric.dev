@@ -6,6 +6,19 @@ sidebar_label: 'DefaultNamespace'
 
 Resolving a namespace's default provider for a component.
 
+:::info
+
+### Generated machinery
+
+**You do not implement `DefaultNamespace`.**
+[`cgp_namespace!`](../macros/cgp_namespace.md) and its
+[`#[prefix(...)]`](../macros/cgp_namespace.md) attribute emit the impls. You name the trait in exactly
+one place — a `namespace` header inside
+[`delegate_components!`](../macros/delegate_components.md) — and this page explains what that header
+generates, including why a direct entry can shadow an inherited default without conflicting with it.
+
+:::
+
 ## What it's for
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** — the

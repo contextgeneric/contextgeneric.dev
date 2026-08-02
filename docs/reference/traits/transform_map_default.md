@@ -6,6 +6,18 @@ sidebar_label: 'TransformMapDefault'
 
 The transform marker that makes every field present, defaulting whatever is not.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `TransformMapDefault` directly.** It is the
+marker [`CanFinalizeWithDefault`](./can_finalize_with_default.md) and
+[`CanBuildWithDefault`](./can_build_with_default.md) drive, and calling one of those is what you write.
+This page explains the three conversions behind them — which is also the model to copy if you write a
+transform of your own.
+
+:::
+
 ## What it's for
 
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) works by re-marking every field of a partial

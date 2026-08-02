@@ -6,6 +6,18 @@ sidebar_label: 'PartialData'
 
 Naming the concrete type a partial value is on its way to becoming.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to implement `PartialData`.**
+[`#[derive(BuildField)]`](../derives/derive_build_field.md) and
+[`#[derive(ExtractField)]`](../derives/derive_extract_field.md) emit it for every companion type they
+generate. What you meet is the projection `Self::Target` in another trait's signature; this page explains
+where that projection comes from.
+
+:::
+
 ## What it's for
 
 A partial record is a companion type — `__PartialPerson<IsNothing, IsPresent>` — and generic code holding

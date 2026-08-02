@@ -6,6 +6,17 @@ sidebar_label: 'MapTypeRef'
 
 The marker trait deciding how a borrowed partial type holds its payloads.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to implement `MapTypeRef`.** Its three markers are supplied
+by CGP, and [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) generates the borrowed
+companion that carries one. What you do with this trait is recognize its markers in an error; this page
+explains what each one means and how it composes with the per-field markers.
+
+:::
+
 ## What it's for
 
 [`MapType`](./map_type.md) decides whether a field of a partial type holds its value, nothing, or an

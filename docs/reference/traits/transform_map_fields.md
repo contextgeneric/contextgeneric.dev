@@ -6,6 +6,17 @@ sidebar_label: 'TransformMapFields'
 
 Applying one per-field transform across a whole partial record.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to call `transform_map_fields` directly.** It is the
+recursion the optional-field layer is built from, and
+[`CanFinalizeWithDefault`](./can_finalize_with_default.md) and [`ToOptional`](./to_optional.md) are what
+you call. This page explains the walk, which is what makes those two behave so symmetrically.
+
+:::
+
 ## What it's for
 
 [`TransformMap`](./transform_map.md) converts *one* field from one marker's storage to another's.

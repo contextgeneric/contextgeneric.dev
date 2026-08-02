@@ -6,6 +6,17 @@ sidebar_label: 'ContainsValue'
 
 Naming the value a monad threads forward out of a step's output.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `ContainsValue`.** The
+[bind providers](../providers/monad_providers.md) use it while running a step, and the monad markers CGP
+ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
+page is here to explain how a step unwraps its input.
+
+:::
+
 ## What it's for
 
 A step in a [monadic pipeline](/docs/concepts/monadic-handlers) produces a wrapped output — a `Result`,

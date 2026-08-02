@@ -6,6 +6,16 @@ sidebar_label: 'FieldMapper'
 
 The provider-side mirror of `MapField`.
 
+:::info
+
+### Generated machinery
+
+**You will not call `map_field` yourself.** It is a blanket impl over every
+[`FieldGetter`](./field_getter.md), and [`ChainGetters`](../providers/chain_getters.md) is its only
+caller in practice. This page explains the mechanism a chained getter is built from.
+
+:::
+
 ## What it's for
 
 [`MapField`](./map_field.md) reads through a field without forcing its type to be `'static`, by taking a

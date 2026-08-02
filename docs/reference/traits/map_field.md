@@ -6,6 +6,17 @@ sidebar_label: 'MapField'
 
 Reading through a field without forcing its type to be `'static`.
 
+:::info
+
+### Generated machinery
+
+**You will not call `map_field` yourself.** It is a blanket impl that every
+[`HasField`](./has_field.md) already has, and [`ChainGetters`](../providers/chain_getters.md) is what
+uses it to descend into a nested context. This page explains the lifetime problem it exists to solve,
+which is why reaching a nested field is a provider rather than two chained reads.
+
+:::
+
 ## What it's for
 
 Chaining field reads looks like it should just work — read a field, then read a field of *that* —

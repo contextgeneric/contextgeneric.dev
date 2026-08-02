@@ -6,6 +6,18 @@ sidebar_label: 'DefaultImpls1'
 
 Resolving a namespace default keyed on a component *and* a type.
 
+:::info
+
+### Generated machinery
+
+**You do not implement `DefaultImpls1`.**
+[`#[default_impl(...)]`](../attributes/default_impl.md) emits the impls and a `for … in` statement inside
+[`delegate_components!`](../macros/delegate_components.md) consumes them. You name the trait in those two
+places only; this page explains what each of them emits, and the positional rule that is easy to get
+backwards.
+
+:::
+
 ## What it's for
 
 [`DefaultNamespace`](./default_namespace.md) keys a default on the component alone: one component, one

@@ -6,6 +6,17 @@ sidebar_label: 'TransformOptional'
 
 The transform marker that makes every field optional.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `TransformOptional` directly.** It is the
+marker [`ToOptional`](./to_optional.md) and [`HasOptionalBuilder`](./has_optional_builder.md) drive, and
+calling one of those is what you write. This page explains the conversion behind them, and why it needs
+less of a field's type than its defaulting counterpart does.
+
+:::
+
 ## What it's for
 
 [`ToOptional`](./to_optional.md) re-marks every field of a partial record to `IsOptional`, so it can then

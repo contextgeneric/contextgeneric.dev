@@ -6,6 +6,18 @@ sidebar_label: 'CanUseComponent'
 
 The context-side check that a context both wires a component and satisfies its provider.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `CanUseComponent` directly.**
+[`check_components!`](../macros/check_components.md) and
+[`delegate_and_check_components!`](../macros/delegate_and_check_components.md) generate the assertion
+that uses it. What you write is the check; this page explains what a check actually asserts, so that its
+failure is legible.
+
+:::
+
 ## What it's for
 
 CGP's wiring is lazy: writing a wiring line does not check that the chosen implementation's own requirements

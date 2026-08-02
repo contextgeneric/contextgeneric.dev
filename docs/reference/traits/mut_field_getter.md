@@ -6,6 +6,17 @@ sidebar_label: 'MutFieldGetter'
 
 The provider-side mirror of `HasFieldMut` — wired field access that can mutate.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to implement `MutFieldGetter`.**
+[`#[cgp_getter]`](../macros/cgp_getter.md) generates it alongside its supertrait, and
+[`UseField`](../providers/use_field.md) satisfies both. What you write is the wiring entry; this page
+explains what the mutable half of that entry provides.
+
+:::
+
 ## What it's for
 
 [`FieldGetter`](./field_getter.md) is field access in provider-trait shape, so that a context can choose

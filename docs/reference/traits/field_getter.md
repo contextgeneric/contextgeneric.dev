@@ -6,6 +6,17 @@ sidebar_label: 'FieldGetter'
 
 The provider-side mirror of `HasField` — field access that gets wired.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to implement `FieldGetter`.**
+[`#[cgp_getter]`](../macros/cgp_getter.md) generates it as the getter's provider trait, and
+[`UseField`](../providers/use_field.md) is the provider you wire to satisfy it. What you write is the
+wiring entry; this page explains the shape that entry resolves through.
+
+:::
+
 ## What it's for
 
 [`HasField`](./has_field.md) is a bound an implementation states about its own context. Sometimes field

@@ -6,6 +6,17 @@ sidebar_label: 'ConcatProduct'
 
 Splicing one type-level product list onto the end of another.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to use `ConcatProduct` directly.** It is a type-level
+operation the extensible-data machinery computes with, and you will most likely meet it in an error
+message from code that walks a shape rather than in code you wrote. This page explains what it
+produces.
+
+:::
+
 ## What it's for
 
 Merging two records means merging their shapes, and the shapes are type-level lists — a

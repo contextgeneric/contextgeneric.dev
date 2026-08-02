@@ -6,6 +6,18 @@ sidebar_label: 'DelegateComponent'
 
 The per-context type-level table mapping a component key to its provider.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to write `DelegateComponent` impls.**
+[`delegate_components!`](../macros/delegate_components.md) emits one per entry of a wiring table, and
+[`cgp_namespace!`](../macros/cgp_namespace.md) emits the blanket forwarding impls behind a namespace.
+What you write is the table. This page explains what the table *becomes*, so that an expansion or a
+wiring error naming this trait is legible.
+
+:::
+
 ## What it's for
 
 Wiring a **context** — the type the capability runs against, which supplies the values it needs as its

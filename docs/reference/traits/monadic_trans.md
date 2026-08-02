@@ -6,6 +6,17 @@ sidebar_label: 'MonadicTrans'
 
 Stacking one monad on top of another.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to name `MonadicTrans`.**
+[`PipeMonadic`](../providers/monad_providers.md) resolves a stacked monad through it before any binding
+happens, and the transformer markers CGP ships already implement it. The one case for naming it is giving
+a monad of your own a transformer form; otherwise this page is here to explain how monads stack.
+
+:::
+
 ## What it's for
 
 A [monadic pipeline](/docs/concepts/monadic-handlers) over a nested output — a `Result` inside a

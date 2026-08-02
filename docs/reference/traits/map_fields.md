@@ -6,6 +6,18 @@ sidebar_label: 'MapFields'
 
 Rewriting every entry of a type-level list through one marker.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to use `MapFields` directly.** It is the type-level operation
+behind a partial record's shape, computed by the machinery
+[`#[derive(CgpData)]`](../derives/derive_cgp_data.md) generates. You will most likely meet it in an error
+message; this page explains what it produces, and how it differs from the two similarly-named traits
+beside it.
+
+:::
+
 ## What it's for
 
 A partial record is the same record with every field's storage changed the same way — each value wrapped

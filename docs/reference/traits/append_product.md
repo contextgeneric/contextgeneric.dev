@@ -6,6 +6,17 @@ sidebar_label: 'AppendProduct'
 
 Adding one entry to the end of a type-level product list.
 
+:::info
+
+### Generated machinery
+
+**You are not expected to use `AppendProduct` directly.** It is a type-level
+operation the extensible-data machinery computes with — the builder and merge recursions are its callers
+in practice. You will most likely meet it in an error message from code that walks a shape; this page
+explains what it produces so that message is legible.
+
+:::
+
 ## What it's for
 
 A struct's shape in CGP is a type-level list — a [`Product!`](../macros/product.md) of named fields.
