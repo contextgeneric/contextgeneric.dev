@@ -16,10 +16,16 @@ cargo check         # the fast check: the code compiles
 
 One file per page, at the matching path with the file name in `snake_case`:
 
-| Page | File |
+| Section | Coverage |
 |---|---|
-| `docs/concepts/coherence.md` | `src/concepts/coherence.rs` |
-| `docs/concepts/consumer-and-provider-traits.md` | `src/concepts/consumer_and_provider_traits.rs` |
+| `docs/concepts/` | complete — sixteen files under `src/concepts/`, one per page that shows code |
+| `docs/reference/` | none yet |
+| `docs/tutorials/` | none yet |
+| front page, orientation pages | none yet |
+
+Within a covered section the mapping is mechanical: `docs/concepts/coherence.md` is answered by
+`src/concepts/coherence.rs`, and `docs/concepts/consumer-and-provider-traits.md` by
+`src/concepts/consumer_and_provider_traits.rs`.
 
 A page that shows no code gets no file — `docs/concepts/modularity-hierarchy.md` is prose and tables,
 so it has no module here, and neither does a section index.

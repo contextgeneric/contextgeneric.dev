@@ -16,15 +16,6 @@ name of the thing they want. A concept page answers the question neither of thos
 *why does CGP work this way, and when is it the right thing to reach for?* Each page names the
 constructs it involves and links to the reference for their exact syntax, rather than repeating it.
 
-:::info
-
-### Still being written
-
-The list of ideas below is complete, so nothing is missing from this index — but most of the pages
-behind it are placeholders for now, and each one says so when you open it.
-
-:::
-
 ## Where to start
 
 **Read [Bypassing coherence](./coherence.md) first if you want to know why CGP exists.** It explains
