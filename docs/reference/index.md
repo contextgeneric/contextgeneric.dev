@@ -88,12 +88,13 @@ chosen by wiring, through [`UseField` and its siblings](./providers/use_field.md
 
 ### Declare what an implementation needs
 
-These attributes state a provider's dependencies where the implementation lives, so they never appear
-in the interface callers see. [`#[uses]`](./attributes/uses.md) imports the capabilities it depends on,
-[`#[use_provider]`](./attributes/use_provider.md) does the same for an inner provider in a
-higher-order provider, and [`#[extend]`](./attributes/extend.md) and
-[`#[extend_where]`](./attributes/extend_where.md) add bounds to a generated trait rather than to its
-implementation.
+These attributes state what an implementation needs, and they divide by whether the requirement stays
+private to it. [`#[uses]`](./attributes/uses.md) imports the capabilities the body depends on and
+[`#[use_provider]`](./attributes/use_provider.md) does the same for an inner provider in a higher-order
+provider — both landing on the implementation alone, so a caller never sees them. Where a requirement
+should instead be part of what the trait promises, [`#[extend]`](./attributes/extend.md) adds it as a
+supertrait and [`#[extend_where]`](./attributes/extend_where.md) as a predicate on the generated trait
+itself.
 
 ### Let each context choose a type
 

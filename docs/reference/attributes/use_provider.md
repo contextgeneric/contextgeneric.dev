@@ -4,14 +4,278 @@ sidebar_label: '#[use_provider]'
 
 # `#[use_provider]`
 
-Complete an inner provider's bound in a higher-order provider.
+Depend on another implementation by name, without writing the context argument its bound requires.
 
-:::info
+## What it's for
 
-### Not written yet
+An implementation can be parameterized by *another* implementation — a wrapper that scales whatever an
+inner calculator produces, a retry layer over whatever performs the request. Declaring that dependency
+means bounding the inner one, and the bound has a surprise in it.
 
-This reference page is still being written. Until it lands, the
-[`cgp` source](https://github.com/contextgeneric/cgp) is the authority on this construct,
-and `cargo cgp expand` will show you what it generates in your own code.
+A [provider trait](../macros/cgp_component.md) is not shaped like the trait it came from: the original
+`Self` has moved into an explicit leading type parameter for the **context**, the type the implementation
+runs against. So while callers write `CanCalculateArea`, an implementation depending on another one has to
+write `AreaCalculator<Self>` — with a context argument that has no counterpart in the consumer trait, and
+that a reader will not expect:
+
+```rust
+where
+    InnerCalculator: AreaCalculator<Self>,
+```
+
+`#[use_provider]` lets you leave that argument off. You write the bound as though the provider trait had
+the same shape as the trait it came from, and the macro fills the context in:
+
+```rust
+#[use_provider(InnerCalculator: AreaCalculator)]
+```
+
+That is the whole of what it does, and knowing the boundary matters: **it completes and inserts a bound,
+and it does not touch the body.** The inner implementation is still invoked as an associated function with
+the context passed explicitly — `InnerCalculator::area(self)` — because that is what the provider trait's
+method actually takes. The attribute removes the surprise from the bound; the call site keeps it.
+
+## Using it
+
+`#[use_provider(...)]` takes a provider, a colon, and the trait bounds it must satisfy:
+
+```rust
+#[use_provider(InnerCalculator: AreaCalculator)]
+```
+
+`InnerCalculator` is the provider — usually a generic parameter of the implementation — and
+`AreaCalculator` is the provider trait whose context argument is filled in. The trait may carry further
+arguments of its own after the context slot, and those are preserved in order behind the inserted context.
+
+Two forms cover more than one bound, and which you need depends on what is being multiplied.
+
+**One provider, several traits — join them with `+`:**
+
+```rust
+#[use_provider(Inner: AreaCalculator + PerimeterCalculator)]
+```
+
+**Several providers — one attribute each, stacked:**
+
+```rust
+#[use_provider(A: AreaCalculator)]
+#[use_provider(P: PerimeterCalculator)]
+```
+
+Stacking is the intended form here rather than a fallback, because a comma-separated list of
+provider-and-trait pairs is *not* accepted — see [Gotchas](#gotchas). This differs from
+[`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), where commas are the preferred way to carry several
+entries, so it is worth remembering as the exception.
+
+`#[use_provider]` is accepted on [`#[cgp_impl]`](../macros/cgp_impl.md) and on
+[`#[cgp_fn]`](../macros/cgp_fn.md), and it works the same way on both.
+
+## Examples
+
+The archetypal use is a wrapper parameterized by whatever it wraps. Given a component and a plain
+implementation of it:
+
+```rust
+use cgp::prelude::*;
+
+#[cgp_component(AreaCalculator)]
+pub trait CanCalculateArea {
+    fn area(&self) -> f64;
+}
+
+#[cgp_impl(new RectangleArea)]
+impl AreaCalculator {
+    fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+        width * height
+    }
+}
+```
+
+a scaling wrapper takes the inner implementation as a parameter, declares it with `#[use_provider]`, and
+calls it by name:
+
+```rust
+#[cgp_impl(new ScaledArea<InnerCalculator>)]
+#[use_provider(InnerCalculator: AreaCalculator)]
+impl<InnerCalculator> AreaCalculator {
+    fn area(&self, #[implicit] scale_factor: f64) -> f64 {
+        let base_area = InnerCalculator::area(self);
+        base_area * scale_factor * scale_factor
+    }
+}
+```
+
+A context then composes the two when it wires the component, and `ScaledArea<RectangleArea>` computes a
+rectangle's area and scales it:
+
+```rust
+#[derive(HasField)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+    pub scale_factor: f64,
+}
+
+delegate_components! {
+    Rectangle {
+        AreaCalculatorComponent: ScaledArea<RectangleArea>,
+    }
+}
+```
+
+Because the wrapper never names a particular inner implementation, the same `ScaledArea` composes over any
+of them — and composition is a type, so `type ScaledRectangle = ScaledArea<RectangleArea>;` is a complete
+way to name the combination.
+
+The attribute is also useful for depending on one *specific* implementation rather than a parameter, which
+is what a [`#[cgp_fn]`](../macros/cgp_fn.md) does when it wants a named implementation instead of whatever
+the context has wired:
+
+```rust
+#[cgp_fn]
+#[use_provider(RectangleArea: AreaCalculator)]
+pub fn rect_area(&self) -> f64 {
+    RectangleArea::area(self)
+}
+```
+
+## When to reach for it, and when not
+
+**Use `#[use_provider]` whenever an implementation depends on another implementation by name**, in
+preference to writing the context argument by hand. That is the recommendation, and the explicit
+`Inner: AreaCalculator<Self>` form is what to read rather than write.
+
+The choice against its neighbours is about *what* is being depended on, and one of the distinctions is
+easy to miss because both spellings compile.
+
+- **A capability of the context** is [`#[uses]`](uses.md). That bound is on `Self`; this one is on a
+  separate provider type, which is why `#[uses]` has no context argument to fill in.
+- **Whatever the context already chose** needs no attribute at all. Calling `self.area()` in the body
+  routes through the context's own wiring, which is a *different dispatch* from
+  `InnerCalculator::area(self)` — the first asks the context, the second names an implementation
+  statically. Reach for `#[use_provider]` only when you want the second.
+- **A choice made per type rather than fixed** is dispatch rather than parameterization, so it belongs in
+  the wiring: the `open` statement of [`delegate_components!`](../macros/delegate_components.md) maps each
+  type to its own implementation.
+
+One ergonomic option is worth knowing when writing the provider struct by hand: giving the parameter a
+default of [`UseContext`](../providers/use_context.md) — `pub struct IterSum<Inner = UseContext>(...)` —
+makes an unparameterized `IterSum` fall back to the context's own wiring, so the wrapper can be dropped in
+without naming a base case.
+
+## Under the hood
+
+:::note
+
+### Advanced
+
+This section shows the bound the attribute produces. You do not need it to use `#[use_provider]`, but the
+inserted argument is exactly what an unsatisfied inner dependency names in an error, so it is worth seeing
+once. `cargo cgp expand` prints the same thing for your own code.
 
 :::
+
+The attribute inserts the context type as the provider trait's leading argument and appends the completed
+bound to the `where` clause. Nothing else changes — the body is emitted as written. From the `ScaledArea`
+example:
+
+```rust
+#[cgp_impl(new ScaledArea<InnerCalculator>)]
+#[use_provider(InnerCalculator: AreaCalculator)]
+impl<InnerCalculator> AreaCalculator {
+    fn area(&self, #[implicit] scale_factor: f64) -> f64 {
+        InnerCalculator::area(self) * scale_factor * scale_factor
+    }
+}
+```
+
+the macro emits the provider implementation with the argument filled in:
+
+```rust
+impl<__Context__, InnerCalculator> AreaCalculator<__Context__>
+    for ScaledArea<InnerCalculator>
+where
+    __Context__: HasField<Symbol!("scale_factor"), Value = f64>,
+    InnerCalculator: AreaCalculator<__Context__>,
+{
+    fn area(__context__: &__Context__) -> f64 {
+        let scale_factor: f64 = __context__
+            .get_field(PhantomData::<Symbol!("scale_factor")>)
+            .clone();
+
+        InnerCalculator::area(__context__) * scale_factor * scale_factor
+    }
+}
+```
+
+The `Self` you wrote in the attribute is the context, so it appears as `__Context__` here — the reserved
+name the surrounding macro inserted. Writing `#[use_provider(InnerCalculator: AreaCalculator)]` is
+therefore exactly equivalent to writing `where InnerCalculator: AreaCalculator<Self>` by hand.
+
+On a [`#[cgp_fn]`](../macros/cgp_fn.md) the same insertion happens, and because that macro's
+implementation is written *for* the context the bound reads with `Self` directly:
+
+```rust
+impl<__Context__> RectArea for __Context__
+where
+    RectangleArea: AreaCalculator<Self>,
+{
+    fn rect_area(&self) -> f64 {
+        RectangleArea::area(self)
+    }
+}
+```
+
+Note that the body is untouched in both. The call stays `InnerCalculator::area(__context__)`, passing the
+context as the first argument, because that is the shape the provider trait's method has.
+
+## Gotchas
+
+**A comma-separated list of pairs is not accepted.** Writing two providers in one attribute is a parse
+error, because after the first trait the parser is looking for a `+` to continue that provider's bounds:
+
+```text
+error: expected `+`
+   |
+   | #[use_provider(A: AreaCalculator, P: PerimeterCalculator)]
+   |                                 ^
+```
+
+Use one attribute per provider instead. This is the opposite of the convention for
+[`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), which do take comma-separated lists, so the habit
+transfers wrongly.
+
+**The provider and the trait are both required.** There is no bare form naming a provider alone, and
+omitting the bound reports the missing colon:
+
+```text
+error: expected `:`
+   |
+   | #[use_provider(RectangleArea)]
+   |                             ^
+```
+
+**There is no call-site rewriting.** The attribute never turns `self.area()` into
+`InnerCalculator::area(self)`, so a body that calls the method on `self` compiles but does something
+different: it dispatches through the context's own wiring rather than through the parameter. When the
+intent is to use the inner implementation, spell out the associated-function call.
+
+## Related constructs
+
+- [`#[cgp_impl]`](../macros/cgp_impl.md) and [`#[cgp_fn]`](../macros/cgp_fn.md) — the two hosts.
+- [`#[cgp_component]`](../macros/cgp_component.md) — generates the provider trait whose argument is filled in.
+- [`#[uses]`](uses.md) — the counterpart for a bound on the context rather than on a provider.
+- [`UseContext`](../providers/use_context.md) — the usual default for an inner-provider parameter.
+- [`delegate_components!`](../macros/delegate_components.md) — where a composed wrapper is wired.
+- [`check_components!`](../macros/check_components.md) — its `#[check_providers(...)]` form checks each
+  layer of a nested stack separately, which is how a broken layer is localized.
+
+## Source
+
+- Parsing and bound completion: [`types/attributes/use_provider/attribute.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/use_provider/attribute.rs)
+- Collection: [`types/attributes/cgp_impl_attributes.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/cgp_impl_attributes.rs)
+  and [`types/attributes/function.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/function.rs)
+
+---
+
+*This page was written by an AI agent from the CGP knowledge base and verified against the library's source — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
