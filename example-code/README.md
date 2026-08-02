@@ -20,6 +20,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 |---|---|
 | `docs/concepts/` | complete — sixteen files under `src/concepts/`, one per page that shows code |
 | `docs/reference/` | `macros/delegate_components.md` only — the section is being filled in lazily |
+| `docs/cargo-cgp/` | complete — the two pages that show Rust, under `src/cargo_cgp/` |
 | `docs/tutorials/` | none yet |
 | front page, orientation pages | none yet |
 

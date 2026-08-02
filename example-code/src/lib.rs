@@ -19,5 +19,6 @@
 // here; a warning that means something — an unused import, an unreachable pattern — still fires.
 #![allow(dead_code, unused_variables)]
 
+pub mod cargo_cgp;
 pub mod concepts;
 pub mod reference;
