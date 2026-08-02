@@ -27,6 +27,17 @@ const config: Config = {
 
   onBrokenLinks: 'throw',
 
+  // Parse `.md` as CommonMark and `.mdx` as MDX, rather than treating every file
+  // as MDX. The skill pages under `docs/ai/skills/` are symlinks into the
+  // `cgp-skills` submodule — plain markdown written for coding agents, by a
+  // repository that has no reason to know about MDX — and MDX would read an
+  // autolink like `<https://example.com>` as a JSX tag and fail the build. No page
+  // on this site uses MDX-only syntax (imports, exports, or JSX components), so
+  // nothing else changes: admonitions and raw HTML work under both.
+  markdown: {
+    format: 'detect',
+  },
+
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
@@ -35,6 +46,22 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    // Keep webpack from resolving a symlink to its real path. The skill pages
+    // under `docs/ai/skills/` are symlinks into the `cgp-skills` submodule, whose
+    // real path sits outside `docs/`; resolved, the compiled module no longer
+    // matches the metadata the docs plugin registered for the symlink, and every
+    // such page fails to render with `Cannot read properties of undefined`.
+    function resolveSymlinkedDocs() {
+      return {
+        name: 'resolve-symlinked-docs',
+        configureWebpack() {
+          return {resolve: {symlinks: false}};
+        },
+      };
+    },
+  ],
+
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -42,6 +69,12 @@ const config: Config = {
         docs: {
           showLastUpdateTime: true,
           sidebarPath: './sidebars.ts',
+          // The `cgp-skills` submodule is checked out inside `docs/ai/skills/` so
+          // the skill pages can symlink to it from next door. Its own files are the
+          // source, not pages: the ones we publish are reached through those
+          // symlinks, and the rest (README, AGENTS, sibling-projects) are not site
+          // content at all.
+          exclude: ['**/cgp-skills/**'],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:

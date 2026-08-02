@@ -1,0 +1,1 @@
+../cgp-skills/cgp/references/functions-and-getters.md

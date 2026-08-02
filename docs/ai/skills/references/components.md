@@ -1,0 +1,1 @@
+../cgp-skills/cgp/references/components.md

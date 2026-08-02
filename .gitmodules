@@ -1,0 +1,3 @@
+[submodule "cgp-skills"]
+	path = docs/ai/skills/cgp-skills
+	url = https://github.com/contextgeneric/cgp-skills.git

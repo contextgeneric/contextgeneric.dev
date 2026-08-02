@@ -1,0 +1,1 @@
+../cgp-skills/cgp/references/namespaces.md
