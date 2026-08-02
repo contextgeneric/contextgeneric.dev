@@ -20,8 +20,9 @@ its own.
 ### Still being written
 
 The construct list below is complete — every construct the `cgp` crate exports has a page, or a named
-place on a page it shares — so nothing is missing from this index. Most of the pages behind it are
-placeholders for now, and each one says so when you open it.
+place on a page it shares — so nothing is missing from this index. The macros, attributes, derives, and
+traits are written; the components, providers, and type-level pages are still placeholders, and each one
+says so when you open it.
 
 :::
 

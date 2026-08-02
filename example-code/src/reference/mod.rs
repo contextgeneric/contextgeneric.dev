@@ -6,3 +6,4 @@
 pub mod derives;
 pub mod errors;
 pub mod macros;
+pub mod traits;
