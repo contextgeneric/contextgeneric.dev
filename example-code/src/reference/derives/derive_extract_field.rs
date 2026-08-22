@@ -5,7 +5,7 @@
 //! `cargo cgp expand` is the check on that section. What this file pins is the accepted and rejected
 //! shapes, the three extractors, and the exhaustiveness claim in both directions.
 
-/// ## What it's for
+/// ## Overview
 ///
 /// The opening extraction, and the payload types the page names without declaring.
 pub mod what_its_for {

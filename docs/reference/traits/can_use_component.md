@@ -18,7 +18,7 @@ failure is legible.
 
 :::
 
-## What it's for
+## Overview
 
 CGP's wiring is lazy: writing a wiring line does not check that the chosen implementation's own requirements
 are met. That check happens the first time the capability is actually called, which is usually somewhere far

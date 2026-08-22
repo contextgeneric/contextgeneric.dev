@@ -6,7 +6,7 @@ sidebar_label: 'SetOptional'
 
 Setting one field of an optional builder, as many times as you like.
 
-## What it's for
+## Overview
 
 [`BuildField`](./build_field.md) sets an absent field and consumes the slot: the builder's type changes,
 and setting the same field twice is a compile error. `SetOptional` is the optional layer's answer, and its

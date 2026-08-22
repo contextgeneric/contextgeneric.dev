@@ -18,7 +18,7 @@ expansion or an error message is legible. The one case for naming it is generic 
 
 :::
 
-## What it's for
+## Overview
 
 A [`Path!`](../macros/path.md) is a type-level list of segments — the route a namespaced component
 lookup is redirected along, or the chain of field names a nested getter descends. Composing two such

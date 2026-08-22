@@ -17,7 +17,7 @@ explains what each one means and how it composes with the per-field markers. The
 
 :::
 
-## What it's for
+## Overview
 
 [`MapType`](./map_type.md) decides whether a field of a partial type holds its value, nothing, or an
 uninhabited type. A **borrowed** partial type needs a second decision on top: whether each payload is

@@ -6,7 +6,7 @@ sidebar_label: 'HasExtractorMut'
 
 Obtaining an extractor that can change a payload in place.
 
-## What it's for
+## Overview
 
 [`HasExtractorRef`](./has_extractor_ref.md) borrows an enum so its variants can be read without consuming
 it. `HasExtractorMut` borrows it mutably, so a payload can be **changed in place**:

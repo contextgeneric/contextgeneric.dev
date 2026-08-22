@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_type]'
 
 Define an abstract-type component, whose concrete type each context chooses for itself.
 
-## What it's for
+## Overview
 
 Generic code often has to name a type it should not choose. A fallible operation returns *some* error, a
 geometry routine computes in *some* scalar, a storage layer holds *some* connection handle — and code

@@ -17,7 +17,7 @@ produces. The one case for naming it is generic code that must describe the shap
 
 :::
 
-## What it's for
+## Overview
 
 Merging two records means merging their shapes, and the shapes are type-level lists — a
 [`Product!`](../macros/product.md) of named fields each. `ConcatProduct<Items>` names the list you get by

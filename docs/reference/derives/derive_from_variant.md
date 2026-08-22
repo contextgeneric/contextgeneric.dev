@@ -6,7 +6,7 @@ sidebar_label: '#[derive(FromVariant)]'
 
 Generic construction of an enum from one of its named variants.
 
-## What it's for
+## Overview
 
 `Shape::Circle(circle)` names two things: the enum, and the variant. That is fine at a concrete call site and
 useless to code that knows neither — a routine that has been handed a value and told which variant to wrap it

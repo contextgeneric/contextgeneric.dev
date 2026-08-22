@@ -17,7 +17,7 @@ which is why reaching a nested field is a provider rather than two chained reads
 
 :::
 
-## What it's for
+## Overview
 
 Chaining field reads looks like it should just work — read a field, then read a field of *that* —
 and it does not, for a reason that is about lifetimes rather than about CGP. Writing

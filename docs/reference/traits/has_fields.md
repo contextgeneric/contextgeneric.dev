@@ -6,7 +6,7 @@ sidebar_label: 'HasFields'
 
 A type's whole shape, as a single type.
 
-## What it's for
+## Overview
 
 Some code needs one field of a type. Other code needs the *shape* — every field, its name, and its type
 — so it can walk them: a serializer, a validator, a builder that merges two structs, a dispatcher that

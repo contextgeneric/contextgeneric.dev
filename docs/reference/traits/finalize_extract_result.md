@@ -6,7 +6,7 @@ sidebar_label: 'FinalizeExtractResult'
 
 Collapsing the `Result` at the end of an extraction chain.
 
-## What it's for
+## Overview
 
 Every step of an [extraction chain](./extract_field.md) returns a `Result`: the payload on the left, the
 narrowed remainder on the right. At the last step the remainder is uninhabited, so the `Err` case cannot

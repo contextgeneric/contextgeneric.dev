@@ -6,7 +6,7 @@ sidebar_label: 'FinalizeExtract'
 
 Discharging an extractor that has nothing left in it.
 
-## What it's for
+## Overview
 
 An [extraction chain](./extract_field.md) ends when every variant has been ruled out. At that point the
 remainder's type is **uninhabited** — a value of it cannot exist — and `FinalizeExtract` is what turns

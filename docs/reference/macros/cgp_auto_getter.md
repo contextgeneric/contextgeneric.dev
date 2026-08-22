@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_auto_getter]'
 
 Define a getter as a blanket impl over `HasField`, keyed by the method name.
 
-## What it's for
+## Overview
 
 `#[cgp_auto_getter]` publishes a context field as a named, reusable accessor. You write a trait of getter
 methods, and the macro implements it for every **context** — the type the capability runs against, which

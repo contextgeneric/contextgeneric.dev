@@ -6,7 +6,7 @@ sidebar_label: 'FinalizeOptional'
 
 Finalizing an optional builder, reporting the first missing field.
 
-## What it's for
+## Overview
 
 An [optional builder](./has_optional_builder.md) has given up the compile-time completeness check: every
 field is `IsOptional`, so the type no longer records what has been set. Something has to check at run

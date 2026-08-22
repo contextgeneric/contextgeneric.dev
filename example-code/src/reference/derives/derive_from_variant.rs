@@ -5,7 +5,7 @@
 //! check on that section. What this file pins is that the tag-generic constructor works, and the two
 //! shapes the page says are rejected.
 
-/// ## What it's for
+/// ## Overview
 ///
 /// The opening claim: `from_variant` with a tag is the same construction as naming the variant.
 pub mod what_its_for {

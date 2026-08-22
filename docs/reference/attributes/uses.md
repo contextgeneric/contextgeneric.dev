@@ -6,7 +6,7 @@ sidebar_label: '#[uses]'
 
 Import the capabilities an implementation depends on, reading like a `use` statement.
 
-## What it's for
+## Overview
 
 An implementation usually calls capabilities defined elsewhere, and to do so it has to require that the
 **context** — the type it runs against — provides them. Written out, that requirement is a bound on

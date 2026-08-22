@@ -6,7 +6,7 @@ sidebar_label: 'HasField'
 
 Reading a field by a type-level name, from a context you cannot name.
 
-## What it's for
+## Overview
 
 An implementation written against a **context** — the type the capability runs against, which supplies
 the values it needs as its fields — is generic over that context and cannot name its concrete type. So it

@@ -6,7 +6,7 @@ sidebar_label: 'delegate_and_check_components!'
 
 Wire a context and check that wiring in one macro.
 
-## What it's for
+## Overview
 
 CGP's wiring is [lazy](./delegate_components.md#gotchas): a
 [`delegate_components!`](./delegate_components.md) entry is accepted without verifying that the provider it

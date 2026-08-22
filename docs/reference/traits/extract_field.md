@@ -6,7 +6,7 @@ sidebar_label: 'ExtractField'
 
 Pulling one variant out of an extractor, or narrowing what remains.
 
-## What it's for
+## Overview
 
 A `match` on a concrete enum is checked for exhaustiveness. Code that is generic over the enum cannot
 write one, so it falls back on a wildcard arm and an `unreachable!()` — losing exactly the guarantee you

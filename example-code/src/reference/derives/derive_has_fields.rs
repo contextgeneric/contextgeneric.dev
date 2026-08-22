@@ -5,7 +5,7 @@
 //! `cargo cgp expand` is the check on that section. What this file pins is the `Fields` type the page
 //! claims for each input shape, asserted by round-tripping a value through it.
 
-/// ## What it's for
+/// ## Overview
 ///
 /// The `Fields` type the page opens on, checked by naming it explicitly.
 pub mod what_its_for {

@@ -17,7 +17,7 @@ less of a field's type than its defaulting counterpart does. The one case for na
 
 :::
 
-## What it's for
+## Overview
 
 [`ToOptional`](./to_optional.md) re-marks every field of a partial record to `IsOptional`, so it can then
 be set freely and finalized either way. `TransformOptional` is the marker carrying the per-field

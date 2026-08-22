@@ -19,7 +19,7 @@ generates, including why a direct entry can shadow an inherited default without 
 
 :::
 
-## What it's for
+## Overview
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** — the
 type the capability runs against — can opt into and then selectively override. Resolving one of those

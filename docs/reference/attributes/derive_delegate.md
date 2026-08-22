@@ -23,7 +23,7 @@ component that keeps it stays compatible with existing wiring. It is expected to
 
 :::
 
-## What it's for
+## Overview
 
 A component generic over a type parameter usually wants a different implementation per value of it:
 `Rectangle` handled one way, `Circle` another. Something has to look at the type and pick, and written by

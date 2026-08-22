@@ -6,7 +6,7 @@ sidebar_label: 'TakeField'
 
 Removing one currently-present field from a builder.
 
-## What it's for
+## Overview
 
 `TakeField` is the reverse of [`BuildField`](./build_field.md): it removes a field that is currently set,
 handing back the value and the partial record without it.

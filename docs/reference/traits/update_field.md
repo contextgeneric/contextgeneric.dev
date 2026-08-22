@@ -18,7 +18,7 @@ optional-field layer reaches for when neither direction fits.
 
 :::
 
-## What it's for
+## Overview
 
 Everything in the [builder family](./has_builder.md) reduces to one operation: change one field's storage
 from one [`MapType`](./map_type.md) marker to another, and hand back what was there before.

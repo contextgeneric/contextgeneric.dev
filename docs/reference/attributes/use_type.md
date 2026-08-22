@@ -6,7 +6,7 @@ sidebar_label: '#[use_type]'
 
 Import an abstract associated type and write it as a bare name.
 
-## What it's for
+## Overview
 
 Generic CGP code constantly needs a type it does not choose — an error type, a scalar, a database handle —
 supplied by the **context**, the type the code runs against. Such a type lives as an

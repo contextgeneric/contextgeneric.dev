@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_getter]'
 
 Define a getter as a full component, so the field it reads is chosen by wiring rather than by its name.
 
-## What it's for
+## Overview
 
 [`#[cgp_auto_getter]`](./cgp_auto_getter.md) ties a getter to a field of the same name: declare
 `fn name(&self) -> &str` and every context with a `name` field satisfies it. That is the right trade almost

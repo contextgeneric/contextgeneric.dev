@@ -6,7 +6,7 @@ sidebar_label: 'Symbol!'
 
 A type-level string, used as a field-name tag.
 
-## What it's for
+## Overview
 
 CGP needs field *names* to be types. Reading a field goes through
 [`HasField<Tag>`](../traits/has_field.md), where `Tag` identifies which field is meant — so to look up a field

@@ -6,7 +6,7 @@ sidebar_label: 'CanBuildWithDefault'
 
 Widening one record into another in a single call.
 
-## What it's for
+## Overview
 
 Turning a narrow record into a wider one whose extra fields have sensible defaults is a three-step motion:
 start a builder, copy the shared fields, default the rest. `CanBuildWithDefault` is that motion as one

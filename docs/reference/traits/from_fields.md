@@ -6,7 +6,7 @@ sidebar_label: 'FromFields'
 
 Rebuilding a concrete value from its shape.
 
-## What it's for
+## Overview
 
 [`ToFields`](./to_fields.md) takes a value apart into an anonymous list of named entries. `FromFields` is
 the return journey:

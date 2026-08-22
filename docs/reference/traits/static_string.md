@@ -6,7 +6,7 @@ sidebar_label: 'StaticString'
 
 Recovering a type-level string as a compile-time `&'static str`.
 
-## What it's for
+## Overview
 
 CGP encodes field and variant names as *types* — a [`Symbol!`](../macros/symbol.md) is a length plus a
 character list, one node per character — so that names can drive trait resolution. But a program

@@ -6,7 +6,7 @@ sidebar_label: '#[derive(CgpVariant)]'
 
 The extensible-data derive for an enum.
 
-## What it's for
+## Overview
 
 A plain Rust enum is opaque to generic code. There is no way to refer to "the `Circle` variant" through
 a type parameter, so anything that must work across several enums ends up written once per enum — and

@@ -6,7 +6,7 @@ sidebar_label: '#[derive(ExtractField)]'
 
 Extractor support for a variant.
 
-## What it's for
+## Overview
 
 A `match` on an enum is checked for exhaustiveness, which is one of Rust's best properties — and it only
 works where the concrete enum is named. Code that is generic over the enum cannot write a `match`, so it

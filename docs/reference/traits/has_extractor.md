@@ -6,7 +6,7 @@ sidebar_label: 'HasExtractor'
 
 Turning an enum into an extractor, and back.
 
-## What it's for
+## Overview
 
 [`ExtractField`](./extract_field.md) narrows an *extractor*, not an enum. `HasExtractor` is where one
 comes from:

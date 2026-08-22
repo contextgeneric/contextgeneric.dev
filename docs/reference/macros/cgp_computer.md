@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_computer]'
 
 Define a `Computer` provider from a plain function.
 
-## What it's for
+## Overview
 
 CGP models computation as a family of components varying along three axes — synchronous or async, fallible
 or not, taking an input or not. A provider in that family is a struct with one or more impls threading a

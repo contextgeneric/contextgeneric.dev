@@ -6,7 +6,7 @@ sidebar_label: 'FinalizeBuild'
 
 Turning a fully-built partial record back into the concrete struct.
 
-## What it's for
+## Overview
 
 `FinalizeBuild` is where a build ends:
 

@@ -6,7 +6,7 @@ sidebar_label: '#[derive(HasFields)]'
 
 The whole-struct or whole-enum field-list view.
 
-## What it's for
+## Overview
 
 Some code needs one field of a type. Other code needs the *shape* of the type: every field, its name, and
 its type, so it can walk them. A serializer, a validator, a builder that merges two structs, a dispatcher

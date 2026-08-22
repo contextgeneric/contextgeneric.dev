@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_auto_dispatch]'
 
 Generate a handler that dispatches over an extensible-data input from a per-type trait.
 
-## What it's for
+## Overview
 
 `#[cgp_auto_dispatch]` answers a common shape: **you have a trait with one implementation per type, and you
 want it to work on an enum of those types too.**

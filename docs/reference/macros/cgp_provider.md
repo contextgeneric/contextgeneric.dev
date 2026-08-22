@@ -7,7 +7,7 @@ sidebar_label: '#[cgp_provider] & #[cgp_new_provider]'
 Implement a provider trait directly, in the inside-out shape the sugar desugars to — with or without
 declaring the provider struct.
 
-## What it's for
+## Overview
 
 A provider trait is not shaped like the trait it came from. [`#[cgp_component]`](./cgp_component.md)
 moves the original `Self` into an explicit leading type parameter for the **context** — the type the

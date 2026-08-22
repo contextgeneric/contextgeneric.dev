@@ -6,7 +6,7 @@ sidebar_label: 'HasOptionalBuilder'
 
 Starting a builder in which every field is already optional.
 
-## What it's for
+## Overview
 
 The core [builder family](./has_builder.md) is deliberately strict: a field is set exactly once, and a
 partial record becomes its concrete struct only when **every** field is present. That strictness is what

@@ -18,7 +18,7 @@ backwards.
 
 :::
 
-## What it's for
+## Overview
 
 [`DefaultNamespace`](./default_namespace.md) keys a default on the component alone: one component, one
 default provider. `DefaultImpls1` adds a second type to the key, which is what a **per-type default**

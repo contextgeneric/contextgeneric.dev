@@ -18,7 +18,7 @@ transform of your own.
 
 :::
 
-## What it's for
+## Overview
 
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) works by re-marking every field of a partial
 record to `IsPresent` and then calling the ordinary [`finalize_build`](./finalize_build.md).

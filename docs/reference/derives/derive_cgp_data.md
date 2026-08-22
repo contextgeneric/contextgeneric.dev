@@ -6,7 +6,7 @@ sidebar_label: '#[derive(CgpData)]'
 
 The umbrella extensible-data derive, for a struct or an enum.
 
-## What it's for
+## Overview
 
 A plain Rust struct or enum is opaque to generic code. There is no way to refer to "the `first_name`
 field" or "the `Circle` variant" through a type parameter, so anything that must work across several

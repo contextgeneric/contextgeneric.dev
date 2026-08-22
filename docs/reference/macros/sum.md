@@ -6,7 +6,7 @@ sidebar_label: 'Sum!'
 
 A type-level sum, the dual of `Product!`.
 
-## What it's for
+## Overview
 
 `Sum![A, B, C]` represents a *choice* among several types as a single type. CGP uses it to describe the shape
 of an **enum** — the list of its variants — the way [`Product!`](./product.md) describes the fields of a

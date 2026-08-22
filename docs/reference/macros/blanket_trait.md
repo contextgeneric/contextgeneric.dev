@@ -6,7 +6,7 @@ sidebar_label: '#[blanket_trait]'
 
 Generate a blanket impl from a trait with default methods and supertrait dependencies.
 
-## What it's for
+## Overview
 
 The pattern CGP is built on is an **extension trait**: a trait with a clean interface whose
 [blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) carries the

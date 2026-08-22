@@ -5,7 +5,7 @@
 //! `cargo cgp expand` is the check on that section. What this file pins is that each of the page's
 //! snippets runs, and that the incomplete build it says will not compile does not.
 
-/// ## What it's for
+/// ## Overview
 ///
 /// The opening builder chain. The page shows it against `Person`, which it declares under *Using it*.
 pub mod what_its_for {

@@ -6,7 +6,7 @@ sidebar_label: 'Product! & product!'
 
 A type-level list and its value-level counterpart.
 
-## What it's for
+## Overview
 
 `Product![A, B, C]` represents an ordered sequence of types as a single type. CGP uses it to describe the
 *shape* of a struct — the list of its fields, in order, as one type that generic code can reason about.

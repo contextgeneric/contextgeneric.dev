@@ -6,7 +6,7 @@ sidebar_label: 'delegate_components!'
 
 Build a context's wiring table, naming the provider that implements each of its components.
 
-## What it's for
+## Overview
 
 [`#[cgp_component]`](./cgp_component.md) separates the trait callers use from the trait
 implementations target, which leaves one question open: for a given type, *which* implementation

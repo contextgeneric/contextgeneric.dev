@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_producer]'
 
 Define a `Producer` provider from an input-free function.
 
-## What it's for
+## Overview
 
 `#[cgp_producer]` is for the degenerate member of the handler family: a computation that takes no input and
 yields a value from nothing. A constant, a default, a seed for a pipeline. It is the input-free sibling of

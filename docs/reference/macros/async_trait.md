@@ -6,7 +6,7 @@ sidebar_label: '#[async_trait]'
 
 Rewrite a trait's `async fn` declarations into the lint-clean `-> impl Future` form CGP's async methods use.
 
-## What it's for
+## Overview
 
 Writing a bare `async fn` inside a trait compiles on stable Rust, and the compiler warns about it. The
 `async_fn_in_trait` lint fires because the future such a method returns is *opaque*: a caller working through

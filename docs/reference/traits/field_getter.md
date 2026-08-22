@@ -17,7 +17,7 @@ wiring entry; this page explains the shape that entry resolves through. The one 
 
 :::
 
-## What it's for
+## Overview
 
 [`HasField`](./has_field.md) is a bound an implementation states about its own context. Sometimes field
 access should instead be **chosen by wiring**, so that a context decides which of its fields answers a

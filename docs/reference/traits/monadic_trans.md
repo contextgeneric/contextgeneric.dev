@@ -17,7 +17,7 @@ a monad of your own a transformer form; otherwise this page is here to explain h
 
 :::
 
-## What it's for
+## Overview
 
 A [monadic pipeline](/docs/concepts/monadic-handlers) over a nested output — a `Result` inside a
 `Result` — needs to peel more than one layer, and hard-coding a depth would give up the composability

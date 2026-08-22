@@ -6,7 +6,7 @@ sidebar_label: 'cgp_namespace!'
 
 Define a reusable, inheritable wiring table that many contexts can join.
 
-## What it's for
+## Overview
 
 With [`delegate_components!`](./delegate_components.md) alone, every **context** — the type the capability
 runs against, which supplies the values it needs as its fields — spells out its own wiring entry by entry.

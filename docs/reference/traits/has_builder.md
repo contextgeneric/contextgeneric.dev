@@ -6,7 +6,7 @@ sidebar_label: 'HasBuilder'
 
 Starting an empty builder for a record.
 
-## What it's for
+## Overview
 
 A struct literal supplies every field at once, in one place that names the type. `HasBuilder` is the
 entry point for the case where that is impossible: the fields come from several independent places, none

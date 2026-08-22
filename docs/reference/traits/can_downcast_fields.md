@@ -6,7 +6,7 @@ sidebar_label: 'CanDowncastFields'
 
 Continuing a narrowing chain on a remainder.
 
-## What it's for
+## Overview
 
 [`CanDowncast`](./can_downcast.md) narrows an enum and, when it fails, hands back a *remainder* — the
 same value with the attempted variants ruled out in its type. `CanDowncastFields` is what that remainder

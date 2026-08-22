@@ -18,7 +18,7 @@ where that projection comes from. The one case for bounding on it is generic cod
 
 :::
 
-## What it's for
+## Overview
 
 A partial record is a companion type — `__PartialPerson<IsNothing, IsPresent>` — and generic code holding
 one often needs to know what it will *become* before it is complete: to name the return type of a

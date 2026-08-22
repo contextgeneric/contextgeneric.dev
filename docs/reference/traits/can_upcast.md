@@ -6,7 +6,7 @@ sidebar_label: 'CanUpcast'
 
 Widening a narrow enum into a wider one that shares its variants.
 
-## What it's for
+## Overview
 
 Two enums defined independently can share variant names — a small `FooBar` and a larger `FooBarBaz`,
 say. Converting the narrow one into the wide one is a conversion you could write by hand, and it is

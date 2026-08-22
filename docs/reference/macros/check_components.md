@@ -6,7 +6,7 @@ sidebar_label: 'check_components!'
 
 Assert at compile time that a context can actually use each component it wires.
 
-## What it's for
+## Overview
 
 **CGP's wiring is lazy, and this macro is the answer to that.** When
 [`delegate_components!`](./delegate_components.md) records that a **context** — the type the capability

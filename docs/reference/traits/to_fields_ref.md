@@ -6,7 +6,7 @@ sidebar_label: 'ToFieldsRef'
 
 Walking a value's shape without consuming it.
 
-## What it's for
+## Overview
 
 [`ToFields`](./to_fields.md) takes a value apart into its shape and consumes it in the process. Code that
 only reads — a validator, a serializer, a routine that inspects a struct and hands it back — should not

@@ -6,7 +6,7 @@ sidebar_label: 'ToFields'
 
 Taking a value apart into its shape.
 
-## What it's for
+## Overview
 
 [`HasFields`](./has_fields.md) *names* a type's shape. `ToFields` produces a value in it:
 

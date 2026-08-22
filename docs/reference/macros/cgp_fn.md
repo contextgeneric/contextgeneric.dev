@@ -6,7 +6,7 @@ sidebar_label: '#[cgp_fn]'
 
 Define a single-implementation capability as a blanket-impl trait, straight from a function.
 
-## What it's for
+## Overview
 
 `#[cgp_fn]` is the smallest amount of CGP that does anything useful. You write a plain function, mark
 the values it needs from the **context** — the type the capability runs against, which supplies those

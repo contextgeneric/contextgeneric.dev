@@ -7,7 +7,7 @@ sidebar_label: '#[cgp_impl]'
 Write a provider using consumer-trait syntax, keeping `self`, `Self`, and the method signatures you
 already know.
 
-## What it's for
+## Overview
 
 A [provider trait](./cgp_component.md) is shaped inside-out compared with the trait it came from. The
 original `Self` has moved into an explicit leading type parameter, the implementation targets a small

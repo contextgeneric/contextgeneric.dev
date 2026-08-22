@@ -7,35 +7,50 @@ sidebar_label: '#[cgp_component]'
 Turn a trait into a component: the consumer trait callers use, the provider trait implementations
 target, and the key that wires them together.
 
-## What it's for
+## Overview
 
-An ordinary Rust [trait](https://doc.rust-lang.org/book/ch10-02-traits.html) can have only one
-implementation per type. That is usually what you want, and it is what lets the compiler resolve a
-`where T: Display` bound without anyone naming an implementation — but it means a capability with
-several plausible implementations has nowhere to put them. A type either sends real email or records
-it for a test; it cannot do both, and choosing between them means editing the impl rather than
-choosing at the point of use.
+`#[cgp_component]` can be applied to any Rust trait definition to give that trait the full set of
+CGP's capabilities. Applying it takes nothing away: the trait you wrote keeps working exactly as it
+did, now under the name CGP calls the **consumer trait**, and every call site that already uses it
+keeps compiling unchanged. The macro adds a matching **provider trait** for implementations to target,
+a small marker type called the **component** that names the capability for wiring, and a pair of
+[**blanket implementations**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
+that connect the three without requiring you to write them.
 
-`#[cgp_component]` splits that one trait into two, so that *using* a capability and *implementing* it
-stop being the same act:
+`#[cgp_component]` makes it possible to define several overlapping implementations of one capability
+at once. An ordinary Rust trait does not allow this. A
+[trait](https://doc.rust-lang.org/book/ch10-02-traits.html) can have only one implementation per
+type, a rule called [coherence](/docs/concepts/coherence). That rule is usually the right one: it lets
+the compiler resolve a `where T: Display` bound without anyone naming which implementation applies.
+But it also means a capability with several plausible implementations has nowhere to put the
+alternatives. A type can send real email or record it for a test, never both at once, and switching
+between the two means editing the impl itself rather than choosing between them at the point of use.
 
-- The **consumer trait** is what callers write — `rect.area()`. It keeps the name and shape you gave
-  it.
-- The **provider trait** is what implementations target. It is the same interface with `Self` moved
-  into an explicit type parameter, so an implementation is written for a small named type of its own
-  rather than for the type the capability is about.
+`#[cgp_component]` solves that by splitting the one trait into two: the
+[consumer and provider traits](/docs/concepts/consumer-and-provider-traits), so that *using* a
+capability and *implementing* it stop being the same act.
 
-Because each implementation now targets its own name, any number of them can coexist. A **provider**
-is one of those names — a zero-sized type such as `RectangleArea` that exists only to identify an
-implementation. A **context** — the type the capability runs against, which supplies the values it
-needs as its fields — then picks the provider it wants through
-[`delegate_components!`](./delegate_components.md), and generated glue routes calls on the consumer
-trait to the provider that was picked. The whole choice is resolved during compilation and compiles
-down to a direct call.
+- The **consumer trait** is the trait callers write, such as `rect.area()`. It is your original
+  trait, kept exactly as you wrote it.
+- An implementation targets the **provider trait** instead. It repeats the same methods with `Self`
+  moved into an explicit type parameter, so you write an implementation for a small named type of its
+  own rather than for the type the capability is actually about.
 
-The macro also emits a **component name** — a marker type such as `AreaCalculatorComponent` — which is
-the key wiring uses. You will see it in every `delegate_components!` entry and in most compiler
-errors, so it is worth recognizing even though you never write its definition.
+Moving `Self` out of the way lets more than one implementation coexist: each one now targets its own
+small type instead of competing for the single `Self` slot every plain trait has. A **provider** is
+one of those targets: a zero-sized type such as `RectangleArea` that carries no data of its own and
+exists only to name one implementation. The type the capability actually runs against is called the
+**context**. It supplies whatever values an implementation needs as its own fields, then picks the
+provider it wants through [`delegate_components!`](./delegate_components.md), and the generated
+blanket implementations route a call on the consumer trait through to that choice automatically. None
+of this costs anything at runtime. Wiring fixes the provider once, at compile time, and the compiler
+turns the call into a direct, statically-dispatched call, exactly as if you had written the
+implementation yourself.
+
+The macro's last piece is the **component** itself, a marker type such as `AreaCalculatorComponent`
+that names the capability and is the key `delegate_components!` wires against. You will meet it in
+every wiring entry and in most compiler errors that involve this capability, so you should be able to
+recognize it immediately, even though you never write its definition yourself.
 
 ## Using it
 

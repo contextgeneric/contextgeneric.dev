@@ -6,7 +6,7 @@ sidebar_label: '#[derive(CgpRecord)]'
 
 The extensible-data derive for a struct.
 
-## What it's for
+## Overview
 
 A plain Rust struct is opaque to generic code. There is no way to refer to "the `first_name` field"
 through a type parameter, so anything that must work across several structs ends up written once per

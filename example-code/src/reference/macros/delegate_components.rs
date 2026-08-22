@@ -1,6 +1,6 @@
 //! Code from `docs/reference/macros/delegate_components.md` — *`delegate_components!`*.
 
-/// ## What it's for
+/// ## Overview
 ///
 /// The page opens on the single-entry table. The component, the provider, and the context it wires
 /// are shown further down the page under *Examples*; they are declared here so the opening snippet

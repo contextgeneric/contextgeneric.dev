@@ -6,7 +6,7 @@ sidebar_label: '#[derive(BuildField)]'
 
 Builder support for a record.
 
-## What it's for
+## Overview
 
 A struct literal has to be written in one place that names the concrete type and supplies every field at
 once. That is usually what you want — and it is exactly wrong when the fields come from several independent

@@ -6,7 +6,7 @@ sidebar_label: '#[extend]'
 
 Add a capability as a supertrait of a generated trait, so callers can rely on it too.
 
-## What it's for
+## Overview
 
 `#[extend]` declares that a capability is part of what a trait *guarantees*, rather than something its
 implementation happens to need. Where [`#[uses]`](uses.md) adds a private requirement, `#[extend]` adds a

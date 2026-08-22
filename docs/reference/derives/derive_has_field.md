@@ -6,7 +6,7 @@ sidebar_label: '#[derive(HasField)]'
 
 Per-field accessors keyed by a type-level tag.
 
-## What it's for
+## Overview
 
 An implementation written against a **context** — the type the capability runs against, which supplies the
 values it needs as its fields — cannot name that context's concrete type. It is generic over it, so

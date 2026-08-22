@@ -18,7 +18,7 @@ one.
 
 :::
 
-## What it's for
+## Overview
 
 A bind step in a [monadic pipeline](/docs/concepts/monadic-handlers) unwraps a value, runs a
 continuation or short-circuits, and then has to produce the step's own output. Producing it means

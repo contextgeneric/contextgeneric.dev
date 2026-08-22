@@ -6,7 +6,7 @@ sidebar_label: 'HasFieldMut'
 
 Mutable tag-keyed field access.
 
-## What it's for
+## Overview
 
 [`HasField`](./has_field.md) lets an implementation read a field of a context it cannot name, by keying
 on the field's name as a type. `HasFieldMut` is the same access with mutation: it hands back a `&mut`

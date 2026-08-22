@@ -18,7 +18,7 @@ beside it. The one case for naming it is generic code that must describe a unifo
 
 :::
 
-## What it's for
+## Overview
 
 A partial record is the same record with every field's storage changed the same way — each value wrapped
 in an `Option`, or replaced by `()`, or left alone. Describing that as a type means rewriting every entry

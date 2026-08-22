@@ -17,7 +17,7 @@ names, and reading that error is the reason to know it exists.
 
 :::
 
-## What it's for
+## Overview
 
 An implementation in CGP states what it needs from its **context** — the type the capability runs against —
 in its own `where` clause: a field, an abstract type, another capability. When one of those requirements is

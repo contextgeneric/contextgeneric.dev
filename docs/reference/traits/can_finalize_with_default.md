@@ -6,7 +6,7 @@ sidebar_label: 'CanFinalizeWithDefault'
 
 Finalizing a partial record, filling whatever is unset from `Default`.
 
-## What it's for
+## Overview
 
 The core [builder family](./has_builder.md) refuses to finalize an incomplete record, which is what
 catches a missing field at compile time. For a record where some fields have sensible defaults, that

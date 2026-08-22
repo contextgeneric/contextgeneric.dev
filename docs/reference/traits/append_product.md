@@ -17,7 +17,7 @@ explains what it produces so that message is legible. The one case for naming it
 
 :::
 
-## What it's for
+## Overview
 
 A struct's shape in CGP is a type-level list — a [`Product!`](../macros/product.md) of named fields.
 Code that processes such a shape generically sometimes needs to describe a *new* shape computed from an

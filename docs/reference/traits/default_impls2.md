@@ -17,7 +17,7 @@ page explains what they emit.
 
 :::
 
-## What it's for
+## Overview
 
 [`DefaultImpls1`](./default_impls1.md) keys a namespace default on a component plus one type, which is
 what a per-type default needs. `DefaultImpls2` is the same idea under a **pair** of types:

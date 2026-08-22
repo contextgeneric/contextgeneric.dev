@@ -6,7 +6,7 @@ sidebar_label: 'CanDowncast'
 
 Narrowing a wide enum into a smaller one, or handing back what is left.
 
-## What it's for
+## Overview
 
 Converting a wide enum into a narrower one is the direction that can fail: the value's current variant
 may be one the target does not have. `CanDowncast` attempts that conversion, and what makes it more than

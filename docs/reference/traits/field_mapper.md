@@ -16,7 +16,7 @@ caller in practice. This page explains the mechanism a chained getter is built f
 
 :::
 
-## What it's for
+## Overview
 
 [`MapField`](./map_field.md) reads through a field without forcing its type to be `'static`, by taking a
 higher-ranked closure instead of returning the intermediate borrow. `FieldMapper` is the same operation

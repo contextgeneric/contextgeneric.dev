@@ -6,7 +6,7 @@ sidebar_label: 'CanBuildFrom'
 
 Filling a builder with every field it shares with another record.
 
-## What it's for
+## Overview
 
 Assembling one struct out of several smaller ones means copying each shared field across by hand — a
 line per field, repeated for every pair of types. `CanBuildFrom` derives that copying from the field

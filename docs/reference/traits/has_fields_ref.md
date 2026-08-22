@@ -17,7 +17,7 @@ lifetime name that shows up in an error message.
 
 :::
 
-## What it's for
+## Overview
 
 [`HasFields`](./has_fields.md) describes a type as a list of named entries holding owned values. Code
 that only *reads* a value should not have to consume it to walk its shape — a validator, a serializer, a

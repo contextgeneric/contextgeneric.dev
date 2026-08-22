@@ -6,7 +6,7 @@ sidebar_label: 'Path!'
 
 A type-level path, used by namespaces and redirected lookups.
 
-## What it's for
+## Overview
 
 `Path!(@a.B.c)` builds a type-level **route** — a list of segments naming a way through nested wiring tables.
 Read left to right, each segment narrows a lookup one step: through a namespace, through a prefix, down to a

@@ -6,7 +6,7 @@ sidebar_label: 'IntoBuilder'
 
 Turning a complete record into a partial one, with every field present.
 
-## What it's for
+## Overview
 
 [`HasBuilder`](./has_builder.md) starts from nothing: a partial value with every field absent, to be
 filled. `IntoBuilder` starts from the other end:

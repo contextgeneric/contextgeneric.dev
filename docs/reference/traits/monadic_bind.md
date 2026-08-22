@@ -17,7 +17,7 @@ otherwise this page is here to explain how a pipeline is assembled.
 
 :::
 
-## What it's for
+## Overview
 
 A [monadic pipeline](/docs/concepts/monadic-handlers) chains steps where each may either continue or
 short-circuit — the familiar `?`-style behaviour, expressed as composable providers rather than as

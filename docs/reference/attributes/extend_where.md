@@ -6,7 +6,7 @@ sidebar_label: '#[extend_where]'
 
 Add `where` predicates to a generated trait's own definition, not just to its implementation.
 
-## What it's for
+## Overview
 
 A [`#[cgp_fn]`](../macros/cgp_fn.md) treats the `where` clause you write on the function as an
 implementation detail: the bounds land on the generated implementation and never appear on the generated

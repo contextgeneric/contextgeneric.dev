@@ -6,7 +6,7 @@ sidebar_label: 'ToOptional'
 
 Re-marking every field of an existing builder as optional.
 
-## What it's for
+## Overview
 
 [`HasOptionalBuilder`](./has_optional_builder.md) starts an all-optional builder from nothing.
 `ToOptional` is the conversion for the case where you already hold a partial value and want to relax it:

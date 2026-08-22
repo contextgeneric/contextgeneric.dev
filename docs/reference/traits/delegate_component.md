@@ -18,7 +18,7 @@ wiring error naming this trait is legible.
 
 :::
 
-## What it's for
+## Overview
 
 Wiring a **context** — the type the capability runs against, which supplies the values it needs as its
 fields — means recording which implementation it uses for each capability. `DelegateComponent` is the trait

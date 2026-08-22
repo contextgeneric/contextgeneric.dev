@@ -18,7 +18,7 @@ what each one means. The one case for bounding on the trait is generic code of y
 
 :::
 
-## What it's for
+## Overview
 
 CGP represents a half-built struct or a partly-extracted enum as a single type whose every field is
 independently wrapped: a field that is set carries its value, a field that is not carries nothing, a

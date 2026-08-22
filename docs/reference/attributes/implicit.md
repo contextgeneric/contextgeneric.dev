@@ -6,7 +6,7 @@ sidebar_label: '#[implicit]'
 
 Source a function argument from a same-named field on the context.
 
-## What it's for
+## Overview
 
 Reading a value out of the surrounding type is most of what CGP code does, and `#[implicit]` is what
 makes it look like an ordinary function parameter. You mark a parameter, and it disappears from the

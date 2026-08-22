@@ -5,7 +5,7 @@
 //! only honest check on that section is `cargo cgp expand`. What this file pins is every input shape
 //! the page says is accepted, and that the generated access actually resolves.
 
-/// ## What it's for
+/// ## Overview
 ///
 /// The page opens on the bound an implementation writes. The component and the context are shown
 /// further down under *Examples*; they are declared here so the opening bound has something to hold.

@@ -6,7 +6,7 @@ sidebar_label: '#[default_impl]'
 
 Register a provider as a namespace's default for a key.
 
-## What it's for
+## Overview
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** — the
 type the capability runs against — can opt into and then selectively override. Ordinarily a namespace's

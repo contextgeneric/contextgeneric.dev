@@ -6,7 +6,7 @@ sidebar_label: 'TransformMap'
 
 The per-field function that converts a value from one marker's storage to another's.
 
-## What it's for
+## Overview
 
 [`MapType`](./map_type.md) only names storage *types*: it says that an `IsNothing` field holds `()` and
 an `IsPresent` field holds its value, and nothing about how you get from one to the other.

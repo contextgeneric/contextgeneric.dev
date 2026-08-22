@@ -6,7 +6,7 @@ sidebar_label: '#[use_provider]'
 
 Depend on another implementation by name, without writing the context argument its bound requires.
 
-## What it's for
+## Overview
 
 An implementation can be parameterized by *another* implementation — a wrapper that scales whatever an
 inner calculator produces, a retry layer over whatever performs the request. Declaring that dependency

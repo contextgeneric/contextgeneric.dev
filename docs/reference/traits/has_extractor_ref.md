@@ -6,7 +6,7 @@ sidebar_label: 'HasExtractorRef'
 
 Obtaining an extractor that borrows the value rather than consuming it.
 
-## What it's for
+## Overview
 
 [`HasExtractor`](./has_extractor.md) consumes an enum to produce an extractor with owned payloads. Code
 that only *reads* a variant — checking it, measuring it, rendering it — should not have to give up the

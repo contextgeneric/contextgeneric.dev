@@ -17,7 +17,7 @@ and the narrow case where bounding on it is the answer.
 
 :::
 
-## What it's for
+## Overview
 
 CGP encodes field and variant names as *types*, so a name can drive trait resolution. Printing one means
 turning that type back into characters, and `StaticFormat` is the trait that does it **lazily**, by

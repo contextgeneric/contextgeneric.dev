@@ -17,7 +17,7 @@ page is here to explain how a step unwraps its input.
 
 :::
 
-## What it's for
+## Overview
 
 A step in a [monadic pipeline](/docs/concepts/monadic-handlers) produces a wrapped output — a `Result`,
 say — and the next step needs the value *inside* the wrapper for the branch that continues. Which half of
