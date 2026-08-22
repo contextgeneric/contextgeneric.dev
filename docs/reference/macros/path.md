@@ -8,14 +8,14 @@ A type-level path, used by namespaces and redirected lookups.
 
 ## Overview
 
-`Path!(@a.B.c)` builds a type-level **route** — a list of segments naming a way through nested wiring tables.
+`Path!(@a.B.c)` builds a type-level **route**: a list of segments naming a way through nested wiring tables.
 Read left to right, each segment narrows a lookup one step: through a namespace, through a prefix, down to a
 component key.
 
 CGP needs such routes because [namespaces](./cgp_namespace.md) resolve lookups by path rather than by bare
-component name, which is what lets a whole subtree be rerouted at once and a single inherited entry be shadowed
-without disturbing the rest. Written as the underlying spine those routes are unreadable —
-`PathCons<…, PathCons<…, Nil>>` nested several deep — so `Path!` lets one be written the way it reads:
+component name, which lets a whole subtree be rerouted at once and a single inherited entry be shadowed
+without disturbing the rest. Written as the underlying spine, those routes are unreadable
+(`PathCons<…, PathCons<…, Nil>>` nested several deep), so `Path!` lets one be written the way it reads:
 
 ```rust
 Path!(@app.error.ErrorRaiserComponent)
@@ -28,13 +28,13 @@ It is the path-shaped sibling of CGP's other type-level construction macros. Whe
 
 **You will more often write the syntax than the macro.** The same `@`-path form is embedded directly in
 [`cgp_namespace!`](./cgp_namespace.md) entries, in `#[prefix(...)]` attributes, and in the `@`-path keys of
-[`delegate_components!`](./delegate_components.md) — and that is where paths are normally written. The bare
+[`delegate_components!`](./delegate_components.md). That is where paths are normally written. The bare
 macro is for the occasional case where a route needs naming as a type on its own.
 
-## Using it
+## Usage
 
-`Path!` takes a single `@`-prefixed path of one or more dot-separated segments. The leading `@` is required — it
-is the sigil marking the body as a path rather than a plain type — and at least one segment must follow:
+`Path!` takes a single `@`-prefixed path of one or more dot-separated segments. The leading `@` is required,
+since it is the sigil marking the body as a path rather than a plain type, and at least one segment must follow:
 
 ```rust
 Path!(@app)
@@ -45,13 +45,13 @@ Path!(@app.error.ErrorRaiserComponent)
 ### How a segment is encoded
 
 Each segment is parsed as a type, and **its first character decides how it is treated**. This is the one rule
-worth learning, because it is what lets a path mix names and types without any extra syntax:
+worth learning, because it lets a path mix names and types without any extra syntax:
 
 | The segment | Becomes |
 |---|---|
-| A single lowercase identifier — `app`, `error` | a [`Symbol`](./symbol.md) type-level string |
-| A capitalized name — `ErrorRaiserComponent` | that named type |
-| A primitive type name — `u32`, `bool`, `str` | that type, *not* a symbol |
+| A single lowercase identifier (`app`, `error`) | a [`Symbol`](./symbol.md) type-level string |
+| A capitalized name (`ErrorRaiserComponent`) | that named type |
+| A primitive type name (`u32`, `bool`, `str`) | that type, *not* a symbol |
 
 So lowercase segments read as namespace and prefix names, capitalized ones as component keys or marker types,
 and the primitive exception keeps `@u32` meaning the type `u32` rather than the string `"u32"`. Mixing is
@@ -114,16 +114,16 @@ different things.
 ## When to reach for it, and when not
 
 **Write the `@`-path syntax wherever a namespace or a wiring key asks for a route**, and reach for the bare
-`Path!` macro only when a route needs to be a named type on its own — which is rare.
+`Path!` macro only when a route needs to be a named type on its own, which is rare.
 
 - **Prefer the embedded form.** A namespace entry, a `#[prefix]`, or an `@`-path wiring key is where a route
   belongs, and each accepts the syntax directly. Naming a `type SomeRoute = Path!(…)` and using it indirectly
   usually makes the wiring harder to follow rather than easier.
-- **Never hand-write the spine.** `PathCons<Symbol!("app"), PathCons<…, Nil>>` is what the macro expands to,
+- **Never hand-write the spine.** The macro expands to `PathCons<Symbol!("app"), PathCons<…, Nil>>`,
   and writing it out is longer and identical in meaning.
 - **Reach for the [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement)
   rather than constructing paths yourself** when the goal is per-type dispatch on one component. `open` builds
-  the route for you, and its `@Component.Key` entries are the paths — you write the keys, not the routing.
+  the route for you, and its `@Component.Key` entries are the paths: you write the keys, not the routing.
 - **Do not use `Path!` as a general type-level list.** [`Product!`](./product.md) is the list for a sequence of
   types; `Path!` differs in its segment-classification rule, which exists to serve routing and would be
   surprising anywhere else.
@@ -135,7 +135,7 @@ different things.
 ### Advanced
 
 This section shows the spine the macro builds. You do not need it to use `Path!`, but a namespace failure prints
-the expanded path, so recognizing the shape is what lets you read which route came up empty.
+the expanded path, so recognizing the shape lets you read which route came up empty.
 `cargo cgp expand` resugars it back for your own code.
 
 :::
@@ -167,18 +167,18 @@ it looks: the `Symbol` is itself a `Chars`/`Nil` chain, so `@app` desugars all t
 PathCons<Symbol<3, Chars<'a', Chars<'p', Chars<'p', Nil>>>>, Nil>
 ```
 
-That is what a raw compiler error prints, and it is the main reason this section is worth reading once. The
+A raw compiler error prints exactly that, which is the main reason this section is worth reading once. The
 segment-classification rule is visible in the result: `@MyComp` gives `PathCons<MyComp, Nil>` with no `Symbol`
 in it, and `@u32` gives `PathCons<u32, Nil>` rather than treating the primitive as a name.
 
 The same fold drives the embedded forms. A [`cgp_namespace!`](./cgp_namespace.md) redirect
 `FooProviderComponent => @MyFooComponent` produces a
 `RedirectLookup<__Table__, PathCons<MyFooComponent, Nil>>`, and `#[prefix(@show in AppNamespace)]` on a
-`CanShow` component produces a `PathCons<Symbol!("show"), PathCons<ShowImplComponent, Nil>>` — the prefix
+`CanShow` component produces a `PathCons<Symbol!("show"), PathCons<ShowImplComponent, Nil>>`: the prefix
 followed by the component's own key.
 
 One presentational note: `cargo cgp expand` resugars a path back to `Path!(@…)` form in most positions, but not
-uniformly — an `open` statement's per-entry key comes back as a raw `PathCons` spine while its header's redirect
+uniformly. An `open` statement's per-entry key comes back as a raw `PathCons` spine while its header's redirect
 target is resugared. Seeing the same kind of type in two spellings in one expansion is expected rather than a
 sign that they differ.
 
@@ -196,9 +196,9 @@ PathSegment -> Type
 
 The leading `` `@` `` is required and at least one segment must follow. Each `PathSegment` is parsed as a Rust
 `Type`, but its encoding is decided semantically: a single lowercase identifier that is not a primitive type name
-becomes a `Symbol` type-level string, while every other segment — a capitalized name or a primitive — is kept as
-the named type. This same grammar is what [`cgp_namespace!`](./cgp_namespace.md) entries and `#[prefix(...)]`
-attributes embed, where it appears as the `Path` production.
+becomes a `Symbol` type-level string, while every other segment (a capitalized name or a primitive) is kept as
+the named type. [`cgp_namespace!`](./cgp_namespace.md) entries and `#[prefix(...)]`
+attributes embed this same grammar, where it appears as the `Path` production.
 
 </details>
 
@@ -210,8 +210,8 @@ attributes embed, where it appears as the `Path` production.
 error: expected `@`
 ```
 
-**Case decides meaning, silently.** `@app` and `@App` are entirely different segments — a type-level string
-versus a named type — and both are valid, so a capitalization slip produces a path that compiles and routes
+**Case decides meaning, silently.** `@app` and `@App` are entirely different segments (a type-level string
+versus a named type), and both are valid, so a capitalization slip produces a path that compiles and routes
 somewhere else. The failure surfaces later as a lookup that resolves to nothing, with no hint that the cause was
 a capital letter.
 
@@ -220,7 +220,7 @@ almost always what you want, and it means a path segment cannot be the *string* 
 
 **A path that routes nowhere still compiles.** A route is just a type; nothing checks that anything is bound at
 its end. An unbound route is reported only when a [`check_components!`](./check_components.md) evaluates the
-lookup, as an unsatisfied bound naming the expanded path — which is why namespace mistakes tend to surface at
+lookup, as an unsatisfied bound naming the expanded path. This is why namespace mistakes tend to surface at
 the check rather than at the definition.
 
 ## Related constructs

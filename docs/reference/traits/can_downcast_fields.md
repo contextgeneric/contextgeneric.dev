@@ -19,7 +19,7 @@ it is already given. Since a remainder *is* an extractor, that is exactly the sh
 **So the pair is the construct, and this half is never used alone.** A chain reads as one `downcast`
 followed by one `downcast_fields` per additional candidate.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::impls`, alongside `CanDowncast`, which
 you will always be using with it:

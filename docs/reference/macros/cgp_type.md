@@ -9,18 +9,18 @@ Define an abstract-type component, whose concrete type each context chooses for 
 ## Overview
 
 Generic code often has to name a type it should not choose. A fallible operation returns *some* error, a
-geometry routine computes in *some* scalar, a storage layer holds *some* connection handle — and code
+geometry routine computes in *some* scalar, a storage layer holds *some* connection handle. Code
 written once for many applications cannot decide which. Rust's answer is an
 [associated type](https://doc.rust-lang.org/reference/items/associated-items.html): declare
 `trait HasScalarType { type Scalar; }`, and code written against it says `Self::Scalar` while leaving the
 actual type open.
 
-An abstract type in CGP is exactly that trait and nothing more exotic. What `#[cgp_type]` adds is the
-ability to fill the slot by **wiring** rather than by writing an impl. Without it, giving a context a
-concrete scalar means writing a provider by hand — a whole impl whose only content is
+An abstract type in CGP is exactly that trait and nothing more exotic. `#[cgp_type]` adds the ability to
+fill the slot by **wiring** rather than by writing an impl. Without it, giving a context a
+concrete scalar means writing a provider by hand: a whole impl whose only content is
 `type Scalar = f64;`. Since every abstract-type provider has that same trivial shape, `#[cgp_type]`
-generates it once and for all, so a **context** — the type the capability runs against, which supplies
-the values and types it needs — names the concrete type directly in its wiring table:
+generates it once and for all. A **context** is the type the capability runs against, and it supplies
+the values and types it needs. It names the concrete type directly in its wiring table:
 
 ```rust
 delegate_components! {
@@ -31,15 +31,15 @@ delegate_components! {
 ```
 
 That is the payoff: `App` now implements `HasScalarType` with `Scalar = f64`, and no provider was written
-anywhere. The arrangement mirrors what [`#[cgp_getter]`](./cgp_getter.md) does for values — one
+anywhere. The arrangement mirrors what [`#[cgp_getter]`](./cgp_getter.md) does for values: one
 general-purpose provider, parameterized by the thing the context wants to supply.
 
 Two consequences are worth having early. Because the type is chosen per context, two applications can
 pick differently from the same generic code. And because the trait is an ordinary Rust trait, a context
-can skip the wiring entirely and write `impl HasScalarType for App { type Scalar = f64; }` — barely
+can skip the wiring entirely and write `impl HasScalarType for App { type Scalar = f64; }`, barely
 longer, and the clearest way to see that nothing unusual is happening.
 
-## Using it
+## Usage
 
 Apply the attribute to a trait containing **exactly one associated type and no methods**:
 

@@ -39,7 +39,7 @@ the trait solver while the compiler type-checks, so it carries no runtime cost a
 **This is one of the least user-facing traits in the reference.** You meet it if you write generic code
 over shapes, and otherwise only in an error message from code that does.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`:
 

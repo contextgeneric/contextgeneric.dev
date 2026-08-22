@@ -35,7 +35,7 @@ let person = Person::builder()                                      // every fie
 Delete a middle line and this does not compile. **Field presence lives in the type**, which is the
 defining idea of the whole family.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

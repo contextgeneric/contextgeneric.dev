@@ -26,7 +26,7 @@ It chains [`builder()`](./has_builder.md), [`build_from`](./can_build_from.md), 
 [`finalize_with_default`](./can_finalize_with_default.md), and it is worth reaching for precisely because
 those three lines together read as plumbing.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

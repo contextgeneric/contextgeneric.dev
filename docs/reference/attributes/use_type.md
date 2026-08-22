@@ -35,7 +35,7 @@ terms of another, a type can be pulled from a parameter rather than from `Self`,
 be constrained to be the same — none of which you can express by writing a bare identifier and hoping.
 Those are the [advanced forms](#importing-from-another-type) below.
 
-## Using it
+## Usage
 
 Apply `#[use_type]` beside the macro it modifies, naming a trait and the associated type to import:
 

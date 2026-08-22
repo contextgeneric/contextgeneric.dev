@@ -19,7 +19,7 @@ pub trait HasArea {
 ```
 
 Implement `HasArea` for `Circle` and for `Rectangle`, and an `enum Shape` holding those two gets `HasArea`
-as well — dispatching to whichever variant it currently holds. No `match` is written anywhere.
+as well, dispatching to whichever variant it currently holds. No `match` is written anywhere.
 
 Without the macro you would either hand-write that `match` per method, or wire up the
 [dispatch combinators](../providers/dispatch_combinators.md) yourself: a matcher, a per-variant handler, and
@@ -28,11 +28,11 @@ trait, its per-type impls, and a derive on the enum.
 
 **Its value is narrower than it looks, and worth naming precisely.** It fits when the per-variant behaviour
 is *exactly* "call the same trait method on the payload". The moment a variant needs different handling, or
-the dispatch should be chosen by a **context** — the type the capability runs against — rather than fixed on
-the enum, the combinators are what you want directly. This is the convenient front end to
+the dispatch should be chosen by a **context** (the type the capability runs against) rather than fixed on
+the enum, reach for the combinators directly. This is the convenient front end to
 [dispatching](../providers/dispatch_combinators.md), not a replacement for it.
 
-## Using it
+## Usage
 
 Write the attribute above a trait definition. It takes no arguments:
 
@@ -100,7 +100,7 @@ assert_eq!(shape.area(), 4.0);
 
 **Every variant's payload must implement the trait**, and that requirement is checked: forgetting an impl for
 one variant is a compile error where the enum's method is used. That is the same exhaustiveness a hand-written
-`match` gives, recovered for a generic matcher — and adding a variant to the enum without an impl for it
+`match` gives, recovered for a generic matcher. Adding a variant to the enum without an impl for it
 breaks the build rather than silently falling through.
 
 Mutating and argument-taking methods dispatch the same way, so one trait can mix them:
@@ -138,8 +138,8 @@ Reach for something else in four situations.
   [dispatch combinators](../providers/dispatch_combinators.md) directly and name a handler per variant.
 - **The dispatch should be a wired component.** The generated impl is fixed on the enum, with a unit context
   and a unit code, so a context cannot override how one variant is handled. Wiring
-  `MatchWithValueHandlers` into a context's own component is what gives that control.
-- **A method needs to be generic.** Not supported, and not fixable by rearranging — see the
+  `MatchWithValueHandlers` into a context's own component gives that control.
+- **A method needs to be generic.** Not supported, and not fixable by rearranging: see the
   [Gotchas](#gotchas).
 - **The trait needs an associated type or const.** Also rejected. A trait carrying either is not a dispatch
   trait in this sense; give the enum a component of its own instead.
@@ -154,8 +154,8 @@ the operation from scratch and expect contexts to configure it, start with a
 
 ### Advanced
 
-This section shows what the macro generates. You do not need it to use `#[cgp_auto_dispatch]`, but the
-generated bound is what an unmet variant impl is reported against, so reading it once makes that error
+This section shows what the macro generates. You do not need it to use `#[cgp_auto_dispatch]`, but an
+unmet variant impl is reported against the generated bound, so reading it once makes that error
 legible. `cargo cgp expand` prints the same thing for your own code.
 
 :::
@@ -173,7 +173,7 @@ fn area<'__a__, __Variants__: HasArea>(__Variants__: &'__a__ __Variants__) -> f6
 }
 ```
 
-The body just calls the trait method on the payload, which is what makes the per-variant handler "invoke
+The body just calls the trait method on the payload, which makes the per-variant handler "invoke
 `HasArea::area` on whatever this variant holds". It is bound by `__Variants__: HasArea` so it applies to every
 payload type implementing the trait, and borrows through a fresh `'__a__` lifetime to mirror the `&self`
 receiver.
@@ -197,9 +197,9 @@ where
 }
 ```
 
-Three things are worth reading off that. The matcher is invoked with a **unit context and unit code** —
-`&()` and `PhantomData::<()>` — because the per-variant logic depends only on the payload, which is exactly
-why a context cannot influence it. The `__Variants__: HasExtractor` bound is what requires the enum to be
+Three things are worth reading off that. The matcher is invoked with a **unit context and unit code**
+(`&()` and `PhantomData::<()>`), because the per-variant logic depends only on the payload, which is exactly
+why a context cannot influence it. The `__Variants__: HasExtractor` bound requires the enum to be
 extensible. And **the first `where` bound is where a missing variant impl is reported**: it says the matcher
 must be a `Computer` over this enum, which holds only if every variant's payload can be handled.
 
@@ -238,8 +238,8 @@ error: Dispatch trait methods cannot contain non-lifetime generic parameters due
        quantified constraints in Rust
 ```
 
-The blanket impl would need a quantified bound — "for every instantiation of the method's type parameter,
-every variant's payload satisfies it" — and Rust has no way to write that. A method that must be generic has
+The blanket impl would need a quantified bound ("for every instantiation of the method's type parameter,
+every variant's payload satisfies it"), and Rust has no way to write that. A method that must be generic has
 to be handled with the [dispatch combinators](../providers/dispatch_combinators.md) directly. Lifetime
 parameters are fine.
 
@@ -258,8 +258,8 @@ does not fail where the impl should have been; it fails where `shape.area()` is 
 bound on `MatchWithValueHandlersRef<ComputeArea>`. The variant that is missing is somewhere in the chain
 rather than in the headline.
 
-**The generated impl is a blanket impl over every type**, not just your enum. That is what lets it cover any
-extensible enum whose payloads implement the trait — and it means the trait cannot also be implemented by
+**The generated impl is a blanket impl over every type**, not just your enum. This lets it cover any
+extensible enum whose payloads implement the trait, and it means the trait cannot also be implemented by
 hand for some other type without colliding with it.
 
 ## Related constructs

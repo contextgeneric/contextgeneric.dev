@@ -26,7 +26,7 @@ The original survives, and every entry in the result holds a reference rather th
 [`ToFields`](./to_fields.md) when a borrow would do forces every caller to give up ownership or clone,
 which is the most common over-requirement in this family.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

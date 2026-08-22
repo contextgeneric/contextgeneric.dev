@@ -21,16 +21,16 @@ fn magic_number() -> u64 {
 ```
 
 That produces the provider struct `MagicNumber` and an impl of [`Producer`](../components/producer.md), the
-family member whose method takes only a **context** — the type the capability runs against — and a phantom
+family member whose method takes only a **context** (the type the capability runs against) and a phantom
 `Code` tag, with no input value at all.
 
-The reason it is worth a macro of its own is what happens next. **A producer can stand in for any handler**,
+Here is what makes a dedicated macro worth having. **A producer can stand in for any handler**,
 because a handler that ignores its input is just a producer with an unused parameter. So the macro wires the
 generated provider into every member of the family, and one function definition answers `produce`,
-`compute`, `try_compute`, `compute_async`, `handle`, and their by-reference forms — every one of them
+`compute`, `try_compute`, `compute_async`, `handle`, and their by-reference forms, every one of them
 yielding the same value regardless of what it is handed.
 
-## Using it
+## Usage
 
 Apply the attribute to a free function. It takes an optional provider name:
 
@@ -46,7 +46,7 @@ fn magic_number() -> u64 {
 }
 ```
 
-Omitted, the provider struct takes the function name in PascalCase — `magic_number` becomes `MagicNumber`.
+Omitted, the provider struct takes the function name in PascalCase: `magic_number` becomes `MagicNumber`.
 Given, the argument is used verbatim. The function's return type becomes the producer's output.
 
 **The function is constrained tightly, to exactly what a producer can be.** All three restrictions are
@@ -92,7 +92,7 @@ delegate_components! {
 ```
 
 The computer and handler forms accept an input argument and discard it, since the underlying producer takes
-none. The error type wired into `App` is what lets the fallible forms build their `Result`; the produced
+none. The error type wired into `App` lets the fallible forms build their `Result`; the produced
 value is always `Ok`.
 
 The typical use is as the first step of a pipeline, where a producer seeds the value the later steps
@@ -119,7 +119,7 @@ within it there is nothing simpler.
   same macro with the restrictions lifted, and it handles generics, `async`, and `Result` returns.
 - **Write the provider by hand with [`#[cgp_impl]`](./cgp_impl.md) when the value comes from the context.**
   This is the boundary that matters. A `#[cgp_producer]` function has no receiver, so it cannot read a field,
-  name an abstract type, or call a capability — it can only return something it computes from nothing. A
+  name an abstract type, or call a capability. It can only return something it computes from nothing. A
   producer that draws on its context is an impl of `Producer` written with `#[cgp_impl]`, where `self` is the
   context and [`#[implicit]`](../attributes/implicit.md) works normally. **In practice that covers most
   producers**, which makes this macro narrower than it first looks: it is for constants and pure seeds.
@@ -135,7 +135,7 @@ within it there is nothing simpler.
 ### Advanced
 
 This section shows the three items the macro emits. You do not need them to use `#[cgp_producer]`, but the
-delegation block is what makes one function answer eight components, and it differs from
+delegation block makes one function answer eight components, and it differs from
 [`#[cgp_computer]`](./cgp_computer.md)'s in a way worth noticing. `cargo cgp expand` prints the same thing for
 your own code.
 
@@ -189,15 +189,15 @@ delegate_components! {
 ```
 
 Two things differ from `#[cgp_computer]`'s block. `ComputerComponent` **is** in the list, because a producer
-does not implement it directly — a computer takes an input and the producer has none, so the promotion is
-what discards it. And the operator is **`:`** rather than `->`, delegating each component straight to
+does not implement it directly. A computer takes an input and the producer has none, so the promotion
+discards it. And the operator is **`:`** rather than `->`, delegating each component straight to
 [`PromoteProducer<Self>`](../providers/handler_combinators.md) rather than to that bundle's own entry for the
 key. `PromoteProducer` then wires `ComputerComponent` to a promoter that drops the input and calls `produce`,
 and derives the remaining members from there.
 
 **Unlike `#[cgp_computer]`, the expansion has no variation.** Because the function cannot be async, cannot be
 generic, and is not inspected for a `Result` return, there is exactly one base trait and one bundle for every
-`#[cgp_producer]` — the output type is taken as written, whether or not it happens to be a `Result`.
+`#[cgp_producer]`: the output type is taken as written, whether or not it happens to be a `Result`.
 
 <details>
 <summary>Formal grammar</summary>
@@ -212,8 +212,8 @@ ProviderName    -> IDENTIFIER
 ```
 
 Omitted, the provider struct takes the function name converted to PascalCase; a given `IDENTIFIER` is used
-verbatim. The annotated function is plain Rust, constrained to a producer's shape — no parameters, no
-`async`, no generics — as described in [Using it](#using-it).
+verbatim. The annotated function is plain Rust, constrained to a producer's shape (no parameters, no
+`async`, no generics), as described in [Usage](#usage).
 
 </details>
 
@@ -228,7 +228,7 @@ error: Producer functions must have empty generic parameters
 ```
 
 For the first two, [`#[cgp_computer]`](./cgp_computer.md) is the macro that accepts them. For the third there
-is no macro alternative — write the provider by hand.
+is no macro alternative: write the provider by hand.
 
 **The function cannot reach the context**, so a producer that needs a field or an abstract type is not
 expressible this way at all. That rules out most real producers, which is worth knowing before reaching for
@@ -236,7 +236,7 @@ the macro: write an impl of `Producer` with [`#[cgp_impl]`](./cgp_impl.md) inste
 
 **A `Result` return is not interpreted**, and this is the sharpest trap on the page. Unlike
 `#[cgp_computer]`, the macro does not inspect the output for fallibility, so a `#[cgp_producer]` returning
-`Result<T, E>` produces a `Producer` whose `Output` *is* that `Result` — and the fallible members wrap it
+`Result<T, E>` produces a `Producer` whose `Output` *is* that `Result`, and the fallible members wrap it
 again rather than treating it as failure:
 
 ```text
@@ -251,7 +251,7 @@ instead.
 **The fallible forms still need an error type on the context.** `try_compute` and `handle` name the context's
 abstract error, so a context lacking an
 [`ErrorTypeProviderComponent`](../components/has_error_type.md) fails on those members while `produce` and
-`compute` work. Note also that the wiring key is **not in the prelude** — it has to be imported from
+`compute` work. Note also that the wiring key is **not in the prelude**: it has to be imported from
 `cgp::core::error`, and forgetting that reports the component as an unresolved type rather than as a missing
 import.
 

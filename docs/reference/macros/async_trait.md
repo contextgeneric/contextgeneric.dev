@@ -10,7 +10,7 @@ Rewrite a trait's `async fn` declarations into the lint-clean `-> impl Future` f
 
 Writing a bare `async fn` inside a trait compiles on stable Rust, and the compiler warns about it. The
 `async_fn_in_trait` lint fires because the future such a method returns is *opaque*: a caller working through
-the trait cannot name it, so they cannot require anything of it — most importantly that it is `Send`. The
+the trait cannot name it, so they cannot require anything of it, most importantly that it is `Send`. The
 hand-written way to silence the lint is to declare the method as a future-returning function instead, which
 is correct and obscures the intent:
 
@@ -32,15 +32,15 @@ The trait reads as async code, and the declaration the compiler sees is the lint
 **The rewrite is a plain desugaring, not a framework.** Unlike the widely-used `async-trait` crate, nothing
 here boxes the future or allocates: it is return-position `impl Trait` in traits, so the future is exactly the
 one the body produces and the call costs what a hand-written future-returning method costs. That is why the
-macro is used throughout CGP wherever a capability is asynchronous — it is simply how an async method is
+macro is used throughout CGP wherever a capability is asynchronous: it is simply how an async method is
 spelled.
 
 One thing it does *not* do is add a `Send` bound, and that omission has consequences the moment a future is
 spawned. It is covered under [Gotchas](#gotchas).
 
-## Using it
+## Usage
 
-Apply the attribute to a trait definition. It takes no arguments — tokens in the argument position are
+Apply the attribute to a trait definition. It takes no arguments. Tokens in the argument position are
 ignored, so it is always written bare:
 
 ```rust
@@ -125,9 +125,9 @@ delegate_components! {
 }
 ```
 
-Notice the provider needs no `#[async_trait]` of its own. An `async fn` is already legal in an impl block —
-only a trait *declaration* trips the lint — so the provider keeps the natural body while the trait carries the
-rewritten signature, and the two agree because an `async fn` desugars to exactly such a future-returning
+Notice the provider needs no `#[async_trait]` of its own. An `async fn` is already legal in an impl block,
+since only a trait *declaration* trips the lint, so the provider keeps the natural body while the trait carries
+the rewritten signature, and the two agree because an `async fn` desugars to exactly such a future-returning
 method.
 
 ## When to reach for it, and when not
@@ -144,9 +144,9 @@ The decisions worth making are around it rather than about it.
   can add the bound, for the reason in the [Gotchas](#gotchas).
 - **Consider whether the capability needs to be async at all.** The [handler family](./cgp_computer.md) has
   synchronous members, and the [promotion combinators](../providers/handler_combinators.md) lift a synchronous
-  provider into an async one where a caller needs it — so a computation that does no I/O is better declared
+  provider into an async one where a caller needs it. So a computation that does no I/O is better declared
   synchronous and promoted than declared async out of habit.
-- **Reach for the `async-trait` crate instead only if you need `dyn` compatibility.** Boxing is what makes an
+- **Reach for the `async-trait` crate instead only if you need `dyn` compatibility.** Boxing makes an
   async trait object-safe, and this macro deliberately does not box. CGP resolves providers statically, so it
   does not need `dyn`; a codebase that does for other reasons is outside what this macro is for.
 
@@ -188,13 +188,13 @@ pub trait CanFetch {
 ```
 
 Three things to read off it. The `Output` is the original return type verbatim. The bodiless `run` picked up
-`Output = ()`. And `sync_method` was left completely alone, which is what lets a trait mix async and
+`Output = ()`. And `sync_method` was left completely alone, which lets a trait mix async and
 synchronous methods.
 
-**The macro rewrites only trait definitions.** Applied to anything else — most importantly an `impl` block —
-it returns the tokens unchanged. That passthrough is what makes the composition work: an `async fn` is legal in
+**The macro rewrites only trait definitions.** Applied to anything else, most importantly an `impl` block,
+it returns the tokens unchanged. This passthrough makes the composition work: an `async fn` is legal in
 an impl already, so the provider's body stays as written while the trait's declaration carries the future
-type, and the `async fn` satisfies it because that is precisely what an `async fn` desugars to.
+type, and the `async fn` satisfies it because an `async fn` desugars to precisely that.
 
 The composition with [`#[cgp_fn]`](./cgp_fn.md) shows both halves at once. `#[cgp_fn]` first produces a trait
 and a blanket impl, attaching `#[async_trait]` to each:
@@ -225,10 +225,10 @@ the `async fn` body survives intact.
 
 **The generated future carries no `Send` bound**, and this is the limitation that matters in practice. Because
 the rewrite produces a bare `impl Future<Output = T>`, the future is `Send` only when the concrete future
-happens to be, and the trait does not require it — so code that spawns the future onto a multi-threaded,
+happens to be, and the trait does not require it. So code that spawns the future onto a multi-threaded,
 work-stealing executor cannot express what it needs through this trait.
 
-The bound you would want to write is Return Type Notation — `App: CanFetch<fetch(..): Send>` — which is not
+The bound you would want to write is Return Type Notation (`App: CanFetch<fetch(..): Send>`), which is not
 stabilized, so it cannot be written today. The workaround is to declare a second, ordinary trait whose method
 spells `+ Send` on its return type directly, and to implement it for each concrete context. That pattern is
 mechanical but unavoidable; the opacity that makes the rewrite zero-cost is the same opacity that hides the
@@ -243,7 +243,7 @@ error[E0277]: `{integer}` is not a future
 ```
 
 That error names the body's type rather than the rewrite that caused it. In practice this is rarely hit,
-because async trait methods are almost always declarations with the behaviour supplied by a provider — but a
+because async trait methods are almost always declarations with the behaviour supplied by a provider. But a
 default-bodied `async fn` inside an `#[async_trait]` trait is not supported. Wrap the body in an
 `async { … }` block by hand, or move it to a provider.
 

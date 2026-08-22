@@ -27,7 +27,7 @@ to track — building a single variant has no intermediate states. It is the con
 [`ExtractField`](./extract_field.md)'s deconstruction, and the impls come from
 [`#[derive(FromVariant)]`](../derives/derive_from_variant.md), one per variant.
 
-## Using it
+## Usage
 
 The trait is in the prelude. It carries the payload type as an associated `Value` and one associated function:
 

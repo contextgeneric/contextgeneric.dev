@@ -33,7 +33,7 @@ It is one of two endings for a partial builder, and the choice is made at the ca
 | `CanFinalizeWithDefault` | filled from `Default` |
 | [`FinalizeOptional`](./finalize_optional.md) | `Err("field_name")` |
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

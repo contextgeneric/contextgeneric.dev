@@ -37,11 +37,11 @@ which is what lets the projection resolve cleanly. This is the widest of the thr
 
 **Nothing inside CGP emits or consumes it.** It is reachable and tested, and it is a provided extension
 point rather than a construct the generated code relies on — so there is no library-generated example to
-pattern-match against. The [next section](#using-it) shows what a use looks like.
+pattern-match against. The [next section](#usage) shows what a use looks like.
 
 :::
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::component`:
 

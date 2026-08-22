@@ -31,7 +31,7 @@ That is why it is the recommended way to read a context's own field, and why it 
 piece of CGP anyone writes. Nothing about it is unfamiliar: a reader who understands functions and
 arguments can write a working capability and meet the machinery later, when they have a reason to care.
 
-## Using it
+## Usage
 
 `#[implicit]` is a bare marker on a typed parameter. It takes no arguments in any form, and a list or
 name-value spelling is rejected rather than ignored:

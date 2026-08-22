@@ -20,7 +20,7 @@ incremental extractor that peels variants off one at a time while tracking which
 It is the enum-only face of [`#[derive(CgpData)]`](./derive_cgp_data.md). The two run the same code and
 emit the same output on an enum; the difference is that this one **rejects a struct at parse time**.
 
-## Using it
+## Usage
 
 The derive takes no arguments and has no helper attributes:
 

@@ -30,7 +30,7 @@ method, and a [`UseField`](../providers/use_field.md) wiring entry all generate 
 already wrote. **You will read `HasField` far more often than you write it**, and the impls come from
 [`#[derive(HasField)]`](../derives/derive_has_field.md).
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

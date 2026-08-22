@@ -21,7 +21,7 @@ type-check at all, so `upcast` returns the target directly rather than a `Result
 difference between this trait and its narrowing counterpart,
 [`CanDowncast`](./can_downcast.md).
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::impls`, and bring
 `core::marker::PhantomData` into scope too, since the target is named with a `PhantomData` argument

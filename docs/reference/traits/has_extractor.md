@@ -33,7 +33,7 @@ family:
 | [`HasExtractorRef`](./has_extractor_ref.md) | `&T` | survives |
 | [`HasExtractorMut`](./has_extractor_mut.md) | `&mut T` | survives, mutably borrowed |
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

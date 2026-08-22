@@ -31,7 +31,7 @@ like, and the choice of how to end is deferred to the finalize call.
 It stands to [`HasBuilder`](./has_builder.md) as the optional layer stands to the core one: same
 machinery, different starting marker.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Nothing in the optional-field layer is — import it from
 `cgp::extra::field::impls`:

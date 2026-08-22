@@ -42,7 +42,7 @@ compiler can pick the caller's rather than demanding `'static`.
 **You will not normally call it.** [`ChainGetters`](../providers/chain_getters.md) is what uses
 `map_field`, which is how a getter reaches a field on a nested context.
 
-## Using it
+## Usage
 
 **It is not in the prelude** — one of only two members of the `HasField` group that are not. Import it
 from `cgp::core::field::traits`:

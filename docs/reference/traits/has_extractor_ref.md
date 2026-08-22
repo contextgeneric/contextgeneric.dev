@@ -28,7 +28,7 @@ owned one, and the chain ends the same way.
 
 It is the weakest of the three accessors, so prefer it wherever it suffices.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

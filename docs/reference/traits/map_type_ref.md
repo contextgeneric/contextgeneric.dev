@@ -44,7 +44,7 @@ is `MapType::Map<MapTypeRef::Map<'a, T>>`. [`HasExtractorRef`](./has_extractor_r
 marker to `IsRef` and [`HasExtractorMut`](./has_extractor_mut.md) to `IsMut` — which is what lets a value
 be matched without being moved, with the narrowing working identically.
 
-## Using it
+## Usage
 
 **`IsRef` and `IsMut` are in the prelude; `IsOwned` is not** — import it from `cgp::core::field::impls`.
 The trait itself comes with the prelude.

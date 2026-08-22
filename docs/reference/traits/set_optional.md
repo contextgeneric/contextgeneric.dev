@@ -32,7 +32,7 @@ type does not change — which is exactly what makes an optional field settable 
 The two methods differ only in what they do with whatever was there: `set` discards it, and
 `set_optional` hands it back.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

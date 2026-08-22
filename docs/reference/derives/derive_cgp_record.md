@@ -22,7 +22,7 @@ and emit the same output on a struct; the difference is that this one **rejects 
 time**, so a type that is meant to stay a struct says so and the error arrives at the derive rather
 than further along.
 
-## Using it
+## Usage
 
 The derive takes no arguments and has no helper attributes:
 

@@ -48,7 +48,7 @@ pub mod what_its_for {
     }
 }
 
-/// ## Using it
+/// ## Usage
 ///
 /// The accepted enum, the payload-struct rewrite the page recommends — including for a case that
 /// carries nothing — and the variantless enum the page says degenerates.

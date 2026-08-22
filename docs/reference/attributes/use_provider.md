@@ -35,7 +35,7 @@ and it does not touch the body.** The inner implementation is still invoked as a
 the context passed explicitly — `InnerCalculator::area(self)` — because that is what the provider trait's
 method actually takes. The attribute removes the surprise from the bound; the call site keeps it.
 
-## Using it
+## Usage
 
 `#[use_provider(...)]` takes a provider, a colon, and the trait bounds it must satisfy:
 

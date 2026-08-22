@@ -30,7 +30,7 @@ rather than when the builder is created:
 | `FinalizeOptional` | `Err("field_name")` |
 | [`CanFinalizeWithDefault`](./can_finalize_with_default.md) | filled from `Default` |
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

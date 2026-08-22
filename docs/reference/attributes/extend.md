@@ -31,7 +31,7 @@ On [`#[cgp_fn]`](../macros/cgp_fn.md) the attribute is not merely preferred but 
 written on a `#[cgp_fn]` is treated as an implementation detail and never reaches the generated trait, so
 there is no way to spell a supertrait by hand — `#[extend]` is the only mechanism for one.
 
-## Using it
+## Usage
 
 `#[extend(...)]` takes a comma-separated list of trait bounds, each becoming a supertrait of the generated
 trait:

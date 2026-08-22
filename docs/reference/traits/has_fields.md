@@ -39,7 +39,7 @@ enum it is a [`Sum!`](../macros/sum.md) instead — the same idea for a choice r
 **The impls come from [`#[derive(HasFields)]`](../derives/derive_has_fields.md).** What you write is the
 derive; what you bound against is the trait.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough. There is no method, because describing a
 type is not an operation — `Fields` is the whole trait.

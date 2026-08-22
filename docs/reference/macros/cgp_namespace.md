@@ -37,7 +37,7 @@ One structural point saves confusion later: **a namespace is not a context.** It
 the namespace — carrying a `Delegate` associated type and implemented once per key. Nothing instantiates it,
 and it holds no wiring of its own at the context level; it only says where a lookup should go next.
 
-## Using it
+## Usage
 
 The body resembles a [`delegate_components!`](./delegate_components.md) table with an optional header. The
 `new` keyword tells the macro to emit the namespace's trait and its backing struct:

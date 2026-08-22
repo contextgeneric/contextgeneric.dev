@@ -41,7 +41,7 @@ each step.
 **This is a plain capability trait, not a CGP component.** It has no generated provider trait and is
 never wired.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::monad::traits`:
 

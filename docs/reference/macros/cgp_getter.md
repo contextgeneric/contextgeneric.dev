@@ -10,12 +10,12 @@ Define a getter as a full component, so the field it reads is chosen by wiring r
 
 [`#[cgp_auto_getter]`](./cgp_auto_getter.md) ties a getter to a field of the same name: declare
 `fn name(&self) -> &str` and every context with a `name` field satisfies it. That is the right trade almost
-always, and it has one hard edge — a context that stores the value under a different name cannot use the
+always, and it has one hard edge: a context that stores the value under a different name cannot use the
 getter at all.
 
-`#[cgp_getter]` removes that coupling by making the getter a real component. The **context** — the type
-the capability runs against, which supplies the values it needs as its fields — then says in its wiring
-which field the getter should read:
+`#[cgp_getter]` removes that coupling by making the getter a real component. The **context** is the
+type the capability runs against, and it supplies the values it needs as its own fields. It then says
+in its wiring which field the getter should read:
 
 ```rust
 delegate_components! {
@@ -34,10 +34,10 @@ decoupling is a line of wiring per context, and what you get is only useful when
 to control which field is read, or to supply the value some way other than reading a field. Most getters
 want neither. The [When to reach for it](#when-to-reach-for-it-and-when-not) section draws the line.
 
-## Using it
+## Usage
 
-Apply the attribute to a getter trait, exactly as with [`#[cgp_auto_getter]`](./cgp_auto_getter.md). The
-same method forms are accepted — every receiver shape, including a
+Apply the attribute to a getter trait, exactly as with [`#[cgp_auto_getter]`](./cgp_auto_getter.md). It
+accepts the same method forms: every receiver shape, including a
 [typed reference to another type](./cgp_auto_getter.md#reading-a-field-of-another-type) in place of
 `self` and an [optional `PhantomData` argument](./cgp_auto_getter.md#an-optional-phantomdata-argument);
 and the `&str`, `&[T]`, `Option<&T>`, `Option<&str>`, `MRef<'_, T>`, owned, and associated-type return
@@ -76,12 +76,12 @@ Three providers come out of the macro, and which you name decides where the valu
 | Wire it to | The getter reads |
 |---|---|
 | [`UseField<Symbol!("f")>`](../providers/use_field.md) | the field named `f`, whatever the method is called |
-| `UseFields` | the field named after each method — the `#[cgp_auto_getter]` behaviour, as a provider |
+| `UseFields` | the field named after each method, the `#[cgp_auto_getter]` behaviour as a provider |
 | [`WithProvider<P>`](../providers/with_provider.md) | whatever the field-getter provider `P` supplies |
 
 `UseField` is the one to reach for, and the reason the construct exists. `UseFields` is useful when a
 trait has several methods and the names all happen to match, and it is the only one of the three that
-works for a multi-method trait — the other two presuppose a single field.
+works for a multi-method trait: the other two presuppose a single field.
 
 A `#[cgp_getter]` trait can also be implemented directly on a concrete context, like any Rust trait, when
 a particular context wants neither wiring nor a field.
@@ -116,7 +116,7 @@ pub fn greet(person: &Person) {
 ```
 
 `person.name()` returns `first_name`, because the wiring said so. A second context can store it under yet
-another name and wire accordingly, with `HasName` and every caller unchanged — which is the whole
+another name and wire accordingly, with `HasName` and every caller unchanged. This is the whole
 difference from the blanket-impl getter.
 
 Where the names *do* line up, `UseFields` gives the auto-getter behaviour without giving up the component:
@@ -151,14 +151,14 @@ consumer trait can be implemented like any Rust trait.
 the last resort, and the ordering is worth holding whole:
 
 1. **An [`#[implicit]`](../attributes/implicit.md) argument** for a provider reading a field of its own
-   context. No trait, no wiring — this covers most reads.
+   context. No trait, no wiring. This covers most reads.
 2. **[`#[cgp_auto_getter]`](./cgp_auto_getter.md)** when the accessor has to exist as a *named
    capability* other code depends on, when the field lives on another type, or when the getter carries a
    type inferred from the field. One blanket impl, still no wiring.
 3. **`#[cgp_getter]`** only when a context must control *how the getter is satisfied*.
 
 That third condition is narrow, and it has two real forms. One is a **field name that differs per
-context** — the same capability reading `first_name` on one type and `display_name` on another. The other
+context**: the same capability reading `first_name` on one type and `display_name` on another. The other
 is a context that supplies the value **some way other than a plain field read**, through
 `WithProvider` or a hand-written impl, while other contexts still read a field.
 
@@ -182,19 +182,19 @@ Reach for something else in these cases.
 ### Advanced
 
 This section shows the getter-specific providers the macro adds. You do not need them to use
-`#[cgp_getter]`, but the `UseField` impl is what makes the field name a wiring decision, and seeing it
-explains why the tag is a parameter here and a fixed value in the auto-getter. `cargo cgp expand` prints
-the same thing for your own code.
+`#[cgp_getter]`, but the `UseField` impl makes the field name a wiring decision, and seeing it explains
+why the tag is a parameter here and a fixed value in the auto-getter. `cargo cgp expand` prints the
+same thing for your own code.
 
 :::
 
-`#[cgp_getter]` emits everything [`#[cgp_component]`](./cgp_component.md) would — the consumer trait, the
+`#[cgp_getter]` emits everything [`#[cgp_component]`](./cgp_component.md) would: the consumer trait, the
 provider trait, the two blanket impls, the marker, and the standard
 [`UseContext`](../providers/use_context.md) and [`RedirectLookup`](../providers/redirect_lookup.md)
-impls — then adds the getter providers below. `UseFields` is always emitted; `UseField` and `WithProvider`
-only when the trait has exactly one method, since both presuppose a single field.
+impls. It then adds the getter providers below. The macro always emits `UseFields`; it emits `UseField`
+and `WithProvider` only when the trait has exactly one method, since both presuppose a single field.
 
-The important addition is the **`UseField` impl**, which is what decouples the field from the method name.
+The important addition is the **`UseField` impl**, which decouples the field from the method name.
 From this trait:
 
 ```rust
@@ -223,8 +223,8 @@ where
 reads `first_name`. The `&str` shorthand behaves identically in both: the bound asks for a `String` and the
 body appends `.as_str()`.
 
-Next is the `UseFields` impl, which is the auto-getter's behaviour expressed as a provider — the tag fixed
-to each method's own name:
+Next is the `UseFields` impl, which is the auto-getter's behaviour expressed as a provider, with the
+tag fixed to each method's own name:
 
 ```rust
 impl<__Context__> NameGetter<__Context__> for UseFields
@@ -286,8 +286,8 @@ error[E0277]: the trait bound `UseField<Symbol<5, Chars<'w', ...>>>: IsProviderF
 Nothing in that says the trait had too many methods, which is the actual cause. Use `UseFields`, or split
 the trait into one component per field.
 
-**The provider name is derived by stripping `Has`.** `HasName` yields `NameGetterComponent`, so a trait
-*not* named `Has…` produces a component whose name may surprise you — `Dimensions` yields
+**The macro derives the provider name by stripping `Has`.** `HasName` yields `NameGetterComponent`, so
+a trait *not* named `Has…` produces a component whose name may surprise you: `Dimensions` yields
 `DimensionsGetterComponent`. Pass the name explicitly when the convention does not fit.
 
 **Wiring `UseFields` everywhere means the component was unnecessary.** If no context ever names a
@@ -302,8 +302,8 @@ tag chose the field and not the conversion:
 error[E0271]: type mismatch resolving `<P as HasField<Symbol<10, Chars<'f', ...>>>>::Value == String`
 ```
 
-The `Symbol<10, …>` in that message is `first_name` with its length in bytes — worth being able to read, since
-the tag is what tells you which field the mismatch is about.
+The `Symbol<10, …>` in that message is `first_name` with its length in bytes, worth being able to read
+since the tag tells you which field the mismatch is about.
 
 ## Related constructs
 

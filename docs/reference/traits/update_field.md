@@ -47,7 +47,7 @@ directions.
 [`TakeField`](./take_field.md) are library blanket impls over it, each pinning one transition, which is
 why the general form is the one generated per field.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

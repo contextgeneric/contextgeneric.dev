@@ -26,7 +26,7 @@ form gives you the read as well.
 `HasFieldMut` beside `HasField`, so every derived field is mutably accessible and there is no
 derive-level way to make one read-only.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

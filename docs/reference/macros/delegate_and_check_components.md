@@ -10,8 +10,8 @@ Wire a context and check that wiring in one macro.
 
 CGP's wiring is [lazy](./delegate_components.md#gotchas): a
 [`delegate_components!`](./delegate_components.md) entry is accepted without verifying that the provider it
-names can actually satisfy the component, so a **context** — the type the capability runs against, which
-supplies the values it needs as its fields — can compile while being broken. The fix is a
+names can actually satisfy the component, so a **context** (the type the capability runs against, which
+supplies the values it needs as its own fields) can compile while being broken. The fix is a
 [`check_components!`](./check_components.md) block, and the problem with the fix is that keeping it in step
 with the wiring is manual. Add a delegation, remember to add its check.
 
@@ -26,19 +26,19 @@ delegate_and_check_components! {
 }
 ```
 
-Every entry is wired *and* proven, in one place, with nothing to keep in sync. What it emits is exactly what
+Every entry is wired *and* proven, in one place, with nothing to keep in sync. It emits exactly what
 writing both macros by hand would emit.
 
 **It is aimed at simple wiring and at getting started, not at being the default everywhere.** Its value is
 that a newcomer cannot forget the check and then meet the confusing errors lazy wiring produces. The
 derivation understands only a mapping keyed on a component *name*, though, so a codebase whose wiring grows
-past that keeps the two macros separate — the reasons are in
+past that keeps the two macros separate. The reasons are in
 [When to reach for it](#when-to-reach-for-it-and-when-not).
 
-## Using it
+## Usage
 
-The macro takes the same table shape as [`delegate_components!`](./delegate_components.md) — an optional
-generic list and `new` keyword, a target type, and brace-delimited `Key: Value` entries — plus a few
+The macro takes the same table shape as [`delegate_components!`](./delegate_components.md): an optional
+generic list and `new` keyword, a target type, and brace-delimited `Key: Value` entries, plus a few
 attributes governing the checking half:
 
 ```rust
@@ -54,7 +54,7 @@ works".
 
 ### Naming the check trait
 
-The derived trait is named `__CanUse{Context}` — `__CanUseScaledRectangle`. That deliberately differs from
+The derived trait is named `__CanUse{Context}` (`__CanUseScaledRectangle`). That deliberately differs from
 the `__Check{Context}` name [`check_components!`](./check_components.md) derives, so both macros can be used
 once each in the same module without colliding. Override it with a table-level `#[check_trait(Name)]`:
 
@@ -70,8 +70,8 @@ delegate_and_check_components! {
 ### Components with generic parameters
 
 A component with type parameters needs `#[check_params(...)]` on its entry. The delegation half does not
-need them — its impl is generic over them — but the check half must name something concrete, and the macro
-cannot infer what from the delegation alone:
+need them, because its impl is generic over them, but the check half must name something concrete, and the
+macro cannot infer what from the delegation alone:
 
 ```rust
 delegate_and_check_components! {
@@ -139,15 +139,15 @@ error: cannot combine #[skip_check] with #[check_params]
 ### Two forms that quietly check nothing
 
 An **empty** `#[check_params()]` has no parameters to iterate over, so it skips the entry exactly as
-`#[skip_check]` would, without saying so. Write `#[skip_check]` when that is what you mean.
+`#[skip_check]` would, without saying so. Write `#[skip_check]` to say so directly.
 
 A key carrying **only generics** is the opposite case and is easy to assume away: it *is* still checked,
 with its generics bound on the check impl and unit parameters. `<I> FooKey<I>: FooProvider` derives
-`impl<I> __CanUseContext<FooKey<I>, ()> for Context {}`, which is what keeps `I` from appearing unbound.
+`impl<I> __CanUseContext<FooKey<I>, ()> for Context {}`, which keeps `I` from appearing unbound.
 
 ### What is wired, and what is checked
 
-**The wiring half accepts every form [`delegate_components!`](./delegate_components.md) accepts** — all
+**The wiring half accepts every form [`delegate_components!`](./delegate_components.md) accepts**: all
 three operators, all three key forms including grouped `@`-paths, per-key generics, nested table values,
 and the `open`, `namespace`, and `for` statements. Read that page for the grammar; the delegation is
 literally the same evaluation.
@@ -166,7 +166,7 @@ literally the same evaluation.
 
 Nothing warns about the rows that are not checked: the block compiles, the wiring is correct, and those
 components simply go unverified. That silence is the practical reason to split the macros once a table uses
-more than plain entries — a standalone [`check_components!`](./check_components.md) block can name the
+more than plain entries. A standalone [`check_components!`](./check_components.md) block can name the
 concrete parameters an opened component needs and cover what a namespace brought in.
 
 Attributes are accepted only where they mean something. `#[check_params(...)]` and `#[skip_check]` attach
@@ -175,7 +175,7 @@ rather than read and ignored.
 
 ## Examples
 
-The intended use — a straightforward context, wired and proven together:
+The intended use is a straightforward context, wired and proven together:
 
 ```rust
 use cgp::prelude::*;
@@ -236,7 +236,7 @@ wiring is simple.
 there are three things it cannot do, and each is a reason a larger codebase writes
 [`delegate_components!`](./delegate_components.md) and [`check_components!`](./check_components.md) apart:
 
-- **Per-layer checks.** Only a standalone block can use `#[check_providers(...)]`, which is what localizes a
+- **Per-layer checks.** Only a standalone block can use `#[check_providers(...)]`, which localizes a
   broken layer of a nested provider stack.
 - **Generic-parameter dispatch.** The `open` statement and `@`-path keys wire a provider per type; the
   derivation cannot tell which concrete types to check, so those entries need a standalone block naming them.
@@ -245,8 +245,8 @@ there are three things it cannot do, and each is a reason a larger codebase writ
 
 **One case makes this macro wrong rather than merely unnecessary: an
 [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time).** A `new`-keyword bundle
-is a provider other contexts delegate *to*, never a context itself — it has no fields and never stands in the
-context position — so the derived context-side check asks a question that does not apply to it. Wire a bundle
+is a provider other contexts delegate *to*, never a context itself. It has no fields and never stands in the
+context position, so the derived context-side check asks a question that does not apply to it. Wire a bundle
 with plain `delegate_components!`. The [Gotchas](#gotchas) show what the failure looks like, and why it is
 easy to misread.
 
@@ -260,7 +260,7 @@ beginner-proof way to guarantee that for simple contexts; the two separate macro
 ### Advanced
 
 This section shows both halves of what the macro emits. You do not need it to use the macro, but seeing that
-the output is literally the two macros concatenated is what makes a later move to separate blocks
+the output is literally the two macros concatenated makes a later move to separate blocks
 uneventful. `cargo cgp expand` prints the same thing for your own code.
 
 :::
@@ -293,7 +293,7 @@ where
 {}
 ```
 
-and the same pair again for `NameGetterComponent`. Then the checking half — a marker trait aliasing
+and the same pair again for `NameGetterComponent`. Then comes the checking half: a marker trait aliasing
 [`CanUseComponent`](../traits/can_use_component.md), with one empty impl per delegated component:
 
 ```rust
@@ -307,7 +307,7 @@ impl CheckMyContext<NameGetterComponent, ()> for MyContext {}
 
 Without the `#[check_trait(...)]` override the trait would be `__CanUseMyContext`. The whole output is
 identical to a `delegate_components!` block followed by a `check_components!` block whose trait carries the
-`__CanUse{Context}` name — which is why moving to separate blocks later changes nothing about what is
+`__CanUse{Context}` name. This is why moving to separate blocks later changes nothing about what is
 checked.
 
 A `#[check_params(...)]` entry expands its parameters into the `__Params__` slot, one check impl per listed
@@ -318,7 +318,7 @@ impl __CanUseMyApp<AreaCalculatorComponent, Rectangle> for MyApp {}
 impl __CanUseMyApp<AreaCalculatorComponent, Circle> for MyApp {}
 ```
 
-A `#[skip_check]` entry contributes its delegation impls and no check impl — present in the first half,
+A `#[skip_check]` entry contributes its delegation impls and no check impl: present in the first half,
 absent from the second.
 
 A generic table threads its generics through both halves, so `<T> MyContext<T> { … }` yields
@@ -393,7 +393,7 @@ check. Add `#[check_params(...)]`, or move the entry to a standalone
 
 **An inherited, opened, or redirected component is not covered.** A `namespace` header, an `open`
 statement, an `@`-path key, and a `=>` redirect are all accepted in the table and all wired, but the
-derivation only produces checks for entries keyed on a component name — so a table using any of them is
+derivation only produces checks for entries keyed on a component name, so a table using any of them is
 *partly* checked, with no warning about the rest. The
 [coverage table above](#what-is-wired-and-what-is-checked) says which is which; add a standalone
 [`check_components!`](./check_components.md) for the rest.

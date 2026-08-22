@@ -40,7 +40,7 @@ then calling the ordinary [`finalize_build`](./finalize_build.md) is exactly wha
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) does, and re-marking to `IsOptional` is what
 [`ToOptional`](./to_optional.md) does.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`:
 

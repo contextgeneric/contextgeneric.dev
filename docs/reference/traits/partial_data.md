@@ -37,7 +37,7 @@ the first `builder()` call, long before any field is set.
 That is the division of labour with [`FinalizeBuild`](./finalize_build.md), which is implemented **only**
 at the all-present configuration. One says where you are going; the other says you have arrived.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough. There is no method — naming a type is not
 an operation.

@@ -8,15 +8,15 @@ Assert at compile time that a context can actually use each component it wires.
 
 ## Overview
 
-**CGP's wiring is lazy, and this macro is the answer to that.** When
-[`delegate_components!`](./delegate_components.md) records that a **context** — the type the capability
-runs against, which supplies the values it needs as its fields — delegates a component to some provider,
-nothing checks that the provider can do the job. The entry is stored as a type-level fact and believed.
-Whether the chosen provider's own requirements hold *for this context* is a separate question, and it is
-not asked until something tries to use the component.
+**CGP's wiring is lazy, and this macro is the answer to that.** The **context** is the type the
+capability runs against, and it supplies the values it needs as its own fields. When
+[`delegate_components!`](./delegate_components.md) records that a context delegates a component to some
+provider, nothing checks that the provider can do the job. The entry is stored as a type-level fact and
+believed. Whether the chosen provider's own requirements hold *for this context* is a separate question,
+and it is not asked until something tries to use the component.
 
 So a context can look completely wired, compile, and still be broken. Every entry is accepted, the struct
-compiles, the module compiles — and then the first call to the capability fails, often in a file far from
+compiles, the module compiles. Then the first call to the capability fails, often in a file far from
 the mistake.
 
 `check_components!` forces the question at a line you choose:
@@ -33,15 +33,15 @@ That block has no runtime existence. It compiles if `Person` really can use the 
 cannot, at the wiring site rather than wherever the capability first gets called.
 
 The second thing it buys is a *readable* failure, and that is the part worth understanding. Asking the
-obvious question — "does `Person` implement `CanGreet`?" — makes the compiler report only the last link in
+obvious question, "does `Person` implement `CanGreet`?", makes the compiler report only the last link in
 the chain, typically that some provider does not implement its provider trait, with no word about why. The
 macro instead routes the assertion through [`CanUseComponent`](../traits/can_use_component.md), which holds
 only when the context both delegates the component *and* the chosen provider's real bounds are satisfied.
 Because those bounds ride explicitly on a marker trait, the compiler evaluates them and names the one that
-failed — a missing `name` field surfaces as a missing `name` field, not as an opaque "trait not
+failed. A missing `name` field surfaces as a missing `name` field, not as an opaque "trait not
 implemented".
 
-## Using it
+## Usage
 
 The macro takes one or more check tables. Each is a context type followed by a brace-delimited list of the
 components to verify on it:
@@ -59,7 +59,7 @@ Several tables may appear in one invocation, each with its own context type and 
 ### Components with generic parameters
 
 A component taking type parameters needs them supplied, because a check must name something concrete to
-verify. Parameters go after a colon — one bare, several as a tuple, mirroring how the provider trait groups
+verify. Parameters go after a colon: one bare, several as a tuple, mirroring how the provider trait groups
 them:
 
 ```rust
@@ -87,9 +87,9 @@ That is four checks from one entry. A table may also carry a leading `<...>` gen
 
 ### Naming the check trait
 
-The macro derives a trait name of the form `__Check{Context}` — `__CheckPerson` — from the **final segment**
+The macro derives a trait name of the form `__Check{Context}` (`__CheckPerson`) from the **final segment**
 of the context's path, so `some_mod::Person` also yields `__CheckPerson`. Override it with
-`#[check_trait(Name)]` on the table, which is what you need when two tables in one module would otherwise
+`#[check_trait(Name)]` on the table. You need this when two tables in one module would otherwise
 collide:
 
 ```rust
@@ -102,7 +102,7 @@ check_components! {
 ```
 
 Note that [`delegate_and_check_components!`](./delegate_and_check_components.md) derives
-`__CanUse{Context}` instead — deliberately different, so both macros can be used once each in one module
+`__CanUse{Context}` instead: deliberately different, so both macros can be used once each in one module
 without a clash.
 
 ### Checking each provider instead of the context
@@ -124,9 +124,9 @@ check_components! {
 }
 ```
 
-**This is how a broken layer of a nested provider stack is localized**, and it is the main reason to keep
+**This localizes a broken layer of a nested provider stack**, and it is the main reason to keep
 `check_components!` separate from the wiring. A dependency missing only from the outer wrapper fails the
-wrapper's line alone, while one missing from the inner provider fails both — so the pattern of failures
+wrapper's line alone, while one missing from the inner provider fails both. The pattern of failures
 tells you which layer to look at. It must list at least one provider, and may appear at most once per table.
 
 ## Examples
@@ -174,7 +174,7 @@ check_components! {
 ```
 
 The `delegate_components!` block compiles on its own, because wiring is lazy. The `check_components!` block
-does not — and it fails *here*, naming the missing field, rather than at some later `person.greet()` in
+does not. It fails *here*, naming the missing field, rather than at some later `person.greet()` in
 another file.
 
 A generic component supplies its parameters, and the bracketed form checks several at once:
@@ -196,16 +196,16 @@ This verifies `MyApp: CanCalculateArea<Rectangle>` and `MyApp: CanCalculateArea<
 
 ## When to reach for it, and when not
 
-**Every context's wiring should be checked somehow.** That is the rule without exceptions; which macro does
-it is what scales.
+**Every context's wiring should be checked somehow.** That is the rule without exceptions; only the
+choice of macro scales with the wiring's complexity.
 
 - **Use a standalone `check_components!` for anything past simple wiring.** It is the form advanced
   codebases keep, because it is the only one with full control: concrete parameters for generic keys,
   `#[check_providers(...)]` for per-layer checks, and coverage of wiring the fused macro's derivation cannot
-  read — the `open` statement, `@`-path keys, and [namespaces](./cgp_namespace.md).
+  read: the `open` statement, `@`-path keys, and [namespaces](./cgp_namespace.md).
 - **Use [`delegate_and_check_components!`](./delegate_and_check_components.md) while getting started, or for
-  plain `Component: Provider` tables.** It fuses wiring and checking so the check cannot be forgotten,
-  which is what a newcomer needs. Its derivation understands only the plain entry form.
+  plain `Component: Provider` tables.** It fuses wiring and checking so the check cannot be forgotten. A
+  newcomer needs exactly that. Its derivation understands only the plain entry form.
 - **Do not check an [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time) as
   though it were a context.** A `new`-keyword bundle is delegated *to*; it has no fields and never stands in
   the context position, so a context-side check on it asks the wrong question. Verify it through a real
@@ -213,7 +213,7 @@ it is what scales.
   [Gotchas](#gotchas) show what happens if you try.
 
 One limit is worth stating plainly: **not every unsatisfied bound is a component.** A provider may depend on
-an ordinary Rust trait, and there is no component to name in a table for that — the check will still surface
+an ordinary Rust trait, and there is no component to name in a table for that. The check will still surface
 the unsatisfied bound, but you cannot ask for it directly.
 
 ## Under the hood
@@ -256,12 +256,12 @@ delegates the component and that its delegate satisfies [`IsProviderFor`](../tra
 unmet one is reported specifically rather than as a bare missing implementation. The generic parameters are
 literally `__Component__` and `__Params__` in the emitted code.
 
-`__Params__` carries a `?Sized` bound, and that is load-bearing rather than defensive: a component's
-parameter may be an unsized type, so a table checking a component declared over `str` —
-`ReferenceGetterComponent: (Life<'a>, str)` — would be rejected before the assertion was even evaluated
+`__Params__` carries a `?Sized` bound, and that is essential rather than defensive: a component's
+parameter may be an unsized type, so a table checking a component declared over `str`
+(`ReferenceGetterComponent: (Life<'a>, str)`) would be rejected before the assertion was even evaluated
 without it.
 
-Generic parameters land in the `__Params__` slot — one directly, several as a tuple:
+Generic parameters land in the `__Params__` slot: one directly, several as a tuple:
 
 ```rust
 impl __CheckMyApp<AreaCalculatorComponent, Rectangle> for MyApp {}
@@ -318,7 +318,7 @@ CheckValue      -> CheckParam
 CheckParam      -> Generics? Type
 ```
 
-One invocation may carry several `CheckTable`s, written one after another with no separator — which is how
+One invocation may carry several `CheckTable`s, written one after another with no separator. This is how
 a module checks two contexts from one block. Both `TableAttr`s are optional, each may appear at most once,
 and any other attribute is rejected by name rather than ignored. `#[check_trait(...)]` overrides the derived
 `__Check{Context}` name, and `#[check_providers(...)]` switches the assertion to the listed providers. A
@@ -328,8 +328,8 @@ which is merged with the table's before the impl is emitted. `Generics`, `WhereC
 grammar productions.
 
 Both bracketed lists accept **zero** elements, and the two empty forms behave differently. An empty value
-list — `FooComponent: []` — falls back to the no-parameter check, exactly as omitting the colon would. An
-empty *key* list — `[]: Rectangle` — produces no entries at all, so the line silently checks nothing; there
+list, `FooComponent: []`, falls back to the no-parameter check, exactly as omitting the colon would. An
+empty *key* list, `[]: Rectangle`, produces no entries at all, so the line silently checks nothing; there
 is no diagnostic, and it is worth a second look if a table appears to pass without doing anything.
 
 </details>
@@ -339,7 +339,7 @@ is no diagnostic, and it is worth a second look if a table appears to pass witho
 **A check on an aggregate provider asks the wrong question, and how it fails depends on the provider.** A
 `new`-keyword bundle is not a context, so a context-side check demands that the *bundle* satisfy the leaf
 provider's dependencies. If that provider has none, the check passes vacuously and proves nothing. If it
-needs anything from its context — a field, a type — the check fails, blaming the bundle:
+needs anything from its context, such as a field or a type, the check fails, blaming the bundle:
 
 ```text
 error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>`
@@ -353,7 +353,7 @@ Nothing there says the target was never meant to be a context. Wire the bundle w
 
 **A component with generic parameters cannot be checked without them, and the error does not say so.**
 Omitting the value emits a check with an empty parameter tuple, which a component expecting a `Shape` can
-never satisfy — so what you get is an ordinary unsatisfied-wiring complaint that never mentions the
+never satisfy. You get an ordinary unsatisfied-wiring complaint that never mentions the
 parameters:
 
 ```text
@@ -371,7 +371,7 @@ error: `#[check_providers(...)]` requires at least one provider type.
 ```
 
 **Two tables in one module can collide on the derived name.** The name comes from the context's *last* path
-segment, so `a::Person` and `b::Person` both derive `__CheckPerson` — and so do two tables for the same
+segment, so `a::Person` and `b::Person` both derive `__CheckPerson`, and so do two tables for the same
 context:
 
 ```text
@@ -381,7 +381,7 @@ error[E0428]: the name `__CheckPerson` is defined multiple times
 Use `#[check_trait(...)]` on one of them.
 
 **A passing check is not a claim that the capability is correct**, only that it resolves. It proves the
-provider was found and its dependencies are satisfiable — not that the provider does what you meant.
+provider was found and its dependencies are satisfiable, not that the provider does what you meant.
 
 ## Related constructs
 

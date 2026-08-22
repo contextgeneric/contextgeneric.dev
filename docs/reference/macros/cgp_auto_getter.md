@@ -9,8 +9,9 @@ Define a getter as a blanket impl over `HasField`, keyed by the method name.
 ## Overview
 
 `#[cgp_auto_getter]` publishes a context field as a named, reusable accessor. You write a trait of getter
-methods, and the macro implements it for every **context** — the type the capability runs against, which
-supplies the values it needs as its fields — that happens to carry fields of the matching names:
+methods, and the macro implements it for every **context** that happens to carry fields of the matching
+names. The context is the type the capability runs against, and it supplies the values it needs as its
+own fields. For example:
 
 ```rust
 #[cgp_auto_getter]
@@ -24,18 +25,18 @@ wired and no impl is written: the macro emits one
 [blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
 covering every qualifying context, keyed on each method's own name.
 
-What it hides is the field-access trait CGP reads fields through, which is precise and unpleasant to write
-by hand — a bound naming the field as a type-level string, and a `PhantomData` tag at every read. Being
+It hides the field-access trait CGP reads fields through, which is precise and unpleasant to write by
+hand: a bound naming the field as a type-level string, and a `PhantomData` tag at every read. Being
 able to state the same thing as `fn name(&self) -> &str;` is the point.
 
-**Reach for it sparingly.** For the ordinary case — a provider reading a field of its own context — an
+**Reach for it sparingly.** For the ordinary case, a provider reading a field of its own context, an
 [`#[implicit]`](../attributes/implicit.md) argument does the same job with no trait to declare, using the
 same field access and the same conversion rules, so a getter trait declared only to read a field adds a
 name and buys nothing. What a getter trait *does* buy is a capability other code can depend on by name,
 and the three cases where that matters are in
 [When to reach for it](#when-to-reach-for-it-and-when-not).
 
-## Using it
+## Usage
 
 Apply the attribute to a trait definition. It takes no arguments. The body is getter methods, each taking
 `&self` or `&mut self` and returning a reference:
@@ -58,7 +59,7 @@ pub trait HasDimensions {
 ```
 
 **The method name is the field name.** That is the whole convention, and also the construct's one real
-limitation — a context must expose a field of exactly that name.
+limitation: a context must expose a field of exactly that name.
 
 ### How the return type decides the read
 
@@ -73,7 +74,7 @@ natural. The field's type is inferred from what you return:
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
 | `Option<&str>` | `Option<String>` | `.as_deref()` |
 | [`MRef<'_, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
-| An owned type — `f64`, `String`, a tuple, an array | the same type | by reference, then `.clone()` |
+| An owned type (`f64`, `String`, a tuple, an array) | the same type | by reference, then `.clone()` |
 
 A `&mut self` receiver reads mutably, and each reference form has a mutable mirror: `&mut T`, `&mut [T]`
 through `AsMut<[T]>`, `Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` via `.as_deref_mut()`.
@@ -81,7 +82,7 @@ through `AsMut<[T]>`, `Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` v
 The `&str` row is the one most often wanted and least obvious: the context stores a `String` and the
 getter hands out a borrow of it, so no context ever has to hold a `&str`. **These are the same rules an
 [`#[implicit]`](../attributes/implicit.md) argument follows**, so learning them once covers everywhere CGP
-reads a field — with one difference worth holding onto. A getter takes its mutability from the
+reads a field. There is one difference worth holding onto. A getter takes its mutability from the
 **receiver**, while an implicit argument takes it from the *argument's type*. So
 `fn name(&mut self) -> &mut String` reads mutably because of the `&mut self`, whereas
 `#[implicit] name: &String` on a `&mut self` method still reads through a shared borrow.
@@ -99,11 +100,11 @@ pub trait HasFooBar: HasFooType + HasBarType {
 ```
 
 The generated bound now falls on `Self::Foo` rather than on the context, and the method is called as an
-associated function — `App::foo_bar(&foo)`. `Self` inside the argument and return types is rewritten to
-the context, and `&` versus `&mut` decides the access mode exactly as a receiver would.
+associated function: `App::foo_bar(&foo)`. The macro rewrites `Self` inside the argument and return
+types to the context, and `&` versus `&mut` decides the access mode exactly as a receiver would.
 
 **This is the one getter shape an [`#[implicit]`](../attributes/implicit.md) argument cannot reach**,
-because there is no `self` field to read — which makes it the clearest case for declaring a getter at
+because there is no `self` field to read. This makes it the clearest case for declaring a getter at
 all.
 
 ### An optional `PhantomData` argument
@@ -136,7 +137,7 @@ pub trait HasName {
 ```
 
 The bound is enforced on whatever the field holds. When an associated type is present the trait must
-contain **exactly one** getter method, whose return type is `&Self::AssocType` — there is only one field
+contain **exactly one** getter method, whose return type is `&Self::AssocType`. There is only one field
 for the type to be inferred from.
 
 ## Examples
@@ -161,7 +162,7 @@ pub fn greet(person: &Person) {
 }
 ```
 
-`Person` derives [`HasField`](../derives/derive_has_field.md), which is its entire qualification — the
+`Person` derives [`HasField`](../derives/derive_has_field.md), which is its entire qualification. The
 blanket impl applies automatically, with no wiring anywhere in the program.
 
 The reason to declare the trait at all is that other code can now *require* it. A provider states the
@@ -205,14 +206,15 @@ only job was to save you writing the body.
 
 **Prefer an [`#[implicit]`](../attributes/implicit.md) argument, and reach for a getter trait only when one
 cannot do the job.** An implicit argument reads a field of the provider's own context as an ordinary
-parameter — no trait, no declaration, the same access rules — so it covers the common read directly,
-including a field several providers each consume, declared as the same implicit argument in each.
+parameter, with no trait, no declaration, and the same access rules, so it covers the common read
+directly, including a field several providers each consume, declared as the same implicit argument in
+each.
 
 A getter trait earns its keep in three cases an implicit argument cannot reach.
 
 - **The field lives on another type.** An implicit argument reads only from `self`, so a value held by a
-  request, a payload, or any other type needs a getter that can be demanded as a bound on *that* type —
-  `Request: HasBasicAuthHeader<Self>`. There is no `self` field to read.
+  request, a payload, or any other type needs a getter that can be demanded as a bound on *that* type,
+  as in `Request: HasBasicAuthHeader<Self>`. There is no `self` field to read.
 - **The accessor must be a named capability.** When other code depends on "this context can tell you its
   name" rather than on a field, that dependency needs a trait to point at, importable with
   [`#[uses]`](../attributes/uses.md) or usable as a supertrait via [`#[extend]`](../attributes/extend.md).
@@ -224,7 +226,7 @@ Between the two getter macros the line is narrow and worth stating plainly.
 - **`#[cgp_auto_getter]` is the default getter.** One blanket impl, no wiring, field name fixed to the
   method name.
 - **[`#[cgp_getter]`](./cgp_getter.md) is the advanced one**, and not a general upgrade. Reach for it only
-  when a context needs to choose *which field* the getter reads — a different name per context, or an
+  when a context needs to choose *which field* the getter reads, as a different name per context, or an
   implementation selected by wiring. That control costs a line of wiring per context, and most getters do
   not want it.
 
@@ -267,7 +269,7 @@ where
 
 Three things to recognize. The context parameter is literally `__Context__`, a reserved name chosen so it
 cannot collide with one of yours. [`Symbol!("name")`](./symbol.md) is a type-level string standing for the
-field name — the compiler prints its expanded `Symbol<4, Chars<'n', …>>` form in errors, and
+field name. The compiler prints its expanded `Symbol<4, Chars<'n', …>>` form in errors, and
 `cargo cgp expand` resugars it back to this. And because the return type is `&str`, the bound asks for a
 `String` field and the body appends `.as_str()`, which is the conversion table in action.
 
@@ -290,7 +292,7 @@ where
 ```
 
 The associated-type form lifts the type into an extra generic parameter on the impl and binds it through
-the field's value, which is what lets the field decide it:
+the field's value, which lets the field decide it:
 
 ```rust
 impl<__Context__, Name> HasName for __Context__
@@ -338,7 +340,7 @@ error: #[cgp_auto_getter] does not accept any attribute argument
 ```
 
 **The trait still has to be in scope to call its method.** That is ordinary Rust, but it surprises readers
-here, because nothing else about the getter had to be declared — a missing `use` reports the method as not
+here, because nothing else about the getter had to be declared. A missing `use` reports the method as not
 found rather than the trait as not imported.
 
 ## Related constructs

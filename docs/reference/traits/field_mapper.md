@@ -44,7 +44,7 @@ pub trait FieldMapper<Context, Tag>: FieldGetter<Context, Tag> {
 **This is the one [`ChainGetters`](../providers/chain_getters.md) actually uses**, because a chained
 getter is a provider composing other providers rather than a method on a concrete type.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`:
 

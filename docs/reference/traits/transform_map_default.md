@@ -41,7 +41,7 @@ All three target `IsPresent`, which is exactly the configuration
 [`finalize_with_default`](./can_finalize_with_default.md) or
 [`build_with_default`](./can_build_with_default.md), with no marker in sight.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

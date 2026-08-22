@@ -30,7 +30,7 @@ The two entry points differ only in where they begin, and they produce the same 
 | [`HasBuilder`](./has_builder.md) | every field `IsNothing` | assembling a record from pieces |
 | `IntoBuilder` | every field `IsPresent` | taking one apart and putting it back |
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

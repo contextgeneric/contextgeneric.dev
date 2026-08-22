@@ -28,7 +28,7 @@ The reverse direction is [`FromFields`](./from_fields.md), and the two round-tri
 `Fields` type, so generic code can decompose, transform, and rebuild with the shapes lining up by
 construction rather than by check.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

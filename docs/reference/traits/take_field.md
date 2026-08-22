@@ -31,7 +31,7 @@ Two things reach for it. Redistributing a record — [`into_builder`](./into_bui
 put them somewhere else — and, far more often, [`CanBuildFrom`](./can_build_from.md), whose merge
 recursion takes each field out of the source and builds it into the target.
 
-## Using it
+## Usage
 
 **It is not in the prelude** — the one member of the core builder family that is not. Import it from
 `cgp::core::field::traits` when you call `take_field` directly:

@@ -106,7 +106,7 @@ pub mod rejected_read_of_an_unset_field {}
 /// ```
 pub mod rejected_build_from_without_has_fields {}
 
-/// ## Using it
+/// ## Usage
 ///
 /// The shapes the page lists: a named-field struct, a tuple struct keyed by position, and the
 /// fieldless struct whose `builder()` is immediately finalizable.

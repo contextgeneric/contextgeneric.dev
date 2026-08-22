@@ -40,7 +40,7 @@ pub mod what_its_for {
     }
 }
 
-/// ## Using it
+/// ## Usage
 ///
 /// Every struct and enum shape the page lists. The four struct shapes come first, then the four
 /// variant shapes in the single enum the page uses for them.

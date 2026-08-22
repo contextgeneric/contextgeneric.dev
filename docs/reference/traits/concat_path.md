@@ -36,7 +36,7 @@ so it names the combined path type and nothing runs.
 It is the path-level analogue of [`ConcatProduct`](./concat_product.md), with the same two-impl
 recursion over a different spine.
 
-## Using it
+## Usage
 
 **`ConcatPath` is in the prelude** — `use cgp::prelude::*;` names it, which makes it the one member of
 the type-level recovery group that needs no import. Its two neighbours each need a different one:

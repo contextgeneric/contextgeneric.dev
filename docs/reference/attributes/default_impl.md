@@ -25,7 +25,7 @@ table.* A context that pulls that table in gets this provider without naming it.
 The value of registering at the definition is that the provider and its default sit together, so adding a
 new per-type implementation is one place to edit rather than two.
 
-## Using it
+## Usage
 
 The attribute goes on a [`#[cgp_impl]`](../macros/cgp_impl.md) provider and takes one argument in two
 parts, joined by the keyword `in`:

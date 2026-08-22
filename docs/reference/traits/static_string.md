@@ -28,7 +28,7 @@ string is available wherever a `const` is, costs nothing per use, and can be com
 [`StaticFormat`](./static_format.md) recovers a name lazily by writing into a formatter, which is what
 backs `Display`; reach for it only where there is no value to format and no constant will do.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`:
 

@@ -3,7 +3,7 @@
 //! The page's worked example, run, plus the shape it rejects. Written with `CgpVariant` rather than
 //! the umbrella, which is the page's own claim that the two emit the same output on an enum.
 
-/// ## Using it
+/// ## Usage
 ///
 /// The page's rejected snippet: a struct-style variant has no single payload type, so the derive
 /// fails. Every variant must carry exactly one unnamed payload, with no per-variant opt-out.

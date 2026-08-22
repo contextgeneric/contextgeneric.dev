@@ -42,7 +42,7 @@ evaluate and report them. The error that was hidden becomes visible, at the wiri
 **You never name this trait.** It is what [`check_components!`](../macros/check_components.md) asserts, and the
 reason that macro produces a legible error instead of a cascade.
 
-## Using it
+## Usage
 
 The trait is in the prelude. It is empty, and its entire meaning lives in a single blanket impl:
 

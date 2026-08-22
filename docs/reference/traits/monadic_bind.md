@@ -47,7 +47,7 @@ It is one of four traits that give a monad marker its meaning, alongside
 [monad providers](../providers/monad_providers.md) consume it as an ordinary trait bound while folding a
 pipeline at compile time.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::monad::traits`:
 

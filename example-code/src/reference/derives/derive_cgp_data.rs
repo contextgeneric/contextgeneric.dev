@@ -4,7 +4,7 @@
 //! shape pages, so what this file pins is the accepted and rejected shapes, that the umbrella and the
 //! two shape-specific faces agree on their output, and that the degenerate shapes compile.
 
-/// ## Using it
+/// ## Usage
 ///
 /// The two inputs the page opens on, the shape-specific faces, and the shapes the page says are
 /// accepted. The one it says is rejected is a doctest in the module below this one.

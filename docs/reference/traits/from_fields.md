@@ -25,7 +25,7 @@ validate and nothing that can fail.
 It is an associated function rather than a method, since there is no value to call it on. The call reads
 `Person::from_fields(fields)`, or `T::from_fields(fields)` in generic code.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

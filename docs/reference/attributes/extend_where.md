@@ -35,7 +35,7 @@ a bound on `Self`, which callers do receive by elaboration. `#[extend_where]` ad
 can bound anything, most usefully one of the trait's own generic parameters, which a supertrait cannot
 reach.
 
-## Using it
+## Usage
 
 `#[extend_where(...)]` takes a comma-separated list of full `where`-clause predicates:
 

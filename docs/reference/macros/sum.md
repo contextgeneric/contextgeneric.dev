@@ -9,7 +9,7 @@ A type-level sum, the dual of `Product!`.
 ## Overview
 
 `Sum![A, B, C]` represents a *choice* among several types as a single type. CGP uses it to describe the shape
-of an **enum** — the list of its variants — the way [`Product!`](./product.md) describes the fields of a
+of an **enum**, the list of its variants, the way [`Product!`](./product.md) describes the fields of a
 struct.
 
 The pairing is exact and worth holding onto. A `Product!` holds a value for **every** element at once, which is
@@ -19,10 +19,10 @@ a record. A `Sum!` holds a value for exactly **one** element, which is a tagged 
 Sum![u32, String, bool]
 ```
 
-Like its dual it is built from a recursive spine, and that recursion is what makes variant-by-variant
+Like its dual it is built from a recursive spine, and that recursion makes variant-by-variant
 operations possible. Because an enum's variants are exposed as a single sum type through
 [`HasFields`](../traits/has_fields.md), a provider can be written once to match on, dispatch over, or construct
-*any* enum's variants without naming the concrete enum — by walking the nested branches. This is the basis for
+*any* enum's variants without naming the concrete enum, by walking the nested branches. This is the basis for
 CGP's extensible-variant machinery, where each variant is handled by descending the chain rather than by
 writing a `match` against a fixed enum.
 
@@ -30,7 +30,7 @@ writing a `match` against a fixed enum.
 [`#[derive(HasFields)]`](../derives/derive_has_fields.md) or the extensible-data derives; the value of knowing
 the construct is being able to read it in an expansion or an error.
 
-## Using it
+## Usage
 
 The macro takes a comma-separated list of types, which may be empty, and a trailing comma is allowed. It is
 used wherever a type is expected:
@@ -41,7 +41,7 @@ Sum![]   // the empty sum
 ```
 
 Each listed type is one possible variant, and a value of the sum type carries exactly one of them. There are no
-options and no value-level counterpart — unlike [`Product!`](./product.md), which has `product!`, a sum value is
+options and no value-level counterpart. Unlike [`Product!`](./product.md), which has `product!`, a sum value is
 constructed through the variant machinery rather than by a literal.
 
 ## Examples
@@ -71,7 +71,7 @@ pub enum Shape {
 ```
 
 Two things to notice. The variant names are [`Symbol!`](./symbol.md) type-level strings, exactly as field names
-are. And a struct-like variant nests a [`Product!`](./product.md) of its own fields — so an enum's full shape is
+are. And a struct-like variant nests a [`Product!`](./product.md) of its own fields, so an enum's full shape is
 a sum of variants whose payloads may themselves be records. Generic code walks the `Sum!` to find which variant
 a value holds, then walks the nested `Product!` to reach that variant's fields.
 
@@ -90,7 +90,7 @@ use.
 - **Use [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or
   [`#[derive(HasFields)]`](../derives/derive_has_fields.md) on the enum**, which generates the list from the
   variants you already declared. Writing it out means restating the enum, and the two will drift.
-- **Never hand-write the spine.** `Either<A, Either<B, Void>>` is what `Sum!` expands to, and writing it out is
+- **Never hand-write the spine.** `Sum!` expands to `Either<A, Either<B, Void>>`, and writing it out is
   longer and identical in meaning.
 - **Use [`Product!`](./product.md) for a collection rather than a choice.** They are duals: every element
   versus exactly one. A type error is the usual consequence of confusing them, which is at least loud.
@@ -126,17 +126,17 @@ the rest of the chain. So a value of `Either<A, Either<B, Either<C, Void>>>` is 
 `Right(Left(..))` for a `B`, and `Right(Right(Left(..)))` for a `C`.
 
 The terminator is `Void`, an **empty enum that can never be constructed**, and choosing it rather than `Nil` is
-the load-bearing decision here. Reaching the `Void` position would mean the value matched none of the listed
-types, which is impossible — so the type system knows the chain is exhausted. An empty `Sum![]` is therefore
+the essential decision here. Reaching the `Void` position would mean the value matched none of the listed
+types, which is impossible. So the type system knows the chain is exhausted. An empty `Sum![]` is therefore
 just `Void`: a type with no values.
 
 That is precisely the asymmetry with [`Product!`](./product.md). A product terminates in `Nil` because an empty
 record is a perfectly good value; a sum terminates in `Void` because an empty choice is *uninhabited*, there
 being nothing to pick. `Void` functions as the never type, used here to close a sum off.
 
-**Why it matters beyond tidiness**: this is what gives generic variant handling compile-time exhaustiveness
+**Why it matters beyond tidiness**: this gives generic variant handling compile-time exhaustiveness
 without a wildcard arm. As each variant is ruled out, the remaining type shrinks toward `Void`, and code that
-has handled every variant is left holding a value that cannot exist — which the compiler accepts discharging
+has handled every variant is left holding a value that cannot exist. The compiler accepts discharging it
 with no fallback case. Add a variant to the enum without handling it, and the remainder becomes inhabited
 again, so the code stops compiling. The same guarantee a concrete `match` gives, recovered for generic code.
 
@@ -167,8 +167,8 @@ collection.
 constructing and destructuring like any other.
 
 **Variant order is part of the type.** `Sum![A, B]` and `Sum![B, A]` are unrelated. In practice the entries are
-name-tagged [`Field`](../types/field.md)s and the operations match on names, so this bites less than it might —
-but the *types* are still different, and a cast between two enums works through the name matching rather than
+name-tagged [`Field`](../types/field.md)s and the operations match on names, so this bites less than it might.
+But the *types* are still different, and a cast between two enums works through the name matching rather than
 by position.
 
 **A derivable enum's variants must each hold exactly one unnamed field.** That is a restriction of the

@@ -44,7 +44,7 @@ field `IsNothing` and flips each to `IsPresent` as it is filled; an extractor st
 parameter*, the compiler tracks exactly which fields are filled — and refuses to finalize an incomplete
 one.
 
-## Using it
+## Usage
 
 Four markers implement it, and they are the trait's whole public surface. **Three are in the prelude;
 `IsOptional` is not** — import it from `cgp::core::field::impls`.

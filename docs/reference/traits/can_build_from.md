@@ -20,7 +20,7 @@ back, so several sources can be absorbed in sequence before the result is finali
 That is the merge step of the extensible builder pattern: independent parts of a program each produce a
 record, and the target absorbs all of them without any of them naming it.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::impls`:
 

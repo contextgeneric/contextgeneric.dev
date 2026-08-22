@@ -26,7 +26,7 @@ That is what closes a generic match with **no wildcard arm and no `unreachable!(
 [`FinalizeBuild`](./finalize_build.md), and the two are sound for opposite reasons: a build finalizes
 because the value is *complete*, an extraction because the value is *impossible*.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

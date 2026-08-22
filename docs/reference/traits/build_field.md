@@ -29,7 +29,7 @@ It pins one transition of the [`UpdateField`](./update_field.md) primitive: `IsN
 Because it *requires* the starting marker to be `IsNothing`, **building a field that is already set is a
 compile error**, not a silent overwrite.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

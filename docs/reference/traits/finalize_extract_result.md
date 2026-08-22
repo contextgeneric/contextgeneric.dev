@@ -37,7 +37,7 @@ where
 discharge, and it applies to a remainder you already hold; this applies to the `Result` a chain hands
 you, which is the shape the last `extract_field` actually returns.
 
-## Using it
+## Usage
 
 **It is not in the prelude** — the one member of the extractor family that is not. Import it from
 `cgp::core::field::traits`, and you will want it, because it is what closes a chain:

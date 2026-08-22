@@ -34,7 +34,7 @@ fields are present rather than which variants are possible. Both are what "exten
 [extensible data](/docs/concepts/extensible-variants): the type carries the progress, so the compiler
 checks it.
 
-## Using it
+## Usage
 
 The macro is a plain derive on an enum. It takes no arguments and has no helper attributes:
 

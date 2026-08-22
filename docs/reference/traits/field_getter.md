@@ -41,7 +41,7 @@ is read from. This is the ordinary consumer/provider duality applied to field ac
 [`UseField`](../providers/use_field.md) is the provider that implements it by reading a named field, and
 it is what [`#[cgp_getter]`](../macros/cgp_getter.md) targets.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

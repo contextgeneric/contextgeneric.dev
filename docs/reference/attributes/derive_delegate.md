@@ -51,7 +51,7 @@ The reason the `open` statement replaced this is that the indirection turned out
 per-type entries live on the context itself, there is no second table type to name, and the component
 needs no attribute at all.
 
-## Using it
+## Usage
 
 `#[derive_delegate]` takes a wrapper type parameterized by the trait generic to dispatch on:
 

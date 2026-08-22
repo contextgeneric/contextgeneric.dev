@@ -37,7 +37,7 @@ pub mod what_its_for {
     }
 }
 
-/// ## Using it
+/// ## Usage
 ///
 /// The accepted enum, a generic one, and the variantless enum the page says produces no impls.
 pub mod using_it {

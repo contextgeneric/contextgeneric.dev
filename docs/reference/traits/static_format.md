@@ -36,7 +36,7 @@ nothing.
 **It is what backs the `Display` impls on `Symbol` and `Chars`**, which is how you usually meet it: a
 type-level string can be printed with `{}` or `to_string()` because of this trait.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::base::traits`:
 

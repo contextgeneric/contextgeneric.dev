@@ -33,7 +33,7 @@ The derive also generates the conversions that move values in and out of the rep
 makes it a two-way door rather than a description. Generic code can take a concrete value apart into its
 anonymous shape, work on it, and put a concrete value back together.
 
-## Using it
+## Usage
 
 The macro is a plain derive that takes no arguments and has no helper attributes. Unlike its singular
 sibling it accepts **both structs and enums**:

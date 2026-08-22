@@ -33,7 +33,7 @@ It is the third of the group, and the one to reach for least often:
 | [`HasExtractorRef`](./has_extractor_ref.md) | `&T` | survives |
 | `HasExtractorMut` | `&mut T` | survives, mutably borrowed |
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

@@ -42,7 +42,7 @@ write:
 | read | [`HasField`](./has_field.md) | [`FieldGetter`](./field_getter.md) |
 | write | [`HasFieldMut`](./has_field_mut.md) | `MutFieldGetter` |
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

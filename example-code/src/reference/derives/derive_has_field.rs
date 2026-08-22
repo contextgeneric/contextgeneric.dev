@@ -35,7 +35,7 @@ pub mod what_its_for {
     }
 }
 
-/// ## Using it
+/// ## Usage
 ///
 /// The four struct shapes the page lists, in the order it lists them: named fields, a raw-identifier
 /// field, tuple fields, a unit struct, and a generic struct. The unit struct is the one whose whole

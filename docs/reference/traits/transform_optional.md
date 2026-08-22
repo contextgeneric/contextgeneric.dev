@@ -42,7 +42,7 @@ workflows behave so alike.
 [`optional_builder()`](./has_optional_builder.md) or [`to_optional()`](./to_optional.md), with no marker
 in sight.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

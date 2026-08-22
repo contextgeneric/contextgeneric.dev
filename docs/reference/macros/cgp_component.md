@@ -52,7 +52,7 @@ that names the capability and is the key `delegate_components!` wires against. Y
 every wiring entry and in most compiler errors that involve this capability, so you should be able to
 recognize it immediately, even though you never write its definition yourself.
 
-## Using it
+## Usage
 
 Apply the attribute to a trait definition and give it the provider trait's name. The simplest form is
 a bare identifier:

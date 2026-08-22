@@ -46,7 +46,7 @@ out.
 
 :::
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::component`, and you will need to, because the
 generated impl references the trait by name:

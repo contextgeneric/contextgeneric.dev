@@ -10,8 +10,8 @@ Build a context's wiring table, naming the provider that implements each of its 
 
 [`#[cgp_component]`](./cgp_component.md) separates the trait callers use from the trait
 implementations target, which leaves one question open: for a given type, *which* implementation
-supplies the behavior? `delegate_components!` answers it. You give it a type and a list of entries —
-the component name as the key, the chosen provider as the value — and it records that choice on the
+supplies the behavior? `delegate_components!` answers it. You give it a type and a list of entries,
+the component name as the key and the chosen provider as the value, and it records that choice on the
 type.
 
 ```rust
@@ -24,24 +24,24 @@ delegate_components! {
 
 The mental model is a **table**: a compact list saying which implementation supplies each capability.
 It is worth being precise about one thing, because the analogy invites the wrong conclusion. This looks
-like an object's method table, but it is resolved entirely at compile time — the keys and values are
+like an object's method table, but it is resolved entirely at compile time: the keys and values are
 types, the lookup happens during trait resolution, and the result monomorphizes to a direct call.
 There is no table in the compiled program, no dynamic dispatch, and nothing in the binary for a
 provider you did not choose.
 
 The type this table is attached to is a **context**: the type that owns the wiring. Often it is a type
-standing for your whole application, whose job is to carry choices rather than data — `struct App;`
+standing for your whole application, whose job is to carry choices rather than data. `struct App;`
 with no fields is a perfectly good context. Sometimes, as above, it is the data type itself.
 
 A macro is worth having here because each entry expands to two impls rather than one. Besides the impl
 that stores the choice, the macro emits a second one that forwards the chosen provider's own
-dependencies back through the table — which is what makes a missing transitive requirement produce a
-usable error instead of a dead end. [Under the hood](#under-the-hood) shows both.
+dependencies back through the table. This makes a missing transitive requirement produce a usable
+error instead of a dead end. [Under the hood](#under-the-hood) shows both.
 
-## Using it
+## Usage
 
 The macro takes a target type and a brace-delimited body. The body holds any number of **statements**
-followed by any number of **mappings**, and a mapping is a **key**, an **operator**, and a **value** —
+followed by any number of **mappings**, and a mapping is a **key**, an **operator**, and a **value**:
 three choices you make independently. There are three operators, three key forms, two value forms, and
 three statements, and this section takes them in that order.
 
@@ -74,7 +74,7 @@ delegate_components! {
 
 This is how you build an **aggregate provider**: a zero-sized provider whose only job is to hold a
 table dispatching each component to a sub-provider, so that other contexts can delegate a whole group
-of components to it as one unit. An aggregate provider is a *provider*, not a context — it forwards
+of components to it as one unit. An aggregate provider is a *provider*, not a context. It forwards
 each component's provider trait onward, and no call ever resolves with the bundle in the context
 position. That is why it must be wired with plain `delegate_components!` and never with
 [`delegate_and_check_components!`](./delegate_and_check_components.md), whose check asks whether the
@@ -103,7 +103,7 @@ operator against any key form; which pairings are actually worth writing is note
 | `Key -> Table` | **Delegate directly** | whatever `Table`'s own entry for `Key` holds |
 | `Key => @path` | **Redirect** | wherever the path lands, resolved later |
 
-`:` is what nearly all wiring uses, and the rest of this page's examples assume it unless they say
+Nearly all wiring uses `:`, and the rest of this page's examples assume it unless they say
 otherwise.
 
 **`->` is direct delegation.** Instead of naming a provider it forwards the lookup one hop into another
@@ -148,7 +148,7 @@ concern more than a per-context one.
 
 ### The three key forms
 
-**A single key** is one component name, and may carry generics of its own — `<T> BazKey<T>: BazProvider`
+**A single key** is one component name, and may carry generics of its own: `<T> BazKey<T>: BazProvider`
 adds a parameter to just that entry.
 
 **A list key** is a bracketed list, expanding to one entry per name so several components share one
@@ -166,7 +166,7 @@ delegate_components! {
 }
 ```
 
-Each bracketed element is a full key, so an element may carry its own generics — in
+Each bracketed element is a full key, so an element may carry its own generics: in
 `[BarKey<T1>, <T2> BazKey<T1, T2>]: BarValue<T1>` only the second key introduces `T2`. The list is a
 key form rather than an operator, so `[A, B] -> SomeTable` and `[A, B] => @somewhere` are as legal as
 `[A, B]: Provider`; the first adopts several of another table's entries at once, the second points
@@ -176,17 +176,17 @@ several components at one shared slot.
 redirect: the per-value slots an `open` statement opens, or the prefixed routes a
 [namespace](./cgp_namespace.md) registers. `@AreaCalculatorComponent.Rectangle: RectangleArea` stores
 `RectangleArea` where the `AreaCalculatorComponent` redirect lands when the dispatch type is
-`Rectangle`. Segments follow [`Path!`](./path.md)'s convention — a lowercase, non-primitive identifier
-becomes a type-level string, anything else names a type — and a segment may carry generics, as in
+`Rectangle`. Segments follow [`Path!`](./path.md)'s convention: a lowercase, non-primitive identifier
+becomes a type-level string, and anything else names a type. A segment may also carry generics, as in
 `@SomeComponent.<'a, T> &'a T: SomeProvider`.
 
 Two grouping forms fan one path key out into several, and **they are not interchangeable**:
 
 - **`[…]` groups alternatives for one segment**, and the path may continue after it.
-  `@app.[FooComponent, BarComponent].[u64, String]: DummyImpl` writes four entries — the cartesian
+  `@app.[FooComponent, BarComponent].[u64, String]: DummyImpl` writes four entries: the cartesian
   product of the two groups.
 - **`{…}` groups whole remainders**, and ends the path. Its elements may be different lengths and may
-  nest further groups, which is what lets one entry cover routes of different shapes.
+  nest further groups, which lets one entry cover routes of different shapes.
 
 ```rust
 delegate_components! {
@@ -211,7 +211,7 @@ exists, and it is legacy.
 
 :::info
 
-### Legacy — read, don't write
+### Legacy: read, don't write
 
 Older code dispatches per type by nesting a table inside a
 [`UseDelegate`](../providers/use_delegate.md) value:
@@ -230,7 +230,7 @@ delegate_components! {
 
 Three details of the form are easy to miss. The inner braces hold a **full table body**, so an inner
 table accepts everything an outer one does, nesting included. The **wrapper is not fixed to
-`UseDelegate`** — any single-parameter wrapper type is accepted, which is how a component dispatched on
+`UseDelegate`**: any single-parameter wrapper type is accepted, which is how a component dispatched on
 a tuple of parameters gets wired to a matching `UseDelegate2`. And the **inner table's name may carry
 generics**, which a per-entry generic on the outer key threads into:
 
@@ -249,7 +249,7 @@ One prerequisite is not visible in either snippet: **the component must carry
 dispatch impl the wrapper resolves through. Leave it off and the table still expands, then fails at the
 check with an unsatisfied `IsProviderFor` that never mentions the missing attribute.
 
-This still works, and you will meet it — including in CGP's own error and handler
+This still works, and you will meet it, including in CGP's own error and handler
 components, which are defined with `#[derive_delegate]`. The `open` statement below achieves the same
 dispatch with no separate table type, no wrapper, and nothing added to the component, and is preferred
 for new code.
@@ -323,8 +323,8 @@ only in how many entries a line produces and in what each entry resolves to.
 
 ### Attributes
 
-The macro accepts **no attributes** anywhere — not on the table, not on a key, not on a key inside a
-`for` loop or a nested table — and rejects any it finds rather than ignoring them. Attribute-driven
+The macro accepts **no attributes** anywhere: not on the table, not on a key, and not on a key inside a
+`for` loop or a nested table. It rejects any it finds rather than ignoring them. Attribute-driven
 variants such as `#[check_params(...)]` and `#[skip_check]` belong to
 [`delegate_and_check_components!`](./delegate_and_check_components.md).
 
@@ -364,7 +364,7 @@ fn print_area(rect: &Rectangle) {
 }
 ```
 
-The payoff is what happens when a second context wants the same capability answered differently. It
+The payoff shows up when a second context wants the same capability answered differently. It
 writes its own provider and its own table entry, and no code that calls `area()` changes:
 
 ```rust
@@ -388,9 +388,9 @@ delegate_components! {
 ```
 
 `Rectangle` and `Square` now both implement `CanCalculateArea`, through different providers reading
-different fields — and a function generic over `CanCalculateArea` serves both without knowing that any
-of it happened. Each context's choice stays one greppable line, which is the whole of what a reader has
-to find to know which implementation runs.
+different fields. A function generic over `CanCalculateArea` serves both without knowing that any of it
+happened. Each context's choice stays one greppable line, which is all a reader needs to find to know
+which implementation runs.
 
 When one context needs a different provider *per type* rather than one provider outright, it opens the
 component and fills the slots:
@@ -416,16 +416,16 @@ check the wiring**, because CGP's wiring is *lazy*: a table with a missing or wr
 compiles, and the failure only surfaces later, where the capability is used.
 
 - **Pair it with [`check_components!`](./check_components.md)** for anything beyond simple wiring. A
-  separate check gives you full control over what is asserted — concrete parameters for generic keys,
-  per-provider layers, and opened or namespaced wiring — which is why larger codebases keep the two
+  separate check gives you full control over what is asserted: concrete parameters for generic keys,
+  per-provider layers, and opened or namespaced wiring. This is why larger codebases keep the two
   macros apart.
 - **Use [`delegate_and_check_components!`](./delegate_and_check_components.md)** when you are getting
   started or the wiring is plain `Component: Provider` entries. It fuses the two so the check cannot be
   forgotten. It accepts this whole grammar, but it derives checks only from mappings keyed on a
   component *name*, so opened, redirected, and namespaced entries are wired and left unchecked with no
   warning.
-- **Use plain `delegate_components!` with no check** for an **aggregate provider** — the
-  [`new`-keyword form](#defining-the-target-at-the-same-time). That target is a provider other contexts
+- **Use plain `delegate_components!` with no check** for an **aggregate provider** (the
+  [`new`-keyword form](#defining-the-target-at-the-same-time)). That target is a provider other contexts
   delegate to rather than a context in its own right, so a context-side check on it asks the wrong
   question: it either passes vacuously or blames the bundle for requirements a real context would have
   met. Verify it through a context that delegates to it instead.
@@ -433,7 +433,7 @@ compiles, and the failure only surfaces later, where the capability is used.
 Two choices inside the table are worth naming as well. Prefer the **`open` statement** over the legacy
 nested `UseDelegate` table for per-type dispatch: it needs no separate table type and no wrapper. And
 reach for a **[namespace](./cgp_namespace.md)** rather than a longer table once the same wiring is
-repeated across contexts, or once one table has grown too long to read — below that threshold, the
+repeated across contexts, or once one table has grown too long to read. Below that threshold, the
 extra hop costs more than it saves.
 
 The one thing not to do is leave a context's wiring unchecked. Which macro you use to check it scales
@@ -516,7 +516,7 @@ impl DelegateComponent<AreaCalculatorComponent> for MyApp {
 }
 ```
 
-which is byte-for-byte what `AreaCalculatorComponent => @AreaCalculatorComponent,` produces. Each
+`AreaCalculatorComponent => @AreaCalculatorComponent,` produces this same impl, byte-for-byte. Each
 `@AreaCalculatorComponent.Rectangle: RectangleArea` entry then stores its provider in that same table
 under a path key:
 
@@ -532,15 +532,15 @@ impl<__Wildcard__>
 The [`RedirectLookup`](../providers/redirect_lookup.md) impl appends the dispatch parameter onto the
 path and reads the result back, so `MyApp: CanCalculateArea<Rectangle>` resolves to `RectangleArea`.
 
-The tail of that key is a **generic `__Wildcard__` parameter rather than `Nil`**, and that is what makes
-it work: the entry matches any path *beginning* with this component and this dispatch type, whatever the
+The tail of that key is a **generic `__Wildcard__` parameter rather than `Nil`**, and this makes it
+work: the entry matches any path *beginning* with this component and this dispatch type, whatever the
 lookup appends after it, so one entry answers the redirect without having to predict the exact length of
 the path reaching it.
 
 One presentational quirk is worth knowing before you compare these listings against your own expansion.
 Both paths above are [`PathCons`](../types/type_level_spines.md) lists, but `cargo cgp expand` prints
-them differently — it resugars the header's redirect target to [`Path!`](./path.md) form while leaving
-the per-entry key as the raw spine — so the same kind of type appears in two spellings in one expansion.
+them differently: it resugars the header's redirect target to [`Path!`](./path.md) form while leaving
+the per-entry key as the raw spine. So the same kind of type appears in two spellings in one expansion.
 
 **A grouped path key expands to the cartesian product**, one impl pair per combination, each keyed on a
 full prefix ending in `__Wildcard__`. So
@@ -549,13 +549,13 @@ braced group does the same with whole tails rather than single segments, produci
 lengths.
 
 **A nested-table value lifts its inner table out** into its own definition, wiring the outer entry to
-`UseDelegate` over the generated type — so the legacy form is equivalent to writing two separate
+`UseDelegate` over the generated type. So the legacy form is equivalent to writing two separate
 `delegate_components!` blocks, the inner one carrying `new`. Its per-value entries key on the same
 parameter `open` keys on; the difference is only that they live in a separate table type.
 
 **The two namespace statements** share one lowering: an impl generic over a `__Key__` and a `__Value__`,
-bounded on the namespace trait with a `Delegate = __Value__` binding, which is what makes the namespace's
-answer the context's answer. A bare `namespace DefaultNamespace;` produces the blanket form:
+bounded on the namespace trait with a `Delegate = __Value__` binding. This makes the namespace's answer
+the context's answer. A bare `namespace DefaultNamespace;` produces the blanket form:
 
 ```rust
 impl<__Key__, __Value__> DelegateComponent<__Key__> for App
@@ -628,16 +628,16 @@ more path; a braced group holds alternative whole remainders and terminates the 
 the braced form can nest. Both fan out to the cartesian product with the rest of the path.
 
 The three segment productions differ in what they permit, which is why they are named apart. A
-`KeySegment` — inside a `PathKey` — may carry its own generic list, and the parameters of every segment
-along one path are merged onto that entry's impls. A `PathSegment` — inside a `PathValue`, the
-right-hand side of a `=>` — carries none, and admits no groups; it is [`Path!`](./path.md)'s own
-production, which is what keeps the two in step. And every `Generics` list on a key is an impl-position
-list, so a bound is accepted (`<T: Clone> BazKey<T>: BazProvider`) and a parameter *default* is not —
+`KeySegment` (inside a `PathKey`) may carry its own generic list, and the parameters of every segment
+along one path are merged onto that entry's impls. A `PathSegment` (inside a `PathValue`, the
+right-hand side of a `=>`) carries none, and admits no groups. It is [`Path!`](./path.md)'s own
+production, which keeps the two in step. And every `Generics` list on a key is an impl-position
+list, so a bound is accepted (`<T: Clone> BazKey<T>: BazProvider`) and a parameter *default* is not:
 `<T = u32>` fails with `invalid impl generics syntax`.
 
 A `ProviderValue`'s nested-table form carries a full `TableBody`, so an inner table accepts every form
 an outer one does. An `InnerTable` is an identifier with an optional generic list rather than a full
-`TargetType` — a nested table always names a fresh struct the macro declares — and its
+`TargetType` (a nested table always names a fresh struct the macro declares), and its
 `BoundFreeGenerics` is a definition-position list: no bounds, no defaults, and a `const` parameter
 written as the bare name. Put a bound on the entry's own generics instead. A bound written on the inner
 table is rejected as `expected ','`, because the value parser tries the nested-table form speculatively
@@ -653,7 +653,7 @@ anywhere and rejects any it finds.
 **Wiring is lazy.** A table with a missing entry, or one naming a provider whose own dependencies are
 unmet, still compiles. The failure appears later, at the place the capability is used, often as a long
 error naming types you did not write. This is the single most common source of confusion with CGP, and
-the answer is to check the table — see [`check_components!`](./check_components.md) — and to run
+the answer is to check the table (see [`check_components!`](./check_components.md)) and to run
 [`cargo cgp check`](/docs/cargo-cgp/check) in place of `cargo check`, which leads
 with the root cause for the classes it recognizes.
 
@@ -671,7 +671,7 @@ The caret sits on the component being opened, so the message blames it rather th
 **`[…]` and `{…}` in a path are not the same group.** A bracketed group holds alternatives for one
 segment and may be followed by more path; a braced group holds whole tails and ends the path. So
 `@FooProviderComponent.{String, u32}.bool: DummyFoo` does not parse, and the message says nothing about
-groups — it reports the trailing `.bool` sitting where the operator should be:
+groups: it reports the trailing `.bool` sitting where the operator should be:
 
 ```text
 error: expected `:`
@@ -687,7 +687,7 @@ names an unresolved type rather than anything about wiring.
 **Two entries claiming one key conflict**, and the compiler reports it as a coherence error rather than
 as a wiring one. This covers the obvious duplicate, an `open` header colliding with an explicit mapping
 for the same component, and a generic `<T> Wrapper<T>` entry overlapping a specific `Wrapper<u64>` one.
-The same applies to a direct entry for a path a joined namespace itself binds — see
+The same applies to a direct entry for a path a joined namespace itself binds: see
 [`cgp_namespace!`](./cgp_namespace.md#gotchas).
 
 ## Related constructs

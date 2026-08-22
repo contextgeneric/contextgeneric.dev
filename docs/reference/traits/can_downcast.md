@@ -20,7 +20,7 @@ with the compiler tracking, at every step, which variants are still possible.
 The narrowing counterpart of [`CanUpcast`](./can_upcast.md), which always succeeds because a wider target
 has a home for everything.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::impls`, with
 `core::marker::PhantomData` for naming the target:

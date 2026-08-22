@@ -24,7 +24,7 @@ type that tracks, in its own type parameters, which fields are present or which 
 possible — so a half-built value and a finished one are *different types*, and using one where the other
 belongs is a compile error rather than a runtime panic.
 
-## Using it
+## Usage
 
 The derive takes no arguments and has no helper attributes, and it accepts either shape:
 

@@ -26,7 +26,7 @@ currently in state `M1`, produce the same field in state `M2`.*
 new way to re-mark a record means writing one impl per source state and then applying it with
 [`TransformMapFields`](./transform_map_fields.md).
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`, along with any non-prelude
 marker you name — `IsOptional` comes from `cgp::core::field::impls`:

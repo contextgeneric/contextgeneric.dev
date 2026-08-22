@@ -34,7 +34,7 @@ The destination type comes from its supertrait [`PartialData`](./partial_data.md
 configuration implements. That division is deliberate: **one names where you are going, the other says
 you have arrived.**
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

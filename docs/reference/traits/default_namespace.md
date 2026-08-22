@@ -45,7 +45,7 @@ It is the simplest of three lookup traits, keyed on the component alone.
 **You name it in one place**: the `namespace` header of a wiring block. The macros generate the impls and
 the forwarding, so this page is mostly about reading what they generate.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough — unlike its two siblings, which are not.
 

@@ -35,7 +35,7 @@ the trait solver during type checking, so it costs nothing at run time.
 It is the general form of [`AppendProduct`](./append_product.md): **append is the single-entry special
 case of concat**, and that is the shortest way to hold both in mind.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`:
 

@@ -44,7 +44,7 @@ component name.** When it is, the entry makes the context inherit the component'
 is any other type — a shape, a tag, a path segment — the same trait is just a lookup table that a provider
 walks. One trait covers both, which is why it underlies both ordinary wiring and the inner dispatch tables.
 
-## Using it
+## Usage
 
 The trait is in the prelude, so `use cgp::prelude::*;` is enough to name it. It carries one associated type
 and no methods:

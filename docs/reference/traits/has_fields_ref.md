@@ -39,7 +39,7 @@ The two shape traits are independent rather than one extending the other, and th
 may be described owned, borrowed, or both. What connects the borrowed description to a value is
 [`ToFieldsRef`](./to_fields_ref.md).
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough. There is no method — like its owned
 counterpart, this trait only names a type.

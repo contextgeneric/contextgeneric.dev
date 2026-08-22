@@ -33,7 +33,7 @@ The other half of the payoff is that steps are decoupled. Because each `build_fi
 type-level tag rather than by calling a method on the concrete type, generic code can fill in a field of a
 struct it does not know, and two independent implementations can each contribute part of one value.
 
-## Using it
+## Usage
 
 The macro is a plain derive on a struct. It takes no arguments and has no helper attributes:
 

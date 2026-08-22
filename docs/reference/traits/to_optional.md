@@ -28,7 +28,7 @@ ends it.
 **It is the conversion `optional_builder()` is built from**, which is the shortest way to describe both:
 one starts fresh and converts, the other converts something you already have.
 
-## Using it
+## Usage
 
 **It is not in the prelude.** Import it from `cgp::extra::field::impls`:
 

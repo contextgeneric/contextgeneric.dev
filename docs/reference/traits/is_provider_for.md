@@ -40,7 +40,7 @@ constraint failed.
 the difference between "the trait is not implemented" and "the field `name` is missing on `App`", and it is
 the mechanism [`check_components!`](../macros/check_components.md) leans on to produce the second.
 
-## Using it
+## Usage
 
 The trait is in the prelude, so `use cgp::prelude::*;` names it. It is empty, with three parameters:
 

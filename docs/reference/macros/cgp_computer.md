@@ -8,7 +8,7 @@ Define a `Computer` provider from a plain function.
 
 ## Overview
 
-CGP models computation as a family of components varying along three axes — synchronous or async, fallible
+CGP models computation as a family of components varying along three axes: synchronous or async, fallible
 or not, taking an input or not. A provider in that family is a struct with one or more impls threading a
 **context** (the type the capability runs against, which supplies the values it needs as its fields), a
 phantom `Code` tag, and an `Input`. Written by hand for a computation as small as "add two numbers", that is
@@ -23,19 +23,21 @@ fn add(a: u64, b: u64) -> u64 {
 }
 ```
 
-From that the macro produces the provider struct `Add`, an impl of the right base trait, and — the part
-worth understanding — the wiring that makes the *same function* answer the whole family. `Add` satisfies
+From that the macro produces the provider struct `Add`, an impl of the right base trait, and the wiring
+that makes the *same function* answer the whole family. That wiring is the part worth understanding.
+`Add` satisfies
 `compute`, `try_compute`, `compute_async`, and `handle`, along with their by-reference forms, without you
 implementing any of them.
 
-That last property is what the macro is really for. The family exists so a provider can declare exactly the
-capabilities it has, and the [promotion combinators](../providers/handler_combinators.md) exist so a simpler
-provider can stand in where a more capable one is expected — an infallible computation is a fallible one
-that never fails, a synchronous one is an async one that never awaits. `#[cgp_computer]` picks the narrowest
+That last property is the whole reason for the macro. The family exists so a provider can declare exactly
+the capabilities it has, and the [promotion combinators](../providers/handler_combinators.md) exist so a
+simpler provider can stand in where a more capable one is expected: an infallible computation is a
+fallible one that never fails, a synchronous one is an async one that never awaits. `#[cgp_computer]` picks
+the narrowest
 base that fits your function and wires the promotions for the rest, so you write one body and get every
 shape.
 
-## Using it
+## Usage
 
 Apply the attribute to a free function. It takes an optional provider name:
 
@@ -51,7 +53,7 @@ fn add(a: u64, b: u64) -> u64 {
 }
 ```
 
-Omitted, the provider struct takes the function name in PascalCase — `add` becomes `Add`. Given, the
+Omitted, the provider struct takes the function name in PascalCase: `add` becomes `Add`. Given, the
 argument is used verbatim.
 
 The function's shape decides everything else:
@@ -61,7 +63,7 @@ The function's shape decides everything else:
 - **Its return type becomes the output.**
 - **It must not take `self`.** A handler provider has no receiver; the context is supplied separately by
   the handler machinery.
-- **It may be `async`**, and it may return a `Result`. Those two choices are what select the base trait.
+- **It may be `async`**, and it may return a `Result`. Those two choices select the base trait.
 - **Its generics and `where` clause carry over** to the generated impl, so the provider can itself be
   generic.
 
@@ -77,8 +79,8 @@ promotion bundle:
 | `async fn f(..) -> T` | `AsyncComputer` | `PromoteAsyncComputer<Self>` |
 | `async fn f(..) -> Result<T, E>` | `AsyncComputer` | `PromoteHandler<Self>` |
 
-The `Result` row is worth reading twice. The base trait stays `Computer` — its `Output` is simply the
-`Result` type as written — and what changes is the *bundle*, which is what makes `try_compute` and `handle`
+The `Result` row is worth reading twice. The base trait stays `Computer`, and its `Output` is simply the
+`Result` type as written. Only the *bundle* changes, and it makes `try_compute` and `handle`
 surface the `Ok`/`Err` outcome as success or failure rather than handing back a `Result` as a plain value.
 
 ## Examples
@@ -149,12 +151,12 @@ exists for, and it is the shortest route into the handler family.
 - **Use [`#[cgp_fn]`](./cgp_fn.md) when what you want is a capability on the context, not a pipeline step.**
   The two look similar and differ in what they produce: `#[cgp_fn]` gives a trait a context implements,
   called as `self.thing()`; `#[cgp_computer]` gives a *provider* that gets wired into a handler component and
-  composed with combinators. If you are not building a pipeline, `#[cgp_fn]` is what you want.
+  composed with combinators. If you are not building a pipeline, reach for `#[cgp_fn]` instead.
 - **Wire the [handler combinators](../providers/handler_combinators.md) directly for composition.** The macro
   produces one step; `PipeHandlers` and friends chain them.
 
 One thing not to do is reach for the handler family because a capability happens to transform a value. The
-family earns its keep when computations are *composed* — piped, dispatched on a `Code` tag, promoted between
+family earns its keep when computations are *composed*: piped, dispatched on a `Code` tag, promoted between
 variants. A single transform with one caller is a method.
 
 ## Under the hood
@@ -198,8 +200,8 @@ impl<__Context__, __Code__> Computer<__Context__, __Code__, (u64, u64)> for Add 
 }
 ```
 
-[`#[cgp_new_provider]`](./cgp_provider.md) is what declares `pub struct Add;` and derives the
-[`IsProviderFor`](../traits/is_provider_for.md) impl — whose parameter tuple here is
+[`#[cgp_new_provider]`](./cgp_provider.md) declares `pub struct Add;` and derives the
+[`IsProviderFor`](../traits/is_provider_for.md) impl, whose parameter tuple here is
 `(__Code__, (u64, u64))`, the code tag and the input. The context and code parameters are introduced under
 the reserved names `__Context__` and `__Code__`, and the body ignores both.
 
@@ -224,12 +226,12 @@ delegate_components! {
 
 Note the **`->` operator** rather than `:`. It delegates each key to *the value's own entry for that key*
 rather than to the value itself, so `Add` inherits whatever `PromoteComputer<Self>` resolves each component
-to — and [`PromoteComputer`](../providers/handler_combinators.md) is itself a table of single-step promoters.
+to. [`PromoteComputer`](../providers/handler_combinators.md) is itself a table of single-step promoters.
 `ComputerComponent` is absent from the list because `Add` implements it directly.
 
 The other three combinations differ only in which base trait is implemented and which bundle is named. An
 `async` function implements `AsyncComputer` instead, its method is `compute_async` and awaits the call, and
-it delegates a smaller set — `AsyncComputerRefComponent`, `HandlerComponent`, `HandlerRefComponent` — since
+it delegates a smaller set (`AsyncComputerRefComponent`, `HandlerComponent`, `HandlerRefComponent`), since
 the synchronous members are not derivable from an async base. A `Result`-returning function keeps its base
 trait and swaps the bundle to `PromoteTryComputer<Self>` or, when also async, `PromoteHandler<Self>`.
 
@@ -271,7 +273,7 @@ input is `(T)`, which Rust treats as plain `T`.
 **The fallible forms need an error type on the context.** `try_compute` and `handle` name the context's
 abstract error, so a context wiring the provider without an
 [`ErrorTypeProviderComponent`](../components/has_error_type.md) fails on those members while `compute` works
-fine — an error about the error type, arriving only for part of the family. Note also that the wiring key is
+fine. This is an error about the error type, arriving only for part of the family. Note also that the wiring key is
 **not in the prelude**: it has to be imported from `cgp::core::error`, and forgetting that reports the
 component as an unresolved type rather than as a missing import.
 

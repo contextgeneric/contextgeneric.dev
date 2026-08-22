@@ -31,7 +31,7 @@ ergonomic surface stands on: an [`#[implicit]`](../attributes/implicit.md) argum
 wiring entry all generate the bound above from a name you already wrote. What you write is the derive on the
 struct.
 
-## Using it
+## Usage
 
 The macro is a plain derive on a struct. It takes no arguments and has no helper attributes:
 

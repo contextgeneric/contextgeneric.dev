@@ -36,7 +36,7 @@ so the code stops compiling until it is handled.
 The family is the mirror of the [builder](./has_builder.md): a builder tracks which fields are *present*,
 an extractor tracks which variants are still *possible*.
 
-## Using it
+## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 

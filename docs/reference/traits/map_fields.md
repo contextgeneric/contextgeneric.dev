@@ -39,7 +39,7 @@ It is the transforming member of the three product operations, and the only one 
 spines: it walks `Cons`/`Nil` for a product and `Either`/`Void` for a sum. That is what lets one
 operation produce both a partial record and a partial enum.
 
-## Using it
+## Usage
 
 **It is not in the prelude**, and neither is `IsOptional`. Import the trait from
 `cgp::core::field::traits` and any non-prelude marker from `cgp::core::field::impls`:

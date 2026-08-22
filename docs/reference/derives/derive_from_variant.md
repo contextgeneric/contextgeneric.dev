@@ -26,7 +26,7 @@ parameter, so one function can build whichever variant it was asked for, of whic
 tracking, and no traits of its own — just a constructor per variant. It is the counterpart to
 [`#[derive(ExtractField)]`](./derive_extract_field.md), which takes a variant out; this one puts a variant in.
 
-## Using it
+## Usage
 
 The macro is a plain derive on an enum. It takes no arguments and has no helper attributes:
 

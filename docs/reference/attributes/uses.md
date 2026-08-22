@@ -37,7 +37,7 @@ One property of that bound is worth naming, because it is the whole point of put
 the implementation. It lands on the implementation *only*, never on the trait, so a caller who bounds on
 the capability never sees it and never has to repeat it. What an implementation needs is its own business.
 
-## Using it
+## Usage
 
 `#[uses(...)]` takes a comma-separated list of bounds, each becoming a `Self:` predicate on the generated
 implementation:
