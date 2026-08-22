@@ -278,8 +278,8 @@ any other. The `Self` form produces no provider at all.
 Reach for something else in two cases.
 
 - **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
-  function with no component, no provider, and no wiring, which is the bottom rung of
-  [How much CGP to use](/docs/concepts/modularity-hierarchy).
+  function with no component, no provider, and no wiring, which is the bottom tier of
+  [Modularity Hierarchy](/docs/concepts/modularity-hierarchy).
 - **You want to implement the consumer trait directly on one concrete type.** Use the
   [`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which keeps the companion
   attributes while emitting an ordinary impl.

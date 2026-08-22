@@ -446,7 +446,7 @@ The ideas behind it:
 - [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the trait split this
   macro creates, developed at length.
 - [Bypassing coherence](/docs/concepts/coherence) — why the split exists at all.
-- [How much CGP to use](/docs/concepts/modularity-hierarchy) — when a component is the right rung,
+- [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) — when a component is the right tier,
   and when it is more than the problem needs.
 
 ## Source

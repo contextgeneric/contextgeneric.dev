@@ -1,8 +1,7 @@
 //! Code from the pages under `docs/concepts/`, one module per page.
 //!
-//! All eighteen pages of that section are written, and the seventeen that show code have a module here.
-//! The two that show none — the section index, and *How much CGP to use*, which is a decision guide
-//! built from prose and tables — do not.
+//! All eighteen pages of that section are written, and the ones that show code have a module here.
+//! The section index shows none, so it has no module.
 
 pub mod abstract_types;
 pub mod aggregate_providers;
@@ -17,6 +16,7 @@ pub mod higher_order_providers;
 pub mod impl_side_dependencies;
 pub mod implicit_arguments;
 pub mod modular_error_handling;
+pub mod modularity_hierarchy;
 pub mod monadic_handlers;
 pub mod namespaces;
 pub mod send_bounds;

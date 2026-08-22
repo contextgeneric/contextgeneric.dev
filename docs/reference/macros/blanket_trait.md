@@ -300,7 +300,7 @@ The ideas behind it:
 
 - [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the idea this macro automates —
   requirements that live on the impl rather than the interface.
-- [How much CGP to use](/docs/concepts/modularity-hierarchy) — where a blanket trait sits between a
+- [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) — where a blanket trait sits between a
   plain trait and a full component.
 
 ## Source

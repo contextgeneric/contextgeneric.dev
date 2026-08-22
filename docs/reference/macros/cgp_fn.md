@@ -355,7 +355,7 @@ The ideas behind it:
 
 - [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the `where`-clause injection
   this macro is built on.
-- [How much CGP to use](/docs/concepts/modularity-hierarchy) — the ladder this sits at the bottom
+- [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) — the hierarchy this sits at the bottom
   of.
 
 ## Source

@@ -187,8 +187,8 @@ type names exactly one, and resolution is unambiguous.
 
 How far the idea scales is a separate question. Here each type picks one provider, which is the simplest
 shape. A type you define to stand for your own application can pick its own providers, and the same
-capability can even resolve differently for the same data in two applications. Those are higher rungs of
-the same ladder, worked out in [How much CGP to use](./modularity-hierarchy.md).
+capability can even resolve differently for the same data in two applications. Those are higher tiers of
+the same hierarchy, worked out in [Modularity Hierarchy](./modularity-hierarchy.md).
 
 ## What it costs
 
@@ -216,7 +216,7 @@ it recognizes. It is a `v0.1.0-alpha` that reshapes the core wiring errors rathe
 
 ## Where to go next
 
-[How much CGP to use](./modularity-hierarchy.md) is the page to read next if this argument landed, because
+[Modularity Hierarchy](./modularity-hierarchy.md) is the page to read next if this argument landed, because
 a reader who has just been told coherence can be escaped needs to hear immediately that most code should
 not bother. It lays out the range from a plain trait to fully wired components and argues for climbing no
 higher than a problem needs.

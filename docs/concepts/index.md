@@ -27,9 +27,9 @@ the rule buys. Almost everything else here is downstream of it.
 how CGP works.** It covers the trait split at the centre of the design, one trait you call and another
 you implement, and how a call finds its way from one to the other.
 
-**Read [How much CGP to use](./modularity-hierarchy.md) first if you are deciding whether to adopt
-it.** It lays out the range from an ordinary Rust trait to fully wired components as a ladder, and
-argues for climbing no higher than a problem requires.
+**Read [Modularity Hierarchy](./modularity-hierarchy.md) first if you are deciding whether to adopt
+it.** It lays out the range from an ordinary Rust trait to fully wired components as a hierarchy of
+five tiers, and argues for going no higher than a problem requires.
 
 **New to Rust's traits and generics?** These pages explain the reasoning behind CGP and assume you are
 comfortable with traits and generic bounds. If you are not yet, the [tutorials](/docs/tutorials/hello)
@@ -66,8 +66,8 @@ as it goes, turning a small language into types the compiler interprets.
 
 **Two pages stand slightly apart.** [Recovering `Send` bounds](./send-bounds.md) is a workaround for a
 gap in stable Rust rather than a CGP idea, and it matters as soon as an async CGP task is spawned.
-[How much CGP to use](./modularity-hierarchy.md) is a decision guide rather than an explanation, and
-it is the page to reach for when the question is how far to go.
+[Modularity Hierarchy](./modularity-hierarchy.md) explains the five tiers of the hierarchy and then
+turns into a decision guide, and it is the page to reach for when the question is how far to go.
 
 ---
 
