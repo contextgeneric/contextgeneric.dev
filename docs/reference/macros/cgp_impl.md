@@ -26,8 +26,10 @@ where
 ```
 
 Every part of that is correct, and almost every part of it is unfamiliar. The trait carries a
-parameter you did not write, `Self` is a type with no values, and there is no `self` anywhere. This
-hides a simple fact: it is an implementation of `CanCalculateArea`.
+parameter you did not write, `Self` is a type with no values, and there is no `self` anywhere. Written
+this way, the code does not read as an implementation of `CanCalculateArea`, even though that is
+exactly what it is. [Bypassing coherence](/docs/concepts/coherence) is why the trait needs a `Self` it
+owns instead of the type the capability is really about.
 
 `#[cgp_impl]` gives you back the familiar shape. Write the implementation as though you were
 implementing the consumer trait directly, with `self` and `Self` and the signatures from the original
@@ -48,12 +50,12 @@ where
 The macro performs the rewrite for you. Write providers this way. The macro produces the inside-out
 form shown earlier, and you will meet that form in generated code.
 
-One fact the convenience must not hide: **inside a `#[cgp_impl]` block, `self` and `Self` mean the
-context, not the provider.** The context is the type the capability runs against, and it supplies the
-values it needs as its own fields. The provider is a type-level name with no fields and no value: it
-is never constructed, and there is nothing in it to read. The macro rewrites `self` to the context
-value and `Self` to the context type because the context is the only thing that exists when the
-method runs.
+This convenience has one exception worth stating plainly: **inside a `#[cgp_impl]` block, `self` and
+`Self` mean the context, not the provider.** The context is the type the capability runs against, and
+it supplies the values it needs as its own fields. The provider is a type-level name with no fields
+and no value: it is never constructed, and there is nothing in it to read. The macro rewrites `self`
+to the context value and `Self` to the context type because the context is the only thing that exists
+when the method runs.
 
 ## Usage
 
@@ -78,11 +80,19 @@ where
 | provider name | Required. The type that takes the `Self` position in the generated provider impl. |
 | `: ComponentType` | Optional. Overrides which component this provider is registered as implementing. Defaults to the provider trait's name plus `Component`. |
 
+The `for Context` clause is optional. Omitting it, as every example on this page does, lets the macro
+insert a generic context parameter for you: write `impl AreaCalculator`, not
+`impl<Context> AreaCalculator for Context`. Name the context explicitly only to bound it in a way the
+omitted form cannot express, such as a lifetime or a higher-ranked bound, or to serve one *concrete*
+context alone, as in `impl AreaCalculator for Rectangle`.
+[When to reach for it](#when-to-reach-for-it-and-when-not) says more about choosing between these
+forms.
+
 Without `new`, the provider struct must already exist. A wiring entry naming a struct nothing
 declares is a common and confusing first error.
 
 A provider may be generic. Parameters go in the attribute and in the impl generics together, which is
-how a higher-order provider takes an inner provider:
+how a [higher-order provider](/docs/concepts/higher-order-providers) takes an inner provider:
 
 ```rust
 #[cgp_impl(new ScaledAreaCalculator<InnerCalculator>)]
@@ -124,33 +134,37 @@ The first block's `new` declares `pub struct RectangleGeometry;`; the second blo
 struct without `new` and adds a second impl to it. Writing `new` on more than one block for the same
 struct is a duplicate-definition error.
 
-**A struct whose shape `new` cannot express** is declared explicitly instead, once, above every
-`#[cgp_impl]` block that targets it. A default generic parameter, such as
-`pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`, is the case you meet most often:
+Declaring the struct explicitly is an equally valid style for this same case: write
+`pub struct RectangleGeometry;` once, above both blocks, and omit `new` from all of them rather than
+from just the second. Either style works; declaring the struct explicitly reads more consistently once
+there are more than two or three blocks, since a reader does not have to find the one block carrying
+`new` to know where the struct comes from. Neither style requires
+[`#[cgp_provider]`](./cgp_provider.md): the struct is only being declared once and reused, and the body
+of every block still reads as an ordinary trait impl.
+
+**A struct whose shape `new` cannot express must be declared explicitly, because `new`'s own grammar is
+narrow.** `#[cgp_impl(new ...)]` desugars to [`#[cgp_new_provider]`](./cgp_new_provider.md), and that
+macro can only emit one of two shapes: a plain provider name becomes a unit struct with no fields, and
+a generic provider becomes a tuple struct with one public
+[`PhantomData`](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) field wrapping all of its
+generic parameters together, always `pub` and never with a default. Anything the struct needs outside
+that shape has to be written by hand.
+
+The case you meet most often is a default on a higher-order provider's inner parameter, so an
+application can omit the inner provider and fall back to
+[`UseContext`](../providers/use_context.md), which routes back through the context's own
+implementation of the component. If `ScaledAreaCalculator` from [Usage](#usage) should default this
+way, `new` has no syntax for it, and the struct has to be declared by hand instead:
 
 ```rust
-pub struct RectangleGeometry;
-
-#[cgp_impl(RectangleGeometry)]
-impl AreaCalculator {
-    fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
-        width * height
-    }
-}
-
-#[cgp_impl(RectangleGeometry)]
-impl PerimeterCalculator {
-    fn perimeter(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
-        2.0 * (width + height)
-    }
-}
+pub struct ScaledAreaCalculator<InnerCalculator = UseContext>(PhantomData<InnerCalculator>);
 ```
 
-Either style works for a struct implementing several components. Declaring it explicitly reads more
-consistently once there are more than two or three blocks, since a reader does not have to find the
-one block carrying `new` to know where the struct comes from. Neither style requires
-[`#[cgp_provider]`](./cgp_provider.md): the struct is only being declared once and reused, and the
-body of every block still reads as an ordinary trait impl.
+Every `#[cgp_impl(ScaledAreaCalculator<InnerCalculator>)]` block implementing a component for it then
+looks exactly like the block shown in [Usage](#usage), minus `new`. The same reasoning covers any other
+shape `new` cannot spell: an extra derive, a visibility narrower than `pub`, or fields beyond that one
+blanket `PhantomData`. Declare the struct with whatever shape it needs, and keep every implementing
+block written with `#[cgp_impl(ProviderName)]`.
 
 ### Companion attributes
 
@@ -166,16 +180,17 @@ let an idiomatic provider state what it needs.
 - [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound in a
   higher-order provider.
 - [`#[default_impl(...)]`](../traits/default_namespace.md) registers the provider as a namespace's
-  per-type default, for use with [`cgp_namespace!`](./cgp_namespace.md).
+  per-type default, emitting a delegation impl alongside it, for use with
+  [`cgp_namespace!`](./cgp_namespace.md).
 
 Each may be repeated. All except `#[use_provider]` also take a comma-separated list inside one
 attribute, which is the form to prefer: `#[uses(HasName, CanRaiseError<String>)]` reads as one
 dependency list. `#[use_provider]` is the exception because its own argument already ends in a bound
 list, so a second pair after a comma has nowhere to go; write one attribute per inner provider.
 
-Three attributes that appear on other CGP macros are not read here. `#[extend]`, `#[extend_where]`,
-and `#[impl_generics]` all act on a *generated trait definition*, which a provider impl does not have,
-so they belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
+`#[cgp_impl]` does not read three attributes you may see on other CGP macros: `#[extend]`,
+`#[extend_where]`, and `#[impl_generics]`. All three act on a *generated trait definition*, which a
+provider impl does not have, so they belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
 [`#[cgp_component]`](./cgp_component.md). Writing one here leaves a name nothing resolves; see
 [Gotchas](#gotchas). An impl-side bound that really is impl-side goes in the block's own `where`
 clause, which passes through untouched.
@@ -183,9 +198,11 @@ clause, which passes through untouched.
 ### Implementing the consumer trait directly
 
 Naming `Self` as the provider bypasses the rewrite entirely and emits the block unchanged as an
-ordinary consumer-trait impl on a concrete type. This form requires the `for Context` clause, and it is
-useful when you want a hand-written impl while still applying the companion attributes. Because the
-macro does not generate a provider struct here, `new` and the component override have no effect.
+ordinary consumer-trait impl on a concrete type. This form requires the `for Context` clause. Omitting
+it is rejected with an `Expected context type to be specified` error, since there is no context left to
+find. The form is useful when you want a hand-written impl while still applying the companion
+attributes. Because the macro does not generate a provider struct here, `new` and the component
+override have no effect; see [Gotchas](#gotchas) for what happens if you write them anyway.
 
 ```rust
 #[cgp_impl(Self)]
@@ -218,9 +235,9 @@ impl AreaCalculator {
 }
 ```
 
-The two `#[implicit]` parameters are removed from the signature and replaced by reads of the `width`
-and `height` fields, so the provider requires a context that has them. The `new` keyword defines
-`RectangleArea`. A concrete type then wires the component and calls through it:
+The macro removes the two `#[implicit]` parameters from the signature and replaces them with reads of
+the `width` and `height` fields, so the provider requires a context that has them. The `new` keyword
+defines `RectangleArea`. A concrete type then wires the component and calls through it:
 
 ```rust
 #[derive(HasField)]
@@ -245,32 +262,30 @@ fn print_area(rect: &Rectangle) {
 **Write providers with `#[cgp_impl]`.** It is the recommended form for every provider, and the cases
 that call for something else are narrower than they look.
 
-Prefer the unqualified header `impl AreaCalculator`, with no `for Context`, and let the macro insert
-the context parameter. This keeps a provider reading like an ordinary trait impl. Name the context
-explicitly, as in `impl<Context> AreaCalculator for Context`, only when you actually need to say
-something about it that the sugar cannot express, such as a lifetime or a higher-ranked bound.
+Prefer the unqualified header from [Usage](#usage), `impl AreaCalculator` with no `for Context`,
+letting the macro insert the context parameter, which keeps a provider reading like an ordinary trait
+impl. Name the context explicitly only when the sugar genuinely falls short, such as a lifetime or a
+higher-ranked bound.
 
-That named context may be a *concrete* type rather than a parameter, as in
-`impl AreaCalculator for Rectangle`, which writes a provider serving only that one context. Keep it
-distinct from the
-[`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which looks similar and does
-something else: this one still produces a named provider that a context wires like any other, and that
-one produces no provider at all.
+Naming a *concrete* type as that context, as in `impl AreaCalculator for Rectangle`, is a different
+choice worth keeping distinct from the
+[`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which looks similar but does
+something else. The concrete-context form still produces a named provider that a context wires like
+any other. The `Self` form produces no provider at all.
 
 Reach for something else in two cases.
 
 - **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
-  function with no component, no provider, and no wiring.
+  function with no component, no provider, and no wiring, which is the bottom rung of
+  [How much CGP to use](/docs/concepts/modularity-hierarchy).
 - **You want to implement the consumer trait directly on one concrete type.** Use the
   [`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which keeps the companion
   attributes while emitting an ordinary impl.
 
-A struct that `new` cannot declare, or one [shared by several
-`#[cgp_impl]` blocks](#declaring-the-provider-struct-separately), is not by itself a reason to drop to
-[`#[cgp_provider]`](./cgp_provider.md): declare the struct yourself and keep writing every block with
-`#[cgp_impl(ProviderName)]`, just without `new`. Reach for the raw form only when you need the
-inside-out provider-trait shape itself: a bound the sugar cannot express, or a rare construct
-`#[cgp_impl]`'s rewrite does not support, whether from a limitation or a bug.
+Needing to [declare the provider struct separately](#declaring-the-provider-struct-separately) is not
+by itself a reason to drop to [`#[cgp_provider]`](./cgp_provider.md). Reach for the raw form only when
+you need the inside-out provider-trait shape itself: a bound the sugar cannot express, or a rare
+construct `#[cgp_impl]`'s rewrite does not support, whether from a limitation or a bug.
 
 ## Under the hood
 
@@ -297,8 +312,8 @@ impl<Context> FooProvider for Context {
 }
 ```
 
-the macro produces the provider impl, an `IsProviderFor` impl, and, because `new` was given, the
-provider struct:
+Because `new` was given, the macro also produces the provider struct alongside the provider impl and
+its `IsProviderFor` impl:
 
 ```rust
 impl<Context> FooProvider<Context> for ValueToString {
@@ -315,8 +330,8 @@ pub struct ValueToString;
 Three things changed. The trait gained `Context` as its leading argument. The `Self` type became the
 provider. `&self` became the explicit parameter `__context__: &Context`. The receiver identifier is
 the snake-cased context type wrapped in double underscores, so both `Context` and the default
-`__Context__` become `__context__`. Every `self` in a body is rewritten to that identifier, and every
-`Self` to the context type.
+`__Context__` become `__context__`. The macro rewrites every `self` in a body to that identifier, and
+every `Self` to the context type.
 
 When `for Context` is omitted the only difference is that the inserted parameter is `__Context__`. The
 earlier `RectangleArea` example is exactly equivalent to writing it out:
@@ -334,15 +349,15 @@ where
 ```
 
 The generated `IsProviderFor` impl copies the provider impl's signature, drops the body, and keeps the
-`where` clause. This is how the provider's dependencies are captured for error reporting. Its
-arguments are the component name, the context, and a tuple of any remaining provider-trait parameters,
+`where` clause, capturing the provider's dependencies for error reporting. Its arguments are the
+component name, the context, and a tuple of any remaining provider-trait parameters,
 so a provider for `ComputerRef<Context, Code, Input>` gets
 `IsProviderFor<ComputerRefComponent, Context, (Code, Input)>`.
 
-**An associated type the block declares is exempt.** `Self::Output` in a provider that supplies
-`type Output` is left alone, because the macro gathers the block's own associated-type names first and
-skips any `Self::` path starting with one. In the emitted impl, `Self` is the provider struct, which is
-the type that declares `Output`, so the path resolves as written. Every other `Self` in the block is
+**An associated type the block declares is exempt.** The macro leaves `Self::Output` alone in a
+provider that supplies `type Output`, because it gathers the block's own associated-type names first
+and skips any `Self::` path starting with one. In the emitted impl, `Self` is the provider struct,
+which is the type that declares `Output`, so the path still resolves. Every other `Self` in the block is
 still rewritten, including one naming an abstract type the *context* supplies. Associated consts are
 not covered by the exemption; see [Gotchas](#gotchas).
 
@@ -397,14 +412,23 @@ eventually create. A `self::` *module* path inside a macro invocation is safe: t
 distinguishes the two meanings of `self`, and only the value form is rewritten.
 
 **A misplaced companion attribute is reported by the compiler, not by the macro.** An attribute
-`#[cgp_impl]` does not recognize is re-attached to the generated provider impl, which lets
-`#[allow(...)]` ride through. A stray `#[extend(HasName)]` therefore produces a *cannot find attribute*
-resolution error pointing at the impl, with no mention of `#[cgp_impl]`.
+`#[cgp_impl]` does not recognize is re-attached to the generated provider impl rather than dropped, so
+`#[allow(...)]` and similar attributes carry over unaffected. A stray `#[extend(HasName)]` therefore
+produces a *cannot find attribute* resolution error pointing at the impl, with no mention of
+`#[cgp_impl]`.
+
+**`new` and a component override are accepted, and ignored, on the `Self` form.** Writing
+`#[cgp_impl(new Self)]` or `#[cgp_impl(Self: SomeComponent)]` parses and compiles, but has exactly the
+same effect as a plain `#[cgp_impl(Self)]`: no struct is declared, and the component override is never
+consulted, because this form builds neither a provider nor an `IsProviderFor` impl for either one to
+apply to. Leave both out.
 
 ## Related constructs
 
 - [`#[cgp_component]`](./cgp_component.md) — defines the component this implements.
 - [`#[cgp_provider]`](./cgp_provider.md) — the lower-level form `#[cgp_impl]` desugars to.
+- [`#[cgp_new_provider]`](./cgp_new_provider.md) — `#[cgp_provider]` with the struct declared too,
+  equivalent to `#[cgp_impl(new ...)]`.
 - [`#[cgp_fn]`](./cgp_fn.md) — the lighter alternative when one implementation is enough.
 - [`delegate_components!`](./delegate_components.md) — wires the provider onto a type.
 - [`check_components!`](./check_components.md) — verifies the wiring resolves.
@@ -418,6 +442,11 @@ The ideas behind it:
   this macro hides.
 - [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — what the block's `where` clause
   is really doing.
+
+To see it taught as a sequence of small steps rather than as a reference, the
+[Static Dispatch tutorial](/docs/tutorials/area-calculation/static-dispatch) builds `#[cgp_component]`
+and `#[cgp_impl]` up from the same coherence failure that
+[Bypassing coherence](/docs/concepts/coherence) explains from the other side.
 
 ## Source
 
