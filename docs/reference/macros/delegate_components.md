@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'delegate_components!'
+sidebar_position: 4
 ---
 
 # `delegate_components!`

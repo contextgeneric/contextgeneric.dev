@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'Symbol!'
+sidebar_position: 16
 ---
 
 # `Symbol!`
@@ -119,7 +120,7 @@ assert_eq!(s.to_string(), "hello");
 ## When to reach for it, and when not
 
 **Write `Symbol!` when a wiring entry has to name a field**, and let the macros produce it everywhere else.
-That is the honest summary: the construct is load-bearing and mostly generated.
+That is the honest summary: the construct is essential and mostly generated.
 
 - **Use an [`#[implicit]`](../attributes/implicit.md) argument to read a field.** The parameter's name becomes
   the tag, so you never type one.
@@ -132,7 +133,7 @@ That is the honest summary: the construct is load-bearing and mostly generated.
 Two things it is not. It is **not a runtime string**: there is no `&str` inside it, and the `Display` impl
 above reconstructs the text from the type rather than reading a stored value. And it is **not a general
 type-level string facility** to build programs out of; it exists to key field and variant lookups, and the
-[`StaticFormat`](../traits/static_format.md) traits recover text from one when that is genuinely
+[`StaticFormat`](../traits/static_format.md) traits recover text from one when that is
 needed.
 
 ## Under the hood

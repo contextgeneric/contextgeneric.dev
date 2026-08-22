@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[async_trait]'
+sidebar_position: 12
 ---
 
 # `#[async_trait]`

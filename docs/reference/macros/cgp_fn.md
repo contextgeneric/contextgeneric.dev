@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_fn]'
+sidebar_position: 3
 ---
 
 # `#[cgp_fn]`
@@ -200,7 +201,7 @@ Reach for something else in three cases.
   when it needs values.
 - **A generic must vary per call.** A generic parameter here goes on the trait rather than the method,
   so it is fixed by whatever satisfies the bounds for a given context rather than chosen at each call
-  site. A capability that genuinely needs a per-call type parameter wants a hand-written blanket impl
+  site. A capability that needs a per-call type parameter wants a hand-written blanket impl
   or a component.
 
 One decision inside the macro is worth making deliberately rather than by default: **where a type the
@@ -299,8 +300,7 @@ Two smaller placements are worth knowing because neither is visible in the sourc
 function's visibility becomes the trait's**, and the impl's method keeps inherited visibility. So
 `pub fn rectangle_area` yields `pub trait RectangleArea`, and a private `fn` yields a private trait
 usable only in its own module. And **the macro copies an attribute it does not recognize onto both
-items**, which lets `#[allow(...)]`, `#[doc]`, or a doc comment ride through and apply to the trait and
-the impl alike.
+items**, so `#[allow(...)]`, `#[doc]`, or a doc comment carries onto the trait and the impl alike.
 
 <details>
 <summary>Formal grammar</summary>

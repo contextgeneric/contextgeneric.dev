@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'cgp_namespace!'
+sidebar_position: 10
 ---
 
 # `cgp_namespace!`
@@ -8,8 +9,8 @@ Define a reusable, inheritable wiring table that many contexts can join.
 
 ## Overview
 
-With [`delegate_components!`](./delegate_components.md) alone, every **context** — the type the capability
-runs against, which supplies the values it needs as its fields — spells out its own wiring entry by entry.
+With [`delegate_components!`](./delegate_components.md) alone, every **context** (the type the capability
+runs against, which supplies the values it needs as its fields) spells out its own wiring entry by entry.
 Two contexts that should share the same providers repeat the same lines, and a table grows with the number
 of components until the wiring is the largest thing in the file.
 
@@ -25,7 +26,7 @@ cgp_namespace! {
 
 A context then **joins** it with one line inside its own table, after which every lookup it does not wire
 directly falls through to the namespace. Its own entries win, so a namespace behaves like a base
-configuration each context specializes — most of the wiring for free, and a handful of overrides where they
+configuration each context specializes: most of the wiring for free, and a handful of overrides where they
 matter.
 
 That inherit-and-override behaviour is why **a namespace is how CGP expresses presets.** There is no
@@ -33,8 +34,8 @@ separate preset construct: a library publishes a namespace of sensible defaults,
 changes the few entries it cares about. Namespaces can also inherit from one another, so a base can be
 extended into a richer one that every downstream context picks up.
 
-One structural point saves confusion later: **a namespace is not a context.** It is a trait — named after
-the namespace — carrying a `Delegate` associated type and implemented once per key. Nothing instantiates it,
+One structural point saves confusion later: **a namespace is not a context.** It is a trait, named after
+the namespace, carrying a `Delegate` associated type and implemented once per key. Nothing instantiates it,
 and it holds no wiring of its own at the context level; it only says where a lookup should go next.
 
 ## Usage
@@ -62,31 +63,31 @@ A namespace body accepts two kinds of entry, and they do different things.
 | `Key => @path` | **Redirect.** Asked for `Key`, look up `@path` instead. The provider is decided wherever the path lands. |
 | `Key: Provider` | **Bind.** Asked for `Key`, resolve straight to `Provider`, as in `delegate_components!`. |
 
-Redirection is what makes namespaces composable: because a lookup is keyed by a *path* rather than a bare
+Redirection makes namespaces composable: because a lookup is keyed by a *path* rather than a bare
 component name, a whole subtree can be rerouted at once, and a more specific path takes precedence over an
-inherited one. Paths are written with the `@` sigil as dotted sequences — `@MyFooComponent`,
-`@app.ErrorRaiserComponent`, `@cgp.core.error` — where lowercase segments become type-level strings and
+inherited one. Paths are written with the `@` sigil as dotted sequences, such as `@MyFooComponent`,
+`@app.ErrorRaiserComponent`, and `@cgp.core.error`, where lowercase segments become type-level strings and
 capitalized segments name types. [`Path!`](./path.md) covers the syntax in full.
 
 ### The rest of the body grammar
 
 **A namespace body is parsed by the same code as a
 [`delegate_components!`](./delegate_components.md) table**, so everything that macro accepts parses here:
-all three operators, all three key forms — including bracketed list keys and `@`-path keys with their
-`[…]` and `{…}` groups — per-key generics, and the leading `open`, `namespace`, and `for` statements. That
+all three operators, all three key forms (including bracketed list keys and `@`-path keys with their
+`[…]` and `{…}` groups), per-key generics, and the leading `open`, `namespace`, and `for` statements. That
 page documents each of them; what follows is only what differs here.
 
-What differs is what an entry becomes. A `delegate_components!` entry records a choice *for a context*; a
+The entry itself means something different. A `delegate_components!` entry records a choice *for a context*; a
 namespace entry records where a lookup for a key should *go next*, for any context that later joins. That
 is why the two forms in the table above are the ones worth writing, and why the others are mostly not:
 
 - **`->` direct delegation** still projects through the *value's* own table, so it names a concrete table
   inside a definition that is meant to be table-generic.
-- **`open Component;`** is accepted and generates exactly what `Component => @Component,` generates —
+- **`open Component;`** is accepted and generates exactly what `Component => @Component,` generates; it is
   occasionally a convenient spelling for rooting a component's route at its own name.
 - **`namespace Other;`** is accepted, but inheritance is written with the `: ParentNamespace` header
   above. That is the form overriding and the cycle diagnostics are defined in terms of.
-- **A nested table value** — `UseDelegate<new Inner { … }>` — works, and is the one legacy form with a
+- **A nested table value**, `UseDelegate<new Inner { … }>`, works, and is the one legacy form with a
   reason to live in a namespace: the macro lifts the inner table out into its own struct and impls, so
   every context joining the namespace inherits the per-type dispatch without restating it. It still
   needs [`#[derive_delegate]`](../attributes/derive_delegate.md) on the component, as it does anywhere.
@@ -135,7 +136,7 @@ delegate_components! {
 ```
 
 A third statement form, `for <T, Provider> in SomeTable { … }`, reads each entry of another lookup table and
-emits one mapping per entry — which is how per-type defaults are pulled in wholesale.
+emits one mapping per entry, which is how per-type defaults are pulled in wholesale.
 
 ## Examples
 
@@ -182,7 +183,7 @@ check_components! {
 ```
 
 Reading the resolution: `MyApp.show()` looks up `ShowImplComponent`, finds no direct entry, falls through to
-`AppNamespace`, which redirects to the path `@show.ShowImplComponent` — and `MyApp`'s own table binds that
+`AppNamespace`, which redirects to the path `@show.ShowImplComponent`, and `MyApp`'s own table binds that
 path to `ShowWithDebug`. **The division of labour is the point.** The namespace owns the *route*; the context
 owns the *provider*. A second context joins the same namespace and supplies a different provider at the same
 path, with nothing duplicated between them.
@@ -208,7 +209,7 @@ delegate_components! {
 
 **Reach for a namespace when the same wiring is repeated across contexts, or when a top-level table has
 grown too long to read.** Those are the two problems it solves, and below that threshold it costs more than
-it saves — a namespace adds a layer of indirection between a component and its provider, which is one more
+it saves: a namespace adds a layer of indirection between a component and its provider, which is one more
 hop for a reader tracing what runs.
 
 Three lighter tools cover most cases, and it is worth knowing where each stops.
@@ -217,16 +218,16 @@ Three lighter tools cover most cases, and it is worth knowing where each stops.
   is short and not shared. Most applications never outgrow this.
 - **The [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement)** is the
   lightweight special case of the same path machinery, for dispatching *one* component on its type parameter
-  directly on a context. It needs no namespace, no prefix, and no shared table — reach for it when the goal
+  directly on a context. It needs no namespace, no prefix, and no shared table; reach for it when the goal
   is per-type dispatch rather than shared wiring.
-- **An [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time)** — the
-  `new`-keyword bundle — packages a group of wirings that contexts adopt by *delegating* named components to
+- **An [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time)**, the
+  `new`-keyword bundle, packages a group of wirings that contexts adopt by *delegating* named components to
   it, rather than by joining and inheriting. It is the more direct mechanism and the better choice for a
   small, explicitly-delegated bundle. A namespace earns its extra machinery when there are many components,
   when inheritance is wanted, or when a library is publishing defaults for applications it does not know
   about.
 
-Two things a namespace is *not* for. It will not make a single context's wiring shorter on its own — the
+Two things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
 entries still have to exist somewhere. And it is not how one component gets per-type dispatch, which is
 `open`'s job; the two do not combine on the same component, as the [Gotchas](#gotchas) explain.
 
@@ -244,7 +245,7 @@ code.
 :::
 
 `cgp_namespace!` emits, in order, an optional backing struct, an optional lookup trait, and one impl of that
-trait per entry — plus one inheritance impl when a parent is named. From this input:
+trait per entry, plus one inheritance impl when a parent is named. From this input:
 
 ```rust
 cgp_namespace! {
@@ -276,7 +277,7 @@ impl<__Table__> MyNamespace<__Table__> for FooProviderComponent {
 ```
 
 Read it back as: `MyNamespace`'s delegate for `FooProviderComponent` is "look up the path `MyFooComponent`
-inside whatever `__Table__` is". The namespace names no provider — it only reroutes, so the provider is
+inside whatever `__Table__` is". The namespace names no provider; it only reroutes, so the provider is
 decided wherever the path finally lands. A `:` entry skips the indirection and maps the key straight to a
 provider, one impl per key when the array form is used.
 
@@ -310,7 +311,7 @@ after this impl and win where their keys are more specific.
 
 Two naming details appear verbatim in errors and are worth recognizing: the table parameter is literally
 `__Table__`, and the inheritance impl uses `__Key__` and `__Value__`. And every `@` path is a
-[type-level list](../types/type_level_spines.md) built by [`Path!`](./path.md) — `expand` resugars it to
+[type-level list](../types/type_level_spines.md) built by [`Path!`](./path.md); `expand` resugars it to
 `Path!(@…)` form, while a raw compiler error prints the underlying spine.
 
 <details>
@@ -329,15 +330,15 @@ NamespaceBody   -> Statement* ( Mapping ( `,` Mapping )* `,`? )?
 ```
 
 `NamespaceBody` is [`delegate_components!`](./delegate_components.md)'s `TableBody` production unchanged,
-so its `Statement` and `Mapping` rules — every operator, every key form, every value form — are defined on
-that page rather than restated here. The two a namespace normally uses are `=>` to an `@`-path and `:` to a
-provider. The `:` between `NamespaceName` and `ParentNamespace` is the inheritance colon, distinct from a
+so its `Statement` and `Mapping` rules, covering every operator, every key form, and every value form, are
+defined on that page rather than restated here. The two a namespace normally uses are `=>` to an `@`-path
+and `:` to a provider. The `:` between `NamespaceName` and `ParentNamespace` is the inheritance colon, distinct from a
 mapping's. `NamespaceName` becomes both a trait and, with `new`, a struct.
 
 Two of the three statement forms in that shared production exist for this macro, because their job is
-joining a context's table to a namespace. A `NamespaceStmt` — `namespace SomeNamespace;` — forwards every
-unwired lookup through the named namespace. A `ForStmt` —
-`for <T, Provider> in SomeTable where … { … }` — binds a key variable and a provider variable, reads each
+joining a context's table to a namespace. A `NamespaceStmt`, `namespace SomeNamespace;`, forwards every
+unwired lookup through the named namespace. A `ForStmt`,
+`for <T, Provider> in SomeTable where … { … }`, binds a key variable and a provider variable, reads each
 entry of the table named after `in`, and emits one mapping per entry; its body admits only the `:` form,
 and its optional `where` clause is merged into every impl the loop generates. Like
 `delegate_components!`, the body accepts **no attributes** on any entry and rejects any it finds.
@@ -352,7 +353,7 @@ NamespacePath -> TypePath GenericArgs?
 ```
 
 `Path` is [`Path!`](./path.md)'s own `@`-prefixed dotted production, so its segments take no generics and
-neither grouping form is accepted — one attribute registers under exactly one prefix, and the attribute
+neither grouping form is accepted: one attribute registers under exactly one prefix, and the attribute
 is repeated to register into several namespaces. `NamespacePath` may itself be parameterized.
 
 </details>
@@ -362,23 +363,23 @@ is repeated to register into several namespaces. `NamespacePath` may itself be p
 **A context cannot override a path its namespace itself terminates.** Joining with `namespace N;` emits a
 blanket `DelegateComponent` impl covering every path `N` resolves, so a direct entry for one of those paths
 is a second impl for the same key and the compiler rejects the overlap with `E0119`. Overriding works only on
-a path the namespace *routes to* without binding — which is why the example above has the namespace own the
+a path the namespace *routes to* without binding, which is why the example above has the namespace own the
 route and the context own the provider. A path the namespace binds with a `:` entry or a `#[default_impl]`
 has to be changed in the namespace instead. The same restriction stops a child namespace from redefining a
 key its parent binds.
 
-**Joining two namespaces on one context conflicts**, for the same reason — two blanket forwarding impls each
-covering every key:
+**Joining two namespaces on one context conflicts, for the same reason.** Each namespace produces a blanket
+forwarding impl covering every key, so joining two collides them:
 
 ```text
 error[E0119]: conflicting implementations of trait `DelegateComponent<_>` for type `App`
 ```
 
 A bare-key `for` loop (`for <Key, Value> in Table { Key: Value }`) alongside a `namespace` join collides the
-same way, which is why a loop's key is normally embedded in a path — `@app.SomeComponent.Key: Value`.
+same way, which is why a loop's key is normally embedded in a path, as in `@app.SomeComponent.Key: Value`.
 
 **`open` does not combine with a prefixed component in a joined namespace.** Once a component's lookups are
-routed under a prefix, `open` — which roots the route at the bare component name — no longer reaches those
+routed under a prefix, `open`, which roots the route at the bare component name, no longer reaches those
 entries. Write the per-value entries with the full prefixed path instead.
 
 **A cyclic parent chain and a self-inheriting namespace fail differently.** Two namespaces inheriting each
@@ -390,7 +391,7 @@ error[E0275]: overflow evaluating the requirement `__Key__: A<__BComponents>`
 note: required for `__Key__` to implement `B<__AComponents>`
 ```
 
-A namespace inheriting *itself* — `new A: A {}` — does not overflow. It produces a forwarding impl whose
+A namespace inheriting *itself*, as in `new A: A {}`, does not overflow. It produces a forwarding impl whose
 value parameter nothing can determine:
 
 ```text
@@ -409,7 +410,7 @@ error[E0277]: the trait bound `PathCons<Symbol<4, Chars<'s', ...>>, ...>: AppNam
               is not satisfied
 ```
 
-The `Symbol<4, …>` is the prefix — `show` — so the message is saying "this route is not something the
+The `Symbol<4, …>` is the prefix, `show`, so the message is saying "this route is not something the
 namespace resolves". This is the lazy-wiring problem in namespace clothing, and the answer is the same: check
 the context.
 

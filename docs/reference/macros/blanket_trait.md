@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[blanket_trait]'
+sidebar_position: 11
 ---
 
 # `#[blanket_trait]`
@@ -159,7 +160,7 @@ That last clause is the real discriminator, separating this macro from its close
 - **A trait alias, when one exists.** The empty-body form above is a workaround for a language feature Rust
   does not have on stable; it is the right workaround, but do not reach for the macro if a plain supertrait
   bound reads fine at the use site.
-- **Nothing at all, for a plain generic function.** If the requirement genuinely belongs in the signature
+- **Nothing at all, for a plain generic function.** If the requirement belongs in the signature
   and no caller is generic over the type, a function with a `where` clause is simpler and the propagation
   problem never arises.
 
@@ -175,7 +176,7 @@ trait. Needing that is the signal to move to a component.
 ### Advanced
 
 This section shows the two items the macro emits. You do not need them to use `#[blanket_trait]`, but the
-associated-type lifting is genuinely surprising the first time, and knowing what the impl requires makes an
+associated-type lifting is surprising the first time, and knowing what the impl requires makes an
 "unsatisfied bound" error much easier to read. `cargo cgp expand` prints the same thing for your own code.
 
 :::

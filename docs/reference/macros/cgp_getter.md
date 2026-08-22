@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_getter]'
+sidebar_position: 9
 ---
 
 # `#[cgp_getter]`
@@ -30,7 +31,7 @@ has moved into the wiring, where a context can change it without touching the tr
 it.
 
 **This is an advanced tool, not the next step up from `#[cgp_auto_getter]`.** What you pay for the
-decoupling is a line of wiring per context, and what you get is only useful when a context genuinely needs
+decoupling is a line of wiring per context, and what you get is only useful when a context needs
 to control which field is read, or to supply the value some way other than reading a field. Most getters
 want neither. The [When to reach for it](#when-to-reach-for-it-and-when-not) section draws the line.
 

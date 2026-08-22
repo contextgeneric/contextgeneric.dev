@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'check_components!'
+sidebar_position: 5
 ---
 
 # `check_components!`
@@ -360,7 +361,7 @@ parameters:
 error[E0277]: the trait bound `App: CanUseComponent<AreaCalculatorComponent>` is not satisfied
 ```
 
-That looks identical to a genuinely broken wiring. If a check fails on a generic component and the wiring
+That looks identical to a broken wiring. If a check fails on a generic component and the wiring
 looks right, the missing value is the first thing to suspect.
 
 **`#[check_providers(...)]` must list at least one provider**, and is rejected rather than treated as a

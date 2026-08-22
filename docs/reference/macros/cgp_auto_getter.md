@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_auto_getter]'
+sidebar_position: 8
 ---
 
 # `#[cgp_auto_getter]`

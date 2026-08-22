@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_provider] & #[cgp_new_provider]'
+sidebar_position: 20
 ---
 
 # `#[cgp_provider]` & `#[cgp_new_provider]`
@@ -189,7 +190,7 @@ the source.
 source that reads like an ordinary trait impl, so it is the recommended form. You mostly *read* these
 two instead: in generated code, in a desugaring, and in CGP's own crates.
 
-Two cases genuinely call for writing the raw form yourself.
+Two cases call for writing the raw form yourself.
 
 - **You need the inside-out provider-trait shape itself**, not merely a separately-declared struct: a
   bound `#[cgp_impl]`'s sugar cannot express, or a rare construct its rewrite does not support, whether
@@ -204,7 +205,7 @@ Two cases genuinely call for writing the raw form yourself.
 - **Reading, rather than writing.** A confusing provider error names types from this shape, and
   `cargo cgp expand` prints it. Recognizing the form is the main reason to read this page.
 
-Once you are genuinely writing the raw form, the choice between the two macros here is mechanical:
+Once you are writing the raw form, the choice between the two macros here is mechanical:
 `#[cgp_new_provider]` when the provider struct is new, `#[cgp_provider]` when it already exists. There
 is no other difference, and using the wrong one is a duplicate-definition error rather than anything
 subtle.
@@ -352,7 +353,7 @@ layer of such a stack is at fault. Components without lifetime parameters are un
 not belong to the provider trait you are implementing produces a marker impl for the wrong key, so the
 provider silently fails to satisfy the wiring that names it. The error appears at the wiring site,
 saying the provider is not a provider for that component. Omit the argument unless the trait's name
-genuinely departs from the `{Trait}Component` convention.
+departs from the `{Trait}Component` convention.
 
 **A provider's own associated const or type still needs qualifying**, though for a different reason than
 in [`#[cgp_impl]`](./cgp_impl.md#gotchas). Here `Self` really is the provider, and nothing rewrites it.

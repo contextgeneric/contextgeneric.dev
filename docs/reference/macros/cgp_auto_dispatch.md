@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_auto_dispatch]'
+sidebar_position: 15
 ---
 
 # `#[cgp_auto_dispatch]`

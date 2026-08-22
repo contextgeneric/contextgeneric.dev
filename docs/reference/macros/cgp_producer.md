@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_producer]'
+sidebar_position: 14
 ---
 
 # `#[cgp_producer]`
@@ -24,8 +25,8 @@ That produces the provider struct `MagicNumber` and an impl of [`Producer`](../c
 family member whose method takes only a **context** (the type the capability runs against) and a phantom
 `Code` tag, with no input value at all.
 
-Here is what makes a dedicated macro worth having. **A producer can stand in for any handler**,
-because a handler that ignores its input is just a producer with an unused parameter. So the macro wires the
+A dedicated macro is worth having because **a producer can stand in for any handler**: a handler that
+ignores its input is just a producer with an unused parameter. So the macro wires the
 generated provider into every member of the family, and one function definition answers `produce`,
 `compute`, `try_compute`, `compute_async`, `handle`, and their by-reference forms, every one of them
 yielding the same value regardless of what it is handed.
@@ -126,7 +127,7 @@ within it there is nothing simpler.
 - **Use [`ReturnInput`](../providers/handler_combinators.md) rather than a producer that ignores its input.**
   If the goal is to pass a value through a pipeline unchanged, that combinator says so directly.
 - **Do not reach for the handler family at all for a plain constant.** A `const` or a function is clearer
-  unless the value is genuinely being composed into a pipeline or dispatched on a `Code` tag.
+  unless the value is being composed into a pipeline or dispatched on a `Code` tag.
 
 ## Under the hood
 
@@ -245,7 +246,7 @@ producer try_compute = Ok(Err("nope"))
 ```
 
 That `Ok(Err(..))` is a success carrying an error, so it short-circuits nothing and a pipeline downstream
-keeps going. If the production can genuinely fail, write a `TryComputer` or `Handler` provider by hand
+keeps going. If the production can fail, write a `TryComputer` or `Handler` provider by hand
 instead.
 
 **The fallible forms still need an error type on the context.** `try_compute` and `handle` name the context's

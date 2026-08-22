@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_computer]'
+sidebar_position: 13
 ---
 
 # `#[cgp_computer]`

@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_impl]'
+sidebar_position: 2
 ---
 
 # `#[cgp_impl]`
@@ -143,8 +144,9 @@ there are more than two or three blocks, since a reader does not have to find th
 of every block still reads as an ordinary trait impl.
 
 **A struct whose shape `new` cannot express must be declared explicitly, because `new`'s own grammar is
-narrow.** `#[cgp_impl(new ...)]` desugars to [`#[cgp_new_provider]`](./cgp_new_provider.md), and that
-macro can only emit one of two shapes: a plain provider name becomes a unit struct with no fields, and
+narrow.** `#[cgp_impl(new ...)]` desugars to
+[`#[cgp_new_provider]`](./cgp_provider.md#the-struct-cgp_new_provider-declares), and that macro can
+only emit one of two shapes: a plain provider name becomes a unit struct with no fields, and
 a generic provider becomes a tuple struct with one public
 [`PhantomData`](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) field wrapping all of its
 generic parameters together, always `pub` and never with a default. Anything the struct needs outside
@@ -264,7 +266,7 @@ that call for something else are narrower than they look.
 
 Prefer the unqualified header from [Usage](#usage), `impl AreaCalculator` with no `for Context`,
 letting the macro insert the context parameter, which keeps a provider reading like an ordinary trait
-impl. Name the context explicitly only when the sugar genuinely falls short, such as a lifetime or a
+impl. Name the context explicitly only when the sugar falls short, such as a lifetime or a
 higher-ranked bound.
 
 Naming a *concrete* type as that context, as in `impl AreaCalculator for Rectangle`, is a different
@@ -426,9 +428,8 @@ apply to. Leave both out.
 ## Related constructs
 
 - [`#[cgp_component]`](./cgp_component.md) — defines the component this implements.
-- [`#[cgp_provider]`](./cgp_provider.md) — the lower-level form `#[cgp_impl]` desugars to.
-- [`#[cgp_new_provider]`](./cgp_new_provider.md) — `#[cgp_provider]` with the struct declared too,
-  equivalent to `#[cgp_impl(new ...)]`.
+- [`#[cgp_provider]` and `#[cgp_new_provider]`](./cgp_provider.md) — the lower-level forms `#[cgp_impl]`
+  desugars to, the latter equivalent to `#[cgp_impl(new ...)]`.
 - [`#[cgp_fn]`](./cgp_fn.md) — the lighter alternative when one implementation is enough.
 - [`delegate_components!`](./delegate_components.md) — wires the provider onto a type.
 - [`check_components!`](./check_components.md) — verifies the wiring resolves.

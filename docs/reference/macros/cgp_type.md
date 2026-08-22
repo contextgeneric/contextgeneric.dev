@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[cgp_type]'
+sidebar_position: 7
 ---
 
 # `#[cgp_type]`
@@ -51,7 +52,7 @@ pub trait HasScalarType {
 ```
 
 Like [`#[cgp_component]`](./cgp_component.md), the component needs a provider trait name, and
-`#[cgp_type]` derives one. **The default is keyed off the associated type's name, not the trait's** —
+`#[cgp_type]` derives one. **The default is keyed off the associated type's name, not the trait's**:
 `type Scalar` yields the provider trait `ScalarTypeProvider` and the marker
 `ScalarTypeProviderComponent`. This is worth fixing in mind, because every other macro derives its
 default from the trait name.
@@ -80,8 +81,8 @@ pub trait HasScalarType {
 }
 ```
 
-A context whose wiring names a type that does not satisfy the bound is rejected — `UseType<String>` here,
-since `String` is not `Copy` — so the bound is written once on the declaration and enforced against every
+A context whose wiring names a type that does not satisfy the bound is rejected (`UseType<String>` here,
+since `String` is not `Copy`), so the bound is written once on the declaration and enforced against every
 context's choice.
 
 **It is enforced lazily, though, like all CGP wiring.** The `delegate_components!` entry naming
@@ -119,7 +120,7 @@ where
 ```
 
 `App` implements `HasScalarType` with `Scalar = f64` through the generated
-[`UseType`](../providers/use_type.md) impl, and the `check_components!` block is what confirms `f64` satisfies
+[`UseType`](../providers/use_type.md) impl, and the `check_components!` block confirms that `f64` satisfies
 the `Copy` bound.
 
 The point compounds when several pieces of code share one type. Because the type lives on a trait the
@@ -134,7 +135,7 @@ pub trait CanCalculateArea<Shape> {
 }
 ```
 
-Here `Rectangle` and `Circle` carry no scalar type of their own — the context computing their areas does,
+Here `Rectangle` and `Circle` carry no scalar type of their own; the context computing their areas does,
 and changing its `UseType<f32>` to `UseType<f64>` changes the scalar for every shape at once. The bare
 `Scalar` in that signature is [`#[use_type]`](../attributes/use_type.md) at work, which is how an
 abstract type is *imported* wherever it is used.
@@ -150,7 +151,7 @@ impl HasScalarType for App {
 ## When to reach for it, and when not
 
 **Reach for `#[cgp_type]` whenever generic code has to name a type the context should choose.** The error
-type is the canonical instance — CGP's own [`HasErrorType`](../components/has_error_type.md) is defined
+type is the canonical instance. CGP's own [`HasErrorType`](../components/has_error_type.md) is defined
 exactly this way, which is why every fallible capability can say `Error` and mean whatever the
 application picked.
 
@@ -167,12 +168,12 @@ there is a cheaper option covering more ground than it looks.
   inferred parameter can do neither, since it exists only where a value of it passes through.
 - **Never thread it as a generic parameter on the capability.** A parameter is an input the caller
   supplies, so it lands in every intermediate signature whether that layer touches the type or not. An
-  abstract type is determined by the context and propagates nowhere. That difference is what the
-  construct is really buying, and it is why a context can decide a dozen types without any signature
+  abstract type is determined by the context and propagates nowhere. That difference is the whole
+  payoff of the construct, and it is why a context can decide a dozen types without any signature
   growing.
 - **Use plain [`#[cgp_component]`](./cgp_component.md) when the trait carries methods.** `#[cgp_type]` is
   only for a trait whose entire content is one associated type. A trait with a method *and* a type it
-  produces is an ordinary component — CGP's own `CanCompute` is that shape.
+  produces is an ordinary component; CGP's own `CanCompute` is that shape.
 
 One alternative looks like this construct and is not. A getter written with
 [`#[cgp_auto_getter]`](./cgp_auto_getter.md) may declare an associated type and return it, inferring it
@@ -192,9 +193,9 @@ written. `cargo cgp expand` prints the same thing for your own code.
 :::
 
 `#[cgp_type]` emits everything [`#[cgp_component]`](./cgp_component.md) would, then adds two provider
-impls of its own. The component half is the familiar shape — consumer trait, provider trait, two blanket
+impls of its own. The component half is the familiar shape: consumer trait, provider trait, two blanket
 impls, marker, and the standard [`UseContext`](../providers/use_context.md) and
-[`RedirectLookup`](../providers/redirect_lookup.md) impls — differing only in that every blanket impl
+[`RedirectLookup`](../providers/redirect_lookup.md) impls, differing only in that every blanket impl
 forwards an *associated type* rather than a method:
 
 ```rust
@@ -219,7 +220,7 @@ where
 
 Read it as: `UseType<T>` is a provider that supplies `T`. Wiring a context's component to `UseType<f64>`
 therefore gives it `Scalar = f64` with nothing written. Note the declaration's `Copy` bound copied into
-the impl's `where` clause — that is what turns an unsuitable concrete type into an error where the wiring
+the impl's `where` clause: it turns an unsuitable concrete type into an error where the wiring
 names it.
 
 The second addition is a [`WithProvider`](../providers/with_provider.md) impl, which adapts CGP's
@@ -237,7 +238,7 @@ where
 ```
 
 [`HasType` / `TypeProvider`](../components/has_type.md) is CGP's single built-in abstract-type component,
-and `UseType` is itself a `TypeProvider`. This impl is what lets one `UseType<T>` satisfy both the
+and `UseType` is itself a `TypeProvider`. This impl lets one `UseType<T>` satisfy both the
 built-in component and any `#[cgp_type]` component you declare, instead of needing a separate provider
 per component.
 
@@ -246,7 +247,7 @@ Each generated provider impl is paired with a matching
 
 A bound that names the type it constrains is rewritten rather than refused. Declaring
 `type Scalar: Mul<Output = Self::Scalar> + Clone;` leaves the bound as written on the two traits, where
-`Self::Scalar` still means what it says — but the copy landing on the `UseType` and `WithProvider` impls
+`Self::Scalar` still means what it says. But the copy landing on the `UseType` and `WithProvider` impls
 becomes `Scalar: Mul<Output = Scalar> + Clone`, with every `Self::Scalar` replaced by the free parameter.
 Copied unchanged it would have named an associated type of the wrong `Self`.
 
@@ -276,7 +277,7 @@ second type, or no type at all all report the same thing:
 error: type trait should contain exactly one associated type item
 ```
 
-A trait that genuinely needs a method alongside a type it produces is an ordinary
+A trait that needs a method alongside a type it produces is an ordinary
 [`#[cgp_component]`](./cgp_component.md).
 
 **The associated type may not be generic or carry a `where` clause**, since the `UseType` impl supplies
@@ -287,7 +288,7 @@ error: generic associated type and where clause are not supported
 ```
 
 **The default provider name comes from the type, not the trait.** `HasScalarType` declaring
-`type Scalar` yields `ScalarTypeProviderComponent`, not `HasScalarTypeComponent` — so a wiring entry
+`type Scalar` yields `ScalarTypeProviderComponent`, not `HasScalarTypeComponent`, so a wiring entry
 guessed from the trait name names a component that does not exist, and the error is an unresolved type
 rather than anything about wiring.
 

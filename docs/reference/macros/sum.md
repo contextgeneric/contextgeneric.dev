@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'Sum!'
+sidebar_position: 18
 ---
 
 # `Sum!`

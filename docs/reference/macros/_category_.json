@@ -2,7 +2,7 @@
   "label": "Macros",
   "position": 1,
   "link": {
-    "type": "generated-index",
-    "description": "The procedural macros you invoke directly: the ones that define components and providers, the ones that wire and check them, and the ones that build type-level values."
+    "type": "doc",
+    "id": "reference/macros/index"
   }
 }

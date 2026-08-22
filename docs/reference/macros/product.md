@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'Product! & product!'
+sidebar_position: 17
 ---
 
 # `Product!` & `product!`
@@ -153,7 +154,7 @@ Cons(a, Cons(b, Cons(c, Nil)))
 ```
 
 Because `Cons` is a real struct and `Nil` a real unit struct, the result is an ordinary owned value whose type
-exactly matches what `Product!` builds over the same elements' types. There is no magic layer between the two
+exactly matches what `Product!` builds over the same elements' types. There is no hidden layer between the two
 macros: they are the same fold at two levels.
 
 **What this means for reading errors**: a mismatched field list is reported as a mismatch between two `Cons`
