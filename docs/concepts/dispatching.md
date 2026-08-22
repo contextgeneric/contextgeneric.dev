@@ -24,8 +24,8 @@ type-level list of handlers, one per element, run as an ordinary
 It runs in two directions, and they are mirror images.
 
 **Matching** consumes a sum. The value is converted into its extractor, and the handlers are tried in
-turn until one matches — so the list stops at the first success. **Building** produces a product. The
-builder starts empty, and every handler runs, each setting one field — so the list runs to the end.
+turn until one matches, so the list stops at the first success. **Building** produces a product. The
+builder starts empty, and every handler runs, each setting one field, so the list runs to the end.
 
 Both come out as `Computer` or `Handler` providers, which is the point: a dispatcher goes anywhere a
 computation goes. It can be wired to a context, nested inside another dispatcher to handle a group of
@@ -72,8 +72,8 @@ The guarantee is the mirror image too: finalizing is available only when every f
 builder missing a handler cannot finalize and does not compile. A matcher proves it covered every
 variant; a builder proves it filled every field.
 
-This is the machinery under the [extensible builder](./extensible-records.md) — the dispatcher is what
-runs each subsystem's provider and merges the outputs.
+This is the machinery under the [extensible builder](./extensible-records.md): the dispatcher runs
+each subsystem's provider and merges the outputs.
 
 ## The shortcut for the common case
 
@@ -89,24 +89,24 @@ pub trait CanDescribe {
 ```
 
 Implement `CanDescribe` for `Circle` and for `Rectangle`, and any enum whose variants all implement it
-gets it too — `shape.describe()` works with no wiring, no combinator named, and no `match`. It is the
+gets it too: `shape.describe()` works with no wiring, no combinator named, and no `match`. It is the
 form to reach for first, and the rest of this page is what it is doing underneath.
 
 ## What it costs
 
 **A recursive shape needs an extra hop written by hand.** The table above names the matcher directly,
 which works because a `Shape` never contains another `Shape`. When a variant's payload *is* the enum
-again — an expression language, a tree — the matcher dispatches back through the same component, and a
-thin wrapper provider has to sit between the enum's entry and the matcher to break the resolution cycle.
-It is ceremony with no conceptual content, and it is the piece of a hand-wired dispatcher most likely to
-puzzle a reader.
+again, as in an expression language or a tree, the matcher dispatches back through the same component,
+and a thin wrapper provider has to sit between the enum's entry and the matcher to break the resolution
+cycle. It is ceremony with no conceptual content, and it is the piece of a hand-wired dispatcher most
+likely to puzzle a reader.
 
 **A missing handler reports as a shape, not as a name.** The failure is an unsatisfiable bound over a
 partial-variant or partial-record type, which is accurate about what is missing and does not say
 "`Rectangle` has no handler".
 
 **There is one hop per element.** Each variant tried is a resolution step, and the whole chain is
-resolved at compile time — so this costs compile time rather than run time, and a wide enum
+resolved at compile time, so this costs compile time rather than run time, and a wide enum
 dispatched at many types is somewhere that cost shows.
 
 **And a `match` is still usually right.** Dispatching pays when the shape is not known where the logic is

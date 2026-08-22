@@ -11,7 +11,7 @@ left at runtime.
 This page answers *what happens when the `Code` tag carries a whole program?* It is the furthest thing
 CGP's pieces are put to, and it assumes [handlers](./handlers.md). It shows a small language built from
 types, why separating its syntax from its meaning is the point, and how a third party extends it. It
-closes on the boundary — the programs this cannot express.
+closes on the boundary: the programs this cannot express.
 
 ## A program that is a type
 
@@ -33,7 +33,7 @@ program:
 type Program = Multiply<Add<Literal<2>, Literal<3>>, Literal<4>>;
 ```
 
-That is `(2 + 3) * 4` as a type. It is the language's **abstract syntax**, and — this is the whole idea —
+That is `(2 + 3) * 4` as a type. It is the language's **abstract syntax**, and this is the whole idea:
 it says nothing at all about what any of it means.
 
 For a real language the fragments carry more: a
@@ -59,9 +59,10 @@ where
 }
 ```
 
-`EvalAdd` interprets *any* addition, whatever its operands, and it evaluates them by asking the context
-— which is what makes the recursion work and what keeps the provider from knowing the rest of the
-language. Its requirements say only "the context can evaluate my operands".
+`EvalAdd` interprets *any* addition, whatever its operands, and it evaluates them by asking the context.
+Asking the context, rather than evaluating the operands itself, both drives the recursion and keeps the
+provider from knowing the rest of the language. Its requirements say only "the context can evaluate my
+operands".
 
 The context then assembles the language, one row per fragment:
 
@@ -83,24 +84,24 @@ And running a program is one call:
 Interpreter.compute(PhantomData::<Program>, ())   // 20
 ```
 
-Because the keys are types with structure, a single row captures a whole family of programs — every
+Because the keys are types with structure, a single row captures a whole family of programs, every
 `Add<_, _>` there will ever be. A value-level lookup table cannot do that.
 
 ## What the separation buys
 
 There is no parser, no syntax tree walked at run time, and no dispatch loop. **Type checking the call
 is the interpretation**: the compiler resolves the wiring recursively through the program's structure,
-and what is left in the binary is the arithmetic.
+and only the arithmetic is left in the binary.
 
 The more interesting consequence is that syntax and meaning vary independently.
 
 **One program, several meanings.** A second context wiring the same fragments to different providers
-interprets the same program differently — evaluate it, pretty-print it, cost it, run it against a test
+interprets the same program differently: evaluate it, pretty-print it, cost it, or run it against a test
 double. Nothing in the program changes, because the program never said what it meant.
 
 **One meaning, extended syntax.** A crate that does not own the language defines a new fragment and a
 provider for it, and a context that wants both wires both. The base language is not patched, forked, or
-even recompiled — the extension is a row. That is the [expression problem](./extensible-variants.md)
+even recompiled. The extension is a row. That is the [expression problem](./extensible-variants.md)
 answered on the syntax side, and it is why a DSL built this way can have third-party dialects.
 
 At scale the rows themselves become a [namespace](./namespaces.md), so a context joins a language rather
@@ -119,20 +120,20 @@ the interpreters.
 ## What it costs
 
 **The program must be known at compile time.** This is the boundary, and it is absolute. A script read
-from a file, a pipeline configured at startup, a user-supplied expression — none of them can be a type.
+from a file, a pipeline configured at startup, or a user-supplied expression cannot be a type.
 If programs arrive at run time you need a runtime interpreter, and this technique is not one.
 
 **The diagnostics are the worst CGP produces.** A malformed program is a trait-resolution failure over a
 deeply nested type, reported in terms of the whole program rather than the fragment at fault. Checks
 localize it and the toolchain reshapes what it recognizes; a badly nested program is still hard reading.
 
-**Compile times feel it.** Every fragment of every program is resolution work, and a large program
+**Compile times go up.** Every fragment of every program is resolution work, and a large program
 instantiated several ways is where CGP's compile-time cost is most visible.
 
 **And it is the most advanced thing here.** Everything else in this section is worth reaching for
-routinely. This is worth reaching for when a language is genuinely the right shape for a problem —
-build pipelines, protocol descriptions, shell-like scripting — and when the programs are fixed when the
-binary is.
+routinely. This is worth reaching for when a language is genuinely the right shape for a problem, such
+as build pipelines, protocol descriptions, or shell-like scripting, and when the programs are fixed when
+the binary is.
 
 ## Where to go next
 

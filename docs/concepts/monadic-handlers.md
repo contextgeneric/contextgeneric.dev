@@ -28,11 +28,11 @@ pub fn increment(value: u8) -> Result<u8, &'static str> {
 ```
 
 Chaining two of these plainly does not even compile: the first produces a `Result<u8, _>` and the second
-wants a `u8`. And forcing the types to line up would be worse than the type error, because the later
+wants a `u8`. And forcing the types to match would be worse than the type error, because the later
 steps would run on a value they were never meant to see.
 
 `Result` is the familiar case, and the shape is more general than `Result`. Any output type carrying two
-possibilities — one to carry on with, one to return immediately — has the same problem.
+possibilities, one to carry on with and one to return immediately, has the same problem.
 
 ## What a monad supplies
 
@@ -53,16 +53,16 @@ type.
 
 ## The three CGP ships
 
-**The err monad** continues on `Ok` and short-circuits on `Err` — the `?`-style early return above,
+**The err monad** continues on `Ok` and short-circuits on `Err`, the `?`-style early return above,
 where the first failure wins. It is the one most pipelines want.
 
 **The ok monad** is its mirror: it continues on `Err` and stops on `Ok`. That sounds backwards until you
-want a chain of attempts where the first *success* ends it — a lookup tried against several sources, a
+want a chain of attempts where the first *success* ends it: a lookup tried against several sources, a
 parser trying alternatives.
 
 **The identity monad** never short-circuits and threads every value forward, which recovers plain
 composition. It exists so that "no short-circuiting" is a choice you make rather than a different
-combinator you reach for, and it is what a `Result`-producing chain almost never wants.
+combinator you reach for, and a `Result`-producing chain almost never wants it.
 
 They also stack, so a pipeline over a nested `Result<Result<T, E>, F>` can short-circuit on the outer
 error while threading the inner result.
@@ -80,8 +80,8 @@ delegate_components! {
 }
 ```
 
-The whole construction lives in types — the monad is a zero-sized marker, the handler list is a
-type-level list, and the pipeline carries no runtime value — so the only branching at run time is the
+The whole construction lives in types: the monad is a zero-sized marker, the handler list is a
+type-level list, and the pipeline carries no runtime value, so the only branching at run time is the
 branching the logic actually asked for.
 
 ## What it costs
@@ -92,7 +92,7 @@ word that will cost you a reader, and a piece of CGP writing is usually better o
 behaviour than naming it.
 
 **A `?` in a function body is simpler, and usually right.** This pays when the *steps are chosen by
-wiring* — when different contexts run different chains, or the chain is assembled from parts that do not
+wiring*: when different contexts run different chains, or the chain is assembled from parts that do not
 know each other. When the steps are fixed, write a function and use `?`.
 
 **The type errors are among CGP's worst.** A stage whose output does not match the next stage's input
@@ -110,11 +110,11 @@ looked like it came from nowhere. [Dispatching](./dispatching.md) is the other b
 matching an enum variant is a chain of attempts where the first success ends it.
 
 For the constructs, [monad providers](/docs/reference/providers/monad_providers) carries `PipeMonadic`,
-the three markers, and the per-step `BindOk` / `BindErr` forms, and
-the four monad traits — [`MonadicBind`](/docs/reference/traits/monadic_bind),
+the three markers, and the per-step `BindOk` / `BindErr` forms. The four monad traits are the layer
+defining what a monad is here: [`MonadicBind`](/docs/reference/traits/monadic_bind),
 [`ContainsValue`](/docs/reference/traits/contains_value),
 [`LiftValue`](/docs/reference/traits/lift_value), and
-[`MonadicTrans`](/docs/reference/traits/monadic_trans) — are the layer defining what a monad is here.
+[`MonadicTrans`](/docs/reference/traits/monadic_trans).
 
 ---
 

@@ -10,7 +10,7 @@ components grows.
 
 This page answers *how does wiring stay readable once there is a lot of it?* It shows what a table
 looks like when it has outgrown its usefulness, the routing that fixes it, and the one rule that
-decides how a namespace has to be designed — a rule most people discover from a compiler error. It
+decides how a namespace has to be designed, a rule most people discover from a compiler error. It
 closes on when the lighter alternative is the better buy.
 
 ## When a table stops being readable
@@ -37,8 +37,8 @@ delegate_components! {
 ```
 
 Two entries out of three are duplicated, and nothing records that they are meant to stay the same.
-Scale that to the thirty components a real application accumulates and the interesting difference —
-one line — is buried in twenty-nine identical ones, which is the opposite of what the table was for.
+Scale that to the thirty components a real application accumulates and the interesting difference, one
+line, is buried in twenty-nine identical ones, which is the opposite of what the table was for.
 
 A **namespace** is a table lifted out of any one context and given a name, so that contexts can share
 it.
@@ -74,15 +74,15 @@ delegate_components! {
 ```
 
 The `namespace` line makes everything `App` does not wire itself fall through to `AppNamespace`.
-Routing through paths rather than flat keys is also what lets a whole group be redirected at once and
-what makes inheritance possible, since a path has structure a name does not.
+Routing through paths rather than flat keys also lets a whole group be redirected at once and makes
+inheritance possible, since a path has structure a name does not.
 
-On its own this is more machinery for the same result. What it buys arrives next.
+On its own this is more machinery for the same result. The payoff arrives next.
 
 ## Binding what is shared, leaving open what varies
 
-A namespace can also **bind** a path — supply the provider itself, rather than routing to it. That is
-what turns it into a set of defaults:
+A namespace can also **bind** a path, supplying the provider itself rather than routing to it. This
+turns it into a set of defaults:
 
 ```rust
 cgp_namespace! {
@@ -110,7 +110,7 @@ Here is the rule, and it is worth learning from this page rather than from the e
 **once a namespace binds a key, no one downstream can rebind it. Only a path the namespace leaves open
 is available to a context.**
 
-The natural thing to reach for — "the namespace sets this, I want something different" — does not
+The natural thing to reach for, "the namespace sets this, I want something different", does not
 compile:
 
 ```rust
@@ -138,7 +138,7 @@ the specific one to win.
 
 So a namespace is designed around the question *what varies?*, and this is the practical shape:
 **bind what every context agrees on, and leave open what any context might need to differ on.** Where a
-key varies, do not bind it in the shared namespace at all — inherit and bind it per configuration
+key varies, do not bind it in the shared namespace at all. Inherit and bind it per configuration
 instead:
 
 ```rust
@@ -151,8 +151,8 @@ naming which configuration it is.
 
 ## Namespaces are how CGP does presets
 
-There is no separate preset construct, and no `cgp_preset!` to look for. A preset — a curated bundle of
-defaults you adopt and then adjust — is exactly the inherit-and-adjust behaviour above, so a namespace
+There is no separate preset construct, and no `cgp_preset!` to look for. A preset, a curated bundle of
+defaults you adopt and then adjust, is exactly the inherit-and-adjust behaviour above, so a namespace
 *is* one.
 
 The same machinery serves a much smaller case. Dispatching a single component per type, with the
@@ -169,29 +169,29 @@ delegate_components! {
 ```
 
 `open` roots a route at the bare component name and puts the per-type entries in the context's own
-table, with no shared namespace involved. It is the lightweight end of the same mechanism, and it is
-what most code uses — which is why [bypassing coherence](./coherence.md) and
+table, with no shared namespace involved. It is the lightweight end of the same mechanism, and most
+code uses it, which is why [bypassing coherence](./coherence.md) and
 [dispatching](./dispatching.md) can use it without mentioning namespaces at all.
 
 The two do not combine for the same component: once a component is registered behind a namespace
-prefix, `open` would root the route at the wrong place, and the full prefixed path is what reaches its
+prefix, `open` would root the route at the wrong place, and only the full prefixed path reaches its
 entries.
 
 ## What it costs
 
 **The design decision comes first, and it is hard to revise.** Which keys a namespace binds and which
-it leaves open is fixed by the rule above, and changing your mind means changing the namespace — which
+it leaves open is fixed by the rule above, and changing your mind means changing the namespace, which
 reaches every context that joined it. A bundle of wiring is easier to get wrong here than anywhere else
 in CGP, because the mistake is not visible until a context wants to differ.
 
 **It is another hop, and a less obvious one.** With an
 [aggregate provider](./aggregate-providers.md) the context says which components come from the bundle.
-With a namespace it says nothing — everything not wired locally falls through — so answering "where
-does this capability come from?" means knowing the namespace and its parents.
+With a namespace it says nothing, since everything not wired locally falls through, so answering
+"where does this capability come from?" means knowing the namespace and its parents.
 
 **Paths are a second vocabulary.** `@app.GreeterComponent` is a type-level path, and it appears in
-error messages spelled out at length. The toolchain resugars it for the classes it recognizes; the raw
-form is still what a plain `cargo check` shows.
+error messages spelled out at length. The toolchain resugars it for the classes it recognizes; a plain
+`cargo check` still shows the raw form.
 
 **And it pays only at scale.** For three components shared by two contexts, the duplication at the top
 of this page is fine and a namespace is not worth its cost. The threshold is a table that has outgrown

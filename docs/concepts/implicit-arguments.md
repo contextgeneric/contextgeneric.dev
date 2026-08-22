@@ -53,15 +53,15 @@ impl Greeter {
 }
 ```
 
-The argument is not passed by anyone. `#[implicit]` removes it from the method's public signature, adds
-the field requirement to the implementation, and binds the value at the top of the body — so a caller
+Nobody passes the argument. `#[implicit]` removes it from the method's public signature, adds
+the field requirement to the implementation, and binds the value at the top of the body, so a caller
 still writes `app.greet()` with no arguments, and the body reads a plain local.
 
 Nothing was hidden that was not already hidden. The bound, the tag, and the read are the same three
-things; what changed is that the author writes the name of the value they want and the macro derives
+things; the change is that the author writes the name of the value they want and the macro derives
 the rest from it. Someone who understands functions and arguments can write a complete provider without
 meeting a type-level anything, which is why this is the recommended way to read a context field and the
-on-ramp most introductions to CGP should use.
+starting point most introductions to CGP should use.
 
 ## A capability from a function alone
 
@@ -75,8 +75,8 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 }
 ```
 
-Any context with a `width` and a `height` can now call `rectangle_area()`. That is the whole program —
-there is no component to define and nothing to choose, because this capability has one implementation
+Any context with a `width` and a `height` can now call `rectangle_area()`. That is the whole program.
+There is no component to define and nothing to choose, because this capability has one implementation
 and needs none. It is the smallest useful thing CGP does, and the right place to start a codebase that
 may never need more.
 
@@ -100,8 +100,8 @@ pub fn describe(
 }
 ```
 
-The rule of thumb is that the declared type is what the body works with and the conversion is the
-macro's problem. Prefer a borrow where the body only reads — `&str` over `String` — since that is free
+The rule of thumb is that the body works with the declared type and the conversion is the
+macro's problem. Prefer a borrow where the body only reads, `&str` over `String`, since that is free
 while an owned argument clones. Further forms exist for options and slices, and they are enumerated on
 the [`#[implicit]`](/docs/reference/attributes/implicit) reference page rather than here.
 
@@ -110,8 +110,8 @@ These are the same rules a getter follows, so learning them once covers both.
 ## When a getter trait is still the right thing
 
 An implicit argument reads from the provider's own `self`. That covers every value a provider wants
-from its own context — including one that several providers each read, declared as the same argument in
-each — so it is the default, and a getter trait is the exception.
+from its own context, including one that several providers each read, declared as the same argument in
+each, so it is the default, and a getter trait is the exception.
 
 Three cases fall outside it. The value may live on a **type other than the context**, where there is no
 `self` field to read and the requirement is a bound on that other type:
@@ -130,9 +130,9 @@ where
 
 `HasAuthHeader` there is a getter on `Request`, not on the application, and no implicit argument can
 express that. The accessor may also need to exist as a **named capability** that other code depends on
-through `#[uses(...)]` or a supertrait — a name is something you can require, and an argument is not. Or
-the getter may carry an **associated type inferred from the field**, so callers stay generic over what
-the value actually is.
+through `#[uses(...)]` or a supertrait, because a name is something you can require and an argument is
+not. Or the getter may carry an **associated type inferred from the field**, so callers stay generic
+over what the value actually is.
 
 Outside those three, prefer the argument. A getter trait declared only so a provider can read a field of
 its own context is a trait, an impl, and an import bought for nothing.
@@ -144,17 +144,17 @@ whose argument was named after it, and the failure surfaces as a missing-field e
 forces the check rather than at the rename. Nothing in the struct definition marks the coupling.
 
 **The requirement is invisible at the call site.** `app.greet()` gives no hint that the context must
-carry a `name`. That is the point — it is what keeps the requirement off the interface — and it is also
+carry a `name`. That is the point, since it keeps the requirement off the interface, and it is also
 why the answer to "what does this context need?" lives in the providers it wired rather than in the
 traits it implements.
 
 **Matching by name is looser than matching by type.** Two unrelated values with the same name and type
 are the same implicit argument as far as the machinery is concerned, so a context that happens to have a
-field called `name` satisfies a provider written for something else. In practice that is what makes the
-mechanism so cheap; it is still worth knowing that nobody is checking your intent.
+field called `name` satisfies a provider written for something else. In practice that looseness makes
+the mechanism cheap; it is still worth knowing that nobody is checking your intent.
 
-**The clone is real.** An owned argument copies the field on every call. Usually that is nothing, and on
-a large value in a hot path it is not — declare a borrow.
+**The clone is real.** An owned argument copies the field on every call. Usually that is nothing; on
+a large value in a hot path it is not, so declare a borrow.
 
 ## Where to go next
 

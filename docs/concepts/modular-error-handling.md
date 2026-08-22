@@ -15,9 +15,9 @@ paying.
 
 ## Why the error type is the hard one
 
-Every fallible function has to return *something*, and generic code has no business deciding what. A
+Every fallible function has to return *something*, and generic code should not decide what. A
 provider parsing a port number does not know whether the application wants `anyhow::Error`, a domain
-enum, or a plain string — and hard-coding any of them commits every caller in every application to that
+enum, or a plain string, and hard-coding any of them commits every caller in every application to that
 choice.
 
 The usual answers each cost something. A concrete error type in a library is a decision imposed on
@@ -26,11 +26,11 @@ signature along with its bounds, which is the leak [impl-side dependencies](./im
 describes. Converting by hand at each boundary is the boilerplate error-handling crates exist to remove,
 and it comes back the moment the boundary is generic.
 
-What makes this tractable is noticing that "error handling" is not one decision but three, and that they
-are independent:
+This becomes tractable once you notice that "error handling" is not one decision but three, and that
+they are independent:
 
-- **what the error type is** — a type the context names;
-- **how a foreign error becomes it** — `ParseIntError`, `io::Error`, a `String` from a domain rule;
+- **what the error type is**: a type the context names;
+- **how a foreign error becomes it**: `ParseIntError`, `io::Error`, or a `String` from a domain rule;
 - **what detail is attached** as it propagates.
 
 CGP makes each of the three a wiring choice, and the code that fails makes none of them.
@@ -64,15 +64,15 @@ impl PortParser {
 
 `Error` is the context's [abstract type](./abstract-types.md), imported by `#[use_type]`.
 `Self::raise_error` turns a concrete failure into it, and the `#[uses]` line declares which failures
-this provider raises — two of them, a parse error and a string — as requirements on the implementation,
-not on the interface. A caller bounding on `CanParsePort` learns none of it.
+this provider raises, two of them, a parse error and a string, as requirements on the implementation
+rather than on the interface. A caller bounding on `CanParsePort` learns none of it.
 
-`raise_error` is called on the *type* rather than on a value, because constructing an error is something
-the context knows how to do rather than something a particular value does.
+The provider calls `raise_error` on the *type* rather than on a value, because constructing an error is
+something the context knows how to do rather than something a particular value does.
 
 ## Three sources, three strategies, one table
 
-The context supplies the answers, and the second and third decisions are made per source error type:
+The context supplies the answers, making the second and third decisions per source error type:
 
 ```rust
 delegate_components! {
@@ -89,15 +89,15 @@ delegate_components! {
 ```
 
 Three lines, three decisions. The error type is `String`. A raised `String` is converted straight
-through with `From`. A `ParseIntError` is formatted with `Debug` into a `String` — and then handed back
-to the context's own `String` route, which is what makes the two compose rather than each needing to
-know the final type.
+through with `From`. A `ParseIntError` is formatted with `Debug` into a `String`, then handed back
+to the context's own `String` route, so the two compose rather than each needing to know the final
+type.
 
-That last point is what the per-source dispatch buys. A real application raises a dozen unrelated
+The per-source dispatch buys exactly that last point. A real application raises a dozen unrelated
 failures, and most of them want the same treatment; naming a strategy per source type lets the
-interesting ones differ without a match arm anywhere. CGP ships the strategies as ordinary providers —
+interesting ones differ without a match arm anywhere. CGP ships the strategies as ordinary providers:
 `RaiseFrom` for a `From` conversion, `DebugError` and `DisplayError` for formatting, `ReturnError` when
-the source already is the error type, `RaiseInfallible` for a step that cannot fail — and they stay
+the source already is the error type, and `RaiseInfallible` for a step that cannot fail. They stay
 generic over whatever error type the context chose.
 
 ## Changing the answer changes nothing else
@@ -122,7 +122,7 @@ delegate_components! {
 named `String`, so nothing in it referred to the thing that changed. Swapping `anyhow` for `eyre`, or a
 prototype's `String` for a real domain type, is this edit.
 
-Concrete backends come as separate crates for the same reason — `cgp-error-anyhow` and its siblings each
+Concrete backends come as separate crates for the same reason: `cgp-error-anyhow` and its siblings each
 supply a type-setting provider and the raisers that go with it, so the dependency on `anyhow` lives in
 the wiring rather than in any code that fails.
 
@@ -147,28 +147,28 @@ Self::raise_http_error(ErrUnauthorized, "you must first login")
 ```
 
 and knows neither the status number nor the error type. The two are decided in the table, in the same
-place as everything else the application decides — which is the whole pattern, applied to a vocabulary
+place as everything else the application decides. This is the whole pattern, applied to a vocabulary
 the built-in components know nothing about.
 
 ## What it costs
 
 **The imports are not in the prelude, deliberately.** `HasErrorType` and `CanRaiseError` are, but the
 wiring keys live under `cgp::core::error` and the strategy providers under `cgp::extra::error`. That is
-a real papercut the first time, and it is the price of the error components not being forced on code
+a real annoyance the first time, and it is the price of the error components not being forced on code
 that does not use them.
 
 **Three decisions means three ways to be under-wired.** A context can name an error type and forget a
 raiser for a source some provider raises, and it compiles until something raises one.
-[`check_components!`](/docs/reference/macros/check_components) is what catches it, as with any other
+[`check_components!`](/docs/reference/macros/check_components) catches it, as with any other
 wiring.
 
-**The error type is one per context.** Everything in a context agreeing on one `Error` is what lets
-errors compose without conversion; it also means a context genuinely needing two unrelated error types
-needs two components or two contexts.
+**The error type is one per context.** All the code in a context sharing one `Error` lets errors
+compose without conversion; it also means a context genuinely needing two unrelated error types needs
+two components or two contexts.
 
 **And it does not decide what a good error is.** CGP makes the type swappable and the construction
 routable. Whether your errors carry useful context, whether they are matchable, whether the messages
-help — all of that is the same design problem it always was, and none of it is answered by wiring.
+help: all of that is the same design problem it always was, and wiring answers none of it.
 
 ## Where to go next
 

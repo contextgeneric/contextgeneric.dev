@@ -44,14 +44,14 @@ where
 
 `greet_twice` never touches a name. It declares the requirement because the function it calls does, and
 the function above `greet_twice` will declare it for the same reason. Add a requirement four layers
-down and every layer above grows a bound it has no interest in — which is why a mature generic API
+down and every layer above grows a bound it has no interest in. This is why a mature generic API
 tends to accumulate signatures nobody can read, and why adding a dependency deep in a library is a
 change that reaches its users.
 
 ## Moving the requirement onto the implementation
 
 Rust already has the answer, and most Rust programmers have used it without naming it. Put the logic in
-a **blanket implementation** — one `impl` covering every type that meets a bound — and the requirement
+a **blanket implementation**, one `impl` covering every type that meets a bound, and the requirement
 moves out of the interface and onto the implementation:
 
 ```rust
@@ -81,16 +81,16 @@ where
 }
 ```
 
-The requirement did not disappear — the compiler still checks it, at the point where a concrete type
-meets the impl. What changed is that it stopped being part of the contract. That is an **impl-side
+The requirement did not disappear: the compiler still checks it, at the point where a concrete type
+meets the impl. It has only stopped being part of the contract. That is an **impl-side
 dependency**: something an implementation needs, stated where the implementation lives rather than
 where the interface is declared.
 
 This is the construct CGP is built out of, which is worth saying plainly, because it makes the
 foundation something you already have. If you have used `Itertools` or `StreamExt`, you have used a
-blanket impl over every `Iterator` or every `Stream` — that is why a method appears on a type whose
-author never wrote it. What CGP adds is not the mechanism but the ability to have more than one of them
-and choose between them.
+blanket impl over every `Iterator` or every `Stream`. That is why a method appears on a type whose
+author never wrote it. CGP adds not the mechanism but the ability to have more than one of them and
+choose between them.
 
 ## Two providers, two sets of requirements, one interface
 
@@ -127,7 +127,7 @@ impl EmailSender {
 the right way to take it: the provider is saying *this code relies on the context being able to do
 this*. Underneath it becomes a bound on the implementation, exactly as in the blanket impl above.
 
-The consequence is worth stating precisely. `CanSendEmail` has no idea that SMTP servers exist. A
+The consequence is worth stating precisely. `CanSendEmail` says nothing about SMTP servers. A
 function bounded on it accepts both applications, even though they satisfy it for reasons that have
 nothing in common:
 
@@ -140,20 +140,20 @@ where
 }
 ```
 
-Both examples here wire a type standing for an application — `App` for production, `TestApp` for a test
-harness — rather than a piece of data. That is where most CGP code lives, and it is what makes the
-point land: the two applications differ in what they can supply, and the interface between them and
+Both examples here wire a type standing for an application, `App` for production and `TestApp` for a
+test harness, rather than a piece of data. That is where most CGP code lives, and it makes the point
+clearly: the two applications differ in what they can supply, and the interface between them and
 `notify` does not record the difference.
 
 ## The three things an implementation can ask for
 
-Everything above is one kind of requirement — a capability. There are three, they all work the same
+Everything above is one kind of requirement, a capability. There are three, they all work the same
 way, and each has a syntax that keeps the bound out of sight.
 
-**A capability** is what `#[uses]` declares, as above. It covers other CGP capabilities and ordinary
+**A capability** is the kind `#[uses]` declares, as above. It covers other CGP capabilities and ordinary
 Rust traits alike: `#[uses(AsRef<[u8]>)]` is as valid as `#[uses(HasSmtpServer)]`.
 
-**A value** is a field the implementation reads, and it is declared by writing it as an argument:
+**A value** is a field the implementation reads; you declare it by writing it as an argument:
 
 ```rust
 #[cgp_impl(new GreetByName)]
@@ -164,13 +164,12 @@ impl Greeter {
 }
 ```
 
-The `name` argument is not passed by the caller. It is read from a `name` field on the context, the
-requirement is generated from the argument's name and type and lands on the implementation, and
-`greet()` still takes nothing from the outside. [Implicit arguments](./implicit-arguments.md) develops
-this one.
+The caller does not pass the `name` argument. The provider reads it from a `name` field on the context,
+and the macro turns the argument's name and type into a requirement on the implementation, so `greet()`
+still takes nothing from the outside. [Implicit arguments](./implicit-arguments.md) develops this one.
 
-**A type** is the third, and it is the one that buys the most, because what it displaces is not a
-leaked bound but a leaked *parameter*.
+**A type** is the third, and it buys the most, because it displaces not a leaked bound but a leaked
+*parameter*.
 
 ## Type dependencies, and why they need no parameter
 
@@ -195,7 +194,7 @@ along declares all three and repeats their bounds, and adding a fourth open type
 for every caller.
 
 An **abstract type** inverts the direction. Rather than the caller supplying the type, the context
-determines it — it is an associated type on a trait the context implements, so an implementation can
+determines it. It is an associated type on a trait the context implements, so an implementation can
 name it without anyone choosing it at a call site:
 
 ```rust
@@ -225,7 +224,7 @@ signatures growing: **the number of types a context decides can rise freely, bec
 passing.** [Abstract types](./abstract-types.md) is the page for that half.
 
 One thing to be accurate about: when a capability's own signature names the type, the owning trait does
-become part of the contract — `CanRunJob` really does imply `HasErrorType`. But a caller bounding on
+become part of the contract: `CanRunJob` really does imply `HasErrorType`. But a caller bounding on
 `CanRunJob` gets that implication for free, never restates it, and names the type only if it handles
 one. Compare `trait CanRunJob<E>`, which forces `<E>` onto every caller and every caller's caller
 whether they touch an error or not. The bound is on the implementation; the parameter would be on
@@ -234,7 +233,7 @@ everyone.
 ## What it costs
 
 **A hidden requirement is hidden from you too.** The point of all this is that `CanSendEmail` does not
-say what its implementations need — which also means reading the interface tells you nothing about what
+say what its implementations need, which also means reading the interface tells you nothing about what
 a context must supply. The answer is in the provider, and finding it means knowing which provider the
 context wired.
 
@@ -247,8 +246,8 @@ an unsatisfied field bound naming a type-level spelling of the field name, sever
 that caused it. [`check_components!`](/docs/reference/macros/check_components) forces the failure to the
 wiring line and names the actual gap, and
 [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) leads with the root cause for the
-classes it recognizes — a `v0.1.0-alpha` covering the core wiring errors rather than all of them. Both
-help substantially; neither makes the raw output pleasant.
+classes it recognizes. It is a `v0.1.0-alpha` covering the core wiring errors rather than all of them.
+Both help substantially; neither makes the raw output pleasant.
 
 **And it is more machinery than a plain function needs.** For a capability with one implementation, the
 blanket impl in the second section is the whole of what is useful here, and it is ordinary Rust.
@@ -263,7 +262,7 @@ and the one that changes how a codebase's signatures age.
 
 [Consumer and provider traits](./consumer-and-provider-traits.md) is the other half of what a component
 is: this page covers how an implementation states what it needs, and that one covers how a call reaches
-the implementation at all. [Checking your wiring](./check-traits.md) takes up the cost above — why the
+the implementation at all. [Checking your wiring](./check-traits.md) takes up the cost above: why the
 check is late, and what to do about it.
 
 For the constructs themselves, [`#[uses]`](/docs/reference/attributes/uses) declares a capability,

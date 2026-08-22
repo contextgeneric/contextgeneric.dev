@@ -57,11 +57,11 @@ it. When `rectangle.area()` resolves:
 - and `GeometryComponents` implements it because *its* table sends the component to `RectangleArea`.
 
 At every step the context is `Rectangle`. `GeometryComponents` only ever appears as the thing being
-delegated to. So when `RectangleArea` reads a `width`, it reads it from `Rectangle` — the bundle has no
+delegated to. So when `RectangleArea` reads a `width`, it reads it from `Rectangle`. The bundle has no
 `width`, is never asked for one, and would not be consulted if it had one.
 
-That is what makes a bundle a *provider* rather than a context: it is something delegated **to**, never
-something used **as**. Bundles nest for the same reason — a table entry may name another table, and
+This is why a bundle is a *provider* rather than a context: it is something delegated **to**, never
+something used **as**. Bundles nest for the same reason: a table entry may name another table, and
 resolution walks each in turn while the context argument stays fixed on the real context at the end of
 the chain.
 
@@ -72,13 +72,13 @@ There is one place a bundle behaves unlike anything else, and it is worth knowin
 **Never wire a bundle with the fused
 [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components).** That macro
 derives a check asking whether the target can *use* each component as a context. For a bundle that is a
-question about a role it never plays, so the answer carries no information — and which answer comes back
+question about a role it never plays, so the answer carries no information, and which answer comes back
 depends on what is inside:
 
 - If the bundled providers need nothing from their context, they implement the capability for *every*
   context, the bundle included. The check passes. It has proved nothing, and it looks like it has.
 - If a bundled provider needs a field or a type, the check fails, reporting that `GeometryComponents`
-  does not have a `width` — blaming the bundle for something the real context would have supplied.
+  does not have a `width`, blaming the bundle for something the real context would have supplied.
 
 The silent case is the dangerous one. Wire a bundle with plain
 [`delegate_components!`](/docs/reference/macros/delegate_components) and let it be verified where the
@@ -86,8 +86,8 @@ question means something.
 
 ## Verifying one properly
 
-A bundle is checked through a context that uses it. Checking `Rectangle` walks the whole chain — through
-the bundle's table, down to `RectangleArea`'s requirements, against `Rectangle`'s fields — so a gap
+A bundle is checked through a context that uses it. Checking `Rectangle` walks the whole chain, through
+the bundle's table, down to `RectangleArea`'s requirements, against `Rectangle`'s fields, so a gap
 several bundles deep still surfaces:
 
 ```rust
@@ -99,7 +99,7 @@ check_components! {
 }
 ```
 
-When the bundle itself needs pinning down — usually to find which layer of a nested stack is broken —
+When the bundle itself needs pinning down, usually to find which layer of a nested stack is broken,
 the [`#[check_providers]`](/docs/reference/macros/check_components) form asserts the provider-side
 question instead, naming the bundle *for a concrete context*:
 
@@ -122,7 +122,7 @@ Both routes go through a real context. Neither treats the bundle as one.
 A bundle and a [namespace](./namespaces.md) both package reusable wiring, and they differ in how a
 context takes it on.
 
-A context adopts a bundle by **delegating named components to it** — `[A, B]: TheBundle` — so the
+A context adopts a bundle by **delegating named components to it**, `[A, B]: TheBundle`, so the
 context spells out which components come from where. That is direct, obvious to read, and it scales
 linearly: twenty components from a bundle means twenty names in the brackets.
 
@@ -144,12 +144,12 @@ between the call and the code.
 nothing. The threshold is a second context wanting the same group, not the anticipation of one.
 
 **It is the construct whose checking rule is a genuine trap**, per the section above, and the failure
-mode is a check that passes. Nothing in the code marks a bundle as different from a context — both are
-`delegate_components!` on a type — so the distinction has to be held by the person writing it.
+mode is a check that passes. Nothing in the code marks a bundle as different from a context, since both
+are `delegate_components!` on a type, so the distinction has to be held by the person writing it.
 
 **And the type name carries no clue.** `GeometryComponents` is a struct like any other; only its usage
-says it is a bundle. Naming the group rather than a thing — `…Components` — is the convention that keeps
-it legible.
+says it is a bundle. Naming the group rather than a thing, with a `…Components` suffix, is the convention
+that keeps it legible.
 
 ## Where to go next
 

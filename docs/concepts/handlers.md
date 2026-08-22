@@ -5,8 +5,8 @@ sidebar_position: 11
 
 # Handlers
 
-The family of computation components, and the three axes — synchronous or async, fallible or not,
-taking an input or not — that tell them apart.
+The family of computation components, and the three axes that tell them apart: synchronous or async,
+fallible or not, and taking an input or not.
 
 This page answers *why does CGP ship a dozen computation components instead of one?* It gives the shape
 they share, the three axes that separate them, the promotion that means you only ever write the
@@ -16,7 +16,7 @@ better answer.
 ## Computation as something a context decides
 
 Most CGP components are capabilities an application has: send email, query a user, load a file. The
-handler family is for a different thing — a *computation* the application performs on a value, where
+handler family is for a different thing: a *computation* the application performs on a value, where
 the interesting question is not "can it" but "which one, and composed how".
 
 Everything in the family shares one shape:
@@ -35,10 +35,10 @@ have.
 ## Three axes, and the names that encode them
 
 **Synchronous or asynchronous.** A synchronous member returns immediately; an asynchronous one returns
-a future and carries `Async` in its name — `AsyncComputer` beside `Computer`.
+a future and carries `Async` in its name, as `AsyncComputer` beside `Computer`.
 
 **Infallible or fallible.** A fallible member returns a `Result` against the context's
-[abstract error type](./modular-error-handling.md), and carries `Try` — `TryComputer` beside `Computer`.
+[abstract error type](./modular-error-handling.md), and carries `Try`, as `TryComputer` beside `Computer`.
 
 **Owned or borrowed input.** A `*Ref` variant takes `&Input` where the base takes `Input`, for a
 computation that only reads its argument.
@@ -46,7 +46,7 @@ computation that only reads its argument.
 Cross those and you get the members that are documented separately:
 [`Computer`](/docs/reference/components/computer) is the pure synchronous corner,
 [`TryComputer`](/docs/reference/components/try_computer) the fallible synchronous one, and
-[`Handler`](/docs/reference/components/handler) — async *and* fallible — the general workhorse, which is
+[`Handler`](/docs/reference/components/handler), async *and* fallible, the general workhorse, which is
 why it needs no qualifier. [`Producer`](/docs/reference/components/producer) sits slightly apart: a
 computation with no input at all, producing a value from the context and a tag.
 
@@ -56,8 +56,8 @@ two numbers is a `Computer`, and nothing about it should mention futures or erro
 ## Write the weakest one; the rest come free
 
 Which raises the obvious objection: if wiring wants a `Handler` and you wrote a `Computer`, have you
-picked wrong? No — the inclusions between the axes are real (an infallible computation is a fallible one
-that never fails, a synchronous one is an async one that never awaits) and CGP encodes each as a
+picked wrong? No. The inclusions between the axes are real (an infallible computation is a fallible one
+that never fails, a synchronous one is an async one that never awaits), and CGP encodes each as a
 combinator that lifts a provider from one member into another.
 
 The practical result is that one definition answers the whole family:
@@ -85,7 +85,7 @@ whatever it needs.** You do not have to predict which one a caller will want.
 
 ## A pipeline is a wiring entry
 
-Because every member is an ordinary component, composing computations is composing providers — and the
+Because every member is an ordinary component, composing computations is composing providers, and the
 combinators that do it are [higher-order providers](./higher-order-providers.md), so a whole chain has a
 name and lives in a table:
 
@@ -105,7 +105,7 @@ delegate_components! {
 
 `PipeHandlers` runs the stages left to right, threading each output into the next input. Each stage here
 reads one field from the context and folds it into the running value, so `app.compute(…, 5)` evaluates
-`((5 * foo) + bar) * baz` — and the shape of the computation is a line of wiring rather than a function
+`((5 * foo) + bar) * baz`, and the shape of the computation is a line of wiring rather than a function
 body. Changing the order, dropping a stage, or swapping one for another is an edit to a type.
 
 `ComposeHandlers` nests rather than chains, `ReturnInput` passes a value through, and the `Promote*`
@@ -114,7 +114,7 @@ adapters are the lifts from the previous section made explicit. They are catalog
 
 ## Many computations on one context
 
-The `Code` tag is what stops a context being limited to one computation per member of the family. Two
+The `Code` tag stops a context being limited to one computation per member of the family. Two
 tags, two providers, one table:
 
 ```rust
@@ -129,19 +129,19 @@ delegate_components! {
 ```
 
 `App.compute(PhantomData::<Doubled>, 21)` and `App.compute(PhantomData::<Negated>, 21)` reach different
-providers. Dispatch can key on the `Input` type as readily as on the `Code`, which is what
-[dispatching](./dispatching.md) over extensible data uses, and what makes a program written as types
-interpretable — see [type-level DSLs](./type-level-dsls.md).
+providers. Dispatch can key on the `Input` type as readily as on the `Code`. That is how
+[dispatching](./dispatching.md) over extensible data works, and how a program written as types becomes
+interpretable, as [type-level DSLs](./type-level-dsls.md) shows.
 
 ## What it costs
 
 **The `PhantomData` at every call site.** `app.compute(PhantomData::<()>, input)` is the price of the
-tag being a type. For a context with one computation it is pure ceremony, and it is what most makes
-handler code look unlike ordinary Rust.
+tag being a type. For a context with one computation it is pure ceremony, and it does more than anything
+else to make handler code look unlike ordinary Rust.
 
 **The family is a lot of names to hold.** Twelve or so components across three axes, plus the promotion
-combinators, is more surface than any other part of CGP. The mitigation is the rule above — write the
-weakest member and ignore the rest — but reading someone else's handler wiring means knowing which
+combinators, is more surface than any other part of CGP. The mitigation is the rule above, to write the
+weakest member and ignore the rest, but reading someone else's handler wiring means knowing which
 member each name belongs to.
 
 **A pipeline in a type is harder to debug than a function body.** There is no line to step through and
@@ -150,7 +150,7 @@ terms of an `Output` associated type, and localizing it means the per-layer chec
 [checking your wiring](./check-traits.md).
 
 **And most computations should stay functions.** This family earns its keep when the *steps* need to be
-chosen by wiring — when different contexts run different pipelines, or a program is data. A computation
+chosen by wiring: when different contexts run different pipelines, or a program is data. A computation
 with one implementation is a function, and [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is how to write
 one that still reads its inputs from a context.
 

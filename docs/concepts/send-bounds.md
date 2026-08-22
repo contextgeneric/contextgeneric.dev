@@ -9,7 +9,7 @@ Restoring the guarantee an async trait method drops, so the future it returns ca
 multi-threaded runtime.
 
 This page answers *why will my async CGP handler not spawn?* It is short, and it is about a gap in
-stable Rust rather than about CGP — CGP just meets it sooner than most code does. It explains where the
+stable Rust rather than about CGP. CGP just meets it sooner than most code does. It explains where the
 guarantee goes, the bound that would fix it and does not exist yet, and the workaround. It closes on
 what that workaround costs, which is repetition.
 
@@ -28,7 +28,7 @@ pub trait CanHandleApi<Api> {
 }
 ```
 
-That rewrite is faithful and costs nothing — no boxing, no allocation. It also drops every auto-trait
+That rewrite is faithful and costs nothing: no boxing and no allocation. It also drops every auto-trait
 bound. The returned future is `Send` when the concrete future the body produces happens to be, and a
 caller working through the trait has no way to *require* it.
 
@@ -37,8 +37,8 @@ not see the concrete type, and the future's `Send`-ness is part of what is hidde
 
 ## Why that matters, and what you cannot write
 
-It matters the moment the future is spawned. A work-stealing runtime — the default Tokio runtime an Axum
-server runs on — may move a task between threads while it is suspended, so every future it drives must
+It matters the moment the future is spawned. A work-stealing runtime, the default Tokio runtime an Axum
+server runs on, may move a task between threads while it is suspended, so every future it drives must
 be `Send`. A generic handler awaiting `handle_api` produces a task that is `Send` only if that future
 is.
 
@@ -56,7 +56,7 @@ where
 }
 ```
 
-Return Type Notation — `handle_api(..): Send` — says exactly the right thing: whatever arguments the
+Return Type Notation, `handle_api(..): Send`, says exactly the right thing: whatever arguments the
 method is called with, its future is `Send`. It is not stabilized, so this cannot be written in
 production code today.
 
@@ -90,11 +90,11 @@ where
 ## Why the implementation cannot be generic
 
 The obvious next step is one blanket implementation covering every context that already handles the API.
-It does not compile, and the reason is worth following, because it is the same gap wearing a disguise.
+It does not compile, and the reason is worth following, because it is the same gap in another form.
 
 Such an impl would wrap `self.handle_api(..)` in an `async` block, and that block is `Send` only if the
 future it awaits is. For a generic `App` and `Api` the awaited future is an opaque `impl Future` whose
-auto-traits are unknown — so the impl cannot prove its own `+ Send` return type. A generic blanket impl
+auto-traits are unknown, so the impl cannot prove its own `+ Send` return type. A generic blanket impl
 *is* Return Type Notation, and it is blocked for the same reason.
 
 Dropping to a concrete context and a concrete API closes it:
@@ -108,8 +108,9 @@ impl CanHandleApiSend<QueryBalance> for MockApp {
 ```
 
 Now `Self` is a fixed type and `Api` is a fixed marker, so the call resolves through the wiring to a
-concrete provider producing a concrete future — and the compiler computes that future's auto-traits and
-finds it `Send`. No annotation is needed, because `Send` is inferred structurally for a known type.
+concrete provider producing a concrete future, and the compiler computes that future's auto-traits and
+finds it `Send`. No annotation is needed, because the compiler infers `Send` structurally for a known
+type.
 
 Each of these impls is mechanical: forward, and await. Each is also a *proof*, accepted only because at
 this instantiation the future really is `Send`.
@@ -120,8 +121,9 @@ this instantiation the future really is `Send`.
 where RTN would have allowed a single generic impl, this needs one for every pair. A service with eight
 endpoints and two contexts writes sixteen forwarding bodies.
 
-**It is boilerplate that cannot be abstracted away**, since abstracting it is what does not compile. A
-macro could generate it, and the impls would still be there.
+**It is boilerplate that cannot be abstracted away.** The abstraction that would remove it is the
+generic blanket impl, and that does not compile. A macro could generate the impls, but they would still
+be there.
 
 **And it is a second trait to keep in step.** Adding a method to the capability means adding it here
 too, and nothing enforces that the two stay aligned beyond the supertrait.
@@ -133,7 +135,7 @@ workaround with a known expiry, not a design.
 
 [Handlers](./handlers.md) is the family whose futures most often need this, since it is where CGP's
 async I/O lives. [Consumer and provider traits](./consumer-and-provider-traits.md) explains the wiring
-the concrete impl forwards through, which is what makes the resolved future a concrete, checkable type.
+the concrete impl forwards through, which turns the resolved future into a concrete, checkable type.
 
 For the constructs, [`#[async_trait]`](/docs/reference/macros/async_trait) is the rewrite that drops the
 bound, and its own page records the same gap from the macro's side.

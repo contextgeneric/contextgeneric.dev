@@ -9,7 +9,7 @@ Why a wiring mistake still compiles, and how a compile-time assertion turns the 
 one that names the real cause.
 
 This page answers *why did my mistake not fail where I made it?* It follows one broken context through
-three stages — unchecked, checked, and checked through the error toolchain — quoting what the compiler
+three stages, unchecked, checked, and checked through the error toolchain, quoting what the compiler
 actually reports at each. It closes on what checking does not fix, which is the honest version of CGP's
 most-cited cost.
 
@@ -40,7 +40,7 @@ delegate_components! { BrokenApp { EmailSenderComponent: RecordEmails } }
 is meant to: the table stores "this key points to this provider" as a type-level fact, and nothing has
 asked yet whether the provider's own requirements hold for this particular context.
 
-That laziness is not an oversight. It is what lets a provider be written once against every possible
+That laziness is not an oversight. It lets a provider be written once against every possible
 context, lets a bundle of wiring be reused by applications the bundle has never heard of, and lets a
 table be assembled from pieces that never meet. Checking each entry as it was written would mean every
 entry knowing its final context, which is the coupling the whole design exists to avoid.
@@ -49,9 +49,9 @@ The price is that a context can look finished and be broken.
 
 ## Where the failure surfaces instead
 
-The question gets asked the first time something uses the capability, which may be in another module,
-another crate, or a test somebody runs next week. And the answer arrives in a form that does not name
-the problem:
+The compiler asks the question the first time something uses the capability, which may be in another
+module, another crate, or a test somebody runs next week. And the answer arrives in a form that does
+not name the problem:
 
 ```text
 error[E0599]: the method `send_email` exists for reference `&BrokenApp`,
@@ -67,16 +67,16 @@ note: the following trait bounds were not satisfied:
 
 Read it closely and it says only that the capability is unavailable, restated twice. The word
 `sent_emails` does not appear. Neither does anything about a field. The compiler answered the question
-it was asked — *does this type have this method?* — and the reasoning that produced "no" was discarded
-on the way out.
+it was asked, *does this type have this method?*, and discarded the reasoning that produced "no" on the
+way out.
 
-This is the single worst experience CGP offers a newcomer, and it is worth being blunt that it is what
-a mis-wire looks like by default.
+This is the single worst experience CGP offers a newcomer, and it is worth being blunt that a mis-wire
+looks like this by default.
 
 ## Asking the question at a line you chose
 
 A **check** forces the same question early, at the wiring, where you can see it. It is not a new
-mechanism — the plain-Rust form is a trait that demands something and an impl with nothing in it:
+mechanism. The plain-Rust form is a trait that demands something and an impl with nothing in it:
 
 ```rust
 trait CanUseApp: CanSendEmail {}
@@ -98,9 +98,9 @@ check_components! {
 ```
 
 But the important part is not the convenience. A check asserts something *stronger* than the consumer
-trait, and that is what changes the error. Asking "does `BrokenApp` implement `CanSendEmail`?" gets the
-answer above. Asking "can `BrokenApp` use this component?" makes the compiler evaluate the provider's
-actual requirements and report the one that failed:
+trait, and that stronger assertion changes the error. Asking "does `BrokenApp` implement
+`CanSendEmail`?" gets the answer above. Asking "can `BrokenApp` use this component?" makes the compiler
+evaluate the provider's actual requirements and report the one that failed:
 
 ```text
 error[E0277]: the trait bound `BrokenApp: CanUseComponent<EmailSenderComponent>`
@@ -117,7 +117,7 @@ note: required for `RecordEmails` to implement
 
 The cause is in there now. A field is missing, one *is* present, and the provider that wanted it is
 named. Two things still stand between that and a usable message: the field names are spelled as
-type-level character lists — `sent_emails` and `smtp_server`, one character per layer — and the headline
+type-level character lists, `sent_emails` and `smtp_server` at one character per layer, and the headline
 is about a trait nobody wrote.
 
 ## Reading it through the toolchain
@@ -143,7 +143,7 @@ words you would use to describe it.
 The tool does more than reformat: for the worst class it turns on the compiler's next-generation trait
 solver to recover a cause the default solver discards entirely, which is why the first error on this
 page had nothing to reshape. It is a `v0.1.0-alpha`, it covers the core wiring errors rather than every
-class, and some — orphan-rule failures among them — still pass through as the compiler wrote them.
+class, and some still pass through as the compiler wrote them, orphan-rule failures among them.
 Dramatically better and actively improving, not solved.
 
 ## Checking a stack one layer at a time
@@ -185,7 +185,7 @@ verified.
 
 One case is not a matter of taste: **never fuse the check onto a
 [bundle of wiring](./aggregate-providers.md)**. A bundle is a provider other contexts delegate to, not a
-context, so a context-side check on it asks a question it was never meant to answer — and gets an answer
+context, so a context-side check on it asks a question it was never meant to answer, and gets an answer
 that means nothing either way. It passes vacuously when the bundled providers need nothing from their
 context, and fails blaming the bundle when any of them does. Verify a bundle through a context that
 delegates to it.
@@ -211,7 +211,7 @@ and three exist is the reader CGP loses.
 ## Where to go next
 
 [Impl-side dependencies](./impl-side-dependencies.md) is why the requirement was hidden in the first
-place — the design decision this page pays for. [Higher-order providers](./higher-order-providers.md) is
+place, the design decision this page pays for. [Higher-order providers](./higher-order-providers.md) is
 where per-layer checking earns its keep, and [Aggregate providers](./aggregate-providers.md) is the case
 where the context-side check is the wrong one.
 

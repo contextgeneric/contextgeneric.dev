@@ -5,8 +5,8 @@ sidebar_position: 5
 
 # Abstract types
 
-Naming a type in generic code — an error type, a scalar, a runtime — and letting each context decide
-what it actually is.
+Naming a type in generic code, such as an error type, a scalar, or a runtime, and letting each context
+decide what it actually is.
 
 This page answers *how does code name a type it does not choose?* It starts from the ordinary Rust
 feature that already does this, shows what CGP adds to it, and works through the two things abstract
@@ -34,10 +34,10 @@ impl HasScalarType for Embedded {
 
 Generic code names `Context::Scalar` and never commits to `f32` or `f64`. Each type answers for itself,
 the compiler resolves the answer where a concrete type is known, and nothing costs anything at runtime.
-That is the whole idea, and CGP does not replace it — a context can implement an abstract-type trait
+That is the whole idea, and CGP does not replace it. A context can implement an abstract-type trait
 directly, exactly as above, and everything else on this page still works.
 
-What is worth noticing is the *direction*. A generic parameter is an input the caller supplies; an
+The *direction* is worth noticing. A generic parameter is an input the caller supplies; an
 associated type is an output the implementing type determines. That difference is small in one function
 and decides how a codebase ages, which the last section of this page is about.
 
@@ -69,18 +69,18 @@ delegate_components! {
 }
 ```
 
-`UseType<f64>` says "the type is `f64`", and that is all it says — every abstract type is answered the
+`UseType<f64>` says "the type is `f64`", and that is all it says. Every abstract type is answered the
 same trivial way, so `#[cgp_type]` generates that answer once and a context supplies the type as an
-argument to it. The bound on the associated type is carried through and enforced on whatever the context
-chooses: wiring `UseType<String>` against a `Copy` scalar is an error reading
+argument to it. The bound on the associated type carries through, and the compiler enforces it on
+whatever the context chooses: wiring `UseType<String>` against a `Copy` scalar is an error reading
 `the trait bound String: Copy is not satisfied`. Like every other wiring choice it is
 [checked lazily](./check-traits.md), so that error appears where the component is checked or used rather
 than on the wiring line itself.
 
-This is a small win on its own. What it buys is that a context's type choices sit beside its behaviour
-choices, in one table, rather than being scattered across `impl` blocks — and that a type can be chosen
-by something more interesting than a fixed answer, since `UseType<T>` is just one provider among the
-ones a component can be wired to.
+This is a small win on its own. It buys two things. A context's type choices sit beside its behaviour
+choices, in one table, rather than scattered across `impl` blocks. And a type can be chosen by
+something more interesting than a fixed answer, since `UseType<T>` is just one provider among the ones a
+component can be wired to.
 
 ## One type, agreed on by everything that needs it
 
@@ -101,10 +101,10 @@ pub trait CanCalculateShapeArea<Shape> {
 
 `Rectangle` declares nothing. The application declares the scalar, every shape interoperates through it,
 and switching the application from `UseType<f32>` to `UseType<f64>` changes the arithmetic for every
-shape at once. The application here is a type standing for the program rather than a piece of data —
-`struct App;` with no fields is a complete one — which is the shape most CGP code is in.
+shape at once. The application here is a type standing for the program rather than a piece of data, and
+`struct App;` with no fields is a complete one, which is the shape most CGP code is in.
 
-The `#[use_type(HasScalarType.Scalar)]` line is what lets the signature say `Scalar` instead of
+The `#[use_type(HasScalarType.Scalar)]` line lets the signature say `Scalar` instead of
 `<Self as HasScalarType>::Scalar`. It imports the type and adds the requirement in one line, and it
 reads like a `use` for a type because that is what it is.
 
@@ -133,9 +133,9 @@ impl Loader {
 }
 ```
 
-`LoadOrFail` fails, and never learns what failing means in this application. The context decides —
-`anyhow::Error`, a domain enum, a plain `String` — and every fallible provider in that context refers to
-the same one, so errors compose instead of needing conversion at each boundary.
+`LoadOrFail` fails, and never learns what failing means in this application. The context decides,
+whether `anyhow::Error`, a domain enum, or a plain `String`, and every fallible provider in that context
+refers to the same one, so errors compose instead of needing conversion at each boundary.
 [Modular error handling](./modular-error-handling.md) is the page for what else follows from that.
 
 ## Two things called `UseType`
@@ -153,11 +153,11 @@ program constantly and never in the same position.
 **It is deferral, not encapsulation.** An abstract type leaves the choice open; it does not hide the
 answer. Once a context wires `UseType<f64>`, code with that context in hand sees `f64` and can do
 anything `f64` allows. If the goal is that callers must *not* know the representation, that is Rust's
-module privacy, and an abstract type is the wrong tool for it — a distinction worth being precise about
-with anyone arriving from ML modules.
+module privacy, and an abstract type is the wrong tool for it. That distinction is worth being precise
+about with anyone arriving from ML modules.
 
 **A bound on the associated type is the only thing generic code can rely on.** `type Scalar: Copy` means
-generic code can copy a scalar and nothing else — no arithmetic, no comparison, unless those bounds are
+generic code can copy a scalar and nothing else: no arithmetic and no comparison, unless those bounds are
 declared too. Adding one later is a change every context has to satisfy, so the bounds are worth
 thinking about when the trait is written.
 
@@ -176,7 +176,7 @@ wiring line, like everything else.
 the type-shaped version of a requirement stated on the implementation, beside the capability leg and the
 value leg. [Implicit arguments](./implicit-arguments.md) is that value leg.
 
-[Modular error handling](./modular-error-handling.md) develops the canonical case at length — the error
+[Modular error handling](./modular-error-handling.md) develops the canonical case at length: the error
 type, how a foreign error becomes it, and what detail it carries, as three separate choices.
 
 For the constructs, [`#[cgp_type]`](/docs/reference/macros/cgp_type) defines an abstract-type component,

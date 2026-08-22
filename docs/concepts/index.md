@@ -7,7 +7,7 @@ sidebar_position: 0
 
 This section explains the ideas behind CGP: why it is built the way it is, what each of its ideas
 actually does, and where the boundaries of each one lie. It is written to be read away from a
-keyboard — there is nothing here to follow along with, and nothing to install first.
+keyboard. There is nothing here to follow along with, and nothing to install first.
 
 It sits alongside the other two parts of the documentation. The [tutorials](/docs/tutorials/hello)
 teach by building something, so they show a construct at the moment it is needed and move on. The
@@ -24,8 +24,8 @@ correct, what it costs in practice, and the move CGP makes to work around it wit
 the rule buys. Almost everything else here is downstream of it.
 
 **Read [Consumer and provider traits](./consumer-and-provider-traits.md) first if you want to know
-how CGP works.** It covers the trait split at the centre of the design — one trait you call, another
-you implement — and how a call finds its way from one to the other.
+how CGP works.** It covers the trait split at the centre of the design, one trait you call and another
+you implement, and how a call finds its way from one to the other.
 
 **Read [How much CGP to use](./modularity-hierarchy.md) first if you are deciding whether to adopt
 it.** It lays out the range from an ordinary Rust trait to fully wired components as a ladder, and
