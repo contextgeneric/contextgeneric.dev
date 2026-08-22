@@ -88,14 +88,6 @@ called, while [`HasField`](./has_field.md) is what reads its value.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section explains the `LEN` parameter that otherwise looks redundant on every `Symbol`.
-
-:::
-
 `StaticString` is const evaluation rather than a recursion at run time. It is a blanket impl over an
 internal `StaticBytes` trait: `Symbol<LEN, Chars>` computes a `[u8; LEN]` in a `const` block by walking
 the character list and UTF-8-encoding each character into the array, and `VALUE` then validates those
@@ -106,7 +98,7 @@ size, and the size cannot be computed from inside the const context by walking t
 precomputes it. It is a *byte* length, which is what makes multi-byte Unicode round-trip correctly and
 why `LEN` disagrees with the visible character count for any non-ASCII name.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude** while [`ConcatPath`](./concat_path.md) is — an asymmetry between two traits
 that do neighbouring jobs. Import `StaticString` from `cgp::core::field::traits`.

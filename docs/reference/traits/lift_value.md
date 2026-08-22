@@ -94,14 +94,6 @@ chain steps without a branch and involve none of this.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows where a bind step uses it.
-
-:::
-
 The [`BindOk` and `BindErr`](../providers/monad_providers.md) providers use `LiftValue` in their
 [`Computer`](../components/computer.md) and `AsyncComputer` impls, as the closing half of a step whose
 opening half is [`ContainsValue`](./contains_value.md). The step unwraps the incoming output, decides
@@ -118,7 +110,7 @@ one where the distinction happens to be vacuous, not one where it does not exist
 The transformer forms implement both by delegating to the base monad after handling their own layer,
 which is what lets a stack lift through *n* layers with no depth-specific code.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

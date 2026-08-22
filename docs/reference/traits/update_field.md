@@ -103,14 +103,6 @@ call site.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the generated impl, and the detail that makes build order free.
-
-:::
-
 The derive emits one impl per field, and the key property is visible in the generics: **only the named
 field's marker moves, while every other stays generic.**
 
@@ -137,7 +129,7 @@ by constraining it. [`BuildField`](./build_field.md) is a blanket impl over
 Nothing here changes a value's runtime layout beyond moving it in or out of the slot; the markers are
 zero-sized and the wrapping is a type-level fiction.
 
-## Gotchas
+## Common Mistakes
 
 **`Mapper` is the state *before* the call, not after.** The name reads either way, and getting it
 backwards makes a bound resolve to the wrong impl or none at all.

@@ -241,8 +241,7 @@ A bound that names the type it constrains is rewritten rather than refused. Decl
 becomes `Scalar: Mul<Output = Scalar> + Clone`, with every `Self::Scalar` replaced by the free parameter.
 Copied unchanged it would have named an associated type of the wrong `Self`.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is the same grammar as [`#[cgp_component]`](./cgp_component.md)'s, in the Rust
 Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -256,9 +255,7 @@ A bare provider name, or the keyed `name` / `provider` / `context` form. The onl
 derived from the **associated type's** name plus `TypeProvider`, so `type Scalar;` yields
 `ScalarTypeProvider`. Every other key and default behaves as documented there.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **The trait must contain exactly one associated type and nothing else.** A method beside the type, a
 second type, or no type at all all report the same thing:
@@ -301,7 +298,7 @@ note: required for `UseType<String>` to implement `IsProviderFor<ScalarTypeProvi
 
 The offending type and the declaration that demanded the bound are both in the notes rather than the
 headline, so read downward. **Without a check the mistake is silent**, which is the ordinary consequence of
-[lazy wiring](./delegate_components.md#gotchas) rather than anything specific to abstract types.
+[lazy wiring](./delegate_components.md#common-mistakes) rather than anything specific to abstract types.
 
 ## Related constructs
 

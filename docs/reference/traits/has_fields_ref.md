@@ -99,14 +99,6 @@ a caller must supply.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the generated impl, and the reserved lifetime name in it.
-
-:::
-
 The derive emits the borrowed shape with a **reserved lifetime name**, `'__a`, so it cannot collide with
 a lifetime of yours:
 
@@ -129,7 +121,7 @@ Because the rewrite is per-entry rather than structural, **a field that is alrea
 another one**: a field of type `&'a Name` appears as `&'__a &'a Name`. That is correct, and it is the one
 thing about this trait that surprises people in an error message.
 
-## Gotchas
+## Common Mistakes
 
 **A field that is already borrowed gets a second borrow.** `&'a Name` becomes `&'__a &'a Name` in
 `FieldsRef`, which reads oddly in a diagnostic and is not a bug.

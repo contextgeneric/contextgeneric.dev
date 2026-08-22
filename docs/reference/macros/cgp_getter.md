@@ -244,8 +244,7 @@ where
 Each of these is paired with a matching [`IsProviderFor`](../traits/is_provider_for.md) impl carrying the
 same bounds, so a missing field is reported by name when the component is checked.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is the same grammar as [`#[cgp_component]`](./cgp_component.md)'s, in the Rust
 Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -259,9 +258,7 @@ A bare provider name, or the keyed `name` / `provider` / `context` form. The onl
 derived from the trait name by stripping a leading `Has` and appending `Getter`, so `HasName` yields
 `NameGetter`. Every other key and default behaves as documented there.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **A multi-method trait gets no `UseField` provider.** Both `UseField` and `WithProvider` are emitted only
 for a single-method trait, because each supplies one field. Wiring a two-method getter to

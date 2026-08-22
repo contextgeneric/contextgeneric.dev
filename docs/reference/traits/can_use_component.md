@@ -167,15 +167,6 @@ verify those — they surface as themselves.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows how the two bounds distinguish the two ways wiring goes wrong. You do not need it to write
-a check, but it is what tells you whether to add a wiring line or supply a dependency.
-
-:::
-
 The blanket impl *is* the behaviour, and its two bounds fail differently — which is the practical payoff.
 
 **The first bound failing means the wiring is absent.** `Context: DelegateComponent<Component>` is unmet when
@@ -196,7 +187,7 @@ supertrait is this bound, then one empty impl of that trait per checked entry. E
 supertrait holds, so the table is an assertion. Because it produces no values, a successful build *is* the
 passing test.
 
-## Gotchas
+## Common Mistakes
 
 **It is not the consumer trait.** `Person: CanUseComponent<GreeterComponent, ()>` holding is not the same
 statement as `Person: CanGreet`, even though in practice one follows the other. The check exists precisely

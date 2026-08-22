@@ -120,16 +120,6 @@ are a different family: [`ExtractField`](./extract_field.md) for taking a value 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what `Builder` actually is, and why finalizing early fails. The partial type appears
-by name in every builder error, so recognizing it turns "no method named `finalize_build`" into a legible
-message.
-
-:::
-
 The derive generates a companion struct — `__Partial{Name}` — that is your struct with one
 [`MapType`](./map_type.md) parameter added per field and each field's type wrapped in that parameter's
 projection:
@@ -166,7 +156,7 @@ Everything between the two ends reduces to one primitive, [`UpdateField`](./upda
 what the derive actually writes; [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are
 library blanket impls over it in opposite directions.
 
-## Gotchas
+## Common Mistakes
 
 **"No method named `finalize_build`" is the expected error for an incomplete build.** A missing field
 means the all-present impl does not apply, so the compiler reports a missing method rather than a missing

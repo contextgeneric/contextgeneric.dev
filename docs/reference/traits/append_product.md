@@ -97,15 +97,6 @@ There is no `AppendSum`. Growing a sum is not an operation this layer provides.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion. It is four lines, and reading it makes
-[`ConcatProduct`](./concat_product.md) obvious for free.
-
-:::
-
 The trait is a pair of impls, one for the spine's `Cons` node and one for its `Nil` terminator. Each head
 is kept and the tail rebuilt, with a single-element list grafted on at the end:
 
@@ -128,7 +119,7 @@ different orders are unrelated types.
 
 All of this is resolved during type checking. There is no `fn` anywhere on this page.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`. This is the first thing that goes
 wrong when reaching for it.

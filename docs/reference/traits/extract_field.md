@@ -114,15 +114,6 @@ the whole family is [`HasBuilder`](./has_builder.md).
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows how narrowing is encoded. The partial enums appear by name in every extraction error,
-so recognizing one makes those errors legible.
-
-:::
-
 The derive generates a companion enum with one [`MapType`](./map_type.md) parameter per variant, each
 payload wrapped in that parameter's projection:
 
@@ -149,7 +140,7 @@ The borrowed accessors use the same partial enum with an extra [`MapTypeRef`](./
 parameter fixed to `IsRef` or `IsMut`, so a value can be matched without being moved and the narrowing
 works identically.
 
-## Gotchas
+## Common Mistakes
 
 **`Self` is an extractor, not the enum.** A chain starts with [`to_extractor`](./has_extractor.md) or one
 of its borrowing siblings.

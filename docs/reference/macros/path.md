@@ -173,8 +173,7 @@ uniformly. An `open` statement's per-entry key comes back as a raw `PathCons` sp
 target is resugared. Seeing the same kind of type in two spellings in one expansion is expected rather than a
 sign that they differ.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The input is a leading `@` followed by one or more dot-separated segments, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -191,9 +190,7 @@ becomes a `Symbol` type-level string, while every other segment (a capitalized n
 the named type. [`cgp_namespace!`](./cgp_namespace.md) entries and `#[prefix(...)]`
 attributes embed this same grammar, where it appears as the `Path` production.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **The leading `@` is not optional**, and the macro says exactly what it wanted:
 

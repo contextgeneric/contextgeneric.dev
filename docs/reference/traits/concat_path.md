@@ -90,15 +90,6 @@ nothing to concatenate.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion, which is [`ConcatProduct`](./concat_product.md#under-the-hood)'s over
-the path spine.
-
-:::
-
 Two impls, one per spine node. Each node keeps its head segment and rebuilds the tail; the terminator
 becomes the other path outright:
 
@@ -125,7 +116,7 @@ resolution proportional to the first path's length.
 It never touches a value; it only names the combined path type, which a getter or a
 [`RedirectLookup`](../providers/redirect_lookup.md) then uses to descend.
 
-## Gotchas
+## Common Mistakes
 
 **[`Path!`](../macros/path.md) requires a leading `@`.** `Path!(a.b)` does not parse; `Path!(@a.b)` does.
 This is the most common way an otherwise-correct `ConcatPath` example fails to build.

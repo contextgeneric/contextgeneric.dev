@@ -103,14 +103,6 @@ and reading it here is the shortest route to understanding that layer.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section explains why the impls are shaped the way they are.
-
-:::
-
 The signature's argument and return types are **projections through the two markers**, so the concrete
 types differ per impl even though the trait is the same. `TransformMap<IsNothing, IsPresent, T>` has an
 argument type of `<IsNothing as MapType>::Map<T>`, which normalizes to `()`, and a return type of `T`.
@@ -129,7 +121,7 @@ re-marks exactly the fields the concrete struct declares.
 Nothing here has a runtime representation beyond the field values themselves: the markers are zero-sized,
 and `transform_mapped` is an associated function with no receiver.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 

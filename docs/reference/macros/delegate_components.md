@@ -562,8 +562,7 @@ where
 A `for` loop produces the same shape once per mapping in its body, plus any predicates its `where`
 clause adds.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 In the Rust Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
 
@@ -639,9 +638,7 @@ opening exactly one component. Every `Statement` precedes every `Mapping`. `Name
 `ForStmt` are described under [`cgp_namespace!`](./cgp_namespace.md). The macro accepts no attributes
 anywhere and rejects any it finds.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **Wiring is lazy.** A table with a missing entry, or one naming a provider whose own dependencies are
 unmet, still compiles. The failure appears later, at the place the capability is used, often as a long
@@ -681,7 +678,7 @@ names an unresolved type rather than anything about wiring.
 as a wiring one. This covers the obvious duplicate, an `open` header colliding with an explicit mapping
 for the same component, and a generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a
 specific `AreaCalculatorComponent<Rectangle>` one. The same applies to a direct entry for a path a
-joined namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#gotchas).
+joined namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#common-mistakes).
 
 ## Related constructs
 

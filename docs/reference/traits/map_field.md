@@ -120,14 +120,6 @@ say — and even then the existing ones usually compose.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section explains why the blanket impl needs a `'static` tag and the value does not.
-
-:::
-
 `MapField` is a blanket impl for every [`HasField`](./has_field.md) whose **tag** is `'static`:
 
 ```rust
@@ -146,7 +138,7 @@ lifetime, and the result can be returned to the caller.
 [`ChainGetters`](../providers/chain_getters.md) composes descents by nesting these calls, one per
 segment, so an arbitrarily deep path stays lifetime-correct with no `'static` anywhere in the chain.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 [`FieldMapper`](./field_mapper.md) is the other non-prelude member of the group; everything else in it

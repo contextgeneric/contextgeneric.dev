@@ -85,14 +85,6 @@ The payload arrives as `&mut Circle`, so the write lands in the original value. 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the marker that distinguishes it from the shared-borrow form.
-
-:::
-
 It uses the **same borrowed companion** as [`HasExtractorRef`](./has_extractor_ref.md#under-the-hood),
 with the outer [`MapTypeRef`](./map_type_ref.md) marker fixed to `IsMut` rather than `IsRef`:
 
@@ -108,7 +100,7 @@ difference between the two borrowing accessors: one marker.
 
 There is no rebuild counterpart, and none is needed — the value was never taken apart, only borrowed.
 
-## Gotchas
+## Common Mistakes
 
 **It takes `&mut self`, so nothing else may borrow the value** for as long as the extractor lives. That is
 ordinary borrow checking, but it surfaces as an error about the companion type, which reads as though the

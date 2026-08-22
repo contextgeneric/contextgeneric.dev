@@ -103,14 +103,6 @@ forgot, and it is the only place the compiler names it.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the impl, and why the error reads the way it does.
-
-:::
-
 The derive emits one impl, with every marker fixed:
 
 ```rust
@@ -141,7 +133,7 @@ The optional layer reaches this same impl rather than replacing it:
 [`TransformMapFields`](./transform_map_fields.md) to `IsPresent` first, so **the strict, all-present impl
 remains the only way a partial value becomes a concrete struct.**
 
-## Gotchas
+## Common Mistakes
 
 **"No method named `finalize_build`" is the expected error for an incomplete build.** Read the partial
 type in the message: the field whose marker is still `IsNothing` is the one missing.

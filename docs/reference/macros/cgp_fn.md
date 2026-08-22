@@ -122,7 +122,7 @@ pub fn describe(&self, #[implicit] name: &Name) -> String {
 The cost is that the type is concealed rather than named. It exists only where a value of it flows
 through an implicit argument, so nothing else can refer to it, including this function's own
 signature. Naming it in a return type or an explicit parameter does not compile, as the
-[Gotchas](#gotchas) explain. When the type must be nameable, or when two capabilities have to agree
+[Common Mistakes](#common-mistakes) explain. When the type must be nameable, or when two capabilities have to agree
 that they mean the same type, promote it to an abstract type with [`#[cgp_type]`](./cgp_type.md) and
 import it with [`#[use_type]`](../attributes/use_type.md).
 
@@ -292,8 +292,7 @@ function's visibility becomes the trait's**, and the impl's method keeps inherit
 usable only in its own module. And **the macro copies an attribute it does not recognize onto both
 items**, so `#[allow(...)]`, `#[doc]`, or a doc comment carries onto the trait and the impl alike.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is a single optional trait name, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -308,9 +307,7 @@ When the argument is omitted, the trait name defaults to the function name conve
 `#[implicit]` markers on parameters and the companion attributes are separate attributes with grammars
 of their own, documented on their own pages.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **A function with implicit arguments must take `self` first.** Without a receiver there is no context
 to read a field from, and the macro says so rather than emitting a bound that fails later:

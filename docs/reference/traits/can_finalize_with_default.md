@@ -92,14 +92,6 @@ The one-call form that also copies from a source is
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the two-line body, which is the clearest statement of how the layer works.
-
-:::
-
 The whole impl is a transform followed by the ordinary finalize:
 
 ```rust
@@ -128,7 +120,7 @@ symmetrically.
 Because the transform targets `IsPresent`, the value handed to `finalize_build` is at exactly the
 configuration its single impl requires — so the strict check runs, and cannot fail.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

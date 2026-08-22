@@ -229,7 +229,7 @@ Three lighter tools cover most cases, and it is worth knowing where each stops.
 
 Two things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
 entries still have to exist somewhere. And it is not how one component gets per-type dispatch, which is
-`open`'s job; the two do not combine on the same component, as the [Gotchas](#gotchas) explain.
+`open`'s job; the two do not combine on the same component, as the [Common Mistakes](#common-mistakes) explain.
 
 ## Under the hood
 
@@ -303,8 +303,7 @@ Two naming details appear verbatim in errors and are worth recognizing: the tabl
 [type-level list](../types/type_level_spines.md) built by [`Path!`](./path.md); `expand` resugars it to
 `Path!(@…)` form, while a raw compiler error prints the underlying spine.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The body is a header and a table, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -345,9 +344,7 @@ NamespacePath -> TypePath GenericArgs?
 neither grouping form is accepted: one attribute registers under exactly one prefix, and the attribute
 is repeated to register into several namespaces. `NamespacePath` may itself be parameterized.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **A context cannot override a path its namespace itself terminates.** Joining with `namespace N;` emits a
 blanket `DelegateComponent` impl covering every path `N` resolves, so a direct entry for one of those paths

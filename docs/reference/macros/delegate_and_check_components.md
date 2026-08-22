@@ -9,7 +9,7 @@ Wire a context and check that wiring in one macro.
 
 ## Overview
 
-CGP's wiring is [lazy](./delegate_components.md#gotchas): a
+CGP's wiring is [lazy](./delegate_components.md#common-mistakes): a
 [`delegate_components!`](./delegate_components.md) entry is accepted without verifying that the provider it
 names can actually satisfy the component, so a **context** (the type the capability runs against, which
 supplies the values it needs as its own fields) can compile while being broken. The fix is a
@@ -248,7 +248,7 @@ there are three things it cannot do, and each is a reason a larger codebase writ
 [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time).** A `new`-keyword bundle
 is a provider other contexts delegate *to*, never a context itself. It has no fields and never stands in the
 context position, so the derived context-side check asks a question that does not apply to it. Wire a bundle
-with plain `delegate_components!`. The [Gotchas](#gotchas) show what the failure looks like, and why it is
+with plain `delegate_components!`. The [Common Mistakes](#common-mistakes) show what the failure looks like, and why it is
 easy to misread.
 
 The invariant across all of this is that a context's wiring is checked *somehow*. This macro is the
@@ -318,8 +318,7 @@ A generic table threads its generics through both halves, so `<T> MyContext<T> {
 derived check the same way, so `<I> BarGetterAtComponent<I>: UseField<Symbol!("dummy")>` checks as
 `impl<I> __CanUse…<BarGetterAtComponent<I>, ()> for MyContext {}`.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The body is [`delegate_components!`](./delegate_components.md)'s table shape plus the check attributes, in the
 Rust Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -344,9 +343,7 @@ The `Mapping`, `Key`, `ProviderValue`, and `Statement` productions are exactly
 `EntryAttr`, and the two are mutually exclusive: `#[check_params(...)]` supplies the parameters a generic
 component's check needs, and `#[skip_check]` wires the entry with no check at all.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **Used on an aggregate provider, this macro reports a failure that describes nothing real.** A `new`-keyword
 bundle is not a context, so the derived check asks whether the *bundle* satisfies the leaf provider's

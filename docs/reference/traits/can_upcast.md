@@ -94,15 +94,6 @@ has not derived the machinery cannot participate at all.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion. You do not need it to call `upcast`, but it explains why the widening
-is total where a narrowing is not.
-
-:::
-
 `CanUpcast` **recurses over the source's variants**. It converts the source to its extractor with
 [`HasExtractor`](./has_extractor.md), then walks the source's own field list, pulling each variant out
 with [`ExtractField`](./extract_field.md) and rebuilding it into the target with
@@ -116,7 +107,7 @@ One detail from the source is worth knowing if you read it: the recursion drivin
 `FieldsExtractor`, is **public**, so it can appear by name in a diagnostic and be named in a bound. Its
 record-side analogue `FieldsBuilder`, behind [`CanBuildFrom`](./can_build_from.md), is private.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`. This is the first thing that goes
 wrong.

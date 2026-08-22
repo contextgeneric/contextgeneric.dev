@@ -92,14 +92,6 @@ let builder = context.into_builder().to_optional();   // every field Some
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the transform it drives.
-
-:::
-
 `ToOptional` is a [`TransformMapFields`](./transform_map_fields.md) walk carrying the
 [`TransformOptional`](./transform_optional.md) marker, targeting `IsOptional`:
 
@@ -118,7 +110,7 @@ with [`TransformMapDefault`](./transform_map_default.md) toward `IsPresent`. **B
 same recursion with a different marker**, which is why the defaulted and optional workflows behave so
 symmetrically.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

@@ -176,8 +176,7 @@ against the expanded tag, so an error mentioning
 `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` is telling you the field `width` is missing. Counting the
 characters is enough to decode it, and `cargo cgp check` resugars the common cases.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The input is a single string literal, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -190,9 +189,7 @@ SymbolInput -> STRING_LITERAL
 empty string and multi-byte Unicode. The macro is used in type position, and this single literal is the whole
 of its input.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **The `LEN` in an expanded `Symbol` is bytes, not characters.** For ASCII the two coincide, which is why the
 distinction only shows up on non-ASCII field names, where the number will not match the visible character

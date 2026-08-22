@@ -95,14 +95,6 @@ marker directly.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows where the fold uses it.
-
-:::
-
 `MonadicTrans` is applied to the **monads** rather than to the handlers, and it runs *before* any binding
 does. [`PipeMonadic`](../providers/monad_providers.md) resolves the stacked monad first, then walks the
 handler list asking [`MonadicBind`](./monadic_bind.md) to turn each continuation into a bind step.
@@ -115,7 +107,7 @@ resolved stack is just another marker, and everything downstream treats it as on
 
 The whole fold happens during trait resolution, so a stacked monadic pipeline is not a runtime structure.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

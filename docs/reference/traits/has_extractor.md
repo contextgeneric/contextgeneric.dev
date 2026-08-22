@@ -99,14 +99,6 @@ accessor otherwise — the weakest that works is the right one.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what `Extractor` is.
-
-:::
-
 The derive generates a companion enum with one [`MapType`](./map_type.md) parameter per variant, and this
 trait fixes the starting configuration to all-possible:
 
@@ -133,7 +125,7 @@ families share directly.
 Narrowing from here is [`ExtractField`](./extract_field.md), and the chain ends at
 [`FinalizeExtract`](./finalize_extract.md).
 
-## Gotchas
+## Common Mistakes
 
 **It consumes the value.** Reach for [`HasExtractorRef`](./has_extractor_ref.md) when the original must
 survive. This is the commonest over-requirement in the family.

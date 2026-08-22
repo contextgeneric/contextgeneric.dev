@@ -78,14 +78,6 @@ full chain narrows the same way, with each remainder also borrowing.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows how the borrowed companion is built from the two marker families.
-
-:::
-
 The borrowed accessor uses the **same partial enum** as the owning one, with an extra
 [`MapTypeRef`](./map_type_ref.md) parameter fixed to `IsRef`:
 
@@ -110,7 +102,7 @@ through a borrow as through an owned value.
 There is no `from_extractor` counterpart here: a borrowed extractor cannot rebuild an owned enum, and the
 original is still there anyway.
 
-## Gotchas
+## Common Mistakes
 
 **There is no rebuild.** [`HasExtractor`](./has_extractor.md)'s `from_extractor` has no borrowing
 equivalent, which is rarely a problem since the value was never consumed.

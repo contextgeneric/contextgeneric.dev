@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[use_type]'
+sidebar_position: 3
 ---
 
 # `#[use_type]`
@@ -8,32 +9,28 @@ Import an abstract associated type and write it as a bare name.
 
 ## Overview
 
-Generic CGP code constantly needs a type it does not choose — an error type, a scalar, a database handle —
-supplied by the **context**, the type the code runs against. Such a type lives as an
-[associated type](https://doc.rust-lang.org/reference/items/associated-items.html) on another trait, and
-Rust requires every mention of it to be written out in full:
+`#[use_type]` imports a type from the **context**, the type the code runs against. In CGP a type
+supplied this way is called an [*abstract type*](/docs/concepts/abstract-types): the code names it,
+and the context chooses what it actually is, at compile time, through its
+[`delegate_components!`](../macros/delegate_components.md) wiring.
 
-```rust
-fn load(&self, path: &str) -> Result<String, <Self as HasErrorType>::Error>;
-```
-
-That is correct and almost unreadable, and it has to be repeated at every occurrence — the return type,
-each argument, each local binding. `#[use_type]` imports the type once so the signature can name it
-plainly:
+The type most often imported this way is a context's
+[error type](/docs/concepts/modular-error-handling). One attribute lets a fallible signature name it as a
+bare `Error`:
 
 ```rust
 #[use_type(HasErrorType.Error)]
 ```
 
-With that in place the same method reads `-> Result<String, Error>`, and the macro expands each bare
-`Error` back into the qualified path while adding the bound that makes it available. The bare name behaves
-like an ordinary type in your source and resolves to the associated type in the output.
+A method can then return `Result<String, Error>`, and the code that writes it is reused as is: it
+compiles whether the context chose `anyhow::Error`, `Box<dyn core::error::Error>`, or a plain `String` as
+its error type. The code never names any of those; the context does, in its wiring.
 
-Reading better is the obvious benefit; the less obvious one is that the qualified form composes where a
-bare one cannot. Because the macro always emits `<Context as Trait>::Type`, one import can be defined in
-terms of another, a type can be pulled from a parameter rather than from `Self`, and two abstract types can
-be constrained to be the same — none of which you can express by writing a bare identifier and hoping.
-Those are the [advanced forms](#importing-from-another-type) below.
+`#[use_type]` reads like a `use` statement for a type, which is what it is, and
+[Under the hood](#under-the-hood) shows how the bare name resolves. It also has advanced forms a bare
+identifier could not express, covered [below](#importing-from-another-type): pinning the type to a
+concrete one, importing it from a parameter rather than the context, and tying two abstract types
+together.
 
 ## Usage
 
@@ -48,7 +45,7 @@ not `::`**, and that is deliberate: it leaves `::` free for the trait's own path
 `#[use_type(errors::HasErrorType.Error)]` imports from a trait named by path and
 `#[use_type(HasFooType<X>.Foo)]` imports from a particular generic instantiation.
 
-By default the type is projected from `Self`, so `Scalar` expands to `<Self as HasScalarType>::Scalar`.
+By default the macro projects the type from `Self`, so `Scalar` expands to `<Self as HasScalarType>::Scalar`.
 
 The attribute is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md),
 [`#[cgp_impl]`](../macros/cgp_impl.md), and [`#[cgp_component]`](../macros/cgp_component.md).
@@ -69,21 +66,21 @@ a local alias:
 #[use_type(HasFooType.{Foo, Bar as Baz})]
 ```
 
-Stacking several `#[use_type]` attributes behaves identically, because every attribute's entries are
-collected into one list before any of them is resolved — so an alias declared in one is available to
-another regardless of which comes first. Reach for a second attribute only when there is a reason.
+Stacking several `#[use_type]` attributes behaves identically, because the macro collects every
+attribute's entries into one list before it resolves any of them, so an alias declared in one is
+available to another regardless of which comes first. Reach for a second attribute only when there is a reason.
 
 ### Pinning a type to a concrete one
 
 An `= Type` clause imports the type *and* constrains it, which is how a provider says "this only works when
-the error type is `AppError`":
+the error type is `anyhow::Error`":
 
 ```rust
-#[use_type(HasErrorType.{Error = AppError})]
+#[use_type(HasErrorType.{Error = anyhow::Error})]
 ```
 
-That emits `Self: HasErrorType<Error = AppError>` in place of the plain bound. The right-hand side is
-itself substituted, so it may name another import — which is how two abstract types are tied together:
+That emits `Self: HasErrorType<Error = anyhow::Error>` in place of the plain bound. The macro substitutes the
+right-hand side too, so it may name another import, which is how two abstract types are tied together:
 
 ```rust
 #[use_type(HasPasswordType.Password, HasHashedPasswordType.{HashedPassword = Password})]
@@ -105,7 +102,7 @@ parameter rather than on `Self`:
 braced group projects every type in it against the same target, and because `in` is a reserved word it can
 never be mistaken for a type name.
 
-This is also the form that lets an import parameterize the trait it comes from. An alias may appear in
+This form also lets an import parameterize the trait it comes from. An alias may appear in
 another entry's `in` clause *or* in its trait arguments, and the macro resolves the chain for you:
 
 ```rust
@@ -113,7 +110,7 @@ another entry's `in` clause *or* in its trait arguments, and the macro resolves 
 ```
 
 Here `Pool` is projected from `HasPoolType<<Self as HasDbType>::Db>`. Such chains may be written in any
-order — see [Under the hood](#under-the-hood) — provided they do not form a cycle.
+order (see [Under the hood](#under-the-hood)), provided they do not form a cycle.
 
 ## Examples
 
@@ -144,7 +141,7 @@ impl AreaCalculator {
 ```
 
 The component gains `HasScalarType` as a supertrait and the provider gains it as a bound, and every
-`Scalar` in both becomes the same qualified projection — so the fields the provider reads and the value it
+`Scalar` in both becomes the same qualified projection, so the fields the provider reads and the value it
 returns are guaranteed to agree on whatever scalar the context chose.
 
 A context supplies the concrete type by wiring, and nothing above changes:
@@ -164,8 +161,9 @@ delegate_components! {
 }
 ```
 
-The most common use of all is an error type, where the import saves a projection in every fallible
-signature:
+The most common use of all is an
+[error type](/docs/concepts/abstract-types#the-canonical-one-a-contexts-error-type), where the import
+saves a projection in every fallible signature:
 
 ```rust
 #[cgp_component(Loader)]
@@ -175,47 +173,42 @@ pub trait CanLoad {
 }
 ```
 
+The error type is one of three decisions a context makes about failure, and
+[modular error handling](/docs/concepts/modular-error-handling#why-the-error-type-is-the-hard-one)
+separates them.
+
 ## When to reach for it, and when not
 
 **Use `#[use_type]` whenever a definition names an abstract type another component supplies.** It is the
-recommended form, and a hand-written supertrait plus `Self::`-qualified paths is what to read rather than
-write.
+recommended form; you read a hand-written supertrait plus `Self::`-qualified paths in existing code rather
+than write them.
 
-Two neighbours cover requirements that are not types, and one construct is what `#[use_type]` imports
-*from*.
+Two neighbours cover requirements that are not types, and one further construct is the one `#[use_type]`
+imports *from*.
 
 - **A capability** is [`#[uses]`](uses.md) for a private bound or [`#[extend]`](extend.md) for a
-  supertrait. Reach for `#[extend]` specifically when the supertrait's methods are what matter and its
-  associated types are not named in your signatures — that is the case `#[use_type]` has nothing to
-  rewrite.
+  supertrait. Reach for `#[extend]` specifically when the supertrait's methods matter and its associated
+  types are not named in your signatures, the case where `#[use_type]` has nothing to rewrite.
 - **A value from a field** is an [`#[implicit]`](implicit.md) argument.
 - **The type itself** is declared with [`#[cgp_type]`](../macros/cgp_type.md) and bound to a concrete type
-  by wiring the component to [`UseType<T>`](../providers/use_type.md). Note that the `UseType` *provider*
-  and this *attribute* are different things despite the shared name: the provider supplies a type to a
-  context, and the attribute imports one into a definition.
+  by wiring the component to [`UseType<T>`](../providers/use_type.md). The `UseType` *provider* and this
+  *attribute* are [two different things](/docs/concepts/abstract-types#two-things-called-usetype) despite
+  the shared name: the provider supplies a type to a context, and the attribute imports one into a
+  definition.
 
-There is one boundary worth stating plainly, because getting it wrong produces a confusing error. A
-construct's **own** associated type is not imported and stays qualified as `Self::Output`. `#[use_type]`
+One boundary is worth stating plainly, because getting it wrong produces a confusing error. `#[use_type]`
+does not import a construct's **own** associated type, so it stays qualified as `Self::Output`. It
 rewrites only the names it was given, so a local type written bare resolves to nothing. A mixed signature
-such as `Result<Self::Output, Error>` is therefore correct and idiomatic — the local type qualified, the
+such as `Result<Self::Output, Error>` is therefore correct and idiomatic: the local type qualified, the
 imported one bare.
 
 Finally, prefer an inferred parameter over an abstract type when the type only ever flows through values
 the body reads: [`#[impl_generics]`](../macros/cgp_fn.md) on a `#[cgp_fn]` is shorter and needs no wiring.
 Climb to an abstract type when the type must be named in the capability's own signature, or when two
-capabilities have to agree that they mean the same one.
+capabilities have to
+[agree that they mean the same one](/docs/concepts/abstract-types#one-type-agreed-on-by-everything-that-needs-it).
 
 ## Under the hood
-
-:::note
-
-### Advanced
-
-This section shows the three steps the attribute performs and what each one touches. You do not need it to
-use `#[use_type]`, but the substitution has edges worth knowing, and an unmet import names the generated
-bound rather than your import. `cargo cgp expand` prints the same thing for your own code.
-
-:::
 
 `#[use_type]` runs before the surrounding macro, in three steps: it **grounds** each import's own type
 positions, **substitutes** every matching bare identifier, then **adds the bound**.
@@ -250,9 +243,10 @@ where
 **Where the bound lands depends on the target.** When the type is projected from `Self` it becomes a
 *supertrait* of the generated trait, and also a `where` bound on the implementation. When an `in Context`
 clause names some other type, a supertrait of `Self` would be wrong, so the macro adds a plain
-`Context: Trait` predicate — to the implementation, and on `#[cgp_fn]` and `#[cgp_component]` to the
-generated trait's own `where` clause as well, since the trait's signatures now mention the projection and
-would not otherwise be well-formed. A plain unbounded `<Types>` on your function is therefore enough:
+`Context: Trait` predicate. That predicate goes on the implementation, and on `#[cgp_fn]` and
+`#[cgp_component]` it goes on the generated trait's own `where` clause as well, since the trait's
+signatures now mention the projection and would not otherwise be well-formed. A plain unbounded `<Types>`
+on your function is therefore enough:
 
 ```rust
 pub trait AreaOf<Types>
@@ -263,31 +257,31 @@ where
 }
 ```
 
-An equality pin is the exception: it stays on the implementation and is never added to the trait.
+An equality pin is the exception: it stays on the implementation, and the macro never adds it to the trait.
 
 **What substitution touches.** The rewrite matches a single-segment type path with no arguments whose
-identifier is an imported name or alias, anywhere it appears — a return type, an argument, a `where`
+identifier is an imported name or alias, anywhere it appears: a return type, an argument, a `where`
 predicate, a local binding. It also reaches an alias used to *qualify* a path, so `Transaction::begin()`
 becomes `<<Self as HasTransactionType>::Transaction>::begin()`, since `<Self as Trait>::Assoc::method` is
 not valid syntax.
 
-The one position left alone is a **bare alias in expression position**, which names a value — something an
-abstract type can never be. So an alias sharing its name with a unit struct still constructs the struct:
+The rewrite leaves one position alone: a **bare alias in expression position**, which names a value,
+something an abstract type can never be. So an alias sharing its name with a unit struct still constructs
+the struct:
 
 ```rust
 let value = Marker;            // stays the unit struct `Marker`
 let typed: Marker = todo!();   // becomes <Self as HasMarkerType>::Marker
 ```
 
-**Grounding, and why order does not matter.** Each import is resolved against the imports it *depends on*
-rather than the ones written before it, so every arrangement of the same entries produces the same
-substitutions and the same bounds. Only the order the bounds are listed in follows the source. A chain like
+**Grounding, and why order does not matter.** The macro resolves each import against the imports it
+*depends on* rather than the ones written before it, so every arrangement of the same entries produces
+the same substitutions and the same bounds. Only the order the bounds are listed in follows the source. A chain like
 `#[use_type(HasC<B>.C in B, HasB<A>.B in A, HasA.A)]` grounds exactly as its front-to-back spelling does,
-and two imports may share one target as readily as chain through it. What has no valid order is a
-**cycle** — see the Gotchas.
+and two imports may share one target as readily as chain through it. Only a **cycle** has no valid order;
+see [Common Mistakes](#common-mistakes).
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The tokens inside `#[use_type(...)]`, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -310,15 +304,13 @@ UseTypeIdent -> IDENTIFIER ( `as` IDENTIFIER )? ( `=` Type )?
 arguments; their `::` segments belong to the path, while the `.` after the trait begins the
 associated-type list. An omitted `in ContextPath` defaults the target to `Self`. In each `UseTypeIdent`
 the leading `IDENTIFIER` is the associated type's own name, `as` gives it a local alias to write in
-signatures, and `= Type` pins it with an equality bound — accepted on `#[cgp_fn]` and `#[cgp_impl]`,
+signatures, and `= Type` pins it with an equality bound, accepted on `#[cgp_fn]` and `#[cgp_impl]` and
 rejected on `#[cgp_component]`.
 
-</details>
+## Common Mistakes
 
-## Gotchas
-
-**Two imports may not share a name or alias.** The substitution could only pick one, so a collision is
-rejected rather than resolved:
+**Two imports may not share a name or alias.** The substitution could only pick one, so the macro
+rejects a collision rather than resolving it:
 
 ```text
 error: Multiple abstract types cannot share the same identifier or alias
@@ -364,8 +356,11 @@ Pin the type on the provider with [`#[cgp_impl]`](../macros/cgp_impl.md) instead
 
 The ideas behind it:
 
-- [Abstract types](/docs/concepts/abstract-types) — the idea behind the types this attribute
-  imports.
+- [Abstract types](/docs/concepts/abstract-types) — the idea behind the types this attribute imports,
+  from [choosing the type by wiring](/docs/concepts/abstract-types#choosing-the-type-by-wiring) to
+  [what an abstract type costs](/docs/concepts/abstract-types#what-it-costs).
+- [Modular error handling](/docs/concepts/modular-error-handling) — the error type is the abstract type
+  this attribute imports most, treated there as one of three independent wiring choices.
 
 ## Source
 

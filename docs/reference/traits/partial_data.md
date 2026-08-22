@@ -92,14 +92,6 @@ traits otherwise.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section explains why the trait is separate from the finalize.
-
-:::
-
 The derive emits one impl covering every configuration at once, by leaving the markers generic:
 
 ```rust
@@ -119,7 +111,7 @@ single trait carrying both would have to choose one or the other.
 The enum side implements it identically on its extraction companions, with `Target` naming the original
 enum, which is how [`HasExtractor`](./has_extractor.md)'s round trip knows what to rebuild.
 
-## Gotchas
+## Common Mistakes
 
 **It says nothing about completeness.** A `PartialData` bound is satisfied by an empty builder as readily
 as by a full one. Requiring completeness is [`FinalizeBuild`](./finalize_build.md).

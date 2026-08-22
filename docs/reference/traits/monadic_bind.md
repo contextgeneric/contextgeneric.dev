@@ -105,14 +105,6 @@ And the alternatives to prefer when you do *not* need short-circuiting:
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows where the fold uses it.
-
-:::
-
 [`PipeMonadic`](../providers/monad_providers.md) walks the handler list and, for each step, asks the monad
 to turn the continuation built so far into a bind step — which is this trait. Because the walk proceeds
 from the end of the list backwards, `Provider` at each stage is everything that follows the current step,
@@ -127,7 +119,7 @@ The whole fold happens during trait resolution. A monadic pipeline is not a runt
 provider it resolves to implements the [`Computer`](../components/computer.md) family like any other
 handler.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

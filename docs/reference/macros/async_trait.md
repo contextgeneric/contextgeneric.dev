@@ -37,7 +37,7 @@ macro is used throughout CGP wherever a capability is asynchronous: it is simply
 spelled.
 
 One thing it does *not* do is add a `Send` bound, and that omission has consequences the moment a future is
-spawned. It is covered under [Gotchas](#gotchas).
+spawned. It is covered under [Common Mistakes](#common-mistakes).
 
 ## Usage
 
@@ -142,7 +142,7 @@ The decisions worth making are around it rather than about it.
 - **Do not put it on an impl block.** It is accepted there and does nothing, since the rewrite only applies to
   trait definitions. Harmless, but it suggests a misunderstanding of where the lint comes from.
 - **Reach for the `Send`-recovery pattern when a future is spawned**, not for a different macro. No attribute
-  can add the bound, for the reason in the [Gotchas](#gotchas).
+  can add the bound, for the reason in the [Common Mistakes](#common-mistakes).
 - **Consider whether the capability needs to be async at all.** The [handler family](./cgp_computer.md) has
   synchronous members, and the [promotion combinators](../providers/handler_combinators.md) lift a synchronous
   provider into an async one where a caller needs it. So a computation that does no I/O is better declared
@@ -213,7 +213,7 @@ where
 `#[async_trait]` then runs on both. On the trait it rewrites the declaration; on the impl it is a no-op, so
 the `async fn` body survives intact.
 
-## Gotchas
+## Common Mistakes
 
 **The generated future carries no `Send` bound**, and this is the limitation that matters in practice. Because
 the rewrite produces a bare `impl Future<Output = T>`, the future is `Send` only when the concrete future

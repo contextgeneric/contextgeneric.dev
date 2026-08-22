@@ -106,14 +106,6 @@ shared reference satisfies [`HasField`](./has_field.md) and not this.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-One blanket impl belongs to this trait, and it mirrors its supertrait's.
-
-:::
-
 `HasFieldMut` is implemented for any type whose
 [`DerefMut`](https://doc.rust-lang.org/std/ops/trait.DerefMut.html) target implements it, with the target
 additionally bounded `'static`. That extra bound is the one asymmetry with
@@ -126,7 +118,7 @@ which keeps a missing-field error pointed at the struct that lacks the field rat
 The per-field impls themselves come from [`#[derive(HasField)]`](../derives/derive_has_field.md), one
 `HasFieldMut` beside each `HasField`.
 
-## Gotchas
+## Common Mistakes
 
 **It is not separately opt-in.** The derive always emits it, so there is no way to expose a field as
 read-only through the derive. Restricting mutation is a matter of what the implementations declare.

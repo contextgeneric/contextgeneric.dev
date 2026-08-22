@@ -113,16 +113,6 @@ The full argument for when a type earns the extensible-data machinery at all is 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates. You do not need it to use the derive, but the companion
-type appears by name in every builder error, so recognizing one turns an intimidating error into a
-legible one. `cargo cgp expand` prints the same thing for your own code, with the tags resugared.
-
-:::
-
 The derive emits three groups in order. From:
 
 ```rust
@@ -182,7 +172,7 @@ yields a `pub` companion. Each generated impl is aimed at the token it came from
 its field, a whole-type impl at the type name — so a conflict with a hand-written impl underlines that
 token rather than the whole derive.
 
-## Gotchas
+## Common Mistakes
 
 **The companion type carries none of your attributes.** The derive clears them, so a
 `#[derive(Debug, Clone)]` on the record does not reach `__Partial{Name}` and a partially-built value can

@@ -105,14 +105,6 @@ Had that used `finalize_optional`, it would have returned `Err("bar")` instead.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows that the entry point is a composition rather than new machinery.
-
-:::
-
 `optional_builder()` is [`HasBuilder`](./has_builder.md)'s `builder()` followed by
 [`ToOptional`](./to_optional.md) — start at all-`IsNothing`, then re-mark every field to `IsOptional`
 with a [`TransformMapFields`](./transform_map_fields.md) walk carrying the
@@ -131,7 +123,7 @@ operations apply: [`SetOptional`](./set_optional.md) resolves where
 [`FinalizeBuild`](./finalize_build.md) does not resolve at all until a finalize has re-marked the fields
 back to `IsPresent`.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`, along with whatever else in the
 layer you use.

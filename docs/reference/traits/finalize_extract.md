@@ -85,15 +85,6 @@ remainder.** The two do the same job at different points in the chain.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is the exhaustiveness argument in full, and it is the one part of the extractor family worth
-reading closely.
-
-:::
-
 **Everything turns on what `IsVoid` maps to.** The [`MapType`](./map_type.md) marker `IsVoid` maps a
 payload to the uninhabited [`Void`](../types/type_level_spines.md), so once every variant's marker is
 `IsVoid`, every arm of the partial enum holds a `Void` and **the whole type is uninhabited**.
@@ -119,7 +110,7 @@ no value can be in. That is exactly why a builder needs an explicit all-present
 [`FinalizeBuild`](./finalize_build.md) impl while an extractor can discharge its remainder with an empty
 `match`.
 
-## Gotchas
+## Common Mistakes
 
 **Finalizing early does not compile, and the error names the partial enum.** The all-void impl does not
 apply while any marker is still `IsPresent`, so the compiler reports a missing method. Read the type in

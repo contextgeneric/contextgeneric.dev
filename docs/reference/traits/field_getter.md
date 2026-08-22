@@ -111,14 +111,6 @@ requires; the other is what a context supplies.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the impl that connects wiring to a context's own fields.
-
-:::
-
 The provider side connects to ordinary derived field access through one blanket impl:
 [`UseContext`](../providers/use_context.md) implements `FieldGetter` for any context that already has the
 field, delegating straight through.
@@ -146,7 +138,7 @@ The lifetime-safe variant [`FieldMapper`](./field_mapper.md) is a blanket impl o
 with the getter and tag `'static`, which is what [`ChainGetters`](../providers/chain_getters.md) relies
 on.
 
-## Gotchas
+## Common Mistakes
 
 **`Self` is the provider, not the context.** The context is the first type parameter. Reading the
 signature the other way round is the usual confusion when meeting a provider trait, and it applies to

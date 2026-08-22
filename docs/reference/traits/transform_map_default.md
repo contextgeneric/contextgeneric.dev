@@ -105,14 +105,6 @@ served by the two capabilities already built on it.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the three impls, which are the layer's actual content.
-
-:::
-
 The marker is zero-sized and carries no data. What it carries is three
 [`TransformMap`](./transform_map.md) impls, distinguished by their source marker:
 
@@ -145,7 +137,7 @@ Three impls are needed rather than one because
 [`TransformMapFields`](./transform_map_fields.md#under-the-hood) resolves a conversion per field from
 whatever state that field is in, and a record may hold fields in all three states at once.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

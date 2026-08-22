@@ -194,7 +194,7 @@ list, so a second pair after a comma has nowhere to go; write one attribute per 
 `#[extend_where]`, and `#[impl_generics]`. All three act on a *generated trait definition*, which a
 provider impl does not have, so they belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
 [`#[cgp_component]`](./cgp_component.md). Writing one here leaves a name nothing resolves; see
-[Gotchas](#gotchas). An impl-side bound that really is impl-side goes in the block's own `where`
+[Common Mistakes](#common-mistakes). An impl-side bound that really is impl-side goes in the block's own `where`
 clause, which passes through untouched.
 
 ### Implementing the consumer trait directly
@@ -204,7 +204,7 @@ ordinary consumer-trait impl on a concrete type. This form requires the `for Con
 it is rejected with an `Expected context type to be specified` error, since there is no context left to
 find. The form is useful when you want a hand-written impl while still applying the companion
 attributes. Because the macro does not generate a provider struct here, `new` and the component
-override have no effect; see [Gotchas](#gotchas) for what happens if you write them anyway.
+override have no effect; see [Common Mistakes](#common-mistakes) for what happens if you write them anyway.
 
 ```rust
 #[cgp_impl(Self)]
@@ -351,15 +351,14 @@ provider that supplies `type Output`, because it gathers the block's own associa
 and skips any `Self::` path starting with one. In the emitted impl, `Self` is the provider struct,
 which is the type that declares `Output`, so the path still resolves. Every other `Self` in the block is
 still rewritten, including one naming an abstract type the *context* supplies. Associated consts are
-not covered by the exemption; see [Gotchas](#gotchas).
+not covered by the exemption; see [Common Mistakes](#common-mistakes).
 
 **The rewrite is scoped to the block's own method bodies.** An item nested *inside* a body, such as a
 local `struct` with its own impl, a helper `fn`, or an inline `trait`, introduces a fresh `self`/`Self`
 that belongs to that item, exactly as in ordinary Rust, and the macro leaves it alone. Closures, which
 capture the enclosing `self`, are rewritten like any other expression.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument names the provider, optionally preceded by `new` and followed by a
 component-type override, in the Rust Reference's
@@ -377,9 +376,7 @@ generic provider such as `ScaledAreaCalculator<InnerCalculator>`, or the literal
 passthrough form. `ComponentType` overrides the component in the generated `IsProviderFor` impl,
 defaulting to the provider trait's name plus `Component`. Both are Rust `Type` productions.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **A provider's own associated const is awkward to name inside its body**, and this follows directly
 from the rewrite. The exemption described above covers associated *types* only, so a provider that

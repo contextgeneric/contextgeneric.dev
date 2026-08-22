@@ -91,14 +91,6 @@ borrowing form otherwise.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the generated impl, which is where the `Cons` spine becomes visible.
-
-:::
-
 `Product![A, B]` is `Cons<A, Cons<B, Nil>>`, so the conversion builds a `Cons` chain, one node per field,
 wrapping each value into its [`Field`](../types/field.md) entry:
 
@@ -120,7 +112,7 @@ Because the shape is built positionally from declaration order, `to_fields` and
 [`from_fields`](./from_fields.md) are exact inverses by construction — there is no lookup, no matching by
 name at run time, and nothing that can fail.
 
-## Gotchas
+## Common Mistakes
 
 **It consumes the value.** Reach for [`ToFieldsRef`](./to_fields_ref.md) when you need to keep it. This
 is the commonest surprise in the family, because the two read alike.

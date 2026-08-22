@@ -189,8 +189,7 @@ and derives the remaining members from there.
 generic, and is not inspected for a `Result` return, there is exactly one base trait and one bundle for every
 `#[cgp_producer]`: the output type is taken as written, whether or not it happens to be a `Result`.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is a single optional provider name, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -205,9 +204,7 @@ Omitted, the provider struct takes the function name converted to PascalCase; a 
 verbatim. The annotated function is plain Rust, constrained to a producer's shape (no parameters, no
 `async`, no generics), as described in [Usage](#usage).
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **All three shape restrictions have their own message**, so the macro tells you which one you broke:
 

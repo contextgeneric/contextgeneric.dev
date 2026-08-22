@@ -151,8 +151,7 @@ macros: they are the same fold at two levels.
 chains, and the position where they diverge is the field that differs. An error mentioning
 `Cons<u32, Cons<bool, Nil>>` where you expected three fields is telling you the third entry is missing.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 Both macros take a possibly-empty comma-separated list, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -168,9 +167,7 @@ grammar of the value macro `product!`, used in expression position. `Type` and `
 grammar's productions. Both lists may be empty (`Product![]`, `product![]`) or carry a trailing comma, and
 they line up positionally so a `product!` value has the type the corresponding `Product!` builds.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **`Product!` and `product!` differ only in case, and the compiler's complaint will not say so.** Using the
 type macro in expression position fails inside the macro's own parser, which is expecting a type, so the

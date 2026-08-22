@@ -149,16 +149,6 @@ problem rather than the hidden one.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows where the three generated pieces come from. You do not need it to write CGP, but every
-non-trivial wiring error names this trait, and the three-part chain is what those errors are walking.
-`cargo cgp expand` prints all three for your own code.
-
-:::
-
 `IsProviderFor` appears in three places, and together they form the chain an error travels along.
 
 **First, the supertrait link.** [`#[cgp_component]`](../macros/cgp_component.md) emits every provider trait
@@ -212,7 +202,7 @@ clause the provider macros derive is **augmented rather than copied**. A bound n
 provider trait gains its marker counterpart, which is the mechanism that carries an inner provider's
 requirements outward through a higher-order stack.
 
-## Gotchas
+## Common Mistakes
 
 **`Params` grouping is the usual mistake in a hand-written assertion.** One parameter goes in directly, two
 or more as a tuple, none as `()`. Getting it wrong reports as an unsatisfied bound on a trait you did not

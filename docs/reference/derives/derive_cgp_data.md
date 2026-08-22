@@ -149,15 +149,6 @@ give, and it is not free.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section covers only what the umbrella itself does. The expansions are on the two shape pages,
-because that is where they belong once the derives are documented separately.
-
-:::
-
 Nothing about the umbrella is special. `#[derive(CgpData)]` inspects the item, dispatches on whether it
 is a struct or an enum, and then runs exactly the same code path the matching shape-specific derive
 runs — [`#[derive(CgpRecord)]`](./derive_cgp_record.md#under-the-hood) enters the first directly and
@@ -167,11 +158,11 @@ one of the other two.
 
 Applied to a union, all three fail: the family models products and sums, and a union is neither.
 
-## Gotchas
+## Common Mistakes
 
 **Which gotchas apply depends on the shape**, and the shape pages carry them: the
-[record ones](./derive_cgp_record.md#gotchas) — the companion's cleared attributes, position-keyed tuple
-builders, the newtype special case — and the [variant ones](./derive_cgp_variant.md#gotchas) — the
+[record ones](./derive_cgp_record.md#common-mistakes) — the companion's cleared attributes, position-keyed tuple
+builders, the newtype special case — and the [variant ones](./derive_cgp_variant.md#common-mistakes) — the
 one-payload rule and the seven reserved variant names. Two are worth repeating here because they catch
 people who reached for the umbrella without reading either.
 

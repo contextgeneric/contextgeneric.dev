@@ -107,14 +107,6 @@ let rect = shape
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is short: the trait is one blanket impl.
-
-:::
-
 The impl delegates to [`FinalizeExtract`](./finalize_extract.md) on the error half, which is where the
 soundness argument lives — the remainder is uninhabited once every variant is `IsVoid`, so the `Err` arm
 is discharged with an empty `match` and no execution path reaches it.
@@ -126,7 +118,7 @@ outside the extractor family, for collapsing a `Result` that a signature require
 `Output` being an associated type rather than a generic is what lets the call sit at the end of a method
 chain with nothing to annotate.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`. Without it there is no
 `finalize_extract_result` in scope and the chain has no clean ending — and the error is a

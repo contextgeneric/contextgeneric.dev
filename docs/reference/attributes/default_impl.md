@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[default_impl]'
+sidebar_position: 7
 ---
 
 # `#[default_impl(...)]`
@@ -8,9 +9,9 @@ Register a provider as a namespace's default for a key.
 
 ## Overview
 
-A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** — the
-type the capability runs against — can opt into and then selectively override. Ordinarily a namespace's
-entries are written in its own body. `#[default_impl(...)]` lets a *provider* register itself instead,
+A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context**, the
+type the capability runs against, can opt into and then selectively override. Ordinarily you write a
+namespace's entries in its own body. `#[default_impl(...)]` lets a *provider* register itself instead,
 at the point where it is defined:
 
 ```rust
@@ -22,8 +23,8 @@ impl ShowImpl<String> { /* … */ }
 Read that as: *`ShowString` is the default for `String`, in the `DefaultImpls1<ShowImplComponent>`
 table.* A context that pulls that table in gets this provider without naming it.
 
-The value of registering at the definition is that the provider and its default sit together, so adding a
-new per-type implementation is one place to edit rather than two.
+Registering at the definition keeps the provider and its default together, so adding a new per-type
+implementation is one place to edit rather than two.
 
 ## Usage
 
@@ -35,7 +36,7 @@ parts, joined by the keyword `in`:
 ```
 
 **`Key` becomes the emitted impl's `Self`**, and `NamespacePath` names the lookup trait plus whatever
-leading arguments you write inside it. The table parameter is appended for you. So the example above
+leading arguments you write inside it. The macro appends the table parameter for you. So the example above
 emits:
 
 ```rust
@@ -45,32 +46,15 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 ```
 
 That rule is worth internalizing, because the trait's own parameter names suggest the opposite
-arrangement — see [`DefaultImpls1`](../traits/default_impls1.md#the-one-thing-to-get-right).
+arrangement (see [`DefaultImpls1`](../traits/default_impls1.md#the-one-thing-to-get-right)).
 
 **The path may name any trait**, not only the three CGP ships. A trait of your own with the right shape
 works identically, which is why [`DefaultImpls2`](../traits/default_impls2.md) needed no new construct to
 be usable.
 
 The three built-in targets are [`DefaultNamespace`](../traits/default_namespace.md) for a component-only
-key, [`DefaultImpls1`](../traits/default_impls1.md) for a per-type default — the usual choice — and
+key, [`DefaultImpls1`](../traits/default_impls1.md) for a per-type default (the usual choice), and
 [`DefaultImpls2`](../traits/default_impls2.md) for a two-type key.
-
-<details>
-<summary>Formal grammar</summary>
-
-The attribute argument is a key type, the keyword `in`, and a namespace path, in the Rust Reference's
-[notation](https://doc.rust-lang.org/reference/notation.html):
-
-```ebnf
-DefaultImplArgs -> Type `in` TypePath
-```
-
-`Type` is the key that becomes the emitted impl's `Self`, and `TypePath` is the lookup trait with its
-leading generic arguments written out — the table parameter is appended by the macro and must not be
-given. The attribute takes exactly one such argument; it is neither comma-separated nor repeatable for
-several tables on one provider.
-
-</details>
 
 ## Examples
 
@@ -114,7 +98,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, parameter-targeted** — `App` carries the wiring and the shown value is a
+**Environmental context, parameter-targeted**: `App` carries the wiring and the shown value is a
 parameter. The loop wires every type with a registered default, and the direct `u64` line shadows
 whatever the namespace would otherwise supply for that one type.
 
@@ -126,8 +110,8 @@ provider is written.**
 - **Write the entry in the namespace body instead** when the defaults belong together as a set, or when
   the provider is one of several candidates and none is obviously *the* default. A
   [`cgp_namespace!`](../macros/cgp_namespace.md) body reads as a table; scattered attributes do not.
-- **Use it** when per-type defaults accumulate — a conversion, a formatter, a codec with one provider per
-  type — because then the alternative is a namespace body that has to be edited every time a type is
+- **Use it** when per-type defaults accumulate (a conversion, a formatter, a codec with one provider per
+  type), because then the alternative is a namespace body that has to be edited every time a type is
   added.
 - **Do not reach for a namespace at all** until the top-level wiring is long enough to be a problem.
 
@@ -141,14 +125,6 @@ that must live downstream goes in the namespace body of the crate that owns it i
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the attribute emits, and the one thing it deliberately leaves out.
-
-:::
-
 The attribute emits a single impl of the named lookup trait, for the key type:
 
 ```rust
@@ -160,8 +136,8 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 The `Components` parameter is the table the lookup runs against, appended by the macro and left generic
 so one registration serves every context.
 
-**The registration impl carries only the parameters naming the key and the provider, plus the table —
-never the provider's own `where` clause.** That is deliberate and is what makes the attribute usable with
+**The registration impl carries only the parameters naming the key and the provider, plus the table,
+never the provider's own `where` clause.** That is deliberate, and it lets the attribute work with
 ordinary providers: a provider whose bounds come from [`#[use_type]`](./use_type.md),
 [`#[uses]`](./uses.md), [`#[implicit]`](./implicit.md), or [`#[use_provider]`](./use_provider.md)
 registers cleanly, because those bounds stay on the provider's impl and its
@@ -175,10 +151,24 @@ Consumption is the mirror. A `for <T, Provider> in DefaultImpls1<Component> { �
 where T: DefaultImpls1<Component, App, Delegate = Provider>
 ```
 
-Because the loop variables appear only in that bound and in the key, **the key must mention them** — or
-the parameter is unconstrained and the impl is rejected with `E0207`.
+Because the loop variables appear only in that bound and in the key, **the key must mention them**, or
+the parameter is unconstrained and the compiler rejects the impl with `E0207`.
 
-## Gotchas
+## Formal grammar
+
+The attribute argument is a key type, the keyword `in`, and a namespace path, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+DefaultImplArgs -> Type `in` TypePath
+```
+
+`Type` is the key that becomes the emitted impl's `Self`, and `TypePath` is the lookup trait with its
+leading generic arguments written out. The table parameter is appended by the macro and must not be
+given. The attribute takes exactly one such argument; it is neither comma-separated nor repeatable for
+several tables on one provider.
+
+## Common Mistakes
 
 **`Key` becomes `Self`, not a parameter.** Read `#[default_impl(Key in Path)]` as "`Key` becomes `Self`"
 and the trait's positions follow. The parameter names on
@@ -188,7 +178,7 @@ and the trait's positions follow. The parameter names on
 wrong.
 
 **On a prefixed component it is confined to the namespace's crate**, by the orphan rule. This is not
-something to work around — put the wiring in the namespace body instead.
+something to work around: put the wiring in the namespace body instead.
 
 **The lookup trait must be imported.** The emitted impl names it, so
 [`DefaultImpls1`](../traits/default_impls1.md) and [`DefaultImpls2`](../traits/default_impls2.md) need

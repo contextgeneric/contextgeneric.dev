@@ -88,15 +88,6 @@ There is no `ConcatSum`. Combining two sums is not an operation this layer provi
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion, which is [`AppendProduct`](./append_product.md#under-the-hood)'s with
-one line changed.
-
-:::
-
 Two impls, one per spine node. Each head is kept and the tail rebuilt; at the terminator, the whole
 second list is substituted:
 
@@ -119,7 +110,7 @@ append is a special case.
 The recursion walks the *first* list only, so its cost is proportional to the left operand's length
 rather than to the result's.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 

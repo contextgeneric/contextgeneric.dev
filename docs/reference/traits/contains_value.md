@@ -94,14 +94,6 @@ of this.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows where a bind step uses it.
-
-:::
-
 The [`BindOk` and `BindErr`](../providers/monad_providers.md) providers use `ContainsValue` in their
 [`Computer`](../components/computer.md) and `AsyncComputer` impls. Running one bind step means: take the
 step's output, ask the monad what value sits beneath its wrapper, and hand that to the continuation. This
@@ -114,7 +106,7 @@ traits bracket one step: unwrap, run, re-wrap.
 Because the transformer forms implement it by delegating to the base monad, the unwrapping composes
 without any depth-specific code.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

@@ -90,14 +90,6 @@ the record.**
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows why the trait is not generated.
-
-:::
-
 `BuildField` is a **library blanket impl** over [`UpdateField`](./update_field.md), pinning the target
 marker to `IsPresent` and constraining the reported source marker to `IsNothing`:
 
@@ -118,7 +110,7 @@ because the old value under `IsNothing` is `()`.
 [`TakeField`](./take_field.md) is the mirror image — the same primitive with `IsNothing` as the target
 and `Mapper = IsPresent` — which is why the two read as opposites and share every mechanism.
 
-## Gotchas
+## Common Mistakes
 
 **Building a field twice does not compile.** The second call finds `Mapper = IsPresent` and no impl. That
 is the guarantee, and the error is a missing-method one rather than anything mentioning "already set".

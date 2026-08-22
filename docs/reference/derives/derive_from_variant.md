@@ -148,17 +148,6 @@ derived together because a generic pipeline usually does both.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates. You do not need it to use `#[derive(FromVariant)]`, and this is
-the shortest expansion in the family — it is worth reading once because the impls appear by name in errors
-about generic construction. `cargo cgp expand` prints the same thing for your own code, with the tags
-resugared.
-
-:::
-
 The derive emits **one impl per variant and nothing else** — no companion type, no markers, no state. From:
 
 ```rust
@@ -201,7 +190,7 @@ The [`FromVariant`](../traits/from_variant.md) trait itself is defined in the li
 these per-variant impls. Each is aimed at the variant it came from, so a conflict with a hand-written impl
 underlines that variant rather than the whole `#[derive(FromVariant)]`.
 
-## Gotchas
+## Common Mistakes
 
 **Every variant must carry exactly one unnamed payload**, the same requirement the extractor has, with no
 per-variant opt-out. [`#[derive(HasFields)]`](./derive_has_fields.md) is the derive that accepts all four

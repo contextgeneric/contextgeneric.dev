@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[extend_where]'
+sidebar_position: 6
 ---
 
 # `#[extend_where]`
@@ -10,12 +11,12 @@ Add `where` predicates to a generated trait's own definition, not just to its im
 
 A [`#[cgp_fn]`](../macros/cgp_fn.md) treats the `where` clause you write on the function as an
 implementation detail: the bounds land on the generated implementation and never appear on the generated
-trait. That default is what keeps a capability's requirements out of sight of its callers, and it is right
-almost always.
+trait. That default keeps a capability's requirements out of sight of its callers, and it is right almost
+always.
 
-What it costs is that an unsatisfiable requirement becomes invisible. A bound on the implementation only
-decides which **contexts** the implementation covers — a context being the type the capability runs
-against, which supplies the values it needs as its fields — so naming the capability for a type that can
+The cost is that an unsatisfiable requirement becomes invisible. A bound on the implementation only
+decides which **contexts** the implementation covers, a context being the type the capability runs
+against, which supplies the values it needs as its fields. So naming the capability for a type that can
 never satisfy it is not an error. It is a bound nobody can prove, accepted quietly, and the complaint
 arrives later and somewhere else. `#[extend_where]` moves the predicate onto the trait, where it becomes a
 condition of naming the trait at all:
@@ -24,13 +25,14 @@ condition of naming the trait at all:
 #[extend_where(Scalar: Clone)]
 ```
 
-The distinction is worth being exact about, because it is easy to get backwards. Promoting a predicate does
-**not** hand it to callers — a trait's `where` clause is a precondition they must prove, not a guarantee
-they receive, so a caller naming the trait still writes the bound themselves. What promotion buys is that
-they are *made* to, and that getting it wrong is reported against the trait rather than deferred.
+The distinction is worth being exact about, because it is easy to get backwards. Promoting a predicate
+does **not** hand it to callers. A trait's `where` clause is a precondition they must prove, not a
+guarantee they receive, so a caller naming the trait still writes the bound themselves. Promotion changes
+two things: callers are now *made* to write the bound, and getting it wrong is reported against the trait
+rather than deferred.
 
 It is the `where`-clause sibling of [`#[extend]`](extend.md). Both put a requirement into the trait's
-public interface; they differ in position, and in what the reader gets. `#[extend]` adds a **supertrait** —
+public interface; they differ in position, and in what the reader gets. `#[extend]` adds a **supertrait**,
 a bound on `Self`, which callers do receive by elaboration. `#[extend_where]` adds a **predicate**, which
 can bound anything, most usefully one of the trait's own generic parameters, which a supertrait cannot
 reach.
@@ -44,13 +46,13 @@ reach.
 ```
 
 Unlike [`#[uses]`](uses.md) and [`#[extend]`](extend.md), whose entries are trait bounds attached to `Self`,
-these are arbitrary predicates — a bound on any type in scope, including an associated-type equality, a
-higher-ranked bound, or a lifetime bound. Each is added to the generated trait's `where` clause verbatim,
-and kept on the implementation as well.
+these are arbitrary predicates: a bound on any type in scope, including an associated-type equality, a
+higher-ranked bound, or a lifetime bound. The macro adds each to the generated trait's `where` clause
+verbatim, and keeps it on the implementation as well.
 
 **`#[extend_where]` is supported only on [`#[cgp_fn]`](../macros/cgp_fn.md).** It has no meaning on
 [`#[cgp_impl]`](../macros/cgp_impl.md) or [`#[cgp_component]`](../macros/cgp_component.md), because in
-those the `where` clause you write is already part of the definition — there is nothing to promote, so
+those the `where` clause you write is already part of the definition. There is nothing to promote, so
 write the bound as an ordinary `where` clause directly.
 
 ## Examples
@@ -71,12 +73,13 @@ where
 }
 ```
 
-Two bounds, two destinations. `Scalar: Clone` is promoted onto the trait, so it is checked wherever
-`Scale<Scalar>` is named. `Scalar: Mul<Output = Scalar>` stays on the implementation, because multiplying
-is how *this* body happens to compute a scale and no use site needs to know it.
+Two bounds, two destinations. The macro promotes `Scalar: Clone` onto the trait, so the compiler checks
+it wherever `Scale<Scalar>` is named. `Scalar: Mul<Output = Scalar>` stays on the implementation, because
+multiplication is a detail of how *this* body computes a scale and no use site needs to know it.
 
-What the promotion changes is visible at the boundary. A caller naming the capability for a type that
-cannot satisfy it is rejected where the bound is written, and told which trait demanded it:
+The promotion's effect is visible at the boundary. The compiler rejects a caller that names the
+capability for a type it cannot satisfy, at the place the bound is written, and names the trait that
+demanded it:
 
 ```rust
 pub struct NoClone;
@@ -90,8 +93,8 @@ where
 ```
 
 **Leave `Clone` on the implementation instead and that same function compiles**, with no diagnostic at
-all — `Ctx: Scale<NoClone>` is simply a bound no type can ever prove, and nothing says so until somebody
-tries to call `scale_it` with a concrete context. That silence is what the attribute exists to remove.
+all: `Ctx: Scale<NoClone>` is simply a bound no type can ever prove, and nothing says so until somebody
+tries to call `scale_it` with a concrete context. The attribute exists to remove that silence.
 
 A caller who *can* satisfy the predicate states it as usual, and there is no way around stating it:
 
@@ -113,36 +116,25 @@ That is a real but uncommon need, and the default of leaving bounds on the imple
 almost everything.
 
 The useful test is who the bound is *about*. A bound describing how the body computes its answer belongs on
-the implementation. A bound describing what the capability requires of its own type parameters — something
-that would be part of the signature if you were writing the trait by hand — belongs on the trait.
+the implementation. A bound describing what the capability requires of its own type parameters, something
+that would be part of the signature if you were writing the trait by hand, belongs on the trait.
 
 Three neighbours cover what this attribute should not be used for.
 
 - **A bound on `Self`** is a supertrait, so use [`#[extend]`](extend.md). `#[extend_where]` can express it,
   but a supertrait reads as what it is, and unlike a predicate it *is* handed to callers by elaboration.
-- **A private requirement** — the overwhelmingly common case — belongs in the function's own `where` clause,
+- **A private requirement**, the overwhelmingly common case, belongs in the function's own `where` clause,
   or in [`#[uses]`](uses.md) when it is a capability.
 - **An abstract type pinned to a concrete one** is [`#[use_type]`](use_type.md)'s equality form, which adds
   the bound and lets the signature name the type as a bare word.
 
 Do not reach for it to spare callers a bound: it has the opposite effect. If the goal is that holding the
-capability should imply something, that is what a supertrait does, and the bound has to be on `Self` for it
-to work.
+capability should imply something, a supertrait does that, and the bound has to be on `Self` for it to work.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows where each predicate lands, and in what order. You do not need it to use
-`#[extend_where]`, but the ordering explains a long `where` clause that otherwise looks arbitrary.
-`cargo cgp expand` prints the same thing for your own code.
-
-:::
-
-Each predicate is added to the generated trait's `where` clause, and also kept on the implementation so the
-body can rely on it. From the `scale` example above:
+The macro adds each predicate to the generated trait's `where` clause, and also keeps it on the
+implementation so the body can rely on it. From the `scale` example above:
 
 ```rust
 pub trait Scale<Scalar>
@@ -173,8 +165,7 @@ reading a long `where` clause in an expansion, since it tells you where each bou
 The context parameter is literally `__Context__` in the emitted code and appears as `Self` inside the
 implementation.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is a comma-separated list of `where` predicates, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -183,16 +174,14 @@ The attribute argument is a comma-separated list of `where` predicates, in the R
 ExtendWhereArgs -> WherePredicate ( `,` WherePredicate )* `,`?
 ```
 
-`WherePredicate` is the Rust grammar's own production — the thing that appears between the commas of a
-`where` clause — which is what separates this attribute from [`#[uses]`](uses.md) and
-[`#[extend]`](extend.md). Those take a *bound* and always attach it to `Self`; a predicate names its own
-subject, so `#[extend_where(Self::Output: Clone)]` and `#[extend_where(for<'a> &'a T: IntoIterator)]` are
-both expressible here and neither is expressible there. The list may be empty and the attribute may be
+`WherePredicate` is the Rust grammar's own production, the thing that appears between the commas of a
+`where` clause, and it separates this attribute from [`#[uses]`](uses.md) and [`#[extend]`](extend.md).
+Those take a *bound* and always attach it to `Self`, whereas a predicate names its own subject, so
+`#[extend_where(Self::Output: Clone)]` and `#[extend_where(for<'a> &'a T: IntoIterator)]` are both
+expressible here and neither is expressible there. The list may be empty and the attribute may be
 repeated.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **A promoted predicate does not reach callers as a guarantee.** This is the mistake the attribute most
 invites: because `#[extend]` gives callers its supertrait, it is natural to assume `#[extend_where]` gives

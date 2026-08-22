@@ -196,17 +196,6 @@ Between this derive and its neighbours the choice is about how much of the machi
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates. You do not need it to use `#[derive(BuildField)]`, but the
-companion type appears by name in every builder error, so recognizing it turns "no method named
-`finalize_build`" into a legible message. `cargo cgp expand` prints the same thing for your own code, with
-the tags resugared.
-
-:::
-
 The derive centres on a companion struct named `__Partial{Name}`. It is your struct with one
 [`MapType`](../traits/map_type.md) parameter added per field, and each field's type wrapped in that
 parameter's projection. The marker decides how the field is stored: `IsPresent` maps `T` to `T`, `IsNothing`
@@ -299,7 +288,7 @@ way to state — but it does mean a half-built value cannot be printed.
 Each generated impl is aimed at the token it came from: a per-field impl at its field, a whole-struct impl at
 the struct name.
 
-## Gotchas
+## Common Mistakes
 
 **`finalize_build` missing is the expected error, not a bug.** A field left unset means the all-present impl
 does not apply, and the compiler reports a missing method rather than a missing field. Read it as "some field

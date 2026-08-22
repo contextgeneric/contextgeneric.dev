@@ -133,8 +133,7 @@ again, so the code stops compiling. The same guarantee a concrete `match` gives,
 
 The macro builds the chain by folding the element types right to left onto `Void`.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The input is a possibly-empty comma-separated list of types, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -146,9 +145,7 @@ SumInput -> ( Type ( `,` Type )* `,`? )?
 `Type` is the Rust grammar's type production, and the list may be empty (`Sum![]`) or carry a trailing comma.
 The macro is used in type position, and each listed type is one possible variant of the sum.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **The empty sum is uninhabited, not empty-but-usable.** `Sum![]` is `Void`, so a function claiming to return one
 can never return at all. That is deliberate and occasionally useful, but it is not the analogue of an empty

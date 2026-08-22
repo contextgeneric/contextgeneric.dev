@@ -92,14 +92,6 @@ machinery, the names must match exactly, and nothing is inspected at run time.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion, which is the record mirror of the variant casts'.
-
-:::
-
 `CanBuildFrom` **recurses over the source's field product.** For each field the source exposes, it uses
 [`TakeField`](./take_field.md) to remove that value from the source and [`BuildField`](./build_field.md)
 to write it into the target builder, threading both the shrinking source and the growing builder through
@@ -112,7 +104,7 @@ One asymmetry in the source is worth knowing if you read it: this recursion, `Fi
 **private**, while the variant casts' `FieldsExtractor` is public. So the extractor recursion can appear
 by name in a diagnostic and be named in a bound; this one cannot.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 

@@ -121,14 +121,6 @@ whether composing the existing ones does the job.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section explains the two `'static` bounds and why they cost nothing.
-
-:::
-
 `FieldMapper` is a blanket impl over every [`FieldGetter`](./field_getter.md), with two `'static` bounds
 that its consumer-side twin needs only one of:
 
@@ -144,7 +136,7 @@ lifetime the naive chained read could not express.
 path segment, so an arbitrarily deep chain stays lifetime-correct. Because the impl is blanket, adding a
 new getter provider makes it chainable with no extra work.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 [`MapField`](./map_field.md) is the other non-prelude member of the group.

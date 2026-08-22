@@ -110,14 +110,6 @@ where the syntax requires it.** It appears in a `namespace` header and nowhere e
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what a `namespace` header generates, and why an override does not conflict with it.
-
-:::
-
 A `namespace N;` header does not emit one entry — it emits a **blanket**
 [`DelegateComponent`](./delegate_component.md) impl on the context that forwards every key through the
 namespace:
@@ -144,7 +136,7 @@ forwarding any key the parent resolves, so the child resolves everything the par
 entries — and a context's direct entry still shadows either. All of it is projections, resolved at
 compile time, with nothing at run time.
 
-## Gotchas
+## Common Mistakes
 
 **A namespace default is a fallback, not an assignment.** It resolves only for keys the context does not
 wire directly, which is the intent, and it means a stray direct entry can silently shadow a default you

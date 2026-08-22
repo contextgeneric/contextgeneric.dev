@@ -130,16 +130,6 @@ building one up field by field or taking one apart variant by variant is the
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the shape expands to. You do not need it to bound on the trait, but the `Fields`
-type appears verbatim in compiler errors about structural code, so reading one makes those errors
-legible. `cargo cgp expand` prints it resugared for your own code.
-
-:::
-
 The trait module defines only the bare trait; every impl comes from
 [`#[derive(HasFields)]`](../derives/derive_has_fields.md). The load-bearing part is what the derive puts
 in `Fields`, and the sugar hides one level of structure:
@@ -163,7 +153,7 @@ product.
 Because a shape is a type rather than a value, nothing about this costs anything at run time. It exists
 to give the trait solver something to recurse over.
 
-## Gotchas
+## Common Mistakes
 
 **`HasFields` and [`HasField`](./has_field.md) differ by one letter and do not overlap.** The plural is
 the whole shape and takes structs and enums; the singular is per-field access and takes only structs.

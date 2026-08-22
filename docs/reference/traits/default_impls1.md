@@ -162,14 +162,6 @@ Wiring that must live downstream goes in the namespace body of the crate that ow
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the `for … in` loop generates.
-
-:::
-
 A `for <T, Provider> in DefaultImpls1<Component> { … }` loop emits a
 [`DelegateComponent`](./delegate_component.md) impl whose `where` clause projects the default:
 
@@ -190,7 +182,7 @@ this trait for the key type, carrying **only** the parameters naming the key and
 provider's impl and its [`IsProviderFor`](./is_provider_for.md), and are checked when a real context
 resolves it.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::component`.
 [`DefaultNamespace`](./default_namespace.md) is.

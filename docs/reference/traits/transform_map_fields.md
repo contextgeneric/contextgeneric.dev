@@ -100,14 +100,6 @@ optional-field layer means.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion and the two limits it explains.
-
-:::
-
 `TransformMapFields` walks the target's [`HasFields`](./has_fields.md) product one entry at a time. For
 each `Field<Tag, Value>` it uses [`UpdateField`](./update_field.md) **twice**: it takes the field out —
 replacing its marker with `IsNothing` and reading what the marker *was* — applies
@@ -127,7 +119,7 @@ declares, in declaration order, and a field the shape does not mention is not vi
 The intermediate `IsNothing` state is invisible from outside: it exists only between the two
 `UpdateField` calls for one field, and no observable value is ever in a half-transformed configuration.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 

@@ -96,14 +96,6 @@ which field is missing and not enough to match on programmatically.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows why this one walks the shape itself rather than using a transform.
-
-:::
-
 Unlike its defaulting sibling, `FinalizeOptional` does **not** go through
 [`TransformMapFields`](./transform_map_fields.md). It walks the target's
 [`HasFields`](./has_fields.md) spine directly, and the reason is that it has to be able to *stop*.
@@ -125,7 +117,7 @@ before it is invoked — or reports why it could not be.
 That short-circuiting is also why only the *first* missing field is named: the walk stops at it rather
 than collecting.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

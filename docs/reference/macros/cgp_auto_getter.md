@@ -302,7 +302,7 @@ where
 The declared bound moves onto that parameter, so `Display` is required of whatever the field holds. Note
 that the field tag still comes from the **method** name rather than from the associated type's.
 
-## Gotchas
+## Common Mistakes
 
 **The field name is fixed to the method name.** A context storing the value under any other name does not
 satisfy the trait, and because the failure is an unmet bound on a blanket impl the method reads as missing

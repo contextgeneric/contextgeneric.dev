@@ -93,14 +93,6 @@ thing the core builder cannot express.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows why the type does not change, which is the trait's whole trick.
-
-:::
-
 `SetOptional` is a single [`UpdateField`](./update_field.md) call writing `Some(value)` into an
 `IsOptional` slot, with both the source and target markers pinned to `IsOptional`:
 
@@ -120,7 +112,7 @@ Since the primitive returns the old storage alongside the new value, `set_option
 `set` discards it. Under `IsOptional` that old storage is an `Option<Value>`, which is why the returned
 value is optional even though the argument is not.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

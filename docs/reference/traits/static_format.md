@@ -116,14 +116,6 @@ more than once, and this trait only when you need to write characters without a 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion, which is the shorter of the two string recoveries.
-
-:::
-
 Each character node writes itself and defers to the tail:
 
 ```rust
@@ -147,7 +139,7 @@ than read out of storage, since there is no `&str` inside a `Symbol` to read.
 That per-call reconstruction is the difference from [`StaticString`](./static_string.md), which does the
 same decoding once, at compile time, into a `&'static str` constant.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude, and its import differs from both its neighbours'.** This trait comes from
 `cgp::core::base::traits`, [`StaticString`](./static_string.md) from `cgp::core::field::traits`, and

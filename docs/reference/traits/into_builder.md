@@ -80,15 +80,6 @@ entry points and the one that shows up in generic code more than in application 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is short, because the companion type is
-[`HasBuilder`](./has_builder.md#under-the-hood)'s.
-
-:::
-
 The derive generates one partial companion per record — `__Partial{Name}`, with a
 [`MapType`](./map_type.md) parameter per field — and the two entry points differ only in the
 configuration they name:
@@ -111,7 +102,7 @@ Because the result is at the all-present configuration, it satisfies
 [`FinalizeBuild`](./finalize_build.md) immediately and [`TakeField`](./take_field.md) for every field,
 which is exactly the pair a redistribution needs.
 
-## Gotchas
+## Common Mistakes
 
 **It consumes the value.** There is no borrowing form; use [`ToFieldsRef`](./to_fields_ref.md) if the
 original must survive, bearing in mind that gives you a shape rather than a builder.

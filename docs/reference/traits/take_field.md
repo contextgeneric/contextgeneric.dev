@@ -85,14 +85,6 @@ merging one record into another — already uses it for you.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows why the trait is not generated, and where it is really used.
-
-:::
-
 `TakeField` is a **library blanket impl** over [`UpdateField`](./update_field.md), the mirror image of
 [`BuildField`](./build_field.md#under-the-hood):
 
@@ -115,7 +107,7 @@ list, taking each field out with `take_field` and writing it into the target wit
 [`build_field`](./build_field.md), threading the shrinking source and the growing target through — which
 is why a merge needs [`HasFields`](./has_fields.md) on the source as well as a builder.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`. Every other trait in the core
 builder family is.

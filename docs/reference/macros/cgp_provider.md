@@ -298,8 +298,7 @@ provider trait's argument list has nowhere to live in the type-only params tuple
 *trait's* arguments, not about a const generic on the provider struct, which passes through untouched.
 And an item that is not an `impl` is refused outright. Each message names what was missing.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument of either macro is a single optional component type, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -315,9 +314,7 @@ substituted into the first position of the generated marker impl. `Type` is the 
 The struct declaration that distinguishes `#[cgp_new_provider]` is implied by the macro name and is not
 written in the argument.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **`#[cgp_new_provider]` fails if the struct already exists**, which is the usual result of converting
 one macro to the other and forgetting to delete the declaration:
@@ -346,7 +343,7 @@ saying the provider is not a provider for that component. Omit the argument unle
 departs from the `{Trait}Component` convention.
 
 **A provider's own associated const or type still needs qualifying**, though for a different reason than
-in [`#[cgp_impl]`](./cgp_impl.md#gotchas). Here `Self` really is the provider, and nothing rewrites it.
+in [`#[cgp_impl]`](./cgp_impl.md#common-mistakes). Here `Self` really is the provider, and nothing rewrites it.
 But the provider struct is also a perfectly good context, so the consumer blanket impl gives it the
 *consumer* trait as well, and both traits declare the item. `Self::LIMIT` is therefore ambiguous rather
 than missing:

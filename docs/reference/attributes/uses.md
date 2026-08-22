@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[uses]'
+sidebar_position: 2
 ---
 
 # `#[uses]`
@@ -8,34 +9,25 @@ Import the capabilities an implementation depends on, reading like a `use` state
 
 ## Overview
 
-An implementation usually calls capabilities defined elsewhere, and to do so it has to require that the
-**context** — the type it runs against — provides them. Written out, that requirement is a bound on
-`Self`:
-
-```rust
-where
-    Self: RectangleArea,
-```
-
-Bounding `Self` is unusual in everyday Rust and reads as machinery rather than as intent. `#[uses]` says
-the same thing in the register the code is actually in:
+`#[uses]` imports the capabilities an implementation depends on. It names a
+[consumer trait](../macros/cgp_component.md) (or an ordinary Rust trait) that `Self` must satisfy, so the
+body can call it. `Self` here is the **context**, the type the implementation runs against:
 
 ```rust
 #[uses(RectangleArea)]
 ```
 
-That reads as *this implementation uses the `RectangleArea` capability*, which is what a `use` statement
-means for a name, and the body can then call `self.rectangle_area()` as though the capability had been
-imported.
+That reads as *this implementation uses the `RectangleArea` capability*, the same thing a `use`
+statement means for a name, and the body can then call `self.rectangle_area()` as though the capability
+had been imported. It is the consumer-side counterpart to [`#[use_provider]`](use_provider.md): where
+`#[use_provider]` imports a provider trait a named provider must satisfy for the context, `#[uses]`
+imports a trait the context itself must satisfy.
 
-The two forms generate exactly the same bound, so nothing is gained or lost mechanically. What changes is
-that the dependency list stops looking like a constraint the author had to satisfy and starts looking like
-a list of what the code needs — which is the reason `#[uses]` is the recommended form and a hand-written
-`where Self: Trait` is what you meet in older code.
-
-One property of that bound is worth naming, because it is the whole point of putting the dependency on
-the implementation. It lands on the implementation *only*, never on the trait, so a caller who bounds on
-the capability never sees it and never has to repeat it. What an implementation needs is its own business.
+The requirement stays private to the implementation. A caller who depends on the capability never sees
+it and never has to repeat it, which is the point of declaring the dependency where the implementation
+lives rather than on its public interface. Preferring `#[uses]` over a hand-written bound is the
+recommendation; the equivalent `where` clause is the older form you meet in existing code, and
+[Under the hood](#under-the-hood) shows the two desugar identically.
 
 ## Usage
 
@@ -46,17 +38,17 @@ implementation:
 #[uses(RectangleArea, CanCalculateArea)]
 ```
 
-Each entry is a capability, optionally with type arguments — a bare `RectangleArea` becomes
+Each entry is a capability, optionally with type arguments: a bare `RectangleArea` becomes
 `Self: RectangleArea`, and `CanCompute<Code, Input>` becomes `Self: CanCompute<Code, Input>`.
 
 **The trait need not be a CGP construct.** `#[uses(Display)]` and `#[uses(AsRef<[u8]>)]` are accepted and
 preferred over the equivalent hand-written clause: the attribute only cares that the bound is one a
 context can satisfy, so an ordinary Rust trait imports exactly as a capability does.
 
-**Prefer one attribute carrying every dependency** — `#[uses(RectangleArea, Display)]` — since a single
-list reads as a single set of requirements. Entries may also be split across several `#[uses(...)]`
-attributes on the same item and they accumulate into one bound, but reach for a second attribute only
-when there is a reason rather than by default.
+**Prefer one attribute carrying every dependency**, as in `#[uses(RectangleArea, Display)]`, since a
+single list reads as a single set of requirements. Entries may also be split across several
+`#[uses(...)]` attributes on the same item, and they accumulate into one bound, but reach for a second
+attribute only when there is a reason rather than by default.
 
 `#[uses(...)]` is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md) and on
 [`#[cgp_impl]`](../macros/cgp_impl.md). In both it imports into the thing being defined, and it does not
@@ -65,8 +57,8 @@ care how the imported capability was itself produced.
 ### Bounds beyond the simple form
 
 The idiomatic entry is a plain `Trait<Params>`, because the attribute is meant to read as an import. An
-entry may nonetheless be any bound a `where` clause accepts — an associated-type equality such as
-`HasErrorType<Error = anyhow::Error>`, a higher-ranked bound, a lifetime bound — and it lands on the
+entry may nonetheless be any bound a `where` clause accepts: an associated-type equality such as
+`HasErrorType<Error = anyhow::Error>`, a higher-ranked bound, or a lifetime bound. Each lands on the
 `where` clause verbatim.
 
 Use that generality sparingly, and prefer a more specific tool where one exists. To pin an abstract type
@@ -94,9 +86,9 @@ pub fn scaled_area(&self, #[implicit] scale_factor: f64) -> f64 {
 }
 ```
 
-`#[uses(CanCalculateArea)]` is what makes `self.area()` legal. The dependency is on the *consumer* trait
-rather than on any particular provider, so every context that can calculate an area gets `scaled_area`
-regardless of how it does so — and a context that swaps its area provider keeps `scaled_area` working
+`#[uses(CanCalculateArea)]` makes `self.area()` legal. The dependency is on the *consumer* trait rather
+than on any particular provider, so every context that can calculate an area gets `scaled_area`
+regardless of how it does so. A context that swaps its area provider keeps `scaled_area` working
 unchanged.
 
 The same attribute inside a provider, this time importing a plain function-style capability:
@@ -122,10 +114,10 @@ This provider is a two-line adapter: it satisfies the `AreaCalculator` component
 ## When to reach for it, and when not
 
 **Use `#[uses]` for every capability dependency**, in preference to writing the `Self:` bound by hand.
-That is the recommendation, and the hand-written form is what to read rather than write.
+That is the recommendation; you read the hand-written form in existing code rather than write it.
 
-The distinction that decides between `#[uses]` and its neighbours is *what* is being depended on and
-*where the requirement should be visible*.
+Two questions decide between `#[uses]` and its neighbours: *what* is being depended on, and *where the
+requirement should be visible*.
 
 - **A value from the context** is not a capability. Use an [`#[implicit]`](implicit.md) argument, which
   reads a field directly rather than routing through a trait.
@@ -135,19 +127,9 @@ The distinction that decides between `#[uses]` and its neighbours is *what* is b
   provider trait carries a context argument that `#[uses]` would not fill in.
 - **A requirement callers should see** belongs on the trait rather than on the implementation:
   [`#[extend]`](extend.md) makes it a supertrait, and [`#[extend_where]`](extend_where.md) a predicate.
-  `#[uses]` is for what the implementation needs privately, which is the `use` to their `pub use`.
+  `#[uses]` keeps a requirement private to the implementation, where those two make it public.
 
 ## Under the hood
-
-:::note
-
-### Advanced
-
-This section shows what the attribute injects. You do not need it to use `#[uses]`, but it is a short
-rewrite and seeing it once explains why the bound never appears on the trait. `cargo cgp expand` prints
-the same thing for your own code.
-
-:::
 
 Every entry becomes one `Self`-anchored predicate on the generated implementation, joined with `+`, and
 nothing else changes. From this input:
@@ -160,8 +142,8 @@ pub fn describe_area(&self) -> String {
 }
 ```
 
-the trait is emitted exactly as it would have been without the attribute, and the implementation carries
-the imports:
+the macro emits the trait exactly as it would have been without the attribute, and the implementation
+carries the imports:
 
 ```rust
 pub trait DescribeArea {
@@ -176,22 +158,21 @@ where
 }
 ```
 
-That asymmetry is the mechanism, not a detail: `DescribeArea` is what callers name, and it says nothing
+That asymmetry is the mechanism rather than a detail: callers name `DescribeArea`, and it says nothing
 about `BaseArea` or `Display`, so a caller bounding on it inherits no requirement to pass on. Writing
 `#[uses(BaseArea, Display)]` is therefore exactly equivalent to writing
 `where Self: BaseArea + Display` on the function, and the two desugar identically.
 
-Entries split across stacked `#[uses(...)]` attributes are collected before the bound is built, so
+The macro collects entries split across stacked `#[uses(...)]` attributes before it builds the bound, so
 `#[uses(BaseArea)]` above `#[uses(Display)]` produces the same single predicate shown above. The context
 parameter is literally `__Context__` in the emitted code, and appears as `Self` inside the implementation.
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) block the behaviour is the same, with the predicates
-appended to that provider's `where` clause — which is also where they are picked up by the generated
-[`IsProviderFor`](../traits/is_provider_for.md) impl, so an unmet import is reported by name rather than
-as a bare missing implementation.
+appended to that provider's `where` clause. That is also where the generated
+[`IsProviderFor`](../traits/is_provider_for.md) impl picks them up, so the compiler reports an unmet
+import by name rather than as a bare missing implementation.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is a comma-separated list of bounds, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -202,18 +183,16 @@ UsesArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
 
 `TypeParamBound` is the Rust grammar's own bound production, which is wider than the plain `Trait<Args>`
 this attribute is normally written with: a lifetime, a `?Sized`, and an associated-type equality such as
-`HasErrorType<Error = AppError>` all parse. The list may be empty, and the attribute may be repeated —
-entries from every occurrence are collected into one `Self:` predicate. The commas separate *bounds*, so
-`#[uses(A, B)]` and `#[uses(A)] #[uses(B)]` are the same thing; the single-attribute form is the one to
-write.
+`HasErrorType<Error = AppError>` all parse. The list may be empty, and the attribute may be repeated,
+with entries from every occurrence collected into one `Self:` predicate. The commas separate *bounds*, so
+`#[uses(A, B)]` and `#[uses(A)] #[uses(B)]` are the same thing, and the single-attribute form is the one
+to write.
 
-</details>
+## Common Mistakes
 
-## Gotchas
-
-**Naming a provider trait instead of a consumer trait does not work**, and this is the most likely way to
-reach for `#[uses]` when [`#[use_provider]`](use_provider.md) is what you wanted. A provider trait carries
-an explicit context parameter, and `#[uses]` does not fill it in, so the bound is incomplete:
+**Naming a provider trait instead of a consumer trait does not work**, and it is the most likely way to
+reach for `#[uses]` when you actually wanted [`#[use_provider]`](use_provider.md). A provider trait
+carries an explicit context parameter, and `#[uses]` does not fill it in, so the bound is incomplete:
 
 ```text
 error[E0107]: missing generics for trait `AreaCalculator`
@@ -224,10 +203,10 @@ error[E0107]: missing generics for trait `AreaCalculator`
 note: trait defined here, with 1 generic parameter: `__Context__`
 ```
 
-The `__Context__` in that note is the giveaway. Depend on the **consumer** trait —
-`#[uses(CanCalculateArea)]` — when what you want is "whatever this context has wired", which is almost
-always the case. Use [`#[use_provider]`](use_provider.md) when you genuinely mean a named implementation,
-and it will supply the missing argument.
+The `__Context__` in that note points to the mistake. Depend on the **consumer** trait, as in
+`#[uses(CanCalculateArea)]`, when you want "whatever this context has wired", which is almost always the
+case. Use [`#[use_provider]`](use_provider.md) when you genuinely mean a named implementation, and it
+will supply the missing argument.
 
 ## Related constructs
 

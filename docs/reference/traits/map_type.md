@@ -122,14 +122,6 @@ one marker across every entry of a type-level list, where this one names a singl
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is short, because the trait is one associated type.
-
-:::
-
 A `MapType` impl is a **type-level function** and nothing more. The markers are zero-sized and carry no
 data; nothing here has a runtime representation, and the only values that exist are the field values
 being wrapped or unwrapped.
@@ -148,7 +140,7 @@ So the partial type's *shape* is fixed while its *storage* is decided per instan
 transition is a change of type argument. [`UpdateField`](./update_field.md) is what performs one such
 transition on a value.
 
-## Gotchas
+## Common Mistakes
 
 **`IsNothing` and `IsVoid` are not interchangeable.** `IsNothing` is inhabited (`()`), `IsVoid` is not
 (`Void`). Records use the first, variants the second, and an error naming the wrong one usually means the

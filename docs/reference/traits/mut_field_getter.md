@@ -98,14 +98,6 @@ and rarer still than mutation generally.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is short, because the machinery is [`FieldGetter`](./field_getter.md#under-the-hood)'s.
-
-:::
-
 `MutFieldGetter` adds one method to its supertrait and no new resolution path: a provider that implements
 [`FieldGetter`](./field_getter.md) and can also produce a `&mut` implements this too, and
 [`UseField`](../providers/use_field.md) does for any context whose field is derived.
@@ -115,7 +107,7 @@ The route from a wired getter back to a context's own fields runs through
 target that its immutable counterpart does not — so a context behind a smart pointer holding borrowed
 data can satisfy the wired read and not the wired write.
 
-## Gotchas
+## Common Mistakes
 
 **`Self` is the provider, not the context.** The context is the first type parameter, and it arrives as
 `&mut Context` in the method rather than as `&mut self`.
@@ -127,7 +119,7 @@ read half is not optional.
 
 **The `'static` bound behind `DerefMut` can bite.** A wired read that resolves and a wired write that
 does not usually means the context is behind a smart pointer over borrowed data — see
-[`HasFieldMut`](./has_field_mut.md#gotchas).
+[`HasFieldMut`](./has_field_mut.md#common-mistakes).
 
 **Requiring it where a read would do narrows the contexts that fit**, since a provider holding `&Context`
 cannot satisfy it.

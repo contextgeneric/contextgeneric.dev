@@ -119,15 +119,6 @@ and is worked out on [its page](./default_impls1.md#when-to-reach-for-it-and-whe
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is short, because the mechanism is
-[`DefaultImpls1`](./default_impls1.md#under-the-hood)'s with one more parameter.
-
-:::
-
 A `for … in` loop emits a [`DelegateComponent`](./delegate_component.md) impl whose `where` clause
 projects the default:
 
@@ -145,7 +136,7 @@ are checked when a real context resolves it.
 Because nothing in the library emits this trait, there is no generated code to compare against — the
 impls you see are the ones you or the attribute wrote.
 
-## Gotchas
+## Common Mistakes
 
 **Nothing inside CGP uses it.** There is no generated code to pattern-match against, and no worked
 library example.

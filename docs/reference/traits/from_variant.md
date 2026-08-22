@@ -131,15 +131,6 @@ The split with its counterpart is exactly what the names say: this trait puts a 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive emits. It is the shortest expansion in the family, and worth reading once
-because the impls appear by name in errors about generic construction.
-
-:::
-
 The derive emits **one impl per variant and nothing else**:
 
 ```rust
@@ -170,7 +161,7 @@ The trait itself is defined in the library; the derive supplies only these per-v
 the variant it came from, so a conflict with a hand-written impl underlines that variant rather than the whole
 derive.
 
-## Gotchas
+## Common Mistakes
 
 **The tag must be written out, not inferred.** `Shape::from_variant(PhantomData::<Symbol!("Circle")>, value)`
 needs the turbofish, because nothing in the value determines the variant when two variants could share a payload

@@ -147,16 +147,6 @@ provider-side mirror: you bound against `HasField` and wire `FieldGetter`.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the blanket impls that make the access compose. You do not need it to read a field,
-but a missing field is reported against the generated bound with the tag fully expanded, so recognizing
-the shape makes that error legible.
-
-:::
-
 The per-field impls come almost entirely from
 [`#[derive(HasField)]`](../derives/derive_has_field.md). What the trait module itself supplies is the
 blanket impls that let the access compose, and two of them belong to this trait.
@@ -188,7 +178,7 @@ The remaining blanket impls belong to the neighbours: [`HasFieldMut`](./has_fiel
 `DerefMut` forwarding, and [`MapField`](./map_field.md) is free for every `HasField` whose tag is
 `'static`.
 
-## Gotchas
+## Common Mistakes
 
 **Two spellings of a name are unrelated types.** `Symbol!("first_name")` and `Symbol!("firstName")` have
 nothing to do with each other, and a mismatch reports as a missing `HasField` bound rather than as a

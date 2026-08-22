@@ -98,14 +98,6 @@ Three similar names, three unrelated jobs.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion, which exists twice — once per spine.
-
-:::
-
 Like its two siblings, `MapFields` is a pair of impls per spine, one for the node and one for the
 terminator. Unlike them, it *transforms* the head rather than preserving it:
 
@@ -131,7 +123,7 @@ sum still a sum.
 All of it resolves during type checking, so a mapped shape is a name for a type rather than a
 computation that runs.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`, and remember that `IsOptional`
 needs its own import from `cgp::core::field::impls`.

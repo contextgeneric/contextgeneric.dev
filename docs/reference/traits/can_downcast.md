@@ -92,14 +92,6 @@ first starts the chain and the second continues it on each remainder.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the recursion, and why the remainder is the shape it is.
-
-:::
-
 **The downcasts recurse over the *target's* variants**, which is the mirror image of
 [`CanUpcast`](./can_upcast.md#under-the-hood) walking the source's. For each `Field<Tag, Value>` in
 `Target::Fields`, the implementation tries pulling that variant out of the source extractor: on success
@@ -112,7 +104,7 @@ this one calls [`to_extractor`](./has_extractor.md) on the enum first, while tha
 extractor it is handed. That is the entire reason two traits exist rather than one, and it is what makes
 chaining possible — the `Remainder` a `downcast` returns is precisely a `downcast_fields` input.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 

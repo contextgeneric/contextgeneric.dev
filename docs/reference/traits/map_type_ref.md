@@ -117,14 +117,6 @@ what this page is for: an error mentioning `IsRef` is telling you the value is b
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows how the two marker families combine in one generated type.
-
-:::
-
 A borrowed companion enum carries the outer marker as an extra parameter alongside the per-variant ones,
 and each payload slot projects through both:
 
@@ -146,7 +138,7 @@ The `T: 'a` bound and the `: 'a` bound on the associated type are what keep the 
 a payload cannot be borrowed for longer than it lives, and the resulting storage type cannot outlive the
 borrow either.
 
-## Gotchas
+## Common Mistakes
 
 **`IsOwned` is unused by CGP.** It is a legal marker with no consumer, so selecting it means writing the
 machinery that uses it yourself.

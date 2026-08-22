@@ -91,14 +91,6 @@ direction happens.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the generated impl, which is `to_fields` read backwards.
-
-:::
-
 The conversion destructures the `Cons` chain positionally and unwraps each entry's value:
 
 ```rust
@@ -117,7 +109,7 @@ exist only to make the types distinct.
 An enum's impl is the dual: a `match` over the `Either` chain, each arm reconstructing the corresponding
 variant, with the `Void` terminator unreachable by construction.
 
-## Gotchas
+## Common Mistakes
 
 **It is an associated function, not a method.** Write `T::from_fields(fields)`; there is no receiver.
 

@@ -88,14 +88,6 @@ by ownership. A routine that must move a field out of a struct needs the owning 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section covers the lifetime plumbing, which is the only interesting part.
-
-:::
-
 The generated impl borrows each field and wraps it into the corresponding entry of the borrowed shape,
 under the reserved lifetime name `'__a` that
 [`HasFieldsRef`](./has_fields_ref.md#under-the-hood) declares:
@@ -116,7 +108,7 @@ An enum's borrowed conversion matches the concrete variant and produces the corr
 borrowed sum, with the payload borrowed rather than moved — which is also how
 [`HasExtractorRef`](./has_extractor_ref.md) reads a variant without consuming the value.
 
-## Gotchas
+## Common Mistakes
 
 **It supertraits [`HasFieldsRef`](./has_fields_ref.md), not [`HasFields`](./has_fields.md).** Bounding on
 `ToFieldsRef` does not give you `Fields`; require both traits if the code needs both shapes.

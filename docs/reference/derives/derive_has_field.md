@@ -193,16 +193,6 @@ access to fields that already exist. Building a struct up field by field is
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates. You do not need it to use `#[derive(HasField)]`, but a missing
-field is reported against the generated bound with the tag fully expanded, so reading one expansion makes
-that error legible. `cargo cgp expand` prints the same thing for your own code, with the tags resugared.
-
-:::
-
 The derive leaves the struct definition untouched and adds **two impls per field** — a read accessor and a
 mutable one. From this input:
 
@@ -266,7 +256,7 @@ Each generated impl is also aimed at the field it came from, so a compiler error
 a conflict with a hand-written impl, or the "but the trait is implemented for" hint inside a missing-field
 error — underlines that field rather than the whole `#[derive(HasField)]`.
 
-## Gotchas
+## Common Mistakes
 
 **A unit struct produces nothing, silently.** There is no field to key, so the derive succeeds and emits no
 impls. That is correct, but it means the mistake surfaces later, as an unsatisfied `HasField` bound at a

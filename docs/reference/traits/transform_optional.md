@@ -102,14 +102,6 @@ Writing a marker of your own follows the same shape; the
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows why it needs fewer impls than its counterpart.
-
-:::
-
 The marker is zero-sized and carries [`TransformMap`](./transform_map.md) impls distinguished by their
 source marker, each targeting `IsOptional`:
 
@@ -135,7 +127,7 @@ The result is a partial value at a configuration the core builder never reaches 
 makes [`SetOptional`](./set_optional.md) resolve and the strict
 [`FinalizeBuild`](./finalize_build.md) not.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

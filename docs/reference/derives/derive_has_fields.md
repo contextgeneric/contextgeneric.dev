@@ -194,16 +194,6 @@ a type you do not own and cannot patch has no shape at all.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates. You do not need it to use `#[derive(HasFields)]`, but the
-`Fields` type appears verbatim in compiler errors about structural code, so reading one expansion makes
-those errors legible. `cargo cgp expand` prints the same thing for your own code, with the tags resugared.
-
-:::
-
 The derive leaves the type definition untouched and emits **five impls**: the shape, the borrowed shape, and
 three conversions. From a named-field struct:
 
@@ -295,7 +285,7 @@ empty `match`.
 Each generated impl is aimed at the type name the user wrote, so a conflict with a hand-written `HasFields`
 impl underlines the struct or enum rather than the whole `#[derive(HasFields)]`.
 
-## Gotchas
+## Common Mistakes
 
 **A newtype's `Fields` is the inner type, not a one-element product.** `struct Wrapper(String)` has
 `Fields = String`. Generic code written against `Cons<Field<Index<0>, _>, Nil>` will not match it, and

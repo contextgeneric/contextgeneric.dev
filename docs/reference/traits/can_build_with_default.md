@@ -86,14 +86,6 @@ in between needs to happen.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the composition, which is all there is to it.
-
-:::
-
 The impl chains the three steps and constrains each with a bound:
 
 ```rust
@@ -116,7 +108,7 @@ remaining fields — through a [`TransformMapFields`](./transform_map_fields.md)
 So an unsatisfied bound here is always really an unsatisfied bound one layer down, which is worth knowing
 because the error names that layer rather than this trait.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

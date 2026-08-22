@@ -51,7 +51,7 @@ Two restrictions are enforced when the macro expands:
 
 - **Every trait item must be a method.** Associated types and constants are rejected.
 - **A method may not have non-lifetime generic parameters.** Lifetimes are fine. The reason is in the
-  [Gotchas](#gotchas), and it is a real limitation rather than an oversight.
+  [Common Mistakes](#common-mistakes), and it is a real limitation rather than an oversight.
 
 Each method must have a `self` receiver, since the receiver is the enum value being matched.
 
@@ -141,7 +141,7 @@ Reach for something else in four situations.
   and a unit code, so a context cannot override how one variant is handled. Wiring
   `MatchWithValueHandlers` into a context's own component gives that control.
 - **A method needs to be generic.** Not supported, and not fixable by rearranging: see the
-  [Gotchas](#gotchas).
+  [Common Mistakes](#common-mistakes).
 - **The trait needs an associated type or const.** Also rejected. A trait carrying either is not a dispatch
   trait in this sense; give the enum a component of its own instead.
 
@@ -220,7 +220,7 @@ fn contains(&self, arg_0: f64, arg_1: f64) -> bool {
 An `async` method selects the `AsyncComputer` form of the bound and the call instead of `Computer`, and awaits
 the result.
 
-## Gotchas
+## Common Mistakes
 
 **A trait method cannot be generic**, and the macro explains why in the message itself:
 

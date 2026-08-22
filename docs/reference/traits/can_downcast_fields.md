@@ -97,15 +97,6 @@ use: its `Self` is a remainder, and a remainder only ever comes from a prior dow
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section is one paragraph, because the recursion is
-[`CanDowncast`](./can_downcast.md#under-the-hood)'s.
-
-:::
-
 Both traits walk the *target's* variant list, trying to pull each one out of the extractor they hold and
 threading the shrunken remainder into the next attempt, with the terminal `Void` impl returning the whole
 remainder as `Err`. The only difference is the entry point: `CanDowncast` calls
@@ -116,7 +107,7 @@ Because the remainder type narrows at every step, a chain's types are all distin
 knows at each point exactly which variants remain — the same narrowing a hand-written
 [extraction chain](./extract_field.md) performs.
 
-## Gotchas
+## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 

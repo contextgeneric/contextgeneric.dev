@@ -206,16 +206,6 @@ derive you did not need.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates. You do not need it to use `#[derive(ExtractField)]`, but the
-companion enums appear by name in every extraction error, so recognizing one turns an intimidating error into
-a legible message. `cargo cgp expand` prints the same thing for your own code, with the tags resugared.
-
-:::
-
 The derive centres on **two** companion enums. `__Partial{Name}` is your enum with one
 [`MapType`](../traits/map_type.md) parameter added per variant and each payload wrapped in that parameter's
 projection, where `IsPresent` keeps the payload and `IsVoid` maps it to the uninhabited `Void`.
@@ -309,7 +299,7 @@ borrow marker — leaving them in would make both unused parameters. And every b
 Each generated impl is aimed at the token it came from: a per-variant impl at its variant, a whole-enum impl
 at the enum name. The companion enums are cloned from yours, so their tokens already carry meaningful spans.
 
-## Gotchas
+## Common Mistakes
 
 **Every variant must carry exactly one unnamed payload.** A unit, multi-field, or struct-style variant fails,
 with no per-variant opt-out. Wrap the payload in its own struct — including for a case that carries nothing,

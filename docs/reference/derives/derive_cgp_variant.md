@@ -138,16 +138,6 @@ The full argument for when a type earns the extensible-data machinery at all is 
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the derive generates and why the extraction chain can end without a wildcard.
-You do not need it to use the derive, but the companion enums appear by name in every extraction error.
-`cargo cgp expand` prints the same thing for your own code, with the tags resugared.
-
-:::
-
 The derive emits three groups in order. From:
 
 ```rust
@@ -215,7 +205,7 @@ The companion names are reserved: `__Partial{Name}` and `__PartialRef{Name}`. Th
 type's visibility. Each generated impl is aimed at the token it came from, so a conflict with a
 hand-written impl underlines that variant rather than the whole derive.
 
-## Gotchas
+## Common Mistakes
 
 **Every variant needs exactly one unnamed payload**, with no per-variant opt-out.
 [`#[derive(HasFields)]`](./derive_has_fields.md) is the one derive in the family that accepts all four

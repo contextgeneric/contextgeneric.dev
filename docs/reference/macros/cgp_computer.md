@@ -231,8 +231,7 @@ reference parameter is preserved too: `fn to_string_ref<V: Display>(value: &V) -
 `Computer` whose input tuple is `(&V)`, and the bundle's by-reference entries make it serve the `…Ref`
 components.
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is a single optional provider name, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -247,9 +246,7 @@ Omitted, the provider struct takes the function name converted to PascalCase; a 
 verbatim. The annotated function is plain Rust, and the macro reads its parameters, return type,
 `async`-ness, generics, and `where` clause to choose the base trait and promotion bundle as described above.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **The function cannot reach the context.** There is no receiver and no context parameter in scope, so
 `#[implicit]` arguments and `#[uses]` have nothing to attach to. A computation that needs anything from its

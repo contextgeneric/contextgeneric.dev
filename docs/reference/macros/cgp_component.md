@@ -138,7 +138,7 @@ Three attributes that look like they belong here do not, and the error is confus
 naming: `#[uses(...)]`, `#[extend_where(...)]`, and `#[use_provider(...)]` are read by
 [`#[cgp_impl]`](./cgp_impl.md) and [`#[cgp_fn]`](./cgp_fn.md) but not by `#[cgp_component]`. None of
 them is an attribute in its own right, so writing one here leaves a name nothing can resolve; see
-[Gotchas](#gotchas). The equivalent of `#[uses]` on a component is a supertrait, written with
+[Common Mistakes](#common-mistakes). The equivalent of `#[uses]` on a component is a supertrait, written with
 `#[extend]`.
 
 ## Examples
@@ -372,10 +372,9 @@ them into the `IsProviderFor` parameter tuple. That tuple holds types, so a life
 
 Bounds and defaults are dropped from the tuple, which names the parameters positionally and nothing
 more. A const parameter has no place in it at all, which is why the macro rejects one; see
-[Gotchas](#gotchas).
+[Common Mistakes](#common-mistakes).
 
-<details>
-<summary>Formal grammar</summary>
+## Formal grammar
 
 The attribute argument is either a bare provider name or a comma-separated set of keyed values, in the
 Rust Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
@@ -400,9 +399,7 @@ parameters while the provider name may not. The attribute delimiter, `(...)` for
 `{...}` for the key/value form, is ordinary Rust attribute syntax and does not change how the
 arguments inside are parsed.
 
-</details>
-
-## Gotchas
+## Common Mistakes
 
 **A const generic parameter on the trait is rejected**, by the macro rather than by the compiler:
 
@@ -418,7 +415,7 @@ An associated `const` *item* is unaffected. `const LIMIT: u64;` as a trait membe
 [associated const](https://doc.rust-lang.org/reference/items/associated-items.html), not a generic
 parameter, and a provider supplies it in the ordinary way. Naming your own associated const from
 *inside* a [`#[cgp_impl]`](./cgp_impl.md) body has a wrinkle of its own, covered in that page's
-Gotchas.
+[Common Mistakes](./cgp_impl.md#common-mistakes).
 
 **The attribute must be applied to a trait.** A struct, an enum, or a free function is refused at
 parse time with an error naming the trait the macro expected, rather than being lowered into code that
