@@ -118,16 +118,6 @@ a provider list. Everywhere else it is generated for you.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the spine both macros build. You do not need it to use them, but a compiler error prints
-the expanded form, so recognizing it makes those errors readable. `cargo cgp expand` resugars it
-back for your own code.
-
-:::
-
 `Product!` expands to a right-nested chain of `Cons`, terminated by `Nil`:
 
 ```rust

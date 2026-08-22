@@ -113,18 +113,20 @@ is how one table adopts a single choice from another rather than repeating it:
 
 ```rust
 delegate_components! {
-    new BarComponents {
-        Index<0>:
-            FooComponents,     // the provider *is* FooComponents
-        Index<1> ->
-            FooComponents,     // the provider is whatever FooComponents wires for Index<1>
+    new ScaledGeometryComponents {
+        AreaCalculatorComponent:
+            ScaledAreaCalculator<RectangleArea>,     // the provider *is* this scaled calculator
+        PerimeterCalculatorComponent ->
+            GeometryComponents,     // the provider is whatever GeometryComponents wires for perimeter
     }
 }
 ```
 
 Those two lines are worth reading against each other, because the difference is easy to miss. The `:`
-entry hands the whole lookup to `FooComponents`; the `->` entry reaches into `FooComponents`'s table
-and copies out the one value it holds for that key.
+entry names `ScaledAreaCalculator<RectangleArea>` outright, so `ScaledGeometryComponents` scales the
+area calculation; the `->` entry reaches into `GeometryComponents`'s table and copies out whatever it
+holds for `PerimeterCalculatorComponent`, so the perimeter is left exactly as `GeometryComponents`
+already computes it, unscaled.
 
 **`=>` is redirection.** It sends the lookup along a type-level [path](./path.md) rather than to a
 provider, so the provider is decided wherever the path finally lands. On a context, that path names a
@@ -134,10 +136,10 @@ from a single entry:
 ```rust
 delegate_components! {
     App {
-        [BarProviderComponent, BazProviderComponent] =>
+        [AreaCalculatorComponent, PerimeterCalculatorComponent] =>
             @shared,
 
-        @shared: DummyImpl,
+        @shared: RectangleGeometry,
     }
 }
 ```
@@ -149,8 +151,8 @@ concern more than a per-context one.
 
 ### The three key forms
 
-**A single key** is one component name, and may carry generics of its own: `<T> BazKey<T>: BazProvider`
-adds a parameter to just that entry.
+**A single key** is one component name, and may carry generics of its own:
+`<Shape> ShapeAreaCalculatorComponent<Shape>: SumAreas` adds a parameter to just that entry.
 
 **A list key** is a bracketed list, expanding to one entry per name so several components share one
 value:
@@ -159,17 +161,17 @@ value:
 delegate_components! {
     MyComponents {
         [
-            FooComponent,
-            BarComponent,
-        ]: FooBarProvider,
-        BazComponent: BazProvider,
+            AreaCalculatorComponent,
+            PerimeterCalculatorComponent,
+        ]: RectangleGeometry,
+        ColorComponent: SolidColor,
     }
 }
 ```
 
 Each bracketed element is a full key, so an element may carry its own generics: in
-`[BarKey<T1>, <T2> BazKey<T1, T2>]: BarValue<T1>` only the second key introduces `T2`. The list is a
-key form rather than an operator, so `[A, B] -> SomeTable` and `[A, B] => @somewhere` are as legal as
+`[WidthKey<T1>, <T2> HeightKey<T1, T2>]: RectangleValue<T1>` only the second key introduces `T2`. The
+list is a key form rather than an operator, so `[A, B] -> SomeTable` and `[A, B] => @somewhere` are as legal as
 `[A, B]: Provider`; the first adopts several of another table's entries at once, the second points
 several components at one shared slot.
 
@@ -184,8 +186,8 @@ becomes a type-level string, and anything else names a type. A segment may also 
 Two grouping forms fan one path key out into several, and **they are not interchangeable**:
 
 - **`[…]` groups alternatives for one segment**, and the path may continue after it.
-  `@app.[FooComponent, BarComponent].[u64, String]: DummyImpl` writes four entries: the cartesian
-  product of the two groups.
+  `@app.[AreaCalculatorComponent, PerimeterCalculatorComponent].[u64, String]: RectangleGeometry`
+  writes four entries: the cartesian product of the two groups.
 - **`{…}` groups whole remainders**, and ends the path. Its elements may be different lengths and may
   nest further groups, which lets one entry cover routes of different shapes.
 
@@ -212,10 +214,16 @@ exists, and it is legacy.
 
 :::info
 
-### Legacy: read, don't write
+### Legacy — read, don't write
 
-Older code dispatches per type by nesting a table inside a
-[`UseDelegate`](../providers/use_delegate.md) value:
+Older code dispatches per type by nesting a table inside a [`UseDelegate`](../providers/use_delegate.md)
+value instead of using the `open` statement below. **Prefer `open` for anything new**: it needs no
+separate table type and no wrapper. This form is here because you will meet it in existing code,
+including in CGP's own error and handler components, which are still defined this way.
+
+:::
+
+Nesting a table inside a `UseDelegate` value looks like this:
 
 ```rust
 delegate_components! {
@@ -238,8 +246,8 @@ generics**, which a per-entry generic on the outer key threads into:
 ```rust
 delegate_components! {
     new MyComponents {
-        <T> BarKey<T>: UseDelegate<new BarValue<T> {
-            BazKey: BazValue<T>,
+        <T> WidthKey<T>: UseDelegate<new WidthValue<T> {
+            HeightKey: HeightValue<T>,
         }>,
     }
 }
@@ -249,13 +257,6 @@ One prerequisite is not visible in either snippet: **the component must carry
 [`#[derive_delegate(UseDelegate<Shape>)]`](../attributes/derive_delegate.md)**, which generates the
 dispatch impl the wrapper resolves through. Leave it off and the table still expands, then fails at the
 check with an unsatisfied `IsProviderFor` that never mentions the missing attribute.
-
-This still works, and you will meet it, including in CGP's own error and handler
-components, which are defined with `#[derive_delegate]`. The `open` statement below achieves the same
-dispatch with no separate table type, no wrapper, and nothing added to the component, and is preferred
-for new code.
-
-:::
 
 ### Choosing a provider per type: the `open` statement
 
@@ -306,9 +307,9 @@ delegate_components! {
     App {
         open AreaCalculatorComponent;
 
-        BarProviderComponent -> BarBundle,
+        PerimeterCalculatorComponent -> GeometryComponents,
 
-        [BazProviderComponent, QuuxProviderComponent]: DummyBaz,
+        [ColorComponent, LabelComponent]: DefaultStyle,
 
         @AreaCalculatorComponent.{Rectangle, Circle}:
             ShapeArea,
@@ -442,16 +443,6 @@ with how complicated the wiring is; that it is checked somehow does not.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the impls each entry expands to. You do not need them to wire a context, but they
-are what a wiring error names, so reading one makes those errors much easier to follow.
-`cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 Each entry becomes a pair of impls. From the single-entry table above, first the
 [`DelegateComponent`](../traits/delegate_component.md) impl that records the choice:
 
@@ -485,25 +476,26 @@ emitted code.
 **Every other form on this page lowers to that same pair.** What a form changes is how many pairs one
 line produces and what the `Delegate` type is.
 
-**A list key repeats the pair per name.** A table pairing `[FooComponent, BarComponent]` with
-`FooBarProvider`, alongside a `BazComponent: BazProvider` entry, yields three `DelegateComponent` impls
-and three matching `IsProviderFor` impls.
+**A list key repeats the pair per name.** A table pairing
+`[AreaCalculatorComponent, PerimeterCalculatorComponent]` with `RectangleGeometry`, alongside a
+`ColorComponent: SolidColor` entry, yields three `DelegateComponent` impls and three matching
+`IsProviderFor` impls.
 
 **A `->` mapping projects through the value's table**, and adds the bound that makes the projection
 well-formed:
 
 ```rust
-impl DelegateComponent<Index<1>> for BarComponents
+impl DelegateComponent<PerimeterCalculatorComponent> for ScaledGeometryComponents
 where
-    FooComponents: DelegateComponent<Index<1>>,
+    GeometryComponents: DelegateComponent<PerimeterCalculatorComponent>,
 {
-    type Delegate = <FooComponents as DelegateComponent<Index<1>>>::Delegate;
+    type Delegate = <GeometryComponents as DelegateComponent<PerimeterCalculatorComponent>>::Delegate;
 }
 ```
 
 **A `=>` mapping wires a [`RedirectLookup`](../providers/redirect_lookup.md)** over the table and the
-path. Against a plain key the path is complete, so `FooProviderComponent => @MyFooComponent` gives
-`RedirectLookup<Table, Path!(@MyFooComponent)>`. Against a path key, both sides instead end in a shared
+path. Against a plain key the path is complete, so `AreaCalculatorComponent => @shared` gives
+`RedirectLookup<Table, Path!(@shared)>`. Against a path key, both sides instead end in a shared
 wildcard parameter, so an entry like `@cgp.core.error => @app` rewrites one path prefix to another and
 passes everything beyond it through unchanged.
 
@@ -545,9 +537,9 @@ the per-entry key as the raw spine. So the same kind of type appears in two spel
 
 **A grouped path key expands to the cartesian product**, one impl pair per combination, each keyed on a
 full prefix ending in `__Wildcard__`. So
-`@app.[FooProviderComponent, BarProviderComponent].[u64, String]: DummyImpl` emits four pairs, and a
-braced group does the same with whole tails rather than single segments, producing keys of different
-lengths.
+`@app.[AreaCalculatorComponent, PerimeterCalculatorComponent].[u64, String]: RectangleGeometry` emits
+four pairs, and a braced group does the same with whole tails rather than single segments, producing
+keys of different lengths.
 
 **A nested-table value lifts its inner table out** into its own definition, wiring the outer entry to
 `UseDelegate` over the generated type. So the legacy form is equivalent to writing two separate
@@ -633,7 +625,7 @@ The three segment productions differ in what they permit, which is why they are 
 along one path are merged onto that entry's impls. A `PathSegment` (inside a `PathValue`, the
 right-hand side of a `=>`) carries none, and admits no groups. It is [`Path!`](./path.md)'s own
 production, which keeps the two in step. And every `Generics` list on a key is an impl-position
-list, so a bound is accepted (`<T: Clone> BazKey<T>: BazProvider`) and a parameter *default* is not:
+list, so a bound is accepted (`<T: Clone> WidthKey<T>: WidthProvider`) and a parameter *default* is not:
 `<T = u32>` fails with `invalid impl generics syntax`.
 
 A `ProviderValue`'s nested-table form carries a full `TableBody`, so an inner table accepts every form
@@ -671,8 +663,8 @@ The caret sits on the component being opened, so the message blames it rather th
 
 **`[…]` and `{…}` in a path are not the same group.** A bracketed group holds alternatives for one
 segment and may be followed by more path; a braced group holds whole tails and ends the path. So
-`@FooProviderComponent.{String, u32}.bool: DummyFoo` does not parse, and the message says nothing about
-groups: it reports the trailing `.bool` sitting where the operator should be:
+`@AreaCalculatorComponent.{String, u32}.bool: RectangleGeometry` does not parse, and the message says
+nothing about groups: it reports the trailing `.bool` sitting where the operator should be:
 
 ```text
 error: expected `:`
@@ -687,9 +679,9 @@ names an unresolved type rather than anything about wiring.
 
 **Two entries claiming one key conflict**, and the compiler reports it as a coherence error rather than
 as a wiring one. This covers the obvious duplicate, an `open` header colliding with an explicit mapping
-for the same component, and a generic `<T> Wrapper<T>` entry overlapping a specific `Wrapper<u64>` one.
-The same applies to a direct entry for a path a joined namespace itself binds: see
-[`cgp_namespace!`](./cgp_namespace.md#gotchas).
+for the same component, and a generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a
+specific `AreaCalculatorComponent<Rectangle>` one. The same applies to a direct entry for a path a
+joined namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#gotchas).
 
 ## Related constructs
 

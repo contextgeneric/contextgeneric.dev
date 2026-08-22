@@ -182,16 +182,6 @@ wiring; `#[cgp_type]` is for a type that stands on its own.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the macro generates. You do not need it to use `#[cgp_type]`, but the `UseType`
-impl is the piece that makes wiring a type possible, and seeing it explains why no provider has to be
-written. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 `#[cgp_type]` emits everything [`#[cgp_component]`](./cgp_component.md) would, then adds two provider
 impls of its own. The component half is the familiar shape: consumer trait, provider trait, two blanket
 impls, marker, and the standard [`UseContext`](../providers/use_context.md) and

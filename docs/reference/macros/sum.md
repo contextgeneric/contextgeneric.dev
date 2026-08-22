@@ -101,16 +101,6 @@ use.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the spine the macro builds, and why its terminator differs from `Product!`'s. You do not need
-it to use `Sum!`, but the difference explains the exhaustiveness guarantee that the extensible-variant
-machinery rests on. `cargo cgp expand` resugars it back for your own code.
-
-:::
-
 `Sum!` expands to a right-nested chain of `Either`, terminated by `Void`:
 
 ```rust

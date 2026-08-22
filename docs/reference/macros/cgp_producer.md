@@ -131,17 +131,6 @@ within it there is nothing simpler.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the three items the macro emits. You do not need them to use `#[cgp_producer]`, but the
-delegation block makes one function answer eight components, and it differs from
-[`#[cgp_computer]`](./cgp_computer.md)'s in a way worth noticing. `cargo cgp expand` prints the same thing for
-your own code.
-
-:::
-
 The macro emits the function unchanged, a provider impl of [`Producer`](../components/producer.md), and a
 [`delegate_components!`](./delegate_components.md) block wiring the whole family. From this input:
 

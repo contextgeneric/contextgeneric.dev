@@ -153,15 +153,6 @@ The decisions worth making are around it rather than about it.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the rewrite. It is the simplest expansion in CGP, and worth seeing once because it explains
-why a provider needs no attribute of its own. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 For each `async` method the macro removes the `async` keyword and wraps the return type in
 `impl ::core::future::Future<Output = …>`. A method with no return arrow is treated as returning `()`. From
 this input:

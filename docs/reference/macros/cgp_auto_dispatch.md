@@ -151,16 +151,6 @@ the operation from scratch and expect contexts to configure it, start with a
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the macro generates. You do not need it to use `#[cgp_auto_dispatch]`, but an
-unmet variant impl is reported against the generated bound, so reading it once makes that error
-legible. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 The macro keeps the trait unchanged and appends two kinds of item: one per-method computer, and one blanket
 impl of the trait for a fresh enum parameter.
 

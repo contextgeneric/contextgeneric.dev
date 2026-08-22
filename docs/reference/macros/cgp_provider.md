@@ -212,16 +212,6 @@ subtle.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the impls the macros emit. You do not need them to write a provider, but this is the
-shape `#[cgp_impl]` desugars *to*, so reading it once explains most confusing provider errors.
-`cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 `#[cgp_provider]` emits two items: your impl, passed through unchanged, and a marker impl derived from
 it. From this input:
 

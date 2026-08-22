@@ -138,16 +138,6 @@ needed.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the macro expands to. You do not need it to use `Symbol!`, but the expanded form is
-exactly what a compiler error prints, so reading it once turns an intimidating error into a legible one.
-`cargo cgp expand` resugars it back for your own code.
-
-:::
-
 `Symbol!("...")` expands to a `Symbol` type wrapping a `Chars` chain that spells the string one character at a
 time:
 

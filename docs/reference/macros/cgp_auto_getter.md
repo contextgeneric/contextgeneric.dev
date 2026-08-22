@@ -236,16 +236,6 @@ So the ordering is: implicit argument by default, `#[cgp_auto_getter]` for the t
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the blanket impl the macro generates. You do not need it to use `#[cgp_auto_getter]`,
-but an unsatisfied getter names the generated bound rather than your method, so reading one makes that
-error much easier to follow. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 The macro re-emits the trait unchanged and adds one blanket impl over a generic context. From this input:
 
 ```rust

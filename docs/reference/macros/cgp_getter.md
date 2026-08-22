@@ -178,17 +178,6 @@ Reach for something else in these cases.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the getter-specific providers the macro adds. You do not need them to use
-`#[cgp_getter]`, but the `UseField` impl makes the field name a wiring decision, and seeing it explains
-why the tag is a parameter here and a fixed value in the auto-getter. `cargo cgp expand` prints the
-same thing for your own code.
-
-:::
-
 `#[cgp_getter]` emits everything [`#[cgp_component]`](./cgp_component.md) would: the consumer trait, the
 provider trait, the two blanket impls, the marker, and the standard
 [`UseContext`](../providers/use_context.md) and [`RedirectLookup`](../providers/redirect_lookup.md)

@@ -162,17 +162,6 @@ variants. A single transform with one caller is a method.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the three items the macro emits, and how the promotion wiring makes one function answer
-the whole family. You do not need it to use `#[cgp_computer]`, but the delegation block is unusual enough
-that seeing it once explains a lot of handler errors. `cargo cgp expand` prints the same thing for your own
-code.
-
-:::
-
 The macro emits the function unchanged, a provider impl of the base trait, and a
 [`delegate_components!`](./delegate_components.md) block wiring the rest of the family. From this input:
 

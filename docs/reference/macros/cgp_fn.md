@@ -215,16 +215,6 @@ they touch it or not.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the two items the macro generates. You do not need them to use `#[cgp_fn]`, but they
-are what an unsatisfied field requirement names, so reading one makes those errors much easier to
-follow. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 `#[cgp_fn]` emits exactly two items: the trait carrying the method, and a blanket impl of it for a
 generic context. From this input:
 

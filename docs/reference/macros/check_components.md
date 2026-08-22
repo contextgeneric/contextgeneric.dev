@@ -219,16 +219,6 @@ the unsatisfied bound, but you cannot ask for it directly.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what a check table expands to. You do not need it to write one, but knowing that a check
-is an empty impl explains both why it costs nothing at runtime and why its errors read the way they do.
-`cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 A check table expands to one marker trait plus one empty impl per entry. The trait's supertrait *is* the
 assertion; the impl has nothing of its own to prove, so it compiles exactly when the supertrait holds. From
 this input:

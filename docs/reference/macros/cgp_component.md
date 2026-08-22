@@ -227,17 +227,6 @@ machinery.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the code the macro generates. You do not need it to use `#[cgp_component]`, but
-CGP's constructs are macros, and reading what one produces is the fastest way to understand a compiler
-error that names a type you did not write. Running `cargo cgp expand` prints the same thing for your
-own code.
-
-:::
-
 From this input:
 
 ```rust

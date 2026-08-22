@@ -256,16 +256,6 @@ beginner-proof way to guarantee that for simple contexts; the two separate macro
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows both halves of what the macro emits. You do not need it to use the macro, but seeing that
-the output is literally the two macros concatenated makes a later move to separate blocks
-uneventful. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 The macro emits the delegation impls exactly as [`delegate_components!`](./delegate_components.md) would,
 then appends a check trait and one impl per non-skipped entry exactly as
 [`check_components!`](./check_components.md) would. From this input:

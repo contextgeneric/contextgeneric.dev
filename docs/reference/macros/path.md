@@ -131,16 +131,6 @@ different things.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the spine the macro builds. You do not need it to use `Path!`, but a namespace failure prints
-the expanded path, so recognizing the shape lets you read which route came up empty.
-`cargo cgp expand` resugars it back for your own code.
-
-:::
-
 `Path!` expands to a right-nested chain of `PathCons` terminated by `Nil`, with each segment encoded by the
 lowercase-versus-capitalized rule:
 

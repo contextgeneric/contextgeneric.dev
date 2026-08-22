@@ -233,17 +233,6 @@ entries still have to exist somewhere. And it is not how one component gets per-
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the trait and impls a namespace becomes. You do not need them to use one, but namespace
-failures are reported in terms of these types, and the resolution is far easier to follow once you have seen
-that a namespace is a trait with one associated type. `cargo cgp expand` prints the same thing for your own
-code.
-
-:::
-
 `cgp_namespace!` emits, in order, an optional backing struct, an optional lookup trait, and one impl of that
 trait per entry, plus one inheritance impl when a parent is named. From this input:
 

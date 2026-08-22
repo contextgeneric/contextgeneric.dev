@@ -291,16 +291,6 @@ construct `#[cgp_impl]`'s rewrite does not support, whether from a limitation or
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows what the macro generates. You do not need it to write a provider, but the rewrite
-explains most confusing errors in a provider body, so it is worth seeing once. `cargo cgp expand`
-prints the same thing for your own code.
-
-:::
-
 `#[cgp_impl]` desugars to [`#[cgp_provider]`](./cgp_provider.md). It moves the context type to the
 leading position of the provider trait, swaps the provider name into the `Self` position, and rewrites
 every `self`/`Self`. From this input, with the context named explicitly for clarity:

@@ -171,16 +171,6 @@ trait. Needing that is the signal to move to a component.
 
 ## Under the hood
 
-:::note
-
-### Advanced
-
-This section shows the two items the macro emits. You do not need them to use `#[blanket_trait]`, but the
-associated-type lifting is surprising the first time, and knowing what the impl requires makes an
-"unsatisfied bound" error much easier to read. `cargo cgp expand` prints the same thing for your own code.
-
-:::
-
 The macro emits the trait and a blanket impl over a generic context. From the method example:
 
 ```rust
