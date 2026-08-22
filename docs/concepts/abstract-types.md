@@ -15,8 +15,8 @@ the costs, which are mostly about what an abstract type is *not*.
 
 ## Rust already has this
 
-An abstract type in CGP is an ordinary associated type, and it is worth starting there because it means
-half of what follows is a feature you already use:
+An abstract type in CGP is an ordinary associated type: a type a trait names but leaves each implementer
+to fill in. It is worth starting there, because half of what follows is a feature you already use:
 
 ```rust
 pub trait HasScalarType {
@@ -106,7 +106,7 @@ shape at once. The application here is a type standing for the program rather th
 
 The `#[use_type(HasScalarType.Scalar)]` line lets the signature say `Scalar` instead of
 `<Self as HasScalarType>::Scalar`. It imports the type and adds the requirement in one line, and it
-reads like a `use` for a type because that is what it is.
+reads like a `use` for a type because it is one.
 
 ## The canonical one: a context's error type
 

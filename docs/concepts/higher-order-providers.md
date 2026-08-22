@@ -43,7 +43,7 @@ delegate_components! { ScaledCircle    { AreaCalculatorComponent: ScaledArea<Cir
 ```
 
 This is passing a function to a function, done in types. And because a provider is a name rather than a
-value, nesting them costs nothing at runtime: the composition is resolved during compilation, and only
+value, nesting them costs nothing at runtime: the composition resolves during compilation, and only
 a direct call executes.
 
 ## The extra `<Self>`, and the attribute that fills it in

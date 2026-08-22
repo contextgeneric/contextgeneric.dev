@@ -127,7 +127,7 @@ context spells out which components come from where. That is direct, obvious to 
 linearly: twenty components from a bundle means twenty names in the brackets.
 
 A context adopts a namespace by **joining it**, after which everything it does not wire itself falls
-through, and a direct entry overrides just that key. That is what you want once the count is large or
+through, and a direct entry overrides just that key. You want that once the count is large or
 the defaults should be inherited and selectively replaced.
 
 Reach for a bundle when the group is small and you want the delegation visible. Reach for a namespace

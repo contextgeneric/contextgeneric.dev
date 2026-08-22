@@ -123,7 +123,7 @@ method runs.
 Two pieces connect the halves: a table on the context that names its choice, and a pair of generated
 implementations that follow it.
 
-The table is what a context writes. It maps each **component**, one capability defined once that
+A context writes the table. It maps each **component**, one capability defined once that
 implementations can be wired for, to the provider that should supply it, and it is the one place a
 choice is recorded:
 

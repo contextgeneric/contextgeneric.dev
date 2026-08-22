@@ -90,7 +90,7 @@ pub trait CanDescribe {
 
 Implement `CanDescribe` for `Circle` and for `Rectangle`, and any enum whose variants all implement it
 gets it too: `shape.describe()` works with no wiring, no combinator named, and no `match`. It is the
-form to reach for first, and the rest of this page is what it is doing underneath.
+form to reach for first, and the rest of this page shows what it does underneath.
 
 ## What it costs
 

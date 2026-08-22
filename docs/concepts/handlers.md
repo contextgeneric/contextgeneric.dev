@@ -158,7 +158,7 @@ one that still reads its inputs from a context.
 
 [Monadic handlers](./monadic-handlers.md) is the next thing a pipeline needs: what happens when a stage
 produces a result the chain should stop on. [Dispatching](./dispatching.md) is the family applied to the
-shape of a record or an enum, and [Type-level DSLs](./type-level-dsls.md) is what it becomes when the
+shape of a record or an enum, and the family becomes a [type-level DSL](./type-level-dsls.md) when the
 `Code` tag carries a whole program.
 
 [Higher-order providers](./higher-order-providers.md) is the mechanism the combinators are built from,

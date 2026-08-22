@@ -31,6 +31,11 @@ you implement, and how a call finds its way from one to the other.
 it.** It lays out the range from an ordinary Rust trait to fully wired components as a ladder, and
 argues for climbing no higher than a problem requires.
 
+**New to Rust's traits and generics?** These pages explain the reasoning behind CGP and assume you are
+comfortable with traits and generic bounds. If you are not yet, the [tutorials](/docs/tutorials/hello)
+build the ideas up from working code and are the gentler way in; come back here for the *why* behind
+them.
+
 ## The ideas, grouped
 
 The pages below are ordered in the sidebar roughly as a reader meets them, and grouped here by what
