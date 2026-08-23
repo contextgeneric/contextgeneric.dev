@@ -1,0 +1,22 @@
+error[E0599]: the associated function or constant `compute` exists for struct `PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/concepts/monadic_handlers_plain_composition_is_wrong.rs:12:61
+   |
+12 |     let _ = PipeHandlers::<Product![Increment, Increment]>::compute(&(), PhantomData::<()>, 1u8);
+   |                                                             ^^^^^^^ associated function or constant cannot be called due to unsatisfied trait bounds
+   |
+  ::: $CARGO/cgp-handler-$VERSION/src/providers/pipe.rs
+   |
+   | pub struct PipeHandlers<Providers>(pub PhantomData<Providers>);
+   | ---------------------------------- doesn't satisfy `_: Computer<_, _, _>` or `_: IsProviderFor<ComputerComponent, _, (_, _)>`
+   |
+   = note: the following trait bounds were not satisfied:
+           `PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: IsProviderFor<cgp::prelude::ComputerComponent, _, (_, _)>`
+           which is required by `PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: Computer<_, _, _>`
+           `&PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: DelegateComponent<cgp::prelude::ComputerComponent>`
+           which is required by `&PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: Computer<_, _, _>`
+           `&PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: IsProviderFor<cgp::prelude::ComputerComponent, _, (_, _)>`
+           which is required by `&PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: Computer<_, _, _>`
+           `&mut PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: DelegateComponent<cgp::prelude::ComputerComponent>`
+           which is required by `&mut PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: Computer<_, _, _>`
+           `&mut PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: IsProviderFor<cgp::prelude::ComputerComponent, _, (_, _)>`
+           which is required by `&mut PipeHandlers<Cons<Increment, Cons<Increment, Nil>>>: Computer<_, _, _>`

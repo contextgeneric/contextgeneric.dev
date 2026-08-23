@@ -1,0 +1,41 @@
+error[E0599]: the method `send_email` exists for struct `BrokenApp`, but its trait bounds were not satisfied
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_1.rs:30:9
+   |
+19 | pub struct BrokenApp {
+   | -------------------- method `send_email` not found for this struct because it doesn't satisfy `BrokenApp: CanSendEmail` or `BrokenApp: EmailSender<BrokenApp>`
+...
+30 |     app.send_email("a@b.c", "hi");
+   |         ^^^^^^^^^^ this is an associated function, not a method
+   |
+   = note: found the following associated functions; to be used as methods, functions must have a `self` parameter
+note: the candidate is defined in the trait `EmailSender`
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_1.rs:7:5
+   |
+ 7 |     fn send_email(&self, to: &str, body: &str);
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: trait bound `BrokenApp: EmailSender<BrokenApp>` was not satisfied
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_1.rs:5:1
+   |
+ 5 | #[cgp_component(EmailSender)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 6 | pub trait CanSendEmail {
+   |           ^^^^^^^^^^^^
+note: the trait `EmailSender` must be implemented
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_1.rs:6:1
+   |
+ 6 | / pub trait CanSendEmail {
+ 7 | |     fn send_email(&self, to: &str, body: &str);
+ 8 | | }
+   | |_^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `CanSendEmail` defines an item `send_email`, perhaps you need to implement it
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_1.rs:6:1
+   |
+ 6 | pub trait CanSendEmail {
+   | ^^^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use associated function syntax instead
+   |
+30 -     app.send_email("a@b.c", "hi");
+30 +     BrokenApp::send_email("a@b.c", "hi");
+   |

@@ -1,0 +1,10 @@
+error: missing `struct` for struct definition
+  --> tests/compile_fail/reference/errors_the_fix_2.rs:34:1
+   |
+34 | Person { age: 0 }.greet();
+   | ^^^^^^
+   |
+help: add `struct` here to parse `Person` as a struct
+   |
+34 | struct Person { age: 0 }.greet();
+   | ++++++

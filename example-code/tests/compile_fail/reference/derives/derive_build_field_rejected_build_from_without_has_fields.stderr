@@ -1,0 +1,14 @@
+error[E0277]: the trait bound `FooBar: HasFields` is not satisfied
+  --> tests/compile_fail/reference/derives/derive_build_field_rejected_build_from_without_has_fields.rs:25:21
+   |
+25 |         .build_from(source)
+   |          ---------- ^^^^^^ unsatisfied trait bound
+   |          |
+   |          required by a bound introduced by this call
+   |
+help: the trait `HasFields` is not implemented for `FooBar`
+  --> tests/compile_fail/reference/derives/derive_build_field_rejected_build_from_without_has_fields.rs:5:1
+   |
+ 5 | pub struct FooBar {
+   | ^^^^^^^^^^^^^^^^^
+   = note: required for `__PartialFooBarBaz<IsNothing, IsNothing, IsNothing>` to implement `CanBuildFrom<FooBar>`

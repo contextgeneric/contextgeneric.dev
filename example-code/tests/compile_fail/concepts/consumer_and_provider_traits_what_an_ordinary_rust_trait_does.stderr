@@ -1,0 +1,33 @@
+error[E0119]: conflicting implementations of trait `CanSendEmail`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:9:1
+  |
+8 | impl<T: HasSmtpConfig>     CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }
+  | --------------------------------------------- first implementation here
+9 | impl<T: HasRecordedEmails> CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }   // error[E0119]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation
+
+warning: unused variable: `to`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:8:70
+  |
+8 | impl<T: HasSmtpConfig>     CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }
+  |                                                                      ^^ help: if this is intentional, prefix it with an underscore: `_to`
+  |
+  = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `body`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:8:80
+  |
+8 | impl<T: HasSmtpConfig>     CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }
+  |                                                                                ^^^^ help: if this is intentional, prefix it with an underscore: `_body`
+
+warning: unused variable: `to`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:9:70
+  |
+9 | impl<T: HasRecordedEmails> CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }   // error[E0119]
+  |                                                                      ^^ help: if this is intentional, prefix it with an underscore: `_to`
+
+warning: unused variable: `body`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:9:80
+  |
+9 | impl<T: HasRecordedEmails> CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }   // error[E0119]
+  |                                                                                ^^^^ help: if this is intentional, prefix it with an underscore: `_body`

@@ -1,0 +1,17 @@
+error[E0599]: no method named `finalize_build` found for struct `__PartialPerson<__F0__, __F1__>` in the current scope
+  --> tests/compile_fail/reference/traits/has_builder_rejected_incomplete_build.rs:13:10
+   |
+ 4 |   pub struct Person {
+   |   ----------------- method `finalize_build` not found for this struct
+...
+11 |       let person: Person = Person::builder()
+   |  __________________________-
+12 | |         .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
+13 | |         .finalize_build();
+   | |         -^^^^^^^^^^^^^^ method not found in `__PartialPerson<IsPresent, IsNothing>`
+   | |_________|
+   |
+   |
+   = help: items from traits can only be used if the trait is implemented and in scope
+   = note: the following trait defines an item `finalize_build`, perhaps you need to implement it:
+           candidate #1: `cgp::prelude::FinalizeBuild`

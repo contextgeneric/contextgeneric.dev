@@ -10,5 +10,6 @@ cgp = "0.8.0-alpha"
 
 [dev-dependencies]
 futures = "0.3"
+trybuild = "1"
 
 [workspace]

@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `BrokenApp: CanUseComponent<EmailSenderComponent>` is not satisfied
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:28:9
+   |
+28 |         EmailSenderComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<Symbol<11, cgp::prelude::Chars<'s', cgp::prelude::Chars<'e', cgp::prelude::Chars<'n', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'e', cgp::prelude::Chars<'m', cgp::prelude::Chars<'a', cgp::prelude::Chars<'i', cgp::prelude::Chars<'l', cgp::prelude::Chars<'s', Nil>>>>>>>>>>>>>` is not implemented for `BrokenApp`
+      but trait `HasField<Symbol<11, cgp::prelude::Chars<'s', cgp::prelude::Chars<'m', cgp::prelude::Chars<'t', cgp::prelude::Chars<'p', cgp::prelude::Chars<'_', cgp::prelude::Chars<'s', cgp::prelude::Chars<'e', cgp::prelude::Chars<'r', cgp::prelude::Chars<'v', cgp::prelude::Chars<'e', cgp::prelude::Chars<'r', Nil>>>>>>>>>>>>>` is implemented for it
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:18:10
+   |
+18 | #[derive(HasField)]
+   |          ^^^^^^^^
+note: required for `RecordEmails` to implement `IsProviderFor<EmailSenderComponent, BrokenApp>`
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:10:1
+   |
+10 | #[cgp_impl(new RecordEmails)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `BrokenApp` to implement `CanUseComponent<EmailSenderComponent>`
+note: required by a bound in `__CheckBrokenApp`
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:26:1
+   |
+26 | / check_components! {
+27 | |     BrokenApp {
+28 | |         EmailSenderComponent,
+29 | |     }
+30 | | }
+   | |_^ required by this bound in `__CheckBrokenApp`
+   = note: this error originates in the derive macro `HasField` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

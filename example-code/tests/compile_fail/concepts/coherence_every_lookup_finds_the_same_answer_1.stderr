@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `CanEncode`
+  --> tests/compile_fail/concepts/coherence_every_lookup_finds_the_same_answer_1.rs:13:1
+   |
+ 8 | impl<T: Display> CanEncode for T {
+   | -------------------------------- first implementation here
+...
+13 | impl<T: AsRef<[u8]>> CanEncode for T {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation

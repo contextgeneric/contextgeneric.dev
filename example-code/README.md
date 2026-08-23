@@ -8,25 +8,36 @@ that page can be checked against something the compiler has agreed to rather tha
 Run it from this directory:
 
 ```sh
-cargo test          # the full check: the code compiles, and the rejected snippets still fail
-cargo check         # the fast check: the code compiles
+cargo test              # the full check: the code compiles, and the rejected snippets still fail
+cargo test --no-run     # the fast check: everything compiles, nothing runs
 ```
 
+The code lives in **integration tests**, which a plain `cargo check` skips; use `cargo test --no-run`
+(or `cargo check --tests`) for a compile-only pass. The crate has no library or binary target.
+
 ## The layout mirrors `docs/`
+
+The code lives under `tests/`, as one integration-test binary per `docs/` section. Each entrypoint
+pulls in a module tree that mirrors that section's pages:
+
+- `tests/concepts_tests.rs` → `tests/concepts/`, mirroring `docs/concepts/`
+- `tests/reference_tests.rs` → `tests/reference/`, mirroring `docs/reference/`
+- `tests/cargo_cgp_tests.rs` → `tests/cargo_cgp/`, mirroring `docs/cargo-cgp/`
+- `tests/compile_fail_tests.rs` → `tests/compile_fail/`, the snippets the pages **reject** (see below)
 
 One file per page, at the matching path with the file name in `snake_case`:
 
 | Section | Coverage |
 |---|---|
-| `docs/concepts/` | complete — sixteen files under `src/concepts/`, one per page that shows code |
+| `docs/concepts/` | complete — one file under `tests/concepts/` per page that shows code |
 | `docs/reference/` | partial — `errors.md`, `macros/delegate_components.md`, all of `derives/`, the `traits/` pages that show checkable code, most of `providers/` (the singletons, all of `error/`, `handler/`, and `monad/`, and the matcher-side of `dispatch/`), and all of `components/` (each component page that shows code, including the `handler/` subsection); `types/` is the remaining gap, and the section is filled in lazily |
-| `docs/cargo-cgp/` | complete — the two pages that show Rust, under `src/cargo_cgp/` |
+| `docs/cargo-cgp/` | complete — the two pages that show Rust, under `tests/cargo_cgp/` |
 | `docs/tutorials/` | none yet |
 | front page, orientation pages | none yet |
 
 Within a covered section the mapping is mechanical: `docs/concepts/coherence.md` is answered by
-`src/concepts/coherence.rs`, and `docs/concepts/consumer-and-provider-traits.md` by
-`src/concepts/consumer_and_provider_traits.rs`.
+`tests/concepts/coherence.rs`, and `docs/concepts/consumer-and-provider-traits.md` by
+`tests/concepts/consumer_and_provider_traits.rs`.
 
 A page that shows no code gets no file — `docs/concepts/modularity-hierarchy.md` is prose and tables,
 so it has no module here, and neither does a section index.
@@ -59,25 +70,32 @@ page is not, so the page is the likelier culprit, but a stale file here is worse
 
 ## Code a page deliberately rejects
 
-Several pages show code the compiler refuses, quoting the error as the point of the snippet. That
-code cannot live in the crate, so it is carried as a `compile_fail` doctest in the module for its
-section, with the quoted error code in a comment.
+Several pages show code the compiler refuses, quoting the error as the point of the snippet. That code
+cannot live in a module, so each rejected snippet is a standalone fixture under `tests/compile_fail/`,
+at the page's mirrored path, and [`trybuild`](https://docs.rs/trybuild) compiles each one and checks
+that it fails. The harness is `tests/compile_fail_tests.rs`.
 
-Two limits are worth knowing. **`compile_fail` does not check *which* error is produced** — rustdoc
-accepts an error code after the annotation but does not enforce it, so a snippet that starts failing
-for an unrelated reason still passes. What the doctest genuinely catches is the regression that
-matters: a snippet the page calls rejected that the compiler has started accepting. And **a body the
-page elides has to be filled in for these too**, so that the quoted error is the only thing wrong
-with the snippet — an empty `/* ... */` body would fail on its own and the doctest would pass while
-proving nothing.
+Each fixture is a **complete program** whose only fault is the intended one: the elided bodies are
+filled in, an item-only snippet carries a trailing `fn main() {}`, and a snippet with statements is
+wrapped in `fn main() { ... }` — the way rustdoc wraps the doctest these were carried as before.
+
+trybuild compares each fixture's output against a sibling `.stderr` file. **What that genuinely guards
+is the regression that matters: a snippet the page calls rejected that the compiler has started
+accepting.** The exact wording of a `.stderr` is toolchain- and `cgp`-version-specific, so re-bless
+them after a bump rather than editing them by hand:
+
+```sh
+TRYBUILD=overwrite cargo test --test compile_fail_tests
+```
 
 ## Generated code
 
 Two of these pages show what a macro *generates*, in simplified form. A hand-rolled rendering of such
 a listing — as `concepts::consumer_and_provider_traits::how_a_call_finds_its_provider` carries — is a
 weaker check than the rest of this crate: it shows the listing is structurally sound, not that its
-text is current. **The authority on what a macro emits is `cargo cgp expand --lib --item …`**, run
-against the crate the page's example lives in. Check the text with `expand`; check the shape here.
+text is current. **The authority on what a macro emits is `cargo cgp expand`**, run against the test
+target the example lives in (for example `cargo cgp expand --test concepts_tests --item …`). Check the
+text with `expand`; check the shape here.
 
 ## Adding a file
 
@@ -85,8 +103,10 @@ Files are added **lazily**: when a page that shows code is written, or revised, 
 is created or brought back into agreement in the same change. There is no obligation to backfill
 pages nobody is working on, and a missing file means only that nobody has been through that page yet.
 
-Adding one means creating it at the mirrored path, registering it in the parent `mod.rs`, adding a
-row to the table above, and leaving `cargo test` green.
+Adding a runnable one means creating it at the mirrored path under `tests/<section>/`, registering it
+in the parent `mod.rs`, adding a row to the table above, and leaving `cargo test` green. Adding a
+rejected snippet means writing a fixture under `tests/compile_fail/`, blessing its `.stderr` with
+`TRYBUILD=overwrite cargo test --test compile_fail_tests`, and leaving `cargo test` green.
 
 ## The `cgp` version
 

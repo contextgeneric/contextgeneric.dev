@@ -1,0 +1,5 @@
+error: Expected variant to contain exactly one unnamed field
+ --> tests/compile_fail/reference/derives/derive_cgp_variant_rejected_struct_style_variant.rs:5:5
+  |
+5 |     Circle { radius: f64 },
+  |     ^^^^^^

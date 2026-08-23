@@ -1,0 +1,28 @@
+error[E0599]: the method `finalize_extract_result` exists for enum `Result<Circle, __PartialShape<IsVoid, IsPresent>>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/derives/derive_extract_field_rejected_premature_finalize.rs:25:10
+   |
+13 |   pub enum Shape {
+   |   -------------- doesn't satisfy `__PartialShape<IsVoid, IsPresent>: FinalizeExtract`
+...
+22 |       let _ = shape
+   |  _____________-
+23 | |         .to_extractor()
+24 | |         .extract_field(PhantomData::<Symbol!("Circle")>)
+25 | |         .finalize_extract_result();
+   | |         -^^^^^^^^^^^^^^^^^^^^^^^ method cannot be called on `Result<Circle, __PartialShape<IsVoid, IsPresent>>` due to unsatisfied trait bounds
+   | |_________|
+   |
+   |
+  ::: $RUST/core/src/result.rs
+   |
+   |   pub enum Result<T, E> {
+   |   --------------------- doesn't satisfy `_: FinalizeExtractResult`
+   |
+   = note: the following trait bounds were not satisfied:
+           `__PartialShape<IsVoid, IsPresent>: FinalizeExtract`
+           which is required by `Result<Circle, __PartialShape<IsVoid, IsPresent>>: FinalizeExtractResult`
+note: the trait `FinalizeExtract` must be implemented
+  --> $CARGO/cgp-field-$VERSION/src/traits/extract_field.rs
+   |
+   | pub trait FinalizeExtract {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
