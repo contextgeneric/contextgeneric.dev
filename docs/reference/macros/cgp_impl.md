@@ -181,7 +181,7 @@ let an idiomatic provider state what it needs.
   occurrences to fully qualified form.
 - [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound in a
   higher-order provider.
-- [`#[default_impl(...)]`](../traits/default_namespace.md) registers the provider as a namespace's
+- [`#[default_impl(...)]`](../traits/namespace/default_namespace.md) registers the provider as a namespace's
   per-type default, emitting a delegation impl alongside it, for use with
   [`cgp_namespace!`](./cgp_namespace.md).
 
@@ -422,7 +422,7 @@ apply to. Leave both out.
 - [`check_components!`](./check_components.md) — verifies the wiring resolves.
 - [`#[implicit]`](../attributes/implicit.md), [`#[uses]`](../attributes/uses.md),
   [`#[use_type]`](../attributes/use_type.md), [`#[use_provider]`](../attributes/use_provider.md),
-  [`#[default_impl]`](../traits/default_namespace.md) — the companion attributes.
+  [`#[default_impl]`](../traits/namespace/default_namespace.md) — the companion attributes.
 
 The ideas behind it:
 

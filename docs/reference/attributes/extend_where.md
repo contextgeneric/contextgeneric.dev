@@ -158,7 +158,7 @@ The trait carries only the promoted predicate; the function's own bound is absen
 default this attribute overrides.
 
 The implementation carries three, and their **order is fixed**: the function's own `where` clause first,
-then whatever the attributes contribute, then the [`HasField`](../traits/has_field.md) bounds from
+then whatever the attributes contribute, then the [`HasField`](../traits/field-access/has_field.md) bounds from
 [`#[implicit]`](implicit.md) arguments, which are always appended last. That order is worth knowing when
 reading a long `where` clause in an expansion, since it tells you where each bound came from.
 

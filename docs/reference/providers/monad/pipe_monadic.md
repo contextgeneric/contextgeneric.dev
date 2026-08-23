@@ -82,7 +82,7 @@ bound, through the monad, to the monadically-composed rest of the list.
 For the fallible components `TryComputerComponent` and `HandlerComponent`, it bridges through the err
 monad. It first maps every provider to [`TryPromote`](../handler/try_promote.md), demoting fallible
 handlers to plain computers whose output is an explicit `Result`; the mapper that rewrites the whole list
-is `TryPromoteProviders`, which implements [`MapType`](../../traits/map_type.md). It then applies
+is `TryPromoteProviders`, which implements [`MapType`](../../traits/type-level/map_type.md). It then applies
 `ErrMonadic` as a transformer on top of `M`, composes the demoted list under the transformed monad, and
 wraps the composed provider back in `TryPromote` to restore the fallible interface. A `PipeMonadic` over
 fallible handlers therefore short-circuits on the context's error type in addition to whatever branching
@@ -97,7 +97,7 @@ structure.
 - [`PipeHandlers`](../handler/pipe_handlers.md) — the non-monadic pipeline this generalizes.
 - [`TryPromote`](../handler/try_promote.md) — the lift it uses to bridge fallible and infallible
   handlers.
-- [`MonadicBind`](../../traits/monadic_bind.md), [`MonadicTrans`](../../traits/monadic_trans.md) — the
+- [`MonadicBind`](../../traits/monad/monadic_bind.md), [`MonadicTrans`](../../traits/monad/monadic_trans.md) — the
   traits it bounds on while folding.
 - [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family a
   pipeline implements.

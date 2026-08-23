@@ -61,7 +61,7 @@ where
 ```
 
 The detail is bound only so the method can accept it; the body returns the error untouched. The
-generated [`IsProviderFor`](../../traits/is_provider_for.md) impl carries the same `HasErrorType` bound.
+generated [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same `HasErrorType` bound.
 
 ## Related constructs
 

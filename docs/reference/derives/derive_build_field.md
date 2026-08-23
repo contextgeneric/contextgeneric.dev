@@ -82,7 +82,7 @@ three of them.
 **`build_field`** sets one absent field to a value, which is the step shown above.
 
 **`build_from`** copies every field the target and a source record share, in one step. It comes from
-[`CanBuildFrom`](../traits/can_build_from.md), and is imported from
+[`CanBuildFrom`](../traits/casting/can_build_from.md), and is imported from
 `cgp::core::field::impls`:
 
 ```rust
@@ -185,7 +185,7 @@ case it exists for, and it is a narrower case than "this struct has several fiel
 - **Do not reach for it in place of a conventional builder** with defaults and validation. It tracks presence
   and nothing else: it has no notion of a default value, no way to run a check at finalize time, and no
   optional field unless you make the field's own type optional. The
-  [optional-field extensions](../traits/has_optional_builder.md) cover the defaulted and optional cases,
+  [optional-field extensions](../traits/optional/has_optional_builder.md) cover the defaulted and optional cases,
   and a hand-written builder remains the better fit when the logic is the point.
 
 Between this derive and its neighbours the choice is about how much of the machinery you want.
@@ -199,7 +199,7 @@ Between this derive and its neighbours the choice is about how much of the machi
 ## Under the hood
 
 The derive centres on a companion struct named `__Partial{Name}`. It is your struct with one
-[`MapType`](../traits/map_type.md) parameter added per field, and each field's type wrapped in that
+[`MapType`](../traits/type-level/map_type.md) parameter added per field, and each field's type wrapped in that
 parameter's projection. The marker decides how the field is stored: `IsPresent` maps `T` to `T`, `IsNothing`
 maps it to `()`, and `IsVoid` maps it to the uninhabited `Void`. From:
 
@@ -310,7 +310,7 @@ directly. `CanBuildFrom`, which provides `build_from`, comes from `cgp::core::fi
 
 **There are no defaults and no validation.** Presence is all that is tracked. A field with a sensible default
 still has to be set explicitly, unless you reach for
-[`CanFinalizeWithDefault`](../traits/can_finalize_with_default.md).
+[`CanFinalizeWithDefault`](../traits/optional/can_finalize_with_default.md).
 
 **A tuple struct's steps are keyed by position.** Use `PhantomData::<Index<0>>`, not a `Symbol!` of the
 number.
@@ -332,13 +332,13 @@ renaming a field in one struct silently stops it being copied from the other. Th
   not generate either.
 - [`#[derive(ExtractField)]`](./derive_extract_field.md) — the enum analogue: incremental deconstruction
   rather than construction.
-- [`HasBuilder`](../traits/has_builder.md) — the builder trait family, including `UpdateField`, `BuildField`,
+- [`HasBuilder`](../traits/builder/has_builder.md) — the builder trait family, including `UpdateField`, `BuildField`,
   `TakeField`, and `FinalizeBuild`.
-- [`MapType`](../traits/map_type.md) — the `IsPresent`/`IsNothing`/`IsVoid` markers the companion is
+- [`MapType`](../traits/type-level/map_type.md) — the `IsPresent`/`IsNothing`/`IsVoid` markers the companion is
   parameterized by.
-- [`CanBuildFrom`](../traits/can_build_from.md) — where `build_from` is documented.
-- [`HasOptionalBuilder`](../traits/has_optional_builder.md) and
-  [`CanFinalizeWithDefault`](../traits/can_finalize_with_default.md) — optional and defaulted fields,
+- [`CanBuildFrom`](../traits/casting/can_build_from.md) — where `build_from` is documented.
+- [`HasOptionalBuilder`](../traits/optional/has_optional_builder.md) and
+  [`CanFinalizeWithDefault`](../traits/optional/can_finalize_with_default.md) — optional and defaulted fields,
   which the plain builder does not model.
 - [Dispatch combinators](../providers/dispatch/index.md) — the providers that run several builder
   implementations and merge their outputs.

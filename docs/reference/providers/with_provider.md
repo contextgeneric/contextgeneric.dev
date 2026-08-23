@@ -11,7 +11,7 @@ specific named component.
 ## Overview
 
 `WithProvider<Provider>` bridges CGP's two layers of provider trait. Foundational traits like
-[`TypeProvider`](../components/has_type.md) and [`FieldGetter`](../traits/field_getter.md) are generic,
+[`TypeProvider`](../components/has_type.md) and [`FieldGetter`](../traits/field-access/field_getter.md) are generic,
 component-agnostic mechanisms: a `TypeProvider` supplies *some* abstract type for *some* tag, and a
 `FieldGetter` reads *some* field for *some* output tag, without either knowing which named component it
 serves. A named component, by contrast, has a specific provider trait, such as `NameTypeProvider` or
@@ -138,7 +138,7 @@ where
 In both cases the bound names the foundational trait, keyed by the component marker, and the method or
 associated type forwards to it. `#[cgp_getter]` generates the `WithProvider` impl only when the getter
 has exactly one method, since a single foundational getter cannot serve several methods at once. Each
-impl is paired with a matching [`IsProviderFor`](../traits/is_provider_for.md) impl.
+impl is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.
 
 The aliases specialize `WithProvider` to a fixed inner provider so the common cases need no
 `WithProvider<...>` spelled out. Each has its own page: [`WithContext`](with_context.md),
@@ -149,7 +149,7 @@ The aliases specialize `WithProvider` to a fixed inner provider so the common ca
 
 - [`#[cgp_type]`](../macros/cgp_type.md) and [`#[cgp_getter]`](../macros/cgp_getter.md) — generate the
   `WithProvider` impls that make a component adaptable.
-- [`TypeProvider`](../components/has_type.md) and [`FieldGetter`](../traits/field_getter.md) — the
+- [`TypeProvider`](../components/has_type.md) and [`FieldGetter`](../traits/field-access/field_getter.md) — the
   foundational traits it adapts.
 - [`UseContext`](use_context.md), [`UseType`](use_type.md), [`UseField`](use_field.md),
   [`UseFieldRef`](use_field_ref.md), and [`UseDelegatedType`](use_delegated_type.md) — the inner

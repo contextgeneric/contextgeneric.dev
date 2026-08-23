@@ -292,7 +292,7 @@ Where a type needs different behaviour, the trait wants to be a [component](./cg
   dependencies are fields rather than traits.
 - [`#[cgp_component]`](./cgp_component.md) — the step up, when one implementation is not enough.
 - [`#[cgp_auto_getter]`](./cgp_auto_getter.md) — the same constraint-hiding applied to reading a field.
-- [`HasField`](../traits/has_field.md) — what value-level dependency injection is built on.
+- [`HasField`](../traits/field-access/has_field.md) — what value-level dependency injection is built on.
 - [`#[uses]`](../attributes/uses.md) — how a CGP provider declares the trait dependencies a supertrait
   declares here.
 

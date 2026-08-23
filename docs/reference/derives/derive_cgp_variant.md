@@ -113,7 +113,7 @@ fn area(shape: Shape) -> f64 {
 
 There is no wildcard arm and no `unreachable!()`. After the second extraction the remainder's type has
 both variants ruled out, which makes it uninhabited, and
-[`finalize_extract_result`](../traits/finalize_extract_result.md) discharges a value that cannot exist.
+[`finalize_extract_result`](../traits/variant/finalize_extract_result.md) discharges a value that cannot exist.
 Add a third variant to `Shape` and this function stops compiling until it is handled, which is the same
 guarantee a concrete `match` gives, recovered for code that never names the enum.
 
@@ -176,7 +176,7 @@ impl FromVariant<Symbol!("Circle")> for Shape {
 
 Then the **extractor**, which is [`#[derive(ExtractField)]`](./derive_extract_field.md)'s output and
 where two companion enums appear: `__PartialShape` for owned extraction and `__PartialRefShape` for
-borrowed. A variant's payload is wrapped in a [`MapType`](../traits/map_type.md) marker that is either
+borrowed. A variant's payload is wrapped in a [`MapType`](../traits/type-level/map_type.md) marker that is either
 `IsPresent` or `IsVoid`, the latter mapping it to the uninhabited `Void`:
 
 ```rust
@@ -239,10 +239,10 @@ record and variant machinery have been crossed.
 - [`#[derive(CgpRecord)]`](./derive_cgp_record.md) — the struct face.
 - [`#[derive(HasFields)]`](./derive_has_fields.md), [`#[derive(FromVariant)]`](./derive_from_variant.md),
   and [`#[derive(ExtractField)]`](./derive_extract_field.md) — the three slices this emits.
-- [`ExtractField`](../traits/extract_field.md) — the extractor family it generates impls for.
-- [`MapType`](../traits/map_type.md) — the `IsPresent`/`IsVoid` markers the companions are parameterized
+- [`ExtractField`](../traits/variant/extract_field.md) — the extractor family it generates impls for.
+- [`MapType`](../traits/type-level/map_type.md) — the `IsPresent`/`IsVoid` markers the companions are parameterized
   by.
-- [`CanUpcast`](../traits/can_upcast.md) and [`CanDowncast`](../traits/can_downcast.md) — converting
+- [`CanUpcast`](../traits/casting/can_upcast.md) and [`CanDowncast`](../traits/casting/can_downcast.md) — converting
   between two enums whose variants overlap, built on this machinery.
 - [Dispatch combinators](../providers/dispatch/index.md) — the providers that route a variant to
   the implementation handling it.

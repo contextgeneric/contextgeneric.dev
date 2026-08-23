@@ -56,7 +56,7 @@ where
 ```
 
 It runs `Provider` on a reference to the builder to compute the value, then calls
-[`BuildField<Tag>`](../../traits/build_field.md) to set it. It implements `Computer`, `TryComputer`, and
+[`BuildField<Tag>`](../../traits/builder/build_field.md) to set it. It implements `Computer`, `TryComputer`, and
 `Handler`; the fallible and async forms require the context to have an error type and propagate the
 provider's error.
 
@@ -65,7 +65,7 @@ provider's error.
 - [`BuildAndMerge`](build_and_merge.md) — the bulk counterpart, copying a whole record's fields at once.
 - [`BuildWithHandlers`](build_with_handlers.md) — the entry point that runs a list of these adapters and
   finalizes.
-- [`BuildField`](../../traits/build_field.md) — the trait it drives to set a field.
+- [`BuildField`](../../traits/builder/build_field.md) — the trait it drives to set a field.
 - [`UseContext`](../use_context.md) — the default provider.
 
 The ideas behind it:

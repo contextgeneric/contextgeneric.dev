@@ -65,7 +65,7 @@ where
 ```
 
 Because an `Infallible` value cannot be constructed, the empty `match` is total and the function has no
-reachable body. The generated [`IsProviderFor`](../../traits/is_provider_for.md) impl carries the same
+reachable body. The generated [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same
 `HasErrorType` bound.
 
 ## Related constructs

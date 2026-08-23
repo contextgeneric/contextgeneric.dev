@@ -227,7 +227,7 @@ impl HasFieldMut<Symbol!("name")> for Person {
 
 The `PhantomData<Tag>` parameter carries no value. It exists so a call site can say *which* field it
 means when several `HasField` impls are in scope, which is why a call site writes
-`PhantomData::<Symbol!("name")>`. [`HasFieldMut`](../traits/has_field_mut.md) extends `HasField` with
+`PhantomData::<Symbol!("name")>`. [`HasFieldMut`](../traits/field-access/has_field_mut.md) extends `HasField` with
 `get_field_mut`, and it is always generated alongside the read accessor, whether or not anything uses it.
 
 A tuple struct produces the same shape with a positional tag:
@@ -285,7 +285,7 @@ are easy to confuse.
 
 - [`#[derive(HasFields)]`](./derive_has_fields.md) — the whole-shape counterpart, commonly derived
   alongside this one.
-- [`HasField`](../traits/has_field.md) — the trait this generates, with `HasFieldMut` and the provider-side
+- [`HasField`](../traits/field-access/has_field.md) — the trait this generates, with `HasFieldMut` and the provider-side
   `FieldGetter`.
 - [`Symbol!`](../macros/symbol.md) — the tag for a named field.
 - [`Index`](../types/index.md) — the tag for a tuple field.

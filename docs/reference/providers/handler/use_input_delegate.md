@@ -105,7 +105,7 @@ shape is generated for every handler family member.
 - [`delegate_components!`](../../macros/delegate_components.md) — wires it through a nested table.
 - [Dispatch combinators](../dispatch/index.md) — the main users of input dispatch, selecting a per-variant
   handler by payload type.
-- [`DelegateComponent`](../../traits/delegate_component.md) — the table the lookup reads.
+- [`DelegateComponent`](../../traits/wiring/delegate_component.md) — the table the lookup reads.
 
 The ideas behind it:
 

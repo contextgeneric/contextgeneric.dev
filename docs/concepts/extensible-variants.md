@@ -148,10 +148,10 @@ For the constructs, [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_da
 derive and its slices are [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) for the
 whole shape, [`#[derive(ExtractField)]`](/docs/reference/derives/derive_extract_field) for the
 narrowing, and [`#[derive(FromVariant)]`](/docs/reference/derives/derive_from_variant) for construction
-by name. [`ExtractField`](/docs/reference/traits/extract_field) is the extractor family those produce,
-[`FromVariant`](/docs/reference/traits/from_variant) constructs a variant generically, and
-[the casts](/docs/reference/traits/can_upcast) are `CanUpcast` and
-[`CanDowncast`](/docs/reference/traits/can_downcast).
+by name. [`ExtractField`](/docs/reference/traits/variant/extract_field) is the extractor family those produce,
+[`FromVariant`](/docs/reference/traits/variant/from_variant) constructs a variant generically, and
+[the casts](/docs/reference/traits/casting/can_upcast) are `CanUpcast` and
+[`CanDowncast`](/docs/reference/traits/casting/can_downcast).
 
 ---
 

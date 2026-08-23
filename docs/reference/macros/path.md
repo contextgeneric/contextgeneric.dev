@@ -221,7 +221,7 @@ the check rather than at the definition.
 - [`Symbol!`](./symbol.md) — what a lowercase segment becomes.
 - [Type-level spines](../types/type_level_spines.md) — the `PathCons` chain the expansion builds.
 - [`Product!`](./product.md) and [`Sum!`](./sum.md) — the sibling construction macros, sharing the fold shape.
-- [`DelegateComponent`](../traits/delegate_component.md) — the per-key table a resolved path finally reads.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the per-key table a resolved path finally reads.
 
 The ideas behind it:
 

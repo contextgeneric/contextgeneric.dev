@@ -22,7 +22,7 @@ The mechanism is the same indirection [`UseDelegate`](use_delegate.md) provides 
 components, lifted to the type level. Where `UseDelegate<Components>` dispatches a *method call* to
 whichever provider `Components` maps the active tag to, `UseDelegatedType<Components>` dispatches a
 *type resolution* to whichever concrete type `Components` maps the tag to. Both read an entry out of a
-[`DelegateComponent`](../traits/delegate_component.md) table keyed by the tag, but one yields behavior
+[`DelegateComponent`](../traits/wiring/delegate_component.md) table keyed by the tag, but one yields behavior
 and the other yields a type. Like every CGP provider, it carries no runtime value.
 
 ## Usage
@@ -68,7 +68,7 @@ reports the single type `T`: `UseDelegatedType` adds exactly one level of indire
 - [`UseType`](use_type.md) — the simpler sibling that fixes an abstract type to one concrete type.
 - [`UseDelegate`](use_delegate.md) — the behavioral counterpart that dispatches a method call through
   the same kind of table.
-- [`DelegateComponent`](../traits/delegate_component.md) — the table it reads.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table it reads.
 - [`HasType` / `TypeProvider`](../components/has_type.md) — the abstract-type component it answers for.
 - [`WithDelegatedType`](with_delegated_type.md) — the alias you wire, and the home of the import and
   worked example.

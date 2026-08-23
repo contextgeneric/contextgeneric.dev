@@ -168,10 +168,10 @@ useful mid-debugging: it works on a crate that does not type-check. For the wiri
 Four situations, all of them cases where the answer is in the generated code rather than in a message:
 
 - **A diagnostic names a type you did not write** —
-  [`IsProviderFor`](/docs/reference/traits/is_provider_for), a `PathCons` key, a `__Context__`
+  [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), a `PathCons` key, a `__Context__`
   parameter — and you want to see the impl it came from.
 - **A wiring table does not resolve** and you want its real
-  [`DelegateComponent`](/docs/reference/traits/delegate_component) keys and values rather
+  [`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) keys and values rather
   than inferring them from the table's syntax.
 - **You are unsure what a construct emits** — the exact `where` clauses of a provider impl, whether a
   getter's blanket impl needs the field you think it does.

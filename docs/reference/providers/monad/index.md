@@ -50,7 +50,7 @@ on top of a base monad `M`, so monads can stack over nested result types. Writin
 inner `Result` through the err monad beneath it. A single layer of branching needs no explicit
 transformer, because the bare markers produce their own transformer form over `IdentMonadic` when used
 as transformers. The trait layer that gives a marker its meaning is documented under
-[`MonadicBind`](../../traits/monadic_bind.md) and [`MonadicTrans`](../../traits/monadic_trans.md).
+[`MonadicBind`](../../traits/monad/monadic_bind.md) and [`MonadicTrans`](../../traits/monad/monadic_trans.md).
 
 ## Related constructs
 
@@ -58,8 +58,8 @@ as transformers. The trait layer that gives a marker its meaning is documented u
 - [`BindOk`](bind_ok.md), [`BindErr`](bind_err.md) — the per-step bind providers.
 - [`PipeHandlers`](../handler/pipe_handlers.md) — non-monadic composition, which `PipeMonadic<IdentMonadic, …>`
   reduces to.
-- [`MonadicBind`](../../traits/monadic_bind.md), [`MonadicTrans`](../../traits/monadic_trans.md),
-  [`ContainsValue`](../../traits/contains_value.md), [`LiftValue`](../../traits/lift_value.md) — the
+- [`MonadicBind`](../../traits/monad/monadic_bind.md), [`MonadicTrans`](../../traits/monad/monadic_trans.md),
+  [`ContainsValue`](../../traits/monad/contains_value.md), [`LiftValue`](../../traits/monad/lift_value.md) — the
   four traits a marker implements.
 - [`Product!`](../../macros/product.md) — the type-level list a pipeline's steps are given in.
 

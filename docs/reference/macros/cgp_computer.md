@@ -191,7 +191,7 @@ impl<__Context__, __Code__> Computer<__Context__, __Code__, (u64, u64)> for Add 
 ```
 
 [`#[cgp_new_provider]`](./cgp_provider.md) declares `pub struct Add;` and derives the
-[`IsProviderFor`](../traits/is_provider_for.md) impl, whose parameter tuple here is
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl, whose parameter tuple here is
 `(__Code__, (u64, u64))`, the code tag and the input. The context and code parameters are introduced under
 the reserved names `__Context__` and `__Code__`, and the body ignores both.
 

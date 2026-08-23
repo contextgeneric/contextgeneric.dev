@@ -62,7 +62,7 @@ where
 ```
 
 The return type is `Context::Error`, but `panic!` diverges, so the body never produces one. The
-generated [`IsProviderFor`](../../traits/is_provider_for.md) impl carries the same bounds.
+generated [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same bounds.
 
 ## Related constructs
 

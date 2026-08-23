@@ -91,7 +91,7 @@ The loop is the same `DispatchMatchers` alias described on
   [`HandleFirstFieldValue`](handle_field_value.md) — the first-argument adapters its list is built from.
 - [`MatchWithValueHandlers`](match_with_value_handlers.md) — the automatic form, whose
   `MatchFirstWithValueHandlers` sibling matches this convention.
-- [`HasExtractor`](../../traits/has_extractor.md), [`FinalizeExtract`](../../traits/finalize_extract.md)
+- [`HasExtractor`](../../traits/variant/has_extractor.md), [`FinalizeExtract`](../../traits/variant/finalize_extract.md)
   — the traits it stands on.
 
 The ideas behind it:

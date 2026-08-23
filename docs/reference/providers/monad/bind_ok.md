@@ -62,7 +62,7 @@ short-circuits, lifting the value directly to the output and skipping `Cont`. It
 - The [monad markers](index.md#the-monad-markers) — `OkMonadic` is the marker `BindOk` implements the
   bind for.
 - [`PipeHandlers`](../handler/pipe_handlers.md) — where a hand-built bind step is placed.
-- [`ContainsValue`](../../traits/contains_value.md), [`LiftValue`](../../traits/lift_value.md) — the
+- [`ContainsValue`](../../traits/monad/contains_value.md), [`LiftValue`](../../traits/monad/lift_value.md) — the
   traits it uses to inspect and lift a step's value.
 
 The ideas behind it:

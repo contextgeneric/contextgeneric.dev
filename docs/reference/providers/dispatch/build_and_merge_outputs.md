@@ -52,7 +52,7 @@ table that maps the whole handler family (`ComputerComponent`, `TryComputerCompo
 `HandlerComponent`, and their `Ref` forms) to
 `BuildWithHandlers<Output, Handlers::Mapped>`, where each provider in `Handlers` has first been wrapped
 in [`BuildAndMerge`](build_and_merge.md). The wrapping is done by mapping the list through the
-`ToBuildAndMergeHandler` [`MapType`](../../traits/map_type.md) marker, so a caller supplies plain
+`ToBuildAndMergeHandler` [`MapType`](../../traits/type-level/map_type.md) marker, so a caller supplies plain
 result-producing providers and each is merged into the builder automatically.
 
 ## Related constructs
@@ -60,7 +60,7 @@ result-producing providers and each is merged into the builder automatically.
 - [`BuildWithHandlers`](build_with_handlers.md) — the entry point this wraps, for a list of builder
   adapters directly.
 - [`BuildAndMerge`](build_and_merge.md) — the merge step each provider in the list is wrapped in.
-- [`MapType`](../../traits/map_type.md) — the trait the list-mapping marker implements.
+- [`MapType`](../../traits/type-level/map_type.md) — the trait the list-mapping marker implements.
 
 The ideas behind it:
 

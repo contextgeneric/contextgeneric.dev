@@ -151,7 +151,7 @@ where
 ```
 
 The provider method takes the context explicitly and calls the context's own `CanGreet::greet`. Each
-`UseContext` impl is paired with a matching [`IsProviderFor`](../traits/is_provider_for.md) impl
+`UseContext` impl is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl
 carrying the same `where` clause, so delegation propagates the dependency and a check reports a missing
 consumer-trait implementation precisely. Any supertrait bound on the consumer trait is reproduced in the
 `where` clause, so a context must satisfy it before `UseContext` can stand in as a provider.
@@ -182,7 +182,7 @@ resolves `Encoder<u32>`, a different entry.
 - [Dispatch combinators](dispatch/index.md) — default their per-variant provider to `UseContext`.
 - [`delegate_components!`](../macros/delegate_components.md) — wires it, and its `open` statement
   dispatches a component per type as the example does.
-- [`IsProviderFor`](../traits/is_provider_for.md) — carries the dependency `UseContext` propagates.
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — carries the dependency `UseContext` propagates.
 
 The ideas behind it:
 

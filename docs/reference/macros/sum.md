@@ -22,7 +22,7 @@ Sum![u32, String, bool]
 
 Like its dual it is built from a recursive spine, and that recursion makes variant-by-variant
 operations possible. Because an enum's variants are exposed as a single sum type through
-[`HasFields`](../traits/has_fields.md), a provider can be written once to match on, dispatch over, or construct
+[`HasFields`](../traits/shape/has_fields.md), a provider can be written once to match on, dispatch over, or construct
 *any* enum's variants without naming the concrete enum, by walking the nested branches. This is the basis for
 CGP's extensible-variant machinery, where each variant is handled by descending the chain rather than by
 writing a `match` against a fixed enum.
@@ -169,12 +169,12 @@ struct: the variant's payload type has to be a single nameable type for the sum 
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` types the expansion builds.
 - [`Field`](../types/field.md) — what the branches usually are, pairing a variant name with its payload.
 - [`Symbol!`](./symbol.md) — the name half of a branch.
-- [`HasFields`](../traits/has_fields.md) — the trait exposing an enum's shape as one of these sums.
+- [`HasFields`](../traits/shape/has_fields.md) — the trait exposing an enum's shape as one of these sums.
 - [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) — the derive that generates it, with the variant
   machinery.
-- [`FromVariant`](../traits/from_variant.md) and [`ExtractField`](../traits/extract_field.md) — constructing and
+- [`FromVariant`](../traits/variant/from_variant.md) and [`ExtractField`](../traits/variant/extract_field.md) — constructing and
   taking apart a variant generically.
-- [`CanUpcast`](../traits/can_upcast.md) — converting between two enums that share variants.
+- [`CanUpcast`](../traits/casting/can_upcast.md) — converting between two enums that share variants.
 
 The ideas behind it:
 

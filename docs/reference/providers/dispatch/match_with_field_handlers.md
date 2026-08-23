@@ -62,7 +62,7 @@ The per-variant list is built from a context's field list by three cooperating t
 is a type-level function from a field's `Tag` to the adapter that should handle it; `ToFieldHandlers`
 walks the [sum spine](../../types/type_level_spines.md) of a field list and applies that function to each
 field, producing a [`Product!`](../../macros/product.md) list of adapters; and `HasFieldHandlers` reads a
-context's [`HasFields`](../../traits/has_fields.md) list and runs `ToFieldHandlers` over it:
+context's [`HasFields`](../../traits/shape/has_fields.md) list and runs `ToFieldHandlers` over it:
 
 ```rust
 impl<Context, Fields, M> HasFieldHandlers<M> for Context
@@ -90,7 +90,7 @@ the matcher runs one extract adapter per variant without the user spelling out t
 - [`ExtractFieldAndHandle`](extract_field_and_handle.md) — the per-variant adapter the list is built
   from.
 - [`UseInputDelegate`](../handler/use_input_delegate.md) — the input dispatcher this alias is built on.
-- [`HasFields`](../../traits/has_fields.md) — the field list the handler list is synthesized from.
+- [`HasFields`](../../traits/shape/has_fields.md) — the field list the handler list is synthesized from.
 
 The ideas behind it:
 

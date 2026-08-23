@@ -58,7 +58,7 @@ where
 ```
 
 It runs `Provider` on a reference to the builder to produce a result record, then uses
-[`CanBuildFrom`](../../traits/can_build_from.md) to copy every shared field into the builder. It
+[`CanBuildFrom`](../../traits/casting/can_build_from.md) to copy every shared field into the builder. It
 implements `Computer`, `TryComputer`, and `Handler`; the fallible and async forms require the context to
 have an error type.
 
@@ -68,7 +68,7 @@ have an error type.
 - [`BuildWithHandlers`](build_with_handlers.md) — the entry point that runs a list of these adapters.
 - [`BuildAndMergeOutputs`](build_and_merge_outputs.md) — wraps a list of plain field-producing providers
   in `BuildAndMerge` automatically.
-- [`CanBuildFrom`](../../traits/can_build_from.md) — the cast it uses to copy shared fields.
+- [`CanBuildFrom`](../../traits/casting/can_build_from.md) — the cast it uses to copy shared fields.
 
 The ideas behind it:
 

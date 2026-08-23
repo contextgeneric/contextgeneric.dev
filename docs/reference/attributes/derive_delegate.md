@@ -200,7 +200,7 @@ where
 
 Reading it back: `UseDelegate<Components>` is a provider for any `Shape` whose entry in `Components`
 names something that is itself a provider for that `Shape`, and the method simply forwards. The
-`Components` type is the inner table, and [`DelegateComponent`](../traits/delegate_component.md) is the
+`Components` type is the inner table, and [`DelegateComponent`](../traits/wiring/delegate_component.md) is the
 same trait ordinary wiring is made of, which is why you write the table with
 [`delegate_components!`](../macros/delegate_components.md) like any other.
 
@@ -285,7 +285,7 @@ per-type entries have to be written with the full prefixed path instead.
 - [`UseDelegate`](../providers/use_delegate.md) — the provider the generated impl is written for.
 - [`RedirectLookup`](../providers/redirect_lookup.md) — what `open` resolves through instead.
 - [`#[cgp_component]`](../macros/cgp_component.md) — the host, and the source of the provider trait.
-- [`DelegateComponent`](../traits/delegate_component.md) — the table trait the lookup reads.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table trait the lookup reads.
 - [`cgp_namespace!`](../macros/cgp_namespace.md) — the full form of the mechanism `open` is a special case of.
 
 The ideas behind it:

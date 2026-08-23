@@ -21,7 +21,7 @@ Product![u32, String, bool]
 ```
 
 That recursion makes structural, field-by-field operations possible at all. Because a struct's fields
-are exposed as a single list type through [`HasFields`](../traits/has_fields.md), a provider can be written
+are exposed as a single list type through [`HasFields`](../traits/shape/has_fields.md), a provider can be written
 once to walk, transform, or rebuild *any* struct's fields without naming the concrete struct, by recursing
 over the list. A plain tuple cannot be decomposed that way in generic code; the recursive list can.
 
@@ -195,9 +195,9 @@ the order *is* the execution order.
 - [Type-level spines](../types/type_level_spines.md) — the `Cons`/`Nil` types the expansion builds.
 - [`Field`](../types/field.md) — what the entries usually are, pairing a name with a type.
 - [`Symbol!`](./symbol.md) — the name half of a `Field` entry.
-- [`HasFields`](../traits/has_fields.md) — the trait that exposes a struct's shape as one of these lists.
+- [`HasFields`](../traits/shape/has_fields.md) — the trait that exposes a struct's shape as one of these lists.
 - [`#[derive(HasFields)]`](../derives/derive_has_fields.md) — generates that list for you.
-- [`AppendProduct`](../traits/append_product.md) — the operations that combine and transform these lists.
+- [`AppendProduct`](../traits/type-level/append_product.md) — the operations that combine and transform these lists.
 - [Handler combinators](../providers/handler/index.md) — where `Product!` is written by hand, as a
   pipeline.
 

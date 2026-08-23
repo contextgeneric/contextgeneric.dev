@@ -61,7 +61,7 @@ pub struct ExtractFieldAndHandle<Tag, Provider = UseContext>(pub PhantomData<(Ta
 pub struct ExtractFirstFieldAndHandle<Tag, Provider = UseContext>(pub PhantomData<(Tag, Provider)>);
 ```
 
-Its `Output` is `Result<Output, Remainder>`. It calls [`ExtractField<Tag>`](../../traits/extract_field.md)
+Its `Output` is `Result<Output, Remainder>`. It calls [`ExtractField<Tag>`](../../traits/variant/extract_field.md)
 on the input; on success it forwards a `Field<Tag, Value>` to `Provider` and returns `Ok`, and on
 failure it returns `Err` of the remainder, the extractor with that variant ruled out. It implements both
 `Computer` and `AsyncComputer`.
@@ -73,7 +73,7 @@ failure it returns `Err` of the remainder, the extractor with that variant ruled
 - [`DowncastAndHandle`](downcast_and_handle.md) — the adapter that matches a group of variants at once
   instead of one.
 - [`MatchWithHandlers`](match_with_handlers.md) — the matcher that consumes a list of these adapters.
-- [`ExtractField`](../../traits/extract_field.md) — the trait it drives, and
+- [`ExtractField`](../../traits/variant/extract_field.md) — the trait it drives, and
   [`Field`](../../types/field.md) — the tagged payload it forwards.
 - [`UseContext`](../use_context.md) — the default inner provider.
 

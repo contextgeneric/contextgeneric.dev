@@ -226,7 +226,7 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 ```
 
 the macro produces the trait with the implicit parameters stripped from the signature, and the impl
-with those parameters turned into [`HasField`](../traits/has_field.md) bounds and `let` bindings at the
+with those parameters turned into [`HasField`](../traits/field-access/has_field.md) bounds and `let` bindings at the
 top of the body:
 
 ```rust

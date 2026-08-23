@@ -132,8 +132,8 @@ For the constructs, [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_da
 derive and its slices are [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) for reading
 one field, [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) for the whole shape, and
 [`#[derive(BuildField)]`](/docs/reference/derives/derive_build_field) for the builder.
-[`HasFields`](/docs/reference/traits/has_fields) is the whole-shape view those produce,
-[`HasBuilder`](/docs/reference/traits/has_builder) is the builder family, and
+[`HasFields`](/docs/reference/traits/shape/has_fields) is the whole-shape view those produce,
+[`HasBuilder`](/docs/reference/traits/builder/has_builder) is the builder family, and
 [`Field`](/docs/reference/types/field) and [`Symbol!`](/docs/reference/macros/symbol) are the pieces a
 shape is made of.
 

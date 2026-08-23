@@ -10,7 +10,7 @@ A type-level string, used as a field-name tag.
 ## Overview
 
 CGP needs field *names* to be types. Reading a field goes through
-[`HasField<Tag>`](../traits/has_field.md), where `Tag` identifies which field is meant. So to look up a field
+[`HasField<Tag>`](../traits/field-access/has_field.md), where `Tag` identifies which field is meant. So to look up a field
 called `name`, something has to stand in for the string `"name"` at the type level.
 
 `Symbol!("name")` is that something. It produces a distinct type whose whole identity is the characters it
@@ -133,7 +133,7 @@ That is the honest summary: the construct is essential and mostly generated.
 Two things it is not. It is **not a runtime string**: there is no `&str` inside it, and the `Display` impl
 above reconstructs the text from the type rather than reading a stored value. And it is **not a general
 type-level string facility** to build programs out of; it exists to key field and variant lookups, and the
-[`StaticFormat`](../traits/static_format.md) traits recover text from one when that is
+[`StaticFormat`](../traits/formatting/static_format.md) traits recover text from one when that is
 needed.
 
 ## Under the hood
@@ -209,7 +209,7 @@ type argument rather than the value.
 ## Related constructs
 
 - [`Index`](../types/index.md) — the position-keyed tag for tuple-struct fields.
-- [`HasField`](../traits/has_field.md) — what a tag is looked up through.
+- [`HasField`](../traits/field-access/has_field.md) — what a tag is looked up through.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — generates one tag per named field.
 - [`#[implicit]`](../attributes/implicit.md) — generates the tag from an argument name.
 - [`#[cgp_auto_getter]`](./cgp_auto_getter.md) — generates it from a method name.
@@ -217,7 +217,7 @@ type argument rather than the value.
 - [Type-level spines](../types/type_level_spines.md) — the `Chars`/`Nil` chain the expansion builds.
 - [`Product!`](./product.md) and [`Sum!`](./sum.md) — the record and variant lists whose entries carry these
   tags.
-- [`StaticFormat`](../traits/static_format.md) — recovering runtime text from a type-level string.
+- [`StaticFormat`](../traits/formatting/static_format.md) — recovering runtime text from a type-level string.
 
 The ideas behind it:
 

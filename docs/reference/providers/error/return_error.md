@@ -79,7 +79,7 @@ where
 ```
 
 The `HasErrorType<Error = E>` bound ties the source type to the abstract error, so `raise_error` returns
-its argument. The generated [`IsProviderFor`](../../traits/is_provider_for.md) impl carries the same
+its argument. The generated [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same
 bound.
 
 ## Related constructs

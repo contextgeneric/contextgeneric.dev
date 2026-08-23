@@ -189,9 +189,9 @@ companion type and roughly twenty impls. If only part of the output is wanted, d
 - [`#[derive(BuildField)]`](./derive_build_field.md) — the record builder slice, on its own.
 - [`#[derive(ExtractField)]`](./derive_extract_field.md) — the extractor slice, on its own.
 - [`#[derive(FromVariant)]`](./derive_from_variant.md) — the variant constructors, on their own.
-- [`HasBuilder`](../traits/has_builder.md) and [`ExtractField`](../traits/extract_field.md) — the two
+- [`HasBuilder`](../traits/builder/has_builder.md) and [`ExtractField`](../traits/variant/extract_field.md) — the two
   trait families the shapes generate impls for.
-- [`MapType`](../traits/map_type.md) — the markers the companion types are parameterized by.
+- [`MapType`](../traits/type-level/map_type.md) — the markers the companion types are parameterized by.
 
 The ideas behind it:
 

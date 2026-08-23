@@ -651,9 +651,9 @@ A tree entry that merely passes a non-CGP message through in rustc's own words i
 - [`check_components!`](./macros/check_components.md) — turns a hidden failure into a surfaced one, and
   the first thing to reach for.
 - [`delegate_components!`](./macros/delegate_components.md) — the wiring nearly every error here is about.
-- [`IsProviderFor`](./traits/is_provider_for.md) — the marker that carries a provider's requirements into
+- [`IsProviderFor`](./traits/wiring/is_provider_for.md) — the marker that carries a provider's requirements into
   a diagnostic; the reason a checked error names the cause at all.
-- [`CanUseComponent`](./traits/can_use_component.md) — what a check asserts.
+- [`CanUseComponent`](./traits/wiring/can_use_component.md) — what a check asserts.
 - [`cargo cgp check`](/docs/cargo-cgp/check) — the tool every rewritten output on this page came from.
 - [`Symbol!`](./macros/symbol.md) — the type-level field name whose raw `Chars<…>` spine the tool
   resugars.

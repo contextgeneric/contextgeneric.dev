@@ -146,11 +146,11 @@ where
 }
 ```
 
-The mechanism is a single [`DelegateComponent`](../traits/delegate_component.md) lookup keyed on
+The mechanism is a single [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on
 `SourceError`. `UseDelegate<Components>` implements `ErrorRaiser` for a given `SourceError` exactly when
 `Components` maps that `SourceError` to a delegate that itself implements `ErrorRaiser`, and the method
 forwards to it. Only the parameter named inside `UseDelegate<...>` is the key; the rest pass through
-unchanged. Each impl is paired with an [`IsProviderFor`](../traits/is_provider_for.md) impl so
+unchanged. Each impl is paired with an [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl so
 dependencies propagate to a check. A component may derive more than one dispatcher when different
 parameters should be routed differently.
 
@@ -162,8 +162,8 @@ parameters should be routed differently.
   and carries the `open` statement that replaces it.
 - [`RedirectLookup`](redirect_lookup.md) — the mechanism `open` rides instead.
 - [`UseInputDelegate`](handler/use_input_delegate.md) — the sibling that keys on a handler's `Input` type.
-- [`DelegateComponent`](../traits/delegate_component.md) — the table the lookup reads.
-- [`IsProviderFor`](../traits/is_provider_for.md) — propagates the dispatched provider's dependencies.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — propagates the dispatched provider's dependencies.
 
 The ideas behind it:
 

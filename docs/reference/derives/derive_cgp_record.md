@@ -87,9 +87,9 @@ fn promote(person: Person, id: u64) -> Employee {
 ```
 
 Neither struct knows about the other. They share two field *names*, matched at the type level, so
-[`build_from`](../traits/can_build_from.md) moves those fields across and leaves `employee_id` for the
+[`build_from`](../traits/casting/can_build_from.md) moves those fields across and leaves `employee_id` for the
 caller. Remove the `build_field` line and this stops compiling, because
-[`finalize_build`](../traits/finalize_build.md) only exists once every field is present.
+[`finalize_build`](../traits/builder/finalize_build.md) only exists once every field is present.
 
 ## When to use it
 
@@ -125,8 +125,8 @@ pub struct Person {
 }
 ```
 
-it first emits the **per-field access**: a [`HasField`](../traits/has_field.md) and a
-[`HasFieldMut`](../traits/has_field_mut.md) impl per field, exactly what
+it first emits the **per-field access**: a [`HasField`](../traits/field-access/has_field.md) and a
+[`HasFieldMut`](../traits/field-access/has_field_mut.md) impl per field, exactly what
 [`#[derive(HasField)]`](./derive_has_field.md) produces on its own.
 
 Then the **representation**, exposing the struct as a product of named entries with conversions in both
@@ -144,7 +144,7 @@ impl HasFields for Person {
 ```
 
 Then the **builder**, which is [`#[derive(BuildField)]`](./derive_build_field.md)'s output and where the
-companion type appears. Each field's type is wrapped in a [`MapType`](../traits/map_type.md) marker, so
+companion type appears. Each field's type is wrapped in a [`MapType`](../traits/type-level/map_type.md) marker, so
 a field can be present (`IsPresent`, holding the value) or absent (`IsNothing`, holding `()`):
 
 ```rust
@@ -164,9 +164,9 @@ impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
 ```
 
 That pair of impls is the whole safety argument: `builder()` starts at all-absent, each
-[`build_field`](../traits/build_field.md) flips one marker, and
-[`finalize_build`](../traits/finalize_build.md) exists only at all-present, so finalizing early is a
-missing impl rather than a runtime check. The per-field [`UpdateField`](../traits/update_field.md) impls
+[`build_field`](../traits/builder/build_field.md) flips one marker, and
+[`finalize_build`](../traits/builder/finalize_build.md) exists only at all-present, so finalizing early is a
+missing impl rather than a runtime check. The per-field [`UpdateField`](../traits/builder/update_field.md) impls
 that move a marker, and the `HasField` impls on the companion that let a set field be read back, follow.
 
 The companion is named `__Partial{Name}` and keeps the original type's visibility, so a `pub` struct
@@ -179,7 +179,7 @@ token rather than the whole derive.
 **The companion type carries none of your attributes.** The derive clears them, so a
 `#[derive(Debug, Clone)]` on the record does not reach `__Partial{Name}` and a partially-built value can
 be neither printed nor cloned. Read a set field back through the companion's
-[`HasField`](../traits/has_field.md) impl instead.
+[`HasField`](../traits/field-access/has_field.md) impl instead.
 
 **A tuple struct's builder is keyed by position.** Its companion exposes `UpdateField<Index<0>, _>`
 rather than symbol-keyed impls, so `build_field` takes `PhantomData::<Index<0>>`.
@@ -203,10 +203,10 @@ companion type and roughly twenty impls. If only part of the output is wanted, d
 - [`#[derive(CgpVariant)]`](./derive_cgp_variant.md) — the enum face.
 - [`#[derive(HasField)]`](./derive_has_field.md), [`#[derive(HasFields)]`](./derive_has_fields.md), and
   [`#[derive(BuildField)]`](./derive_build_field.md) — the three slices this emits.
-- [`HasBuilder`](../traits/has_builder.md) — the builder family it generates impls for.
-- [`MapType`](../traits/map_type.md) — the `IsPresent`/`IsNothing` markers the companion is
+- [`HasBuilder`](../traits/builder/has_builder.md) — the builder family it generates impls for.
+- [`MapType`](../traits/type-level/map_type.md) — the `IsPresent`/`IsNothing` markers the companion is
   parameterized by.
-- [`CanBuildFrom`](../traits/can_build_from.md) — merging one record into another's builder.
+- [`CanBuildFrom`](../traits/casting/can_build_from.md) — merging one record into another's builder.
 
 The ideas behind it:
 

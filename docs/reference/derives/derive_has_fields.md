@@ -327,7 +327,7 @@ by one letter and the outputs do not overlap.
 
 - [`#[derive(HasField)]`](./derive_has_field.md) — the singular counterpart, per-field access, commonly
   derived alongside this one.
-- [`HasFields`](../traits/has_fields.md) — the traits this generates and the conversions between a value
+- [`HasFields`](../traits/shape/has_fields.md) — the traits this generates and the conversions between a value
   and its shape.
 - [`#[derive(CgpData)]`](./derive_cgp_data.md) — the umbrella derive, which includes this one plus the
   incremental machinery.
@@ -337,8 +337,8 @@ by one letter and the outputs do not overlap.
 - [`Symbol!`](../macros/symbol.md) and [`Index`](../types/index.md) — the tags that name an entry.
 - [Type-level spines](../types/type_level_spines.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
   sugar expands to.
-- [`AppendProduct`](../traits/append_product.md) — operations over a shape once you have one.
-- [`CanUpcast`](../traits/can_upcast.md) — converting between two types whose shapes overlap.
+- [`AppendProduct`](../traits/type-level/append_product.md) — operations over a shape once you have one.
+- [`CanUpcast`](../traits/casting/can_upcast.md) — converting between two types whose shapes overlap.
 
 The ideas behind it:
 

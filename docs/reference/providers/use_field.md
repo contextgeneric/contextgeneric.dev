@@ -23,7 +23,7 @@ This is the provider that [`#[cgp_getter]`](../macros/cgp_getter.md) targets. Th
 `UseField` implementation for the getter's provider trait with the field tag left as a free parameter,
 so a context picks the field by writing `UseField<Symbol!("...")>` in its wiring table. `UseField`
 itself is the general provider underneath: it works for any tag the context's
-[`HasField`](../traits/has_field.md) implementation supports.
+[`HasField`](../traits/field-access/has_field.md) implementation supports.
 
 The `Tag` is usually a type-level string built with [`Symbol!`](../macros/symbol.md), such as
 `Symbol!("name")`, or a type-level integer wrapped in `Index<N>` for a tuple field. These are the tags
@@ -112,8 +112,8 @@ inside a nested context, use [`ChainGetters`](chain_getters.md).
 ## Under the hood
 
 `UseField<Tag>` implements three provider traits, each forwarding to the context's
-[`HasField`](../traits/has_field.md) implementation for `Tag`. The central one is the provider-side
-getter [`FieldGetter`](../traits/field_getter.md), which reads the field by reference:
+[`HasField`](../traits/field-access/has_field.md) implementation for `Tag`. The central one is the provider-side
+getter [`FieldGetter`](../traits/field-access/field_getter.md), which reads the field by reference:
 
 ```rust
 impl<Context, OutTag, Tag, Value> FieldGetter<Context, OutTag> for UseField<Tag>
@@ -134,11 +134,11 @@ and reads `Tag` from the context, which is the decoupling: the component's ident
 are independent. The associated `Value` comes from the context's `HasField<Tag>` implementation, so
 the returned reference is to the real field.
 
-`UseField<Tag>` also implements the mutable getter [`MutFieldGetter`](../traits/mut_field_getter.md)
+`UseField<Tag>` also implements the mutable getter [`MutFieldGetter`](../traits/field-access/mut_field_getter.md)
 the same way, requiring `Context: HasFieldMut<Tag>` and returning `&mut Value`. And it implements
 [`TypeProvider`](../components/has_type.md), reporting the field's `Value` type as an abstract type, so
 the *type* of a field can itself be wired as a context's abstract type. Each implementation is paired
-with an [`IsProviderFor`](../traits/is_provider_for.md) implementation carrying the same `HasField`
+with an [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation carrying the same `HasField`
 bound, so delegation propagates the dependency and a check reports a missing field precisely.
 
 ## Related constructs
@@ -152,7 +152,7 @@ bound, so delegation propagates the dependency and a check reports a missing fie
 - [`WithField`](with_field.md) — the `WithProvider`-adapted alias that binds the same field.
 - [`WithProvider`](with_provider.md) — the adapter behind the `WithField` alias.
 - [`UseType`](use_type.md) — the abstract-type analogue for a `#[cgp_type]` component.
-- [`HasField`](../traits/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the
+- [`HasField`](../traits/field-access/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the
   consumer-side field access this reads, keyed by [`Symbol!`](../macros/symbol.md) or `Index<N>`.
 - [`delegate_components!`](../macros/delegate_components.md) — wires it, and
   [`check_components!`](../macros/check_components.md) verifies the field is present.

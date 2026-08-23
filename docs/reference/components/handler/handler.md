@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Handler'
 sidebar_position: 3
+slug: /reference/components/handler/handler
 ---
 
 # `Handler`

@@ -87,7 +87,7 @@ where
 
 Both bounds require the context to already handle the `String` case, which is the indirection that
 reduces any `Debug` source to the one case the context knows. Each impl is paired with a matching
-[`IsProviderFor`](../../traits/is_provider_for.md) impl.
+[`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl.
 
 ## Related constructs
 

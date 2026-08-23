@@ -233,7 +233,7 @@ built-in component and any `#[cgp_type]` component you declare, instead of needi
 per component.
 
 Each generated provider impl is paired with a matching
-[`IsProviderFor`](../traits/is_provider_for.md) impl carrying the same bounds, as everywhere else.
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl carrying the same bounds, as everywhere else.
 
 A bound that names the type it constrains is rewritten rather than refused. Declaring
 `type Scalar: Mul<Output = Self::Scalar> + Clone;` leaves the bound as written on the two traits, where

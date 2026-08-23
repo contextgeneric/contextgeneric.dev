@@ -270,8 +270,8 @@ delegate_and_check_components! {
 }
 ```
 
-the wiring half is a [`DelegateComponent`](../traits/delegate_component.md) impl plus an
-[`IsProviderFor`](../traits/is_provider_for.md) forwarding impl per entry:
+the wiring half is a [`DelegateComponent`](../traits/wiring/delegate_component.md) impl plus an
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) forwarding impl per entry:
 
 ```rust
 impl DelegateComponent<NameTypeProviderComponent> for MyContext {
@@ -285,7 +285,7 @@ where
 ```
 
 and the same pair again for `NameGetterComponent`. Then comes the checking half: a marker trait aliasing
-[`CanUseComponent`](../traits/can_use_component.md), with one empty impl per delegated component:
+[`CanUseComponent`](../traits/wiring/can_use_component.md), with one empty impl per delegated component:
 
 ```rust
 trait CheckMyContext<__Component__, __Params__: ?Sized>:
@@ -390,9 +390,9 @@ derivation only produces checks for entries keyed on a component name, so a tabl
 
 - [`delegate_components!`](./delegate_components.md) — the wiring half, and what to use alone for a bundle.
 - [`check_components!`](./check_components.md) — the checking half, and the form to use once wiring grows.
-- [`CanUseComponent`](../traits/can_use_component.md) — the assertion the derived check makes.
-- [`DelegateComponent`](../traits/delegate_component.md) and
-  [`IsProviderFor`](../traits/is_provider_for.md) — the impls each entry expands into.
+- [`CanUseComponent`](../traits/wiring/can_use_component.md) — the assertion the derived check makes.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) and
+  [`IsProviderFor`](../traits/wiring/is_provider_for.md) — the impls each entry expands into.
 - [`#[cgp_component]`](./cgp_component.md) — defines the components a table wires.
 - [`cgp_namespace!`](./cgp_namespace.md) — inherited wiring, which the derivation does not cover.
 - [`UseField`](../providers/use_field.md) and [`UseType`](../providers/use_type.md) — the providers the

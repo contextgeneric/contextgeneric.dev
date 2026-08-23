@@ -131,13 +131,13 @@ where
 }
 ```
 
-The mechanism is one [`DelegateComponent`](../traits/delegate_component.md) lookup keyed on `__Path__`
+The mechanism is one [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on `__Path__`
 rather than on the component marker. `RedirectLookup<Components, Path>` implements `Greeter` whenever
 `Components` maps `Path` to a delegate that itself implements `Greeter`, and the method forwards to that
 delegate. When the consumer trait carries generic type parameters, the impl additionally constrains
-`Path` with [`ConcatPath`](../traits/concat_path.md) so the parameters are appended to the path before
+`Path` with [`ConcatPath`](../traits/formatting/concat_path.md) so the parameters are appended to the path before
 the lookup, letting the redirected key encode the generic arguments. As always, the impl is paired with a matching
-[`IsProviderFor`](../traits/is_provider_for.md) impl.
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.
 
 The `#[prefix(@path in Namespace)]` attribute populates the path side: it generates a namespace
 impl whose delegate is `RedirectLookup<Components, Path>`, with the prefix path joined onto the
@@ -152,7 +152,7 @@ table.
   target `RedirectLookup`.
 - [`delegate_components!`](../macros/delegate_components.md) — the `open` and `namespace` statements that
   generate the redirect entries.
-- [`DelegateComponent`](../traits/delegate_component.md) — the table the lookup reads.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
 - [`Path!`](../macros/path.md) and [`PathCons`](../types/type_level_spines.md) — the type-level path it
   walks.
 - [`UseContext`](use_context.md) — the other `#[cgp_component]`-generated provider, routing back to the

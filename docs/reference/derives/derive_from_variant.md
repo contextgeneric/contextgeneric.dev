@@ -123,7 +123,7 @@ let expr = LispSubExpr::Ident(Ident("+".to_owned())).upcast(PhantomData::<LispEx
 The upcast always succeeds, because every variant of the smaller enum maps to one in the larger one. That is
 the construction-side counterpart of reading a field through a getter: the implementation names only what it
 needs, and the widening is checked. Upcasting is documented with the other
-[structural casts](../traits/can_upcast.md), and it is built on the same per-variant machinery as this derive.
+[structural casts](../traits/casting/can_upcast.md), and it is built on the same per-variant machinery as this derive.
 
 ## When to use it
 
@@ -187,7 +187,7 @@ The `PhantomData<Tag>` parameter carries no value. It exists so a call site can 
 several are in scope, which is why the tag is passed as `PhantomData::<Symbol!("Circle")>` rather than
 inferred.
 
-The [`FromVariant`](../traits/from_variant.md) trait itself is defined in the library; the derive supplies only
+The [`FromVariant`](../traits/variant/from_variant.md) trait itself is defined in the library; the derive supplies only
 these per-variant impls. Each is aimed at the variant it came from, so a conflict with a hand-written impl
 underlines that variant rather than the whole `#[derive(FromVariant)]`.
 
@@ -228,9 +228,9 @@ and, as with the other empty shapes, means a mistake shows up later rather than 
   not generate, and the only derive that accepts every variant shape.
 - [`#[derive(BuildField)]`](./derive_build_field.md) — the struct analogue: setting one field rather than
   choosing one variant.
-- [`FromVariant`](../traits/from_variant.md) — the trait this generates impls of.
+- [`FromVariant`](../traits/variant/from_variant.md) — the trait this generates impls of.
 - [`Symbol!`](../macros/symbol.md) — the tag that names a variant.
-- [`CanUpcast`](../traits/can_upcast.md) — widening a smaller enum into a larger one, built on these constructors.
+- [`CanUpcast`](../traits/casting/can_upcast.md) — widening a smaller enum into a larger one, built on these constructors.
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain the constructed variants
   correspond to.
 

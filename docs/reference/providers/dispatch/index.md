@@ -62,11 +62,11 @@ the hood on [`MatchWithHandlers`](match_with_handlers.md).
 
 - [`#[cgp_auto_dispatch]`](../../macros/cgp_auto_dispatch.md) — generates a matcher-backed handler impl
   automatically.
-- [`extract_field`](../../traits/extract_field.md), [`has_extractor`](../../traits/has_extractor.md),
-  [`finalize_extract`](../../traits/finalize_extract.md) — the enum-deconstruction traits the matchers
+- [`extract_field`](../../traits/variant/extract_field.md), [`has_extractor`](../../traits/variant/has_extractor.md),
+  [`finalize_extract`](../../traits/variant/finalize_extract.md) — the enum-deconstruction traits the matchers
   stand on.
-- [`has_builder`](../../traits/has_builder.md), [`build_field`](../../traits/build_field.md),
-  [`finalize_build`](../../traits/finalize_build.md) — the record-assembly traits the builders stand on.
+- [`has_builder`](../../traits/builder/has_builder.md), [`build_field`](../../traits/builder/build_field.md),
+  [`finalize_build`](../../traits/builder/finalize_build.md) — the record-assembly traits the builders stand on.
 - [`UseInputDelegate`](../handler/use_input_delegate.md) — the input dispatcher the convenience matchers
   use.
 - [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — the derive that gives a type the shape these

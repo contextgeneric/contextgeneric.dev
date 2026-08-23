@@ -207,7 +207,7 @@ derive you did not need.
 ## Under the hood
 
 The derive centres on **two** companion enums. `__Partial{Name}` is your enum with one
-[`MapType`](../traits/map_type.md) parameter added per variant and each payload wrapped in that parameter's
+[`MapType`](../traits/type-level/map_type.md) parameter added per variant and each payload wrapped in that parameter's
 projection, where `IsPresent` keeps the payload and `IsVoid` maps it to the uninhabited `Void`.
 `__PartialRef{Name}` adds a reserved `'__a__` lifetime and a second marker that selects a shared or a mutable
 borrow of each payload. From:
@@ -350,11 +350,11 @@ enum's own variant list rather than repeating it at each site.
   not generate either, and the one derive that accepts every variant shape.
 - [`#[derive(BuildField)]`](./derive_build_field.md) — the struct analogue: incremental construction rather
   than deconstruction.
-- [`ExtractField`](../traits/extract_field.md) — the extractor trait family, including `HasExtractor`,
+- [`ExtractField`](../traits/variant/extract_field.md) — the extractor trait family, including `HasExtractor`,
   `FinalizeExtract`, and `FinalizeExtractResult`.
-- [`MapType`](../traits/map_type.md) — the `IsPresent`/`IsVoid` markers the companion enums are parameterized
+- [`MapType`](../traits/type-level/map_type.md) — the `IsPresent`/`IsVoid` markers the companion enums are parameterized
   by.
-- [`CanUpcast`](../traits/can_upcast.md) — upcasting and downcasting between enums, which reuse this recursion.
+- [`CanUpcast`](../traits/casting/can_upcast.md) — upcasting and downcasting between enums, which reuse this recursion.
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain an enum's shape is built
   from.
 - [Dispatch combinators](../providers/dispatch/index.md) — the providers that build an extraction chain

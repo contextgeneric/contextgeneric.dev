@@ -171,7 +171,7 @@ this shape.
 For the constructs, [`#[implicit]`](/docs/reference/attributes/implicit) carries the full list of
 accepted forms and access rules, [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is the no-wiring
 capability, [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter) is the getter to reach for in
-the three cases above, and [`HasField`](/docs/reference/traits/has_field) is the trait underneath all of
+the three cases above, and [`HasField`](/docs/reference/traits/field-access/has_field) is the trait underneath all of
 them.
 
 ---

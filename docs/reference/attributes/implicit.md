@@ -26,7 +26,7 @@ A call like `rect.rectangle_area()` does not require the arguments to be passed 
 
 `#[implicit]` gives better ergonomics than the alternatives, such as
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) or the direct use of
-[`HasField`](../traits/has_field.md). With those, you declare that the context has each field and then
+[`HasField`](../traits/field-access/has_field.md). With those, you declare that the context has each field and then
 fetch it by hand, so you have to understand the mechanism behind field access, such as how a type-level
 [`Symbol!`](../macros/symbol.md) and a `PhantomData` tag work. `#[implicit]` keeps all of that behind an
 argument that reads as `width: f64`, and the argument's *name* names the field.
@@ -91,8 +91,8 @@ The same rules govern the getter traits, so learning them once covers everywhere
 
 An implicit argument is mutable when its type carries a `&mut`: the outer reference of a `&mut T` or a
 `&mut [T]`, or the inner reference of an `Option<&mut T>` or an `Option<&mut str>`. A mutable argument
-reads through [`HasFieldMut`](../traits/has_field_mut.md) and `get_field_mut` rather than through
-[`HasField`](../traits/has_field.md) and `get_field`, so it borrows the field for writing.
+reads through [`HasFieldMut`](../traits/field-access/has_field_mut.md) and `get_field_mut` rather than through
+[`HasField`](../traits/field-access/has_field.md) and `get_field`, so it borrows the field for writing.
 
 Two rules follow. A mutable argument requires a `&mut self` receiver, since a function cannot borrow a
 field mutably through a shared `&self`. And it must be the only implicit argument on its function,
@@ -190,7 +190,7 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 ```
 
 the macro strips the arguments from the trait's method and turns them into
-[`HasField`](../traits/has_field.md) bounds and reads:
+[`HasField`](../traits/field-access/has_field.md) bounds and reads:
 
 ```rust
 pub trait RectangleArea {
@@ -272,7 +272,7 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 - [`#[cgp_fn]`](../macros/cgp_fn.md) — the usual host, turning a function into a capability.
 - [`#[cgp_impl]`](../macros/cgp_impl.md) — the other host, for a component's provider.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — what a context derives to qualify.
-- [`HasField`](../traits/has_field.md) — the trait the generated bounds are written against.
+- [`HasField`](../traits/field-access/has_field.md) — the trait the generated bounds are written against.
 - [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — the getter form, for the cases above.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — a getter whose source field is chosen by wiring.
 - [`#[uses]`](uses.md) — imports a capability rather than a value.

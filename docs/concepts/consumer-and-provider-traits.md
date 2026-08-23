@@ -175,7 +175,7 @@ because its table maps `EmailSenderComponent` to `SendViaSmtp`; and `SendViaSmtp
 never reaches the binary.
 
 The one piece of that listing not yet explained is
-[`IsProviderFor`](/docs/reference/traits/is_provider_for), which is also a supertrait on the provider
+[`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), which is also a supertrait on the provider
 trait. Every provider implements it under exactly the bounds it needs, and requiring it here carries
 those bounds back down the chain, so when a context is missing something a provider requires, the
 compiler can name the missing requirement instead of reporting only that the provider trait is not

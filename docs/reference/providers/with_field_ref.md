@@ -17,7 +17,7 @@ and borrowing it through `AsRef` to produce a `&Value`, where the stored field t
 
 Unlike [`WithField`](with_field.md), this alias is not an alternative to a directly-wireable provider:
 the bare [`UseFieldRef`](use_field_ref.md) supplies only the foundational
-[`FieldGetter`](../traits/field_getter.md), so `WithFieldRef` is the form you wire.
+[`FieldGetter`](../traits/field-access/field_getter.md), so `WithFieldRef` is the form you wire.
 
 ## Usage
 
@@ -101,7 +101,7 @@ pub type WithFieldRef<Tag, Value> = WithProvider<UseFieldRef<Tag, Value>>;
 
 The [`WithProvider`](with_provider.md) adapter forwards a getter's provider-trait method to the inner
 provider's foundational method, and [`UseFieldRef<Tag, Value>`](use_field_ref.md) is the foundational
-[`FieldGetter`](../traits/field_getter.md) that reads the field at `Tag` and borrows it through `AsRef`.
+[`FieldGetter`](../traits/field-access/field_getter.md) that reads the field at `Tag` and borrows it through `AsRef`.
 The `UseFieldRef` mechanism, including its mutable form, is documented on the
 [`UseFieldRef`](use_field_ref.md) page, and the generated `WithProvider` impl on the
 [`WithProvider`](with_provider.md) page.
@@ -113,8 +113,8 @@ The `UseFieldRef` mechanism, including its mutable form, is documented on the
   documented.
 - [`WithField`](with_field.md) — the sibling alias for a field read directly, without the `AsRef` step.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — defines the getter component this is wired to.
-- [`FieldGetter`](../traits/field_getter.md) and [`MutFieldGetter`](../traits/mut_field_getter.md) — the
-  provider-side getters the inner provider implements, over [`HasField`](../traits/has_field.md).
+- [`FieldGetter`](../traits/field-access/field_getter.md) and [`MutFieldGetter`](../traits/field-access/mut_field_getter.md) — the
+  provider-side getters the inner provider implements, over [`HasField`](../traits/field-access/has_field.md).
 
 The ideas behind it:
 

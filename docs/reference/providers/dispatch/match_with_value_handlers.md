@@ -64,7 +64,7 @@ generated uniformly from the field list.
 
 `MatchWithValueHandlers<Provider>` is a type alias over
 [`UseInputDelegate`](../handler/use_input_delegate.md) that dispatches on the input type and, for each
-input, synthesizes the per-variant handler list from that input's [`HasFields`](../../traits/has_fields.md):
+input, synthesizes the per-variant handler list from that input's [`HasFields`](../../traits/shape/has_fields.md):
 
 ```rust
 pub type MatchWithValueHandlers<Provider = UseContext> =
@@ -86,7 +86,7 @@ so one struct serves both the by-value-of-reference and the by-reference interfa
 - [`UseInputDelegate`](../handler/use_input_delegate.md) — the input dispatcher this alias is built on.
 - [`HandleFieldValue`](handle_field_value.md), [`UseContext`](../use_context.md) — the wrapper it adds
   and the default per-variant provider.
-- [`HasFields`](../../traits/has_fields.md) — the field list the handler list is synthesized from.
+- [`HasFields`](../../traits/shape/has_fields.md) — the field list the handler list is synthesized from.
 
 The ideas behind it:
 

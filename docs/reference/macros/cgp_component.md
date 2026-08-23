@@ -246,7 +246,7 @@ pub trait CanCalculateArea {
 
 Second, the **provider trait**: the same interface with `Self` replaced by a leading `Context` type
 parameter and every `self`/`Self` rewritten to `context`/`Context`. Its
-[`IsProviderFor`](../traits/is_provider_for.md) supertrait makes an unmet dependency report
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) supertrait makes an unmet dependency report
 itself by name rather than as a bare "trait not implemented"; its third argument is a tuple of the
 component's extra type parameters, empty here:
 
@@ -307,7 +307,7 @@ where
 ```
 
 Fourth, the **provider blanket impl**, which makes wiring work: anything that delegates this
-component through [`DelegateComponent`](../traits/delegate_component.md) inherits the provider trait
+component through [`DelegateComponent`](../traits/wiring/delegate_component.md) inherits the provider trait
 from whatever it delegates to.
 
 ```rust

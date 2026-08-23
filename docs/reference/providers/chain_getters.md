@@ -18,7 +18,7 @@ getter to the nesting. `ChainGetters<Getters>` takes a list of getters, applies 
 threads the reference from each step into the next, so the chain reads like the path it traverses:
 outer getter, then the next, ending at the target field.
 
-`ChainGetters` is a foundational [`FieldGetter`](../traits/field_getter.md), so it is wired to a getter
+`ChainGetters` is a foundational [`FieldGetter`](../traits/field-access/field_getter.md), so it is wired to a getter
 component through the [`WithProvider`](with_provider.md) adapter rather than named on its own. The list
 is a type-level [`Cons`](../types/type_level_spines.md) spine whose elements are each a field getter for
 the value the previous step produced, written with the [`Product!`](../macros/product.md) macro.
@@ -109,7 +109,7 @@ only once the value is more than one hop away.
 
 ## Under the hood
 
-`ChainGetters` implements the provider-side getter [`FieldGetter`](../traits/field_getter.md) with two
+`ChainGetters` implements the provider-side getter [`FieldGetter`](../traits/field-access/field_getter.md) with two
 impls that together recurse over the list, one for a non-empty `Cons` and one for the empty `Nil`. The
 `Cons` impl applies the head getter, then delegates the rest of the path to `ChainGetters` over the
 tail:
@@ -133,7 +133,7 @@ where
 
 The head `Getter` reads `ValueA` from the `Context`, and the rest of the chain reads `ValueB` from that
 `ValueA`, so the whole chain's `Value` is `ValueB`, the value at the end of the path. The head is
-applied through [`FieldMapper`](../traits/field_mapper.md) rather than `FieldGetter` directly:
+applied through [`FieldMapper`](../traits/field-access/field_mapper.md) rather than `FieldGetter` directly:
 `map_field` hands the intermediate reference to a closure that runs the rest of the chain on it, which
 keeps the borrowed lifetimes inferring across each hop.
 
@@ -160,8 +160,8 @@ what turns it into a provider a getter component can be wired to.
 - [`WithProvider`](with_provider.md) — the adapter that turns `ChainGetters` into a getter-component
   provider.
 - [`UseField`](use_field.md) and [`UseFieldRef`](use_field_ref.md) — the getters that form each step of
-  the chain, implementing the same [`FieldGetter`](../traits/field_getter.md) it composes.
-- [`FieldMapper`](../traits/field_mapper.md) — what each step is applied through, to keep borrowed
+  the chain, implementing the same [`FieldGetter`](../traits/field-access/field_getter.md) it composes.
+- [`FieldMapper`](../traits/field-access/field_mapper.md) — what each step is applied through, to keep borrowed
   lifetimes inferring across hops.
 - [`Product!`](../macros/product.md) — builds the list of getters.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — defines the getter this is wired to.

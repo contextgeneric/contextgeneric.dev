@@ -241,7 +241,7 @@ where
 }
 ```
 
-Each of these is paired with a matching [`IsProviderFor`](../traits/is_provider_for.md) impl carrying the
+Each of these is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl carrying the
 same bounds, so a missing field is reported by name when the component is checked.
 
 ## Formal grammar
@@ -299,7 +299,7 @@ since the tag tells you which field the mismatch is about.
 - [`UseField`](../providers/use_field.md) — the provider that makes the field name a wiring decision, with
   `UseFieldRef` and `UseFields` alongside it.
 - [`#[cgp_component]`](./cgp_component.md) — the macro this extends, and the source of the naming rules.
-- [`#[derive(HasField)]`](../derives/derive_has_field.md) and [`HasField`](../traits/has_field.md) — the
+- [`#[derive(HasField)]`](../derives/derive_has_field.md) and [`HasField`](../traits/field-access/has_field.md) — the
   field access underneath.
 - [`Symbol!`](./symbol.md) — the type-level field name a wiring entry supplies.
 - [`WithProvider`](../providers/with_provider.md) — the adapter for a value that does not come from a field.

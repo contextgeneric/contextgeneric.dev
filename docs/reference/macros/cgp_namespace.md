@@ -406,10 +406,10 @@ the context.
   the shared table grammar.
 - [`Path!`](./path.md) — the `@`-path syntax namespace entries and `#[prefix]` use.
 - [`RedirectLookup`](../providers/redirect_lookup.md) — the provider every redirect resolves through.
-- [`DefaultNamespace`](../traits/default_namespace.md) — inherited and per-type default resolution,
+- [`DefaultNamespace`](../traits/namespace/default_namespace.md) — inherited and per-type default resolution,
   including `#[default_impl(...)]`.
 - [`#[cgp_component]`](./cgp_component.md) — the host of the `#[prefix(...)]` attribute.
-- [`DelegateComponent`](../traits/delegate_component.md) — the per-key table a redirect finally walks.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the per-key table a redirect finally walks.
 - [`check_components!`](./check_components.md) — the only thing that catches a route bound to nothing.
 
 The ideas behind it:

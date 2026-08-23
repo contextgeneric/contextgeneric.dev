@@ -16,7 +16,7 @@ component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes one 
 The context is the type the capability runs against, and it supplies those values as its own fields.
 `UseFields` is the provider that realizes the arrangement: wiring a getter to `UseFields` makes every
 method read the context field whose name equals the method name, looked up through
-[`HasField`](../traits/has_field.md) keyed by a [`Symbol!`](../macros/symbol.md).
+[`HasField`](../traits/field-access/has_field.md) keyed by a [`Symbol!`](../macros/symbol.md).
 
 This is the provider analogue of the blanket implementation that
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) emits. `#[cgp_auto_getter]` produces a single
@@ -127,7 +127,7 @@ Each method becomes a `HasField` bound keyed on the method name as a `Symbol!`, 
 field. The `&str` return makes the field `Value` a `String` and appends `.as_str()`, the same shorthand
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) uses. When a getter has several methods, the
 implementation carries one `HasField` bound and one body per method, each keyed by its own name. The
-implementation is paired with a matching [`IsProviderFor`](../traits/is_provider_for.md), so a check
+implementation is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md), so a check
 reports a missing field precisely.
 
 This is one of three provider implementations `#[cgp_getter]` generates for a getter component. The
@@ -142,7 +142,7 @@ them at wiring time.
   for a getter that need not be wired.
 - [`UseField`](use_field.md) — the sibling that keys on a wiring-chosen tag instead of the method name.
 - [`WithProvider`](with_provider.md) — the third getter provider `#[cgp_getter]` emits.
-- [`HasField`](../traits/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the
+- [`HasField`](../traits/field-access/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the
   field access it reads, keyed by [`Symbol!`](../macros/symbol.md) on the method name.
 
 The ideas behind it:

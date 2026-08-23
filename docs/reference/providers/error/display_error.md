@@ -80,7 +80,7 @@ where
 ```
 
 Both bounds require the context to already handle `String`. Each impl is paired with a matching
-[`IsProviderFor`](../../traits/is_provider_for.md) impl.
+[`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl.
 
 ## Related constructs
 

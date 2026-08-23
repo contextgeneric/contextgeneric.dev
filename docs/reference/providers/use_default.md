@@ -131,7 +131,7 @@ pub struct UseDefault;
 Meaning is given to it by the provider impl an author writes. An empty
 [`#[cgp_impl(UseDefault)]`](../macros/cgp_impl.md) block emits a provider-trait implementation with no
 method bodies, so each method falls back to the default defined on the consumer trait, plus the
-matching [`IsProviderFor`](../traits/is_provider_for.md) implementation carrying the block's `where`
+matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation carrying the block's `where`
 clause. That is the same pair any `#[cgp_impl]` produces; the only thing special about `UseDefault` is
 the empty body and the shared, conventional name.
 
@@ -143,7 +143,7 @@ the empty body and the shared, conventional name.
   [`check_components!`](../macros/check_components.md) verifies its dependencies.
 - [`UseContext`](use_context.md) and [`UseFields`](use_fields.md) — the providers that carry
   macro-generated behavior rather than relying on author-written empty bodies.
-- [`IsProviderFor`](../traits/is_provider_for.md) — tracks the dependencies of a `UseDefault` impl.
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — tracks the dependencies of a `UseDefault` impl.
 
 The ideas behind it:
 

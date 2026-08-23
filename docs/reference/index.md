@@ -70,7 +70,7 @@ complete and every dependency behind it is satisfied.
 suits simple wiring and getting started. Two providers appear in tables constantly:
 [`UseContext`](./providers/use_context.md), which routes back through the context's own
 implementation, and [`UseDefault`](./providers/use_default.md), which selects a component's default
-method bodies. Underneath it all is [`DelegateComponent`](./traits/delegate_component.md), the trait
+method bodies. Underneath it all is [`DelegateComponent`](./traits/wiring/delegate_component.md), the trait
 the table is made of.
 
 ### Read values out of the context
@@ -78,12 +78,12 @@ the table is made of.
 An [`#[implicit]`](./attributes/implicit.md) argument is the default way to read a field: it looks like
 an ordinary function parameter and is filled from a same-named field on the context. The field access
 itself comes from [`#[derive(HasField)]`](./derives/derive_has_field.md) and the
-[`HasField`](./traits/has_field.md) trait, whose mutable form is
-[`HasFieldMut`](./traits/has_field_mut.md). Four further traits are the machinery underneath, generated
-rather than written: [`FieldGetter`](./traits/field_getter.md) and
-[`MutFieldGetter`](./traits/mut_field_getter.md) are the provider-side mirrors a getter component is
-wired through, and [`MapField`](./traits/map_field.md) with
-[`FieldMapper`](./traits/field_mapper.md) are what let a getter reach into a nested value without
+[`HasField`](./traits/field-access/has_field.md) trait, whose mutable form is
+[`HasFieldMut`](./traits/field-access/has_field_mut.md). Four further traits are the machinery underneath, generated
+rather than written: [`FieldGetter`](./traits/field-access/field_getter.md) and
+[`MutFieldGetter`](./traits/field-access/mut_field_getter.md) are the provider-side mirrors a getter component is
+wired through, and [`MapField`](./traits/field-access/map_field.md) with
+[`FieldMapper`](./traits/field-access/field_mapper.md) are what let a getter reach into a nested value without
 forcing its type to be `'static`.
 
 Getter traits are the sparing alternative, for the cases an implicit argument cannot reach.
@@ -146,8 +146,8 @@ Providers in this family are written from plain functions with
 composed with the [handler combinators](./providers/handler/index.md), the
 [dispatch combinators](./providers/dispatch/index.md), and the
 [monad providers](./providers/monad/index.md) built on the monad traits —
-[`MonadicBind`](./traits/monadic_bind.md), [`ContainsValue`](./traits/contains_value.md),
-[`LiftValue`](./traits/lift_value.md), and [`MonadicTrans`](./traits/monadic_trans.md).
+[`MonadicBind`](./traits/monad/monadic_bind.md), [`ContainsValue`](./traits/monad/contains_value.md),
+[`LiftValue`](./traits/monad/lift_value.md), and [`MonadicTrans`](./traits/monad/monadic_trans.md).
 [`#[cgp_auto_dispatch]`](./macros/cgp_auto_dispatch.md) generates a dispatching handler from a per-type
 trait.
 
@@ -164,18 +164,18 @@ individual slices are [`#[derive(HasFields)]`](./derives/derive_has_fields.md),
 [`#[derive(FromVariant)]`](./derives/derive_from_variant.md).
 
 Each of those generates traits, and the traits are where the operations live. The whole-shape view is
-[`HasFields`](./traits/has_fields.md) with its conversions [`ToFields`](./traits/to_fields.md) and
-[`FromFields`](./traits/from_fields.md); the builder family runs from
-[`HasBuilder`](./traits/has_builder.md) through [`BuildField`](./traits/build_field.md) to
-[`FinalizeBuild`](./traits/finalize_build.md); the extractor family runs from
-[`HasExtractor`](./traits/has_extractor.md) through [`ExtractField`](./traits/extract_field.md) to
-[`FinalizeExtract`](./traits/finalize_extract.md), with
-[`FromVariant`](./traits/from_variant.md) constructing rather than deconstructing. Underneath sit the
-presence markers of [`MapType`](./traits/map_type.md), the list algebra of
-[`AppendProduct`](./traits/append_product.md), the structural casts
-[`CanUpcast`](./traits/can_upcast.md) and [`CanBuildFrom`](./traits/can_build_from.md), and the
+[`HasFields`](./traits/shape/has_fields.md) with its conversions [`ToFields`](./traits/shape/to_fields.md) and
+[`FromFields`](./traits/shape/from_fields.md); the builder family runs from
+[`HasBuilder`](./traits/builder/has_builder.md) through [`BuildField`](./traits/builder/build_field.md) to
+[`FinalizeBuild`](./traits/builder/finalize_build.md); the extractor family runs from
+[`HasExtractor`](./traits/variant/has_extractor.md) through [`ExtractField`](./traits/variant/extract_field.md) to
+[`FinalizeExtract`](./traits/variant/finalize_extract.md), with
+[`FromVariant`](./traits/variant/from_variant.md) constructing rather than deconstructing. Underneath sit the
+presence markers of [`MapType`](./traits/type-level/map_type.md), the list algebra of
+[`AppendProduct`](./traits/type-level/append_product.md), the structural casts
+[`CanUpcast`](./traits/casting/can_upcast.md) and [`CanBuildFrom`](./traits/casting/can_build_from.md), and the
 optional-field extensions starting at
-[`HasOptionalBuilder`](./traits/has_optional_builder.md). Each entry in a shape is a
+[`HasOptionalBuilder`](./traits/optional/has_optional_builder.md). Each entry in a shape is a
 [`Field`](./types/field.md).
 
 Those families run to a good many traits, most of which you read rather than write. The table below is
@@ -183,13 +183,13 @@ the whole set, so that a name met in an expansion or an error message can be loo
 
 | Family | The traits in it |
 |---|---|
-| The shape | [`HasFields`](./traits/has_fields.md), [`HasFieldsRef`](./traits/has_fields_ref.md), [`ToFields`](./traits/to_fields.md), [`FromFields`](./traits/from_fields.md), [`ToFieldsRef`](./traits/to_fields_ref.md) |
-| Building a record | [`HasBuilder`](./traits/has_builder.md), [`IntoBuilder`](./traits/into_builder.md), [`BuildField`](./traits/build_field.md), [`TakeField`](./traits/take_field.md), [`UpdateField`](./traits/update_field.md), [`PartialData`](./traits/partial_data.md), [`FinalizeBuild`](./traits/finalize_build.md) |
-| Taking an enum apart | [`HasExtractor`](./traits/has_extractor.md), [`HasExtractorRef`](./traits/has_extractor_ref.md), [`HasExtractorMut`](./traits/has_extractor_mut.md), [`ExtractField`](./traits/extract_field.md), [`FinalizeExtract`](./traits/finalize_extract.md), [`FinalizeExtractResult`](./traits/finalize_extract_result.md), [`FromVariant`](./traits/from_variant.md) |
-| Converting between shapes | [`CanUpcast`](./traits/can_upcast.md), [`CanDowncast`](./traits/can_downcast.md), [`CanDowncastFields`](./traits/can_downcast_fields.md), [`CanBuildFrom`](./traits/can_build_from.md) |
-| Optional and defaulted fields | [`HasOptionalBuilder`](./traits/has_optional_builder.md), [`ToOptional`](./traits/to_optional.md), [`SetOptional`](./traits/set_optional.md), [`FinalizeOptional`](./traits/finalize_optional.md), [`CanFinalizeWithDefault`](./traits/can_finalize_with_default.md), [`CanBuildWithDefault`](./traits/can_build_with_default.md) |
-| Field state, and changing it | [`MapType`](./traits/map_type.md), [`MapTypeRef`](./traits/map_type_ref.md), [`TransformMap`](./traits/transform_map.md), [`TransformMapFields`](./traits/transform_map_fields.md), [`TransformMapDefault`](./traits/transform_map_default.md), [`TransformOptional`](./traits/transform_optional.md) |
-| Computing a shape | [`AppendProduct`](./traits/append_product.md), [`ConcatProduct`](./traits/concat_product.md), [`MapFields`](./traits/map_fields.md) |
+| The shape | [`HasFields`](./traits/shape/has_fields.md), [`HasFieldsRef`](./traits/shape/has_fields_ref.md), [`ToFields`](./traits/shape/to_fields.md), [`FromFields`](./traits/shape/from_fields.md), [`ToFieldsRef`](./traits/shape/to_fields_ref.md) |
+| Building a record | [`HasBuilder`](./traits/builder/has_builder.md), [`IntoBuilder`](./traits/builder/into_builder.md), [`BuildField`](./traits/builder/build_field.md), [`TakeField`](./traits/builder/take_field.md), [`UpdateField`](./traits/builder/update_field.md), [`PartialData`](./traits/builder/partial_data.md), [`FinalizeBuild`](./traits/builder/finalize_build.md) |
+| Taking an enum apart | [`HasExtractor`](./traits/variant/has_extractor.md), [`HasExtractorRef`](./traits/variant/has_extractor_ref.md), [`HasExtractorMut`](./traits/variant/has_extractor_mut.md), [`ExtractField`](./traits/variant/extract_field.md), [`FinalizeExtract`](./traits/variant/finalize_extract.md), [`FinalizeExtractResult`](./traits/variant/finalize_extract_result.md), [`FromVariant`](./traits/variant/from_variant.md) |
+| Converting between shapes | [`CanUpcast`](./traits/casting/can_upcast.md), [`CanDowncast`](./traits/casting/can_downcast.md), [`CanDowncastFields`](./traits/casting/can_downcast_fields.md), [`CanBuildFrom`](./traits/casting/can_build_from.md) |
+| Optional and defaulted fields | [`HasOptionalBuilder`](./traits/optional/has_optional_builder.md), [`ToOptional`](./traits/optional/to_optional.md), [`SetOptional`](./traits/optional/set_optional.md), [`FinalizeOptional`](./traits/optional/finalize_optional.md), [`CanFinalizeWithDefault`](./traits/optional/can_finalize_with_default.md), [`CanBuildWithDefault`](./traits/optional/can_build_with_default.md) |
+| Field state, and changing it | [`MapType`](./traits/type-level/map_type.md), [`MapTypeRef`](./traits/type-level/map_type_ref.md), [`TransformMap`](./traits/type-level/transform_map.md), [`TransformMapFields`](./traits/type-level/transform_map_fields.md), [`TransformMapDefault`](./traits/optional/transform_map_default.md), [`TransformOptional`](./traits/optional/transform_optional.md) |
+| Computing a shape | [`AppendProduct`](./traits/type-level/append_product.md), [`ConcatProduct`](./traits/type-level/concat_product.md), [`MapFields`](./traits/type-level/map_fields.md) |
 
 ### Keep large wiring manageable
 
@@ -197,8 +197,8 @@ the whole set, so that a name met in an expansion or an error message can be loo
 contexts can join, which is how top-level wiring stays short as component counts grow. It works
 through [`RedirectLookup`](./providers/redirect_lookup.md), which re-routes a lookup along a
 [`Path!`](./macros/path.md), together with the three lookup traits that resolve inherited and per-type
-defaults — [`DefaultNamespace`](./traits/default_namespace.md) for a key that is a component alone, and
-[`DefaultImpls1`](./traits/default_impls1.md) and [`DefaultImpls2`](./traits/default_impls2.md) when the
+defaults — [`DefaultNamespace`](./traits/namespace/default_namespace.md) for a key that is a component alone, and
+[`DefaultImpls1`](./traits/namespace/default_impls1.md) and [`DefaultImpls2`](./traits/namespace/default_impls2.md) when the
 key carries one further type or two. A provider registers itself as one of those defaults with
 [`#[default_impl(...)]`](./attributes/default_impl.md). The `open` statement of
 [`delegate_components!`](./macros/delegate_components.md) is a
@@ -214,14 +214,14 @@ sugar — [`Symbol!`](./macros/symbol.md) for a field name, [`Product!`](./macro
 recognize [what they expand into](./types/type_level_spines.md) when it appears in an error message.
 [`Index`](./types/index.md) tags a tuple field and [`Life`](./types/life.md) lifts a lifetime into a
 type. Three traits turn those encodings back into runtime data:
-[`StaticString`](./traits/static_string.md) decodes a type-level string into a constant,
-[`StaticFormat`](./traits/static_format.md) writes one into a formatter and is what makes it printable
-at all, and [`ConcatPath`](./traits/concat_path.md) joins two paths.
+[`StaticString`](./traits/formatting/static_string.md) decodes a type-level string into a constant,
+[`StaticFormat`](./traits/formatting/static_format.md) writes one into a formatter and is what makes it printable
+at all, and [`ConcatPath`](./traits/formatting/concat_path.md) joins two paths.
 
 When wiring fails, three traits are what you will see named:
-[`DelegateComponent`](./traits/delegate_component.md),
-[`IsProviderFor`](./traits/is_provider_for.md), which is what makes a missing dependency show up by
-name, and [`CanUseComponent`](./traits/can_use_component.md), which is what a check asserts. The
+[`DelegateComponent`](./traits/wiring/delegate_component.md),
+[`IsProviderFor`](./traits/wiring/is_provider_for.md), which is what makes a missing dependency show up by
+name, and [`CanUseComponent`](./traits/wiring/can_use_component.md), which is what a check asserts. The
 [compile errors](./errors.md) page covers the recurring failures and how to read them.
 
 ## Looking for a name you don't see?
@@ -241,8 +241,8 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 | `MatchWithHandlersRef`, `MatchFirstWithHandlers`, and the other borrowed and first-argument matcher forms | the matcher page they vary, under [Dispatch combinators](./providers/dispatch/index.md) |
 | `ExtractFirstFieldAndHandle`, `HandleFirstFieldValue` | [`ExtractFieldAndHandle`](./providers/dispatch/extract_field_and_handle.md), [`HandleFieldValue`](./providers/dispatch/handle_field_value.md) |
 | `DispatchMatchers`, `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler` | [Dispatch combinators](./providers/dispatch/index.md) |
-| `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/map_type.md) |
-| `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/map_type_ref.md) |
+| `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/type-level/map_type.md) |
+| `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/type-level/map_type_ref.md) |
 | `product!` (the value-level form) | [`Product!`](./macros/product.md) |
 | `#[impl_generics(...)]` | [`#[cgp_fn]`](./macros/cgp_fn.md) |
 | `#[prefix(...)]` | [`cgp_namespace!`](./macros/cgp_namespace.md) |

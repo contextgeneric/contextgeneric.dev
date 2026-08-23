@@ -16,7 +16,7 @@ stored field type implements `AsRef<Value>`. It exists for a getter whose return
 *through* a field rather than being the field's own type: a `&Config` from a stored `Arc<Config>`, for
 example, where the field is not a `Config` but can be borrowed as one.
 
-`UseFieldRef` is a foundational [`FieldGetter`](../traits/field_getter.md) rather than a getter
+`UseFieldRef` is a foundational [`FieldGetter`](../traits/field-access/field_getter.md) rather than a getter
 component's own provider, so it is wired through its [`WithFieldRef`](with_field_ref.md) alias,
 `WithProvider<UseFieldRef<Tag, Value>>`. That distinguishes it from [`UseField`](use_field.md), which
 [`#[cgp_getter]`](../macros/cgp_getter.md) generates a getter-component implementation for directly.
@@ -31,7 +31,7 @@ borrowed as. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
-`UseFieldRef` supplies only the foundational [`FieldGetter`](../traits/field_getter.md), so it is wired
+`UseFieldRef` supplies only the foundational [`FieldGetter`](../traits/field-access/field_getter.md), so it is wired
 through its [`WithFieldRef`](with_field_ref.md) alias rather than named directly. See
 [`WithFieldRef`](with_field_ref.md) for the import, the wiring form, and a worked example; the mechanism
 those rest on is described under [Under the hood](#under-the-hood) below.
@@ -46,7 +46,7 @@ a borrowed-view getter needs it — rather than the plain [`UseField`](use_field
 ## Under the hood
 
 `UseFieldRef<Tag, Value>` implements the provider-side getter
-[`FieldGetter`](../traits/field_getter.md) by reading the field at `Tag` and dereferencing it to
+[`FieldGetter`](../traits/field-access/field_getter.md) by reading the field at `Tag` and dereferencing it to
 `&Value`:
 
 ```rust
@@ -68,7 +68,7 @@ The `where` clause carries the defining constraint: the context's field at `Tag`
 is read at `Tag`. The body reads the field and calls `as_ref()`. The `'static` bound on the field type
 lets Rust infer the borrow's lifetime through the `AsRef` call.
 
-`UseFieldRef` also implements the mutable getter [`MutFieldGetter`](../traits/mut_field_getter.md),
+`UseFieldRef` also implements the mutable getter [`MutFieldGetter`](../traits/field-access/mut_field_getter.md),
 requiring the field type to implement both `AsRef<Value>` and `AsMut<Value>` and returning `&mut Value`
 through `as_mut()`. Because these are `FieldGetter` implementations rather than a getter component's own
 provider trait, the [`WithProvider`](with_provider.md) adapter behind `WithFieldRef` turns
@@ -86,8 +86,8 @@ access rather than abstract-type resolution.
   `UseFieldRef` into a getter-component provider.
 - [`ChainGetters`](chain_getters.md) — another foundational `FieldGetter`, composed for nested contexts.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — the macro that defines the getter this is wired to.
-- [`FieldGetter`](../traits/field_getter.md) and [`MutFieldGetter`](../traits/mut_field_getter.md) — the
-  provider-side getters it implements, over [`HasField`](../traits/has_field.md).
+- [`FieldGetter`](../traits/field-access/field_getter.md) and [`MutFieldGetter`](../traits/field-access/mut_field_getter.md) — the
+  provider-side getters it implements, over [`HasField`](../traits/field-access/has_field.md).
 
 The ideas behind it:
 

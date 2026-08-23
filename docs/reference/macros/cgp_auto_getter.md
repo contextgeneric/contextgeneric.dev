@@ -339,7 +339,7 @@ found rather than the trait as not imported.
 - [`#[implicit]`](../attributes/implicit.md) — the default way to read a field, and the form to prefer.
 - [`#[cgp_getter]`](./cgp_getter.md) — the wireable counterpart, for per-context field choice.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — what a context derives to qualify.
-- [`HasField`](../traits/has_field.md) — the trait the generated bound is written against.
+- [`HasField`](../traits/field-access/has_field.md) — the trait the generated bound is written against.
 - [`Symbol!`](./symbol.md) — the type-level field name the bound is keyed on.
 - [`#[uses]`](../attributes/uses.md) — how a provider depends on a getter by name.
 - [`#[cgp_type]`](./cgp_type.md) — for an abstract type standing on its own rather than inferred from a

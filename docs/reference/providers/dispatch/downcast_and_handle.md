@@ -49,7 +49,7 @@ pub struct DowncastAndHandle<Input, Provider = UseContext>(pub PhantomData<(Inpu
 ```
 
 Its `Output` is `Result<Output, Remainder>`. It uses
-[`CanDowncastFields<Inner>`](../../traits/can_downcast_fields.md) to try to narrow the input to `Inner`;
+[`CanDowncastFields<Inner>`](../../traits/casting/can_downcast_fields.md) to try to narrow the input to `Inner`;
 on success it hands the whole `Inner` value to `Provider` and returns `Ok`, and on failure it returns
 `Err` of the remainder. It implements both `Computer` and `AsyncComputer`.
 
@@ -58,7 +58,7 @@ on success it hands the whole `Inner` value to `Provider` and returns `Ok`, and 
 - [`ExtractFieldAndHandle`](extract_field_and_handle.md) — the single-variant adapter this generalizes to
   a group.
 - [`MatchWithHandlers`](match_with_handlers.md) — the matcher that consumes a list mixing both.
-- [`CanDowncastFields`](../../traits/can_downcast_fields.md) — the cast it uses to narrow the input.
+- [`CanDowncastFields`](../../traits/casting/can_downcast_fields.md) — the cast it uses to narrow the input.
 - [`UseContext`](../use_context.md) — the default inner provider.
 
 The ideas behind it:

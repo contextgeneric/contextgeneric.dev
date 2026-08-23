@@ -260,7 +260,7 @@ hand for some other type without colliding with it.
 - [`#[cgp_computer]`](./cgp_computer.md) — how each per-variant handler is emitted.
 - [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) — what the enum needs to be dispatchable.
 - [`Computer`](../components/handler/computer.md) — the component the generated bound is written against.
-- [`ExtractField`](../traits/extract_field.md) — the extractor family the matching walks.
+- [`ExtractField`](../traits/variant/extract_field.md) — the extractor family the matching walks.
 - [`#[cgp_component]`](./cgp_component.md) — the better starting point when contexts should configure the
   operation.
 

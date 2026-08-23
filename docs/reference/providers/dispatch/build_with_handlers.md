@@ -65,9 +65,9 @@ where
 }
 ```
 
-It obtains an empty builder from [`HasBuilder`](../../traits/has_builder.md), threads it through the list
+It obtains an empty builder from [`HasBuilder`](../../traits/builder/has_builder.md), threads it through the list
 with [`PipeHandlers`](../handler/pipe_handlers.md) so each adapter sets its field, and calls
-[`FinalizeBuild`](../../traits/finalize_build.md) to recover the concrete `Output`. The original `Input`
+[`FinalizeBuild`](../../traits/builder/finalize_build.md) to recover the concrete `Output`. The original `Input`
 is discarded; the output is produced from the builder. It implements `Computer`, `TryComputer`, and
 `Handler`, the latter two requiring the context to have an error type. Because `finalize_build` is in
 scope only for the all-present builder configuration, a missing field is caught at compile time.
@@ -79,7 +79,7 @@ scope only for the all-present builder configuration, a missing field is caught 
 - [`BuildAndMergeOutputs`](build_and_merge_outputs.md) — the higher-level wrapper for a list of plain
   field-producing providers.
 - [`PipeHandlers`](../handler/pipe_handlers.md) — the pipeline it threads the builder through.
-- [`HasBuilder`](../../traits/has_builder.md), [`FinalizeBuild`](../../traits/finalize_build.md) — the
+- [`HasBuilder`](../../traits/builder/has_builder.md), [`FinalizeBuild`](../../traits/builder/finalize_build.md) — the
   traits that start and finish the build.
 
 The ideas behind it:

@@ -88,7 +88,7 @@ the value, use [`MatchFirstWithHandlers`](match_first_with_handlers.md).
 pub struct MatchWithHandlers<Handlers>(pub PhantomData<Handlers>);
 ```
 
-Its `Computer` impl requires the input to implement [`HasExtractor`](../../traits/has_extractor.md), runs
+Its `Computer` impl requires the input to implement [`HasExtractor`](../../traits/variant/has_extractor.md), runs
 the shared matcher loop over `Input::Extractor` to obtain `Result<Output, Remainder>`, and calls
 `finalize_extract_result` on that result so the uninhabited remainder is discharged:
 
@@ -129,8 +129,8 @@ a user names.
 - [`ExtractFieldAndHandle`](extract_field_and_handle.md), [`HandleFieldValue`](handle_field_value.md) —
   the adapters the list is built from.
 - [`PipeMonadic`](../monad/pipe_monadic.md) — the `OkMonadic` pipeline the matcher loop is built on.
-- [`HasExtractor`](../../traits/has_extractor.md), [`FinalizeExtract`](../../traits/finalize_extract.md),
-  [`FinalizeExtractResult`](../../traits/finalize_extract_result.md) — the traits it stands on.
+- [`HasExtractor`](../../traits/variant/has_extractor.md), [`FinalizeExtract`](../../traits/variant/finalize_extract.md),
+  [`FinalizeExtractResult`](../../traits/variant/finalize_extract_result.md) — the traits it stands on.
 
 The ideas behind it:
 

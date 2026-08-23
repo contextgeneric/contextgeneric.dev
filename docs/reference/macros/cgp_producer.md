@@ -155,7 +155,7 @@ impl<__Context__, __Code__> Producer<__Context__, __Code__> for MagicNumber {
 ```
 
 [`#[cgp_new_provider]`](./cgp_provider.md) declares `pub struct MagicNumber;` and derives the
-[`IsProviderFor`](../traits/is_provider_for.md) impl, whose parameter tuple here holds just the code tag. The
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl, whose parameter tuple here holds just the code tag. The
 context and code parameters carry the reserved names `__Context__` and `__Code__`.
 
 Then the wiring, which reaches **all eight** other components:

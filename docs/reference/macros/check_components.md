@@ -36,7 +36,7 @@ cannot, at the wiring site rather than wherever the capability first gets called
 The second thing it buys is a *readable* failure, and that is the part worth understanding. Asking the
 obvious question, "does `Person` implement `CanGreet`?", makes the compiler report only the last link in
 the chain, typically that some provider does not implement its provider trait, with no word about why. The
-macro instead routes the assertion through [`CanUseComponent`](../traits/can_use_component.md), which holds
+macro instead routes the assertion through [`CanUseComponent`](../traits/wiring/can_use_component.md), which holds
 only when the context both delegates the component *and* the chosen provider's real bounds are satisfied.
 Because those bounds ride explicitly on a marker trait, the compiler evaluates them and names the one that
 failed. A missing `name` field surfaces as a missing `name` field, not as an opaque "trait not
@@ -242,7 +242,7 @@ impl __CheckPerson<GreeterComponent, ()> for Person {}
 ```
 
 The impl holds only if `Person: CanUseComponent<GreeterComponent, ()>`, which in turn requires that `Person`
-delegates the component and that its delegate satisfies [`IsProviderFor`](../traits/is_provider_for.md) for
+delegates the component and that its delegate satisfies [`IsProviderFor`](../traits/wiring/is_provider_for.md) for
 `Person`. That indirection is the entire point: because the marker carries the provider's real bounds, an
 unmet one is reported specifically rather than as a bare missing implementation. The generic parameters are
 literally `__Component__` and `__Params__` in the emitted code.
@@ -376,10 +376,10 @@ provider was found and its dependencies are satisfiable, not that the provider d
 - [`delegate_components!`](./delegate_components.md) — the wiring this verifies.
 - [`delegate_and_check_components!`](./delegate_and_check_components.md) — wires and checks in one step, for
   simple tables.
-- [`CanUseComponent`](../traits/can_use_component.md) — the assertion the default form makes.
-- [`IsProviderFor`](../traits/is_provider_for.md) — what `#[check_providers]` asserts, and what carries a
+- [`CanUseComponent`](../traits/wiring/can_use_component.md) — the assertion the default form makes.
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — what `#[check_providers]` asserts, and what carries a
   provider's real bounds.
-- [`DelegateComponent`](../traits/delegate_component.md) — the lazily-accepted table entry that makes a check
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the lazily-accepted table entry that makes a check
   necessary.
 - [`#[cgp_component]`](./cgp_component.md) — defines the components a table names.
 - [`#[use_provider]`](../attributes/use_provider.md) — builds the nested stacks `#[check_providers]` exists

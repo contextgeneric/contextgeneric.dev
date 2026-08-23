@@ -46,15 +46,15 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 ```
 
 That rule is worth internalizing, because the trait's own parameter names suggest the opposite
-arrangement (see [`DefaultImpls1`](../traits/default_impls1.md#the-one-thing-to-get-right)).
+arrangement (see [`DefaultImpls1`](../traits/namespace/default_impls1.md#the-one-thing-to-get-right)).
 
 **The path may name any trait**, not only the three CGP ships. A trait of your own with the right shape
-works identically, which is why [`DefaultImpls2`](../traits/default_impls2.md) needed no new construct to
+works identically, which is why [`DefaultImpls2`](../traits/namespace/default_impls2.md) needed no new construct to
 be usable.
 
-The three built-in targets are [`DefaultNamespace`](../traits/default_namespace.md) for a component-only
-key, [`DefaultImpls1`](../traits/default_impls1.md) for a per-type default (the usual choice), and
-[`DefaultImpls2`](../traits/default_impls2.md) for a two-type key.
+The three built-in targets are [`DefaultNamespace`](../traits/namespace/default_namespace.md) for a component-only
+key, [`DefaultImpls1`](../traits/namespace/default_impls1.md) for a per-type default (the usual choice), and
+[`DefaultImpls2`](../traits/namespace/default_impls2.md) for a two-type key.
 
 ## Examples
 
@@ -141,11 +141,11 @@ never the provider's own `where` clause.** That is deliberate, and it lets the a
 ordinary providers: a provider whose bounds come from [`#[use_type]`](./use_type.md),
 [`#[uses]`](./uses.md), [`#[implicit]`](./implicit.md), or [`#[use_provider]`](./use_provider.md)
 registers cleanly, because those bounds stay on the provider's impl and its
-[`IsProviderFor`](../traits/is_provider_for.md) and are checked when a real context resolves it.
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) and are checked when a real context resolves it.
 
 Consumption is the mirror. A `for <T, Provider> in DefaultImpls1<Component> { … }` loop inside
 [`delegate_components!`](../macros/delegate_components.md) emits a
-[`DelegateComponent`](../traits/delegate_component.md) impl whose `where` clause projects the default:
+[`DelegateComponent`](../traits/wiring/delegate_component.md) impl whose `where` clause projects the default:
 
 ```rust
 where T: DefaultImpls1<Component, App, Delegate = Provider>
@@ -172,7 +172,7 @@ several tables on one provider.
 
 **`Key` becomes `Self`, not a parameter.** Read `#[default_impl(Key in Path)]` as "`Key` becomes `Self`"
 and the trait's positions follow. The parameter names on
-[`DefaultImpls1`](../traits/default_impls1.md) suggest otherwise.
+[`DefaultImpls1`](../traits/namespace/default_impls1.md) suggest otherwise.
 
 **Do not write the table parameter.** The macro appends it; supplying it yourself makes the path's arity
 wrong.
@@ -181,8 +181,8 @@ wrong.
 something to work around: put the wiring in the namespace body instead.
 
 **The lookup trait must be imported.** The emitted impl names it, so
-[`DefaultImpls1`](../traits/default_impls1.md) and [`DefaultImpls2`](../traits/default_impls2.md) need
-`use cgp::core::component::…`; [`DefaultNamespace`](../traits/default_namespace.md) is in the prelude.
+[`DefaultImpls1`](../traits/namespace/default_impls1.md) and [`DefaultImpls2`](../traits/namespace/default_impls2.md) need
+`use cgp::core::component::…`; [`DefaultNamespace`](../traits/namespace/default_namespace.md) is in the prelude.
 
 **It takes one argument and is not repeatable** for several tables on one provider.
 
@@ -190,16 +190,16 @@ something to work around: put the wiring in the namespace body instead.
 
 ## Related constructs
 
-- [`DefaultImpls1`](../traits/default_impls1.md) — the usual target, and where the positional rule is
+- [`DefaultImpls1`](../traits/namespace/default_impls1.md) — the usual target, and where the positional rule is
   worked out.
-- [`DefaultNamespace`](../traits/default_namespace.md) and
-  [`DefaultImpls2`](../traits/default_impls2.md) — the component-only and two-type targets.
+- [`DefaultNamespace`](../traits/namespace/default_namespace.md) and
+  [`DefaultImpls2`](../traits/namespace/default_impls2.md) — the component-only and two-type targets.
 - [`cgp_namespace!`](../macros/cgp_namespace.md) — defines a namespace, and documents
   `#[prefix(...)]`.
 - [`delegate_components!`](../macros/delegate_components.md) — carries the `namespace` header and the
   `for … in` loop that consume a registration.
 - [`#[cgp_impl]`](../macros/cgp_impl.md) — the host this attribute goes on.
-- [`IsProviderFor`](../traits/is_provider_for.md) — where a registered provider's real bounds are
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — where a registered provider's real bounds are
   checked.
 - [`RedirectLookup`](../providers/redirect_lookup.md) — the usual `Delegate` value.
 

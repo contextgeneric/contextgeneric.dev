@@ -31,7 +31,7 @@ delegate_components! {
 ```
 
 The tag is a [`Symbol!`](../macros/symbol.md) for a named field or an `Index<N>` for a tuple field, and
-the context must have a [`HasField`](../traits/has_field.md) implementation for it. This reads the
+the context must have a [`HasField`](../traits/field-access/has_field.md) implementation for it. This reads the
 `first_name` field exactly as wiring [`UseField<Symbol!("first_name")>`](use_field.md) would.
 
 ## Examples
@@ -83,7 +83,7 @@ pub type WithField<Tag> = WithProvider<UseField<Tag>>;
 
 The [`WithProvider`](with_provider.md) adapter forwards a getter's provider-trait method to the inner
 provider's foundational method, and [`UseField<Tag>`](use_field.md) is the foundational
-[`FieldGetter`](../traits/field_getter.md) that reads the field at `Tag`. The generated `WithProvider`
+[`FieldGetter`](../traits/field-access/field_getter.md) that reads the field at `Tag`. The generated `WithProvider`
 impl that makes this work is shown on the [`WithProvider`](with_provider.md) page.
 
 ## Related constructs
@@ -93,7 +93,7 @@ impl that makes this work is shown on the [`WithProvider`](with_provider.md) pag
 - [`WithFieldRef`](with_field_ref.md) — the sibling alias for a field borrowed through `AsRef`.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — defines the getter component and generates the
   `WithProvider` impl.
-- [`HasField`](../traits/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the
+- [`HasField`](../traits/field-access/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the
   field access it reads, keyed by [`Symbol!`](../macros/symbol.md) or `Index<N>`.
 
 The ideas behind it:

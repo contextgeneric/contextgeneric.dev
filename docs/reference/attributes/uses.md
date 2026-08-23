@@ -169,7 +169,7 @@ parameter is literally `__Context__` in the emitted code, and appears as `Self` 
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) block the behaviour is the same, with the predicates
 appended to that provider's `where` clause. That is also where the generated
-[`IsProviderFor`](../traits/is_provider_for.md) impl picks them up, so the compiler reports an unmet
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl picks them up, so the compiler reports an unmet
 import by name rather than as a bare missing implementation.
 
 ## Formal grammar

@@ -242,7 +242,7 @@ where
 The derived impl is your impl with the body and associated types removed and the trait swapped. It
 keeps the same generic parameters and the same bounds, so it holds under precisely the conditions the
 real impl holds. This is the whole point: a check evaluates
-[`IsProviderFor`](../traits/is_provider_for.md) to find out *why* a provider does not apply.
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) to find out *why* a provider does not apply.
 
 The macro assembles its three trait arguments from the provider trait's own. The first is the
 **component** (`ComputerRefComponent`, the default derived from the trait name, or whatever the
@@ -367,7 +367,7 @@ the consumer side is unaffected: a wired context reads `<App as CanRateLimit>::L
 
 - [`#[cgp_impl]`](./cgp_impl.md) — the form to write, which desugars to these two.
 - [`#[cgp_component]`](./cgp_component.md) — defines the provider trait being implemented.
-- [`IsProviderFor`](../traits/is_provider_for.md) — the marker trait the macro derives, and why.
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — the marker trait the macro derives, and why.
 - [`delegate_components!`](./delegate_components.md) — wires a provider onto a context.
 - [`check_components!`](./check_components.md) — evaluates the derived marker to report a missing
   dependency by name.

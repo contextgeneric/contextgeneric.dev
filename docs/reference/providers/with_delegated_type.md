@@ -104,7 +104,7 @@ pub type WithDelegatedType<Components> = WithProvider<UseDelegatedType<Component
 The [`WithProvider`](with_provider.md) adapter forwards a type component's provider-trait method to the
 inner provider's foundational method, and [`UseDelegatedType<Components>`](use_delegated_type.md) is the
 foundational [`TypeProvider`](../components/has_type.md) that resolves each tag through a
-[`DelegateComponent`](../traits/delegate_component.md) lookup. The `UseDelegatedType` mechanism is
+[`DelegateComponent`](../traits/wiring/delegate_component.md) lookup. The `UseDelegatedType` mechanism is
 documented on the [`UseDelegatedType`](use_delegated_type.md) page, and the generated `WithProvider` impl
 on the [`WithProvider`](with_provider.md) page.
 
@@ -114,7 +114,7 @@ on the [`WithProvider`](with_provider.md) page.
 - [`UseDelegatedType`](use_delegated_type.md) — the foundational provider it wraps, where the table
   lookup is documented.
 - [`WithType`](with_type.md) — the sibling alias for a single fixed concrete type.
-- [`DelegateComponent`](../traits/delegate_component.md) — the table the lookup reads.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
 - [`HasType` / `TypeProvider`](../components/has_type.md) — the abstract-type component it answers for.
 - [`#[cgp_type]`](../macros/cgp_type.md) — defines the abstract-type components it resolves.
 
