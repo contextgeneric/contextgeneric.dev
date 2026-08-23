@@ -110,7 +110,7 @@ then delegates both components to `UseDefault` in one array entry, so `App.greet
 `"Hello, John!"` entirely from the two default bodies, with no method implemented on `App` or on a
 dedicated provider.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `UseDefault` when a component's methods all have usable defaults and a context wants them
 unchanged.** It gives a default-only component a name to wire, so it fits the delegation table like any

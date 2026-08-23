@@ -177,7 +177,7 @@ The error type is one of three decisions a context makes about failure, and
 [modular error handling](/docs/concepts/modular-error-handling#why-the-error-type-is-the-hard-one)
 separates them.
 
-## When to reach for it, and when not
+## When to use it
 
 **Use `#[use_type]` whenever a definition names an abstract type another component supplies.** It is the
 recommended form; you read a hand-written supertrait plus `Self::`-qualified paths in existing code rather

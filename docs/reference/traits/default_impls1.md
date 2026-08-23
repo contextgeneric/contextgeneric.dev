@@ -139,7 +139,7 @@ cgp_namespace! {
 Pointing `for <T, Provider> in DefaultShowComponents { … }` at this wires the listed types through the
 same projection.
 
-## When to reach for it, and when not
+## When to use it
 
 **Use it for a per-type default, and reach for the simpler trait when the key is a component alone.**
 

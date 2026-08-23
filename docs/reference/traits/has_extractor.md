@@ -83,7 +83,7 @@ let shape = Shape::from_extractor(extractor);
 Note that this only works on an extractor still at the all-possible configuration. Once a variant has
 been ruled out the type has changed, and there is no way back.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `to_extractor` only when the chain will take payloads by value**, and prefer a borrowing
 accessor otherwise — the weakest that works is the right one.

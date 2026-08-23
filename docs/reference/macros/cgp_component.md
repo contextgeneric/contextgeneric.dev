@@ -182,7 +182,7 @@ table, which maps `AreaCalculatorComponent` to `RectangleArea`, and `RectangleAr
 fields to compute the result. Swapping the provider in that one wiring line changes what `rect.area()`
 does, and nothing else in the program changes.
 
-## When to reach for it, and when not
+## When to use it
 
 Reach for `#[cgp_component]` when a capability needs **more than one implementation, and the
 choice belongs to the type using it.** That is the case it exists for, and its machinery is not free:

@@ -34,7 +34,7 @@ type Pipeline = PipeHandlers<Product![Classify, BindOk<IdentMonadic, Halve>]>;
 At the bottom of a single-layer pipeline `M` is `IdentMonadic`; a stacked monad threads a deeper monad
 through it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the [monad providers](index.md) rather than `BindOk` directly.** Wiring
 [`PipeMonadic`](pipe_monadic.md) with the [`OkMonadic`](index.md#the-monad-markers) marker composes

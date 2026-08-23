@@ -37,7 +37,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PromoteTryComputer` when the base provider is a synchronous fallible `TryComputer`** and
 you wire its family by hand. For a plain `Computer` base use [`PromoteComputer`](promote_computer.md);

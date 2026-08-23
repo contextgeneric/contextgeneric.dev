@@ -72,7 +72,7 @@ where
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it whenever generic code reads a shape and the caller keeps the value** — which is most
 read-only structural code.

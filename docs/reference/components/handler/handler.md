@@ -101,7 +101,7 @@ the wired provider is a pure `Computer`, a fallible `TryComputer`, an `AsyncComp
 pipeline code targets `Handler`. The example is **parameter-targeted**: the computation acts on the
 `Input` type, while the context decides which provider answers.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound generic pipeline code against `CanHandle` when it should accept any computation regardless of
 which capabilities the provider actually uses.** Because every simpler member promotes up to a handler,

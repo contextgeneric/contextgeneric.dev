@@ -108,7 +108,7 @@ where
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[extend_where]` when a predicate is part of what the capability means**, and you want it
 enforced where the trait is named rather than silently narrowing which contexts the implementation covers.

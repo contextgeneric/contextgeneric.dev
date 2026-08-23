@@ -195,7 +195,7 @@ check_components! {
 
 This verifies `MyApp: CanCalculateArea<Rectangle>` and `MyApp: CanCalculateArea<Circle>` in one table.
 
-## When to reach for it, and when not
+## When to use it
 
 **Every context's wiring should be checked somehow.** That is the rule without exceptions; only the
 choice of macro scales with the wiring's complexity.

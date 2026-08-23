@@ -43,7 +43,7 @@ matchers [`MatchWithValueHandlers`](match_with_value_handlers.md) and
 [`MatchWithFieldHandlers`](match_with_field_handlers.md) generate lists of these adapters from an enum's
 fields, so you rarely write them out by hand.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `ExtractFieldAndHandle` when you spell out a matcher's per-variant list by hand** with
 [`MatchWithHandlers`](match_with_handlers.md), naming one adapter per variant. When every variant is

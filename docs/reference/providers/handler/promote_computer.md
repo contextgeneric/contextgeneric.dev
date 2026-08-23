@@ -47,7 +47,7 @@ delegate_components! {
 
 Most code gets this wiring from [`#[cgp_computer]`](../../macros/cgp_computer.md) rather than writing it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PromoteComputer` when you wire a hand-written `Computer` provider's family explicitly**
 rather than through [`#[cgp_computer]`](../../macros/cgp_computer.md), which wires it for you. Use a

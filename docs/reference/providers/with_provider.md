@@ -83,7 +83,7 @@ abstract types: wiring a type component to `WithType<String>` adapts [`UseType<S
 and to `WithDelegatedType<SomeTable>` adapts a [`UseDelegatedType`](use_delegated_type.md) that resolves
 the type through a table.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for one of the aliases, not `WithProvider` directly.** [`WithField`](with_field.md),
 [`WithType`](with_type.md), and [`WithContext`](with_context.md) are interchangeable with the plain

@@ -44,7 +44,7 @@ maps each input type to the provider responsible for it. Unlike the per-`Code` d
 [`UseDelegate`](../use_delegate.md), input dispatch has no `open`-statement equivalent, so the nested
 table is the current form rather than a legacy one.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `UseInputDelegate` when a handler should run a different provider depending on the type of
 its input**, which is common in the [dispatch combinators](../dispatch/index.md), where a matcher routes

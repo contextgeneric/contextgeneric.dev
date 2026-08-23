@@ -131,7 +131,7 @@ since only a trait *declaration* trips the lint, so the provider keeps the natur
 the rewritten signature, and the two agree because an `async fn` desugars to exactly such a future-returning
 method.
 
-## When to reach for it, and when not
+## When to use it
 
 **Use `#[async_trait]` on every CGP trait with an async method.** There is no judgement to make here: it is
 how an async method is declared, and the alternative is either a lint warning or writing the `impl Future`

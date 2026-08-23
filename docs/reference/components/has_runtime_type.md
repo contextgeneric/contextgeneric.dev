@@ -91,7 +91,7 @@ where
 `TokioRuntime`. `describe` names only the runtime type and never a runtime value, which is exactly the
 case `HasRuntimeType` serves alone. `App` is an **environmental context**, and the capability targets it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `HasRuntimeType` when code names the runtime type but never touches a runtime value.** That
 is the narrower of the two runtime capabilities, and asking for it alone keeps a bound honest about what

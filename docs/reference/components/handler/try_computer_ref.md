@@ -88,7 +88,7 @@ where
 abstract error on failure. The example is **parameter-targeted**: the computation acts on the `Input`,
 while the context decides the provider and the error type.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `TryComputerRef` when a fallible synchronous computation only needs to read its input.** It
 keeps ownership with the caller while still reporting failure through the context's error type.

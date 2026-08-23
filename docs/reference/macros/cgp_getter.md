@@ -33,7 +33,7 @@ it.
 **This is an advanced tool, not the next step up from `#[cgp_auto_getter]`.** What you pay for the
 decoupling is a line of wiring per context, and what you get is only useful when a context needs
 to control which field is read, or to supply the value some way other than reading a field. Most getters
-want neither. The [When to reach for it](#when-to-reach-for-it-and-when-not) section draws the line.
+want neither. The [When to use it](#when-to-use-it) section draws the line.
 
 ## Usage
 
@@ -146,7 +146,7 @@ impl HasName for Anonymous {
 That last form is worth seeing, because it shows a `#[cgp_getter]` trait is an ordinary component whose
 consumer trait can be implemented like any Rust trait.
 
-## When to reach for it, and when not
+## When to use it
 
 **Do not reach for `#[cgp_getter]` by default.** Among the three ways to read a value from a context it is
 the last resort, and the ordering is worth holding whole:

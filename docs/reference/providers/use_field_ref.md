@@ -36,7 +36,7 @@ through its [`WithFieldRef`](with_field_ref.md) alias rather than named directly
 [`WithFieldRef`](with_field_ref.md) for the import, the wiring form, and a worked example; the mechanism
 those rest on is described under [Under the hood](#under-the-hood) below.
 
-## When to reach for it, and when not
+## When to use it
 
 You choose `UseFieldRef` by wiring its [`WithFieldRef`](with_field_ref.md) alias, so the guidance on when
 a borrowed-view getter needs it — rather than the plain [`UseField`](use_field.md) or an

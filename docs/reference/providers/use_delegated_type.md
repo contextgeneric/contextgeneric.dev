@@ -32,7 +32,7 @@ wired through its [`WithDelegatedType`](with_delegated_type.md) alias rather tha
 [`WithDelegatedType`](with_delegated_type.md) for the import, the wiring form, and a worked example; the
 mechanism those rest on is described under [Under the hood](#under-the-hood) below.
 
-## When to reach for it, and when not
+## When to use it
 
 You choose `UseDelegatedType` by wiring its [`WithDelegatedType`](with_delegated_type.md) alias, so the
 guidance on when to answer several abstract types from one shared table — rather than fixing each one

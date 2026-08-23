@@ -59,7 +59,7 @@ through the err monad, and the same list composed under `OkMonadic` can be drive
 PipeMonadic::<OkMonadic, Product![ReturnOkErr, ReturnOkOk, ReturnOkErr]>::try_compute(&context, code, 1)
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PipeMonadic` when a pipeline's steps should short-circuit on a branch**, such as an error
 or the first success, rather than always feeding the next step. For a pipeline where every step runs

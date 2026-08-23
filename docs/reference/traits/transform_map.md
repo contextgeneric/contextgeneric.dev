@@ -85,7 +85,7 @@ configuration [`FinalizeBuild`](./finalize_build.md) accepts.
 **That is not hypothetical: it is how [`CanFinalizeWithDefault`](./can_finalize_with_default.md) works**,
 and reading it here is the shortest route to understanding that layer.
 
-## When to reach for it, and when not
+## When to use it
 
 **Implement it to define a new per-field conversion**, and reach for the existing layer otherwise.
 

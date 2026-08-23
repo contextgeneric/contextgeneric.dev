@@ -40,7 +40,7 @@ delegate_components! {
 
 A `String` entry must be present for `DisplayError` to forward to.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `DisplayError` when a source implements `Display` and you want its user-facing message
 carried as a string.** Pair it with a provider on the `String` source, since it forwards rather than

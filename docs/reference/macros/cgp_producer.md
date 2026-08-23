@@ -111,7 +111,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[cgp_producer]` when a pipeline step needs no input.** That is the whole of its remit, and
 within it there is nothing simpler.

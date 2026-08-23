@@ -103,7 +103,7 @@ the `Code` tag. The example is **parameter-targeted**: the computation acts on t
 the context decides the provider. In practice a provider like this is written with
 [`#[cgp_computer]`](../../macros/cgp_computer.md) rather than by hand.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `Computer` for a synchronous transform that cannot fail.** It is the default member of the
 family to implement, because promotion lifts it into every other variant, so one `Computer` provider can

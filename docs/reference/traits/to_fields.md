@@ -73,7 +73,7 @@ where
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it when generic code must consume a value and work on its entries**, and reach for the
 borrowing form otherwise.

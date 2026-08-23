@@ -73,7 +73,7 @@ let employee = Employee::builder()
     .finalize_build();
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a record is assembled from independent pieces.** That is the extensible builder
 pattern's merge step, and it is what the trait exists for.

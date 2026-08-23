@@ -127,7 +127,7 @@ let mut shape = Shape::Circle(Circle { radius: 1.0 });
 shape.scale(2.0);
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when an existing per-type trait should also work on an enum of those types, unchanged.** That
 is the case it is built for, and within it there is nothing shorter.

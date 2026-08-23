@@ -40,7 +40,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **You rarely reach for `TryPromote` by hand.** The [`PromoteTryComputer`](promote_try_computer.md) and
 [`PromoteHandler`](promote_handler.md) bundles wire it, and [`PipeMonadic`](../monad/pipe_monadic.md)

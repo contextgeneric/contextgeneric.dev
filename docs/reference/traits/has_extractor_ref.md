@@ -64,7 +64,7 @@ let radius = shape
 The payload arrives as `&Circle`, so `circle.radius` reads through the borrow and nothing is moved. A
 full chain narrows the same way, with each remainder also borrowing.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it whenever the value must survive**, which is most read-only code over an enum.
 

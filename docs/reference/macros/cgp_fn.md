@@ -183,7 +183,7 @@ dependency; it does not know or care how that capability is implemented. `Rectan
 read, and that is its entire qualification. There is no `delegate_components!` anywhere in this
 program, and adding one would change nothing.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[cgp_fn]` first.** When a capability has one natural definition, this is the form to
 write, and starting here costs nothing if that changes later: the trait keeps its name and its method,

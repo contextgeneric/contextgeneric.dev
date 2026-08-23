@@ -77,7 +77,7 @@ Converting a *complete* value works too, by way of
 let builder = context.into_builder().to_optional();   // every field Some
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a builder already exists and its strictness has become the wrong shape.**
 

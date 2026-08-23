@@ -137,7 +137,7 @@ some later `person.greet()`.
 Rename the field to `name` and the block compiles and produces nothing — a passing check is a successful
 build, with nothing added to the binary.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for [`check_components!`](../macros/check_components.md); it is what reaches for this trait.** The one
 non-negotiable is that a context's wiring gets checked *somehow* — lazy wiring means an unchecked context can

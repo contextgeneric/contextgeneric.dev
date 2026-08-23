@@ -58,7 +58,7 @@ delegate_components! {
 `Scalar = f64`. The `Copy` bound on the associated type is checked against `f64` where the wiring is
 written.
 
-## When to reach for it, and when not
+## When to use it
 
 **Prefer the plain [`UseType<T>`](use_type.md) form.** It binds the same type and is the idiomatic
 value for a [`#[cgp_type]`](../macros/cgp_type.md) component's wiring entry. `WithType` exists for the

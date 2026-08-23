@@ -72,7 +72,7 @@ where
 An enum rebuilds the same way, from a [`Sum!`](../macros/sum.md) rather than a product — the arm that is
 present becomes the variant that is constructed.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it when generic code produces a concrete value from entries it has assembled or transformed.**
 Pair it with [`ToFields`](./to_fields.md) for a round trip, and require only one of the two when only one

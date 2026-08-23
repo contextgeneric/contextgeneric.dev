@@ -35,7 +35,7 @@ able to state the same thing as `fn name(&self) -> &str;` is the point.
 same field access and the same conversion rules, so a getter trait declared only to read a field adds a
 name and buys nothing. What a getter trait *does* buy is a capability other code can depend on by name,
 and the three cases where that matters are in
-[When to reach for it](#when-to-reach-for-it-and-when-not).
+[When to use it](#when-to-use-it).
 
 ## Usage
 
@@ -203,7 +203,7 @@ impl HasName for Employee {
 That hand-written impl is worth seeing, because it shows the trait is an ordinary Rust trait. The macro's
 only job was to save you writing the body.
 
-## When to reach for it, and when not
+## When to use it
 
 **Prefer an [`#[implicit]`](../attributes/implicit.md) argument, and reach for a getter trait only when one
 cannot do the job.** An implicit argument reads a field of the provider's own context as an ordinary

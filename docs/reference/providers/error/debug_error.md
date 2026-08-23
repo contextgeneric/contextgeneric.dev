@@ -46,7 +46,7 @@ The `String` entry must be present for `DebugError` to forward to. Here a raised
 formatted with `Debug` and handed to the `String` entry, which `RaiseFrom` converts into the abstract
 error.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `DebugError` when a source error implements `Debug` but the abstract error has no `From` impl
 for it, and you want its debug output carried as a string.** Pair it with a provider on the `String`

@@ -77,7 +77,7 @@ behaviour.
 stack therefore unwraps two `Result` layers in order, and an *n*-layer stack unwraps *n*, with no code
 specific to any depth.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the [monad providers](../providers/monad/index.md), not this trait.** A pipeline is built
 by wiring [`PipeMonadic`](../providers/monad/pipe_monadic.md) with a marker and a handler list; this is what

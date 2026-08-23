@@ -91,7 +91,7 @@ Neither struct knows about the other. They share two field *names*, matched at t
 caller. Remove the `build_field` line and this stops compiling, because
 [`finalize_build`](../traits/finalize_build.md) only exists once every field is present.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when generic code has to work over the struct's own structure**, and prefer
 [`#[derive(CgpData)]`](./derive_cgp_data.md) unless naming the shape earns its keep as documentation.
@@ -111,7 +111,7 @@ about what it emits.
   most of them.
 
 The full argument for when a type earns the extensible-data machinery at all is on the
-[umbrella page](./derive_cgp_data.md#when-to-reach-for-it-and-when-not).
+[umbrella page](./derive_cgp_data.md#when-to-use-it).
 
 ## Under the hood
 

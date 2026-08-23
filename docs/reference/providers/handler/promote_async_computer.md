@@ -40,7 +40,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PromoteAsyncComputer` when the base is an infallible async `AsyncComputer`** and you wire
 its family by hand. For a synchronous base use [`PromoteComputer`](promote_computer.md), and for a

@@ -82,7 +82,7 @@ where
 Requiring [`ToFields`](./to_fields.md) there instead would force every caller to give up its value or
 clone it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it when generic code reads a type's shape without consuming it**, and pair it with
 [`ToFieldsRef`](./to_fields_ref.md), which is the only way to obtain a value in this shape.

@@ -80,7 +80,7 @@ type OptionalVariants = <Variants as MapFields<IsOptional>>::Mapped;
 // = Sum![Option<String>, Option<u16>]
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when generic code must name a uniformly re-wrapped shape**, which is what a partial
 representation is — and essentially never otherwise.

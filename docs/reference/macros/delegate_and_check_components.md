@@ -34,7 +34,7 @@ writing both macros by hand would emit.
 that a newcomer cannot forget the check and then meet the confusing errors lazy wiring produces. The
 derivation understands only a mapping keyed on a component *name*, though, so a codebase whose wiring grows
 past that keeps the two macros separate. The reasons are in
-[When to reach for it](#when-to-reach-for-it-and-when-not).
+[When to use it](#when-to-use-it).
 
 ## Usage
 
@@ -227,7 +227,7 @@ check_components! {
 That pairing is the usual reason to reach for `#[skip_check]`: the fused derivation can only check the
 context, and a nested stack is better checked per layer.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it while getting started, and for tables that are plain `Component: Provider` entries.** It is
 the form that makes forgetting a check impossible, which is worth more than the control it gives up when the

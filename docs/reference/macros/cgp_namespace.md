@@ -205,7 +205,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for a namespace when the same wiring is repeated across contexts, or when a top-level table has
 grown too long to read.** Those are the two problems it solves, and below that threshold it costs more than

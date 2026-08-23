@@ -140,7 +140,7 @@ pub fn rect_area(&self) -> f64 {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Use `#[use_provider]` whenever an implementation depends on another implementation by name**, in
 preference to writing the bound by hand. You read the explicit `Inner: AreaCalculator<Self>` form in

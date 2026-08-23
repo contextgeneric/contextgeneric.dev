@@ -75,7 +75,7 @@ where
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when composing paths in generic code**, which is nested-accessor territory. If you are
 writing a path literally, [`Path!`](../macros/path.md) already gives you the whole thing and there is

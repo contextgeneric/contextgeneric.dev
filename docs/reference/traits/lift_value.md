@@ -79,7 +79,7 @@ bare value is being wrapped for the first time; `lift_output` where a continuati
 something in the inner shape and the step is passing it outward. Implementing the second as the first
 collapses the two branches.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the [monad providers](../providers/monad/index.md), not this trait.** A pipeline is built
 by wiring [`PipeMonadic`](../providers/monad/pipe_monadic.md) with a marker and a handler list.

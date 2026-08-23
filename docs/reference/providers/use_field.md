@@ -89,7 +89,7 @@ from the wiring.
 The same binding can be written with the [`WithField`](with_field.md) alias, which routes through
 [`WithProvider`](with_provider.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `UseField` only when the field name must differ from the method name**, or when a context
 needs full control over which field a getter reads from. That is the advanced case

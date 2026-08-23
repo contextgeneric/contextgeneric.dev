@@ -99,7 +99,7 @@ type Row = Product![u32, String, bool];
 let row: Row = product![1, "hi".to_string(), true];
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Write `Product!` when a construct asks for a type-level list**, which in practice means a handler pipeline or
 a provider list. Everywhere else it is generated for you.

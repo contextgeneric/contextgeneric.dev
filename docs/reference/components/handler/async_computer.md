@@ -83,7 +83,7 @@ example is **parameter-targeted**: the computation acts on the `Input`, while th
 provider. A provider is usually generated from a function with
 [`#[cgp_computer]`](../../macros/cgp_computer.md) rather than written by hand.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `AsyncComputer` for a computation that awaits but cannot fail.** It is the async infallible
 corner of the family, so a provider that only reads its input should prefer the by-reference

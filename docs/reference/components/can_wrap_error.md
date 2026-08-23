@@ -104,7 +104,7 @@ dependencies are declared with [`#[uses]`](../attributes/uses.md), so neither ap
 `CanLoad` signature, and any context that satisfies them makes `load` produce enriched errors in its own
 error type. The context is an **environmental context**, and the capability targets it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `CanWrapError<D>` when a provider should add context to an error before returning it.** It
 is how a CGP program builds the equivalent of an error chain or a `.context(...)` message without

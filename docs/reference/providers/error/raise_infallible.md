@@ -38,7 +38,7 @@ delegate_components! {
 The `Infallible` entry satisfies the raiser bound for a step that cannot fail, while other entries handle
 the source types that can.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `RaiseInfallible` when generic code must raise an `Infallible` on a context, even though the
 value can never occur.** This happens when a component is generic over an operation and one wiring of it

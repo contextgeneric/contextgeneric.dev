@@ -108,7 +108,7 @@ pub enum Shape {
 constructors, and an extractor. Worked examples of each half are on the
 [record](./derive_cgp_record.md#examples) and [variant](./derive_cgp_variant.md#examples) pages.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for one of these derives when generic code has to work over the type's own structure.** That is
 the test, and it is narrower than it sounds. Most types in a CGP program want

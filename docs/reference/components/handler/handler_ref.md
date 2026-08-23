@@ -90,7 +90,7 @@ where
 abstract error on failure. The example is **parameter-targeted**: the computation acts on the `Input`,
 while the context decides the provider and the error type.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `HandlerRef` when an async, fallible computation only needs to read its input**, for instance
 a request handler that inspects a borrowed request without consuming it. Bounding generic pipeline code

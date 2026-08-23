@@ -82,7 +82,7 @@ match value.downcast(PhantomData::<JustFoo>) {
 The first call starts the chain and the second continues it. Written the other way round — a second
 `downcast` on the remainder — it does not compile, because a remainder is not an enum.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it only as the continuation of a [`CanDowncast`](./can_downcast.md) chain.** It has no other
 use: its `Self` is a remainder, and a remainder only ever comes from a prior downcast.

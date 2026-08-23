@@ -76,7 +76,7 @@ The same appears in [`FinalizeOptional`](./finalize_optional.md), which returns
 `Result<Self::Target, &'static str>` — again projecting the destination through this trait rather than
 declaring one of its own.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it when generic code needs the destination type mid-build**, and reach for the more specific
 traits otherwise.

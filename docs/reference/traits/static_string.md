@@ -69,7 +69,7 @@ Where it shows up in real code is recovering a name for an error. The
 [optional-field layer](./finalize_optional.md)'s `finalize_optional` reports its missing field by
 returning `Tag::VALUE` — the field's own name, as a static string, with no allocation.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `StaticString` when you need a name as data, and for `Display` when you need it in a
 message.** That is the whole decision.

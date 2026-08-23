@@ -72,7 +72,7 @@ a context with `foo = 2`, `bar = 3`, `baz = 4` gives `((5 * 2) + 3) * 4`. Stages
 can be reconciled inline, as in `PromoteAsync<Promote<Add<Symbol!("bar")>>>`, which lifts a plain
 `Computer` stage up to the async `Handler` shape a pipeline expects.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PipeHandlers` to compose three or more handlers**, or any time a list reads better than
 nesting [`ComposeHandlers`](compose_handlers.md) by hand. For exactly two, `ComposeHandlers` is the

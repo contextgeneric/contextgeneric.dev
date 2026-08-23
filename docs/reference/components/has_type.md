@@ -101,7 +101,7 @@ where
 the application that carries its type choices. In real code you would write the named `#[cgp_type]`
 layer; this page documents the substrate it rests on.
 
-## When to reach for it, and when not
+## When to use it
 
 **You rarely name `HasType` directly. Reach for [`#[cgp_type]`](../macros/cgp_type.md) instead**, which
 defines a named abstract type with its own readable trait, and let it build on this substrate. The one

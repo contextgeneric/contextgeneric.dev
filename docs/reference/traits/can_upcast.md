@@ -74,7 +74,7 @@ assert_eq!(wide, FooBarBaz::Foo(1));
 Neither enum names the other. They share variant *names*, matched at the type level, and that is the
 whole coupling.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when an implementation works in a small local enum and its result must be widened.** That
 is the common use, and it is the construction-side counterpart of reading one field through a getter:

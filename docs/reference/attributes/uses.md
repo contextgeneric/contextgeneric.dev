@@ -111,7 +111,7 @@ impl AreaCalculator {
 This provider is a two-line adapter: it satisfies the `AreaCalculator` component by deferring to whatever
 `rectangle_area` computes. Any context with the fields that capability needs can wire it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Use `#[uses]` for every capability dependency**, in preference to writing the `Self:` bound by hand.
 That is the recommendation; you read the hand-written form in existing code rather than write it.

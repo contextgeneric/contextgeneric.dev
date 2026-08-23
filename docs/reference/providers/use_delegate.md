@@ -111,7 +111,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Prefer the [`open` statement](../macros/delegate_components.md) for new per-type dispatch.** It needs
 no separate table type, no `UseDelegate` wrapper, and no `#[derive_delegate]` on the component, because

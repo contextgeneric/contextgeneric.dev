@@ -42,7 +42,7 @@ type Match = MatchFirstWithHandlers<Product![
 
 For a list built automatically, use [`MatchFirstWithValueHandlers`](match_with_value_handlers.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `MatchFirstWithHandlers` when the per-variant handlers need extra arguments passed alongside
 the matched value**, such as a renderer that takes a target buffer or a visitor that takes an

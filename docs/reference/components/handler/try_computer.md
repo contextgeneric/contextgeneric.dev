@@ -108,7 +108,7 @@ supertraits `HasErrorType`, `App` must also wire an error type and an error rais
 `try_compute`. The example is **parameter-targeted**: the computation acts on the `Input`, while the
 context decides the provider and the error type.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `TryComputer` for a synchronous computation that can fail.** It is the fallible middle of
 the family, and it sits in the promotion lattice, so it both receives providers promoted from a

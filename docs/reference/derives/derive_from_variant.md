@@ -125,7 +125,7 @@ the construction-side counterpart of reading a field through a getter: the imple
 needs, and the widening is checked. Upcasting is documented with the other
 [structural casts](../traits/can_upcast.md), and it is built on the same per-variant machinery as this derive.
 
-## When to reach for it, and when not
+## When to use it
 
 **Derive it when code that does not name a variant has to construct one.** That is the whole test, and it is
 a narrower need than deconstruction. Most code decides which variant to build at a site that can just name

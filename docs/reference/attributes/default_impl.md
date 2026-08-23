@@ -102,7 +102,7 @@ delegate_components! {
 parameter. The loop wires every type with a registered default, and the direct `u64` line shadows
 whatever the namespace would otherwise supply for that one type.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a provider is the natural default for its key and you want that recorded where the
 provider is written.**

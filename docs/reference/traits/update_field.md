@@ -87,7 +87,7 @@ let (previous, builder) = builder.update_field(
 Because both markers are `IsOptional` here, `Output` is the same type as `Self` — which is exactly what
 lets an optional field be set repeatedly, unlike the core `build_field` that consumes an absent slot once.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it directly only for an operation neither [`BuildField`](./build_field.md) nor
 [`TakeField`](./take_field.md) covers.** Those two are the common transitions and read far better at a

@@ -79,7 +79,7 @@ where
 `scan` awaits the computation while keeping ownership of the `String` with the caller. The example is
 **parameter-targeted**: the computation acts on the `Input`, while the context decides the provider.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `AsyncComputerRef` when a computation is async and infallible and only reads its input.**
 That is a narrow combination, so most code reaches a simpler member first and lets promotion bridge to

@@ -51,7 +51,7 @@ through the context's own `ComputerComponent`, so the `Circle` and `Rectangle` p
 `ComputeArea` after all. `UseInputDelegate` is the correct wiring here because it keys on the input
 type; it has no `open`-statement equivalent.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `MatchWithValueHandlers` when every variant of an enum is handled the same way and each
 handler wants the bare payload.** This is the usual case, and far shorter than spelling out the list

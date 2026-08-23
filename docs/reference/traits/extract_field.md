@@ -89,7 +89,7 @@ after only the first extraction and it does not compile.
 implementations, which is the extensible visitor pattern: a chain exactly like the one above, generated,
 with one implementation per variant chosen by wiring.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the family when independent code handles one variant each, or when the matching code cannot
 name the enum.** Outside those two cases a `match` wins on every count: shorter, clearer, already

@@ -77,7 +77,7 @@ Had that used [`finalize_optional`](./finalize_optional.md), it would have retur
 The one-call form that also copies from a source is
 [`CanBuildWithDefault`](./can_build_with_default.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when unset fields have meaningful defaults and silence is the right outcome.**
 

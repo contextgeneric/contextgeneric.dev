@@ -98,7 +98,7 @@ and a projection names one marker's storage directly:
 // IsVoid::Map<String>    is Void
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **You will name the markers far more often than the trait.** `IsPresent` and `IsNothing` appear whenever
 you read a builder's type in an error; `IsVoid` whenever you read an extractor's. Recognizing them is the

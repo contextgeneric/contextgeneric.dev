@@ -43,7 +43,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **You rarely reach for `Promote` by hand.** A provider written with
 [`#[cgp_computer]`](../../macros/cgp_computer.md) or [`#[cgp_producer]`](../../macros/cgp_producer.md)

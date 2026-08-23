@@ -92,7 +92,7 @@ delegate_components! {
 namespace, and the direct entry shadows whatever the namespace would otherwise supply for that one key —
 the inheritance-with-override shape presets rely on.
 
-## When to reach for it, and when not
+## When to use it
 
 **Write [`cgp_namespace!`](../macros/cgp_namespace.md) and the wiring statements; name this trait only
 where the syntax requires it.** It appears in a `namespace` header and nowhere else in ordinary code.
@@ -151,7 +151,7 @@ type takes the `Self` position instead. The inconsistency is the family's sharpe
 **There is no method.** Resolving a default is a type projection.
 
 **Registering into a foreign namespace is bound by the orphan rule** — see
-[`DefaultImpls1`](./default_impls1.md#when-to-reach-for-it-and-when-not), where the
+[`DefaultImpls1`](./default_impls1.md#when-to-use-it), where the
 [`#[default_impl]`](../attributes/default_impl.md) attribute's placement constraint is worked out.
 
 ## Related constructs

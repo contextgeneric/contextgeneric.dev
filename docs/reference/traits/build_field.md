@@ -74,7 +74,7 @@ let employee = Employee::builder()
     .finalize_build();
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Call `build_field` in any code that fills a builder; bound on the trait when the code is generic over
 the record.**

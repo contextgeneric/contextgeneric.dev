@@ -184,7 +184,7 @@ impl AreaCalculator {
 All three produce the same three items. The difference is only how much of the machinery is visible in
 the source.
 
-## When to reach for it, and when not
+## When to use it
 
 **Write [`#[cgp_impl]`](./cgp_impl.md) instead, by default.** It produces the identical output from
 source that reads like an ordinary trait impl, so it is the recommended form. You mostly *read* these

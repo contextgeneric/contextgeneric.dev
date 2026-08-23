@@ -110,7 +110,7 @@ the context's shared error without spelling `Self::Error`. `App` wires its error
 satisfies the `Debug` bound. `App` is an **environmental context**, a type that stands for the
 application and carries its choices, and the capability targets that context rather than a value.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `HasErrorType` in any fallible component whose error type the context should choose.** It is
 the foundation of CGP's error handling and is a supertrait of every other fallible capability, so a

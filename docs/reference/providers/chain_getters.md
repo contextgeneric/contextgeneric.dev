@@ -98,7 +98,7 @@ second, `UseField<Symbol!("name")>`, reads that `Config`'s `name` field to produ
 `&str` getter borrows from. `ChainGetters` threads the reference from the first step into the second, so
 `app.name()` returns the name nested two levels in, with no hand-written walking code.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `ChainGetters` when a getter's value lives on a nested inner context** rather than on the
 context directly, so the getter has to walk through one or more intermediate values to reach it.

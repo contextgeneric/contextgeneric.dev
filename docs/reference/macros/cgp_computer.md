@@ -136,7 +136,7 @@ pub fn add_generic<T: core::ops::Add<Output = T>>(a: T, b: T) -> T {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[cgp_computer]` when a step in a pipeline is naturally a function.** That is the case it
 exists for, and it is the shortest route into the handler family.

@@ -87,7 +87,7 @@ let person = Person::builder()
 **Read the partial type in the message to see which marker is still `IsNothing`.** That is the field you
 forgot, and it is the only place the compiler names it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Call it at the end of every build; bound on it when the code is generic over the record.**
 

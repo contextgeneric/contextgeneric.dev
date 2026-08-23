@@ -89,7 +89,7 @@ much.
 Writing a marker of your own follows the same shape; the
 [`TransformMap`](./transform_map.md#examples) page shows one with three impls.
 
-## When to reach for it, and when not
+## When to use it
 
 **Name it only when writing a capability that drives the optional conversion.**
 

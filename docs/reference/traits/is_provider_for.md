@@ -125,7 +125,7 @@ The check forces `App: CanUseComponent<GreeterComponent, ()>`, which routes thro
 requirement — so the error names the absent field, at the wiring site. Remove the `check_components!` block
 and the same mistake surfaces far away, at whatever calls `app.greet()`, as a much worse message.
 
-## When to reach for it, and when not
+## When to use it
 
 **Do not reach for it. Recognize it.** There is no case in ordinary CGP code where you write
 `IsProviderFor`: the provider macros emit the impl, `#[cgp_component]` emits the supertrait link, and

@@ -64,7 +64,7 @@ Note that a value straight out of `into_builder` is already finalizable — ever
 [`finalize_build`](./finalize_build.md) resolves immediately and the round trip is the identity. What
 makes the trait useful is what happens in between.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when the starting point is a value rather than nothing**, which is the narrower of the two
 entry points and the one that shows up in generic code more than in application code.

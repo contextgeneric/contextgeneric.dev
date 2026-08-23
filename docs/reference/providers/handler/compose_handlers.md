@@ -55,7 +55,7 @@ Computing over an input of `5` runs `Double` first, then `AddOne` on its output,
 The same composite serves as a `TryComputer`, `AsyncComputer`, or `Handler` if both stages support that
 shape.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `ComposeHandlers` to sequence exactly two handlers.** For three or more, use
 [`PipeHandlers`](pipe_handlers.md), which reads better as a list and folds to the same nested

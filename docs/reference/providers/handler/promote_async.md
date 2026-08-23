@@ -40,7 +40,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **You rarely reach for `PromoteAsync` by hand.** The [`PromoteComputer`](promote_computer.md) bundle
 wires it into the async slots, so a synchronous provider serves the async family without you naming it.

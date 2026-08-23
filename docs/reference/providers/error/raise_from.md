@@ -60,7 +60,7 @@ delegate_components! {
 [`DebugError`](debug_error.md) formats the `ParseIntError` into a `String` and forwards it back through the
 `String` entry, which `RaiseFrom` handles.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `RaiseFrom` whenever the abstract error already has a `From` impl for the source.** It is the
 plainest raiser and the one to try first.

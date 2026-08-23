@@ -34,7 +34,7 @@ delegate_components! {
 Any call to `Context::raise_error(source)` on `TestApp` panics with `format!("{source:?}")` rather than
 returning.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PanicOnError` where an error means a bug that should abort rather than be handled**, such as
 a test harness or a fail-fast tool. It removes the need to give the context a real error type or a

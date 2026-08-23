@@ -32,7 +32,7 @@ type Pipeline = PipeHandlers<Product![Increment, BindErr<IdentMonadic, Increment
 // 1 -> Ok(2) -> BindErr runs the second Increment on 2 -> Ok(3)
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the [monad providers](index.md) rather than `BindErr` directly.** Wiring
 [`PipeMonadic`](pipe_monadic.md) with the [`ErrMonadic`](index.md#the-monad-markers) marker composes

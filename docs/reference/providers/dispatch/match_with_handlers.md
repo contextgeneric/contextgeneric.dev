@@ -72,7 +72,7 @@ The list tries `Circle` first. If the value is a circle, `ComputeArea` runs on t
 the loop stops. Otherwise the remainder carries `Circle` ruled out into the `Rectangle` adapter, the
 last arm, so its failure would leave an uninhabited remainder that the matcher discharges.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `MatchWithHandlers` when you want to name a handler per variant explicitly**, or when the
 variants map to handlers in a way the automatic form cannot express. For the common case where every

@@ -90,7 +90,7 @@ let rect = shape
     .finalize_extract_result();
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Use it to close every hand-written extraction chain**, and prefer not writing the chain at all.
 

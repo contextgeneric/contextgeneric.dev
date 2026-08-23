@@ -100,7 +100,7 @@ use cgp::core::field::traits::StaticString;
 assert_eq!(<Symbol!("height") as StaticString>::VALUE, "height");
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `Display` for one-off formatting, [`StaticString`](./static_string.md) for a name you use
 more than once, and this trait only when you need to write characters without a value to hand.**

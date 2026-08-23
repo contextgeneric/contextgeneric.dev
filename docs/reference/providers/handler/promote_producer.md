@@ -42,7 +42,7 @@ delegate_components! {
 
 Most code gets this wiring from [`#[cgp_producer]`](../../macros/cgp_producer.md) rather than writing it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PromoteProducer` when the base is an input-free `Producer`** and you wire its family by
 hand rather than through [`#[cgp_producer]`](../../macros/cgp_producer.md). For an input-taking base use

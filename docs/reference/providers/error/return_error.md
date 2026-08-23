@@ -53,7 +53,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `ReturnError` when generic code raises a value that is already the context's error type.** A
 `From<AppError> for AppError` impl exists in the standard library, so [`RaiseFrom`](raise_from.md) would

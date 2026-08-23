@@ -38,7 +38,7 @@ copy the `foo` and `bar` fields from a built `FooBar`, runs
 [`BuildAndSetField`](build_and_set_field.md) to compute and set `baz`, and finalizes. Dropping either
 handler leaves a field unset and fails to compile at the finalize step.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `BuildWithHandlers` to assemble a record from a list of builder adapters**,
 [`BuildAndSetField`](build_and_set_field.md) and [`BuildAndMerge`](build_and_merge.md). When the list is

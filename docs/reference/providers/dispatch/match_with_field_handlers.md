@@ -42,7 +42,7 @@ delegate_components! {
 attached to it. For a handler that wants only the payload, use
 [`MatchWithValueHandlers`](match_with_value_handlers.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `MatchWithFieldHandlers` when the per-variant handler needs the variant tag**, for example
 to log which case ran or to route further by name. When the handler wants only the payload, which is the common

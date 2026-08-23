@@ -80,7 +80,7 @@ delegate_components! {
 `config` field, a `StoredConfig`, and because `StoredConfig: AsRef<Config>`, returns `&Config` from
 `as_ref()`. The getter exposes the borrowed `Config` view while the context owns the `StoredConfig`.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `WithFieldRef` when a getter returns `&T` and the context stores a different type that
 borrows as `T` through `AsRef`.** The stored type and the exposed type differ, and neither the plain

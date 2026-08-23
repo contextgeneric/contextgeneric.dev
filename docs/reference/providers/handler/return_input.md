@@ -51,7 +51,7 @@ delegate_components! {
 The `ReturnInput` stage passes its input straight to `Format`, so the pipeline behaves as
 `PipeHandlers<Product![ParseInput, Format]>`.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `ReturnInput` when a handler slot must be filled but no transformation is wanted**, such as
 the base case of a pipeline built up conditionally, or a stage that is a no-op for one context. Reach

@@ -104,7 +104,7 @@ let name = <UseContext as FieldMapper<Outer, Symbol!("inner")>>::map_field(
 );
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for [`ChainGetters`](../providers/chain_getters.md) rather than this trait.** It is the construct;
 `FieldMapper` is the mechanism underneath it.

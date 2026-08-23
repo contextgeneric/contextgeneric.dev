@@ -151,7 +151,7 @@ Callers still write `app.send_email(to, body)`. The provider's requirement from 
 `smtp_server` field borrowed here as a `&str` from a `String`, never appears in the trait everyone else
 calls.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[implicit]` by default whenever a provider needs a value from its own context.** It is the
 shortest form, it introduces no new declaration, and it uses the same field access a getter would, so a

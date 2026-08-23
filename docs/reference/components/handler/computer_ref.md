@@ -78,7 +78,7 @@ where
 `measure` passes the input by reference, so the caller keeps ownership of the `String`. The example is
 **parameter-targeted**: the computation acts on the `Input`, while the context decides the provider.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `ComputerRef` when a synchronous, infallible computation only needs to read its input.** It
 avoids handing ownership to a computation that does not consume the value, which matters when the caller

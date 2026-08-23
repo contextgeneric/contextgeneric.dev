@@ -30,7 +30,7 @@ type Handlers = Product![
 ];
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `BuildAndMerge` when a builder step produces several fields at once**, a sub-record merged
 into the result, inside a list passed to [`BuildWithHandlers`](build_with_handlers.md). For a single

@@ -69,7 +69,7 @@ let rect = remainder
     .finalize_extract_result();
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for [`FinalizeExtractResult`](./finalize_extract_result.md) unless you already hold a
 remainder.** The two do the same job at different points in the chain.

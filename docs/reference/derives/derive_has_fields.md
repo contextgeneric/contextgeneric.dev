@@ -171,7 +171,7 @@ Generic code binds on the shape rather than on the type. An implementation that 
 writes `where Self: HasFields` and recurses over `Self::Fields`, so it applies to `Config`, to `Person`,
 and to a struct declared in another crate that happens to derive the same thing.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[derive(HasFields)]` when code must process a type's whole shape, and for
 [`#[derive(HasField)]`](./derive_has_field.md) when it needs one named field.** That is the whole

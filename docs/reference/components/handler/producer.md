@@ -96,7 +96,7 @@ context decides which provider answers, and no value is operated on. In practice
 with [`#[cgp_producer]`](../../macros/cgp_producer.md), which also wires the promotion so the same function
 answers the input-taking components while ignoring their input.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `Producer` for a value that a computation needs but does not compute from an input**, such
 as a constant, a default, or a value read from the context. It is the family's source, and promotion

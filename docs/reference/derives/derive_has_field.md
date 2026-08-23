@@ -166,7 +166,7 @@ Field access also passes through smart pointers with no extra derive. `Box<Perso
 dereferences to `Person` resolve a field read to the inner struct, so wrapping a context does not break
 the implementations that read from it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Derive it on every context whose fields an implementation reads.** There is little judgement here: the
 derive is how a struct's fields become visible to the trait system, it costs one line, and every

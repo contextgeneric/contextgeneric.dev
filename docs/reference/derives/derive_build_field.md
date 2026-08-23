@@ -169,7 +169,7 @@ let person = remainder
     .finalize_build();                                          // all present again
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Derive `BuildField` when a struct is assembled by code that does not know the whole struct.** That is the
 case it exists for, and it is a narrower case than "this struct has several fields".

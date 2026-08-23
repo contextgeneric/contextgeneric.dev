@@ -164,7 +164,7 @@ delegate_components! {
 trait attaches to either; they are data that a [`UseDelegate`](../providers/use_delegate.md) provider reads
 at dispatch time to pick `RectangleArea` or `CircleArea` for the shape it was asked about.
 
-## When to reach for it, and when not
+## When to use it
 
 **Write [`delegate_components!`](../macros/delegate_components.md), not `DelegateComponent`.** That is the
 honest summary of this page: the trait is what you read, and the macro is what you write. The macro also

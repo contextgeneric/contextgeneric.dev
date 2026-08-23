@@ -87,7 +87,7 @@ assert_eq!(context.bar, 0);   // defaulted
 
 Had that used `finalize_optional`, it would have returned `Err("bar")` instead.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when fields must be settable in any order and more than once**, which the core
 `build_field` cannot do — and stay on the core builder otherwise.

@@ -75,7 +75,7 @@ An *n*-layer stack unwraps *n* layers with no code specific to any depth, which 
 **Layer order is meaningful.** `OkMonadicTrans<ErrMonadic>` and `ErrMonadicTrans<OkMonadic>` unwrap their
 `Result` layers in opposite orders and are not interchangeable.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the [monad providers](../providers/monad/index.md), not this trait.** Wiring
 [`PipeMonadic`](../providers/monad/pipe_monadic.md) with a marker — including a stacked one — is how a

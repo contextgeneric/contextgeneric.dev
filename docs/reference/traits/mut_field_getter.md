@@ -82,7 +82,7 @@ delegate_components! {
 and because [`UseField`](../providers/use_field.md) implements `MutFieldGetter` as well, a provider that
 holds `&mut App` can write through the same wiring.
 
-## When to reach for it, and when not
+## When to use it
 
 **Wire it only when the mutable access must be chosen per context**, which is rarer than the read case
 and rarer still than mutation generally.

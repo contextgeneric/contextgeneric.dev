@@ -70,7 +70,7 @@ if let Ok(circle) = shape
 The payload arrives as `&mut Circle`, so the write lands in the original value. Written with
 [`HasExtractor`](./has_extractor.md) instead, the same code would consume `shape` and have to rebuild it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it only when a payload must be mutated in place**, which is the narrowest of the three cases.
 

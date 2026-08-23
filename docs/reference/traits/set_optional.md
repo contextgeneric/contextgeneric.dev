@@ -79,7 +79,7 @@ assert_eq!(context.foo, "bar");
 Because `set` returns `Self`, the calls chain exactly as core `build_field` calls do — the difference is
 invisible at the call site and lives entirely in the type.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a field may be set more than once, or when the order is not known.** That is the one
 thing the core builder cannot express.

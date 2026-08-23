@@ -78,7 +78,7 @@ where
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a routine must describe the shape it *will* produce** — in a signature, an associated
 type, or a `where` clause — and essentially never otherwise. It is a building block the extensible-data

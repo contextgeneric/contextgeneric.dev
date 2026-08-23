@@ -87,7 +87,7 @@ written.
 The same binding can be written with the [`WithType`](with_type.md) alias, which routes through
 [`WithProvider`](with_provider.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `UseType<T>` to bind an abstract type to a concrete one, which is the common case.** It is
 the idiomatic value for a [`#[cgp_type]`](../macros/cgp_type.md) component's wiring entry, and it saves

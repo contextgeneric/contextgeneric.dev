@@ -62,7 +62,7 @@ delegate_components! {
 `WithField<Symbol!("first_name")>` expands to `WithProvider<UseField<Symbol!("first_name")>>`, so
 `person.name()` reads the `first_name` field. The field name lives in the wiring, not in the trait.
 
-## When to reach for it, and when not
+## When to use it
 
 **Prefer the plain [`UseField<Tag>`](use_field.md) form.** It reads the same field and is the value a
 [`#[cgp_getter]`](../macros/cgp_getter.md) component is normally wired to. `WithField` exists for the

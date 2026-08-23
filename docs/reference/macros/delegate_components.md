@@ -410,7 +410,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 Use `delegate_components!` whenever a context needs to choose providers, which is any time you use
 [`#[cgp_component]`](./cgp_component.md) at all. The real decision is not whether to wire but **how to

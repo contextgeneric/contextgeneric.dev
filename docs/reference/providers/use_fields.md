@@ -85,7 +85,7 @@ field whose name equals the method `foo`. If the value were stored under a diffe
 this wiring would not apply, and the context would wire [`UseField<Symbol!("...")>`](use_field.md) with
 the actual field name instead.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `UseFields` when a `#[cgp_getter]` component's methods each read a same-named field.** It is
 the wired counterpart of the [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) convention, for the

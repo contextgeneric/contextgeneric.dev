@@ -82,7 +82,7 @@ A standalone sum can be written directly, which is mostly useful for illustratio
 type Token = Sum![u32, String, bool];
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Let the derives write it.** That is the honest recommendation for this construct: unlike
 [`Product!`](./product.md), which you write by hand for handler pipelines, `Sum!` has no everyday hand-written

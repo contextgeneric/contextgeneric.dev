@@ -34,7 +34,7 @@ delegate_components! {
 Wired this way, any call to `Context::wrap_error(error, detail)` on `App` returns `error` and drops
 `detail`, for every detail type.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `DiscardDetail` when a context's error type cannot hold extra detail, or when a call site
 attaches detail that this context has no use for.** It keeps the `CanWrapError` capability satisfiable

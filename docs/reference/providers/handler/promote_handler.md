@@ -36,7 +36,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `PromoteHandler` when the base is the fully general async fallible `Handler`** and you wire
 its family by hand. For a less capable base, use the bundle that matches it:

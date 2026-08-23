@@ -86,7 +86,7 @@ insert a generic context parameter for you: write `impl AreaCalculator`, not
 `impl<Context> AreaCalculator for Context`. Name the context explicitly only to bound it in a way the
 omitted form cannot express, such as a lifetime or a higher-ranked bound, or to serve one *concrete*
 context alone, as in `impl AreaCalculator for Rectangle`.
-[When to reach for it](#when-to-reach-for-it-and-when-not) says more about choosing between these
+[When to use it](#when-to-use-it) says more about choosing between these
 forms.
 
 Without `new`, the provider struct must already exist. A wiring entry naming a struct nothing
@@ -259,7 +259,7 @@ fn print_area(rect: &Rectangle) {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Write providers with `#[cgp_impl]`.** It is the recommended form for every provider, and the cases
 that call for something else are narrower than they look.

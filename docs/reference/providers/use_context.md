@@ -111,7 +111,7 @@ wiring.
 generic parameter, as `EncodeVec` does. A provider without such a default has no inner provider to fall
 back to, and the inner provider must always be named.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `UseContext` as the default inner provider of a higher-order provider**, so the wrapper
 reuses the context's own wiring for the inner step when no inner provider is named. The inner step may

@@ -91,7 +91,7 @@ marker. The lookup follows that path into `App`'s table, matches the entry above
 `RedirectLookup` walks. This is the indirection that lets namespaces organize wiring by path while still
 resolving to ordinary providers.
 
-## When to reach for it, and when not
+## When to use it
 
 **You do not reach for `RedirectLookup` directly.** Use the [`open` statement](../macros/delegate_components.md)
 for per-type dispatch on one context, and a [namespace](../macros/cgp_namespace.md) for reusable,

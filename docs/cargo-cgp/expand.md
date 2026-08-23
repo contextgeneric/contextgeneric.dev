@@ -163,7 +163,7 @@ during expansion — but a wiring mistake does not surface here at all. That is 
 useful mid-debugging: it works on a crate that does not type-check. For the wiring mistake itself, use
 [`cargo cgp check`](./check.md).
 
-## When to reach for it
+## When to use it
 
 Four situations, all of them cases where the answer is in the generated code rather than in a message:
 

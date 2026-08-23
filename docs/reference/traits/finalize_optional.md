@@ -77,7 +77,7 @@ let result = Context::optional_builder()
 assert_eq!(result.err(), Some("bar"));
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when absence is an error you want to *report* rather than paper over.**
 

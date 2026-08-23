@@ -30,7 +30,7 @@ type Handlers = Product![
 ];
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `BuildAndSetField` when a builder step computes one named field**, inside a list passed to
 [`BuildWithHandlers`](build_with_handlers.md). To copy a whole record's worth of fields in one step, use

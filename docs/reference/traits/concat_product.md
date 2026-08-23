@@ -71,7 +71,7 @@ type Full = <WithPort as ConcatProduct<Extra>>::Output;
 Which is the type-level counterpart of what [`CanBuildFrom`](./can_build_from.md) does with values: this
 names the combined shape, that moves the fields into it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when generic code must name the shape produced by combining two others** — a merge, a
 routine that extends a record with a caller-supplied set of fields — and essentially never otherwise.

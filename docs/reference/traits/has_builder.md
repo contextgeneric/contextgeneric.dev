@@ -97,7 +97,7 @@ assert_eq!(partial.get_field(PhantomData::<Symbol!("first_name")>), "Alice");
 
 Asking for `last_name` there would not compile.
 
-## When to reach for it, and when not
+## When to use it
 
 **Call `builder()` freely in concrete code; bound on the trait only in generic code.** In concrete code
 you call it and never name a trait. The bound matters when you write code that is generic over the

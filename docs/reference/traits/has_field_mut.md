@@ -86,7 +86,7 @@ delegate_components! {
 Mutable access passes through a smart pointer too, via a `DerefMut` forwarding impl, so a
 `Box<App>` resolves the write to the inner struct.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it only when the implementation genuinely writes**, and prefer the read-only bound otherwise.
 Requiring mutation where none happens narrows what a caller can pass for no benefit — a context behind a

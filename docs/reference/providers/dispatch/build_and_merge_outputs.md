@@ -37,7 +37,7 @@ delegate_components! {
 Each of the three providers produces a record's worth of fields, and `BuildAndMergeOutputs` merges them
 in turn into an `App`.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `BuildAndMergeOutputs` when your handlers are plain field-producing providers** rather than
 builder adapters, so each is merged into the builder without you writing the merge step. When you want

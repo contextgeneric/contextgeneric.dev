@@ -33,7 +33,7 @@ type Match = MatchWithHandlers<Product![
 ]>;
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `DowncastAndHandle` when several variants share one sub-handler** and you want to route them
 as a group rather than name each one. For a single variant use

@@ -68,7 +68,7 @@ let person = remainder
 Dropping the `build_field` line makes `finalize_build` fail to resolve, which is the guarantee: a field
 taken out and not replaced cannot be forgotten silently.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a complete value must be decomposed**, and remember that the common case —
 merging one record into another — already uses it for you.

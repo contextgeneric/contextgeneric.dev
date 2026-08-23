@@ -36,7 +36,7 @@ exercises directly:
 - [`UseFields`](use_fields.md) on a getter component, to read same-named fields;
 - the bare [`UseContext`](use_context.md), as a higher-order provider's default inner provider.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the constructs above rather than `WithContext` in practice.** The value it wraps is reached
 more directly through [`UseContext`](use_context.md), [`UseFields`](use_fields.md), or an

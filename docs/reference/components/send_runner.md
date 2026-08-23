@@ -108,7 +108,7 @@ makes the spawn type-check. The context wires its [`CanRun`](./runner.md) tasks 
 never on the abstract task or error types. `App` is an **environmental context**, and the task is a
 type-level `Code` selector.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `CanSendRun` when a runner's future must be `Send`**, which in practice means whenever the
 work is handed to a work-stealing spawner like `tokio::spawn`. A provider that spawns bounds its context

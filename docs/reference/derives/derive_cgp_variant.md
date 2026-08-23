@@ -117,7 +117,7 @@ both variants ruled out, which makes it uninhabited, and
 Add a third variant to `Shape` and this function stops compiling until it is handled, which is the same
 guarantee a concrete `match` gives, recovered for code that never names the enum.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when generic code has to work over the enum's own structure**, and prefer
 [`#[derive(CgpData)]`](./derive_cgp_data.md) unless naming the shape earns its keep as documentation.
@@ -134,7 +134,7 @@ guarantee a concrete `match` gives, recovered for code that never names the enum
   accepts every variant shape.
 
 The full argument for when a type earns the extensible-data machinery at all is on the
-[umbrella page](./derive_cgp_data.md#when-to-reach-for-it-and-when-not).
+[umbrella page](./derive_cgp_data.md#when-to-use-it).
 
 ## Under the hood
 

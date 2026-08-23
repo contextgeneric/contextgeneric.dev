@@ -110,7 +110,7 @@ pub trait CanGreet {
 `CanGreet` now means "can greet, and can tell you its name". Every provider may rely on the name being
 available, and so may every caller.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[extend]` when callers of the trait should be able to rely on the capability too**, and for
 a capability supertrait on a `#[cgp_component]` in preference to native `:` syntax. Reach for something

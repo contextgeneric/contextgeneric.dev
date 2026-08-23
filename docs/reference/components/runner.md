@@ -107,7 +107,7 @@ task or error types carry `Send` bounds; that requirement is discharged only at 
 [`CanSendRun`](./send_runner.md) proxy. `App` is an **environmental context**, and the task is a
 type-level `Code` selector the wiring dispatches on.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `CanRun` to model a unit of work a context executes to completion**, such as a background
 job, a startup action, or a scheduled task, especially when one context hosts several such tasks that

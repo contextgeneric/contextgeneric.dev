@@ -101,7 +101,7 @@ delegate_components! {
 
 which is the same descent, chosen at the wiring site rather than written at the call site.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for [`ChainGetters`](../providers/chain_getters.md) rather than this trait.** The provider is the
 construct; `map_field` is the mechanism it is built from, and calling it by hand means writing at a call

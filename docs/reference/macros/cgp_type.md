@@ -148,7 +148,7 @@ impl HasScalarType for App {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[cgp_type]` whenever generic code has to name a type the context should choose.** The error
 type is the canonical instance. CGP's own [`HasErrorType`](../components/has_error_type.md) is defined

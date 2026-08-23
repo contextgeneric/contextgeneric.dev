@@ -108,7 +108,7 @@ where
 context retargets it at the mock with no change to its body. `App` is an **environmental context**, and
 the capability targets it.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `HasRuntime` in any provider that performs an effect against the runtime**, such as spawning
 a task, awaiting a timer, or opening a connection, and reach it as a `#[uses(HasRuntime)]` dependency so

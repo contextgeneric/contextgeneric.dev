@@ -112,7 +112,7 @@ delegate_components! {
 All four build the same kind of list. The macro and the embedded syntax are two places to write it, not two
 different things.
 
-## When to reach for it, and when not
+## When to use it
 
 **Write the `@`-path syntax wherever a namespace or a wiring key asks for a route**, and reach for the bare
 `Path!` macro only when a route needs to be a named type on its own, which is rare.

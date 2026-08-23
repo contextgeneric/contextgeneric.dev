@@ -70,7 +70,7 @@ let point_3d: Point3d = Point3d::builder()
     .finalize_with_default();
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it for a one-call widening from a narrower record**, and reach for the pieces when anything
 in between needs to happen.

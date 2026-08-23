@@ -117,7 +117,7 @@ let s = <Symbol!("hello")>::default();
 assert_eq!(s.to_string(), "hello");
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Write `Symbol!` when a wiring entry has to name a field**, and let the macros produce it everywhere else.
 That is the honest summary: the construct is essential and mostly generated.

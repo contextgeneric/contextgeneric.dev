@@ -38,7 +38,7 @@ The convenience matcher [`MatchWithValueHandlers`](match_with_value_handlers.md)
 automatically, which is the one difference between it and
 [`MatchWithFieldHandlers`](match_with_field_handlers.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `HandleFieldValue` inside an extract adapter when the inner handler is an ordinary computer
 over the payload type**, so it receives the bare value rather than a tagged `Field`. You rarely write it

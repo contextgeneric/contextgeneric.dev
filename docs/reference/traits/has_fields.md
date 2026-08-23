@@ -107,7 +107,7 @@ giving `Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Recta
 tuple, multi-field, and struct-style — because it only *describes* a variant rather than deconstructing
 it. The derives that take an enum apart need exactly one unnamed payload per variant; this one does not.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on `HasFields` when code must process a type's whole shape; bound on
 [`HasField`](./has_field.md) when it needs one named field.** That is the entire distinction, and the two

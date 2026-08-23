@@ -144,7 +144,7 @@ pub trait FooBar: Foo + Bar {}
 
 Any type that is `Foo + Bar` is now `FooBar`, and a signature can say so in one word.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `#[blanket_trait]` when a capability has one definition and its dependencies are other traits.**
 That last clause is the real discriminator, separating this macro from its closest neighbour.

@@ -85,7 +85,7 @@ delegate_components! {
 `App` answers two abstract types, with the concrete choices held in one place where they can be reused,
 swapped, or supplied by a namespace.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `WithDelegatedType` when several abstract types should be answered from one shared table**,
 so a context points its type components at the table rather than fixing each one at the wiring site.

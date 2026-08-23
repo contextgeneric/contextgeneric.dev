@@ -97,7 +97,7 @@ Neither call names a marker. What the markers do is decide the type the payload 
 in the first case, `&mut Circle` in the second — while the per-field
 [`MapType`](./map_type.md) markers track which variants are still possible.
 
-## When to reach for it, and when not
+## When to use it
 
 **You will recognize these markers far more often than you name them**, and recognizing them is most of
 what this page is for: an error mentioning `IsRef` is telling you the value is being read through

@@ -110,7 +110,7 @@ The upcast always succeeds, because every variant of the smaller enum has a home
 a field through a getter: the implementation names only what it needs, and the widening is checked.
 Upcasting is documented with the other [structural casts](./can_upcast.md).
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on `FromVariant` when the variant to build is decided by a type parameter.** That is the whole test,
 and it is narrower than the extractor's, because most code decides which variant to build at a site that can

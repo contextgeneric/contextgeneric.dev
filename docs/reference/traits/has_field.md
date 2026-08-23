@@ -122,7 +122,7 @@ let boxed: Box<Person> = Box::new(Person { name: "Alice".to_owned() });
 assert_eq!(boxed.get_field(PhantomData::<Symbol!("name")>), "Alice");
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound against `HasField` only when the ergonomic constructs cannot do the job**, which is rarely. The
 ordering is settled and worth following.

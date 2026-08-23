@@ -112,7 +112,7 @@ abstract error, and any wired context that satisfies that bound, typically by pl
 backend, makes `load` produce errors in that context's chosen type. The context is an **environmental
 context**, and the capability targets it rather than a value.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for `CanRaiseError<E>` whenever a provider holds a concrete error `E` and must return the
 context's abstract error.** It is the standard way a fallible provider bridges from a library's error

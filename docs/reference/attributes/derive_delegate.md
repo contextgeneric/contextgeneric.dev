@@ -158,7 +158,7 @@ delegate_components! {
 No wrapper, no second table type, and nothing on the component. The two forms dispatch on the same
 parameter and resolve to the same implementations.
 
-## When to reach for it, and when not
+## When to use it
 
 **Do not add `#[derive_delegate]` to a new component.** Use the `open` statement of
 [`delegate_components!`](../macros/delegate_components.md), which needs no attribute and no table type.

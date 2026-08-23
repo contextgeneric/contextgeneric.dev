@@ -75,7 +75,7 @@ assert_eq!(FooBarBaz::Baz(true).downcast(PhantomData::<FooBar>).ok(), None);
 `.ok()` is right for a single attempt and wrong when another target should be tried, because it throws
 away the remainder that the next attempt needs.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a value must be tried against a target the source may or may not fit**, and reach
 for it *with* [`CanDowncastFields`](./can_downcast_fields.md) when there is more than one candidate: the

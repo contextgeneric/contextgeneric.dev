@@ -100,7 +100,7 @@ delegate_components! {
 **Environmental context, parameter-targeted.** The loop variable must still appear in the key, exactly as
 for the one-type form.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for it when a default genuinely depends on two types**, and prefer the narrower forms otherwise —
 each extra key position is one more thing a reader has to hold.
@@ -115,7 +115,7 @@ each extra key position is one more thing a reader has to hold.
   purpose-named trait is often the clearer choice.
 
 The orphan-rule constraint on where a registration may be *written* is the same as for the one-type form,
-and is worked out on [its page](./default_impls1.md#when-to-reach-for-it-and-when-not).
+and is worked out on [its page](./default_impls1.md#when-to-use-it).
 
 ## Under the hood
 

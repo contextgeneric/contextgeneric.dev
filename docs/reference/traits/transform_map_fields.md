@@ -84,7 +84,7 @@ still runs — it just always passes, because the transform guaranteed presence 
 Applying a transform of your own follows the same shape, with your marker in place of
 `TransformMapDefault`.
 
-## When to reach for it, and when not
+## When to use it
 
 **Bound on it when writing a capability that re-marks a whole record**, which is what extending the
 optional-field layer means.

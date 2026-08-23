@@ -175,7 +175,7 @@ In practice you rarely write these chains by hand. The
 implementations, which is the extensible visitor pattern: a chain like the one above, generated, with one
 implementation per variant chosen by wiring.
 
-## When to reach for it, and when not
+## When to use it
 
 **Derive an extractor when independent code has to handle one variant each, or when the code doing the
 matching cannot name the enum.** Those are the two cases, and outside them a `match` wins on every count.

@@ -85,7 +85,7 @@ something succeeds — useful for a fallback chain.
 **The transformer forms delegate one layer down.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` bind their
 own `Result` layer and hand the rest to `M`, which is how a stack reaches arbitrary depth.
 
-## When to reach for it, and when not
+## When to use it
 
 **Reach for the [monad providers](../providers/monad/index.md), not this trait.** Building a pipeline
 means wiring `PipeMonadic` with a monad marker and a handler list; this is what that provider bounds on

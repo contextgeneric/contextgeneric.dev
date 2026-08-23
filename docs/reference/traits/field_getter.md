@@ -92,7 +92,7 @@ delegate_components! {
 A second context can answer the same getter from a different field by changing one wiring line, which is
 what the provider-side shape buys and what a plain [`HasField`](./has_field.md) bound cannot express.
 
-## When to reach for it, and when not
+## When to use it
 
 **Wire a `FieldGetter` only when a context must choose which field a getter reads**, which is the
 advanced case. Everything else is better served higher up.

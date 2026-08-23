@@ -90,7 +90,7 @@ The marker is the first type argument, and swapping it for
 Writing a marker of your own follows the same three-impl shape; the
 [`TransformMap`](./transform_map.md#examples) page shows one.
 
-## When to reach for it, and when not
+## When to use it
 
 **Name it only when writing a capability that drives the defaulting conversion.** Everything else is
 served by the two capabilities already built on it.

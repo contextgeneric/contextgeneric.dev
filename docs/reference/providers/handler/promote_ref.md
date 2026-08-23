@@ -44,7 +44,7 @@ delegate_components! {
 }
 ```
 
-## When to reach for it, and when not
+## When to use it
 
 **You rarely reach for `PromoteRef` by hand.** Every promotion bundle wires it into the `…Ref` slots, so
 the by-reference family follows from a by-value provider automatically. Reach for it directly only when
