@@ -85,7 +85,7 @@ finalize is accepted with no wildcard arm. That is not a convention — it is th
 after only the first extraction and it does not compile.
 
 **In practice you rarely write these chains.** The
-[dispatch combinators](../providers/dispatch_combinators.md) build them from a set of per-variant
+[dispatch combinators](../providers/dispatch/index.md) build them from a set of per-variant
 implementations, which is the extensible visitor pattern: a chain exactly like the one above, generated,
 with one implementation per variant chosen by wiring.
 
@@ -104,7 +104,7 @@ exhaustive, and it generates nothing. This is not an improvement on `match`; it 
   [`to_extractor`](./has_extractor.md) only when you genuinely want to consume.
 - **Do not use it to test which variant a value holds.** `matches!` or an `if let` answers that in a
   line. The family's value is in the *chain* and what the chain proves.
-- **Reach for the [dispatch combinators](../providers/dispatch_combinators.md) rather than writing the
+- **Reach for the [dispatch combinators](../providers/dispatch/index.md) rather than writing the
   chain**, since they derive it from the enum's own variant list instead of repeating it at each site —
   which is what keeps "add a variant" from breaking every call site by hand.
 
@@ -159,7 +159,7 @@ derives, so a `Result<Payload, Remainder>` is neither `Debug` nor `PartialEq` ho
 be written in any order — but every variant must be tried before the remainder can be finalized.
 
 **Adding a variant breaks every hand-written chain, by design.** That is the guarantee, and it is the
-reason to prefer the [dispatch combinators](../providers/dispatch_combinators.md).
+reason to prefer the [dispatch combinators](../providers/dispatch/index.md).
 
 **Five enum variant names are reserved**, because the generated impls name their associated types through
 `Self::…`. The [derive's page](../derives/derive_extract_field.md) lists them.
@@ -177,7 +177,7 @@ reason to prefer the [dispatch combinators](../providers/dispatch_combinators.md
 - [`CanDowncast`](./can_downcast.md) — narrowing to another enum rather than to a payload, built on this.
 - [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) — generates the partial enums and every
   impl here.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that build the chain for
+- [Dispatch combinators](../providers/dispatch/index.md) — the providers that build the chain for
   you.
 - [Type-level spines](../types/type_level_spines.md) — `Either`/`Void`, where the uninhabited terminator
   comes from.

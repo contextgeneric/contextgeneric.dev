@@ -340,7 +340,7 @@ renaming a field in one struct silently stops it being copied from the other. Th
 - [`HasOptionalBuilder`](../traits/has_optional_builder.md) and
   [`CanFinalizeWithDefault`](../traits/can_finalize_with_default.md) — optional and defaulted fields,
   which the plain builder does not model.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that run several builder
+- [Dispatch combinators](../providers/dispatch/index.md) — the providers that run several builder
   implementations and merge their outputs.
 
 The ideas behind it:

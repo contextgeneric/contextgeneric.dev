@@ -244,7 +244,7 @@ record and variant machinery have been crossed.
   by.
 - [`CanUpcast`](../traits/can_upcast.md) and [`CanDowncast`](../traits/can_downcast.md) — converting
   between two enums whose variants overlap, built on this machinery.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that route a variant to
+- [Dispatch combinators](../providers/dispatch/index.md) — the providers that route a variant to
   the implementation handling it.
 
 The ideas behind it:

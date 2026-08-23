@@ -20,9 +20,9 @@ its own.
 ### Still being written
 
 The construct list below is complete — every construct the `cgp` crate exports has a page, or a named
-place on a page it shares — so nothing is missing from this index. The macros, attributes, derives, and
-traits are written; the components, providers, and type-level pages are still placeholders, and each one
-says so when you open it.
+place on a page it shares — so nothing is missing from this index. The macros, attributes, derives,
+traits, and providers are written; the components and type-level pages are still placeholders, and each
+one says so when you open it.
 
 :::
 
@@ -120,7 +120,7 @@ in as a named component's.
 [`HasErrorType`](./components/has_error_type.md) gives a context one shared error type, and
 [`CanRaiseError` and `CanWrapError`](./components/can_raise_error.md) construct it from a source error
 and attach detail. The interchangeable strategies that satisfy them — `RaiseFrom`, `ReturnError`,
-`DebugError`, and the rest — are the [error providers](./providers/error_providers.md).
+`DebugError`, and the rest — are the [error providers](./providers/error/index.md).
 
 ### Compute things
 
@@ -136,9 +136,9 @@ they vary.
 
 Providers in this family are written from plain functions with
 [`#[cgp_computer]`](./macros/cgp_computer.md) and [`#[cgp_producer]`](./macros/cgp_producer.md), and
-composed with the [handler combinators](./providers/handler_combinators.md), the
-[dispatch combinators](./providers/dispatch_combinators.md), and the
-[monad providers](./providers/monad_providers.md) built on the monad traits —
+composed with the [handler combinators](./providers/handler/index.md), the
+[dispatch combinators](./providers/dispatch/index.md), and the
+[monad providers](./providers/monad/index.md) built on the monad traits —
 [`MonadicBind`](./traits/monadic_bind.md), [`ContainsValue`](./traits/contains_value.md),
 [`LiftValue`](./traits/lift_value.md), and [`MonadicTrans`](./traits/monadic_trans.md).
 [`#[cgp_auto_dispatch]`](./macros/cgp_auto_dispatch.md) generates a dispatching handler from a per-type
@@ -232,13 +232,11 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 | `HasRuntimeType` | [`HasRuntime`](./components/has_runtime.md) |
 | `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
 | `Cons`, `Nil`, `Either`, `Void`, `Chars`, `PathCons` | [Type-level spines](./types/type_level_spines.md) |
-| `ComposeHandlers`, `PipeHandlers`, `ReturnInput`, `Promote*` | [Handler combinators](./providers/handler_combinators.md) |
-| `MatchWithHandlers`, `ExtractFieldAndHandle` | [Dispatch combinators](./providers/dispatch_combinators.md) |
-| `PipeMonadic`, `BindOk`, `BindErr` | [Monad providers](./providers/monad_providers.md) |
-| `RaiseFrom`, `ReturnError`, `DebugError`, `DisplayError` | [Error providers](./providers/error_providers.md) |
+| `IdentMonadic`, `OkMonadic`, `ErrMonadic`, `OkMonadicTrans`, `ErrMonadicTrans` | [Monad providers](./providers/monad/index.md) |
 | `UseDelegatedType`, `WithDelegatedType` | [`UseDelegatedType`](./providers/use_delegated_type.md) and [`WithProvider`](./providers/with_provider.md) |
-| `UseInputDelegate` | [Handler combinators](./providers/handler_combinators.md) |
-| `RaiseInfallible`, `DiscardDetail`, `PanicOnError` | [Error providers](./providers/error_providers.md) |
+| `MatchWithHandlersRef`, `MatchFirstWithHandlers`, and the other borrowed and first-argument matcher forms | the matcher page they vary, under [Dispatch combinators](./providers/dispatch/index.md) |
+| `ExtractFirstFieldAndHandle`, `HandleFirstFieldValue` | [`ExtractFieldAndHandle`](./providers/dispatch/extract_field_and_handle.md), [`HandleFieldValue`](./providers/dispatch/handle_field_value.md) |
+| `DispatchMatchers`, `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler` | [Dispatch combinators](./providers/dispatch/index.md) |
 | `ComputerRef`, `AsyncComputer`, `TryComputerRef`, `HandlerRef` | the page for the component they vary — [`Computer`](./components/computer.md), [`TryComputer`](./components/try_computer.md), [`Handler`](./components/handler.md) |
 | `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/map_type.md) |
 | `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/map_type_ref.md) |

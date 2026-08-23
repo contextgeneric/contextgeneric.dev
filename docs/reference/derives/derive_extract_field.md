@@ -171,7 +171,7 @@ if let Ok(circle) = shape
 ```
 
 In practice you rarely write these chains by hand. The
-[dispatch combinators](../providers/dispatch_combinators.md) build them for you from a set of per-variant
+[dispatch combinators](../providers/dispatch/index.md) build them for you from a set of per-variant
 implementations, which is the extensible visitor pattern: a chain like the one above, generated, with one
 implementation per variant chosen by wiring.
 
@@ -335,7 +335,7 @@ the message to see which variants are still possible.
 you may extract in any order. But you must extract *every* variant before the remainder can be finalized.
 
 **Adding a variant breaks every hand-written chain, by design.** That is the guarantee, and it is the reason
-to prefer the [dispatch combinators](../providers/dispatch_combinators.md), which derive the chain from the
+to prefer the [dispatch combinators](../providers/dispatch/index.md), which derive the chain from the
 enum's own variant list rather than repeating it at each site.
 
 **It does not accept a struct.** The struct analogue is
@@ -357,7 +357,7 @@ enum's own variant list rather than repeating it at each site.
 - [`CanUpcast`](../traits/can_upcast.md) — upcasting and downcasting between enums, which reuse this recursion.
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain an enum's shape is built
   from.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that build an extraction chain
+- [Dispatch combinators](../providers/dispatch/index.md) — the providers that build an extraction chain
   for you, one implementation per variant.
 
 The ideas behind it:

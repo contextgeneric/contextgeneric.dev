@@ -110,7 +110,7 @@ body. Changing the order, dropping a stage, or swapping one for another is an ed
 
 `ComposeHandlers` nests rather than chains, `ReturnInput` passes a value through, and the `Promote*`
 adapters are the lifts from the previous section made explicit. They are catalogued together in
-[handler combinators](/docs/reference/providers/handler_combinators).
+[handler combinators](/docs/reference/providers/handler).
 
 ## Many computations on one context
 
@@ -170,7 +170,7 @@ For the constructs, [`Computer`](/docs/reference/components/computer),
 [`Producer`](/docs/reference/components/producer) are the corners;
 [`#[cgp_computer]`](/docs/reference/macros/cgp_computer) and
 [`#[cgp_producer]`](/docs/reference/macros/cgp_producer) build a provider from a function; and
-[handler combinators](/docs/reference/providers/handler_combinators) is the full catalogue.
+[handler combinators](/docs/reference/providers/handler) is the full catalogue.
 
 ---
 

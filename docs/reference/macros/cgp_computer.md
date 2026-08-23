@@ -31,7 +31,7 @@ that makes the *same function* answer the whole family. That wiring is the part 
 implementing any of them.
 
 That last property is the whole reason for the macro. The family exists so a provider can declare exactly
-the capabilities it has, and the [promotion combinators](../providers/handler_combinators.md) exist so a
+the capabilities it has, and the [promotion combinators](../providers/handler/index.md) exist so a
 simpler provider can stand in where a more capable one is expected: an infallible computation is a
 fallible one that never fails, a synchronous one is an async one that never awaits. `#[cgp_computer]` picks
 the narrowest
@@ -153,7 +153,7 @@ exists for, and it is the shortest route into the handler family.
   The two look similar and differ in what they produce: `#[cgp_fn]` gives a trait a context implements,
   called as `self.thing()`; `#[cgp_computer]` gives a *provider* that gets wired into a handler component and
   composed with combinators. If you are not building a pipeline, reach for `#[cgp_fn]` instead.
-- **Wire the [handler combinators](../providers/handler_combinators.md) directly for composition.** The macro
+- **Wire the [handler combinators](../providers/handler/index.md) directly for composition.** The macro
   produces one step; `PipeHandlers` and friends chain them.
 
 One thing not to do is reach for the handler family because a capability happens to transform a value. The
@@ -216,7 +216,7 @@ delegate_components! {
 
 Note the **`->` operator** rather than `:`. It delegates each key to *the value's own entry for that key*
 rather than to the value itself, so `Add` inherits whatever `PromoteComputer<Self>` resolves each component
-to. [`PromoteComputer`](../providers/handler_combinators.md) is itself a table of single-step promoters.
+to. [`PromoteComputer`](../providers/handler/promote_computer.md) is itself a table of single-step promoters.
 `ComputerComponent` is absent from the list because `Add` implements it directly.
 
 The other three combinations differ only in which base trait is implemented and which bundle is named. An
@@ -275,7 +275,7 @@ short-circuits.
 - [`Computer`](../components/computer.md) — the base component, with its by-reference and async variants.
 - [`Handler`](../components/handler.md) and [`TryComputer`](../components/try_computer.md) — the more capable
   members the promotions reach.
-- [Handler combinators](../providers/handler_combinators.md) — the `Promote*` bundles this wires, plus
+- [Handler combinators](../providers/handler/index.md) — the `Promote*` bundles this wires, plus
   `PipeHandlers` and `ComposeHandlers` for composing steps.
 - [`#[cgp_impl]`](./cgp_impl.md) — for a handler provider that needs its context.
 - [`#[cgp_fn]`](./cgp_fn.md) — for a capability on the context rather than a pipeline step.

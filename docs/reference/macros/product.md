@@ -198,7 +198,7 @@ the order *is* the execution order.
 - [`HasFields`](../traits/has_fields.md) — the trait that exposes a struct's shape as one of these lists.
 - [`#[derive(HasFields)]`](../derives/derive_has_fields.md) — generates that list for you.
 - [`AppendProduct`](../traits/append_product.md) — the operations that combine and transform these lists.
-- [Handler combinators](../providers/handler_combinators.md) — where `Product!` is written by hand, as a
+- [Handler combinators](../providers/handler/index.md) — where `Product!` is written by hand, as a
   pipeline.
 
 The ideas behind it:

@@ -11,7 +11,7 @@ Turning a continuation into one bind step of a monadic pipeline.
 ### Generated machinery
 
 **You are not expected to name `MonadicBind`.**
-[`PipeMonadic`](../providers/monad_providers.md) bounds on it while folding a pipeline, and the monad
+[`PipeMonadic`](../providers/monad/pipe_monadic.md) bounds on it while folding a pipeline, and the monad
 markers CGP ships already implement it. The one case for naming it is defining a monad of your own;
 otherwise this page is here to explain how a pipeline is assembled.
 
@@ -34,7 +34,7 @@ pub trait MonadicBind<Provider> {
 
 `Self` is the monad marker. The parameter is the **continuation** — the handler that should run on the
 continue branch — and the associated type is the **bind provider** that wraps it. For the base monads
-this resolves to a [`BindOk` or `BindErr`](../providers/monad_providers.md) provider; for `IdentMonadic`
+this resolves to a [`BindOk` or `BindErr`](../providers/monad/index.md) provider; for `IdentMonadic`
 it is the continuation unchanged, which is what makes the identity monad free.
 
 It is one of four traits that give a monad marker its meaning, alongside
@@ -44,7 +44,7 @@ It is one of four traits that give a monad marker its meaning, alongside
 **This is a plain capability trait, not a CGP component.** It has no generated provider trait, no
 `…Component` marker, and is never wired through
 [`delegate_components!`](../macros/delegate_components.md) — the
-[monad providers](../providers/monad_providers.md) consume it as an ordinary trait bound while folding a
+[monad providers](../providers/monad/index.md) consume it as an ordinary trait bound while folding a
 pipeline at compile time.
 
 ## Usage
@@ -56,7 +56,7 @@ use cgp::extra::monad::traits::MonadicBind;
 ```
 
 In practice you import it only when **defining a monad of your own**. Using the existing ones means
-naming [`PipeMonadic`](../providers/monad_providers.md) and a marker in a wiring entry, with no trait in
+naming [`PipeMonadic`](../providers/monad/pipe_monadic.md) and a marker in a wiring entry, with no trait in
 sight.
 
 There is no method. The whole trait is a type-level function from a continuation to the provider that
@@ -87,7 +87,7 @@ own `Result` layer and hand the rest to `M`, which is how a stack reaches arbitr
 
 ## When to reach for it, and when not
 
-**Reach for the [monad providers](../providers/monad_providers.md), not this trait.** Building a pipeline
+**Reach for the [monad providers](../providers/monad/index.md), not this trait.** Building a pipeline
 means wiring `PipeMonadic` with a monad marker and a handler list; this is what that provider bounds on
 internally.
 
@@ -98,14 +98,14 @@ step tries to run, because the running half is [`ContainsValue`](./contains_valu
 
 And the alternatives to prefer when you do *not* need short-circuiting:
 
-- **[Handler combinators](../providers/handler_combinators.md)** — `ComposeHandlers` and `PipeHandlers`
+- **[Handler combinators](../providers/handler/index.md)** — `ComposeHandlers` and `PipeHandlers`
   chain handlers without a branch. If every step runs unconditionally, do not involve a monad at all.
 - **Ordinary `?` in one provider body** — if the whole chain lives in a single implementation, Rust's own
   operator is clearer than any composition.
 
 ## Under the hood
 
-[`PipeMonadic`](../providers/monad_providers.md) walks the handler list and, for each step, asks the monad
+[`PipeMonadic`](../providers/monad/pipe_monadic.md) walks the handler list and, for each step, asks the monad
 to turn the continuation built so far into a bind step — which is this trait. Because the walk proceeds
 from the end of the list backwards, `Provider` at each stage is everything that follows the current step,
 and the result is a single nested provider by the time the list is exhausted.
@@ -128,7 +128,7 @@ handler.
 consumes it.
 
 **`OkMonadic` short-circuits on `Ok`, not on `Err`.** The naming reads as "the monad *for* `Ok`" and means
-"the monad whose continue branch is `Err`". [`ErrMonadic`](../providers/monad_providers.md) is the one
+"the monad whose continue branch is `Err`". [`ErrMonadic`](../providers/monad/index.md) is the one
 that behaves like `?`. Getting these the wrong way round produces a pipeline that runs exactly when you
 expected it to stop.
 
@@ -141,9 +141,9 @@ missing trait rather than the gap.
 - [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) — the two traits that run one
   bind step, where this one only builds it.
 - [`MonadicTrans`](./monadic_trans.md) — stacking one monad on another during the same fold.
-- [Monad providers](../providers/monad_providers.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the monad
+- [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the monad
   markers; what you actually wire.
-- [Handler combinators](../providers/handler_combinators.md) — composition without a short-circuit
+- [Handler combinators](../providers/handler/index.md) — composition without a short-circuit
   branch.
 - [`Computer`](../components/computer.md) — the component family a monadic pipeline implements.
 - [`Product!`](../macros/product.md) — the type-level list a pipeline's steps are given in.

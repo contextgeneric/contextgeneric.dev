@@ -124,7 +124,7 @@ within it there is nothing simpler.
   producer that draws on its context is an impl of `Producer` written with `#[cgp_impl]`, where `self` is the
   context and [`#[implicit]`](../attributes/implicit.md) works normally. **In practice that covers most
   producers**, which makes this macro narrower than it first looks: it is for constants and pure seeds.
-- **Use [`ReturnInput`](../providers/handler_combinators.md) rather than a producer that ignores its input.**
+- **Use [`ReturnInput`](../providers/handler/return_input.md) rather than a producer that ignores its input.**
   If the goal is to pass a value through a pipeline unchanged, that combinator says so directly.
 - **Do not reach for the handler family at all for a plain constant.** A `const` or a function is clearer
   unless the value is being composed into a pipeline or dispatched on a `Code` tag.
@@ -181,7 +181,7 @@ delegate_components! {
 Two things differ from `#[cgp_computer]`'s block. `ComputerComponent` **is** in the list, because a producer
 does not implement it directly. A computer takes an input and the producer has none, so the promotion
 discards it. And the operator is **`:`** rather than `->`, delegating each component straight to
-[`PromoteProducer<Self>`](../providers/handler_combinators.md) rather than to that bundle's own entry for the
+[`PromoteProducer<Self>`](../providers/handler/promote_producer.md) rather than to that bundle's own entry for the
 key. `PromoteProducer` then wires `ComputerComponent` to a promoter that drops the input and calls `produce`,
 and derives the remaining members from there.
 
@@ -246,7 +246,7 @@ import.
 
 - [`#[cgp_computer]`](./cgp_computer.md) — the sibling for a computation that takes an input.
 - [`Producer`](../components/producer.md) — the base component this implements.
-- [Handler combinators](../providers/handler_combinators.md) — `PromoteProducer`, which this wires, plus
+- [Handler combinators](../providers/handler/index.md) — `PromoteProducer`, which this wires, plus
   `ReturnInput` and `PipeHandlers`.
 - [`Computer`](../components/computer.md) and [`Handler`](../components/handler.md) — the members the
   promotion reaches.

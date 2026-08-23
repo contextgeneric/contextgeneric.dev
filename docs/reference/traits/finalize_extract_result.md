@@ -98,7 +98,7 @@ let rect = shape
   holding a `Result`.
 - **[`FinalizeExtract`](./finalize_extract.md)** when a nested `match` has already unwrapped the
   remainder out of its `Result`.
-- **The [dispatch combinators](../providers/dispatch_combinators.md)** rather than a hand-written chain,
+- **The [dispatch combinators](../providers/dispatch/index.md)** rather than a hand-written chain,
   since they generate it from the enum's own variant list — which is what keeps "add a variant" from
   breaking every call site.
 - **`.ok()` or a `match`** when you are making a single attempt and do not intend to exhaust the enum.
@@ -144,7 +144,7 @@ bound stops being satisfied.
 - [`HasExtractor`](./has_extractor.md) — where a chain begins.
 - [`FinalizeBuild`](./finalize_build.md) — the record family's ending.
 - [Type-level spines](../types/type_level_spines.md) — where the uninhabited `Void` comes from.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that build the chain for
+- [Dispatch combinators](../providers/dispatch/index.md) — the providers that build the chain for
   you.
 - [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) — what makes an enum extractable.
 

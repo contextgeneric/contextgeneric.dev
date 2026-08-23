@@ -50,8 +50,9 @@ to a component.
 ## The computation-family combinators
 
 The handler family has its own providers, which build, route, and lift computations rather than wire a
-single capability. The [error providers](./error_providers.md) raise and wrap a context's abstract
-error, the [handler combinators](./handler_combinators.md) compose and promote handlers across the
-family's synchronous, async, and fallible shapes, the [dispatch combinators](./dispatch_combinators.md)
+single capability. The [error providers](./error/index.md) raise and wrap a context's abstract
+error, the [handler combinators](./handler/index.md) compose and promote handlers across the
+family's synchronous, async, and fallible shapes, the [dispatch combinators](./dispatch/index.md)
 route an extensible-data value to per-field or per-variant handlers, and the
-[monad providers](./monad_providers.md) chain handlers that short-circuit through a monad.
+[monad providers](./monad/index.md) chain handlers that short-circuit through a monad. Each group is a
+subsection here with one page per provider and its own overview.

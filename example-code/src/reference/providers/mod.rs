@@ -4,6 +4,10 @@
 //! or reviewed rather than the section's full inventory.
 
 pub mod chain_getters;
+pub mod error;
+pub mod dispatch;
+pub mod handler;
+pub mod monad;
 pub mod redirect_lookup;
 pub mod use_context;
 pub mod use_default;

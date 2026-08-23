@@ -109,7 +109,7 @@ pipeline does.
 looked like it came from nowhere. [Dispatching](./dispatching.md) is the other big user of the ok monad:
 matching an enum variant is a chain of attempts where the first success ends it.
 
-For the constructs, [monad providers](/docs/reference/providers/monad_providers) carries `PipeMonadic`,
+For the constructs, [monad providers](/docs/reference/providers/monad) carries `PipeMonadic`,
 the three markers, and the per-step `BindOk` / `BindErr` forms. The four monad traits are the layer
 defining what a monad is here: [`MonadicBind`](/docs/reference/traits/monadic_bind),
 [`ContainsValue`](/docs/reference/traits/contains_value),

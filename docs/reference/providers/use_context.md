@@ -41,7 +41,7 @@ pub struct GreetLoudly<Inner = UseContext>(pub PhantomData<Inner>);
 ```
 
 It also appears directly in a wiring entry to route a component through the context's own
-implementation, which is how the [dispatch combinators](dispatch_combinators.md) default their
+implementation, which is how the [dispatch combinators](dispatch/index.md) default their
 per-variant provider.
 
 **Do not wire a component to `UseContext` when that component's only implementation on the context is
@@ -173,7 +173,7 @@ capability or a per-type dispatch entry.
   context's own implementation into a component.
 - [`RedirectLookup`](redirect_lookup.md) — the other `#[cgp_component]`-generated provider, routing
   through a separate table rather than back to the context.
-- [Dispatch combinators](dispatch_combinators.md) — default their per-variant provider to `UseContext`.
+- [Dispatch combinators](dispatch/index.md) — default their per-variant provider to `UseContext`.
 - [`IsProviderFor`](../traits/is_provider_for.md) — carries the dependency `UseContext` propagates.
 
 The ideas behind it:

@@ -11,7 +11,7 @@ Stacking one monad on top of another.
 ### Generated machinery
 
 **You are not expected to name `MonadicTrans`.**
-[`PipeMonadic`](../providers/monad_providers.md) resolves a stacked monad through it before any binding
+[`PipeMonadic`](../providers/monad/pipe_monadic.md) resolves a stacked monad through it before any binding
 happens, and the transformer markers CGP ships already implement it. The one case for naming it is giving
 a monad of your own a transformer form; otherwise this page is here to explain how monads stack.
 
@@ -77,8 +77,8 @@ An *n*-layer stack unwraps *n* layers with no code specific to any depth, which 
 
 ## When to reach for it, and when not
 
-**Reach for the [monad providers](../providers/monad_providers.md), not this trait.** Wiring
-[`PipeMonadic`](../providers/monad_providers.md) with a marker — including a stacked one — is how a
+**Reach for the [monad providers](../providers/monad/index.md), not this trait.** Wiring
+[`PipeMonadic`](../providers/monad/pipe_monadic.md) with a marker — including a stacked one — is how a
 pipeline is built.
 
 The reasons to name it are two, and both are narrow.
@@ -96,7 +96,7 @@ marker directly.
 ## Under the hood
 
 `MonadicTrans` is applied to the **monads** rather than to the handlers, and it runs *before* any binding
-does. [`PipeMonadic`](../providers/monad_providers.md) resolves the stacked monad first, then walks the
+does. [`PipeMonadic`](../providers/monad/pipe_monadic.md) resolves the stacked monad first, then walks the
 handler list asking [`MonadicBind`](./monadic_bind.md) to turn each continuation into a bind step.
 
 Because the transformer forms implement [`ContainsValue`](./contains_value.md) and
@@ -132,7 +132,7 @@ bound rather than saying the marker is not stackable.
   step.
 - [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) — the two traits that run one
   step, where these two build the pipeline.
-- [Monad providers](../providers/monad_providers.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
+- [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers, including the transformer forms.
 - [`Computer`](../components/computer.md) — the component family a monadic pipeline implements.
 - [`Product!`](../macros/product.md) — the type-level list a pipeline's steps are given in.

@@ -11,7 +11,7 @@ Putting a value back into a monad's output type, on either branch.
 ### Generated machinery
 
 **You are not expected to name `LiftValue`.** The
-[bind providers](../providers/monad_providers.md) use it while running a step, and the monad markers CGP
+[bind providers](../providers/monad/index.md) use it while running a step, and the monad markers CGP
 ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
 page is here to explain how a step produces its output — and why that takes two methods rather than
 one.
@@ -81,20 +81,20 @@ collapses the two branches.
 
 ## When to reach for it, and when not
 
-**Reach for the [monad providers](../providers/monad_providers.md), not this trait.** A pipeline is built
-by wiring [`PipeMonadic`](../providers/monad_providers.md) with a marker and a handler list.
+**Reach for the [monad providers](../providers/monad/index.md), not this trait.** A pipeline is built
+by wiring [`PipeMonadic`](../providers/monad/pipe_monadic.md) with a marker and a handler list.
 
 The one real reason to name it is **defining a new monad**. Implement it alongside
 [`ContainsValue`](./contains_value.md), since the two are the pair that runs a step, and take the
 `OkMonadic`/`ErrMonadic` pair as the model — including their separate treatment of the two methods, which
 is the part a first implementation usually gets wrong.
 
-If short-circuiting is not what you need, the [handler combinators](../providers/handler_combinators.md)
+If short-circuiting is not what you need, the [handler combinators](../providers/handler/index.md)
 chain steps without a branch and involve none of this.
 
 ## Under the hood
 
-The [`BindOk` and `BindErr`](../providers/monad_providers.md) providers use `LiftValue` in their
+The [`BindOk` and `BindErr`](../providers/monad/index.md) providers use `LiftValue` in their
 [`Computer`](../components/computer.md) and `AsyncComputer` impls, as the closing half of a step whose
 opening half is [`ContainsValue`](./contains_value.md). The step unwraps the incoming output, decides
 whether to short-circuit, and then lifts:
@@ -134,10 +134,10 @@ forwarded; the associated type is the step's own. They coincide for some monads 
   type.
 - [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md) — the two traits that fold
   the pipeline rather than run a step.
-- [Monad providers](../providers/monad_providers.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
+- [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers; what you actually wire.
 - [`Computer`](../components/computer.md) — the component family the bind providers implement.
-- [Handler combinators](../providers/handler_combinators.md) — composition without a short-circuit
+- [Handler combinators](../providers/handler/index.md) — composition without a short-circuit
   branch.
 
 The ideas behind it:

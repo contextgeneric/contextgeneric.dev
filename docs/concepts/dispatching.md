@@ -120,7 +120,7 @@ the two halves this operates on, and both are worth reading first.
 [Handlers](./handlers.md) is the interface every dispatcher and every per-element handler speaks, and
 [monadic handlers](./monadic-handlers.md) is the chaining the matcher is built from.
 
-For the constructs, [the dispatch combinators](/docs/reference/providers/dispatch_combinators) is the
+For the constructs, [the dispatch combinators](/docs/reference/providers/dispatch) is the
 catalogue of matchers, builders, and per-element adapters, and
 [`#[cgp_auto_dispatch]`](/docs/reference/macros/cgp_auto_dispatch) is the shortcut above.
 

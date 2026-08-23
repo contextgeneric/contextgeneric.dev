@@ -123,7 +123,7 @@ handler families. The dispatching-per-type choice is worked through in
 [`#[derive_delegate]`](../attributes/derive_delegate.md).
 
 For dispatching on the *input* type of a handler rather than a `Code` parameter, the sibling provider is
-[`UseInputDelegate`](handler_combinators.md).
+[`UseInputDelegate`](handler/use_input_delegate.md).
 
 ## Under the hood
 
@@ -161,7 +161,7 @@ parameters should be routed differently.
 - [`delegate_components!`](../macros/delegate_components.md) — wires it, usually through a nested table,
   and carries the `open` statement that replaces it.
 - [`RedirectLookup`](redirect_lookup.md) — the mechanism `open` rides instead.
-- [`UseInputDelegate`](handler_combinators.md) — the sibling that keys on a handler's `Input` type.
+- [`UseInputDelegate`](handler/use_input_delegate.md) — the sibling that keys on a handler's `Input` type.
 - [`DelegateComponent`](../traits/delegate_component.md) — the table the lookup reads.
 - [`IsProviderFor`](../traits/is_provider_for.md) — propagates the dispatched provider's dependencies.
 

@@ -135,7 +135,7 @@ value type are both part of the entry.
   recursion routes through.
 - [`HasFields`](./has_fields.md) — the variant shape being walked.
 - [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain underneath.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — where casting meets per-variant routing.
+- [Dispatch combinators](../providers/dispatch/index.md) — where casting meets per-variant routing.
 
 The ideas behind it:
 

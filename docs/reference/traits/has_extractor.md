@@ -94,7 +94,7 @@ accessor otherwise — the weakest that works is the right one.
 - **[`HasExtractorMut`](./has_extractor_mut.md)** to change a payload in place.
 - **`HasExtractor`** when the payload must be moved out — returned, stored, or handed on by value.
 - **A `match`** when the enum is concrete. The family is for code that cannot name it.
-- **The [dispatch combinators](../providers/dispatch_combinators.md)** rather than a hand-written chain,
+- **The [dispatch combinators](../providers/dispatch/index.md)** rather than a hand-written chain,
   since they derive it from the enum's variant list.
 
 ## Under the hood

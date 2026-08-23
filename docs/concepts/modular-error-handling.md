@@ -179,7 +179,7 @@ if `#[use_type]` above was unfamiliar. [Impl-side dependencies](./impl-side-depe
 
 For the constructs, [`HasErrorType`](/docs/reference/components/has_error_type) is the abstract error
 type, [`CanRaiseError`](/docs/reference/components/can_raise_error) covers raising and wrapping, and
-[the error providers](/docs/reference/providers/error_providers) is the catalogue of strategies with the
+[the error providers](/docs/reference/providers/error) is the catalogue of strategies with the
 bound each one places on the context.
 
 ---

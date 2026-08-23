@@ -11,7 +11,7 @@ Naming the value a monad threads forward out of a step's output.
 ### Generated machinery
 
 **You are not expected to name `ContainsValue`.** The
-[bind providers](../providers/monad_providers.md) use it while running a step, and the monad markers CGP
+[bind providers](../providers/monad/index.md) use it while running a step, and the monad markers CGP
 ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
 page is here to explain how a step unwraps its input.
 
@@ -79,8 +79,8 @@ specific to any depth.
 
 ## When to reach for it, and when not
 
-**Reach for the [monad providers](../providers/monad_providers.md), not this trait.** A pipeline is built
-by wiring [`PipeMonadic`](../providers/monad_providers.md) with a marker and a handler list; this is what
+**Reach for the [monad providers](../providers/monad/index.md), not this trait.** A pipeline is built
+by wiring [`PipeMonadic`](../providers/monad/pipe_monadic.md) with a marker and a handler list; this is what
 the bind providers bound on internally.
 
 The one real reason to name it is **defining a new monad** — short-circuiting over an `Option`, or over a
@@ -89,12 +89,12 @@ that runs a step and neither is useful without the other, and copy the mirror-im
 `OkMonadic`/`ErrMonadic` pair as the model.
 
 If you do not need short-circuiting at all, the
-[handler combinators](../providers/handler_combinators.md) chain steps without a branch and involve none
+[handler combinators](../providers/handler/index.md) chain steps without a branch and involve none
 of this.
 
 ## Under the hood
 
-The [`BindOk` and `BindErr`](../providers/monad_providers.md) providers use `ContainsValue` in their
+The [`BindOk` and `BindErr`](../providers/monad/index.md) providers use `ContainsValue` in their
 [`Computer`](../components/computer.md) and `AsyncComputer` impls. Running one bind step means: take the
 step's output, ask the monad what value sits beneath its wrapper, and hand that to the continuation. This
 trait is the second half of that sentence.
@@ -128,7 +128,7 @@ the first step rather than at the definition.
 - [`LiftValue`](./lift_value.md) — the other half of running a step: getting back into the output type.
 - [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md) — the two traits that fold
   the pipeline rather than run a step.
-- [Monad providers](../providers/monad_providers.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
+- [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers; what you actually wire.
 - [`Computer`](../components/computer.md) — the component family the bind providers implement.
 - [`TryComputer`](../components/try_computer.md) and [`Handler`](../components/handler.md) — the fallible

@@ -191,7 +191,7 @@ struct.
 - [`Symbol!`](../macros/symbol.md) — the tag that names a variant.
 - [`CanUpcast`](./can_upcast.md) — widening a narrow enum into a wider one, built on these constructors.
 - [`HasFields`](./has_fields.md) — the variant shape a cast walks while rebuilding.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — where variant construction meets routing.
+- [Dispatch combinators](../providers/dispatch/index.md) — where variant construction meets routing.
 
 The ideas behind it:
 

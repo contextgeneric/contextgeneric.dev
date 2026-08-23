@@ -78,7 +78,7 @@ remainder.** The two do the same job at different points in the chain.
   `Result`, which is nearly always.
 - **`FinalizeExtract`** when a remainder has already been unwrapped out of its `Result`, typically inside
   a nested `match`.
-- **The [dispatch combinators](../providers/dispatch_combinators.md)** rather than writing the chain at
+- **The [dispatch combinators](../providers/dispatch/index.md)** rather than writing the chain at
   all — they generate it from the enum's variant list, which is what stops "add a variant" from breaking
   every call site by hand.
 - **A `match`** when the enum is concrete, where Rust's own exhaustiveness check already does this job.
@@ -124,7 +124,7 @@ record and variant machinery have been crossed.
 
 **Adding a variant re-inhabits the final remainder**, so every hand-written chain stops compiling. That
 is the guarantee, and the reason to prefer the
-[dispatch combinators](../providers/dispatch_combinators.md).
+[dispatch combinators](../providers/dispatch/index.md).
 
 **It also covers `Infallible`**, which is occasionally useful when threading a chain through an error type
 that cannot occur.
@@ -140,7 +140,7 @@ that cannot occur.
 - [`MapType`](./map_type.md) — the `IsVoid` marker the argument rests on.
 - [Type-level spines](../types/type_level_spines.md) — where the uninhabited `Void` comes from.
 - [`CanUpcast`](./can_upcast.md) — a cast whose total walk ends with this same discharge.
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the providers that build the chain.
+- [Dispatch combinators](../providers/dispatch/index.md) — the providers that build the chain.
 - [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) — generates this impl.
 
 The ideas behind it:

@@ -144,7 +144,7 @@ The decisions worth making are around it rather than about it.
 - **Reach for the `Send`-recovery pattern when a future is spawned**, not for a different macro. No attribute
   can add the bound, for the reason in the [Common Mistakes](#common-mistakes).
 - **Consider whether the capability needs to be async at all.** The [handler family](./cgp_computer.md) has
-  synchronous members, and the [promotion combinators](../providers/handler_combinators.md) lift a synchronous
+  synchronous members, and the [promotion combinators](../providers/handler/index.md) lift a synchronous
   provider into an async one where a caller needs it. So a computation that does no I/O is better declared
   synchronous and promoted than declared async out of habit.
 - **Reach for the `async-trait` crate instead only if you need `dyn` compatibility.** Boxing makes an
@@ -252,7 +252,7 @@ provider needed it; it did not, and removing it changes nothing.
 - [`#[cgp_impl]`](./cgp_impl.md) — where a provider writes an ordinary `async fn` body and needs no attribute.
 - [`Handler`](../components/handler.md) — CGP's built-in async, fallible component, declared this way.
 - [`#[cgp_computer]`](./cgp_computer.md) — where an `async` function selects the async base trait.
-- [Handler combinators](../providers/handler_combinators.md) — the promotions that lift a synchronous provider
+- [Handler combinators](../providers/handler/index.md) — the promotions that lift a synchronous provider
   into an async one.
 
 The ideas behind it:

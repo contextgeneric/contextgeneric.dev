@@ -23,7 +23,7 @@ Implement `HasArea` for `Circle` and for `Rectangle`, and an `enum Shape` holdin
 as well, dispatching to whichever variant it currently holds. No `match` is written anywhere.
 
 Without the macro you would either hand-write that `match` per method, or wire up the
-[dispatch combinators](../providers/dispatch_combinators.md) yourself: a matcher, a per-variant handler, and
+[dispatch combinators](../providers/dispatch/index.md) yourself: a matcher, a per-variant handler, and
 the field-extraction machinery between them. The macro does exactly that wiring, so what you write is the
 trait, its per-type impls, and a derive on the enum.
 
@@ -31,7 +31,7 @@ trait, its per-type impls, and a derive on the enum.
 is *exactly* "call the same trait method on the payload". The moment a variant needs different handling, or
 the dispatch should be chosen by a **context** (the type the capability runs against) rather than fixed on
 the enum, reach for the combinators directly. This is the convenient front end to
-[dispatching](../providers/dispatch_combinators.md), not a replacement for it.
+[dispatching](../providers/dispatch/index.md), not a replacement for it.
 
 ## Usage
 
@@ -136,7 +136,7 @@ Reach for something else in four situations.
 
 - **The behaviour differs per variant.** The macro generates one handler that calls the same method on every
   payload. When a variant needs something else, use the
-  [dispatch combinators](../providers/dispatch_combinators.md) directly and name a handler per variant.
+  [dispatch combinators](../providers/dispatch/index.md) directly and name a handler per variant.
 - **The dispatch should be a wired component.** The generated impl is fixed on the enum, with a unit context
   and a unit code, so a context cannot override how one variant is handled. Wiring
   `MatchWithValueHandlers` into a context's own component gives that control.
@@ -231,7 +231,7 @@ error: Dispatch trait methods cannot contain non-lifetime generic parameters due
 
 The blanket impl would need a quantified bound ("for every instantiation of the method's type parameter,
 every variant's payload satisfies it"), and Rust has no way to write that. A method that must be generic has
-to be handled with the [dispatch combinators](../providers/dispatch_combinators.md) directly. Lifetime
+to be handled with the [dispatch combinators](../providers/dispatch/index.md) directly. Lifetime
 parameters are fine.
 
 **Associated types and consts are rejected.** Every trait item must be a method:
@@ -255,7 +255,7 @@ hand for some other type without colliding with it.
 
 ## Related constructs
 
-- [Dispatch combinators](../providers/dispatch_combinators.md) — the matchers this wires, and what to use
+- [Dispatch combinators](../providers/dispatch/index.md) — the matchers this wires, and what to use
   directly for anything it cannot express.
 - [`#[cgp_computer]`](./cgp_computer.md) — how each per-variant handler is emitted.
 - [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) — what the enum needs to be dispatchable.
