@@ -18,7 +18,7 @@ only knows how to turn a `Debug` value into a `String` and hand it off, leaving 
 whatever string-handling provider the context already wires. Like every CGP provider, `DebugError`
 carries no runtime value.
 
-This design is what lets a context handle an open-ended set of error types with one concrete
+This design lets a context handle an open-ended set of error types with one concrete
 string-raising rule. `DebugError` routes every `Debug` source through the single `String` path, and the
 context wires one provider (often [`RaiseFrom`](raise_from.md)) for that path.
 

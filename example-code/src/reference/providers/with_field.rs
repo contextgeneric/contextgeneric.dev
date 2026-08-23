@@ -1,10 +1,11 @@
-//! Code from `docs/reference/providers/use_field.md` — *`UseField`*.
+//! Code from `docs/reference/providers/with_field.md` — *`WithField`*.
 //!
-//! Pins the decoupling the page is about: a getter method `name` reads a `first_name` field through
-//! `UseField`. The `WithField` alias is covered by `with_field.rs`.
+//! Pins that the `WithField<Symbol!("first_name")>` alias wires a `name` getter to read the
+//! `first_name` field, the same as the plain `UseField`.
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::WithField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -19,7 +20,7 @@ pub mod examples {
 
     delegate_components! {
         Person {
-            NameGetterComponent: UseField<Symbol!("first_name")>,
+            NameGetterComponent: WithField<Symbol!("first_name")>,
         }
     }
 
@@ -29,17 +30,11 @@ pub mod examples {
         }
     }
 
-    // The page's `greet` fn.
-    fn greet(person: &Person) {
-        println!("Hello, {}!", person.name()); // reads the first_name field
-    }
-
     #[test]
-    fn test_use_field_reads_first_name() {
+    fn test_with_field_reads_first_name() {
         let person = Person {
             first_name: "Alice".to_owned(),
         };
         assert_eq!(person.name(), "Alice");
-        greet(&person);
     }
 }

@@ -61,7 +61,7 @@ delegate_components! {
 The `new` keyword declares the inner table `AreaCalculatorComponents` in place and maps each concrete
 type to its provider. The component must be defined with a
 [`#[derive_delegate(UseDelegate<Param>)]`](../attributes/derive_delegate.md) attribute naming the
-parameter to dispatch on, which is what generates the `UseDelegate` provider impl that reads the table.
+parameter to dispatch on, which generates the `UseDelegate` provider impl that reads the table.
 
 ## Examples
 

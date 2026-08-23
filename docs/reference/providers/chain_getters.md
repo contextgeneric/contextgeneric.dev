@@ -135,7 +135,7 @@ The head `Getter` reads `ValueA` from the `Context`, and the rest of the chain r
 `ValueA`, so the whole chain's `Value` is `ValueB`, the value at the end of the path. The head is
 applied through [`FieldMapper`](../traits/field_mapper.md) rather than `FieldGetter` directly:
 `map_field` hands the intermediate reference to a closure that runs the rest of the chain on it, which
-is what keeps the borrowed lifetimes inferring across each hop.
+keeps the borrowed lifetimes inferring across each hop.
 
 The recursion bottoms out at the empty list, where `ChainGetters<Nil>` is the identity getter and
 returns the context it was given:

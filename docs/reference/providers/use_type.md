@@ -1,9 +1,9 @@
 ---
-sidebar_label: 'UseType (provider)'
+sidebar_label: 'UseType'
 sidebar_position: 2
 ---
 
-# `UseType` (provider)
+# `UseType`
 
 Supply a concrete type as the value of an abstract-type component, binding it purely through wiring.
 
@@ -56,9 +56,8 @@ component marker `ScalarTypeProviderComponent`; wiring that marker to `UseType<f
 `Scalar` to `f64`. Any bound on the associated type, such as `type Scalar: Copy`, is enforced against
 the concrete type at the wiring site.
 
-`UseType<Type>` has an alias, `WithType<Type>`, which is
-[`WithProvider<UseType<Type>>`](with_provider.md); it is imported from `cgp::core::types`. Both bind
-the same type. Prefer the plain `UseType<Type>` form.
+`UseType<Type>` also has an alias, [`WithType<Type>`](with_type.md), the `WithProvider`-adapted form
+imported from `cgp::core::types`. Both bind the same type; prefer the plain `UseType<Type>` form.
 
 ## Examples
 
@@ -85,20 +84,8 @@ delegate_components! {
 `Scalar = f64`. The `Copy` bound on the associated type is checked against `f64` where the wiring is
 written.
 
-The same binding can be written with the `WithType` alias, which routes through
-[`WithProvider`](with_provider.md):
-
-```rust
-use cgp::core::types::WithType; // not in the prelude
-
-delegate_components! {
-    App {
-        ScalarTypeProviderComponent: WithType<f64>,
-    }
-}
-```
-
-Both make `App::Scalar` resolve to `f64`.
+The same binding can be written with the [`WithType`](with_type.md) alias, which routes through
+[`WithProvider`](with_provider.md).
 
 ## When to reach for it, and when not
 
@@ -129,7 +116,7 @@ The implementation is unconditional in `Context` and `Tag`: `UseType<f64>` is a 
 reads this, so once a context's type component is wired to `UseType<f64>`, the context implements
 `HasType<Tag>` with `Type = f64`.
 
-The same provider is what [`#[cgp_type]`](../macros/cgp_type.md) targets. For
+[`#[cgp_type]`](../macros/cgp_type.md) targets the same provider. For
 `#[cgp_type] trait HasScalarType { type Scalar; }`, the macro generates a `UseType` implementation for
 the component's own provider trait:
 
@@ -155,6 +142,7 @@ clause, so the concrete type must satisfy it at the wiring site.
   implements.
 - [`UseDelegatedType`](use_delegated_type.md) — resolves an abstract type through a table instead of
   fixing it.
+- [`WithType`](with_type.md) — the `WithProvider`-adapted alias that binds the same type.
 - [`WithProvider`](with_provider.md) — the adapter behind the `WithType` alias.
 - [`UseField`](use_field.md) — the field-level analogue for getter components.
 

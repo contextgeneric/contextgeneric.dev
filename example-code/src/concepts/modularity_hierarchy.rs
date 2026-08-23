@@ -190,7 +190,7 @@ pub mod tier_5 {
 
     use cgp::prelude::*;
 
-    use super::tier_4::{CanEncodeValue, EncodeAsHex, EncodeAsText, Encoder, EncoderComponent};
+    use super::tier_4::{EncodeAsHex, EncodeAsText, Encoder, EncoderComponent};
 
     pub struct EncodeVecWith<Inner = UseContext>(pub PhantomData<Inner>);
 
@@ -221,6 +221,8 @@ pub mod tier_5 {
     // `UseContext` default, and the `Vec<Vec<u8>>` call exercises the pinned inner provider.
     #[test]
     fn app_encodes_nested_collections() {
+        use super::tier_4::CanEncodeValue;
+
         let flat = <App as CanEncodeValue<Vec<u32>>>::encode(&App, &vec![1, 2, 3]);
         assert_eq!(flat, b"123");
 

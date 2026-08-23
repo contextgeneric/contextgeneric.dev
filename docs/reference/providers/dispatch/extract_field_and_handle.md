@@ -13,7 +13,7 @@ The per-variant adapter that tries one variant and forwards its matched payload 
 tries to extract the variant named `Tag` from the input. On success it wraps the payload in a
 `Field<Tag, Value>` and hands it to `Provider`, returning `Ok` of the provider's output. On failure it
 returns `Err` of the remainder, the extractor with that variant ruled out. It runs on a **context**, the
-type a capability runs against. The `Result<Output, Remainder>` shape it returns is exactly what the
+type a capability runs against. It returns the `Result<Output, Remainder>` shape the
 matcher loop expects, so a [`Product!`](../../macros/product.md) of these adapters is the list a matcher
 consumes. Like every CGP provider, it carries no runtime value.
 
@@ -38,7 +38,7 @@ type Match = MatchWithHandlers<Product![
 ```
 
 The payload arrives at `Provider` still wrapped as a `Field<Tag, Value>`, so wrapping the inner handler
-in [`HandleFieldValue`](handle_field_value.md) is what strips the tag to a bare value. The convenience
+in [`HandleFieldValue`](handle_field_value.md) strips the tag to a bare value. The convenience
 matchers [`MatchWithValueHandlers`](match_with_value_handlers.md) and
 [`MatchWithFieldHandlers`](match_with_field_handlers.md) generate lists of these adapters from an enum's
 fields, so you rarely write them out by hand.

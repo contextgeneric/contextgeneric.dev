@@ -87,7 +87,7 @@ where
 }
 ```
 
-The bound `Context::Error: From<E>` is what makes one wiring cover many source types. The generated
+The bound `Context::Error: From<E>` makes one wiring cover many source types. The generated
 [`IsProviderFor`](../../traits/is_provider_for.md) impl carries the same clause, so a
 [check](../../macros/check_components.md) reports a missing `From` impl at the wiring site.
 

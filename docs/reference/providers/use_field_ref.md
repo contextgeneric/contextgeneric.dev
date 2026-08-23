@@ -17,8 +17,8 @@ stored field type implements `AsRef<Value>`. It exists for a getter whose return
 example, where the field is not a `Config` but can be borrowed as one.
 
 `UseFieldRef` is a foundational [`FieldGetter`](../traits/field_getter.md) rather than a getter
-component's own provider, so it is wired through the [`WithProvider`](with_provider.md) adapter using its
-`WithFieldRef` alias. That distinguishes it from [`UseField`](use_field.md), which
+component's own provider, so it is wired through its [`WithFieldRef`](with_field_ref.md) alias,
+`WithProvider<UseFieldRef<Tag, Value>>`. That distinguishes it from [`UseField`](use_field.md), which
 [`#[cgp_getter]`](../macros/cgp_getter.md) generates a getter-component implementation for directly.
 
 Most borrowed-view getters do not need `UseFieldRef` at all, and this is the key thing to know before
@@ -31,82 +31,17 @@ borrowed as. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
-`UseFieldRef` is not in the prelude, and neither is its `WithFieldRef` alias. Import them from
-`cgp::core::field::impls`:
-
-```rust
-use cgp::core::field::impls::WithFieldRef;
-```
-
-`WithFieldRef<Tag, Value>` is [`WithProvider<UseFieldRef<Tag, Value>>`](with_provider.md), and it is the
-form you wire, since the bare `UseFieldRef` provides the foundational `FieldGetter` rather than a named
-getter's provider trait. It takes the field tag and the borrowed value type, and appears as the value of
-a getter component's wiring entry:
-
-```rust
-delegate_components! {
-    App {
-        ConfigGetterComponent: WithFieldRef<Symbol!("config"), Config>,
-    }
-}
-```
-
-`Tag` names the field, as in [`UseField`](use_field.md), and `Value` is the type the getter exposes. The
-stored field type must implement `AsRef<Value>` (and, for the mutable getter, `AsMut<Value>`), and the
-getter's return type must be `&Value`.
-
-## Examples
-
-A getter returns `&Config` while the context stores the config in a wrapper that borrows as `Config`.
-The wrapper implements `AsRef<Config>`, so `WithFieldRef` reads it and borrows through it:
-
-```rust
-use cgp::prelude::*;
-use cgp::core::field::impls::WithFieldRef; // not in the prelude
-
-pub struct Config {
-    pub port: u16,
-}
-
-pub struct StoredConfig(pub Config);
-
-impl AsRef<Config> for StoredConfig {
-    fn as_ref(&self) -> &Config {
-        &self.0
-    }
-}
-
-#[cgp_getter]
-pub trait HasConfig {
-    fn config(&self) -> &Config;
-}
-
-#[derive(HasField)]
-pub struct App {
-    pub config: StoredConfig,
-}
-
-delegate_components! {
-    App {
-        ConfigGetterComponent: WithFieldRef<Symbol!("config"), Config>,
-    }
-}
-```
-
-`App` wires `ConfigGetterComponent` to `WithFieldRef<Symbol!("config"), Config>`. The provider reads the
-`config` field, a `StoredConfig`, and because `StoredConfig: AsRef<Config>`, returns `&Config` from
-`as_ref()`. The getter exposes the borrowed `Config` view while the context owns the `StoredConfig`.
+`UseFieldRef` supplies only the foundational [`FieldGetter`](../traits/field_getter.md), so it is wired
+through its [`WithFieldRef`](with_field_ref.md) alias rather than named directly. See
+[`WithFieldRef`](with_field_ref.md) for the import, the wiring form, and a worked example; the mechanism
+those rest on is described under [Under the hood](#under-the-hood) below.
 
 ## When to reach for it, and when not
 
-**Reach for `UseFieldRef` when a getter returns `&T` and the context stores a different type that
-borrows as `T` through `AsRef`.** The stored type and the exposed type differ, and neither the plain
-[`UseField`](use_field.md) nor an [`#[implicit]`](../attributes/implicit.md) argument can bridge them.
-
-Prefer [`UseField`](use_field.md) for the common borrowed-view getters. A `-> &str` getter over a
-`String` field and a `-> &[u8]` getter over a `Vec<u8>` field are handled by the generated `UseField`
-implementation, which borrows through `as_str()` or `as_ref()` based on the return type, so they need no
-`UseFieldRef`. And for a field returned as its own type, an `#[implicit]` argument is simpler still.
+You choose `UseFieldRef` by wiring its [`WithFieldRef`](with_field_ref.md) alias, so the guidance on when
+a borrowed-view getter needs it — rather than the plain [`UseField`](use_field.md) or an
+[`#[implicit]`](../attributes/implicit.md) argument — lives with that alias, on
+[`WithFieldRef`](with_field_ref.md).
 
 ## Under the hood
 
@@ -136,7 +71,7 @@ lets Rust infer the borrow's lifetime through the `AsRef` call.
 `UseFieldRef` also implements the mutable getter [`MutFieldGetter`](../traits/mut_field_getter.md),
 requiring the field type to implement both `AsRef<Value>` and `AsMut<Value>` and returning `&mut Value`
 through `as_mut()`. Because these are `FieldGetter` implementations rather than a getter component's own
-provider trait, the [`WithProvider`](with_provider.md) adapter behind `WithFieldRef` is what turns
+provider trait, the [`WithProvider`](with_provider.md) adapter behind `WithFieldRef` turns
 `UseFieldRef` into a provider a getter component can be wired to. Unlike [`UseField`](use_field.md), it
 does not implement [`TypeProvider`](../components/has_type.md), because its purpose is borrowed field
 access rather than abstract-type resolution.
@@ -145,6 +80,8 @@ access rather than abstract-type resolution.
 
 - [`UseField`](use_field.md) — the getter provider that reads a field directly, and that already handles
   the `&str`/`&[u8]` borrowed shorthands.
+- [`WithFieldRef`](with_field_ref.md) — the alias you wire, and the home of the import and worked
+  example.
 - [`WithProvider`](with_provider.md) — the adapter behind the `WithFieldRef` alias, which turns
   `UseFieldRef` into a getter-component provider.
 - [`ChainGetters`](chain_getters.md) — another foundational `FieldGetter`, composed for nested contexts.

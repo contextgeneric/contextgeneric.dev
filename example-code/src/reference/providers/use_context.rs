@@ -1,36 +1,39 @@
 //! Code from `docs/reference/providers/use_context.md` — *`UseContext`*.
 //!
-//! Pins the non-cyclic default-inner-provider use: a loud greeter wraps the context's own greeter
-//! through `UseContext`, delegating to a *different* component so there is no cycle.
+//! Pins the default-inner-provider use: `EncodeVec` encodes a `Vec` by encoding each element through its
+//! inner provider, which defaults to `UseContext` so the elements route back to the context's own
+//! `CanEncode` wiring for their type. No cycle, because the element lookup is for a different type
+//! (`u32`) than the wired one (`Vec<u32>`).
 
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
 
-    #[cgp_component(Greeter)]
-    pub trait CanGreet {
-        fn greet(&self) -> String;
+    #[cgp_component(Encoder)]
+    pub trait CanEncode<Value> {
+        fn encode(&self, value: &Value) -> Vec<u8>;
     }
 
-    #[cgp_component(LoudGreeter)]
-    pub trait CanGreetLoudly {
-        fn greet_loudly(&self) -> String;
-    }
-
-    #[cgp_impl(new GreetHello)]
-    impl Greeter {
-        fn greet(&self) -> String {
-            "Hello".to_owned()
+    #[cgp_impl(new EncodeAsText)]
+    impl<Value> Encoder<Value>
+    where
+        Value: core::fmt::Display,
+    {
+        fn encode(&self, value: &Value) -> Vec<u8> {
+            value.to_string().into_bytes()
         }
     }
 
-    pub struct GreetLoudly<Inner = UseContext>(pub PhantomData<Inner>);
+    pub struct EncodeVec<Inner = UseContext>(pub PhantomData<Inner>);
 
-    #[cgp_impl(GreetLoudly<Inner>)]
-    #[use_provider(Inner: Greeter)]
-    impl<Inner> LoudGreeter {
-        fn greet_loudly(&self) -> String {
-            format!("{}!", Inner::greet(self).to_uppercase())
+    #[cgp_impl(EncodeVec<Inner>)]
+    #[use_provider(Inner: Encoder<Item>)]
+    impl<Item, Inner> Encoder<Vec<Item>> {
+        fn encode(&self, values: &Vec<Item>) -> Vec<u8> {
+            values
+                .iter()
+                .flat_map(|item| Inner::encode(self, item))
+                .collect()
         }
     }
 
@@ -38,21 +41,26 @@ pub mod examples {
 
     delegate_components! {
         App {
-            GreeterComponent: GreetHello,
-            LoudGreeterComponent: GreetLoudly,
+            open EncoderComponent;
+
+            @EncoderComponent.u32: EncodeAsText,
+            @EncoderComponent.Vec<u32>: EncodeVec,
         }
     }
 
-    check_components! {
-        App {
-            GreeterComponent,
-            LoudGreeterComponent,
+    mod check_app {
+        use super::*;
+        check_components! {
+            App {
+                EncoderComponent: [u32, Vec<u32>],
+            }
         }
     }
 
     #[test]
     fn test_use_context_default_inner() {
-        let app = App;
-        assert_eq!(app.greet_loudly(), "HELLO!");
+        // The `Vec<u32>` element encoding routes through `UseContext` to the `u32` encoder.
+        let flat = <App as CanEncode<Vec<u32>>>::encode(&App, &vec![1u32, 2, 3]);
+        assert_eq!(flat, b"123");
     }
 }

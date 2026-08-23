@@ -1,6 +1,7 @@
-//! Code from `docs/reference/providers/use_delegated_type.md` — *`UseDelegatedType`*.
+//! Code from `docs/reference/providers/with_delegated_type.md` — *`WithDelegatedType`*.
 //!
-//! Pins that one `UseDelegatedType<AppTypes>` entry answers two abstract-type components, each
+//! `WithDelegatedType` (`WithProvider<UseDelegatedType<..>>`) is the form that wires the foundational
+//! `UseDelegatedType` provider. This pins that one entry answers two abstract-type components, each
 //! resolving to the concrete type held in the `AppTypes` table.
 
 /// ## Examples

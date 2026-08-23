@@ -27,7 +27,7 @@ use cgp::extra::monad::monadic::err::BindErr;
 use cgp::extra::monad::monadic::ident::IdentMonadic;
 use cgp::extra::handler::PipeHandlers;
 
-// This is what PipeMonadic builds internally for a two-element list under ErrMonadic.
+// PipeMonadic builds this internally for a two-element list under ErrMonadic.
 type Pipeline = PipeHandlers<Product![Increment, BindErr<IdentMonadic, Increment>]>;
 // 1 -> Ok(2) -> BindErr runs the second Increment on 2 -> Ok(3)
 ```
@@ -51,7 +51,7 @@ pub struct BindErr<M, Cont>(pub PhantomData<(M, Cont)>);
 It implements `Computer` and `AsyncComputer` for an input of `Result<T1, E>`. On `Ok(value)` it runs
 `Cont` on the value and lifts the continuation's output back through `M`. On `Err(err)` it
 short-circuits, lifting the error directly to the output and skipping `Cont`. It is the mirror of
-[`BindOk`](bind_ok.md), which branches the other way. The `M` parameter is what lets these binds nest: at
+[`BindOk`](bind_ok.md), which branches the other way. The `M` parameter lets these binds nest: at
 the bottom of a single-layer pipeline it is `IdentMonadic`, and a stacked monad threads a deeper monad
 through it.
 

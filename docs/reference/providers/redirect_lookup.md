@@ -27,11 +27,11 @@ this provider is legible.
 table* answers it. The ordinary provider blanket impl looks a component up in the **context**'s own
 delegation table, keyed by the component marker, where the context is the type the capability runs
 against. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed by a
-type-level `Path`, then delegates to whatever provider that entry holds. This indirection is what lets
+type-level `Path`, then delegates to whatever provider that entry holds. This indirection lets
 one component's resolution be redirected to a different key in a different table, which is the basis for
 organizing wiring into namespaces.
 
-The redirection is what makes namespaces work. A namespace groups a context's components under a path
+The redirection makes namespaces work. A namespace groups a context's components under a path
 prefix so several related components can be wired in one place and addressed by a shared path.
 `RedirectLookup` turns a prefixed path back into a concrete provider: the namespace machinery sets a
 component's delegate to a `RedirectLookup` carrying the path under which the real provider was
@@ -60,7 +60,7 @@ delegate_components! {
 }
 ```
 
-The path-keyed entry above (`@bar.baz`) is what a `RedirectLookup` later walks. The path itself is a
+A `RedirectLookup` later walks the path-keyed entry above (`@bar.baz`). The path itself is a
 [`PathCons`](../types/type_level_spines.md) chain of [`Symbol!`](../macros/symbol.md) segments, most
 easily written with [`Path!`](../macros/path.md).
 
@@ -135,11 +135,11 @@ The mechanism is one [`DelegateComponent`](../traits/delegate_component.md) look
 rather than on the component marker. `RedirectLookup<Components, Path>` implements `Greeter` whenever
 `Components` maps `Path` to a delegate that itself implements `Greeter`, and the method forwards to that
 delegate. When the consumer trait carries generic type parameters, the impl additionally constrains
-`Path` with `ConcatPath` so the parameters are appended to the path before the lookup, letting the
-redirected key encode the generic arguments. As always, the impl is paired with a matching
+`Path` with [`ConcatPath`](../traits/concat_path.md) so the parameters are appended to the path before
+the lookup, letting the redirected key encode the generic arguments. As always, the impl is paired with a matching
 [`IsProviderFor`](../traits/is_provider_for.md) impl.
 
-The `#[prefix(@path in Namespace)]` attribute is what populates the path side: it generates a namespace
+The `#[prefix(@path in Namespace)]` attribute populates the path side: it generates a namespace
 impl whose delegate is `RedirectLookup<Components, Path>`, with the prefix path joined onto the
 component marker, so resolving the component under that namespace follows the prefixed path into the
 table.

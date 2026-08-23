@@ -16,8 +16,8 @@ is the fuller map for once the essentials are familiar.
 ## Wiring an everyday component
 
 [`UseContext`](./use_context.md) implements a provider trait by routing back through the context's own
-consumer-trait implementation, which is what a higher-order provider falls back to and the default
-per-variant provider a dispatch combinator routes each matched case through.
+consumer-trait implementation. A higher-order provider falls back to it, and a dispatch combinator
+routes each matched case through it as its default per-variant provider.
 [`UseType`](./use_type.md) supplies a concrete type for an abstract-type component, so a context binds
 its error type or runtime with one wiring line.
 [`UseField`](./use_field.md) implements a getter by reading a context field named by a tag, and
@@ -27,15 +27,18 @@ behaviour left for a provider to supply.
 
 [`WithProvider`](./with_provider.md) is the adapter behind the `With…` aliases: it turns a foundational
 provider such as a field getter or a type provider into a provider for a named component, and the
-aliases `WithField`, `WithType`, and `WithContext` are how it usually appears in wiring.
+aliases [`WithField`](./with_field.md), [`WithType`](./with_type.md), [`WithContext`](./with_context.md),
+[`WithFieldRef`](./with_field_ref.md), and [`WithDelegatedType`](./with_delegated_type.md) are how it
+usually appears in wiring.
 
 ## Dispatching per type, and organizing wiring
 
 [`UseDelegate`](./use_delegate.md) chooses a provider by the type of a generic parameter through a
-lookup table, the legacy form of the per-type dispatch the `open` statement now expresses.
+lookup table, the legacy form of the per-type dispatch the
+[`open` statement](../macros/delegate_components.md) now expresses.
 [`RedirectLookup`](./redirect_lookup.md) routes a component's lookup along a type-level path in a
-separate table, the mechanism every namespace and `open` statement rides. Both are read in wiring far
-more often than written.
+separate table, the mechanism every [namespace](../macros/cgp_namespace.md) and `open` statement rides.
+Both are read in wiring far more often than written.
 
 ## The specialized getters and type providers
 
@@ -56,3 +59,7 @@ family's synchronous, async, and fallible shapes, the [dispatch combinators](./d
 route an extensible-data value to per-field or per-variant handlers, and the
 [monad providers](./monad/index.md) chain handlers that short-circuit through a monad. Each group is a
 subsection here with one page per provider and its own overview.
+
+---
+
+*This page was written by an AI agent from the CGP knowledge base and verified against the library's source — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

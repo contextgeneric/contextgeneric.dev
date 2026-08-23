@@ -48,10 +48,9 @@ The tag is a [`Symbol!`](../macros/symbol.md) for a named field or an `Index<N>`
 The context must have a `HasField` implementation for that tag, which
 [`#[derive(HasField)]`](../derives/derive_has_field.md) supplies for every field of a struct.
 
-`UseField<Tag>` has an alias, `WithField<Tag>`, which is
-[`WithProvider<UseField<Tag>>`](with_provider.md). Both bind the same field; the alias routes through
-the `WithProvider` adapter instead of the getter's own generated `UseField` implementation. Prefer the
-plain `UseField<Tag>` form.
+`UseField<Tag>` also has an alias, [`WithField<Tag>`](with_field.md), which is
+[`WithProvider<UseField<Tag>>`](with_provider.md). Both bind the same field; prefer the plain
+`UseField<Tag>` form.
 
 ## Examples
 
@@ -87,18 +86,8 @@ fn greet(person: &Person) {
 the `first_name` field. The method name and the field name diverge, and the field name comes entirely
 from the wiring.
 
-The same binding can be written with the `WithField` alias, which routes through
-[`WithProvider`](with_provider.md):
-
-```rust
-delegate_components! {
-    Person {
-        NameGetterComponent: WithField<Symbol!("first_name")>,
-    }
-}
-```
-
-Both read `first_name`.
+The same binding can be written with the [`WithField`](with_field.md) alias, which routes through
+[`WithProvider`](with_provider.md).
 
 ## When to reach for it, and when not
 
@@ -160,6 +149,7 @@ bound, so delegation propagates the dependency and a check reports a missing fie
 - [`UseFieldRef`](use_field_ref.md) — the foundational getter for a stored type that borrows to a
   different return type through `AsRef`.
 - [`ChainGetters`](chain_getters.md) — reaches a field on a nested context by composing getters.
+- [`WithField`](with_field.md) — the `WithProvider`-adapted alias that binds the same field.
 - [`WithProvider`](with_provider.md) — the adapter behind the `WithField` alias.
 - [`UseType`](use_type.md) — the abstract-type analogue for a `#[cgp_type]` component.
 - [`HasField`](../traits/has_field.md) and [`#[derive(HasField)]`](../derives/derive_has_field.md) — the

@@ -25,7 +25,7 @@ the defaults wires the component to `UseDefault` and writes no method bodies of 
 `UseDefault` is a bare marker that CGP defines but does not implement for any trait. Unlike
 [`UseContext`](use_context.md) or the getter providers, no macro generates a provider implementation
 for it. The author writes the implementation, usually with [`#[cgp_impl]`](../macros/cgp_impl.md) and
-an empty body so the trait's defaults take effect. That is what distinguishes `UseDefault` from the
+an empty body so the trait's defaults take effect. That distinguishes `UseDefault` from the
 providers that carry generated behavior: it is purely a conventional name for an author-supplied,
 default-bodied implementation. Like every CGP provider, it carries no runtime value.
 

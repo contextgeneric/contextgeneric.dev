@@ -13,7 +13,7 @@ Strip the variant tag from a matched payload and pass the bare value to an inner
 handler that does the work. An extract adapter such as
 [`ExtractFieldAndHandle`](extract_field_and_handle.md) delivers a `Field<Tag, Value>`, so the variant
 name stays attached to the payload. `HandleFieldValue` strips the `Field` wrapper and passes the bare
-`Value` to `Provider`, on a **context**, the type a capability runs against. This is what lets an
+`Value` to `Provider`, on a **context**, the type a capability runs against. This lets an
 ordinary computer over the payload type serve as a per-variant handler. Like every CGP provider, it
 carries no runtime value.
 

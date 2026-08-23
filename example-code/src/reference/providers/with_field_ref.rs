@@ -1,8 +1,7 @@
-//! Code from `docs/reference/providers/use_field_ref.md` — *`UseFieldRef`*.
+//! Code from `docs/reference/providers/with_field_ref.md` — *`WithFieldRef`*.
 //!
-//! `UseFieldRef` is a foundational `FieldGetter`, so it is wired to a getter component through the
-//! `WithFieldRef` alias (`WithProvider<UseFieldRef<..>>`). This pins that a `-> &Config` getter reads
-//! a stored `AsRef<Config>` field.
+//! `WithFieldRef` (`WithProvider<UseFieldRef<..>>`) is the form that wires the foundational
+//! `UseFieldRef` getter. This pins that a `-> &Config` getter reads a stored `AsRef<Config>` field.
 
 /// ## Examples
 pub mod examples {
@@ -46,7 +45,7 @@ pub mod examples {
     }
 
     #[test]
-    fn test_use_field_ref_borrows_through_as_ref() {
+    fn test_with_field_ref_borrows_through_as_ref() {
         let app = App {
             config: StoredConfig(Config { port: 8080 }),
         };

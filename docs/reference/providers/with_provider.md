@@ -20,7 +20,7 @@ serves. A named component, by contrast, has a specific provider trait, such as `
 one of those named components: it implements the component's provider trait by forwarding to the
 foundational provider's method.
 
-This adapter is what lets the foundational layer be wired without each foundational provider
+This adapter lets the foundational layer be wired without each foundational provider
 implementing every component trait by hand. A field getter written once as a `FieldGetter` can serve any
 number of getter components through `WithProvider`, and an abstract-type implementation written once as
 a `TypeProvider` can serve any type component the same way.
@@ -28,7 +28,7 @@ a `TypeProvider` can serve any type component the same way.
 `WithProvider` is rarely written in full, because its common uses are packaged as aliases. The family
 `WithContext`, `WithType`, `WithField`, `WithFieldRef`, and `WithDelegatedType` are each
 `WithProvider<...>` specialized to a particular inner provider, and those aliases are what appear in
-everyday wiring. Understanding `WithProvider` is what explains why the aliases work. Like every CGP
+everyday wiring. Understanding `WithProvider` explains why the aliases work. Like every CGP
 provider, it carries no runtime value.
 
 ## Usage
@@ -39,11 +39,11 @@ practice you write one of its aliases instead:
 
 | Alias | Expands to | Import from |
 |---|---|---|
-| `WithContext` | `WithProvider<UseContext>` | prelude |
-| `WithType<Type>` | `WithProvider<UseType<Type>>` | `cgp::core::types` |
-| `WithField<Tag>` | `WithProvider<UseField<Tag>>` | `cgp::core::field::impls` |
-| `WithFieldRef<Tag, Value>` | `WithProvider<UseFieldRef<Tag, Value>>` | `cgp::core::field::impls` |
-| `WithDelegatedType<Components>` | `WithProvider<UseDelegatedType<Components>>` | `cgp::core::types` |
+| [`WithContext`](with_context.md) | `WithProvider<UseContext>` | prelude |
+| [`WithType<Type>`](with_type.md) | `WithProvider<UseType<Type>>` | `cgp::core::types` |
+| [`WithField<Tag>`](with_field.md) | `WithProvider<UseField<Tag>>` | `cgp::core::field::impls` |
+| [`WithFieldRef<Tag, Value>`](with_field_ref.md) | `WithProvider<UseFieldRef<Tag, Value>>` | `cgp::core::field::impls` |
+| [`WithDelegatedType<Components>`](with_delegated_type.md) | `WithProvider<UseDelegatedType<Components>>` | `cgp::core::types` |
 
 Each alias wires the inner provider it names as a specific component's provider. A component becomes
 adaptable this way only when its macro generates the `WithProvider` impl:
@@ -85,12 +85,13 @@ the type through a table.
 
 ## When to reach for it, and when not
 
-**Reach for one of the aliases, not `WithProvider` directly.** `WithField`, `WithType`, `WithContext`,
-`WithFieldRef`, and `WithDelegatedType` are the readable forms, and they are interchangeable with the
-plain providers they wrap: wiring a getter to `WithField<Tag>` and to
-[`UseField<Tag>`](use_field.md) both read the same field. Prefer the plain provider
-([`UseField`](use_field.md), [`UseType`](use_type.md)) where it applies, and the `With...` alias where a
-component is reached only through the `WithProvider` adapter.
+**Reach for one of the aliases, not `WithProvider` directly.** [`WithField`](with_field.md),
+[`WithType`](with_type.md), and [`WithContext`](with_context.md) are interchangeable with the plain
+providers they wrap: wiring a getter to `WithField<Tag>` and to [`UseField<Tag>`](use_field.md) both
+read the same field, so prefer the plain provider ([`UseField`](use_field.md), [`UseType`](use_type.md))
+where it applies. [`WithFieldRef`](with_field_ref.md) and [`WithDelegatedType`](with_delegated_type.md)
+have no plain wireable form, because their inner providers are foundational, so you wire the alias.
+Each alias is documented on its own page, linked from the table above.
 
 Write `WithProvider<Provider>` in full only when adapting a foundational provider that has no ready
 alias.
@@ -140,11 +141,9 @@ has exactly one method, since a single foundational getter cannot serve several 
 impl is paired with a matching [`IsProviderFor`](../traits/is_provider_for.md) impl.
 
 The aliases specialize `WithProvider` to a fixed inner provider so the common cases need no
-`WithProvider<...>` spelled out. `WithContext = WithProvider<UseContext>` adapts the context's own
-consumer-trait implementation; `WithType<Type>` and `WithField<Tag>` adapt the foundational type and
-field providers; `WithFieldRef<Tag, Value>` adapts a getter that borrows through `AsRef`; and
-`WithDelegatedType<Components>` adapts a type provider that looks its type up in a table. Each alias
-lives beside the inner provider it wraps.
+`WithProvider<...>` spelled out. Each has its own page: [`WithContext`](with_context.md),
+[`WithType`](with_type.md), [`WithField`](with_field.md), [`WithFieldRef`](with_field_ref.md), and
+[`WithDelegatedType`](with_delegated_type.md), and each lives beside the inner provider it wraps.
 
 ## Related constructs
 
@@ -155,6 +154,9 @@ lives beside the inner provider it wraps.
 - [`UseContext`](use_context.md), [`UseType`](use_type.md), [`UseField`](use_field.md),
   [`UseFieldRef`](use_field_ref.md), and [`UseDelegatedType`](use_delegated_type.md) — the inner
   providers its aliases wrap.
+- [`WithContext`](with_context.md), [`WithType`](with_type.md), [`WithField`](with_field.md),
+  [`WithFieldRef`](with_field_ref.md), and [`WithDelegatedType`](with_delegated_type.md) — the aliases
+  this adapter is spelled through, one page each.
 - [`delegate_components!`](../macros/delegate_components.md) — wires the aliases, and
   [`check_components!`](../macros/check_components.md) verifies them.
 

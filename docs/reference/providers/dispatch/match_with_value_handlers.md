@@ -72,7 +72,7 @@ pub type MatchWithValueHandlers<Provider = UseContext> =
 ```
 
 Wrapping `Provider` in [`HandleFieldValue`](handle_field_value.md) is the one difference from
-[`MatchWithFieldHandlers`](match_with_field_handlers.md), and it is what makes each payload arrive as a
+[`MatchWithFieldHandlers`](match_with_field_handlers.md), and it makes each payload arrive as a
 bare value. The list itself is assembled by the `HasFieldHandlers` machinery described on
 [`MatchWithFieldHandlers`](match_with_field_handlers.md#under-the-hood). The borrowed variants
 additionally wire the `…RefComponent` handler traits through [`PromoteRef`](../handler/promote_ref.md),

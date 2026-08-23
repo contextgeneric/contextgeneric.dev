@@ -13,7 +13,7 @@ wildcard arm.
 `MatchWithHandlers<Handlers>` is the owned-input matcher. Given a value, it converts the value to its
 extractor and runs a list of handlers over it, stopping at the first one that matches. It runs on a
 **context**, the type a capability runs against. When the list is exhausted the remaining type has every
-variant ruled out and is therefore uninhabited, which is what lets the matcher return the bare output
+variant ruled out and is therefore uninhabited, which lets the matcher return the bare output
 with no fallback arm. Like every CGP provider, it carries no runtime value; the handler list rides in
 `PhantomData`.
 
