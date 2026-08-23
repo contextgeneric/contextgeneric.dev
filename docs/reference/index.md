@@ -227,7 +227,6 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 | Looking for | It's on |
 |---|---|
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
-| `UseFieldRef`, `UseFields` | [`UseField`](./providers/use_field.md) |
 | `CanSendRun` | [`CanRun`](./components/runner.md) |
 | `CanWrapError` | [`CanRaiseError`](./components/can_raise_error.md) |
 | `HasRuntimeType` | [`HasRuntime`](./components/has_runtime.md) |
