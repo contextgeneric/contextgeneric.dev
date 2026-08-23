@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'UseDelegate'
+sidebar_position: 7
 ---
 
 # `UseDelegate`

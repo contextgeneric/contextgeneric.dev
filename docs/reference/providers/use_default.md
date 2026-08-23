@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'UseDefault'
+sidebar_position: 5
 ---
 
 # `UseDefault`

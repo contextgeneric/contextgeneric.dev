@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'UseContext'
+sidebar_position: 1
 ---
 
 # `UseContext`

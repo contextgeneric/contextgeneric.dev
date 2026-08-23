@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'RedirectLookup'
+sidebar_position: 8
 ---
 
 # `RedirectLookup`

@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'UseDelegatedType'
+sidebar_position: 11
 ---
 
 # `UseDelegatedType`

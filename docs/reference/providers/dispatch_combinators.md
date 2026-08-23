@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'Dispatch combinators'
+sidebar_position: 14
 ---
 
 # Dispatch combinators

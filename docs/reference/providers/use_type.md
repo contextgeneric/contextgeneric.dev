@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'UseType (provider)'
+sidebar_position: 2
 ---
 
 # `UseType` (provider)

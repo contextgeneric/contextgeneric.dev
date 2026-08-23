@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'Error providers'
+sidebar_position: 12
 ---
 
 # Error providers

@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'WithProvider'
+sidebar_position: 6
 ---
 
 # `WithProvider`

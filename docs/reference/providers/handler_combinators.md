@@ -1,5 +1,6 @@
 ---
 sidebar_label: 'Handler combinators'
+sidebar_position: 13
 ---
 
 # Handler combinators
