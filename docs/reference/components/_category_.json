@@ -2,7 +2,7 @@
   "label": "Components",
   "position": 4,
   "link": {
-    "type": "generated-index",
-    "description": "The components CGP ships with \u2014 each a consumer trait, a provider trait, and a wiring key \u2014 that your application wires like any component it defines itself."
+    "type": "doc",
+    "id": "reference/components/index"
   }
 }

@@ -65,7 +65,7 @@ generated [`IsProviderFor`](../../traits/is_provider_for.md) impl carries the sa
 
 ## Related constructs
 
-- [`CanWrapError`](../../components/can_raise_error.md) — the component `DiscardDetail` supplies, through
+- [`CanWrapError`](../../components/can_wrap_error.md) — the component `DiscardDetail` supplies, through
   the `ErrorWrapper` provider trait.
 - [`DebugError`](debug_error.md), [`DisplayError`](display_error.md) — wrap by keeping the detail as a
   formatted string instead of discarding it.

@@ -67,8 +67,8 @@ pub struct PromoteAsync<Provider>(pub PhantomData<Provider>);
   single-step lifts.
 - [`PromoteComputer`](promote_computer.md) and the other bundles — wire `PromoteAsync` into the family
   automatically.
-- [`Computer`](../../components/computer.md), [`TryComputer`](../../components/try_computer.md),
-  [`Handler`](../../components/handler.md) — the family members it lifts between.
+- [`Computer`](../../components/handler/computer.md), [`TryComputer`](../../components/handler/try_computer.md),
+  [`Handler`](../../components/handler/handler.md) — the family members it lifts between.
 
 The ideas behind it:
 

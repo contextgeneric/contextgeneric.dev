@@ -102,7 +102,7 @@ shared reference satisfies [`HasField`](./has_field.md) and not this.
   bounded — the provider-side mirror of this trait.
 - **Consider whether the context should be mutated at all.** Much CGP code keeps contexts immutable and
   threads state through handler outputs instead, which composes better with the
-  [handler family](../components/handler.md).
+  [handler family](../components/handler/handler.md).
 
 ## Under the hood
 

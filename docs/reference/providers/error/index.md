@@ -11,7 +11,7 @@ concrete error type the context chose.
 ## Overview
 
 The error providers supply common error-handling strategies to any **context**, the type a capability
-runs against. [`CanRaiseError` and `CanWrapError`](../../components/can_raise_error.md) define *what* a
+runs against. [`CanRaiseError`](../../components/can_raise_error.md) and [`CanWrapError`](../../components/can_wrap_error.md) define *what* a
 context can do with an error: turn a source error into its abstract `Self::Error`, or attach detail to
 one it already holds. They say nothing about *how*. These providers supply the how for the cases that
 need no particular error library. Each one is generic over the context, so it works with whatever error
@@ -65,7 +65,7 @@ still defined with [`#[derive_delegate]`](../../attributes/derive_delegate.md), 
 
 ## Related constructs
 
-- [`CanRaiseError` and `CanWrapError`](../../components/can_raise_error.md) — the components these
+- [`CanRaiseError`](../../components/can_raise_error.md) and [`CanWrapError`](../../components/can_wrap_error.md) — the components these
   implement, through the `ErrorRaiser` and `ErrorWrapper` provider traits.
 - [`HasErrorType`](../../components/has_error_type.md) — names the abstract `Self::Error` every provider
   here produces.

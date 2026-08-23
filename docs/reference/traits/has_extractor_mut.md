@@ -81,7 +81,7 @@ The payload arrives as `&mut Circle`, so the write lands in the original value. 
 - **A `match` on `&mut`** when the enum is concrete. `if let Shape::Circle(c) = &mut shape` does this in
   a line, and the family is for code that cannot name the enum.
 - **Consider returning a new value instead.** Much CGP code threads state through handler outputs rather
-  than mutating in place, which composes better with the [handler family](../components/handler.md).
+  than mutating in place, which composes better with the [handler family](../components/handler/handler.md).
 
 ## Under the hood
 

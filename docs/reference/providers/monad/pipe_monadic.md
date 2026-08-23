@@ -99,7 +99,7 @@ structure.
   handlers.
 - [`MonadicBind`](../../traits/monadic_bind.md), [`MonadicTrans`](../../traits/monadic_trans.md) — the
   traits it bounds on while folding.
-- [`Computer`](../../components/computer.md), [`Handler`](../../components/handler.md) — the family a
+- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family a
   pipeline implements.
 
 The ideas behind it:

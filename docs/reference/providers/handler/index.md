@@ -12,8 +12,8 @@ through a pipeline, returning the input unchanged, and lifting one handler shape
 
 The handler combinators exist because the handler family is not one trait but several related ones, and
 code is rarely written against all of them at once. A provider author writes a plain synchronous
-[`Computer`](../../components/computer.md), a fallible [`TryComputer`](../../components/try_computer.md),
-or an async [`Handler`](../../components/handler.md), depending on the computation. The combinators let
+[`Computer`](../../components/handler/computer.md), a fallible [`TryComputer`](../../components/handler/try_computer.md),
+or an async [`Handler`](../../components/handler/handler.md), depending on the computation. The combinators let
 those single-shape providers be wired where a different shape is expected, and let several providers be
 glued into a larger one, on a **context**, the type a capability runs against. Like every CGP provider,
 each combinator is zero-sized: its type parameters are inner providers carried in `PhantomData`.
@@ -24,12 +24,12 @@ Every combinator is defined in terms of the handler component traits, so a short
 family shares one method signature: a context reference, a `PhantomData<Code>` tag selecting the
 operation, and an input, producing an associated `Output`. The members differ on two axes.
 
-- [`Computer`](../../components/computer.md) is synchronous and infallible.
-- [`TryComputer`](../../components/try_computer.md) is synchronous and fallible, and requires the context
+- [`Computer`](../../components/handler/computer.md) is synchronous and infallible.
+- [`TryComputer`](../../components/handler/try_computer.md) is synchronous and fallible, and requires the context
   to have an error type.
 - `AsyncComputer` is asynchronous and infallible.
-- [`Handler`](../../components/handler.md) is asynchronous and fallible, the most general member.
-- [`Producer`](../../components/producer.md) takes no input.
+- [`Handler`](../../components/handler/handler.md) is asynchronous and fallible, the most general member.
+- [`Producer`](../../components/handler/producer.md) takes no input.
 
 Each of the first four has a `…Ref` companion whose method takes the input by reference. The promotion
 combinators trade on the natural orderings among these: a `Computer` is also a valid `TryComputer` and a
@@ -70,8 +70,8 @@ wire automatically:
 
 ## Related constructs
 
-- [`Computer`](../../components/computer.md), [`TryComputer`](../../components/try_computer.md),
-  [`Handler`](../../components/handler.md), [`Producer`](../../components/producer.md) — the components
+- [`Computer`](../../components/handler/computer.md), [`TryComputer`](../../components/handler/try_computer.md),
+  [`Handler`](../../components/handler/handler.md), [`Producer`](../../components/handler/producer.md) — the components
   these providers implement.
 - [`#[cgp_computer]`](../../macros/cgp_computer.md) and [`#[cgp_producer]`](../../macros/cgp_producer.md)
   — generate a single-trait provider and wire the rest of the family through the promotion bundles.

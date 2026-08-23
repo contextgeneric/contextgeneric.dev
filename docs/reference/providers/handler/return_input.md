@@ -74,9 +74,9 @@ require the context to have an error type.
 
 - [`ComposeHandlers`](compose_handlers.md), [`PipeHandlers`](pipe_handlers.md) — the composition
   combinators `ReturnInput` is the neutral element of.
-- [`Producer`](../../components/producer.md) — for a stage that computes a value rather than echoing
+- [`Producer`](../../components/handler/producer.md) — for a stage that computes a value rather than echoing
   the input.
-- [`Computer`](../../components/computer.md), [`Handler`](../../components/handler.md) — the family it
+- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family it
   implements.
 
 The ideas behind it:

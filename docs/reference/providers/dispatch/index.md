@@ -15,9 +15,9 @@ variants is not known at the call site and the handling logic for each one lives
 provider. A hand-written `match` names every variant in one place; these combinators instead drive the
 extractor and builder trait families to do the same work over a value whose shape is only known at the
 type level, dispatching each field or variant to a handler chosen by type. They run on a **context**,
-the type a capability runs against, and are all [`Computer`](../../components/computer.md)-family
-providers, several also [`Handler`](../../components/handler.md) and
-[`TryComputer`](../../components/try_computer.md) providers. Like every CGP provider, each is zero-sized.
+the type a capability runs against, and are all [`Computer`](../../components/handler/computer.md)-family
+providers, several also [`Handler`](../../components/handler/handler.md) and
+[`TryComputer`](../../components/handler/try_computer.md) providers. Like every CGP provider, each is zero-sized.
 
 The combinators divide into two halves.
 

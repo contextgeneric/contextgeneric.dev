@@ -113,7 +113,7 @@ shape the wiring asks for.
 - [`ReturnInput`](return_input.md) — the identity stage, the neutral element of the fold.
 - [`Product!`](../../macros/product.md) — the type-level list of stages.
 - [`PipeMonadic`](../monad/pipe_monadic.md) — the monadic pipeline that adds short-circuiting.
-- [`Computer`](../../components/computer.md), [`Handler`](../../components/handler.md) — the family a
+- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family a
   pipeline implements.
 
 The ideas behind it:

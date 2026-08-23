@@ -72,7 +72,7 @@ The analogous pair lifts between `Handler` (from an `AsyncComputer` returning a 
 - [`PromoteTryComputer`](promote_try_computer.md) — the bundle that wires `TryPromote`.
 - [`PipeMonadic`](../monad/pipe_monadic.md) — uses `TryPromote` to demote fallible handlers when
   composing a fallible monadic pipeline.
-- [`TryComputer`](../../components/try_computer.md), [`Handler`](../../components/handler.md) — the
+- [`TryComputer`](../../components/handler/try_computer.md), [`Handler`](../../components/handler/handler.md) — the
   fallible family members it bridges.
 
 The ideas behind it:

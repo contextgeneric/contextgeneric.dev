@@ -21,7 +21,7 @@ its own.
 
 The construct list below is complete — every construct the `cgp` crate exports has a page, or a named
 place on a page it shares — so nothing is missing from this index. The macros, attributes, derives,
-traits, and providers are written; the components and type-level pages are still placeholders, and each
+traits, providers, and components are written; the type-level pages are still placeholders, and each
 one says so when you open it.
 
 :::
@@ -117,22 +117,29 @@ in as a named component's.
 
 ### Handle errors
 
-[`HasErrorType`](./components/has_error_type.md) gives a context one shared error type, and
-[`CanRaiseError` and `CanWrapError`](./components/can_raise_error.md) construct it from a source error
-and attach detail. The interchangeable strategies that satisfy them — `RaiseFrom`, `ReturnError`,
-`DebugError`, and the rest — are the [error providers](./providers/error/index.md).
+[`HasErrorType`](./components/has_error_type.md) gives a context one shared error type,
+[`CanRaiseError`](./components/can_raise_error.md) constructs it from a source error, and
+[`CanWrapError`](./components/can_wrap_error.md) attaches detail to it. The interchangeable strategies
+that satisfy them — `RaiseFrom`, `ReturnError`, `DebugError`, and the rest — are the
+[error providers](./providers/error/index.md).
 
 ### Compute things
 
-The handler family models computation along three axes: synchronous or async, fallible or not, taking
-an input or not. [`Computer`](./components/computer.md) is the plain synchronous transform,
-[`TryComputer`](./components/try_computer.md) adds fallibility,
-[`Handler`](./components/handler.md) is the general async and fallible case, and
-[`Producer`](./components/producer.md) is the input-free one.
-[`CanRun`](./components/runner.md) runs tasks and [`HasRuntime`](./components/has_runtime.md) supplies
-the runtime they run on. Each of those four has by-reference and, where it applies, async siblings —
-`ComputerRef`, `AsyncComputer`, `HandlerRef`, and the rest — documented on the page for the component
-they vary.
+The [handler family](./components/handler/index.md) models computation along three axes: synchronous or
+async, fallible or not, taking an input or not. [`Computer`](./components/handler/computer.md) is the
+plain synchronous transform, [`TryComputer`](./components/handler/try_computer.md) adds fallibility,
+[`Handler`](./components/handler/handler.md) is the general async and fallible case, and
+[`Producer`](./components/handler/producer.md) is the input-free one.
+[`CanRun`](./components/runner.md) runs tasks, [`CanSendRun`](./components/send_runner.md) is its
+`Send`-future variant, and [`HasRuntime`](./components/has_runtime.md) with
+[`HasRuntimeType`](./components/has_runtime_type.md) supplies the runtime they run on. Each of the three
+computers and the handler also has by-reference and, where it applies, async siblings —
+[`ComputerRef`](./components/handler/computer_ref.md),
+[`AsyncComputer`](./components/handler/async_computer.md),
+[`AsyncComputerRef`](./components/handler/async_computer_ref.md),
+[`TryComputerRef`](./components/handler/try_computer_ref.md), and
+[`HandlerRef`](./components/handler/handler_ref.md) — each a component with its own page under the
+[handler family](./components/handler/index.md).
 
 Providers in this family are written from plain functions with
 [`#[cgp_computer]`](./macros/cgp_computer.md) and [`#[cgp_producer]`](./macros/cgp_producer.md), and
@@ -221,15 +228,12 @@ name, and [`CanUseComponent`](./traits/can_use_component.md), which is what a ch
 
 Almost every construct has a page of its own. The exceptions are names that are not separately
 *constructs*: a **marker** is a type implementing a trait, an **alias** is another spelling of a
-construct, and a **variant** of a component differs from it by one axis. Each is documented on the page
+construct, and a **variant** differs from a base construct by one axis. Each is documented on the page
 of the thing it belongs to. If you arrived knowing one of these names, this is where it lives.
 
 | Looking for | It's on |
 |---|---|
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
-| `CanSendRun` | [`CanRun`](./components/runner.md) |
-| `CanWrapError` | [`CanRaiseError`](./components/can_raise_error.md) |
-| `HasRuntimeType` | [`HasRuntime`](./components/has_runtime.md) |
 | `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
 | `Cons`, `Nil`, `Either`, `Void`, `Chars`, `PathCons` | [Type-level spines](./types/type_level_spines.md) |
 | `IdentMonadic`, `OkMonadic`, `ErrMonadic`, `OkMonadicTrans`, `ErrMonadicTrans` | [Monad providers](./providers/monad/index.md) |
@@ -237,7 +241,6 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 | `MatchWithHandlersRef`, `MatchFirstWithHandlers`, and the other borrowed and first-argument matcher forms | the matcher page they vary, under [Dispatch combinators](./providers/dispatch/index.md) |
 | `ExtractFirstFieldAndHandle`, `HandleFirstFieldValue` | [`ExtractFieldAndHandle`](./providers/dispatch/extract_field_and_handle.md), [`HandleFieldValue`](./providers/dispatch/handle_field_value.md) |
 | `DispatchMatchers`, `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler` | [Dispatch combinators](./providers/dispatch/index.md) |
-| `ComputerRef`, `AsyncComputer`, `TryComputerRef`, `HandlerRef` | the page for the component they vary — [`Computer`](./components/computer.md), [`TryComputer`](./components/try_computer.md), [`Handler`](./components/handler.md) |
 | `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/map_type.md) |
 | `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/map_type_ref.md) |
 | `product!` (the value-level form) | [`Product!`](./macros/product.md) |

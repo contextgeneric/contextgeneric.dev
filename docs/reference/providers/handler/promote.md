@@ -78,8 +78,8 @@ result, without changing what the inner provider computes.
   automatically.
 - [`#[cgp_computer]`](../../macros/cgp_computer.md), [`#[cgp_producer]`](../../macros/cgp_producer.md) —
   generate providers that the bundles promote.
-- [`Producer`](../../components/producer.md), [`Computer`](../../components/computer.md),
-  [`Handler`](../../components/handler.md) — the family members it lifts between.
+- [`Producer`](../../components/handler/producer.md), [`Computer`](../../components/handler/computer.md),
+  [`Handler`](../../components/handler/handler.md) — the family members it lifts between.
 
 The ideas behind it:
 

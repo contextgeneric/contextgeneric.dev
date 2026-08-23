@@ -250,7 +250,7 @@ provider needed it; it did not, and removing it changes nothing.
 - [`#[cgp_component]`](./cgp_component.md) — the usual host, with `#[async_trait]` placed outermost.
 - [`#[cgp_fn]`](./cgp_fn.md) — the other host, with `#[async_trait]` placed beneath it.
 - [`#[cgp_impl]`](./cgp_impl.md) — where a provider writes an ordinary `async fn` body and needs no attribute.
-- [`Handler`](../components/handler.md) — CGP's built-in async, fallible component, declared this way.
+- [`Handler`](../components/handler/handler.md) — CGP's built-in async, fallible component, declared this way.
 - [`#[cgp_computer]`](./cgp_computer.md) — where an `async` function selects the async base trait.
 - [Handler combinators](../providers/handler/index.md) — the promotions that lift a synchronous provider
   into an async one.

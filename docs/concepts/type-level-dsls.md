@@ -141,8 +141,8 @@ the binary is.
 [Dispatching](./dispatching.md) is the same routing applied to data rather than to programs, and
 [namespaces](./namespaces.md) is how a language is packaged once it outgrows a table.
 
-For the constructs, [`Computer`](/docs/reference/components/computer) and
-[`Handler`](/docs/reference/components/handler) are the interpreter interfaces,
+For the constructs, [`Computer`](/docs/reference/components/handler/computer) and
+[`Handler`](/docs/reference/components/handler/handler) are the interpreter interfaces,
 [`delegate_components!`](/docs/reference/macros/delegate_components) carries the `open` statement and
 generic path keys, and [`Product!`](/docs/reference/macros/product) and
 [`Symbol!`](/docs/reference/macros/symbol) are how a real language carries lists and strings.

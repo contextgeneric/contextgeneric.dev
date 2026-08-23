@@ -272,8 +272,8 @@ short-circuits.
 ## Related constructs
 
 - [`#[cgp_producer]`](./cgp_producer.md) — the input-free sibling, producing a `Producer`.
-- [`Computer`](../components/computer.md) — the base component, with its by-reference and async variants.
-- [`Handler`](../components/handler.md) and [`TryComputer`](../components/try_computer.md) — the more capable
+- [`Computer`](../components/handler/computer.md) — the base component, with its by-reference and async variants.
+- [`Handler`](../components/handler/handler.md) and [`TryComputer`](../components/handler/try_computer.md) — the more capable
   members the promotions reach.
 - [Handler combinators](../providers/handler/index.md) — the `Promote*` bundles this wires, plus
   `PipeHandlers` and `ComposeHandlers` for composing steps.

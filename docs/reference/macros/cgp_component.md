@@ -209,7 +209,7 @@ an implementation should compose with a wrapper.
 
 A component trait is an ordinary trait. It takes as many methods, associated types, and associated
 consts as any other, and every one of them is reproduced on the provider trait. CGP's own
-[`CanCompute`](../components/computer.md) declares an associated `Output` beside its method, and there
+[`CanCompute`](../components/handler/computer.md) declares an associated `Output` beside its method, and there
 is no cap.
 
 What to group is a judgement rather than a rule, and the useful question is: **everything in one

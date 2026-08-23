@@ -58,7 +58,7 @@ awaited value in `Ok`, and routes `AsyncComputerRefComponent` and `HandlerRefCom
 - [`PromoteComputer`](promote_computer.md) — the synchronous-base counterpart.
 - [`PromoteHandler`](promote_handler.md) — defers its async-ref components here.
 - [`Promote`](promote.md), [`PromoteRef`](promote_ref.md) — the lifts this table wires.
-- [`Handler`](../../components/handler.md), [`Computer`](../../components/computer.md) — the family it
+- [`Handler`](../../components/handler/handler.md), [`Computer`](../../components/handler/computer.md) — the family it
   fills in.
 
 The ideas behind it:

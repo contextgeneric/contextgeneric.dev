@@ -259,7 +259,7 @@ hand for some other type without colliding with it.
   directly for anything it cannot express.
 - [`#[cgp_computer]`](./cgp_computer.md) — how each per-variant handler is emitted.
 - [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) — what the enum needs to be dispatchable.
-- [`Computer`](../components/computer.md) — the component the generated bound is written against.
+- [`Computer`](../components/handler/computer.md) — the component the generated bound is written against.
 - [`ExtractField`](../traits/extract_field.md) — the extractor family the matching walks.
 - [`#[cgp_component]`](./cgp_component.md) — the better starting point when contexts should configure the
   operation.

@@ -59,7 +59,7 @@ computer form.
 - [`TryPromote`](try_promote.md) — the lift it routes the fallible slot through.
 - [`PromoteProducer`](promote_producer.md), [`PromoteAsyncComputer`](promote_async_computer.md),
   [`PromoteHandler`](promote_handler.md) — the bundles for the other base traits.
-- [`TryComputer`](../../components/try_computer.md), [`Handler`](../../components/handler.md) — the
+- [`TryComputer`](../../components/handler/try_computer.md), [`Handler`](../../components/handler/handler.md) — the
   family it fills in.
 
 The ideas behind it:

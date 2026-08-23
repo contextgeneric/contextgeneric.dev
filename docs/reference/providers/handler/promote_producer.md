@@ -20,7 +20,7 @@ family explicitly. This page explains what that wiring emits.
 
 ## Overview
 
-`PromoteProducer<Provider>` starts from a [`Producer`](../../components/producer.md), a provider that
+`PromoteProducer<Provider>` starts from a [`Producer`](../../components/handler/producer.md), a provider that
 takes no input, and fills in every input-taking member of the handler family on a **context**, the
 type a capability runs against. The single produced value flows out of every handler shape regardless
 of the input, which the promotion discards. Like every CGP provider, it carries no runtime value.
@@ -62,7 +62,7 @@ computer's input and calls the producer, and defers every remaining component to
   `PromoteProducer`.
 - [`Promote`](promote.md) — the lift that discards a computer's input and calls the producer.
 - [`PromoteComputer`](promote_computer.md) — the bundle this defers to.
-- [`Producer`](../../components/producer.md), [`Computer`](../../components/computer.md) — the base and
+- [`Producer`](../../components/handler/producer.md), [`Computer`](../../components/handler/computer.md) — the base and
   the family it fills in.
 
 The ideas behind it:

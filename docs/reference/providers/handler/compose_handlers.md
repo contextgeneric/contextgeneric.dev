@@ -98,7 +98,7 @@ type; the async variants `.await` each step.
 
 - [`PipeHandlers`](pipe_handlers.md) — generalizes this to a list, folding to nested `ComposeHandlers`.
 - [`ReturnInput`](return_input.md) — the identity that composes with any handler without changing it.
-- [`Computer`](../../components/computer.md), [`Handler`](../../components/handler.md) — the family it
+- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family it
   implements.
 - [`PipeMonadic`](../monad/pipe_monadic.md) — composition that short-circuits through a monad.
 

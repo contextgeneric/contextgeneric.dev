@@ -89,7 +89,7 @@ The base `ComputerComponent` is the inner provider itself; the table fills in th
   bundles for the other base traits.
 - [`Promote`](promote.md), [`PromoteAsync`](promote_async.md), [`PromoteRef`](promote_ref.md) — the
   single-step lifts this table wires.
-- [`Computer`](../../components/computer.md), [`Handler`](../../components/handler.md) — the family it
+- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family it
   fills in.
 
 The ideas behind it:

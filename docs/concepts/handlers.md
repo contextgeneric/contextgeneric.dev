@@ -44,10 +44,10 @@ a future and carries `Async` in its name, as `AsyncComputer` beside `Computer`.
 computation that only reads its argument.
 
 Cross those and you get the members that are documented separately:
-[`Computer`](/docs/reference/components/computer) is the pure synchronous corner,
-[`TryComputer`](/docs/reference/components/try_computer) the fallible synchronous one, and
-[`Handler`](/docs/reference/components/handler), async *and* fallible, the general workhorse, which is
-why it needs no qualifier. [`Producer`](/docs/reference/components/producer) sits slightly apart: a
+[`Computer`](/docs/reference/components/handler/computer) is the pure synchronous corner,
+[`TryComputer`](/docs/reference/components/handler/try_computer) the fallible synchronous one, and
+[`Handler`](/docs/reference/components/handler/handler), async *and* fallible, the general workhorse, which is
+why it needs no qualifier. [`Producer`](/docs/reference/components/handler/producer) sits slightly apart: a
 computation with no input at all, producing a value from the context and a tag.
 
 The point of the spread is that a provider declares exactly the capabilities it has. A function adding
@@ -164,10 +164,10 @@ shape of a record or an enum, and the family becomes a [type-level DSL](./type-l
 [Higher-order providers](./higher-order-providers.md) is the mechanism the combinators are built from,
 and worth reading first if `PipeHandlers<Product![…]>` looked like new machinery.
 
-For the constructs, [`Computer`](/docs/reference/components/computer),
-[`TryComputer`](/docs/reference/components/try_computer),
-[`Handler`](/docs/reference/components/handler), and
-[`Producer`](/docs/reference/components/producer) are the corners;
+For the constructs, [`Computer`](/docs/reference/components/handler/computer),
+[`TryComputer`](/docs/reference/components/handler/try_computer),
+[`Handler`](/docs/reference/components/handler/handler), and
+[`Producer`](/docs/reference/components/handler/producer) are the corners;
 [`#[cgp_computer]`](/docs/reference/macros/cgp_computer) and
 [`#[cgp_producer]`](/docs/reference/macros/cgp_producer) build a provider from a function; and
 [handler combinators](/docs/reference/providers/handler) is the full catalogue.

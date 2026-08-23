@@ -85,7 +85,7 @@ Both bounds require the context to already handle `String`. Each impl is paired 
 ## Related constructs
 
 - [`DebugError`](debug_error.md) — the same provider formatting with `Debug` instead.
-- [`CanRaiseError` and `CanWrapError`](../../components/can_raise_error.md) — the components it supplies,
+- [`CanRaiseError`](../../components/can_raise_error.md) and [`CanWrapError`](../../components/can_wrap_error.md) — the components it supplies,
   and the `String` forms it forwards to.
 - [`RaiseFrom`](raise_from.md) — the usual provider on the `String` source that finishes the raise.
 - [`UseDelegate`](../use_delegate.md) — dispatches `DisplayError` for the source types it should format.

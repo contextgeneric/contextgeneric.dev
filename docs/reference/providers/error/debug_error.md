@@ -92,7 +92,7 @@ reduces any `Debug` source to the one case the context knows. Each impl is paire
 ## Related constructs
 
 - [`DisplayError`](display_error.md) — the same provider formatting with `Display` and `to_string()`.
-- [`CanRaiseError` and `CanWrapError`](../../components/can_raise_error.md) — the components it supplies,
+- [`CanRaiseError`](../../components/can_raise_error.md) and [`CanWrapError`](../../components/can_wrap_error.md) — the components it supplies,
   and the `String` forms it forwards to.
 - [`RaiseFrom`](raise_from.md) — the usual provider on the `String` source that finishes the raise.
 - [`UseDelegate`](../use_delegate.md) — dispatches `DebugError` for the source types it should format.

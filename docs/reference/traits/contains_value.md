@@ -95,7 +95,7 @@ of this.
 ## Under the hood
 
 The [`BindOk` and `BindErr`](../providers/monad/index.md) providers use `ContainsValue` in their
-[`Computer`](../components/computer.md) and `AsyncComputer` impls. Running one bind step means: take the
+[`Computer`](../components/handler/computer.md) and `AsyncComputer` impls. Running one bind step means: take the
 step's output, ask the monad what value sits beneath its wrapper, and hand that to the continuation. This
 trait is the second half of that sentence.
 
@@ -130,8 +130,8 @@ the first step rather than at the definition.
   the pipeline rather than run a step.
 - [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers; what you actually wire.
-- [`Computer`](../components/computer.md) — the component family the bind providers implement.
-- [`TryComputer`](../components/try_computer.md) and [`Handler`](../components/handler.md) — the fallible
+- [`Computer`](../components/handler/computer.md) — the component family the bind providers implement.
+- [`TryComputer`](../components/handler/try_computer.md) and [`Handler`](../components/handler/handler.md) — the fallible
   members a single step usually is.
 
 The ideas behind it:

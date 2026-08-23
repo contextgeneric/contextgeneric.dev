@@ -116,7 +116,7 @@ list-folding half of the four traits, while [`ContainsValue`](./contains_value.m
 [`LiftValue`](./lift_value.md) are the step-running half.
 
 The whole fold happens during trait resolution. A monadic pipeline is not a runtime structure, and the
-provider it resolves to implements the [`Computer`](../components/computer.md) family like any other
+provider it resolves to implements the [`Computer`](../components/handler/computer.md) family like any other
 handler.
 
 ## Common Mistakes
@@ -145,7 +145,7 @@ missing trait rather than the gap.
   markers; what you actually wire.
 - [Handler combinators](../providers/handler/index.md) — composition without a short-circuit
   branch.
-- [`Computer`](../components/computer.md) — the component family a monadic pipeline implements.
+- [`Computer`](../components/handler/computer.md) — the component family a monadic pipeline implements.
 - [`Product!`](../macros/product.md) — the type-level list a pipeline's steps are given in.
 
 The ideas behind it:

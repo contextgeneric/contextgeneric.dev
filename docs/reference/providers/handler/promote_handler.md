@@ -20,7 +20,7 @@ family explicitly. This page explains what that wiring emits.
 ## Overview
 
 `PromoteHandler<Provider>` starts from the most general base, a provider that implements
-[`Handler`](../../components/handler.md), and fills in the rest of the family on a **context**, the
+[`Handler`](../../components/handler/handler.md), and fills in the rest of the family on a **context**, the
 type a capability runs against. Like every CGP provider, it carries no runtime value.
 
 ## Usage
@@ -57,7 +57,7 @@ handler as an async computer returning an explicit `Result`, and defers the asyn
 - [`TryPromote`](try_promote.md) — the lift it routes the handler slot through.
 - [`PromoteComputer`](promote_computer.md), [`PromoteTryComputer`](promote_try_computer.md),
   [`PromoteProducer`](promote_producer.md) — the bundles for the other base traits.
-- [`Handler`](../../components/handler.md) — the base and the most general family member.
+- [`Handler`](../../components/handler/handler.md) — the base and the most general family member.
 
 The ideas behind it:
 

@@ -134,7 +134,7 @@ bound rather than saying the marker is not stackable.
   step, where these two build the pipeline.
 - [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers, including the transformer forms.
-- [`Computer`](../components/computer.md) — the component family a monadic pipeline implements.
+- [`Computer`](../components/handler/computer.md) — the component family a monadic pipeline implements.
 - [`Product!`](../macros/product.md) — the type-level list a pipeline's steps are given in.
 
 The ideas behind it:

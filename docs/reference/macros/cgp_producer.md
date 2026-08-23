@@ -21,7 +21,7 @@ fn magic_number() -> u64 {
 }
 ```
 
-That produces the provider struct `MagicNumber` and an impl of [`Producer`](../components/producer.md), the
+That produces the provider struct `MagicNumber` and an impl of [`Producer`](../components/handler/producer.md), the
 family member whose method takes only a **context** (the type the capability runs against) and a phantom
 `Code` tag, with no input value at all.
 
@@ -131,7 +131,7 @@ within it there is nothing simpler.
 
 ## Under the hood
 
-The macro emits the function unchanged, a provider impl of [`Producer`](../components/producer.md), and a
+The macro emits the function unchanged, a provider impl of [`Producer`](../components/handler/producer.md), and a
 [`delegate_components!`](./delegate_components.md) block wiring the whole family. From this input:
 
 ```rust
@@ -245,10 +245,10 @@ import.
 ## Related constructs
 
 - [`#[cgp_computer]`](./cgp_computer.md) — the sibling for a computation that takes an input.
-- [`Producer`](../components/producer.md) — the base component this implements.
+- [`Producer`](../components/handler/producer.md) — the base component this implements.
 - [Handler combinators](../providers/handler/index.md) — `PromoteProducer`, which this wires, plus
   `ReturnInput` and `PipeHandlers`.
-- [`Computer`](../components/computer.md) and [`Handler`](../components/handler.md) — the members the
+- [`Computer`](../components/handler/computer.md) and [`Handler`](../components/handler/handler.md) — the members the
   promotion reaches.
 - [`#[cgp_impl]`](./cgp_impl.md) — for a producer that needs its context, which is most of them.
 - [`#[cgp_new_provider]`](./cgp_provider.md) — what the generated impl is emitted through.

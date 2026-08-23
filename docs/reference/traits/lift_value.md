@@ -95,7 +95,7 @@ chain steps without a branch and involve none of this.
 ## Under the hood
 
 The [`BindOk` and `BindErr`](../providers/monad/index.md) providers use `LiftValue` in their
-[`Computer`](../components/computer.md) and `AsyncComputer` impls, as the closing half of a step whose
+[`Computer`](../components/handler/computer.md) and `AsyncComputer` impls, as the closing half of a step whose
 opening half is [`ContainsValue`](./contains_value.md). The step unwraps the incoming output, decides
 whether to short-circuit, and then lifts:
 
@@ -136,7 +136,7 @@ forwarded; the associated type is the step's own. They coincide for some monads 
   the pipeline rather than run a step.
 - [Monad providers](../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers; what you actually wire.
-- [`Computer`](../components/computer.md) — the component family the bind providers implement.
+- [`Computer`](../components/handler/computer.md) — the component family the bind providers implement.
 - [Handler combinators](../providers/handler/index.md) — composition without a short-circuit
   branch.
 

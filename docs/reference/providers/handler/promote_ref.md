@@ -72,7 +72,7 @@ written to take `&T` can then serve a slot that hands it a smart pointer to `T`,
   other single-step lifts, along the fallibility and asynchrony axes rather than the borrow axis.
 - [`PromoteComputer`](promote_computer.md) and the other bundles — wire `PromoteRef` into every `…Ref`
   slot automatically.
-- [`Computer`](../../components/computer.md), [`Handler`](../../components/handler.md) — the family
+- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family
   members and their by-reference companions it bridges.
 
 The ideas behind it:
