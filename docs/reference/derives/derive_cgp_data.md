@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[derive(CgpData)]'
+sidebar_position: 3
 ---
 
 # `#[derive(CgpData)]`
@@ -15,14 +16,14 @@ data types ends up written once per type.
 `#[derive(CgpData)]` is the one-line answer: it turns a struct or an enum into **extensible data**, a
 type whose fields or variants generic code can name, read, construct, and take apart without ever
 mentioning the concrete type. It is the umbrella derive, and what it generates depends entirely on what
-it is applied to — on a struct it emits the record machinery, on an enum the variant machinery.
+it is applied to: on a struct it emits the record machinery, on an enum the variant machinery.
 
-The two things this buys are worth naming separately, because together they are what "extensible" means
-here. The **representation** view describes the type as a list of named entries, which is what lets one
+The two things this buys are worth naming separately, because together they define what "extensible"
+means here. The **representation** view describes the type as a list of named entries, which lets one
 implementation serialize any record or dispatch over any enum. The **incremental** view adds a companion
 type that tracks, in its own type parameters, which fields are present or which variants are still
-possible — so a half-built value and a finished one are *different types*, and using one where the other
-belongs is a compile error rather than a runtime panic.
+possible. A half-built value and a finished one are therefore *different types*, and using one where the
+other belongs is a compile error rather than a runtime panic.
 
 ## Usage
 
@@ -51,8 +52,8 @@ everything generated, including the companion types.
 
 ### What each shape emits, and where it is documented
 
-The derive dispatches on the shape of its input and then runs one of two fixed sequences. Those two
-sequences are what the shape-specific derives run, so each is documented on its own page rather than
+The derive dispatches on the shape of its input and then runs one of two fixed sequences. The
+shape-specific derives run those same two sequences, so each is documented on its own page rather than
 twice here:
 
 | Applied to | It emits | Documented on |
@@ -67,7 +68,7 @@ one unnamed payload**, and there is no per-variant opt-out.
 ### Choosing among the three
 
 The three derives are interchangeable wherever the shape allows, so the choice is about what you want
-the code to say. There is no output difference to weigh — `CgpData` on a struct emits exactly what
+the code to say. There is no output difference to weigh: `CgpData` on a struct emits exactly what
 `CgpRecord` emits, and on an enum exactly what `CgpVariant` emits.
 
 - **`#[derive(CgpData)]`** is the default. Use it unless you have a reason not to.
@@ -112,14 +113,14 @@ constructors, and an extractor. Worked examples of each half are on the
 **Reach for one of these derives when generic code has to work over the type's own structure.** That is
 the test, and it is narrower than it sounds. Most types in a CGP program want
 [`#[derive(HasField)]`](./derive_has_field.md) and nothing more, because most of what implementations
-need from a context — the type a capability runs against, which supplies values as its fields — is to
+need from a context (the type a capability runs against, which supplies values as its own fields) is to
 read one value out of it.
 
 The cases that do earn it are specific.
 
 - **A record assembled from independent pieces.** When several parts of a program each contribute part
-  of a struct and no one place should know the whole type, that is the extensible builder pattern and
-  this is what it runs on.
+  of a struct and no one place should know the whole type, that is the extensible builder pattern, and
+  this derive runs it.
 - **An enum handled one variant at a time by independent code.** When variants and the operations over
   them both need to grow without editing each other, this is the extensible visitor pattern.
 - **A framework over any user type.** A serializer, a validator, or a mapper written once against the
@@ -151,7 +152,7 @@ give, and it is not free.
 
 Nothing about the umbrella is special. `#[derive(CgpData)]` inspects the item, dispatches on whether it
 is a struct or an enum, and then runs exactly the same code path the matching shape-specific derive
-runs — [`#[derive(CgpRecord)]`](./derive_cgp_record.md#under-the-hood) enters the first directly and
+runs. [`#[derive(CgpRecord)]`](./derive_cgp_record.md#under-the-hood) enters the first directly, and
 [`#[derive(CgpVariant)]`](./derive_cgp_variant.md#under-the-hood) the second. That shared dispatch is
 why all three agree on their output, and why a claim about what `CgpData` emits is always a claim about
 one of the other two.
@@ -160,15 +161,16 @@ Applied to a union, all three fail: the family models products and sums, and a u
 
 ## Common Mistakes
 
-**Which gotchas apply depends on the shape**, and the shape pages carry them: the
-[record ones](./derive_cgp_record.md#common-mistakes) — the companion's cleared attributes, position-keyed tuple
-builders, the newtype special case — and the [variant ones](./derive_cgp_variant.md#common-mistakes) — the
-one-payload rule and the seven reserved variant names. Two are worth repeating here because they catch
-people who reached for the umbrella without reading either.
+**Which mistakes apply depends on the shape**, and the shape pages carry them. The
+[record ones](./derive_cgp_record.md#common-mistakes) cover the companion's cleared attributes,
+position-keyed tuple builders, and the newtype special case; the
+[variant ones](./derive_cgp_variant.md#common-mistakes) cover the one-payload rule and the seven reserved
+variant names. Two are worth repeating here because they catch people who reached for the umbrella
+without reading either.
 
 **Every enum variant needs exactly one unnamed payload.** A unit, multi-field, or struct-style variant
 fails, with no per-variant opt-out. [`#[derive(HasFields)]`](./derive_has_fields.md) is the one derive in
-the family that accepts all four shapes, so it is what an enum with mixed variants gets.
+the family that accepts all four shapes, so an enum with mixed variants gets that derive instead.
 
 **Absence is spelled differently on the two sides.** `IsNothing` for a missing record field, `IsVoid` for
 a ruled-out variant, and they are not interchangeable. An error mentioning the wrong one usually means

@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[derive(CgpVariant)]'
+sidebar_position: 5
 ---
 
 # `#[derive(CgpVariant)]`
@@ -9,16 +10,16 @@ The extensible-data derive for an enum.
 ## Overview
 
 A plain Rust enum is opaque to generic code. There is no way to refer to "the `Circle` variant" through
-a type parameter, so anything that must work across several enums ends up written once per enum — and
+a type parameter, so anything that must work across several enums ends up written once per enum, and
 the `match` that would make it exhaustive can only be written where the concrete enum is named.
 
 `#[derive(CgpVariant)]` turns an enum into **extensible data**: a type whose variants generic code can
 name, construct, and take apart without ever mentioning the concrete type. It produces the whole
-variant half of the family in one line — the whole-shape variant list, a constructor per variant, and an
-incremental extractor that peels variants off one at a time while tracking which are still possible.
+variant half of the family in one line: the whole-shape variant list, a constructor per variant, and an
+incremental extractor that removes variants one at a time while tracking which are still possible.
 
 It is the enum-only face of [`#[derive(CgpData)]`](./derive_cgp_data.md). The two run the same code and
-emit the same output on an enum; the difference is that this one **rejects a struct at parse time**.
+emit the same output on an enum. The difference is that this one **rejects a struct at parse time**.
 
 ## Usage
 
@@ -42,7 +43,7 @@ and a `where` clause are carried onto everything generated, including the compan
 **This is the family's one real restriction.** It comes from the two slices that take an enum apart:
 each has to name a single type per variant, and a unit, multi-field, or struct-style variant gives it
 none or several. Such a variant fails with `Expected variant to contain exactly one unnamed field`, and
-there is **no way to opt one variant out** — an enum that mixes shapes cannot take this derive at all.
+there is **no way to opt one variant out**. An enum that mixes shapes cannot take this derive at all.
 
 The fix is to wrap the richer payload in its own struct, so the variant's value stays a single nameable
 type:
@@ -64,14 +65,13 @@ pub enum Shape {
 }
 ```
 
-That is idiomatic rather than a workaround — the payload struct usually wants to be a type in its own
+That is idiomatic rather than a workaround. The payload struct usually wants to be a type in its own
 right, and it can derive [`#[derive(CgpRecord)]`](./derive_cgp_record.md) too, which is how a nested
 shape becomes reachable.
 
-One escape hatch is worth knowing: [`#[derive(HasFields)]`](./derive_has_fields.md) accepts **all four**
+One exception is worth knowing: [`#[derive(HasFields)]`](./derive_has_fields.md) accepts **all four**
 variant shapes, because it only describes a variant rather than deconstructing it. So an enum with mixed
-variants can still have a structural representation; what it cannot have is the generic constructor or
-the extractor.
+variants can still have a structural representation, but not the generic constructor or the extractor.
 
 ### What it generates
 
@@ -113,8 +113,8 @@ fn area(shape: Shape) -> f64 {
 
 There is no wildcard arm and no `unreachable!()`. After the second extraction the remainder's type has
 both variants ruled out, which makes it uninhabited, and
-[`finalize_extract_result`](../traits/finalize_extract_result.md) is what discharges a value that cannot
-exist. Add a third variant to `Shape` and this function stops compiling until it is handled — the same
+[`finalize_extract_result`](../traits/finalize_extract_result.md) discharges a value that cannot exist.
+Add a third variant to `Shape` and this function stops compiling until it is handled, which is the same
 guarantee a concrete `match` gives, recovered for code that never names the enum.
 
 ## When to reach for it, and when not
@@ -128,9 +128,9 @@ guarantee a concrete `match` gives, recovered for code that never names the enum
 - **Prefer a `match`** for a closed enum with fixed operations. It is clearer than any machinery and it
   already gives exhaustiveness. Reach for the variant derives when the variant set is open, or when
   independent modules must each contribute a variant or an operation over one.
-- **Derive the slice you want** — [`FromVariant`](./derive_from_variant.md) alone if code only needs to
-  *construct*, [`ExtractField`](./derive_extract_field.md) alone if it only needs to deconstruct,
-  [`HasFields`](./derive_has_fields.md) alone for the shape, and it is the only one of the three that
+- **Derive the slice you want**: [`FromVariant`](./derive_from_variant.md) alone if code only needs to
+  *construct*, [`ExtractField`](./derive_extract_field.md) alone if it only needs to deconstruct, and
+  [`HasFields`](./derive_has_fields.md) alone for the shape, which is the only one of the three that
   accepts every variant shape.
 
 The full argument for when a type earns the extensible-data machinery at all is on the
@@ -175,7 +175,7 @@ impl FromVariant<Symbol!("Circle")> for Shape {
 ```
 
 Then the **extractor**, which is [`#[derive(ExtractField)]`](./derive_extract_field.md)'s output and
-where two companion enums appear — `__PartialShape` for owned extraction and `__PartialRefShape` for
+where two companion enums appear: `__PartialShape` for owned extraction and `__PartialRefShape` for
 borrowed. A variant's payload is wrapped in a [`MapType`](../traits/map_type.md) marker that is either
 `IsPresent` or `IsVoid`, the latter mapping it to the uninhabited `Void`:
 
@@ -198,7 +198,7 @@ impl FinalizeExtract for __PartialShape<IsVoid, IsVoid> {    // nothing left: un
 **Note the asymmetry with the record side, which is the detail most worth carrying away: a record uses
 `IsNothing` for a field that is not there, and a variant uses `IsVoid` for one that has been ruled out.**
 `IsNothing` maps a type to `()`, which is inhabited; `IsVoid` maps it to `Void`, which is not. That is
-exactly why extraction ends the way it does — once every variant is `IsVoid` the whole companion enum is
+exactly why extraction ends the way it does: once every variant is `IsVoid` the whole companion enum is
 uninhabited, so a value of it cannot exist and can be discharged to produce anything.
 
 The companion names are reserved: `__Partial{Name}` and `__PartialRef{Name}`. They keep the original
@@ -209,7 +209,7 @@ hand-written impl underlines that variant rather than the whole derive.
 
 **Every variant needs exactly one unnamed payload**, with no per-variant opt-out.
 [`#[derive(HasFields)]`](./derive_has_fields.md) is the one derive in the family that accepts all four
-shapes, so it is what an enum with mixed variants gets.
+shapes, so an enum with mixed variants gets that derive instead.
 
 **Seven variant names are reserved.** Because the generated impls name their associated types through
 `Self::…`, a variant called `Fields`, `FieldsRef`, `Value`, `Remainder`, `Extractor`, `ExtractorRef`, or
@@ -221,7 +221,7 @@ variant is the fix. Record field names are unaffected, since a field is not in t
 associated type.
 
 **The companion enums carry none of your attributes.** The derive clears them, so an extraction
-remainder is neither `Debug` nor `PartialEq` however the enum is derived — `assert_eq!` over a
+remainder is neither `Debug` nor `PartialEq` however the enum is derived. `assert_eq!` over a
 `Result<Payload, Remainder>` does not compile. Reach for `.ok()`, `.is_ok()`, or a `match`.
 
 **Absence is spelled differently on the two sides.** `IsVoid` for a ruled-out variant, `IsNothing` for a

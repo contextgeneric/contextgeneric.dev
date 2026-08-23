@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[derive(FromVariant)]'
+sidebar_position: 8
 ---
 
 # `#[derive(FromVariant)]`
@@ -9,7 +10,7 @@ Generic construction of an enum from one of its named variants.
 ## Overview
 
 `Shape::Circle(circle)` names two things: the enum, and the variant. That is fine at a concrete call site and
-useless to code that knows neither — a routine that has been handed a value and told which variant to wrap it
+useless to code that knows neither: a routine that has been handed a value and told which variant to wrap it
 in cannot write that expression.
 
 `#[derive(FromVariant)]` gives it a way to. The derive adds one constructor per variant, addressed by the
@@ -23,7 +24,7 @@ That call is equivalent to `Shape::Circle(circle)`. The difference is that the t
 parameter, so one function can build whichever variant it was asked for, of whichever enum.
 
 **This is the simplest derive in the extensible-data family.** It generates no companion type, no state
-tracking, and no traits of its own — just a constructor per variant. It is the counterpart to
+tracking, and no traits of its own: just a constructor per variant. It is the counterpart to
 [`#[derive(ExtractField)]`](./derive_extract_field.md), which takes a variant out; this one puts a variant in.
 
 ## Usage
@@ -51,7 +52,7 @@ variant, a multi-field tuple variant, and a struct-style variant all fail with
 `Expected variant to contain exactly one unnamed field`. There is no per-variant opt-out, so an enum that
 mixes shapes cannot take this derive.
 
-Wrapping the payload in its own struct is the fix, and it is what idiomatic CGP enums do anyway:
+Wrapping the payload in its own struct is the fix, and idiomatic CGP enums do it anyway:
 
 ```rust
 pub struct Circle {
@@ -68,8 +69,8 @@ If the enum only needs to be *described* rather than constructed,
 [`#[derive(HasFields)]`](./derive_has_fields.md) accepts all four variant shapes instead. A variantless enum
 is accepted here and simply produces no impls.
 
-The derive parses an enum, so applying it to a struct fails at parse time. The struct analogue — setting one
-field of a value being assembled — is [`#[derive(BuildField)]`](./derive_build_field.md).
+The derive parses an enum, so applying it to a struct fails at parse time. The struct analogue, setting one
+field of a value being assembled, is [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ### What it does *not* generate
 
@@ -109,9 +110,9 @@ let rect = wrap(PhantomData::<Symbol!("Rectangle")>, Rectangle { width: 3.0, hei
 No hand-written function can do that, because `Shape::Circle` and `Shape::Rectangle` are different
 expressions taking different types.
 
-Where this earns its keep in practice is building a value using only the variants an implementation knows
-about, then widening it. A routine that only produces two of a large enum's variants declares a small local
-enum, constructs into that, and lifts the result into the full type with an upcast:
+In practice this earns its keep when building a value using only the variants an implementation knows about,
+then widening it. A routine that only produces two of a large enum's variants declares a small local enum,
+constructs into that, and lifts the result into the full type with an upcast:
 
 ```rust
 use cgp::core::field::impls::CanUpcast;   // not in the prelude
@@ -119,7 +120,7 @@ use cgp::core::field::impls::CanUpcast;   // not in the prelude
 let expr = LispSubExpr::Ident(Ident("+".to_owned())).upcast(PhantomData::<LispExpr>);
 ```
 
-The upcast always succeeds, because every variant of the smaller enum has a home in the larger one. That is
+The upcast always succeeds, because every variant of the smaller enum maps to one in the larger one. That is
 the construction-side counterpart of reading a field through a getter: the implementation names only what it
 needs, and the widening is checked. Upcasting is documented with the other
 [structural casts](../traits/can_upcast.md), and it is built on the same per-variant machinery as this derive.
@@ -127,28 +128,28 @@ needs, and the widening is checked. Upcasting is documented with the other
 ## When to reach for it, and when not
 
 **Derive it when code that does not name a variant has to construct one.** That is the whole test, and it is
-a narrower need than deconstruction — most code decides which variant to build at a site that can just name
+a narrower need than deconstruction. Most code decides which variant to build at a site that can just name
 it.
 
 - **Reach for it when the variant is chosen by a type parameter.** A routine parameterized over the variant
   it produces has no other option.
 - **Reach for it to make a smaller enum upcastable into a larger one.** Casting between enums is built on
-  these constructors, so this derive is what lets an implementation work in a narrow local enum and widen the
+  these constructors, so this derive lets an implementation work in a narrow local enum and widen the
   result.
 - **Do not reach for it for an ordinary constructor call.** `Shape::Circle(circle)` is shorter, clearer, and
   generates nothing. This derive adds a *second* way to do the same thing, for callers that cannot use the
   first.
-- **Do not derive it alone if you also want to take the enum apart**, which is the usual case — reach for
-  [`#[derive(CgpData)]`](./derive_cgp_data.md) or [`#[derive(CgpVariant)]`](./derive_cgp_data.md), which
+- **Do not derive it alone if you also want to take the enum apart**, which is the usual case. Reach for
+  [`#[derive(CgpData)]`](./derive_cgp_data.md) or [`#[derive(CgpVariant)]`](./derive_cgp_variant.md), which
   bundle construction, deconstruction, and the representation.
 
-Between the constructor and the extractor the split is exactly what the names say: this derive puts a value
+The constructor and the extractor divide exactly as their names suggest: this derive puts a value
 into an enum, [`#[derive(ExtractField)]`](./derive_extract_field.md) gets one out, and they are commonly
 derived together because a generic pipeline usually does both.
 
 ## Under the hood
 
-The derive emits **one impl per variant and nothing else** — no companion type, no markers, no state. From:
+The derive emits **one impl per variant and nothing else**: no companion type, no markers, no state. From:
 
 ```rust
 #[derive(FromVariant)]
@@ -178,9 +179,9 @@ impl FromVariant<Symbol!("Rectangle")> for Shape {
 }
 ```
 
-Each body is the plain constructor call. What the impl adds is that the *choice* between them is now a type
-argument, and that the payload type is reachable as `<Shape as FromVariant<Tag>>::Value` — which is what lets
-a generic signature name it without knowing which variant is in play.
+Each body is the plain constructor call. The impl adds two things: the *choice* between them is now a type
+argument, and the payload type is reachable as `<Shape as FromVariant<Tag>>::Value`, which lets a generic
+signature name it without knowing which variant is in play.
 
 The `PhantomData<Tag>` parameter carries no value. It exists so a call site can say which impl it means when
 several are in scope, which is why the tag is passed as `PhantomData::<Symbol!("Circle")>` rather than
@@ -207,10 +208,10 @@ for the previous point, and it means a mistyped tag is a missing-impl error rath
 `Symbol!("circle")` are unrelated types, so a case slip reports as an unsatisfied `FromVariant` bound.
 
 **A variant named `Value` does not compile.** The generated body writes `Self::Value` to name the payload
-type, and a variant of that name makes the path ambiguous — the compiler reports
-`ambiguous associated item` with its headline on the derive and a note pointing at the offending variant. `Value` is the only name
-this derive reserves; the [extractor](./derive_extract_field.md) reserves several more, so an enum taking
-both should avoid all of them. Renaming the variant is the fix.
+type, and a variant of that name makes the path ambiguous. The compiler reports
+`ambiguous associated item` with its headline on the derive and a note pointing at the offending variant.
+`Value` is the only name this derive reserves; the [extractor](./derive_extract_field.md) reserves several
+more, so an enum taking both should avoid all of them. Renaming the variant is the fix.
 
 **A variantless enum produces nothing**, silently. The derive succeeds and emits no impls, which is correct
 and, as with the other empty shapes, means a mistake shows up later rather than here.

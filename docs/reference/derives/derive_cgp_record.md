@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[derive(CgpRecord)]'
+sidebar_position: 4
 ---
 
 # `#[derive(CgpRecord)]`
@@ -14,11 +15,11 @@ struct.
 
 `#[derive(CgpRecord)]` turns a struct into **extensible data**: a type whose fields generic code can
 name, read, and assemble without ever mentioning the concrete type. It produces the whole record half
-of the family in one line — per-field access, the whole-shape field list, and an incremental builder
+of the family in one line: per-field access, the whole-shape field list, and an incremental builder
 that fills a value one field at a time.
 
 It is the struct-only face of [`#[derive(CgpData)]`](./derive_cgp_data.md). The two run the same code
-and emit the same output on a struct; the difference is that this one **rejects an enum at parse
+and emit the same output on a struct. The difference is that this one **rejects an enum at parse
 time**, so a type that is meant to stay a struct says so and the error arrives at the derive rather
 than further along.
 
@@ -38,8 +39,8 @@ pub struct Person {
 
 **Every struct shape is accepted.** A named-field struct is keyed by
 [`Symbol!`](../macros/symbol.md), a tuple struct by [`Index<N>`](../types/index.md), and a fieldless
-struct is the degenerate case rather than an error — its companion type takes no parameters at all, so
-`builder()` is immediately finalizable because there is nothing to track.
+struct is the degenerate case rather than an error. Its companion type takes no parameters at all, so
+`builder()` is immediately finalizable, because there is nothing to track.
 
 Generic parameters, lifetimes, and a `where` clause are carried onto everything generated, including
 the companion type.
@@ -104,9 +105,10 @@ about what it emits.
 - **Use [`#[derive(HasField)]`](./derive_has_field.md) alone** when the fields are only ever read. That
   is most types in a CGP program, and it is one impl pair per field rather than a companion type and a
   dozen impls.
-- **Derive the slice you want** — [`HasFields`](./derive_has_fields.md) for the representation,
-  [`BuildField`](./derive_build_field.md) for the builder — when only part of the output is wanted. The
-  umbrella is the right call once you want most of them.
+- **Derive the slice you want** when only part of the output is wanted:
+  [`HasFields`](./derive_has_fields.md) for the representation,
+  [`BuildField`](./derive_build_field.md) for the builder. The umbrella is the right call once you want
+  most of them.
 
 The full argument for when a type earns the extensible-data machinery at all is on the
 [umbrella page](./derive_cgp_data.md#when-to-reach-for-it-and-when-not).
@@ -123,7 +125,7 @@ pub struct Person {
 }
 ```
 
-it first emits the **per-field access** — a [`HasField`](../traits/has_field.md) and a
+it first emits the **per-field access**: a [`HasField`](../traits/has_field.md) and a
 [`HasFieldMut`](../traits/has_field_mut.md) impl per field, exactly what
 [`#[derive(HasField)]`](./derive_has_field.md) produces on its own.
 
@@ -168,8 +170,8 @@ missing impl rather than a runtime check. The per-field [`UpdateField`](../trait
 that move a marker, and the `HasField` impls on the companion that let a set field be read back, follow.
 
 The companion is named `__Partial{Name}` and keeps the original type's visibility, so a `pub` struct
-yields a `pub` companion. Each generated impl is aimed at the token it came from — a per-field impl at
-its field, a whole-type impl at the type name — so a conflict with a hand-written impl underlines that
+yields a `pub` companion. Each generated impl is aimed at the token it came from (a per-field impl at
+its field, a whole-type impl at the type name), so a conflict with a hand-written impl underlines that
 token rather than the whole derive.
 
 ## Common Mistakes
@@ -182,9 +184,9 @@ be neither printed nor cloned. Read a set field back through the companion's
 **A tuple struct's builder is keyed by position.** Its companion exposes `UpdateField<Index<0>, _>`
 rather than symbol-keyed impls, so `build_field` takes `PhantomData::<Index<0>>`.
 
-**A single-field tuple struct's representation is the inner type directly**, not a one-element product —
-the newtype special case described on the [`#[derive(HasFields)]`](./derive_has_fields.md) page, which
-this derive inherits.
+**A single-field tuple struct's representation is the inner type directly**, not a one-element product.
+This is the newtype special case described on the [`#[derive(HasFields)]`](./derive_has_fields.md) page,
+which this derive inherits.
 
 **A fieldless struct compiles and does nothing useful.** It yields a parameterless companion whose
 `builder()` is immediately finalizable.

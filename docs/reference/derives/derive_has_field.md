@@ -1,5 +1,6 @@
 ---
 sidebar_label: '#[derive(HasField)]'
+sidebar_position: 1
 ---
 
 # `#[derive(HasField)]`
@@ -8,27 +9,27 @@ Per-field accessors keyed by a type-level tag.
 
 ## Overview
 
-An implementation written against a **context** — the type the capability runs against, which supplies the
-values it needs as its fields — cannot name that context's concrete type. It is generic over it, so
-`self.name` is not something it can write. Yet reading a field out of the context is the most common thing
-such an implementation does.
+An implementation written against a **context** cannot name that context's concrete type. The context
+is the type the capability runs against, and it supplies the values the implementation needs as its own
+fields. Because the implementation is generic over the context, it cannot write `self.name`. Yet reading
+a field out of the context is the most common thing such an implementation does.
 
-`#[derive(HasField)]` is what closes that gap. It gives each of a struct's fields a *type-level name*, so an
-implementation can ask for "a `String` field called `name`" as an ordinary trait bound and receive the field
-without knowing what type it came from:
+`#[derive(HasField)]` closes that gap. It gives each of a struct's fields a *type-level name*, so an
+implementation can ask for "a `String` field called `name`" as an ordinary trait bound and receive the
+field without knowing what type it came from:
 
 ```rust
 Self: HasField<Symbol!("name"), Value = String>
 ```
 
-Any struct that derives `HasField` and happens to have such a field satisfies that bound. Nothing is matched
-by string at runtime — [`Symbol!("name")`](../macros/symbol.md) is a type, so the compiler resolves the
-lookup during compilation and the read compiles down to a direct field access.
+Any struct that derives `HasField` and happens to have such a field satisfies that bound. Nothing is
+matched by string at runtime. [`Symbol!("name")`](../macros/symbol.md) is a type, so the compiler
+resolves the lookup during compilation and the read compiles down to a direct field access.
 
-**You will derive this constantly and almost never name `HasField` by hand.** It is the foundation the
-ergonomic surface stands on: an [`#[implicit]`](../attributes/implicit.md) argument, a
+**You will derive this constantly and almost never name `HasField` by hand.** It is the foundation of
+the ergonomic surface: an [`#[implicit]`](../attributes/implicit.md) argument, a
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) method, and a [`UseField`](../providers/use_field.md)
-wiring entry all generate the bound above from a name you already wrote. What you write is the derive on the
+wiring entry all generate the bound above from a name you already wrote. You write only the derive on the
 struct.
 
 ## Usage
@@ -43,29 +44,29 @@ pub struct Person {
 }
 ```
 
-It accepts any struct shape. What differs between them is only how each field's tag is computed.
+It accepts any struct shape. The shapes differ only in how each field's tag is computed.
 
 ### Named fields
 
 A named field is keyed by [`Symbol!`](../macros/symbol.md), the type-level string of its identifier. The
 struct above gains access keyed by `Symbol!("name")` and `Symbol!("age")`.
 
-A field written as a [raw identifier](https://doc.rust-lang.org/reference/identifiers.html) is keyed by its
-*logical* name, with the `r#` stripped — a field `r#type` is keyed by `Symbol!("type")`, not
+A field written as a [raw identifier](https://doc.rust-lang.org/reference/identifiers.html) is keyed by
+its *logical* name, with the `r#` stripped: a field `r#type` is keyed by `Symbol!("type")`, not
 `Symbol!("r#type")`. The generated accessor still borrows the real field.
 
 ### Tuple fields
 
-A tuple field has no name, so it is keyed by [`Index<N>`](../types/index.md), the type-level number of its
-position:
+A tuple field has no name, so it is keyed by [`Index<N>`](../types/index.md), the type-level number of
+its position:
 
 ```rust
 #[derive(HasField)]
 pub struct Rectangle(pub f64, pub f64);
 ```
 
-`Rectangle` gains access keyed by `Index<0>` and `Index<1>`. A tuple field is never keyed by a `Symbol!` of
-its position — `Index<0>` and `Symbol!("0")` are different types.
+`Rectangle` gains access keyed by `Index<0>` and `Index<1>`. A tuple field is never keyed by a `Symbol!`
+of its position, because `Index<0>` and `Symbol!("0")` are different types.
 
 ### Unit structs
 
@@ -77,14 +78,15 @@ rather than reporting an error:
 pub struct App;
 ```
 
-This is worth knowing because it is silent. Deriving `HasField` on a fieldless context is harmless and does
-nothing, which is the right outcome — such a context carries choices rather than data — but it also means a
-mistake that leaves a struct fieldless produces no complaint here, only an unsatisfied bound later.
+This is worth knowing because it is silent. Deriving `HasField` on a fieldless context is harmless and
+does nothing. That is the right outcome, since such a context carries choices rather than data. But it
+also means a mistake that leaves a struct fieldless produces no complaint here, only an unsatisfied bound
+later.
 
 ### Generic structs
 
-Generic parameters, lifetimes, and a `where` clause are all carried onto the generated access, so a generic
-struct works with no extra ceremony:
+Generic parameters, lifetimes, and a `where` clause are all carried onto the generated access, so a
+generic struct works with no extra work:
 
 ```rust
 #[derive(HasField)]
@@ -99,13 +101,13 @@ pub struct Wrapper<T> {
 
 The derive parses its input as a struct, so applying it to an enum or a union fails at parse time. The
 whole-shape view of a struct *or* an enum is a different derive,
-[`#[derive(HasFields)]`](./derive_has_fields.md) — note the plural — and the two are frequently derived
+[`#[derive(HasFields)]`](./derive_has_fields.md) (note the plural), and the two are frequently derived
 together.
 
 ## Examples
 
-An implementation states the field it needs as a bound, and the derive is what lets a concrete context
-satisfy it. First the implementation, asking for a `String` field called `name`:
+An implementation states the field it needs as a bound, and the derive lets a concrete context satisfy
+it. First the implementation, asking for a `String` field called `name`:
 
 ```rust
 use cgp::prelude::*;
@@ -143,7 +145,7 @@ delegate_components! {
 
 Because `Person` derives `HasField`, it satisfies exactly the bound `GreetHello` requires, so
 `person.greet()` compiles and prints the person's name. Remove the `name` field and the wiring stops
-compiling — the requirement is checked, not assumed.
+compiling: the requirement is checked, not assumed.
 
 **Written idiomatically, none of that bound is visible.** The same read is an
 [`#[implicit]`](../attributes/implicit.md) argument, which looks like an ordinary function parameter:
@@ -157,43 +159,41 @@ impl Greeter {
 }
 ```
 
-That version generates the same `HasField` bound and the same field read. The explicit form above is what
-you *read* — in generated code, in a compiler error — rather than what you write.
+That version generates the same `HasField` bound and the same field read. You *read* the explicit form
+above in generated code or in a compiler error; you do not write it.
 
 Field access also passes through smart pointers with no extra derive. `Box<Person>` and any newtype that
-dereferences to `Person` resolve a field read to the inner struct, so wrapping a context does not break the
-implementations that read from it.
+dereferences to `Person` resolve a field read to the inner struct, so wrapping a context does not break
+the implementations that read from it.
 
 ## When to reach for it, and when not
 
 **Derive it on every context whose fields an implementation reads.** There is little judgement here: the
-derive is how a struct's fields become visible to the trait system, it costs one line, and every construct
-that reads a field needs it. A context that derives nothing can still be wired and can still implement
-consumer traits — it just cannot supply values.
+derive is how a struct's fields become visible to the trait system, it costs one line, and every
+construct that reads a field needs it. A context that derives nothing can still be wired and can still
+implement consumer traits. It just cannot supply values.
 
-What *is* a judgement call is how you read the field once the derive is in place, and the ordering is
-settled.
+The judgement call is how you read the field once the derive is in place, and the ordering is settled.
 
 - **Use an [`#[implicit]`](../attributes/implicit.md) argument by default.** It reads a field of the
-  implementation's own context as a plain parameter, with no trait to declare. This covers the common case,
-  including a field that several implementations each read.
+  implementation's own context as a plain parameter, with no trait to declare. This covers the common
+  case, including a field that several implementations each read.
 - **Use [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) when the read needs to be a named
   capability**, when the field lives on a type other than the context, or when the getter should carry a
-  type inferred from the field — the three cases an implicit argument cannot reach.
-- **Write the `HasField` bound by hand only when neither fits**, which is rare. When you do, remember it is
-  an ordinary trait bound and can carry `Value = T` to pin the field's type.
+  type inferred from the field. Those are the three cases an implicit argument cannot reach.
+- **Write the `HasField` bound by hand only when neither fits**, which is rare. When you do, remember it
+  is an ordinary trait bound and can carry `Value = T` to pin the field's type.
 - **Reach for [`#[derive(HasFields)]`](./derive_has_fields.md) instead when code must process the whole
-  shape** rather than one named field — serializing a struct, folding over its fields, building it
+  shape** rather than one named field: serializing a struct, folding over its fields, building it
   generically. The two answer different questions and are often derived together.
 
-One thing this derive is not: it is **not** what makes a struct an extensible record. It gives indexed
-access to fields that already exist. Building a struct up field by field is
-[`#[derive(BuildField)]`](./derive_build_field.md), and the umbrella that includes both is
-[`#[derive(CgpData)]`](./derive_cgp_data.md).
+This derive does **not** make a struct an extensible record. It gives indexed access to fields that
+already exist. Building a struct up field by field is [`#[derive(BuildField)]`](./derive_build_field.md),
+and [`#[derive(CgpData)]`](./derive_cgp_data.md) is the umbrella that includes both.
 
 ## Under the hood
 
-The derive leaves the struct definition untouched and adds **two impls per field** — a read accessor and a
+The derive leaves the struct definition untouched and adds **two impls per field**: a read accessor and a
 mutable one. From this input:
 
 ```rust
@@ -204,7 +204,8 @@ pub struct Person {
 }
 ```
 
-it produces, for each field, the field's type as the associated `Value` and a body that simply borrows it:
+it produces, for each field, the field's type as the associated `Value` and a body that simply borrows
+it:
 
 ```rust
 impl HasField<Symbol!("name")> for Person {
@@ -224,10 +225,10 @@ impl HasFieldMut<Symbol!("name")> for Person {
 // and the same pair for `age`, with `Value = u8`
 ```
 
-The `PhantomData<Tag>` parameter carries no value. It exists so a call site can say *which* field it means
-when several `HasField` impls are in scope, which is what `PhantomData::<Symbol!("name")>` at a call site is
-doing. [`HasFieldMut`](../traits/has_field.md) extends `HasField` with `get_field_mut`; it is always
-generated alongside the read accessor, whether or not anything uses it.
+The `PhantomData<Tag>` parameter carries no value. It exists so a call site can say *which* field it
+means when several `HasField` impls are in scope, which is why a call site writes
+`PhantomData::<Symbol!("name")>`. [`HasFieldMut`](../traits/has_field_mut.md) extends `HasField` with
+`get_field_mut`, and it is always generated alongside the read accessor, whether or not anything uses it.
 
 A tuple struct produces the same shape with a positional tag:
 
@@ -241,36 +242,36 @@ impl HasField<Index<0>> for Rectangle {
 }
 ```
 
-A generic struct has its parameters split into impl-position generics, type arguments, and a `where` clause
-and threaded onto every impl, so `struct Wrapper<T> { value: T }` yields
-`impl<T> HasField<Symbol!("value")> for Wrapper<T>` with `Value = T`. A struct lifetime carries through the
-same way, and a borrowed field type is kept verbatim as `Value`.
+A generic struct has its parameters split into impl-position generics, type arguments, and a `where`
+clause and threaded onto every impl, so `struct Wrapper<T> { value: T }` yields
+`impl<T> HasField<Symbol!("value")> for Wrapper<T>` with `Value = T`. A struct lifetime carries through
+the same way, and a borrowed field type is kept verbatim as `Value`.
 
-**The smart-pointer behaviour comes from the library, not the derive.** `HasField` and `HasFieldMut` carry
-blanket impls for any type whose [`Deref`](https://doc.rust-lang.org/std/ops/trait.Deref.html) target
-implements them, which is what lets `Box<Person>` resolve a field read to the inner struct. Those blanket
-impls are marked so the compiler does not suggest them in a diagnostic, which keeps a missing-field error
+**The smart-pointer behaviour comes from the library, not the derive.** `HasField` and `HasFieldMut`
+carry blanket impls for any type whose [`Deref`](https://doc.rust-lang.org/std/ops/trait.Deref.html)
+target implements them, so `Box<Person>` resolves a field read to the inner struct. Those blanket impls
+are marked so the compiler does not suggest them in a diagnostic, which keeps a missing-field error
 pointed at the struct that lacks the field rather than at the pointer.
 
-Each generated impl is also aimed at the field it came from, so a compiler error about one field's access —
-a conflict with a hand-written impl, or the "but the trait is implemented for" hint inside a missing-field
-error — underlines that field rather than the whole `#[derive(HasField)]`.
+Each generated impl is also aimed at the field it came from, so a compiler error about one field's access
+underlines that field rather than the whole `#[derive(HasField)]`. That covers a conflict with a
+hand-written impl, and the "but the trait is implemented for" hint inside a missing-field error.
 
 ## Common Mistakes
 
-**A unit struct produces nothing, silently.** There is no field to key, so the derive succeeds and emits no
-impls. That is correct, but it means the mistake surfaces later, as an unsatisfied `HasField` bound at a
-wiring site rather than as a complaint on the struct.
+**A unit struct produces nothing, silently.** There is no field to key, so the derive succeeds and emits
+no impls. That is correct, but it means the mistake surfaces later, as an unsatisfied `HasField` bound at
+a wiring site rather than as a complaint on the struct.
 
 **Two spellings of a field name are unrelated types.** `Symbol!("first_name")` and `Symbol!("firstName")`
-have nothing to do with each other, and a mismatch is reported as a missing `HasField` bound rather than as
-a typo. This is the usual cause of a read that "should" work.
+have nothing to do with each other, and a mismatch is reported as a missing `HasField` bound rather than
+as a typo. This is the usual cause of a read that "should" work.
 
 **A raw-identifier field is tagged without the `r#`.** The tag for `r#type` is `Symbol!("type")`, so
 `Symbol!("r#type")` matches nothing.
 
-**A tuple field is keyed by `Index<N>`, never by a `Symbol!` of the number.** `Index<0>` and `Symbol!("0")`
-are different types, and only the first is generated.
+**A tuple field is keyed by `Index<N>`, never by a `Symbol!` of the number.** `Index<0>` and
+`Symbol!("0")` are different types, and only the first is generated.
 
 **The mutable accessor is always generated.** There is no way to derive read-only access. If a field must
 not be mutated by an implementation, that is a matter of what the implementations declare rather than
