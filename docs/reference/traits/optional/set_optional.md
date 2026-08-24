@@ -33,7 +33,7 @@ pub trait SetOptional<Tag> {
 ```
 
 `Tag` is the field's type-level name, a [`Symbol!`](../../macros/symbol.md) for a named field or an
-[`Index<N>`](../../types/index.md) for a tuple field, passed at the call site as a `PhantomData<Tag>`
+[`Index<N>`](../../types/index_type.md) for a tuple field, passed at the call site as a `PhantomData<Tag>`
 argument. `Value` is the field's declared type, so a caller passes an ordinary value rather than an
 `Option`. Both methods take `self` and return `Self`: the field's marker stays `IsOptional` before and
 after, so the builder's type does not change and an optional field can be set repeatedly. The two

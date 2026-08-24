@@ -44,7 +44,7 @@ pub trait HasField<Tag> {
 ```
 
 `Tag` is a type-level name: [`Symbol!("field_name")`](../../macros/symbol.md) for a named field,
-[`Index<N>`](../../types/index.md) for a tuple field. `Value` is the field's type, exposed as an associated
+[`Index<N>`](../../types/index_type.md) for a tuple field. `Value` is the field's type, exposed as an associated
 type so a bound can pin it or leave it open — `HasField<Symbol!("name")>` accepts a field of any type,
 while `HasField<Symbol!("name"), Value = String>` requires a `String`. `get_field` takes `&self` and
 returns `&Self::Value`, a borrow of the field; its `PhantomData<Tag>` argument carries no data and only
@@ -186,7 +186,7 @@ The remaining blanket impls belong to the neighbours: [`HasFieldMut`](./has_fiel
 nothing to do with each other, and a mismatch reports as a missing `HasField` bound rather than as a
 typo. This is the usual cause of a read that "should" work.
 
-**A tuple field is keyed by [`Index<N>`](../../types/index.md), never by a `Symbol!` of the number.**
+**A tuple field is keyed by [`Index<N>`](../../types/index_type.md), never by a `Symbol!` of the number.**
 `Index<0>` and `Symbol!("0")` are different types.
 
 **`Value` can be pinned or left open.** Omitting `Value = T` when you meant to pin it produces an
@@ -208,7 +208,7 @@ parameter is owned.
 - [`FieldGetter`](./field_getter.md) — the provider-side mirror that gets wired.
 - [`MapField`](./map_field.md) — the lifetime-safe form for reaching into a nested value.
 - [`HasFields`](../shape/has_fields.md) — the plural, whole-shape counterpart.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags that key a field.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that key a field.
 - [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to read a field.
 - [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md) and [`#[cgp_getter]`](../../macros/cgp_getter.md) —
   getter traits over the same access.

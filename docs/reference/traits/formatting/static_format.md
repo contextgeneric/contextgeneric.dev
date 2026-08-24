@@ -166,7 +166,7 @@ this trait is what you need when there is no value to construct.
 - [`StaticString`](./static_string.md) — the eager counterpart, and the one to reach for.
 - [`ConcatPath`](./concat_path.md) — path composition, its reachable sibling in the same group.
 - [`Symbol!`](../../macros/symbol.md) — the type-level string being formatted.
-- [Type-level spines](../../types/type_level_spines.md) — the `Chars` chain being walked.
+- [Type-level spines](../../types/spines/index.md) — the `Chars` chain being walked.
 - [`HasField`](../field-access/has_field.md) — where the names being decoded are used as keys.
 
 The ideas behind it:

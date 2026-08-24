@@ -170,7 +170,7 @@ and transform impls are written against the standard markers, so a custom one ha
 - [`MapFields`](./map_fields.md) — applies one marker across a whole type-level list.
 - [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — generates the partial types these markers
   parameterize.
-- [Type-level spines](../../types/type_level_spines.md) — where the uninhabited `Void` comes from.
+- [Type-level spines](../../types/spines/index.md) — where the uninhabited `Void` comes from.
 
 The ideas behind it:
 

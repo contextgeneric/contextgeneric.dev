@@ -15,17 +15,6 @@ time rather than building an idea up. When a page here tells you *what* a constr
 to know *why* CGP works that way, the [concepts](/docs/concepts/) are where each idea is explained on
 its own.
 
-:::info
-
-### Still being written
-
-The construct list below is complete — every construct the `cgp` crate exports has a page, or a named
-place on a page it shares — so nothing is missing from this index. The macros, attributes, derives,
-traits, providers, and components are written; the type-level pages are still placeholders, and each
-one says so when you open it.
-
-:::
-
 ## Start with these six
 
 Most CGP code uses a small number of constructs over and over. If you read nothing else here, read
@@ -208,12 +197,20 @@ lightweight special case of the same mechanism, and it supersedes the older
 
 ### Understand a generated type or an error
 
-These are the type-level building blocks the rest of CGP is made of. You mostly write them through
-sugar — [`Symbol!`](./macros/symbol.md) for a field name, [`Product!`](./macros/product.md) for a list,
-[`Sum!`](./macros/sum.md) for its dual, [`Path!`](./macros/path.md) for a route — and only need to
-recognize [what they expand into](./types/type_level_spines.md) when it appears in an error message.
-[`Index`](./types/index.md) tags a tuple field and [`Life`](./types/life.md) lifts a lifetime into a
-type. Three traits turn those encodings back into runtime data:
+These are the type-level building blocks the rest of CGP is made of, and the place to look when a
+generated type or an error names one you did not write. [`PhantomData`](./types/phantom_data.md) is the
+one to start with: it is what lets a provider or a tag carry a type it stores no value of, and it
+underlies most of the rest. You write the lists through sugar — [`Symbol!`](./macros/symbol.md) for a
+field name, [`Product!`](./macros/product.md) for a record list, [`Sum!`](./macros/sum.md) for its dual,
+[`Path!`](./macros/path.md) for a route — and only need to recognize the
+[list spines](./types/spines/index.md) they expand into, [`Cons`](./types/spines/cons.md) and
+[`Nil`](./types/spines/nil.md), [`Either`](./types/spines/either.md) and
+[`Void`](./types/spines/void.md), [`Chars`](./types/spines/chars.md), and
+[`PathCons`](./types/spines/path_cons.md), when one shows up in an error. Each entry in a record or a
+variant is a [`Field`](./types/field.md), tagged by a [`Symbol!`](./macros/symbol.md) or an
+[`Index`](./types/index_type.md), and [`Life`](./types/life.md) lifts a lifetime into a type where the
+wiring needs one. [`MRef`](./types/mref.md) is the odd one out, a runtime value a getter returns rather
+than a type-level marker. Three traits turn those encodings back into runtime data:
 [`StaticString`](./traits/formatting/static_string.md) decodes a type-level string into a constant,
 [`StaticFormat`](./traits/formatting/static_format.md) writes one into a formatter and is what makes it printable
 at all, and [`ConcatPath`](./traits/formatting/concat_path.md) joins two paths.
@@ -235,7 +232,7 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 |---|---|
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
 | `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
-| `Cons`, `Nil`, `Either`, `Void`, `Chars`, `PathCons` | [Type-level spines](./types/type_level_spines.md) |
+| `Symbol` (the type, not the `Symbol!` macro) | [`Chars`](./types/spines/chars.md) |
 | `IdentMonadic`, `OkMonadic`, `ErrMonadic`, `OkMonadicTrans`, `ErrMonadicTrans` | [Monad providers](./providers/monad/index.md) |
 | `UseDelegatedType`, `WithDelegatedType` | [`UseDelegatedType`](./providers/use_delegated_type.md) and [`WithProvider`](./providers/with_provider.md) |
 | `MatchWithHandlersRef`, `MatchFirstWithHandlers`, and the other borrowed and first-argument matcher forms | the matcher page they vary, under [Dispatch combinators](./providers/dispatch/index.md) |

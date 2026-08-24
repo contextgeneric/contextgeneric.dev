@@ -32,7 +32,7 @@ pub trait FinalizeExtract {
 `Self` is the exhausted remainder, and `finalize_extract` consumes it to return whatever type `T` the
 surrounding code needs. That return is sound because the receiver is uninhabited: no value of it can
 exist, so no execution path reaches the method. The trait is implemented for the uninhabited
-[`Void`](../../types/type_level_spines.md), the standard `Infallible`, and the all-ruled-out
+[`Void`](../../types/spines/void.md), the standard `Infallible`, and the all-ruled-out
 configuration of a partial enum.
 
 ## Usage
@@ -91,7 +91,7 @@ remainder.** The two do the same job at different points in the chain.
 ## Under the hood
 
 **Everything turns on what `IsVoid` maps to.** The [`MapType`](../type-level/map_type.md) marker `IsVoid` maps a
-payload to the uninhabited [`Void`](../../types/type_level_spines.md), so once every variant's marker is
+payload to the uninhabited [`Void`](../../types/spines/void.md), so once every variant's marker is
 `IsVoid`, every arm of the partial enum holds a `Void` and **the whole type is uninhabited**.
 
 The derive supplies an impl on exactly that configuration:
@@ -143,7 +143,7 @@ that cannot occur.
 - [`HasExtractor`](./has_extractor.md) — where a chain begins.
 - [`FinalizeBuild`](../builder/finalize_build.md) — the record family's ending, sound for the opposite reason.
 - [`MapType`](../type-level/map_type.md) — the `IsVoid` marker the argument rests on.
-- [Type-level spines](../../types/type_level_spines.md) — where the uninhabited `Void` comes from.
+- [Type-level spines](../../types/spines/index.md) — where the uninhabited `Void` comes from.
 - [`CanUpcast`](../casting/can_upcast.md) — a cast whose total walk ends with this same discharge.
 - [Dispatch combinators](../../providers/dispatch/index.md) — the providers that build the chain.
 - [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates this impl.

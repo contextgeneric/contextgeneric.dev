@@ -20,7 +20,7 @@ outer getter, then the next, ending at the target field.
 
 `ChainGetters` is a foundational [`FieldGetter`](../traits/field-access/field_getter.md), so it is wired to a getter
 component through the [`WithProvider`](with_provider.md) adapter rather than named on its own. The list
-is a type-level [`Cons`](../types/type_level_spines.md) spine whose elements are each a field getter for
+is a type-level [`Cons`](../types/spines/cons.md) spine whose elements are each a field getter for
 the value the previous step produced, written with the [`Product!`](../macros/product.md) macro.
 `ChainGetters` recurses down the list. Like every CGP provider, it carries no runtime value: it is a
 marker named in wiring.

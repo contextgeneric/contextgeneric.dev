@@ -169,7 +169,7 @@ reads as though the machinery is at fault.
 - [`ToFieldsRef`](../shape/to_fields_ref.md) — the record side's answer to the same problem.
 - [`HasFieldsRef`](../shape/has_fields_ref.md) — the borrowed shape it produces.
 - [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates the borrowed companion.
-- [Type-level spines](../../types/type_level_spines.md) — the `Either`/`Void` chain underneath.
+- [Type-level spines](../../types/spines/index.md) — the `Either`/`Void` chain underneath.
 
 The ideas behind it:
 

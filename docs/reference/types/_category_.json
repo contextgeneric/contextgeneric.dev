@@ -1,8 +1,8 @@
 {
-  "label": "Type-level types",
+  "label": "Types",
   "position": 7,
   "link": {
-    "type": "generated-index",
-    "description": "The type-level building blocks the rest of CGP is constructed from."
+    "type": "doc",
+    "id": "reference/types/index"
   }
 }

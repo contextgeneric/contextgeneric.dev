@@ -57,7 +57,7 @@ its *logical* name, with the `r#` stripped: a field `r#type` is keyed by `Symbol
 
 ### Tuple fields
 
-A tuple field has no name, so it is keyed by [`Index<N>`](../types/index.md), the type-level number of
+A tuple field has no name, so it is keyed by [`Index<N>`](../types/index_type.md), the type-level number of
 its position:
 
 ```rust
@@ -288,7 +288,7 @@ are easy to confuse.
 - [`HasField`](../traits/field-access/has_field.md) — the trait this generates, with `HasFieldMut` and the provider-side
   `FieldGetter`.
 - [`Symbol!`](../macros/symbol.md) — the tag for a named field.
-- [`Index`](../types/index.md) — the tag for a tuple field.
+- [`Index`](../types/index_type.md) — the tag for a tuple field.
 - [`#[implicit]`](../attributes/implicit.md) — the idiomatic way to read a field, generating the bound for
   you.
 - [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — a named accessor over the same access.

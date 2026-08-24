@@ -140,7 +140,7 @@ the lifetime rather than the field.
 **`Value` lives on the supertrait.** Pin it as `HasFieldMut<Symbol!("x"), Value = u64>` — the associated
 type is inherited, not redeclared.
 
-**A tuple field is keyed by [`Index<N>`](../../types/index.md)**, exactly as for the immutable form.
+**A tuple field is keyed by [`Index<N>`](../../types/index_type.md)**, exactly as for the immutable form.
 
 ## Related constructs
 
@@ -148,7 +148,7 @@ type is inherited, not redeclared.
 - [`MutFieldGetter`](./mut_field_getter.md) — the provider-side mirror of this trait.
 - [`#[derive(HasField)]`](../../derives/derive_has_field.md) — generates both impls per field.
 - [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to reach a field, including mutably.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags that key a field.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that key a field.
 - [`UseField`](../../providers/use_field.md) — the provider that implements the wired form.
 
 The ideas behind it:

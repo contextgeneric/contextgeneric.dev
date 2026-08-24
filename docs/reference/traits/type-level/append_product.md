@@ -147,7 +147,7 @@ from.
 - [`ConcatProduct`](./concat_product.md) — the general form; append is its single-entry case.
 - [`MapFields`](./map_fields.md) — rewriting every entry rather than adding one.
 - [`Product!`](../../macros/product.md) — the sugar for the lists this operates on.
-- [Type-level spines](../../types/type_level_spines.md) — the `Cons`/`Nil` chain underneath.
+- [Type-level spines](../../types/spines/index.md) — the `Cons`/`Nil` chain underneath.
 - [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
 - [`Field`](../../types/field.md) — the entries a field list is usually made of.
 - [`HasBuilder`](../builder/has_builder.md) — the family that moves values through the shapes this computes.

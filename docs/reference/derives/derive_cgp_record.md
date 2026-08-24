@@ -38,7 +38,7 @@ pub struct Person {
 ```
 
 **Every struct shape is accepted.** A named-field struct is keyed by
-[`Symbol!`](../macros/symbol.md), a tuple struct by [`Index<N>`](../types/index.md), and a fieldless
+[`Symbol!`](../macros/symbol.md), a tuple struct by [`Index<N>`](../types/index_type.md), and a fieldless
 struct is the degenerate case rather than an error. Its companion type takes no parameters at all, so
 `builder()` is immediately finalizable, because there is nothing to track.
 

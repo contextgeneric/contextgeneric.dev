@@ -139,7 +139,7 @@ cannot satisfy it.
 - [`UseField`](../../providers/use_field.md) — the provider that implements both halves.
 - [`#[cgp_getter]`](../../macros/cgp_getter.md) — the macro that makes a getter a full component.
 - [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to reach a field.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags that key a field.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that key a field.
 
 The ideas behind it:
 

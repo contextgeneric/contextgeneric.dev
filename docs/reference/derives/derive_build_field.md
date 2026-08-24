@@ -50,7 +50,7 @@ pub struct Person {
 
 Each named field becomes a [`Symbol!`](../macros/symbol.md) tag and its declared type becomes the value that
 tag holds. A tuple struct works the same way with positional tags: a field at position `N` is keyed by
-[`Index<N>`](../types/index.md), so its builder step is
+[`Index<N>`](../types/index_type.md), so its builder step is
 `build_field(PhantomData::<Index<0>>, value)`. Generic parameters, lifetimes, and a `where` clause are
 carried onto the companion type and every generated impl.
 

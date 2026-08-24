@@ -47,7 +47,7 @@ pub enum Shape {
 
 Naming follows the family's rules: a named struct field or a variant is keyed by
 [`Symbol!`](../macros/symbol.md), and a positional field of a tuple struct by
-[`Index<N>`](../types/index.md). Generic parameters, lifetimes, and a `where` clause are carried onto
+[`Index<N>`](../types/index_type.md). Generic parameters, lifetimes, and a `where` clause are carried onto
 everything generated, including the companion types.
 
 ### What each shape emits, and where it is documented

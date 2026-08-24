@@ -166,7 +166,7 @@ struct: the variant's payload type has to be a single nameable type for the sum 
 ## Related constructs
 
 - [`Product!`](./product.md) — the dual, for a collection rather than a choice.
-- [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` types the expansion builds.
+- [Type-level spines](../types/spines/index.md) — the `Either`/`Void` types the expansion builds.
 - [`Field`](../types/field.md) — what the branches usually are, pairing a variant name with its payload.
 - [`Symbol!`](./symbol.md) — the name half of a branch.
 - [`HasFields`](../traits/shape/has_fields.md) — the trait exposing an enum's shape as one of these sums.

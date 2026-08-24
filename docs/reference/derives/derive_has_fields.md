@@ -56,7 +56,7 @@ pub enum Shape {
 
 For a struct the shape is a product; for an enum it is a sum. Naming follows the same rules everywhere: a
 named field or a variant is keyed by [`Symbol!`](../macros/symbol.md), a positional field by
-[`Index<N>`](../types/index.md). Applying the derive to anything other than a struct or an enum is a
+[`Index<N>`](../types/index_type.md). Applying the derive to anything other than a struct or an enum is a
 compile error.
 
 ### Struct shapes
@@ -255,10 +255,10 @@ impl ToFieldsRef for Person {
 ```
 
 `Product![A, B]` is sugar for `Cons<A, Cons<B, Nil>>`, which is why the bodies build a `Cons` chain. The
-[type-level spines](../types/type_level_spines.md) page covers that shape, and it is the form printed in
+[type-level spines](../types/spines/index.md) page covers that shape, and it is the form printed in
 an error.
 
-An enum's shape is the dual: an [`Either`](../types/type_level_spines.md) chain terminated by `Void`
+An enum's shape is the dual: an [`Either`](../types/spines/either.md) chain terminated by `Void`
 rather than a `Cons` chain terminated by `Nil`, with each arm tagged by the variant name:
 
 ```rust
@@ -334,8 +334,8 @@ by one letter and the outputs do not overlap.
 - [`Product!`](../macros/product.md) and [`Sum!`](../macros/sum.md) — the list types a struct and an enum
   shape are built from.
 - [`Field`](../types/field.md) — one entry: a value paired with its type-level name.
-- [`Symbol!`](../macros/symbol.md) and [`Index`](../types/index.md) — the tags that name an entry.
-- [Type-level spines](../types/type_level_spines.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
+- [`Symbol!`](../macros/symbol.md) and [`Index`](../types/index_type.md) — the tags that name an entry.
+- [Type-level spines](../types/spines/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
   sugar expands to.
 - [`AppendProduct`](../traits/type-level/append_product.md) — operations over a shape once you have one.
 - [`CanUpcast`](../traits/casting/can_upcast.md) — converting between two types whose shapes overlap.

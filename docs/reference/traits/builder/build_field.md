@@ -152,7 +152,7 @@ detectable at the end, since any prefix of a chain is a legal partial value.
 - [`MapType`](../type-level/map_type.md) — the `IsNothing`/`IsPresent` markers this moves between.
 - [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the `UpdateField` impls behind
   it.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags that name a field.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that name a field.
 
 The ideas behind it:
 

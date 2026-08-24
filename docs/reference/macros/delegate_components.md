@@ -531,7 +531,7 @@ lookup appends after it, so one entry answers the redirect without having to pre
 the path reaching it.
 
 One presentational quirk is worth knowing before you compare these listings against your own expansion.
-Both paths above are [`PathCons`](../types/type_level_spines.md) lists, but `cargo cgp expand` prints
+Both paths above are [`PathCons`](../types/spines/path_cons.md) lists, but `cargo cgp expand` prints
 them differently: it resugars the header's redirect target to [`Path!`](./path.md) form while leaving
 the per-entry key as the raw spine. So the same kind of type appears in two spellings in one expansion.
 

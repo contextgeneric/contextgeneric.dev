@@ -136,7 +136,7 @@ say — and even then the existing ones usually compose.
 ```
 
 The bound is on the *tag*, not on the value, and that is the point. A tag is a
-[`Symbol!`](../../macros/symbol.md) or an [`Index<N>`](../../types/index.md), both of which are `'static` by
+[`Symbol!`](../../macros/symbol.md) or an [`Index<N>`](../../types/index_type.md), both of which are `'static` by
 construction, so the bound costs nothing. The value stays free, which is exactly what the naive chained
 read could not achieve.
 
@@ -173,7 +173,7 @@ type-level list, and `MapType` names one field's storage on a partial type.
 - [`HasField`](./has_field.md) — the supertrait, and the plain read.
 - [`ChainGetters`](../../providers/chain_getters.md) — the provider that uses `map_field` to descend.
 - [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to read a field of the context itself.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags, which are `'static` by
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags, which are `'static` by
   construction.
 - [`MRef`](../../types/mref.md) — the return type for a getter that may produce rather than lend.
 - [`MapFields`](../type-level/map_fields.md) and [`MapType`](../type-level/map_type.md) — the two similarly-named traits that do

@@ -54,7 +54,7 @@ Self: HasField<Symbol!("name"), Value = String>
 ### The tag for a tuple field
 
 A tuple-struct field has no name, so it cannot be keyed by a string.
-[`#[derive(HasField)]`](../derives/derive_has_field.md) tags those with [`Index`](../types/index.md) instead
+[`#[derive(HasField)]`](../derives/derive_has_field.md) tags those with [`Index`](../types/index_type.md) instead
 (`Index<0>`, `Index<1>`), which encodes a number at the type level the way `Symbol!` encodes a string. A field
 is keyed by `Symbol!` when it has a name and by `Index` when it has only a position.
 
@@ -127,7 +127,7 @@ That is the honest summary: the construct is essential and mostly generated.
 - **Use [`#[cgp_auto_getter]`](./cgp_auto_getter.md) for a named accessor.** The method name becomes the tag.
 - **Write `Symbol!` explicitly with [`UseField`](../providers/use_field.md)**, where the whole point is that
   the field name is a wiring decision rather than fixed to a method name. This is its main hand-written use.
-- **Use [`Index`](../types/index.md) for a tuple field**, not a `Symbol!` of `"0"`. They are different types
+- **Use [`Index`](../types/index_type.md) for a tuple field**, not a `Symbol!` of `"0"`. They are different types
   and the derive generates the former.
 
 Two things it is not. It is **not a runtime string**: there is no `&str` inside it, and the `Display` impl
@@ -151,7 +151,7 @@ Symbol<3, Chars<'a', Chars<'b', Chars<'c', Nil>>>>
 
 Two type constructors do the work. `Chars<const CHAR: char, Tail>` is one character paired with the rest of
 the string; chained through its tail and terminated by `Nil`, it forms a
-[type-level list](../types/type_level_spines.md) of characters, the same shape as
+[type-level list](../types/spines/chars.md) of characters, the same shape as
 [`Product!`](./product.md)'s `Cons`/`Nil` spine, specialized so the head is a `const char` rather than a type.
 `Symbol<const LEN: usize, Chars>` then wraps that list together with a length.
 
@@ -208,13 +208,13 @@ type argument rather than the value.
 
 ## Related constructs
 
-- [`Index`](../types/index.md) — the position-keyed tag for tuple-struct fields.
+- [`Index`](../types/index_type.md) — the position-keyed tag for tuple-struct fields.
 - [`HasField`](../traits/field-access/has_field.md) — what a tag is looked up through.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — generates one tag per named field.
 - [`#[implicit]`](../attributes/implicit.md) — generates the tag from an argument name.
 - [`#[cgp_auto_getter]`](./cgp_auto_getter.md) — generates it from a method name.
 - [`UseField`](../providers/use_field.md) — where the tag is written by hand, as a wiring decision.
-- [Type-level spines](../types/type_level_spines.md) — the `Chars`/`Nil` chain the expansion builds.
+- [Type-level spines](../types/spines/index.md) — the `Chars`/`Nil` chain the expansion builds.
 - [`Product!`](./product.md) and [`Sum!`](./sum.md) — the record and variant lists whose entries carry these
   tags.
 - [`StaticFormat`](../traits/formatting/static_format.md) — recovering runtime text from a type-level string.

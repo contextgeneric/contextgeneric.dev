@@ -158,7 +158,7 @@ width.
 - [`TransformMapFields`](./transform_map_fields.md) — the value-level counterpart, which actually converts
   the fields.
 - [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the sugar for both spines.
-- [Type-level spines](../../types/type_level_spines.md) — the `Cons`/`Nil` and `Either`/`Void` chains
+- [Type-level spines](../../types/spines/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
   underneath.
 - [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
 - [`MapField`](../field-access/map_field.md) — the similarly-named lifetime helper, which does something else entirely.

@@ -192,7 +192,7 @@ the order *is* the execution order.
 ## Related constructs
 
 - [`Sum!`](./sum.md) — the dual, for a choice among types rather than a collection of them.
-- [Type-level spines](../types/type_level_spines.md) — the `Cons`/`Nil` types the expansion builds.
+- [Type-level spines](../types/spines/index.md) — the `Cons`/`Nil` types the expansion builds.
 - [`Field`](../types/field.md) — what the entries usually are, pairing a name with a type.
 - [`Symbol!`](./symbol.md) — the name half of a `Field` entry.
 - [`HasFields`](../traits/shape/has_fields.md) — the trait that exposes a struct's shape as one of these lists.

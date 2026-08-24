@@ -231,7 +231,7 @@ and, as with the other empty shapes, means a mistake shows up later rather than 
 - [`FromVariant`](../traits/variant/from_variant.md) — the trait this generates impls of.
 - [`Symbol!`](../macros/symbol.md) — the tag that names a variant.
 - [`CanUpcast`](../traits/casting/can_upcast.md) — widening a smaller enum into a larger one, built on these constructors.
-- [Type-level spines](../types/type_level_spines.md) — the `Either`/`Void` chain the constructed variants
+- [Type-level spines](../types/spines/index.md) — the `Either`/`Void` chain the constructed variants
   correspond to.
 
 The ideas behind it:

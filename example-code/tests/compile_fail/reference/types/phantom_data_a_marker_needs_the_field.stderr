@@ -1,0 +1,8 @@
+error[E0392]: type parameter `Field` is never used
+ --> tests/compile_fail/reference/types/phantom_data_a_marker_needs_the_field.rs:5:21
+  |
+5 | pub struct Multiply<Field>;
+  |                     ^^^^^ unused type parameter
+  |
+  = help: consider removing `Field`, referring to it in a field, or using a marker such as `PhantomData`
+  = help: if you intended `Field` to be a const parameter, use `const Field: /* Type */` instead

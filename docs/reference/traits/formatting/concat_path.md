@@ -138,7 +138,7 @@ normalizes them.
 ## Related constructs
 
 - [`Path!`](../../macros/path.md) — the sugar for the paths this joins.
-- [`PathCons`](../../types/type_level_spines.md) — the spine underneath.
+- [`PathCons`](../../types/spines/path_cons.md) — the spine underneath.
 - [`ConcatProduct`](../type-level/concat_product.md) — the product-level analogue.
 - [`StaticString`](./static_string.md) — recovering a segment's name as text.
 - [`StaticFormat`](./static_format.md) — the lazy formatting counterpart.

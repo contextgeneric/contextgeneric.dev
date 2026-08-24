@@ -139,7 +139,7 @@ value type are both part of the entry.
 - [`ExtractField`](../variant/extract_field.md) and [`FromVariant`](../variant/from_variant.md) — the two primitives the
   recursion routes through.
 - [`HasFields`](../shape/has_fields.md) — the variant shape being walked.
-- [Type-level spines](../../types/type_level_spines.md) — the `Either`/`Void` chain underneath.
+- [Type-level spines](../../types/spines/index.md) — the `Either`/`Void` chain underneath.
 - [Dispatch combinators](../../providers/dispatch/index.md) — where casting meets per-variant routing.
 
 The ideas behind it:

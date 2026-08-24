@@ -134,7 +134,7 @@ whether composing the existing ones does the job.
 that its consumer-side twin needs only one of:
 
 - the **tag** must be `'static`, which is free — a [`Symbol!`](../../macros/symbol.md) or an
-  [`Index<N>`](../../types/index.md) is `'static` by construction;
+  [`Index<N>`](../../types/index_type.md) is `'static` by construction;
 - the **getter** — that is, `Self`, the provider — must be `'static`, which is also free, since a
   provider is a zero-sized marker type with no lifetime parameters in the ordinary case.
 
@@ -172,7 +172,7 @@ failure when it happens.
 - [`HasField`](./has_field.md) — the consumer side of field access.
 - [`UseField`](../../providers/use_field.md) and [`UseContext`](../../providers/use_context.md) — the two
   providers a chain is usually built from.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags, `'static` by construction.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags, `'static` by construction.
 - [`MRef`](../../types/mref.md) — the return type for a getter that may produce rather than lend.
 
 The ideas behind it:

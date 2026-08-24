@@ -9,3 +9,4 @@ pub mod errors;
 pub mod macros;
 pub mod providers;
 pub mod traits;
+pub mod types;

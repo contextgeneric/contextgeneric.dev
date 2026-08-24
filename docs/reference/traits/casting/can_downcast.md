@@ -138,7 +138,7 @@ stored where the original was.
 - [`HasExtractor`](../variant/has_extractor.md) — where the walk starts.
 - [`FromVariant`](../variant/from_variant.md) — how a matched variant is rebuilt into the target.
 - [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) — what makes an enum eligible.
-- [Type-level spines](../../types/type_level_spines.md) — the `Either`/`Void` chain underneath.
+- [Type-level spines](../../types/spines/index.md) — the `Either`/`Void` chain underneath.
 
 The ideas behind it:
 

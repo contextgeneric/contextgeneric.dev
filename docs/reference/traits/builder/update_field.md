@@ -168,7 +168,7 @@ with the tag fully expanded rather than saying the field does not exist.
   field.
 - [`SetOptional`](../optional/set_optional.md) — a transition this covers and the directional traits do not.
 - [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the per-field impls.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index.md) — the tags that name a field.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that name a field.
 
 The ideas behind it:
 

@@ -140,7 +140,7 @@ to the first one's width.
 - [`MapFields`](./map_fields.md) — rewriting every entry rather than adding any.
 - [`ConcatPath`](../formatting/concat_path.md) — the same operation over type-level paths.
 - [`Product!`](../../macros/product.md) — the sugar for the lists this operates on.
-- [Type-level spines](../../types/type_level_spines.md) — the `Cons`/`Nil` chain underneath.
+- [Type-level spines](../../types/spines/index.md) — the `Cons`/`Nil` chain underneath.
 - [`CanBuildFrom`](../casting/can_build_from.md) — merging the values whose shapes this combines.
 - [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
 
