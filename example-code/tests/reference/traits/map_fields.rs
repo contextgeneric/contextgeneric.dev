@@ -1,7 +1,7 @@
 //! Code from `docs/reference/traits/map_fields.md` — *`MapFields`*.
 //!
 //! A pure type-level function, so the check is a type equality. What this pins beyond the page's two
-//! snippets is that the same marker applies over *both* spines — a product and a sum — and the two
+//! snippets is that the same marker applies over *both* lists — a product and a sum — and the two
 //! import paths, since neither the trait nor the `IsOptional` marker is in the prelude.
 
 /// ## Examples

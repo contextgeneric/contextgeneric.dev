@@ -1,4 +1,4 @@
-//! Code from `docs/reference/types/spines/chars.md` — *`Chars`*.
+//! Code from `docs/reference/types/chars.md` — *`Chars`*.
 //!
 //! A `Symbol!` wraps a `Chars` chain. The page reads a field by its `Symbol!` tag and rebuilds the
 //! string from the type; both run here. The greet provider duplicates the one on the `PhantomData`

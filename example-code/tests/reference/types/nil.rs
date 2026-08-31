@@ -1,6 +1,6 @@
-//! Code from `docs/reference/types/spines/nil.md` — *`Nil`*.
+//! Code from `docs/reference/types/nil.md` — *`Nil`*.
 //!
-//! `Nil` terminates the product, string, and path spines and is the empty product. This pins that the
+//! `Nil` terminates the product, string, and path lists and is the empty product. This pins that the
 //! empty `Product!` is `Nil`, at the type level and the value level.
 
 /// ## Examples

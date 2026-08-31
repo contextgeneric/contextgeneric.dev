@@ -1,4 +1,4 @@
-//! Code from `docs/reference/types/spines/void.md` — *`Void`*.
+//! Code from `docs/reference/types/void.md` — *`Void`*.
 //!
 //! `Void` is uninhabited, so there is no value to build. Naming the empty `Sum!` as `Void` and coercing
 //! it is the check.

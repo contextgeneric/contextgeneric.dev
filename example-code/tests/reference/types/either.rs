@@ -1,4 +1,4 @@
-//! Code from `docs/reference/types/spines/either.md` — *`Either`*.
+//! Code from `docs/reference/types/either.md` — *`Either`*.
 //!
 //! `Either`/`Void` are what `Sum!` expands to. This pins the `Either` chain a derive assigns to an enum
 //! and the branch a nested `Either` value selects.

@@ -1,4 +1,4 @@
-//! Code from `docs/reference/types/spines/cons.md` — *`Cons`*.
+//! Code from `docs/reference/types/cons.md` — *`Cons`*.
 //!
 //! `Cons`/`Nil` are what `Product!` expands to. This pins the `Cons` chain a derive assigns and the one
 //! a `Product!` alias produces, by naming the chain explicitly and by building a `product!` value by

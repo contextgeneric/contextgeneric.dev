@@ -1,4 +1,4 @@
-//! Code from `docs/reference/types/spines/path_cons.md` — *`PathCons`*.
+//! Code from `docs/reference/types/path_cons.md` — *`PathCons`*.
 //!
 //! `PathCons` is built by `Path!` and emitted by `cgp_namespace!`. Paths are unsized markers, so there
 //! is no value to build: naming the `PathCons` chain a `Path!` produces and coercing it is the check,
