@@ -25,7 +25,7 @@ A [`Path!`](../../macros/path.md) is a type-level list of segments — the route
 lookup is redirected along, or the chain of field names a nested getter descends. Composing two such
 routes means splicing one list onto the end of another, and `ConcatPath` is that operation. It is the
 path-level analogue of [`ConcatProduct`](../type-level/concat_product.md), with the same two-impl
-recursion over a different spine.
+recursion over a different list.
 
 ## Definition
 
@@ -86,13 +86,13 @@ nothing to concatenate.
 - **Use [`ChainGetters`](../../providers/chain_getters.md)** rather than composing paths by hand when the
   goal is reaching a field on a nested context. That provider is the construct this operation serves.
 - **Use [`ConcatProduct`](../type-level/concat_product.md)** for field lists rather than paths. The two recursions
-  are the same shape over different spines and are not interchangeable.
+  are the same shape over different lists and are not interchangeable.
 - **Use [`StaticString`](./static_string.md)** if what you want is the segments as *text*. This produces
   a type; decoding it means decoding each segment's symbol.
 
 ## Under the hood
 
-Two impls, one per spine node. Each node keeps its head segment and rebuilds the tail; the terminator
+Two impls, one per list node. Each node keeps its head segment and rebuilds the tail; the terminator
 becomes the other path outright:
 
 ```rust
@@ -138,7 +138,7 @@ normalizes them.
 ## Related constructs
 
 - [`Path!`](../../macros/path.md) — the sugar for the paths this joins.
-- [`PathCons`](../../types/spines/path_cons.md) — the spine underneath.
+- [`PathCons`](../../types/path_cons.md) — the list underneath.
 - [`ConcatProduct`](../type-level/concat_product.md) — the product-level analogue.
 - [`StaticString`](./static_string.md) — recovering a segment's name as text.
 - [`StaticFormat`](./static_format.md) — the lazy formatting counterpart.

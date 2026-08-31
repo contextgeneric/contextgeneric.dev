@@ -188,7 +188,7 @@ reason to prefer the [dispatch combinators](../../providers/dispatch/index.md).
   impl here.
 - [Dispatch combinators](../../providers/dispatch/index.md) — the providers that build the chain for
   you.
-- [Type-level spines](../../types/spines/index.md) — `Either`/`Void`, where the uninhabited terminator
+- [Type-level lists](../../types/index.md) — `Either`/`Void`, where the uninhabited terminator
   comes from.
 
 The ideas behind it:

@@ -116,7 +116,7 @@ impl HasFieldsRef for Person {
 }
 ```
 
-The transformation is uniform: each entry's value type `T` becomes `&'__a T`, and the spine is otherwise
+The transformation is uniform: each entry's value type `T` becomes `&'__a T`, and the list is otherwise
 untouched — same length, same order, same tags. An enum's borrowed shape is the dual, an `Either` chain
 whose arms carry borrowed payloads.
 

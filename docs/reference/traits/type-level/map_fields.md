@@ -31,7 +31,7 @@ is the identity; with `IsNothing` every entry collapses to `()`; with `IsOptiona
 `Option<_>`; with `IsVoid` every entry becomes uninhabited.
 
 It is the transforming member of the three product operations, and the only one defined over **both**
-spines: it walks `Cons`/`Nil` for a product and `Either`/`Void` for a sum. That lets one
+lists: it walks `Cons`/`Nil` for a product and `Either`/`Void` for a sum. That lets one
 operation produce both a partial record and a partial enum.
 
 ## Definition
@@ -105,7 +105,7 @@ Three similar names, three unrelated jobs.
 
 ## Under the hood
 
-Like its two siblings, `MapFields` is a pair of impls per spine, one for the node and one for the
+Like its two siblings, `MapFields` is a pair of impls per list, one for the node and one for the
 terminator. Unlike them, it *transforms* the head rather than preserving it:
 
 ```rust
@@ -123,7 +123,7 @@ impl<Mapper> MapFields<Mapper> for Nil {
 ```
 
 The `Either`/`Void` impls mirror these exactly, with `Either` standing where `Cons` does and `Void` where
-`Nil` does. Because the recursion only ever replaces a head *type*, the spine's length and shape are
+`Nil` does. Because the recursion only ever replaces a head *type*, the list's length and shape are
 structurally preserved — which is why a mapped product is still a product of the same arity, and a mapped
 sum still a sum.
 
@@ -157,8 +157,8 @@ width.
   that grow a list rather than rewrite it.
 - [`TransformMapFields`](./transform_map_fields.md) — the value-level counterpart, which actually converts
   the fields.
-- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the sugar for both spines.
-- [Type-level spines](../../types/spines/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
+- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the sugar for both lists.
+- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
   underneath.
 - [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
 - [`MapField`](../field-access/map_field.md) — the similarly-named lifetime helper, which does something else entirely.
@@ -171,7 +171,7 @@ The ideas behind it:
 ## Source
 
 - [`map_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_fields.rs)
-  — `MapFields`, over both spines
+  — `MapFields`, over both lists
 
 ---
 

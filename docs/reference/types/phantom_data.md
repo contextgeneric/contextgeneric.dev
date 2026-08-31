@@ -79,9 +79,9 @@ as genuinely different. That page explains why.
 The two uses are the declaring side and the passing side, and they look different in the code.
 
 **On the declaring side, `PhantomData` fills the field of a zero-sized type**, the way `Multiply<Field>`
-above carries it. The same pattern runs through CGP's [list spines](spines/index.md): a
-[`Chars`](spines/chars.md) node holds its next node in a `PhantomData<Tail>`, a
-[`PathCons`](spines/path_cons.md) holds both its head and tail that way, and a [`Field`](field.md) holds
+above carries it. The same pattern runs through CGP's recursive type-level lists: a
+[`Chars`](chars.md) node holds its next node in a `PhantomData<Tail>`, a
+[`PathCons`](path_cons.md) holds both its head and tail that way, and a [`Field`](field.md) holds
 its type-level name tag in a `PhantomData<Tag>` beside the one real value it stores. In each case the
 parameter is part of the type's identity and nothing the type keeps at run time.
 
@@ -179,7 +179,8 @@ fails to compile with `error[E0392]` without one.
 
 - [`Field`](field.md) — holds its type-level name tag in a `PhantomData<Tag>` beside its value.
 - [`Life`](life.md) — a lifetime lifted into a type through a deliberately invariant `PhantomData`.
-- [Type-level spines](spines/index.md) — the recursive lists whose tails are `PhantomData` markers.
+- [`Chars`](chars.md) and [`PathCons`](path_cons.md) — recursive type-level lists whose tails are
+  `PhantomData` markers.
 - [`Symbol!`](../macros/symbol.md) and [`Index`](index_type.md) — the tags a `PhantomData::<Tag>`
   argument usually carries.
 - [`HasField`](../traits/field-access/has_field.md) — whose `get_field` takes the tag as a

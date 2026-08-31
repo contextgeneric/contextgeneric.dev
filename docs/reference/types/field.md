@@ -35,7 +35,7 @@ field-by-field generic code possible. This is the same type-as-name trick that
 [`Symbol!`](../macros/symbol.md) provides for a named field and [`Index`](index_type.md) for a tuple
 position. `Field` is where that tag meets the value it labels.
 
-`Field` fills both structural spines. In a record it is the element of a [`Product!`](../macros/product.md)
+`Field` fills both structural lists. In a record it is the element of a [`Product!`](../macros/product.md)
 of entries, one per field. In a variant it is the element of a [`Sum!`](../macros/sum.md) of entries, one
 per variant, where the `Value` is the variant's payload. The same `Field<Tag, Value>` shape names a
 field in a struct and a variant in an enum.
@@ -123,7 +123,7 @@ is the common case, and it is most of what this page is for.
   a record or a variant entry by entry. The `.into()` form is how you build one, and the tag comes from
   the expected type.
 - **Do not reach for a bare [`Product!`](../macros/product.md) of values** when you need the names.
-  A list of `Field` entries is what carries the names, and the operations that walk a shape match on
+  A list of `Field` entries carries the names, and the operations that walk a shape match on
   them.
 
 ## Common Mistakes
@@ -146,8 +146,7 @@ distinguish them at run time, it does not; the tag distinguishes them only in th
 - [`PhantomData`](phantom_data.md) — where the tag is stored, at zero size.
 - [`Product!`](../macros/product.md) and [`Sum!`](../macros/sum.md) — the lists of `Field` entries that
   describe a record and a variant.
-- [Type-level spines](spines/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains those lists are
-  built from.
+- [`Cons`](cons.md) and [`Either`](either.md) — the product and sum lists those entries are built into.
 - [`HasFields`](../traits/shape/has_fields.md) — exposes a type's whole list of `Field` entries.
 - [`HasField`](../traits/field-access/has_field.md) — single-field access against a matching tag.
 - [`#[derive(HasFields)]`](../derives/derive_has_fields.md) — assigns the list of entries to a type.

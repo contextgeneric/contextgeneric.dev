@@ -151,8 +151,8 @@ Symbol<3, Chars<'a', Chars<'b', Chars<'c', Nil>>>>
 
 Two type constructors do the work. `Chars<const CHAR: char, Tail>` is one character paired with the rest of
 the string; chained through its tail and terminated by `Nil`, it forms a
-[type-level list](../types/spines/chars.md) of characters, the same shape as
-[`Product!`](./product.md)'s `Cons`/`Nil` spine, specialized so the head is a `const char` rather than a type.
+[type-level list](../types/chars.md) of characters, the same shape as
+[`Product!`](./product.md)'s `Cons`/`Nil` list, specialized so the head is a `const char` rather than a type.
 `Symbol<const LEN: usize, Chars>` then wraps that list together with a length.
 
 **The `LEN` parameter is the part most likely to surprise**, and it exists to work around a limit in stable
@@ -214,7 +214,7 @@ type argument rather than the value.
 - [`#[implicit]`](../attributes/implicit.md) — generates the tag from an argument name.
 - [`#[cgp_auto_getter]`](./cgp_auto_getter.md) — generates it from a method name.
 - [`UseField`](../providers/use_field.md) — where the tag is written by hand, as a wiring decision.
-- [Type-level spines](../types/spines/index.md) — the `Chars`/`Nil` chain the expansion builds.
+- [Type-level lists](../types/index.md) — the `Chars`/`Nil` chain the expansion builds.
 - [`Product!`](./product.md) and [`Sum!`](./sum.md) — the record and variant lists whose entries carry these
   tags.
 - [`StaticFormat`](../traits/formatting/static_format.md) — recovering runtime text from a type-level string.

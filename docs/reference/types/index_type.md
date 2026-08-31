@@ -1,6 +1,6 @@
 ---
 sidebar_label: 'Index'
-sidebar_position: 4
+sidebar_position: 3
 ---
 
 # `Index`

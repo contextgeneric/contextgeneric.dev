@@ -15,7 +15,7 @@ component key.
 
 CGP needs such routes because [namespaces](./cgp_namespace.md) resolve lookups by path rather than by bare
 component name, which lets a whole subtree be rerouted at once and a single inherited entry be shadowed
-without disturbing the rest. Written as the underlying spine, those routes are unreadable
+without disturbing the rest. Written as the underlying list, those routes are unreadable
 (`PathCons<…, PathCons<…, Nil>>` nested several deep), so `Path!` lets one be written the way it reads:
 
 ```rust
@@ -120,7 +120,7 @@ different things.
 - **Prefer the embedded form.** A namespace entry, a `#[prefix]`, or an `@`-path wiring key is where a route
   belongs, and each accepts the syntax directly. Naming a `type SomeRoute = Path!(…)` and using it indirectly
   usually makes the wiring harder to follow rather than easier.
-- **Never hand-write the spine.** The macro expands to `PathCons<Symbol!("app"), PathCons<…, Nil>>`,
+- **Never hand-write the list.** The macro expands to `PathCons<Symbol!("app"), PathCons<…, Nil>>`,
   and writing it out is longer and identical in meaning.
 - **Reach for the [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement)
   rather than constructing paths yourself** when the goal is per-type dispatch on one component. `open` builds
@@ -151,7 +151,7 @@ PathCons<
 The macro parses the segments after the `@` into a list and folds them right to left onto `Nil`, wrapping each in
 a `PathCons` whose tail is the accumulated rest. A single-segment path is therefore `PathCons<Segment, Nil>`.
 
-**A lowercase segment nests a second spine inside the first**, which is why a fully-expanded path is longer than
+**A lowercase segment nests a second list inside the first**, which is why a fully-expanded path is longer than
 it looks: the `Symbol` is itself a `Chars`/`Nil` chain, so `@app` desugars all the way down to
 
 ```rust
@@ -169,7 +169,7 @@ The same fold drives the embedded forms. A [`cgp_namespace!`](./cgp_namespace.md
 followed by the component's own key.
 
 One presentational note: `cargo cgp expand` resugars a path back to `Path!(@…)` form in most positions, but not
-uniformly. An `open` statement's per-entry key comes back as a raw `PathCons` spine while its header's redirect
+uniformly. An `open` statement's per-entry key comes back as a raw `PathCons` list while its header's redirect
 target is resugared. Seeing the same kind of type in two spellings in one expansion is expected rather than a
 sign that they differ.
 
@@ -219,7 +219,7 @@ the check rather than at the definition.
 - [`delegate_components!`](./delegate_components.md) — `@`-path keys and the `open` statement that builds routes
   for you.
 - [`Symbol!`](./symbol.md) — what a lowercase segment becomes.
-- [Type-level spines](../types/spines/index.md) — the `PathCons` chain the expansion builds.
+- [Type-level lists](../types/index.md) — the `PathCons` chain the expansion builds.
 - [`Product!`](./product.md) and [`Sum!`](./sum.md) — the sibling construction macros, sharing the fold shape.
 - [`DelegateComponent`](../traits/wiring/delegate_component.md) — the per-key table a resolved path finally reads.
 

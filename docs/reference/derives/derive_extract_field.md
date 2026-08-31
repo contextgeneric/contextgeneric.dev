@@ -355,7 +355,7 @@ enum's own variant list rather than repeating it at each site.
 - [`MapType`](../traits/type-level/map_type.md) — the `IsPresent`/`IsVoid` markers the companion enums are parameterized
   by.
 - [`CanUpcast`](../traits/casting/can_upcast.md) — upcasting and downcasting between enums, which reuse this recursion.
-- [Type-level spines](../types/spines/index.md) — the `Either`/`Void` chain an enum's shape is built
+- [Type-level lists](../types/index.md) — the `Either`/`Void` chain an enum's shape is built
   from.
 - [Dispatch combinators](../providers/dispatch/index.md) — the providers that build an extraction chain
   for you, one implementation per variant.

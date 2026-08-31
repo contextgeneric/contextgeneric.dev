@@ -110,7 +110,7 @@ impl ToFields for Person {
 ```
 
 An error message prints that chain when structural code fails to resolve, and the
-[type-level spines](../../types/spines/index.md) page covers reading it.
+[type-level lists](../../types/index.md) page covers reading it.
 
 An enum's conversion is the dual: each concrete variant is matched onto its arm of an `Either` chain
 terminated by `Void`, tagged with the variant name.
@@ -146,7 +146,7 @@ such as a [cast](../casting/can_downcast.md).
 - [`#[derive(HasFields)]`](../../derives/derive_has_fields.md) — generates this impl.
 - [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md) — what
   a shape is made of.
-- [Type-level spines](../../types/spines/index.md) — the `Cons` chain the conversion builds.
+- [Type-level lists](../../types/index.md) — the `Cons` chain the conversion builds.
 - [`HasBuilder`](../builder/has_builder.md) — incremental assembly, as against this wholesale conversion.
 
 The ideas behind it:

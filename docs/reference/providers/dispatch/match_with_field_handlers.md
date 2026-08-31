@@ -60,7 +60,7 @@ pub type MatchWithFieldHandlers<Provider = UseContext> =
 
 The per-variant list is built from a context's field list by three cooperating traits. `MapFieldHandler`
 is a type-level function from a field's `Tag` to the adapter that should handle it; `ToFieldHandlers`
-walks the [sum spine](../../types/spines/either.md) of a field list and applies that function to each
+walks the [sum list](../../types/either.md) of a field list and applies that function to each
 field, producing a [`Product!`](../../macros/product.md) list of adapters; and `HasFieldHandlers` reads a
 context's [`HasFields`](../../traits/shape/has_fields.md) list and runs `ToFieldHandlers` over it:
 
@@ -74,7 +74,7 @@ where
 }
 ```
 
-`ToFieldHandlers` is implemented inductively over the sum spine: for `Either<Field<Tag, Value>, Rest>`
+`ToFieldHandlers` is implemented inductively over the sum list: for `Either<Field<Tag, Value>, Rest>`
 it produces `Cons<M::FieldHandler<Tag>, Rest::Handlers>`, and for the terminating `Void` it produces
 `Nil`. The `MapFieldHandler` marker the crate supplies here is `MapExtractFieldAndHandle<Provider>`,
 whose `FieldHandler<Tag>` is [`ExtractFieldAndHandle`](extract_field_and_handle.md)`<Tag, Provider>`, so

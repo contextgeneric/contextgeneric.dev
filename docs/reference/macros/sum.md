@@ -20,7 +20,7 @@ a record. A `Sum!` holds a value for exactly **one** element, which is a tagged 
 Sum![u32, String, bool]
 ```
 
-Like its dual it is built from a recursive spine, and that recursion makes variant-by-variant
+Like its dual it is built from a recursive list, and that recursion makes variant-by-variant
 operations possible. Because an enum's variants are exposed as a single sum type through
 [`HasFields`](../traits/shape/has_fields.md), a provider can be written once to match on, dispatch over, or construct
 *any* enum's variants without naming the concrete enum, by walking the nested branches. This is the basis for
@@ -91,7 +91,7 @@ use.
 - **Use [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or
   [`#[derive(HasFields)]`](../derives/derive_has_fields.md) on the enum**, which generates the list from the
   variants you already declared. Writing it out means restating the enum, and the two will drift.
-- **Never hand-write the spine.** `Sum!` expands to `Either<A, Either<B, Void>>`, and writing it out is
+- **Never hand-write the list.** `Sum!` expands to `Either<A, Either<B, Void>>`, and writing it out is
   longer and identical in meaning.
 - **Use [`Product!`](./product.md) for a collection rather than a choice.** They are duals: every element
   versus exactly one. A type error is the usual consequence of confusing them, which is at least loud.
@@ -111,7 +111,7 @@ Sum![A, B, C]
 Either<A, Either<B, Either<C, Void>>>
 ```
 
-The two building blocks differ from the product spine in being *branching* rather than pairing.
+The two building blocks differ from the product list in being *branching* rather than pairing.
 `Either<Head, Tail>` is an enum with two cases: `Left(Head)` selects the head type, and `Right(Tail)` defers to
 the rest of the chain. So a value of `Either<A, Either<B, Either<C, Void>>>` is `Left` for an `A`,
 `Right(Left(..))` for a `B`, and `Right(Right(Left(..)))` for a `C`.
@@ -166,7 +166,7 @@ struct: the variant's payload type has to be a single nameable type for the sum 
 ## Related constructs
 
 - [`Product!`](./product.md) — the dual, for a collection rather than a choice.
-- [Type-level spines](../types/spines/index.md) — the `Either`/`Void` types the expansion builds.
+- [Type-level lists](../types/index.md) — the `Either`/`Void` types the expansion builds.
 - [`Field`](../types/field.md) — what the branches usually are, pairing a variant name with its payload.
 - [`Symbol!`](./symbol.md) — the name half of a branch.
 - [`HasFields`](../traits/shape/has_fields.md) — the trait exposing an enum's shape as one of these sums.
@@ -179,7 +179,7 @@ struct: the variant's payload type has to be a single nameable type for the sum 
 The ideas behind it:
 
 - [Extensible variants](/docs/concepts/extensible-variants) — the variant representation this list
-  is the spine of.
+  encodes.
 
 ## Source
 

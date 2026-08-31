@@ -263,7 +263,7 @@ derived from the trait name by stripping a leading `Has` and appending `Getter`,
 **A multi-method trait gets no `UseField` provider.** Both `UseField` and `WithProvider` are emitted only
 for a single-method trait, because each supplies one field. Wiring a two-method getter to
 `UseField<Symbol!("width")>` therefore reports the provider as not being a provider for the component,
-with the tag expanded into its raw spine:
+with the tag expanded into its raw list:
 
 ```text
 error[E0277]: the trait bound `UseField<Symbol<5, Chars<'w', ...>>>: IsProviderFor<..., ...>`

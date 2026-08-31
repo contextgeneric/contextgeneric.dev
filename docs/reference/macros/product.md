@@ -13,7 +13,7 @@ A type-level list and its value-level counterpart.
 *shape* of a struct: the list of its fields, in order, as one type that generic code can reason about.
 
 It is sometimes called an anonymous product type, because like a tuple it holds several things at once. The
-difference from a tuple is the one that matters: a `Product!` is built from a recursive spine that generic code
+difference from a tuple is the one that matters: a `Product!` is built from a recursive list that generic code
 can take apart **one element at a time**:
 
 ```rust
@@ -104,9 +104,9 @@ let row: Row = product![1, "hi".to_string(), true];
 **Write `Product!` when a construct asks for a type-level list**, which in practice means a handler pipeline or
 a provider list. Everywhere else it is generated for you.
 
-- **Never hand-write the spine.** `Product!` expands to `Cons<A, Cons<B, Nil>>`, and writing it out is
+- **Never hand-write the list.** `Product!` expands to `Cons<A, Cons<B, Nil>>`, and writing it out is
   strictly worse: longer, harder to change, and identical in meaning. The same holds for
-  [`Sum!`](./sum.md)'s spine.
+  [`Sum!`](./sum.md)'s list.
 - **Use [`#[derive(HasFields)]`](../derives/derive_has_fields.md) for a struct's shape** rather than declaring
   the list yourself. Writing it by hand means restating the struct, and the two will disagree eventually.
 - **Use a tuple when nothing generic consumes it.** A `Product!` earns its keep only where code recurses over
@@ -192,7 +192,7 @@ the order *is* the execution order.
 ## Related constructs
 
 - [`Sum!`](./sum.md) — the dual, for a choice among types rather than a collection of them.
-- [Type-level spines](../types/spines/index.md) — the `Cons`/`Nil` types the expansion builds.
+- [Type-level lists](../types/index.md) — the `Cons`/`Nil` types the expansion builds.
 - [`Field`](../types/field.md) — what the entries usually are, pairing a name with a type.
 - [`Symbol!`](./symbol.md) — the name half of a `Field` entry.
 - [`HasFields`](../traits/shape/has_fields.md) — the trait that exposes a struct's shape as one of these lists.
@@ -203,8 +203,8 @@ the order *is* the execution order.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — the record representation this list is
-  the spine of.
+- [Extensible records](/docs/concepts/extensible-records) — the record representation this list
+  encodes.
 
 ## Source
 

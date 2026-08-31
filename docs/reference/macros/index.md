@@ -60,5 +60,5 @@ fields or a handler pipeline's steps, [`Sum!`](./sum.md) builds the dual list fo
 and [`Path!`](./path.md) builds the routing list that namespaces and redirected lookups resolve
 against. All four are mostly generated for you, by a derive, by the ergonomic macros above, or by the
 `open` statement inside `delegate_components!`, and the skill worth having is reading one back out of
-a compiler error rather than writing it, since a diagnostic actually prints the raw spine each expands
+a compiler error rather than writing it, since a diagnostic actually prints the raw list each expands
 to (`Cons`/`Nil`, `Either`/`Void`, `PathCons`).

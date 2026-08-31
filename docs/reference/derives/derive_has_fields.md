@@ -255,10 +255,10 @@ impl ToFieldsRef for Person {
 ```
 
 `Product![A, B]` is sugar for `Cons<A, Cons<B, Nil>>`, which is why the bodies build a `Cons` chain. The
-[type-level spines](../types/spines/index.md) page covers that shape, and it is the form printed in
+[type-level lists](../types/index.md) page covers that shape, and it is the form printed in
 an error.
 
-An enum's shape is the dual: an [`Either`](../types/spines/either.md) chain terminated by `Void`
+An enum's shape is the dual: an [`Either`](../types/either.md) chain terminated by `Void`
 rather than a `Cons` chain terminated by `Nil`, with each arm tagged by the variant name:
 
 ```rust
@@ -335,7 +335,7 @@ by one letter and the outputs do not overlap.
   shape are built from.
 - [`Field`](../types/field.md) — one entry: a value paired with its type-level name.
 - [`Symbol!`](../macros/symbol.md) and [`Index`](../types/index_type.md) — the tags that name an entry.
-- [Type-level spines](../types/spines/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
+- [Type-level lists](../types/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
   sugar expands to.
 - [`AppendProduct`](../traits/type-level/append_product.md) — operations over a shape once you have one.
 - [`CanUpcast`](../traits/casting/can_upcast.md) — converting between two types whose shapes overlap.

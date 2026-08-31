@@ -102,7 +102,7 @@ There is no `AppendSum`. Growing a sum is not an operation this layer provides.
 
 ## Under the hood
 
-The trait is a pair of impls, one for the spine's `Cons` node and one for its `Nil` terminator. Each head
+The trait is a pair of impls, one for the list's `Cons` node and one for its `Nil` terminator. Each head
 is kept and the tail rebuilt, with a single-element list grafted on at the end:
 
 ```rust
@@ -118,7 +118,7 @@ where
 }
 ```
 
-Because the recursion only ever rebuilds the spine, order is structurally preserved — which is why
+Because the recursion only ever rebuilds the list, order is structurally preserved — which is why
 appending yields a *different* type from prepending, and why two products with the same entries in
 different orders are unrelated types.
 
@@ -138,7 +138,7 @@ unresolved-associated-type error.
 **Order is part of the type.** Appending is not commutative with prepending, and nothing reorders a list
 to make two shapes match.
 
-**A long list means a deep recursion.** This is trait resolution over the spine, so a very wide struct
+**A long list means a deep recursion.** This is trait resolution over the list, so a very wide struct
 costs compile time proportional to its width — one of the places CGP's compile-time cost actually comes
 from.
 
@@ -147,7 +147,7 @@ from.
 - [`ConcatProduct`](./concat_product.md) — the general form; append is its single-entry case.
 - [`MapFields`](./map_fields.md) — rewriting every entry rather than adding one.
 - [`Product!`](../../macros/product.md) — the sugar for the lists this operates on.
-- [Type-level spines](../../types/spines/index.md) — the `Cons`/`Nil` chain underneath.
+- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` chain underneath.
 - [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
 - [`Field`](../../types/field.md) — the entries a field list is usually made of.
 - [`HasBuilder`](../builder/has_builder.md) — the family that moves values through the shapes this computes.

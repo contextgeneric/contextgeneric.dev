@@ -300,8 +300,8 @@ after this impl and win where their keys are more specific.
 
 Two naming details appear verbatim in errors and are worth recognizing: the table parameter is literally
 `__Table__`, and the inheritance impl uses `__Key__` and `__Value__`. And every `@` path is a
-[type-level list](../types/spines/path_cons.md) built by [`Path!`](./path.md); `expand` resugars it to
-`Path!(@…)` form, while a raw compiler error prints the underlying spine.
+[type-level list](../types/path_cons.md) built by [`Path!`](./path.md); `expand` resugars it to
+`Path!(@…)` form, while a raw compiler error prints the underlying list.
 
 ## Formal grammar
 

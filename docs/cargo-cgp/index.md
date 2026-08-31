@@ -47,7 +47,7 @@ help: the trait `HasField<Symbol<6, cgp::prelude::Chars<'h', cgp::prelude::Chars
 ```
 
 The answer is in there — the field is spelled out one character per type parameter — but you have to
-decode a `Chars` spine to read it, and this is the *good* case, where a check forced the failure to the
+decode a `Chars` list to read it, and this is the *good* case, where a check forced the failure to the
 wiring site.
 
 `cargo cgp check` reports the same mistake like this:
@@ -91,7 +91,7 @@ Everything after `check` is forwarded to cargo, so the flags you already use wor
 
 [**`cargo cgp expand`**](./expand.md) prints what your CGP macros generated, with CGP's type-level
 constructs spelled the way you wrote them — a field tag reads `Symbol!("height")` rather than the
-six-level `Chars` spine above. It is how you answer "what did that macro actually produce?" rather than
+six-level `Chars` list above. It is how you answer "what did that macro actually produce?" rather than
 reasoning about what it probably produced.
 
 ## What it is not

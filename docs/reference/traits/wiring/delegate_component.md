@@ -106,7 +106,7 @@ An **arbitrary type** — a shape, a tag — makes the table a plain dispatch ma
 attached. This is what the nested tables inside [`UseDelegate`](../../providers/use_delegate.md) are, and what
 the `open` statement's per-key entries resolve through.
 
-A **type-level path** — a [`PathCons`](../../types/spines/path_cons.md) list built by
+A **type-level path** — a [`PathCons`](../../types/path_cons.md) list built by
 [`Path!`](../../macros/path.md) — is how namespaces key their entries, so a lookup walks one segment at a time.
 [`RedirectLookup`](../../providers/redirect_lookup.md) is the provider that performs that walk.
 

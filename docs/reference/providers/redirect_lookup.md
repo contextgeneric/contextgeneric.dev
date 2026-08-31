@@ -61,7 +61,7 @@ delegate_components! {
 ```
 
 A `RedirectLookup` later walks the path-keyed entry above (`@bar.baz`). The path itself is a
-[`PathCons`](../types/spines/path_cons.md) chain of [`Symbol!`](../macros/symbol.md) segments, most
+[`PathCons`](../types/path_cons.md) chain of [`Symbol!`](../macros/symbol.md) segments, most
 easily written with [`Path!`](../macros/path.md).
 
 ## Examples
@@ -153,7 +153,7 @@ table.
 - [`delegate_components!`](../macros/delegate_components.md) — the `open` and `namespace` statements that
   generate the redirect entries.
 - [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
-- [`Path!`](../macros/path.md) and [`PathCons`](../types/spines/path_cons.md) — the type-level path it
+- [`Path!`](../macros/path.md) and [`PathCons`](../types/path_cons.md) — the type-level path it
   walks.
 - [`UseContext`](use_context.md) — the other `#[cgp_component]`-generated provider, routing back to the
   context.

@@ -105,7 +105,7 @@ which field is missing and not enough to match on programmatically.
 
 Unlike its defaulting sibling, `FinalizeOptional` does **not** go through
 [`TransformMapFields`](../type-level/transform_map_fields.md). It walks the target's
-[`HasFields`](../shape/has_fields.md) spine directly, and the reason is that it has to be able to *stop*.
+[`HasFields`](../shape/has_fields.md) list directly, and the reason is that it has to be able to *stop*.
 
 For each field it pulls the `Option` out with [`UpdateField`](../builder/update_field.md), and:
 

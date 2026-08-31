@@ -120,7 +120,7 @@ soundness argument lives: the remainder is uninhabited once every variant is `Is
 is discharged with an empty `match` and no execution path reaches it.
 
 Because the bound is on `E` rather than on any CGP type in particular, the impl also covers a `Result`
-whose error is `Infallible` or [`Void`](../../types/spines/void.md). That is occasionally useful
+whose error is `Infallible` or [`Void`](../../types/void.md). That is occasionally useful
 outside the extractor family, for collapsing a `Result` that a signature required but that cannot fail.
 
 `Output` being an associated type rather than a generic lets the call sit at the end of a method
@@ -151,7 +151,7 @@ bound stops being satisfied.
 - [`ExtractField`](./extract_field.md) — the narrowing that produces the `Result` this collapses.
 - [`HasExtractor`](./has_extractor.md) — where a chain begins.
 - [`FinalizeBuild`](../builder/finalize_build.md) — the record family's ending.
-- [Type-level spines](../../types/spines/index.md) — where the uninhabited `Void` comes from.
+- [Type-level lists](../../types/index.md) — where the uninhabited `Void` comes from.
 - [Dispatch combinators](../../providers/dispatch/index.md) — the providers that build the chain for
   you.
 - [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — what makes an enum extractable.

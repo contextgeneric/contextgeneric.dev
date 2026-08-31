@@ -1,6 +1,6 @@
 ---
 sidebar_label: 'Life'
-sidebar_position: 5
+sidebar_position: 4
 ---
 
 # `Life`
@@ -108,7 +108,7 @@ all that is asked.
 carries a lifetime.
 
 **`Life<'a>` is invariant in `'a`, on purpose.** It does not behave like `&'a ()`, which is covariant.
-The invariance is what keeps providers wired for different lifetimes from being confused, so it is a
+The invariance keeps providers wired for different lifetimes from being confused, so it is a
 feature rather than an over-restriction.
 
 **A higher-order provider with a lifetime loses its dependency propagation.** The inner-provider bound of
@@ -124,7 +124,7 @@ a recorded limitation, noted on [`IsProviderFor`](../traits/wiring/is_provider_f
 - [`#[cgp_component]`](../macros/cgp_component.md) — inserts `Life` when a consumer trait carries a
   lifetime.
 - [`PhantomData`](phantom_data.md) — the marker `Life` is built from, wrapped for invariance.
-- [`Index`](index_type.md) and [`Chars`](spines/chars.md) — the other lifts that make a non-type
+- [`Index`](index_type.md) and [`Chars`](chars.md) — the other lifts that make a non-type
   addressable in trait resolution, a number and a string where `Life` lifts a lifetime.
 
 The ideas behind it:

@@ -306,7 +306,7 @@ or direct wiring puts a provider there:
 
 The same `[CGP-E107]` leaf covers a component the context simply never wired. The path is resugared to
 its `@app.GreeterComponent` form, which is the largest readability win here — raw `rustc` prints it as a
-`PathCons<Symbol<3, Chars<..>>, _>` spine.
+`PathCons<Symbol<3, Chars<..>>, _>` list.
 
 In the raw output this class is unusual in that the cause **is** the primary error rather than a note
 below it: an `E0277` saying a `PathCons<…>` path does not implement the namespace trait. A `Self` that is
@@ -655,7 +655,7 @@ A tree entry that merely passes a non-CGP message through in rustc's own words i
   a diagnostic; the reason a checked error names the cause at all.
 - [`CanUseComponent`](./traits/wiring/can_use_component.md) — what a check asserts.
 - [`cargo cgp check`](/docs/cargo-cgp/check) — the tool every rewritten output on this page came from.
-- [`Symbol!`](./macros/symbol.md) — the type-level field name whose raw `Chars<…>` spine the tool
+- [`Symbol!`](./macros/symbol.md) — the type-level field name whose raw `Chars<…>` list the tool
   resugars.
 
 The ideas behind it:

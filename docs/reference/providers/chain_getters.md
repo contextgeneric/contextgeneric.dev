@@ -20,7 +20,7 @@ outer getter, then the next, ending at the target field.
 
 `ChainGetters` is a foundational [`FieldGetter`](../traits/field-access/field_getter.md), so it is wired to a getter
 component through the [`WithProvider`](with_provider.md) adapter rather than named on its own. The list
-is a type-level [`Cons`](../types/spines/cons.md) spine whose elements are each a field getter for
+is a type-level [`Cons`](../types/cons.md) list whose elements are each a field getter for
 the value the previous step produced, written with the [`Product!`](../macros/product.md) macro.
 `ChainGetters` recurses down the list. Like every CGP provider, it carries no runtime value: it is a
 marker named in wiring.
@@ -151,7 +151,7 @@ impl<Context, Tag> FieldGetter<Context, Tag> for ChainGetters<Nil> {
 ```
 
 So a chain of one getter resolves to that getter applied to the context, a chain of two applies the
-first then the second, and so on down the `Cons` spine. Because `ChainGetters` produces a `FieldGetter`
+first then the second, and so on down the `Cons` list. Because `ChainGetters` produces a `FieldGetter`
 rather than the getter component's own provider trait, the [`WithProvider`](with_provider.md) adapter is
 what turns it into a provider a getter component can be wired to.
 

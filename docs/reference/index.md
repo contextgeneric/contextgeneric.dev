@@ -203,10 +203,10 @@ one to start with: it is what lets a provider or a tag carry a type it stores no
 underlies most of the rest. You write the lists through sugar — [`Symbol!`](./macros/symbol.md) for a
 field name, [`Product!`](./macros/product.md) for a record list, [`Sum!`](./macros/sum.md) for its dual,
 [`Path!`](./macros/path.md) for a route — and only need to recognize the
-[list spines](./types/spines/index.md) they expand into, [`Cons`](./types/spines/cons.md) and
-[`Nil`](./types/spines/nil.md), [`Either`](./types/spines/either.md) and
-[`Void`](./types/spines/void.md), [`Chars`](./types/spines/chars.md), and
-[`PathCons`](./types/spines/path_cons.md), when one shows up in an error. Each entry in a record or a
+[lists](./types/index.md) they expand into, [`Cons`](./types/cons.md) and
+[`Nil`](./types/nil.md), [`Either`](./types/either.md) and
+[`Void`](./types/void.md), [`Chars`](./types/chars.md), and
+[`PathCons`](./types/path_cons.md), when one shows up in an error. Each entry in a record or a
 variant is a [`Field`](./types/field.md), tagged by a [`Symbol!`](./macros/symbol.md) or an
 [`Index`](./types/index_type.md), and [`Life`](./types/life.md) lifts a lifetime into a type where the
 wiring needs one. [`MRef`](./types/mref.md) is the odd one out, a runtime value a getter returns rather
@@ -232,7 +232,7 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 |---|---|
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
 | `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
-| `Symbol` (the type, not the `Symbol!` macro) | [`Chars`](./types/spines/chars.md) |
+| `Symbol` (the type, not the `Symbol!` macro) | [`Chars`](./types/chars.md) |
 | `IdentMonadic`, `OkMonadic`, `ErrMonadic`, `OkMonadicTrans`, `ErrMonadicTrans` | [Monad providers](./providers/monad/index.md) |
 | `UseDelegatedType`, `WithDelegatedType` | [`UseDelegatedType`](./providers/use_delegated_type.md) and [`WithProvider`](./providers/with_provider.md) |
 | `MatchWithHandlersRef`, `MatchFirstWithHandlers`, and the other borrowed and first-argument matcher forms | the matcher page they vary, under [Dispatch combinators](./providers/dispatch/index.md) |

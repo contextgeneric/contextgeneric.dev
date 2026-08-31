@@ -151,7 +151,7 @@ impl HasFields for Person {
 ```
 
 `Product![A, B]` is `Cons<A, Cons<B, Nil>>`, so a `Fields` type in an error message is a `Cons` chain
-rather than the sugar — the [type-level spines](../../types/spines/index.md) page covers reading it.
+rather than the sugar — the [type-level lists](../../types/index.md) page covers reading it.
 
 An enum's shape is the dual: an `Either` chain terminated by `Void` rather than a `Cons` chain terminated
 by `Nil`, with each arm tagged by the variant name and carrying that variant's own fields as a nested
@@ -193,7 +193,7 @@ the other reserved names.
 - [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the list types a shape is built
   from.
 - [`Field`](../../types/field.md) — one entry: a value paired with its type-level name.
-- [Type-level spines](../../types/spines/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
+- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
   underneath.
 - [`AppendProduct`](../type-level/append_product.md) — the operations that compute new shapes from old ones.
 - [`CanUpcast`](../casting/can_upcast.md) and [`CanBuildFrom`](../casting/can_build_from.md) — conversions between two

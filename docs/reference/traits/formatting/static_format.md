@@ -39,7 +39,7 @@ pub trait StaticFormat {
 
 Note the absent `self`: there is no runtime value, only the type, so `fmt` takes the formatter alone and
 writes the type's characters into it. The trait is implemented for the type-level string itself, by
-recursion over the character spine, and the terminator writes nothing.
+recursion over the character list, and the terminator writes nothing.
 
 ## Usage
 
@@ -66,7 +66,7 @@ assert_eq!(s.to_string(), "hello");
 assert_eq!(format!("field: {s}"), "field: hello");
 ```
 
-The impls exist for `Chars` — the character spine — and for `Nil`, which terminates it, with `Symbol`
+The impls exist for `Chars` — the character list — and for `Nil`, which terminates it, with `Symbol`
 delegating to its inner list. Every type-level string therefore formats, including the empty one.
 
 ## Examples
@@ -166,7 +166,7 @@ this trait is what you need when there is no value to construct.
 - [`StaticString`](./static_string.md) — the eager counterpart, and the one to reach for.
 - [`ConcatPath`](./concat_path.md) — path composition, its reachable sibling in the same group.
 - [`Symbol!`](../../macros/symbol.md) — the type-level string being formatted.
-- [Type-level spines](../../types/spines/index.md) — the `Chars` chain being walked.
+- [Type-level lists](../../types/index.md) — the `Chars` chain being walked.
 - [`HasField`](../field-access/has_field.md) — where the names being decoded are used as keys.
 
 The ideas behind it:

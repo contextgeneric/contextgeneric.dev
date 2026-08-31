@@ -140,7 +140,7 @@ Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<'h', Chars<'t', Nil>
 
 `cargo cgp expand` resugars it back to `Symbol!("height")`, which is what you wrote. It does the same
 for the rest of the vocabulary — a pipeline reads `Product![StepOne, StepTwo]` rather than a `Cons`
-spine, and a namespace key reads `Path!(@app.GreeterComponent)`. On a page of wiring the difference is
+list, and a namespace key reads `Path!(@app.GreeterComponent)`. On a page of wiring the difference is
 between a listing you can read and one you have to decode.
 
 Two smaller differences follow from the same purpose. **`--item` understands Rust items** — asking for

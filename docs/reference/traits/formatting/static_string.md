@@ -127,7 +127,7 @@ means decoding each segment's symbol.
 - [`StaticFormat`](./static_format.md) — the lazy counterpart, behind the `Display` impls.
 - [`ConcatPath`](./concat_path.md) — the same recovery idea one level up, for paths.
 - [`Symbol!`](../../macros/symbol.md) — the type-level string this decodes, and where the `LEN` comes from.
-- [Type-level spines](../../types/spines/index.md) — the `Chars` chain being walked.
+- [Type-level lists](../../types/index.md) — the `Chars` chain being walked.
 - [`HasField`](../field-access/has_field.md) — where the names being decoded are used as keys.
 - [`FinalizeOptional`](../optional/finalize_optional.md) — a real consumer, reporting a missing field by name.
 
