@@ -7,17 +7,6 @@ sidebar_position: 6
 
 The end marker of the product, string, and path lists: an empty, constructible list.
 
-:::info
-
-### Generated machinery
-
-**You are not expected to write `Nil` by hand.** It is produced by the sugar that builds the lists it
-terminates: [`Product!`](../macros/product.md), [`Symbol!`](../macros/symbol.md), and
-[`Path!`](../macros/path.md). You meet it at the end of a chain in an expansion or an error, and this
-page explains what it marks.
-
-:::
-
 ## Overview
 
 `Nil` marks the end of a right-nested type-level list. Where a [`Cons`](cons.md) cell pairs a head with

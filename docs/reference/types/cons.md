@@ -8,17 +8,6 @@ sidebar_position: 5
 The head-and-tail cell of the product list: the recursive list that describes a record, one field at a
 time.
 
-:::info
-
-### Generated machinery
-
-**You are not expected to write `Cons` by hand.** You build a product list with the
-[`Product!`](../macros/product.md) and `product!` macros, and a struct's field list comes from
-[`#[derive(HasFields)]`](../derives/derive_has_fields.md). You meet `Cons` in an expansion and in a
-field-mismatch error, and this page explains its shape so those read clearly.
-
-:::
-
 ## Overview
 
 `Cons<Head, Tail>` represents an ordered sequence of types as a single type, so a collection of fields

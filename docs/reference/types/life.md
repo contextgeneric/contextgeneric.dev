@@ -8,16 +8,6 @@ sidebar_position: 4
 A lifetime lifted into a type, so a lifetime parameter can travel through machinery that only accepts
 types.
 
-:::info
-
-### Generated machinery
-
-**You are not expected to write `Life` by hand.** The component-defining macros, principally
-[`#[cgp_component]`](../macros/cgp_component.md), insert it when a trait carries a lifetime. You meet it
-in a generated provider trait and in a provider-resolution error, and this page explains why it is there.
-
-:::
-
 ## Overview
 
 `Life<'a>` exists because CGP's wiring is parameterized by *types*, not lifetimes, yet a CGP trait may

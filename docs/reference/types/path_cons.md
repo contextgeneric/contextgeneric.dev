@@ -8,16 +8,6 @@ sidebar_position: 10
 One segment of a type-level path: the list that names a route through nested delegation tables, so a
 lookup can reach an entry several layers deep.
 
-:::info
-
-### Generated machinery
-
-**You are not expected to write `PathCons` by hand.** The [`Path!`](../macros/path.md) macro builds it,
-and [`cgp_namespace!`](../macros/cgp_namespace.md) emits it when it reroutes a component. You meet it
-in an expansion of namespace wiring and in a routing error, and this page explains its shape.
-
-:::
-
 ## Overview
 
 `PathCons<Head, Tail>` expresses a *route* through nested delegation tables as a single type. A bare

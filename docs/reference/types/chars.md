@@ -8,17 +8,6 @@ sidebar_position: 9
 One character of a type-level string: the list that spells a field name out one character at a time so
 the name can be a type.
 
-:::info
-
-### Generated machinery
-
-**You are not expected to write `Chars` by hand.** The [`Symbol!`](../macros/symbol.md) macro folds a
-string literal into a `Chars` chain, and a `Symbol` wraps that chain. You meet `Chars` in a
-missing-field error, where a field name prints as its expanded character list, and this page explains how
-to read it.
-
-:::
-
 ## Overview
 
 `Chars<const CHAR: char, Tail>` encodes a string as a type, so that a field name can take part in trait

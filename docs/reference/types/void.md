@@ -5,18 +5,8 @@ sidebar_position: 8
 
 # `Void`
 
-The uninhabited end marker of the sum list: an empty enum that can never be constructed, which is what
-lets a total variant match close with no runtime branch.
-
-:::info
-
-### Generated machinery
-
-**You are not expected to write `Void` by hand.** It is produced by [`Sum!`](../macros/sum.md) as the
-terminator of a sum, and it appears in the extractor machinery. You meet it at the end of an
-[`Either`](either.md) chain and in an extraction error, and this page explains why it is uninhabited.
-
-:::
+The uninhabited end marker of the sum list: an empty enum that can never be constructed, which lets a
+total variant match close with no runtime branch.
 
 ## Overview
 

@@ -8,17 +8,6 @@ sidebar_position: 7
 The head-or-rest cell of the sum list: the recursive list that describes an enum, one variant at a
 time.
 
-:::info
-
-### Generated machinery
-
-**You are not expected to write `Either` by hand.** You build a sum list with the
-[`Sum!`](../macros/sum.md) macro, and an enum's variant list comes from
-[`#[derive(HasFields)]`](../derives/derive_has_fields.md). You meet `Either` in an expansion and in a
-variant-mismatch error, and this page explains its shape so those read clearly.
-
-:::
-
 ## Overview
 
 `Either<Head, Tail>` represents a choice among several types as a single type, so an enum's variants can

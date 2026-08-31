@@ -8,18 +8,6 @@ sidebar_position: 2
 A value paired with its type-level name tag, so a struct's fields and an enum's variants can be
 described one entry at a time without naming the concrete type.
 
-:::info
-
-### Generated machinery
-
-**You rarely write `Field` by hand.** The extensible-data derives —
-[`#[derive(HasFields)]`](../derives/derive_has_fields.md) and the wider
-[`#[derive(CgpData)]`](../derives/derive_cgp_data.md) — build the `Field` entries that make up a type's
-shape. You meet the type in a generated shape, in a builder or extractor error, and occasionally when
-you construct one entry directly. This page explains what it is so those are legible.
-
-:::
-
 ## Overview
 
 `Field<Tag, Value>` carries a field's *name* and its *value* together in one type. A bare
