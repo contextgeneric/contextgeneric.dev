@@ -23,8 +23,8 @@ impl ShowImpl<String> { /* … */ }
 Read that as: *`ShowString` is the default for `String`, in the `DefaultImpls1<ShowImplComponent>`
 table.* A context that pulls that table in gets this provider without naming it.
 
-Registering at the definition keeps the provider and its default together, so adding a new per-type
-implementation is one place to edit rather than two.
+Registering at the definition keeps the provider and its default together, so a new per-type
+implementation is one edit rather than two.
 
 ## Usage
 
@@ -45,7 +45,7 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 }
 ```
 
-That rule is worth internalizing, because the trait's own parameter names suggest the opposite
+That rule is worth remembering, because the trait's own parameter names suggest the opposite
 arrangement (see [`DefaultImpls1`](../traits/namespace/default_impls1.md#the-one-thing-to-get-right)).
 
 **The key is a type or a `@`-path.** A type key, as above, is the usual form for a per-type default:
@@ -162,14 +162,14 @@ with `GreetHello`.
 ## When to use it
 
 **Reach for it when a provider is the natural default for its key and you want that recorded where the
-provider is written.**
+provider is written.** The alternatives differ in where the entry lives.
 
-- **Write the entry in the namespace body instead** when the defaults belong together as a set, or when
-  the provider is one of several candidates and none is obviously *the* default. A
-  [`cgp_namespace!`](../macros/cgp_namespace.md) body reads as a table; scattered attributes do not.
 - **Use it** when per-type defaults accumulate (a conversion, a formatter, a codec with one provider per
   type), because then the alternative is a namespace body that has to be edited every time a type is
   added.
+- **Write the entry in the namespace body instead** when the defaults belong together as a set, or when
+  the provider is one of several candidates and none is obviously *the* default. A
+  [`cgp_namespace!`](../macros/cgp_namespace.md) body reads as a table; scattered attributes do not.
 - **Do not reach for a namespace at all** until the top-level wiring is long enough to be a problem.
 
 **One constraint decides where the attribute may be written, and it is Rust's orphan rule rather than
@@ -213,7 +213,7 @@ ordinary providers: a provider whose bounds come from [`#[use_type]`](./use_type
 registers cleanly, because those bounds stay on the provider's impl and its
 [`IsProviderFor`](../traits/wiring/is_provider_for.md) and are checked when a real context resolves it.
 
-Consumption is the mirror. A `for <T, Provider> in DefaultImpls1<Component> { … }` loop inside
+Consumption runs the other way. A `for <T, Provider> in DefaultImpls1<Component> { … }` loop inside
 [`delegate_components!`](../macros/delegate_components.md) emits a
 [`DelegateComponent`](../traits/wiring/delegate_component.md) impl whose `where` clause projects the default:
 

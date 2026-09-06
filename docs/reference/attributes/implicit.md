@@ -24,16 +24,16 @@ A call like `rect.rectangle_area()` does not require the arguments to be passed 
 `width` and `height` fields are automatically extracted from the `rect` value. Any type carrying a
 `width` and a `height` field can call it.
 
-`#[implicit]` gives better ergonomics than the alternatives, such as
+`#[implicit]` is shorter to write than the alternatives, such as
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) or the direct use of
-[`HasField`](../traits/field-access/has_field.md). With those, you declare that the context has each field and then
-fetch it by hand, so you have to understand the mechanism behind field access, such as how a type-level
-[`Symbol!`](../macros/symbol.md) and a `PhantomData` tag work. `#[implicit]` keeps all of that behind an
-argument that reads as `width: f64`, and the argument's *name* names the field.
+[`HasField`](../traits/field-access/has_field.md). With those, you declare that the context has each
+field and then fetch it by hand, so you have to understand the mechanism behind field access, such as
+how a type-level [`Symbol!`](../macros/symbol.md) and a `PhantomData` tag work. `#[implicit]` keeps
+all of that behind an argument that reads as `width: f64`, and the argument's *name* names the field.
 
-That is why it is the recommended way to read a context's own field, and why it is usually the first
-piece of CGP anyone writes. A reader who understands functions and arguments can write a working
-capability and meet the machinery later, when they have a reason to care.
+So `#[implicit]` is the recommended way to read a context's own field, and usually the first piece of
+CGP anyone writes. A reader who understands functions and arguments can write a working capability and
+meet the machinery later, when they have a reason to care.
 
 ## Usage
 
@@ -50,9 +50,9 @@ fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
 [`#[cgp_fn]`](../macros/cgp_fn.md) and the methods of a [`#[cgp_impl]`](../macros/cgp_impl.md) block. It
 is not a macro of its own, so it does nothing on an ordinary function.
 
-Three rules constrain where it may appear. The function must take `self` first, since the field is read
-from `self`. The argument must be a bare identifier, not a destructuring or `mut` pattern. And a
-**mutable** implicit argument carries two further requirements of its own, covered in
+The macro constrains where the attribute may appear. The function must take `self` first, since the
+field is read from `self`. The argument must be a bare identifier, not a destructuring or `mut`
+pattern. And a **mutable** implicit argument carries further requirements of its own, covered in
 [Mutable arguments](#mutable-arguments) below.
 
 ### How the argument's type decides the read
@@ -74,12 +74,12 @@ stored field. The table below is the whole mapping:
 | `Option<&mut str>` | `Option<String>` | `.as_deref_mut()` |
 | [`MRef<'a, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
 
-Three of those rows are easy to misread. `&str` is the case most often wanted and least obvious: the
-field is a `String`, and the argument borrows from it, so a context never has to store a `&str`. An
-owned argument *clones* the value. That is cheap for an `f64` and less so for a large `String`, which
-is a reason to take `&str` or `&T` wherever the body only needs to read. And `MRef` is the
-owned-or-borrowed form: it reads a plain `T` field, hands the body a value that may be either, and is
-the one reference-shaped row with no mutable counterpart.
+The rows for `&str`, for an owned type, and for `MRef` are the ones most easily misread. `&str` is the
+case most often wanted and least obvious: the field is a `String`, and the argument borrows from it, so
+a context never has to store a `&str`. An owned argument *clones* the value. That is cheap for an
+`f64` and less so for a large `String`, which is a reason to take `&str` or `&T` wherever the body only
+needs to read. And `MRef` is the owned-or-borrowed form: it reads a plain `T` field, hands the body a
+value that may be either, and is the one reference-shaped row with no mutable counterpart.
 
 The macro matches the `MRef` row by *shape* rather than by resolving the name: a single-segment `MRef`
 with one lifetime argument and one type argument. Anything else spelled `MRef` falls into the owned row
@@ -94,10 +94,9 @@ An implicit argument is mutable when its type carries a `&mut`: the outer refere
 reads through [`HasFieldMut`](../traits/field-access/has_field_mut.md) and `get_field_mut` rather than through
 [`HasField`](../traits/field-access/has_field.md) and `get_field`, so it borrows the field for writing.
 
-Two rules follow. A mutable argument requires a `&mut self` receiver, since a function cannot borrow a
-field mutably through a shared `&self`. And it must be the only implicit argument on its function,
-because reading one field mutably borrows the whole context exclusively and cannot coexist with any
-other field read.
+A mutable argument requires a `&mut self` receiver, since a function cannot borrow a field mutably
+through a shared `&self`. It must also be the only implicit argument on its function, because reading
+one field mutably borrows the whole context exclusively and cannot coexist with any other field read.
 
 Mutability follows the *argument's* type rather than the receiver's. An argument carrying a `&mut` reads
 mutably, and every other argument, an `MRef` included, reads through a shared borrow. A `&mut self`
@@ -132,7 +131,7 @@ pub fn print_area(rect: &Rectangle) {
 ```
 
 `Rectangle` derives [`HasField`](../derives/derive_has_field.md), which is its entire qualification.
-There is no wiring anywhere in this program.
+This program wires nothing.
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) provider the attribute behaves identically and mixes
 freely with the method's real arguments. The implicit ones vanish from the signature while `to` and
@@ -162,11 +161,11 @@ clone, so it suits a large value as well as a small one. A field that several pr
 declared as the same implicit argument in each of them, which costs nothing and keeps every provider's
 requirements visible where the provider is written.
 
-A **getter trait** is worth using in the three cases an implicit argument cannot reach.
+A **getter trait** covers the cases an implicit argument cannot reach.
 
 - **The field is on a different type.** An implicit argument reads only from `self`, so a value living on
   a request, a payload, or any other type needs a getter that can be demanded as a bound on *that* type.
-  There is no `self` field to read.
+  The value does not live on `self` at all.
 - **The accessor must be a named capability.** When other code depends on "this context can tell you its
   name" rather than on a field, that dependency needs a trait to point at, importable with
   [`#[uses]`](uses.md) or usable as a supertrait.
@@ -179,8 +178,8 @@ reach for it only when the *field a getter reads* should be chosen per context a
 
 ## Under the hood
 
-Each marked argument becomes two things: a field bound on the generated implementation, and a `let`
-binding at the top of the body. From this input:
+Each marked argument becomes a field bound on the generated implementation and a `let` binding at the
+top of the body. From this input:
 
 ```rust
 #[cgp_fn]
@@ -221,12 +220,12 @@ field name. The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form i
 `cargo cgp expand` resugars it back. The context parameter is literally `__Context__`, a reserved name
 chosen so it cannot collide with one of yours.
 
-Two shapes in the table above generate something other than a `Value = T` equality, which is worth
-recognizing because it reads oddly at first. A slice argument bounds the *associated type* instead, so
-`&[u8]` emits `HasField<Symbol!("slice"), Value: AsRef<[u8]> + 'static>`, so any field whose value can be
-viewed as a `[u8]` qualifies rather than one exact type. And every mutable form swaps the trait as well
-as the accessor: `&mut u64` emits `HasFieldMut<Symbol!("counter"), Value = u64>` and reads through
-`get_field_mut`.
+The slice rows and the mutable rows generate something other than a `Value = T` equality, which is
+worth recognizing because it reads oddly at first. A slice argument bounds the *associated type*
+instead, so `&[u8]` emits `HasField<Symbol!("slice"), Value: AsRef<[u8]> + 'static>`. Any field whose
+value can be viewed as a `[u8]` then qualifies, rather than one exact type. And every mutable form
+swaps the trait as well as the accessor: `&mut u64` emits
+`HasFieldMut<Symbol!("counter"), Value = u64>` and reads through `get_field_mut`.
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) block the rewrite is the same, except the bounds join
 that provider's `where` clause. One addition shows only in a multi-method block: the macro collects the

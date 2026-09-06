@@ -91,9 +91,9 @@ on a prefixed component is a foreign path.
 ### Choosing a prefix
 
 A prefix is part of the component's public surface, and expensive to change once wiring depends on
-it, so choose it for every implementation the component might have rather than for the one in front
-of you. Give components separate sub-paths whenever they are likely to need separate providers, even
-when the current wiring happens to treat them alike. Abstract types belong under a `types` sub-path
+it, so choose it for every implementation the component might have rather than for the one you are
+writing now. Give components separate sub-paths whenever they are likely to need separate providers,
+even when the current wiring happens to treat them alike. Abstract types belong under a `types` sub-path
 of their layer, such as `@app.auth.types`, because a production context typically points the logic
 under `@app.auth` at a database while leaving the types on the same concrete choices.
 
@@ -197,7 +197,7 @@ delegate_components! {
 
 **Reach for `#[prefix]` as soon as a wiring table has enough components that grouping helps a
 reader.** It costs nothing at the point of use, it is the one namespace tool without a downstream
-restriction, and it pays off at once in a table that reads as a directory listing. It is also the
+restriction, and the table it produces reads at once as a directory listing. It is also the
 form a library uses to publish its components into a shared namespace.
 
 Some situations call for something else.
@@ -236,9 +236,10 @@ The path is the prefix with the marker appended, a [`PathCons`](../types/path_co
 `cargo cgp expand` prints it as `Path!(@app.GreeterComponent)`, and a raw compiler error prints the
 underlying `PathCons<Symbol<3, Chars<'a', …>>, PathCons<GreeterComponent, Nil>>`.
 
-Resolution then runs in three hops. Joining the namespace emits, on the context, a blanket
-`DelegateComponent` impl whose `Delegate` is whatever the namespace answers, so asking `App` for
-`GreeterComponent` yields `RedirectLookup<App, Path!(@app.GreeterComponent)>`. That provider's impl
+Resolution then runs through the namespace, then the redirect, then the context's own table. Joining
+the namespace emits, on the context, a blanket `DelegateComponent` impl whose `Delegate` is whatever
+the namespace answers, so asking `App` for `GreeterComponent` yields
+`RedirectLookup<App, Path!(@app.GreeterComponent)>`. That provider's impl
 of `Greeter` looks the path up in `App`'s own table, as `App: DelegateComponent<Path!(...)>`, and
 forwards to the delegate it finds there, `GreetHello`. For a component with type parameters,
 `RedirectLookup` appends the parameters to the path before the lookup, which is why per-type entries
@@ -249,10 +250,10 @@ The impl has the same shape as a `=>` entry written in a namespace body:
 attribute lets the component's own crate contribute that entry, which a foreign crate could not write
 into the namespace's body.
 
-Two details are easy to misread. The namespace's key is the *marker*, not the path, so a `help:`
-list in an error names `GreeterComponent` as implementing the namespace trait even when the path it
-routes to is empty. And a component marker declared with generics through the `name:` key of
-`#[cgp_component]` carries those generics onto the impl after `__Components__`.
+The namespace's key is the *marker* rather than the path, which is easy to misread: a `help:` list in
+an error names `GreeterComponent` as implementing the namespace trait even when the path it routes
+to is empty. A component marker declared with generics through the `name:` key of
+`#[cgp_component]` also carries those generics onto the impl after `__Components__`.
 
 ## Formal grammar
 

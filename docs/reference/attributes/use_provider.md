@@ -48,7 +48,8 @@ a different choice and usually not what a higher-order provider wants.
 `AreaCalculator` is the provider trait it must satisfy. The trait may carry further arguments of its own,
 and the macro preserves those in order.
 
-Two forms cover more than one bound, and which you need depends on what is being multiplied.
+The form to use depends on whether one provider must satisfy several traits, or several providers must
+each satisfy one.
 
 **One provider, several traits: join them with `+`.**
 
@@ -146,7 +147,7 @@ pub fn rect_area(&self) -> f64 {
 preference to writing the bound by hand. You read the explicit `Inner: AreaCalculator<Self>` form in
 generated code and older wiring rather than write it.
 
-The choice against its neighbours is about *what* is being depended on, and one of the distinctions is
+The choice against its neighbours turns on *what* the implementation depends on, and one distinction is
 easy to miss because both spellings compile.
 
 - **A capability of the context** is [`#[uses]`](uses.md), which imports a consumer trait or an ordinary
@@ -154,16 +155,17 @@ easy to miss because both spellings compile.
   provider satisfies for the context.
 - **Whatever the context already chose** needs no attribute at all. Calling `self.area()` in the body
   routes through the context's own wiring, which is a *different dispatch* from
-  `InnerCalculator::area(self)`: the first asks the context, the second names an implementation
-  statically. Reach for `#[use_provider]` only when you want the second.
+  `InnerCalculator::area(self)`: the method call asks the context, and the associated-function call
+  names an implementation statically. Reach for `#[use_provider]` only when you want the named
+  implementation.
 - **A choice made per type rather than fixed** is dispatch rather than parameterization, so it belongs in
   the wiring: the `open` statement of [`delegate_components!`](../macros/delegate_components.md) maps each
   type to its own implementation.
 
-One ergonomic option is worth knowing when writing the provider struct by hand. Giving the parameter a
-default of [`UseContext`](../providers/use_context.md), as in `pub struct IterSum<Inner = UseContext>(...)`,
-makes an unparameterized `IterSum` fall back to the context's own wiring, so the wrapper can be dropped in
-without naming a base case.
+Giving the parameter a default of [`UseContext`](../providers/use_context.md), as in
+`pub struct IterSum<Inner = UseContext>(...)`, makes an unparameterized `IterSum` fall back to the
+context's own wiring, so the wrapper can be used without naming a base case. That option is worth
+knowing when writing the provider struct by hand.
 
 ## Under the hood
 
@@ -240,12 +242,12 @@ Both parts are required. `ProviderType` names the generic parameter the inner pr
 `ProviderBound` is the provider trait to require of it, written *without* its leading context argument,
 which the attribute inserts.
 
-Two restrictions follow from those productions and account for every parse failure this attribute
-produces. **`ProviderBound` is a path with plain generic arguments**, not a full `TypeParamBound`, so a
-turbofish or an associated-type binding in that position does not parse; a bound of that shape belongs in
-the block's own `where` clause. And **the argument holds exactly one provider**, because the
-`+`-separated bound list runs to the end of the attribute, so a comma after the first pair lands where a
-`+` was expected. That makes this attribute the one exception to the comma-separated convention its
+Those productions carry the restrictions that account for every parse failure this attribute produces.
+**`ProviderBound` is a path with plain generic arguments**, not a full `TypeParamBound`, so a turbofish
+or an associated-type binding in that position does not parse; a bound of that shape belongs in the
+block's own `where` clause. And **the argument holds exactly one provider**, because the `+`-separated
+bound list runs to the end of the attribute, so a comma after the first pair lands where a `+` was
+expected. That makes this attribute the one exception to the comma-separated convention its
 siblings follow: bind several inner providers by stacking one attribute each. See [Common Mistakes](#common-mistakes).
 
 ## Common Mistakes
@@ -264,8 +266,8 @@ Use one attribute per provider instead. This is the opposite of the convention f
 [`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), which do take comma-separated lists, so the habit
 transfers wrongly.
 
-**The provider and the trait are both required.** There is no bare form naming a provider alone, and
-omitting the bound reports the missing colon:
+**The provider and the trait are both required.** The attribute accepts no bare form naming a provider
+alone, and omitting the bound reports the missing colon:
 
 ```text
 error: expected `:`
@@ -274,7 +276,7 @@ error: expected `:`
    |                             ^
 ```
 
-**There is no call-site rewriting.** The attribute never turns `self.area()` into
+**The attribute does not rewrite call sites.** It never turns `self.area()` into
 `InnerCalculator::area(self)`, so a body that calls the method on `self` compiles but does something
 different: it dispatches through the context's own wiring rather than through the parameter. When the
 intent is to use the inner implementation, spell out the associated-function call.

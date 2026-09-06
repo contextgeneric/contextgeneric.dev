@@ -22,15 +22,14 @@ bare `Error`:
 #[use_type(HasErrorType.Error)]
 ```
 
-A method can then return `Result<String, Error>`, and the code that writes it is reused as is: it
-compiles whether the context chose `anyhow::Error`, `Box<dyn core::error::Error>`, or a plain `String` as
-its error type. The code never names any of those; the context does, in its wiring.
+A method can then return `Result<String, Error>`, and that method compiles unchanged whether the
+context chose `anyhow::Error`, `Box<dyn core::error::Error>`, or a plain `String` as its error type.
+The method never names any of those; the context does, in its wiring.
 
-`#[use_type]` reads like a `use` statement for a type, which is what it is, and
-[Under the hood](#under-the-hood) shows how the bare name resolves. It also has advanced forms a bare
-identifier could not express, covered [below](#importing-from-another-type): pinning the type to a
-concrete one, importing it from a parameter rather than the context, and tying two abstract types
-together.
+`#[use_type]` reads like a `use` statement for a type, and [Under the hood](#under-the-hood) shows how
+the bare name resolves. It also has advanced forms a bare identifier could not express, covered
+[below](#importing-from-another-type): pinning the type to a concrete one, importing it from a
+parameter rather than the context, and tying two abstract types together.
 
 ## Usage
 
@@ -67,8 +66,9 @@ a local alias:
 ```
 
 Stacking several `#[use_type]` attributes behaves identically, because the macro collects every
-attribute's entries into one list before it resolves any of them, so an alias declared in one is
-available to another regardless of which comes first. Reach for a second attribute only when there is a reason.
+attribute's entries into one list before it resolves any of them. So an alias declared in one is
+available to another regardless of which comes first. Reach for a second attribute only when there is
+a reason.
 
 ### Pinning a type to a concrete one
 
@@ -179,12 +179,11 @@ separates them.
 
 ## When to use it
 
-**Use `#[use_type]` whenever a definition names an abstract type another component supplies.** It is the
-recommended form; you read a hand-written supertrait plus `Self::`-qualified paths in existing code rather
-than write them.
+**Use `#[use_type]` whenever a definition names an abstract type another component supplies.** You read
+a hand-written supertrait plus `Self::`-qualified paths in existing code rather than write them.
 
-Its neighbours cover requirements that are not types, and one further construct is the one `#[use_type]`
-imports *from*.
+Its neighbours handle the requirements that are not types, and one of them declares the type this
+attribute imports.
 
 - **A capability** is [`#[uses]`](uses.md) for a private bound or [`#[extend]`](extend.md) for a
   supertrait. Reach for `#[extend]` specifically when the supertrait's methods matter and its associated
@@ -196,22 +195,22 @@ imports *from*.
   the shared name: the provider supplies a type to a context, and the attribute imports one into a
   definition.
 
-One boundary is worth stating plainly, because getting it wrong produces a confusing error. `#[use_type]`
-does not import a construct's **own** associated type, so it stays qualified as `Self::Output`. It
-rewrites only the names it was given, so a local type written bare resolves to nothing. A mixed signature
-such as `Result<Self::Output, Error>` is therefore correct and idiomatic: the local type qualified, the
-imported one bare.
+`#[use_type]` does not import a construct's **own** associated type, so it stays qualified as
+`Self::Output`. That boundary is worth stating plainly, because getting it wrong produces a confusing
+error. The attribute rewrites only the names it was given, so a local type written bare resolves to
+nothing. A mixed signature such as `Result<Self::Output, Error>` is therefore correct and idiomatic:
+the local type qualified, the imported one bare.
 
-Finally, prefer an inferred parameter over an abstract type when the type only ever flows through values
-the body reads: [`#[impl_generics]`](./impl_generics.md) on a `#[cgp_fn]` is shorter and needs no wiring.
+Prefer an inferred parameter over an abstract type when the type only ever flows through values the
+body reads: [`#[impl_generics]`](./impl_generics.md) on a `#[cgp_fn]` is shorter and needs no wiring.
 Climb to an abstract type when the type must be named in the capability's own signature, or when two
 capabilities have to
 [agree that they mean the same one](/docs/concepts/abstract-types#one-type-agreed-on-by-everything-that-needs-it).
 
 ## Under the hood
 
-`#[use_type]` runs before the surrounding macro, in three steps: it **grounds** each import's own type
-positions, **substitutes** every matching bare identifier, then **adds the bound**.
+`#[use_type]` runs before the surrounding macro: it **grounds** each import's own type positions,
+**substitutes** every matching bare identifier, then **adds the bound**.
 
 From this input:
 

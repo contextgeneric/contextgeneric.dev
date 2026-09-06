@@ -27,10 +27,10 @@ component that keeps it stays compatible with existing wiring. It is expected to
 ## Overview
 
 A component generic over a type parameter usually wants a different implementation per value of it:
-`Rectangle` handled one way, `Circle` another. Something has to look at the type and pick, and written by
-hand that dispatcher is an implementation of the provider trait that reads a lookup table, finds the entry
-for the type, and forwards every method to it. That code is mechanical, identical in shape for every
-component, differing only in which parameter is the key.
+`Rectangle` handled one way, `Circle` another. Something has to look at the type and pick. Written by
+hand, that dispatcher is an implementation of the provider trait that reads a lookup table, finds the
+entry for the type, and forwards every method to it. That code is mechanical, identical in shape for
+every component, differing only in which parameter is the key.
 
 `#[derive_delegate]` generates it:
 
@@ -42,14 +42,14 @@ pub trait CanCalculateArea<Shape> {
 }
 ```
 
-A **context**, the type the capability runs against and owns the wiring, then points the component at
-[`UseDelegate`](../providers/use_delegate.md) over a table naming one implementation per shape, and the
-generated dispatcher does the lookup.
+A **context**, the type the capability runs against, which also owns the wiring, then points the
+component at [`UseDelegate`](../providers/use_delegate.md) over a table naming one implementation per
+shape, and the generated dispatcher does the lookup.
 
 `open` replaced this because the indirection turned out to be unnecessary. Every
 [`#[cgp_component]`](../macros/cgp_component.md) already generates a
 [`RedirectLookup`](../providers/redirect_lookup.md) impl, and `open` routes through that instead, so the
-per-type entries live on the context itself, there is no second table type to name, and the component
+per-type entries live on the context itself, the wiring names no second table type, and the component
 needs no attribute at all.
 
 ## Usage
@@ -155,16 +155,16 @@ delegate_components! {
 }
 ```
 
-No wrapper, no second table type, and nothing on the component. The two forms dispatch on the same
-parameter and resolve to the same implementations.
+This form needs no wrapper, no second table type, and nothing on the component. The two forms dispatch
+on the same parameter and resolve to the same implementations.
 
 ## When to use it
 
 **Do not add `#[derive_delegate]` to a new component.** Use the `open` statement of
 [`delegate_components!`](../macros/delegate_components.md), which needs no attribute and no table type.
-That is the recommendation without qualification for new code.
 
-A few situations still involve it, and only one is a reason to write it.
+A few situations still involve the attribute, and only the dispatcher that `open` cannot express is a
+reason to write it.
 
 - **Keeping compatibility with existing wiring.** The attribute makes
   `UseDelegate<new Table { … }>` wiring possible, so removing it from a published component is a breaking
@@ -204,11 +204,12 @@ names something that is itself a provider for that `Shape`, and the method simpl
 same trait ordinary wiring is made of, which is why you write the table with
 [`delegate_components!`](../macros/delegate_components.md) like any other.
 
-Two details of the real output are worth recognizing. **The key is wrapped in a tuple**, as
-`DelegateComponent<(Shape), …>`, so that a single-parameter key and a multi-parameter one compose
-uniformly: a `UseDelegate<(Code, Input)>` declaration produces `DelegateComponent<(Code, Input), …>` with
-no other change. And the generics carry reserved names: the table is `__Components__` and the looked-up
-entry `__Delegate__`, alongside the provider trait's own `__Context__`.
+The tuple key and the reserved generic names are worth recognizing in the real output. **The key is
+wrapped in a tuple**, as `DelegateComponent<(Shape), …>`, so that a single-parameter key and a
+multi-parameter one compose uniformly: a `UseDelegate<(Code, Input)>` declaration produces
+`DelegateComponent<(Code, Input), …>` with no other change. And the generics carry reserved names: the
+table is `__Components__` and the looked-up entry `__Delegate__`, alongside the provider trait's own
+`__Context__`.
 
 **A component's supertraits carry into the dispatcher.** The provider trait records each supertrait as a
 `Context:` predicate, and because the dispatcher reuses the provider trait's generics that predicate
@@ -260,8 +261,8 @@ there is nothing for it to do.
 **One component gets one dispatch mechanism.** Wiring the same component both with `open` and with a
 `UseDelegate` table is a coherence conflict, because each produces its own table entry for that key. A
 wiring entry expands to two impls, and both of them collide, so the compiler reports the conflict twice, once
-for `IsProviderFor` and once for `DelegateComponent`. The second is the readable one, since its trait
-argument names the component at issue:
+for `IsProviderFor` and once for `DelegateComponent`. The `DelegateComponent` report is the readable
+one, since its trait argument names the component at issue:
 
 ```text
 error[E0119]: conflicting implementations of trait `DelegateComponent<AreaCalculatorComponent>`

@@ -123,8 +123,8 @@ repeat `Name: Display`, and pass the parameter on to everything that calls it.
 
 **Start with `#[impl_generics]` for a type that only ever flows through implicit arguments.** It is
 the shortest form, it does not need wiring, and it reads as "this works with any `name` field of a
-compatible type". Two conditions force a climb to an abstract type, and each is about needing to
-*name* the type somewhere the inferred form cannot reach.
+compatible type". You must climb to an abstract type once the type has to be *named* somewhere the
+inferred form cannot reach.
 
 - **The type appears in the capability's signature.** An impl-only parameter is not in scope on the
   trait, so a return type or an explicit parameter cannot mention it. This condition arrives the
@@ -139,7 +139,7 @@ In both cases declare the type with [`#[cgp_type]`](../macros/cgp_type.md), impo
 condition with a generic parameter on the function. Such a parameter lands on the trait, so every
 caller and every intermediate capability must declare it and repeat its bounds whether they touch it
 or not. It also misplaces the decision: `<Db>` on a trait says the caller chooses the database type,
-when the application determines it.
+though the application determines it.
 
 Some neighbours cover what this attribute is not for.
 

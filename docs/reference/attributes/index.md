@@ -16,16 +16,16 @@ is the fuller map, for once the essentials are familiar.
 
 ## Reading a value from the context
 
-[`#[implicit]`](./implicit.md) is the one almost every provider uses, and usually the first piece of CGP
-anyone writes. It marks a function argument that the macro reads from a same-named field on the context
-rather than from the caller, so a provider that needs a value reads like an ordinary function that takes
-it.
+[`#[implicit]`](./implicit.md) marks a function argument that the macro reads from a same-named field
+on the context, the type the capability runs against, rather than from the caller. A provider that needs
+a value then reads like an ordinary function that takes it. Almost every provider uses the attribute,
+and it is usually the first piece of CGP anyone writes.
 
 ## Importing a dependency
 
 These attributes declare what an implementation depends on, each reading like an import. Most
-dependencies belong on the implementation, out of sight of callers, and two of the attributes put one on
-the generated trait instead, for when every caller must rely on it.
+dependencies belong on the implementation, out of sight of callers, and `#[extend]` and
+`#[extend_where]` put one on the generated trait instead, for when every caller must rely on it.
 
 [`#[uses]`](./uses.md) imports a consumer trait, or an ordinary Rust trait, that the context must
 satisfy, which is the common case. [`#[use_type]`](./use_type.md) imports an abstract type another
@@ -47,7 +47,7 @@ implicit argument reads. It is the first form to reach for when a body needs a t
 
 ## Registering into a namespace
 
-Two attributes let a definition register itself into a [namespace](/docs/concepts/namespaces) at the
+These attributes let a definition register itself into a [namespace](/docs/concepts/namespaces) at the
 point where it is written, rather than in the namespace's own body. [`#[prefix]`](./prefix.md) goes on
 a component and routes it under a path prefix, so contexts that join the namespace address it by that
 path and a wiring table reads as a tree. [`#[default_impl]`](./default_impl.md) goes on a provider and

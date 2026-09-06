@@ -11,8 +11,8 @@ Add `where` predicates to a generated trait's own definition, not just to its im
 
 A [`#[cgp_fn]`](../macros/cgp_fn.md) treats the `where` clause you write on the function as an
 implementation detail: the bounds land on the generated implementation and never appear on the generated
-trait. That default keeps a capability's requirements out of sight of its callers, and it is right almost
-always.
+trait. That default keeps a capability's requirements out of sight of its callers, and it is almost
+always right.
 
 The cost is that an unsatisfiable requirement becomes invisible. A bound on the implementation only
 decides which **contexts** the implementation covers, a context being the type the capability runs
@@ -25,17 +25,17 @@ condition of naming the trait at all:
 #[extend_where(Scalar: Clone)]
 ```
 
-The distinction is worth being exact about, because it is easy to get backwards. Promoting a predicate
-does **not** hand it to callers. A trait's `where` clause is a precondition they must prove, not a
-guarantee they receive, so a caller naming the trait still writes the bound themselves. Promotion changes
-two things: callers are now *made* to write the bound, and getting it wrong is reported against the trait
-rather than deferred.
+Promoting a predicate does **not** hand it to callers, and the distinction is worth being exact about,
+because it is easy to get backwards. A trait's `where` clause is a precondition they must prove, not a
+guarantee they receive, so a caller naming the trait still writes the bound themselves. Promotion
+instead makes callers write the bound, and reports a wrong one against the trait rather than deferring
+it.
 
-It is the `where`-clause sibling of [`#[extend]`](extend.md). Both put a requirement into the trait's
-public interface; they differ in position, and in what the reader gets. `#[extend]` adds a **supertrait**,
-a bound on `Self`, which callers do receive by elaboration. `#[extend_where]` adds a **predicate**, which
-can bound anything, most usefully one of the trait's own generic parameters, which a supertrait cannot
-reach.
+`#[extend_where]` is the `where`-clause sibling of [`#[extend]`](extend.md). Both put a requirement into
+the trait's public interface; they differ in position, and in what the reader gets. `#[extend]` adds a
+**supertrait**, a bound on `Self`, which callers do receive by elaboration. `#[extend_where]` adds a
+**predicate**, which can bound anything, most usefully one of the trait's own generic parameters, which
+a supertrait cannot reach.
 
 ## Usage
 
@@ -52,7 +52,7 @@ verbatim, and keeps it on the implementation as well.
 
 **`#[extend_where]` is supported only on [`#[cgp_fn]`](../macros/cgp_fn.md).** It has no meaning on
 [`#[cgp_impl]`](../macros/cgp_impl.md) or [`#[cgp_component]`](../macros/cgp_component.md), because in
-those the `where` clause you write is already part of the definition. There is nothing to promote, so
+those the `where` clause you write is already part of the definition. Nothing needs promoting, so
 write the bound as an ordinary `where` clause directly.
 
 ## Examples
@@ -73,9 +73,9 @@ where
 }
 ```
 
-Two bounds, two destinations. The macro promotes `Scalar: Clone` onto the trait, so the compiler checks
-it wherever `Scale<Scalar>` is named. `Scalar: Mul<Output = Scalar>` stays on the implementation, because
-multiplication is a detail of how *this* body computes a scale and no use site needs to know it.
+Each bound has its own destination. The macro promotes `Scalar: Clone` onto the trait, so the compiler
+checks it wherever `Scale<Scalar>` is named. `Scalar: Mul<Output = Scalar>` stays on the implementation,
+because multiplication is a detail of how *this* body computes a scale and no use site needs to know it.
 
 The promotion's effect is visible at the boundary. The compiler rejects a caller that names the
 capability for a type it cannot satisfy, at the place the bound is written, and names the trait that
@@ -96,7 +96,7 @@ where
 all: `Ctx: Scale<NoClone>` is simply a bound no type can ever prove, and nothing says so until somebody
 tries to call `scale_it` with a concrete context. The attribute exists to remove that silence.
 
-A caller who *can* satisfy the predicate states it as usual, and there is no way around stating it:
+A caller who *can* satisfy the predicate states it as usual, and cannot avoid stating it:
 
 ```rust
 pub fn scale_it<Ctx, Scalar>(ctx: &Ctx) -> Scalar
@@ -119,7 +119,7 @@ The useful test is who the bound is *about*. A bound describing how the body com
 the implementation. A bound describing what the capability requires of its own type parameters, something
 that would be part of the signature if you were writing the trait by hand, belongs on the trait.
 
-Other constructs cover what this attribute should not be used for.
+Other constructs carry the requirements that belong elsewhere.
 
 - **A bound on `Self`** is a supertrait, so use [`#[extend]`](extend.md). `#[extend_where]` can express it,
   but a supertrait reads as what it is, and unlike a predicate it *is* handed to callers by elaboration.
@@ -157,10 +157,11 @@ where
 The trait carries only the promoted predicate; the function's own bound is absent from it, which is the
 default this attribute overrides.
 
-The implementation carries three, and their **order is fixed**: the function's own `where` clause first,
-then whatever the attributes contribute, then the [`HasField`](../traits/field-access/has_field.md) bounds from
-[`#[implicit]`](implicit.md) arguments, which are always appended last. That order is worth knowing when
-reading a long `where` clause in an expansion, since it tells you where each bound came from.
+The implementation carries all of them, and their **order is fixed**: the function's own `where` clause
+first, then whatever the attributes contribute, then the
+[`HasField`](../traits/field-access/has_field.md) bounds from [`#[implicit]`](implicit.md) arguments,
+which are always appended last. That order is worth knowing when reading a long `where` clause in an
+expansion, since it tells you where each bound came from.
 
 The context parameter is literally `__Context__` in the emitted code and appears as `Self` inside the
 implementation.

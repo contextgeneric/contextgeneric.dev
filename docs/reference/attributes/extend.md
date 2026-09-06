@@ -18,9 +18,10 @@ must also satisfy it, and every caller may rely on it.
 #[extend(HasName)]
 ```
 
-The clearest way to hold the pair apart is that **`#[extend]` is the `pub use` to `#[uses]`'s `use`**.
-Both take the same syntax and both read as imports, but one imports a capability for the implementation's
-own use and keeps it out of sight, while the other re-exports it as part of the contract.
+**`#[extend]` is the `pub use` to `#[uses]`'s `use`**, which is the clearest way to tell the pair apart.
+Both take the same syntax and both read as imports. But `#[uses]` imports a capability for the
+implementation's own use and keeps it out of sight, where `#[extend]` re-exports it as part of the
+contract.
 
 That framing is also why `#[extend]` is preferred over Rust's native supertrait syntax on a
 [`#[cgp_component]`](../macros/cgp_component.md). Writing `pub trait CanGreet: HasName` reads as
@@ -125,10 +126,10 @@ else when the requirement belongs elsewhere, and the choice turns on where it sh
   on `Self`. Use [`#[extend_where]`](extend_where.md), which puts it on the generated trait's own `where`
   clause.
 
-Weigh one cost before promoting anything. A supertrait widens the contract permanently: you cannot later
-narrow it without breaking every implementor, and it demands the capability from contexts that only ever
-call the one method the trait actually declares. Prefer `#[uses]` unless callers genuinely need the
-guarantee.
+A supertrait widens the contract permanently, and that is the cost to weigh before promoting anything.
+You cannot later narrow it without breaking every implementor, and it demands the capability from
+contexts that only ever call the one method the trait actually declares. Prefer `#[uses]` unless callers
+genuinely need the guarantee.
 
 ## Under the hood
 
@@ -159,8 +160,8 @@ where
 ```
 
 Callers see the supertrait, and the predicate on the implementation lets the body call the methods.
-Compare [`#[uses]`](uses.md), which emits only the second of those two and leaves the trait declaration
-bare. That single difference is the whole of the distinction.
+Compare [`#[uses]`](uses.md), which emits only the predicate and leaves the trait declaration bare.
+That single difference is the whole of the distinction.
 
 On a `#[cgp_component]` the supertrait goes on the consumer trait, and it also joins the `where` clause of
 the generated consumer blanket implementation, since that implementation can only apply where the
@@ -183,9 +184,9 @@ where
 ```
 
 Here the result is identical to `pub trait CanGreet: HasName`, so on a component
-`#[extend]` generates nothing the language cannot already spell. It remains the preferred form for the
-reason given above: it presents the bound as an import rather than as inheritance, and it keeps the
-`use`/`pub use` pairing with `#[uses]` reading consistently across both macros.
+`#[extend]` generates nothing the language cannot already spell. It remains the preferred form because
+it presents the bound as an import rather than as inheritance, and because it keeps the `use`/`pub use`
+pairing with `#[uses]` reading consistently across both macros.
 
 ## Formal grammar
 
