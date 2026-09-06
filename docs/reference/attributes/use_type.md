@@ -183,7 +183,7 @@ separates them.
 recommended form; you read a hand-written supertrait plus `Self::`-qualified paths in existing code rather
 than write them.
 
-Two neighbours cover requirements that are not types, and one further construct is the one `#[use_type]`
+Its neighbours cover requirements that are not types, and one further construct is the one `#[use_type]`
 imports *from*.
 
 - **A capability** is [`#[uses]`](uses.md) for a private bound or [`#[extend]`](extend.md) for a

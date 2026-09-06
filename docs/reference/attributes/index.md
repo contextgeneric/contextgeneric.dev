@@ -11,8 +11,8 @@ An attribute here is a modifier, not a macro of its own. Each one is an option a
 generates. This page groups every attribute in this section by the job it does, in roughly the order
 most CGP code reaches for them.
 
-If you are new to CGP, start with the [reference overview](/docs/reference/) rather than here; this page
-is the fuller map for once the essentials are familiar.
+If you are new to CGP, start with the [reference overview](/docs/reference/) rather than here. This page
+is the fuller map, for once the essentials are familiar.
 
 ## Reading a value from the context
 

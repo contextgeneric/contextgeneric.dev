@@ -276,7 +276,7 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 - [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — the getter form, for the cases above.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — a getter whose source field is chosen by wiring.
 - [`#[uses]`](uses.md) — imports a capability rather than a value.
-- [`#[use_type]`](use_type.md) — imports a type rather than a value; the third of the three.
+- [`#[use_type]`](use_type.md) — imports a type rather than a value.
 - [`Symbol!`](../macros/symbol.md) — the type-level field name the bounds are keyed on.
 
 The ideas behind it:

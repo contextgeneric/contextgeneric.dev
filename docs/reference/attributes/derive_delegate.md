@@ -9,7 +9,7 @@ Generate the `UseDelegate` dispatcher impl for a component. Superseded by the `o
 
 :::info
 
-### Legacy — read, don't write
+### Legacy: read, don't write
 
 `#[derive_delegate]` and the [`UseDelegate`](../providers/use_delegate.md) provider it generates are the
 older way to choose an implementation per type. A component no longer needs this attribute to be
@@ -164,7 +164,7 @@ parameter and resolve to the same implementations.
 [`delegate_components!`](../macros/delegate_components.md), which needs no attribute and no table type.
 That is the recommendation without qualification for new code.
 
-Three situations still involve it, and only the first is a reason to write it.
+A few situations still involve it, and only one is a reason to write it.
 
 - **Keeping compatibility with existing wiring.** The attribute makes
   `UseDelegate<new Table { … }>` wiring possible, so removing it from a published component is a breaking

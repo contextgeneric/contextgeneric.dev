@@ -119,7 +119,7 @@ The useful test is who the bound is *about*. A bound describing how the body com
 the implementation. A bound describing what the capability requires of its own type parameters, something
 that would be part of the signature if you were writing the trait by hand, belongs on the trait.
 
-Three neighbours cover what this attribute should not be used for.
+Other constructs cover what this attribute should not be used for.
 
 - **A bound on `Self`** is a supertrait, so use [`#[extend]`](extend.md). `#[extend_where]` can express it,
   but a supertrait reads as what it is, and unlike a predicate it *is* handed to callers by elaboration.

@@ -240,10 +240,10 @@ PathSegment     -> Type
 NamespacePath   -> TypePath GenericArgs?
 ```
 
-`Key` is either a Rust `Type`, which becomes the emitted impl's `Self`, or a `Path`, which is
-[`Path!`](../macros/path.md)'s own production and lowers to a `PathCons` list in the same position; the
-leading `@` tells them apart. `NamespacePath` is the lookup trait with its leading generic arguments
-written out. The table parameter is appended by the macro and must not be given. Each attribute takes
+`Key` is either a Rust `Type` or a `Path`, and the leading `@` tells them apart. A `Type` becomes the
+emitted impl's `Self`. A `Path` is [`Path!`](../macros/path.md)'s own production and lowers to a
+`PathCons` list in the same position. `NamespacePath` is the lookup trait with its leading generic
+arguments written out. The table parameter is appended by the macro and must not be given. Each attribute takes
 exactly one such argument, and the attribute may be repeated.
 
 ## Common Mistakes
@@ -252,8 +252,8 @@ exactly one such argument, and the attribute may be repeated.
 and the trait's positions follow. The parameter names on
 [`DefaultImpls1`](../traits/namespace/default_impls1.md) suggest otherwise.
 
-**Do not write the table parameter.** The macro appends it; supplying it yourself makes the path's arity
-wrong.
+**Do not write the table parameter.** The macro appends it, so supplying it yourself makes the path's
+arity wrong.
 
 **On a prefixed component it is confined to the namespace's crate**, by the orphan rule. This is not
 something to work around: put the wiring in the namespace body instead.

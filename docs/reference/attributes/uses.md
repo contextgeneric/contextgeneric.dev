@@ -26,7 +26,7 @@ imports a trait the context itself must satisfy.
 The requirement stays private to the implementation. A caller who depends on the capability never sees
 it and never has to repeat it, which is the point of declaring the dependency where the implementation
 lives rather than on its public interface. Preferring `#[uses]` over a hand-written bound is the
-recommendation; the equivalent `where` clause is the older form you meet in existing code, and
+recommendation. The equivalent `where` clause is the older form you meet in existing code, and
 [Under the hood](#under-the-hood) shows the two desugar identically.
 
 ## Usage
@@ -114,7 +114,7 @@ This provider is a two-line adapter: it satisfies the `AreaCalculator` component
 ## When to use it
 
 **Use `#[uses]` for every capability dependency**, in preference to writing the `Self:` bound by hand.
-That is the recommendation; you read the hand-written form in existing code rather than write it.
+That is the recommendation. You read the hand-written form in existing code rather than write it.
 
 Two questions decide between `#[uses]` and its neighbours: *what* is being depended on, and *where the
 requirement should be visible*.

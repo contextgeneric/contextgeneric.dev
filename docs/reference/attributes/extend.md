@@ -30,7 +30,7 @@ same trait, so this is a choice about how the definition reads.
 
 On [`#[cgp_fn]`](../macros/cgp_fn.md) the attribute is not merely preferred but necessary. The `#[cgp_fn]`
 macro treats a `where` clause you write as an implementation detail and never puts it on the generated
-trait, so there is no way to spell a supertrait by hand. `#[extend]` is the only mechanism for one.
+trait, so you cannot spell a supertrait by hand. `#[extend]` is the only mechanism for one.
 
 ## Usage
 
@@ -114,7 +114,7 @@ available, and so may every caller.
 
 **Reach for `#[extend]` when callers of the trait should be able to rely on the capability too**, and for
 a capability supertrait on a `#[cgp_component]` in preference to native `:` syntax. Reach for something
-else in three cases, and the choice turns on where the requirement should be visible.
+else when the requirement belongs elsewhere, and the choice turns on where it should be visible.
 
 - **The implementation needs it privately.** Use [`#[uses]`](uses.md). This is the common case by a wide
   margin: most dependencies are private to the implementation, and putting one on the trait forces it on
