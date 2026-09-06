@@ -5,8 +5,8 @@ sidebar_position: 1
 
 # `PhantomData`
 
-The standard-library marker that lets a type carry a type parameter it stores no value of. It is what
-makes CGP's zero-sized providers and type-level markers legal, and it is the token you pass to hand a
+The standard-library marker that lets a type carry a type parameter it stores no value of. It makes
+CGP's zero-sized providers and type-level markers legal, and it is the token you pass to hand a
 type to a function.
 
 ## Overview
@@ -67,7 +67,7 @@ one by writing `PhantomData`, and you name the type it carries with a turbofish 
 as in `PhantomData::<u32>`.
 
 Because the type parameter is recorded but no value of it is stored, `PhantomData<T>` also tells the
-compiler how the surrounding type relates to `T` for three purposes beyond the "used parameter" rule:
+compiler how the surrounding type relates to `T`, beyond the "used parameter" rule: it sets
 **variance** (whether a longer lifetime may stand in for a shorter one), **drop checking**, and the
 **auto traits** such as `Send` and `Sync`. Most CGP markers do not care which relationship they get and
 use the plain `PhantomData<T>`. The exception is [`Life`](life.md), which wraps its lifetime as
@@ -86,7 +86,7 @@ its type-level name tag in a `PhantomData<Tag>` beside the one real value it sto
 parameter is part of the type's identity and nothing the type keeps at run time.
 
 **On the passing side, `PhantomData::<T>` is a zero-sized value that hands the type `T` to a
-function.** A method that must know which field, which code, or which tag is meant takes a
+function.** A method that must know which field, which computation, or which tag is meant takes a
 `PhantomData<T>` argument, and the caller supplies the type through it:
 
 ```rust
@@ -177,22 +177,22 @@ fails to compile with `error[E0392]` without one.
 
 ## Related constructs
 
-- [`Field`](field.md) — holds its type-level name tag in a `PhantomData<Tag>` beside its value.
-- [`Life`](life.md) — a lifetime lifted into a type through a deliberately invariant `PhantomData`.
-- [`Chars`](chars.md) and [`PathCons`](path_cons.md) — recursive type-level lists whose tails are
+- [`Field`](field.md): holds its type-level name tag in a `PhantomData<Tag>` beside its value.
+- [`Life`](life.md): a lifetime lifted into a type through a deliberately invariant `PhantomData`.
+- [`Chars`](chars.md) and [`PathCons`](path_cons.md): recursive type-level lists whose tails are
   `PhantomData` markers.
-- [`Symbol!`](../macros/symbol.md) and [`Index`](index_type.md) — the tags a `PhantomData::<Tag>`
+- [`Symbol!`](../macros/symbol.md) and [`Index`](index_type.md): the tags a `PhantomData::<Tag>`
   argument usually carries.
-- [`HasField`](../traits/field-access/has_field.md) — whose `get_field` takes the tag as a
+- [`HasField`](../traits/field-access/has_field.md): whose `get_field` takes the tag as a
   `PhantomData` argument.
-- [`#[cgp_new_provider]`](../macros/cgp_provider.md) — declares a provider struct's `PhantomData` field
+- [`#[cgp_new_provider]`](../macros/cgp_provider.md): declares a provider struct's `PhantomData` field
   for you.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — where the zero-sized
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): where the zero-sized
   provider structs that carry `PhantomData` come from.
-- [Type-level DSLs](/docs/concepts/type-level-dsls) — encoding a program as types, which is why a type
+- [Type-level DSLs](/docs/concepts/type-level-dsls): encoding a program as types, which is why a type
   gets passed as a value at all.
 
 ## Source

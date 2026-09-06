@@ -122,19 +122,19 @@ the same terminator doing the same job it does for a record, not a sign the two 
 
 ## Related constructs
 
-- [`Nil`](nil.md) — the end marker that terminates a `PathCons` chain.
-- [`Cons`](cons.md) — the product list this one parallels, whose elements are sized values rather than
+- [`Nil`](nil.md): the end marker that terminates a `PathCons` chain.
+- [`Cons`](cons.md): the product list this one parallels, whose elements are sized values rather than
   `?Sized` markers.
-- [`Chars`](chars.md) — the [`Symbol`](chars.md) segments a path is built from.
-- [`Path!`](../macros/path.md) — the macro that folds `@`-segments onto this list.
-- [`ConcatPath`](../traits/formatting/concat_path.md) — appends one path onto another.
-- [`RedirectLookup`](../providers/redirect_lookup.md) — walks a path against a table at resolution
+- [`Chars`](chars.md): the [`Symbol`](chars.md) segments a path is built from.
+- [`Path!`](../macros/path.md): the macro that folds `@`-segments onto this list.
+- [`ConcatPath`](../traits/formatting/concat_path.md): appends one path onto another.
+- [`RedirectLookup`](../providers/redirect_lookup.md): walks a path against a table at resolution
   time.
-- [`cgp_namespace!`](../macros/cgp_namespace.md) — emits these paths to reroute and register entries.
+- [`cgp_namespace!`](../macros/cgp_namespace.md): emits these paths to reroute and register entries.
 
 The ideas behind it:
 
-- [Namespaces](/docs/concepts/namespaces) — where a path routes a component lookup through a reusable
+- [Namespaces](/docs/concepts/namespaces): where a path routes a component lookup through a reusable
   table.
 
 ## Source

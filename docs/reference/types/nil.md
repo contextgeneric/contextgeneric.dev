@@ -13,7 +13,7 @@ The end marker of the product, string, and path lists: an empty, constructible l
 the rest of the list, `Nil` is the rest when there is nothing left, so a list of any length is a `Cons`
 chain that finishes in `Nil`. On its own, `Nil` is the empty list.
 
-The same marker terminates three of CGP's four lists. It ends the product list built from
+The same marker terminates every CGP list but one. It ends the product list built from
 [`Cons`](cons.md), the string list built from [`Chars`](chars.md), and the path list built from
 [`PathCons`](path_cons.md). Only the sum list ends differently, in the uninhabited [`Void`](void.md),
 and that difference is the point of both markers: a record, a string, and a path can each be empty and
@@ -91,14 +91,14 @@ seeing it outside a record is expected.
 
 ## Related constructs
 
-- [`Cons`](cons.md) — the head-and-tail cell this marker terminates in a record.
-- [`Void`](void.md) — the sum list's uninhabited end marker, the counterpart to this one.
-- [`Chars`](chars.md) and [`PathCons`](path_cons.md) — the string and path lists `Nil` also terminates.
-- [`Product!`](../macros/product.md) — the macro whose empty form is `Nil`.
+- [`Cons`](cons.md): the head-and-tail cell this marker terminates in a record.
+- [`Void`](void.md): the sum list's uninhabited end marker, the counterpart to this one.
+- [`Chars`](chars.md) and [`PathCons`](path_cons.md): the string and path lists `Nil` also terminates.
+- [`Product!`](../macros/product.md): the macro whose empty form is `Nil`.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where the empty and terminating record shape
+- [Extensible records](/docs/concepts/extensible-records): where the empty and terminating record shape
   matters.
 
 ## Source

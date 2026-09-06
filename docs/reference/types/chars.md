@@ -16,7 +16,7 @@ for the string `"name"` at the type level, so the compiler can match one
 [`HasField`](../traits/field-access/has_field.md) impl against another purely from the tag. A `Chars`
 chain is how the string becomes a type, and a `Symbol` wrapping that chain is the tag itself.
 
-The reason the encoding is a *list of characters* is a limit in stable Rust: a `String` or `&str` cannot
+The encoding is a *list of characters* because of a limit in stable Rust: a `String` or `&str` cannot
 be a const-generic parameter, but a single `char` can. So CGP spells the string out one character at a
 time through a recursive `Chars` list, terminated by [`Nil`](nil.md), the same way the product list
 spells out its elements through [`Cons`](cons.md). `Chars` is the specialized form of `Cons` in which the
@@ -115,20 +115,20 @@ a `const char`, so it cannot carry arbitrary element types the way a product lis
 
 ## Related constructs
 
-- [`Nil`](nil.md) — the end marker that terminates a `Chars` chain.
-- [`Cons`](cons.md) — the general product list this one specializes, with a type head rather than a
+- [`Nil`](nil.md): the end marker that terminates a `Chars` chain.
+- [`Cons`](cons.md): the general product list this one specializes, with a type head rather than a
   `const char`.
-- [`Symbol!`](../macros/symbol.md) — the macro that folds a string into a `Chars` chain and wraps it.
+- [`Symbol!`](../macros/symbol.md): the macro that folds a string into a `Chars` chain and wraps it.
 - [`StaticFormat`](../traits/formatting/static_format.md) and
-  [`StaticString`](../traits/formatting/static_string.md) — recover the runtime string and the const
+  [`StaticString`](../traits/formatting/static_string.md): recover the runtime string and the const
   from the chain.
-- [`HasField`](../traits/field-access/has_field.md) — matches a field against its `Symbol!` tag.
-- [`Field`](field.md) — carries a `Symbol!` tag beside its value.
-- [`Index`](index_type.md) — the position tag for a tuple field, the numeric counterpart.
+- [`HasField`](../traits/field-access/has_field.md): matches a field against its `Symbol!` tag.
+- [`Field`](field.md): carries a `Symbol!` tag beside its value.
+- [`Index`](index_type.md): the position tag for a tuple field, the numeric counterpart.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where field-name tags are used at scale.
+- [Extensible records](/docs/concepts/extensible-records): where field-name tags are used at scale.
 
 ## Source
 

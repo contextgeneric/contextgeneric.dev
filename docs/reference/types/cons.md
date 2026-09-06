@@ -123,17 +123,17 @@ empty form is the uninhabited [`Void`](void.md). An empty record exists; an empt
 
 ## Related constructs
 
-- [`Nil`](nil.md) — the end marker that terminates this list.
-- [`Either`](either.md) and [`Void`](void.md) — the sum list, the choice-shaped dual of this one.
-- [`Chars`](chars.md) — the same list specialized to a `const char` head.
-- [`Product!`](../macros/product.md) — the macro that folds elements onto this list.
-- [`Field`](field.md) — what the elements usually are, pairing a name with a value.
-- [`HasFields`](../traits/shape/has_fields.md) — exposes a struct's shape as one of these lists.
-- [`#[derive(HasFields)]`](../derives/derive_has_fields.md) — generates that list for a struct.
+- [`Nil`](nil.md): the end marker that terminates this list.
+- [`Either`](either.md) and [`Void`](void.md): the sum list, the choice-shaped dual of this one.
+- [`Chars`](chars.md): the same list specialized to a `const char` head.
+- [`Product!`](../macros/product.md): the macro that folds elements onto this list.
+- [`Field`](field.md): what the elements usually are, pairing a name with a value.
+- [`HasFields`](../traits/shape/has_fields.md): exposes a struct's shape as one of these lists.
+- [`#[derive(HasFields)]`](../derives/derive_has_fields.md): generates that list for a struct.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — the record representation this list encodes.
+- [Extensible records](/docs/concepts/extensible-records): the record representation this list encodes.
 
 ## Source
 

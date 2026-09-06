@@ -127,16 +127,16 @@ it might, but the types still differ.
 
 ## Related constructs
 
-- [`Void`](void.md) — the uninhabited end marker that terminates this list.
-- [`Cons`](cons.md) and [`Nil`](nil.md) — the product list, the record-shaped dual of this one.
-- [`Sum!`](../macros/sum.md) — the macro that folds element types onto this list.
-- [`Field`](field.md) — what the branches usually are, pairing a variant name with its payload.
-- [`HasFields`](../traits/shape/has_fields.md) — exposes an enum's shape as one of these lists.
-- [`ExtractField`](../traits/variant/extract_field.md) — the extractor family that walks this list.
+- [`Void`](void.md): the uninhabited end marker that terminates this list.
+- [`Cons`](cons.md) and [`Nil`](nil.md): the product list, the record-shaped dual of this one.
+- [`Sum!`](../macros/sum.md): the macro that folds element types onto this list.
+- [`Field`](field.md): what the branches usually are, pairing a variant name with its payload.
+- [`HasFields`](../traits/shape/has_fields.md): exposes an enum's shape as one of these lists.
+- [`ExtractField`](../traits/variant/extract_field.md): the extractor family that walks this list.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — the variant representation this list encodes.
+- [Extensible variants](/docs/concepts/extensible-variants): the variant representation this list encodes.
 
 ## Source
 

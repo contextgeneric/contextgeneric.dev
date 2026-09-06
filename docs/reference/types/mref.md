@@ -54,8 +54,8 @@ so `&*my_ref` and any auto-deref method call work regardless of which case is in
 Building an `MRef` is frictionless, because it implements `From` in both directions: `From<T>` builds
 `Owned` and `From<&'a T>` builds `Ref`, so a value or a reference converts with `.into()`. When a caller
 needs ownership unconditionally, `get_or_clone` resolves the enum to a plain `T`, returning the owned
-value as is or cloning the borrowed one, and is available whenever `T: Clone`. These three pieces, the
-transparent `Deref` and `AsRef`, the two `From` impls, and `get_or_clone`, are the whole surface: a
+value as is or cloning the borrowed one, and is available whenever `T: Clone`. Together these make up the
+whole surface: the transparent `Deref` and `AsRef`, the two `From` impls, and `get_or_clone`. A
 borrowed `MRef` is read cheaply and promoted to ownership only when asked.
 
 ## Examples
@@ -114,17 +114,17 @@ the value should have been promoted with `get_or_clone` instead.
 
 ## Related constructs
 
-- [`#[cgp_getter]`](../macros/cgp_getter.md) — the getter component whose return type may be `MRef`.
-- [`UseField`](../providers/use_field.md) and [`UseFieldRef`](../providers/use_field_ref.md) — the
+- [`#[cgp_getter]`](../macros/cgp_getter.md): the getter component whose return type may be `MRef`.
+- [`UseField`](../providers/use_field.md) and [`UseFieldRef`](../providers/use_field_ref.md): the
   providers that wire a getter, and the by-reference variant.
-- [`HasField`](../traits/field-access/has_field.md) — the field access an `MRef` getter builds on.
-- [`#[implicit]`](../attributes/implicit.md) — the default way to read a field, which also accepts an
+- [`HasField`](../traits/field-access/has_field.md): the field access an `MRef` getter builds on.
+- [`#[implicit]`](../attributes/implicit.md): the default way to read a field, which also accepts an
   `MRef` type.
-- [`Life`](life.md) — a different, type-level use of a lifetime, not to be confused with this one.
+- [`Life`](life.md): a different, type-level use of a lifetime, not to be confused with this one.
 
 The ideas behind it:
 
-- [Implicit arguments](/docs/concepts/implicit-arguments) — reading a value out of a context, which is
+- [Implicit arguments](/docs/concepts/implicit-arguments): reading a value out of a context, which is
   what an `MRef` getter returns.
 
 ## Source

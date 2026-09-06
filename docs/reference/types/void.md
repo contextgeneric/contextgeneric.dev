@@ -91,7 +91,7 @@ on it with no arms, which the extractor family does when a variant match is comp
 ## Common Mistakes
 
 **`Void` is uninhabited; [`Nil`](nil.md) is not.** `Nil` is a real value the empty product is, while
-`Void` is a type with no values. Records use the first, variants the second, and an error naming the
+`Void` is a type with no values. Records use `Nil`, variants use `Void`, and an error naming the
 wrong one usually means the two families have been crossed.
 
 **You cannot build a `Void`.** There is no constructor and no literal for it, by design. Any code that
@@ -99,18 +99,18 @@ appears to "return a `Void`" is really an empty match that never returns at all.
 
 ## Related constructs
 
-- [`Either`](either.md) — the head-or-rest cell this marker terminates.
-- [`Nil`](nil.md) — the product, string, and path lists' constructible end marker, the counterpart to
+- [`Either`](either.md): the head-or-rest cell this marker terminates.
+- [`Nil`](nil.md): the product, string, and path lists' constructible end marker, the counterpart to
   this one.
-- [`Sum!`](../macros/sum.md) — the macro whose empty form is `Void`.
-- [`FinalizeExtract`](../traits/variant/finalize_extract.md) — discharges the uninhabited remainder of
+- [`Sum!`](../macros/sum.md): the macro whose empty form is `Void`.
+- [`FinalizeExtract`](../traits/variant/finalize_extract.md): discharges the uninhabited remainder of
   a variant extraction with an empty match.
-- [`FinalizeExtractResult`](../traits/variant/finalize_extract_result.md) — the result-carrying form
+- [`FinalizeExtractResult`](../traits/variant/finalize_extract_result.md): the result-carrying form
   built on the same idea.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — where the uninhabited terminator closes a
+- [Extensible variants](/docs/concepts/extensible-variants): where the uninhabited terminator closes a
   total variant match.
 
 ## Source

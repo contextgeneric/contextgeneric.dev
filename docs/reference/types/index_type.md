@@ -14,11 +14,11 @@ A number lifted into a type, so a tuple-struct field can be named by its positio
 *type* tag, and a tuple-struct field has no string name to turn into a [`Symbol!`](../macros/symbol.md);
 it has only a position. To let positional fields use the same trait-resolution machinery as named fields,
 the position itself becomes a type. `Index<I>` is that type: it carries a `usize` as a const parameter
-and nothing else, so `Index<0>`, `Index<1>`, and `Index<2>` are three distinct types standing in for the
-first, second, and third fields of a tuple struct.
+and nothing else, so `Index<0>`, `Index<1>`, and `Index<2>` are distinct types standing in for a tuple
+struct's positional fields.
 
-Encoding the position as a type lets positional field access resolve through traits. A **context** is
-the type the capability runs against, which supplies those values as its own fields. Because
+Encoding the position as a type lets positional field access resolve through traits. Here a **context** is
+the type the capability runs against, which supplies the values it needs as its own fields. Because
 `Index<0>` is a type, a context can carry a
 [`HasField<Index<0>>`](../traits/field-access/has_field.md) impl for its first field and a
 `HasField<Index<1>>` impl for its second side by side, and the compiler selects the right one from the
@@ -42,8 +42,8 @@ pub struct Index<const I: usize>;
 
 `I` is the position the type represents: `Index<0>` for the field at offset zero, and so on. The struct
 has no fields, so a value of `Index<I>` carries no data and the number lives entirely in the type. The
-derived `Default`, `Clone`, and `Copy` make a value trivially available when one is needed, and `Eq` and
-`PartialEq` compare two values of the same `Index<I>` as always equal, since there is nothing to differ.
+derived `Default`, `Clone`, and `Copy` make a value available whenever one is needed, and `Eq` and
+`PartialEq` treat two values of the same `Index<I>` as always equal, since they hold no data.
 `Index<I>` also implements `Display` and `Debug`, and both print the underlying number, so `Index<0>`
 displays as `0` and the position a tag stands for is visible in output and in diagnostics.
 
@@ -59,7 +59,7 @@ reads positions where it would read `Symbol!` names for a named struct.
 
 Because `Index<I>` is zero-sized and the position lives in the type, accessing a field by index resolves
 entirely at compile time: there is no array bound check and no runtime indexing. Selecting the wrong
-index is a type error rather than a panic, because `Index<5>` on a three-field struct simply has no
+index is a type error rather than a panic, because `Index<5>` on a three-field struct has no
 matching `HasField` impl.
 
 ## Examples
@@ -122,17 +122,17 @@ struct has no `HasField` impl, so the mistake is caught at compile time.
 
 ## Related constructs
 
-- [`Symbol!`](../macros/symbol.md) — the string tag for a named field, the counterpart to this numeric
+- [`Symbol!`](../macros/symbol.md): the string tag for a named field, the counterpart to this numeric
   one.
-- [`HasField`](../traits/field-access/has_field.md) — what a tag is looked up through.
-- [`#[derive(HasField)]`](../derives/derive_has_field.md) — generates an `Index` tag per tuple field.
-- [`Field`](field.md) — carries an `Index` tag beside a positional value.
-- [`PhantomData`](phantom_data.md) — how an `Index` tag is passed to `get_field`.
-- [`HasFields`](../traits/shape/has_fields.md) — the tuple struct's shape whose entries this tag names.
+- [`HasField`](../traits/field-access/has_field.md): what a tag is looked up through.
+- [`#[derive(HasField)]`](../derives/derive_has_field.md): generates an `Index` tag per tuple field.
+- [`Field`](field.md): carries an `Index` tag beside a positional value.
+- [`PhantomData`](phantom_data.md): how an `Index` tag is passed to `get_field`.
+- [`HasFields`](../traits/shape/has_fields.md): the tuple struct's shape whose entries this tag names.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where positional field access is used at
+- [Extensible records](/docs/concepts/extensible-records): where positional field access is used at
   scale.
 
 ## Source

@@ -5,7 +5,7 @@ sidebar_position: 4
 
 # `Life`
 
-A lifetime lifted into a type, so a lifetime parameter can travel through machinery that only accepts
+A lifetime lifted into a type, so a lifetime parameter can travel through machinery that accepts only
 types.
 
 ## Overview
@@ -19,9 +19,9 @@ lifetime parameter on the trait must first become a type, and `Life<'a>` is that
 the lifetime `'a` as a concrete type that can stand alongside the trait's other type parameters.
 
 Without this lift, a trait that borrows could not record its lifetime in the dependency marker, and the
-wiring could not tell one lifetime instantiation from another. Here a **context** is the type the
-capability runs against. `Life` lets the lifetime ride through `IsProviderFor` as `(Life<'a>, T)`,
-keeping it part of the provider's identity while the marker's argument stays a plain type.
+wiring could not tell one lifetime instantiation from another. `Life` lets the lifetime ride through
+`IsProviderFor` as `(Life<'a>, T)`, keeping it part of the provider's identity while the marker's
+argument stays a plain type.
 
 ## Definition
 
@@ -47,8 +47,8 @@ to a real borrow, since it neither owns nor references a real value.
 position. In a generated provider trait for a component with a lifetime, the lifetime is collected into
 the [`IsProviderFor`](../traits/wiring/is_provider_for.md) argument tuple as `Life<'a>`, so the provider's
 dependency obligation reads the same way it would for any type parameter. The provider trait, its blanket
-forwarding impl, and the impls that satisfy it all agree on the same `(Life<'a>, T)` shape, which is what
-lets a borrowing component be wired and checked exactly like a non-borrowing one.
+forwarding impl, and the impls that satisfy it all agree on the same `(Life<'a>, T)` shape, and that
+shared shape lets a borrowing component be wired and checked exactly like a non-borrowing one.
 
 ## Examples
 
@@ -109,17 +109,17 @@ a recorded limitation, noted on [`IsProviderFor`](../traits/wiring/is_provider_f
 
 ## Related constructs
 
-- [`IsProviderFor`](../traits/wiring/is_provider_for.md) — whose parameter tuple a lifetime is lifted
+- [`IsProviderFor`](../traits/wiring/is_provider_for.md): whose parameter tuple a lifetime is lifted
   into as `Life<'a>`.
-- [`#[cgp_component]`](../macros/cgp_component.md) — inserts `Life` when a consumer trait carries a
+- [`#[cgp_component]`](../macros/cgp_component.md): inserts `Life` when a consumer trait carries a
   lifetime.
-- [`PhantomData`](phantom_data.md) — the marker `Life` is built from, wrapped for invariance.
-- [`Index`](index_type.md) and [`Chars`](chars.md) — the other lifts that make a non-type
+- [`PhantomData`](phantom_data.md): the marker `Life` is built from, wrapped for invariance.
+- [`Index`](index_type.md) and [`Chars`](chars.md): the other lifts that make a non-type
   addressable in trait resolution, a number and a string where `Life` lifts a lifetime.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the provider-trait
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the provider-trait
   machinery whose dependency marker carries this lift.
 
 ## Source

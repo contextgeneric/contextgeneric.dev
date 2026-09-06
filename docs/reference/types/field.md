@@ -129,20 +129,20 @@ distinguish them at run time, it does not; the tag distinguishes them only in th
 
 ## Related constructs
 
-- [`Symbol!`](../macros/symbol.md) — the tag for a named field or variant.
-- [`Index`](index_type.md) — the tag for a tuple-struct position.
-- [`PhantomData`](phantom_data.md) — where the tag is stored, at zero size.
-- [`Product!`](../macros/product.md) and [`Sum!`](../macros/sum.md) — the lists of `Field` entries that
+- [`Symbol!`](../macros/symbol.md): the tag for a named field or variant.
+- [`Index`](index_type.md): the tag for a tuple-struct position.
+- [`PhantomData`](phantom_data.md): where the tag is stored, at zero size.
+- [`Product!`](../macros/product.md) and [`Sum!`](../macros/sum.md): the lists of `Field` entries that
   describe a record and a variant.
-- [`Cons`](cons.md) and [`Either`](either.md) — the product and sum lists those entries are built into.
-- [`HasFields`](../traits/shape/has_fields.md) — exposes a type's whole list of `Field` entries.
-- [`HasField`](../traits/field-access/has_field.md) — single-field access against a matching tag.
-- [`#[derive(HasFields)]`](../derives/derive_has_fields.md) — assigns the list of entries to a type.
+- [`Cons`](cons.md) and [`Either`](either.md): the product and sum lists those entries are built into.
+- [`HasFields`](../traits/shape/has_fields.md): exposes a type's whole list of `Field` entries.
+- [`HasField`](../traits/field-access/has_field.md): single-field access against a matching tag.
+- [`#[derive(HasFields)]`](../derives/derive_has_fields.md): assigns the list of entries to a type.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where field-name entries are used at scale.
-- [Extensible variants](/docs/concepts/extensible-variants) — the same entry naming a variant.
+- [Extensible records](/docs/concepts/extensible-records): where field-name entries are used at scale.
+- [Extensible variants](/docs/concepts/extensible-variants): the same entry naming a variant.
 
 ## Source
 
