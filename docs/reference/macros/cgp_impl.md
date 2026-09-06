@@ -411,7 +411,9 @@ produces a *cannot find attribute* resolution error pointing at the impl, and it
 `#[cgp_impl(new Self)]` or `#[cgp_impl(Self: SomeComponent)]` parses and compiles, but has exactly the
 same effect as a plain `#[cgp_impl(Self)]`. The macro does not declare a struct, and it never consults
 the component override, because this form builds neither a provider nor an `IsProviderFor` impl for
-either one to apply to. Leave both out.
+either one to apply to. Leave both out. A [`#[default_impl]`](../attributes/default_impl.md) on this
+form is not ignored: the macro still emits its registration, with `type Delegate = Self`, which inside
+that impl names the key rather than a provider. Leave it out too.
 
 ## Related constructs
 

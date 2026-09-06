@@ -227,3 +227,44 @@ pub mod under_the_hood {
         assert_eq!(App.greet(), "Hello!");
     }
 }
+
+/// ## Common Mistakes: the `#[cgp_impl(Self)]` form
+///
+/// The page says the attribute is still lowered on the passthrough form, with `Delegate = Self`,
+/// which names the key. This compiles and pins that reading: the registration exists and its
+/// delegate is the key itself, not a provider.
+pub mod common_mistakes_self_form {
+    use core::marker::PhantomData;
+
+    use cgp::prelude::*;
+
+    cgp_namespace! {
+        new AppNamespace {}
+    }
+
+    #[cgp_component(Greeter)]
+    pub trait CanGreet {
+        fn greet(&self) -> String;
+    }
+
+    pub struct App;
+
+    #[cgp_impl(Self)]
+    #[default_impl(GreeterComponent in AppNamespace)]
+    impl CanGreet for App {
+        fn greet(&self) -> String {
+            "Hello!".to_owned()
+        }
+    }
+
+    fn same_type<T>(_: PhantomData<T>, _: PhantomData<T>) {}
+
+    #[test]
+    fn the_registration_names_the_key_as_its_own_delegate() {
+        same_type(
+            PhantomData::<<GreeterComponent as AppNamespace<()>>::Delegate>,
+            PhantomData::<GreeterComponent>,
+        );
+        assert_eq!(App.greet(), "Hello!");
+    }
+}

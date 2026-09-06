@@ -261,6 +261,17 @@ check with an unsatisfied `IsProviderFor` that never mentions the missing attrib
 
 When a component is generic over a type parameter, you usually want a different provider for each
 value of it. The `open` statement folds those per-value entries straight into the context's own table.
+The per-type wiring on this page therefore dispatches a generic `CanCalculateArea<Shape>`, whose
+provider trait is `AreaCalculator<Context, Shape>`, rather than the parameterless component the
+opening example wires:
+
+```rust
+#[cgp_component(AreaCalculator)]
+pub trait CanCalculateArea<Shape> {
+    fn area(&self, shape: &Shape) -> f64;
+}
+```
+
 A leading `open …;` header opens one or more components, and `@`-path entries then assign a provider
 per key:
 
@@ -394,8 +405,10 @@ different fields. A function generic over `CanCalculateArea` serves both without
 happened. Each context's choice stays one line a reader can search for, and finding that line tells
 them which implementation runs.
 
-When one context needs a different provider *per type* rather than one provider outright, it opens the
-component and fills the slots:
+When one context needs a different provider *per type* rather than one provider outright, the
+component carries the type as a parameter, as the generic `CanCalculateArea<Shape>` under
+[Usage](#choosing-a-provider-per-type-the-open-statement) does. The context then opens the component
+and fills the slots:
 
 ```rust
 pub struct MyApp;

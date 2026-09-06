@@ -291,6 +291,10 @@ error[E0119]: conflicting implementations of trait `DefaultImpls1<ShowImplCompon
 
 **A registered default is a fallback, not an assignment.** A context's direct entry silently shadows it.
 
+**On the `#[cgp_impl(Self)]` form the registration is emitted with `Delegate = Self`.** That form does
+not build a provider, so the macro fills the delegate with `Self`, which inside the registration impl is
+the key itself. The attribute cannot be used sensibly there; leave it off.
+
 ## Related constructs
 
 - [`DefaultImpls1`](../traits/namespace/default_impls1.md) — the usual target, and where the positional rule is

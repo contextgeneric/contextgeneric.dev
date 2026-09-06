@@ -334,6 +334,11 @@ error: #[cgp_auto_getter] does not accept any attribute argument
 here, because nothing else about the getter had to be declared. A missing `use` reports the method as not
 found rather than the trait as not imported.
 
+**`#[prefix]` and `#[derive_delegate]` are accepted and dropped.** The macro runs the attribute
+collector of [`#[cgp_component]`](./cgp_component.md) so that `#[extend]` and `#[use_type]` apply, but
+it does not generate a component, so those two attributes register nothing and report nothing. A getter that
+must live in a namespace, or dispatch per type, is a [`#[cgp_getter]`](./cgp_getter.md) component.
+
 ## Related constructs
 
 - [`#[implicit]`](../attributes/implicit.md) — the default way to read a field, and the form to prefer.

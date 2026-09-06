@@ -174,3 +174,33 @@ pub mod under_the_hood {
         assert_eq!(person.greet(), "Hello, Alice!");
     }
 }
+
+/// ## Under the hood: lifetime ordering
+///
+/// The page says a lifetime declared in the attribute lands ahead of the context parameter because
+/// `syn` prints lifetimes first. If it did not, the emitted `impl<__Context__, 'a, …>` would be a
+/// syntax error, so compiling this is the check.
+pub mod lifetime_ordering {
+    use core::fmt::Display;
+
+    use cgp::prelude::*;
+
+    #[cgp_fn]
+    #[impl_generics('a, Name: Display + 'a)]
+    pub fn greet_for_a_while(&self, #[implicit] name: &Name) -> String {
+        format!("Hello, {name}!")
+    }
+
+    #[derive(HasField)]
+    pub struct Person {
+        pub name: String,
+    }
+
+    #[test]
+    fn lifetime_parameter_is_accepted() {
+        let person = Person {
+            name: "Alice".to_owned(),
+        };
+        assert_eq!(person.greet_for_a_while(), "Hello, Alice!");
+    }
+}

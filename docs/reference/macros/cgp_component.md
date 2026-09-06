@@ -349,10 +349,12 @@ namespace impls one per attribute:
 - One namespace impl per [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, binding the
   component's key inside that namespace to a redirect down the given path.
 
-The `RedirectLookup` impl puts a component's own type parameters into a path, and it makes
-`@AreaCalculatorComponent.Rectangle` resolve. For a component with type parameters the impl does not
-look the incoming path up directly. It appends the parameters to the path first, so a lookup that
-arrives at `AreaCalculatorComponent` without a path ends up looking for `Rectangle`. Only *type*
+The `RedirectLookup` impl puts a component's own type parameters into a path, and it makes per-type
+wiring such as `@AreaCalculatorComponent.Rectangle` resolve. That entry presumes a generic
+`CanCalculateArea<Shape>`, as in the table below, rather than the parameterless component this page
+defines. For such a component the impl does not look the incoming path up directly. It appends the
+parameters to the path first, so a lookup for `CanCalculateArea<Rectangle>` that arrives at
+`@AreaCalculatorComponent` ends up looking for `@AreaCalculatorComponent.Rectangle`. Only *type*
 parameters take part. A lifetime or a const parameter cannot key a path, so the impl leaves it out.
 
 Some details of the real output differ from the listings above, and each is easy to misread in an
