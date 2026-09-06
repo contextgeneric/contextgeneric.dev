@@ -21,7 +21,7 @@ where that projection comes from. The one case for bounding on it is generic cod
 
 ## Overview
 
-A partial record is a companion type — `__PartialPerson<IsNothing, IsPresent>` — and generic code holding
+A partial record is a companion type (`__PartialPerson<IsNothing, IsPresent>`), and generic code holding
 one often needs to know what it will *become* before it is complete: to name the return type of a
 routine, to state a bound, to decide what to do next. `PartialData` answers that: its single `Target`
 associated type is the concrete struct or enum the partial value corresponds to. **It is implemented for
@@ -63,7 +63,7 @@ where
 ```
 
 The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.md) for a record and
-[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) for an enum — **both** partial families
+[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) for an enum. **Both** partial families
 implement it, which is worth knowing because it is the one trait the builder and extractor sides share
 directly.
 
@@ -82,7 +82,7 @@ pub trait FinalizeBuild: PartialData {
 type, and the destination would be unnameable until the value was complete.
 
 The same appears in [`FinalizeOptional`](../optional/finalize_optional.md), which returns
-`Result<Self::Target, &'static str>` — again projecting the destination through this trait rather than
+`Result<Self::Target, &'static str>`, again projecting the destination through this trait rather than
 declaring one of its own.
 
 ## When to use it
@@ -95,7 +95,7 @@ traits otherwise.
 - **[`HasBuilder`](./has_builder.md)** when you have the concrete type and want a builder. That is the
   opposite direction: `Person::Builder` from `Person`, rather than `Target` from a partial.
 - **`PartialData`** when the code holds a partial value of unknown completeness and must name what it
-  belongs to — a signature, a `where` clause, an error message.
+  belongs to: a signature, a `where` clause, an error message.
 - **[`TransformMapFields`](../type-level/transform_map_fields.md)** requires it, which is the other place it shows up
   in a bound rather than as a projection.
 
@@ -114,7 +114,7 @@ Nothing about the markers is constrained, so the destination stays available at 
 a build. Contrast [`FinalizeBuild`](./finalize_build.md), whose impl fixes every marker to `IsPresent`.
 
 Splitting the two lets generic builder code work against a destination it can name while
-still being *unable* to finalize prematurely — the type is known, the conversion is not available. A
+still being *unable* to finalize prematurely: the type is known, the conversion is not available. A
 single trait carrying both would have to choose one or the other.
 
 The enum side implements it identically on its extraction companions, with `Target` naming the original
@@ -137,27 +137,27 @@ usual confusion when meeting it in an error.
 
 ## Related constructs
 
-- [`FinalizeBuild`](./finalize_build.md) — the subtrait that actually produces the target.
-- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md) — the opposite direction, from
+- [`FinalizeBuild`](./finalize_build.md): the subtrait that actually produces the target.
+- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md): the opposite direction, from
   a concrete type to a partial one.
-- [`UpdateField`](./update_field.md) — what moves a partial value between configurations.
-- [`FinalizeOptional`](../optional/finalize_optional.md) — the optional layer's finalize, which projects `Target`
+- [`UpdateField`](./update_field.md): what moves a partial value between configurations.
+- [`FinalizeOptional`](../optional/finalize_optional.md): the optional layer's finalize, which projects `Target`
   the same way.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — requires this bound.
-- [`ExtractField`](../variant/extract_field.md) — the enum family whose companions also implement it.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): requires this bound.
+- [`ExtractField`](../variant/extract_field.md): the enum family whose companions also implement it.
 - [`#[derive(BuildField)]`](../../derives/derive_build_field.md) and
-  [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generate the impls.
-- [`MapType`](../type-level/map_type.md) — the markers a configuration is written in.
+  [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generate the impls.
+- [`MapType`](../type-level/map_type.md): the markers a configuration is written in.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`partial_data.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/partial_data.rs)
-  — `PartialData`
+- [`partial_data.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/partial_data.rs):
+  `PartialData`
 
 ---
 

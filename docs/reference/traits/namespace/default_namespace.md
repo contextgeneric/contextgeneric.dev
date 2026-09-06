@@ -14,16 +14,16 @@ Resolving a namespace's default provider for a component.
 **You do not implement `DefaultNamespace`.**
 [`cgp_namespace!`](../../macros/cgp_namespace.md) and its
 [`#[prefix(...)]`](../../macros/cgp_namespace.md) attribute emit the impls. You name the trait in exactly
-one place — a `namespace` header inside
-[`delegate_components!`](../../macros/delegate_components.md) — and this page explains what that header
+one place, a `namespace` header inside
+[`delegate_components!`](../../macros/delegate_components.md), and this page explains what that header
 generates, including why a direct entry can shadow an inherited default without conflicting with it.
 
 :::
 
 ## Overview
 
-A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** — the
-type the capability runs against — can opt into and then selectively override. Resolving one of those
+A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** (the
+type the capability runs against) can opt into and then selectively override. Resolving one of those
 defaults means asking: *for this component, what does the namespace delegate to?*
 
 `DefaultNamespace` answers that. It is the simplest of three lookup traits, keyed on the component alone.
@@ -51,7 +51,7 @@ value: the provider the key maps to. There is no method and no data, so resolvin
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough — unlike its two siblings, which are not.
+**It is in the prelude**, so `use cgp::prelude::*;` is enough, unlike its two siblings, which are not.
 
 A context joins a namespace with a header inside
 [`delegate_components!`](../../macros/delegate_components.md):
@@ -93,7 +93,7 @@ delegate_components! {
 ```
 
 **Environmental context, self-targeted.** The header forwards `App`'s unwired lookups through the
-namespace, and the direct entry shadows whatever the namespace would otherwise supply for that one key —
+namespace, and the direct entry shadows whatever the namespace would otherwise supply for that one key,
 the inheritance-with-override shape presets rely on.
 
 ## When to use it
@@ -114,7 +114,7 @@ where the syntax requires it.** It appears in a `namespace` header and nowhere e
 
 ## Under the hood
 
-A `namespace N;` header does not emit one entry — it emits a **blanket**
+A `namespace N;` header does not emit one entry. It emits a **blanket**
 [`DelegateComponent`](../wiring/delegate_component.md) impl on the context that forwards every key through the
 namespace:
 
@@ -131,13 +131,13 @@ paired with the matching [`IsProviderFor`](../wiring/is_provider_for.md) forward
 diagnosable.
 
 **That blanket makes override work.** A directly-wired entry is a *concrete* impl for one key,
-and a concrete impl is more specific than the blanket, so it resolves first — shadowing the inherited
+and a concrete impl is more specific than the blanket, so it resolves first, shadowing the inherited
 default for that key and leaving the rest untouched. Two *concrete* entries for one key would conflict; a
 concrete entry against a blanket does not.
 
 Inheritance composes on top. A namespace declared `new Child: Parent { … }` emits a blanket impl
 forwarding any key the parent resolves, so the child resolves everything the parent does plus its own
-entries — and a context's direct entry still shadows either. All of it is projections, resolved at
+entries, and a context's direct entry still shadows either. All of it is projections, resolved at
 compile time, with nothing at run time.
 
 ## Common Mistakes
@@ -146,7 +146,7 @@ compile time, with nothing at run time.
 wire directly, which is the intent, and it means a stray direct entry can silently shadow a default you
 expected to apply.
 
-**`Self` is the component here**, as you would expect — but **not** in
+**`Self` is the component here**, as you would expect, but **not** in
 [`DefaultImpls1`](./default_impls1.md) and [`DefaultImpls2`](./default_impls2.md), where the instance
 type takes the `Self` position instead. The inconsistency is the family's sharpest edge.
 
@@ -154,33 +154,33 @@ type takes the `Self` position instead. The inconsistency is the family's sharpe
 
 **There is no method.** Resolving a default is a type projection.
 
-**Registering into a foreign namespace is bound by the orphan rule** — see
+**Registering into a foreign namespace is bound by the orphan rule.** See
 [`DefaultImpls1`](./default_impls1.md#when-to-use-it), where the
 [`#[default_impl]`](../../attributes/default_impl.md) attribute's placement constraint is worked out.
 
 ## Related constructs
 
-- [`DefaultImpls1`](./default_impls1.md) and [`DefaultImpls2`](./default_impls2.md) — the per-type and
+- [`DefaultImpls1`](./default_impls1.md) and [`DefaultImpls2`](./default_impls2.md): the per-type and
   per-pair variants.
-- [`#[default_impl(...)]`](../../attributes/default_impl.md) — the attribute that registers a provider as a
+- [`#[default_impl(...)]`](../../attributes/default_impl.md): the attribute that registers a provider as a
   default.
-- [`cgp_namespace!`](../../macros/cgp_namespace.md) — defines a namespace, and documents `#[prefix(...)]`.
-- [`delegate_components!`](../../macros/delegate_components.md) — carries the `namespace` header.
-- [`DelegateComponent`](../wiring/delegate_component.md) — what a namespace header forwards *into*.
-- [`IsProviderFor`](../wiring/is_provider_for.md) — forwarded alongside, so dependency errors stay readable.
-- [`RedirectLookup`](../../providers/redirect_lookup.md) — the usual `Delegate` value, re-routing along a
+- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace, and documents `#[prefix(...)]`.
+- [`delegate_components!`](../../macros/delegate_components.md): carries the `namespace` header.
+- [`DelegateComponent`](../wiring/delegate_component.md): what a namespace header forwards *into*.
+- [`IsProviderFor`](../wiring/is_provider_for.md): forwarded alongside, so dependency errors stay readable.
+- [`RedirectLookup`](../../providers/redirect_lookup.md): the usual `Delegate` value, re-routing along a
   path.
-- [`Path!`](../../macros/path.md) — the paths a prefixed key is built from.
+- [`Path!`](../../macros/path.md): the paths a prefixed key is built from.
 
 The ideas behind it:
 
-- [Namespaces](/docs/concepts/namespaces) — reusable, inheritable wiring tables and preset-style
+- [Namespaces](/docs/concepts/namespaces): reusable, inheritable wiring tables and preset-style
   configuration.
 
 ## Source
 
-- [`namespaces.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/namespaces.rs)
-  — the three lookup traits
+- [`namespaces.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/namespaces.rs):
+  the three lookup traits
 - Header and loop codegen: [`delegate_component/statement/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/delegate_component/statement)
 
 ---

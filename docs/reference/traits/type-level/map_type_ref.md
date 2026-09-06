@@ -48,7 +48,7 @@ from outliving it either. That is more machinery than [`MapType`](./map_type.md)
 
 ## Usage
 
-**`IsRef` and `IsMut` are in the prelude; `IsOwned` is not** — import it from `cgp::core::field::impls`.
+**`IsRef` and `IsMut` are in the prelude; `IsOwned` is not.** Import it from `cgp::core::field::impls`.
 The trait itself comes with the prelude. Three markers implement it:
 
 ```rust
@@ -97,8 +97,8 @@ if let Ok(circle) = shape
 }
 ```
 
-Neither call names a marker. What the markers do is decide the type the payload comes out as — `&Circle`
-in the first case, `&mut Circle` in the second — while the per-field
+Neither call names a marker. What the markers do is decide the type the payload comes out as (`&Circle`
+in the first case, `&mut Circle` in the second) while the per-field
 [`MapType`](./map_type.md) markers track which variants are still possible.
 
 ## When to use it
@@ -157,31 +157,31 @@ usually means the owned and borrowed forms have been crossed.
 `MapType` bound, and eliding the lifetime rarely works.
 
 **A mutable extractor cannot coexist with another borrow of the same value**, which is ordinary borrow
-checking rather than anything CGP adds — but it surfaces as an error about the companion type, which
+checking rather than anything CGP adds, but it surfaces as an error about the companion type, which
 reads as though the machinery is at fault.
 
 ## Related constructs
 
-- [`MapType`](./map_type.md) — the per-field presence marker this composes with.
-- [`HasExtractorRef`](../variant/has_extractor_ref.md) and [`HasExtractorMut`](../variant/has_extractor_mut.md) — the two
+- [`MapType`](./map_type.md): the per-field presence marker this composes with.
+- [`HasExtractorRef`](../variant/has_extractor_ref.md) and [`HasExtractorMut`](../variant/has_extractor_mut.md): the two
   accessors that fix the outer marker.
-- [`ExtractField`](../variant/extract_field.md) — the narrowing that works identically through a borrow.
-- [`ToFieldsRef`](../shape/to_fields_ref.md) — the record side's answer to the same problem.
-- [`HasFieldsRef`](../shape/has_fields_ref.md) — the borrowed shape it produces.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates the borrowed companion.
-- [Type-level lists](../../types/index.md) — the `Either`/`Void` chain underneath.
+- [`ExtractField`](../variant/extract_field.md): the narrowing that works identically through a borrow.
+- [`ToFieldsRef`](../shape/to_fields_ref.md): the record side's answer to the same problem.
+- [`HasFieldsRef`](../shape/has_fields_ref.md): the borrowed shape it produces.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates the borrowed companion.
+- [Type-level lists](../../types/index.md): the `Either`/`Void` chain underneath.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — matching a variant without consuming the
+- [Extensible variants](/docs/concepts/extensible-variants): matching a variant without consuming the
   value.
 
 ## Source
 
-- [`map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_type_ref.rs)
-  — the trait
-- [`impls/map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type_ref.rs)
-  — `IsRef`, `IsMut`, `IsOwned`
+- [`map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_type_ref.rs):
+  the trait
+- [`impls/map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type_ref.rs):
+  `IsRef`, `IsMut`, `IsOwned`
 
 ---
 

@@ -14,7 +14,7 @@ catches a missing field at compile time. For a record where some fields have sen
 strictness is the wrong shape. `CanFinalizeWithDefault` relaxes it: every field that is not set becomes
 `Default::default()`, and the result is the concrete struct.
 
-**The strict presence check still runs — it just always passes**, because the fields are re-marked to
+**The strict presence check still runs; it just always passes**, because the fields are re-marked to
 `IsPresent` first. That is the layer's whole design in one sentence, and it is why the core
 [`FinalizeBuild`](../builder/finalize_build.md) remains the only route from a partial value to a struct.
 
@@ -80,8 +80,8 @@ assert_eq!(context.foo, "foo");
 assert_eq!(context.bar, 0);        // defaulted
 ```
 
-Had that used [`finalize_optional`](./finalize_optional.md), it would have returned `Err("bar")` instead
-— which is the point of deferring the choice to the finalize call rather than to the builder.
+Had that used [`finalize_optional`](./finalize_optional.md), it would have returned `Err("bar")` instead,
+which is the point of deferring the choice to the finalize call rather than to the builder.
 
 The one-call form that also copies from a source is
 [`CanBuildWithDefault`](./can_build_with_default.md).
@@ -92,7 +92,7 @@ The one-call form that also copies from a source is
 
 - **[`FinalizeOptional`](./finalize_optional.md)** when absence is an error worth reporting. The two are
   the same builder finalized differently.
-- **[`FinalizeBuild`](../builder/finalize_build.md)** — the core builder — when every field is genuinely
+- **[`FinalizeBuild`](../builder/finalize_build.md)** (the core builder) when every field is genuinely
   required. A missing field is then a compile error, which is strictly stronger.
 - **[`CanBuildWithDefault`](./can_build_with_default.md)** when the set fields come from another record
   rather than from individual calls. It chains the merge and this finalize into one call.
@@ -127,14 +127,14 @@ recursion with a different marker**, which is why the defaulted and optional wor
 symmetrically.
 
 Because the transform targets `IsPresent`, the value handed to `finalize_build` is at exactly the
-configuration its single impl requires — so the strict check runs, and cannot fail.
+configuration its single impl requires, so the strict check runs, and cannot fail.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 
 **Every field's type needs `Default`.** A field whose type has none makes the transform unresolvable, and
-the error names the missing [`TransformMap`](../type-level/transform_map.md) impl rather than the field — which is
+the error names the missing [`TransformMap`](../type-level/transform_map.md) impl rather than the field, which is
 the most confusing failure in this layer.
 
 **A defaulted field is silent.** Nothing distinguishes "set to zero" from "left unset" in the result, which
@@ -142,32 +142,32 @@ is the trade against [`FinalizeOptional`](./finalize_optional.md).
 
 **It gives up the compile-time completeness check** that the core builder provides.
 
-**It applies to a core builder too**, not only an optional one — an absent `IsNothing` field is
+**It applies to a core builder too**, not only an optional one: an absent `IsNothing` field is
 transformed as readily as a `None`.
 
 **It consumes the builder.**
 
 ## Related constructs
 
-- [`FinalizeOptional`](./finalize_optional.md) — the other ending, reporting rather than filling.
-- [`CanBuildWithDefault`](./can_build_with_default.md) — merge and default in one call.
-- [`TransformMapDefault`](./transform_map_default.md) — the marker this drives.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — the walk it runs.
-- [`FinalizeBuild`](../builder/finalize_build.md) — the strict impl it ultimately calls.
-- [`HasOptionalBuilder`](./has_optional_builder.md) and [`ToOptional`](./to_optional.md) — the optional
+- [`FinalizeOptional`](./finalize_optional.md): the other ending, reporting rather than filling.
+- [`CanBuildWithDefault`](./can_build_with_default.md): merge and default in one call.
+- [`TransformMapDefault`](./transform_map_default.md): the marker this drives.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): the walk it runs.
+- [`FinalizeBuild`](../builder/finalize_build.md): the strict impl it ultimately calls.
+- [`HasOptionalBuilder`](./has_optional_builder.md) and [`ToOptional`](./to_optional.md): the optional
   entry points.
-- [`HasBuilder`](../builder/has_builder.md) — the core family this relaxes.
-- [`MapType`](../type-level/map_type.md) — the markers the transform moves between.
+- [`HasBuilder`](../builder/has_builder.md): the core family this relaxes.
+- [`MapType`](../type-level/map_type.md): the markers the transform moves between.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records, and where relaxing presence
+- [Extensible records](/docs/concepts/extensible-records): partial records, and where relaxing presence
   fits.
 
 ## Source
 
-- [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs)
-  — `CanFinalizeWithDefault`, `CanBuildWithDefault`, and `TransformMapDefault`
+- [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs):
+  `CanFinalizeWithDefault`, `CanBuildWithDefault`, and `TransformMapDefault`
 
 ---
 

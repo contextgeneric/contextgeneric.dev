@@ -11,8 +11,8 @@ Re-marking every field of an existing builder as optional.
 
 [`HasOptionalBuilder`](./has_optional_builder.md) starts an all-optional builder from nothing.
 `ToOptional` is the conversion for the case where you already hold a partial value and want to relax it.
-Every field is re-marked to `IsOptional`, whatever state it was in — a set field becomes `Some(value)`,
-an absent one becomes `None` — and from there the value behaves like any other optional builder:
+Every field is re-marked to `IsOptional`, whatever state it was in (a set field becomes `Some(value)`,
+an absent one becomes `None`), and from there the value behaves like any other optional builder:
 [`SetOptional`](./set_optional.md) applies, and either
 [`FinalizeOptional`](./finalize_optional.md) or [`CanFinalizeWithDefault`](./can_finalize_with_default.md)
 ends it.
@@ -92,7 +92,7 @@ let builder = context.into_builder().to_optional();   // every field Some
 
 - **[`HasOptionalBuilder`](./has_optional_builder.md)** when nothing has been built yet.
   `optional_builder()` is `builder().to_optional()` and reads better.
-- **`ToOptional`** when a core builder is partly filled — because a routine handed it to you, or because
+- **`ToOptional`** when a core builder is partly filled, because a routine handed it to you, or because
   the first few fields were known and the rest are not.
 - **[`IntoBuilder`](../builder/into_builder.md) then `to_optional`** to relax a complete value, typically before
   overwriting some of its fields.
@@ -128,37 +128,37 @@ symmetrically.
 **A field already set survives as `Some`.** It is not reset, which is the difference from
 [`optional_builder()`](./has_optional_builder.md) and is easy to assume the other way round.
 
-**Converting gives up the compile-time completeness check** for the fields that were still absent — from
+**Converting gives up the compile-time completeness check** for the fields that were still absent. From
 here a missing field is an `Err` or a default rather than a compile error.
 
 **It is not reversible.** There is no `from_optional`; getting back to a strict configuration means
 finalizing, through [`FinalizeOptional`](./finalize_optional.md) or
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md).
 
-**A field whose type is already `Option<T>` becomes `Option<Option<T>>`** in the slot. That is correct —
-the outer layer is the builder's presence tracking — and reads confusingly in an error.
+**A field whose type is already `Option<T>` becomes `Option<Option<T>>`** in the slot. That is correct
+(the outer layer is the builder's presence tracking) and reads confusingly in an error.
 
 ## Related constructs
 
-- [`HasOptionalBuilder`](./has_optional_builder.md) — the entry point built from this conversion.
-- [`SetOptional`](./set_optional.md) — setting a field once every marker is `IsOptional`.
+- [`HasOptionalBuilder`](./has_optional_builder.md): the entry point built from this conversion.
+- [`SetOptional`](./set_optional.md): setting a field once every marker is `IsOptional`.
 - [`FinalizeOptional`](./finalize_optional.md) and
-  [`CanFinalizeWithDefault`](./can_finalize_with_default.md) — the two endings.
-- [`TransformOptional`](./transform_optional.md) — the marker this walk carries.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — the walk itself.
-- [`IntoBuilder`](../builder/into_builder.md) — how a complete value becomes a builder to convert.
-- [`HasBuilder`](../builder/has_builder.md) — the core family this relaxes.
-- [`MapType`](../type-level/map_type.md) — the `IsOptional` marker.
+  [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the two endings.
+- [`TransformOptional`](./transform_optional.md): the marker this walk carries.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): the walk itself.
+- [`IntoBuilder`](../builder/into_builder.md): how a complete value becomes a builder to convert.
+- [`HasBuilder`](../builder/has_builder.md): the core family this relaxes.
+- [`MapType`](../type-level/map_type.md): the `IsOptional` marker.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records, and where relaxing presence
+- [Extensible records](/docs/concepts/extensible-records): partial records, and where relaxing presence
   fits.
 
 ## Source
 
-- [`to_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/to_optional.rs)
-  — `ToOptional`, `HasOptionalBuilder`, and `TransformOptional`
+- [`to_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/to_optional.rs):
+  `ToOptional`, `HasOptionalBuilder`, and `TransformOptional`
 
 ---
 

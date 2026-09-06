@@ -9,12 +9,12 @@ Widening a narrow enum into a wider one that shares its variants.
 
 ## Overview
 
-Two enums defined independently can share variant names — a small `FooBar` and a larger `FooBarBaz`,
-say. Converting the narrow one into the wide one is a conversion you could write by hand, and it is
+Two enums defined independently can share variant names, say a small `FooBar` and a larger `FooBarBaz`.
+Converting the narrow one into the wide one is a conversion you could write by hand, and it is
 pure boilerplate: one `match` arm per variant, rewrapping each payload under the same name.
 
 `CanUpcast` derives that conversion from the names instead. Once both enums expose their shape as a
-type-level list — which [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) makes them — widening is a
+type-level list, which [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) makes them, widening is a
 matter of routing each source variant to the target's slot of the same name.
 
 **It always succeeds.** Every variant of the source has a home in the target, or the conversion does not
@@ -90,7 +90,7 @@ name only the variants you need, and let the widening be checked.
   type, and generates nothing.
 - **Reach for [`CanDowncast`](./can_downcast.md)** for the other direction, which can fail and therefore
   reads quite differently.
-- **Reach for [`CanBuildFrom`](./can_build_from.md)** for the record analogue — merging a struct's fields
+- **Reach for [`CanBuildFrom`](./can_build_from.md)** for the record analogue: merging a struct's fields
   into another struct's builder.
 
 One boundary worth stating: this is **compile-time, name-driven, and opt-in**. Both enums must derive
@@ -131,24 +131,24 @@ value type are both part of the entry.
 
 ## Related constructs
 
-- [`CanDowncast`](./can_downcast.md) — the narrowing direction, which can fail.
-- [`CanDowncastFields`](./can_downcast_fields.md) — narrowing continued on a remainder.
-- [`CanBuildFrom`](./can_build_from.md) — the record counterpart.
+- [`CanDowncast`](./can_downcast.md): the narrowing direction, which can fail.
+- [`CanDowncastFields`](./can_downcast_fields.md): narrowing continued on a remainder.
+- [`CanBuildFrom`](./can_build_from.md): the record counterpart.
 - [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) and
-  [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) — what makes an enum eligible.
-- [`ExtractField`](../variant/extract_field.md) and [`FromVariant`](../variant/from_variant.md) — the two primitives the
+  [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md): what makes an enum eligible.
+- [`ExtractField`](../variant/extract_field.md) and [`FromVariant`](../variant/from_variant.md): the two primitives the
   recursion routes through.
-- [`HasFields`](../shape/has_fields.md) — the variant shape being walked.
-- [Type-level lists](../../types/index.md) — the `Either`/`Void` chain underneath.
-- [Dispatch combinators](../../providers/dispatch/index.md) — where casting meets per-variant routing.
+- [`HasFields`](../shape/has_fields.md): the variant shape being walked.
+- [Type-level lists](../../types/index.md): the `Either`/`Void` chain underneath.
+- [Dispatch combinators](../../providers/dispatch/index.md): where casting meets per-variant routing.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — upcasting and downcasting between enums.
+- [Extensible variants](/docs/concepts/extensible-variants): upcasting and downcasting between enums.
 
 ## Source
 
-- [`cast.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/cast.rs) —
+- [`cast.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/cast.rs):
   `CanUpcast` and the `FieldsExtractor` recursion
 
 ---

@@ -47,7 +47,7 @@ where
 
 ## Usage
 
-**It is not in the prelude** — the one member of the extractor family that is not. Import it from
+**It is not in the prelude**, the one member of the extractor family that is not. Import it from
 `cgp::core::field::traits`, and you will want it, because it closes a chain:
 
 ```rust
@@ -90,7 +90,7 @@ tried, which makes it a proof rather than an assertion.
 Calling it one step early does not compile:
 
 ```rust
-// error: the trait bound is not satisfied — Circle is still possible,
+// error: the trait bound is not satisfied: Circle is still possible,
 // so the remainder is inhabited and cannot be discharged
 let rect = shape
     .to_extractor()
@@ -146,25 +146,25 @@ bound stops being satisfied.
 
 ## Related constructs
 
-- [`FinalizeExtract`](./finalize_extract.md) — the underlying discharge, and the full exhaustiveness
+- [`FinalizeExtract`](./finalize_extract.md): the underlying discharge, and the full exhaustiveness
   argument.
-- [`ExtractField`](./extract_field.md) — the narrowing that produces the `Result` this collapses.
-- [`HasExtractor`](./has_extractor.md) — where a chain begins.
-- [`FinalizeBuild`](../builder/finalize_build.md) — the record family's ending.
-- [Type-level lists](../../types/index.md) — where the uninhabited `Void` comes from.
-- [Dispatch combinators](../../providers/dispatch/index.md) — the providers that build the chain for
+- [`ExtractField`](./extract_field.md): the narrowing that produces the `Result` this collapses.
+- [`HasExtractor`](./has_extractor.md): where a chain begins.
+- [`FinalizeBuild`](../builder/finalize_build.md): the record family's ending.
+- [Type-level lists](../../types/index.md): where the uninhabited `Void` comes from.
+- [Dispatch combinators](../../providers/dispatch/index.md): the providers that build the chain for
   you.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — what makes an enum extractable.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): what makes an enum extractable.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — the exhaustiveness argument and the
+- [Extensible variants](/docs/concepts/extensible-variants): the exhaustiveness argument and the
   extensible visitor pattern.
 
 ## Source
 
-- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs)
-  — `FinalizeExtractResult` and the rest of the family
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `FinalizeExtractResult` and the rest of the family
 
 ---
 

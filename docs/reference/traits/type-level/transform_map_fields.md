@@ -55,7 +55,7 @@ use cgp::core::field::traits::TransformMapFields;
 ```
 
 It is implemented for any [`PartialData`](../builder/partial_data.md) whose fields the transform can convert, so
-there is nothing to implement — what you supply is the `Transform` marker, by writing
+there is nothing to implement. What you supply is the `Transform` marker, by writing
 [`TransformMap`](./transform_map.md) impls for it.
 
 The two type parameters are usually inferred from the surrounding bound rather than written at a call
@@ -107,8 +107,8 @@ layer requires exactly that.
 ## Under the hood
 
 `TransformMapFields` walks the target's [`HasFields`](../shape/has_fields.md) product one entry at a time. For
-each `Field<Tag, Value>` it uses [`UpdateField`](../builder/update_field.md) **twice**: it takes the field out —
-replacing its marker with `IsNothing` and reading what the marker *was* — applies
+each `Field<Tag, Value>` it uses [`UpdateField`](../builder/update_field.md) **twice**: it takes the field out
+(replacing its marker with `IsNothing` and reading what the marker *was*), applies
 `Transform::transform_mapped` to convert the value into the `TargetMap` wrapping, then writes it back
 under `TargetMap`.
 
@@ -116,7 +116,7 @@ So the result type has every field re-marked to `TargetMap`, with the values con
 things follow from that construction, and both explain limits you might otherwise trip over.
 
 **The transform must have an impl for every source marker a field might currently be in**, or the walk
-does not resolve — which is why a transform like `FillDefaults` needs three
+does not resolve, which is why a transform like `FillDefaults` needs three
 [`TransformMap`](./transform_map.md) impls rather than one.
 
 **The recursion is driven by the target's shape**, so it re-marks exactly the fields the concrete struct
@@ -134,7 +134,7 @@ impl for one field's source marker, not the record, so it reads as being about a
 about the transform being incomplete.
 
 **`Output` is a partial type, not the finished struct.** Finalizing is still
-[`FinalizeBuild`](../builder/finalize_build.md)'s job — this trait only guarantees the configuration that impl
+[`FinalizeBuild`](../builder/finalize_build.md)'s job. This trait only guarantees the configuration that impl
 requires.
 
 **It walks every field.** For a single field's transition, [`UpdateField`](../builder/update_field.md) is the
@@ -148,24 +148,24 @@ with [`HasBuilder`](../builder/has_builder.md) or [`IntoBuilder`](../builder/int
 
 ## Related constructs
 
-- [`TransformMap`](./transform_map.md) — the per-field conversion this lifts.
-- [`MapType`](./map_type.md) — the markers naming each state.
-- [`UpdateField`](../builder/update_field.md) — the primitive the walk calls twice per field.
-- [`PartialData`](../builder/partial_data.md) — what a partial value is, and the bound this requires.
-- [`FinalizeBuild`](../builder/finalize_build.md) — what an all-`IsPresent` result is accepted by.
-- [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) and [`ToOptional`](../optional/to_optional.md) — the
+- [`TransformMap`](./transform_map.md): the per-field conversion this lifts.
+- [`MapType`](./map_type.md): the markers naming each state.
+- [`UpdateField`](../builder/update_field.md): the primitive the walk calls twice per field.
+- [`PartialData`](../builder/partial_data.md): what a partial value is, and the bound this requires.
+- [`FinalizeBuild`](../builder/finalize_build.md): what an all-`IsPresent` result is accepted by.
+- [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) and [`ToOptional`](../optional/to_optional.md): the
   two capabilities built directly on this.
-- [`MapFields`](./map_fields.md) — the type-level counterpart.
-- [`HasFields`](../shape/has_fields.md) — the shape the walk follows.
+- [`MapFields`](./map_fields.md): the type-level counterpart.
+- [`HasFields`](../shape/has_fields.md): the shape the walk follows.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and how their states change.
+- [Extensible records](/docs/concepts/extensible-records): partial records and how their states change.
 
 ## Source
 
-- [`transform_map.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/transform_map.rs)
-  — `TransformMapFields` and `TransformMap`
+- [`transform_map.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/transform_map.rs):
+  `TransformMapFields` and `TransformMap`
 
 ---
 

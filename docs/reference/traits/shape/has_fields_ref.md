@@ -21,8 +21,8 @@ lifetime name that shows up in an error message.
 ## Overview
 
 [`HasFields`](./has_fields.md) describes a type as a list of named entries holding owned values. Code
-that only *reads* a value should not have to consume it to walk its shape — a validator, a serializer, a
-routine that inspects a struct and hands it back — so there is a second description in which every entry
+that only *reads* a value should not have to consume it to walk its shape (a validator, a serializer, a
+routine that inspects a struct and hands it back), so there is a second description in which every entry
 holds a borrow instead.
 
 ## Definition
@@ -90,14 +90,14 @@ clone it.
 **Bound on it when generic code reads a type's shape without consuming it**, and pair it with
 [`ToFieldsRef`](./to_fields_ref.md), which is the only way to obtain a value in this shape.
 
-- **Use [`HasFields`](./has_fields.md)** when the code takes ownership — building, converting,
+- **Use [`HasFields`](./has_fields.md)** when the code takes ownership: building, converting,
   destructuring.
 - **Use `HasFieldsRef` + [`ToFieldsRef`](./to_fields_ref.md)** when the original must survive. This is
   the weaker requirement, so prefer it when it suffices.
 - **Use [`HasField`](../field-access/has_field.md)** when only one named field is needed. The whole-shape traits are
   for code that walks everything.
 
-Being precise about which of the five shape traits a routine requires pays, because each one narrows what
+Being precise about which shape trait a routine requires pays, because each one narrows what
 a caller must supply.
 
 ## Under the hood
@@ -117,7 +117,7 @@ impl HasFieldsRef for Person {
 ```
 
 The transformation is uniform: each entry's value type `T` becomes `&'__a T`, and the list is otherwise
-untouched — same length, same order, same tags. An enum's borrowed shape is the dual, an `Either` chain
+untouched: same length, same order, same tags. An enum's borrowed shape is the dual, an `Either` chain
 whose arms carry borrowed payloads.
 
 Because the rewrite is per-entry rather than structural, **a field that is already a reference gains
@@ -144,23 +144,23 @@ named through `Self::…` in the generated impls. The
 
 ## Related constructs
 
-- [`HasFields`](./has_fields.md) — the owned shape, and where the family is explained in full.
-- [`ToFieldsRef`](./to_fields_ref.md) — the conversion that produces a value in this shape.
-- [`ToFields`](./to_fields.md) and [`FromFields`](./from_fields.md) — the owned conversions.
-- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md) — generates this impl.
-- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the list types a shape is built
+- [`HasFields`](./has_fields.md): the owned shape, and where the family is explained in full.
+- [`ToFieldsRef`](./to_fields_ref.md): the conversion that produces a value in this shape.
+- [`ToFields`](./to_fields.md) and [`FromFields`](./from_fields.md): the owned conversions.
+- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
+- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md): the list types a shape is built
   from.
-- [`Field`](../../types/field.md) — one entry of a shape.
-- [`MapTypeRef`](../type-level/map_type_ref.md) — the borrow markers the extractor family uses for the same job.
+- [`Field`](../../types/field.md): one entry of a shape.
+- [`MapTypeRef`](../type-level/map_type_ref.md): the borrow markers the extractor family uses for the same job.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — a struct as a product of named fields.
+- [Extensible records](/docs/concepts/extensible-records): a struct as a product of named fields.
 
 ## Source
 
-- [`has_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_fields.rs)
-  — `HasFieldsRef` and `HasFields`
+- [`has_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_fields.rs):
+  `HasFieldsRef` and `HasFields`
 - Derive codegen: [`cgp_data/derive_has_fields/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_has_fields)
 
 ---

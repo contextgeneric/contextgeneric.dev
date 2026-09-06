@@ -9,8 +9,8 @@ Recovering a type-level string as a compile-time `&'static str`.
 
 ## Overview
 
-CGP encodes field and variant names as *types* — a [`Symbol!`](../../macros/symbol.md) is a length plus a
-character list, one node per character — so that names can drive trait resolution. But a program
+CGP encodes field and variant names as *types* (a [`Symbol!`](../../macros/symbol.md) is a length plus a
+character list, one node per character) so that names can drive trait resolution. But a program
 eventually needs those names as ordinary strings: to report a missing field, to build a key, to compare
 against input.
 
@@ -60,7 +60,7 @@ use cgp::prelude::*;
 // eagerly, as a compile-time constant
 assert_eq!(<Symbol!("hello") as StaticString>::VALUE, "hello");
 
-// lazily, through Display — reconstructed at the point of formatting
+// lazily, through Display: reconstructed at the point of formatting
 let s = <Symbol!("hello")>::default();
 assert_eq!(s.to_string(), "hello");
 ```
@@ -74,7 +74,7 @@ assert_eq!(<Symbol!("") as StaticString>::VALUE, "");
 
 Where it shows up in real code is recovering a name for an error. The
 [optional-field layer](../optional/finalize_optional.md)'s `finalize_optional` reports its missing field by
-returning `Tag::VALUE` — the field's own name, as a static string, with no allocation.
+returning `Tag::VALUE`, the field's own name, as a static string, with no allocation.
 
 ## When to use it
 
@@ -90,7 +90,7 @@ message.** That is the whole decision.
 
 Two things this is not for. It is **not a general string facility**: [`Symbol!`](../../macros/symbol.md)
 exists to key field and variant lookups, and building programs out of type-level strings is not what the
-encoding is for. And it is **not how you read a field** — recovering a name tells you what a field is
+encoding is for. And it is **not how you read a field**: recovering a name tells you what a field is
 called, while [`HasField`](../field-access/has_field.md) reads its value.
 
 ## Under the hood
@@ -101,13 +101,13 @@ the character list and UTF-8-encoding each character into the array, and `VALUE`
 bytes as UTF-8 and exposes the `&'static str`.
 
 **That array is why `Symbol` carries a `LEN` at all.** A const-evaluated byte array must have a known
-size, and the size cannot be computed from inside the const context by walking the list — so the macro
-precomputes it. It is a *byte* length, which makes multi-byte Unicode round-trip correctly and
-why `LEN` disagrees with the visible character count for any non-ASCII name.
+size, and the size cannot be computed from inside the const context by walking the list, so the macro
+precomputes it. It is a *byte* length, which makes multi-byte Unicode round-trip correctly and makes
+`LEN` disagree with the visible character count for any non-ASCII name.
 
 ## Common Mistakes
 
-**It is not in the prelude** while [`ConcatPath`](./concat_path.md) is — an asymmetry between two traits
+**It is not in the prelude** while [`ConcatPath`](./concat_path.md) is, an asymmetry between two traits
 that do neighbouring jobs. Import `StaticString` from `cgp::core::field::traits`.
 
 **`VALUE` is a constant, so it is named through the trait.** Write
@@ -124,22 +124,22 @@ means decoding each segment's symbol.
 
 ## Related constructs
 
-- [`StaticFormat`](./static_format.md) — the lazy counterpart, behind the `Display` impls.
-- [`ConcatPath`](./concat_path.md) — the same recovery idea one level up, for paths.
-- [`Symbol!`](../../macros/symbol.md) — the type-level string this decodes, and where the `LEN` comes from.
-- [Type-level lists](../../types/index.md) — the `Chars` chain being walked.
-- [`HasField`](../field-access/has_field.md) — where the names being decoded are used as keys.
-- [`FinalizeOptional`](../optional/finalize_optional.md) — a real consumer, reporting a missing field by name.
+- [`StaticFormat`](./static_format.md): the lazy counterpart, behind the `Display` impls.
+- [`ConcatPath`](./concat_path.md): the same recovery idea one level up, for paths.
+- [`Symbol!`](../../macros/symbol.md): the type-level string this decodes, and where the `LEN` comes from.
+- [Type-level lists](../../types/index.md): the `Chars` chain being walked.
+- [`HasField`](../field-access/has_field.md): where the names being decoded are used as keys.
+- [`FinalizeOptional`](../optional/finalize_optional.md): a real consumer, reporting a missing field by name.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where field-name types are put to work at
+- [Extensible records](/docs/concepts/extensible-records): where field-name types are put to work at
   scale.
 
 ## Source
 
-- [`static_string.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/static_string.rs)
-  — `StaticString` and its const-evaluated UTF-8 decoding
+- [`static_string.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/static_string.rs):
+  `StaticString` and its const-evaluated UTF-8 decoding
 
 ---
 

@@ -84,8 +84,8 @@ match value.downcast(PhantomData::<JustFoo>) {
 }
 ```
 
-The first call starts the chain and the second continues it. Written the other way round — a second
-`downcast` on the remainder — it does not compile, because a remainder is not an enum.
+The first call starts the chain and the second continues it. Written the other way round, with a second
+`downcast` on the remainder, it does not compile, because a remainder is not an enum.
 
 ## When to use it
 
@@ -109,7 +109,7 @@ remainder as `Err`. The only difference is the entry point: `CanDowncast` calls
 handed.
 
 Because the remainder type narrows at every step, a chain's types are all distinct, and the compiler
-knows at each point exactly which variants remain — the same narrowing a hand-written
+knows at each point exactly which variants remain, the same narrowing a hand-written
 [extraction chain](../variant/extract_field.md) performs.
 
 ## Common Mistakes
@@ -130,20 +130,20 @@ attempt needs.
 
 ## Related constructs
 
-- [`CanDowncast`](./can_downcast.md) — the first step, and where the pair is explained in full.
-- [`CanUpcast`](./can_upcast.md) — the widening direction.
-- [`ExtractField`](../variant/extract_field.md) — narrowing to a payload rather than to another enum.
-- [`FinalizeExtract`](../variant/finalize_extract.md) — how an exhausted remainder is discharged.
-- [`HasExtractor`](../variant/has_extractor.md) — what turns an enum into the extractor this operates on.
-- [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) — what makes an enum eligible.
+- [`CanDowncast`](./can_downcast.md): the first step, and where the pair is explained in full.
+- [`CanUpcast`](./can_upcast.md): the widening direction.
+- [`ExtractField`](../variant/extract_field.md): narrowing to a payload rather than to another enum.
+- [`FinalizeExtract`](../variant/finalize_extract.md): how an exhausted remainder is discharged.
+- [`HasExtractor`](../variant/has_extractor.md): what turns an enum into the extractor this operates on.
+- [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md): what makes an enum eligible.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — partial variants and the narrowing chain.
+- [Extensible variants](/docs/concepts/extensible-variants): partial variants and the narrowing chain.
 
 ## Source
 
-- [`cast.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/cast.rs) —
+- [`cast.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/cast.rs):
   `CanDowncastFields` and the `FieldsExtractor` recursion
 
 ---

@@ -143,36 +143,36 @@ so it is neither `Debug` nor `PartialEq` however the enum is derived.
 **`Extractor` is not the enum.** A signature that returns `Self::Extractor` is returning a companion
 type, and naming it in a public API exposes a generated name.
 
-**Every variant must carry exactly one unnamed payload** for the derive to apply at all — the family's
+**Every variant must carry exactly one unnamed payload** for the derive to apply at all, the family's
 one real restriction, covered on the
 [derive's page](../../derives/derive_extract_field.md).
 
 ## Related constructs
 
-- [`ExtractField`](./extract_field.md) — what narrows the extractor this produces.
-- [`HasExtractorRef`](./has_extractor_ref.md) and [`HasExtractorMut`](./has_extractor_mut.md) — the two
+- [`ExtractField`](./extract_field.md): what narrows the extractor this produces.
+- [`HasExtractorRef`](./has_extractor_ref.md) and [`HasExtractorMut`](./has_extractor_mut.md): the two
   borrowing accessors.
 - [`FinalizeExtract`](./finalize_extract.md) and
-  [`FinalizeExtractResult`](./finalize_extract_result.md) — how a chain ends.
-- [`FromVariant`](./from_variant.md) — constructing an enum from one named variant.
-- [`PartialData`](../builder/partial_data.md) — what names the enum a companion belongs to.
-- [`MapType`](../type-level/map_type.md) — the `IsPresent`/`IsVoid` markers the companion is parameterized by.
-- [`CanUpcast`](../casting/can_upcast.md) and [`CanDowncast`](../casting/can_downcast.md) — casts built on this recursion.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates the companion and this
+  [`FinalizeExtractResult`](./finalize_extract_result.md): how a chain ends.
+- [`FromVariant`](./from_variant.md): constructing an enum from one named variant.
+- [`PartialData`](../builder/partial_data.md): what names the enum a companion belongs to.
+- [`MapType`](../type-level/map_type.md): the `IsPresent`/`IsVoid` markers the companion is parameterized by.
+- [`CanUpcast`](../casting/can_upcast.md) and [`CanDowncast`](../casting/can_downcast.md): casts built on this recursion.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates the companion and this
   impl.
-- [`HasBuilder`](../builder/has_builder.md) — the struct analogue.
+- [`HasBuilder`](../builder/has_builder.md): the struct analogue.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — partial variants and the extensible visitor
+- [Extensible variants](/docs/concepts/extensible-variants): partial variants and the extensible visitor
   pattern.
 
 ## Source
 
-- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs)
-  — `HasExtractor` and the rest of the family
-- [`partial_data.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/partial_data.rs)
-  — `PartialData`, which the companions also implement
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `HasExtractor` and the rest of the family
+- [`partial_data.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/partial_data.rs):
+  `PartialData`, which the companions also implement
 
 ---
 

@@ -120,8 +120,8 @@ let name = <UseContext as FieldMapper<Outer, Symbol!("inner")>>::map_field(
 
 - **Use [`ChainGetters`](../../providers/chain_getters.md)** to reach a field on a nested context by wiring.
 - **Use [`FieldGetter`](./field_getter.md)** when the wired access is a plain one-level read.
-- **Use [`MapField`](./map_field.md)** when the descent happens on `self` rather than on a wired context
-  — the consumer-side twin.
+- **Use [`MapField`](./map_field.md)** when the descent happens on `self` rather than on a wired context:
+  the consumer-side twin.
 - **Use an [`#[implicit]`](../../attributes/implicit.md) argument** before any of them for a field of the
   implementation's own context.
 
@@ -133,9 +133,9 @@ whether composing the existing ones does the job.
 `FieldMapper` is a blanket impl over every [`FieldGetter`](./field_getter.md), with two `'static` bounds
 that its consumer-side twin needs only one of:
 
-- the **tag** must be `'static`, which is free — a [`Symbol!`](../../macros/symbol.md) or an
+- the **tag** must be `'static`, which is free, since a [`Symbol!`](../../macros/symbol.md) or an
   [`Index<N>`](../../types/index_type.md) is `'static` by construction;
-- the **getter** — that is, `Self`, the provider — must be `'static`, which is also free, since a
+- the **getter**, that is, `Self`, the provider, must be `'static`, which is also free, since a
   provider is a zero-sized marker type with no lifetime parameters in the ordinary case.
 
 The field's *value* stays free of any bound, which is the whole point: it is the intermediate whose
@@ -165,25 +165,25 @@ failure when it happens.
 
 ## Related constructs
 
-- [`MapField`](./map_field.md) — the consumer-side twin, and where the lifetime problem is explained in
+- [`MapField`](./map_field.md): the consumer-side twin, and where the lifetime problem is explained in
   full.
-- [`FieldGetter`](./field_getter.md) — the supertrait, and the plain wired read.
-- [`ChainGetters`](../../providers/chain_getters.md) — the provider that uses this to descend.
-- [`HasField`](./has_field.md) — the consumer side of field access.
-- [`UseField`](../../providers/use_field.md) and [`UseContext`](../../providers/use_context.md) — the two
+- [`FieldGetter`](./field_getter.md): the supertrait, and the plain wired read.
+- [`ChainGetters`](../../providers/chain_getters.md): the provider that uses this to descend.
+- [`HasField`](./has_field.md): the consumer side of field access.
+- [`UseField`](../../providers/use_field.md) and [`UseContext`](../../providers/use_context.md): the two
   providers a chain is usually built from.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags, `'static` by construction.
-- [`MRef`](../../types/mref.md) — the return type for a getter that may produce rather than lend.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags, `'static` by construction.
+- [`MRef`](../../types/mref.md): the return type for a getter that may produce rather than lend.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the duality this trait is
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the duality this trait is
   an instance of.
 
 ## Source
 
-- [`map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs)
-  — `FieldMapper` and `MapField`
+- [`map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs):
+  `FieldMapper` and `MapField`
 
 ---
 

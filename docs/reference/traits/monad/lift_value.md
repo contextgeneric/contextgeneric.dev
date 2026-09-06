@@ -14,7 +14,7 @@ Putting a value back into a monad's output type, on either branch.
 **You are not expected to name `LiftValue`.** The
 [bind providers](../../providers/monad/index.md) use it while running a step, and the monad markers CGP
 ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
-page is here to explain how a step produces its output — and why that takes two methods rather than
+page is here to explain how a step produces its output, and why that takes two methods rather than
 one.
 
 :::
@@ -79,7 +79,7 @@ where the mirroring shows:
 | `ErrMonadic` | `Ok` | `Ok` |
 | `OkMonadic` | `Err` | `Err` |
 
-So under `ErrMonadic` a bare value re-enters the pipeline as `Ok(value)` — the ordinary `?` behaviour —
+So under `ErrMonadic` a bare value re-enters the pipeline as `Ok(value)`, the ordinary `?` behaviour,
 and under `OkMonadic` as `Err(value)`.
 
 **Both methods matter, and conflating them changes behaviour silently.** `lift_value` is used where a
@@ -94,7 +94,7 @@ by wiring [`PipeMonadic`](../../providers/monad/pipe_monadic.md) with a marker a
 
 The one real reason to name it is **defining a new monad**. Implement it alongside
 [`ContainsValue`](./contains_value.md), since the two are the pair that runs a step, and take the
-`OkMonadic`/`ErrMonadic` pair as the model — including their separate treatment of the two methods, which
+`OkMonadic`/`ErrMonadic` pair as the model, including their separate treatment of the two methods, which
 is the part a first implementation usually gets wrong.
 
 If short-circuiting is not what you need, the [handler combinators](../../providers/handler/index.md)
@@ -112,7 +112,7 @@ whether to short-circuit, and then lifts:
 - on the **continue** branch, the continuation has already produced an inner output, so it is forwarded
   with `lift_output`.
 
-That is the whole reason for two methods. A monad whose two methods agree — as `IdentMonadic`'s do — is
+That is the whole reason for two methods. A monad whose two methods agree, as `IdentMonadic`'s do, is
 one where the distinction happens to be vacuous, not one where it does not exist.
 
 The transformer forms implement both by delegating to the base monad after handling their own layer,
@@ -124,8 +124,8 @@ which lets a stack lift through *n* layers with no depth-specific code.
 
 **It is not a component and cannot be wired.** What gets wired is the provider that consumes it.
 
-**`lift_value` and `lift_output` are not the same method.** Implementing the second as the first — or
-forgetting the distinction — collapses the two branches and silently changes what a pipeline does on a
+**`lift_value` and `lift_output` are not the same method.** Implementing the second as the first, or
+forgetting the distinction, collapses the two branches and silently changes what a pipeline does on a
 short-circuit. This is the most likely defect in a hand-written monad.
 
 **`OkMonadic` lifts with `Err`.** Its continue branch is the error half, which follows from
@@ -138,25 +138,25 @@ forwarded; the associated type is the step's own. They coincide for some monads 
 
 ## Related constructs
 
-- [`ContainsValue`](./contains_value.md) — the other half of running a step: getting out of the output
+- [`ContainsValue`](./contains_value.md): the other half of running a step: getting out of the output
   type.
-- [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md) — the two traits that fold
+- [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md): the two traits that fold
   the pipeline rather than run a step.
-- [Monad providers](../../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
+- [Monad providers](../../providers/monad/index.md): `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers; what you actually wire.
-- [`Computer`](../../components/handler/computer.md) — the component family the bind providers implement.
-- [Handler combinators](../../providers/handler/index.md) — composition without a short-circuit
+- [`Computer`](../../components/handler/computer.md): the component family the bind providers implement.
+- [Handler combinators](../../providers/handler/index.md): composition without a short-circuit
   branch.
 
 The ideas behind it:
 
-- [Monadic handlers](/docs/concepts/monadic-handlers) — why a pipeline short-circuits and how the monads
+- [Monadic handlers](/docs/concepts/monadic-handlers): why a pipeline short-circuits and how the monads
   compose.
 
 ## Source
 
-- [`lift.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/lift.rs)
-  — `LiftValue`
+- [`lift.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/lift.rs):
+  `LiftValue`
 - Per-marker impls: [`cgp-monad/src/monadic/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-monad/src/monadic)
 
 ---

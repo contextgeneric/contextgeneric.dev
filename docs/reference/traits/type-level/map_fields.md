@@ -21,12 +21,12 @@ beside it. The one case for naming it is generic code that must describe a unifo
 
 ## Overview
 
-A partial record is the same record with every field's storage changed the same way — each value wrapped
+A partial record is the same record with every field's storage changed the same way: each value wrapped
 in an `Option`, or replaced by `()`, or left alone. Describing that as a type means rewriting every entry
 of the shape uniformly, and `MapFields<Mapper>` is that operation.
 
 The list's length and order never change. Each entry type `T` becomes `Mapper::Map<T>`, where the mapper
-is a [`MapType`](./map_type.md) marker — so **the marker decides the whole effect**. With `IsPresent` it
+is a [`MapType`](./map_type.md) marker, so **the marker decides the whole effect**. With `IsPresent` it
 is the identity; with `IsNothing` every entry collapses to `()`; with `IsOptional` every entry becomes
 `Option<_>`; with `IsVoid` every entry becomes uninhabited.
 
@@ -45,7 +45,7 @@ pub trait MapFields<Mapper> {
 ```
 
 `Self` is the list, `Mapper` is the [`MapType`](./map_type.md) marker to apply, and the result is exposed
-as `Mapped` — note the name, which differs from the `Output` its two siblings
+as `Mapped`. Note the name, which differs from the `Output` its two siblings
 [`AppendProduct`](./append_product.md) and [`ConcatProduct`](./concat_product.md) expose. There is no
 method, because there is nothing to execute.
 
@@ -63,7 +63,7 @@ use cgp::core::field::traits::MapFields;
 
 ## Examples
 
-Applying `IsOptional` turns a product of values into a product of optionals — the shape a partial builder
+Applying `IsOptional` turns a product of values into a product of optionals, the shape a partial builder
 uses to track what is not yet filled:
 
 ```rust
@@ -90,7 +90,7 @@ type OptionalVariants = <Variants as MapFields<IsOptional>>::Mapped;
 ## When to use it
 
 **Reach for it when generic code must name a uniformly re-wrapped shape**, the form a partial
-representation takes — and essentially never otherwise.
+representation takes, and essentially never otherwise.
 
 - **Reach for [`AppendProduct`](./append_product.md) or [`ConcatProduct`](./concat_product.md)** when the
   shape grows rather than changing its wrapping.
@@ -100,7 +100,7 @@ representation takes — and essentially never otherwise.
 
 One name worth disambiguating, because three similar ones sit close together. `MapFields` applies one
 marker across a whole list; [`MapType`](./map_type.md) is a single marker naming *one* field's storage;
-and [`MapField`](../field-access/map_field.md) — singular, no *s* — is a lifetime helper for reading a nested field.
+and [`MapField`](../field-access/map_field.md), singular, with no *s*, is a lifetime helper for reading a nested field.
 Three similar names, three unrelated jobs.
 
 ## Under the hood
@@ -124,7 +124,7 @@ impl<Mapper> MapFields<Mapper> for Nil {
 
 The `Either`/`Void` impls mirror these exactly, with `Either` standing where `Cons` does and `Void` where
 `Nil` does. Because the recursion only ever replaces a head *type*, the list's length and shape are
-structurally preserved — which is why a mapped product is still a product of the same arity, and a mapped
+structurally preserved, which is why a mapped product is still a product of the same arity, and a mapped
 sum still a sum.
 
 All of it resolves during type checking, so a mapped shape is a name for a type rather than a
@@ -138,8 +138,8 @@ needs its own import from `cgp::core::field::impls`.
 **The result is `Mapped`, not `Output`.** [`AppendProduct`](./append_product.md) and
 [`ConcatProduct`](./concat_product.md) both expose `Output`, and this one does not.
 
-**It computes types, not values.** A `MapFields<IsOptional>` result does not wrap anything at run time —
-something still has to build the wrapped values, which on a partial record is
+**It computes types, not values.** A `MapFields<IsOptional>` result does not wrap anything at run time.
+Something still has to build the wrapped values, which on a partial record is
 [`TransformMapFields`](./transform_map_fields.md).
 
 **A marker with no `MapType` impl does not resolve**, and the error names the missing `MapType` bound
@@ -152,26 +152,26 @@ width.
 
 ## Related constructs
 
-- [`MapType`](./map_type.md) — the markers this applies, and the trait most easily confused with it.
-- [`AppendProduct`](./append_product.md) and [`ConcatProduct`](./concat_product.md) — the two operations
+- [`MapType`](./map_type.md): the markers this applies, and the trait most easily confused with it.
+- [`AppendProduct`](./append_product.md) and [`ConcatProduct`](./concat_product.md): the two operations
   that grow a list rather than rewrite it.
-- [`TransformMapFields`](./transform_map_fields.md) — the value-level counterpart, which actually converts
+- [`TransformMapFields`](./transform_map_fields.md): the value-level counterpart, which actually converts
   the fields.
-- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the sugar for both lists.
-- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
+- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md): the sugar for both lists.
+- [Type-level lists](../../types/index.md): the `Cons`/`Nil` and `Either`/`Void` chains
   underneath.
-- [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
-- [`MapField`](../field-access/map_field.md) — the similarly-named lifetime helper, which does something else entirely.
+- [`HasFields`](../shape/has_fields.md): where a type's existing shape comes from.
+- [`MapField`](../field-access/map_field.md): the similarly-named lifetime helper, which does something else entirely.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — presence tracking on a partial record.
-- [Extensible variants](/docs/concepts/extensible-variants) — possibility tracking on a partial variant.
+- [Extensible records](/docs/concepts/extensible-records): presence tracking on a partial record.
+- [Extensible variants](/docs/concepts/extensible-variants): possibility tracking on a partial variant.
 
 ## Source
 
-- [`map_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_fields.rs)
-  — `MapFields`, over both lists
+- [`map_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_fields.rs):
+  `MapFields`, over both lists
 
 ---
 

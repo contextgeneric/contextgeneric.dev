@@ -35,7 +35,7 @@ pub trait DefaultImpls1<T, Components> {
 }
 ```
 
-`Self` is the key being looked up — the *instance* type, such as `String`. `T` is the further lookup
+`Self` is the key being looked up, the *instance* type, such as `String`. `T` is the further lookup
 type, which the attribute fills with the component name. `Components` is the table the lookup runs
 against, and `Delegate` is the resolved provider. There is no method and no data, so resolving a default
 projects `Delegate` from the matching impl, exactly as with
@@ -48,7 +48,7 @@ which lets the projection `<Key as Trait<…, Delegate = Provider>>` resolve cle
 :::warning
 
 **The parameter names are misleading about which position holds what.** For this trait and its sibling,
-**`Self` is the instance type and the component name is a leading parameter** — the opposite of
+**`Self` is the instance type and the component name is a leading parameter**, the opposite of
 [`DefaultNamespace`](./default_namespace.md). The [next section](#the-one-thing-to-get-right) works it
 out.
 
@@ -82,7 +82,7 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 
 The rule that governs this comes from the attribute rather than the trait, and once you have it the
 positions stop being surprising. **`#[default_impl(Key in NamespacePath)]` makes `Key` the impl's
-`Self`** and appends the table parameter to whatever `NamespacePath` names — so the leading arguments are
+`Self`** and appends the table parameter to whatever `NamespacePath` names, so the leading arguments are
 simply whatever you wrote inside the path. The same rule is why the `for … in` loop's bound reads
 `T: DefaultImpls1<Component, App, Delegate = Provider>`, with the loop variable in the `Self` position.
 
@@ -129,7 +129,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, parameter-targeted** — `App` carries the wiring and the shown value is a
+**Environmental context, parameter-targeted.** `App` carries the wiring and the shown value is a
 parameter. The loop wires every type with a registered default by projecting
 `T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>`, and the direct `u64` line shadows
 whatever the namespace would otherwise supply for that one type.
@@ -179,13 +179,13 @@ where T: DefaultImpls1<Component, App, Delegate = Provider>
 
 Read it as: for each type `T` that has a default, wire that key to the projected `Provider`.
 
-**Because the loop variables appear only in that bound and in the key, the key must mention `T`** —
+**Because the loop variables appear only in that bound and in the key, the key must mention `T`**,
 otherwise the parameter is unconstrained and the compiler rejects the impl with `E0207`, which reads as a
 puzzling error about a generic parameter rather than about the loop.
 
 The registration side is the mirror. [`#[default_impl]`](../../attributes/default_impl.md) emits an impl of
-this trait for the key type, carrying **only** the parameters naming the key and provider plus the table
-— never the provider's own `where` clause. A provider whose bounds come from `#[use_type]`, `#[uses]`,
+this trait for the key type, carrying **only** the parameters naming the key and provider plus the table,
+never the provider's own `where` clause. A provider whose bounds come from `#[use_type]`, `#[uses]`,
 `#[implicit]`, or `#[use_provider]` therefore registers cleanly, because those bounds stay on the
 provider's impl and its [`IsProviderFor`](../wiring/is_provider_for.md), and are checked when a real context
 resolves it.
@@ -205,29 +205,29 @@ Put downstream wiring in the namespace body instead.
 
 **A default is a fallback, not an assignment.** A direct entry silently shadows it.
 
-**The registration impl carries none of the provider's bounds**, which is deliberate — they are checked
+**The registration impl carries none of the provider's bounds**, which is deliberate: they are checked
 where the provider is used rather than where it is registered.
 
 ## Related constructs
 
-- [`DefaultNamespace`](./default_namespace.md) — the one-key form, and the common case.
-- [`DefaultImpls2`](./default_impls2.md) — the two-type form.
-- [`#[default_impl(...)]`](../../attributes/default_impl.md) — the attribute that emits impls of this trait.
-- [`cgp_namespace!`](../../macros/cgp_namespace.md) — defines a namespace, and documents `#[prefix(...)]`.
-- [`delegate_components!`](../../macros/delegate_components.md) — carries the `for … in` loop.
-- [`DelegateComponent`](../wiring/delegate_component.md) — what the loop ultimately writes.
-- [`IsProviderFor`](../wiring/is_provider_for.md) — where a registered provider's real bounds are checked.
-- [`RedirectLookup`](../../providers/redirect_lookup.md) — the usual `Delegate` value.
+- [`DefaultNamespace`](./default_namespace.md): the one-key form, and the common case.
+- [`DefaultImpls2`](./default_impls2.md): the two-type form.
+- [`#[default_impl(...)]`](../../attributes/default_impl.md): the attribute that emits impls of this trait.
+- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace, and documents `#[prefix(...)]`.
+- [`delegate_components!`](../../macros/delegate_components.md): carries the `for … in` loop.
+- [`DelegateComponent`](../wiring/delegate_component.md): what the loop ultimately writes.
+- [`IsProviderFor`](../wiring/is_provider_for.md): where a registered provider's real bounds are checked.
+- [`RedirectLookup`](../../providers/redirect_lookup.md): the usual `Delegate` value.
 
 The ideas behind it:
 
-- [Namespaces](/docs/concepts/namespaces) — reusable, inheritable wiring tables and preset-style
+- [Namespaces](/docs/concepts/namespaces): reusable, inheritable wiring tables and preset-style
   configuration.
 
 ## Source
 
-- [`namespaces.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/namespaces.rs)
-  — the three lookup traits
+- [`namespaces.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/namespaces.rs):
+  the three lookup traits
 - The `#[default_impl]` attribute: [`attributes/default_impl/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/attributes/default_impl)
 - Header and loop codegen: [`delegate_component/statement/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/delegate_component/statement)
 

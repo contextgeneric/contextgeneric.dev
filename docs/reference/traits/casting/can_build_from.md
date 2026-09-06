@@ -9,7 +9,7 @@ Filling a builder with every field it shares with another record.
 
 ## Overview
 
-Assembling one struct out of several smaller ones means copying each shared field across by hand — a
+Assembling one struct out of several smaller ones means copying each shared field across by hand: a
 line per field, repeated for every pair of types. `CanBuildFrom` derives that copying from the field
 names instead.
 
@@ -123,7 +123,7 @@ an unsatisfied `HasFields` bound on the source type.
 is a builder you still have to [finalize](../builder/finalize_build.md).
 
 **Field names are the whole interface.** Renaming a field in one struct silently stops it being copied,
-and the failure surfaces at `finalize_build` — a missing-method error — rather than at the rename.
+and the failure surfaces at `finalize_build`, as a missing-method error, rather than at the rename.
 
 **A field the target lacks is not an error and not copied.** The walk matches on the target's slots, so
 an extra field on the source is simply dropped.
@@ -132,23 +132,23 @@ an extra field on the source is simply dropped.
 
 ## Related constructs
 
-- [`HasBuilder`](../builder/has_builder.md) — where a builder comes from, and the family this belongs to.
-- [`BuildField`](../builder/build_field.md) and [`TakeField`](../builder/take_field.md) — the two primitives the recursion
+- [`HasBuilder`](../builder/has_builder.md): where a builder comes from, and the family this belongs to.
+- [`BuildField`](../builder/build_field.md) and [`TakeField`](../builder/take_field.md): the two primitives the recursion
   routes through.
-- [`FinalizeBuild`](../builder/finalize_build.md) — how the resulting builder becomes a struct.
-- [`HasFields`](../shape/has_fields.md) — the shape the walk reads, and what the source must derive.
-- [`CanBuildWithDefault`](../optional/can_build_with_default.md) — merge plus a defaulted finalize, in one call.
-- [`CanUpcast`](./can_upcast.md) — the enum counterpart.
-- [`#[derive(CgpRecord)]`](../../derives/derive_cgp_record.md) — what makes a struct eligible.
+- [`FinalizeBuild`](../builder/finalize_build.md): how the resulting builder becomes a struct.
+- [`HasFields`](../shape/has_fields.md): the shape the walk reads, and what the source must derive.
+- [`CanBuildWithDefault`](../optional/can_build_with_default.md): merge plus a defaulted finalize, in one call.
+- [`CanUpcast`](./can_upcast.md): the enum counterpart.
+- [`#[derive(CgpRecord)]`](../../derives/derive_cgp_record.md): what makes a struct eligible.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — merging records through a builder.
+- [Extensible records](/docs/concepts/extensible-records): merging records through a builder.
 
 ## Source
 
-- [`build_from.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/build_from.rs)
-  — `CanBuildFrom` and its `FieldsBuilder` recursion
+- [`build_from.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/build_from.rs):
+  `CanBuildFrom` and its `FieldsBuilder` recursion
 
 ---
 

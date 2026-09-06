@@ -66,7 +66,7 @@ let person = remainder
     .finalize_build();                                       // all present again
 ```
 
-Note that a value straight out of `into_builder` is already finalizable — every marker is `IsPresent`, so
+Note that a value straight out of `into_builder` is already finalizable: every marker is `IsPresent`, so
 [`finalize_build`](./finalize_build.md) resolves immediately and the round trip is the identity. The trait earns its keep only from what happens in between.
 
 ## When to use it
@@ -76,8 +76,8 @@ entry points and the one that shows up in generic code more than in application 
 
 - **Use [`HasBuilder`](./has_builder.md)** when assembling a record from independent pieces. That is the
   common case and the one the extensible builder pattern is about.
-- **Use `IntoBuilder`** when a complete value must be decomposed — to swap one field, to hand fields to
-  several destinations, to rebuild a record with one type changed.
+- **Use `IntoBuilder`** when a complete value must be decomposed: to swap one field, to hand fields to
+  several destinations, or to rebuild a record with one type changed.
 - **Use [`ToFields`](../shape/to_fields.md)** instead when what you want is the value's *shape* as a flat list
   rather than a partial type you can fill. A partial value tracks presence; a `Fields` product does not.
 - **Prefer a struct update expression** in concrete code. `Person { first_name, ..person }` does the
@@ -85,8 +85,8 @@ entry points and the one that shows up in generic code more than in application 
 
 ## Under the hood
 
-The derive generates one partial companion per record — `__Partial{Name}`, with a
-[`MapType`](../type-level/map_type.md) parameter per field — and the two entry points differ only in the
+The derive generates one partial companion per record (`__Partial{Name}`, with a
+[`MapType`](../type-level/map_type.md) parameter per field), and the two entry points differ only in the
 configuration they name:
 
 ```rust
@@ -100,7 +100,7 @@ impl IntoBuilder for Person {
 ```
 
 `into_builder` moves each field of the concrete struct into the corresponding slot of the companion,
-which under `IsPresent` holds the value itself — so the conversion is a move rather than a wrap, and
+which under `IsPresent` holds the value itself, so the conversion is a move rather than a wrap, and
 nothing about the runtime representation changes.
 
 Because the result is at the all-present configuration, it satisfies
@@ -113,13 +113,13 @@ which is exactly the pair a redistribution needs.
 original must survive, bearing in mind that gives you a shape rather than a builder.
 
 **The result is already finalizable.** Calling `into_builder().finalize_build()` is the identity, which
-is legal and pointless — the trait earns its keep only if something happens in between.
+is legal and pointless. The trait earns its keep only if something happens in between.
 
 **The partial type cannot be printed or cloned.** The derive clears the original's attributes, so a value
 mid-redistribution has none of the record's own derives.
 
 **It is a method, where [`HasBuilder`](./has_builder.md)'s `builder()` is an associated function.** The
-asymmetry is deliberate — one starts from a value and the other from nothing — and it catches people
+asymmetry is deliberate (one starts from a value and the other from nothing), and it catches people
 writing `Person::into_builder()`.
 
 **Taking a field out makes the value unfinalizable until it is put back.** That is the guarantee, and it
@@ -128,25 +128,25 @@ dropped.
 
 ## Related constructs
 
-- [`HasBuilder`](./has_builder.md) — the other entry point, and where the family is explained in full.
-- [`TakeField`](./take_field.md) — removing a present field, which this enables.
-- [`BuildField`](./build_field.md) — putting one back.
-- [`FinalizeBuild`](./finalize_build.md) — returning to the concrete struct.
-- [`UpdateField`](./update_field.md) — the primitive underneath both directions.
-- [`PartialData`](./partial_data.md) — what names the destination type mid-build.
-- [`ToFields`](../shape/to_fields.md) — the flat-shape alternative to a partial value.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates this impl.
-- [`MapType`](../type-level/map_type.md) — the markers the configuration is written in.
+- [`HasBuilder`](./has_builder.md): the other entry point, and where the family is explained in full.
+- [`TakeField`](./take_field.md): removing a present field, which this enables.
+- [`BuildField`](./build_field.md): putting one back.
+- [`FinalizeBuild`](./finalize_build.md): returning to the concrete struct.
+- [`UpdateField`](./update_field.md): the primitive underneath both directions.
+- [`PartialData`](./partial_data.md): what names the destination type mid-build.
+- [`ToFields`](../shape/to_fields.md): the flat-shape alternative to a partial value.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates this impl.
+- [`MapType`](../type-level/map_type.md): the markers the configuration is written in.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`has_builder.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_builder.rs)
-  — `IntoBuilder` and `HasBuilder`
+- [`has_builder.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_builder.rs):
+  `IntoBuilder` and `HasBuilder`
 
 ---
 

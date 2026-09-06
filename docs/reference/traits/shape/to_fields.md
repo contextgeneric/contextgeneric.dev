@@ -66,7 +66,7 @@ let config_again = Config::from_fields(fields);   // the product -> Config
 assert_eq!(config, config_again);
 ```
 
-The `clone()` is there only because the assertion compares against the original — `to_fields` would
+The `clone()` is there only because the assertion compares against the original. `to_fields` would
 otherwise have consumed it, which is exactly the point.
 
 In generic code, the bound is the point:
@@ -116,7 +116,7 @@ An enum's conversion is the dual: each concrete variant is matched onto its arm 
 terminated by `Void`, tagged with the variant name.
 
 Because the shape is built positionally from declaration order, `to_fields` and
-[`from_fields`](./from_fields.md) are exact inverses by construction — there is no lookup, no matching by
+[`from_fields`](./from_fields.md) are exact inverses by construction: there is no lookup, no matching by
 name at run time, and nothing that can fail.
 
 ## Common Mistakes
@@ -139,24 +139,24 @@ such as a [cast](../casting/can_downcast.md).
 
 ## Related constructs
 
-- [`HasFields`](./has_fields.md) — the supertrait that names the shape.
-- [`FromFields`](./from_fields.md) — the reverse conversion.
-- [`ToFieldsRef`](./to_fields_ref.md) — the borrowing form, which leaves the value intact.
-- [`HasFieldsRef`](./has_fields_ref.md) — the shape that form produces.
-- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md) — generates this impl.
-- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md) — what
+- [`HasFields`](./has_fields.md): the supertrait that names the shape.
+- [`FromFields`](./from_fields.md): the reverse conversion.
+- [`ToFieldsRef`](./to_fields_ref.md): the borrowing form, which leaves the value intact.
+- [`HasFieldsRef`](./has_fields_ref.md): the shape that form produces.
+- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
+- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md): what
   a shape is made of.
-- [Type-level lists](../../types/index.md) — the `Cons` chain the conversion builds.
-- [`HasBuilder`](../builder/has_builder.md) — incremental assembly, as against this wholesale conversion.
+- [Type-level lists](../../types/index.md): the `Cons` chain the conversion builds.
+- [`HasBuilder`](../builder/has_builder.md): incremental assembly, as against this wholesale conversion.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — a struct as a product of named fields.
+- [Extensible records](/docs/concepts/extensible-records): a struct as a product of named fields.
 
 ## Source
 
-- [`to_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/to_fields.rs)
-  — `ToFields` and `ToFieldsRef`
+- [`to_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/to_fields.rs):
+  `ToFields` and `ToFieldsRef`
 
 ---
 

@@ -51,7 +51,7 @@ storage reads `M: MapType<Map<String> = String>`, and one that leaves it open is
 ## Usage
 
 Four markers implement it, and they are the trait's whole public surface. **Three are in the prelude;
-`IsOptional` is not** — import it from `cgp::core::field::impls`.
+`IsOptional` is not.** Import it from `cgp::core::field::impls`.
 
 ```rust
 impl MapType for IsPresent  { type Map<T> = T; }         // the field holds its value
@@ -61,7 +61,7 @@ impl MapType for IsOptional { type Map<T> = Option<T>; } // the field may or may
 ```
 
 **The distinction between `IsNothing` and `IsVoid` is the one that matters and the one most easily
-blurred.** `IsNothing` maps to `()`, which is **inhabited** — an absent field is a real state a value can
+blurred.** `IsNothing` maps to `()`, which is **inhabited**: an absent field is a real state a value can
 be in, which is why a builder needs an explicit all-present impl to finalize. `IsVoid` maps to the
 uninhabited `Void`, so a value with every marker `IsVoid` **cannot exist**. That is exactly how an
 extractor discharges its remainder with an empty `match`. Records use the first, variants the second.
@@ -106,7 +106,7 @@ common case, and it is most of what this page is for.
 
 The trait itself has narrower uses.
 
-- **Bound on `MapType`** when you write generic code over a partial type's marker parameter — which is
+- **Bound on `MapType`** when you write generic code over a partial type's marker parameter, which is
   what the builder and extractor families do internally, and what you would do writing your own
   partial-type machinery.
 - **Implement [`TransformMap`](./transform_map.md)** rather than this trait to define a new per-field
@@ -117,7 +117,7 @@ The trait itself has narrower uses.
 - **Reach for the [optional-field layer](../optional/has_optional_builder.md)** if what you want is defaulted or
   optional finalization. Both already exist, built on exactly this.
 
-[`MapFields`](./map_fields.md) — the other trait with a similar name — is a different thing: it applies
+[`MapFields`](./map_fields.md), the other trait with a similar name, is a different thing: it applies
 one marker across every entry of a type-level list, where this one names a single field's storage.
 
 ## Under the hood
@@ -151,7 +151,7 @@ two families have been crossed.
 
 **`MapType` and [`MapFields`](./map_fields.md) are different traits.** One marker naming one field's
 storage, against one marker applied across a whole list. The names are close and the jobs are not.
-[`MapField`](../field-access/map_field.md) — singular, no *s* — is a third, unrelated thing again.
+[`MapField`](../field-access/map_field.md), singular, with no *s*, is a third, unrelated thing again.
 
 **A new marker gets you a type and nothing else.** Implementing `MapType` is easy; the derives' finalize
 and transform impls are written against the standard markers, so a custom one has no machinery behind it.
@@ -161,28 +161,28 @@ and transform impls are written against the standard markers, so a custom one ha
 
 ## Related constructs
 
-- [`MapTypeRef`](./map_type_ref.md) — the same idea for borrowed views, with a lifetime.
-- [`TransformMap`](./transform_map.md) — the per-field conversion function, and the extension point.
-- [`TransformMapFields`](./transform_map_fields.md) — that conversion lifted across a whole record.
-- [`HasBuilder`](../builder/has_builder.md) — uses `IsPresent`/`IsNothing` to track which fields are filled.
-- [`ExtractField`](../variant/extract_field.md) — uses `IsPresent`/`IsVoid` to track which variants remain.
-- [`UpdateField`](../builder/update_field.md) — the primitive that moves a field from one marker to another.
-- [`MapFields`](./map_fields.md) — applies one marker across a whole type-level list.
-- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — generates the partial types these markers
+- [`MapTypeRef`](./map_type_ref.md): the same idea for borrowed views, with a lifetime.
+- [`TransformMap`](./transform_map.md): the per-field conversion function, and the extension point.
+- [`TransformMapFields`](./transform_map_fields.md): that conversion lifted across a whole record.
+- [`HasBuilder`](../builder/has_builder.md): uses `IsPresent`/`IsNothing` to track which fields are filled.
+- [`ExtractField`](../variant/extract_field.md): uses `IsPresent`/`IsVoid` to track which variants remain.
+- [`UpdateField`](../builder/update_field.md): the primitive that moves a field from one marker to another.
+- [`MapFields`](./map_fields.md): applies one marker across a whole type-level list.
+- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md): generates the partial types these markers
   parameterize.
-- [Type-level lists](../../types/index.md) — where the uninhabited `Void` comes from.
+- [Type-level lists](../../types/index.md): where the uninhabited `Void` comes from.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — presence tracking on a partial record.
-- [Extensible variants](/docs/concepts/extensible-variants) — possibility tracking on a partial variant.
+- [Extensible records](/docs/concepts/extensible-records): presence tracking on a partial record.
+- [Extensible variants](/docs/concepts/extensible-variants): possibility tracking on a partial variant.
 
 ## Source
 
-- [`map_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_type.rs)
-  — the trait
-- [`impls/map_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type.rs)
-  — `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional`
+- [`map_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_type.rs):
+  the trait
+- [`impls/map_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type.rs):
+  `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional`
 
 ---
 

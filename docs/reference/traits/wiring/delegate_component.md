@@ -21,8 +21,8 @@ wiring error naming this trait is legible.
 
 ## Overview
 
-Wiring a **context** — the type the capability runs against, which supplies the values it needs as its
-fields — means recording which implementation it uses for each capability. `DelegateComponent` is the trait
+Wiring a **context** (the type the capability runs against, which supplies the values it needs as its
+fields) means recording which implementation it uses for each capability. `DelegateComponent` is the trait
 that record is made of. One impl is one entry:
 
 ```rust
@@ -42,7 +42,7 @@ page is that it appears by name in compiler errors, and that reading it is how y
 
 One thing to notice early, because it explains why the trait is so general: **the key does not have to be a
 component name.** When it is, the entry makes the context inherit the component's provider trait. When it
-is any other type — a shape, a tag, a path segment — the same trait is just a lookup table that a provider
+is any other type (a shape, a tag, a path segment) the same trait is just a lookup table that a provider
 walks. One trait covers both, which is why it underlies both ordinary wiring and the inner dispatch tables.
 
 ## Definition
@@ -98,23 +98,23 @@ error rather than a silent overwrite.
 
 The key's type decides what the entry *means*, and there are three shapes in practice.
 
-A **component name** — `GreeterComponent`, `AreaCalculatorComponent` — is the ordinary case. An entry keyed
+A **component name** (`GreeterComponent`, `AreaCalculatorComponent`) is the ordinary case. An entry keyed
 this way is read by the blanket impl that [`#[cgp_component]`](../../macros/cgp_component.md) generates, which
 concludes that the context has the component's provider trait, and from there its consumer trait.
 
-An **arbitrary type** — a shape, a tag — makes the table a plain dispatch map with no provider trait
+An **arbitrary type** (a shape, a tag) makes the table a plain dispatch map with no provider trait
 attached. This is what the nested tables inside [`UseDelegate`](../../providers/use_delegate.md) are, and what
 the `open` statement's per-key entries resolve through.
 
-A **type-level path** — a [`PathCons`](../../types/path_cons.md) list built by
-[`Path!`](../../macros/path.md) — is how namespaces key their entries, so a lookup walks one segment at a time.
+A **type-level path** (a [`PathCons`](../../types/path_cons.md) list built by
+[`Path!`](../../macros/path.md)) is how namespaces key their entries, so a lookup walks one segment at a time.
 [`RedirectLookup`](../../providers/redirect_lookup.md) is the provider that performs that walk.
 
 ### What owns a table
 
 `Self` is not always a context. A [`delegate_components!`](../../macros/delegate_components.md) block with a
 leading `new` declares a provider bundle that owns its own table, so several contexts can delegate a whole
-group of components to it as one unit. Resolution is shallow — one read yields the immediate `Delegate` —
+group of components to it as one unit. Resolution is shallow (one read yields the immediate `Delegate`),
 and chaining happens when that delegate is itself a table, which is exactly what a bundle is.
 
 ## Examples
@@ -158,7 +158,7 @@ impl DelegateComponent<GreeterComponent> for App {
 ```
 
 From there the generated blanket impls take over: because `App` delegates `GreeterComponent`, it gets the
-`Greeter` provider trait, and because it has that, it gets `CanGreet` — so `app.greet()` compiles. Swap
+`Greeter` provider trait, and because it has that, it gets `CanGreet`, so `app.greet()` compiles. Swap
 `GreetHello` for another provider and only that one line changes.
 
 An arbitrary-key table looks identical and means something different. The nested-table syntax builds a
@@ -182,13 +182,13 @@ at dispatch time to pick `RectangleArea` or `CircleArea` for the shape it was as
 **Write [`delegate_components!`](../../macros/delegate_components.md), not `DelegateComponent`.** That is the
 honest summary of this page: the trait is what you read, and the macro is what you write. The macro also
 emits the [`IsProviderFor`](./is_provider_for.md) forwarding impl beside each entry, which is what keeps a
-missing dependency diagnosable — so a hand-written `DelegateComponent` impl gets you the wiring and loses
+missing dependency diagnosable, so a hand-written `DelegateComponent` impl gets you the wiring and loses
 the error message.
 
-There are two narrow reasons to name the trait yourself.
+There are narrow reasons to name the trait yourself.
 
-- **Reading an entry in generic code.** A provider that must resolve a key itself — a dispatcher, a
-  higher-order provider walking a table — bounds on `DelegateComponent<Key>` and projects `Delegate`. This
+- **Reading an entry in generic code.** A provider that must resolve a key itself (a dispatcher, a
+  higher-order provider walking a table) bounds on `DelegateComponent<Key>` and projects `Delegate`. This
   is the one legitimate hand-written use, and it is a *read*.
 - **Recognizing it in an error.** `the trait bound App: DelegateComponent<GreeterComponent> is not
   satisfied` means the context never wired that component. That is the most common wiring error there is,
@@ -201,7 +201,7 @@ implementation is one of several, or is shared, or should compose with a wrapper
 
 ## Under the hood
 
-The trait is the plainest thing in CGP — one associated type, no method — so the interesting part is what
+The trait is the plainest thing in CGP (one associated type, no method), so the interesting part is what
 reads it. The provider blanket impl generated by [`#[cgp_component]`](../../macros/cgp_component.md) is the
 reader, and its body is itself a table lookup: it bounds the provider on `DelegateComponent<FooComponent>`
 and forwards each method to `<Provider as DelegateComponent<FooComponent>>::Delegate`. So the "routing" is
@@ -226,7 +226,7 @@ add a wiring line or supply a dependency.
 
 **Two entries for the same key is a coherence error, not an override.** Wiring one component twice on one
 context reports `E0119` conflicting implementations. A namespace *can* be shadowed by a direct entry,
-because the namespace side is a blanket impl rather than a second concrete one — but two concrete entries
+because the namespace side is a blanket impl rather than a second concrete one, but two concrete entries
 always conflict.
 
 **`Self` is not always a context.** A provider bundle declared with `new` owns a table too, and reading an
@@ -241,24 +241,24 @@ this is not it, and that is the point.
 
 ## Related constructs
 
-- [`delegate_components!`](../../macros/delegate_components.md) — the macro that generates these impls; what
+- [`delegate_components!`](../../macros/delegate_components.md): the macro that generates these impls; what
   you write instead of the trait.
-- [`#[cgp_component]`](../../macros/cgp_component.md) — generates the blanket impl that reads the table.
-- [`IsProviderFor`](./is_provider_for.md) — emitted beside each entry so a missing dependency stays
+- [`#[cgp_component]`](../../macros/cgp_component.md): generates the blanket impl that reads the table.
+- [`IsProviderFor`](./is_provider_for.md): emitted beside each entry so a missing dependency stays
   readable.
-- [`CanUseComponent`](./can_use_component.md) — combines a delegation and a valid provider into one
+- [`CanUseComponent`](./can_use_component.md): combines a delegation and a valid provider into one
   assertion.
-- [`check_components!`](../../macros/check_components.md) — asserts that combination.
-- [`UseDelegate`](../../providers/use_delegate.md) — reads an arbitrary-key table for per-type dispatch.
-- [`RedirectLookup`](../../providers/redirect_lookup.md) — walks path-keyed entries; the namespace mechanism.
-- [`DefaultNamespace`](../namespace/default_namespace.md) — the lookup traits a `namespace` header forwards through.
+- [`check_components!`](../../macros/check_components.md): asserts that combination.
+- [`UseDelegate`](../../providers/use_delegate.md): reads an arbitrary-key table for per-type dispatch.
+- [`RedirectLookup`](../../providers/redirect_lookup.md): walks path-keyed entries; the namespace mechanism.
+- [`DefaultNamespace`](../namespace/default_namespace.md): the lookup traits a `namespace` header forwards through.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the split this table
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the split this table
   connects.
-- [Bypassing coherence](/docs/concepts/coherence) — why the choice is recorded per context at all.
-- [Aggregate providers](/docs/concepts/aggregate-providers) — a table owned by a provider rather than a
+- [Bypassing coherence](/docs/concepts/coherence): why the choice is recorded per context at all.
+- [Aggregate providers](/docs/concepts/aggregate-providers): a table owned by a provider rather than a
   context.
 
 ## Source

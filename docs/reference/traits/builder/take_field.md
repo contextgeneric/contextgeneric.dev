@@ -18,9 +18,9 @@ It pins the `IsPresent → IsNothing` transition of the [`UpdateField`](./update
 because it *requires* the starting marker to be `IsPresent`, **taking a field that is absent is a compile
 error** rather than an `Option` you have to handle.
 
-Two things reach for it. Redistributing a record — [`into_builder`](./into_builder.md), take fields out,
-put them somewhere else — and, far more often, [`CanBuildFrom`](../casting/can_build_from.md), whose merge
-recursion takes each field out of the source and builds it into the target.
+Two uses reach for it. One is redistributing a record: [`into_builder`](./into_builder.md), take fields
+out, put them somewhere else. The other, far more often, is [`CanBuildFrom`](../casting/can_build_from.md),
+whose merge recursion takes each field out of the source and builds it into the target.
 
 ## Definition
 
@@ -43,7 +43,7 @@ that supplies this is shown in [Under the hood](#under-the-hood).
 
 ## Usage
 
-**It is not in the prelude** — the one member of the core builder family that is not. Import it from
+**It is not in the prelude**, the one member of the core builder family that is not. Import it from
 `cgp::core::field::traits` when you call `take_field` directly:
 
 ```rust
@@ -80,8 +80,8 @@ taken out and not replaced cannot be forgotten silently.
 
 ## When to use it
 
-**Reach for it when a complete value must be decomposed**, and remember that the common case —
-merging one record into another — already uses it for you.
+**Reach for it when a complete value must be decomposed**, and remember that the common case,
+merging one record into another, already uses it for you.
 
 - **Use [`CanBuildFrom`](../casting/can_build_from.md)** to move every shared field from one record into another's
   builder. It is this trait applied in a loop, written once.
@@ -104,7 +104,7 @@ merging one record into another — already uses it for you.
 //   where Partial: UpdateField<Tag, IsNothing, Mapper = IsPresent>
 ```
 
-The target marker is `IsNothing` and the constraint on the reported source marker is `IsPresent` — both
+The target marker is `IsNothing` and the constraint on the reported source marker is `IsPresent`, both
 swapped relative to `BuildField`. Since `Mapper` is an *output* of the primitive, constraining it selects
 only those partial types whose field is currently set.
 
@@ -114,7 +114,7 @@ value back.
 
 **Its heaviest user is [`CanBuildFrom`](../casting/can_build_from.md).** That recursion walks the source's field
 list, taking each field out with `take_field` and writing it into the target with
-[`build_field`](./build_field.md), threading the shrinking source and the growing target through — which
+[`build_field`](./build_field.md), threading the shrinking source and the growing target through, which
 is why a merge needs [`HasFields`](../shape/has_fields.md) on the source as well as a builder.
 
 ## Common Mistakes
@@ -139,26 +139,26 @@ variable.
 
 ## Related constructs
 
-- [`BuildField`](./build_field.md) — the opposite direction.
-- [`UpdateField`](./update_field.md) — the primitive both are built from.
-- [`IntoBuilder`](./into_builder.md) — how a complete value becomes a partial one to take from.
-- [`CanBuildFrom`](../casting/can_build_from.md) — the merge that uses this internally.
-- [`FinalizeBuild`](./finalize_build.md) — what a remainder cannot satisfy until the field is restored.
-- [`HasBuilder`](./has_builder.md) — the family's entry point.
-- [`MapType`](../type-level/map_type.md) — the `IsPresent`/`IsNothing` markers this moves between.
-- [`ToFields`](../shape/to_fields.md) — the flat-shape alternative to decomposing a partial value.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the `UpdateField` impls behind
+- [`BuildField`](./build_field.md): the opposite direction.
+- [`UpdateField`](./update_field.md): the primitive both are built from.
+- [`IntoBuilder`](./into_builder.md): how a complete value becomes a partial one to take from.
+- [`CanBuildFrom`](../casting/can_build_from.md): the merge that uses this internally.
+- [`FinalizeBuild`](./finalize_build.md): what a remainder cannot satisfy until the field is restored.
+- [`HasBuilder`](./has_builder.md): the family's entry point.
+- [`MapType`](../type-level/map_type.md): the `IsPresent`/`IsNothing` markers this moves between.
+- [`ToFields`](../shape/to_fields.md): the flat-shape alternative to decomposing a partial value.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates the `UpdateField` impls behind
   it.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`take_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/take_field.rs)
-  — `TakeField`
+- [`take_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/take_field.rs):
+  `TakeField`
 
 ---
 

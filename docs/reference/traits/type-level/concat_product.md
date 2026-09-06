@@ -20,7 +20,7 @@ produces. The one case for naming it is generic code that must describe the shap
 
 ## Overview
 
-Merging two records means merging their shapes, and the shapes are type-level lists — a
+Merging two records means merging their shapes, and the shapes are type-level lists, a
 [`Product!`](../../macros/product.md) of named fields each. `ConcatProduct<Items>` names the list you get by
 following one product with another.
 
@@ -77,8 +77,8 @@ names the combined shape, that moves the fields into it.
 
 ## When to use it
 
-**Reach for it when generic code must name the shape produced by combining two others** — a merge, a
-routine that extends a record with a caller-supplied set of fields — and essentially never otherwise.
+**Reach for it when generic code must name the shape produced by combining two others** (a merge, a
+routine that extends a record with a caller-supplied set of fields) and essentially never otherwise.
 
 - **Reach for [`AppendProduct`](./append_product.md)** for a single entry. It is the same recursion with
   a one-element graft, and it reads better for the one-field case.
@@ -136,22 +136,22 @@ to the first one's width.
 
 ## Related constructs
 
-- [`AppendProduct`](./append_product.md) — the single-entry case.
-- [`MapFields`](./map_fields.md) — rewriting every entry rather than adding any.
-- [`ConcatPath`](../formatting/concat_path.md) — the same operation over type-level paths.
-- [`Product!`](../../macros/product.md) — the sugar for the lists this operates on.
-- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` chain underneath.
-- [`CanBuildFrom`](../casting/can_build_from.md) — merging the values whose shapes this combines.
-- [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
+- [`AppendProduct`](./append_product.md): the single-entry case.
+- [`MapFields`](./map_fields.md): rewriting every entry rather than adding any.
+- [`ConcatPath`](../formatting/concat_path.md): the same operation over type-level paths.
+- [`Product!`](../../macros/product.md): the sugar for the lists this operates on.
+- [Type-level lists](../../types/index.md): the `Cons`/`Nil` chain underneath.
+- [`CanBuildFrom`](../casting/can_build_from.md): merging the values whose shapes this combines.
+- [`HasFields`](../shape/has_fields.md): where a type's existing shape comes from.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where computing a new shape is put to work.
+- [Extensible records](/docs/concepts/extensible-records): where computing a new shape is put to work.
 
 ## Source
 
-- [`concat_product.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/concat_product.rs)
-  — `ConcatProduct`
+- [`concat_product.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/concat_product.rs):
+  `ConcatProduct`
 
 ---
 

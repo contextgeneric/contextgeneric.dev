@@ -91,7 +91,7 @@ assert_eq!(result.err(), Some("bar"));
 - **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** when unset fields have meaningful
   defaults and silence is the right outcome. The two are the same builder finalized differently, so the
   same value can go either way.
-- **[`FinalizeBuild`](../builder/finalize_build.md)** — that is, the core builder — when every field is genuinely
+- **[`FinalizeBuild`](../builder/finalize_build.md)** (that is, the core builder) when every field is genuinely
   required and set once. A missing field is then a *compile* error, which is strictly better than a
   `Result`, and moving to this layer gives that check up.
 - **A hand-written check** when the validation is more than presence: interdependent fields, ranges,
@@ -111,7 +111,7 @@ For each field it pulls the `Option` out with [`UpdateField`](../builder/update_
 
 - if it is `Some`, writes the value back as `IsPresent` with [`BuildField`](../builder/build_field.md) and
   continues;
-- if it is `None`, returns `Err(Tag::VALUE)` immediately — the field's name recovered as a static string
+- if it is `None`, returns `Err(Tag::VALUE)` immediately, the field's name recovered as a static string
   through [`StaticString`](../formatting/static_string.md).
 
 Only if every field yields a value does the walk reach the all-present configuration and call
@@ -119,7 +119,7 @@ Only if every field yields a value does the walk reach the all-present configura
 
 **The strict, all-present [`FinalizeBuild`](../builder/finalize_build.md) remains the only way a partial value
 becomes a concrete struct.** Everything in this layer simply guarantees that configuration is reached
-before it is invoked — or reports why it could not be.
+before it is invoked, or reports why it could not be.
 
 That short-circuiting is also why only the *first* missing field is named: the walk stops at it rather
 than collecting.
@@ -144,26 +144,26 @@ first `None`.
 
 ## Related constructs
 
-- [`CanFinalizeWithDefault`](./can_finalize_with_default.md) — the other ending, filling gaps from
+- [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the other ending, filling gaps from
   `Default`.
-- [`HasOptionalBuilder`](./has_optional_builder.md) and [`ToOptional`](./to_optional.md) — where an
+- [`HasOptionalBuilder`](./has_optional_builder.md) and [`ToOptional`](./to_optional.md): where an
   optional builder comes from.
-- [`SetOptional`](./set_optional.md) — filling one.
-- [`FinalizeBuild`](../builder/finalize_build.md) — the strict impl this ultimately calls.
-- [`PartialData`](../builder/partial_data.md) — the supertrait naming the destination.
-- [`StaticString`](../formatting/static_string.md) — how the missing field's name is recovered.
-- [`UpdateField`](../builder/update_field.md) and [`BuildField`](../builder/build_field.md) — the primitives the walk uses.
-- [`HasFields`](../shape/has_fields.md) — the shape it walks.
+- [`SetOptional`](./set_optional.md): filling one.
+- [`FinalizeBuild`](../builder/finalize_build.md): the strict impl this ultimately calls.
+- [`PartialData`](../builder/partial_data.md): the supertrait naming the destination.
+- [`StaticString`](../formatting/static_string.md): how the missing field's name is recovered.
+- [`UpdateField`](../builder/update_field.md) and [`BuildField`](../builder/build_field.md): the primitives the walk uses.
+- [`HasFields`](../shape/has_fields.md): the shape it walks.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records, and where relaxing presence
+- [Extensible records](/docs/concepts/extensible-records): partial records, and where relaxing presence
   fits.
 
 ## Source
 
-- [`finalize_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/finalize_optional.rs)
-  — `FinalizeOptional`
+- [`finalize_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/finalize_optional.rs):
+  `FinalizeOptional`
 
 ---
 

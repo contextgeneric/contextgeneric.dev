@@ -9,13 +9,13 @@ A type's whole shape, as a single type.
 
 ## Overview
 
-Some code needs one field of a type. Other code needs the *shape* — every field, its name, and its type
-— so it can walk them: a serializer, a validator, a builder that merges two structs, a dispatcher that
+Some code needs one field of a type. Other code needs the *shape*, every field, its name, and its type,
+so it can walk them: a serializer, a validator, a builder that merges two structs, a dispatcher that
 routes an enum to a handler per variant. None of those can be written one field at a time, and none can
 name the concrete type either.
 
 `HasFields` gives a type that shape as a single associated type. Where
-[`HasField<Tag>`](../field-access/has_field.md) — singular — answers *"give me this field"*, `HasFields` answers
+[`HasField<Tag>`](../field-access/has_field.md), the singular, answers *"give me this field"*, `HasFields` answers
 *"describe all of them at once"*.
 
 **The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md).** What you write is the
@@ -65,7 +65,7 @@ value and it. This trait names the shape; those move values through it.
 ### Bounding on the shape
 
 The point of all this is a bound. Generic code writes `T: HasFields` and recurses over `T::Fields`, so it
-applies to any type that derives the shape — including one declared in another crate:
+applies to any type that derives the shape, including one declared in another crate:
 
 ```rust
 fn describe<T>() -> &'static str
@@ -110,27 +110,27 @@ pub enum Shape {
 
 giving `Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Rectangle>]`.
 
-**`HasFields` is the one member of the extensible-data family that accepts every variant shape** — unit,
-tuple, multi-field, and struct-style — because it only *describes* a variant rather than deconstructing
+**`HasFields` is the one member of the extensible-data family that accepts every variant shape** (unit,
+tuple, multi-field, and struct-style) because it only *describes* a variant rather than deconstructing
 it. The derives that take an enum apart need exactly one unnamed payload per variant; this one does not.
 
 ## When to use it
 
 **Bound on `HasFields` when code must process a type's whole shape; bound on
 [`HasField`](../field-access/has_field.md) when it needs one named field.** That is the entire distinction, and the two
-are complementary rather than ranked — most types that need both derive both in one `#[derive(...)]`.
+are complementary rather than ranked. Most types that need both derive both in one `#[derive(...)]`.
 
-- **`HasFields` alone** when the code only names the shape — a `where` clause, an associated-type
-  projection, a type-level computation like [`AppendProduct`](../type-level/append_product.md).
+- **`HasFields` alone** when the code only names the shape: a `where` clause, an associated-type
+  projection, or a type-level computation like [`AppendProduct`](../type-level/append_product.md).
 - **[`ToFields`](./to_fields.md) and [`FromFields`](./from_fields.md)** when values move through the
   shape in both directions.
 - **[`ToFieldsRef`](./to_fields_ref.md)** when the value must not be consumed. Requiring `ToFields` where
   a borrow would do forces callers to clone.
 
 Two things this is not. It is **not runtime reflection**: a type has a shape only because it opted in
-with a derive, there is nothing to query at run time, and the shape is a type rather than data. What that
-buys is static checking and no runtime cost; what it costs is that a foreign type you cannot patch has no
-shape at all. And it is **not the whole extensible-data story** — the shape describes a type, while
+with a derive, there is nothing to query at run time, and the shape is a type rather than data. That buys
+static checking and no runtime cost, and it costs one thing: a foreign type you cannot patch has no
+shape at all. And it is **not the whole extensible-data story**. The shape describes a type, while
 building one up field by field or taking one apart variant by variant is the
 [builder](../builder/has_builder.md) and [extractor](../variant/extract_field.md) families, bundled with this one by
 [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md).
@@ -151,7 +151,7 @@ impl HasFields for Person {
 ```
 
 `Product![A, B]` is `Cons<A, Cons<B, Nil>>`, so a `Fields` type in an error message is a `Cons` chain
-rather than the sugar — the [type-level lists](../../types/index.md) page covers reading it.
+rather than the sugar. The [type-level lists](../../types/index.md) page covers reading it.
 
 An enum's shape is the dual: an `Either` chain terminated by `Void` rather than a `Cons` chain terminated
 by `Nil`, with each arm tagged by the variant name and carrying that variant's own fields as a nested
@@ -167,7 +167,7 @@ the whole shape and takes structs and enums; the singular is per-field access an
 Their derives are likewise distinct.
 
 **A newtype's shape is the inner type, not a one-element product.** `struct Wrapper(String)` has
-`Fields = String`. Generic code written against a `Cons` chain will not match it — the
+`Fields = String`. Generic code written against a `Cons` chain will not match it. The
 [derive's page](../../derives/derive_has_fields.md) has the rule and the other shapes.
 
 **Field order is declaration order and is part of the type.** Two structs with the same names in
@@ -183,31 +183,31 @@ the other reserved names.
 
 ## Related constructs
 
-- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md) — generates this impl and the four
+- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl and the four
   companions'; what you write.
-- [`HasFieldsRef`](./has_fields_ref.md) — the borrowed shape.
+- [`HasFieldsRef`](./has_fields_ref.md): the borrowed shape.
 - [`ToFields`](./to_fields.md), [`FromFields`](./from_fields.md), and
-  [`ToFieldsRef`](./to_fields_ref.md) — the conversions between a value and its shape.
-- [`HasField`](../field-access/has_field.md) — the singular counterpart, per-field access.
-- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — bundles this with the builder and extractor.
-- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md) — the list types a shape is built
+  [`ToFieldsRef`](./to_fields_ref.md): the conversions between a value and its shape.
+- [`HasField`](../field-access/has_field.md): the singular counterpart, per-field access.
+- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md): bundles this with the builder and extractor.
+- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md): the list types a shape is built
   from.
-- [`Field`](../../types/field.md) — one entry: a value paired with its type-level name.
-- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains
+- [`Field`](../../types/field.md): one entry: a value paired with its type-level name.
+- [Type-level lists](../../types/index.md): the `Cons`/`Nil` and `Either`/`Void` chains
   underneath.
-- [`AppendProduct`](../type-level/append_product.md) — the operations that compute new shapes from old ones.
-- [`CanUpcast`](../casting/can_upcast.md) and [`CanBuildFrom`](../casting/can_build_from.md) — conversions between two
+- [`AppendProduct`](../type-level/append_product.md): the operations that compute new shapes from old ones.
+- [`CanUpcast`](../casting/can_upcast.md) and [`CanBuildFrom`](../casting/can_build_from.md): conversions between two
   types whose shapes overlap, driven by this one.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — a struct as a product of named fields.
-- [Extensible variants](/docs/concepts/extensible-variants) — the enum half, and the expression problem.
+- [Extensible records](/docs/concepts/extensible-records): a struct as a product of named fields.
+- [Extensible variants](/docs/concepts/extensible-variants): the enum half, and the expression problem.
 
 ## Source
 
-- [`has_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_fields.rs)
-  — `HasFields` and `HasFieldsRef`
+- [`has_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_fields.rs):
+  `HasFields` and `HasFieldsRef`
 - Derive codegen: [`cgp_data/derive_has_fields/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_has_fields)
 
 ---

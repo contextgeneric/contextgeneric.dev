@@ -11,8 +11,8 @@ Turning a fully-built partial record back into the concrete struct.
 
 `FinalizeBuild` is where a build ends. What makes it the family's safety argument is not the method but
 **where the impl exists**. It is
-implemented for exactly one configuration of a partial record — the one in which every field is
-`IsPresent` — so calling it on an incomplete value is a *missing impl*, not a runtime check that fails:
+implemented for exactly one configuration of a partial record, the one in which every field is
+`IsPresent`, so calling it on an incomplete value is a *missing impl*, not a runtime check that fails:
 
 ```rust
 let person = Person::builder()
@@ -21,7 +21,7 @@ let person = Person::builder()
     .finalize_build();                                       // resolves only here
 ```
 
-Delete a middle line and this does not compile. There is nothing to run and nothing to panic — the method
+Delete a middle line and this does not compile. There is nothing to run and nothing to panic: the method
 is simply not in scope for a value with a field still absent.
 
 The destination type comes from its supertrait [`PartialData`](./partial_data.md), which every
@@ -42,14 +42,14 @@ pub trait FinalizeBuild: PartialData {
 concrete struct being built. `Target` is not declared here: it comes from the supertrait
 [`PartialData`](./partial_data.md), which every configuration of a partial record implements, so the
 destination is nameable at any point in a build. What `FinalizeBuild` adds is the method, and its impl
-exists for only one configuration — every field `IsPresent` — which is the safety argument the rest of
+exists for only one configuration (every field `IsPresent`), which is the safety argument the rest of
 this page works out.
 
 ## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-`finalize_build` consumes the partial value and returns `Self::Target`. It takes no arguments — there is
+`finalize_build` consumes the partial value and returns `Self::Target`. It takes no arguments. There is
 nothing left to decide by the time it applies.
 
 Bounding on it is how generic builder code says it will produce a finished value:
@@ -85,7 +85,7 @@ let person = Person::builder()
     .finalize_build();
 ```
 
-And the failure it exists to produce — omitting a field:
+And the failure it exists to produce, omitting a field:
 
 ```rust
 // error: no method named `finalize_build` found for struct
@@ -135,7 +135,7 @@ So a partial value always knows its destination and only sometimes has a way to 
 same order, and the body is a field-by-field move with nothing to unwrap.
 
 **This is why the error is a missing method rather than a missing field.** Method resolution looks for
-`finalize_build` on `__PartialPerson<IsPresent, IsNothing>`, finds no impl, and reports that — the
+`finalize_build` on `__PartialPerson<IsPresent, IsNothing>`, finds no impl, and reports that. The
 compiler has no way to say "you forgot `last_name`", because nothing in the failed lookup mentions field
 names. The marker list in the type is the diagnostic.
 
@@ -158,34 +158,34 @@ type in the message: the field whose marker is still `IsNothing` is the one miss
 [`FinalizeOptional`](../optional/finalize_optional.md), a different trait in a different crate.
 
 **A fieldless struct finalizes immediately.** Its companion has no markers, so `builder().finalize_build()`
-compiles — legal and useless.
+compiles, which is legal and useless.
 
 **The enum side has its own ending.** [`FinalizeExtract`](../variant/finalize_extract.md) discharges an exhausted
 extractor, and it is sound for the opposite reason: the value cannot exist, rather than being complete.
 
 ## Related constructs
 
-- [`PartialData`](./partial_data.md) — the supertrait naming the destination.
-- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md) — where a partial value comes
+- [`PartialData`](./partial_data.md): the supertrait naming the destination.
+- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md): where a partial value comes
   from.
-- [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) — what moves it between
+- [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md): what moves it between
   configurations.
-- [`UpdateField`](./update_field.md) — the primitive underneath both.
+- [`UpdateField`](./update_field.md): the primitive underneath both.
 - [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) and
-  [`FinalizeOptional`](../optional/finalize_optional.md) — the two relaxed endings.
-- [`MapType`](../type-level/map_type.md) — the `IsPresent` marker every field must reach.
-- [`FinalizeExtract`](../variant/finalize_extract.md) — the enum family's ending, sound for the opposite reason.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates this impl.
+  [`FinalizeOptional`](../optional/finalize_optional.md): the two relaxed endings.
+- [`MapType`](../type-level/map_type.md): the `IsPresent` marker every field must reach.
+- [`FinalizeExtract`](../variant/finalize_extract.md): the enum family's ending, sound for the opposite reason.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates this impl.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`build_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/build_field.rs)
-  — `FinalizeBuild` and `BuildField`
+- [`build_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/build_field.rs):
+  `FinalizeBuild` and `BuildField`
 
 ---
 

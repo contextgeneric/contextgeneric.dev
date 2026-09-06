@@ -129,27 +129,27 @@ generic over the [`MapTypeRef`](../type-level/map_type_ref.md) marker too.
 
 ## Related constructs
 
-- [`HasExtractorRef`](./has_extractor_ref.md) — the shared-borrow accessor, and the one to prefer.
-- [`HasExtractor`](./has_extractor.md) — the owning accessor, and where the group is compared.
-- [`ExtractField`](./extract_field.md) — the narrowing, identical through a mutable borrow.
+- [`HasExtractorRef`](./has_extractor_ref.md): the shared-borrow accessor, and the one to prefer.
+- [`HasExtractor`](./has_extractor.md): the owning accessor, and where the group is compared.
+- [`ExtractField`](./extract_field.md): the narrowing, identical through a mutable borrow.
 - [`FinalizeExtract`](./finalize_extract.md) and
-  [`FinalizeExtractResult`](./finalize_extract_result.md) — how a chain ends.
-- [`MapTypeRef`](../type-level/map_type_ref.md) — the `IsMut` marker this fixes.
-- [`MapType`](../type-level/map_type.md) — the per-variant markers it composes with.
-- [`HasFieldMut`](../field-access/has_field_mut.md) — the record side's mutable access.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates the borrowed companion.
+  [`FinalizeExtractResult`](./finalize_extract_result.md): how a chain ends.
+- [`MapTypeRef`](../type-level/map_type_ref.md): the `IsMut` marker this fixes.
+- [`MapType`](../type-level/map_type.md): the per-variant markers it composes with.
+- [`HasFieldMut`](../field-access/has_field_mut.md): the record side's mutable access.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates the borrowed companion.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — matching a variant without consuming the
+- [Extensible variants](/docs/concepts/extensible-variants): matching a variant without consuming the
   value.
 
 ## Source
 
-- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs)
-  — `HasExtractorMut` and the rest of the family
-- [`impls/map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type_ref.rs)
-  — the `IsMut` marker
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `HasExtractorMut` and the rest of the family
+- [`impls/map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type_ref.rs):
+  the `IsMut` marker
 
 ---
 

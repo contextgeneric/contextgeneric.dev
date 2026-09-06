@@ -10,7 +10,7 @@ Obtaining an extractor that borrows the value rather than consuming it.
 ## Overview
 
 [`HasExtractor`](./has_extractor.md) consumes an enum to produce an extractor with owned payloads. Code
-that only *reads* a variant — checking it, measuring it, rendering it — should not have to give up the
+that only *reads* a variant (checking it, measuring it, rendering it) should not have to give up the
 value. `HasExtractorRef` is the borrowing accessor.
 
 Payloads come out as shared references and the original survives. **The narrowing works identically**:
@@ -81,7 +81,7 @@ full chain narrows the same way, with each remainder also borrowing.
 - **[`HasExtractor`](./has_extractor.md)** only when the payload must be moved out.
 - **A `match`** when the enum is concrete. This family is for code that cannot name it.
 - **[`ToFieldsRef`](../shape/to_fields_ref.md)** when what you want is the value's borrowed *shape* rather than
-  a narrowing chain — the same borrow-rather-than-consume idea, applied to the whole-shape view.
+  a narrowing chain: the same borrow-rather-than-consume idea, applied to the whole-shape view.
 
 ## Under the hood
 
@@ -101,8 +101,8 @@ The borrowed accessor uses the **same partial enum** as the owning one, with an 
 // }
 ```
 
-Read the nesting outward: the [`MapTypeRef`](../type-level/map_type_ref.md) marker decides *how* a payload is held —
-`IsRef::Map<'a, T>` is `&'a T` — and the per-variant [`MapType`](../type-level/map_type.md) markers decide *whether*
+Read the nesting outward: the [`MapTypeRef`](../type-level/map_type_ref.md) marker decides *how* a payload is held
+(`IsRef::Map<'a, T>` is `&'a T`), and the per-variant [`MapType`](../type-level/map_type.md) markers decide *whether*
 it is still possible. The two axes are independent, which is precisely why narrowing behaves the same
 through a borrow as through an owned value.
 
@@ -128,27 +128,27 @@ one, or be generic over the [`MapTypeRef`](../type-level/map_type_ref.md) marker
 
 ## Related constructs
 
-- [`HasExtractor`](./has_extractor.md) — the owning accessor, and where the group is compared.
-- [`HasExtractorMut`](./has_extractor_mut.md) — the mutable accessor.
-- [`ExtractField`](./extract_field.md) — the narrowing, identical through a borrow.
+- [`HasExtractor`](./has_extractor.md): the owning accessor, and where the group is compared.
+- [`HasExtractorMut`](./has_extractor_mut.md): the mutable accessor.
+- [`ExtractField`](./extract_field.md): the narrowing, identical through a borrow.
 - [`FinalizeExtract`](./finalize_extract.md) and
-  [`FinalizeExtractResult`](./finalize_extract_result.md) — how a chain ends.
-- [`MapTypeRef`](../type-level/map_type_ref.md) — the `IsRef` marker this fixes.
-- [`MapType`](../type-level/map_type.md) — the per-variant markers it composes with.
-- [`ToFieldsRef`](../shape/to_fields_ref.md) — the record side's borrow-rather-than-consume view.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates the borrowed companion.
+  [`FinalizeExtractResult`](./finalize_extract_result.md): how a chain ends.
+- [`MapTypeRef`](../type-level/map_type_ref.md): the `IsRef` marker this fixes.
+- [`MapType`](../type-level/map_type.md): the per-variant markers it composes with.
+- [`ToFieldsRef`](../shape/to_fields_ref.md): the record side's borrow-rather-than-consume view.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates the borrowed companion.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — matching a variant without consuming the
+- [Extensible variants](/docs/concepts/extensible-variants): matching a variant without consuming the
   value.
 
 ## Source
 
-- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs)
-  — `HasExtractorRef` and the rest of the family
-- [`impls/map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type_ref.rs)
-  — the `IsRef` marker
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `HasExtractorRef` and the rest of the family
+- [`impls/map_type_ref.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/map_type_ref.rs):
+  the `IsRef` marker
 
 ---
 

@@ -21,7 +21,7 @@ otherwise this page is here to explain how a pipeline is assembled.
 ## Overview
 
 A [monadic pipeline](/docs/concepts/monadic-handlers) chains steps where each may either continue or
-short-circuit — the familiar `?`-style behaviour, expressed as composable providers rather than as
+short-circuit, the familiar `?`-style behaviour, expressed as composable providers rather than as
 syntax. Folding such a pipeline means asking the monad, once per step: *given everything built so far,
 what provider runs one bind?*
 
@@ -69,8 +69,8 @@ binds it.
 
 ## Examples
 
-The trait is consumed rather than called, so the thing to read is what each marker's impl *says* —
-because that decides how a pipeline behaves.
+The trait is consumed rather than called, so read what each marker's impl *says*, because that decides
+how a pipeline behaves.
 
 **`IdentMonadic` implements it as the identity**: `MonadicBind<Provider>::Provider` is `Provider`
 unchanged. Nothing wraps the continuation, nothing branches, and a pipeline under `IdentMonadic` is
@@ -85,7 +85,7 @@ over a `Result`:
 | `OkMonadic` | `Err` | `Ok` | `BindErr` |
 
 So `ErrMonadic` gives the ordinary `?` behaviour, and `OkMonadic` the inverted one that runs until
-something succeeds — useful for a fallback chain.
+something succeeds, useful for a fallback chain.
 
 **The transformer forms delegate one layer down.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` bind their
 own `Result` layer and hand the rest to `M`, which is how a stack reaches arbitrary depth.
@@ -103,15 +103,15 @@ step tries to run, because the running half is [`ContainsValue`](./contains_valu
 
 And the alternatives to prefer when you do *not* need short-circuiting:
 
-- **[Handler combinators](../../providers/handler/index.md)** — `ComposeHandlers` and `PipeHandlers`
+- **[Handler combinators](../../providers/handler/index.md)**: `ComposeHandlers` and `PipeHandlers`
   chain handlers without a branch. If every step runs unconditionally, do not involve a monad at all.
-- **Ordinary `?` in one provider body** — if the whole chain lives in a single implementation, Rust's own
+- **Ordinary `?` in one provider body**: if the whole chain lives in a single implementation, Rust's own
   operator is clearer than any composition.
 
 ## Under the hood
 
 [`PipeMonadic`](../../providers/monad/pipe_monadic.md) walks the handler list and, for each step, asks the monad
-to turn the continuation built so far into a bind step — which is this trait. Because the walk proceeds
+to turn the continuation built so far into a bind step, which is this trait. Because the walk proceeds
 from the end of the list backwards, `Provider` at each stage is everything that follows the current step,
 and the result is a single nested provider by the time the list is exhausted.
 
@@ -143,25 +143,25 @@ missing trait rather than the gap.
 
 ## Related constructs
 
-- [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) — the two traits that run one
+- [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md): the two traits that run one
   bind step, where this one only builds it.
-- [`MonadicTrans`](./monadic_trans.md) — stacking one monad on another during the same fold.
-- [Monad providers](../../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the monad
+- [`MonadicTrans`](./monadic_trans.md): stacking one monad on another during the same fold.
+- [Monad providers](../../providers/monad/index.md): `PipeMonadic`, `BindOk`, `BindErr`, and the monad
   markers; what you actually wire.
-- [Handler combinators](../../providers/handler/index.md) — composition without a short-circuit
+- [Handler combinators](../../providers/handler/index.md): composition without a short-circuit
   branch.
-- [`Computer`](../../components/handler/computer.md) — the component family a monadic pipeline implements.
-- [`Product!`](../../macros/product.md) — the type-level list a pipeline's steps are given in.
+- [`Computer`](../../components/handler/computer.md): the component family a monadic pipeline implements.
+- [`Product!`](../../macros/product.md): the type-level list a pipeline's steps are given in.
 
 The ideas behind it:
 
-- [Monadic handlers](/docs/concepts/monadic-handlers) — why a pipeline short-circuits and how the monads
+- [Monadic handlers](/docs/concepts/monadic-handlers): why a pipeline short-circuits and how the monads
   compose.
 
 ## Source
 
-- [`bind.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/bind.rs)
-  — `MonadicBind`
+- [`bind.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/bind.rs):
+  `MonadicBind`
 - Per-marker impls: [`cgp-monad/src/monadic/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-monad/src/monadic)
 
 ---

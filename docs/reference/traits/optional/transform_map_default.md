@@ -14,7 +14,7 @@ The transform marker that makes every field present, defaulting whatever is not.
 **You are not expected to name `TransformMapDefault` directly.** It is the
 marker [`CanFinalizeWithDefault`](./can_finalize_with_default.md) and
 [`CanBuildWithDefault`](./can_build_with_default.md) drive, and calling one of those is what you write.
-This page explains the three conversions behind them — which is also the model to copy if you write a
+This page explains the three conversions behind them, which is also the model to copy if you write a
 transform of your own.
 
 :::
@@ -68,7 +68,7 @@ conversion it drives:
 Builder: TransformMapFields<TransformMapDefault, IsPresent>
 ```
 
-**Every field's type must implement `Default`** for the two filling impls to apply — which is where the
+**Every field's type must implement `Default`** for the two filling impls to apply, which is where the
 defaulting layer's one real requirement comes from.
 
 ## Examples
@@ -95,7 +95,7 @@ where
 ```
 
 The marker is the first type argument, and swapping it for
-[`TransformOptional`](./transform_optional.md) — with `IsOptional` as the target — is exactly how
+[`TransformOptional`](./transform_optional.md) (with `IsOptional` as the target) is exactly how
 [`ToOptional`](./to_optional.md) is written. **Same recursion, different marker.**
 
 Writing a marker of your own follows the same three-impl shape; the
@@ -110,7 +110,7 @@ served by the two capabilities already built on it.
   gaps.
 - **[`CanBuildWithDefault`](./can_build_with_default.md)** to merge from a source and default the rest, in
   one call.
-- **Write your own [`TransformMap`](../type-level/transform_map.md) marker** for a conversion these do not cover — one
+- **Write your own [`TransformMap`](../type-level/transform_map.md) marker** for a conversion these do not cover: one
   that validates, logs, or fills from something other than `Default`.
 - **[`TransformOptional`](./transform_optional.md)** is its counterpart, targeting `IsOptional` instead.
 
@@ -139,7 +139,7 @@ impl<T: Default> TransformMap<IsOptional, IsPresent, T> for TransformMapDefault 
 }
 ```
 
-Note that each argument type is the *source* marker's projection — `T`, then `()`, then `Option<T>` —
+Note that each argument type is the *source* marker's projection (`T`, then `()`, then `Option<T>`),
 which keeps the three from overlapping. And note that only two carry the `T: Default` bound: a
 field already present needs no default, which is why a fully-set builder can be finalized this way
 regardless of its field types.
@@ -158,7 +158,7 @@ moment that field is unset, and the error names the missing `TransformMap` impl 
 **It always targets `IsPresent`.** It cannot be used to reach any other configuration; that is
 [`TransformOptional`](./transform_optional.md)'s job.
 
-**It is a marker, not a capability.** There is no method to call and nothing to wire — it is named in a
+**It is a marker, not a capability.** There is no method to call and nothing to wire. It is named in a
 bound.
 
 **A defaulted field is indistinguishable from one set to the default value** in the result, which is the
@@ -166,22 +166,22 @@ trade against [`FinalizeOptional`](./finalize_optional.md).
 
 ## Related constructs
 
-- [`CanFinalizeWithDefault`](./can_finalize_with_default.md) — the capability built directly on it.
-- [`CanBuildWithDefault`](./can_build_with_default.md) — merge plus that finalize.
-- [`TransformOptional`](./transform_optional.md) — the counterpart marker, targeting `IsOptional`.
-- [`TransformMap`](../type-level/transform_map.md) — the trait it implements three times.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — the walk that applies it.
-- [`MapType`](../type-level/map_type.md) — the markers it converts between.
-- [`FinalizeBuild`](../builder/finalize_build.md) — what an all-`IsPresent` result is accepted by.
+- [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the capability built directly on it.
+- [`CanBuildWithDefault`](./can_build_with_default.md): merge plus that finalize.
+- [`TransformOptional`](./transform_optional.md): the counterpart marker, targeting `IsOptional`.
+- [`TransformMap`](../type-level/transform_map.md): the trait it implements three times.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): the walk that applies it.
+- [`MapType`](../type-level/map_type.md): the markers it converts between.
+- [`FinalizeBuild`](../builder/finalize_build.md): what an all-`IsPresent` result is accepted by.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and how their states change.
+- [Extensible records](/docs/concepts/extensible-records): partial records and how their states change.
 
 ## Source
 
-- [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs)
-  — `TransformMapDefault` and the capabilities built on it
+- [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs):
+  `TransformMapDefault` and the capabilities built on it
 
 ---
 

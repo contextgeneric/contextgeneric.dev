@@ -12,7 +12,7 @@ Adding one entry to the end of a type-level product list.
 ### Generated machinery
 
 **You are not expected to use `AppendProduct` directly.** It is a type-level
-operation the extensible-data machinery computes with — the builder and merge recursions are its callers
+operation the extensible-data machinery computes with. The builder and merge recursions are its callers
 in practice. You will most likely meet it in an error message from code that walks a shape; this page
 explains what it produces so that message is legible. The one case for naming it is generic code that must describe in a signature the shape it *will* produce.
 
@@ -20,7 +20,7 @@ explains what it produces so that message is legible. The one case for naming it
 
 ## Overview
 
-A struct's shape in CGP is a type-level list — a [`Product!`](../../macros/product.md) of named fields.
+A struct's shape in CGP is a type-level list, a [`Product!`](../../macros/product.md) of named fields.
 Code that processes such a shape generically sometimes needs to describe a *new* shape computed from an
 old one: the shape a builder will have after one more field is set, say, or the shape a routine promises
 to return.
@@ -54,8 +54,8 @@ ordering.
 use cgp::core::field::traits::AppendProduct;
 ```
 
-Every existing entry is preserved in order, and the new one lands last. Appending onto `Nil` — the empty
-product — yields a one-element list, which is the recursion's base case and occasionally useful to know
+Every existing entry is preserved in order, and the new one lands last. Appending onto `Nil` (the empty
+product) yields a one-element list, which is the recursion's base case and occasionally useful to know
 when reading a bound.
 
 ## Examples
@@ -85,8 +85,8 @@ where
 
 ## When to use it
 
-**Reach for it when a routine must describe the shape it *will* produce** — in a signature, an associated
-type, or a `where` clause — and essentially never otherwise. It is a building block the extensible-data
+**Reach for it when a routine must describe the shape it *will* produce** (in a signature, an associated
+type, or a `where` clause) and essentially never otherwise. It is a building block the extensible-data
 machinery uses; application code touches the machinery itself.
 
 - **Reach for [`ConcatProduct`](./concat_product.md)** to splice a whole list rather than one entry.
@@ -118,7 +118,7 @@ where
 }
 ```
 
-Because the recursion only ever rebuilds the list, order is structurally preserved — which is why
+Because the recursion only ever rebuilds the list, order is structurally preserved, which is why
 appending yields a *different* type from prepending, and why two products with the same entries in
 different orders are unrelated types.
 
@@ -139,27 +139,27 @@ unresolved-associated-type error.
 to make two shapes match.
 
 **A long list means a deep recursion.** This is trait resolution over the list, so a very wide struct
-costs compile time proportional to its width — one of the places CGP's compile-time cost actually comes
+costs compile time proportional to its width, one of the places CGP's compile-time cost actually comes
 from.
 
 ## Related constructs
 
-- [`ConcatProduct`](./concat_product.md) — the general form; append is its single-entry case.
-- [`MapFields`](./map_fields.md) — rewriting every entry rather than adding one.
-- [`Product!`](../../macros/product.md) — the sugar for the lists this operates on.
-- [Type-level lists](../../types/index.md) — the `Cons`/`Nil` chain underneath.
-- [`HasFields`](../shape/has_fields.md) — where a type's existing shape comes from.
-- [`Field`](../../types/field.md) — the entries a field list is usually made of.
-- [`HasBuilder`](../builder/has_builder.md) — the family that moves values through the shapes this computes.
+- [`ConcatProduct`](./concat_product.md): the general form; append is its single-entry case.
+- [`MapFields`](./map_fields.md): rewriting every entry rather than adding one.
+- [`Product!`](../../macros/product.md): the sugar for the lists this operates on.
+- [Type-level lists](../../types/index.md): the `Cons`/`Nil` chain underneath.
+- [`HasFields`](../shape/has_fields.md): where a type's existing shape comes from.
+- [`Field`](../../types/field.md): the entries a field list is usually made of.
+- [`HasBuilder`](../builder/has_builder.md): the family that moves values through the shapes this computes.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — where computing a new shape is put to work.
+- [Extensible records](/docs/concepts/extensible-records): where computing a new shape is put to work.
 
 ## Source
 
-- [`append_product.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/append_product.rs)
-  — `AppendProduct`
+- [`append_product.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/append_product.rs):
+  `AppendProduct`
 
 ---
 

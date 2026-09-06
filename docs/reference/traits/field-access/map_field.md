@@ -20,8 +20,8 @@ which is why reaching a nested field is a provider rather than two chained reads
 
 ## Overview
 
-Chaining field reads looks like it should just work — read a field, then read a field of *that* —
-and it does not, for a reason that is about lifetimes rather than about CGP. Writing
+Chaining field reads looks like it should just work: read a field, then read a field of *that*. It does
+not, and the reason is about lifetimes rather than about CGP. Writing
 `context.get_field(..).get_field(..)` makes the intermediate `Value` outlive the borrow it came from,
 which the compiler can only accept by requiring it to be `'static`.
 
@@ -53,7 +53,7 @@ demanding `'static`.
 
 ## Usage
 
-**It is not in the prelude** — one of only two members of the `HasField` group that are not. Import it
+**It is not in the prelude**, one of only two members of the `HasField` group that are not. Import it
 from `cgp::core::field::traits`:
 
 ```rust
@@ -124,8 +124,8 @@ site what the wiring could have decided.
 - **Reach for [`FieldMapper`](./field_mapper.md)** when the same descent must happen on the provider
   side, where the context is a type argument rather than `self`.
 
-Call `map_field` directly only when you are writing machinery of the same kind — a new getter provider,
-say — and even then the existing ones usually compose.
+Call `map_field` directly only when you are writing machinery of the same kind, such as a new getter
+provider, and even then the existing ones usually compose.
 
 ## Under the hood
 
@@ -163,30 +163,30 @@ in scope does not satisfy the binder, which is the safety the design buys.
 **It cannot map to an owned value.** The signature returns `&T`. A getter that must produce a value uses
 [`MRef`](../../types/mref.md) instead.
 
-**`MapField` is not [`MapFields`](../type-level/map_fields.md) and not [`MapType`](../type-level/map_type.md).** Three similar
-names: this one is a lifetime helper for reading a nested field, `MapFields` applies a marker across a
-type-level list, and `MapType` names one field's storage on a partial type.
+**`MapField` is not [`MapFields`](../type-level/map_fields.md) and not [`MapType`](../type-level/map_type.md).** The names
+are similar: this one is a lifetime helper for reading a nested field, `MapFields` applies a marker across
+a type-level list, and `MapType` names one field's storage on a partial type.
 
 ## Related constructs
 
-- [`FieldMapper`](./field_mapper.md) — the provider-side mirror of this trait.
-- [`HasField`](./has_field.md) — the supertrait, and the plain read.
-- [`ChainGetters`](../../providers/chain_getters.md) — the provider that uses `map_field` to descend.
-- [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to read a field of the context itself.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags, which are `'static` by
+- [`FieldMapper`](./field_mapper.md): the provider-side mirror of this trait.
+- [`HasField`](./has_field.md): the supertrait, and the plain read.
+- [`ChainGetters`](../../providers/chain_getters.md): the provider that uses `map_field` to descend.
+- [`#[implicit]`](../../attributes/implicit.md): the idiomatic way to read a field of the context itself.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags, which are `'static` by
   construction.
-- [`MRef`](../../types/mref.md) — the return type for a getter that may produce rather than lend.
-- [`MapFields`](../type-level/map_fields.md) and [`MapType`](../type-level/map_type.md) — the two similarly-named traits that do
+- [`MRef`](../../types/mref.md): the return type for a getter that may produce rather than lend.
+- [`MapFields`](../type-level/map_fields.md) and [`MapType`](../type-level/map_type.md): the two similarly-named traits that do
   something else.
 
 The ideas behind it:
 
-- [Implicit arguments](/docs/concepts/implicit-arguments) — the ergonomic surface over field access.
+- [Implicit arguments](/docs/concepts/implicit-arguments): the ergonomic surface over field access.
 
 ## Source
 
-- [`map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs)
-  — `MapField` and `FieldMapper`
+- [`map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs):
+  `MapField` and `FieldMapper`
 
 ---
 

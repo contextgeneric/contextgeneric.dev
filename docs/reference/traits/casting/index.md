@@ -13,10 +13,10 @@ Two types that share a subset of named fields or variants can convert into one a
 without a hand-written `From` or `TryFrom`. Because CGP represents each record as a product of named
 fields and each enum as a sum of named variants, a conversion becomes a matter of routing each named
 entry to the target's slot of the same name. Both types must derive the extensible-data machinery, and
-the names are matched at the type level. None of these traits is in the prelude — import each from
+the names are matched at the type level. None of these traits is in the prelude. Import each from
 `cgp::core::field::impls`.
 
-The four cover the directions that routing can take.
+These traits cover the directions that routing can take.
 
 For **enums**, [`CanUpcast`](can_upcast.md) widens a value into an enum whose variants are a superset,
 which always succeeds, and [`CanDowncast`](can_downcast.md) narrows into a smaller enum, which can fail
@@ -28,8 +28,8 @@ another record, so several sources can be merged into one target before it is fi
 
 ## The ideas behind them
 
-- [Extensible variants](/docs/concepts/extensible-variants) — upcasting and downcasting between enums.
-- [Extensible records](/docs/concepts/extensible-records) — merging records through a builder.
+- [Extensible variants](/docs/concepts/extensible-variants): upcasting and downcasting between enums.
+- [Extensible records](/docs/concepts/extensible-records): merging records through a builder.
 
 ---
 

@@ -20,8 +20,8 @@ a monad of your own a transformer form; otherwise this page is here to explain h
 
 ## Overview
 
-A [monadic pipeline](/docs/concepts/monadic-handlers) over a nested output — a `Result` inside a
-`Result` — needs to peel more than one layer, and hard-coding a depth would give up the composability
+A [monadic pipeline](/docs/concepts/monadic-handlers) over a nested output, a `Result` inside a
+`Result`, needs to peel more than one layer, and hard-coding a depth would give up the composability
 the design exists for. `MonadicTrans` is how a monad is expressed as a *transformer* over another.
 
 It is one of four traits that give a monad marker its meaning, and it belongs with
@@ -63,8 +63,8 @@ composed one.
 
 What each marker's impl says decides how deeply a pipeline can reach.
 
-**`IdentMonadic` returns `M` unchanged**, so applying it as a transformer changes nothing — which is what
-makes it the neutral element of a stack as well as of a pipeline.
+**`IdentMonadic` returns `M` unchanged**, so applying it as a transformer changes nothing, which makes
+it the neutral element of a stack as well as of a pipeline.
 
 **The transformer forms compose.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` implement the running
 traits by peeling their own `Result` layer and handing the rest to `M`, and their `MonadicTrans` impls
@@ -84,10 +84,10 @@ An *n*-layer stack unwraps *n* layers with no code specific to any depth, which 
 ## When to use it
 
 **Reach for the [monad providers](../../providers/monad/index.md), not this trait.** Wiring
-[`PipeMonadic`](../../providers/monad/pipe_monadic.md) with a marker — including a stacked one — is how a
+[`PipeMonadic`](../../providers/monad/pipe_monadic.md) with a marker, including a stacked one, is how a
 pipeline is built.
 
-The reasons to name it are two, and both are narrow.
+The reasons to name it are narrow.
 
 - **Defining a new monad that should stack.** The three other traits give a marker meaning on its own;
   this one lets it sit over another. A marker without it works as a base monad and cannot be a
@@ -96,7 +96,7 @@ The reasons to name it are two, and both are narrow.
   trait, and knowing it is the composition step rather than the running step tells you the
   problem is the stack's shape rather than a step's types.
 
-If your pipeline runs over a single-layer output, you do not need a transformer at all — use the base
+If your pipeline runs over a single-layer output, you do not need a transformer at all. Use the base
 marker directly.
 
 ## Under the hood
@@ -107,7 +107,7 @@ handler list asking [`MonadicBind`](./monadic_bind.md) to turn each continuation
 
 Because the transformer forms implement [`ContainsValue`](./contains_value.md) and
 [`LiftValue`](./lift_value.md) by delegating to the base monad after handling their own layer, a
-two-layer stack unwraps two `Result` layers in order and re-wraps them in reverse — and the same code
+two-layer stack unwraps two `Result` layers in order and re-wraps them in reverse, and the same code
 serves any depth. That is the sense in which stacking is composition rather than a special case: the
 resolved stack is just another marker, and everything downstream treats it as one.
 
@@ -134,24 +134,24 @@ bound rather than saying the marker is not stackable.
 
 ## Related constructs
 
-- [`MonadicBind`](./monadic_bind.md) — the other folding trait, which turns a continuation into a bind
+- [`MonadicBind`](./monadic_bind.md): the other folding trait, which turns a continuation into a bind
   step.
-- [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) — the two traits that run one
+- [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md): the two traits that run one
   step, where these two build the pipeline.
-- [Monad providers](../../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
+- [Monad providers](../../providers/monad/index.md): `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers, including the transformer forms.
-- [`Computer`](../../components/handler/computer.md) — the component family a monadic pipeline implements.
-- [`Product!`](../../macros/product.md) — the type-level list a pipeline's steps are given in.
+- [`Computer`](../../components/handler/computer.md): the component family a monadic pipeline implements.
+- [`Product!`](../../macros/product.md): the type-level list a pipeline's steps are given in.
 
 The ideas behind it:
 
-- [Monadic handlers](/docs/concepts/monadic-handlers) — why a pipeline short-circuits and how the monads
+- [Monadic handlers](/docs/concepts/monadic-handlers): why a pipeline short-circuits and how the monads
   compose.
 
 ## Source
 
-- [`monadic_trans.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/monadic_trans.rs)
-  — `MonadicTrans`
+- [`monadic_trans.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/monadic_trans.rs):
+  `MonadicTrans`
 - Per-marker impls: [`cgp-monad/src/monadic/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-monad/src/monadic)
 
 ---

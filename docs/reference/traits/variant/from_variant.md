@@ -10,7 +10,7 @@ Generic construction of an enum from a named variant.
 ## Overview
 
 `Shape::Circle(circle)` names two things: the enum and the variant. That is fine where both are known and
-useless to code that knows neither — a routine handed a payload and told which variant to wrap it in cannot
+useless to code that knows neither: a routine handed a payload and told which variant to wrap it in cannot
 write that expression.
 
 `FromVariant<Tag>` gives it a way to. The variant is selected by its *name as a type*, so the choice becomes a
@@ -191,19 +191,19 @@ struct.
 
 ## Related constructs
 
-- [`#[derive(FromVariant)]`](../../derives/derive_from_variant.md) — generates the per-variant impls; what you
+- [`#[derive(FromVariant)]`](../../derives/derive_from_variant.md): generates the per-variant impls; what you
   write.
-- [`ExtractField`](./extract_field.md) — the reverse operation, and the trait most often derived alongside.
-- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — bundles this with the extractor and the shape.
-- [`HasBuilder`](../builder/has_builder.md) — the struct analogue: setting one field rather than choosing one variant.
-- [`Symbol!`](../../macros/symbol.md) — the tag that names a variant.
-- [`CanUpcast`](../casting/can_upcast.md) — widening a narrow enum into a wider one, built on these constructors.
-- [`HasFields`](../shape/has_fields.md) — the variant shape a cast walks while rebuilding.
-- [Dispatch combinators](../../providers/dispatch/index.md) — where variant construction meets routing.
+- [`ExtractField`](./extract_field.md): the reverse operation, and the trait most often derived alongside.
+- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md): bundles this with the extractor and the shape.
+- [`HasBuilder`](../builder/has_builder.md): the struct analogue: setting one field rather than choosing one variant.
+- [`Symbol!`](../../macros/symbol.md): the tag that names a variant.
+- [`CanUpcast`](../casting/can_upcast.md): widening a narrow enum into a wider one, built on these constructors.
+- [`HasFields`](../shape/has_fields.md): the variant shape a cast walks while rebuilding.
+- [Dispatch combinators](../../providers/dispatch/index.md): where variant construction meets routing.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — construction by name, and building through a
+- [Extensible variants](/docs/concepts/extensible-variants): construction by name, and building through a
   small local enum before widening.
 
 ## Source

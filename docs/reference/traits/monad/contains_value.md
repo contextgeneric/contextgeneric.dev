@@ -20,8 +20,8 @@ page is here to explain how a step unwraps its input.
 
 ## Overview
 
-A step in a [monadic pipeline](/docs/concepts/monadic-handlers) produces a wrapped output — a `Result`,
-say — and the next step needs the value *inside* the wrapper for the branch that continues. Which half of
+A step in a [monadic pipeline](/docs/concepts/monadic-handlers) produces a wrapped output, a `Result`,
+say, and the next step needs the value *inside* the wrapper for the branch that continues. Which half of
 the wrapper that is depends on the monad, so it cannot be hard-coded.
 
 `ContainsValue` is where each monad answers it.
@@ -56,7 +56,7 @@ layer unwraps it further.
 use cgp::extra::monad::traits::ContainsValue;
 ```
 
-You import it only when **defining a monad of your own**. There is no method — the trait is a type-level
+You import it only when **defining a monad of your own**. There is no method. The trait is a type-level
 projection from an output type to the value beneath the wrapper.
 
 ## Examples
@@ -73,7 +73,7 @@ unwrapped, and every value threads forward.
 | `ErrMonadic` | `T` | the `Ok` payload threads forward |
 | `OkMonadic` | `E` | the `Err` payload threads forward |
 
-So under `ErrMonadic` a step's continuation receives the `Ok` payload — the ordinary `?` behaviour — and
+So under `ErrMonadic` a step's continuation receives the `Ok` payload, the ordinary `?` behaviour, and
 under `OkMonadic` it receives the `Err` payload, which is the inverted, run-until-something-succeeds
 behaviour.
 
@@ -88,7 +88,7 @@ specific to any depth.
 by wiring [`PipeMonadic`](../../providers/monad/pipe_monadic.md) with a marker and a handler list; this is what
 the bind providers bound on internally.
 
-The one real reason to name it is **defining a new monad** — short-circuiting over an `Option`, or over a
+The one real reason to name it is **defining a new monad**: short-circuiting over an `Option`, or over a
 custom two-branch enum. Implement it alongside [`LiftValue`](./lift_value.md), since the two are the pair
 that runs a step and neither is useful without the other, and copy the mirror-image
 `OkMonadic`/`ErrMonadic` pair as the model.
@@ -104,7 +104,7 @@ The [`BindOk` and `BindErr`](../../providers/monad/index.md) providers use `Cont
 step's output, ask the monad what value sits beneath its wrapper, and hand that to the continuation. This
 trait is the second half of that sentence.
 
-[`LiftValue`](./lift_value.md) is then what puts a result back into the output type — `lift_value` for the
+[`LiftValue`](./lift_value.md) then puts a result back into the output type: `lift_value` for the
 branch that short-circuits, `lift_output` for the branch that forwarded to the continuation. So the two
 traits bracket one step: unwrap, run, re-wrap.
 
@@ -130,24 +130,24 @@ the first step rather than at the definition.
 
 ## Related constructs
 
-- [`LiftValue`](./lift_value.md) — the other half of running a step: getting back into the output type.
-- [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md) — the two traits that fold
+- [`LiftValue`](./lift_value.md): the other half of running a step: getting back into the output type.
+- [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md): the two traits that fold
   the pipeline rather than run a step.
-- [Monad providers](../../providers/monad/index.md) — `PipeMonadic`, `BindOk`, `BindErr`, and the
+- [Monad providers](../../providers/monad/index.md): `PipeMonadic`, `BindOk`, `BindErr`, and the
   markers; what you actually wire.
-- [`Computer`](../../components/handler/computer.md) — the component family the bind providers implement.
-- [`TryComputer`](../../components/handler/try_computer.md) and [`Handler`](../../components/handler/handler.md) — the fallible
+- [`Computer`](../../components/handler/computer.md): the component family the bind providers implement.
+- [`TryComputer`](../../components/handler/try_computer.md) and [`Handler`](../../components/handler/handler.md): the fallible
   members a single step usually is.
 
 The ideas behind it:
 
-- [Monadic handlers](/docs/concepts/monadic-handlers) — why a pipeline short-circuits and how the monads
+- [Monadic handlers](/docs/concepts/monadic-handlers): why a pipeline short-circuits and how the monads
   compose.
 
 ## Source
 
-- [`value.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/value.rs)
-  — `ContainsValue`
+- [`value.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-monad/src/traits/value.rs):
+  `ContainsValue`
 - Per-marker impls: [`cgp-monad/src/monadic/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-monad/src/monadic)
 
 ---

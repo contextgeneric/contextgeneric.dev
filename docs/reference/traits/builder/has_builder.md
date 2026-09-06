@@ -15,7 +15,7 @@ of which should know the whole struct, and the result must still be checked at c
 
 `builder()` hands back a partial value with **every field absent**. Filling it is
 [`BuildField`](./build_field.md), and turning it back into the concrete struct is
-[`FinalizeBuild`](./finalize_build.md) — which is implemented **only** for the fully-present
+[`FinalizeBuild`](./finalize_build.md), which is implemented **only** for the fully-present
 configuration, so finalizing early is a missing impl rather than a runtime panic:
 
 ```rust
@@ -110,7 +110,7 @@ Asking for `last_name` there would not compile.
 
 **Call `builder()` freely in concrete code; bound on the trait only in generic code.** In concrete code
 you call it and never name a trait. The bound matters when you write code that is generic over the
-record being built — which is the extensible builder pattern, and the reason the family exists.
+record being built, which is the extensible builder pattern, and the reason the family exists.
 
 - **Bound on `HasBuilder` + [`BuildField`](./build_field.md) + [`FinalizeBuild`](./finalize_build.md)**
   to write a routine that assembles some record it does not name.
@@ -121,15 +121,15 @@ record being built — which is the extensible builder pattern, and the reason t
   decouple it is pure cost.
 
 Two boundaries are worth stating plainly. This is **not a conventional builder**: it tracks presence and
-nothing else — no defaults, no validation at finalize, no optional field unless the field's own type is
-optional. The [optional-field extensions](../optional/has_optional_builder.md) cover the defaulted and optional
+nothing else, with no defaults, no validation at finalize, and no optional field unless the field's own
+type is optional. The [optional-field extensions](../optional/has_optional_builder.md) cover the defaulted and optional
 cases, and a hand-written builder remains better when the *logic* is the point. And the enum counterparts
 are a different family: [`ExtractField`](../variant/extract_field.md) for taking a value apart and
 [`FromVariant`](../variant/from_variant.md) for constructing one.
 
 ## Under the hood
 
-The derive generates a companion struct — `__Partial{Name}` — that is your struct with one
+The derive generates a companion struct, `__Partial{Name}`, that is your struct with one
 [`MapType`](../type-level/map_type.md) parameter added per field and each field's type wrapped in that parameter's
 projection:
 
@@ -158,7 +158,7 @@ impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
 ```
 
 That pair is the whole safety argument. `builder()` starts at all-absent, each
-[`build_field`](./build_field.md) flips one marker, and there is no check to run at the end — the impl
+[`build_field`](./build_field.md) flips one marker, and there is no check to run at the end: the impl
 simply is not there for an incomplete value.
 
 Everything between the two ends reduces to one primitive, [`UpdateField`](./update_field.md), which is
@@ -187,29 +187,29 @@ legal and useless.
 
 ## Related constructs
 
-- [`IntoBuilder`](./into_builder.md) — the other entry point, starting from a complete value.
-- [`BuildField`](./build_field.md) — setting one absent field.
-- [`TakeField`](./take_field.md) — the reverse, removing one present field.
-- [`UpdateField`](./update_field.md) — the primitive both are built from.
-- [`PartialData`](./partial_data.md) and [`FinalizeBuild`](./finalize_build.md) — naming the destination,
+- [`IntoBuilder`](./into_builder.md): the other entry point, starting from a complete value.
+- [`BuildField`](./build_field.md): setting one absent field.
+- [`TakeField`](./take_field.md): the reverse, removing one present field.
+- [`UpdateField`](./update_field.md): the primitive both are built from.
+- [`PartialData`](./partial_data.md) and [`FinalizeBuild`](./finalize_build.md): naming the destination,
   and reaching it.
-- [`CanBuildFrom`](../casting/can_build_from.md) — merging every shared field from another record.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the partial type and every impl
+- [`CanBuildFrom`](../casting/can_build_from.md): merging every shared field from another record.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates the partial type and every impl
   in the family.
-- [`MapType`](../type-level/map_type.md) — the `IsPresent`/`IsNothing` markers presence is encoded in.
-- [`HasField`](../field-access/has_field.md) — how a set field is read back off a partial value.
-- [Optional fields](../optional/has_optional_builder.md) — defaulted and optional finalization.
-- [`ExtractField`](../variant/extract_field.md) and [`FromVariant`](../variant/from_variant.md) — the enum counterparts.
+- [`MapType`](../type-level/map_type.md): the `IsPresent`/`IsNothing` markers presence is encoded in.
+- [`HasField`](../field-access/has_field.md): how a set field is read back off a partial value.
+- [Optional fields](../optional/has_optional_builder.md): defaulted and optional finalization.
+- [`ExtractField`](../variant/extract_field.md) and [`FromVariant`](../variant/from_variant.md): the enum counterparts.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`has_builder.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_builder.rs)
-  — `HasBuilder` and `IntoBuilder`
+- [`has_builder.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_builder.rs):
+  `HasBuilder` and `IntoBuilder`
 
 ---
 

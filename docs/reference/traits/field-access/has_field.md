@@ -9,8 +9,8 @@ Reading a field by a type-level name, from a context you cannot name.
 
 ## Overview
 
-An implementation written against a **context** — the type the capability runs against, which supplies
-the values it needs as its fields — is generic over that context and cannot name its concrete type. So it
+An implementation written against a **context**, the type the capability runs against, which supplies
+the values it needs as its fields, is generic over that context and cannot name its concrete type. So it
 cannot write `self.name`. Yet reading a value out of the context is the commonest thing such an
 implementation does.
 
@@ -21,7 +21,7 @@ an ordinary trait bound:
 Self: HasField<Symbol!("name"), Value = String>
 ```
 
-Any context with a matching field satisfies that bound. Nothing is compared by string at run time —
+Any context with a matching field satisfies that bound. Nothing is compared by string at run time.
 [`Symbol!("name")`](../../macros/symbol.md) is a type, so the compiler resolves which field is meant and the
 read compiles to a direct field access.
 
@@ -45,7 +45,7 @@ pub trait HasField<Tag> {
 
 `Tag` is a type-level name: [`Symbol!("field_name")`](../../macros/symbol.md) for a named field,
 [`Index<N>`](../../types/index_type.md) for a tuple field. `Value` is the field's type, exposed as an associated
-type so a bound can pin it or leave it open — `HasField<Symbol!("name")>` accepts a field of any type,
+type so a bound can pin it or leave it open: `HasField<Symbol!("name")>` accepts a field of any type,
 while `HasField<Symbol!("name"), Value = String>` requires a `String`. `get_field` takes `&self` and
 returns `&Self::Value`, a borrow of the field; its `PhantomData<Tag>` argument carries no data and only
 lets a call site say *which* field it means when several `HasField` impls are in scope, which is why a
@@ -98,7 +98,7 @@ delegate_components! {
 ```
 
 `Person` derives the access, so it satisfies exactly the bound `GreetHello` requires and the wiring
-compiles. **Value context, self-targeted** — the wired type is the data the capability runs against.
+compiles. **Value context, self-targeted**: the wired type is the data the capability runs against.
 
 **Written idiomatically, none of that bound is visible.** The same read is an
 [`#[implicit]`](../../attributes/implicit.md) argument:
@@ -134,14 +134,14 @@ ordering is settled and worth following.
   case, including a field several implementations each read.
 - **Use [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md)** when the read must be a *named* capability,
   when the field lives on a type other than the context, or when the getter should carry a type inferred
-  from the field — the three cases an implicit argument cannot reach.
+  from the field. An implicit argument cannot reach those cases.
 - **Use [`#[cgp_getter]`](../../macros/cgp_getter.md) with [`UseField`](../../providers/use_field.md)** only
   when a context needs to choose *which* field the getter reads. That is the advanced case and costs a
   wiring line per context.
-- **Write the bound by hand** when none of those fit — a bound on a type that is not `Self`, say. It is an
-  ordinary trait bound.
+- **Write the bound by hand** when none of those fit, such as a bound on a type that is not `Self`. It is
+  an ordinary trait bound.
 
-Three neighbours are easy to confuse with it. [`HasFields`](../shape/has_fields.md) — plural — is the
+Three neighbours are easy to confuse with it. [`HasFields`](../shape/has_fields.md), the plural, is the
 whole-shape view, for code that must process *every* field rather than one named one; the two are
 complementary and often derived together. [`HasFieldMut`](./has_field_mut.md) is the same access with
 mutation, not an alternative. And [`FieldGetter`](./field_getter.md) is not an alternative either but the
@@ -202,29 +202,29 @@ parameter is owned.
 
 ## Related constructs
 
-- [`#[derive(HasField)]`](../../derives/derive_has_field.md) — generates the per-field impls; what a context
+- [`#[derive(HasField)]`](../../derives/derive_has_field.md): generates the per-field impls; what a context
   writes.
-- [`HasFieldMut`](./has_field_mut.md) — the mutable extension.
-- [`FieldGetter`](./field_getter.md) — the provider-side mirror that gets wired.
-- [`MapField`](./map_field.md) — the lifetime-safe form for reaching into a nested value.
-- [`HasFields`](../shape/has_fields.md) — the plural, whole-shape counterpart.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that key a field.
-- [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to read a field.
-- [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md) and [`#[cgp_getter]`](../../macros/cgp_getter.md) —
+- [`HasFieldMut`](./has_field_mut.md): the mutable extension.
+- [`FieldGetter`](./field_getter.md): the provider-side mirror that gets wired.
+- [`MapField`](./map_field.md): the lifetime-safe form for reaching into a nested value.
+- [`HasFields`](../shape/has_fields.md): the plural, whole-shape counterpart.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags that key a field.
+- [`#[implicit]`](../../attributes/implicit.md): the idiomatic way to read a field.
+- [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md) and [`#[cgp_getter]`](../../macros/cgp_getter.md):
   getter traits over the same access.
-- [`UseField`](../../providers/use_field.md) — the provider-side implementation of `FieldGetter`.
-- [`HasBuilder`](../builder/has_builder.md) — where `HasField` reappears on a partial record, gated on presence.
+- [`UseField`](../../providers/use_field.md): the provider-side implementation of `FieldGetter`.
+- [`HasBuilder`](../builder/has_builder.md): where `HasField` reappears on a partial record, gated on presence.
 
 The ideas behind it:
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — why a field requirement belongs on
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): why a field requirement belongs on
   the implementation rather than the interface.
-- [Implicit arguments](/docs/concepts/implicit-arguments) — the ergonomic surface built on this trait.
+- [Implicit arguments](/docs/concepts/implicit-arguments): the ergonomic surface built on this trait.
 
 ## Source
 
-- [`has_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field.rs)
-  — `HasField`, `FieldGetter`, the `Deref` forwarding, and the `UseContext` impl
+- [`has_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field.rs):
+  `HasField`, `FieldGetter`, the `Deref` forwarding, and the `UseContext` impl
 
 ---
 

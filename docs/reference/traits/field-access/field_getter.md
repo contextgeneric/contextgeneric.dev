@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # `FieldGetter`
 
-The provider-side mirror of `HasField` — field access that gets wired.
+The provider-side mirror of `HasField`: field access that gets wired.
 
 :::info
 
@@ -65,8 +65,8 @@ delegate_components! {
 ```
 
 Reading it back: the getter component is answered by [`UseField`](../../providers/use_field.md), which
-implements `FieldGetter` by reading the `first_name` field — a field whose name need not match the
-getter's method name, which is the whole point of wiring the access rather than deriving it.
+implements `FieldGetter` by reading the `first_name` field, whose name need not match the getter's method
+name. That is the whole point of wiring the access rather than deriving it.
 
 Writing a `FieldGetter` impl by hand is the escape hatch for a getter whose value is computed rather than
 stored, and it is an ordinary trait impl on a marker type of your own.
@@ -168,28 +168,28 @@ getter's own name**, since that impl keys on the tag it is given.
 
 ## Related constructs
 
-- [`HasField`](./has_field.md) — the consumer side you bound against.
-- [`MutFieldGetter`](./mut_field_getter.md) — the mutable extension of this trait.
-- [`FieldMapper`](./field_mapper.md) — the lifetime-safe form, for nested access.
-- [`UseField`](../../providers/use_field.md) — the provider that implements it by reading a named field.
-- [`UseContext`](../../providers/use_context.md) — the provider that routes back through the context's own
+- [`HasField`](./has_field.md): the consumer side you bound against.
+- [`MutFieldGetter`](./mut_field_getter.md): the mutable extension of this trait.
+- [`FieldMapper`](./field_mapper.md): the lifetime-safe form, for nested access.
+- [`UseField`](../../providers/use_field.md): the provider that implements it by reading a named field.
+- [`UseContext`](../../providers/use_context.md): the provider that routes back through the context's own
   fields.
-- [`#[cgp_getter]`](../../macros/cgp_getter.md) — the macro that makes a getter a full component.
-- [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md) — the simpler getter, keyed by method name.
-- [`ChainGetters`](../../providers/chain_getters.md) — composing getters to reach a nested field.
-- [`MRef`](../../types/mref.md) — the owned-or-borrowed return type for a getter that may produce its value.
+- [`#[cgp_getter]`](../../macros/cgp_getter.md): the macro that makes a getter a full component.
+- [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md): the simpler getter, keyed by method name.
+- [`ChainGetters`](../../providers/chain_getters.md): composing getters to reach a nested field.
+- [`MRef`](../../types/mref.md): the owned-or-borrowed return type for a getter that may produce its value.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the duality this trait is
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the duality this trait is
   the field-access instance of.
 
 ## Source
 
-- [`has_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field.rs)
-  — `FieldGetter` and the `UseContext` impl
-- [`use_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/use_field.rs)
-  — the `UseField` provider
+- [`has_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field.rs):
+  `FieldGetter` and the `UseContext` impl
+- [`use_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/use_field.rs):
+  the `UseField` provider
 
 ---
 

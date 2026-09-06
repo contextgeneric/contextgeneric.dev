@@ -49,7 +49,7 @@ not in the prelude; import it from `cgp-field-extra`.
 use cgp::extra::field::impls::SetOptional;
 ```
 
-`Self` must be an optional builder — one from
+`Self` must be an optional builder, one from
 [`optional_builder()`](./has_optional_builder.md) or [`to_optional()`](./to_optional.md). Calling it on a
 core builder does not resolve, because the field's marker is `IsNothing` rather than `IsOptional`. There
 is no "unset" operation: a field starts absent and stays so unless it is set.
@@ -82,7 +82,7 @@ let context = builder.finalize_optional().unwrap();
 assert_eq!(context.foo, "bar");
 ```
 
-Because `set` returns `Self`, the calls chain exactly as core `build_field` calls do — the difference is
+Because `set` returns `Self`, the calls chain exactly as core `build_field` calls do. The difference is
 invisible at the call site and lives entirely in the type.
 
 ## When to use it
@@ -93,7 +93,7 @@ thing the core builder cannot express.
 - **[`BuildField`](../builder/build_field.md)** when each field is set exactly once. The compile-time
   completeness check it buys is the reason the core family exists.
 - **`set`** when whatever was there should simply be replaced.
-- **`set_optional`** when the previous value matters — merging, accumulating, warning on a duplicate.
+- **`set_optional`** when the previous value matters: merging, accumulating, or warning on a duplicate.
 - **[`CanBuildFrom`](../casting/can_build_from.md)** when the values come from another record wholesale rather
   than one at a time.
 
@@ -140,24 +140,24 @@ conflate.
 
 ## Related constructs
 
-- [`HasOptionalBuilder`](./has_optional_builder.md) — where an optional builder comes from.
-- [`ToOptional`](./to_optional.md) — converting an existing builder into one.
+- [`HasOptionalBuilder`](./has_optional_builder.md): where an optional builder comes from.
+- [`ToOptional`](./to_optional.md): converting an existing builder into one.
 - [`FinalizeOptional`](./finalize_optional.md) and
-  [`CanFinalizeWithDefault`](./can_finalize_with_default.md) — the two endings.
-- [`BuildField`](../builder/build_field.md) — the strict, set-once counterpart.
-- [`UpdateField`](../builder/update_field.md) — the primitive this is one call of.
-- [`MapType`](../type-level/map_type.md) — the `IsOptional` marker it pins on both sides.
-- [`CanBuildFrom`](../casting/can_build_from.md) — filling many fields from another record.
+  [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the two endings.
+- [`BuildField`](../builder/build_field.md): the strict, set-once counterpart.
+- [`UpdateField`](../builder/update_field.md): the primitive this is one call of.
+- [`MapType`](../type-level/map_type.md): the `IsOptional` marker it pins on both sides.
+- [`CanBuildFrom`](../casting/can_build_from.md): filling many fields from another record.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records, and where relaxing presence
+- [Extensible records](/docs/concepts/extensible-records): partial records, and where relaxing presence
   fits.
 
 ## Source
 
-- [`set_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/set_optional.rs)
-  — `SetOptional`
+- [`set_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/set_optional.rs):
+  `SetOptional`
 
 ---
 

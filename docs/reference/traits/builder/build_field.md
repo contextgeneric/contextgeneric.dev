@@ -12,7 +12,7 @@ Setting one currently-absent field of a builder.
 `BuildField` is the direction of the [builder family](./has_builder.md) you write most: take a partial
 record with a field absent, supply the value, and get back a partial record with that field present.
 
-`Output` is a **different type** from `Self` — the same partial record with one marker flipped — which is
+`Output` is a **different type** from `Self` (the same partial record with one marker flipped), which is
 what makes the compiler track completeness. A chain of `build_field` calls walks through as many distinct
 types as there are fields, and only the last one satisfies
 [`FinalizeBuild`](./finalize_build.md).
@@ -109,16 +109,16 @@ marker to `IsPresent` and constraining the reported source marker to `IsNothing`
 //   where Partial: UpdateField<Tag, IsPresent, Mapper = IsNothing>
 ```
 
-The `Mapper = IsNothing` constraint does the checking. `Mapper` is an *output* of the primitive —
-the marker the field was in — so constraining it selects only those partial types whose field is
+The `Mapper = IsNothing` constraint does the checking. `Mapper` is an *output* of the primitive (the
+marker the field was in), so constraining it selects only those partial types whose field is
 currently absent. A field already set has `Mapper = IsPresent`, no impl matches, and the call fails to
 resolve.
 
 `update_field` returns the old value alongside the new partial; `build_field` discards it, which is sound
 because the old value under `IsNothing` is `()`.
 
-[`TakeField`](./take_field.md) is the mirror image — the same primitive with `IsNothing` as the target
-and `Mapper = IsPresent` — which is why the two read as opposites and share every mechanism.
+[`TakeField`](./take_field.md) is the mirror image (the same primitive with `IsNothing` as the target
+and `Mapper = IsPresent`), which is why the two read as opposites and share every mechanism.
 
 ## Common Mistakes
 
@@ -126,7 +126,7 @@ and `Mapper = IsPresent` — which is why the two read as opposites and share ev
 is the guarantee, and the error is a missing-method one rather than anything mentioning "already set".
 
 **`Output` is a different type from `Self`.** A builder cannot be stored in a variable of fixed type
-across a chain, and it cannot be filled in a loop — the chain is unrolled by construction.
+across a chain, and it cannot be filled in a loop. The chain is unrolled by construction.
 
 **The error for an incomplete build arrives at `finalize_build`**, not here. Forgetting a field is only
 detectable at the end, since any prefix of a chain is a legal partial value.
@@ -142,27 +142,27 @@ detectable at the end, since any prefix of a chain is a legal partial value.
 
 ## Related constructs
 
-- [`UpdateField`](./update_field.md) — the primitive this pins one direction of.
-- [`TakeField`](./take_field.md) — the opposite direction.
-- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md) — where a partial value comes
+- [`UpdateField`](./update_field.md): the primitive this pins one direction of.
+- [`TakeField`](./take_field.md): the opposite direction.
+- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md): where a partial value comes
   from.
-- [`FinalizeBuild`](./finalize_build.md) — where a completed one goes.
-- [`CanBuildFrom`](../casting/can_build_from.md) — filling many fields from another record in one call.
-- [`SetOptional`](../optional/set_optional.md) — the settable-repeatedly counterpart.
-- [`MapType`](../type-level/map_type.md) — the `IsNothing`/`IsPresent` markers this moves between.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the `UpdateField` impls behind
+- [`FinalizeBuild`](./finalize_build.md): where a completed one goes.
+- [`CanBuildFrom`](../casting/can_build_from.md): filling many fields from another record in one call.
+- [`SetOptional`](../optional/set_optional.md): the settable-repeatedly counterpart.
+- [`MapType`](../type-level/map_type.md): the `IsNothing`/`IsPresent` markers this moves between.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates the `UpdateField` impls behind
   it.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that name a field.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags that name a field.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`build_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/build_field.rs)
-  — `BuildField` and `FinalizeBuild`
+- [`build_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/build_field.rs):
+  `BuildField` and `FinalizeBuild`
 
 ---
 

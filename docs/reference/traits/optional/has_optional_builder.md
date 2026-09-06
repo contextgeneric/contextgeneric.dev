@@ -45,7 +45,7 @@ prelude; the whole optional-field layer lives in `cgp-field-extra`.
 
 ## Usage
 
-**It is not in the prelude.** Nothing in the optional-field layer is — import it from
+**It is not in the prelude.** Nothing in the optional-field layer is. Import it from
 `cgp::extra::field::impls`:
 
 ```rust
@@ -53,8 +53,8 @@ use cgp::extra::field::impls::HasOptionalBuilder;
 ```
 
 The impls are blanket ones over the core builder machinery, so any record deriving
-[`#[derive(BuildField)]`](../../derives/derive_build_field.md) — or
-[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — gets this for free. There is no separate derive.
+[`#[derive(BuildField)]`](../../derives/derive_build_field.md) (or
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md)) gets this for free. There is no separate derive.
 
 **Two endings are available**, and picking between them at the call site is the layer's real payoff:
 [`FinalizeOptional`](./finalize_optional.md) requires every field and reports the first missing one, while
@@ -100,23 +100,23 @@ Had that used `finalize_optional`, it would have returned `Err("bar")` instead.
 ## When to use it
 
 **Reach for it when fields must be settable in any order and more than once**, which the core
-`build_field` cannot do — and stay on the core builder otherwise.
+`build_field` cannot do, and stay on the core builder otherwise.
 
 - **[`HasBuilder`](../builder/has_builder.md)** when every field is genuinely required and set once. You lose the
   compile-time completeness check by moving here, and that check is the reason the builder family
   exists.
-- **`HasOptionalBuilder`** when the fields arrive unpredictably — parsed configuration, accumulated
-  defaults, a value assembled across several passes.
+- **`HasOptionalBuilder`** when the fields arrive unpredictably: parsed configuration, accumulated
+  defaults, or a value assembled across several passes.
 - **[`ToOptional`](./to_optional.md)** when you already hold a core builder and want to convert it rather
   than start fresh.
-- **A hand-written builder** when the *logic* is the point — validation at finalize, interdependent
-  fields, computed defaults that are not `Default::default()`. This layer models presence and defaulting,
+- **A hand-written builder** when the *logic* is the point: validation at finalize, interdependent
+  fields, or computed defaults that are not `Default::default()`. This layer models presence and defaulting,
   and nothing else.
 
 ## Under the hood
 
 `optional_builder()` is [`HasBuilder`](../builder/has_builder.md)'s `builder()` followed by
-[`ToOptional`](./to_optional.md) — start at all-`IsNothing`, then re-mark every field to `IsOptional`
+[`ToOptional`](./to_optional.md): start at all-`IsNothing`, then re-mark every field to `IsOptional`
 with a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying the
 [`TransformOptional`](./transform_optional.md) marker.
 
@@ -154,24 +154,24 @@ Conflating them produces an `Option<Option<T>>`.
 
 ## Related constructs
 
-- [`SetOptional`](./set_optional.md) — setting a field on the builder this produces.
-- [`FinalizeOptional`](./finalize_optional.md) — the strict ending, reporting the first missing field.
-- [`CanFinalizeWithDefault`](./can_finalize_with_default.md) — the defaulting ending.
-- [`ToOptional`](./to_optional.md) — converting an existing core builder instead of starting fresh.
-- [`HasBuilder`](../builder/has_builder.md) — the core entry point this relaxes.
-- [`MapType`](../type-level/map_type.md) — the `IsOptional` marker the layer runs on.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — the walk that re-marks every field.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the machinery underneath.
+- [`SetOptional`](./set_optional.md): setting a field on the builder this produces.
+- [`FinalizeOptional`](./finalize_optional.md): the strict ending, reporting the first missing field.
+- [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the defaulting ending.
+- [`ToOptional`](./to_optional.md): converting an existing core builder instead of starting fresh.
+- [`HasBuilder`](../builder/has_builder.md): the core entry point this relaxes.
+- [`MapType`](../type-level/map_type.md): the `IsOptional` marker the layer runs on.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): the walk that re-marks every field.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates the machinery underneath.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records, and where relaxing presence
+- [Extensible records](/docs/concepts/extensible-records): partial records, and where relaxing presence
   fits.
 
 ## Source
 
-- [`to_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/to_optional.rs)
-  — `HasOptionalBuilder`, `ToOptional`, and `TransformOptional`
+- [`to_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/to_optional.rs):
+  `HasOptionalBuilder`, `ToOptional`, and `TransformOptional`
 
 ---
 

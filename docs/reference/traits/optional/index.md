@@ -13,7 +13,7 @@ The core [record builder](../builder/index.md) is deliberately strict: a field i
 partial record becomes its struct only when every field is present. That strictness catches a missing
 field at compile time, and it is too rigid for a record whose fields arrive unpredictably or have
 sensible defaults. These traits, from `cgp-field-extra`, relax it while reusing the same machinery
-underneath. Nothing here is in the prelude — import each from `cgp::extra::field::impls`.
+underneath. Nothing here is in the prelude. Import each from `cgp::extra::field::impls`.
 
 The layer divides into entry points, the setter, the two endings, and the transform markers behind
 them.
@@ -36,7 +36,7 @@ The **transform markers** carry the per-field conversions the endings run.
 
 ## The ideas behind them
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records, and where relaxing presence
+- [Extensible records](/docs/concepts/extensible-records): partial records, and where relaxing presence
   fits.
 
 ---

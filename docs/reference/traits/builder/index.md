@@ -11,7 +11,7 @@ Assembling a struct one field at a time, with field presence tracked in the type
 
 These traits build a record incrementally, where the fields come from several independent places and
 the result must still be checked at compile time. The build starts from an empty *partial* value and
-adds fields one by one, and each field's presence lives in the type — so finalizing an incomplete
+adds fields one by one, and each field's presence lives in the type, so finalizing an incomplete
 record is a missing impl rather than a runtime panic. The impls come from
 [`#[derive(BuildField)]`](../../derives/derive_build_field.md), which also generates the partial
 companion type.
@@ -34,7 +34,7 @@ generic builder code knows what it is building before the build is complete.
 
 ## The ideas behind them
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ---

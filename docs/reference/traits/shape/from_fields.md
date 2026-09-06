@@ -12,7 +12,7 @@ Rebuilding a concrete value from its shape.
 [`ToFields`](./to_fields.md) takes a value apart into an anonymous list of named entries. `FromFields` is
 the return journey. It closes the loop for generic code: decompose a value, work on the entries without
 naming the type, and put a concrete value back together at the end. Both directions go through the
-identical `Fields` type, so **the shapes line up by construction rather than by check** — there is
+identical `Fields` type, so **the shapes line up by construction rather than by check**: there is
 nothing to validate and nothing that can fail.
 
 ## Definition
@@ -35,11 +35,7 @@ because there is no value to call it on, so the call reads `Person::from_fields(
 **It is in the prelude**, so `use cgp::prelude::*;` is enough. The impls come from
 [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all five shape traits together.
 
-The argument must be **exactly** `Self::Fields` — the same entries, the same tags, in the same order. A
-shape that merely has the same field names in a different order is a different type and will not be
-accepted, which makes the conversion total.
-
-The argument must be **exactly** `Self::Fields` — the same entries, the same tags, in the same order. A
+The argument must be **exactly** `Self::Fields`: the same entries, the same tags, in the same order. A
 shape that merely has the same field names in a different order is a different type and will not be
 accepted, which makes the conversion total.
 
@@ -75,7 +71,7 @@ where
 }
 ```
 
-An enum rebuilds the same way, from a [`Sum!`](../../macros/sum.md) rather than a product — the arm that is
+An enum rebuilds the same way, from a [`Sum!`](../../macros/sum.md) rather than a product: the arm that is
 present becomes the variant that is constructed.
 
 ## When to use it
@@ -109,7 +105,7 @@ impl FromFields for Person {
 
 Note the pattern in the argument position: the shape is matched apart in the signature itself, one node
 per field, terminated by `Nil`. Because the chain is built and matched in declaration order, this is the
-exact inverse of [`to_fields`](./to_fields.md) — no lookup by name happens at run time, and the tags
+exact inverse of [`to_fields`](./to_fields.md): no lookup by name happens at run time, and the tags
 exist only to make the types distinct.
 
 An enum's impl is the dual: a `match` over the `Either` chain, each arm reconstructing the corresponding
@@ -137,25 +133,25 @@ a borrowed shape cannot yield an owned value.
 
 ## Related constructs
 
-- [`ToFields`](./to_fields.md) — the reverse conversion, and the one usually written first.
-- [`HasFields`](./has_fields.md) — the supertrait that names the shape.
-- [`ToFieldsRef`](./to_fields_ref.md) and [`HasFieldsRef`](./has_fields_ref.md) — the borrowed half of
+- [`ToFields`](./to_fields.md): the reverse conversion, and the one usually written first.
+- [`HasFields`](./has_fields.md): the supertrait that names the shape.
+- [`ToFieldsRef`](./to_fields_ref.md) and [`HasFieldsRef`](./has_fields_ref.md): the borrowed half of
   the family, which has no rebuild.
-- [`FromVariant`](../variant/from_variant.md) — constructing an enum from one named variant.
-- [`HasBuilder`](../builder/has_builder.md) — incremental assembly, as against this wholesale conversion.
-- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md) — generates this impl.
-- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md) — what
+- [`FromVariant`](../variant/from_variant.md): constructing an enum from one named variant.
+- [`HasBuilder`](../builder/has_builder.md): incremental assembly, as against this wholesale conversion.
+- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
+- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md): what
   a shape is made of.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — a struct as a product of named fields.
-- [Extensible variants](/docs/concepts/extensible-variants) — the enum half.
+- [Extensible records](/docs/concepts/extensible-records): a struct as a product of named fields.
+- [Extensible variants](/docs/concepts/extensible-variants): the enum half.
 
 ## Source
 
-- [`from_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/from_fields.rs)
-  — `FromFields`
+- [`from_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/from_fields.rs):
+  `FromFields`
 
 ---
 

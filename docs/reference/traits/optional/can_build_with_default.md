@@ -14,7 +14,7 @@ start a builder, copy the shared fields, default the rest. `CanBuildWithDefault`
 call.
 
 `Self` is the target record and `Source` the narrower one. **It is the field-level counterpart of an
-[upcast](../casting/can_upcast.md)** — turning a `Point2d` into a `Point3d` whose extra `z` is `0`, naming no field
+[upcast](../casting/can_upcast.md)**: turning a `Point2d` into a `Point3d` whose extra `z` is `0`, naming no field
 explicitly.
 
 It chains [`builder()`](../builder/has_builder.md), [`build_from`](../casting/can_build_from.md), and
@@ -87,7 +87,7 @@ in between needs to happen.
 - **[`CanBuildFrom`](../casting/can_build_from.md) plus an explicit finalize** when some fields must be set by
   hand as well as copied. This trait offers no place to insert a `build_field`.
 - **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** when there is no source to merge from.
-- **[`CanUpcast`](../casting/can_upcast.md)** for the enum analogue — widening a variant set rather than a field
+- **[`CanUpcast`](../casting/can_upcast.md)** for the enum analogue: widening a variant set rather than a field
   set.
 - **A plain `From` impl** when both types are yours and the conversion is one you would write once. A
   hand-written `From` is clearer, requires nothing of either type, and lets you choose values other than
@@ -111,7 +111,7 @@ The impl chains the three steps and constrains each with a bound:
 Each bound is where one of the requirements comes from: [`CanBuildFrom`](../casting/can_build_from.md) brings the
 [`HasFields`](../shape/has_fields.md) obligation on the source, and
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) brings the `Default` obligation on the
-remaining fields — through a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying
+remaining fields, through a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying
 [`TransformMapDefault`](./transform_map_default.md).
 
 So an unsatisfied bound here is always really an unsatisfied bound one layer down, which is worth knowing
@@ -122,7 +122,7 @@ because the error names that layer rather than this trait.
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 
 **The source needs [`HasFields`](../shape/has_fields.md), not just a builder.** Deriving only
-[`BuildField`](../../derives/derive_build_field.md) on both looks symmetric and fails — the same trap
+[`BuildField`](../../derives/derive_build_field.md) on both looks symmetric and fails, the same trap
 [`CanBuildFrom`](../casting/can_build_from.md) carries.
 
 **Every field the source does not supply needs `Default`.** The error names the missing
@@ -137,22 +137,22 @@ the source.
 
 ## Related constructs
 
-- [`CanBuildFrom`](../casting/can_build_from.md) — the merge step, and where the source's requirements come from.
-- [`CanFinalizeWithDefault`](./can_finalize_with_default.md) — the defaulting finalize step.
-- [`HasBuilder`](../builder/has_builder.md) — the builder it starts from.
-- [`TransformMapDefault`](./transform_map_default.md) — the marker behind the defaulting.
-- [`CanUpcast`](../casting/can_upcast.md) — the enum analogue of widening.
-- [`HasFields`](../shape/has_fields.md) — what the source must derive.
-- [`#[derive(CgpRecord)]`](../../derives/derive_cgp_record.md) — what makes both records eligible.
+- [`CanBuildFrom`](../casting/can_build_from.md): the merge step, and where the source's requirements come from.
+- [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the defaulting finalize step.
+- [`HasBuilder`](../builder/has_builder.md): the builder it starts from.
+- [`TransformMapDefault`](./transform_map_default.md): the marker behind the defaulting.
+- [`CanUpcast`](../casting/can_upcast.md): the enum analogue of widening.
+- [`HasFields`](../shape/has_fields.md): what the source must derive.
+- [`#[derive(CgpRecord)]`](../../derives/derive_cgp_record.md): what makes both records eligible.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — merging records through a builder.
+- [Extensible records](/docs/concepts/extensible-records): merging records through a builder.
 
 ## Source
 
-- [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs)
-  — `CanBuildWithDefault`, `CanFinalizeWithDefault`, and `TransformMapDefault`
+- [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs):
+  `CanBuildWithDefault`, `CanFinalizeWithDefault`, and `TransformMapDefault`
 
 ---
 

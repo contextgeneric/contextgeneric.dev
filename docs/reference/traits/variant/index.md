@@ -32,9 +32,9 @@ result.
 
 ## The ideas behind them
 
-- [Extensible variants](/docs/concepts/extensible-variants) — partial variants, the exhaustiveness
+- [Extensible variants](/docs/concepts/extensible-variants): partial variants, the exhaustiveness
   argument, and the extensible visitor pattern.
-- [Dispatching](/docs/concepts/dispatching) — routing a variant to the implementation that handles it.
+- [Dispatching](/docs/concepts/dispatching): routing a variant to the implementation that handles it.
 
 ---
 

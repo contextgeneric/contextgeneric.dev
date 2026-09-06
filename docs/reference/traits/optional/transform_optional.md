@@ -25,7 +25,7 @@ be set freely and finalized either way. `TransformOptional` is the marker carryi
 conversions that make that possible.
 
 **It is the exact mirror of [`TransformMapDefault`](./transform_map_default.md)**, which targets
-`IsPresent` instead — same walk, different destination. That symmetry is why the defaulted and optional
+`IsPresent` instead: same walk, different destination. That symmetry is why the defaulted and optional
 workflows behave so alike.
 
 **You name it only when extending the layer.** Using the optional workflow means calling
@@ -71,7 +71,7 @@ conversion it drives:
 Builder: TransformMapFields<TransformOptional, IsOptional>
 ```
 
-Unlike its defaulting counterpart, **it requires nothing of the field types** — wrapping a value in
+Unlike its defaulting counterpart, **it requires nothing of the field types**: wrapping a value in
 `Some` and producing `None` need no `Default` and no other bound, which is why the optional path applies
 to records the defaulting path does not.
 
@@ -133,7 +133,7 @@ applies to every field type.
 
 [`TransformMapFields`](../type-level/transform_map_fields.md#under-the-hood) applies it, visiting each field
 of the target's [`HasFields`](../shape/has_fields.md) shape and using
-[`UpdateField`](../builder/update_field.md) twice per field — once to take the value out and learn its marker,
+[`UpdateField`](../builder/update_field.md) twice per field: once to take the value out and learn its marker,
 once to write it back under `IsOptional`.
 
 The result is a partial value at a configuration the core builder never reaches on its own, which is what
@@ -147,7 +147,7 @@ makes [`SetOptional`](./set_optional.md) resolve and the strict
 **It always targets `IsOptional`.** Reaching `IsPresent` is
 [`TransformMapDefault`](./transform_map_default.md)'s job.
 
-**It is a marker, not a capability.** There is no method and nothing to wire — it is named in a bound.
+**It is a marker, not a capability.** There is no method and nothing to wire. It is named in a bound.
 
 **It requires nothing of the field types**, which is the one place the two markers genuinely differ in
 what they can be applied to.
@@ -160,22 +160,22 @@ builder's presence tracking, and the two are easy to conflate in an error.
 
 ## Related constructs
 
-- [`ToOptional`](./to_optional.md) — the conversion built directly on it.
-- [`HasOptionalBuilder`](./has_optional_builder.md) — the entry point built on that.
-- [`TransformMapDefault`](./transform_map_default.md) — the counterpart marker, targeting `IsPresent`.
-- [`TransformMap`](../type-level/transform_map.md) — the trait it implements.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — the walk that applies it.
-- [`SetOptional`](./set_optional.md) — what the resulting configuration makes available.
-- [`MapType`](../type-level/map_type.md) — the `IsOptional` marker it targets.
+- [`ToOptional`](./to_optional.md): the conversion built directly on it.
+- [`HasOptionalBuilder`](./has_optional_builder.md): the entry point built on that.
+- [`TransformMapDefault`](./transform_map_default.md): the counterpart marker, targeting `IsPresent`.
+- [`TransformMap`](../type-level/transform_map.md): the trait it implements.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): the walk that applies it.
+- [`SetOptional`](./set_optional.md): what the resulting configuration makes available.
+- [`MapType`](../type-level/map_type.md): the `IsOptional` marker it targets.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and how their states change.
+- [Extensible records](/docs/concepts/extensible-records): partial records and how their states change.
 
 ## Source
 
-- [`to_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/to_optional.rs)
-  — `TransformOptional`, `ToOptional`, and `HasOptionalBuilder`
+- [`to_optional.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/to_optional.rs):
+  `TransformOptional`, `ToOptional`, and `HasOptionalBuilder`
 
 ---
 

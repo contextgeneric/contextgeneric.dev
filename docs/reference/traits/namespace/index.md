@@ -11,7 +11,7 @@ The lookup traits behind a namespace and a per-type default.
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a context opts into
 and then selectively overrides. Resolving one of those defaults means asking, for a given key, what the
-namespace delegates to — and these three traits answer it, differing only in how many types take part
+namespace delegates to, and these three traits answer it, differing only in how many types take part
 in the key. You name them where the syntax requires it: a `namespace` header or a `for … in` loop
 inside [`delegate_components!`](../../macros/delegate_components.md), and the
 [`#[default_impl]`](../../attributes/default_impl.md) attribute. The macros generate the impls.
@@ -31,7 +31,7 @@ works it out.
 
 ## The ideas behind them
 
-- [Namespaces](/docs/concepts/namespaces) — reusable, inheritable wiring tables and preset-style
+- [Namespaces](/docs/concepts/namespaces): reusable, inheritable wiring tables and preset-style
   configuration.
 
 ---

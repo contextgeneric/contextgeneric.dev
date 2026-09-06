@@ -80,7 +80,7 @@ let partial = Person::builder()
     .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned());
 ```
 
-Naming `UpdateField` yourself is for a transition neither direction covers — which in practice means one
+Naming `UpdateField` yourself is for a transition neither direction covers, which in practice means one
 involving `IsOptional`:
 
 ```rust
@@ -91,7 +91,7 @@ let (previous, builder) = builder.update_field(
 );
 ```
 
-Because both markers are `IsOptional` here, `Output` is the same type as `Self` — which is exactly what
+Because both markers are `IsOptional` here, `Output` is the same type as `Self`, which is exactly what
 lets an optional field be set repeatedly, unlike the core `build_field` that consumes an absent slot once.
 
 ## When to use it
@@ -102,7 +102,7 @@ call site.
 
 - **[`BuildField`](./build_field.md)** for `IsNothing → IsPresent`, which is setting a field.
 - **[`TakeField`](./take_field.md)** for `IsPresent → IsNothing`, which is removing one.
-- **`UpdateField`** for anything else — a transition to or from `IsOptional`, which the
+- **`UpdateField`** for anything else: a transition to or from `IsOptional`, which the
   [optional-field extensions](../optional/set_optional.md) do, or a transform's intermediate steps.
 - **[`TransformMapFields`](../type-level/transform_map_fields.md)** when *every* field changes state rather than one.
   It calls this twice per field internally, and reaching for `UpdateField` in a loop is re-implementing
@@ -131,7 +131,7 @@ other fields' states.
 Because `Mapper` is an *output* rather than an input, the two directional traits can pin a transition
 by constraining it. [`BuildField`](./build_field.md) is a blanket impl over
 `UpdateField<Tag, IsPresent, Mapper = IsNothing>` and [`TakeField`](./take_field.md) over
-`UpdateField<Tag, IsNothing, Mapper = IsPresent>` — same primitive, opposite constraints.
+`UpdateField<Tag, IsNothing, Mapper = IsPresent>`: same primitive, opposite constraints.
 
 Nothing here changes a value's runtime layout beyond moving it in or out of the slot; the markers are
 zero-sized and the wrapping is a type-level fiction.
@@ -158,27 +158,27 @@ with the tag fully expanded rather than saying the field does not exist.
 
 ## Related constructs
 
-- [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) — the two directions, as blanket
+- [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md): the two directions, as blanket
   impls over this.
-- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md) — where a partial value comes
+- [`HasBuilder`](./has_builder.md) and [`IntoBuilder`](./into_builder.md): where a partial value comes
   from.
-- [`FinalizeBuild`](./finalize_build.md) — where one ends up.
-- [`MapType`](../type-level/map_type.md) — the markers a field moves between.
-- [`TransformMapFields`](../type-level/transform_map_fields.md) — the whole-record form, which calls this twice per
+- [`FinalizeBuild`](./finalize_build.md): where one ends up.
+- [`MapType`](../type-level/map_type.md): the markers a field moves between.
+- [`TransformMapFields`](../type-level/transform_map_fields.md): the whole-record form, which calls this twice per
   field.
-- [`SetOptional`](../optional/set_optional.md) — a transition this covers and the directional traits do not.
-- [`#[derive(BuildField)]`](../../derives/derive_build_field.md) — generates the per-field impls.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that name a field.
+- [`SetOptional`](../optional/set_optional.md): a transition this covers and the directional traits do not.
+- [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates the per-field impls.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags that name a field.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
   pattern.
 
 ## Source
 
-- [`update_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/update_field.rs)
-  — `UpdateField`
+- [`update_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/update_field.rs):
+  `UpdateField`
 
 ---
 

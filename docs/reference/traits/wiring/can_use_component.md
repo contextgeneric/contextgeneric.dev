@@ -26,15 +26,15 @@ are met. That check happens the first time the capability is actually called, wh
 from the wiring and produces a bad error when it fails.
 
 `CanUseComponent` is the bound that forces the check early, and it exists because the obvious way of asking
-does not work. Asking "does this **context** — the type the capability runs against — implement the consumer
+does not work. Asking "does this **context** (the type the capability runs against) implement the consumer
 trait?" makes the compiler report the outermost unmet bound, usually a bare "the provider does not implement
 the provider trait", and hide the reasoning behind it. The root cause, often one absent field, never appears.
 
 `CanUseComponent` reframes the same question along a path the compiler will explain. It holds when two things
 hold together:
 
-- the context **delegates** the component — it has a [`DelegateComponent`](./delegate_component.md) entry;
-- the delegated provider **is a valid provider** for that exact context and parameters — it satisfies
+- the context **delegates** the component: it has a [`DelegateComponent`](./delegate_component.md) entry;
+- the delegated provider **is a valid provider** for that exact context and parameters: it satisfies
   [`IsProviderFor`](./is_provider_for.md).
 
 Because `IsProviderFor` carries the provider's real `where` bounds, requiring it forces the compiler to
@@ -143,7 +143,7 @@ The check forces `Person: CanUseComponent<GreeterComponent, ()>`. Resolving it n
 and `Person` has no `name` field. The compiler reports the absent field **here**, at the check, rather than at
 some later `person.greet()`.
 
-Rename the field to `name` and the block compiles and produces nothing — a passing check is a successful
+Rename the field to `name` and the block compiles and produces nothing: a passing check is a successful
 build, with nothing added to the binary.
 
 ## When to use it
@@ -166,13 +166,13 @@ compile and fail later. Which macro does it is a matter of scale.
 One case makes a context-side check actively wrong rather than merely unnecessary: **a provider bundle.** A
 [`delegate_components!`](../../macros/delegate_components.md) block with a leading `new` declares a provider that
 other contexts delegate to, not a context. Asserting `CanUseComponent` on it asks whether the bundle can use
-each component *as a context* — a role it never plays — so the answer is uninformative either way. It passes
+each component *as a context* (a role it never plays), so the answer is uninformative either way. It passes
 vacuously when the bundled providers need nothing from their context, and fails blaming the bundle when any of
 them needs something the real context would have supplied. Wire a bundle with plain
 `delegate_components!` and let a real context's check verify it, or assert `IsProviderFor` on it directly.
 
 Finally, not every unmet bound is a component. Some are ordinary or blanket traits, and no check macro can
-verify those — they surface as themselves.
+verify those. They surface as themselves.
 
 ## Under the hood
 
@@ -203,7 +203,7 @@ statement as `Person: CanGreet`, even though in practice one follows the other. 
 because the two questions produce different diagnostics.
 
 **Do not assert it on a provider bundle.** The question is meaningless there, and worse, it can pass
-vacuously — so a green check on a bundle proves nothing. This is why
+vacuously, so a green check on a bundle proves nothing. This is why
 [`delegate_and_check_components!`](../../macros/delegate_and_check_components.md) is wrong for a bundle.
 
 **`Params` follows the tuple rule.** One parameter directly, several as a tuple, `()` for none. A hand-written
@@ -217,19 +217,19 @@ the binary. The cost is trait resolution at build time, which is the trade the c
 
 ## Related constructs
 
-- [`check_components!`](../../macros/check_components.md) — the macro that asserts this trait; what you write.
-- [`delegate_and_check_components!`](../../macros/delegate_and_check_components.md) — wires and checks at once,
+- [`check_components!`](../../macros/check_components.md): the macro that asserts this trait; what you write.
+- [`delegate_and_check_components!`](../../macros/delegate_and_check_components.md): wires and checks at once,
   for basic wiring.
-- [`DelegateComponent`](./delegate_component.md) — the first of the two bounds: the context must delegate.
-- [`IsProviderFor`](./is_provider_for.md) — the second bound, and the provider-indexed counterpart of this
+- [`DelegateComponent`](./delegate_component.md): the first of the two bounds: the context must delegate.
+- [`IsProviderFor`](./is_provider_for.md): the second bound, and the provider-indexed counterpart of this
   trait.
-- [`#[cgp_component]`](../../macros/cgp_component.md) — defines the components being checked.
-- [Compile errors](../../errors.md) — the shapes these checks produce, and how to read them.
+- [`#[cgp_component]`](../../macros/cgp_component.md): defines the components being checked.
+- [Compile errors](../../errors.md): the shapes these checks produce, and how to read them.
 
 The ideas behind it:
 
-- [Check traits](/docs/concepts/check-traits) — why wiring is lazy, and what a compile-time assertion buys.
-- [Higher-order providers](/docs/concepts/higher-order-providers) — the case where a context-side check is not
+- [Check traits](/docs/concepts/check-traits): why wiring is lazy, and what a compile-time assertion buys.
+- [Higher-order providers](/docs/concepts/higher-order-providers): the case where a context-side check is not
   enough.
 
 ## Source

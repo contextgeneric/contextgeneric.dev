@@ -10,8 +10,8 @@ Recovering a field name or a routing path as runtime data.
 ## Overview
 
 CGP encodes field and variant names as *types*, so that a name can drive trait resolution. A program
-eventually needs those names as ordinary strings — to report a missing field, to build a key, to render
-a path — and these traits are how a name comes back out. The three sit in three different homes, which
+eventually needs those names as ordinary strings, to report a missing field, to build a key, or to render
+a path, and these traits are how a name comes back out. They sit in three different homes, which
 is the group's sharpest edge: one is in the prelude and the other two each need a different import.
 
 - [`StaticString`](static_string.md) decodes a [`Symbol!`](../../macros/symbol.md) into a compile-time
@@ -25,8 +25,8 @@ is the group's sharpest edge: one is in the prelude and the other two each need 
 
 ## The ideas behind them
 
-- [Namespaces](/docs/concepts/namespaces) — reusable wiring tables and the paths that route into them.
-- [Extensible records](/docs/concepts/extensible-records) — where field-name types are put to work at
+- [Namespaces](/docs/concepts/namespaces): reusable wiring tables and the paths that route into them.
+- [Extensible records](/docs/concepts/extensible-records): where field-name types are put to work at
   scale.
 
 ---

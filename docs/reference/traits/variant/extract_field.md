@@ -18,8 +18,8 @@ wanted.
 is still possible**, so attempting the same variant twice is a compile error rather than a guaranteed
 miss.
 
-Keep going and the remainder narrows. Once every variant has been ruled out its type is **uninhabited** —
-a value of it cannot exist — and [`FinalizeExtract`](./finalize_extract.md) closes the chain with
+Keep going and the remainder narrows. Once every variant has been ruled out its type is **uninhabited**
+(a value of it cannot exist), and [`FinalizeExtract`](./finalize_extract.md) closes the chain with
 no wildcard and no panic path. Add a variant to the enum and the final remainder becomes inhabited again,
 so the code stops compiling until it is handled.
 
@@ -49,7 +49,7 @@ extractor with this one variant ruled out. `extract_field` consumes the extracto
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-`Self` is an extractor rather than the enum, so a chain begins by obtaining one —
+`Self` is an extractor rather than the enum, so a chain begins by obtaining one:
 [`to_extractor`](./has_extractor.md) to consume the value, [`extractor_ref`](./has_extractor_ref.md) to
 borrow it, or [`extractor_mut`](./has_extractor_mut.md) to borrow it mutably. Which one you pick decides
 whether the payloads come out owned, shared, or mutable; the narrowing is identical in all three.
@@ -176,31 +176,31 @@ reason to prefer the [dispatch combinators](../../providers/dispatch/index.md).
 ## Related constructs
 
 - [`HasExtractor`](./has_extractor.md), [`HasExtractorRef`](./has_extractor_ref.md), and
-  [`HasExtractorMut`](./has_extractor_mut.md) — the three ways to obtain an extractor.
+  [`HasExtractorMut`](./has_extractor_mut.md): the three ways to obtain an extractor.
 - [`FinalizeExtract`](./finalize_extract.md) and
-  [`FinalizeExtractResult`](./finalize_extract_result.md) — how a chain ends.
-- [`FromVariant`](./from_variant.md) — the construction counterpart.
-- [`HasBuilder`](../builder/has_builder.md) — the struct analogue of the whole family.
-- [`MapType`](../type-level/map_type.md) — the `IsPresent`/`IsVoid` markers, and where the contrast with `IsNothing`
+  [`FinalizeExtractResult`](./finalize_extract_result.md): how a chain ends.
+- [`FromVariant`](./from_variant.md): the construction counterpart.
+- [`HasBuilder`](../builder/has_builder.md): the struct analogue of the whole family.
+- [`MapType`](../type-level/map_type.md): the `IsPresent`/`IsVoid` markers, and where the contrast with `IsNothing`
   is explained.
-- [`CanDowncast`](../casting/can_downcast.md) — narrowing to another enum rather than to a payload, built on this.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates the partial enums and every
+- [`CanDowncast`](../casting/can_downcast.md): narrowing to another enum rather than to a payload, built on this.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates the partial enums and every
   impl here.
-- [Dispatch combinators](../../providers/dispatch/index.md) — the providers that build the chain for
+- [Dispatch combinators](../../providers/dispatch/index.md): the providers that build the chain for
   you.
-- [Type-level lists](../../types/index.md) — `Either`/`Void`, where the uninhabited terminator
+- [Type-level lists](../../types/index.md): `Either`/`Void`, where the uninhabited terminator
   comes from.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — partial variants, the exhaustiveness
+- [Extensible variants](/docs/concepts/extensible-variants): partial variants, the exhaustiveness
   argument, and the extensible visitor pattern.
-- [Dispatching](/docs/concepts/dispatching) — routing a variant to the implementation that handles it.
+- [Dispatching](/docs/concepts/dispatching): routing a variant to the implementation that handles it.
 
 ## Source
 
-- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs)
-  — `ExtractField` and the rest of the family
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `ExtractField` and the rest of the family
 
 ---
 

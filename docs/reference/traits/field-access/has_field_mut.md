@@ -88,7 +88,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, self-targeted** — `App` stands for the application and carries the wiring.
+**Environmental context, self-targeted**: `App` stands for the application and carries the wiring.
 
 Mutable access passes through a smart pointer too, via a `DerefMut` forwarding impl, so a
 `Box<App>` resolves the write to the inner struct.
@@ -96,8 +96,8 @@ Mutable access passes through a smart pointer too, via a `DerefMut` forwarding i
 ## When to use it
 
 **Bound on it only when the implementation genuinely writes**, and prefer the read-only bound otherwise.
-Requiring mutation where none happens narrows what a caller can pass for no benefit — a context behind a
-shared reference satisfies [`HasField`](./has_field.md) and not this.
+Requiring mutation where none happens narrows what a caller can pass for no benefit. A context behind a
+shared reference satisfies [`HasField`](./has_field.md) but not this.
 
 - **Use [`HasField`](./has_field.md)** whenever the value is only read. This is the overwhelmingly common
   case.
@@ -106,7 +106,7 @@ shared reference satisfies [`HasField`](./has_field.md) and not this.
   too, under the access rules on that page, which is the idiomatic route before reaching for this trait
   by hand.
 - **Reach for [`MutFieldGetter`](./mut_field_getter.md)** when the mutation must be *wired* rather than
-  bounded — the provider-side mirror of this trait.
+  bounded: the provider-side mirror of this trait.
 - **Consider whether the context should be mutated at all.** Much CGP code keeps contexts immutable and
   threads state through handler outputs instead, which composes better with the
   [handler family](../../components/handler/handler.md).
@@ -137,29 +137,29 @@ the lifetime rather than the field.
 **Bounding on it implies the read.** `Self: HasFieldMut<Tag>` already gives `get_field`, so adding
 `HasField<Tag>` alongside is redundant.
 
-**`Value` lives on the supertrait.** Pin it as `HasFieldMut<Symbol!("x"), Value = u64>` — the associated
+**`Value` lives on the supertrait.** Pin it as `HasFieldMut<Symbol!("x"), Value = u64>`. The associated
 type is inherited, not redeclared.
 
 **A tuple field is keyed by [`Index<N>`](../../types/index_type.md)**, exactly as for the immutable form.
 
 ## Related constructs
 
-- [`HasField`](./has_field.md) — the supertrait, and where the tag-keyed access is explained in full.
-- [`MutFieldGetter`](./mut_field_getter.md) — the provider-side mirror of this trait.
-- [`#[derive(HasField)]`](../../derives/derive_has_field.md) — generates both impls per field.
-- [`#[implicit]`](../../attributes/implicit.md) — the idiomatic way to reach a field, including mutably.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md) — the tags that key a field.
-- [`UseField`](../../providers/use_field.md) — the provider that implements the wired form.
+- [`HasField`](./has_field.md): the supertrait, and where the tag-keyed access is explained in full.
+- [`MutFieldGetter`](./mut_field_getter.md): the provider-side mirror of this trait.
+- [`#[derive(HasField)]`](../../derives/derive_has_field.md): generates both impls per field.
+- [`#[implicit]`](../../attributes/implicit.md): the idiomatic way to reach a field, including mutably.
+- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags that key a field.
+- [`UseField`](../../providers/use_field.md): the provider that implements the wired form.
 
 The ideas behind it:
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — why a field requirement belongs on
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): why a field requirement belongs on
   the implementation rather than the interface.
 
 ## Source
 
-- [`has_field_mut.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field_mut.rs)
-  — `HasFieldMut`, `MutFieldGetter`, and the `DerefMut` forwarding
+- [`has_field_mut.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field_mut.rs):
+  `HasFieldMut`, `MutFieldGetter`, and the `DerefMut` forwarding
 
 ---
 

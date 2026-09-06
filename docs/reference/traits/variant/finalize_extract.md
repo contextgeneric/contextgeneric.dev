@@ -10,7 +10,7 @@ Discharging an extractor that has nothing left in it.
 ## Overview
 
 An [extraction chain](./extract_field.md) ends when every variant has been ruled out. At that point the
-remainder's type is **uninhabited** — a value of it cannot exist — and `FinalizeExtract` turns
+remainder's type is **uninhabited** (a value of it cannot exist), and `FinalizeExtract` turns
 that fact into a usable ending.
 
 **It returns *any* type.** That looks unsound and is not, because there is no value to return it from:
@@ -109,8 +109,8 @@ any return type for the same reason. So a caller reaches `finalize_extract` only
 variant, and the compiler accepts the discharge with no fallback.
 
 **This is where the record and variant families diverge, and the difference decides the whole design.** A record
-uses `IsNothing` for a missing field, which maps to `()` and is *inhabited* — an absent field is a real
-state a value can be in. A variant uses `IsVoid`, which is *uninhabited* — a ruled-out variant is a state
+uses `IsNothing` for a missing field, which maps to `()` and is *inhabited*: an absent field is a real
+state a value can be in. A variant uses `IsVoid`, which is *uninhabited*: a ruled-out variant is a state
 no value can be in. That is exactly why a builder needs an explicit all-present
 [`FinalizeBuild`](../builder/finalize_build.md) impl while an extractor can discharge its remainder with an empty
 `match`.
@@ -138,24 +138,24 @@ that cannot occur.
 
 ## Related constructs
 
-- [`FinalizeExtractResult`](./finalize_extract_result.md) — the form that closes a chain from a `Result`.
-- [`ExtractField`](./extract_field.md) — the narrowing that leads here.
-- [`HasExtractor`](./has_extractor.md) — where a chain begins.
-- [`FinalizeBuild`](../builder/finalize_build.md) — the record family's ending, sound for the opposite reason.
-- [`MapType`](../type-level/map_type.md) — the `IsVoid` marker the argument rests on.
-- [Type-level lists](../../types/index.md) — where the uninhabited `Void` comes from.
-- [`CanUpcast`](../casting/can_upcast.md) — a cast whose total walk ends with this same discharge.
-- [Dispatch combinators](../../providers/dispatch/index.md) — the providers that build the chain.
-- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) — generates this impl.
+- [`FinalizeExtractResult`](./finalize_extract_result.md): the form that closes a chain from a `Result`.
+- [`ExtractField`](./extract_field.md): the narrowing that leads here.
+- [`HasExtractor`](./has_extractor.md): where a chain begins.
+- [`FinalizeBuild`](../builder/finalize_build.md): the record family's ending, sound for the opposite reason.
+- [`MapType`](../type-level/map_type.md): the `IsVoid` marker the argument rests on.
+- [Type-level lists](../../types/index.md): where the uninhabited `Void` comes from.
+- [`CanUpcast`](../casting/can_upcast.md): a cast whose total walk ends with this same discharge.
+- [Dispatch combinators](../../providers/dispatch/index.md): the providers that build the chain.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates this impl.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — the exhaustiveness argument, in full.
+- [Extensible variants](/docs/concepts/extensible-variants): the exhaustiveness argument, in full.
 
 ## Source
 
-- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs)
-  — `FinalizeExtract` and the rest of the family
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `FinalizeExtract` and the rest of the family
 
 ---
 

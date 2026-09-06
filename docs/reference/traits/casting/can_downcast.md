@@ -119,7 +119,7 @@ chaining possible: the `Remainder` a `downcast` returns is precisely a `downcast
 attempt and wrong if you meant to try another target.
 
 **A remainder carries none of the enum's attributes**, so a `Result<Target, Remainder>` is neither
-`Debug` nor `PartialEq` — comparing one whole does not compile. Reach for `.ok()`, `.is_ok()`, or a
+`Debug` nor `PartialEq`, and comparing one whole does not compile. Reach for `.ok()`, `.is_ok()`, or a
 `match`.
 
 **Names and payload types must match exactly**, and a mismatch is a compile error rather than a runtime
@@ -130,23 +130,23 @@ stored where the original was.
 
 ## Related constructs
 
-- [`CanDowncastFields`](./can_downcast_fields.md) — the continuation, called on each remainder.
-- [`CanUpcast`](./can_upcast.md) — the widening direction, which cannot fail.
-- [`CanBuildFrom`](./can_build_from.md) — the record counterpart of casting.
-- [`ExtractField`](../variant/extract_field.md) — the primitive each attempt uses, and the family that narrows the
+- [`CanDowncastFields`](./can_downcast_fields.md): the continuation, called on each remainder.
+- [`CanUpcast`](./can_upcast.md): the widening direction, which cannot fail.
+- [`CanBuildFrom`](./can_build_from.md): the record counterpart of casting.
+- [`ExtractField`](../variant/extract_field.md): the primitive each attempt uses, and the family that narrows the
   same way to a payload.
-- [`HasExtractor`](../variant/has_extractor.md) — where the walk starts.
-- [`FromVariant`](../variant/from_variant.md) — how a matched variant is rebuilt into the target.
-- [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) — what makes an enum eligible.
-- [Type-level lists](../../types/index.md) — the `Either`/`Void` chain underneath.
+- [`HasExtractor`](../variant/has_extractor.md): where the walk starts.
+- [`FromVariant`](../variant/from_variant.md): how a matched variant is rebuilt into the target.
+- [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md): what makes an enum eligible.
+- [Type-level lists](../../types/index.md): the `Either`/`Void` chain underneath.
 
 The ideas behind it:
 
-- [Extensible variants](/docs/concepts/extensible-variants) — upcasting and downcasting between enums.
+- [Extensible variants](/docs/concepts/extensible-variants): upcasting and downcasting between enums.
 
 ## Source
 
-- [`cast.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/cast.rs) —
+- [`cast.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/cast.rs):
   `CanDowncast` and the `FieldsExtractor` recursion
 
 ---

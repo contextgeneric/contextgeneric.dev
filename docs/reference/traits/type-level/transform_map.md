@@ -37,7 +37,7 @@ produce the same field in state `M2`.
 ## Usage
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`, along with any non-prelude
-marker you name — `IsOptional` comes from `cgp::core::field::impls`:
+marker you name; `IsOptional` comes from `cgp::core::field::impls`:
 
 ```rust
 use cgp::core::field::impls::IsOptional;
@@ -48,7 +48,7 @@ The trait is implemented on a **transform marker**, a zero-sized type you declar
 and exists only to name the set of conversions, exactly as a provider does elsewhere in CGP.
 
 **A transform needs an impl for every source marker a field might currently be in.** That is the rule
-that decides how many impls you write, and getting it wrong is the usual failure — the walk simply does
+that decides how many impls you write, and getting it wrong is the usual failure: the walk does
 not resolve, and the error names the missing `TransformMap` impl rather than the field.
 
 ## Examples
@@ -83,7 +83,7 @@ impl<T: Default> TransformMap<IsOptional, IsPresent, T> for FillDefaults {
 
 Read that as three cases of one rule: a present field passes through, an absent one becomes its default,
 and an optional one becomes its contents or the default. Note how each signature's argument type is the
-source marker's `Map<T>` — `T`, then `()`, then `Option<T>` — which makes the three impls
+source marker's `Map<T>` (`T`, then `()`, then `Option<T>`), which makes the three impls
 non-overlapping.
 
 Because all three target `IsPresent`, applying `FillDefaults` through
@@ -101,8 +101,8 @@ and reading it here is the shortest route to understanding that layer.
   optional finalization. Both already exist, built on exactly this, and
   [`TransformMapDefault`](../optional/transform_map_default.md) and
   [`TransformOptional`](../optional/transform_optional.md) are the two markers it ships.
-- **Implement `TransformMap`** for a conversion those do not cover — a validating transform, one that
-  logs, one that fills from something other than `Default`.
+- **Implement `TransformMap`** for a conversion those do not cover: a validating transform, one that
+  logs, or one that fills from something other than `Default`.
 - **Use [`TransformMapFields`](./transform_map_fields.md)** to apply what you have written. This trait
   converts one field; that one walks a whole record.
 - **Do not implement [`MapType`](./map_type.md) for a new marker** and expect the derives to use it. A
@@ -117,8 +117,8 @@ argument type of `<IsNothing as MapType>::Map<T>`, which normalizes to `()`, and
 That lets three impls for one marker coexist without overlapping: they differ in `M1`.
 
 [`TransformMapFields`](./transform_map_fields.md) calls this. For each field of the target's
-[`HasFields`](../shape/has_fields.md) shape, it uses [`UpdateField`](../builder/update_field.md) to take the field out —
-learning the marker it was in — applies `Transform::transform_mapped`, and writes the result back under
+[`HasFields`](../shape/has_fields.md) shape, it uses [`UpdateField`](../builder/update_field.md) to take the field out
+(learning the marker it was in), applies `Transform::transform_mapped`, and writes the result back under
 the target marker.
 
 Two consequences follow from that construction, and both explain limits you might otherwise trip over.
@@ -150,25 +150,25 @@ layer's payoff comes from every field landing in one state, usually `IsPresent`.
 
 ## Related constructs
 
-- [`TransformMapFields`](./transform_map_fields.md) — lifts this across a whole partial record.
-- [`MapType`](./map_type.md) — the markers naming each state, and the trait this supplies the missing
+- [`TransformMapFields`](./transform_map_fields.md): lifts this across a whole partial record.
+- [`MapType`](./map_type.md): the markers naming each state, and the trait this supplies the missing
   half of.
-- [`TransformMapDefault`](../optional/transform_map_default.md) and [`TransformOptional`](../optional/transform_optional.md)
-  — the two markers CGP ships, and the models to copy.
-- [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) — the capability built from the first of
+- [`TransformMapDefault`](../optional/transform_map_default.md) and [`TransformOptional`](../optional/transform_optional.md):
+  the two markers CGP ships, and the models to copy.
+- [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md): the capability built from the first of
   them.
-- [`UpdateField`](../builder/update_field.md) — the primitive the walk uses to take a field out and write it back.
-- [`FinalizeBuild`](../builder/finalize_build.md) — what an all-`IsPresent` result is accepted by.
-- [`HasFields`](../shape/has_fields.md) — the shape the walk follows.
+- [`UpdateField`](../builder/update_field.md): the primitive the walk uses to take a field out and write it back.
+- [`FinalizeBuild`](../builder/finalize_build.md): what an all-`IsPresent` result is accepted by.
+- [`HasFields`](../shape/has_fields.md): the shape the walk follows.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records) — partial records and how their states change.
+- [Extensible records](/docs/concepts/extensible-records): partial records and how their states change.
 
 ## Source
 
-- [`transform_map.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/transform_map.rs)
-  — `TransformMap` and `TransformMapFields`
+- [`transform_map.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/transform_map.rs):
+  `TransformMap` and `TransformMapFields`
 
 ---
 

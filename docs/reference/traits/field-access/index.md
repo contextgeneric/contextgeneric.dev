@@ -9,14 +9,14 @@ Reading one field of a context by its type-level name, from code that cannot nam
 
 ## Overview
 
-The most common thing a CGP implementation does is read a value out of its **context** — the type a
-capability runs against — without naming that type. It reads the field by keying on the field's *name
-as a type*, so any context with a matching field satisfies the bound. These traits are the foundation
+A CGP implementation most often reads a value out of its **context**, the type a capability runs against,
+without naming that type. It reads the field by keying on the field's *name as a type*, so any context
+with a matching field satisfies the bound. These traits are the foundation
 the ergonomic surface stands on: an [`#[implicit]`](../../attributes/implicit.md) argument, a
 [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md) method, and a
 [`UseField`](../../providers/use_field.md) wiring entry all generate a bound on the traits here.
 
-The six traits divide on two axes: read versus write, and consumer-side versus provider-side.
+The traits divide on two axes: read versus write, and consumer-side versus provider-side.
 
 The **consumer traits** are what an implementation bounds against on its own context.
 [`HasField`](has_field.md) reads a field, and [`HasFieldMut`](has_field_mut.md) adds mutable access.
@@ -32,9 +32,9 @@ nested context.
 
 ## The ideas behind them
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — why a field requirement belongs on
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): why a field requirement belongs on
   the implementation rather than the interface.
-- [Implicit arguments](/docs/concepts/implicit-arguments) — the ergonomic surface built on these traits.
+- [Implicit arguments](/docs/concepts/implicit-arguments): the ergonomic surface built on these traits.
 
 ---
 

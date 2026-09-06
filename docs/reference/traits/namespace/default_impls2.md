@@ -43,7 +43,7 @@ which lets the projection resolve cleanly. This is the widest of the three.
 :::warning
 
 **Nothing inside CGP emits or consumes it.** It is reachable and tested, and it is a provided extension
-point rather than a construct the generated code relies on — so there is no library-generated example to
+point rather than a construct the generated code relies on, so there is no library-generated example to
 pattern-match against. The [next section](#usage) shows what a use looks like.
 
 :::
@@ -109,13 +109,13 @@ for the one-type form.
 
 ## When to use it
 
-**Reach for it when a default genuinely depends on two types**, and prefer the narrower forms otherwise —
-each extra key position is one more thing a reader has to hold.
+**Reach for it when a default genuinely depends on two types**, and prefer the narrower forms otherwise,
+since each extra key position is one more thing a reader has to hold.
 
 - **[`DefaultNamespace`](./default_namespace.md)** when the key is the component alone. The common case.
 - **[`DefaultImpls1`](./default_impls1.md)** when one further type decides the default. This is what
   `#[default_impl]` is usually pointed at.
-- **`DefaultImpls2`** when two do — a conversion keyed on source *and* target, say.
+- **`DefaultImpls2`** when two do, such as a conversion keyed on source *and* target.
 - **Define your own namespace trait** when the shape does not fit.
   [`#[default_impl]`](../../attributes/default_impl.md) accepts any path, so a trait of your own with
   whatever arity you need works identically. Given that nothing in the library uses this one, a
@@ -133,14 +133,14 @@ projects the default:
 where T: DefaultImpls2<Component, Other, App, Delegate = Provider>
 ```
 
-The loop variables appear only in that bound and in the key, so **the key must mention them** — otherwise
+The loop variables appear only in that bound and in the key, so **the key must mention them**, otherwise
 the parameter is unconstrained and the compiler rejects the impl with `E0207`.
 
 The registration impl carries only the parameters naming the key and provider plus the table, never the
 provider's own `where` clause, so a provider with impl-side dependencies registers cleanly and its bounds
 are checked when a real context resolves it.
 
-Because nothing in the library emits this trait, there is no generated code to compare against — the
+Because nothing in the library emits this trait, there is no generated code to compare against. The
 impls you see are the ones you or the attribute wrote.
 
 ## Common Mistakes
@@ -162,24 +162,24 @@ library example.
 
 ## Related constructs
 
-- [`DefaultImpls1`](./default_impls1.md) — the one-type form, and where the family's mechanics are
+- [`DefaultImpls1`](./default_impls1.md): the one-type form, and where the family's mechanics are
   worked out.
-- [`DefaultNamespace`](./default_namespace.md) — the component-only form.
-- [`#[default_impl(...)]`](../../attributes/default_impl.md) — the attribute that emits impls of this trait.
-- [`cgp_namespace!`](../../macros/cgp_namespace.md) — defines a namespace.
-- [`delegate_components!`](../../macros/delegate_components.md) — carries the `for … in` loop.
-- [`DelegateComponent`](../wiring/delegate_component.md) — what the loop ultimately writes.
-- [`RedirectLookup`](../../providers/redirect_lookup.md) — the usual `Delegate` value.
+- [`DefaultNamespace`](./default_namespace.md): the component-only form.
+- [`#[default_impl(...)]`](../../attributes/default_impl.md): the attribute that emits impls of this trait.
+- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace.
+- [`delegate_components!`](../../macros/delegate_components.md): carries the `for … in` loop.
+- [`DelegateComponent`](../wiring/delegate_component.md): what the loop ultimately writes.
+- [`RedirectLookup`](../../providers/redirect_lookup.md): the usual `Delegate` value.
 
 The ideas behind it:
 
-- [Namespaces](/docs/concepts/namespaces) — reusable, inheritable wiring tables and preset-style
+- [Namespaces](/docs/concepts/namespaces): reusable, inheritable wiring tables and preset-style
   configuration.
 
 ## Source
 
-- [`namespaces.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/namespaces.rs)
-  — the three lookup traits
+- [`namespaces.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/namespaces.rs):
+  the three lookup traits
 - The `#[default_impl]` attribute: [`attributes/default_impl/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/attributes/default_impl)
 
 ---
