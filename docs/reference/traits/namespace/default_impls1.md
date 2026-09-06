@@ -152,7 +152,7 @@ same projection.
 **Use it for a per-type default, and reach for the simpler trait when the key is a component alone.**
 
 - **[`DefaultNamespace`](./default_namespace.md)** when one component has one default. That is the common
-  case, and it is what [`#[prefix(...)]`](../../macros/cgp_namespace.md) registers a component into.
+  case, and it is what [`#[prefix(...)]`](../../attributes/prefix.md) registers a component into.
 - **`DefaultImpls1`** when the same component resolves differently per type.
   [`#[default_impl]`](../../attributes/default_impl.md) is usually pointed at it.
 - **[`DefaultImpls2`](./default_impls2.md)** for a two-type key.
@@ -161,12 +161,14 @@ same projection.
   rather than the only options.
 
 **One constraint decides where a `#[default_impl]` may be written, and it is Rust's orphan rule rather
-than anything CGP chose.** The emitted impl is `impl Namespace<..> for Key`, so a crate may register a
-default when it owns either the namespace trait or the key type. For an unprefixed component the key is
-the component's own marker, so a downstream crate owning the component can register into a foreign
-namespace. For a [`#[prefix]`](../../macros/cgp_namespace.md)-ed component the key is a path built from
-`cgp`-owned types plus the marker, so the impl is orphan-legal **only in the namespace's own crate**.
-Wiring that must live downstream goes in the namespace body of the crate that owns it instead.
+than anything CGP chose.** The emitted impl is `impl Namespace<..> for Key`, and Rust accepts it when
+the crate owns the namespace trait, or when a local type appears in the impl header ahead of the table
+parameter. That local type may be the key itself, or the component named inside the namespace path, so
+a crate that owns `ShowImplComponent` may write `String in DefaultImpls1<ShowImplComponent>` against
+the foreign `DefaultImpls1`. A path key is a `PathCons` list, which is never a local type even when it
+contains a local marker, so a [`#[prefix]`](../../attributes/prefix.md)-ed component's path can be
+registered **only in the namespace's own crate**. Wiring that must live downstream goes in the namespace
+body of the crate that owns it, or into a local namespace that inherits the foreign one.
 
 ## Under the hood
 
@@ -213,7 +215,8 @@ where the provider is used rather than where it is registered.
 - [`DefaultNamespace`](./default_namespace.md): the one-key form, and the common case.
 - [`DefaultImpls2`](./default_impls2.md): the two-type form.
 - [`#[default_impl(...)]`](../../attributes/default_impl.md): the attribute that emits impls of this trait.
-- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace, and documents `#[prefix(...)]`.
+- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace.
+- [`#[prefix(...)]`](../../attributes/prefix.md): registers a component into a namespace under a path.
 - [`delegate_components!`](../../macros/delegate_components.md): carries the `for … in` loop.
 - [`DelegateComponent`](../wiring/delegate_component.md): what the loop ultimately writes.
 - [`IsProviderFor`](../wiring/is_provider_for.md): where a registered provider's real bounds are checked.

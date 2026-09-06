@@ -1,0 +1,8 @@
+error[E0207]: the type parameter `T` is not constrained by the impl trait, self type, or predicates
+  --> tests/compile_fail/reference/attributes/default_impl_rejected_generic_impl.rs:19:6
+   |
+17 | #[cgp_impl(new ShowWithDisplay)]
+   | -------------------------------- help: remove the unused type parameter `T`
+18 | #[default_impl(String in DefaultImpls1<ShowImplComponent>)]
+19 | impl<T: Display> ShowImpl<T> {
+   |      ^ unconstrained type parameter

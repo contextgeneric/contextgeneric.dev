@@ -203,7 +203,7 @@ such as `Result<Self::Output, Error>` is therefore correct and idiomatic: the lo
 imported one bare.
 
 Finally, prefer an inferred parameter over an abstract type when the type only ever flows through values
-the body reads: [`#[impl_generics]`](../macros/cgp_fn.md) on a `#[cgp_fn]` is shorter and needs no wiring.
+the body reads: [`#[impl_generics]`](./impl_generics.md) on a `#[cgp_fn]` is shorter and needs no wiring.
 Climb to an abstract type when the type must be named in the capability's own signature, or when two
 capabilities have to
 [agree that they mean the same one](/docs/concepts/abstract-types#one-type-agreed-on-by-everything-that-needs-it).

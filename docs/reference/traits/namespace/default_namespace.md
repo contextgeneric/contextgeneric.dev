@@ -13,7 +13,7 @@ Resolving a namespace's default provider for a component.
 
 **You do not implement `DefaultNamespace`.**
 [`cgp_namespace!`](../../macros/cgp_namespace.md) and its
-[`#[prefix(...)]`](../../macros/cgp_namespace.md) attribute emit the impls. You name the trait in exactly
+[`#[prefix(...)]`](../../attributes/prefix.md) attribute emit the impls. You name the trait in exactly
 one place, a `namespace` header inside
 [`delegate_components!`](../../macros/delegate_components.md), and this page explains what that header
 generates, including why a direct entry can shadow an inherited default without conflicting with it.
@@ -65,7 +65,7 @@ delegate_components! {
 ```
 
 after which every lookup `App` does not wire directly forwards through the namespace. A component
-registers into one with the [`#[prefix(...)]`](../../macros/cgp_namespace.md) attribute on its
+registers into one with the [`#[prefix(...)]`](../../attributes/prefix.md) attribute on its
 `#[cgp_component]` trait.
 
 ## Examples
@@ -102,7 +102,7 @@ the inheritance-with-override shape presets rely on.
 where the syntax requires it.** It appears in a `namespace` header and nowhere else in ordinary code.
 
 - **Use `DefaultNamespace`** for a namespace whose defaults are per component, which is the common case
-  and what [`#[prefix(...)]`](../../macros/cgp_namespace.md) registers into.
+  and what [`#[prefix(...)]`](../../attributes/prefix.md) registers into.
 - **Use [`DefaultImpls1`](./default_impls1.md)** for a per-type default, where one component resolves
   differently per type.
 - **Define your own namespace trait instead** when you want a named table of your own;
@@ -164,7 +164,8 @@ type takes the `Self` position instead. The inconsistency is the family's sharpe
   per-pair variants.
 - [`#[default_impl(...)]`](../../attributes/default_impl.md): the attribute that registers a provider as a
   default.
-- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace, and documents `#[prefix(...)]`.
+- [`cgp_namespace!`](../../macros/cgp_namespace.md): defines a namespace.
+- [`#[prefix(...)]`](../../attributes/prefix.md): registers a component into a namespace under a path.
 - [`delegate_components!`](../../macros/delegate_components.md): carries the `namespace` header.
 - [`DelegateComponent`](../wiring/delegate_component.md): what a namespace header forwards *into*.
 - [`IsProviderFor`](../wiring/is_provider_for.md): forwarded alongside, so dependency errors stay readable.

@@ -104,7 +104,7 @@ comma-separated list inside one attribute.
 | [`#[use_type(Trait.Type)]`](../attributes/use_type.md) | Imports an abstract type: adds the supertrait *and* rewrites the bare name in your signatures |
 | [`#[extend(Trait)]`](../attributes/extend.md) | Adds a supertrait with no type to import |
 | [`#[derive_delegate(...)]`](../attributes/derive_delegate.md) | Generates dispatch impls for a component generic over a parameter |
-| [`#[prefix(@path in Namespace)]`](./cgp_namespace.md) | Registers the component into a namespace under a type-level path |
+| [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) | Registers the component into a namespace under a type-level path |
 
 When a component depends on a type another component supplies, most often the error type from
 [`HasErrorType`](../components/has_error_type.md), import it with `#[use_type]` rather than writing
@@ -346,7 +346,7 @@ namespace impls one per attribute:
   [namespaces](./cgp_namespace.md) resolve through.
 - One [`UseDelegate`](../providers/use_delegate.md) impl per
   [`#[derive_delegate(...)]`](../attributes/derive_delegate.md) attribute.
-- One namespace impl per [`#[prefix(@path in Namespace)]`](./cgp_namespace.md) attribute, binding the
+- One namespace impl per [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, binding the
   component's key inside that namespace to a redirect down the given path.
 
 The `RedirectLookup` impl puts a component's own type parameters into a path, and it makes
@@ -437,8 +437,9 @@ name gives, so the fix is to move the attribute rather than to add an import.
 - [`check_components!`](./check_components.md) — verifies that wiring at compile time.
 - [`#[cgp_type]`](./cgp_type.md) — the specialized form for a component that supplies a type.
 - [`#[cgp_getter]`](./cgp_getter.md) — the specialized form for a component that reads a field.
-- [`#[use_type]`](../attributes/use_type.md), [`#[extend]`](../attributes/extend.md), and
-  [`#[derive_delegate]`](../attributes/derive_delegate.md) — attributes that change what it generates.
+- [`#[use_type]`](../attributes/use_type.md), [`#[extend]`](../attributes/extend.md),
+  [`#[derive_delegate]`](../attributes/derive_delegate.md), and [`#[prefix]`](../attributes/prefix.md) —
+  attributes that change what it generates.
 
 The ideas behind it:
 

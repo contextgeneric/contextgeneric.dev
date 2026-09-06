@@ -90,7 +90,9 @@ private to it. [`#[uses]`](./attributes/uses.md) imports the capabilities the bo
 provider — both landing on the implementation alone, so a caller never sees them. Where a requirement
 should instead be part of what the trait promises, [`#[extend]`](./attributes/extend.md) adds it as a
 supertrait and [`#[extend_where]`](./attributes/extend_where.md) as a predicate on the generated trait
-itself.
+itself. When the body needs a type that a field of the context fixes,
+[`#[impl_generics]`](./attributes/impl_generics.md) declares the parameter on the implementation alone,
+so callers never name it.
 
 ### Let each context choose a type
 
@@ -188,8 +190,9 @@ through [`RedirectLookup`](./providers/redirect_lookup.md), which re-routes a lo
 [`Path!`](./macros/path.md), together with the three lookup traits that resolve inherited and per-type
 defaults — [`DefaultNamespace`](./traits/namespace/default_namespace.md) for a key that is a component alone, and
 [`DefaultImpls1`](./traits/namespace/default_impls1.md) and [`DefaultImpls2`](./traits/namespace/default_impls2.md) when the
-key carries one further type or two. A provider registers itself as one of those defaults with
-[`#[default_impl(...)]`](./attributes/default_impl.md). The `open` statement of
+key carries one further type or two. A component registers into a namespace under a path prefix with
+[`#[prefix(...)]`](./attributes/prefix.md), and a provider registers itself as one of those defaults
+with [`#[default_impl(...)]`](./attributes/default_impl.md). The `open` statement of
 [`delegate_components!`](./macros/delegate_components.md) is a
 lightweight special case of the same mechanism, and it supersedes the older
 [`UseDelegate`](./providers/use_delegate.md) tables and the
@@ -241,8 +244,6 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 | `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/type-level/map_type.md) |
 | `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/type-level/map_type_ref.md) |
 | `product!` (the value-level form) | [`Product!`](./macros/product.md) |
-| `#[impl_generics(...)]` | [`#[cgp_fn]`](./macros/cgp_fn.md) |
-| `#[prefix(...)]` | [`cgp_namespace!`](./macros/cgp_namespace.md) |
 | `#[check_trait(...)]`, `#[check_providers(...)]` | [`check_components!`](./macros/check_components.md) |
 | `#[check_params(...)]`, `#[skip_check]` | [`delegate_and_check_components!`](./macros/delegate_and_check_components.md) |
 

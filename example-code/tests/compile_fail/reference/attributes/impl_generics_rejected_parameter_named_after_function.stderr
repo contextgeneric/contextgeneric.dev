@@ -1,0 +1,10 @@
+error[E0404]: expected trait, found type parameter `Count`
+  --> tests/compile_fail/reference/attributes/impl_generics_rejected_parameter_named_after_function.rs:11:8
+   |
+10 | #[impl_generics(Count: Display)]
+   |                 ----- found this type parameter
+11 | pub fn count(&self, #[implicit] count: &Count) -> String {
+   |        ^^^^^
+   |        |
+   |        you might have meant to refer to this trait
+   |        not a trait

@@ -189,9 +189,10 @@ attribute, which is the form to prefer: `#[uses(HasName, CanRaiseError<String>)]
 dependency list. `#[use_provider]` is the exception because its own argument already ends in a bound
 list, so the parser could not tell where a second pair begins. Write one attribute per inner provider.
 
-`#[cgp_impl]` does not read `#[extend]`, `#[extend_where]`, or `#[impl_generics]`, although you may
-see them on other CGP macros. Each of them acts on a *generated trait definition*, which a provider
-impl does not have, so they belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
+`#[cgp_impl]` does not read `#[extend]`, `#[extend_where]`, or
+[`#[impl_generics]`](../attributes/impl_generics.md), although you may see them on other CGP macros.
+Each of them acts on a *generated trait definition*, which a provider impl does not have, so they
+belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
 [`#[cgp_component]`](./cgp_component.md). Writing one here leaves a name nothing resolves; see
 [Common Mistakes](#common-mistakes). An impl-side bound that really is impl-side goes in the block's
 own `where` clause, which passes through untouched.

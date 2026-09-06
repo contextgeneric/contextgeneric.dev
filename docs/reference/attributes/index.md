@@ -37,11 +37,22 @@ must satisfy, the dependency a higher-order provider declares.
 trait rather than on the implementation, so every caller inherits it: `#[extend]` adds a supertrait, and
 `#[extend_where]` adds a `where` predicate a supertrait cannot express.
 
-## Registering a namespace default
+## Naming a type the body needs
 
-[`#[default_impl]`](./default_impl.md) lets a provider register itself as a namespace's default for a
-key, at the point where the provider is defined rather than in the namespace's own body. Reach for it
-once per-type defaults accumulate.
+[`#[impl_generics]`](./impl_generics.md) declares a generic parameter on the generated implementation
+alone, for a type that a field of the context fixes: a database handle, a printable name. The trait
+stays free of the parameter, so callers never name the type, and the compiler infers it from the field an
+implicit argument reads. It is the first form to reach for when a body needs a type nobody chooses, and
+[`#[use_type]`](./use_type.md) is the form to climb to once the type must be named in a signature.
+
+## Registering into a namespace
+
+Two attributes let a definition register itself into a [namespace](/docs/concepts/namespaces) at the
+point where it is written, rather than in the namespace's own body. [`#[prefix]`](./prefix.md) goes on
+a component and routes it under a path prefix, so contexts that join the namespace address it by that
+path and a wiring table reads as a tree. [`#[default_impl]`](./default_impl.md) goes on a provider and
+binds it as the namespace's default for a key. Reach for the prefix as soon as grouping helps a reader,
+and for the default once per-type defaults accumulate.
 
 ## Legacy
 

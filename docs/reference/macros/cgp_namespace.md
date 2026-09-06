@@ -112,7 +112,8 @@ the one above reroutes a whole subtree of the parent's namespace rather than a s
 ### The other two halves: registering, and joining
 
 Defining a namespace is only one part of the pattern. A component **registers into** one with the
-`#[prefix(...)]` attribute on its trait, which puts that component's lookups under a path:
+[`#[prefix(...)]`](../attributes/prefix.md) attribute on its trait, which puts that component's
+lookups under a path:
 
 ```rust
 #[cgp_component(ShowImpl)]
@@ -270,18 +271,11 @@ inside whatever `__Table__` is". The namespace names no provider; it only rerout
 decided wherever the path finally lands. A `:` entry skips the indirection and maps the key straight to a
 provider, one impl per key when the array form is used.
 
-`#[prefix(...)]` is the other side of this, and it generates an impl of exactly the same shape. From
-`#[prefix(@show in AppNamespace)]` on a `CanShow` component:
-
-```rust
-impl<__Components__> AppNamespace<__Components__> for ShowImplComponent {
-    type Delegate = RedirectLookup<__Components__, Path!(@show.ShowImplComponent)>;
-}
-```
-
-So the component contributes its own route into the namespace, under the prefix, ending at its own component
-name. That is why a joining context binds `@show.ShowImplComponent` rather than the bare component. A
-component may carry several `#[prefix]` attributes to register into several namespaces.
+[`#[prefix(...)]`](../attributes/prefix.md) is the other side of this, and it generates an impl of
+exactly the same shape for the component's marker, with the path ending at the component's own name.
+So `#[prefix(@show in AppNamespace)]` on a `CanShow` component routes `ShowImplComponent` to
+`@show.ShowImplComponent`, which is why a joining context binds that path rather than the bare
+component. The attribute's page shows the emitted impl.
 
 When a parent is named, the macro prepends a blanket impl forwarding every key the parent resolves:
 
@@ -332,17 +326,8 @@ and its optional `where` clause is merged into every impl the loop generates. Li
 `delegate_components!`, the body accepts **no attributes** on any entry and rejects any it finds.
 
 The `#[prefix(...)]` attribute, which registers a component into a namespace and is written on a
-[`#[cgp_component]`](./cgp_component.md) trait, has a grammar of its own:
-
-```ebnf
-PrefixArgs    -> Path `in` NamespacePath
-
-NamespacePath -> TypePath GenericArgs?
-```
-
-`Path` is [`Path!`](./path.md)'s own `@`-prefixed dotted production, so its segments take no generics and
-neither grouping form is accepted: one attribute registers under exactly one prefix, and the attribute
-is repeated to register into several namespaces. `NamespacePath` may itself be parameterized.
+[`#[cgp_component]`](./cgp_component.md) trait, has a grammar of its own, given on
+[its page](../attributes/prefix.md#formal-grammar).
 
 ## Common Mistakes
 
@@ -408,6 +393,8 @@ the context.
 - [`RedirectLookup`](../providers/redirect_lookup.md) — the provider every redirect resolves through.
 - [`DefaultNamespace`](../traits/namespace/default_namespace.md) — inherited and per-type default resolution,
   including `#[default_impl(...)]`.
+- [`#[prefix(...)]`](../attributes/prefix.md) — registers a component into a namespace under a path
+  prefix, the other half of the pattern.
 - [`#[cgp_component]`](./cgp_component.md) — the host of the `#[prefix(...)]` attribute.
 - [`DelegateComponent`](../traits/wiring/delegate_component.md) — the per-key table a redirect finally walks.
 - [`check_components!`](./check_components.md) — the only thing that catches a route bound to nothing.

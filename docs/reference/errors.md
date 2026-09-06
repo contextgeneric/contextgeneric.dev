@@ -293,8 +293,8 @@ A neighbouring failure that reads like a dependency problem but is not: no provi
 rather than one being found whose requirements fail.
 
 The common case is a component registered into a [namespace](./macros/cgp_namespace.md) under a path that
-nothing ever binds — a `#[prefix]` routes the lookup somewhere, and no `#[default_impl]`, namespace entry,
-or direct wiring puts a provider there:
+nothing ever binds: a [`#[prefix]`](./attributes/prefix.md) routes the lookup somewhere, and no
+`#[default_impl]`, namespace entry, or direct wiring puts a provider there:
 
 ```text
    = note: root cause: [CGP-E107] context `App` does not contain any delegate entry for `@app.GreeterComponent`
@@ -487,8 +487,9 @@ The caret lands on the name *you* wrote — the macro copies the identifier's sp
 
 ### A name the generated code cannot see
 
-`#[impl_generics]` adds a parameter to the generated *impl* alone, so the generated trait cannot see it.
-Naming it in the signature, which stays on the trait, refers to nothing:
+[`#[impl_generics]`](./attributes/impl_generics.md) adds a parameter to the generated *impl* alone, so
+the generated trait cannot see it. Naming it in the signature, which stays on the trait, refers to
+nothing:
 
 ```text
 error[E0433]: cannot find type `Db` in this scope

@@ -1,6 +1,6 @@
 ---
 sidebar_label: '#[derive_delegate]'
-sidebar_position: 8
+sidebar_position: 10
 ---
 
 # `#[derive_delegate]`
@@ -275,8 +275,8 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<AreaCalcul
 ```
 
 Pick one per component. The related restriction is that `open` does not combine with a joined namespace
-where the component carries a `#[prefix(...)]`: its lookups are already routed under that path, so the
-per-type entries have to be written with the full prefixed path instead.
+where the component carries a [`#[prefix(...)]`](./prefix.md): its lookups are already routed under
+that path, so the per-type entries have to be written with the full prefixed path instead.
 
 ## Related constructs
 

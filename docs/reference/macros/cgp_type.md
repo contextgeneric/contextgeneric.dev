@@ -57,6 +57,10 @@ Like [`#[cgp_component]`](./cgp_component.md), the component needs a provider tr
 `ScalarTypeProviderComponent`. This is worth fixing in mind, because every other macro derives its
 default from the trait name.
 
+The companion attributes of `#[cgp_component]` apply unchanged, so
+[`#[prefix(...)]`](../attributes/prefix.md) registers the abstract type into a namespace. CGP's own
+`HasErrorType` carries `#[prefix(@cgp.core.error in DefaultNamespace)]` this way.
+
 Pass an identifier to override it, exactly as with `#[cgp_component]`:
 
 ```rust
@@ -160,7 +164,7 @@ there is a cheaper option that does more than it looks.
 
 - **Prefer an inferred impl parameter while the type only flows through values.** If the type appears
   solely because a provider reads a field of it,
-  [`#[impl_generics]`](./cgp_fn.md#a-type-the-caller-should-not-name) on a `#[cgp_fn]` puts a parameter on
+  [`#[impl_generics]`](../attributes/impl_generics.md) on a `#[cgp_fn]` puts a parameter on
   the implementation alone. Nothing is wired, nothing is declared, and a context qualifies just by
   carrying a field of a compatible type.
 - **Move up to an abstract type when the type must be nameable.** Two things force it: the capability's own

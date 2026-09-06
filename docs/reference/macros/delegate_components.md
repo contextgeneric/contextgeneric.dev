@@ -283,7 +283,7 @@ and the macro rejects a braceless header naming more than one component.
 [`RedirectLookup`](../providers/redirect_lookup.md) impl that every `#[cgp_component]` already
 generates. It is a lightweight special case of the full [namespace](./cgp_namespace.md) feature, suited
 to a context wiring its own components directly, and it does not combine with a joined namespace where
-the component carries a `#[prefix(...)]`.
+the component carries a [`#[prefix(...)]`](../attributes/prefix.md).
 
 ### The namespace statements
 

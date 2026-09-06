@@ -1,0 +1,5 @@
+error[E0207]: the type parameter `Name` is not constrained by the impl trait, self type, or predicates
+ --> tests/compile_fail/reference/attributes/impl_generics_rejected_unconstrained_parameter.rs:8:17
+  |
+8 | #[impl_generics(Name: Display)]
+  |                 ^^^^ unconstrained type parameter

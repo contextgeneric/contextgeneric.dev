@@ -17,7 +17,7 @@ inside [`delegate_components!`](../../macros/delegate_components.md), and the
 [`#[default_impl]`](../../attributes/default_impl.md) attribute. The macros generate the impls.
 
 - [`DefaultNamespace`](default_namespace.md) keys a default on the component alone, the common case that
-  [`#[prefix(...)]`](../../macros/cgp_namespace.md) registers into. It is the one member of the group
+  [`#[prefix(...)]`](../../attributes/prefix.md) registers into. It is the one member of the group
   that is in the prelude.
 - [`DefaultImpls1`](default_impls1.md) adds one further type, for a per-type default where the same
   component resolves differently for `String` than for `u64`.

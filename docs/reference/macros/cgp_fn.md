@@ -82,7 +82,7 @@ most of what you need to learn about the macro.
 |---|---|
 | A generic parameter on the function | Both the trait and the impl |
 | A `where` clause on the function | The impl only |
-| [`#[impl_generics(T: Bound)]`](#a-type-the-caller-should-not-name) | The impl only |
+| [`#[impl_generics(T: Bound)]`](../attributes/impl_generics.md) | The impl only |
 | [`#[extend_where(...)]`](../attributes/extend_where.md) | Both the trait and the impl |
 
 By default, generics land on both the trait and the impl, and the `where` clause lands on the impl
@@ -104,8 +104,8 @@ where
 #### A type the caller should not name
 
 When the function needs a type that should be inferred rather than chosen, such as a database handle
-or a displayable value, declare it with `#[impl_generics(...)]`. The parameter goes on the impl alone,
-so the trait stays unparameterized and callers never mention it:
+or a displayable value, declare it with [`#[impl_generics(...)]`](../attributes/impl_generics.md).
+The parameter goes on the impl alone, so the trait stays unparameterized and callers never mention it:
 
 ```rust
 #[cgp_fn]
@@ -118,12 +118,9 @@ pub fn describe(&self, #[implicit] name: &Name) -> String {
 The `Describe` trait is not generic. A context becomes eligible purely by carrying a `name` field of
 some `Display` type, and the compiler resolves the type from that field.
 
-The cost is that the type is concealed rather than named. It exists only where a value of it flows
-through an implicit argument, so nothing else can refer to it, including this function's own
-signature. Naming it in a return type or an explicit parameter does not compile, as the
-[Common Mistakes](#common-mistakes) explain. When the type must be nameable, or when two capabilities
-have to agree that they mean the same type, promote it to an abstract type with
-[`#[cgp_type]`](./cgp_type.md) and import it with [`#[use_type]`](../attributes/use_type.md).
+The type is then concealed rather than named, so it cannot appear in this function's own signature,
+and two capabilities cannot agree on it. The [`#[impl_generics]`](../attributes/impl_generics.md)
+page says when to promote such a type to an abstract type instead.
 
 ### Companion attributes
 
@@ -140,6 +137,8 @@ it depends on.
   rather than part of the interface.
 - [`#[extend_where(...)]`](../attributes/extend_where.md) puts a predicate on the generated trait's own
   `where` clause, for a bound callers need to see.
+- [`#[impl_generics(...)]`](../attributes/impl_generics.md) declares a generic parameter on the
+  generated impl alone, for a type that a field of the context fixes and callers should never name.
 - [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound when the
   function delegates to one.
 - [`#[async_trait]`](./async_trait.md) goes directly beneath `#[cgp_fn]` on an `async fn`. The macro
@@ -204,7 +203,8 @@ Use something else in these cases:
   component instead.
 
 Make one decision inside the macro deliberately rather than by default: **where a type the body needs
-should live.** Start with `#[impl_generics]` while the type only ever flows through implicit
+should live.** Start with [`#[impl_generics]`](../attributes/impl_generics.md) while the type only
+ever flows through implicit
 arguments. It is shorter, does not need wiring, and reads as "this works with any `database` field of
 a compatible type". Move up to an [abstract type](./cgp_type.md) when the type must appear in the
 capability's own signature, or when two capabilities must agree that they mean the same one. Avoid a
@@ -330,17 +330,11 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 ```
 
 **An `#[impl_generics]` parameter cannot appear in the capability's own signature.** Only the generated
-impl declares it, so naming it in a return type or an explicit parameter leaves it unresolved in the
-trait. A bare `Db` reports:
-
-```text
-error[E0425]: cannot find type `Db` in this scope
-```
-
-A qualified path such as `Db::Row` reports `E0433` instead, and the compiler labels its span *use of
-undeclared type `Db`*. The code differs, and that matters because you are likely to search for it.
-Both mean the same thing: either the type belongs out of the signature, or it needs to be an
-[abstract type](./cgp_type.md) rather than an inferred impl parameter.
+impl declares it, so a return type or an explicit parameter that names it leaves it unresolved in the
+trait. A bare `Db` reports `E0425` and a qualified path such as `Db::Row` reports `E0433`, both under
+the headline *cannot find type `Db` in this scope*, so search for both codes. Either the type belongs
+out of the signature, or it needs to be an [abstract type](./cgp_type.md) rather than an inferred impl
+parameter. The [`#[impl_generics]`](../attributes/impl_generics.md) page shows both diagnostics.
 
 ## Related constructs
 

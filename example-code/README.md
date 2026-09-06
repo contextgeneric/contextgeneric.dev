@@ -30,7 +30,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 | Section | Coverage |
 |---|---|
 | `docs/concepts/` | complete — one file under `tests/concepts/` per page that shows code |
-| `docs/reference/` | partial — `errors.md`, `macros/delegate_components.md`, all of `derives/`, the `traits/` pages that show checkable code, most of `providers/` (the singletons, all of `error/`, `handler/`, and `monad/`, and the matcher-side of `dispatch/`), all of `components/` (each component page that shows code, including the `handler/` subsection), and all of `types/` (each type page that shows code, the `spines/` subsection included); the section is filled in lazily |
+| `docs/reference/` | partial — `errors.md`, `macros/delegate_components.md`, the `attributes/` pages `default_impl.md`, `impl_generics.md`, and `prefix.md`, all of `derives/`, the `traits/` pages that show checkable code, most of `providers/` (the singletons, all of `error/`, `handler/`, and `monad/`, and the matcher-side of `dispatch/`), all of `components/` (each component page that shows code, including the `handler/` subsection), and all of `types/` (each type page that shows code, the `spines/` subsection included); the section is filled in lazily |
 | `docs/cargo-cgp/` | complete — the two pages that show Rust, under `tests/cargo_cgp/` |
 | `docs/tutorials/` | none yet |
 | front page, orientation pages | none yet |

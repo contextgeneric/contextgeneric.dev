@@ -14,7 +14,7 @@ and `open`.
 
 **You are not expected to write `RedirectLookup` entries.**
 [`#[cgp_component]`](../macros/cgp_component.md) generates a `RedirectLookup` impl for every component,
-and the [`#[prefix]`](../macros/cgp_namespace.md) attribute and the `open` and `namespace` statements of
+and the [`#[prefix]`](../attributes/prefix.md) attribute and the `open` and `namespace` statements of
 [`delegate_components!`](../macros/delegate_components.md) generate the delegation entries that target
 it. This page explains what those generated entries *are*, so that an expansion or a wiring error naming
 this provider is legible.
@@ -47,7 +47,7 @@ generated entries is where this provider appears. Like every CGP provider, it ca
 
 `RedirectLookup` is in the prelude, but you do not name it directly. It appears where the namespace and
 `open` machinery generate it. A component is registered under a path with the
-[`#[prefix(@path in Namespace)]`](../macros/cgp_namespace.md) attribute, and a context joins a namespace
+[`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, and a context joins a namespace
 or opens a component for per-type dispatch:
 
 ```rust
@@ -139,17 +139,19 @@ delegate. When the consumer trait carries generic type parameters, the impl addi
 the lookup, letting the redirected key encode the generic arguments. As always, the impl is paired with a matching
 [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.
 
-The `#[prefix(@path in Namespace)]` attribute populates the path side: it generates a namespace
-impl whose delegate is `RedirectLookup<Components, Path>`, with the prefix path joined onto the
-component marker, so resolving the component under that namespace follows the prefixed path into the
-table.
+The [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute populates the path side: it
+generates a namespace impl whose delegate is `RedirectLookup<Components, Path>`, with the prefix path
+joined onto the component marker, so resolving the component under that namespace follows the
+prefixed path into the table.
 
 ## Related constructs
 
 - [`#[cgp_component]`](../macros/cgp_component.md) — generates a `RedirectLookup` impl for every
   component.
-- [`cgp_namespace!`](../macros/cgp_namespace.md) — defines namespaces and the `#[prefix]` attribute that
-  target `RedirectLookup`.
+- [`cgp_namespace!`](../macros/cgp_namespace.md) — defines the namespaces whose entries target
+  `RedirectLookup`.
+- [`#[prefix]`](../attributes/prefix.md) — registers a component under a path that resolves through
+  it.
 - [`delegate_components!`](../macros/delegate_components.md) — the `open` and `namespace` statements that
   generate the redirect entries.
 - [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.

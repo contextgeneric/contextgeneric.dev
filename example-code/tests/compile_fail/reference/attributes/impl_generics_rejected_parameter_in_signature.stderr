@@ -1,0 +1,5 @@
+error[E0433]: cannot find type `Db` in this scope
+  --> tests/compile_fail/reference/attributes/impl_generics_rejected_parameter_in_signature.rs:14:61
+   |
+14 | pub fn fetch_row(&self, #[implicit] database: &Pool<Db>) -> Db::Row {
+   |                                                             ^^ use of undeclared type `Db`

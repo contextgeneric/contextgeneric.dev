@@ -57,6 +57,9 @@ and derives one from the **trait** name: a leading `Has` is stripped and `Getter
 yields the provider trait `NameGetter` and the marker `NameGetterComponent`. The macro is therefore at its
 most ergonomic when getter traits follow the `Has{Field}` convention.
 
+The companion attributes of `#[cgp_component]` apply here too, so
+[`#[prefix(...)]`](../attributes/prefix.md) registers the getter into a namespace.
+
 Pass an identifier to override it, as with `#[cgp_component]`:
 
 ```rust
