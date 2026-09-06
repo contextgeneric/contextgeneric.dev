@@ -50,8 +50,8 @@ fn magic_number() -> u64 {
 Omitted, the provider struct takes the function name in PascalCase: `magic_number` becomes `MagicNumber`.
 Given, the argument is used verbatim. The function's return type becomes the producer's output.
 
-**The function is constrained tightly, to exactly what a producer can be.** All three restrictions are
-enforced at expansion time with their own messages:
+**The function is constrained tightly, to exactly what a producer can be.** Each restriction is
+enforced at expansion time with its own message:
 
 | Restriction | Why |
 |---|---|
@@ -59,8 +59,8 @@ enforced at expansion time with their own messages:
 | Not `async` | The producer trait is synchronous. |
 | No generic parameters | There is nothing to infer them from. |
 
-That third restriction is the one most likely to bite, and it is the sharpest difference from
-[`#[cgp_computer]`](./cgp_computer.md), which carries generics through happily. A producer has no input, so a
+That last restriction is the one most likely to cause trouble, and it is the biggest difference from
+[`#[cgp_computer]`](./cgp_computer.md), which carries generics through fine. A producer has no input, so a
 type parameter would be determined by nothing at all.
 
 ## Examples
@@ -113,7 +113,7 @@ delegate_components! {
 
 ## When to use it
 
-**Reach for `#[cgp_producer]` when a pipeline step needs no input.** That is the whole of its remit, and
+**Use `#[cgp_producer]` when a pipeline step needs no input.** That is all it is for, and
 within it there is nothing simpler.
 
 - **Use [`#[cgp_computer]`](./cgp_computer.md) as soon as there is an input**, even a trivial one. It is the
@@ -126,7 +126,7 @@ within it there is nothing simpler.
   producers**, which makes this macro narrower than it first looks: it is for constants and pure seeds.
 - **Use [`ReturnInput`](../providers/handler/return_input.md) rather than a producer that ignores its input.**
   If the goal is to pass a value through a pipeline unchanged, that combinator says so directly.
-- **Do not reach for the handler family at all for a plain constant.** A `const` or a function is clearer
+- **Do not use the handler family at all for a plain constant.** A `const` or a function is clearer
   unless the value is being composed into a pipeline or dispatched on a `Code` tag.
 
 ## Under the hood
@@ -158,7 +158,7 @@ impl<__Context__, __Code__> Producer<__Context__, __Code__> for MagicNumber {
 [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl, whose parameter tuple here holds just the code tag. The
 context and code parameters carry the reserved names `__Context__` and `__Code__`.
 
-Then the wiring, which reaches **all eight** other components:
+Then the wiring, which reaches **all the other** components:
 
 ```rust
 delegate_components! {
@@ -178,7 +178,7 @@ delegate_components! {
 }
 ```
 
-Two things differ from `#[cgp_computer]`'s block. `ComputerComponent` **is** in the list, because a producer
+A couple of things differ from `#[cgp_computer]`'s block. `ComputerComponent` **is** in the list, because a producer
 does not implement it directly. A computer takes an input and the producer has none, so the promotion
 discards it. And the operator is **`:`** rather than `->`, delegating each component straight to
 [`PromoteProducer<Self>`](../providers/handler/promote_producer.md) rather than to that bundle's own entry for the
@@ -206,7 +206,7 @@ verbatim. The annotated function is plain Rust, constrained to a producer's shap
 
 ## Common Mistakes
 
-**All three shape restrictions have their own message**, so the macro tells you which one you broke:
+**Each shape restriction has its own message**, so the macro tells you which one you broke:
 
 ```text
 error: Producer functions cannot have parameters
@@ -221,7 +221,7 @@ is no macro alternative: write the provider by hand.
 expressible this way at all. That rules out most real producers, which is worth knowing before reaching for
 the macro: write an impl of `Producer` with [`#[cgp_impl]`](./cgp_impl.md) instead.
 
-**A `Result` return is not interpreted**, and this is the sharpest trap on the page. Unlike
+**A `Result` return is not interpreted**, and this is the most confusing case on the page. Unlike
 `#[cgp_computer]`, the macro does not inspect the output for fallibility, so a `#[cgp_producer]` returning
 `Result<T, E>` produces a `Producer` whose `Output` *is* that `Result`, and the fallible members wrap it
 again rather than treating it as failure:

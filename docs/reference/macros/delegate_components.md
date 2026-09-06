@@ -42,9 +42,9 @@ error instead of a dead end. [Under the hood](#under-the-hood) shows both.
 ## Usage
 
 The macro takes a target type and a brace-delimited body. The body holds any number of **statements**
-followed by any number of **mappings**, and a mapping is a **key**, an **operator**, and a **value**:
-three choices you make independently. There are three operators, three key forms, two value forms, and
-three statements, and this section takes them in that order.
+followed by any number of **mappings**, and a mapping is a **key**, an **operator**, and a **value**,
+chosen independently. This section covers the operators, the key forms, the value forms, and the
+statements, in that order.
 
 **Every one of these forms combines with the others inside a single block.** A table routinely opens a
 component for per-type dispatch, joins a namespace, and still maps plain component names to providers
@@ -183,7 +183,7 @@ redirect: the per-value slots an `open` statement opens, or the prefixed routes 
 becomes a type-level string, and anything else names a type. A segment may also carry generics, as in
 `@SomeComponent.<'a, T> &'a T: SomeProvider`.
 
-Two grouping forms fan one path key out into several, and **they are not interchangeable**:
+A couple of grouping forms expand one path key into several, and **they are not interchangeable**:
 
 - **`[…]` groups alternatives for one segment**, and the path may continue after it.
   `@app.[AreaCalculatorComponent, PerimeterCalculatorComponent].[u64, String]: RectangleGeometry`
@@ -214,11 +214,11 @@ exists, and it is legacy.
 
 :::info
 
-### Legacy — read, don't write
+### Legacy: read, don't write
 
 Older code dispatches per type by nesting a table inside a [`UseDelegate`](../providers/use_delegate.md)
 value instead of using the `open` statement below. **Prefer `open` for anything new**: it needs no
-separate table type and no wrapper. This form is here because you will meet it in existing code,
+separate table type and no wrapper. This form is here because you will see it in existing code,
 including in CGP's own error and handler components, which are still defined this way.
 
 :::
@@ -237,7 +237,7 @@ delegate_components! {
 }
 ```
 
-Three details of the form are easy to miss. The inner braces hold a **full table body**, so an inner
+A few details of the form are easy to miss. The inner braces hold a **full table body**, so an inner
 table accepts everything an outer one does, nesting included. The **wrapper is not fixed to
 `UseDelegate`**: any single-parameter wrapper type is accepted, which is how a component dispatched on
 a tuple of parameters gets wired to a matching `UseDelegate2`. And the **inner table's name may carry
@@ -288,7 +288,7 @@ the component carries a `#[prefix(...)]`.
 
 ### The namespace statements
 
-Two further statements opt a context into a [`cgp_namespace!`](./cgp_namespace.md), and both are
+A couple of further statements opt a context into a [`cgp_namespace!`](./cgp_namespace.md), and both are
 described in full on that page, where they are most often written.
 
 **`namespace SomeNamespace;`** joins the namespace, so every lookup the table does not wire directly
@@ -366,7 +366,7 @@ fn print_area(rect: &Rectangle) {
 }
 ```
 
-The payoff shows up when a second context wants the same capability answered differently. It
+The benefit shows up when a second context wants the same capability answered differently. It
 writes its own provider and its own table entry, and no code that calls `area()` changes:
 
 ```rust
@@ -432,9 +432,9 @@ compiles, and the failure only surfaces later, where the capability is used.
   question: it either passes vacuously or blames the bundle for requirements a real context would have
   met. Verify it through a context that delegates to it instead.
 
-Two choices inside the table are worth naming as well. Prefer the **`open` statement** over the legacy
+A couple of choices inside the table are worth naming as well. Prefer the **`open` statement** over the legacy
 nested `UseDelegate` table for per-type dispatch: it needs no separate table type and no wrapper. And
-reach for a **[namespace](./cgp_namespace.md)** rather than a longer table once the same wiring is
+use a **[namespace](./cgp_namespace.md)** rather than a longer table once the same wiring is
 repeated across contexts, or once one table has grown too long to read. Below that threshold, the
 extra hop costs more than it saves.
 
@@ -473,7 +473,7 @@ the `where` bounds it needs, so an unsatisfied requirement flows back through th
 the point of use. Note that these parameters are literally named `__Context__` and `__Params__` in the
 emitted code.
 
-**Every other form on this page lowers to that same pair.** What a form changes is how many pairs one
+**Every other form on this page lowers to that same pair.** A form changes only how many pairs one
 line produces and what the `Delegate` type is.
 
 **A list key repeats the pair per name.** A table pairing
@@ -546,7 +546,7 @@ keys of different lengths.
 `delegate_components!` blocks, the inner one carrying `new`. Its per-value entries key on the same
 parameter `open` keys on; the difference is only that they live in a separate table type.
 
-**The two namespace statements** share one lowering: an impl generic over a `__Key__` and a `__Value__`,
+**The namespace statements** share one lowering: an impl generic over a `__Key__` and a `__Value__`,
 bounded on the namespace trait with a `Delegate = __Value__` binding. This makes the namespace's answer
 the context's answer. A bare `namespace DefaultNamespace;` produces the blanket form:
 
@@ -614,12 +614,12 @@ struct. The operator choice is independent of the key form: `:` maps a key to a 
 to the value's own entry for that key, and `=>` redirects along a path. `NormalMapping` is named
 separately because a `ForStmt` body admits only that form.
 
-The two grouping forms inside a `PathHead` differ in what they group and in whether the path may
+The grouping forms inside a `PathHead` differ in what they group and in whether the path may
 continue. A bracketed group holds alternative segments for one position and may be followed by `.` and
 more path; a braced group holds alternative whole remainders and terminates the path, which is why only
-the braced form can nest. Both fan out to the cartesian product with the rest of the path.
+the braced form can nest. Both expand to the cartesian product with the rest of the path.
 
-The three segment productions differ in what they permit, which is why they are named apart. A
+The segment productions differ in what they permit, which is why they are named apart. A
 `KeySegment` (inside a `PathKey`) may carry its own generic list, and the parameters of every segment
 along one path are merged onto that entry's impls. A `PathSegment` (inside a `PathValue`, the
 right-hand side of a `=>`) carries none, and admits no groups. It is [`Path!`](./path.md)'s own

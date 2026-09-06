@@ -30,7 +30,7 @@ trait, its per-type impls, and a derive on the enum.
 **Its value is narrower than it looks, and worth naming precisely.** It fits when the per-variant behaviour
 is *exactly* "call the same trait method on the payload". The moment a variant needs different handling, or
 the dispatch should be chosen by a **context** (the type the capability runs against) rather than fixed on
-the enum, reach for the combinators directly. This is the convenient front end to
+the enum, use the combinators directly. This is the convenient front end to
 [dispatching](../providers/dispatch/index.md), not a replacement for it.
 
 ## Usage
@@ -47,7 +47,7 @@ pub trait HasArea {
 The trait may have generic parameters and supertraits. Each method may take `self` by value, by shared
 reference, or by mutable reference; may take further value or reference arguments; and may be `async`.
 
-Two restrictions are enforced when the macro expands:
+A couple of restrictions are enforced when the macro expands:
 
 - **Every trait item must be a method.** Associated types and constants are rejected.
 - **A method may not have non-lifetime generic parameters.** Lifetimes are fine. The reason is in the
@@ -129,10 +129,10 @@ shape.scale(2.0);
 
 ## When to use it
 
-**Reach for it when an existing per-type trait should also work on an enum of those types, unchanged.** That
+**Use it when an existing per-type trait should also work on an enum of those types, unchanged.** That
 is the case it is built for, and within it there is nothing shorter.
 
-Reach for something else in four situations.
+Use something else in these situations:
 
 - **The behaviour differs per variant.** The macro generates one handler that calls the same method on every
   payload. When a variant needs something else, use the
@@ -188,7 +188,7 @@ where
 }
 ```
 
-Three things are worth reading off that. The matcher is invoked with a **unit context and unit code**
+A few things are worth reading off that. The matcher is invoked with a **unit context and unit code**
 (`&()` and `PhantomData::<()>`), because the per-variant logic depends only on the payload, which is exactly
 why a context cannot influence it. The `__Variants__: HasExtractor` bound requires the enum to be
 extensible. And **the first `where` bound is where a missing variant impl is reported**: it says the matcher

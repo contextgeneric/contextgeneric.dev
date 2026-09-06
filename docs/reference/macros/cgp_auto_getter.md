@@ -30,11 +30,11 @@ It hides the field-access trait CGP reads fields through, which is precise and u
 hand: a bound naming the field as a type-level string, and a `PhantomData` tag at every read. Being
 able to state the same thing as `fn name(&self) -> &str;` is the point.
 
-**Reach for it sparingly.** For the ordinary case, a provider reading a field of its own context, an
+**Use it sparingly.** For the ordinary case, a provider reading a field of its own context, an
 [`#[implicit]`](../attributes/implicit.md) argument does the same job with no trait to declare, using the
 same field access and the same conversion rules, so a getter trait declared only to read a field adds a
-name and buys nothing. What a getter trait *does* buy is a capability other code can depend on by name,
-and the three cases where that matters are in
+name and gives nothing back. A getter trait *does* give you one thing: a capability other code can depend on by name.
+The cases where that matters are in
 [When to use it](#when-to-use-it).
 
 ## Usage
@@ -83,7 +83,7 @@ through `AsMut<[T]>`, `Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` v
 The `&str` row is the one most often wanted and least obvious: the context stores a `String` and the
 getter hands out a borrow of it, so no context ever has to hold a `&str`. **These are the same rules an
 [`#[implicit]`](../attributes/implicit.md) argument follows**, so learning them once covers everywhere CGP
-reads a field. There is one difference worth holding onto. A getter takes its mutability from the
+reads a field. There is one difference worth remembering. A getter takes its mutability from the
 **receiver**, while an implicit argument takes it from the *argument's type*. So
 `fn name(&mut self) -> &mut String` reads mutably because of the `&mut self`, whereas
 `#[implicit] name: &String` on a `&mut self` method still reads through a shared borrow.
@@ -205,13 +205,13 @@ only job was to save you writing the body.
 
 ## When to use it
 
-**Prefer an [`#[implicit]`](../attributes/implicit.md) argument, and reach for a getter trait only when one
+**Prefer an [`#[implicit]`](../attributes/implicit.md) argument, and use a getter trait only when one
 cannot do the job.** An implicit argument reads a field of the provider's own context as an ordinary
 parameter, with no trait, no declaration, and the same access rules, so it covers the common read
 directly, including a field several providers each consume, declared as the same implicit argument in
 each.
 
-A getter trait earns its keep in three cases an implicit argument cannot reach.
+A getter trait is worth declaring in a few cases an implicit argument cannot reach.
 
 - **The field lives on another type.** An implicit argument reads only from `self`, so a value held by a
   request, a payload, or any other type needs a getter that can be demanded as a bound on *that* type,
@@ -226,12 +226,12 @@ Between the two getter macros the line is narrow and worth stating plainly.
 
 - **`#[cgp_auto_getter]` is the default getter.** One blanket impl, no wiring, field name fixed to the
   method name.
-- **[`#[cgp_getter]`](./cgp_getter.md) is the advanced one**, and not a general upgrade. Reach for it only
+- **[`#[cgp_getter]`](./cgp_getter.md) is the advanced one**, and not a general upgrade. Use it only
   when a context needs to choose *which field* the getter reads, as a different name per context, or an
   implementation selected by wiring. That control costs a line of wiring per context, and most getters do
   not want it.
 
-So the ordering is: implicit argument by default, `#[cgp_auto_getter]` for the three cases above, and
+So the ordering is: implicit argument by default, `#[cgp_auto_getter]` for the cases above, and
 `#[cgp_getter]` only for per-context field choice.
 
 ## Under the hood
@@ -258,7 +258,7 @@ where
 }
 ```
 
-Three things to recognize. The context parameter is literally `__Context__`, a reserved name chosen so it
+A few things to recognize. The context parameter is literally `__Context__`, a reserved name chosen so it
 cannot collide with one of yours. [`Symbol!("name")`](./symbol.md) is a type-level string standing for the
 field name. The compiler prints its expanded `Symbol<4, Chars<'n', …>>` form in errors, and
 `cargo cgp expand` resugars it back to this. And because the return type is `&str`, the bound asks for a

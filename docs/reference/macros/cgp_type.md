@@ -31,11 +31,11 @@ delegate_components! {
 }
 ```
 
-That is the payoff: `App` now implements `HasScalarType` with `Scalar = f64`, and no provider was written
+That is the benefit: `App` now implements `HasScalarType` with `Scalar = f64`, and no provider was written
 anywhere. The arrangement mirrors what [`#[cgp_getter]`](./cgp_getter.md) does for values: one
 general-purpose provider, parameterized by the thing the context wants to supply.
 
-Two consequences are worth having early. Because the type is chosen per context, two applications can
+A couple of consequences are worth knowing early. Because the type is chosen per context, two applications can
 pick differently from the same generic code. And because the trait is an ordinary Rust trait, a context
 can skip the wiring entirely and write `impl HasScalarType for App { type Scalar = f64; }`, barely
 longer, and the clearest way to see that nothing unusual is happening.
@@ -150,26 +150,26 @@ impl HasScalarType for App {
 
 ## When to use it
 
-**Reach for `#[cgp_type]` whenever generic code has to name a type the context should choose.** The error
+**Use `#[cgp_type]` whenever generic code has to name a type the context should choose.** The error
 type is the canonical instance. CGP's own [`HasErrorType`](../components/has_error_type.md) is defined
 exactly this way, which is why every fallible capability can say `Error` and mean whatever the
 application picked.
 
 The decision worth making deliberately is **whether the type needs to be abstract at all**, because
-there is a cheaper option covering more ground than it looks.
+there is a cheaper option that does more than it looks.
 
 - **Prefer an inferred impl parameter while the type only flows through values.** If the type appears
   solely because a provider reads a field of it,
   [`#[impl_generics]`](./cgp_fn.md#a-type-the-caller-should-not-name) on a `#[cgp_fn]` puts a parameter on
   the implementation alone. Nothing is wired, nothing is declared, and a context qualifies just by
   carrying a field of a compatible type.
-- **Climb to an abstract type when the type must be nameable.** Two things force it: the capability's own
+- **Move up to an abstract type when the type must be nameable.** Two things force it: the capability's own
   signature has to mention the type, or two capabilities have to agree they mean the *same* type. An
   inferred parameter can do neither, since it exists only where a value of it passes through.
 - **Never thread it as a generic parameter on the capability.** A parameter is an input the caller
   supplies, so it lands in every intermediate signature whether that layer touches the type or not. An
   abstract type is determined by the context and propagates nowhere. That difference is the whole
-  payoff of the construct, and it is why a context can decide a dozen types without any signature
+  benefit of the construct, and it is why a context can decide many types without any signature
   growing.
 - **Use plain [`#[cgp_component]`](./cgp_component.md) when the trait carries methods.** `#[cgp_type]` is
   only for a trait whose entire content is one associated type. A trait with a method *and* a type it
@@ -196,7 +196,7 @@ pub trait ScalarTypeProvider<__Context__>:
 }
 ```
 
-The first addition is the **`UseType` impl**, and it is the heart of the macro. It implements the provider
+The first addition is the **`UseType` impl**, and it is the core of the macro. It implements the provider
 trait for `UseType<Scalar>` by setting the abstract type to the generic parameter:
 
 ```rust

@@ -33,12 +33,12 @@ check_components! {
 That block has no runtime existence. It compiles if `Person` really can use the component and fails if it
 cannot, at the wiring site rather than wherever the capability first gets called.
 
-The second thing it buys is a *readable* failure, and that is the part worth understanding. Asking the
+The other thing it gives you is a *readable* failure, and that is the part worth understanding. Asking the
 obvious question, "does `Person` implement `CanGreet`?", makes the compiler report only the last link in
 the chain, typically that some provider does not implement its provider trait, with no word about why. The
 macro instead routes the assertion through [`CanUseComponent`](../traits/wiring/can_use_component.md), which holds
 only when the context both delegates the component *and* the chosen provider's real bounds are satisfied.
-Because those bounds ride explicitly on a marker trait, the compiler evaluates them and names the one that
+Because those bounds are carried explicitly on a marker trait, the compiler evaluates them and names the one that
 failed. A missing `name` field surfaces as a missing `name` field, not as an opaque "trait not
 implemented".
 
@@ -243,7 +243,7 @@ impl __CheckPerson<GreeterComponent, ()> for Person {}
 
 The impl holds only if `Person: CanUseComponent<GreeterComponent, ()>`, which in turn requires that `Person`
 delegates the component and that its delegate satisfies [`IsProviderFor`](../traits/wiring/is_provider_for.md) for
-`Person`. That indirection is the entire point: because the marker carries the provider's real bounds, an
+`Person`. That indirection is the whole reason for it: because the marker carries the provider's real bounds, an
 unmet one is reported specifically rather than as a bare missing implementation. The generic parameters are
 literally `__Component__` and `__Params__` in the emitted code.
 
@@ -317,7 +317,7 @@ and any other attribute is rejected by name rather than ignored. `#[check_trait(
 which is merged with the table's before the impl is emitted. `Generics`, `WhereClause`, and `Type` are Rust
 grammar productions.
 
-Both bracketed lists accept **zero** elements, and the two empty forms behave differently. An empty value
+Both bracketed lists accept **zero** elements, and the empty forms behave differently. An empty value
 list, `FooComponent: []`, falls back to the no-parameter check, exactly as omitting the colon would. An
 empty *key* list, `[]: Rectangle`, produces no entries at all, so the line silently checks nothing; there
 is no diagnostic, and it is worth a second look if a table appears to pass without doing anything.

@@ -141,13 +141,13 @@ The decisions worth making are around it rather than about it.
 
 - **Do not put it on an impl block.** It is accepted there and does nothing, since the rewrite only applies to
   trait definitions. Harmless, but it suggests a misunderstanding of where the lint comes from.
-- **Reach for the `Send`-recovery pattern when a future is spawned**, not for a different macro. No attribute
+- **Use the `Send`-recovery pattern when a future is spawned**, not a different macro. No attribute
   can add the bound, for the reason in the [Common Mistakes](#common-mistakes).
 - **Consider whether the capability needs to be async at all.** The [handler family](./cgp_computer.md) has
   synchronous members, and the [promotion combinators](../providers/handler/index.md) lift a synchronous
   provider into an async one where a caller needs it. So a computation that does no I/O is better declared
   synchronous and promoted than declared async out of habit.
-- **Reach for the `async-trait` crate instead only if you need `dyn` compatibility.** Boxing makes an
+- **Use the `async-trait` crate instead only if you need `dyn` compatibility.** Boxing makes an
   async trait object-safe, and this macro deliberately does not box. CGP resolves providers statically, so it
   does not need `dyn`; a codebase that does for other reasons is outside what this macro is for.
 
@@ -179,7 +179,7 @@ pub trait CanFetch {
 }
 ```
 
-Three things to read off it. The `Output` is the original return type verbatim. The bodiless `run` picked up
+A few things to read off it. The `Output` is the original return type verbatim. The bodiless `run` picked up
 `Output = ()`. And `sync_method` was left completely alone, which lets a trait mix async and
 synchronous methods.
 

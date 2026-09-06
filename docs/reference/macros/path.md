@@ -114,7 +114,7 @@ different things.
 
 ## When to use it
 
-**Write the `@`-path syntax wherever a namespace or a wiring key asks for a route**, and reach for the bare
+**Write the `@`-path syntax wherever a namespace or a wiring key asks for a route**, and use the bare
 `Path!` macro only when a route needs to be a named type on its own, which is rare.
 
 - **Prefer the embedded form.** A namespace entry, a `#[prefix]`, or an `@`-path wiring key is where a route
@@ -122,7 +122,7 @@ different things.
   usually makes the wiring harder to follow rather than easier.
 - **Never hand-write the list.** The macro expands to `PathCons<Symbol!("app"), PathCons<…, Nil>>`,
   and writing it out is longer and identical in meaning.
-- **Reach for the [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement)
+- **Use the [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement)
   rather than constructing paths yourself** when the goal is per-type dispatch on one component. `open` builds
   the route for you, and its `@Component.Key` entries are the paths: you write the keys, not the routing.
 - **Do not use `Path!` as a general type-level list.** [`Product!`](./product.md) is the list for a sequence of
@@ -138,7 +138,7 @@ lowercase-versus-capitalized rule:
 // before
 Path!(@app.error.ErrorRaiserComponent)
 
-// after — readable form
+// after (readable form)
 PathCons<
     Symbol!("app"),
     PathCons<

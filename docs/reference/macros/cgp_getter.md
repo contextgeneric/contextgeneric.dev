@@ -10,8 +10,8 @@ Define a getter as a full component, so the field it reads is chosen by wiring r
 ## Overview
 
 [`#[cgp_auto_getter]`](./cgp_auto_getter.md) ties a getter to a field of the same name: declare
-`fn name(&self) -> &str` and every context with a `name` field satisfies it. That is the right trade almost
-always, and it has one hard edge: a context that stores the value under a different name cannot use the
+`fn name(&self) -> &str` and every context with a `name` field satisfies it. That is the right tradeoff almost
+always, and it has one hard limitation: a context that stores the value under a different name cannot use the
 getter at all.
 
 `#[cgp_getter]` removes that coupling by making the getter a real component. The **context** is the
@@ -30,10 +30,10 @@ delegate_components! {
 has moved into the wiring, where a context can change it without touching the trait or any code that calls
 it.
 
-**This is an advanced tool, not the next step up from `#[cgp_auto_getter]`.** What you pay for the
-decoupling is a line of wiring per context, and what you get is only useful when a context needs
+**This is an advanced tool, not the next step up from `#[cgp_auto_getter]`.** The decoupling costs a
+line of wiring per context, and it helps only when a context needs
 to control which field is read, or to supply the value some way other than reading a field. Most getters
-want neither. The [When to use it](#when-to-use-it) section draws the line.
+need neither. The [When to use it](#when-to-use-it) section draws the line.
 
 ## Usage
 
@@ -72,7 +72,7 @@ Here the provider trait is `GetName` and the component `GetNameComponent`. The k
 
 ### What a context can wire it to
 
-Three providers come out of the macro, and which you name decides where the value comes from.
+The macro produces these providers, and which you name decides where the value comes from:
 
 | Wire it to | The getter reads |
 |---|---|
@@ -80,8 +80,8 @@ Three providers come out of the macro, and which you name decides where the valu
 | `UseFields` | the field named after each method, the `#[cgp_auto_getter]` behaviour as a provider |
 | [`WithProvider<P>`](../providers/with_provider.md) | whatever the field-getter provider `P` supplies |
 
-`UseField` is the one to reach for, and the reason the construct exists. `UseFields` is useful when a
-trait has several methods and the names all happen to match, and it is the only one of the three that
+`UseField` is the one to use, and the reason the construct exists. `UseFields` is useful when a
+trait has several methods and the names all happen to match, and it is the only one of them that
 works for a multi-method trait: the other two presuppose a single field.
 
 A `#[cgp_getter]` trait can also be implemented directly on a concrete context, like any Rust trait, when
@@ -148,8 +148,8 @@ consumer trait can be implemented like any Rust trait.
 
 ## When to use it
 
-**Do not reach for `#[cgp_getter]` by default.** Among the three ways to read a value from a context it is
-the last resort, and the ordering is worth holding whole:
+**Do not use `#[cgp_getter]` by default.** Among the ways to read a value from a context it is
+the last resort, and the ordering is worth keeping whole:
 
 1. **An [`#[implicit]`](../attributes/implicit.md) argument** for a provider reading a field of its own
    context. No trait, no wiring. This covers most reads.
@@ -163,9 +163,9 @@ context**: the same capability reading `first_name` on one type and `display_nam
 is a context that supplies the value **some way other than a plain field read**, through
 `WithProvider` or a hand-written impl, while other contexts still read a field.
 
-Reach for something else in these cases.
+Use something else in these cases.
 
-- **Every context stores the field under the method's name.** Then the wiring line is pure ceremony:
+- **Every context stores the field under the method's name.** Then the wiring line is pure overhead:
   `#[cgp_auto_getter]` gives the same result with nothing to wire, and wiring `UseFields` here is a sign
   the component was not needed.
 - **Only one provider reads the value.** An `#[implicit]` argument is shorter and keeps the requirement

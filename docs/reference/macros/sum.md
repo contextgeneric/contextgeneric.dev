@@ -13,7 +13,7 @@ A type-level sum, the dual of `Product!`.
 of an **enum**, the list of its variants, the way [`Product!`](./product.md) describes the fields of a
 struct.
 
-The pairing is exact and worth holding onto. A `Product!` holds a value for **every** element at once, which is
+The pairing is exact and worth remembering. A `Product!` holds a value for **every** element at once, which is
 a record. A `Sum!` holds a value for exactly **one** element, which is a tagged union:
 
 ```rust
@@ -71,7 +71,7 @@ pub enum Shape {
 // }
 ```
 
-Two things to notice. The variant names are [`Symbol!`](./symbol.md) type-level strings, exactly as field names
+A couple of things to notice. The variant names are [`Symbol!`](./symbol.md) type-level strings, exactly as field names
 are. And a struct-like variant nests a [`Product!`](./product.md) of its own fields, so an enum's full shape is
 a sum of variants whose payloads may themselves be records. Generic code walks the `Sum!` to find which variant
 a value holds, then walks the nested `Product!` to reach that variant's fields.
@@ -95,7 +95,7 @@ use.
   longer and identical in meaning.
 - **Use [`Product!`](./product.md) for a collection rather than a choice.** They are duals: every element
   versus exactly one. A type error is the usual consequence of confusing them, which is at least loud.
-- **Use a plain `enum` and `match` when the variant set is closed and known.** The machinery earns its keep
+- **Use a plain `enum` and `match` when the variant set is closed and known.** The machinery is worth using
   when independent code has to handle variants it did not define, or when the variant set is open. For a fixed
   enum consumed in one place, a `match` is clearer and free.
 

@@ -13,7 +13,7 @@ CGP models computation as a family of components varying along three axes: synch
 or not, taking an input or not. A provider in that family is a struct with one or more impls threading a
 **context** (the type the capability runs against, which supplies the values it needs as its fields), a
 phantom `Code` tag, and an `Input`. Written by hand for a computation as small as "add two numbers", that is
-disproportionate ceremony.
+far more code than the task needs.
 
 `#[cgp_computer]` lets you write just the computation:
 
@@ -80,7 +80,7 @@ promotion bundle:
 | `async fn f(..) -> T` | `AsyncComputer` | `PromoteAsyncComputer<Self>` |
 | `async fn f(..) -> Result<T, E>` | `AsyncComputer` | `PromoteHandler<Self>` |
 
-The `Result` row is worth reading twice. The base trait stays `Computer`, and its `Output` is simply the
+The `Result` row is worth a careful read. The base trait stays `Computer`, and its `Output` is simply the
 `Result` type as written. Only the *bundle* changes, and it makes `try_compute` and `handle`
 surface the `Ok`/`Err` outcome as success or failure rather than handing back a `Result` as a plain value.
 
@@ -138,8 +138,8 @@ pub fn add_generic<T: core::ops::Add<Output = T>>(a: T, b: T) -> T {
 
 ## When to use it
 
-**Reach for `#[cgp_computer]` when a step in a pipeline is naturally a function.** That is the case it
-exists for, and it is the shortest route into the handler family.
+**Use `#[cgp_computer]` when a step in a pipeline is naturally a function.** That is the case it
+exists for, and it is the simplest way into the handler family.
 
 - **Use [`#[cgp_producer]`](./cgp_producer.md) when the computation takes no input.** A constant, or a value
   drawn from the context alone. It is the input-free sibling and produces a `Producer`.
@@ -149,15 +149,15 @@ exists for, and it is the shortest route into the handler family.
   capability, it wants a provider impl of `Computer` or `Handler` written with `#[cgp_impl]`, where `self` is
   the context and [`#[implicit]`](../attributes/implicit.md) and [`#[uses]`](../attributes/uses.md) work
   normally.
-- **Use [`#[cgp_fn]`](./cgp_fn.md) when what you want is a capability on the context, not a pipeline step.**
+- **Use [`#[cgp_fn]`](./cgp_fn.md) when you want a capability on the context, not a pipeline step.**
   The two look similar and differ in what they produce: `#[cgp_fn]` gives a trait a context implements,
   called as `self.thing()`; `#[cgp_computer]` gives a *provider* that gets wired into a handler component and
-  composed with combinators. If you are not building a pipeline, reach for `#[cgp_fn]` instead.
+  composed with combinators. If you are not building a pipeline, use `#[cgp_fn]` instead.
 - **Wire the [handler combinators](../providers/handler/index.md) directly for composition.** The macro
   produces one step; `PipeHandlers` and friends chain them.
 
-One thing not to do is reach for the handler family because a capability happens to transform a value. The
-family earns its keep when computations are *composed*: piped, dispatched on a `Code` tag, promoted between
+One thing not to do is use the handler family just because a capability happens to transform a value. The
+family is worth using when computations are *composed*: piped, dispatched on a `Code` tag, promoted between
 variants. A single transform with one caller is a method.
 
 ## Under the hood
@@ -219,7 +219,7 @@ rather than to the value itself, so `Add` inherits whatever `PromoteComputer<Sel
 to. [`PromoteComputer`](../providers/handler/promote_computer.md) is itself a table of single-step promoters.
 `ComputerComponent` is absent from the list because `Add` implements it directly.
 
-The other three combinations differ only in which base trait is implemented and which bundle is named. An
+The other combinations differ only in which base trait is implemented and which bundle is named. An
 `async` function implements `AsyncComputer` instead, its method is `compute_async` and awaits the call, and
 it delegates a smaller set (`AsyncComputerRefComponent`, `HandlerComponent`, `HandlerRefComponent`), since
 the synchronous members are not derivable from an async base. A `Result`-returning function keeps its base

@@ -100,8 +100,8 @@ pub struct RectangleArea;
 pub struct SpawnAndRun<InCode>(pub ::core::marker::PhantomData<InCode>);
 ```
 
-This is also the limit of what the attribute form can express, and the reason `#[cgp_provider]` still
-has a job. A struct that needs a **default** generic parameter has to be written by hand, and so does
+This is also the limit of what the attribute form can express, and the reason `#[cgp_provider]` is
+still needed. A struct that needs a **default** generic parameter has to be written by hand, and so does
 one shared by several impls. The common shape is
 `pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`, which a higher-order provider uses so it
 can fall back to the context's own wiring.
@@ -190,7 +190,7 @@ the source.
 source that reads like an ordinary trait impl, so it is the recommended form. You mostly *read* these
 two instead: in generated code, in a desugaring, and in CGP's own crates.
 
-Two cases call for writing the raw form yourself.
+A couple of cases call for writing the raw form yourself:
 
 - **You need the inside-out provider-trait shape itself**, not merely a separately-declared struct: a
   bound `#[cgp_impl]`'s sugar cannot express, or a rare construct its rewrite does not support, whether
@@ -241,7 +241,7 @@ where
 
 The derived impl is your impl with the body and associated types removed and the trait swapped. It
 keeps the same generic parameters and the same bounds, so it holds under precisely the conditions the
-real impl holds. This is the whole point: a check evaluates
+real impl holds. This is the reason for it: a check evaluates
 [`IsProviderFor`](../traits/wiring/is_provider_for.md) to find out *why* a provider does not apply.
 
 The macro assembles its three trait arguments from the provider trait's own. The first is the
@@ -250,7 +250,7 @@ attribute argument said). The second is the **context**. The third is a **tuple 
 over**: `(Code, Input)` here, and the empty `()` for a provider trait that takes nothing but a
 context.
 
-Two rules decide that split, and they only become visible on a provider trait that carries a
+A couple of rules decide that split, and they only become visible on a provider trait that carries a
 [lifetime](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html). The context is the first
 *type* argument rather than the first argument, because Rust puts lifetime arguments first and a
 lifetime cannot be a context. And the macro lifts a lifetime into [`Life<'a>`](../types/life.md) to
@@ -291,7 +291,7 @@ described [above](#the-struct-cgp_new_provider-declares).
 
 ### Input the macros refuse
 
-Both macros reject four shapes at expansion, rather than lowering them into code that fails later. An
+Both macros reject several shapes at expansion, rather than lowering them into code that fails later. An
 **inherent impl**, with no trait, has no provider trait to read the component and context from. A
 **provider trait with no type argument** leaves nothing to be the context. A **const argument** in the
 provider trait's argument list has nowhere to live in the type-only params tuple. This is about the

@@ -49,9 +49,9 @@ turns the call into a direct, statically-dispatched call, exactly as if you had 
 implementation yourself.
 
 The macro's last piece is the **component** itself, a marker type such as `AreaCalculatorComponent`
-that names the capability and is the key `delegate_components!` wires against. You will meet it in
+that names the capability and is the key `delegate_components!` wires against. You see it in
 every wiring entry and in most compiler errors that involve this capability, so you should be able to
-recognize it immediately, even though you never write its definition yourself.
+recognize it at once, even though you never write its definition yourself.
 
 ## Usage
 
@@ -134,7 +134,7 @@ associated type the trait declares *itself* is not imported and stays written as
 [`delegate_components!`](./delegate_components.md) and is mostly something you read in existing code
 rather than write.
 
-Three attributes that look like they belong here do not, and the error is confusing enough to be worth
+A few attributes that look like they belong here do not, and the error is confusing enough to be worth
 naming: `#[uses(...)]`, `#[extend_where(...)]`, and `#[use_provider(...)]` are read by
 [`#[cgp_impl]`](./cgp_impl.md) and [`#[cgp_fn]`](./cgp_fn.md) but not by `#[cgp_component]`. None of
 them is an attribute in its own right, so writing one here leaves a name nothing can resolve; see
@@ -184,7 +184,7 @@ does, and nothing else in the program changes.
 
 ## When to use it
 
-Reach for `#[cgp_component]` when a capability needs **more than one implementation, and the
+Use `#[cgp_component]` when a capability needs **more than one implementation, and the
 choice belongs to the type using it.** That is the case it exists for, and its machinery is not free:
 a component is a trait, a second trait, a marker type, and a line of wiring per type.
 
@@ -194,7 +194,7 @@ Prefer something simpler when you can.
   straight from a function, needs no wiring at all, and keeps working unchanged if a second
   implementation ever arrives, which makes it the right starting point rather than a lesser one.
 - **One implementation per type, chosen globally.** A plain Rust trait already does this well.
-  Reach for a component when two *different* applications must make different choices for the same
+  Use a component when two *different* applications must make different choices for the same
   type, or when the implementations must overlap in a way the compiler rejects.
 - **A closed set of variants with fixed operations.** An `enum` and a `match` are clearer than any
   machinery.
@@ -202,7 +202,7 @@ Prefer something simpler when you can.
 There is also a finer line worth knowing: a capability may need several implementations
 while each individual implementation serves exactly one type. In that case you can implement the
 consumer trait directly on each concrete type, as you would any Rust trait, and skip providers
-entirely. Named providers earn their place once a second type wants the *same* implementation, or once
+entirely. Named providers become worth their cost once a second type wants the *same* implementation, or once
 an implementation should compose with a wrapper.
 
 ### How many items should a component have?
@@ -212,12 +212,12 @@ consts as any other, and every one of them is reproduced on the provider trait. 
 [`CanCompute`](../components/handler/computer.md) declares an associated `Output` beside its method, and there
 is no cap.
 
-What to group is a judgement rather than a rule, and the useful question is: **everything in one
+How much to group is a judgement rather than a rule, and the useful question is: **everything in one
 component is answered by one provider choice.** Items a single choice settles belong together: a
 method and the associated type it returns, or several field reads one getter provider answers by name.
 Items that separate choices settle are better apart, because grouping them costs reuse: every provider
 then carries the union of the dependencies of all the methods, a wrapper must forward the methods it
-has no opinion about, and a type that needs only part of the surface must still supply the rest.
+does not touch, and a type that needs only part of the surface must still supply the rest.
 
 The usual sign of a component that has grown past one decision is a consumer trait named after a noun
 rather than a verb, such as `Shape` carrying `area`, `perimeter`, `scale`, and `rotate`. It compiles,
@@ -336,8 +336,8 @@ Those five are emitted in the order consumer trait, consumer impl, provider trai
 marker. The listings above instead pair each trait with the impl that routes to it, which reads better
 than the order they actually appear in.
 
-Beyond the five, the macro emits the provider impls that let the component participate in CGP's usual
-patterns. Two are always emitted, and two are one per attribute:
+Beyond the five, the macro emits the provider impls that let the component take part in CGP's usual
+patterns. The first two below are always emitted; the last two are generated one per attribute:
 
 - A [`UseContext`](../providers/use_context.md) impl, so the provider trait can be satisfied by
   routing back through the context's own implementation. Its only bound is
@@ -355,7 +355,7 @@ impl does not look the incoming path up directly: it appends the parameters to i
 that arrives at `AreaCalculatorComponent` carrying no path ends up looking for `Rectangle`. Only
 *type* parameters take part; a lifetime or a const parameter cannot key a path and is left out.
 
-Two details of the real output differ from the listings above, and both trip people up when reading an
+Some details of the real output differ from the listings above, and each is easy to misread when reading an
 error. The generated parameters carry **reserved names**: the context is literally `__Context__`
 unless you override it, and the provider parameter is `__Provider__`. The readable `Context` and
 `Provider` here are for legibility only. And a component with parameters of its own appends them

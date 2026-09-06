@@ -109,7 +109,7 @@ a provider list. Everywhere else it is generated for you.
   [`Sum!`](./sum.md)'s list.
 - **Use [`#[derive(HasFields)]`](../derives/derive_has_fields.md) for a struct's shape** rather than declaring
   the list yourself. Writing it by hand means restating the struct, and the two will disagree eventually.
-- **Use a tuple when nothing generic consumes it.** A `Product!` earns its keep only where code recurses over
+- **Use a tuple when nothing generic consumes it.** A `Product!` is worth using only where code recurses over
   the list; for a fixed group of values passed between known functions, a tuple or a struct is clearer and
   needs no machinery.
 - **Use [`Sum!`](./sum.md) for a choice rather than a collection.** `Product!` holds a value for *every*

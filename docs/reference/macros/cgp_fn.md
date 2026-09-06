@@ -9,7 +9,7 @@ Define a single-implementation capability as a blanket-impl trait, straight from
 
 ## Overview
 
-`#[cgp_fn]` is the smallest amount of CGP that does anything useful. You write a plain function and
+`#[cgp_fn]` is the simplest CGP construct that does anything useful. You write a plain function and
 mark the values it needs from the **context**. The context is the type the capability runs against,
 and it supplies those values as its own fields. The macro turns the function into a capability that
 every type with those fields gets automatically:
@@ -26,11 +26,11 @@ define, no provider to name, and no wiring table anywhere. The macro emits a tra
 [blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
 covering every context that satisfies the field requirements.
 
-That is the trade it makes, and it is worth being explicit about. A
+That is the tradeoff it makes, and it is worth being explicit about. A
 [`#[cgp_component]`](./cgp_component.md) supports many interchangeable implementations, one chosen per
-context, and this costs extra ceremony. `#[cgp_fn]` supports exactly one implementation, the function
+context, and this costs extra boilerplate. `#[cgp_fn]` supports exactly one implementation, the function
 body, and costs nothing. For the large share of capabilities that have one natural definition, that is
-the better deal, which is why `#[cgp_fn]` is the recommended place to start rather than a lesser form
+the better choice, which is why `#[cgp_fn]` is the recommended place to start rather than a lesser form
 of the real thing.
 
 It is also the easiest introduction to CGP, because nothing in it is unfamiliar. A reader who
@@ -185,19 +185,19 @@ program, and adding one would change nothing.
 
 ## When to use it
 
-**Reach for `#[cgp_fn]` first.** When a capability has one natural definition, this is the form to
+**Use `#[cgp_fn]` first.** When a capability has one natural definition, this is the form to
 write, and starting here costs nothing if that changes later: the trait keeps its name and its method,
 so promoting it to a [`#[cgp_component]`](./cgp_component.md) leaves every call site untouched. What
 you add at that point is the component, a named provider, and a line of wiring per context.
 
-Reach for something else in three cases.
+Use something else in these cases:
 
 - **The capability needs a second implementation, chosen per context.**
   [`#[cgp_component]`](./cgp_component.md) is for that, and no amount of `#[cgp_fn]` will get you
   there: its blanket impl already covers every context, so there is nowhere for an alternative to live.
 - **The dependencies are traits rather than fields.** [`#[blanket_trait]`](./blanket_trait.md) builds
   the same kind of single-implementation, no-wiring capability from a trait with supertraits and
-  default method bodies. Reach for it when the body needs other capabilities; reach for `#[cgp_fn]`
+  default method bodies. Use it when the body needs other capabilities; use `#[cgp_fn]`
   when it needs values.
 - **A generic must vary per call.** A generic parameter here goes on the trait rather than the method,
   so it is fixed by whatever satisfies the bounds for a given context rather than chosen at each call
@@ -207,7 +207,7 @@ Reach for something else in three cases.
 One decision inside the macro is worth making deliberately rather than by default: **where a type the
 body needs should live.** Start with `#[impl_generics]` while the type only ever flows through implicit
 arguments. It is shorter, needs no wiring, and reads as "this works with any `database` field of a
-compatible type". Climb to an [abstract type](./cgp_type.md) when the type must appear in the
+compatible type". Move up to an [abstract type](./cgp_type.md) when the type must appear in the
 capability's own signature, or when two capabilities must agree that they mean the same one. Avoid a
 plain generic parameter on the function in both cases: it lands on the trait and makes every caller,
 and every intermediate capability built on it, declare the parameter and repeat its bounds whether
@@ -252,7 +252,7 @@ where
 }
 ```
 
-Three details of the real output are worth recognizing. The context type parameter is literally
+A few details of the real output are worth recognizing. The context type parameter is literally
 `__Context__`, a reserved name chosen so it cannot collide with one of yours, and it is referred to as
 `Self` inside the impl. [`Symbol!("width")`](./symbol.md) is a type-level string standing for the field
 name. The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and
@@ -286,7 +286,7 @@ parameters, so a lifetime or a const parameter is accepted there too); and
 fully qualified form. The macro appends the implicit-argument bounds last, after whatever the
 attributes contributed.
 
-Two smaller placements are worth knowing because neither is visible in the source you wrote. **The
+A couple of smaller placements are worth knowing because neither is visible in the source you wrote. **The
 function's visibility becomes the trait's**, and the impl's method keeps inherited visibility. So
 `pub fn rectangle_area` yields `pub trait RectangleArea`, and a private `fn` yields a private trait
 usable only in its own module. And **the macro copies an attribute it does not recognize onto both

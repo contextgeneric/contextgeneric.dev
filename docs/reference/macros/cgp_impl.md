@@ -49,7 +49,7 @@ where
 ```
 
 The macro performs the rewrite for you. Write providers this way. The macro produces the inside-out
-form shown earlier, and you will meet that form in generated code.
+form shown earlier, and you will see that form in generated code.
 
 This convenience has one exception worth stating plainly: **inside a `#[cgp_impl]` block, `self` and
 `Self` mean the context, not the provider.** The context is the type the capability runs against, and
@@ -152,7 +152,7 @@ a generic provider becomes a tuple struct with one public
 generic parameters together, always `pub` and never with a default. Anything the struct needs outside
 that shape has to be written by hand.
 
-The case you meet most often is a default on a higher-order provider's inner parameter, so an
+The case you see most often is a default on a higher-order provider's inner parameter, so an
 application can omit the inner provider and fall back to
 [`UseContext`](../providers/use_context.md), which routes back through the context's own
 implementation of the component. If `ScaledAreaCalculator` from [Usage](#usage) should default this
@@ -275,7 +275,7 @@ choice worth keeping distinct from the
 something else. The concrete-context form still produces a named provider that a context wires like
 any other. The `Self` form produces no provider at all.
 
-Reach for something else in two cases.
+Use something else in these cases:
 
 - **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
   function with no component, no provider, and no wiring, which is the bottom tier of
@@ -285,7 +285,7 @@ Reach for something else in two cases.
   attributes while emitting an ordinary impl.
 
 Needing to [declare the provider struct separately](#declaring-the-provider-struct-separately) is not
-by itself a reason to drop to [`#[cgp_provider]`](./cgp_provider.md). Reach for the raw form only when
+by itself a reason to drop to [`#[cgp_provider]`](./cgp_provider.md). Use the raw form only when
 you need the inside-out provider-trait shape itself: a bound the sugar cannot express, or a rare
 construct `#[cgp_impl]`'s rewrite does not support, whether from a limitation or a bug.
 
@@ -319,7 +319,7 @@ impl<Context> IsProviderFor<FooProviderComponent, Context, ()> for ValueToString
 pub struct ValueToString;
 ```
 
-Three things changed. The trait gained `Context` as its leading argument. The `Self` type became the
+A few things changed. The trait gained `Context` as its leading argument. The `Self` type became the
 provider. `&self` became the explicit parameter `__context__: &Context`. The receiver identifier is
 the snake-cased context type wrapped in double underscores, so both `Context` and the default
 `__Context__` become `__context__`. The macro rewrites every `self` in a body to that identifier, and

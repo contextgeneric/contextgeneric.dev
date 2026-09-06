@@ -125,12 +125,12 @@ That is the honest summary: the construct is essential and mostly generated.
 - **Use an [`#[implicit]`](../attributes/implicit.md) argument to read a field.** The parameter's name becomes
   the tag, so you never type one.
 - **Use [`#[cgp_auto_getter]`](./cgp_auto_getter.md) for a named accessor.** The method name becomes the tag.
-- **Write `Symbol!` explicitly with [`UseField`](../providers/use_field.md)**, where the whole point is that
+- **Write `Symbol!` explicitly with [`UseField`](../providers/use_field.md)**, where the reason for it is that
   the field name is a wiring decision rather than fixed to a method name. This is its main hand-written use.
 - **Use [`Index`](../types/index_type.md) for a tuple field**, not a `Symbol!` of `"0"`. They are different types
   and the derive generates the former.
 
-Two things it is not. It is **not a runtime string**: there is no `&str` inside it, and the `Display` impl
+A couple of things it is not. It is **not a runtime string**: there is no `&str` inside it, and the `Display` impl
 above reconstructs the text from the type rather than reading a stored value. And it is **not a general
 type-level string facility** to build programs out of; it exists to key field and variant lookups, and the
 [`StaticFormat`](../traits/formatting/static_format.md) traits recover text from one when that is
@@ -171,7 +171,7 @@ through the list.
 The expansion is built by folding the characters right to left onto `Nil` and wrapping the result, so the empty
 string `Symbol!("")` becomes `Symbol<0, Nil>`.
 
-**What this means for reading errors** is the practical payoff. A missing field on a context is reported
+**What this means for reading errors** is the practical benefit. A missing field on a context is reported
 against the expanded tag, so an error mentioning
 `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` is telling you the field `width` is missing. Counting the
 characters is enough to decode it, and `cargo cgp check` resugars the common cases.

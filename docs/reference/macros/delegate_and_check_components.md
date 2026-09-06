@@ -31,7 +31,7 @@ Every entry is wired *and* proven, in one place, with nothing to keep in sync. I
 writing both macros by hand would emit.
 
 **It is aimed at simple wiring and at getting started, not at being the default everywhere.** Its value is
-that a newcomer cannot forget the check and then meet the confusing errors lazy wiring produces. The
+that a newcomer cannot forget the check and then run into the confusing errors lazy wiring produces. The
 derivation understands only a mapping keyed on a component *name*, though, so a codebase whose wiring grows
 past that keeps the two macros separate. The reasons are in
 [When to use it](#when-to-use-it).
@@ -224,17 +224,17 @@ check_components! {
 }
 ```
 
-That pairing is the usual reason to reach for `#[skip_check]`: the fused derivation can only check the
+That pairing is the usual reason to use `#[skip_check]`: the fused derivation can only check the
 context, and a nested stack is better checked per layer.
 
 ## When to use it
 
-**Reach for it while getting started, and for tables that are plain `Component: Provider` entries.** It is
+**Use it while getting started, and for tables that are plain `Component: Provider` entries.** It is
 the form that makes forgetting a check impossible, which is worth more than the control it gives up when the
 wiring is simple.
 
 **Keep the two macros separate once the wiring is not simple.** The derivation reads delegation keys, so
-there are three things it cannot do, and each is a reason a larger codebase writes
+there are a few things it cannot do, and each is a reason a larger codebase writes
 [`delegate_components!`](./delegate_components.md) and [`check_components!`](./check_components.md) apart:
 
 - **Per-layer checks.** Only a standalone block can use `#[check_providers(...)]`, which localizes a
@@ -331,7 +331,7 @@ TableAttr        -> `#` `[` `check_trait` `(` IDENTIFIER `)` `]`
 TableBody        -> Statement* ( CheckedMapping ( `,` CheckedMapping )* `,`? )?
 
 CheckedMapping   -> EntryAttr? Mapping    // Mapping, Key, ProviderValue, Statement
-                                          // — see delegate_components!
+                                          // see delegate_components!
 
 EntryAttr        -> `#` `[` `check_params` `(` Type ( `,` Type )* `,`? `)` `]`
                   | `#` `[` `skip_check` `]`
@@ -368,8 +368,8 @@ error: Expected at most one `#[check_params]` or `#[skip_check]` attribute
 
 **A generic component without `#[check_params(...)]` cannot be checked, and the error does not say so.** The
 delegation succeeds; the derived check is emitted with an empty parameter tuple, which a component expecting a
-type parameter can never satisfy. What surfaces is an ordinary unsatisfied-marker complaint against the
-provider:
+type parameter can never satisfy. An ordinary unsatisfied-marker complaint against the
+provider surfaces instead:
 
 ```text
 error[E0277]: the trait bound `RectArea: IsProviderFor<AreaCalculatorComponent, App2>` is not satisfied

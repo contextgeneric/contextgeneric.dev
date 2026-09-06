@@ -146,7 +146,7 @@ Any type that is `Foo + Bar` is now `FooBar`, and a signature can say so in one 
 
 ## When to use it
 
-**Reach for `#[blanket_trait]` when a capability has one definition and its dependencies are other traits.**
+**Use `#[blanket_trait]` when a capability has one definition and its dependencies are other traits.**
 That last clause is the real discriminator, separating this macro from its closest neighbour.
 
 - **[`#[cgp_fn]`](./cgp_fn.md) when the dependencies are context *fields*.** Both macros produce a
@@ -158,7 +158,7 @@ That last clause is the real discriminator, separating this macro from its close
   every type satisfying its bounds, which leaves nowhere for an alternative to live. Promoting later is
   cheap (the trait keeps its name and method), so starting here costs nothing if that changes.
 - **A trait alias, when one exists.** The empty-body form above is a workaround for a language feature Rust
-  does not have on stable; it is the right workaround, but do not reach for the macro if a plain supertrait
+  does not have on stable; it is the right workaround, but do not use the macro if a plain supertrait
   bound reads fine at the use site.
 - **Nothing at all, for a plain generic function.** If the requirement belongs in the signature
   and no caller is generic over the type, a function with a `where` clause is simpler and the propagation
@@ -218,7 +218,7 @@ where
 {}
 ```
 
-Associated types are where the expansion earns its keep. Each becomes a new generic parameter on the impl,
+Associated types are where the expansion does its real work. Each becomes a new generic parameter on the impl,
 the supertrait's equality bound is rewritten to name that parameter, and the impl assigns it back:
 
 ```rust
@@ -298,7 +298,7 @@ Where a type needs different behaviour, the trait wants to be a [component](./cg
 
 The ideas behind it:
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the idea this macro automates —
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the idea this macro automates:
   requirements that live on the impl rather than the interface.
 - [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) — where a blanket trait sits between a
   plain trait and a full component.

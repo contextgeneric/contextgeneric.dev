@@ -88,7 +88,7 @@ is why the two forms in the table above are the ones worth writing, and why the 
 - **`namespace Other;`** is accepted, but inheritance is written with the `: ParentNamespace` header
   above. That is the form overriding and the cycle diagnostics are defined in terms of.
 - **A nested table value**, `UseDelegate<new Inner { … }>`, works, and is the one legacy form with a
-  reason to live in a namespace: the macro lifts the inner table out into its own struct and impls, so
+  reason to keep in a namespace: the macro lifts the inner table out into its own struct and impls, so
   every context joining the namespace inherits the per-type dispatch without restating it. It still
   needs [`#[derive_delegate]`](../attributes/derive_delegate.md) on the component, as it does anywhere.
 
@@ -111,7 +111,7 @@ the one above reroutes a whole subtree of the parent's namespace rather than a s
 
 ### The other two halves: registering, and joining
 
-Defining a namespace is only a third of the pattern. A component **registers into** one with the
+Defining a namespace is only one part of the pattern. A component **registers into** one with the
 `#[prefix(...)]` attribute on its trait, which puts that component's lookups under a path:
 
 ```rust
@@ -135,7 +135,7 @@ delegate_components! {
 }
 ```
 
-A third statement form, `for <T, Provider> in SomeTable { … }`, reads each entry of another lookup table and
+Another statement form, `for <T, Provider> in SomeTable { … }`, reads each entry of another lookup table and
 emits one mapping per entry, which is how per-type defaults are pulled in wholesale.
 
 ## Examples
@@ -207,27 +207,27 @@ delegate_components! {
 
 ## When to use it
 
-**Reach for a namespace when the same wiring is repeated across contexts, or when a top-level table has
-grown too long to read.** Those are the two problems it solves, and below that threshold it costs more than
+**Use a namespace when the same wiring is repeated across contexts, or when a top-level table has
+grown too long to read.** Those are the problems it solves, and below that threshold it costs more than
 it saves: a namespace adds a layer of indirection between a component and its provider, which is one more
 hop for a reader tracing what runs.
 
-Three lighter tools cover most cases, and it is worth knowing where each stops.
+A few lighter tools cover most cases, and it is worth knowing where each stops.
 
 - **A plain [`delegate_components!`](./delegate_components.md) table** is right while each context's wiring
   is short and not shared. Most applications never outgrow this.
 - **The [`open` statement](./delegate_components.md#choosing-a-provider-per-type-the-open-statement)** is the
   lightweight special case of the same path machinery, for dispatching *one* component on its type parameter
-  directly on a context. It needs no namespace, no prefix, and no shared table; reach for it when the goal
+  directly on a context. It needs no namespace, no prefix, and no shared table; use it when the goal
   is per-type dispatch rather than shared wiring.
 - **An [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time)**, the
   `new`-keyword bundle, packages a group of wirings that contexts adopt by *delegating* named components to
   it, rather than by joining and inheriting. It is the more direct mechanism and the better choice for a
-  small, explicitly-delegated bundle. A namespace earns its extra machinery when there are many components,
+  small, explicitly-delegated bundle. A namespace is worth its extra machinery when there are many components,
   when inheritance is wanted, or when a library is publishing defaults for applications it does not know
   about.
 
-Two things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
+A couple of things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
 entries still have to exist somewhere. And it is not how one component gets per-type dispatch, which is
 `open`'s job; the two do not combine on the same component, as the [Common Mistakes](#common-mistakes) explain.
 
@@ -298,7 +298,7 @@ where
 For any key the parent resolves, the child resolves it to the same value. The child's own entries are emitted
 after this impl and win where their keys are more specific.
 
-Two naming details appear verbatim in errors and are worth recognizing: the table parameter is literally
+A couple of naming details appear verbatim in errors and are worth recognizing: the table parameter is literally
 `__Table__`, and the inheritance impl uses `__Key__` and `__Value__`. And every `@` path is a
 [type-level list](../types/path_cons.md) built by [`Path!`](./path.md); `expand` resugars it to
 `Path!(@…)` form, while a raw compiler error prints the underlying list.
@@ -323,7 +323,7 @@ defined on that page rather than restated here. The two a namespace normally use
 and `:` to a provider. The `:` between `NamespaceName` and `ParentNamespace` is the inheritance colon, distinct from a
 mapping's. `NamespaceName` becomes both a trait and, with `new`, a struct.
 
-Two of the three statement forms in that shared production exist for this macro, because their job is
+Two statement forms in that shared production exist for this macro, because their job is
 joining a context's table to a namespace. A `NamespaceStmt`, `namespace SomeNamespace;`, forwards every
 unwired lookup through the named namespace. A `ForStmt`,
 `for <T, Provider> in SomeTable where … { … }`, binds a key variable and a provider variable, reads each
@@ -397,7 +397,7 @@ error[E0277]: the trait bound `PathCons<Symbol<4, Chars<'s', ...>>, ...>: AppNam
 ```
 
 The `Symbol<4, …>` is the prefix, `show`, so the message is saying "this route is not something the
-namespace resolves". This is the lazy-wiring problem in namespace clothing, and the answer is the same: check
+namespace resolves". This is the lazy-wiring problem in a namespace setting, and the answer is the same: check
 the context.
 
 ## Related constructs
