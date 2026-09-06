@@ -10,38 +10,39 @@ the one ordinary runtime type you return from a getter.
 
 ## Overview
 
-Most types on these pages are **type-level building blocks**. Much of CGP's machinery runs at the type
-level, where a field name, a variant, a position, or a whole record shape is a *type* rather than a value.
-These building blocks are how CGP does that, and you write almost none of them by hand. You meet them when
-you read the code a macro generated, or when a wiring mistake prints a wall of nested types. This section
-exists to make such a type legible.
+Most types on these pages are **type-level building blocks**, and you read them far more often than you
+write them. Much of CGP's machinery runs at the type level, where a field name, a variant, a position, or
+a whole record shape is a *type* rather than a value. These building blocks carry that information. A
+macro writes almost all of them for you, so you meet them when you read generated code or when a wiring
+mistake reports a deeply nested type. This section exists to make such a type readable.
 
-One idea runs through nearly all of them, so hold it first: a type can carry information the program never
-stores as a value. A struct can name a type parameter it keeps no field of, so a name, a number, or a
+One idea runs through nearly all of them: a type can carry information the program never stores as a
+value. A struct can name a type parameter without keeping a field of that type, so a name, a number, or a
 lifetime becomes part of the type's identity, and the compiler matches on it during trait resolution.
-[`PhantomData`](phantom_data.md) is the standard-library tool that makes this legal, so it comes first
-here, and the other types build on it.
+[`PhantomData`](phantom_data.md) is the standard-library marker that makes this legal. It comes first
+here, because the other types build on it.
 
-The building blocks divide into two groups: markers and recursive type-level lists.
+The building blocks are either markers or recursive type-level lists.
 
-The **markers** each attach one piece of information at the type level. [`Index`](index_type.md) turns a
-tuple-field position into a type, the way [`Symbol!`](../macros/symbol.md) turns a field name into one,
-and [`Life`](life.md) lifts a lifetime into a type so it can travel through machinery that accepts only
-types. [`Field`](field.md) uses such a tag: it pairs a value with its type-level name, so a record or a
-variant entry knows what it is called.
+Each **marker** attaches one piece of information at the type level. [`Index`](index_type.md) turns a
+tuple-field position into a type, in the same way that [`Symbol!`](../macros/symbol.md) turns a field
+name into one. [`Life`](life.md) lifts a lifetime into a type, so that it can pass through machinery that
+accepts only types. [`Field`](field.md) uses such a tag: it pairs a value with its type-level name, so a
+record entry or a variant entry carries its own name.
 
-The **recursive type-level lists** are the chains everything structural is built from. Each pairs a
-head-and-tail cell with a terminator, and generic code takes it apart one element at a time. Each family
-covers one job, and its full account lives on its head cell. [`Cons`](cons.md) and [`Nil`](nil.md) build a
-record, and `Cons` owns the type-level product. [`Either`](either.md) and [`Void`](void.md) build a
-variant, and `Either` owns the type-level sum. [`Chars`](chars.md) builds a string, and
-[`PathCons`](path_cons.md) builds a routing path. You write these through the sugar
-([`Product!`](../macros/product.md), [`Sum!`](../macros/sum.md), [`Symbol!`](../macros/symbol.md), and
-[`Path!`](../macros/path.md)) and read them in expansions and errors.
+The **recursive type-level lists** are the chains that every structural shape is built from. Each list
+pairs a head-and-tail cell with a terminator, and generic code takes the list apart one element at a time.
+Each family covers one job, and the head cell's page carries the full account of that family.
+[`Cons`](cons.md) and [`Nil`](nil.md) build a record, and the `Cons` page explains the type-level product.
+[`Either`](either.md) and [`Void`](void.md) build a variant, and the `Either` page explains the type-level
+sum. [`Chars`](chars.md) builds a string, and [`PathCons`](path_cons.md) builds a routing path. You write
+these lists through the macros ([`Product!`](../macros/product.md), [`Sum!`](../macros/sum.md),
+[`Symbol!`](../macros/symbol.md), and [`Path!`](../macros/path.md)) and read them in expansions and
+errors.
 
-One type is not a building block at all. [`MRef`](mref.md) is an ordinary runtime value, the
-owned-or-borrowed return type of a getter. It is here because it is the one type in this section you write
-on purpose.
+[`MRef`](mref.md) is the one type here that is not a building block. It is an ordinary runtime value, the
+owned-or-borrowed return type of a getter. It belongs in this section because it is the one type here that
+you write yourself.
 
 ## The ideas behind them
 

@@ -11,25 +11,25 @@ A number lifted into a type, so a tuple-struct field can be named by its positio
 ## Overview
 
 `Index<const I: usize>` encodes a `usize` at the type level. CGP's getter mechanism keys every field by a
-*type* tag, and a tuple-struct field has no string name to turn into a [`Symbol!`](../macros/symbol.md);
-it has only a position. To let positional fields use the same trait-resolution machinery as named fields,
-the position itself becomes a type. `Index<I>` is that type: it carries a `usize` as a const parameter
-and nothing else, so `Index<0>`, `Index<1>`, and `Index<2>` are distinct types standing in for a tuple
-struct's positional fields.
+*type* tag, but a tuple-struct field has only a position and lacks a string name to turn into a
+[`Symbol!`](../macros/symbol.md). So the position itself becomes a type, and positional fields can use the
+same trait-resolution machinery as named fields. `Index<I>` is that type. It carries a `usize` as a const
+parameter and nothing else, so `Index<0>`, `Index<1>`, and `Index<2>` are distinct types that stand for a
+tuple struct's positional fields.
 
 Encoding the position as a type lets positional field access resolve through traits. Here a **context** is
-the type the capability runs against, which supplies the values it needs as its own fields. Because
-`Index<0>` is a type, a context can carry a
+the type the capability runs against. It supplies the values the capability needs as its own fields.
+Because `Index<0>` is a type, a context can carry a
 [`HasField<Index<0>>`](../traits/field-access/has_field.md) impl for its first field and a
-`HasField<Index<1>>` impl for its second side by side, and the compiler selects the right one from the
-tag alone, exactly as it would for two differently-named `Symbol!` tags. `Index` is the numeric
-counterpart to `Symbol!`: a field is keyed by a `Symbol!` when it has a name and by an `Index` when it
-has only a position.
+`HasField<Index<1>>` impl for its second, side by side. The compiler selects the right one from the tag
+alone, exactly as it does for differently named `Symbol!` tags. `Index` is the numeric counterpart to
+`Symbol!`. A field is keyed by a `Symbol!` when it has a name, and by an `Index` when it has only a
+position.
 
-`Index` carries no runtime data; it is a zero-sized marker. Its whole job is to make a number available
-at the type level, so it can be a [`HasField`](../traits/field-access/has_field.md) tag, the tag of a
-[`Field`](field.md) entry inside a tuple struct's shape, and the type passed inside a
-[`PhantomData`](phantom_data.md) wherever a positional name is needed at compile time.
+`Index` is a zero-sized marker without runtime data. Its only job is to make a number available at the
+type level. So it can serve as a [`HasField`](../traits/field-access/has_field.md) tag, as the tag of
+a [`Field`](field.md) entry inside a tuple struct's shape, and as the type inside a
+[`PhantomData`](phantom_data.md) wherever compile-time code needs a positional name.
 
 ## Definition
 
@@ -41,30 +41,30 @@ pub struct Index<const I: usize>;
 ```
 
 `I` is the position the type represents: `Index<0>` for the field at offset zero, and so on. The struct
-has no fields, so a value of `Index<I>` carries no data and the number lives entirely in the type. The
-derived `Default`, `Clone`, and `Copy` make a value available whenever one is needed, and `Eq` and
-`PartialEq` treat two values of the same `Index<I>` as always equal, since they hold no data.
-`Index<I>` also implements `Display` and `Debug`, and both print the underlying number, so `Index<0>`
-displays as `0` and the position a tag stands for is visible in output and in diagnostics.
+is empty, so a value of `Index<I>` holds nothing, and the number lives entirely in the type. The
+derived `Default`, `Clone`, and `Copy` make a value available whenever code needs one. `Eq` and
+`PartialEq` treat any two values of the same `Index<I>` as equal, because they hold no data. `Index<I>`
+also implements `Display` and `Debug`, and both print the underlying number. So `Index<0>` displays as
+`0`, and output and diagnostics show the position a tag stands for.
 
 ## Behavior
 
-A tuple struct keys each of its fields by `Index<N>`, counting from zero, so the field at position `N` is
-read through the tag `Index<N>`. When a tuple struct derives
+A tuple struct keys each of its fields by `Index<N>`, counting from zero, so code reads the field at
+position `N` through the tag `Index<N>`. When a tuple struct derives
 [`#[derive(HasField)]`](../derives/derive_has_field.md), the generated impl uses `Index<0>` for the `.0`
-field, `Index<1>` for `.1`, and so on, mapping each `get_field(PhantomData::<Index<N>>)` call to the
+field, `Index<1>` for `.1`, and so on. Each `get_field(PhantomData::<Index<N>>)` call maps to the
 matching positional access. Those tags then appear as the tag of each [`Field`](field.md) entry in the
-tuple struct's [`HasFields`](../traits/shape/has_fields.md) shape, so generic code walking the field list
-reads positions where it would read `Symbol!` names for a named struct.
+tuple struct's [`HasFields`](../traits/shape/has_fields.md) shape. So generic code that walks the field
+list reads positions where it would read `Symbol!` names for a named struct.
 
-Because `Index<I>` is zero-sized and the position lives in the type, accessing a field by index resolves
-entirely at compile time: there is no array bound check and no runtime indexing. Selecting the wrong
-index is a type error rather than a panic, because `Index<5>` on a three-field struct has no
-matching `HasField` impl.
+Because `Index<I>` is zero-sized and the position lives in the type, a field access by index resolves
+entirely at compile time. The access does not check an array bound and does not index at run time.
+Selecting the wrong index is a type error rather than a panic, because a three-field struct lacks a
+`HasField` impl for `Index<5>`.
 
 ## Examples
 
-When a tuple struct derives `HasField`, each positional field is tagged by an `Index`:
+When a tuple struct derives `HasField`, the derive tags each positional field with an `Index`:
 
 ```rust
 use cgp::prelude::*;
@@ -80,7 +80,7 @@ pub struct Pair(pub u32, pub String);
 // }
 ```
 
-A field is then read by supplying the `Index` tag, and the chosen position is fixed at compile time:
+You then read a field by supplying the `Index` tag, and the compiler fixes the chosen position:
 
 ```rust
 use cgp::prelude::*;
@@ -97,14 +97,14 @@ assert_eq!(Index::<2>.to_string(), "2");
 
 ## When to use it
 
-**Use `Index` for a tuple-field tag, and let the derive produce it where it can.** It is generated for
-every field of a tuple struct that derives [`#[derive(HasField)]`](../derives/derive_has_field.md), and
-you write it by hand only when you tag a positional field yourself.
+**Use `Index` for a tuple-field tag, and let the derive produce it where it can.** The derive generates it
+for every field of a tuple struct that derives [`#[derive(HasField)]`](../derives/derive_has_field.md),
+so you write it only when you tag a positional field yourself.
 
 - **Use [`Symbol!`](../macros/symbol.md) for a named field,** not an `Index`. Named and positional fields
   use different tags, and the derive generates the right one for each.
 - **Write `Index<N>` for a tuple position,** never a `Symbol!` of the number. `Symbol!("0")` is a string
-  tag and matches nothing on a tuple struct.
+  tag and does not match any field of a tuple struct.
 - **Read `Index<N>` in an error as a position.** A missing `HasField<Index<2>>` bound names the third
   field of a tuple struct.
 
@@ -115,10 +115,10 @@ type, not by a string of the digit, so `Symbol!("0")` never matches a tuple fiel
 generates it.
 
 **Indices count from zero.** `Index<0>` is the first field, matching Rust's own `.0` access. An
-off-by-one here reports as a missing `HasField` impl rather than an out-of-range error.
+off-by-one error here appears as a missing `HasField` impl rather than as an out-of-range error.
 
-**Selecting a position that does not exist is a type error, not a panic.** `Index<5>` on a three-field
-struct has no `HasField` impl, so the mistake is caught at compile time.
+**Selecting a position that does not exist is a type error, not a panic.** A three-field struct lacks a
+`HasField` impl for `Index<5>`, so the compiler catches the mistake.
 
 ## Related constructs
 

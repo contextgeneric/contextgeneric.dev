@@ -10,22 +10,22 @@ time.
 
 ## Overview
 
-`Cons<Head, Tail>` represents an ordered sequence of types as a single type, so a collection of fields
-can be reasoned about generically. A Rust tuple holds several things at once but cannot be taken apart
-by generic code element by element; a recursive list can. `Cons` pairs the first element with the rest of
-the list, and [`Nil`](nil.md) marks the end, so the two together form an *anonymous product type*: a
-record-shaped value that code can walk without knowing the concrete struct it came from.
+`Cons<Head, Tail>` represents an ordered sequence of types as a single type, so that generic code can
+reason about a collection of fields. A Rust tuple holds several things at once, but generic code cannot
+take it apart element by element. A recursive list allows that. `Cons` pairs the
+first element with the rest of the list, and [`Nil`](nil.md) marks the end. Together they form an
+*anonymous product type*: a record-shaped value that code can walk without knowing the concrete struct it
+came from.
 
-This list makes structural, field-by-field operations work across every struct uniformly. A
-struct's fields are exposed as one list type through [`HasFields`](../traits/shape/has_fields.md), so a
-provider written once to recurse over `Cons` and `Nil` can iterate, transform, read, or rebuild *any*
-struct's fields. Each step handles the `Head`, then recurses into the `Tail`, until it reaches `Nil` and
-stops.
+This list makes structural, field-by-field operations work across every struct in the same way.
+[`HasFields`](../traits/shape/has_fields.md) exposes a struct's fields as one list type, so a provider
+written once to recurse over `Cons` and `Nil` can iterate, transform, read, or rebuild *any* struct's
+fields. Each step handles the `Head`, then recurses into the `Tail`, until it reaches `Nil` and stops.
 
-You write this list through the [`Product!`](../macros/product.md) macro rather than by hand.
+You write this list through the [`Product!`](../macros/product.md) macro rather than directly.
 `Product![A, B, C]` is the right-nested `Cons` chain, and the value macro `product![a, b, c]` builds a
-matching value. The elements are most often [`Field`](field.md) entries pairing a name with a value,
-so a struct's layout becomes a `Product!` of `Field` cells over this list.
+matching value. The elements are most often [`Field`](field.md) entries that pair a name with a value, so
+a struct's layout becomes a `Product!` of `Field` cells over this list.
 
 ## Definition
 
@@ -36,31 +36,30 @@ so a struct's layout becomes a `Product!` of `Field` cells over this list.
 pub struct Cons<Head, Tail>(pub Head, pub Tail);
 ```
 
-`Head` is the first element's type and `Tail` is the rest of the list, itself another `Cons` or, at the
-end, [`Nil`](nil.md). Both positional fields are public, so `Cons(head, tail)` builds a cell and `.0` and
+`Head` is the first element's type, and `Tail` is the rest of the list, which is another `Cons` or, at the
+end, [`Nil`](nil.md). Both positional fields are public, so `Cons(head, tail)` builds a cell, and `.0` and
 `.1` reach its parts. Unlike the zero-sized [`Chars`](chars.md) and [`PathCons`](path_cons.md) lists,
-`Cons` holds real values: it is as large as its elements laid out by nesting, with nothing boxed or
-virtual. It derives `Eq`, `PartialEq`, `Clone`, `Default`, and `Debug`, so a list of values that
-implement those traits inherits them structurally, comparing head to head down the chain.
+`Cons` holds real values. It is as large as its nested elements, without boxing or indirection. It derives
+`Eq`, `PartialEq`, `Clone`, `Default`, and `Debug`, so a list of values that implement those traits
+inherits them structurally, comparing head to head down the chain.
 
 ## Behavior
 
 A list of any length is a `Cons` chain ending in `Nil`, nested to the right. The type `Product![A, B, C]`
-is `Cons<A, Cons<B, Cons<C, Nil>>>`, and the empty `Product![]` is just `Nil`. The matching value is
-built with the tuple-struct constructor, `Cons(a, Cons(b, Cons(c, Nil)))`, so a `product!` value is an
-ordinary owned value whose type is exactly the one `Product!` produces over the same elements' types.
+is `Cons<A, Cons<B, Cons<C, Nil>>>`, and the empty `Product![]` is just `Nil`. The tuple-struct
+constructor builds the matching value, `Cons(a, Cons(b, Cons(c, Nil)))`. So a `product!` value is an
+ordinary owned value, and its type is exactly the one `Product!` produces over the same element types.
 
-Generic code consumes the list by recursing on its two cases. A trait implemented for `Nil` supplies
-the base case, the empty list, and a blanket impl for `Cons<Head, Tail>` supplies the recursive step,
-usually constraining `Tail` to implement the same trait so the recursion bottoms out at `Nil`. This
-pairing of a `Nil` impl with a `Cons<Head, Tail>` impl is the standard shape for any operation that
-folds over a product, and it is how the field machinery processes a struct of any width with no per-field
-code.
+Generic code consumes the list by recursing on its cases. A trait impl for `Nil` supplies the base case,
+the empty list. A blanket impl for `Cons<Head, Tail>` supplies the recursive step, and it usually
+constrains `Tail` to implement the same trait, so that the recursion ends at `Nil`. This pairing of a
+`Nil` impl with a `Cons<Head, Tail>` impl is the standard shape for any operation that folds over a
+product. It is how the field machinery processes a struct of any width without per-field code.
 
 ## Examples
 
 The product list appears most visibly as the `Fields` of a struct that derives
-[`HasFields`](../derives/derive_has_fields.md), where the [`Product!`](../macros/product.md) sugar
+[`HasFields`](../derives/derive_has_fields.md), where the [`Product!`](../macros/product.md) macro
 hides the `Cons`/`Nil` chain:
 
 ```rust
@@ -83,7 +82,7 @@ pub struct Person {
 // }
 ```
 
-A standalone list type and a matching value can also be written through the sugar, which expands to the
+You can also write a standalone list type and a matching value through the macros, which expand to the
 nested `Cons` form:
 
 ```rust
@@ -97,16 +96,16 @@ let row: Row = product![1, "hi".to_string(), true];
 
 ## When to use it
 
-**Read `Cons` in an expansion; write [`Product!`](../macros/product.md) instead.** The sugar produces
-the list, and spelling it out by hand is longer, harder to change, and identical in meaning.
+**Read `Cons` in an expansion, and write [`Product!`](../macros/product.md) instead.** The macro produces
+the list. Writing the chain out yourself is longer, harder to change, and identical in meaning.
 
 - **Use [`#[derive(HasFields)]`](../derives/derive_has_fields.md) for a struct's shape** rather than
-  declaring the `Cons` chain yourself, since a hand-written list restates the struct and the two drift
-  apart.
-- **Use [`Product!`](../macros/product.md) for a list you write on purpose,** such as a handler
-  pipeline, and let it build the list.
-- **Decode a `Cons` chain in an error by counting cells.** A field-list mismatch is reported as a
-  mismatch between two `Cons` chains, and the position where they diverge is the field that differs.
+  declaring the `Cons` chain yourself, because a list you write yourself restates the struct, and the two
+  drift apart.
+- **Use [`Product!`](../macros/product.md) for a list you write deliberately,** such as a handler
+  pipeline, and let the macro build the chain.
+- **Decode a `Cons` chain in an error by counting cells.** The compiler reports a field-list mismatch as
+  a mismatch between two `Cons` chains, and the position where they diverge is the field that differs.
 
 ## Common Mistakes
 
@@ -115,11 +114,11 @@ list of one still carries its cell.
 
 **Element order is part of the type.** `Cons<A, Cons<B, Nil>>` and `Cons<B, Cons<A, Nil>>` are unrelated
 types. For a field list this matters less than it sounds, because the entries are name-tagged
-[`Field`](field.md)s and the operations match on names; for a handler pipeline the order is the
+[`Field`](field.md)s and the operations match on names. For a handler pipeline, the order is the
 execution order.
 
-**The empty product is [`Nil`](nil.md), a real value.** That is the difference from the sum list, whose
-empty form is the uninhabited [`Void`](void.md). An empty record exists; an empty choice cannot.
+**The empty product is [`Nil`](nil.md), a real value.** This differs from the sum list, whose empty form
+is the uninhabited [`Void`](void.md). An empty record can exist, but an empty choice cannot.
 
 ## Related constructs
 

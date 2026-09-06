@@ -11,20 +11,20 @@ the name can be a type.
 ## Overview
 
 `Chars<const CHAR: char, Tail>` encodes a string as a type, so that a field name can take part in trait
-resolution. CGP keys field access by a tag type: to read a field called `name`, something must stand in
-for the string `"name"` at the type level, so the compiler can match one
-[`HasField`](../traits/field-access/has_field.md) impl against another purely from the tag. A `Chars`
-chain is how the string becomes a type, and a `Symbol` wrapping that chain is the tag itself.
+resolution. CGP keys field access by a tag type. To read a field called `name`, something must stand for
+the string `"name"` at the type level, so that the compiler can tell one
+[`HasField`](../traits/field-access/has_field.md) impl from another by the tag alone. A `Chars` chain
+turns the string into a type, and a `Symbol` that wraps the chain is the tag itself.
 
-The encoding is a *list of characters* because of a limit in stable Rust: a `String` or `&str` cannot
-be a const-generic parameter, but a single `char` can. So CGP spells the string out one character at a
-time through a recursive `Chars` list, terminated by [`Nil`](nil.md), the same way the product list
-spells out its elements through [`Cons`](cons.md). `Chars` is the specialized form of `Cons` in which the
-head is a `const char` rather than a type.
+The encoding is a *list of characters* because of a limit in stable Rust. A `String` or `&str` cannot be
+a const-generic parameter, but a single `char` can. So CGP spells the string out one character at a time
+through a recursive `Chars` list terminated by [`Nil`](nil.md), in the same way the product list spells
+out its elements through [`Cons`](cons.md). `Chars` is the specialized form of `Cons` whose head is a
+`const char` rather than a type.
 
-You write this through [`Symbol!`](../macros/symbol.md) rather than by hand. `Symbol!("abc")` folds
-into `Symbol<3, Chars<'a', Chars<'b', Chars<'c', Nil>>>>`, and that macro's page carries the fold, the
-byte-length parameter, and the rest of the wrapper. This page is the runtime `Chars` type underneath.
+You write this through [`Symbol!`](../macros/symbol.md) rather than directly. `Symbol!("abc")` folds
+into `Symbol<3, Chars<'a', Chars<'b', Chars<'c', Nil>>>>`. That macro's page covers the fold, the
+byte-length parameter, and the rest of the wrapper. This page covers the `Chars` type underneath.
 
 ## Definition
 
@@ -35,12 +35,12 @@ its tail:
 pub struct Chars<const CHAR: char, Tail>(pub PhantomData<Tail>);
 ```
 
-`CHAR` is the character at this position, and `Tail` is the rest of the string, expected to be either the
-next `Chars` node or [`Nil`](nil.md) at the end. The character lives in the const parameter and the tail
-in a [`PhantomData<Tail>`](phantom_data.md), so a `Chars` chain carries no runtime data and is erased
-to a zero-sized value. A `Symbol<const LEN: usize, Chars>` then wraps such a chain together with the
-string's byte length; the length is stored explicitly because stable Rust cannot compute it inside a
-const-generic context, and [`Symbol!`](../macros/symbol.md) covers why.
+`CHAR` is the character at this position, and `Tail` is the rest of the string, which is the next `Chars`
+node or [`Nil`](nil.md) at the end. The character lives in the const parameter, and the tail lives in a
+[`PhantomData<Tail>`](phantom_data.md), so a `Chars` chain does not carry runtime data and compiles to
+a zero-sized value. A `Symbol<const LEN: usize, Chars>` then wraps such a chain together with the string's
+byte length. The wrapper stores the length explicitly because stable Rust cannot compute it inside a
+const-generic context, and the [`Symbol!`](../macros/symbol.md) page explains why.
 
 ## Behavior
 
@@ -52,9 +52,9 @@ its `Display` impl defers to `StaticFormat`, so `<Symbol!("hello")>::default().t
 `"hello"`.
 
 The length a `Symbol` records enables [`StaticString`](../traits/formatting/static_string.md), which
-exposes the string as a `const VALUE: &'static str` rather than a formatting routine, by decoding the
+exposes the string as a `const VALUE: &'static str` rather than as a formatting routine. It decodes the
 characters into a byte buffer sized by that length at compile time. Code that needs the string at run
-time uses `Display`; code that needs it as a const uses `StaticString`.
+time uses `Display`, and code that needs it as a const uses `StaticString`.
 
 ## Examples
 
@@ -75,8 +75,8 @@ where
 }
 ```
 
-The same type can be built and inspected at run time through its `Display` impl, which walks the `Chars`
-chain to rebuild the string:
+You can also build the same type at run time and inspect it through its `Display` impl, which walks the
+`Chars` chain to rebuild the string:
 
 ```rust
 use cgp::prelude::*;
@@ -90,12 +90,12 @@ just the terminator and whose recorded length is zero.
 
 ## When to use it
 
-**You read `Chars` in an error; you write [`Symbol!`](../macros/symbol.md).** The macro produces the
-chain, and the reason to know the type is to decode a field name in a diagnostic.
+**You read `Chars` in an error, and you write [`Symbol!`](../macros/symbol.md).** The macro produces the
+chain. You need to know the type so that you can decode a field name in a diagnostic.
 
-- **Decode a `Chars` chain by reading off the characters.** An error mentioning
-  `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` is telling you the field `width` is missing, and
-  `cargo cgp check` resugars the common cases.
+- **Decode a `Chars` chain by reading off the characters.** An error that mentions
+  `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` says that the field `width` is missing, and
+  `cargo cgp check` restores the `Symbol!` form in the common cases.
 - **Use [`Symbol!`](../macros/symbol.md) for a field-name tag,** and let the ergonomic constructs
   produce it from an argument or a method name where they can.
 - **Use [`Index`](index_type.md) for a tuple-field position,** which encodes a number rather than a
@@ -103,12 +103,12 @@ chain, and the reason to know the type is to decode a field name in a diagnostic
 
 ## Common Mistakes
 
-**The `LEN` in a wrapping `Symbol` is bytes, not characters.** For ASCII the two coincide, so the
-distinction only shows on a non-ASCII field name, where `LEN` will not match the visible character count
-and the `Chars` chain will be shorter than `LEN`.
+**The `LEN` in a wrapping `Symbol` is bytes, not characters.** For ASCII the two counts agree, so the
+difference shows only on a non-ASCII field name. There `LEN` does not match the visible character count,
+and the `Chars` chain is shorter than `LEN`.
 
-**`Chars` is zero-sized, so it holds no string at run time.** The `Display` impl rebuilds the text from
-the type; there is no stored `&str` inside it.
+**`Chars` is zero-sized, so it does not hold a string at run time.** The `Display` impl rebuilds the text
+from the type, and the value does not store a `&str`.
 
 **A `Chars` chain is the character specialization of [`Cons`](cons.md), not a general list.** Its head is
 a `const char`, so it cannot carry arbitrary element types the way a product list does.

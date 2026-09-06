@@ -11,26 +11,29 @@ whichever it has without forcing every implementor to one or the other.
 ## Overview
 
 `MRef<'a, T>` lets one getter signature serve both the context that already stores a value and the
-context that must produce one. Here a **context** is the type the capability runs against, which supplies
-the values it needs as its own fields. A getter that returns `&'a T` forces every context to keep a `T`
-it can lend; a getter that returns `T` forces every context to hand over ownership, cloning even when it
-has a perfectly good reference to share. `MRef<'a, T>` removes that dilemma by being either case at run
-time: a context with the value in a field returns `MRef::Ref` and lends it, while a context that computes
-or assembles the value returns `MRef::Owned` and gives it away. The caller treats both the same, because
-`MRef` derefs to `T`.
+context that must produce one. Here a **context** is the type the capability runs against. It supplies the
+values the capability needs as its own fields. A getter that returns `&'a T` forces every context to keep
+a `T` it can lend. A getter that returns `T` forces every context to give up ownership, and to clone even
+when it could share a reference. `MRef<'a, T>` avoids both constraints by being either case at run time. A
+context with the value in a field returns `MRef::Ref` and lends it. A context that computes or assembles
+the value returns `MRef::Owned` and transfers it. The caller treats both the same, because `MRef` derefs
+to `T`.
 
-The type earns its place in CGP's getter machinery, where a getter method's return type decides what body
-the macro generates. When a getter returns `MRef<'a, T>` over `&self`, the generated accessor wraps the
-borrowed field as `MRef::Ref(...)`, so the common case, reading a stored field, costs nothing extra,
-while the same interface still lets a provider elsewhere return an owned value. This lets a
-getter abstract over "do I have this value, or do I make it?" without splitting into two traits.
+CGP's getter machinery uses the type directly, because a getter method's return type decides what
+body the macro generates. When a getter returns `MRef<'a, T>` over `&self`, the generated accessor
+wraps the borrowed field as `MRef::Ref(...)`. So the common case, reading a stored field, costs
+nothing extra, and the same interface still lets a provider elsewhere return an owned value. A
+getter can therefore leave open whether the context stores the value or makes it, without splitting
+into a separate trait for each case.
 
-Unlike the rest of this section, `MRef` is an ordinary runtime value rather than a type-level marker.
-It is here because it is the one type in the group you write on purpose, as the return type of a getter.
+Unlike the rest of this section, `MRef` is an ordinary runtime value rather than a type-level marker. It
+belongs here because it is the one type in the group that you write yourself, as the return type of a
+getter.
 
 ## Definition
 
-`MRef` is a two-variant enum parameterized by a lifetime and an element type:
+`MRef` is an enum with a borrowed variant and an owned variant, parameterized by a lifetime and an element
+type:
 
 ```rust
 pub enum MRef<'a, T> {
@@ -39,29 +42,29 @@ pub enum MRef<'a, T> {
 }
 ```
 
-`Ref` borrows a `T` for the lifetime `'a`; `Owned` carries a `T` by value. The lifetime applies only to
-the borrowed case, so an `MRef` built from an owned value is effectively unbounded in `'a`. It is an
-ordinary owned value, with nothing type-level about it, and it is the payload a getter passes back to its
-caller.
+`Ref` borrows a `T` for the lifetime `'a`, and `Owned` carries a `T` by value. The lifetime applies only
+to the borrowed case, so an `MRef` built from an owned value is effectively unbounded in `'a`. The enum is
+an ordinary owned value, with nothing type-level about it, and it is the payload a getter passes back to
+its caller.
 
 ## Behavior
 
-`MRef` behaves like a smart pointer to `T`, which makes the two variants interchangeable at the
-call site. It implements `Deref<Target = T>` by matching on the variant and returning a `&T` either way,
-so `&*my_ref` and any auto-deref method call work regardless of which case is inside. It also implements
-`AsRef<T>` over the same logic, giving an explicit `as_ref()` for code that prefers it.
+`MRef` behaves like a smart pointer to `T`, which makes the variants interchangeable at the call site. It
+implements `Deref<Target = T>` by matching on the variant and returning a `&T` either way, so `&*my_ref`
+and any auto-deref method call work regardless of which case is inside. It also implements `AsRef<T>` over
+the same logic, giving an explicit `as_ref()` for code that prefers it.
 
-Building an `MRef` is frictionless, because it implements `From` in both directions: `From<T>` builds
-`Owned` and `From<&'a T>` builds `Ref`, so a value or a reference converts with `.into()`. When a caller
-needs ownership unconditionally, `get_or_clone` resolves the enum to a plain `T`, returning the owned
-value as is or cloning the borrowed one, and is available whenever `T: Clone`. Together these make up the
-whole surface: the transparent `Deref` and `AsRef`, the two `From` impls, and `get_or_clone`. A
-borrowed `MRef` is read cheaply and promoted to ownership only when asked.
+Building an `MRef` takes a single `.into()`, because it implements `From` for both cases. `From<T>` builds
+`Owned`, and `From<&'a T>` builds `Ref`, so a value or a reference converts with `.into()`. When a caller
+needs ownership unconditionally, `get_or_clone` resolves the enum to a plain `T`. It returns the owned
+value as is or clones the borrowed one, and it is available whenever `T: Clone`. These make up the whole
+API: the transparent `Deref` and `AsRef`, the `From` impls, and `get_or_clone`. Code reads a borrowed
+`MRef` cheaply and promotes it to ownership only on request.
 
 ## Examples
 
 `MRef` is the return type of a getter that should work whether the context stores the value or produces
-it. A borrowed field and a freshly built value have the same type and are read the same way:
+it. A borrowed field and a freshly built value have the same type, and code reads them the same way:
 
 ```rust
 use cgp::prelude::*;
@@ -81,36 +84,36 @@ let owned: String = borrowed.get_or_clone();
 assert_eq!(owned, "hello");
 ```
 
-Both `borrowed` and `made` have the same type and are consumed the same way; only the construction
-differs, and `get_or_clone` clones the borrowed case while moving the owned one.
+Both `borrowed` and `made` have the same type, and code consumes them the same way. Only the construction
+differs. `get_or_clone` clones the borrowed case and moves the owned one.
 
 ## When to use it
 
-**Return `MRef<'a, T>` from a getter that some contexts store and others build.** It is the getter return
-mode to reach for when the value is not always a field the context can lend.
+**Return `MRef<'a, T>` from a getter that some contexts store and others build.** It is the right getter
+return type when the value is not always a field the context can lend.
 
-- **Use a plain `&T` return** when every context stores the value and can lend it. `MRef` earns its keep
-  only where some context must produce the value instead.
+- **Use a plain `&T` return** when every context stores the value and can lend it. `MRef` is useful only
+  where some context must produce the value instead.
 - **Use an [`#[implicit]`](../attributes/implicit.md) argument** to read a stored field in a provider,
-  which is the default for field access; an implicit argument can itself be typed `MRef<'_, T>` when the
-  field may be lent or produced.
-- **Reach for `MRef` with [`#[cgp_getter]`](../macros/cgp_getter.md)** and the
+  which is the default for field access. An implicit argument can itself have the type `MRef<'_, T>` when
+  the field may be lent or produced.
+- **Use `MRef` with [`#[cgp_getter]`](../macros/cgp_getter.md)** and the
   [`UseField`](../providers/use_field.md) family, where a getter's return type selects the accessor the
   macro generates.
 
 ## Common Mistakes
 
 **`MRef` is not related to [`Life`](life.md).** Its `'a` is an ordinary borrow lifetime on a runtime
-value; `Life<'a>` is a zero-sized type-level lift for provider wiring. The shared word "lifetime" is the
-only thing they have in common.
+value, while `Life<'a>` is a zero-sized type-level lift for provider wiring. They share only the word
+"lifetime".
 
 **`get_or_clone` clones only the borrowed case.** It moves an `Owned` value and clones a `Ref` one, so it
-is free when the getter already owns the value and costs a clone when it borrowed. Reach for it only when
-you genuinely need ownership.
+is free when the getter already owns the value and costs a clone when it borrowed. Use it only when you
+need ownership.
 
 **`Deref` makes the variants transparent, so you rarely match on them.** Reading through `&*` or
-`as_ref()` works whichever case is inside, and matching on `Ref` versus `Owned` by hand is usually a sign
-the value should have been promoted with `get_or_clone` instead.
+`as_ref()` works whichever case is inside, and a manual match on `Ref` versus `Owned` usually means the
+code should have called `get_or_clone` instead.
 
 ## Related constructs
 
