@@ -10,12 +10,12 @@ namespace addresses the component by that path.
 
 ## Overview
 
-A [namespace](/docs/concepts/namespaces) is a reusable wiring table that a **context**, the type the
-capability runs against, joins with one line and then overrides where it needs to. A namespace answers
-a lookup by *routing* it: asked for a component, it says where to look next. `#[prefix(...)]` is how
-a component contributes its own route. Written on the component's trait beside
-[`#[cgp_component]`](../macros/cgp_component.md), it registers the component into the named namespace
-under a path prefix:
+`#[prefix(...)]` registers a component into a [namespace](/docs/concepts/namespaces) under a path
+prefix. Written on the component's trait beside [`#[cgp_component]`](../macros/cgp_component.md), it
+adds the component's own route to the namespace. A namespace is a reusable wiring table that a
+**context** joins with one line and then overrides where it needs to. (The context is the type the
+capability runs against.) A namespace answers a lookup by *routing* it: asked for a component, it says
+where to look next.
 
 ```rust
 #[cgp_component(Greeter)]
@@ -25,11 +25,11 @@ pub trait CanGreet {
 }
 ```
 
-Read that as: *in `AppNamespace`, `GreeterComponent` is found at `@app.GreeterComponent`.* A context
-that joins `AppNamespace` and asks for `GreeterComponent` is sent to that path, and whatever is bound
-there is the provider that runs. The attribute records only the route. A provider is bound at the
-path somewhere else: by a direct `@app.GreeterComponent: GreetHello` entry on the context, by an
-entry in the namespace's body, or by a [`#[default_impl]`](./default_impl.md) on a provider.
+Read that as: *in `AppNamespace`, `GreeterComponent` is found at `@app.GreeterComponent`.* When a
+context joins `AppNamespace` and asks for `GreeterComponent`, the namespace sends it to that path, and
+the provider bound there is the one that runs. The attribute records only the route. Something else
+binds a provider at the path: a direct `@app.GreeterComponent: GreetHello` entry on the context, an
+entry in the namespace's body, or a [`#[default_impl]`](./default_impl.md) on a provider.
 
 Prefixes turn a flat wiring table into a tree. With components registered under `@app.auth`,
 `@app.finance`, and `@app.error`, related entries sort together, a reader finds the auth wiring
@@ -56,7 +56,7 @@ of the macros built on it, [`#[cgp_type]`](../macros/cgp_type.md) and
 
 **The path is a prefix, and the macro appends the component marker for you.**
 `#[prefix(@app in DefaultNamespace)]` on `CanGreet` registers `GreeterComponent` at
-`@app.GreeterComponent`. Writing the marker yourself doubles it; see
+`@app.GreeterComponent`. Writing the marker yourself doubles it. See
 [Common Mistakes](#common-mistakes).
 
 Segments follow [`Path!`](../macros/path.md)'s convention. A lowercase identifier that is not a
@@ -90,8 +90,8 @@ on a prefixed component is a foreign path.
 
 ### Choosing a prefix
 
-A prefix is part of the component's public surface, and expensive to change once wiring depends on
-it, so choose it for every implementation the component might have rather than for the one you are
+A prefix is part of the component's public surface, and costly to change once wiring depends on
+it. So choose it with every implementation the component might have in mind, not only the one you are
 writing now. Give components separate sub-paths whenever they are likely to need separate providers,
 even when the current wiring happens to treat them alike. Abstract types belong under a `types` sub-path
 of their layer, such as `@app.auth.types`, because a production context typically points the logic
@@ -148,8 +148,8 @@ so the lookup falls through to `DefaultNamespace`, which redirects to `@app.Gree
 `App`'s own table binds that path to `GreetHello`. **Environmental context, self-targeted**: `App`
 exists to carry the wiring and a `name` field, and the capability is about `App` itself.
 
-A second context joins the same namespace and binds a different provider at the same path, with
-nothing repeated between the two:
+A second context joins the same namespace and binds a different provider at the same path, without
+repeating anything from the first:
 
 ```rust
 #[cgp_impl(new GreetFormally)]
@@ -197,22 +197,22 @@ delegate_components! {
 
 **Reach for `#[prefix]` as soon as a wiring table has enough components that grouping helps a
 reader.** It costs nothing at the point of use, it is the one namespace tool without a downstream
-restriction, and the table it produces reads at once as a directory listing. It is also the
-form a library uses to publish its components into a shared namespace.
+restriction, and the table it produces reads like a directory listing. It is also the form a library
+uses to publish its components into a shared namespace.
 
 Some situations call for something else.
 
-- **A component only ever wired directly on a context** needs no prefix. The `open` statement of
-  [`delegate_components!`](../macros/delegate_components.md) dispatches it per type without a
+- **A component only ever wired directly on a context** does not need a prefix. The `open` statement
+  of [`delegate_components!`](../macros/delegate_components.md) dispatches it per type without a
   namespace, and the two do not combine on one component.
-- **Binding a provider at a path** is the job of the wiring, not of the component. Use a direct entry
-  on the context, a [`cgp_namespace!`](../macros/cgp_namespace.md) body entry, or
-  [`#[default_impl]`](./default_impl.md) on the provider.
+- **The wiring binds a provider at a path**, not the component. Use a direct entry on the context, a
+  [`cgp_namespace!`](../macros/cgp_namespace.md) body entry, or [`#[default_impl]`](./default_impl.md)
+  on the provider.
 - **A small, explicitly delegated bundle** is an
   [aggregate provider](../macros/delegate_components.md#defining-the-target-at-the-same-time),
-  which contexts adopt by delegating named components to it. Namespaces and prefixes earn their extra
-  indirection when there are many components, when inheritance is wanted, or when a library publishes
-  defaults for applications it does not know about.
+  which contexts adopt by delegating named components to it. Namespaces and prefixes justify their
+  extra indirection when there are many components, when inheritance is wanted, or when a library
+  publishes defaults for applications it does not know about.
 
 ## Under the hood
 
@@ -279,13 +279,13 @@ namespaces.
 
 ## Common Mistakes
 
-**The marker is appended for you, so do not write it.** `#[prefix(@app.GreeterComponent in Ns)]`
+**The macro appends the marker, so do not write it.** `#[prefix(@app.GreeterComponent in Ns)]`
 registers the component at `@app.GreeterComponent.GreeterComponent`. It compiles, and a context that
 binds `@app.GreeterComponent` then finds its entry never consulted, because the route and the binding
 name different paths. Write the prefix alone.
 
-**Registering routes a component and binds nothing.** A prefixed component compiles even when
-nothing binds its path, and so does a context that joins the namespace. Only a
+**Registering routes a component but does not bind a provider.** A prefixed component compiles even
+when nothing binds its path, and so does a context that joins the namespace. Only a
 [`check_components!`](../macros/check_components.md) reports it, as an unsatisfied bound on the
 *path* rather than on a provider:
 
@@ -321,9 +321,9 @@ bare marker, while the prefix routes under the path, so the per-type entries `op
 consulted. Write the entries with the full prefixed path instead, as
 [`cgp_namespace!`](../macros/cgp_namespace.md#common-mistakes) explains.
 
-**Case decides a segment's meaning silently.** `@app` is a type-level string and `@App` is a type,
-both are valid, and a capitalization slip routes to a path nothing binds. The failure surfaces as the
-unbound path above, without a hint about the letter; see
+**Case decides a segment's meaning without a warning.** `@app` is a type-level string and `@App` is a
+type, both are valid, and a capitalization slip routes to a path nothing binds. The failure surfaces
+as the unbound path above, without a hint about the letter. See
 [`Path!`](../macros/path.md#common-mistakes).
 
 **On `#[cgp_auto_getter]` the attribute is accepted and dropped.** That macro runs the same attribute
@@ -331,8 +331,8 @@ collector as `#[cgp_component]`, to apply `#[extend]` and `#[use_type]`, but it 
 component to register, so a `#[prefix]` on it registers nothing and reports nothing. A getter that
 must live in a namespace is a [`#[cgp_getter]`](../macros/cgp_getter.md) component.
 
-**On `#[cgp_impl]` or `#[cgp_fn]` the attribute is unknown.** Nothing consumes it there, so it
-reaches the compiler as an attribute that does not exist:
+**On `#[cgp_impl]` or `#[cgp_fn]` the compiler does not recognize the attribute.** Neither macro
+consumes it, so it reaches the compiler as an attribute that does not exist:
 
 ```text
 error: cannot find attribute `prefix` in this scope

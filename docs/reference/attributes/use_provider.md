@@ -9,21 +9,21 @@ Depend on another provider by name, importing the provider trait it must satisfy
 
 ## Overview
 
-An implementation can depend on *another* implementation: a wrapper that scales whatever an inner
-calculator produces, a retry layer over whatever performs a request. This shape is a
-[higher-order provider](/docs/concepts/higher-order-providers), and `#[use_provider]` declares its
-dependency by importing the [provider trait](../macros/cgp_component.md) the inner provider must satisfy:
+`#[use_provider]` declares that an implementation depends on *another* implementation, by importing the
+[provider trait](../macros/cgp_component.md) the inner provider must satisfy. An implementation with such
+a dependency is a [higher-order provider](/docs/concepts/higher-order-providers): a wrapper that scales
+whatever an inner calculator produces, or a retry layer over whatever performs a request.
 
 ```rust
 #[use_provider(InnerCalculator: AreaCalculator)]
 ```
 
 That reads as *`InnerCalculator` is an `AreaCalculator` for this context*, and it is the provider-side
-counterpart to [`#[uses]`](uses.md). Where `#[uses]` imports a **consumer trait** (or an ordinary Rust
-trait) that the **context** must satisfy, `#[use_provider]` imports a **provider trait** that a named
-provider must satisfy for the context. The context is the type the implementation runs against. Both read
-as importing a dependency; they differ only in whether the thing depended on is a capability of the
-context or a provider.
+counterpart to [`#[uses]`](uses.md). `#[uses]` imports a consumer trait (or an ordinary Rust trait) that
+the **context** must satisfy. `#[use_provider]` imports a provider trait that a named provider must
+satisfy for the context. The context is the type the implementation runs against. Both attributes read
+as importing a dependency. They differ only in whether the dependency is a capability of the context or
+a provider.
 
 The inner provider is a named type rather than a method on the context, so the body calls it as an
 associated function and passes the context:
@@ -32,7 +32,7 @@ associated function and passes the context:
 let base_area = InnerCalculator::area(self);
 ```
 
-`#[use_provider]` writes the bound behind that call; it does not rewrite the call. Writing `self.area()`
+`#[use_provider]` writes the bound behind that call. It does not rewrite the call. Writing `self.area()`
 instead would route through whatever provider the context has itself wired for `AreaCalculator`, which is
 a different choice and usually not what a higher-order provider wants.
 
@@ -64,10 +64,10 @@ each satisfy one.
 #[use_provider(P: PerimeterCalculator)]
 ```
 
-Stacking is the intended form here rather than a fallback, because a comma-separated list of
-provider-and-trait pairs is *not* accepted (see [Common Mistakes](#common-mistakes)). This differs from
-[`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), where commas are the preferred way to carry several
-entries, so it is worth remembering as the exception.
+Stacking is the intended form here rather than a fallback, because the parser does *not* accept a
+comma-separated list of provider-and-trait pairs (see [Common Mistakes](#common-mistakes)). This differs
+from [`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), where commas are the preferred way to carry
+several entries, so remember `#[use_provider]` as the exception.
 
 `#[use_provider]` is accepted on [`#[cgp_impl]`](../macros/cgp_impl.md) and on
 [`#[cgp_fn]`](../macros/cgp_fn.md), and it works the same way on both.
@@ -126,7 +126,7 @@ delegate_components! {
 ```
 
 Because the wrapper never names a particular inner implementation, the same `ScaledArea` composes over any
-of them. Composition is itself a type, so `type ScaledRectangle = ScaledArea<RectangleArea>;` is a
+of them. The composition is itself a type, so `type ScaledRectangle = ScaledArea<RectangleArea>;` is a
 complete way to name the combination.
 
 The attribute is also useful for depending on one *specific* implementation rather than a parameter. A
@@ -156,25 +156,25 @@ easy to miss because both spellings compile.
 - **Whatever the context already chose** needs no attribute at all. Calling `self.area()` in the body
   routes through the context's own wiring, which is a *different dispatch* from
   `InnerCalculator::area(self)`: the method call asks the context, and the associated-function call
-  names an implementation statically. Reach for `#[use_provider]` only when you want the named
+  names an implementation statically. Use `#[use_provider]` only when you want the named
   implementation.
 - **A choice made per type rather than fixed** is dispatch rather than parameterization, so it belongs in
   the wiring: the `open` statement of [`delegate_components!`](../macros/delegate_components.md) maps each
   type to its own implementation.
 
-Giving the parameter a default of [`UseContext`](../providers/use_context.md), as in
+A default of [`UseContext`](../providers/use_context.md) on the parameter, as in
 `pub struct IterSum<Inner = UseContext>(...)`, makes an unparameterized `IterSum` fall back to the
-context's own wiring, so the wrapper can be used without naming a base case. That option is worth
-knowing when writing the provider struct by hand.
+context's own wiring, so a context can use the wrapper without naming a base case. This option matters
+when you write the provider struct by hand.
 
 ## Under the hood
 
-A [provider trait](../macros/cgp_component.md) is not shaped like the consumer trait it came from: the
+A [provider trait](../macros/cgp_component.md) is not shaped like the consumer trait it came from. The
 original `Self` moves into an explicit leading type parameter for the context, so the real bound on an
-inner provider is `InnerCalculator: AreaCalculator<Self>`, with a context argument the consumer trait has
-no counterpart for. `#[use_provider]` writes that `<Self>` for you. It inserts the context type as the
-provider trait's leading argument and appends the completed bound to the `where` clause, and nothing else
-changes: the macro emits the body as written. From the `ScaledArea` example:
+inner provider is `InnerCalculator: AreaCalculator<Self>`. The consumer trait has no counterpart for that
+context argument. `#[use_provider]` writes that `<Self>` for you: it inserts the context type as the
+provider trait's leading argument and appends the completed bound to the `where` clause. Nothing else
+changes, and the macro emits the body as written. From the `ScaledArea` example:
 
 ```rust
 #[cgp_impl(new ScaledArea<InnerCalculator>)]
@@ -209,8 +209,8 @@ The `Self` you wrote in the attribute is the context, so it appears as `__Contex
 name the surrounding macro inserted. Writing `#[use_provider(InnerCalculator: AreaCalculator)]` is
 therefore exactly equivalent to writing `where InnerCalculator: AreaCalculator<Self>` by hand.
 
-On a [`#[cgp_fn]`](../macros/cgp_fn.md) the same insertion happens, and because that macro's
-implementation is written *for* the context the bound reads with `Self` directly:
+On a [`#[cgp_fn]`](../macros/cgp_fn.md) the same insertion happens. Because that macro's implementation
+is written *for* the context, the bound reads with `Self` directly:
 
 ```rust
 impl<__Context__> RectArea for __Context__
@@ -244,11 +244,12 @@ which the attribute inserts.
 
 Those productions carry the restrictions that account for every parse failure this attribute produces.
 **`ProviderBound` is a path with plain generic arguments**, not a full `TypeParamBound`, so a turbofish
-or an associated-type binding in that position does not parse; a bound of that shape belongs in the
+or an associated-type binding in that position does not parse. A bound of that shape belongs in the
 block's own `where` clause. And **the argument holds exactly one provider**, because the `+`-separated
 bound list runs to the end of the attribute, so a comma after the first pair lands where a `+` was
-expected. That makes this attribute the one exception to the comma-separated convention its
-siblings follow: bind several inner providers by stacking one attribute each. See [Common Mistakes](#common-mistakes).
+expected. That makes this attribute the one exception to the comma-separated convention its siblings
+follow: bind several inner providers by stacking one attribute each. See
+[Common Mistakes](#common-mistakes).
 
 ## Common Mistakes
 
@@ -264,10 +265,10 @@ error: expected `+`
 
 Use one attribute per provider instead. This is the opposite of the convention for
 [`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), which do take comma-separated lists, so the habit
-transfers wrongly.
+from those attributes leads to this error.
 
-**The provider and the trait are both required.** The attribute accepts no bare form naming a provider
-alone, and omitting the bound reports the missing colon:
+**The provider and the trait are both required.** The attribute does not accept a bare provider name,
+and omitting the bound reports the missing colon:
 
 ```text
 error: expected `:`
@@ -279,7 +280,7 @@ error: expected `:`
 **The attribute does not rewrite call sites.** It never turns `self.area()` into
 `InnerCalculator::area(self)`, so a body that calls the method on `self` compiles but does something
 different: it dispatches through the context's own wiring rather than through the parameter. When the
-intent is to use the inner implementation, spell out the associated-function call.
+intent is to use the inner implementation, write the associated-function call.
 
 ## Related constructs
 
@@ -289,7 +290,7 @@ intent is to use the inner implementation, spell out the associated-function cal
 - [`UseContext`](../providers/use_context.md) — the usual default for an inner-provider parameter.
 - [`delegate_components!`](../macros/delegate_components.md) — where a composed wrapper is wired.
 - [`check_components!`](../macros/check_components.md) — its `#[check_providers(...)]` form checks each
-  layer of a nested stack separately, which is how a broken layer is localized.
+  layer of a nested stack separately, which localizes a broken layer.
 
 The ideas behind it:
 

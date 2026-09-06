@@ -17,14 +17,14 @@ against:
 #[uses(RectangleArea)]
 ```
 
-That reads as *this implementation uses the `RectangleArea` capability*, the same thing a `use`
-statement means for a name, and the body can then call `self.rectangle_area()` as though the capability
-had been imported. It is the consumer-side counterpart to [`#[use_provider]`](use_provider.md): where
-`#[use_provider]` imports a provider trait a named provider must satisfy for the context, `#[uses]`
-imports a trait the context itself must satisfy.
+That reads as *this implementation uses the `RectangleArea` capability*, the same meaning a `use`
+statement has for a name. The body can then call `self.rectangle_area()` as though it had imported
+the capability. `#[uses]` is the consumer-side counterpart to [`#[use_provider]`](use_provider.md).
+`#[use_provider]` imports a provider trait that a named provider must satisfy for the context, whereas
+`#[uses]` imports a trait that the context itself must satisfy.
 
 The requirement stays private to the implementation. A caller who depends on the capability never sees
-it and never has to repeat it, which is the point of declaring the dependency where the implementation
+it and never has to repeat it. That is the point of declaring the dependency where the implementation
 lives rather than on its public interface. Prefer `#[uses]` over a hand-written bound. The equivalent
 `where` clause is the older form you meet in existing code, and [Under the hood](#under-the-hood)
 shows that the two desugar identically.
@@ -42,17 +42,17 @@ Each entry is a capability, optionally with type arguments: a bare `RectangleAre
 `Self: RectangleArea`, and `CanCompute<Code, Input>` becomes `Self: CanCompute<Code, Input>`.
 
 **The trait need not be a CGP construct.** `#[uses(Display)]` and `#[uses(AsRef<[u8]>)]` are accepted and
-preferred over the equivalent hand-written clause: the attribute only cares that the bound is one a
+preferred over the equivalent hand-written clause. The attribute only requires that the bound is one a
 context can satisfy, so an ordinary Rust trait imports exactly as a capability does.
 
-**Prefer one attribute carrying every dependency**, as in `#[uses(RectangleArea, Display)]`, since a
-single list reads as a single set of requirements. Entries may also be split across several
-`#[uses(...)]` attributes on the same item, and they accumulate into one bound, but reach for a second
-attribute only when there is a reason rather than by default.
+**Prefer one attribute carrying every dependency**, as in `#[uses(RectangleArea, Display)]`, because a
+single list reads as a single set of requirements. You may also split entries across several
+`#[uses(...)]` attributes on the same item, and the macro merges them into one bound. Use a second
+attribute only when there is a reason.
 
 `#[uses(...)]` is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md) and on
-[`#[cgp_impl]`](../macros/cgp_impl.md). In both it imports into the thing being defined, and it does not
-care how the imported capability was itself produced.
+[`#[cgp_impl]`](../macros/cgp_impl.md). In both, it imports into the item being defined, and it does not
+matter how the imported capability was itself produced.
 
 ### Bounds beyond the simple form
 
@@ -108,7 +108,7 @@ impl AreaCalculator {
 }
 ```
 
-This provider is a two-line adapter: it satisfies the `AreaCalculator` component by deferring to whatever
+This provider is a short adapter: it satisfies the `AreaCalculator` component by calling whatever
 `rectangle_area` computes. Any context with the fields that capability needs can wire it.
 
 ## When to use it
@@ -158,8 +158,8 @@ where
 }
 ```
 
-That asymmetry is the mechanism rather than a detail: callers name `DescribeArea`, and it says nothing
-about `BaseArea` or `Display`, so a caller bounding on it inherits no requirement to pass on. Writing
+That asymmetry is the whole mechanism. Callers name `DescribeArea`, which says nothing about `BaseArea`
+or `Display`, so a caller bounding on it does not inherit a requirement to pass on. Writing
 `#[uses(BaseArea, Display)]` is therefore exactly equivalent to writing
 `where Self: BaseArea + Display` on the function, and the two desugar identically.
 
@@ -190,9 +190,9 @@ to write.
 
 ## Common Mistakes
 
-**Naming a provider trait instead of a consumer trait does not work**, and it is the most likely way to
-reach for `#[uses]` when you actually wanted [`#[use_provider]`](use_provider.md). A provider trait
-carries an explicit context parameter, and `#[uses]` does not fill it in, so the bound is incomplete:
+**Naming a provider trait instead of a consumer trait does not work**, and it is the most common way to
+write `#[uses]` when you wanted [`#[use_provider]`](use_provider.md). A provider trait carries an
+explicit context parameter, and `#[uses]` does not fill it in, so the bound is incomplete:
 
 ```text
 error[E0107]: missing generics for trait `AreaCalculator`
@@ -205,8 +205,8 @@ note: trait defined here, with 1 generic parameter: `__Context__`
 
 The `__Context__` in that note points to the mistake. Depend on the **consumer** trait, as in
 `#[uses(CanCalculateArea)]`, when you want "whatever this context has wired", which is almost always the
-case. Use [`#[use_provider]`](use_provider.md) when you genuinely mean a named implementation, and it
-will supply the missing argument.
+case. Use [`#[use_provider]`](use_provider.md) when you mean a named implementation, and it will supply
+the missing argument.
 
 ## Related constructs
 

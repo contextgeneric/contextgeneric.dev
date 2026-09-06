@@ -15,24 +15,23 @@ Generate the `UseDelegate` dispatcher impl for a component. Superseded by the `o
 older way to choose an implementation per type. A component no longer needs this attribute to be
 dispatched on a type parameter: the `open` statement of
 [`delegate_components!`](../macros/delegate_components.md) does the same job through machinery every
-component already has, with no separate table and no wrapper.
+component already has, without a separate table or a wrapper.
 
-**Prefer `open` for anything new.** This page is here because you will meet the older form, including in
+**Prefer `open` for anything new.** This page exists because you will meet the older form, including in
 CGP's own error and handler components, which are still defined with this attribute, and because a
-component that keeps it stays compatible with existing wiring. It is expected to be deprecated once
-`open` is shown to cover every dispatch case.
+component that keeps it stays compatible with existing wiring. The project expects to deprecate the
+attribute once `open` is shown to cover every dispatch case.
 
 :::
 
 ## Overview
 
-A component generic over a type parameter usually wants a different implementation per value of it:
-`Rectangle` handled one way, `Circle` another. Something has to look at the type and pick. Written by
-hand, that dispatcher is an implementation of the provider trait that reads a lookup table, finds the
-entry for the type, and forwards every method to it. That code is mechanical, identical in shape for
-every component, differing only in which parameter is the key.
-
-`#[derive_delegate]` generates it:
+`#[derive_delegate]` generates the dispatcher for a component that is generic over a type parameter.
+Such a component usually wants a different implementation per value of the parameter: `Rectangle`
+handled one way, `Circle` another. Something has to look at the type and pick. Written by hand, that
+dispatcher is an implementation of the provider trait that reads a lookup table, finds the entry for the
+type, and forwards every method to it. That code is mechanical and identical in shape for every
+component, differing only in which parameter is the key. The attribute writes it for you:
 
 ```rust
 #[cgp_component(AreaCalculator)]
@@ -42,15 +41,15 @@ pub trait CanCalculateArea<Shape> {
 }
 ```
 
-A **context**, the type the capability runs against, which also owns the wiring, then points the
-component at [`UseDelegate`](../providers/use_delegate.md) over a table naming one implementation per
-shape, and the generated dispatcher does the lookup.
+A **context** then points the component at [`UseDelegate`](../providers/use_delegate.md) over a table
+naming one implementation per shape, and the generated dispatcher does the lookup. (The context is the
+type the capability runs against, and it also owns the wiring.)
 
 `open` replaced this because the indirection turned out to be unnecessary. Every
 [`#[cgp_component]`](../macros/cgp_component.md) already generates a
-[`RedirectLookup`](../providers/redirect_lookup.md) impl, and `open` routes through that instead, so the
-per-type entries live on the context itself, the wiring names no second table type, and the component
-needs no attribute at all.
+[`RedirectLookup`](../providers/redirect_lookup.md) impl, and `open` routes through that instead. So the
+per-type entries live on the context itself, the wiring does not name a second table type, and the
+component does not need an attribute.
 
 ## Usage
 
@@ -69,8 +68,8 @@ once:
 ```
 
 **To dispatch on several parameters independently, repeat the attribute**, one per dispatcher. Each names
-its own wrapper type, and only the parameter in that wrapper's brackets is used as its key. The rest flow
-through unchanged:
+its own wrapper type, and the macro uses only the parameter in that wrapper's brackets as its key. The
+rest flow through unchanged:
 
 ```rust
 #[cgp_component(Computer)]
@@ -84,7 +83,7 @@ pub trait CanCompute<Code, Input> {
 ```
 
 `UseDelegate` is the wrapper CGP provides, but the machinery is not tied to it. Any struct of the same
-shape works, which is how you add a second, independent dispatcher: a user-defined
+shape works, so you add a second, independent dispatcher by defining your own wrapper. A user-defined
 `pub struct UseInputDelegate<Components>(pub PhantomData<Components>);` is all the second line above
 needs.
 
@@ -155,13 +154,14 @@ delegate_components! {
 }
 ```
 
-This form needs no wrapper, no second table type, and nothing on the component. The two forms dispatch
-on the same parameter and resolve to the same implementations.
+This form does not need a wrapper, a second table type, or an attribute on the component. The two forms
+dispatch on the same parameter and resolve to the same implementations.
 
 ## When to use it
 
 **Do not add `#[derive_delegate]` to a new component.** Use the `open` statement of
-[`delegate_components!`](../macros/delegate_components.md), which needs no attribute and no table type.
+[`delegate_components!`](../macros/delegate_components.md), which needs neither an attribute nor a table
+type.
 
 A few situations still involve the attribute, and only the dispatcher that `open` cannot express is a
 reason to write it.
@@ -204,11 +204,13 @@ names something that is itself a provider for that `Shape`, and the method simpl
 same trait ordinary wiring is made of, which is why you write the table with
 [`delegate_components!`](../macros/delegate_components.md) like any other.
 
-The tuple key and the reserved generic names are worth recognizing in the real output. **The key is
-wrapped in a tuple**, as `DelegateComponent<(Shape), …>`, so that a single-parameter key and a
-multi-parameter one compose uniformly: a `UseDelegate<(Code, Input)>` declaration produces
-`DelegateComponent<(Code, Input), …>` with no other change. And the generics carry reserved names: the
-table is `__Components__` and the looked-up entry `__Delegate__`, alongside the provider trait's own
+The parenthesized key and the reserved generic names are worth recognizing in the real output. **The
+macro wraps the key list in parentheses**, so a multi-parameter key becomes a tuple: a
+`UseDelegate<(Code, Input)>` declaration produces `DelegateComponent<(Code, Input), …>` with no other
+change. With one parameter, the parentheses in `DelegateComponent<(Shape), …>` are only grouping, and
+Rust reads the key as the bare `Shape`. That is why the table's entries are written as
+`Rectangle: RectangleArea` rather than as one-element tuples. And the generics carry reserved names:
+the table is `__Components__` and the looked-up entry `__Delegate__`, alongside the provider trait's own
 `__Context__`.
 
 **A component's supertraits carry into the dispatcher.** The provider trait records each supertrait as a
@@ -218,8 +220,8 @@ appears here too, so a component declaring an error type through
 `__Context__: HasErrorType`.
 
 When several `#[derive_delegate]` attributes are present, the macro generates one impl per attribute,
-each keyed on its own parameter and otherwise identical. The two are independent, so a context may dispatch on either
-or nest one table inside the other.
+each keyed on its own parameter and otherwise identical. The impls are independent, so a context may
+dispatch on either or nest one table inside the other.
 
 ## Formal grammar
 
@@ -238,9 +240,9 @@ KeyParams          -> IDENTIFIER
 Both parts are required. `Wrapper` is a bare identifier rather than a path, so a wrapper reached through a
 module path has to be imported first. `KeyParams` are **identifiers**, not types: each must name a generic
 parameter the trait declares, and a type expression such as `Vec<u8>` in that position does not parse. The
-parenthesized form must list at least one parameter (an empty `()` is rejected with *expect non-empty
-tuple list of identifiers in use_delegate_spec*), and a single parameter written bare is keyed the same way
-a one-element tuple would be. The attribute may be repeated, once per dispatcher.
+parenthesized form must list at least one parameter (the parser rejects an empty `()` with *expect
+non-empty tuple list of identifiers in use_delegate_spec*), and a single parameter written bare is keyed
+the same way a one-element list would be. The attribute may be repeated, once per dispatcher.
 
 ## Common Mistakes
 
@@ -262,7 +264,7 @@ there is nothing for it to do.
 `UseDelegate` table is a coherence conflict, because each produces its own table entry for that key. A
 wiring entry expands to two impls, and both of them collide, so the compiler reports the conflict twice, once
 for `IsProviderFor` and once for `DelegateComponent`. The `DelegateComponent` report is the readable
-one, since its trait argument names the component at issue:
+one, because its trait argument names the component at issue:
 
 ```text
 error[E0119]: conflicting implementations of trait `DelegateComponent<AreaCalculatorComponent>`

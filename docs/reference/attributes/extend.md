@@ -18,20 +18,20 @@ must also satisfy it, and every caller may rely on it.
 #[extend(HasName)]
 ```
 
-**`#[extend]` is the `pub use` to `#[uses]`'s `use`**, which is the clearest way to tell the pair apart.
-Both take the same syntax and both read as imports. But `#[uses]` imports a capability for the
-implementation's own use and keeps it out of sight, where `#[extend]` re-exports it as part of the
-contract.
+**`#[extend]` relates to `#[uses]` as `pub use` relates to `use`.** This comparison is the clearest way
+to tell the pair apart. Both take the same syntax and both read as imports. But `#[uses]` imports a
+capability for the implementation's own use and keeps it private, whereas `#[extend]` re-exports it as
+part of the contract.
 
-That framing is also why `#[extend]` is preferred over Rust's native supertrait syntax on a
+The same comparison explains why CGP prefers `#[extend]` over Rust's native supertrait syntax on a
 [`#[cgp_component]`](../macros/cgp_component.md). Writing `pub trait CanGreet: HasName` reads as
 inheritance from a parent, an is-a relationship that a CGP supertrait is not. `#[extend(HasName)]` reads
 as importing a capability the trait passes on, which is the accurate description. The two generate the
 same trait, so this is a choice about how the definition reads.
 
-On [`#[cgp_fn]`](../macros/cgp_fn.md) the attribute is not merely preferred but necessary. The `#[cgp_fn]`
+On [`#[cgp_fn]`](../macros/cgp_fn.md) the attribute is necessary, not only preferred. The `#[cgp_fn]`
 macro treats a `where` clause you write as an implementation detail and never puts it on the generated
-trait, so you cannot spell a supertrait by hand. `#[extend]` is the only mechanism for one.
+trait, so you cannot write a supertrait by hand. `#[extend]` is the only way to add one.
 
 ## Usage
 
@@ -47,17 +47,17 @@ them across attributes, and they accumulate. Prefer one attribute carrying the w
 [`#[uses]`](uses.md).
 
 The attribute is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md) and on
-[`#[cgp_component]`](../macros/cgp_component.md). It is **not** available on
-[`#[cgp_impl]`](../macros/cgp_impl.md), which has no trait definition of its own to attach a supertrait to.
-The supertraits belong to the component's trait, and a provider states its private needs with
-[`#[uses]`](uses.md) instead.
+[`#[cgp_component]`](../macros/cgp_component.md). The macro does **not** accept it on
+[`#[cgp_impl]`](../macros/cgp_impl.md), because a provider does not define a trait that a supertrait
+could attach to. The supertraits belong to the component's trait, and a provider states its private needs
+with [`#[uses]`](uses.md) instead.
 
 ### When the supertrait supplies a type
 
 If the reason for the supertrait is that the trait's signatures name a type the other component provides
-(an error type, a scalar, a runtime), reach for [`#[use_type]`](use_type.md) instead. It adds the
-supertrait *and* rewrites bare mentions of the type into their fully qualified form, so the signature
-reads `Result<String, Error>` rather than `Result<String, <Self as HasErrorType>::Error>`:
+(an error type, a scalar, a runtime), use [`#[use_type]`](use_type.md) instead. It adds the supertrait
+*and* rewrites bare mentions of the type into their fully qualified form, so the signature reads
+`Result<String, Error>` rather than `Result<String, <Self as HasErrorType>::Error>`:
 
 ```rust
 #[cgp_component(Loader)]
@@ -94,7 +94,7 @@ pub fn full_label(&self) -> String {
 }
 ```
 
-The body can call both getters, and so can anyone holding a `T: FullLabel`, which is the difference from
+The body can call both getters, and so can anyone holding a `T: FullLabel`. That is the difference from
 `#[uses]`. A function that takes a labelled value can format its name without asking for `HasName`
 separately.
 
@@ -113,9 +113,9 @@ available, and so may every caller.
 
 ## When to use it
 
-**Reach for `#[extend]` when callers of the trait should be able to rely on the capability too**, and for
-a capability supertrait on a `#[cgp_component]` in preference to native `:` syntax. Reach for something
-else when the requirement belongs elsewhere, and the choice turns on where it should be visible.
+**Reach for `#[extend]` when callers of the trait must be able to rely on the capability too**, and for
+a capability supertrait on a `#[cgp_component]` in preference to native `:` syntax. Use something else
+when the requirement belongs elsewhere. The choice turns on where the requirement should be visible.
 
 - **The implementation needs it privately.** Use [`#[uses]`](uses.md). This is the common case by a wide
   margin: most dependencies are private to the implementation, and putting one on the trait forces it on
@@ -126,15 +126,15 @@ else when the requirement belongs elsewhere, and the choice turns on where it sh
   on `Self`. Use [`#[extend_where]`](extend_where.md), which puts it on the generated trait's own `where`
   clause.
 
-A supertrait widens the contract permanently, and that is the cost to weigh before promoting anything.
-You cannot later narrow it without breaking every implementor, and it demands the capability from
-contexts that only ever call the one method the trait actually declares. Prefer `#[uses]` unless callers
-genuinely need the guarantee.
+A supertrait widens the contract permanently, and that cost decides whether to promote a requirement.
+You cannot later remove it without breaking every implementor, and it demands the capability from
+contexts that only call the one method the trait declares. Prefer `#[uses]` unless callers need the
+guarantee.
 
 ## Under the hood
 
-On a `#[cgp_fn]`, each entry lands in **two** places: as a supertrait of the generated trait, and as a
-`Self:` predicate on the generated implementation. From this input:
+On a `#[cgp_fn]`, each entry lands on both the generated trait, as a supertrait, and the generated
+implementation, as a `Self:` predicate. From this input:
 
 ```rust
 #[cgp_fn]
@@ -164,7 +164,7 @@ Compare [`#[uses]`](uses.md), which emits only the predicate and leaves the trai
 That single difference is the whole of the distinction.
 
 On a `#[cgp_component]` the supertrait goes on the consumer trait, and it also joins the `where` clause of
-the generated consumer blanket implementation, since that implementation can only apply where the
+the generated consumer blanket implementation, because that implementation can only apply where the
 supertrait holds:
 
 ```rust
@@ -183,10 +183,10 @@ where
 }
 ```
 
-Here the result is identical to `pub trait CanGreet: HasName`, so on a component
-`#[extend]` generates nothing the language cannot already spell. It remains the preferred form because
-it presents the bound as an import rather than as inheritance, and because it keeps the `use`/`pub use`
-pairing with `#[uses]` reading consistently across both macros.
+Here the result is identical to `pub trait CanGreet: HasName`, so on a component `#[extend]` generates
+only what the language can already express. It remains the preferred form because it presents the bound
+as an import rather than as inheritance, and because it keeps the `use`/`pub use` pairing with `#[uses]`
+reading consistently across both macros.
 
 ## Formal grammar
 
@@ -204,8 +204,8 @@ differ in where the bounds land, not in the grammar.
 
 ## Common Mistakes
 
-**On a `#[cgp_impl]` the attribute is not recognized at all**, rather than being accepted and ignored.
-Nothing consumes it, so it falls through to the compiler as an unknown attribute:
+**On a `#[cgp_impl]` the compiler does not recognize the attribute**, rather than accepting and ignoring
+it. The macro does not consume it, so it reaches the compiler as an unknown attribute:
 
 ```text
 error: cannot find attribute `extend` in this scope
@@ -213,8 +213,8 @@ error: cannot find attribute `extend` in this scope
 
 Expect a second error alongside it, because the bound was never added. The body's calls to the capability
 then fail with `E0599`, reporting that the method exists but its trait bounds were not satisfied. Both
-errors have the same cause: move the requirement to [`#[uses]`](uses.md), or onto the component's trait
-where supertraits belong.
+errors have the same cause, and one fix removes both: move the requirement to [`#[uses]`](uses.md), or
+onto the component's trait where supertraits belong.
 
 **A supertrait cannot be narrowed later.** Because every implementor and every caller may now rely on it,
 removing an entry from `#[extend]` is a breaking change in a way removing one from `#[uses]` is not. This

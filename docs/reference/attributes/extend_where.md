@@ -9,33 +9,33 @@ Add `where` predicates to a generated trait's own definition, not just to its im
 
 ## Overview
 
-A [`#[cgp_fn]`](../macros/cgp_fn.md) treats the `where` clause you write on the function as an
-implementation detail: the bounds land on the generated implementation and never appear on the generated
-trait. That default keeps a capability's requirements out of sight of its callers, and it is almost
-always right.
+`#[extend_where]` moves a `where` predicate onto the trait that a [`#[cgp_fn]`](../macros/cgp_fn.md)
+generates, so the predicate becomes a condition of naming the trait at all. By default, `#[cgp_fn]`
+treats the `where` clause you write on the function as an implementation detail: the bounds land on the
+generated implementation and never appear on the generated trait. That default keeps a capability's
+requirements private to its implementation, and it is almost always right.
 
-The cost is that an unsatisfiable requirement becomes invisible. A bound on the implementation only
-decides which **contexts** the implementation covers, a context being the type the capability runs
-against, which supplies the values it needs as its fields. So naming the capability for a type that can
-never satisfy it is not an error. It is a bound nobody can prove, accepted quietly, and the complaint
-arrives later and somewhere else. `#[extend_where]` moves the predicate onto the trait, where it becomes a
-condition of naming the trait at all:
+The cost of that default is that an unsatisfiable requirement becomes invisible. A bound on the
+implementation only decides which **contexts** the implementation covers. (A context is the type the
+capability runs against, and it supplies the values the capability needs as its fields.) So the compiler
+accepts a caller that names the capability for a type that can never satisfy it. The bound stays
+unproven, and the error appears later, at a different place. `#[extend_where]` puts the predicate where
+the compiler checks it as soon as the trait is named:
 
 ```rust
 #[extend_where(Scalar: Clone)]
 ```
 
-Promoting a predicate does **not** hand it to callers, and the distinction is worth being exact about,
-because it is easy to get backwards. A trait's `where` clause is a precondition they must prove, not a
-guarantee they receive, so a caller naming the trait still writes the bound themselves. Promotion
-instead makes callers write the bound, and reports a wrong one against the trait rather than deferring
-it.
+Promoting a predicate does **not** give it to callers as a guarantee, and this distinction is easy to
+reverse. A trait's `where` clause is a precondition callers must prove, not a guarantee they receive. So a
+caller that names the trait still writes the bound itself, and the compiler reports a missing bound
+against the trait instead of deferring it.
 
 `#[extend_where]` is the `where`-clause sibling of [`#[extend]`](extend.md). Both put a requirement into
-the trait's public interface; they differ in position, and in what the reader gets. `#[extend]` adds a
-**supertrait**, a bound on `Self`, which callers do receive by elaboration. `#[extend_where]` adds a
-**predicate**, which can bound anything, most usefully one of the trait's own generic parameters, which
-a supertrait cannot reach.
+the trait's public interface. They differ in position, and in what the reader gets. `#[extend]` adds a
+**supertrait**, a bound on `Self`, which callers do receive, because Rust elaborates a supertrait bound
+automatically. `#[extend_where]` adds a **predicate**, which can bound anything, most usefully one of the
+trait's own generic parameters, which a supertrait cannot reach.
 
 ## Usage
 
@@ -50,10 +50,10 @@ these are arbitrary predicates: a bound on any type in scope, including an assoc
 higher-ranked bound, or a lifetime bound. The macro adds each to the generated trait's `where` clause
 verbatim, and keeps it on the implementation as well.
 
-**`#[extend_where]` is supported only on [`#[cgp_fn]`](../macros/cgp_fn.md).** It has no meaning on
-[`#[cgp_impl]`](../macros/cgp_impl.md) or [`#[cgp_component]`](../macros/cgp_component.md), because in
-those the `where` clause you write is already part of the definition. Nothing needs promoting, so
-write the bound as an ordinary `where` clause directly.
+**Only [`#[cgp_fn]`](../macros/cgp_fn.md) supports `#[extend_where]`.** On
+[`#[cgp_impl]`](../macros/cgp_impl.md) or [`#[cgp_component]`](../macros/cgp_component.md) the `where`
+clause you write is already part of the definition, so there is nothing to promote. Write the bound as
+an ordinary `where` clause there.
 
 ## Examples
 
@@ -92,9 +92,9 @@ where
 }
 ```
 
-**Leave `Clone` on the implementation instead and that same function compiles**, with no diagnostic at
-all: `Ctx: Scale<NoClone>` is simply a bound no type can ever prove, and nothing says so until somebody
-tries to call `scale_it` with a concrete context. The attribute exists to remove that silence.
+**With `Clone` left on the implementation instead, that same function compiles** without a diagnostic.
+`Ctx: Scale<NoClone>` is then a bound that no type can prove, and the compiler says so only when somebody
+calls `scale_it` with a concrete context. The attribute exists to report that error earlier.
 
 A caller who *can* satisfy the predicate states it as usual, and cannot avoid stating it:
 
@@ -110,10 +110,10 @@ where
 
 ## When to use it
 
-**Reach for `#[extend_where]` when a predicate is part of what the capability means**, and you want it
-enforced where the trait is named rather than silently narrowing which contexts the implementation covers.
-That is a real but uncommon need, and the default of leaving bounds on the implementation is right for
-almost everything.
+**Reach for `#[extend_where]` when a predicate is part of what the capability means**, and you want the
+compiler to enforce it where the trait is named, rather than letting it narrow which contexts the
+implementation covers without a report. That is a real but uncommon need, and the default of leaving
+bounds on the implementation is right for almost everything.
 
 The useful test is who the bound is *about*. A bound describing how the body computes its answer belongs on
 the implementation. A bound describing what the capability requires of its own type parameters, something
@@ -122,14 +122,15 @@ that would be part of the signature if you were writing the trait by hand, belon
 Other constructs carry the requirements that belong elsewhere.
 
 - **A bound on `Self`** is a supertrait, so use [`#[extend]`](extend.md). `#[extend_where]` can express it,
-  but a supertrait reads as what it is, and unlike a predicate it *is* handed to callers by elaboration.
+  but a supertrait reads as what it is, and unlike a predicate Rust *does* hand it to callers by
+  elaboration.
 - **A private requirement**, the overwhelmingly common case, belongs in the function's own `where` clause,
   or in [`#[uses]`](uses.md) when it is a capability.
 - **An abstract type pinned to a concrete one** is [`#[use_type]`](use_type.md)'s equality form, which adds
   the bound and lets the signature name the type as a bare word.
 
-Do not reach for it to spare callers a bound: it has the opposite effect. If the goal is that holding the
-capability should imply something, a supertrait does that, and the bound has to be on `Self` for it to work.
+Do not use it to spare callers a bound, because it has the opposite effect. If holding the capability
+should imply something, use a supertrait, which requires the bound to be on `Self`.
 
 ## Under the hood
 
@@ -154,14 +155,14 @@ where
 }
 ```
 
-The trait carries only the promoted predicate; the function's own bound is absent from it, which is the
+The trait carries only the promoted predicate. The function's own bound is absent from it, which is the
 default this attribute overrides.
 
 The implementation carries all of them, and their **order is fixed**: the function's own `where` clause
 first, then whatever the attributes contribute, then the
 [`HasField`](../traits/field-access/has_field.md) bounds from [`#[implicit]`](implicit.md) arguments,
-which are always appended last. That order is worth knowing when reading a long `where` clause in an
-expansion, since it tells you where each bound came from.
+which are always appended last. That order helps when you read a long `where` clause in an expansion,
+because it tells you where each bound came from.
 
 The context parameter is literally `__Context__` in the emitted code and appears as `Self` inside the
 implementation.
@@ -198,11 +199,12 @@ error[E0277]: the trait bound `Scalar: Clone` is not satisfied
 note: required by a bound in `Scale`
 ```
 
-Adding `Scalar: Clone` to the caller's own `where` clause is the fix, and is expected rather than a
+The fix is to add `Scalar: Clone` to the caller's own `where` clause. This is the expected use, not a
 workaround.
 
-**On any host other than `#[cgp_fn]` the attribute is not recognized**, rather than accepted and ignored.
-Nothing consumes it, so it reaches the compiler as an unknown attribute:
+**On any host other than `#[cgp_fn]` the compiler does not recognize the attribute**, rather than
+accepting and ignoring it. The macro does not consume it, so it reaches the compiler as an unknown
+attribute:
 
 ```text
 error: cannot find attribute `extend_where` in this scope

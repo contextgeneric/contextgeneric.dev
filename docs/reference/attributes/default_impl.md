@@ -9,10 +9,11 @@ Register a provider as a namespace's default for a key.
 
 ## Overview
 
-A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context**, the
-type the capability runs against, can opt into and then selectively override. Ordinarily you write a
-namespace's entries in its own body. `#[default_impl(...)]` lets a *provider* register itself instead,
-at the point where it is defined:
+`#[default_impl(...)]` lets a *provider* register itself as a [namespace](/docs/concepts/namespaces)'s
+default for a key, at the point where the provider is defined. A namespace is a reusable table of default
+wirings that a **context** can opt into and then override entry by entry. (The context is the type the
+capability runs against.) Ordinarily you write a namespace's entries in its own body. This attribute
+moves one entry onto the provider:
 
 ```rust
 #[cgp_impl(new ShowString)]
@@ -45,14 +46,14 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 }
 ```
 
-That rule is worth remembering, because the trait's own parameter names suggest the opposite
-arrangement (see [`DefaultImpls1`](../traits/namespace/default_impls1.md#the-one-thing-to-get-right)).
+Remember that rule, because the trait's own parameter names suggest the opposite arrangement (see
+[`DefaultImpls1`](../traits/namespace/default_impls1.md#the-one-thing-to-get-right)).
 
 **The key is a type or a `@`-path.** A type key, as above, is the usual form for a per-type default:
 the type is the value of the component's dispatch parameter, and the component is named inside the
 lookup trait's arguments. A path key, in [`Path!`](../macros/path.md)'s syntax, binds the provider at a
 full path inside the namespace. Its common use is a prefixed component's own path, so that a context
-which joins the namespace resolves the component with no `for` loop at all:
+which joins the namespace resolves the component without any `for` loop:
 
 ```rust
 #[cgp_component(Greeter)]
@@ -70,21 +71,21 @@ impl Greeter {
 }
 ```
 
-Unlike [`#[prefix]`](./prefix.md), the macro appends nothing to a path key. You write the whole path,
-marker included, and any dispatch type after it, as in `@test.ShowImplComponent.u32`. A path key
+Unlike [`#[prefix]`](./prefix.md), the macro does not append anything to a path key. You write the whole
+path, marker included, and any dispatch type after it, as in `@test.ShowImplComponent.u32`. A path key
 cannot declare generic parameters, and it takes neither of the `[…]` and `{…}` grouping forms a
 [`delegate_components!`](../macros/delegate_components.md) key allows.
 
 **Repeat the attribute to register into several tables**, one attribute per table. The argument
 itself is not comma-separated: each attribute carries exactly one `Key in NamespacePath` pair.
 
-**The path may name any trait**, not only the three CGP ships. A trait of your own with the right shape
-works identically, which is why [`DefaultImpls2`](../traits/namespace/default_impls2.md) needed no new construct to
-be usable.
+**The path may name any trait**, not only the ones CGP ships. A trait of your own with the right shape
+works the same way. That is why [`DefaultImpls2`](../traits/namespace/default_impls2.md) did not need a
+new construct to be usable.
 
-The three built-in targets are [`DefaultNamespace`](../traits/namespace/default_namespace.md) for a component-only
-key, [`DefaultImpls1`](../traits/namespace/default_impls1.md) for a per-type default (the usual choice), and
-[`DefaultImpls2`](../traits/namespace/default_impls2.md) for a two-type key.
+The built-in targets are [`DefaultNamespace`](../traits/namespace/default_namespace.md) for a
+component-only key, [`DefaultImpls1`](../traits/namespace/default_impls1.md) for a per-type default (the
+usual choice), and [`DefaultImpls2`](../traits/namespace/default_impls2.md) for a two-type key.
 
 ## Examples
 
@@ -161,26 +162,27 @@ with `GreetHello`.
 
 ## When to use it
 
-**Reach for it when a provider is the natural default for its key and you want that recorded where the
-provider is written.** The alternatives differ in where the entry lives.
+**Reach for it when a provider is the natural default for its key and you want that fact recorded where
+the provider is written.** The alternatives differ in where the entry lives.
 
 - **Use it** when per-type defaults accumulate (a conversion, a formatter, a codec with one provider per
   type), because then the alternative is a namespace body that has to be edited every time a type is
   added.
 - **Write the entry in the namespace body instead** when the defaults belong together as a set, or when
   the provider is one of several candidates and none is obviously *the* default. A
-  [`cgp_namespace!`](../macros/cgp_namespace.md) body reads as a table; scattered attributes do not.
-- **Do not reach for a namespace at all** until the top-level wiring is long enough to be a problem.
+  [`cgp_namespace!`](../macros/cgp_namespace.md) body reads as a table, whereas scattered attributes do
+  not.
+- **Do not use a namespace at all** until the top-level wiring is long enough to be a problem.
 
-**One constraint decides where the attribute may be written, and it is Rust's orphan rule rather than
-anything CGP chose.** The emitted impl is `impl Namespace<..> for Key`, and Rust accepts it when the
-crate owns the namespace trait, or when a local type appears in the impl header ahead of the table
-parameter. That local type may be the key itself, or a component named inside the namespace path, so a
-crate that owns `ShowImplComponent` may write `String in DefaultImpls1<ShowImplComponent>` against the
-foreign `DefaultImpls1`. A path key is a `PathCons` list, which is never a local type even when it
-contains a local marker, so a [`#[prefix]`](./prefix.md)-ed component's path can be registered **only
-in the namespace's own crate**. Wiring that must live downstream goes in the namespace body of the crate
-that owns it, or into a local namespace that inherits the foreign one.
+**Rust's orphan rule, not a CGP choice, decides where you may write the attribute.** The emitted impl is
+`impl Namespace<..> for Key`, and Rust accepts it when the crate owns the namespace trait, or when a
+local type appears in the impl header ahead of the table parameter. That local type may be the key
+itself, or a component named inside the namespace path, so a crate that owns `ShowImplComponent` may
+write `String in DefaultImpls1<ShowImplComponent>` against the foreign `DefaultImpls1`. A path key is a
+`PathCons` list, which is never a local type even when it contains a local marker, so only **the
+namespace's own crate** can register a [`#[prefix]`](./prefix.md)-ed component's path. Wiring that must
+live downstream goes in the namespace body of the crate that owns it, or into a local namespace that
+inherits the foreign one.
 
 ## Under the hood
 
@@ -208,13 +210,14 @@ answers it.
 
 **The registration impl carries only the parameters naming the key and the provider, plus the table,
 never the provider's own `where` clause.** That is deliberate, and it lets the attribute work with
-ordinary providers: a provider whose bounds come from [`#[use_type]`](./use_type.md),
+ordinary providers. A provider whose bounds come from [`#[use_type]`](./use_type.md),
 [`#[uses]`](./uses.md), [`#[implicit]`](./implicit.md), or [`#[use_provider]`](./use_provider.md)
 registers cleanly, because those bounds stay on the provider's impl and its
-[`IsProviderFor`](../traits/wiring/is_provider_for.md) and are checked when a real context resolves it.
+[`IsProviderFor`](../traits/wiring/is_provider_for.md), and the compiler checks them when a real context
+resolves the provider.
 
-Consumption runs the other way. A `for <T, Provider> in DefaultImpls1<Component> { … }` loop inside
-[`delegate_components!`](../macros/delegate_components.md) emits a
+A context consumes a registration from the other side. A `for <T, Provider> in DefaultImpls1<Component> { … }`
+loop inside [`delegate_components!`](../macros/delegate_components.md) emits a
 [`DelegateComponent`](../traits/wiring/delegate_component.md) impl whose `where` clause projects the default:
 
 ```rust
@@ -243,7 +246,7 @@ NamespacePath   -> TypePath GenericArgs?
 `Key` is either a Rust `Type` or a `Path`, and the leading `@` tells them apart. A `Type` becomes the
 emitted impl's `Self`. A `Path` is [`Path!`](../macros/path.md)'s own production and lowers to a
 `PathCons` list in the same position. `NamespacePath` is the lookup trait with its leading generic
-arguments written out. The table parameter is appended by the macro and must not be given. Each attribute takes
+arguments written out. The macro appends the table parameter, so do not write it. Each attribute takes
 exactly one such argument, and the attribute may be repeated.
 
 ## Common Mistakes
@@ -255,12 +258,12 @@ and the trait's positions follow. The parameter names on
 **Do not write the table parameter.** The macro appends it, so supplying it yourself makes the path's
 arity wrong.
 
-**On a prefixed component it is confined to the namespace's crate**, by the orphan rule. This is not
-something to work around: put the wiring in the namespace body instead.
+**On a prefixed component it is confined to the namespace's crate**, by the orphan rule. Do not try to
+work around this. Put the wiring in the namespace body instead.
 
 **The lookup trait must be imported.** The emitted impl names it, so
 [`DefaultImpls1`](../traits/namespace/default_impls1.md) and [`DefaultImpls2`](../traits/namespace/default_impls2.md) need
-`use cgp::core::component::…`; [`DefaultNamespace`](../traits/namespace/default_namespace.md) is in the prelude.
+`use cgp::core::component::…`. [`DefaultNamespace`](../traits/namespace/default_namespace.md) is in the prelude.
 
 **A provider whose impl is generic cannot register a default.** The registration impl copies the
 provider impl's generic parameters but drops its `where` clause, so a parameter of the impl appears
@@ -289,11 +292,12 @@ error[E0119]: conflicting implementations of trait `DefaultImpls1<ShowImplCompon
    |                ^^^^^^ conflicting implementation for `String`
 ```
 
-**A registered default is a fallback, not an assignment.** A context's direct entry silently shadows it.
+**A registered default is a fallback, not an assignment.** A context's direct entry shadows it without
+a warning.
 
-**On the `#[cgp_impl(Self)]` form the registration is emitted with `Delegate = Self`.** That form does
-not build a provider, so the macro fills the delegate with `Self`, which inside the registration impl is
-the key itself. The attribute cannot be used sensibly there; leave it off.
+**On the `#[cgp_impl(Self)]` form the macro emits the registration with `Delegate = Self`.** That form
+does not build a provider, so the macro fills the delegate with `Self`, which inside the registration
+impl is the key itself. The attribute has no sensible use there, so leave it off.
 
 ## Related constructs
 
