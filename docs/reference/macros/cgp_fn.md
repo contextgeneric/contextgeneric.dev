@@ -21,17 +21,16 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 }
 ```
 
-Any struct with a `width` and a `height` can now call `.rectangle_area()`. There is no component to
-define, no provider to name, and no wiring table anywhere. The macro emits a trait and one
+Any struct with a `width` and a `height` can now call `.rectangle_area()`. You do not define a
+component, name a provider, or write a wiring table. The macro emits a trait and one
 [blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
 covering every context that satisfies the field requirements.
 
-That is the tradeoff it makes, and it is worth being explicit about. A
+The macro makes one tradeoff, and you should know it. A
 [`#[cgp_component]`](./cgp_component.md) supports many interchangeable implementations, one chosen per
 context, and this costs extra boilerplate. `#[cgp_fn]` supports exactly one implementation, the function
-body, and costs nothing. For the large share of capabilities that have one natural definition, that is
-the better choice, which is why `#[cgp_fn]` is the recommended place to start rather than a lesser form
-of the real thing.
+body, and costs nothing. Most capabilities have one natural definition, so `#[cgp_fn]` is the better
+choice for them and the recommended place to start, rather than a lesser form of the real thing.
 
 It is also the easiest introduction to CGP, because nothing in it is unfamiliar. A reader who
 understands functions and arguments can write a working capability without first meeting trait bounds,
@@ -45,10 +44,10 @@ form becomes the trait name: `rectangle_area` generates a `RectangleArea` trait 
 `rectangle_area` method.
 
 Almost every `#[cgp_fn]` takes `self` as its first parameter, because reading a field from the context
-is most of what these functions do, and a receiver is *required* the moment any parameter is
-`#[implicit]`. Omitting it is accepted, and produces a trait whose item is an associated function
-rather than a method; it is rarely what you want here, since a function that reads nothing from its
-context computes the same answer for every context that gets it.
+is most of what these functions do. A receiver is *required* as soon as any parameter is
+`#[implicit]`. The macro accepts a function without a receiver and produces a trait whose item is an
+associated function rather than a method. But you rarely want that here, because a function that reads
+nothing from its context computes the same answer for every context that gets it.
 
 Pass an identifier to override the trait name, which is useful when a verb-style name reads better
 than the function's:
@@ -65,19 +64,19 @@ argument and write through it.
 
 ### Implicit arguments
 
-An [`#[implicit]`](../attributes/implicit.md) parameter is removed from the method's signature and
-filled from a same-named field on the context instead. The parameter's *name* is the field name, and
-its *type* decides how the field is read: an owned type is cloned out, a `&str` is borrowed from a
-`String` field, and a plain `&T` is borrowed with no conversion. The full set of forms, including
+The macro removes an [`#[implicit]`](../attributes/implicit.md) parameter from the method's signature
+and fills it from a same-named field on the context instead. The parameter's *name* is the field name,
+and its *type* decides how the macro reads the field: it clones an owned type out, borrows a `&str`
+from a `String` field, and borrows a plain `&T` without conversion. The full set of forms, including
 options, slices, and the mutable variants, is on the [`#[implicit]`](../attributes/implicit.md) page.
 
-Because these parameters disappear from the signature, `rectangle_area` above is called with no
-arguments at all: `rect.rectangle_area()`.
+Because these parameters disappear from the signature, you call `rectangle_area` above without any
+arguments: `rect.rectangle_area()`.
 
 ### Generics, and where each bound lands
 
 A `#[cgp_fn]` splits its generics and its `where` clause deliberately, and knowing which goes where is
-most of what there is to learn about the macro.
+most of what you need to learn about the macro.
 
 | You write | It lands on |
 |---|---|
@@ -87,8 +86,8 @@ most of what there is to learn about the macro.
 | [`#[extend_where(...)]`](../attributes/extend_where.md) | Both the trait and the impl |
 
 By default, generics land on both the trait and the impl, and the `where` clause lands on the impl
-alone. This keeps a capability's requirements out of sight of its callers: a caller bounds on the
-clean trait, and the constraints the body actually needs stay one level down on the implementation:
+alone. This hides a capability's requirements from its callers: a caller bounds on the clean trait,
+and the constraints the body actually needs stay one level down on the implementation:
 
 ```rust
 #[cgp_fn]
@@ -100,13 +99,13 @@ where
 }
 ```
 
-`Scale<Scalar>` is the trait; `Scalar: Mul<Output = Scalar> + Copy` appears only on the impl.
+`Scale<Scalar>` is the trait, and `Scalar: Mul<Output = Scalar> + Copy` appears only on the impl.
 
 #### A type the caller should not name
 
 When the function needs a type that should be inferred rather than chosen, such as a database handle
-or a displayable value, declare it with `#[impl_generics(...)]`. The parameter goes on the impl alone, so
-the trait stays unparameterized and no caller mentions it:
+or a displayable value, declare it with `#[impl_generics(...)]`. The parameter goes on the impl alone,
+so the trait stays unparameterized and callers never mention it:
 
 ```rust
 #[cgp_fn]
@@ -116,15 +115,15 @@ pub fn describe(&self, #[implicit] name: &Name) -> String {
 }
 ```
 
-`Describe` has no type parameter. A context becomes eligible purely by carrying a `name` field of some
-`Display` type, and the type is resolved from that field.
+The `Describe` trait is not generic. A context becomes eligible purely by carrying a `name` field of
+some `Display` type, and the compiler resolves the type from that field.
 
 The cost is that the type is concealed rather than named. It exists only where a value of it flows
 through an implicit argument, so nothing else can refer to it, including this function's own
 signature. Naming it in a return type or an explicit parameter does not compile, as the
-[Common Mistakes](#common-mistakes) explain. When the type must be nameable, or when two capabilities have to agree
-that they mean the same type, promote it to an abstract type with [`#[cgp_type]`](./cgp_type.md) and
-import it with [`#[use_type]`](../attributes/use_type.md).
+[Common Mistakes](#common-mistakes) explain. When the type must be nameable, or when two capabilities
+have to agree that they mean the same type, promote it to an abstract type with
+[`#[cgp_type]`](./cgp_type.md) and import it with [`#[use_type]`](../attributes/use_type.md).
 
 ### Companion attributes
 
@@ -143,12 +142,12 @@ it depends on.
   `where` clause, for a bound callers need to see.
 - [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound when the
   function delegates to one.
-- [`#[async_trait]`](./async_trait.md) goes directly beneath `#[cgp_fn]` on an `async fn`. It is copied
-  onto both generated items, so the trait ends up declaring a lint-clean `-> impl Future`.
+- [`#[async_trait]`](./async_trait.md) goes directly beneath `#[cgp_fn]` on an `async fn`. The macro
+  copies it onto both generated items, so the trait ends up declaring a lint-clean `-> impl Future`.
 
 ## Examples
 
-Two capabilities, the second built on the first, and a context that gets both without wiring anything:
+A capability, another capability built on it, and a context that gets both without wiring anything:
 
 ```rust
 use cgp::prelude::*;
@@ -178,36 +177,36 @@ pub fn report(rect: &Rectangle) {
 ```
 
 `scaled_rectangle_area` calls `self.rectangle_area()` because `#[uses(RectangleArea)]` declared the
-dependency; it does not know or care how that capability is implemented. `Rectangle` derives
+dependency. It does not know or care how that capability is implemented. `Rectangle` derives
 [`HasField`](../derives/derive_has_field.md) and happens to carry the three fields the two functions
-read, and that is its entire qualification. There is no `delegate_components!` anywhere in this
-program, and adding one would change nothing.
+read, and that is its entire qualification. This program does not use `delegate_components!`
+anywhere, and adding one would change nothing.
 
 ## When to use it
 
-**Use `#[cgp_fn]` first.** When a capability has one natural definition, this is the form to
-write, and starting here costs nothing if that changes later: the trait keeps its name and its method,
-so promoting it to a [`#[cgp_component]`](./cgp_component.md) leaves every call site untouched. What
-you add at that point is the component, a named provider, and a line of wiring per context.
+**Use `#[cgp_fn]` first.** When a capability has one natural definition, this is the form to write.
+Starting here costs nothing if that changes later, because the trait keeps its name and its method, so
+promoting it to a [`#[cgp_component]`](./cgp_component.md) leaves every call site untouched. At that
+point you add the component, a named provider, and a line of wiring per context.
 
 Use something else in these cases:
 
 - **The capability needs a second implementation, chosen per context.**
-  [`#[cgp_component]`](./cgp_component.md) is for that, and no amount of `#[cgp_fn]` will get you
-  there: its blanket impl already covers every context, so there is nowhere for an alternative to live.
+  [`#[cgp_component]`](./cgp_component.md) is for that, and `#[cgp_fn]` cannot provide it: its
+  blanket impl already covers every context, so an alternative cannot coexist with it.
 - **The dependencies are traits rather than fields.** [`#[blanket_trait]`](./blanket_trait.md) builds
   the same kind of single-implementation, no-wiring capability from a trait with supertraits and
-  default method bodies. Use it when the body needs other capabilities; use `#[cgp_fn]`
-  when it needs values.
+  default method bodies. Use it when the body needs other capabilities, and use `#[cgp_fn]` when it
+  needs values.
 - **A generic must vary per call.** A generic parameter here goes on the trait rather than the method,
-  so it is fixed by whatever satisfies the bounds for a given context rather than chosen at each call
-  site. A capability that needs a per-call type parameter wants a hand-written blanket impl
-  or a component.
+  so whatever satisfies the bounds for a given context fixes it, rather than each call site choosing
+  it. A capability that needs a per-call type parameter needs a hand-written blanket impl or a
+  component instead.
 
-One decision inside the macro is worth making deliberately rather than by default: **where a type the
-body needs should live.** Start with `#[impl_generics]` while the type only ever flows through implicit
-arguments. It is shorter, needs no wiring, and reads as "this works with any `database` field of a
-compatible type". Move up to an [abstract type](./cgp_type.md) when the type must appear in the
+Make one decision inside the macro deliberately rather than by default: **where a type the body needs
+should live.** Start with `#[impl_generics]` while the type only ever flows through implicit
+arguments. It is shorter, does not need wiring, and reads as "this works with any `database` field of
+a compatible type". Move up to an [abstract type](./cgp_type.md) when the type must appear in the
 capability's own signature, or when two capabilities must agree that they mean the same one. Avoid a
 plain generic parameter on the function in both cases: it lands on the trait and makes every caller,
 and every intermediate capability built on it, declare the parameter and repeat its bounds whether
@@ -252,16 +251,17 @@ where
 }
 ```
 
-A few details of the real output are worth recognizing. The context type parameter is literally
-`__Context__`, a reserved name chosen so it cannot collide with one of yours, and it is referred to as
-`Self` inside the impl. [`Symbol!("width")`](./symbol.md) is a type-level string standing for the field
-name. The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and
-`cargo cgp expand` resugars it back to this. An *owned* implicit argument compiles to a trailing
-`.clone()`; a `&str` argument ends in `.as_str()` instead, and a plain `&T` in nothing at all.
+Learn to recognize a few details of the real output. The context type parameter is literally
+`__Context__`, a reserved name chosen so it cannot collide with one of yours, and the impl refers to
+it as `Self`. [`Symbol!("width")`](./symbol.md) is a type-level string standing for the field name.
+The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and `cargo cgp expand`
+resugars it back to this. An *owned* implicit argument compiles to a trailing `.clone()`. A `&str`
+argument ends in `.as_str()` instead, and a plain `&T` in nothing at all.
 
 The generics split shows up in the same impl. Given the `scale` function above, the generic goes on
 both items while the function's `where` bound stays on the impl, ordered *before* the implicit field
-bounds. Attribute-contributed predicates always come first, and the implicit ones are appended last:
+bounds. Attribute-contributed predicates always come first, and the macro appends the implicit ones
+last:
 
 ```rust
 pub trait Scale<Scalar> {
@@ -277,16 +277,20 @@ where
 }
 ```
 
-The companion attributes layer into these same two items. `#[uses(Trait)]` adds a `Self: Trait`
-predicate to the impl; `#[extend(Trait)]` adds it to the impl *and* to the trait's supertraits;
-`#[extend_where(P)]` adds `P` to both `where` clauses; `#[impl_generics(T: Bound)]` inserts `T: Bound`
-into the impl's generic list alone (its argument is a comma-separated list of ordinary generic
-parameters, so a lifetime or a const parameter is accepted there too); and
-`#[use_type(Trait.Type)]` adds the supertrait and rewrites every bare mention of the type into its
-fully qualified form. The macro appends the implicit-argument bounds last, after whatever the
-attributes contributed.
+The companion attributes layer into these same two items, and each lands in a fixed place:
 
-A couple of smaller placements are worth knowing because neither is visible in the source you wrote. **The
+- `#[uses(Trait)]` adds a `Self: Trait` predicate to the impl.
+- `#[extend(Trait)]` adds it to the impl *and* to the trait's supertraits.
+- `#[extend_where(P)]` adds `P` to both `where` clauses.
+- `#[impl_generics(T: Bound)]` inserts `T: Bound` into the impl's generic list alone. Its argument is a
+  comma-separated list of ordinary generic parameters, so a lifetime or a const parameter is accepted
+  there too.
+- `#[use_type(Trait.Type)]` adds the supertrait and rewrites every bare mention of the type into its
+  fully qualified form.
+
+The macro appends the implicit-argument bounds last, after whatever the attributes contributed.
+
+Two smaller placements matter because neither is visible in the source you wrote. **The
 function's visibility becomes the trait's**, and the impl's method keeps inherited visibility. So
 `pub fn rectangle_area` yields `pub trait RectangleArea`, and a private `fn` yields a private trait
 usable only in its own module. And **the macro copies an attribute it does not recognize onto both
@@ -309,16 +313,16 @@ of their own, documented on their own pages.
 
 ## Common Mistakes
 
-**A function with implicit arguments must take `self` first.** Without a receiver there is no context
-to read a field from, and the macro says so rather than emitting a bound that fails later:
+**A function with implicit arguments must take `self` first.** Without a receiver the macro cannot
+find a context to read a field from, so it reports that rather than emitting a bound that fails later:
 
 ```text
 error: The first argument of a function with implicit arguments must be `self`
 ```
 
 **A mutable implicit argument must be the only one.** Reading a field mutably borrows the whole context
-exclusively, so it cannot coexist with any other field read. Immutable implicit arguments carry no such
-restriction and combine freely, in any number:
+exclusively, so it cannot coexist with any other field read. Immutable implicit arguments do not have
+this restriction and combine freely, in any number:
 
 ```text
 error: a `&mut` implicit argument must be the only implicit argument, since its mutable
@@ -327,17 +331,16 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 
 **An `#[impl_generics]` parameter cannot appear in the capability's own signature.** Only the generated
 impl declares it, so naming it in a return type or an explicit parameter leaves it unresolved in the
-trait. Both spellings report the same headline:
+trait. A bare `Db` reports:
 
 ```text
 error[E0425]: cannot find type `Db` in this scope
 ```
 
-The error code differs, and that is the part worth noticing, since you are likely to search for it. A
-bare `Db` reports `E0425` as above; a qualified path such as `Db::Row` reports `E0433`, and the
-compiler labels its span *use of undeclared type `Db`* instead. Both mean the same thing: either the
-type belongs out of the signature, or it needs to be an [abstract type](./cgp_type.md) rather than an
-inferred impl parameter.
+A qualified path such as `Db::Row` reports `E0433` instead, and the compiler labels its span *use of
+undeclared type `Db`*. The code differs, and that matters because you are likely to search for it.
+Both mean the same thing: either the type belongs out of the signature, or it needs to be an
+[abstract type](./cgp_type.md) rather than an inferred impl parameter.
 
 ## Related constructs
 
