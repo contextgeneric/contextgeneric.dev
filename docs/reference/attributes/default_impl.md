@@ -37,16 +37,10 @@ parts, joined by the keyword `in`:
 ```
 
 **`Key` becomes the emitted impl's `Self`**, and `NamespacePath` names the lookup trait plus whatever
-leading arguments you write inside it. The macro appends the table parameter for you. So the example above
-emits:
-
-```rust
-impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
-    type Delegate = ShowString;
-}
-```
-
-Remember that rule, because the trait's own parameter names suggest the opposite arrangement (see
+leading arguments you write inside it. The macro appends the table parameter for you. So the example
+above registers `ShowString` as the `DefaultImpls1<ShowImplComponent>` entry for the key `String`, and
+[Under the hood](#under-the-hood) shows the impl it emits. Remember that rule, because the trait's own
+parameter names suggest the opposite arrangement (see
 [`DefaultImpls1`](../traits/namespace/default_impls1.md#the-one-thing-to-get-right)).
 
 **The key is a type or a `@`-path.** A type key, as above, is the usual form for a per-type default:
@@ -109,6 +103,13 @@ impl ShowImpl<String> {
         value.clone()
     }
 }
+
+#[cgp_impl(new ShowWithDisplay)]
+impl<T: Display> ShowImpl<T> {
+    fn show(&self, value: &T) -> String {
+        format!("{value}")
+    }
+}
 ```
 
 Then the context:
@@ -131,7 +132,9 @@ delegate_components! {
 
 **Environmental context, parameter-targeted**: `App` carries the wiring and the shown value is a
 parameter. The loop wires every type with a registered default, and the direct `u64` line shadows
-whatever the namespace would otherwise supply for that one type.
+whatever the namespace would otherwise supply for that one type. `ShowWithDisplay` is wired directly
+rather than registered, because its impl is generic over `T`, and a generic impl cannot register a
+default (see [Common Mistakes](#common-mistakes)).
 
 A path key does not need a loop. With `CanGreet` registered under `@app` and `GreetHello` bound at
 `@app.GreeterComponent` as in [Usage](#usage), a context resolves the component by joining the

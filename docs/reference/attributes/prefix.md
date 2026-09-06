@@ -287,7 +287,23 @@ name different paths. Write the prefix alone.
 **Registering routes a component but does not bind a provider.** A prefixed component compiles even
 when nothing binds its path, and so does a context that joins the namespace. Only a
 [`check_components!`](../macros/check_components.md) reports it, as an unsatisfied bound on the
-*path* rather than on a provider:
+*path* rather than on a provider. With the `CanGreet` component from [Examples](#examples) and a
+context that joins the namespace without binding the path:
+
+```rust
+delegate_components! {
+    App {
+        namespace DefaultNamespace;
+        // nothing binds @app.GreeterComponent
+    }
+}
+
+check_components! {
+    App {
+        GreeterComponent,
+    }
+}
+```
 
 ```text
 error[E0277]: the trait bound `PathCons<Symbol<3, Chars<'a', ...>>, PathCons<GreeterComponent, Nil>>: DefaultNamespace<App>` is not satisfied
@@ -309,6 +325,15 @@ fix is to bind a provider at the path: a direct entry on the context, a namespac
 
 **Two attributes naming the same namespace conflict.** Each emits an impl of that namespace's trait
 for the same marker, and the compiler rejects the second:
+
+```rust
+#[cgp_component(Greeter)]
+#[prefix(@app in AppNamespace)]
+#[prefix(@greeting in AppNamespace)]
+pub trait CanGreet {
+    fn greet(&self) -> String;
+}
+```
 
 ```text
 error[E0119]: conflicting implementations of trait `AppNamespace<_>` for type `GreeterComponent`
@@ -333,6 +358,16 @@ must live in a namespace is a [`#[cgp_getter]`](../macros/cgp_getter.md) compone
 
 **On `#[cgp_impl]` or `#[cgp_fn]` the compiler does not recognize the attribute.** Neither macro
 consumes it, so it reaches the compiler as an attribute that does not exist:
+
+```rust
+#[cgp_impl(new GreetHello)]
+#[prefix(@app in DefaultNamespace)]
+impl Greeter {
+    fn greet(&self) -> String {
+        "Hello!".to_owned()
+    }
+}
+```
 
 ```text
 error: cannot find attribute `prefix` in this scope

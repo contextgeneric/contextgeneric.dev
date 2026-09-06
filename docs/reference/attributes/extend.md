@@ -46,8 +46,10 @@ Each entry names a trait, optionally with type arguments. You may list several i
 them across attributes, and they accumulate. Prefer one attribute carrying the whole list, as with
 [`#[uses]`](uses.md).
 
-The attribute is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md) and on
-[`#[cgp_component]`](../macros/cgp_component.md). The macro does **not** accept it on
+The attribute is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md), on
+[`#[cgp_component]`](../macros/cgp_component.md), and on the macros built on it:
+[`#[cgp_type]`](../macros/cgp_type.md), [`#[cgp_getter]`](../macros/cgp_getter.md), and
+[`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md). The macro does **not** accept it on
 [`#[cgp_impl]`](../macros/cgp_impl.md), because a provider does not define a trait that a supertrait
 could attach to. The supertraits belong to the component's trait, and a provider states its private needs
 with [`#[uses]`](uses.md) instead.
@@ -206,6 +208,16 @@ differ in where the bounds land, not in the grammar.
 
 **On a `#[cgp_impl]` the compiler does not recognize the attribute**, rather than accepting and ignoring
 it. The macro does not consume it, so it reaches the compiler as an unknown attribute:
+
+```rust
+#[cgp_impl(new GreetHello)]
+#[extend(HasName)]
+impl Greeter {
+    fn greet(&self) {
+        println!("Hello, {}!", self.name());
+    }
+}
+```
 
 ```text
 error: cannot find attribute `extend` in this scope

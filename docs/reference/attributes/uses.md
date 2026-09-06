@@ -194,6 +194,14 @@ to write.
 write `#[uses]` when you wanted [`#[use_provider]`](use_provider.md). A provider trait carries an
 explicit context parameter, and `#[uses]` does not fill it in, so the bound is incomplete:
 
+```rust
+#[cgp_fn]
+#[uses(AreaCalculator)]
+pub fn scaled_area(&self, #[implicit] scale_factor: f64) -> f64 {
+    self.area() * scale_factor * scale_factor
+}
+```
+
 ```text
 error[E0107]: missing generics for trait `AreaCalculator`
    |

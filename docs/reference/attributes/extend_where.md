@@ -188,7 +188,16 @@ repeated.
 **A promoted predicate does not reach callers as a guarantee.** This is the mistake the attribute most
 invites: because `#[extend]` gives callers its supertrait, it is natural to assume `#[extend_where]` gives
 them its predicate. It does not. Naming a trait whose `where` clause is unproven is an error against the
-bound, so a caller generic over the parameter must state the predicate too:
+bound, so a caller generic over the parameter must state the predicate too. This caller omits it:
+
+```rust
+pub fn scale_it<Ctx, Scalar>(ctx: &Ctx) -> Scalar
+where
+    Ctx: Scale<Scalar>,
+{
+    ctx.scale()
+}
+```
 
 ```text
 error[E0277]: the trait bound `Scalar: Clone` is not satisfied
@@ -205,6 +214,14 @@ workaround.
 **On any host other than `#[cgp_fn]` the compiler does not recognize the attribute**, rather than
 accepting and ignoring it. The macro does not consume it, so it reaches the compiler as an unknown
 attribute:
+
+```rust
+#[cgp_component(Scaler)]
+#[extend_where(Scalar: Clone)]
+pub trait CanScale<Scalar> {
+    fn scale(&self) -> Scalar;
+}
+```
 
 ```text
 error: cannot find attribute `extend_where` in this scope

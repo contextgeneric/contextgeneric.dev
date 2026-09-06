@@ -47,7 +47,9 @@ not `::`**, and that is deliberate. It leaves `::` free for the trait's own path
 By default the macro projects the type from `Self`, so `Scalar` expands to `<Self as HasScalarType>::Scalar`.
 
 The attribute is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md),
-[`#[cgp_impl]`](../macros/cgp_impl.md), and [`#[cgp_component]`](../macros/cgp_component.md).
+[`#[cgp_impl]`](../macros/cgp_impl.md), [`#[cgp_component]`](../macros/cgp_component.md), and the
+macros built on `#[cgp_component]`: [`#[cgp_type]`](../macros/cgp_type.md),
+[`#[cgp_getter]`](../macros/cgp_getter.md), and [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md).
 
 ### Importing several types
 
@@ -88,7 +90,8 @@ together:
 ```
 
 The pin is an implementation-side constraint, so the macro **rejects it on
-[`#[cgp_component]`](../macros/cgp_component.md)**, whose trait definition has nowhere to put it.
+[`#[cgp_component]`](../macros/cgp_component.md)** and on the macros built on it, whose trait
+definitions have nowhere to put it.
 
 ### Importing from another type
 
@@ -305,12 +308,16 @@ arguments. Their `::` segments belong to the path, while the `.` after the trait
 associated-type list. An omitted `in ContextPath` defaults the target to `Self`. In each `UseTypeIdent`
 the leading `IDENTIFIER` is the associated type's own name, `as` gives it a local alias to write in
 signatures, and `= Type` pins it with an equality bound. The pin is accepted on `#[cgp_fn]` and
-`#[cgp_impl]` and rejected on `#[cgp_component]`.
+`#[cgp_impl]` and rejected on `#[cgp_component]` and the macros built on it.
 
 ## Common Mistakes
 
 **Two imports may not share a name or alias.** The substitution could only pick one, so the macro
 rejects a collision rather than resolving it:
+
+```rust
+#[use_type(HasFooType.Foo, HasBarType.Bar as Foo)]
+```
 
 ```text
 error: Multiple abstract types cannot share the same identifier or alias
@@ -318,6 +325,10 @@ error: Multiple abstract types cannot share the same identifier or alias
 
 **Imports may not resolve through one another in a cycle.** An `in` clause or a trait argument may name
 another import only if the resulting chain is acyclic, and the message names the loop:
+
+```rust
+#[use_type(HasAType.A in B, HasBType.B in A)]
+```
 
 ```text
 error: cannot ground `#[use_type]` imports: they resolve through one another in a cycle `B` -> `A` -> `B`.
@@ -330,6 +341,14 @@ same way.
 
 **An equality pin is rejected on a component trait**, because a trait definition cannot carry an
 implementation-side constraint:
+
+```rust
+#[cgp_component(Loader)]
+#[use_type(HasErrorType.{Error = anyhow::Error})]
+pub trait CanLoad {
+    fn load(&self, path: &str) -> Result<String, Error>;
+}
+```
 
 ```text
 error: Type equality constraints cannot be used in component trait definition
@@ -352,7 +371,8 @@ Write `Self::Output`, and do not list it in a `#[use_type]` attribute.
 - [`#[extend]`](extend.md) — adds a supertrait without rewriting any type names.
 - [`#[implicit]`](implicit.md) — imports a value from a field.
 - [`#[cgp_fn]`](../macros/cgp_fn.md), [`#[cgp_impl]`](../macros/cgp_impl.md), and
-  [`#[cgp_component]`](../macros/cgp_component.md) — the three hosts.
+  [`#[cgp_component]`](../macros/cgp_component.md) — the hosts, together with the macros built on
+  `#[cgp_component]`.
 
 The ideas behind it:
 

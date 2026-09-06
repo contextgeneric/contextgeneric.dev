@@ -205,6 +205,14 @@ parses, and the compiler then rejects it. See [Common Mistakes](#common-mistakes
 mention it and neither does the self type, so only a field bound can determine it. Declaring `Name`
 without reading a field whose type mentions `Name` fails at the implementation:
 
+```rust
+#[cgp_fn]
+#[impl_generics(Name: Display)]
+pub fn greet(&self) -> String {
+    "Hello!".to_owned()
+}
+```
+
 ```text
 error[E0207]: the type parameter `Name` is not constrained by the impl trait, self type, or predicates
 ```
@@ -265,6 +273,16 @@ Rename the parameter, or give the trait another name with `#[cgp_fn(CanCount)]`.
 **On any host other than `#[cgp_fn]` the compiler does not recognize the attribute**, rather than
 accepting and ignoring it. The macro does not consume it, so it reaches the compiler as an attribute
 that does not exist:
+
+```rust
+#[cgp_impl(new GreetHello)]
+#[impl_generics(Name: Display)]
+impl Greeter {
+    fn greet(&self, #[implicit] name: &Name) -> String {
+        format!("Hello, {name}!")
+    }
+}
+```
 
 ```text
 error: cannot find attribute `impl_generics` in this scope

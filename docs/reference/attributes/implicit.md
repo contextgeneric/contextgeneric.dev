@@ -237,12 +237,22 @@ add one `HasField<Symbol!("name"), Value = String>` bound rather than two. The m
 
 **The attribute takes no arguments**, and the macro says so rather than ignoring the argument:
 
+```rust
+fn area(&self, #[implicit(width)] width: f64) -> f64 { width }
+```
+
 ```text
 error: `#[implicit]` does not take any arguments; write it as a bare `#[implicit]`
 ```
 
-**The argument must be a plain identifier.** A destructuring pattern reports `Expected an identifier`,
-and the macro rejects a `mut` binding with the fix in the message:
+**The argument must be a plain identifier.** The destructuring pattern on the first line below reports
+`Expected an identifier`, and the macro rejects the `mut` binding on the second line with the fix in the
+message:
+
+```rust
+fn area(&self, #[implicit] (width, height): (f64, f64)) -> f64 { width * height }
+fn area(&self, #[implicit] mut width: f64) -> f64 { width += 1.0; width }
+```
 
 ```text
 error: Mutable variables are not allowed in implicit arguments. (Explicitly clone a `&` reference if you
@@ -252,12 +262,21 @@ error: Mutable variables are not allowed in implicit arguments. (Explicitly clon
 **A function with implicit arguments must take `self` first**, because there is otherwise no context to
 read from:
 
+```rust
+fn area(#[implicit] width: f64, #[implicit] height: f64) -> f64 { width * height }
+```
+
 ```text
 error: The first argument of a function with implicit arguments must be `self`
 ```
 
-**A mutable argument needs a `&mut self` receiver, and must be the only implicit argument.** The two
-mistakes report separately:
+**A mutable argument needs a `&mut self` receiver, and must be the only implicit argument.** The `&self`
+receiver on the first function below and the extra implicit argument on the second report separately:
+
+```rust
+fn bump(&self, #[implicit] counter: &mut u64) { *counter += 1; }
+fn bump(&mut self, #[implicit] counter: &mut u64, #[implicit] step: u64) { *counter += step; }
+```
 
 ```text
 error: &mut self is required for mutable field reference `& mut u64`
