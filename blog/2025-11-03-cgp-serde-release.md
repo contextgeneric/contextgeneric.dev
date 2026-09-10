@@ -11,7 +11,7 @@ In short, `cgp-serde` extends Serde’s original [`Serialize`](https://docs.rs/s
 
 Furthermore, `cgp-serde` allows us to leverage the powerful [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) concepts in stable Rust today. This unlocks the ability to write context-dependent implementations of `Deserialize`, such as one that uses an arena allocator to deserialize a `'a T` value, a concept detailed in the proposal article.
 
-{/* truncate */}
+<!--truncate-->
 
 ## Preface
 

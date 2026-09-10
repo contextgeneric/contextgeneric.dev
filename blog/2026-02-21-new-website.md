@@ -7,7 +7,7 @@ tags: [release]
 
 If you have visited our website before, you might have noticed that the CGP project website has received a beautiful overhaul redesign with a fresh look and feel. This transformation comes from our migration away from [Zola](https://www.getzola.org/) to [Docusaurus](https://docusaurus.io/), a move driven by our commitment to significantly expand and improve the documentation for CGP.
 
-{/* truncate */}
+<!--truncate-->
 
 ## The journey to a better documentation home
 

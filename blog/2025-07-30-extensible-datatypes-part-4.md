@@ -11,7 +11,7 @@ In the third part of the series, [**Implementing Extensible Records**](/blog/ext
 
 In this final fourth part of the series, we will have the same walk through for the internal implementation details for **extensible variants**.
 
-{/* truncate */}
+<!--truncate-->
 
 ## Recap
 

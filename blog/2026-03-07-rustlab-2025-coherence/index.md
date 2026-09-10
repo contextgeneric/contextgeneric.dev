@@ -15,7 +15,7 @@ This blog post contains the slides and transcript for my presentation of Context
 
 You can also read the [**PDF slides**](./cgp-rustlab-2025-slides.pdf) or watch the video recording of my presentation on [YouTube](https://www.youtube.com/watch?v=gXIfP-W9074).
 
-{/* truncate */}
+<!--truncate-->
 
 ## Discussion
 

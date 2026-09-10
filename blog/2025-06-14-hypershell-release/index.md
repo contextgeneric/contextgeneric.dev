@@ -7,7 +7,7 @@ tags: [release, deepdive]
 
 I am thrilled to introduce [**Hypershell**](https://github.com/contextgeneric/hypershell), a modular, *type-level* domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [**context-generic programming**](/) (CGP), which makes it possible for users to *extend* or *modify* both the language syntax and semantics.
 
-{/* truncate */}
+<!--truncate-->
 
 ## Discussion
 
