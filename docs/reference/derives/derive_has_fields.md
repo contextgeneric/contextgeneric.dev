@@ -5,18 +5,17 @@ sidebar_position: 2
 
 # `#[derive(HasFields)]`
 
-The whole-struct or whole-enum field-list view.
+`#[derive(HasFields)]` generates a structural representation and conversions for a struct or enum.
 
 ## Overview
 
-Some code needs one field of a type. Other code needs the *shape* of the type: every field, its name,
-and its type, so it can walk them. A serializer, a validator, a builder that merges two structs, a
-dispatcher that routes an enum to a handler per variant: none of these can be written against one field
-at a time, and none of them can name the concrete type either.
+Generic serializers, validators, record conversions, and enum dispatchers need a description of the
+whole type. Individual field access does not tell them which fields or variants exist or how to
+traverse them.
 
-`#[derive(HasFields)]` gives a type that shape as a single associated type. Where
-[`#[derive(HasField)]`](./derive_has_field.md) (singular) answers "give me *this* field", `HasFields`
-answers "describe *all* of them at once":
+`#[derive(HasFields)]` describes that structure through a single associated type, `Fields`.
+[`HasField`](./derive_has_field.md) supplies access to one field selected by a tag; `HasFields`
+describes all fields together, for example:
 
 ```rust
 type Fields = Product![
@@ -25,20 +24,17 @@ type Fields = Product![
 ];
 ```
 
-That is the whole struct written as a type: a [`Product!`](../macros/product.md) list with one
-[`Field`](../types/field.md) entry per field, each pairing a value type with its type-level name. For an
-enum it is a [`Sum!`](../macros/sum.md) instead: the same idea for a choice rather than a combination.
-Code that is generic over the shape recurses over that list, and everything is resolved during
-compilation.
+A struct's representation combines its fields in a [`Product!`](../macros/product.md), with a
+[`Field`](../types/field.md) entry pairing each value type with its tag. An enum uses a
+[`Sum!`](../macros/sum.md) to represent a choice of variants. Generic code can recurse over these
+representations, whose types are resolved during compilation.
 
-The derive also generates the conversions that move values in and out of the representation, so it works
-in both directions rather than only describing the type. Generic code can take a concrete value apart
-into its anonymous shape, work on it, and put a concrete value back together.
+The derive also supplies conversions to and from the representation. Generic code can decompose a
+concrete value, process its structural form, and reconstruct the concrete type.
 
 ## Usage
 
-The macro is a plain derive that takes no arguments and has no helper attributes. Unlike the singular
-derive it accepts **both structs and enums**:
+Apply `HasFields` to a struct or enum without arguments or helper attributes:
 
 ```rust
 #[derive(HasFields)]
@@ -61,31 +57,24 @@ compile error.
 
 ### Struct shapes
 
-Every struct shape is accepted, and three of the four behave as you would predict from the field tags
-alone.
+Every struct shape is accepted, with its representation determined by its fields:
 
-- A **named-field struct** becomes a product of `Field<Symbol!("name"), T>` entries, in declaration order.
-- A **multi-field tuple struct** becomes a product keyed by `Index<N>`.
-- A **unit struct** becomes the empty product `Nil`. A fieldless struct is a valid, if trivial, record and
-  round-trips through the representation like any other.
-- A **single-field tuple struct** (a newtype) is the special case: its `Fields` is the inner type
-  *directly*, not wrapped in a one-element product.
+- **Named fields:** a product of `Field<Symbol!("name"), T>` entries in declaration order.
+- **Multiple tuple fields:** a product with fields keyed by `Index<N>`.
+- **Unit struct:** the empty product `Nil`, with conversions to and from the unit value.
+- **Single tuple field (newtype):** the inner type directly, without a one-element product wrapper.
 
-The newtype case is worth noting, because it is the one that will surprise you. `struct Wrapper(String)`
-has `Fields = String`, not `Product![Field<Index<0>, String>]`. The reason is that a newtype is a
-transparent wrapper and generic code almost always wants the inner type rather than the wrapper. The
-practical effect is that adding a second field to a newtype changes its `Fields` type in shape rather
-than in length.
+Adding a second field to a newtype changes the kind of representation. `struct Wrapper(String)` has
+`Fields = String`; a tuple struct with multiple fields has a product of indexed entries. Generic code
+that depends on the original representation must account for that change.
 
 ### Variant shapes
 
-**This is the one derive in the extensible-data family that places no restriction on an enum's variant
-shapes.** The derives that take an enum *apart* (that is,
-[`#[derive(ExtractField)]`](./derive_extract_field.md) and
-[`#[derive(FromVariant)]`](./derive_from_variant.md), and therefore
-[`#[derive(CgpData)]`](./derive_cgp_data.md)) require every variant to carry exactly one unnamed payload,
-because each has to name a single type per variant. `HasFields` only *describes* a variant, so it accepts
-all four shapes and nests that variant's own fields as a product inside its `Field` entry:
+`HasFields` accepts unit, newtype, multi-field tuple, and named-field variants. Its representation
+applies the struct field rules within each variant. In contrast, the per-variant constructor and
+extractor derives ([`FromVariant`](./derive_from_variant.md) and
+[`ExtractField`](./derive_extract_field.md), also included by [`CgpData`](./derive_cgp_data.md))
+require exactly one unnamed payload per variant.
 
 ```rust
 #[derive(HasFields)]
@@ -97,7 +86,7 @@ pub enum Shape {
 }
 ```
 
-Each variant maps by the same rules a struct's fields do:
+The variants above map to these entries in the sum:
 
 | Variant | Its entry in the sum |
 |---|---|
@@ -106,14 +95,13 @@ Each variant maps by the same rules a struct's fields do:
 | `Rectangle(u32, u32)` | `Field<Symbol!("Rectangle"), Product![Field<Index<0>, u32>, Field<Index<1>, u32>]>` |
 | `Triangle { base, height }` | `Field<Symbol!("Triangle"), Product![Field<Symbol!("base"), u32>, Field<Symbol!("height"), u32>]>` |
 
-So a unit variant becomes the empty product, a newtype variant passes its payload straight through (the
-same special case as a newtype struct, applied inside a variant), a multi-field tuple variant becomes an
-`Index`-keyed product, and a named-field variant becomes a `Symbol!`-keyed one. All four round-trip
-through the conversions.
+Every listed shape supports conversion to and from the representation. A unit variant uses `Nil`, a
+newtype variant uses its payload type directly, and multi-field variants use products keyed by
+position or name.
 
-The consequence is worth stating plainly, because it decides which derive to reach for: **an enum with
-mixed variant shapes can have a structural representation but no generic constructor or extractor.**
-`#[derive(HasFields)]` succeeds on the enum above; `#[derive(CgpData)]` on the same enum would not.
+An enum with mixed variant shapes can derive `HasFields` but cannot derive `CgpData`. It gains a
+structural representation and whole-value conversions without per-variant constructors or an
+incremental extractor.
 
 ### Generic types
 
@@ -147,7 +135,7 @@ let fields = config.to_fields();                 // Config -> the product
 let config_again = Config::from_fields(fields);  // the product -> Config
 ```
 
-There is a borrowing form too, used by read-only generic code so it does not have to consume the value:
+`to_fields_ref()` borrows the fields so generic code can read them without consuming the value:
 
 ```rust
 let config = Config { host: "localhost".to_owned(), port: 8080 };
@@ -167,39 +155,34 @@ pub enum Shape {
 
 `Shape::Fields` is `Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Rectangle>]`.
 
-Generic code binds on the shape rather than on the type. An implementation that works for any record
-writes `where Self: HasFields` and recurses over `Self::Fields`, so it applies to `Config`, to `Person`,
-and to a struct declared in another crate that happens to derive the same thing.
+Generic code can operate on `Self::Fields` under a `Self: HasFields` bound. An implementation that
+supports the resulting representation can work with `Config`, `Person`, or a struct in another crate
+that supplies the same traits.
 
 ## When to use it
 
-**Reach for `#[derive(HasFields)]` when code must process a type's whole shape, and for
-[`#[derive(HasField)]`](./derive_has_field.md) when it needs one named field.** That is the whole
-distinction, and the two are complementary rather than ranked. Most types that need both derive both, in
-one `#[derive(...)]`.
+Use `HasFields` when code must process a type's whole structure. Use
+[`HasField`](./derive_has_field.md) for access to an individual field. Derive both when both forms of
+access are needed.
 
-The finer question is whether to derive it on its own or take the umbrella.
+Choose the extent of the generated support according to the operations you need:
 
-- **Derive `HasFields` alone** when the type only needs to be *described* and converted: a payload being
-  serialized, a struct being read structurally, an enum whose shape a dispatcher inspects. This is also
-  the only choice available for an enum with mixed variant shapes.
-- **Reach for [`#[derive(CgpData)]`](./derive_cgp_data.md)** when the type also needs to be built up field
-  by field or taken apart variant by variant, since that derive includes this one plus the incremental
-  machinery. If you find yourself deriving `HasFields`, `HasField`, and
-  [`BuildField`](./derive_build_field.md) together, the umbrella is the shorter way to say it.
-- **Do not derive it speculatively.** It generates five impls and a representation type per use, and a
-  type nothing processes structurally gains nothing from having a shape. Deriving `HasField` for value
-  reads is the far more common need.
+- **`HasFields` alone:** describe and convert a type for serialization, structural reads, or dispatch.
+  This also supports enums with mixed variant shapes.
+- **[`CgpData`](./derive_cgp_data.md):** include incremental building or extraction alongside the
+  representation. For structs, it also includes per-field access.
+- **[`HasField`](./derive_has_field.md) alone:** read individual fields when the whole representation
+  is unnecessary. `HasFields` generates five implementations, so omit it when nothing uses them.
 
-One misreading to head off: **this is not runtime reflection.** A type has a shape only because it opted
-in with a derive, there is nothing to query at runtime, and the shape is a type rather than data. The
-gain is that generic code over it is checked when written and costs nothing when run. The cost is that a
-type you do not own and cannot patch has no shape at all.
+The representation is a type-level description, not runtime reflection. Generic code uses trait
+bounds to access the shape during compilation; it does not query field metadata at runtime. A type
+must supply the representation traits before it can participate. If you cannot implement those traits
+for a type, this derive cannot expose its shape.
 
 ## Under the hood
 
-The derive leaves the type definition untouched and emits **five impls**: the shape, the borrowed shape,
-and three conversions. From a named-field struct:
+The derive preserves the type definition and adds implementations of `HasFields`, `HasFieldsRef`,
+`ToFields`, `FromFields`, and `ToFieldsRef`. For this named-field struct:
 
 ```rust
 #[derive(HasFields)]
@@ -209,7 +192,7 @@ pub struct Person {
 }
 ```
 
-the two shape impls name the product and the same product with each value borrowed:
+The shape implementations name the product and its borrowed counterpart:
 
 ```rust
 impl HasFields for Person {
@@ -229,7 +212,7 @@ impl HasFieldsRef for Person {
 }
 ```
 
-and the three conversions move values between `Person` and that product:
+The conversion implementations move or borrow values between `Person` and that product:
 
 ```rust
 impl ToFields for Person {
@@ -258,8 +241,8 @@ impl ToFieldsRef for Person {
 [type-level lists](../types/index.md) page covers that shape, and it is the form printed in
 an error.
 
-An enum's shape is the dual: an [`Either`](../types/either.md) chain terminated by `Void`
-rather than a `Cons` chain terminated by `Nil`, with each arm tagged by the variant name:
+An enum's sum representation is an [`Either`](../types/either.md) chain terminated by `Void`.
+Each arm carries a field tagged by the variant name:
 
 ```rust
 impl HasFields for Shape {
@@ -270,12 +253,11 @@ impl HasFields for Shape {
 }
 ```
 
-The conversions match each concrete variant onto its arm and back. The four variant shapes described
-above all fall out of one rule rather than being special-cased: each variant's own fields go through the
-same product construction a struct's fields do, which is why a unit variant lands on `Nil`, a newtype
-variant on its payload type, and the two multi-field shapes on `Index`- and `Symbol!`-keyed products.
+The enum conversions map each variant to its corresponding sum arm and back. Each variant's payload
+representation follows the struct rules: `Nil` for a unit variant, the payload itself for a newtype
+variant, or a product keyed by `Index` or `Symbol!` for multiple fields.
 
-The empty shapes come from the same construction. A unit struct's `Fields` is `Nil`:
+A unit struct uses the empty product `Nil` as its representation:
 
 ```rust
 impl HasFields for Unit {
@@ -283,8 +265,8 @@ impl HasFields for Unit {
 }
 ```
 
-and a variantless enum's is `Void`, with its borrowed conversions matching the uninhabited value through
-an empty `match`.
+A variantless enum uses `Void` as its representation. Its conversions use empty matches because the
+value is uninhabited.
 
 Each generated impl is aimed at the type name the user wrote, so a conflict with a hand-written
 `HasFields` impl underlines the struct or enum rather than the whole `#[derive(HasFields)]`.
@@ -295,35 +277,34 @@ Each generated impl is aimed at the type name the user wrote, so a conflict with
 `Fields = String`. Generic code written against `Cons<Field<Index<0>, _>, Nil>` will not match it, and
 adding a second field changes the shape rather than lengthening it.
 
-**A named-field variant is not a newtype variant.** `Circle { radius: f64 }` carries a one-entry product,
-while `Circle(Circle)` carries its payload type directly. The two read almost alike and produce different
-shapes.
+**Named-field and newtype variants have different representations.** `Circle { radius: f64 }` uses a
+one-entry product, while `Circle(Circle)` uses its payload type directly.
 
-**Accepting every variant shape is specific to this derive.** An enum with a unit, multi-field, or
-struct-style variant takes `#[derive(HasFields)]` and rejects `#[derive(CgpData)]`,
-`#[derive(CgpVariant)]`, `#[derive(ExtractField)]`, and `#[derive(FromVariant)]`. If you want the whole
-family, wrap each richer payload in its own struct so every variant has a single nameable type.
+**Only `HasFields` accepts every variant shape in this family.** Unit, multi-field, and struct-style
+variants are rejected by `CgpData`, `CgpVariant`, `ExtractField`, and `FromVariant`. Wrap richer
+payloads in dedicated structs to use those derives.
 
-**The borrowed shape layers borrows rather than collapsing them.** A field already of type `&'a Name`
-appears as `&'__a &'a Name` in the borrowed form, which is correct and occasionally surprising in an error
-message. `'__a` is the reserved name the derive introduces so it cannot collide with a lifetime of yours.
+**The borrowed shape adds a reference to each field's declared type.** A field of type `&'a Name`
+appears as `&'__a &'a Name` in the borrowed form. The derive introduces the reserved lifetime `'__a`
+for that additional borrow.
 
 **Field order is declaration order, and it is part of the type.** Two structs with the same field names in
 different orders have different `Fields` types. Structural conversions that match on names cope with that;
 code written against a literal `Cons` chain does not.
 
-**Two variant names are reserved, and using one does not compile.** The generated impls write
-`Self::Fields` and `Self::FieldsRef`, so an enum with a variant called `Fields` or `FieldsRef` makes the
-path ambiguous. The compiler reports `ambiguous associated item` with its headline on the derive, and a
-note pointing at the offending variant, so following the note tells you which one to rename. The
-[extractor](./derive_extract_field.md) and [constructor](./derive_from_variant.md) derives reserve five
-more names, so an enum taking the whole family should avoid all seven.
+**Variants named `Fields` or `FieldsRef` make generated paths ambiguous.** The implementations use
+`Self::Fields` and `Self::FieldsRef`, which conflict with variants of those names. The compiler
+reports `ambiguous associated item` at the derive and points to the offending variant in a note.
+Rename that variant. The [extractor](./derive_extract_field.md) and
+[constructor](./derive_from_variant.md) derives reserve additional names, so check their restrictions
+when deriving the full family.
 
-**It is a different derive from the singular one.** `#[derive(HasField)]` gives per-field access and takes
-only structs; `#[derive(HasFields)]` gives the whole shape and takes structs and enums. The names differ
-by one letter and the outputs do not overlap.
+**`HasField` and `HasFields` generate different interfaces.** The singular derive provides per-field
+access for structs. The plural derive provides a whole-type representation for structs and enums.
 
 ## Related constructs
+
+These references cover the related derives, generated traits, and supporting types:
 
 - [`#[derive(HasField)]`](./derive_has_field.md) — the singular counterpart, per-field access, commonly
   derived alongside this one.
@@ -340,7 +321,7 @@ by one letter and the outputs do not overlap.
 - [`AppendProduct`](../traits/type-level/append_product.md) — operations over a shape once you have one.
 - [`CanUpcast`](../traits/casting/can_upcast.md) — converting between two types whose shapes overlap.
 
-The ideas behind it:
+The ideas behind it are explained on these concept pages:
 
 - [Extensible records](/docs/concepts/extensible-records) — a struct as a product of named fields, and
   what generic code does with one.
@@ -348,6 +329,8 @@ The ideas behind it:
   addresses.
 
 ## Source
+
+The implementation is defined in these source files:
 
 - Entry point: [`derive_has_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/derive_has_fields.rs)
 - Codegen: [`cgp_data/derive_has_fields/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_has_fields)

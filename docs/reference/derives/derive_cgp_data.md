@@ -5,29 +5,26 @@ sidebar_position: 3
 
 # `#[derive(CgpData)]`
 
-The umbrella extensible-data derive, for a struct or an enum.
+`#[derive(CgpData)]` generates structural access and incremental operations for a struct or enum.
 
 ## Overview
 
-A plain Rust struct or enum is opaque to generic code. There is no way to refer to "the `first_name`
-field" or "the `Circle` variant" through a type parameter, so anything that must work across several
-data types ends up written once per type.
+Generic code needs traits to access a struct's fields or an enum's variants. A type parameter alone
+does not let it name a `first_name` field or a `Circle` variant.
 
-`#[derive(CgpData)]` is the one-line answer: it turns a struct or an enum into **extensible data**, a
-type whose fields or variants generic code can name, read, construct, and take apart without ever
-mentioning the concrete type. It is the umbrella derive, and what it generates depends entirely on what
-it is applied to: on a struct it emits the record machinery, on an enum the variant machinery.
+`#[derive(CgpData)]` supplies those traits by turning the type into **extensible data**. On a struct,
+it generates field access, a structural representation, and a builder. On an enum, it generates a
+structural representation, constructors, and an extractor. Generic code can then work with the type's
+fields or variants without naming the concrete type.
 
-The two things this buys are worth naming separately, because together they define what "extensible"
-means here. The **representation** view describes the type as a list of named entries, which lets one
-implementation serialize any record or dispatch over any enum. The **incremental** view adds a companion
-type that tracks, in its own type parameters, which fields are present or which variants are still
-possible. A half-built value and a finished one are therefore *different types*, and using one where the
-other belongs is a compile error rather than a runtime panic.
+The generated representation and companion types support different operations. The representation
+lists the type's named entries so generic code can process its structure. A companion type tracks
+which record fields are present or which enum variants remain possible. A partial value and a
+finished one therefore have different types, so the compiler rejects an incomplete build or extraction.
 
 ## Usage
 
-The derive takes no arguments and has no helper attributes, and it accepts either shape:
+Apply `CgpData` to a struct or enum without arguments or helper attributes:
 
 ```rust
 use cgp::prelude::*;
@@ -52,32 +49,28 @@ everything generated, including the companion types.
 
 ### What each shape emits, and where it is documented
 
-The derive dispatches on the shape of its input and then runs one of two fixed sequences. The
-shape-specific derives run those same two sequences, so each is documented on its own page rather than
-twice here:
+`CgpData` generates the same output as the matching shape-specific derive. These pages document each
+output in detail:
 
 | Applied to | It emits | Documented on |
 |---|---|---|
 | a struct | per-field access, the representation, and the builder | [`#[derive(CgpRecord)]`](./derive_cgp_record.md) |
 | an enum | the representation, the constructors, and the extractor | [`#[derive(CgpVariant)]`](./derive_cgp_variant.md) |
 
-Read the matching page for the shapes each accepts, the expansion in full, and the corner cases. The one
-restriction worth knowing before you get there is on the enum side: **every variant must carry exactly
-one unnamed payload**, and there is no per-variant opt-out.
+Every enum variant must carry exactly one unnamed payload, and individual variants cannot opt out.
+The matching page covers the accepted shapes, generated code, and corner cases.
 
 ### Choosing among the three
 
-The three derives are interchangeable wherever the shape allows, so the choice is about what you want
-the code to say. There is no output difference to weigh: `CgpData` on a struct emits exactly what
-`CgpRecord` emits, and on an enum exactly what `CgpVariant` emits.
+Choose `CgpData`, `CgpRecord`, or `CgpVariant` according to the input restriction you want to express.
+Their output is identical for the same accepted input:
 
-- **`#[derive(CgpData)]`** is the default. Use it unless you have a reason not to.
-- **[`#[derive(CgpRecord)]`](./derive_cgp_record.md)** says "this is always a struct" and rejects
-  anything else at parse time.
-- **[`#[derive(CgpVariant)]`](./derive_cgp_variant.md)** says "this is always an enum", likewise.
+- **`#[derive(CgpData)]`**: use as the default for either structs or enums.
+- **[`#[derive(CgpRecord)]`](./derive_cgp_record.md)**: accept only structs.
+- **[`#[derive(CgpVariant)]`](./derive_cgp_variant.md)**: accept only enums.
 
-Reach for a shape-specific one when the name earns its keep as documentation, or when you want the error
-for a wrong shape to arrive at the derive rather than further in.
+Use a shape-specific derive when its name documents a constraint on the type. It rejects the wrong
+shape at the derive.
 
 ## Examples
 
@@ -110,76 +103,70 @@ constructors, and an extractor. Worked examples of each half are on the
 
 ## When to use it
 
-**Reach for one of these derives when generic code has to work over the type's own structure.** That is
-the test, and it is narrower than it sounds. Most types in a CGP program want
-[`#[derive(HasField)]`](./derive_has_field.md) and nothing more, because most of what implementations
-need from a context (the type a capability runs against, which supplies values as its own fields) is to
-read one value out of it.
+Use `CgpData` when generic code needs both a type's structure and its incremental operations. For
+reading individual values from a context (the type a capability runs against, which supplies values
+as fields), [`#[derive(HasField)]`](./derive_has_field.md) is sufficient.
 
-The cases that do earn it are specific.
+The full derive supports these uses:
 
-- **A record assembled from independent pieces.** When several parts of a program each contribute part
-  of a struct and no one place should know the whole type, that is the extensible builder pattern, and
-  this derive runs it.
-- **An enum handled one variant at a time by independent code.** When variants and the operations over
-  them both need to grow without editing each other, this is the extensible visitor pattern.
-- **A framework over any user type.** A serializer, a validator, or a mapper written once against the
-  shape rather than once per type.
+- **Records assembled from independent contributions:** the extensible builder pattern combines fields
+  without requiring each contributor to know the target struct.
+- **Enums handled by independent implementations:** the extensible visitor pattern lets variants and
+  operations grow without requiring each implementation to know the whole enum.
+- **Frameworks over user-defined types:** serializers, validators, and mappers can process the shape
+  generically. Use `HasFields` alone if the framework only needs representation and conversions.
 
-And the cases that do not:
+Prefer simpler operations in these cases:
 
-- **A closed enum with fixed operations.** A `match` is clearer than any machinery, and it already gives
-  exhaustiveness.
-- **A struct whose fields are only ever read.** [`#[derive(HasField)]`](./derive_has_field.md) is the
-  whole answer, and it is one impl pair per field rather than a companion type and a dozen impls.
-- **A one-off structural manipulation.** A lighter generic-programming library is a better fit than
-  adopting this family for a single conversion.
+- **Closed enums with fixed operations:** use a `match`, which already checks exhaustiveness.
+- **Structs whose fields are only read:** derive [`HasField`](./derive_has_field.md) for per-field access.
+- **One-off structural manipulations:** consider a narrower generic-programming library when a single
+  conversion is the only reason to adopt this family.
 
-When you want only part of the output, the family splits along the lines you would expect, and deriving
-the slice is the cheaper choice: [`#[derive(HasField)]`](./derive_has_field.md) for the getters,
-[`#[derive(HasFields)]`](./derive_has_fields.md) for the representation,
-[`#[derive(BuildField)]`](./derive_build_field.md) for the record builder,
-[`#[derive(ExtractField)]`](./derive_extract_field.md) for the extractor, and
-[`#[derive(FromVariant)]`](./derive_from_variant.md) for the variant constructors. The umbrella is the
-right call once you want most of them.
+Individual derives let you generate only the operations you need:
 
-One honest cost: this is the heaviest derive in CGP. It generates a companion type and, for an enum, two
-of them, plus an impl per field or variant on top of the whole-type impls. That is compile-time work,
-and the generated types appear by name in error messages. It buys guarantees a runtime builder cannot
-give, and it is not free.
+- [`HasField`](./derive_has_field.md): per-field access.
+- [`HasFields`](./derive_has_fields.md): the representation and conversions.
+- [`BuildField`](./derive_build_field.md): the record builder.
+- [`ExtractField`](./derive_extract_field.md): the enum extractor.
+- [`FromVariant`](./derive_from_variant.md): the variant constructors.
+
+`CgpData` adds compilation work and generated types that can appear in diagnostics. It generates one
+companion type for a struct or two for an enum, plus whole-type and per-field or per-variant
+implementations. Derive only the parts you need when the full set of operations is unnecessary.
 
 ## Under the hood
 
-Nothing about the umbrella is special. `#[derive(CgpData)]` inspects the item, dispatches on whether it
-is a struct or an enum, and then runs exactly the same code path the matching shape-specific derive
-runs. [`#[derive(CgpRecord)]`](./derive_cgp_record.md#under-the-hood) enters the first directly, and
-[`#[derive(CgpVariant)]`](./derive_cgp_variant.md#under-the-hood) the second. That shared dispatch is
-why all three agree on their output, and why a claim about what `CgpData` emits is always a claim about
-one of the other two.
+`CgpData` selects the record or variant code path according to its input.
+[`CgpRecord`](./derive_cgp_record.md#under-the-hood) and
+[`CgpVariant`](./derive_cgp_variant.md#under-the-hood) call those paths directly, which is why their
+output matches. Their pages show the generated implementations.
 
-Applied to a union, all three fail: the family models products and sums, and a union is neither.
+All three derives reject unions. The family models structs and enums.
 
 ## Common Mistakes
 
-**Which mistakes apply depends on the shape**, and the shape pages carry them. The
-[record ones](./derive_cgp_record.md#common-mistakes) cover the companion's cleared attributes,
-position-keyed tuple builders, and the newtype special case; the
-[variant ones](./derive_cgp_variant.md#common-mistakes) cover the one-payload rule and the seven reserved
-variant names. Two are worth repeating here because they catch people who reached for the umbrella
-without reading either.
+The applicable restrictions depend on the input shape. The
+[record page](./derive_cgp_record.md#common-mistakes) covers cleared companion attributes, positional
+tuple builders, and the newtype representation. The
+[variant page](./derive_cgp_variant.md#common-mistakes) covers payload shapes and reserved names.
+The following restrictions apply when choosing the combined derive.
 
-**Every enum variant needs exactly one unnamed payload.** A unit, multi-field, or struct-style variant
-fails, with no per-variant opt-out. [`#[derive(HasFields)]`](./derive_has_fields.md) is the one derive in
-the family that accepts all four shapes, so an enum with mixed variants gets that derive instead.
+**Every enum variant needs exactly one unnamed payload.** Unit, multi-field, and struct-style variants
+are rejected, and individual variants cannot opt out. [`HasFields`](./derive_has_fields.md) accepts
+all of these shapes when only a representation and whole-value conversions are needed.
 
-**Absence is spelled differently on the two sides.** `IsNothing` for a missing record field, `IsVoid` for
-a ruled-out variant, and they are not interchangeable. An error mentioning the wrong one usually means
-record and variant machinery have been crossed.
+**Record and variant absence use different markers.** `IsNothing` represents a missing record field;
+`IsVoid` represents a ruled-out variant. An error mentioning the wrong marker usually means record
+and variant operations have been mixed.
 
-**These are the heaviest derives in CGP.** One `#[derive(CgpData)]` on a five-field struct generates a
-companion type and roughly twenty impls. If only part of the output is wanted, derive the slice.
+**The combined derive generates more code than an individual derive.** A five-field struct gains a
+companion type and per-field implementations in addition to its whole-type implementations. Use an
+individual derive when only part of that output is needed.
 
 ## Related constructs
+
+These references cover the related derives, generated traits, and supporting types:
 
 - [`#[derive(CgpRecord)]`](./derive_cgp_record.md) and
   [`#[derive(CgpVariant)]`](./derive_cgp_variant.md) — the two faces this dispatches to.
@@ -193,7 +180,7 @@ companion type and roughly twenty impls. If only part of the output is wanted, d
   trait families the shapes generate impls for.
 - [`MapType`](../traits/type-level/map_type.md) — the markers the companion types are parameterized by.
 
-The ideas behind it:
+The ideas behind it are explained on these concept pages:
 
 - [Extensible records](/docs/concepts/extensible-records) — the struct half, and the extensible builder
   pattern.
@@ -203,6 +190,8 @@ The ideas behind it:
   variant.
 
 ## Source
+
+The implementation is defined in these source files:
 
 - Entry point: [`cgp_data.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/cgp_data.rs)
 - Shape dispatch: [`cgp_data/item.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_data/item.rs)

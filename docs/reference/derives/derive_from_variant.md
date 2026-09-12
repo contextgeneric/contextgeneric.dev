@@ -5,31 +5,31 @@ sidebar_position: 8
 
 # `#[derive(FromVariant)]`
 
-Generic construction of an enum from one of its named variants.
+`#[derive(FromVariant)]` lets generic code construct an enum variant selected by a type-level tag.
 
 ## Overview
 
-`Shape::Circle(circle)` names two things: the enum, and the variant. That is fine at a concrete call site and
-useless to code that knows neither: a routine that has been handed a value and told which variant to wrap it
-in cannot write that expression.
+Generic code needs a trait interface to construct a variant selected by a type parameter.
+`Shape::Circle(circle)` fixes both the enum and variant at the call site.
 
-`#[derive(FromVariant)]` gives it a way to. The derive adds one constructor per variant, addressed by the
-variant's *name as a type*, so the choice of variant becomes a parameter rather than syntax:
+`#[derive(FromVariant)]` generates a constructor for each variant, keyed by its name as a type-level
+tag:
 
 ```rust
 Shape::from_variant(PhantomData::<Symbol!("Circle")>, circle)
 ```
 
-That call is equivalent to `Shape::Circle(circle)`. The difference is that the tag can come from a type
-parameter, so one function can build whichever variant it was asked for, of whichever enum.
+The tagged call constructs the same value as `Shape::Circle(circle)`. Because the tag can be a type
+parameter, a function can select a variant generically. A bound on the enum type also lets the
+function work across different enums.
 
-**This is the simplest derive in the extensible-data family.** It generates no companion type, no state
-tracking, and no traits of its own: just a constructor per variant. It is the counterpart to
-[`#[derive(ExtractField)]`](./derive_extract_field.md), which takes a variant out; this one puts a variant in.
+The derive generates only per-variant trait implementations, without companion types or state
+tracking. [`ExtractField`](./derive_extract_field.md) provides the reverse operation: extracting a
+payload from an enum.
 
 ## Usage
 
-The macro is a plain derive on an enum. It takes no arguments and has no helper attributes:
+Apply `FromVariant` to an enum without arguments or helper attributes:
 
 ```rust
 use cgp::prelude::*;
@@ -47,12 +47,11 @@ impl.
 
 ### Every variant needs exactly one unnamed payload
 
-**The derive shares the extractor's one requirement.** A constructor has to take a single value, so a unit
-variant, a multi-field tuple variant, and a struct-style variant all fail with
-`Expected variant to contain exactly one unnamed field`. There is no per-variant opt-out, so an enum that
-mixes shapes cannot take this derive.
+Every variant must contain exactly one unnamed field, whose type becomes the constructor's payload
+type. Unit, multi-field, and struct-style variants fail with
+`Expected variant to contain exactly one unnamed field`. Individual variants cannot opt out.
 
-Wrapping the payload in its own struct is the fix, and idiomatic CGP enums do it anyway:
+Wrap a richer payload in a dedicated struct so the variant contains a single payload type:
 
 ```rust
 pub struct Circle {
@@ -65,23 +64,23 @@ pub enum Shape {
 }
 ```
 
-If the enum only needs to be *described* rather than constructed,
-[`#[derive(HasFields)]`](./derive_has_fields.md) accepts all four variant shapes instead. A variantless enum
-is accepted here and simply produces no impls.
+[`HasFields`](./derive_has_fields.md) accepts every variant shape when only a structural
+representation and whole-value conversions are needed. `FromVariant` accepts a variantless enum but
+does not emit any implementations for it.
 
 The derive parses an enum, so applying it to a struct fails at parse time. The struct analogue, setting one
 field of a value being assembled, is [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ### What it does *not* generate
 
-Deriving this slice alone gives you construction and nothing else: **no** whole-shape representation and
-**no** extractor. Those come from [`#[derive(HasFields)]`](./derive_has_fields.md) and
-[`#[derive(ExtractField)]`](./derive_extract_field.md), and the umbrella
-[`#[derive(CgpData)]`](./derive_cgp_data.md) includes all three.
+`FromVariant` generates constructors without a structural representation or an extractor. Derive
+[`HasFields`](./derive_has_fields.md) for the representation and
+[`ExtractField`](./derive_extract_field.md) for extraction, or use
+[`CgpData`](./derive_cgp_data.md) for all of them.
 
 ## Examples
 
-The capability is a function that stays generic over the variant it builds:
+A function can use `FromVariant<Tag>` to stay generic over the variant it constructs:
 
 ```rust
 use cgp::prelude::*;
@@ -100,19 +99,19 @@ where
 }
 ```
 
-One `wrap` builds either variant, and its payload type is *derived from the tag* rather than fixed:
+`wrap` constructs either variant, with the payload type determined by the tag:
 
 ```rust
 let circle = wrap(PhantomData::<Symbol!("Circle")>, Circle { radius: 2.0 });
 let rect = wrap(PhantomData::<Symbol!("Rectangle")>, Rectangle { width: 3.0, height: 4.0 });
 ```
 
-No hand-written function can do that, because `Shape::Circle` and `Shape::Rectangle` are different
-expressions taking different types.
+The `FromVariant<Tag>` bound connects each tag to its payload type and constructor. Without that
+interface, `Shape::Circle` and `Shape::Rectangle` remain separate expressions with different argument
+types.
 
-In practice this earns its keep when building a value using only the variants an implementation knows about,
-then widening it. A routine that only produces two of a large enum's variants declares a small local enum,
-constructs into that, and lifts the result into the full type with an upcast:
+Upcasting lets an implementation construct a small local enum and convert it into a larger one.
+The implementation only needs to know the variants Each generated implementation selects its constructor through the variant-name tag:
 
 ```rust
 use cgp::core::field::impls::CanUpcast;   // not in the prelude
@@ -120,36 +119,29 @@ use cgp::core::field::impls::CanUpcast;   // not in the prelude
 let expr = LispSubExpr::Ident(Ident("+".to_owned())).upcast(PhantomData::<LispExpr>);
 ```
 
-The upcast always succeeds, because every variant of the smaller enum maps to one in the larger one. That is
-the construction-side counterpart of reading a field through a getter: the implementation names only what it
-needs, and the widening is checked. Upcasting is documented with the other
-[structural casts](../traits/casting/can_upcast.md), and it is built on the same per-variant machinery as this derive.
+An upcast succeeds when every source variant has a matching variant in the target enum. The compiler
+checks this correspondence, so the implementation can name only the variants it needs. See
+[`CanUpcast`](../traits/casting/can_upcast.md) for the conversion and its trait requirements.
 
 ## When to use it
 
-**Derive it when code that does not name a variant has to construct one.** That is the whole test, and it is
-a narrower need than deconstruction. Most code decides which variant to build at a site that can just name
-it.
+Use `FromVariant` when generic code must construct a variant selected by a tag. Prefer a direct
+constructor when the call site already knows the variant:
 
-- **Reach for it when the variant is chosen by a type parameter.** A routine parameterized over the variant
-  it produces has no other option.
-- **Reach for it to make a smaller enum upcastable into a larger one.** Casting between enums is built on
-  these constructors, so this derive lets an implementation work in a narrow local enum and widen the
-  result.
-- **Do not reach for it for an ordinary constructor call.** `Shape::Circle(circle)` is shorter, clearer, and
-  generates nothing. This derive adds a *second* way to do the same thing, for callers that cannot use the
-  first.
-- **Do not derive it alone if you also want to take the enum apart**, which is the usual case. Reach for
-  [`#[derive(CgpData)]`](./derive_cgp_data.md) or [`#[derive(CgpVariant)]`](./derive_cgp_variant.md), which
-  bundle construction, deconstruction, and the representation.
+- **A variant selected by a type parameter:** use `FromVariant<Tag>` to connect the tag, payload type,
+  and constructor.
+- **An upcast target:** generic casts use these constructors to build the target enum's variants.
+- **An ordinary constructor call:** use `Shape::Circle(circle)` when the variant is known directly.
+- **Construction and extraction together:** use [`CgpData`](./derive_cgp_data.md) or
+  [`CgpVariant`](./derive_cgp_variant.md) to include both operations and the representation.
 
-The constructor and the extractor divide exactly as their names suggest: this derive puts a value
-into an enum, [`#[derive(ExtractField)]`](./derive_extract_field.md) gets one out, and they are commonly
-derived together because a generic pipeline usually does both.
+`FromVariant` constructs an enum from a payload, while
+[`ExtractField`](./derive_extract_field.md) extracts a payload from an enum. Generic pipelines that
+do both commonly derive both.
 
 ## Under the hood
 
-The derive emits **one impl per variant and nothing else**: no companion type, no markers, no state. From:
+The derive emits one `FromVariant` implementation per variant. For this input:
 
 ```rust
 #[derive(FromVariant)]
@@ -179,13 +171,12 @@ impl FromVariant<Symbol!("Rectangle")> for Shape {
 }
 ```
 
-Each body is the plain constructor call. The impl adds two things: the *choice* between them is now a type
-argument, and the payload type is reachable as `<Shape as FromVariant<Tag>>::Value`, which lets a generic
-signature name it without knowing which variant is in play.
+Each implementation calls the ordinary variant constructor. It exposes the payload type as
+`<Shape as FromVariant<Tag>>::Value`, so a generic signature can name that type without selecting a
+concrete variant.
 
-The `PhantomData<Tag>` parameter carries no value. It exists so a call site can say which impl it means when
-several are in scope, which is why the tag is passed as `PhantomData::<Symbol!("Circle")>` rather than
-inferred.
+`PhantomData<Tag>` selects the trait implementation without storing a runtime tag value. Specify a
+tag such as `PhantomData::<Symbol!("Circle")>` when the call would otherwise be ambiguous.
 
 The [`FromVariant`](../traits/variant/from_variant.md) trait itself is defined in the library; the derive supplies only
 these per-variant impls. Each is aimed at the variant it came from, so a conflict with a hand-written impl
@@ -193,16 +184,15 @@ underlines that variant rather than the whole `#[derive(FromVariant)]`.
 
 ## Common Mistakes
 
-**Every variant must carry exactly one unnamed payload**, the same requirement the extractor has, with no
-per-variant opt-out. [`#[derive(HasFields)]`](./derive_has_fields.md) is the derive that accepts all four
-shapes.
+**Every variant must carry exactly one unnamed payload.** Individual variants cannot opt out.
+[`HasFields`](./derive_has_fields.md) accepts all variant shapes when only a representation is needed.
 
-**The tag has to be written out, not inferred.** `Shape::from_variant(PhantomData::<Symbol!("Circle")>, value)`
-needs the turbofish, because nothing in the value determines which variant to build when two variants could
-share a payload type.
+**Specify the tag when the payload does not determine the variant.** In
+`Shape::from_variant(PhantomData::<Symbol!("Circle")>, value)`, the type argument selects `Circle`.
+The payload type alone cannot distinguish variants that share that type.
 
-**Two variants with the same payload type are still distinguishable, and only by the tag.** That is the reason
-for the previous point, and it means a mistyped tag is a missing-impl error rather than a type mismatch.
+**Variants sharing a payload type have distinct tags.** A tag that does not match an implemented
+variant produces an unsatisfied `FromVariant` bound.
 
 **A variant name is a `Symbol!` of its identifier, matched exactly.** `Symbol!("Circle")` and
 `Symbol!("circle")` are unrelated types, so a case slip reports as an unsatisfied `FromVariant` bound.
@@ -213,13 +203,15 @@ type, and a variant of that name makes the path ambiguous. The compiler reports
 `Value` is the only name this derive reserves; the [extractor](./derive_extract_field.md) reserves several
 more, so an enum taking both should avoid all of them. Renaming the variant is the fix.
 
-**A variantless enum produces nothing**, silently. The derive succeeds and emits no impls, which is correct
-and, as with the other empty shapes, means a mistake shows up later rather than here.
+**A variantless enum is accepted without generating implementations.** It has nothing to construct;
+code requiring a `FromVariant` implementation will fail at that use site.
 
 **It does not accept a struct.** The struct-side analogue is
 [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ## Related constructs
+
+These references cover the related derives, generated traits, and supporting types:
 
 - [`#[derive(ExtractField)]`](./derive_extract_field.md) — the reverse operation, taking a variant out
   rather than putting one in; commonly derived alongside this one.
@@ -234,12 +226,14 @@ and, as with the other empty shapes, means a mistake shows up later rather than 
 - [Type-level lists](../types/index.md) — the `Either`/`Void` chain the constructed variants
   correspond to.
 
-The ideas behind it:
+The ideas behind it are explained on these concept pages:
 
 - [Extensible variants](/docs/concepts/extensible-variants) — construction by name, and building through a
   small local enum before widening.
 
 ## Source
+
+The implementation is defined in these source files:
 
 - Entry point: [`derive_from_variant.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/derive_from_variant.rs)
 - Codegen: [`cgp_data/derive_from_variant.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_from_variant.rs)

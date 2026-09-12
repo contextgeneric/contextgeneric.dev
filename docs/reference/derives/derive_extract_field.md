@@ -5,18 +5,16 @@ sidebar_position: 7
 
 # `#[derive(ExtractField)]`
 
-Extractor support for a variant.
+`#[derive(ExtractField)]` generates an enum extractor that tracks remaining variants in its type.
 
 ## Overview
 
-A `match` on an enum is checked for exhaustiveness, which is one of Rust's best properties. But it only
-works where the concrete enum is named. Code that is generic over the enum cannot write a `match`, so it
-falls back on a wildcard arm and an `unreachable!()`, discarding exactly the guarantee you wanted to
-keep.
+Generic code cannot match directly on an enum whose concrete type it does not know. It needs a trait
+interface that preserves Rust's exhaustiveness checking while handling variants individually.
 
-`#[derive(ExtractField)]` recovers it. It lets an enum be taken apart one variant at a time, and it tracks
-which variants are still possible **in the type**. Each attempt either yields the payload or hands back a
-*remainder* whose type has that variant ruled out:
+`#[derive(ExtractField)]` provides that interface by tracking the remaining variants in the
+extractor's type. Each extraction either returns the payload or returns a **remainder** whose type
+rules out that variant:
 
 ```rust
 match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
@@ -25,19 +23,18 @@ match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
 }
 ```
 
-Keep going and the remainder narrows each time. Once every variant has been ruled out, the remainder's type
-is **uninhabited** (a value of it cannot exist), and that closes the chain with no wildcard arm and no panic
-path. Add a variant to the enum and the final remainder becomes inhabited again, so the code stops compiling
-until the new variant is handled. The exhaustiveness check survives, for code that never names the enum.
+The chain is exhaustive when every variant has been ruled out. At that point, the remainder is
+**uninhabited**, meaning a value of its type cannot exist, so the chain can finish without a wildcard
+arm or a panic. Adding a variant makes the final remainder inhabited again and prevents finalization
+until the new variant is handled.
 
-The struct-side counterpart is [`#[derive(BuildField)]`](./derive_build_field.md), which tracks which
-fields are present rather than which variants are possible. Both show what "extensible" means in
-[extensible data](/docs/concepts/extensible-variants): the type carries the progress, so the compiler
-checks it.
+[`BuildField`](./derive_build_field.md) provides the corresponding operation for structs: it tracks
+which fields are present during construction. Both use types to record progress so the compiler can
+check completeness.
 
 ## Usage
 
-The macro is a plain derive on an enum. It takes no arguments and has no helper attributes:
+Apply `ExtractField` to an enum without arguments or helper attributes:
 
 ```rust
 use cgp::prelude::*;
@@ -55,12 +52,11 @@ every generated impl.
 
 ### Every variant needs exactly one unnamed payload
 
-**This is the derive's one requirement, and it is strict.** Extraction has to name a single type per variant,
-so a unit variant, a multi-field tuple variant, and a struct-style variant all fail with
-`Expected variant to contain exactly one unnamed field`. There is no way to opt one variant out, so an enum
-that mixes shapes cannot derive the extractor at all.
+Every variant must contain exactly one unnamed field. The extractor uses that field's type as its
+payload type. Unit, multi-field, and struct-style variants fail with
+`Expected variant to contain exactly one unnamed field`. Individual variants cannot opt out.
 
-The fix is to give the payload its own struct:
+Wrap the payload in a dedicated struct to give each variant a single payload type:
 
 ```rust
 // rejected: no single payload type
@@ -83,43 +79,39 @@ pub enum Shape {
 }
 ```
 
-That is idiomatic rather than a concession. The payload usually deserves to be a type, and it can derive the
-extensible-data machinery itself. Note that even a fieldless case has to be given a payload struct, since a
-bare `Empty` is a unit variant.
+Payload structs can derive extensible-data operations themselves. A fieldless case also needs a
+payload type, such as the unit struct `Empty` above; a bare `Empty` variant does not meet the
+single-field requirement.
 
-If you want the enum described structurally without deriving the extractor,
-[`#[derive(HasFields)]`](./derive_has_fields.md) accepts all four variant shapes. A variantless enum is
-accepted here too, and degenerates: the companion enums take no parameters at all.
+[`HasFields`](./derive_has_fields.md) accepts every variant shape when only a structural
+representation and whole-value conversions are needed. `ExtractField` also accepts a variantless
+enum; its companion enums do not need field-state parameters.
 
 The derive parses an enum, so applying it to a struct fails at parse time. The struct analogue is
 [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ### What it does *not* generate
 
-Deriving this slice alone gives you deconstruction and nothing else: **no** whole-shape representation and
-**no** generic constructors. Those come from [`#[derive(HasFields)]`](./derive_has_fields.md) and
-[`#[derive(FromVariant)]`](./derive_from_variant.md), and the umbrella
-[`#[derive(CgpData)]`](./derive_cgp_data.md) includes all three. So an enum deriving only `ExtractField` is
-taken apart generically but still constructed with its ordinary `Shape::Circle(..)` constructor.
+`ExtractField` generates extraction support without a structural representation or generic
+constructors. Derive [`HasFields`](./derive_has_fields.md) for the representation and
+[`FromVariant`](./derive_from_variant.md) for constructors, or use
+[`CgpData`](./derive_cgp_data.md) for all of them. An enum deriving only `ExtractField` still uses
+ordinary constructors such as `Shape::Circle(..)`.
 
 ### The three extractors
 
-The derive generates three ways in, differing only in how the payload is held.
+Choose an extractor according to how the operation needs to access the payload:
 
-**`to_extractor()`** consumes the value and yields payloads by value. This is the one most code uses.
+- **`to_extractor()`**: consume the enum and return payloads by value.
+- **`extractor_ref()`**: borrow the enum and return shared references to payloads.
+- **`extractor_mut()`**: borrow the enum mutably so payloads can be modified in place.
 
-**`extractor_ref()`** borrows, so each payload comes out as a shared reference and the original value is
-untouched. Use it for a read-only operation over an enum you do not own.
-
-**`extractor_mut()`** borrows mutably, so a payload can be modified in place.
-
-All three then drive the same `extract_field` chain, and `from_extractor` converts an owned extractor back
-into the enum.
+Each form supports the same `extract_field` chain. `from_extractor` converts an all-present owned
+extractor back into the original enum.
 
 ## Examples
 
-The chain reads as a sequence of attempts, each handling one variant, with the last one closed by
-`finalize_extract_result`:
+`finalize_extract_result` returns the last payload once the chain has ruled out every other variant:
 
 ```rust
 use cgp::core::field::traits::FinalizeExtractResult;
@@ -144,12 +136,11 @@ fn area(shape: Shape) -> f64 {
 }
 ```
 
-The second `extract_field` returns a `Result` whose error type is uninhabited, so
-`finalize_extract_result` collapses it to the value with nothing to handle. That is not a convention. It is
-the type. Try to finalize after only the first extraction and it does not compile, because `Rectangle` is
-still possible.
+The final `extract_field` returns a `Result` with an uninhabited error type, so
+`finalize_extract_result` can return its value directly. Finalizing after only the `Circle` attempt
+fails to compile because `Rectangle` is still possible.
 
-Reading through a borrow leaves the value intact:
+`extractor_ref()` lets the operation read a payload while preserving the original value:
 
 ```rust
 let radius = shape
@@ -159,7 +150,7 @@ let radius = shape
     .ok();
 ```
 
-And the mutable form modifies a payload in place:
+`extractor_mut()` lets the operation modify a payload in place:
 
 ```rust
 if let Ok(circle) = shape
@@ -170,47 +161,40 @@ if let Ok(circle) = shape
 }
 ```
 
-In practice you rarely write these chains by hand. The
-[dispatch combinators](../providers/dispatch/index.md) build them for you from a set of per-variant
-implementations, which is the extensible visitor pattern: a chain like the one above, generated, with one
-implementation per variant chosen by wiring.
+The [dispatch combinators](../providers/dispatch/index.md) generate extraction chains from
+per-variant implementations. This supports the extensible visitor pattern: each implementation
+handles a variant, and wiring selects which implementation to use.
 
 ## When to use it
 
-**Derive an extractor when independent code has to handle one variant each, or when the code doing the
-matching cannot name the enum.** Those are the two cases, and outside them a `match` wins on every count.
+Use `ExtractField` when independent implementations handle individual variants or when generic code
+cannot name the enum. Prefer ordinary matching when the concrete enum is available:
 
-- **Reach for it for the extensible visitor pattern.** When variants and the operations over them both need
-  to grow without editing each other, this derive supports per-variant implementations plus a dispatcher.
-- **Reach for it when the enum is a type parameter.** Generic code cannot `match`, so the extractor is the
-  only route to an exhaustiveness guarantee.
-- **Do not reach for it for a closed enum with fixed operations.** A `match` is shorter, reads better,
-  already gives exhaustiveness, and generates nothing. This derive is not an improvement on `match`; you use
-  it when `match` is unavailable.
-- **Do not reach for it to test which variant a value holds.** `matches!` or an `if let` answers that in one
-  line. The extractor's value is in the *chain* and what the chain proves.
+- **The extensible visitor pattern:** combine independent per-variant implementations through a
+  dispatcher when variants and operations need to grow separately.
+- **A generic enum type:** use the extractor's trait interface to check exhaustiveness without naming
+  the concrete variants in a `match`.
+- **A closed enum with fixed operations:** use a `match`, which already checks exhaustiveness.
+- **A single variant test:** use `matches!` or `if let` when a complete extraction chain is unnecessary.
 
-Between this derive and its neighbours:
+Choose the derive according to the operations the enum needs:
 
-- **[`#[derive(CgpData)]`](./derive_cgp_data.md) or [`#[derive(CgpVariant)]`](./derive_cgp_variant.md)** if the
-  enum also needs a structural representation or generic construction, which is the common case. Those
-  include this output.
-- **`#[derive(ExtractField)]` alone** when the enum is only ever deconstructed generically.
-- **[`#[derive(FromVariant)]`](./derive_from_variant.md)** is the opposite direction, and the two are often
-  wanted together.
+- **[`CgpData`](./derive_cgp_data.md) or [`CgpVariant`](./derive_cgp_variant.md)**: include the
+  representation and generic constructors alongside extraction.
+- **`ExtractField` alone**: provide only generic extraction.
+- **[`FromVariant`](./derive_from_variant.md)**: provide generic construction, often needed alongside
+  extraction.
 
-One honest limit: the single-payload requirement is real friction. An enum whose variants carry no payload,
-or several, has to be restructured before it can take this derive, and that restructuring reaches every
-construction site. It is worth doing when the visitor pattern is the goal and not worth doing to satisfy a
-derive you did not need.
+The single-payload requirement can require changes at every construction site. An enum with unit,
+multi-field, or struct-style variants must be restructured before it can derive the extractor.
+Consider that cost when deciding whether independent variant handling is needed.
 
 ## Under the hood
 
-The derive centres on **two** companion enums. `__Partial{Name}` is your enum with one
-[`MapType`](../traits/type-level/map_type.md) parameter added per variant and each payload wrapped in that parameter's
-projection, where `IsPresent` keeps the payload and `IsVoid` maps it to the uninhabited `Void`.
-`__PartialRef{Name}` adds a reserved `'__a__` lifetime and a second marker that selects a shared or a mutable
-borrow of each payload. From:
+The derive generates an owned companion enum and a borrowed companion enum. `__Partial{Name}` adds
+one [`MapType`](../traits/type-level/map_type.md) parameter per variant: `IsPresent` preserves the
+payload and `IsVoid` replaces it with the uninhabited `Void`. `__PartialRef{Name}` also adds the
+reserved lifetime `'__a__` and a marker selecting shared or mutable references. For this input:
 
 ```rust
 #[derive(ExtractField)]
@@ -220,7 +204,7 @@ pub enum Shape {
 }
 ```
 
-it emits:
+The companion enums wrap each payload in the corresponding marker projections:
 
 ```rust
 pub enum __PartialShape<__F0__: MapType, __F1__: MapType> {
@@ -234,8 +218,8 @@ pub enum __PartialRefShape<'__a__, __R__: MapTypeRef, __F0__: MapType, __F1__: M
 }
 ```
 
-Around them come the three entry points and the exit. `HasExtractor` yields an owned extractor with every
-variant present; the borrowed pair yield the ref enum with the borrow marker fixed to `IsRef` or `IsMut`:
+`HasExtractor` supplies an owned extractor with every variant still possible. `HasExtractorRef` and
+`HasExtractorMut` use the borrowed companion with its borrow marker set to `IsRef` or `IsMut`:
 
 ```rust
 impl HasExtractor for Shape {
@@ -253,9 +237,8 @@ impl HasExtractorRef for Shape {
 // plus HasExtractorMut over __PartialRefShape<'__a__, IsMut, IsPresent, IsPresent>
 ```
 
-The exit is the impl the whole design turns on. It exists only for the all-`IsVoid` configuration, and
-because that configuration is uninhabited its body is an empty `match`, which is why it can claim to return
-*any* type:
+`FinalizeExtract` is implemented only for the all-`IsVoid` configuration. That configuration is
+uninhabited, so its implementation can return any type through an empty match:
 
 ```rust
 impl FinalizeExtract for __PartialShape<IsVoid, IsVoid> {
@@ -265,8 +248,8 @@ impl FinalizeExtract for __PartialShape<IsVoid, IsVoid> {
 }
 ```
 
-Then, per variant, an `ExtractField` impl in scope only when that variant's marker is `IsPresent`. It returns
-`Ok` on a match and, on a miss, an `Err` whose type has that one marker flipped to `IsVoid`:
+Each variant gets an `ExtractField` implementation available when its marker is `IsPresent`.
+A match returns `Ok(payload)`; a miss returns `Err(remainder)` with that marker changed to `IsVoid`:
 
 ```rust
 impl<__F1__: MapType> ExtractField<Symbol!("Circle")> for __PartialShape<IsPresent, __F1__> {
@@ -282,47 +265,45 @@ impl<__F1__: MapType> ExtractField<Symbol!("Circle")> for __PartialShape<IsPrese
 }
 ```
 
-Note that only the extracted variant's marker changes. The rest stay generic, which lets the extractions
-happen in any order. The same impls are emitted over the ref enum, so a borrowed chain narrows identically.
+Extractions can run in any order because each step changes only its own variant's marker. The other
+markers remain generic. The borrowed companion receives equivalent implementations, so borrowed
+extraction narrows the remainder in the same way.
 
 `FinalizeExtract` and its companion `FinalizeExtractResult` are library traits; the derive supplies only the
 all-void impl. `finalize_extract_result` calls `FinalizeExtractResult` to collapse a
 `Result<T, Uninhabited>` into `T`.
 
-**The variantless enum is genuinely special-cased**, and the reason is a Rust subtlety worth knowing. Such an
-enum borrows nothing, so the ref companion is emitted as a bare empty enum with neither the lifetime nor the
-borrow marker. Leaving them in would make both unused parameters. And every borrowed accessor matches
-`*self` rather than `self`, because a reference is always considered inhabited even when its target is not, so
-`match self {}` on a `&Self` would be rejected as non-exhaustive.
+A variantless enum produces an empty borrowed companion without a lifetime or borrow marker. It
+borrows nothing, so those parameters would be unused. Its borrowed accessors match `*self` rather
+than `self`: Rust considers a reference inhabited even when its target is uninhabited, so an empty
+`match self {}` on `&Self` would fail the exhaustiveness check.
 
 Each generated impl is aimed at the token it came from: a per-variant impl at its variant, a whole-enum impl
 at the enum name. The companion enums are cloned from yours, so their tokens already carry meaningful spans.
 
 ## Common Mistakes
 
-**Every variant must carry exactly one unnamed payload.** A unit, multi-field, or struct-style variant fails,
-with no per-variant opt-out. Wrap the payload in its own struct, including for a case that carries nothing,
-which still needs a payload type. [`#[derive(HasFields)]`](./derive_has_fields.md) is the derive that accepts
-all four shapes.
+**Every variant must carry exactly one unnamed payload.** Individual variants cannot opt out. Wrap
+richer payloads in structs, and give a fieldless case a payload type too.
+[`HasFields`](./derive_has_fields.md) accepts all variant shapes if only a representation is needed.
 
-**Absence here is `IsVoid`, not `IsNothing`.** The record side uses `IsNothing`, which maps a type to `()`
-and is inhabited; a ruled-out variant uses `IsVoid`, which maps to the uninhabited `Void`. That difference
-matters rather than being cosmetic: it is why a fully-narrowed remainder cannot exist and can be discharged.
-An error naming the wrong marker usually means record and variant machinery have been crossed.
+**A ruled-out variant uses `IsVoid`.** It maps the payload to uninhabited `Void`, allowing a fully
+narrowed remainder to be finalized. The record marker `IsNothing` maps to inhabited `()`, so it cannot
+serve that purpose. An error naming `IsNothing` usually means record and variant operations have
+been mixed.
 
-**Five variant names are reserved, and using one does not compile.** The generated impls write
-`Self::Value`, `Self::Remainder`, `Self::Extractor`, `Self::ExtractorRef`, and `Self::ExtractorMut` to name
-their associated types, so a variant with any of those names makes the path ambiguous. The compiler reports
-`ambiguous associated item`, and this is the opaque one in the family: both the headline *and* the
-"could refer to the variant defined here" note land on the derive, so nothing in the output names the
-variant to rename. That is because these impls are generated for the companion enums rather than for
-yours. Check your variant names against the five above. Renaming the variant is the fix.
-[`#[derive(HasFields)]`](./derive_has_fields.md) reserves `Fields` and `FieldsRef` for the same reason, so an
-enum deriving the whole family should avoid all seven.
+**Reserved variant names make generated associated-type paths ambiguous.** Avoid `Value`, `Remainder`,
+`Extractor`, `ExtractorRef`, and `ExtractorMut`. The generated implementations use those names through
+`Self::…`, which conflicts with identically named variants and produces `ambiguous associated item`.
 
-**A remainder carries none of the enum's attributes.** Like the record side's companion, the partial enums
-are generated without your derives, so a `Result<Payload, Remainder>` cannot be compared or printed as a
-whole. Reach for `.ok()`, `.is_ok()`, or a `match` rather than `assert_eq!` on the result.
+Extractor diagnostics may leave the offending variant unnamed. The implementations target generated
+companion enums, so both the headline and the note can point to the derive. Check the names above and
+rename the conflicting variant. [`HasFields`](./derive_has_fields.md) also reserves `Fields` and
+`FieldsRef`, so an enum deriving the full family must avoid those too.
+
+**The remainder does not inherit the enum's attributes.** Deriving `Debug` or `PartialEq` on the
+enum does not implement them for the companion. Use `.ok()`, `.is_ok()`, or a `match` to inspect the
+result instead of printing or comparing the whole `Result<Payload, Remainder>`.
 
 **`FinalizeExtractResult` is not in the prelude.** Import it from `cgp::core::field::traits` to call
 `finalize_extract_result`.
@@ -331,17 +312,19 @@ whole. Reach for `.ok()`, `.is_ok()`, or a `match` rather than `assert_eq!` on t
 while any marker is still `IsPresent`, so the compiler reports a missing method. Read the companion type in
 the message to see which variants are still possible.
 
-**The order of extraction is free but the set is not.** Each step only changes its own variant's marker, so
-you may extract in any order. But you must extract *every* variant before the remainder can be finalized.
+**Every variant must be ruled out before finalizing the remainder.** Extraction order is unrestricted
+because each step changes only its own variant's marker.
 
-**Adding a variant breaks every hand-written chain, by design.** That is the guarantee, and it is the reason
-to prefer the [dispatch combinators](../providers/dispatch/index.md), which derive the chain from the
-enum's own variant list rather than repeating it at each site.
+**Adding a variant makes an existing exhaustive chain incomplete.** Update hand-written chains to
+handle the new variant, or use [dispatch combinators](../providers/dispatch/index.md) to generate
+chains from the enum's variant list.
 
 **It does not accept a struct.** The struct analogue is
 [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ## Related constructs
+
+These references cover the related derives, generated traits, and supporting types:
 
 - [`#[derive(CgpData)]`](./derive_cgp_data.md) — the umbrella derive, which includes this slice.
 - [`#[derive(FromVariant)]`](./derive_from_variant.md) — the opposite direction, generic construction, which
@@ -360,13 +343,15 @@ enum's own variant list rather than repeating it at each site.
 - [Dispatch combinators](../providers/dispatch/index.md) — the providers that build an extraction chain
   for you, one implementation per variant.
 
-The ideas behind it:
+The ideas behind it are explained on these concept pages:
 
 - [Extensible variants](/docs/concepts/extensible-variants) — partial variants, the exhaustiveness argument,
   and the extensible visitor pattern.
 - [Dispatching](/docs/concepts/dispatching) — routing a variant to the implementation that handles it.
 
 ## Source
+
+The implementation is defined in these source files:
 
 - Entry point: [`derive_extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/derive_extract_field.rs)
 - Codegen: [`cgp_data/derive_extractor/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_extractor)

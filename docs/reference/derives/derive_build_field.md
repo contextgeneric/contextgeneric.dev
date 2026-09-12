@@ -5,19 +5,18 @@ sidebar_position: 6
 
 # `#[derive(BuildField)]`
 
-Builder support for a record.
+`#[derive(BuildField)]` generates a struct builder that tracks field presence in its type.
 
 ## Overview
 
-A struct literal has to be written in one place that names the concrete type and supplies every field at
-once. That is usually what you want. It is exactly wrong when the fields come from several independent
-places, none of which should know the whole type. A hand-written constructor that grows a parameter per
-subsystem becomes the one file every change has to edit.
+A struct literal requires one place to name the concrete type and supply every field. When independent
+parts of a program contribute fields, a shared constructor can force each contribution to depend on
+the whole struct.
 
-`#[derive(BuildField)]` replaces it with a builder whose completeness is tracked **in the type**. The
-derive generates a companion struct that starts out with every field absent, and each step fills one
-field in and returns a value of a *different* type: one where that field is now present. Only the
-all-present type can be turned back into the real struct:
+`#[derive(BuildField)]` lets generic code assemble fields independently while the compiler checks
+completeness. It generates a companion struct whose type records which fields are present. Each step
+sets a field and returns a new type reflecting that state. The builder can produce the original
+struct only once every field is present:
 
 ```rust
 let person = Person::builder()                                     // nothing set yet
@@ -26,17 +25,17 @@ let person = Person::builder()                                     // nothing se
     .finalize_build();                                             // every field set: closes
 ```
 
-Delete either middle line and this does not compile. There is no runtime check, no `Option` per field,
-and no panic path: `finalize_build` simply does not exist for a value with a field still missing. A
-conventional builder catches a missing field at run time; this catches it while you are typing.
+Finalizing an incomplete builder fails to compile. Removing either `build_field` call above leaves a
+field absent, so `finalize_build` is unavailable for the resulting type. The presence check does not
+require runtime `Option` values or a panic path.
 
-The other half of the payoff is that steps are decoupled. Because each `build_field` names its field by a
-type-level tag rather than by calling a method on the concrete type, generic code can fill in a field of a
-struct it does not know, and two independent implementations can each contribute part of one value.
+Field tags let independent implementations contribute to the same builder. Each `build_field` call
+addresses a field by its type-level tag, so generic code can set that field without knowing the
+concrete struct.
 
 ## Usage
 
-The macro is a plain derive on a struct. It takes no arguments and has no helper attributes:
+Apply `BuildField` to a struct without arguments or helper attributes:
 
 ```rust
 use cgp::prelude::*;
@@ -54,9 +53,8 @@ tag holds. A tuple struct works the same way with positional tags: a field at po
 `build_field(PhantomData::<Index<0>>, value)`. Generic parameters, lifetimes, and a `where` clause are
 carried onto the companion type and every generated impl.
 
-A fieldless struct is the degenerate case rather than an error. Its companion type takes no parameters at
-all, so there is exactly one configuration of it and `builder()` is immediately finalizable. The presence
-tracking has nothing to track.
+A fieldless struct produces a builder that can be finalized immediately. Its companion does not need
+field-state parameters because it has nothing to track.
 
 The derive parses a struct, so applying it to an enum fails at parse time. The enum counterparts are
 [`#[derive(ExtractField)]`](./derive_extract_field.md) for taking one apart and
@@ -64,26 +62,23 @@ The derive parses a struct, so applying it to an enum fails at parse time. The e
 
 ### What it does *not* generate
 
-This is the point of deriving it alone, so it is worth being explicit. `#[derive(BuildField)]` emits the
-builder and nothing else: **no** `HasField` accessors on your struct and **no** whole-shape representation.
-Those come from [`#[derive(HasField)]`](./derive_has_field.md) and
-[`#[derive(HasFields)]`](./derive_has_fields.md), and the umbrella
-[`#[derive(CgpData)]`](./derive_cgp_data.md) includes all three.
+`BuildField` generates the builder without adding accessors or a structural representation to the
+original struct. Derive [`HasField`](./derive_has_field.md) for per-field access and
+[`HasFields`](./derive_has_fields.md) for the representation. [`CgpData`](./derive_cgp_data.md)
+includes all of these outputs.
 
-So a struct that derives only `BuildField` can be *built* generically and not *read* generically. That is
-occasionally exactly right, for an output type a pipeline assembles and hands back, and it is why the
-slice exists.
+A struct deriving only `BuildField` supports generic construction without generic reads from the
+finished value. This suits an output type that a pipeline assembles and returns.
 
 ### The three ways to fill a field
 
-The builder is driven through methods that come from the library rather than from the derive, and there are
-three of them.
+The library provides methods to set a field, merge source fields, and remove a field. The derive
+supplies the implementations these methods require.
 
-**`build_field`** sets one absent field to a value, which is the step shown above.
+**`build_field`** sets an absent field to a value, as shown above.
 
-**`build_from`** copies every field the target and a source record share, in one step. It comes from
-[`CanBuildFrom`](../traits/casting/can_build_from.md), and is imported from
-`cgp::core::field::impls`:
+**`build_from`** moves fields from a source record into the target builder. It comes from
+[`CanBuildFrom`](../traits/casting/can_build_from.md), imported from `cgp::core::field::impls`:
 
 ```rust
 Employee::builder()
@@ -92,25 +87,22 @@ Employee::builder()
     .finalize_build()
 ```
 
-**The source of a `build_from` needs [`#[derive(HasFields)]`](./derive_has_fields.md) as well**, and this
-is the easiest thing on this page to get wrong. `build_from` walks the *source's* field list to know what
-to copy, and that list comes from `HasFields`. A source deriving only `BuildField` has a builder of its
-own and still cannot be merged into anything. The target needs only this derive.
+The source of `build_from` must also derive [`HasFields`](./derive_has_fields.md).
+`build_from` traverses the source's field list, which `BuildField` alone does not provide. The target
+needs only `BuildField`.
 
-**`take_field`** goes the other way: it removes a field that is already present, handing back the value
-alongside a builder with that field absent again. It is the reverse of `build_field` and comes from
-`TakeField`, which unlike the rest of the family is **not in the prelude**. Import it from
-`cgp::core::field::traits` when calling it directly. Most code meets it indirectly, since `build_from`
-uses it to pull each field out of the source.
+**`take_field`** removes a present field and returns its value alongside a builder with that field
+absent. It reverses `build_field` and comes from `TakeField`, which is not in the prelude. Import it
+from `cgp::core::field::traits` for direct calls. `build_from` uses it internally to remove source
+fields.
 
-Two more methods sit at the ends of the process. `builder()` produces the empty builder, and
-`into_builder()` goes the other way, turning a finished struct into an all-present builder so its fields
-can be redistributed.
+`builder()` creates an empty builder, while `into_builder()` turns a finished struct into an
+all-present builder. Use `into_builder()` when generic code needs to redistribute existing fields.
 
 ## Examples
 
-The clearest use is extending one record into a larger one. Both structs derive the builder, and the smaller
-one's fields move across in a single step:
+A builder can extend a source record with additional fields. Both types below derive `BuildField`,
+and the source also derives `HasFields` so `build_from` can traverse its fields:
 
 ```rust
 use cgp::core::field::impls::CanBuildFrom;
@@ -138,11 +130,10 @@ fn extend(foo_bar: FooBar) -> FooBarBaz {
 }
 ```
 
-`FooBarBaz` does not mention `FooBar` and `FooBar` does not mention `FooBarBaz`. They share two field names,
-matched at the type level, which is the whole coupling between them.
+The conversion relates `FooBar` and `FooBarBaz` through their field names and types. Neither struct
+names the other in its definition.
 
-A field that has been set can be read back out mid-build, because the companion type gains a `HasField` impl
-per field that is in scope only once that field is present:
+The companion's `HasField` implementation allows a field to be read once it has been set:
 
 ```rust
 let partial = Person::builder()
@@ -151,10 +142,10 @@ let partial = Person::builder()
 assert_eq!(partial.get_field(PhantomData::<Symbol!("first_name")>), "Alice");
 ```
 
-Asking for `last_name` there would not compile, since that field's accessor is not in scope until it is set.
+Reading `last_name` at this point fails to compile because its field is still absent.
 
-And a finished value can be taken apart and put back together, the operation generic code performs when it
-redistributes fields:
+`into_builder()` and `take_field()` let generic code remove fields from a finished value and rebuild
+it:
 
 ```rust
 use cgp::core::field::traits::TakeField;
@@ -171,37 +162,31 @@ let person = remainder
 
 ## When to use it
 
-**Derive `BuildField` when a struct is assembled by code that does not know the whole struct.** That is the
-case it exists for, and it is a narrower case than "this struct has several fields".
+Use `BuildField` when independent code must assemble a struct without knowing its concrete type.
+Choose it for the generic field interface, rather than for the number of fields:
 
-- **Reach for it when independent parts of a program each contribute fields.** This is the extensible
-  builder pattern: one implementation per subsystem, each producing a small struct, merged into a target
-  whose fields the compiler checks are all supplied.
-- **Reach for it when the type being built is itself generic.** Code that builds "whatever record these
-  contributions add up to" needs a builder addressed by tags rather than by method names.
-- **Do not reach for it for a struct you construct with a literal.** A struct literal is already checked for
-  completeness, reads better, and generates nothing. This derive buys the *decoupling*, and if there is
-  nothing to decouple it is pure cost.
-- **Do not reach for it in place of a conventional builder** with defaults and validation. It tracks presence
-  and nothing else: it has no notion of a default value, no way to run a check at finalize time, and no
-  optional field unless you make the field's own type optional. The
-  [optional-field extensions](../traits/optional/has_optional_builder.md) cover the defaulted and optional cases,
-  and a hand-written builder remains the better fit when the logic is the point.
+- **Independent field contributions:** merge outputs from separate implementations and let the
+  compiler check that the target is complete.
+- **A generic target type:** address fields by tags when the builder cannot name the concrete struct.
+- **Ordinary construction:** prefer a struct literal when one place already knows the type and fields.
+  Rust checks its completeness without a generated companion.
+- **Defaults or validation:** use the [optional-field extensions](../traits/optional/has_optional_builder.md)
+  for defaulted and optional fields, or a hand-written builder for custom validation. This derive
+  tracks presence and does not supply defaults or validation at finalization. An `Option<T>` field
+  still needs to be set in the plain builder, even when its value is `None`.
 
-Between this derive and its neighbours the choice is about how much of the machinery you want.
+Choose the derive according to the operations the struct needs:
 
-- **[`#[derive(CgpData)]`](./derive_cgp_data.md) or [`#[derive(CgpRecord)]`](./derive_cgp_record.md)** if the
-  struct also needs per-field reads or a whole-shape representation, which is the common case. Those include
-  this output.
-- **`#[derive(BuildField)]` alone** when the struct is only ever built generically and never read
-  generically.
+- **[`CgpData`](./derive_cgp_data.md) or [`CgpRecord`](./derive_cgp_record.md)**: include per-field
+  access and a structural representation alongside the builder.
+- **`BuildField` alone**: provide generic construction when the finished value does not need generic
+  field access or a structural representation.
 
 ## Under the hood
 
-The derive centres on a companion struct named `__Partial{Name}`. It is your struct with one
-[`MapType`](../traits/type-level/map_type.md) parameter added per field, and each field's type wrapped in that
-parameter's projection. The marker decides how the field is stored: `IsPresent` maps `T` to `T`, `IsNothing`
-maps it to `()`, and `IsVoid` maps it to the uninhabited `Void`. From:
+The companion struct `__Partial{Name}` stores each field through a
+[`MapType`](../traits/type-level/map_type.md) parameter. `IsPresent` maps `T` to `T`, `IsNothing` maps
+it to `()`, and `IsVoid` maps it to the uninhabited `Void`. For this input:
 
 ```rust
 #[derive(BuildField)]
@@ -211,7 +196,7 @@ pub struct Person {
 }
 ```
 
-it emits:
+The generated companion wraps each field in its corresponding marker:
 
 ```rust
 pub struct __PartialPerson<__F0__: MapType, __F1__: MapType> {
@@ -220,7 +205,8 @@ pub struct __PartialPerson<__F0__: MapType, __F1__: MapType> {
 }
 ```
 
-Around that struct come the entry and exit points, and the pair of them is the whole safety argument:
+The builder implementations define the initial state, conversion from a finished value, target type,
+and finalization. Only the all-present companion implements `FinalizeBuild`:
 
 ```rust
 impl HasBuilder for Person {
@@ -246,8 +232,8 @@ impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {  // only at all-p
 }
 ```
 
-Then, per field, an `UpdateField` impl: the primitive everything else is built from. It moves one field's
-marker to a new state, returning the old value alongside the rebuilt companion:
+Each field gets an `UpdateField` implementation that changes its marker and returns its old value
+alongside the updated companion:
 
 ```rust
 impl<__M1__: MapType, __M2__: MapType, __F1__: MapType>
@@ -260,8 +246,8 @@ impl<__M1__: MapType, __M2__: MapType, __F1__: MapType>
 }
 ```
 
-And, per field, a `HasField` impl on the companion that is in scope only when that field's marker is
-`IsPresent`, which lets a set field be read back mid-build:
+Each field also gets a `HasField` implementation on the companion, available when that field's marker
+is `IsPresent`:
 
 ```rust
 impl<__F1__: MapType> HasField<Symbol!("first_name")> for __PartialPerson<IsPresent, __F1__> {
@@ -270,9 +256,9 @@ impl<__F1__: MapType> HasField<Symbol!("first_name")> for __PartialPerson<IsPres
 }
 ```
 
-**Neither `BuildField` nor `TakeField` is generated.** Both are blanket impls in the library over the
-`UpdateField` above, in opposite directions. That is why the derive actually writes `UpdateField`, the
-general form, parameterized by the marker to move *to*:
+`BuildField` and `TakeField` are library blanket implementations over `UpdateField`. The derive
+generates `UpdateField`, which supports changing a field to a chosen marker. The library supplies
+these specific transitions:
 
 - `BuildField<Tag>` covers `UpdateField<Tag, IsPresent, Mapper = IsNothing>`, the absent-to-present move. So
   `build_field` is `update_field` in that one direction.
@@ -280,50 +266,52 @@ general form, parameterized by the marker to move *to*:
 
 `FinalizeBuild` is likewise a library trait; the derive supplies only the all-present impl of it.
 
-Two properties of the companion follow from how it is built: the derive clones your struct and renames it.
-It **keeps your visibility**, yours and each field's, so a `pub struct` yields a `pub struct __PartialPerson`
-with `pub` fields. But it **carries none of your attributes**: those are cleared, so a
-`#[derive(Debug, Clone)]` on the record does not reach the companion. That is not an oversight. A field's
-type is the projection `<__F0__ as MapType>::Map<String>`, so a derived `Debug` would need bounds the macro
-has no way to state. But it does mean a half-built value cannot be printed.
+The companion preserves the original struct's visibility and each field's visibility. The derive
+creates it by cloning and renaming the struct, so a `pub` struct with `pub` fields produces a public
+companion with public fields.
+
+The companion does not inherit the original attributes. A `#[derive(Debug, Clone)]` on the record
+therefore does not make the builder printable or cloneable. Its fields use projections such as
+`<__F0__ as MapType>::Map<String>`, whose trait bounds depend on the marker.
 
 Each generated impl is aimed at the token it came from: a per-field impl at its field, a whole-struct impl at
 the struct name.
 
 ## Common Mistakes
 
-**`finalize_build` missing is the expected error, not a bug.** A field left unset means the all-present impl
-does not apply, and the compiler reports a missing method rather than a missing field. Read it as "some field
-is still absent" and check the companion type in the error for which marker is `IsNothing`.
+**An incomplete builder cannot call `finalize_build`.** The all-present implementation does not apply
+while any field is unset. Check the companion type in the diagnostic for `IsNothing` to identify the
+missing field.
 
-**The companion cannot be printed or cloned.** Its attributes are cleared, so no `Debug`, no `Clone`, no
-`PartialEq`, whatever the original struct derives. Read a set field through the companion's `HasField` impl
-instead.
+**The companion does not inherit `Debug`, `Clone`, or `PartialEq`.** The derive clears the original
+attributes. Read a set field through the companion's `HasField` implementation when inspecting a
+partial value.
 
-**`build_from` needs `HasFields` on the source, not just `BuildField`.** Deriving only this macro on both
-structs looks symmetric and does not work: `build_from` reads the source's field list, and only
-[`#[derive(HasFields)]`](./derive_has_fields.md) provides one. The error names an unsatisfied `HasFields`
-bound on the source type.
+**`build_from` needs `HasFields` on its source in addition to `BuildField`.** Deriving only
+`BuildField` on both structs leaves the source without the field list that the conversion traverses.
+The error reports an unsatisfied [`HasFields`](./derive_has_fields.md) bound on the source.
 
 **`TakeField` is not in the prelude.** Import it from `cgp::core::field::traits` to call `take_field`
 directly. `CanBuildFrom`, which provides `build_from`, comes from `cgp::core::field::impls`.
 
-**There are no defaults and no validation.** Presence is all that is tracked. A field with a sensible default
-still has to be set explicitly, unless you reach for
-[`CanFinalizeWithDefault`](../traits/optional/can_finalize_with_default.md).
+**The plain builder tracks presence without defaults or validation.** Set each field explicitly or
+use [`CanFinalizeWithDefault`](../traits/optional/can_finalize_with_default.md) to fill unset fields
+from their default values.
 
 **A tuple struct's steps are keyed by position.** Use `PhantomData::<Index<0>>`, not a `Symbol!` of the
 number.
 
-**Field order does not matter, but field *names* are the whole interface.** `build_from` matches by name, so
-renaming a field in one struct silently stops it being copied from the other. The result is a
-`finalize_build` that no longer resolves, reported at the finalize rather than at the rename.
+**`build_from` uses field names, regardless of declaration order.** Renaming a source field breaks
+the correspondence with the target field. If the target field remains unset, `finalize_build` fails
+to resolve, so the error appears at finalization rather than at the rename.
 
 **It does not accept an enum.** The enum counterparts are
 [`#[derive(ExtractField)]`](./derive_extract_field.md) and
 [`#[derive(FromVariant)]`](./derive_from_variant.md).
 
 ## Related constructs
+
+These references cover the related derives, generated traits, and supporting types:
 
 - [`#[derive(CgpData)]`](./derive_cgp_data.md) — the umbrella derive, which includes this slice.
 - [`#[derive(HasField)]`](./derive_has_field.md) — per-field access on the original struct, which this derive
@@ -343,12 +331,14 @@ renaming a field in one struct silently stops it being copied from the other. Th
 - [Dispatch combinators](../providers/dispatch/index.md) — the providers that run several builder
   implementations and merge their outputs.
 
-The ideas behind it:
+The ideas behind it are explained on these concept pages:
 
 - [Extensible records](/docs/concepts/extensible-records) — partial records, and the extensible builder
   pattern this derive is the foundation of.
 
 ## Source
+
+The implementation is defined in these source files:
 
 - Entry point: [`derive_build_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/derive_build_field.rs)
 - Codegen: [`cgp_data/derive_builder/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_builder)

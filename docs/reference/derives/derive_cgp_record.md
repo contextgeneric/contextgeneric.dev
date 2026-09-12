@@ -5,27 +5,23 @@ sidebar_position: 4
 
 # `#[derive(CgpRecord)]`
 
-The extensible-data derive for a struct.
+`#[derive(CgpRecord)]` generates field access, a structural representation, and a builder for a struct.
 
 ## Overview
 
-A plain Rust struct is opaque to generic code. There is no way to refer to "the `first_name` field"
-through a type parameter, so anything that must work across several structs ends up written once per
-struct.
+Generic code needs traits to read and assemble fields across different structs. A type parameter alone
+does not let it refer to a field such as `first_name`.
 
-`#[derive(CgpRecord)]` turns a struct into **extensible data**: a type whose fields generic code can
-name, read, and assemble without ever mentioning the concrete type. It produces the whole record half
-of the family in one line: per-field access, the whole-shape field list, and an incremental builder
-that fills a value one field at a time.
+`#[derive(CgpRecord)]` supplies those traits, making the struct an **extensible record**. It generates
+per-field access, a representation of the whole struct, and a builder that fills fields individually.
+Generic code can use these operations without naming the concrete struct.
 
-It is the struct-only face of [`#[derive(CgpData)]`](./derive_cgp_data.md). The two run the same code
-and emit the same output on a struct. The difference is that this one **rejects an enum at parse
-time**, so a type that is meant to stay a struct says so and the error arrives at the derive rather
-than further along.
+`CgpRecord` accepts only structs. It produces the same output as
+[`CgpData`](./derive_cgp_data.md) on a struct, but rejects an enum at parse time.
 
 ## Usage
 
-The derive takes no arguments and has no helper attributes:
+Apply `CgpRecord` to a struct without arguments or helper attributes:
 
 ```rust
 use cgp::prelude::*;
@@ -37,18 +33,16 @@ pub struct Person {
 }
 ```
 
-**Every struct shape is accepted.** A named-field struct is keyed by
-[`Symbol!`](../macros/symbol.md), a tuple struct by [`Index<N>`](../types/index_type.md), and a fieldless
-struct is the degenerate case rather than an error. Its companion type takes no parameters at all, so
-`builder()` is immediately finalizable, because there is nothing to track.
+Every struct shape is accepted. Named fields use [`Symbol!`](../macros/symbol.md) tags, and tuple
+fields use [`Index<N>`](../types/index_type.md) tags. A fieldless struct produces a companion without
+field-state parameters, so its `builder()` can be finalized immediately.
 
 Generic parameters, lifetimes, and a `where` clause are carried onto everything generated, including
 the companion type.
 
 ### What it generates
 
-Three groups, each of which is also available as a derive of its own when only part of the output is
-wanted:
+The derive combines these outputs, each also available separately:
 
 | Group | The slice on its own |
 |---|---|
@@ -58,8 +52,8 @@ wanted:
 
 ## Examples
 
-The record machinery is most useful for assembling one struct out of pieces. Because both structs
-derive it, a builder can copy every shared field from another record in one step and fill in the rest:
+A record builder can combine fields from another record with fields supplied individually. In this
+example, `build_from` moves the shared fields from `Person` into an `Employee` builder:
 
 ```rust
 use cgp::core::field::impls::CanBuildFrom;
@@ -86,36 +80,30 @@ fn promote(person: Person, id: u64) -> Employee {
 }
 ```
 
-Neither struct knows about the other. They share two field *names*, matched at the type level, so
-[`build_from`](../traits/casting/can_build_from.md) moves those fields across and leaves `employee_id` for the
-caller. Remove the `build_field` line and this stops compiling, because
-[`finalize_build`](../traits/builder/finalize_build.md) only exists once every field is present.
+`build_from` matches the fields by their type-level names, so neither struct needs to name the other.
+It moves `first_name` and `last_name` and leaves `employee_id` for the caller. Removing `build_field`
+makes the example fail to compile because
+[`finalize_build`](../traits/builder/finalize_build.md) is available only after every field is present.
+See [`build_from`](../traits/casting/can_build_from.md) for the conversion requirements.
 
 ## When to use it
 
-**Reach for it when generic code has to work over the struct's own structure**, and prefer
-[`#[derive(CgpData)]`](./derive_cgp_data.md) unless naming the shape earns its keep as documentation.
-The two are interchangeable on a struct, so this is a choice about what the code says rather than
-about what it emits.
+Use `CgpRecord` when generic code needs the struct's field access, representation, and builder, and
+the derive name should specify that the input is a struct. Choose among the related derives according
+to the operations and input restriction you need:
 
-- **Use `#[derive(CgpRecord)]`** to state that a type is always a struct, and to have a later change
-  to an enum fail at the derive rather than inside the generated code.
-- **Use [`#[derive(CgpData)]`](./derive_cgp_data.md)** as the default, especially in a module where
-  structs and enums both take the derive.
-- **Use [`#[derive(HasField)]`](./derive_has_field.md) alone** when the fields are only ever read. That
-  is most types in a CGP program, and it is one impl pair per field rather than a companion type and a
-  dozen impls.
-- **Derive the slice you want** when only part of the output is wanted:
-  [`HasFields`](./derive_has_fields.md) for the representation,
-  [`BuildField`](./derive_build_field.md) for the builder. The umbrella is the right call once you want
-  most of them.
+- **`CgpRecord`**: generate the full record output and reject non-struct inputs.
+- **[`CgpData`](./derive_cgp_data.md)**: generate the same output while also accepting enums.
+- **[`HasField`](./derive_has_field.md)**: generate per-field access when fields only need to be read.
+- **[`HasFields`](./derive_has_fields.md)**: generate the representation and conversions.
+- **[`BuildField`](./derive_build_field.md)**: generate the builder alone.
 
-The full argument for when a type earns the extensible-data machinery at all is on the
-[umbrella page](./derive_cgp_data.md#when-to-use-it).
+The [CgpData page](./derive_cgp_data.md#when-to-use-it) explains when generic structural operations
+justify the additional generated code.
 
 ## Under the hood
 
-The derive emits three groups in order. From:
+The derive generates field access, representation traits, and a builder for the input struct:
 
 ```rust
 #[derive(CgpRecord)]
@@ -125,12 +113,12 @@ pub struct Person {
 }
 ```
 
-it first emits the **per-field access**: a [`HasField`](../traits/field-access/has_field.md) and a
-[`HasFieldMut`](../traits/field-access/has_field_mut.md) impl per field, exactly what
-[`#[derive(HasField)]`](./derive_has_field.md) produces on its own.
+The field-access output contains a [`HasField`](../traits/field-access/has_field.md) and a
+[`HasFieldMut`](../traits/field-access/has_field_mut.md) implementation per field. It matches the output
+of [`#[derive(HasField)]`](./derive_has_field.md).
 
-Then the **representation**, exposing the struct as a product of named entries with conversions in both
-directions, which is [`#[derive(HasFields)]`](./derive_has_fields.md)'s output:
+The representation output describes the struct as a product of named entries and supplies conversions
+in both directions. It matches [`#[derive(HasFields)]`](./derive_has_fields.md):
 
 ```rust
 impl HasFields for Person {
@@ -143,9 +131,10 @@ impl HasFields for Person {
 // plus HasFieldsRef, FromFields, ToFields, ToFieldsRef
 ```
 
-Then the **builder**, which is [`#[derive(BuildField)]`](./derive_build_field.md)'s output and where the
-companion type appears. Each field's type is wrapped in a [`MapType`](../traits/type-level/map_type.md) marker, so
-a field can be present (`IsPresent`, holding the value) or absent (`IsNothing`, holding `()`):
+The builder output adds a companion type, as documented for
+[`#[derive(BuildField)]`](./derive_build_field.md). Each field's type is wrapped in a
+[`MapType`](../traits/type-level/map_type.md) marker: `IsPresent` stores its value, and `IsNothing`
+stores `()`:
 
 ```rust
 pub struct __PartialPerson<__F0__: MapType, __F1__: MapType> {
@@ -163,11 +152,11 @@ impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
 }
 ```
 
-That pair of impls is the whole safety argument: `builder()` starts at all-absent, each
-[`build_field`](../traits/builder/build_field.md) flips one marker, and
-[`finalize_build`](../traits/builder/finalize_build.md) exists only at all-present, so finalizing early is a
-missing impl rather than a runtime check. The per-field [`UpdateField`](../traits/builder/update_field.md) impls
-that move a marker, and the `HasField` impls on the companion that let a set field be read back, follow.
+The builder's type prevents incomplete construction. `builder()` starts with every field absent,
+[`build_field`](../traits/builder/build_field.md) changes one marker to `IsPresent`, and
+[`finalize_build`](../traits/builder/finalize_build.md) applies only when every field is present.
+Per-field [`UpdateField`](../traits/builder/update_field.md) implementations change the markers, and
+`HasField` implementations on the companion allow reads of fields that have been set.
 
 The companion is named `__Partial{Name}` and keeps the original type's visibility, so a `pub` struct
 yields a `pub` companion. Each generated impl is aimed at the token it came from (a per-field impl at
@@ -176,10 +165,9 @@ token rather than the whole derive.
 
 ## Common Mistakes
 
-**The companion type carries none of your attributes.** The derive clears them, so a
-`#[derive(Debug, Clone)]` on the record does not reach `__Partial{Name}` and a partially-built value can
-be neither printed nor cloned. Read a set field back through the companion's
-[`HasField`](../traits/field-access/has_field.md) impl instead.
+**The companion type does not inherit your attributes.** A `#[derive(Debug, Clone)]` on the record
+does not apply to `__Partial{Name}`, so it does not make partial values printable or cloneable. Read a
+set field through the companion's [`HasField`](../traits/field-access/has_field.md) implementation.
 
 **A tuple struct's builder is keyed by position.** Its companion exposes `UpdateField<Index<0>, _>`
 rather than symbol-keyed impls, so `build_field` takes `PhantomData::<Index<0>>`.
@@ -188,16 +176,19 @@ rather than symbol-keyed impls, so `build_field` takes `PhantomData::<Index<0>>`
 This is the newtype special case described on the [`#[derive(HasFields)]`](./derive_has_fields.md) page,
 which this derive inherits.
 
-**A fieldless struct compiles and does nothing useful.** It yields a parameterless companion whose
-`builder()` is immediately finalizable.
+**A fieldless struct has an immediately finalizable builder.** Its companion does not need field-state
+parameters.
 
-**An enum is rejected**, which is the point of the name. Reach for
-[`#[derive(CgpVariant)]`](./derive_cgp_variant.md) or the umbrella.
+**`CgpRecord` rejects enums.** Use [`CgpVariant`](./derive_cgp_variant.md) or
+[`CgpData`](./derive_cgp_data.md) for an enum.
 
-**This is one of the heaviest derives in CGP.** One of these on a five-field struct generates a
-companion type and roughly twenty impls. If only part of the output is wanted, derive the slice.
+**The full record derive adds compilation work.** It generates a companion type, whole-type
+implementations, and per-field implementations. Use an individual derive when only part of the output
+is needed.
 
 ## Related constructs
+
+These references cover the related derives, generated traits, and supporting types:
 
 - [`#[derive(CgpData)]`](./derive_cgp_data.md) — the umbrella, which dispatches here for a struct.
 - [`#[derive(CgpVariant)]`](./derive_cgp_variant.md) — the enum face.
@@ -208,12 +199,14 @@ companion type and roughly twenty impls. If only part of the output is wanted, d
   parameterized by.
 - [`CanBuildFrom`](../traits/casting/can_build_from.md) — merging one record into another's builder.
 
-The ideas behind it:
+The ideas behind it are explained on these concept pages:
 
 - [Extensible records](/docs/concepts/extensible-records) — a struct as a product of named fields, and
   the extensible builder pattern.
 
 ## Source
+
+The implementation is defined in these source files:
 
 - Entry point: [`cgp_record.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/cgp_record.rs)
 - Record codegen: [`cgp_data/record.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_data/record.rs)
