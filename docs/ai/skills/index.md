@@ -4,57 +4,54 @@ sidebar_position: 1
 
 # CGP's Agent Skill
 
-CGP publishes an [agent skill](https://agentskills.io/): a set of Markdown files that teach an LLM
-coding assistant how to read, write, and debug CGP code. It lives in the
-[**cgp-skills** repository](https://github.com/contextgeneric/cgp-skills), and the pages in this
-section are that skill, published here unchanged.
+CGP's agent skill teaches coding assistants how to read, write, and debug CGP code. It is a set of
+Markdown instructions in the [cgp-skills repository](https://github.com/contextgeneric/cgp-skills).
+The pages in this section publish a snapshot of those files without changing their content.
 
 ## What it is for
 
-An assistant that has not met CGP treats it as ordinary Rust and gets the wiring wrong: it reaches for
-a plain trait impl where a provider belongs, or writes a `delegate_components!` table it cannot then
-explain. The skill supplies the missing vocabulary — consumer and provider traits, wiring, impl-side
-dependencies — along with the code each macro expands to and how to read the errors CGP produces.
+The skill gives an assistant the CGP vocabulary and patterns it needs to work with the library.
+It explains consumer and provider traits, component wiring, implementation dependencies, macro
+expansions, and compiler errors. Without that guidance, an assistant may write a plain trait
+implementation where a provider is needed or produce incorrect wiring.
 
-That is a narrow claim, and it is worth keeping narrow. The skill teaches the assistant, not you. It
-does not make CGP simpler, and an assistant using it still writes code you have to review.
+You still need to review the assistant's code. The skill supplies instructions and examples; it
+does not guarantee correct output or replace your understanding of the application.
 
 ## Using it
 
-The quickest way is to hand your assistant the main file. Download
-[`SKILL.md`](https://raw.githubusercontent.com/contextgeneric/cgp-skills/refs/heads/main/cgp/SKILL.md)
-and attach it to the context window of whichever model you use.
+For a first look, download
+[SKILL.md](https://raw.githubusercontent.com/contextgeneric/cgp-skills/refs/heads/main/cgp/SKILL.md)
+and attach it to your assistant's conversation. The file introduces the core model and identifies
+the reference files needed for particular tasks. Make those files available when the assistant needs
+their detailed rules and examples.
 
-For everyday work, install the whole skill rather than the one file. Clone the repository and point
-your assistant's skills directory at it, so the sub-skills load on demand instead of all at once:
+For ongoing work, download the complete skill so the assistant can open its references as needed.
+Clone the repository:
 
 ```sh
 git clone https://github.com/contextgeneric/cgp-skills.git
 ```
 
-The layout follows the convention the tooling expects: `cgp/SKILL.md` is the entry point, and
-`cgp/references/` holds one file per area — components, wiring, checking, handlers, and the rest. The
-entry point is a complete primer on its own, and it tells the assistant which reference to open for
-the construct in front of it.
+Install the `cgp/` directory using your assistant's skill-loading instructions. Keep `cgp/SKILL.md`
+and `cgp/references/` together so the relative links resolve. Cloning the repository downloads the
+files; your assistant's setup determines how it discovers and loads them.
 
 ## Reading it yourself
 
-Nothing stops you, and the skill is written plainly enough to follow. But it is written *for a machine
-reader*: it is dense, it repeats itself where repetition helps an assistant, and it assumes a reader
-who wants exhaustive rules rather than a gentle path through them.
-
-If you are learning CGP, the [Tutorials](/docs/tutorials/hello) start from a working program and the
-[Concepts](/docs/concepts) pages take one idea at a time. Come back here when you want to see exactly
-what your assistant has been told.
+The [tutorials](/docs/tutorials/hello) and [Concepts](/docs/concepts) pages are the starting points
+for learning CGP. The skill is written for an assistant that needs dense rules and worked examples
+for a specific task. Read it when you want that detail or want to see the instructions your
+assistant receives.
 
 ## What is published here
 
-The pages below are the skill's own files, served from the `cgp-skills` repository as a submodule
-pinned to one revision. Nothing here is retyped or summarised — a page is the skill's own bytes — but it
-is a *snapshot*, and the repository moves first. Treat the repository as canonical, and raise any issue
-or correction there.
+The skill pages on this site are pinned to a particular repository revision. The repository may
+contain newer changes, so use it as the authoritative source and report skill corrections there.
+The site provides a place to browse the published snapshot; the repository supplies the files to
+install.
 
 ---
 
-*This page was written by an AI agent from the CGP knowledge base — see
+*This page was written and revised by an AI agent using the CGP knowledge base. See
 [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

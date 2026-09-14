@@ -4,86 +4,178 @@ sidebar_position: 2
 
 # Overview
 
-This page provides a quick overview and highlight the key features of CGP. For a deeper dive into the concepts and patterns of CGP, explore our comprehensive book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
+CGP lets you choose trait implementations at compile time and reuse application logic across those
+choices. This page explains its main capabilities, the problems they address, and the trade-offs to
+consider. Each section links to a fuller explanation; for a working example, start with the
+[Hello World tutorial](/docs/tutorials/hello).
 
-# Key Features
+## Key Features
 
-This section highlights some of the key advantages that Context-Generic Programming (CGP) offers.
+CGP builds on Rust's traits and associated types to separate reusable logic from the concrete choices
+an application makes. A **context** is the type that holds those choices. A **provider** is a named
+implementation, and wiring selects the provider for each component interface.
 
-## Modular Component System
+### One Interface, Many Implementations
 
-CGP leverages Rust's powerful trait system to define generic component _interfaces_ that decouple the code that _consumes_ an interface from the code that _implements_ it. This is achieved by introducing:
+CGP lets several implementations of the same interface coexist, even when they apply to the same
+types. Each context selects the implementation it needs. For example, a production application can
+send email while a test application records messages, with both exposing the same interface to
+callers.
 
-- **Provider traits**, which define the implementation of a component interface.
-- **Consumer traits**, which specify how a component interface is consumed.
+CGP separates the trait callers use, the consumer trait, from the provider trait that named
+implementations implement. Each provider uses its own marker type, so the implementations remain
+distinct under Rust's coherence rules. Read
+[consumer and provider traits](/docs/concepts/consumer-and-provider-traits) for the mechanism and
+[coherence](/docs/concepts/coherence) for the rules it works within.
 
-By separating provider traits from consumer traits, CGP enables multiple context-generic provider implementations to coexist. This approach circumvents Rust's usual limitation on overlapping or orphaned trait implementations, offering greater flexibility and modularity.
+### Zero-Cost Abstraction
 
-## Highly Expressive Macros
+The compiler resolves CGP wiring into statically dispatched calls. Selecting a provider does not
+require a runtime registry, reflection, or a virtual method table. The implementation you select
+still has its own runtime costs, and generic composition can increase compilation time and generated
+code size.
 
-CGP empowers developers to write _abstract programs_ that are generic over a context, including all its associated types and methods. This capability eliminates the need to explicitly specify an extensive list of generic parameters in type signatures, streamlining code structure and readability.
+### Type-Safe Wiring
 
-Additionally, CGP offers powerful _macros_ for defining component interfaces and simplifies the process of wiring component implementations for use with a specific context.
+Rust checks that a selected provider satisfies the requirements of the code using it. Missing
+dependencies become compile errors when the component is used or explicitly checked. Wiring alone
+does not force that verification, so use
+[check traits](/docs/concepts/check-traits) to check a context's components where you assemble them.
 
-With CGP, Rust code can achieve a level of expressiveness comparable to, if not exceeding, that of other popular programming paradigms, such as object-oriented programming and dynamically typed programming.
+These checks establish that components fit together; they do not prove application logic correct.
+[cargo-cgp](/docs/cargo-cgp) helps explain wiring failures by showing the root cause and dependency
+chain. It is an early pre-release and does not rewrite every kind of compiler error.
 
-## Type-Safe Composition
+### Abstract Over Every Dependency
 
-CGP leverages Rust's robust type system to guarantee that all component wiring is _type-safe_, ensuring that any missing dependencies are caught at compile time. It operates entirely within safe Rust, avoiding dynamic typing techniques such as `dyn traits`, `Any`, or runtime reflection.
+CGP lets reusable logic state the capabilities it needs while each application supplies concrete
+implementations. Those choices can include I/O, storage, error handling, and runtime operations.
+Providers declare their requirements where they use them, through
+[impl-side dependencies](/docs/concepts/impl-side-dependencies).
 
-This strict adherence to type safety ensures that no CGP-specific errors can occur during application runtime, providing developers with greater confidence in their code's reliability.
+Keeping platform dependencies behind these interfaces can make the shared logic usable in `no_std`
+environments. CGP itself supports `no_std`, but portability also depends on the providers and other
+dependencies you select. A provider that requires an operating-system service still needs that
+service on its target platform.
 
-## No-Std Friendly
+### Still Ordinary Rust
 
-CGP enables the creation of _fully abstract programs_ that can be defined without relying on any concrete dependencies — except for other abstract CGP components. This abstraction extends to dependencies such as I/O, runtime, cryptographic operations, and encoding schemes, allowing these concerns to be separated from the core application logic.
+CGP's macros generate ordinary Rust traits and implementations that compile on stable Rust. You can
+implement a consumer trait directly, introduce providers where you need them, and keep the rest of
+your project unchanged. Contexts can contain ordinary generic types, enums, and trait objects.
 
-As a result, the core logic of an application can be seamlessly instantiated with specialized dependencies, making it compatible with no-std environments. These include embedded systems, operating system kernels, sandboxed environments like WebAssembly, and symbolic execution platforms such as Kani.
+The additional structure has a cost: you need to learn the provider model and maintain the wiring.
+For an interface with a single implementation, an ordinary trait often supplies all the abstraction
+you need. The [modularity hierarchy](/docs/concepts/modularity-hierarchy) explains how to choose the
+amount of separation your code needs.
 
-## Zero-Cost Abstraction
+### Abstract Types
 
-CGP operates entirely at compile-time, leveraging Rust's type system to ensure correctness without introducing runtime overhead. This approach upholds Rust's hallmark of _zero-cost abstraction_, enabling developers to use CGP's features without sacrificing runtime performance.
+An abstract type lets each context choose a concrete type, such as its error type, without passing
+that choice as a separate generic parameter through every layer. Code names the associated type
+where it needs it. A caller that only invokes a capability can depend on that capability without
+listing the types used inside its implementation.
 
+These are Rust associated types, so their guarantees depend on the bounds you declare. Using `f64`
+for both a distance and a weight does not create distinct concrete types or enforce units. Use
+newtypes when you need that distinction. See [abstract types](/docs/concepts/abstract-types).
 
-# Problems Solved
+### Extensible Records and Variants
 
-Here are some common problems in Rust that CGP helps to address.
+CGP lets generic code build records by field and handle enums by variant. Types opt in through
+derives that expose their structure to the trait system. A library can then assemble records from
+independent field providers or combine handlers for the variants an application uses.
 
-## Error Handling
+The compiler checks this composition against the selected types. It does not discover new fields or
+variants at runtime. Read [extensible records](/docs/concepts/extensible-records),
+[extensible variants](/docs/concepts/extensible-variants), and
+[dispatching](/docs/concepts/dispatching) for the patterns and their limits.
 
-Rather than being tied to a specific error crate like `anyhow` or `eyre`, CGP's `HasErrorType` and `CanRaiseError` traits allow the decoupling of core application logic from error handling. This enables concrete applications to choose their preferred error library and select the error-handling strategy that best suits their needs, such as deciding whether or not to include stack traces in errors.
+### Composable Handlers
 
-For more detailed information on error handling, refer to the [error handling chapter](https://patterns.contextgeneric.dev/error-handling.html) in our book
+CGP provides components for synchronous, asynchronous, fallible, and infallible computations.
+Providers can implement individual steps and combine them into a pipeline whose adjacent input and
+output types must agree. An application chooses the steps through its wiring.
 
-## Async Runtime
+The [handler family](/docs/concepts/handlers) covers these interfaces and their composition. Ordinary
+function calls remain a simpler choice when a sequence has no need for interchangeable steps.
 
-Rather than committing to a specific runtime crate like `tokio` or `async-std`, CGP enables the application core logic to rely on an abstract runtime context that provides only the features required by the application.
+## Problems Solved
 
-Unlike monolithic runtime traits, an abstract runtime context in CGP does _not_ require a comprehensive or upfront design of all possible runtime features any application might need. This flexibility allows easy switching between concrete runtime implementations, depending on the specific runtime features the application utilizes.
+CGP is most useful when a program already needs several implementations or dependency choices. The
+following cases show how its capabilities address those needs.
 
-## Overlapping Implementations
+### Error Handling
 
-A common frustration among Rust programmers is the restriction on overlapping trait implementations. A typical workaround is to use newtype wrappers, but this can become cumbersome when dealing with multiple composite types that need to be extended.
+Reusable logic can return errors without committing to a particular error library. `HasErrorType`
+supplies the context's error type, and `CanRaiseError` converts a source error into it. An application
+chooses both the error representation and the conversion behavior, allowing the same logic to use a
+custom error enum or a general-purpose error library.
 
-Rust requires a crate to own either the type or the trait for a trait implementation, which often places a significant burden on the author of a new type to implement all the common traits their users might need. This can lead to bloated type definitions, with excessive trait implementations such as `Eq`, `Clone`, `TryFrom`, `Hash`, and `Serialize`. Despite careful design, libraries may still face requests from users to implement less common traits, which can only be implemented by the crate that owns the type.
+Changing the error type also requires compatible conversion providers. CGP makes those choices
+explicit; it does not invent conversions between arbitrary errors. See
+[modular error handling](/docs/concepts/modular-error-handling).
 
-With the introduction of _provider traits_, CGP removes these restrictions on overlapping implementations. Both the owner and non-owners of a type can define custom implementations for that type. When multiple provider implementations are available, users can choose one and wire it up easily using CGP constructs.
+### Async Runtime
 
-CGP also favors the use of _abstract types_ over newtype wrappers. For instance, a type like `f64` can be directly used for both `Context::Distance` and `Context::Weight`, with the associated types still treated as distinct within the abstract code. CGP also enables specialized provider implementations, even if the crate does not own the primitive type (e.g., `f64`) or the provider trait.
+Application logic can depend on the runtime operations it uses without naming a particular executor.
+For example, a provider that needs a timer can require a timer capability, leaving the application to
+supply its implementation. Another application can reuse that provider with a different compatible
+timer implementation.
 
-## Dynamic Dispatch
+Changing runtimes requires providers for the operations the application needs, with compatible types
+and behavior. It can also require attention to
+[`Send` bounds](/docs/concepts/send-bounds) when futures move between threads. CGP separates these
+choices but does not make runtime APIs interchangeable by itself.
 
-A common approach for newcomers to support polymorphism in Rust is to use dynamic dispatch with `dyn Trait` objects. However, this severely limits the functionality to a restricted subset of _dyn-compatible_ (object-safe) features in Rust. Often, this limitation spreads throughout the entire codebase, requiring non-trivial workarounds for non-dyn-compatible constructs, such as `Clone`.
+### Overlapping Implementations
 
-Even when dynamic dispatch is not used, many Rust programmers rely on ad-hoc polymorphism, defining enums to represent all potential variants of types in the application. This results in numerous `match` expressions scattered across the codebase, making it difficult to decouple logic for each branch. Additionally, adding new variants to the enum becomes challenging, as every branch must be updated, even when the new variant is only used in a small portion of the code.
+Rust rejects blanket implementations that could apply to the same type, even when different
+applications want different choices. CGP gives each implementation a provider name and makes the
+choice explicit in the context's wiring. A crate can also implement a provider trait for its own
+provider type even when the trait and the data being handled come from other crates.
 
-CGP provides several solutions to address the dynamic dispatch problem by delegating the "assembly" of the variant collection to the concrete context. The core application logic can be written generically over the context and the associated type representing the abstract enum. CGP also facilitates powerful datatype-generic patterns that allow providers for each variant to be implemented separately and combined to work with enums that contain any combination of variants.
+This applies to interfaces that support CGP. It does not let you add arbitrary implementations of
+unchanged foreign traits, such as the standard library's `Hash`, to foreign types. The
+[coherence explanation](/docs/concepts/coherence) shows how providers stay within Rust's rules.
 
-## Monolithic Traits
+### Dynamic Dispatch
 
-Even without CGP, Rust's trait system provides powerful mechanisms for building abstractions that would be difficult to achieve in other mainstream languages. One common best practice is to write abstract code that is generic over a context type, but this often involves an implicit trait bound tied directly to the generic context.
+CGP offers static composition when an application's implementation choices are known at build time.
+For enum-based designs, it can combine separate variant handlers so generic logic works across enums
+containing different sets of variants. This lets each handler be reused without duplicating its
+logic in every matching operation.
 
-Unlike CGP, traits in this pattern are typically designed as monolithic, encompassing all the dependencies that the core application might need. Without CGP, an abstract caller must also include all trait bounds required by the generic functions it invokes. As a result, any additional generic trait bounds tend to propagate throughout the codebase, leading developers to combine all these trait bounds into one monolithic trait for convenience.
+Runtime choices can still use enums or `dyn Trait` inside a CGP context. A program that loads
+implementations dynamically needs a runtime mechanism for doing so. CGP's
+[dispatching](/docs/concepts/dispatching) selects the composition at compile time; an enum's active
+variant is still determined at runtime.
 
-Monolithic traits can quickly become bottlenecks that prevent large projects from scaling. It's not uncommon for such traits to become bloated with dozens or even hundreds of methods and types. This overgrowth makes it increasingly difficult to introduce new implementations or modify existing ones. Additionally, with Rust's current practices, breaking down or decoupling these monolithic traits into smaller, more manageable traits can be challenging.
+### Monolithic Traits
 
-CGP offers significant improvements over this traditional pattern, making it possible to write abstract Rust code without the risk of creating unwieldy, monolithic traits. CGP enables the decomposition of large traits into many small, focused traits, each ideally consisting of just a single method or type. This is made possible by the dependency injection pattern used in CGP, which allows implementations to introduce only the minimal trait bounds they need directly within the implementation, rather than bundling everything into a single, monolithic structure.
+A large trait can force every implementation to supply capabilities it never uses. CGP lets you
+split independently chosen behavior into smaller components, each with its own providers. A
+provider declares the dependencies its implementation needs, while callers depend on the interface
+they use.
+
+Group methods and associated types when one implementation choice should decide them together.
+Splitting every item into a separate component adds wiring without necessarily improving reuse.
+See [impl-side dependencies](/docs/concepts/impl-side-dependencies) and the
+[modularity hierarchy](/docs/concepts/modularity-hierarchy).
+
+### Generic Parameters Through Every Layer
+
+An error type, runtime, and storage backend can become generic parameters that intermediate code
+must repeat even when it only forwards a call. CGP lets the context select those types and expose
+the required operations as capabilities. Intermediate code can then name the capability it calls,
+while the implementation names the dependencies it actually uses.
+
+Types that appear in an interface, such as a returned error, still belong in that interface.
+[Abstract types](/docs/concepts/abstract-types) reduce repeated parameters; they do not remove the
+need to state type relationships. For a function with one or two independent type parameters,
+ordinary generics may be clearer.
+
+---
+
+*This page was revised by an AI agent using the CGP knowledge base. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
