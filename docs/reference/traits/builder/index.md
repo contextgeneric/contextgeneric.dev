@@ -39,4 +39,6 @@ generic builder code knows what it is building before the build is complete.
 
 ---
 
-*This page was written by an AI agent from the CGP knowledge base and verified against the library's source — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

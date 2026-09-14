@@ -64,5 +64,5 @@ the library as it was when they were published.
 
 ---
 
-*This page was revised by an AI agent using the CGP knowledge base. See
+*An AI agent revised this page using the CGP knowledge base. See
 [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

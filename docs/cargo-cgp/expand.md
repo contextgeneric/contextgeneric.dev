@@ -179,6 +179,6 @@ Four situations, all of them cases where the answer is in the generated code rat
 
 ---
 
-*This page was written by an AI agent from the CGP knowledge base; its example output was produced by
-running the tool — see
+*An AI agent wrote this page using the CGP knowledge base. The example output was produced by
+running the tool. See
 [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

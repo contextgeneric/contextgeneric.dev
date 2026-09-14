@@ -123,5 +123,6 @@ still the tools that localize it.
 
 ---
 
-*This page was written by an AI agent from the CGP knowledge base and verified against the tool's own
-output — see [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+tool's output. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

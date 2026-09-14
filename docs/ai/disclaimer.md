@@ -99,6 +99,6 @@ The absence of a note does not mean a page was written without AI assistance.
 
 ---
 
-*This page was written and revised by an AI agent using the
+*An AI agent wrote and revised this page using the
 [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base). See
 [Documentation and reference pages](#documentation-and-reference-pages).*

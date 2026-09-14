@@ -238,5 +238,5 @@ Failures that are not covered here are worth reporting on the
 
 ---
 
-*This page was written by an AI agent from the CGP knowledge base — see
+*An AI agent wrote this page using the CGP knowledge base. See
 [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
