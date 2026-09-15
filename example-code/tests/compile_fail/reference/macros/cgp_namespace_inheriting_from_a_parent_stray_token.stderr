@@ -1,0 +1,5 @@
+error: expected curly braces
+ --> tests/compile_fail/reference/macros/cgp_namespace_inheriting_from_a_parent_stray_token.rs:6:54
+  |
+6 | cgp_namespace! { new ExtendedNamespace: BaseNamespace; }
+  |                                                      ^
