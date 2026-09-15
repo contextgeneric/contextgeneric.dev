@@ -9,7 +9,7 @@ error[E0308]: mismatched types
    = note: expected struct `std::marker::PhantomData<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>`
               found struct `std::marker::PhantomData<cgp::prelude::Symbol<9, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>`
 note: method defined here
-  --> $CARGO/cgp-field-$VERSION/src/traits/has_field.rs
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/has_field.rs:49:8
    |
-   |     fn get_field(&self, _tag: PhantomData<Tag>) -> &Self::Value;
+49 |     fn get_field(&self, _tag: PhantomData<Tag>) -> &Self::Value;
    |        ^^^^^^^^^

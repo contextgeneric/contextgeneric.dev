@@ -83,7 +83,9 @@ pub mod two_providers_two_requirements {
     #[uses(HasSentEmails)]
     impl EmailSender {
         fn send_email(&self, to: &str, body: &str) {
-            self.sent_emails().borrow_mut().push(format!("{to}: {body}"));
+            self.sent_emails()
+                .borrow_mut()
+                .push(format!("{to}: {body}"));
         }
     }
 

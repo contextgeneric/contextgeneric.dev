@@ -22,8 +22,7 @@ pub mod what_its_for {
         pub height: u32,
     }
 
-    #[derive(FromVariant)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(FromVariant, Debug, Eq, PartialEq)]
     pub enum Shape {
         Circle(Circle),
         Rectangle(Rectangle),
@@ -48,14 +47,12 @@ pub mod using_it {
         pub radius: u32,
     }
 
-    #[derive(FromVariant)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(FromVariant, Debug, Eq, PartialEq)]
     pub enum Shape {
         Circle(Circle),
     }
 
-    #[derive(FromVariant)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(FromVariant, Debug, Eq, PartialEq)]
     pub enum Generic<T> {
         Item(T),
     }
@@ -95,8 +92,7 @@ pub mod examples {
         pub height: f64,
     }
 
-    #[derive(FromVariant)]
-    #[derive(Debug, PartialEq)]
+    #[derive(FromVariant, Debug, PartialEq)]
     pub enum Shape {
         Circle(Circle),
         Rectangle(Rectangle),
@@ -145,15 +141,13 @@ pub mod examples_upcast {
     pub struct Literal(pub u64);
 
     /// The narrow enum an implementation constructs into.
-    #[derive(CgpData)]
-    #[derive(Debug, PartialEq)]
+    #[derive(CgpData, Debug, PartialEq)]
     pub enum LispSubExpr {
         Ident(Ident),
     }
 
     /// The full enum it is widened into.
-    #[derive(CgpData)]
-    #[derive(Debug, PartialEq)]
+    #[derive(CgpData, Debug, PartialEq)]
     pub enum LispExpr {
         Ident(Ident),
         Literal(Literal),

@@ -11,16 +11,14 @@
 pub mod what_its_for {
     use cgp::prelude::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Person {
         pub name: String,
         pub age: u8,
     }
 
     // The page writes this type out; asserting the equality is what checks it.
-    pub type ExpectedFields =
-        Product![Field<Symbol!("name"), String>, Field<Symbol!("age"), u8>];
+    pub type ExpectedFields = Product![Field<Symbol!("name"), String>, Field<Symbol!("age"), u8>];
 
     pub fn assert_fields(fields: <Person as HasFields>::Fields) -> ExpectedFields {
         fields
@@ -47,35 +45,29 @@ pub mod what_its_for {
 pub mod using_it {
     use cgp::prelude::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Named {
         pub name: String,
         pub age: u8,
     }
 
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Tuple(pub u32, pub u32);
 
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Unit;
 
     /// The newtype special case: `Fields` is the inner type directly.
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Newtype(pub String);
 
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Generic<T> {
         pub value: T,
     }
 
     /// The four variant shapes, all accepted by this derive and by no other in the family.
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub enum Shape {
         Empty,
         Circle(u32),
@@ -141,10 +133,7 @@ pub mod using_it {
             Shape::Empty,
             Shape::Circle(2),
             Shape::Rectangle(3, 4),
-            Shape::Triangle {
-                base: 6,
-                height: 5,
-            },
+            Shape::Triangle { base: 6, height: 5 },
         ] {
             assert_eq!(Shape::from_fields(shape.clone().to_fields()), shape);
         }
@@ -157,8 +146,7 @@ pub mod using_it {
 pub mod examples {
     use cgp::prelude::*;
 
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    #[derive(HasField, HasFields)]
+    #[derive(Clone, Debug, Eq, PartialEq, HasField, HasFields)]
     pub struct Config {
         pub host: String,
         pub port: u16,
@@ -176,8 +164,7 @@ pub mod examples {
         pub height: f64,
     }
 
-    #[derive(Clone, Debug, PartialEq)]
-    #[derive(HasFields)]
+    #[derive(Clone, Debug, PartialEq, HasFields)]
     pub enum Shape {
         Circle(Circle),
         Rectangle(Rectangle),

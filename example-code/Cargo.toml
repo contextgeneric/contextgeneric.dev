@@ -12,4 +12,6 @@ cgp = "0.8.0-alpha"
 futures = "0.3"
 trybuild = "1"
 
-[workspace]
+
+[patch.crates-io]
+cgp                 = { git = "https://github.com/contextgeneric/cgp.git" }

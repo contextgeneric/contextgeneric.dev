@@ -44,6 +44,9 @@ pub mod unwrapping_a_result_output {
         let code = PhantomData::<()>;
 
         assert_eq!(app.try_compute(code, (1u64, 2u64)), Ok(3));
-        assert_eq!(app.try_compute(code, (u64::MAX, 1u64)), Err("overflow".to_owned()));
+        assert_eq!(
+            app.try_compute(code, (u64::MAX, 1u64)),
+            Err("overflow".to_owned())
+        );
     }
 }

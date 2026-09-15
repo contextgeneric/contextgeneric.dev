@@ -22,41 +22,35 @@ pub mod using_it {
         pub height: u32,
     }
 
-    #[derive(CgpData)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpData, Debug, Eq, PartialEq)]
     pub struct Person {
         pub first_name: String,
         pub last_name: String,
     }
 
-    #[derive(CgpData)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpData, Debug, Eq, PartialEq)]
     pub enum Shape {
         Circle(Circle),
         Rectangle(Rectangle),
     }
 
     /// The shape-specific faces, which the page says emit what the umbrella emits.
-    #[derive(CgpRecord)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpRecord, Debug, Eq, PartialEq)]
     pub struct RecordFace {
         pub value: u32,
     }
 
-    #[derive(CgpVariant)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpVariant, Debug, Eq, PartialEq)]
     pub enum VariantFace {
         One(Circle),
     }
 
     /// The degenerate struct shape: a parameterless companion, so `builder()` finalizes at once.
-    #[derive(CgpData)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpData, Debug, Eq, PartialEq)]
     pub struct NoConfig {}
 
     /// A tuple struct, whose builder steps are keyed by position rather than by name.
-    #[derive(CgpData)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpData, Debug, Eq, PartialEq)]
     pub struct Pair(pub u32, pub u32);
 
     #[test]

@@ -63,7 +63,10 @@ pub mod matching_with_the_tag_attached {
         let code = PhantomData::<()>;
 
         assert_eq!(app.compute(code, Reading::Temperature(21)), "21");
-        assert_eq!(app.compute(code, Reading::Label("north".to_owned())), "north");
+        assert_eq!(
+            app.compute(code, Reading::Label("north".to_owned())),
+            "north"
+        );
         assert_eq!(app.compute(code, ExtendedReading::Flag(true)), "true");
     }
 }

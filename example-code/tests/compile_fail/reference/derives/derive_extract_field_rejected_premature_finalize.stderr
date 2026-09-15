@@ -22,7 +22,7 @@ error[E0599]: the method `finalize_extract_result` exists for enum `Result<Circl
            `__PartialShape<IsVoid, IsPresent>: FinalizeExtract`
            which is required by `Result<Circle, __PartialShape<IsVoid, IsPresent>>: FinalizeExtractResult`
 note: the trait `FinalizeExtract` must be implemented
-  --> $CARGO/cgp-field-$VERSION/src/traits/extract_field.rs
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:38:1
    |
-   | pub trait FinalizeExtract {
+38 | pub trait FinalizeExtract {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -78,7 +78,13 @@ pub mod matching_by_value {
         let code = PhantomData::<()>;
 
         assert_eq!(
-            app.compute(code, Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })),
+            app.compute(
+                code,
+                Shape::Rectangle(Rectangle {
+                    width: 3.0,
+                    height: 4.0
+                })
+            ),
             12.0,
         );
 

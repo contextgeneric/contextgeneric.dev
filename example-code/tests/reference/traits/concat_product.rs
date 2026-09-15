@@ -21,10 +21,10 @@ pub mod examples {
     pub fn assert_full(
         fields: Full,
     ) -> Product![
-        Field<Symbol!("host"), String>,
-        Field<Symbol!("port"), u16>,
-        Field<Symbol!("tls"), bool>,
-    ] {
+           Field<Symbol!("host"), String>,
+           Field<Symbol!("port"), u16>,
+           Field<Symbol!("tls"), bool>,
+       ] {
         fields
     }
 

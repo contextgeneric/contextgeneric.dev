@@ -67,7 +67,11 @@ pub mod a_pipeline_of_field_readers {
     fn the_stages_run_left_to_right() {
         use cgp::extra::handler::CanCompute;
 
-        let app = App { foo: 2, bar: 3, baz: 4 };
+        let app = App {
+            foo: 2,
+            bar: 3,
+            baz: 4,
+        };
         // ((5 * 2) + 3) * 4
         assert_eq!(app.compute(PhantomData::<()>, 5u64), 52);
     }

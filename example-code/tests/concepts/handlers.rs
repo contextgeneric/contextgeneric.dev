@@ -31,8 +31,14 @@ pub mod one_function_the_whole_family {
 
         assert_eq!(Add::compute(&app, PhantomData::<()>, (1, 2)), 3);
         assert_eq!(Add::try_compute(&app, PhantomData::<()>, (1, 2)), Ok(3));
-        assert_eq!(block_on(Add::compute_async(&app, PhantomData::<()>, (1, 2))), 3);
-        assert_eq!(block_on(Add::handle(&app, PhantomData::<()>, (1, 2))), Ok(3));
+        assert_eq!(
+            block_on(Add::compute_async(&app, PhantomData::<()>, (1, 2))),
+            3
+        );
+        assert_eq!(
+            block_on(Add::handle(&app, PhantomData::<()>, (1, 2))),
+            Ok(3)
+        );
     }
 }
 
@@ -60,7 +66,10 @@ pub mod a_fallible_function {
     fn the_error_path_surfaces_through_the_fallible_members() {
         let app = App;
 
-        assert_eq!(CheckedAdd::try_compute(&app, PhantomData::<()>, (1, 2)), Ok(3));
+        assert_eq!(
+            CheckedAdd::try_compute(&app, PhantomData::<()>, (1, 2)),
+            Ok(3)
+        );
         assert_eq!(
             CheckedAdd::try_compute(&app, PhantomData::<()>, (u64::MAX, 1)),
             Err("overflow".to_owned()),

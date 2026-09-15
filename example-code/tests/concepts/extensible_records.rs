@@ -16,7 +16,9 @@ pub mod a_struct_as_a_list_of_named_fields {
     fn the_shape_is_a_type() {
         fn assert_shape<T>()
         where
-            T: HasFields<Fields = Product![Field<Symbol!("url"), String>, Field<Symbol!("pool_size"), u32>]>,
+            T: HasFields<
+                Fields = Product![Field<Symbol!("url"), String>, Field<Symbol!("pool_size"), u32>],
+            >,
         {
         }
 

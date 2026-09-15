@@ -56,7 +56,13 @@ pub mod dispatching_on_the_input_type {
         let code = PhantomData::<()>;
 
         assert_eq!(
-            app.compute(code, Rectangle { width: 3.0, height: 4.0 }),
+            app.compute(
+                code,
+                Rectangle {
+                    width: 3.0,
+                    height: 4.0
+                }
+            ),
             12.0,
         );
 

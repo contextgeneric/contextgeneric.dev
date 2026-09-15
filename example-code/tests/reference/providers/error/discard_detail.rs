@@ -6,7 +6,9 @@
 /// Here a base error is raised and then wrapped with a detail string; because the wrapper is
 /// `DiscardDetail`, the detail is discarded and the base error propagates unchanged.
 pub mod wrapping_by_discarding {
-    use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapperComponent};
+    use cgp::core::error::{
+        ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapperComponent,
+    };
     use cgp::extra::error::{DiscardDetail, RaiseFrom};
     use cgp::prelude::*;
 

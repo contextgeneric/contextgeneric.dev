@@ -59,7 +59,13 @@ pub mod raising_through_from {
     #[test]
     fn a_string_is_converted_and_a_parse_error_is_formatted() {
         assert_eq!(App.parse_port("8080").unwrap(), 8080);
-        assert_eq!(App.parse_port("70000").unwrap_err(), "port 70000 out of range");
-        assert!(App.parse_port("nope").unwrap_err().contains("ParseIntError"));
+        assert_eq!(
+            App.parse_port("70000").unwrap_err(),
+            "port 70000 out of range"
+        );
+        assert!(App
+            .parse_port("nope")
+            .unwrap_err()
+            .contains("ParseIntError"));
     }
 }

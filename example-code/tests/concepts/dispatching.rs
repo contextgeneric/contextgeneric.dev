@@ -71,7 +71,13 @@ pub mod matching_one_handler_per_variant {
         let code = PhantomData::<()>;
 
         assert_eq!(
-            app.compute(code, Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })),
+            app.compute(
+                code,
+                Shape::Rectangle(Rectangle {
+                    width: 3.0,
+                    height: 4.0
+                })
+            ),
             12.0,
         );
 

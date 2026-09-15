@@ -35,7 +35,9 @@ pub mod examples {
         fields
     }
 
-    pub fn assert_nothing(fields: <Fields as MapFields<IsNothing>>::Mapped) -> Product![(), (), ()] {
+    pub fn assert_nothing(
+        fields: <Fields as MapFields<IsNothing>>::Mapped,
+    ) -> Product![(), (), ()] {
         fields
     }
 }

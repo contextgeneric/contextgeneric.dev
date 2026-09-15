@@ -10,15 +10,13 @@ pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
     use cgp::prelude::*;
 
-    #[derive(CgpRecord)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpRecord, Debug, Eq, PartialEq)]
     pub struct Person {
         pub first_name: String,
         pub last_name: String,
     }
 
-    #[derive(CgpRecord)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(CgpRecord, Debug, Eq, PartialEq)]
     pub struct Employee {
         pub employee_id: u64,
         pub first_name: String,

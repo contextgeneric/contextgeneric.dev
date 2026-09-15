@@ -180,12 +180,7 @@ pub mod writing_it {
 
     #[cgp_impl(new RecordEmails)]
     impl EmailSender {
-        fn send_email(
-            &self,
-            #[implicit] sent_emails: &RefCell<Vec<String>>,
-            to: &str,
-            body: &str,
-        ) {
+        fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
             sent_emails.borrow_mut().push(format!("{to}: {body}"));
         }
     }

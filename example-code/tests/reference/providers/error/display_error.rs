@@ -50,6 +50,9 @@ pub mod formatting_through_display {
     fn a_parse_error_is_carried_as_its_display_message() {
         assert_eq!(App.parse("42").unwrap(), 42);
         // The `Display` of `ParseIntError` reads "invalid digit found in string".
-        assert_eq!(App.parse("nope").unwrap_err(), "invalid digit found in string");
+        assert_eq!(
+            App.parse("nope").unwrap_err(),
+            "invalid digit found in string"
+        );
     }
 }

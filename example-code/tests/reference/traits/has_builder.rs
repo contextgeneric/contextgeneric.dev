@@ -11,23 +11,20 @@ pub mod examples {
     use cgp::prelude::*;
 
     // `build_from` walks the *source's* field list, so the source needs `HasFields` too.
-    #[derive(HasFields, BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(HasFields, BuildField, Debug, Eq, PartialEq)]
     pub struct FooBar {
         pub foo: u64,
         pub bar: String,
     }
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct FooBarBaz {
         pub foo: u64,
         pub bar: String,
         pub baz: bool,
     }
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct Person {
         pub first_name: String,
         pub last_name: String,

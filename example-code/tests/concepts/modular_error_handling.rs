@@ -62,7 +62,10 @@ pub mod code_that_fails_without_knowing {
         );
 
         // Raised as a `ParseIntError`, formatted and then routed through the `String` entry.
-        assert!(App.parse_port("http").unwrap_err().contains("ParseIntError"));
+        assert!(App
+            .parse_port("http")
+            .unwrap_err()
+            .contains("ParseIntError"));
     }
 }
 

@@ -109,6 +109,20 @@ cgp_namespace! {
 The parent may itself be parameterized. The child's entries layer on top, and a path-rewriting entry like
 the one above reroutes a whole subtree of the parent's namespace rather than a single component.
 
+A namespace with nothing of its own to add may stop at the header. The braces are optional when the body
+would be empty, which is the usual shape of a namespace that exists only to inherit:
+
+```rust
+cgp_namespace! {
+    new ExtendedNamespace: BaseNamespace
+}
+```
+
+This is the same as writing `{}` after the parent, and `new BaseNamespace` on its own emits just the
+trait and struct the same way. Only the end of the input may follow the header; any other token there is
+an `expected curly braces` error. The shorthand is this macro's alone, since
+[`delegate_components!`](./delegate_components.md) keeps its braces even when its table is empty.
+
 ### The other two halves: registering, and joining
 
 Defining a namespace is only one part of the pattern. A component **registers into** one with the
@@ -195,7 +209,7 @@ joining the child inherits the whole chain:
 ```rust
 cgp_namespace! { new BaseNamespace {} }
 
-cgp_namespace! { new ExtendedNamespace: BaseNamespace {} }
+cgp_namespace! { new ExtendedNamespace: BaseNamespace }
 
 delegate_components! {
     MyApp {
@@ -299,11 +313,11 @@ A couple of naming details appear verbatim in errors and are worth recognizing: 
 
 ## Formal grammar
 
-The body is a header and a table, in the Rust Reference's
+The body is a header and an optional table, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
 
 ```ebnf
-CgpNamespace    -> Generics? `new`? NamespaceName ( `:` ParentNamespace )? `{` NamespaceBody `}`
+CgpNamespace    -> Generics? `new`? NamespaceName ( `:` ParentNamespace )? ( `{` NamespaceBody `}` )?
 
 NamespaceName   -> IDENTIFIER GenericArgs?
 ParentNamespace -> TypePath GenericArgs?
@@ -315,7 +329,9 @@ NamespaceBody   -> Statement* ( Mapping ( `,` Mapping )* `,`? )?
 so its `Statement` and `Mapping` rules, covering every operator, every key form, and every value form, are
 defined on that page rather than restated here. The two a namespace normally uses are `=>` to an `@`-path
 and `:` to a provider. The `:` between `NamespaceName` and `ParentNamespace` is the inheritance colon, distinct from a
-mapping's. `NamespaceName` becomes both a trait and, with `new`, a struct.
+mapping's. `NamespaceName` becomes both a trait and, with `new`, a struct. The table is optional: a header
+followed by nothing is an empty `NamespaceBody`, and a header followed by anything other than `{` is a
+parse error.
 
 Two statement forms in that shared production exist for this macro, because their job is
 joining a context's table to a namespace. A `NamespaceStmt`, `namespace SomeNamespace;`, forwards every

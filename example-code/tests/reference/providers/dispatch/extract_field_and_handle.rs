@@ -76,7 +76,13 @@ pub mod one_adapter_per_variant {
         let code = PhantomData::<()>;
 
         assert_eq!(
-            app.compute(code, Shape::Rectangle(Rectangle { width: 2.0, height: 5.0 })),
+            app.compute(
+                code,
+                Shape::Rectangle(Rectangle {
+                    width: 2.0,
+                    height: 5.0
+                })
+            ),
             10.0,
         );
     }

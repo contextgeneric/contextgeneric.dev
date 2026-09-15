@@ -29,9 +29,9 @@ pub mod an_enum_as_a_list_of_named_variants {
         where
             T: HasFields<
                 Fields = Sum![
-                    Field<Symbol!("Circle"), Circle>,
-                    Field<Symbol!("Rectangle"), Rectangle>,
-                ],
+                             Field<Symbol!("Circle"), Circle>,
+                             Field<Symbol!("Rectangle"), Rectangle>,
+                         ],
             >,
         {
         }
@@ -98,7 +98,10 @@ pub mod one_handler_per_variant {
         let code = PhantomData::<()>;
 
         assert_eq!(app.compute(code, Reading::Temperature(21)), "21");
-        assert_eq!(app.compute(code, Reading::Label("north".to_owned())), "north");
+        assert_eq!(
+            app.compute(code, Reading::Label("north".to_owned())),
+            "north"
+        );
 
         // The wider enum works through the same wiring, with no new arm anywhere.
         assert_eq!(app.compute(code, ExtendedReading::Flag(true)), "true");

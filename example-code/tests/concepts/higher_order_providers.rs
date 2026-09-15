@@ -206,7 +206,10 @@ pub mod falling_back_to_the_context {
     #[use_provider(Inner: ShapeAreaCalculator<Shape>)]
     impl<Shape, Inner> ShapeAreaCalculator<Vec<Shape>> {
         fn shape_area(&self, shapes: &Vec<Shape>) -> f64 {
-            shapes.iter().map(|shape| Inner::shape_area(self, shape)).sum()
+            shapes
+                .iter()
+                .map(|shape| Inner::shape_area(self, shape))
+                .sum()
         }
     }
 

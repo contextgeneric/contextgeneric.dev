@@ -22,8 +22,7 @@ pub mod what_its_for {
         pub height: u32,
     }
 
-    #[derive(ExtractField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(ExtractField, Debug, Eq, PartialEq)]
     pub enum Shape {
         Circle(Circle),
         Rectangle(Rectangle),
@@ -65,8 +64,7 @@ pub mod using_it {
     #[derive(Debug, PartialEq)]
     pub struct Empty;
 
-    #[derive(ExtractField)]
-    #[derive(Debug, PartialEq)]
+    #[derive(ExtractField, Debug, PartialEq)]
     pub enum Shape {
         Circle(Circle),
         Empty(Empty),
@@ -127,8 +125,7 @@ pub mod examples {
         pub height: f64,
     }
 
-    #[derive(ExtractField)]
-    #[derive(Debug, PartialEq)]
+    #[derive(ExtractField, Debug, PartialEq)]
     pub enum Shape {
         Circle(Circle),
         Rectangle(Rectangle),

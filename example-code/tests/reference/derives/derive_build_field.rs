@@ -11,8 +11,7 @@
 pub mod what_its_for {
     use cgp::prelude::*;
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct Person {
         pub first_name: String,
         pub last_name: String,
@@ -65,23 +64,19 @@ pub mod rejected_build_from_without_has_fields {}
 pub mod using_it {
     use cgp::prelude::*;
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct Person {
         pub first_name: String,
         pub last_name: String,
     }
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct Pair(pub u32, pub u32);
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct NoConfig {}
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct Generic<T> {
         pub value: T,
     }
@@ -123,23 +118,20 @@ pub mod examples {
 
     // `build_from` recurses over the *source's* field list, so the source needs `HasFields` as
     // well as the builder. The page says so under *The three ways to fill a field*.
-    #[derive(HasFields, BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(HasFields, BuildField, Debug, Eq, PartialEq)]
     pub struct FooBar {
         pub foo: u64,
         pub bar: String,
     }
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct FooBarBaz {
         pub foo: u64,
         pub bar: String,
         pub baz: bool,
     }
 
-    #[derive(BuildField)]
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(BuildField, Debug, Eq, PartialEq)]
     pub struct Person {
         pub first_name: String,
         pub last_name: String,

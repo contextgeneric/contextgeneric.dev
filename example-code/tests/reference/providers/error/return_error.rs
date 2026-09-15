@@ -73,7 +73,9 @@ pub mod returning_the_error_itself {
         assert_eq!(App.check("8080").unwrap(), 8080);
         assert_eq!(
             App.check("0").unwrap_err(),
-            AppError { message: "port 0 is reserved".to_owned() },
+            AppError {
+                message: "port 0 is reserved".to_owned()
+            },
         );
     }
 }
