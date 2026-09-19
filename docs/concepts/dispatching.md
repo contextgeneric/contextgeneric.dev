@@ -5,39 +5,36 @@ sidebar_position: 15
 
 # Dispatching
 
-Routing each field of a record, or the current variant of an enum, to the handler responsible for
-it.
+Dispatching connects a record's fields or an enum's variants to the providers that process them.
+A generic dispatcher can build several record types or handle several enum types while each provider
+implements one part of the work. This page explains matching, building, and their compile-time
+guarantees, then shows how to derive dispatch from an ordinary trait.
 
-This page answers *what actually runs the per-variant and per-field handlers?* It is the layer that
-turns [extensible records](./extensible-records.md) and
-[extensible variants](./extensible-variants.md) into working code, and it assumes both. It covers the
-two directions, the guarantee each carries, and the shortcut for the common case. It closes on the costs,
-including the one piece of ceremony that appears once the data is recursive.
+The examples build on [extensible records](./extensible-records.md) and
+[extensible variants](./extensible-variants.md). Those pages explain how CGP exposes fields and
+variants to generic code; dispatching chooses and runs the computations that use them.
 
 ## Two directions, one idea
 
-The extensible-data machinery can take an enum apart one variant at a time and can assemble a record one
-field at a time. Neither decides *what to do* with each piece. Dispatching is that decision: a
-type-level list of handlers, one per element, run as an ordinary
-[handler provider](./handlers.md).
+Dispatchers combine generic data operations with a list of handlers. The data traits describe how
+to extract a variant or set a field. A handler supplies the computation to perform on the extracted
+payload or to produce the field's value.
 
-It runs in two directions, and they are mirror images.
+Matching and building use these pieces differently:
 
-**Matching** consumes a sum. The value is converted into its extractor, and the handlers are tried in
-turn until one matches, so the list stops at the first success. **Building** produces a product. The
-builder starts empty, and every handler runs, each setting one field, so the list runs to the end.
+- **Matching:** Try variants until the current one is found, then run its handler.
+- **Building:** Run handlers in sequence, adding their outputs to a partial record until it can be finalized.
 
-Both come out as `Computer` or `Handler` providers, which is the point: a dispatcher goes anywhere a
-computation goes. It can be wired to a context, nested inside another dispatcher to handle a group of
-variants with a sub-matcher, or chained with other combinators.
+Dispatchers implement the same computation interfaces as other
+[handler providers](./handlers.md). They can be selected through context wiring, composed with other
+computations, or nested to delegate a group of variants to another matcher. The available interfaces
+depend on the dispatcher and the providers it contains.
 
 ## Matching, and why it is exhaustive
 
-The matcher is a chain of attempts, sequenced by the ok monad from
-[monadic handlers](./monadic-handlers.md): each step returns success or a remainder, the chain
-short-circuits on the first success, and a miss threads the narrowed remainder forward.
-
-Wiring it means naming a handler per payload type, plus an entry routing the enum itself to the matcher:
+A matcher selects the handler for an enum's current variant. For a `Shape` enum deriving `CgpData`
+with `Circle(Circle)` and `Rectangle(Rectangle)` variants, input-based wiring can select both the
+matcher and the payload handlers:
 
 ```rust
 delegate_components! {
@@ -53,33 +50,51 @@ delegate_components! {
 }
 ```
 
-`app.compute(code, shape)` now reaches `CircleArea` or `RectangleArea` according to the variant in hand,
-and no code anywhere contains a `match` over `Shape`.
+`UseInputDelegate` selects a provider by the input type. A call to `app.compute(code, shape)` first
+reaches `MatchWithValueHandlers`. The matcher extracts the current variant's payload and delegates
+it through the same context: a `Circle` reaches `CircleArea`, and a `Rectangle` reaches
+`RectangleArea`. The application does not write a `match` over `Shape`.
 
-Exhaustiveness survives the indirection, for the reason
-[extensible variants](./extensible-variants.md) gives: each failed attempt rules out one variant in the
-type, so after the last handler the remainder is uninhabited and is discharged by a `match` with no
-arms. Add a variant without a handler and the remainder becomes inhabited again, so the code stops
-compiling. The dispatcher proves it covered everything.
+The matcher tracks unhandled variants through the extractor's remainder type. Each extraction
+attempt returns either a payload to handle or a remainder that excludes that variant. The next
+attempt receives the narrowed remainder. After every variant has been covered, the remainder is
+uninhabited, so finalization can eliminate it without a wildcard or a runtime panic.
+
+A missing handler prevents the matcher from compiling for that enum. An automatically generated
+handler list requires a suitable provider for every payload; an explicit list must leave an
+uninhabited remainder. Adding a variant therefore requires either an existing generic handler that
+covers it or an additional handler.
+
+The attempts are sequenced by the `OkMonadic` pipeline described in
+[monadic handlers](./monadic-handlers.md). A successful extraction stops the search; a miss passes
+the remainder onward. Here the `Err` branch means “try another variant,” rather than an application
+error. Provider selection and exhaustiveness are checked at compile time, while testing the actual
+variant and running its handler happen at runtime.
 
 ## Building, and why it is complete
 
-The mirror image applies to a record. The builder threads a partial record through the handler list,
-each one computing and setting a field, with later handlers able to read fields already set. At the end
-the record is finalized into the concrete struct.
+A builder dispatcher runs handlers over a partial record and finalizes the result. The partial
+record's type tracks which fields are present after each step. `BuildWithHandlers` starts the
+builder, passes it through the handler list, and calls `finalize_build` at the end.
 
-The guarantee is the mirror image too: finalizing is available only when every field is present, so a
-builder missing a handler cannot finalize and does not compile. A matcher proves it covered every
-variant; a builder proves it filled every field.
+Field adapters let a handler produce either one field or a group of fields. `BuildAndSetField`
+computes and sets a named field; `BuildAndMerge` computes a source record and merges its fields.
+Both pass the current builder by reference to the inner provider, so a later provider can read
+fields an earlier step supplied.
 
-This is the machinery under the [extensible builder](./extensible-records.md): the dispatcher runs
-each subsystem's provider and merges the outputs.
+Finalization requires every field in the strict builder to be present. Omitting a required field
+prevents the pipeline from compiling. Fallible handlers can still return runtime errors while
+computing values; completeness guarantees that a successful build supplies every field, not that
+construction cannot fail.
+
+This supports the [extensible builder pattern](./extensible-records.md): independent providers
+produce parts of a result, and a dispatcher assembles them into a target record. The handler order
+must respect any dependencies on fields produced by earlier steps.
 
 ## The shortcut for the common case
 
-Much of the time the per-variant logic is an ordinary Rust trait with one implementation per payload
-type, and setting up a dispatcher by hand for that is disproportionate.
-`#[cgp_auto_dispatch]` generates the wiring instead:
+`#[cgp_auto_dispatch]` forwards an enum's trait methods to its payloads. Use it when each payload
+already implements an ordinary trait and the enum should expose that same behavior:
 
 ```rust
 #[cgp_auto_dispatch]
@@ -88,41 +103,47 @@ pub trait CanDescribe {
 }
 ```
 
-Implement `CanDescribe` for `Circle` and for `Rectangle`, and any enum whose variants all implement it
-gets it too: `shape.describe()` works with no wiring, no combinator named, and no `match`. It is the
-form to reach for first, and the rest of this page shows what it does underneath.
+If `Circle` and `Rectangle` implement `CanDescribe`, a `Shape` enum with the required extensible-data
+support gains the trait through a generated blanket implementation. A call to `shape.describe()`
+forwards to the current payload's implementation without application wiring or a handwritten `match`.
+Deriving `CgpData` on `Shape` supplies that data support.
+
+Explicit dispatch combinators provide more control when the context must choose different handlers
+or when several variants should be handled as a group. The automatic trait form is a simpler entry
+point when forwarding to payload methods is all the operation needs.
 
 ## What it costs
 
-**A recursive shape needs an extra hop written by hand.** The table above names the matcher directly,
-which works because a `Shape` never contains another `Shape`. When a variant's payload *is* the enum
-again, as in an expression language or a tree, the matcher dispatches back through the same component,
-and a thin wrapper provider has to sit between the enum's entry and the matcher to break the resolution
-cycle. It is ceremony with no conceptual content, and it is the piece of a hand-wired dispatcher most
-likely to puzzle a reader.
+Recursive data can create a trait-resolution cycle in directly wired matchers. A payload handler
+may require the enum's computation, which requires the matcher, which in turn requires the payload
+handler. A context-specific wrapper provider can break that cycle by declaring the enum's provider
+implementation and calling the matcher inside its method body. Non-recursive `Shape` wiring does
+not need that extra provider.
 
-**A missing handler reports as a shape, not as a name.** The failure is an unsatisfiable bound over a
-partial-variant or partial-record type, which is accurate about what is missing and does not say
-"`Rectangle` has no handler".
+Missing handlers can produce errors involving partial-variant types or unsatisfied provider bounds.
+An incomplete builder similarly reports bounds involving its partial-record state. These diagnostics
+can be longer and less direct than an ordinary non-exhaustive `match` or missing struct field.
 
-**There is one hop per element.** Each variant tried is a resolution step, and the whole chain is
-resolved at compile time, so this costs compile time rather than run time, and a wide enum
-dispatched at many types is somewhere that cost shows.
+Dispatching adds type-level work for each field or variant. The compiler resolves the handler chain
+and checks its changing types; wide shapes and many instantiations can increase that work. Runtime
+variant tests and handler calls still occur, and their optimization depends on the generated code
+and compiler. Static wiring alone does not guarantee that dispatch has zero runtime cost.
 
-**And a `match` is still usually right.** Dispatching pays when the shape is not known where the logic is
-written, or when handlers must be contributed independently. For a closed enum handled in one place, the
-language's own construct is clearer and free.
+An ordinary `match` or struct literal is usually clearer when one place owns the whole operation.
+Dispatching becomes useful when generic code must work over different shapes or when independently
+written providers need to contribute parts of an operation.
 
 ## Where to go next
 
-[Extensible variants](./extensible-variants.md) and [extensible records](./extensible-records.md) are
-the two halves this operates on, and both are worth reading first.
-[Handlers](./handlers.md) is the interface every dispatcher and every per-element handler speaks, and
-[monadic handlers](./monadic-handlers.md) is the chaining the matcher is built from.
+These pages explain the data operations and computation interfaces behind dispatch:
 
-For the constructs, [the dispatch combinators](/docs/reference/providers/dispatch) is the
-catalogue of matchers, builders, and per-element adapters, and
-[`#[cgp_auto_dispatch]`](/docs/reference/macros/cgp_auto_dispatch) is the shortcut above.
+- [Extensible variants](./extensible-variants.md): Extraction, remainders, and exhaustiveness.
+- [Extensible records](./extensible-records.md): Partial records and complete construction.
+- [Handlers](./handlers.md): The computation interfaces dispatchers implement.
+- [Monadic handlers](./monadic-handlers.md): Sequencing attempts and stopping on a result.
+- [Dispatch combinators](/docs/reference/providers/dispatch): Matchers, builders, and per-element adapters.
+- [`#[cgp_auto_dispatch]`](/docs/reference/macros/cgp_auto_dispatch): Automatic forwarding from an enum
+  to its payloads.
 
 ---
 

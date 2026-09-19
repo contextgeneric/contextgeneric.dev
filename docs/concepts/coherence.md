@@ -5,21 +5,15 @@ sidebar_position: 1
 
 # Bypassing coherence
 
-Rust allows one implementation of a trait per type. Why that rule exists, what it costs, and how CGP
-writes many implementations and lets each type pick the one it wants.
-
-This page answers *why can't Rust do this already?* It builds up what the trait system gives you, shows
-what that costs when you want two implementations of one thing, and works through the move CGP makes,
-which is smaller than it first appears and does not discard the rule. It closes on what that move costs in
-turn. It is the page everything else in this section is downstream of.
+Rust's coherence rules keep trait implementation selection unambiguous. CGP works within those rules
+by giving alternative implementations separate provider types, then letting each context select one.
+This page explains what coherence provides, why overlapping blanket implementations are rejected,
+and how the provider arrangement allows reuse without ambiguous calls.
 
 ## The trait system is already a dependency-injection mechanism
 
-Start with what Rust does well, because the rule that blocks this later is the same rule that makes
-it work.
-
-When you write a generic function with a bound, you are asking the compiler to find an implementation for
-you:
+Rust resolves trait dependencies for generic code at compile time. A function can require an
+implementation through a bound without asking its caller to pass that implementation explicitly:
 
 ```rust
 pub fn describe<T: Display>(value: &T) -> String {
@@ -27,13 +21,12 @@ pub fn describe<T: Display>(value: &T) -> String {
 }
 ```
 
-There is no need to pass `Display` when `describe` is called. The caller writes `describe(&42)`, and the
-compiler goes looking for `impl Display for i32`, finds it, and wires it up. That is dependency injection,
-done by the type system at compile time, and it is so ordinary in Rust that Rust programmers rarely call
-it that.
+Calling `describe(&42)` makes the compiler resolve `i32: Display`. The caller supplies the value;
+the type system determines which formatting implementation the function uses. This serves as a form
+of dependency injection within ordinary Rust.
 
-It is worth noticing that the compiler resolves the `T: Display` bound **transitively**. Suppose a pair
-implements `Display` whenever both of its components do:
+Trait resolution also follows an implementation's dependencies. A pair can implement `Display`
+whenever both of its fields implement it:
 
 ```rust
 struct Pair<A, B>(A, B);
@@ -45,24 +38,20 @@ impl<A: Display, B: Display> Display for Pair<A, B> {
 }
 ```
 
-Now `describe(&Pair("foo", 42u32))` asks the compiler for `Pair<&str, u32>: Display`, and to satisfy that
-it resolves `&str: Display` and `u32: Display` in turn, without the caller naming either. The chain runs
-as deep as the types do: add a requirement four layers down, and callers four layers up are unaffected.
-That reach makes Rust's generics composable rather than a bookkeeping exercise.
+Calling `describe(&Pair("foo", 42u32))` requires `Pair<&str, u32>: Display`, which in turn requires
+`&str: Display` and `u32: Display`. The caller need not list those transitive requirements separately.
+If an implementation acquires another dependency, generic callers can retain their existing bounds,
+provided the concrete types still satisfy the full chain.
 
 ## That only works because every lookup finds the same answer
 
-Transitive resolution depends on something easy to overlook: when the compiler looks up `Display for i32`,
-it must get the same answer no matter where it asks from. If one crate could see one implementation and
-another crate a different one, the same generic function would mean different things depending on who
-called it, and a program combining both would be incoherent: two halves compiled against
-irreconcilable answers.
+Coherence gives trait resolution a consistent answer across a program. For a given trait, including
+its type arguments, and an implementing type, Rust permits at most one applicable implementation.
+Generic code can therefore rely on the same implementation wherever it is called.
 
-**Coherence is the property that guarantees this**, and Rust enforces it with two rules.
-
-The **overlap rule** forbids two implementations that could both apply to the same type. Given a trait you
-own and two blanket implementations (each a single `impl` written once for every type that meets a bound),
-the compiler rejects the second:
+Rust enforces coherence through overlap and orphan rules. The **overlap rule** rejects implementations
+that could apply to the same type. These blanket implementations each cover every type satisfying
+their bound, so they conflict:
 
 ```rust
 pub trait CanEncode {
@@ -80,11 +69,13 @@ impl<T: AsRef<[u8]>> CanEncode for T {
 }
 ```
 
-`String` satisfies both bounds, so the compiler would have no principled way to choose. The rule exists
-precisely to prevent the alternative: silently picking whichever implementation happens to be in scope.
+`String` satisfies both bounds. Both implementations would apply to `String: CanEncode`, and Rust
+does not let a call site select one of them. Each blanket implementation is valid alone; defining
+both for the same trait causes the conflict.
 
-The **orphan rule** forbids implementing a trait for a type unless your crate owns one of the two.
-Neither `Display` nor `Vec<u8>` is yours, so this is rejected:
+The **orphan rule** restricts implementations involving foreign traits and types. For a trait without
+type parameters, your crate must define either the trait or the implementing type. Neither `Display`
+nor `Vec<u8>` belongs to this crate, so Rust rejects this implementation:
 
 ```rust
 // error[E0117]: only traits defined in the current crate can be implemented
@@ -94,36 +85,35 @@ impl Display for Vec<u8> {
 }
 ```
 
-Without it, two unrelated crates could each add their own `Display for Vec<u8>`, and any program
-depending on both would be unbuildable, with neither crate at fault.
+This restriction prevents unrelated crates from independently defining conflicting implementations
+for the same foreign trait and type. Traits with type parameters have additional cases involving a
+local type in those parameters; the
+[Rust Reference](https://doc.rust-lang.org/reference/items/implementations.html#orphan-rules)
+specifies the full rule.
 
-**Both rules are correct.** They are not conservatism or an unfinished corner of the language; they are
-the price of transitive resolution, and the trade is a good one. Any account of CGP that opens by
-calling coherence a limitation has the argument backwards.
+Together, these rules let crates compose without making implementation selection depend on which
+crate asks. CGP retains that guarantee while changing how alternative implementations are represented.
 
 ## What the guarantee costs
 
-The price is that some perfectly reasonable code is unwritable, and the two rules cost you in different
-ways.
+The overlap rule prevents the encoding trait from carrying both blanket implementations above.
+Even if an application author knows which behavior each type should use, the trait system does not
+provide a selection table for those conflicting implementations. Multiple blanket implementations
+are allowed when Rust can establish that they do not overlap.
 
-The overlap rule costs you **alternative implementations**. In the encoding example above, the author knows
-exactly which implementation they want for which type. The ambiguity is the compiler's, not theirs, and
-there is no way to say so. The trait admits exactly one blanket implementation.
+A newtype provides an ordinary Rust way to choose a distinct implementation for a foreign type.
+The wrapper is local, so it can implement a foreign trait such as `Display`. It also makes the
+semantic distinction explicit. Its cost is that callers must use the wrapper, and operations on the
+underlying type may need forwarding methods or trait implementations.
 
-The orphan rule costs you **reach**. A crate that wants to add a capability to another crate's type has to
-wrap it in a newtype and re-expose everything it still needs, which is boilerplate with no upside and a
-type your callers now have to know about.
-
-These pains are sharp enough that Rust developers work around them by hand, and at least one has
-arrived independently at the pattern CGP is built on. The next section shows how CGP makes that pattern
-first-class.
+Named helper types provide another way to represent implementation choices. Each helper implements
+a trait parameterized by the data type, so the helpers can coexist. CGP uses this pattern and adds
+wiring that connects a type's normal method calls to its chosen helper.
 
 ## The move: make `Self` a type you own
 
-CGP's move is to split the trait in two and change what `Self` means on the side that implements it. One
-definition becomes two traits. The **consumer trait** is the caller's view, `CanEncode` unchanged, so
-`value.encode()` stays a method call. The **provider trait** carries the same method with the former
-`Self` moved into a parameter, and each implementation targets a small type it declares for itself:
+CGP separates the caller's interface from the provider's implementation interface. The
+**consumer trait** keeps the method callers use:
 
 ```rust
 #[cgp_component(Encoder)]
@@ -132,9 +122,8 @@ pub trait CanEncode {
 }
 ```
 
-`#[cgp_component]` generates the provider trait `Encoder<Context>` from that one definition, where the
-type being encoded is now the `Context` parameter. Each implementation targets a dummy struct of its own,
-so the two implementations that clashed a moment ago can both be written:
+`#[cgp_component]` also generates a **provider trait**, `Encoder<Context>`. The value being encoded
+becomes its `Context` parameter, while each provider supplies a distinct implementing type:
 
 ```rust
 #[cgp_impl(new EncodeAsText)]
@@ -150,90 +139,76 @@ impl Encoder {
 }
 ```
 
-**Both compile.** `EncodeAsText` and `EncodeAsHex` are different `Self` types, so the two impls no longer
-overlap, however many bounds they share, and any number more would compile too. The orphan rule does not
-enter either, because that `Self` is always a struct this crate declared, which is how a crate adds a
-capability to a type it did not define. Coherence only ever looked at `Self`, and `Self` is now a local
-dummy struct, so there is nothing left for the rules to reject.
+`EncodeAsText` and `EncodeAsHex` can both implement `Encoder<Context>` because their implementing
+types differ. Their context requirements may overlap without the Rust implementations overlapping.
+A crate can also implement a foreign provider trait for its own provider type, even when the context
+comes from another crate. The generated implementations still satisfy Rust's coherence rules.
 
-`#[cgp_impl]` lets a provider keep the consumer trait's `self` receiver, so inside `EncodeAsText` the
-`self` is the value being encoded, and `#[uses(Display)]` records that this provider needs that value to
-be `Display`. Neither rule was repealed; the implementations simply stopped being the kind of thing the
-rules are about. [Consumer and provider traits](./consumer-and-provider-traits.md) works through the two
-halves and how a call crosses between them.
+`#[cgp_impl]` lets provider code retain a familiar `self` receiver. Within that macro's input,
+`self` refers to the value being encoded, and `#[uses(Display)]` requires that value's type to
+implement `Display`. The macro translates this into a provider implementation with an explicit
+context parameter.
 
 ## Coherence comes back, one type at a time
 
-Making the implementations incoherent would be no use if it also made *using* them incoherent. A caller
-still needs `value.encode()` to mean one definite thing.
-
-So the second half brings coherence back at a smaller scale. A type chooses one provider for the
-component, in a small wiring table:
+Each type selects one provider for the component through a wiring table:
 
 ```rust
 delegate_components! { String  { EncoderComponent: EncodeAsText } }
 delegate_components! { Vec<u8> { EncoderComponent: EncodeAsHex  } }
 ```
 
-Now `String` implements `CanEncode` through `EncodeAsText` and `Vec<u8>` through `EncodeAsHex`, so a
-`value.encode()` call resolves to the provider its type named. The two providers still overlap freely, yet
-no call is ambiguous, because each type records its own choice.
+`String` implements `CanEncode` through `EncodeAsText`, while `Vec<u8>` uses `EncodeAsHex`.
+A call to `value.encode()` resolves to the provider selected for that value's type. Both providers
+remain available, but each wired type has an unambiguous choice.
 
-That is the whole trade. **You want incoherence while writing implementations, and coherence while using
-them.** While writing them, overlapping providers coexist with no global conflict. While using them, each
-type names exactly one, and resolution is unambiguous.
+The component key's ownership still matters when wiring foreign types. Here `EncoderComponent` is
+generated in the crate defining `CanEncode`, so that crate can wire it onto `String` and `Vec<u8>`.
+A downstream crate cannot independently wire that foreign key onto those foreign types. This example
+therefore makes one choice per value type across the program.
 
-**Coherence is not repealed; it is scoped.** That line is the whole page in a sentence.
+CGP preserves coherence while making provider selection explicit. Alternative providers can apply
+to the same context, and the wiring chooses which one supplies the consumer trait. Defining a second
+conflicting entry for the same type and component remains an error.
 
-How far the idea scales is a separate question. Here each type picks one provider, which is the simplest
-shape. A type you define to stand for your own application can pick its own providers, and the same
-capability can even resolve differently for the same data in two applications. Those are higher tiers of
-the same hierarchy, worked out in [Modularity Hierarchy](./modularity-hierarchy.md).
+Separate application contexts allow independent choices for the same data type. That arrangement
+requires moving the data into a component parameter; [Modularity Hierarchy](./modularity-hierarchy.md)
+explains when to use it and how it differs from the value-type wiring shown here.
 
 ## What it costs
 
-**It is more machinery than one trait.** A component is two traits, a marker type, and a wiring line per
-type that uses it. For a capability with a single implementation that is pure overhead, and a plain trait
-is the right tool. [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is the CGP construct for that case, and it
-needs no wiring at all.
+A component introduces more declarations than a plain trait: a provider trait, a component marker,
+and wiring for the types that use it. For a capability with one implementation, a plain trait or
+[`#[cgp_fn]`](/docs/reference/macros/cgp_fn) may provide the required reuse without wiring.
 
-**A wired choice is local, not global.** This is a real limit rather than a technicality. When a program
-genuinely needs one answer program-wide, per-type choice is the wrong shape and a coherent trait is safer.
-Consider a single consistent `Ord` for a map key, where two orderings in one program would corrupt the
-map. CGP does not make coherence optional; it moves where the single answer is decided.
+Provider selection belongs to CGP's component interface. It does not give an existing trait such as
+`Ord` multiple implementations, nor change how standard collections select that trait's behavior.
+Use ordinary traits when one consistent implementation per type expresses the intended contract.
 
-**The choice is explicit, which is both the point and a cost.** Nothing is inferred. A type that has not
-named a provider does not get a default, and adding a capability means adding a line. That is the property
-the whole design rests on, and it is also more to write and read than a trait with one implementation.
+Explicit wiring adds configuration to read and maintain. In the tables above, each type needs an
+entry naming its provider. Shared bundles and namespaces can reduce repetition, but they introduce
+further places to inspect when tracing a choice.
 
-**Wiring is checked lazily.** A table naming a provider whose requirements the wired type cannot meet
-still compiles; the failure appears later, where the capability is used, and can be long.
-[`check_components!`](/docs/reference/macros/check_components) forces it to the wiring line and names the
-actual missing requirement, and
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) leads with the root cause for the classes
-it recognizes. It is a `v0.1.0-alpha` that reshapes the core wiring errors rather than all of them.
-[Checking your wiring](./check-traits.md) is the fuller account.
+Wiring checks are deferred until the capability is checked or used. A table can name a provider
+whose requirements the context does not satisfy, and a later call can produce a verbose error.
+[`check_components!`](/docs/reference/macros/check_components) verifies requirements beside the
+wiring. [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) makes recognized causes
+easier to read; its `v0.1.0-alpha` release covers core wiring errors rather than every class.
+[Checking your wiring](./check-traits.md) shows the diagnostics and their limits.
 
 ## Where to go next
 
-[Modularity Hierarchy](./modularity-hierarchy.md) is the page to read next if this argument landed, because
-a reader who has just been told coherence can be escaped needs to hear immediately that most code should
-not bother. It lays out the range from a plain trait to fully wired components and argues for climbing no
-higher than a problem needs.
+Choose the next page according to whether you want to evaluate, understand, or use the arrangement:
 
-[Consumer and provider traits](./consumer-and-provider-traits.md) develops the trait split this page
-introduced: what each half is for, and how a method call crosses between them.
-
-To see it working rather than argued, the [Hello World tutorial](/docs/tutorials/hello) is five minutes and
-one durable idea, and the [Area calculation series](/docs/tutorials/area-calculation/) builds the split up
-from plain functions. For the constructs themselves,
-[`#[cgp_component]`](/docs/reference/macros/cgp_component) generates the pair,
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) writes a provider, and
-[`delegate_components!`](/docs/reference/macros/delegate_components) is the table.
-
-The fullest public account of why coherence exists is the
-[RustLab 2025 talk](/blog/rustlab-2025-coherence), which spends its first third establishing that the rule
-is correct before working around it.
+- [Modularity Hierarchy](./modularity-hierarchy.md): When a plain trait is enough and when further
+  provider choices are useful.
+- [Consumer and provider traits](./consumer-and-provider-traits.md): How a method call reaches its provider.
+- [Hello World tutorial](/docs/tutorials/hello) and
+  [Area calculation series](/docs/tutorials/area-calculation/): Working examples of the component model.
+- [`#[cgp_component]`](/docs/reference/macros/cgp_component),
+  [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), and
+  [`delegate_components!`](/docs/reference/macros/delegate_components): The constructs used here.
+- [RustLab 2025 talk](/blog/rustlab-2025-coherence): A longer account of coherence and CGP's approach.
 
 ---
 

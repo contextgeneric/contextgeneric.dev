@@ -5,22 +5,16 @@ sidebar_position: 7
 
 # Higher-order providers
 
-Providers parameterized by other providers, so one implementation can be expressed in terms of
-another.
-
-This page answers *how does one implementation build on another without choosing which one?* It shows
-the shape, the one piece of syntax that makes it look strange, and the two things it buys: composition
-without a context, and a wrapper that falls back to whatever the context already decided. It closes on
-why this is the step most often taken too early.
+A **higher-order provider** takes another provider as a type parameter and uses it to perform part
+of its work. A wrapper can then reuse the same transformation with different inner implementations.
+This page explains the inner-provider bound, composition before a context is chosen, and delegation
+back to the context through `UseContext`.
 
 ## Choosing is not the only thing you can do with a provider
 
-Wiring picks one implementation from several. That covers a lot, and it does not cover the case where
-you want *the same transformation over any of them*.
-
-A scaled area is that case. Scaling knows how to multiply by a factor squared; it does not know how to
-compute an area, and there is no reason for it to. The base calculation is not something the wrapper
-should choose. It is something the wrapper should take:
+A provider parameter separates a reusable transformation from the calculation it transforms.
+For example, scaling an area requires multiplying a base area by a scale factor squared. The
+scaling logic can accept any provider that calculates the base area:
 
 ```rust
 #[cgp_impl(new ScaledArea<Inner>)]
@@ -33,27 +27,32 @@ impl<Inner> AreaCalculator {
 }
 ```
 
-`ScaledArea` is a **higher-order provider**: a provider with another provider as a parameter, bound to
-supply part of the work. Wiring `ScaledArea<RectangleArea>` reads as "compute the rectangle area, then
-scale it", and `ScaledArea<CircleArea>` reuses the same scaling over a different base:
+`ScaledArea<Inner>` requires `Inner` to implement `AreaCalculator` for the same context.
+It passes that context to `Inner::area`, then applies the `scale` value read from the context's
+field. The wrapper supplies the scaling logic; its type parameter selects the base calculation.
+
+Wiring chooses the combination for each context. A rectangle and a circle can reuse the wrapper
+with different inner providers:
 
 ```rust
 delegate_components! { ScaledRectangle { AreaCalculatorComponent: ScaledArea<RectangleArea> } }
 delegate_components! { ScaledCircle    { AreaCalculatorComponent: ScaledArea<CircleArea>    } }
 ```
 
-This is passing a function to a function, done in types. And because a provider is a name rather than a
-value, nesting them costs nothing at runtime: the composition resolves during compilation, and only
-a direct call executes.
+Here `ScaledRectangle` and `ScaledCircle` hold the shape data and the scale factor. Each must
+satisfy both the wrapper's field requirement and its selected inner provider's requirements.
+`RectangleArea` needs the rectangle's dimensions, while `CircleArea` needs the circle's radius.
+
+Provider composition uses types rather than stored provider values. The compiler resolves the
+inner call statically, without a runtime provider lookup. The selected methods still execute their
+calculations; inlining and other optimizations determine the final machine code.
 
 ## The extra `<Self>`, and the attribute that fills it in
 
-One detail makes these look stranger than they are, and it is worth meeting deliberately rather than in
-an error message.
-
-The [trait split](./consumer-and-provider-traits.md) gives a provider trait the context as an explicit
-parameter. So when a wrapper requires its inner provider to implement the same capability, the
-requirement has to name that context slot:
+An inner-provider bound must identify the context on which the provider operates. The
+[consumer/provider split](./consumer-and-provider-traits.md) gives `AreaCalculator` a leading
+context parameter. Inside `#[cgp_impl]`, `Self` names that context, so the explicit bound is
+`Inner: AreaCalculator<Self>`:
 
 ```rust
 #[cgp_impl(new ScaledArea<Inner>)]
@@ -67,36 +66,43 @@ where
 }
 ```
 
-`AreaCalculator<Self>` has no counterpart in the consumer trait a reader has been looking at, so it
-arrives as an unexplained argument. [`#[use_provider]`](/docs/reference/attributes/use_provider) exists
-to remove it: write `Inner: AreaCalculator` and the attribute supplies the `<Self>`, which is the whole
-of what it does. That is the version in the first snippet, and it is the one to write.
+[`#[use_provider]`](/docs/reference/attributes/use_provider) generates that bound from the shorter
+`Inner: AreaCalculator` form in the first example. It inserts the context argument and adds the
+requirement to the implementation's `where` clause. Prefer this form when declaring an inner
+provider dependency.
 
-The attribute does *not* change the call. `Inner::area(self)` stays as it is: you invoke the inner
-provider as an associated function with the context passed explicitly, because that is the shape the
-provider trait actually has. It is the one place in a well-written provider where the trait split is
-still visible, and trying to make it read as `self.area()` would be calling the context's own wiring,
-which is a different thing entirely.
+The attribute changes bounds, not calls. `Inner::area(self)` invokes the selected inner provider
+with the context passed explicitly. A call to `self.area()` would instead use the context's consumer
+trait implementation, which may route back to the wrapper rather than to `Inner`.
 
 ## Composition without a context to name
 
-The quiet payoff is that composing two providers costs nothing to declare:
+A type alias can name a provider composition before any context uses it:
 
 ```rust
 pub type ScaledScaledRectangleArea = ScaledArea<ScaledArea<RectangleArea>>;
 ```
 
-A type alias, with no bounds on it at all. Compare what composing two constrained generic functions
-normally takes: the composed signature restating both sets of constraints, in Rust as much as in
-Haskell. Here the requirements are discharged where a context wires the stack, not where the stack is
-written, so a composition is just a name for a shape and can be published, reused, and further wrapped
-without accumulating a `where` clause.
+The provider structs carry their dependencies on their trait implementations, so this alias does
+not need to repeat those bounds. It names a composition that can be published, reused, and wrapped
+again without selecting a context or proving that a particular context satisfies it.
+
+The requirements are checked when code uses the composition or explicitly checks it for a context.
+A wiring entry alone does not prove they hold. For this alias, the context needs the dimensions
+required by `RectangleArea` and the `scale` field used by both wrappers. Both layers read the same
+scale value, so nesting them applies its square twice. For base area `12` and scale `2`, the result
+is `192`.
 
 ## Falling back to what the context already decided
 
-A wrapper often wants a default: use whatever the context is already wired to, unless told otherwise.
-[`UseContext`](/docs/reference/providers/use_context) is the provider that means exactly that, and a
-default parameter makes it the fallback:
+[`UseContext`](/docs/reference/providers/use_context) lets an inner step use the context's existing
+consumer-trait implementation. A default type parameter makes that the wrapper's behavior unless
+the wiring names another provider.
+
+Summing areas illustrates a useful default because the collection and its elements need different
+implementations. In this example, `ShapeAreaCalculator<Context, Shape>` calculates the area of a
+separate `Shape` value. The context represents an application that chooses how to measure each
+shape, rather than the shape itself:
 
 ```rust
 pub struct SumAreas<Inner = UseContext>(pub PhantomData<Inner>);
@@ -110,8 +116,9 @@ impl<Shape, Inner> ShapeAreaCalculator<Vec<Shape>> {
 }
 ```
 
-Written unparameterized in a table, `SumAreas` means `SumAreas<UseContext>`, so summing a collection
-asks the context how to measure each element:
+`SumAreas` means `SumAreas<UseContext>` when its type argument is omitted. The wrapper asks the
+context to calculate each element's area, then adds the results. An application can select a
+rectangle provider and reuse the summing provider for vectors:
 
 ```rust
 delegate_components! {
@@ -124,15 +131,24 @@ delegate_components! {
 }
 ```
 
-Naming an inner provider instead, `SumAreas<SomethingElse>`, pins that step regardless of what the
-context would have said, which is how one entry overrides a nested decision without disturbing the rest
-of the table. The default only exists when the provider is declared with an explicit struct; one
-declared inline by the attribute has no parameter to default.
+`open ShapeAreaCalculatorComponent;` enables provider selection by the component's shape parameter.
+A call for `Vec<Rectangle>` selects `SumAreas`. Each inner call then asks for the `Rectangle`
+capability and reaches `RectangleArea`. The inner lookup is different from the collection lookup,
+so it has an independent implementation to resolve to.
+
+An explicit `SumAreas<AnotherCalculator>` uses that provider directly for each element, bypassing
+the context's choice for that inner step. It still passes the same context, which must satisfy
+`AnotherCalculator`'s requirements.
+
+Declare the provider struct explicitly to give its parameter the `UseContext` default. The
+`#[cgp_impl(SumAreas<Inner>)]` block implements that existing struct; the `new` form declares a
+provider but does not supply this default.
 
 ## Not every generic provider is one of these
 
-A provider with a type parameter is not automatically higher-order, and the distinction is worth
-keeping because most generic providers are the other kind:
+A generic provider is higher-order when its parameter represents a provider used to perform work.
+Other parameters may select data, field names, or configuration. This getter uses `Tag` as a field
+name:
 
 ```rust
 #[cgp_impl(new GetName<Tag>)]
@@ -146,44 +162,41 @@ where
 }
 ```
 
-`Tag` here is a field name, used as a key. Nothing is delegated to it, nothing implements a capability
-on its behalf, and none of the machinery on this page applies. A provider is higher-order when a
-parameter is *bound to a provider trait* and invoked to do part of the work.
+`GetName<Tag>` requires the context to supply a `String` field identified by `Tag`. It does not
+require `Tag` to implement a provider trait or invoke it as a provider. By contrast, `ScaledArea`
+both constrains `Inner` with a provider-trait bound and calls it for the base calculation.
 
 ## What it costs
 
-**It is the step most often taken too early.** A provider that is not wrapping anything has nothing to
-gain from a parameter, and adding one buys a type argument at every wiring site, a bound to get right,
-and a call form that reads unlike the rest of the code. Reach for this when one implementation should
-genuinely be expressed in terms of another, not when it merely could be.
+An inner-provider parameter adds a choice to the API and a bound to the implementation. Use it when
+one transformation needs to work with independently selected implementations. A fixed implementation
+with nothing to vary does not benefit from an extra provider parameter.
 
-**A failure names the stack, not the layer.** Checking a context tells you `ScaledArea<RectangleArea>`
-does not work; it does not say which half is at fault. The
-[`#[check_providers]`](/docs/reference/macros/check_components) form fixes that by asserting against
-each layer separately, and a nested stack is the main reason it exists. But it is another thing to
-remember, and without it a deep stack is genuinely hard to debug.
+`UseContext` can create a resolution cycle if the inner request selects the same wrapper again.
+For example, a wrapper wired for a capability cannot use that same capability as its only base
+implementation. The summing example avoids this by requesting the element capability from the
+collection provider. Ensure that the inner lookup resolves to an independently available implementation.
 
-**Compile-time work grows with depth.** Each layer is another round of trait resolution, and a stack
-that is several deep and instantiated at many types is one of the places CGP's compile-time cost is most
-visible.
+A nested composition can make failures harder to locate. An error on `ScaledArea<RectangleArea>`
+may not immediately distinguish the scaling requirement from the rectangle requirements.
+The [`#[check_providers]`](/docs/reference/macros/check_components) form gives each provider a
+separate assertion against the same context, helping identify which layer lacks a dependency.
 
-**And the call form stays visible.** `Inner::area(self)` is the one construct here that still reads
-inside-out, and no attribute hides it. It is a small cost on every higher-order provider written.
+Deeper compositions add trait-resolution work, especially when instantiated for many contexts.
+They also add types and delegation steps for a reader to follow. The explicit `Inner::area(self)`
+call makes the inner choice visible, but requires familiarity with provider-style calls.
 
 ## Where to go next
 
-[Aggregate providers](./aggregate-providers.md) is the other thing a provider parameter is confused
-with: bundling several wiring choices under one name, which composes tables rather than behaviour.
-[Checking your wiring](./check-traits.md) covers the per-layer check this page needs.
+These pages explain related forms of composition and their checks:
 
-[Handlers](./handlers.md) is where composition of this kind is the whole point: a family of
-computation components whose combinators are higher-order providers, chained into pipelines.
-
-For the constructs, [`#[use_provider]`](/docs/reference/attributes/use_provider) completes the inner
-bound, [`UseContext`](/docs/reference/providers/use_context) is the fallback,
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) writes the provider, and
-[`delegate_components!`](/docs/reference/macros/delegate_components) carries the `open` statement the
-last example uses.
+- [Aggregate providers](./aggregate-providers.md): Sharing a group of wiring choices through one provider.
+- [Checking your wiring](./check-traits.md): Checking the context and individual provider layers.
+- [Handlers](./handlers.md): Higher-order providers used as computation and pipeline combinators.
+- [`#[use_provider]`](/docs/reference/attributes/use_provider): Inner-provider bounds and context arguments.
+- [`UseContext`](/docs/reference/providers/use_context): Forwarding to the context's consumer trait.
+- [`#[cgp_impl]`](/docs/reference/macros/cgp_impl): Provider definitions and explicit provider structs.
+- [`delegate_components!`](/docs/reference/macros/delegate_components): Wiring and `open` dispatch.
 
 ---
 

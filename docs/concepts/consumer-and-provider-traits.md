@@ -5,20 +5,19 @@ sidebar_position: 2
 
 # Consumer and provider traits
 
-One trait definition in CGP becomes two traits: a **consumer trait** that callers use, and a
-**provider trait** that implementations target. This page explains why the split exists, what each
-half is for, and how a plain method call finds its way from one to the other. It closes on what the
-arrangement costs, which is the part worth reading before adopting it.
+CGP separates the trait callers use from the trait providers implement. A **consumer trait** exposes
+a capability on a context, while a **provider trait** lets reusable implementations supply that
+capability. This page motivates the split, traces a method call through its wiring, and shows the
+generated Rust before discussing the costs.
 
 ## What an ordinary Rust trait does, and where it stops
 
-A Rust trait joins two jobs that are usually the same job. The type that implements `Display` is the
-type callers format, and that identity lets the compiler resolve a `where T: Display` bound without
-anyone naming an implementation: it looks the type up, finds the one implementation, and is done.
-Almost all Rust code wants exactly this, which is why the language is built around it.
+An ordinary Rust trait connects a type to an implementation of a capability. A `T: Display` bound,
+for example, lets the compiler select the formatting implementation for `T`. This is sufficient when
+each type needs one implementation and you do not need to choose among reusable alternatives.
 
-The consequence is that a trait offers one implementation per type, and that limit shows up sooner
-than it sounds. Consider an application that sends email, with a test harness that must not:
+Separate application types can implement the same trait differently using ordinary Rust.
+A production application might send email, while a test application records it:
 
 ```rust
 use core::cell::RefCell;
@@ -48,35 +47,34 @@ impl CanSendEmail for TestApp {
 }
 ```
 
-This compiles, and it is worth noticing that it already does what you want: two application types,
-two behaviours, no CGP anywhere. `App` and `TestApp` here are types that stand for a whole
-application. Their job is to carry the choices and the data the program needs, not to be operated
-on. That shape is legal Rust and nothing about it is unusual.
+`App` and `TestApp` already provide different behavior without CGP. Each is a context representing
+an application and carrying the data its implementation needs. The SMTP body is omitted here;
+`TestApp` shows the recording behavior in full.
 
-Sharing is where it fails. Try to lift a body out into something reusable, so that a second
-application could adopt the SMTP behaviour without copying it, and the two implementations collide:
+Overlapping blanket implementations prevent those behaviors from being offered as interchangeable
+trait implementations. If the SMTP implementation applies to every type with `HasSmtpConfig`, and
+the recording implementation applies to every type with `HasRecordedEmails`, they conflict:
 
 ```rust
 impl<T: HasSmtpConfig>     CanSendEmail for T { /* over SMTP */ }
 impl<T: HasRecordedEmails> CanSendEmail for T { /* record it */ }   // error[E0119]
 ```
 
-The compiler rejects the second impl because a type could satisfy both bounds, and it has no
-principled way to choose. So the arrangement above survives, but every application must hand-write
-every body, and nothing can be factored out. It is available and unrewarding, which is why almost
-nobody builds on it. That is the gap CGP fills.
+A type could satisfy both bounds, so Rust rejects the pair. The bodies can still be shared through
+helper functions or other composition techniques, but each application must connect its trait
+implementation to the chosen behavior. CGP provides a reusable provider interface and wiring for
+that choice.
 
 ## Splitting one trait in two
 
-CGP's move is to stop implementing the trait for the type the capability is about. A single
-definition produces two traits with the two jobs pulled apart:
+CGP gives callers and implementers separate trait interfaces:
 
-- The **consumer trait** is the caller's view. It keeps the original name, the original `self`
-  receiver, and the original signatures, so a caller writes `app.send_email(..)` as before.
-- The **provider trait** is the implementer's view. It is the same interface with `Self` moved out
-  into an explicit leading `Context` type parameter, and every `self` rewritten to `context`.
+- The **consumer trait** keeps the original methods, so callers use `app.send_email(..)`.
+- The **provider trait** moves the consumer's `Self` into an explicit `Context` parameter and
+  replaces the receiver with a context argument.
 
-For the example above, the pair is:
+The simplified pair for email sending looks like this. The provider's generated checking bound is
+omitted here and explained below:
 
 ```rust
 // what callers use
@@ -90,55 +88,55 @@ pub trait EmailSender<Context> {
 }
 ```
 
-Moving `Self` is the whole change. An implementation no longer says "this type sends email"; it says
-"this *named implementation* sends email, for any context". The name is a small type the
-implementing crate declares for the purpose:
+The provider trait lets a named implementation supply behavior for a context. Each implementation
+uses its own marker type in the `Self` position:
 
 ```rust
 impl<Context> EmailSender<Context> for SendViaSmtp { /* ... */ }
 impl<Context> EmailSender<Context> for RecordEmails { /* ... */ }
 ```
 
-Both compile, and any number more would. There is no overlap, because each `impl` has a different
-`Self`. There is no orphan-rule problem either, because that `Self` is a type the crate writing the
-impl owns, which means a crate can add behaviour for a type it did not define. Neither rule was
-repealed; the implementations simply stopped being the kind of thing the rules are about. The wider
-argument for why that is a fair trade is [Bypassing coherence](./coherence.md).
+The implementations have distinct `Self` types, so they can accept the same contexts without
+conflicting with one another. Owning the provider type also lets a crate implement a provider trait
+from another crate. These are ordinary coherent Rust implementations;
+[Bypassing coherence](./coherence.md) explains the rules behind the arrangement.
+
+A component can contain several methods, associated types, and constants. The single-method example
+keeps the split visible; it is not a restriction imposed by CGP. Group items when one provider choice
+should determine their implementation.
 
 ## A provider is a name, not a value
 
-A **provider** is one of those named implementations: `SendViaSmtp`, `RecordEmails`. It is a
-zero-sized type that exists only to be named. Nothing constructs it, nothing stores it, and there is
-no field in it to read; at runtime it does not exist at all.
+A provider such as `SendViaSmtp` or `RecordEmails` is a zero-sized type used to name an implementation.
+CGP does not construct a provider value or store state in it. The context supplies the values the
+implementation needs.
 
-That has one consequence worth fixing in mind before reading any provider code. Inside a provider,
-`self` and `Self` refer to the **context**, the application type the method is running against,
-never to the provider. When you write a provider with
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl), the macro keeps `self` in the source and rewrites
-it to the context underneath, precisely because the context is the only value that exists when the
-method runs.
+Within [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), `self` and `Self` refer to the context.
+The macro rewrites them into the explicit context argument and type parameter shown above.
+In a raw Rust provider implementation, `Self` instead has its ordinary meaning: the provider type
+following `for`.
 
 ## How a call finds its provider
 
-Two pieces connect the halves: a table on the context that names its choice, and a pair of generated
-implementations that follow it.
-
-A context writes the table. It maps each **component**, one capability defined once that
-implementations can be wired for, to the provider that should supply it, and it is the one place a
-choice is recorded:
+A context's wiring selects a provider for each component, much like a settings table whose keys and
+values are types. The compiler resolves this table at compile time:
 
 ```rust
 delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
 delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
 ```
 
-`EmailSenderComponent` is a marker type generated alongside the two traits, used purely as the key.
-The table itself is a set of trait implementations rather than a runtime structure: the compiler
-performs the lookup, and nothing survives into the program.
+`EmailSenderComponent` is the generated marker used as the key. A **component** groups the consumer
+trait, provider trait, and that marker. The wiring maps its key to `SendViaSmtp` for `App` and to
+`RecordEmails` for `TestApp`.
 
-The two generated implementations then chain through it. The first says that any context which
-implements the *provider* trait for itself gets the *consumer* trait, so `app.send_email(..)` becomes
-a legal call:
+A method call follows the selected entry. For `app.send_email("a@b.c", "hi")`, the compiler resolves
+`App`'s email-sending capability through its table to `SendViaSmtp`, then checks that provider's
+requirements against `App`. The call uses static dispatch; the compiled program does not need a
+runtime wiring table or provider lookup.
+
+The generated consumer implementation connects method syntax to the provider interface. Any context
+that implements the provider trait for itself gets the consumer trait:
 
 ```rust
 impl<Context> CanSendEmail for Context
@@ -151,8 +149,8 @@ where
 }
 ```
 
-The second says that anything with a table entry for this component inherits the provider trait from
-whatever the entry names:
+The generated delegation implementation then connects a table entry to its selected provider.
+`DelegateComponent` represents that entry, and its `Delegate` associated type names the provider:
 
 ```rust
 impl<Context, Provider> EmailSender<Context> for Provider
@@ -167,34 +165,26 @@ where
 }
 ```
 
-Put together, `app.send_email("a@b.c", "hi")` resolves in three steps. `App` implements
-`CanSendEmail` because it implements `EmailSender<App>` for itself; it implements `EmailSender<App>`
-because its table maps `EmailSenderComponent` to `SendViaSmtp`; and `SendViaSmtp` implements
-`EmailSender<App>` directly. Every step is trait resolution, so the finished call is a direct call to
-`SendViaSmtp::send_email`: no lookup happens while the program runs, and a provider no context uses
-never reaches the binary.
+Together, these implementations resolve `App: CanSendEmail` through `App: EmailSender<App>` to
+`SendViaSmtp: EmailSender<App>`. The context remains `App` throughout, so the final provider receives
+the application value on which the caller invoked the method.
 
-The one piece of that listing not yet explained is
-[`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), which is also a supertrait on the provider
-trait. Every provider implements it under exactly the bounds it needs, and requiring it here carries
-those bounds back down the chain, so when a context is missing something a provider requires, the
-compiler can name the missing requirement instead of reporting only that the provider trait is not
-implemented. It is generated, never written by hand.
+[`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for) carries the provider's dependency
+bounds for checking. The provider macros generate an implementation with those bounds, and the
+provider trait also requires it as a supertrait. Explicit component checks use this path to expose
+missing requirements that a consumer-trait error can hide.
 
-Three liberties in the listings above are worth knowing before you read a real error message. The
-generated type parameters carry reserved names: the context is `__Context__` and the provider
-`__Provider__`, and the delegate is spelled out in full as
-`<__Provider__ as DelegateComponent<EmailSenderComponent>>::Delegate`. `Context`, `Provider`, and
-`Provider::Delegate` here are for legibility. And the provider trait printed earlier on this page omitted
-its `IsProviderFor` supertrait, which the real `EmailSender<__Context__>` carries. `cargo cgp expand` will
-show you all of it as the macros actually emit it.
+The listings simplify generated names for readability. Actual expansions use `__Context__` and
+`__Provider__`, and spell the delegate as
+`<__Provider__ as DelegateComponent<EmailSenderComponent>>::Delegate`. The earlier simplified
+`EmailSender` declaration also omitted its `IsProviderFor` supertrait. `cargo cgp expand` shows the
+full expansion for a concrete example.
 
 ## Writing it
 
-In practice you write neither trait by hand. [`#[cgp_component]`](/docs/reference/macros/cgp_component)
-generates the pair, the marker, and the two blanket implementations from one trait definition, and
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) lets a provider be written in the consumer trait's
-shape, keeping `self` and the original signatures, and rewrites it into the provider form:
+The macros generate the trait pair and forwarding implementations from a consumer trait definition.
+`#[cgp_component]` creates the component, and `#[cgp_impl]` defines each provider using context-style
+method syntax:
 
 ```rust
 use cgp::prelude::*;
@@ -233,55 +223,51 @@ delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
 delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
 ```
 
-Two details of that listing are worth pointing out. The
-[`#[implicit]`](/docs/reference/attributes/implicit) arguments are how each provider reaches into its
-context: they read a same-named field and disappear from the method's public signature, so
-`app.send_email(to, body)` still takes two arguments. And the two providers depend on *different*
-fields: `SendViaSmtp` needs an `smtp_server` and `RecordEmails` needs somewhere to record, with
-neither requirement appearing in `CanSendEmail`. That is
-[impl-side dependency injection](./impl-side-dependencies.md), and it stops a context paying
-for the needs of implementations it did not choose.
+Each `#[implicit]` argument reads a same-named field exposed by the context's `HasField` derive.
+The macro removes these arguments from the public signature, so callers still write
+`app.send_email(to, body)`. The SMTP body remains a placeholder; the recording provider stores the
+message in the test application's vector.
 
-A consumer trait remains an ordinary Rust trait throughout. Nothing stops a context from implementing
-it directly, exactly as in the very first listing on this page, and skipping providers and wiring
-entirely. The split is something you opt into for the capabilities that need more than one
-implementation, not a replacement for how traits already work.
+Each provider declares only the fields it needs. `SendViaSmtp` requires `smtp_server`, while
+`RecordEmails` requires `sent_emails`; neither requirement appears in `CanSendEmail`.
+These are [impl-side dependencies](./impl-side-dependencies.md), which let implementations have
+different requirements without changing the caller's interface.
+
+A context can also implement the consumer trait directly, using the ordinary Rust form shown at
+the start of the page. For that capability it can omit providers and wiring. This allows adoption
+one capability at a time, subject to Rust's usual restriction against conflicting implementations.
 
 ## What it costs
 
-**It is more machinery than a plain trait.** One capability becomes two traits, a marker type, and a
-line of wiring per context. For a capability with a single implementation, that is pure overhead:
-write a plain trait, or reach for [`#[cgp_fn]`](/docs/reference/macros/cgp_fn), which builds a
-capability from a function with no component and no wiring at all.
+A component adds declarations and wiring beyond a plain trait. For a capability with one
+implementation, use a plain trait or consider [`#[cgp_fn]`](/docs/reference/macros/cgp_fn), which
+creates a blanket-implemented capability from a function without component wiring.
 
-**Wiring is checked lazily.** A table with a missing entry, or one naming a provider whose own
-requirements the context cannot meet, still compiles; the failure surfaces later, wherever the
-capability is finally used, and the error can be long. This is real, and it has an answer:
-[`check_components!`](/docs/reference/macros/check_components) forces the check at the wiring line so
-the error names the actual gap, and
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reshapes the recognized failures to
-lead with the root cause, though it is a `v0.1.0-alpha` and covers the core wiring errors rather than
-every class. Neither makes the raw diagnostics pleasant. See
-[Checking your wiring](./check-traits.md) for what to expect.
+Wiring does not immediately verify the selected provider's requirements. A missing entry or
+unsatisfied dependency can remain undetected until a caller needs the capability.
+[`check_components!`](/docs/reference/macros/check_components) verifies the requirements where you
+place the check, usually beside the table.
+[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reports recognized failures with
+readable causes; its `v0.1.0-alpha` release covers core wiring errors rather than every class.
+[Checking your wiring](./check-traits.md) shows what to expect with and without those tools.
 
-**There is a hop between the call and the code that runs.** `app.send_email(..)` no longer points at
-one body you can jump to. Unlike runtime dispatch the indirection is fully resolved at compile time
-and never ambiguous, and the wiring table is a single greppable place naming exactly one provider per
-component. But it is a hop, and a reader unfamiliar with the codebase has to follow it.
+Tracing a method call requires following the wiring to its provider. Static dispatch avoids runtime
+lookup costs, but a reader still has to find the table entry and the implementation it names.
+The separation pays for itself when those implementations are reused or selected differently across
+contexts.
 
 ## Where to go next
 
-[Bypassing coherence](./coherence.md) is the argument underneath this page: why Rust's rule exists,
-why it is correct, and why scoping it per context is a fair trade rather than a loophole.
-[Impl-side dependencies](./impl-side-dependencies.md) develops the other half of what makes providers
-reusable: how an implementation states what it needs without the interface carrying it.
+These pages develop the trait model and show how to use it:
 
-To write this rather than read about it, the [Area calculation tutorial](/docs/tutorials/area-calculation/)
-builds the same split up from plain functions, and calls providers by name before any wiring exists.
-For the exact syntax and the full generated code, the reference pages for
-[`#[cgp_component]`](/docs/reference/macros/cgp_component),
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl), and
-[`delegate_components!`](/docs/reference/macros/delegate_components) are the complete account.
+- [Bypassing coherence](./coherence.md): Why distinct provider types permit reusable alternatives.
+- [Impl-side dependencies](./impl-side-dependencies.md): How a provider states requirements without
+  adding them to the caller's interface.
+- [Area calculation tutorial](/docs/tutorials/area-calculation/): Building the same split from plain
+  functions and calling providers before introducing wiring.
+- [`#[cgp_component]`](/docs/reference/macros/cgp_component),
+  [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), and
+  [`delegate_components!`](/docs/reference/macros/delegate_components): Exact syntax and generated code.
 
 ---
 

@@ -5,22 +5,26 @@ sidebar_position: 6
 
 # Checking your wiring
 
-Why a wiring mistake still compiles, and how a compile-time assertion turns the resulting error into
-one that names the real cause.
-
-This page answers *why did my mistake not fail where I made it?* It follows one broken context through
-three stages, unchecked, checked, and checked through the error toolchain, quoting what the compiler
-actually reports at each. It closes on what checking does not fix, which is the honest version of CGP's
-most-cited cost.
+CGP wiring records provider choices without checking their requirements immediately. A compile-time
+check verifies those requirements at a location you choose and helps expose missing dependencies.
+This page follows one broken context from a method-call error through an explicit check and
+`cargo cgp check`, then explains what each can and cannot verify.
 
 ## A context can be wrong and still compile
 
-Wiring records a choice. It does not verify one.
-
-Here is an application wired to a provider that records outgoing email, and an application that has
-nowhere to record it:
+A wiring table can name a provider even when the context lacks a field that provider needs.
+In this example, `RecordEmails` implements the `EmailSender` component by recording messages in
+`sent_emails`, but `BrokenApp` supplies only `smtp_server`:
 
 ```rust
+use cgp::prelude::*;
+use core::cell::RefCell;
+
+#[cgp_component(EmailSender)]
+pub trait CanSendEmail {
+    fn send_email(&self, to: &str, body: &str);
+}
+
 #[cgp_impl(new RecordEmails)]
 impl EmailSender {
     fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
@@ -36,22 +40,19 @@ pub struct BrokenApp {
 delegate_components! { BrokenApp { EmailSenderComponent: RecordEmails } }
 ```
 
-`RecordEmails` needs a `sent_emails` field. `BrokenApp` has a `smtp_server`. **This compiles**, and it
-is meant to: the table stores "this key points to this provider" as a type-level fact, and nothing has
-asked yet whether the provider's own requirements hold for this particular context.
+The table compiles because it records only the mapping from `EmailSenderComponent` to `RecordEmails`.
+The compiler has not yet been asked to prove that `RecordEmails` can send email for `BrokenApp`.
+That proof will fail: the `#[implicit]` argument requires a `sent_emails` field.
 
-That laziness is not an oversight. It lets a provider be written once against every possible
-context, lets a bundle of wiring be reused by applications the bundle has never heard of, and lets a
-table be assembled from pieces that never meet. Checking each entry as it was written would mean every
-entry knowing its final context, which is the coupling the whole design exists to avoid.
-
-The price is that a context can look finished and be broken.
+This deferred checking lets reusable wiring exist before its final context is known.
+An [aggregate provider](./aggregate-providers.md), for example, can group provider choices for
+contexts defined elsewhere. Each context must satisfy the providers' requirements when it uses
+them, but the bundle does not need to supply those dependencies itself.
 
 ## Where the failure surfaces instead
 
-The compiler asks the question the first time something uses the capability, which may be in another
-module, another crate, or a test somebody runs next week. And the answer arrives in a form that does
-not name the problem:
+An unchecked wiring error appears when code first requires the capability. A call to
+`app.send_email(to, body)` on `&BrokenApp` produces an error like this abbreviated diagnostic:
 
 ```text
 error[E0599]: the method `send_email` exists for reference `&BrokenApp`,
@@ -65,29 +66,26 @@ note: the following trait bounds were not satisfied:
       `BrokenApp: EmailSender<BrokenApp>`
 ```
 
-Read it closely and it says only that the capability is unavailable, restated twice. The word
-`sent_emails` does not appear. Neither does anything about a field. The compiler answered the question
-it was asked, *does this type have this method?*, and discarded the reasoning that produced "no" on the
-way out.
-
-This is the single worst experience CGP offers a newcomer, and it is worth being blunt that a mis-wire
-looks like this by default.
+The diagnostic reports that `BrokenApp` lacks `CanSendEmail` and `EmailSender<BrokenApp>`, but does
+not identify the missing `sent_emails` field. The failed requirement is hidden behind the generated
+trait implementations. The error location may also be far from the wiring, in another module or crate.
 
 ## Asking the question at a line you chose
 
-A **check** forces the same question early, at the wiring, where you can see it. It is not a new
-mechanism. The plain-Rust form is a trait that demands something and an impl with nothing in it:
+A check trait forces the compiler to verify a bound where you write its implementation. The basic
+technique uses an ordinary Rust supertrait and an empty implementation:
 
 ```rust
 trait CanUseApp: CanSendEmail {}
 impl CanUseApp for App {}
 ```
 
-The impl has nothing to prove on its own, so it compiles exactly when `App: CanSendEmail` holds and
-fails otherwise. Put it beside the table and a latent gap becomes an error on a known line.
+The empty implementation compiles only if `App: CanSendEmail` holds. Placing it beside the wiring
+catches the failure there, although checking the consumer trait alone can still produce the vague
+error shown above.
 
-[`check_components!`](/docs/reference/macros/check_components) writes that for you, from a list of the
-components to verify:
+[`check_components!`](/docs/reference/macros/check_components) generates a check that exposes the
+selected provider's requirements more directly:
 
 ```rust
 check_components! {
@@ -97,10 +95,8 @@ check_components! {
 }
 ```
 
-But the important part is not the convenience. A check asserts something *stronger* than the consumer
-trait, and that stronger assertion changes the error. Asking "does `BrokenApp` implement
-`CanSendEmail`?" gets the answer above. Asking "can `BrokenApp` use this component?" makes the compiler
-evaluate the provider's actual requirements and report the one that failed:
+The macro checks `CanUseComponent`, which requires a wiring entry and the selected provider's
+dependency bounds for this context. That path makes the missing field visible in the diagnostic:
 
 ```text
 error[E0277]: the trait bound `BrokenApp: CanUseComponent<EmailSenderComponent>`
@@ -115,15 +111,16 @@ note: required for `RecordEmails` to implement
       `IsProviderFor<EmailSenderComponent, BrokenApp>`
 ```
 
-The cause is in there now. A field is missing, one *is* present, and the provider that wanted it is
-named. Two things still stand between that and a usable message: the field names are spelled as
-type-level character lists, `sent_emails` and `smtp_server` at one character per layer, and the headline
-is about a trait nobody wrote.
+The error now identifies a missing `HasField` implementation and names `RecordEmails` as the
+provider requiring it. The expanded field names remain hard to read: `sent_emails` and `smtp_server`
+appear as nested character types. The headline also names the generated `CanUseComponent` bound
+rather than the public capability.
 
 ## Reading it through the toolchain
 
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) runs in place of `cargo check` and
-reshapes the classes it recognizes. On the same code:
+[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) rewrites recognized CGP diagnostics
+with readable field names and dependency chains. For this missing-field case, its abbreviated output
+identifies both the unavailable capability and its cause:
 
 ```text
 error[E0277]: [CGP-E001] the consumer trait `CanSendEmail` is not implemented
@@ -137,19 +134,19 @@ error[E0277]: [CGP-E001] the consumer trait `CanSendEmail` is not implemented
                └─ [CGP-E106] missing field `sent_emails` on `BrokenApp`
 ```
 
-Missing field `sent_emails` on `BrokenApp`, and the path that wanted it. That is the mistake, in the
-words you would use to describe it.
+The root cause is now explicit: `BrokenApp` lacks `sent_emails`, which `RecordEmails` requires.
+The dependency chain connects that missing field to the `CanSendEmail` capability the application needs.
 
-The tool does more than reformat: for the worst class it turns on the compiler's next-generation trait
-solver to recover a cause the default solver discards entirely, which is why the first error on this
-page had nothing to reshape. It is a `v0.1.0-alpha`, it covers the core wiring errors rather than every
-class, and some still pass through as the compiler wrote them, orphan-rule failures among them.
-Dramatically better and actively improving, not solved.
+The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
+next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.
+Its `v0.1.0-alpha` release covers core wiring errors, but some classes, including orphan-rule
+failures, still pass through unchanged. Output details depend on the compiler and tool version.
 
 ## Checking a stack one layer at a time
 
-When providers are built from other providers, checking the context tells you *something* is broken and
-not which layer. A variant of the check asserts against each provider rather than against the context:
+Checks on individual providers help distinguish a wrapper's requirements from its inner provider's
+requirements. Suppose `RectangleArea` needs `width` and `height`, while
+`ScaledArea<RectangleArea>` also needs a scale factor. Both can be checked against `App`:
 
 ```rust
 check_components! {
@@ -163,62 +160,58 @@ check_components! {
 }
 ```
 
-Each provider is now verified on its own line. A requirement missing from the inner `RectangleArea`
-fails on both lines, since the outer one needs it too; one missing only from the wrapper fails on the
-wrapper alone. The difference between those two shapes is how you find the layer at fault, and it is the
-practical tool for debugging a [higher-order provider](./higher-order-providers.md).
+A missing `width` requirement fails both assertions because the wrapper also needs its inner
+provider to work. A missing scale factor fails only the wrapper's assertion. Separate diagnostic
+locations make that difference easier to see when debugging a
+[higher-order provider](./higher-order-providers.md).
 
 ## What to check, and when to fuse it
 
-The rule that does not bend is that a context's wiring is checked **somehow**. Which macro does it
-scales with how complicated the wiring is.
+Check each context's required components when you define its wiring. This catches missing entries
+and unsatisfied dependencies before a later caller happens to exercise them.
 
-For a starter context, or a table of plain `Component: Provider` entries,
-[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) does both at
-once, so the check cannot be forgotten and cannot drift from the table. Its reach stops at that basic
-form: it cannot derive checks for per-type dispatch, for namespaced wiring, or for individual provider
-layers, because those need parameters or provider names it has no way to infer.
+[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) combines
+wiring and checking for basic `Component: Provider` entries. For generic components, its
+`#[check_params(...)]` attribute supplies parameter sets to check. Keeping the assertion beside the
+entry helps prevent the two from drifting apart.
 
-For anything past that, keep the two apart. A standalone check is where concrete parameters for a
-generic component go, where `#[check_providers]` goes, and where opened or namespaced wiring is
-verified.
+Separate checks are needed for advanced mappings and individual provider layers. The combined
+macro does not derive checks for `open` statements, namespace joins, or path-based entries; those
+forms can remain unchecked even inside a combined table. Use `check_components!` to name the
+components and parameters you need to verify, and `#[check_providers]` to inspect provider layers.
 
-One case is not a matter of taste: **never fuse the check onto a
-[bundle of wiring](./aggregate-providers.md)**. A bundle is a provider other contexts delegate to, not a
-context, so a context-side check on it asks a question it was never meant to answer, and gets an answer
-that means nothing either way. It passes vacuously when the bundled providers need nothing from their
-context, and fails blaming the bundle when any of them does. Verify a bundle through a context that
-delegates to it.
+Check an [aggregate provider](./aggregate-providers.md) through a context that uses it. Applying
+the combined macro to the bundle checks the bundle as a context instead. It can pass when the
+providers need nothing from their context, or fail because the bundle lacks fields the actual
+context supplies. Neither result verifies the intended application.
 
 ## What it costs
 
-**A check is something you write.** Nothing generates it from the table unless you fuse the two, so a
-component nobody listed is a component nobody verified. In practice the discipline is to add the check
-when the context is created, not when it breaks.
+Explicit checks cover only the components and parameter sets you list. Add them as you add wiring;
+otherwise an omitted component can still fail only when a caller uses it. Generic wiring may need
+several checks to cover the concrete uses an application depends on.
 
-**It moves the error; it does not shrink it.** The output above is better because it names the cause,
-not because it is short. A context wired wrong in several places reports several failures, and one deep
-mistake reaching many providers can report at each of them.
+A check can expose a cause without making the diagnostic short. Several invalid entries can produce
+several errors, and one shared missing dependency can appear in multiple provider failures.
+`cargo cgp check` makes recognized cases easier to read, but raw compiler diagnostics remain verbose.
 
-**A check verifies wiring, not everything.** Some of what a provider needs is an ordinary Rust trait
-rather than a CGP component, and a bound like `Value: Display` failing looks like any other unsatisfied
-bound. There is nothing CGP-specific to route it through.
-
-**And the raw diagnostics remain verbose** for anyone not running the toolchain, which is why this page
-quotes all three stages rather than only the last. A reader who meets stage one with no idea stages two
-and three exist is the reader CGP loses.
+Checks verify trait requirements rather than runtime behavior. Ordinary bounds such as `Value: Display`
+can still fail as dependencies of a provider, and those traits need ordinary Rust implementations.
+They cannot be listed as components in a wiring check unless they have the corresponding CGP component
+machinery. Tests remain necessary for behavior such as whether an email was recorded correctly.
 
 ## Where to go next
 
-[Impl-side dependencies](./impl-side-dependencies.md) is why the requirement was hidden in the first
-place, the design decision this page pays for. [Higher-order providers](./higher-order-providers.md) is
-where per-layer checking earns its keep, and [Aggregate providers](./aggregate-providers.md) is the case
-where the context-side check is the wrong one.
+These pages explain the dependencies being checked and the available check forms:
 
-For the constructs, [`check_components!`](/docs/reference/macros/check_components) carries every form
-including `#[check_providers]` and per-component parameters, and
-[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) is the fused
-version for basic wiring.
+- [Impl-side dependencies](./impl-side-dependencies.md): Why provider requirements can be absent from
+  the caller's interface.
+- [Higher-order providers](./higher-order-providers.md): Composing providers and checking their layers.
+- [Aggregate providers](./aggregate-providers.md): Verifying shared wiring against a real context.
+- [`check_components!`](/docs/reference/macros/check_components): Component parameters and
+  `#[check_providers]` assertions.
+- [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components): Combined
+  wiring and checking, including its coverage limits.
 
 ---
 

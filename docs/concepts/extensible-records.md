@@ -5,19 +5,15 @@ sidebar_position: 13
 
 # Extensible records
 
-Building and reading a struct through the names of its fields, without naming the struct.
-
-This page answers *how does code assemble a struct it does not know the type of?* It shows what a
-struct becomes when its shape is a type, how a value is built one field at a time with the compiler
-tracking what is still missing, and the pattern that follows: independent pieces of a program each
-contributing part of a whole. It closes on the opt-in requirement, which is the honest limit of all of
-this.
+Extensible records let generic code read and assemble structs through their field names and types.
+Independent providers can contribute fields without knowing the final struct, while the compiler
+checks that construction is complete. This page explains the field representation, partial-record
+builders, and the limits of matching fields by name.
 
 ## What a closed struct cannot do
 
-A Rust struct is closed against incremental construction. A struct literal names the concrete type and
-supplies every field at once, so building one is something a single place has to do, and that place
-grows a line for every subsystem the program acquires:
+A struct literal assembles a known type by supplying its fields in one expression. Individual field
+values can come from reusable functions, as in this application constructor:
 
 ```rust
 let app = App {
@@ -28,16 +24,19 @@ let app = App {
 };
 ```
 
-Everything about that is fine until the subsystems want to be independent of each other and of `App`.
-A database module that could build its own piece without knowing what it is a piece *of* would be
-reusable across applications; written this way it cannot be, because the only thing that can name a
-field of `App` is code that names `App`.
+This approach works well when the assembly code should know `App` and its complete set of fields.
+The database and HTTP helpers can already be independent of `App`; the constructor connects their
+outputs to the application's fields.
+
+Generic assembly needs a way to make those connections without naming the target struct's fields
+in the assembly code. For example, a subsystem might return a small configuration record whose
+fields should populate any compatible application. CGP exposes field names and types through traits
+so a reusable builder can perform that merge.
 
 ## A struct as a list of named fields
 
-The move is to give the shape a type.
-[`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) gives a struct a description of itself
-that generic code can read:
+[`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) gives a struct the traits needed for
+generic field access, structural conversion, and incremental construction:
 
 ```rust
 #[derive(CgpData)]
@@ -47,22 +46,25 @@ pub struct DatabaseClient {
 }
 ```
 
-Its shape is now available as a type-level list, one entry per field, each pairing the field's name
-with the field's type:
+The generated `HasFields::Fields` associated type describes the struct as a product of named fields:
 
 ```rust
 Product![Field<Symbol!("url"), String>, Field<Symbol!("pool_size"), u32>]
 ```
 
-`Symbol!("url")` is the field name lifted into a type, so the trait system can match *by name*. Nothing
-here is inspected at run time; the list exists during compilation and is gone afterwards. This is the
-same field-name-as-type idea behind an [implicit argument](./implicit-arguments.md), scaled from one
-field to a whole struct.
+Each `Field` pairs a name tag with a value type. `Symbol!("url")` encodes the name as a type, allowing
+trait bounds to identify the field during compilation. A product contains every listed field;
+this differs from an enum's sum, which contains one variant at a time.
+
+Generic code can use either the complete field representation or a single-field bound. `HasFields`
+describes the whole structure, while `HasField<Tag>` provides access to one field. The latter is
+also the mechanism used by [implicit arguments](./implicit-arguments.md). These operations use
+generated Rust implementations rather than inspecting field names at runtime.
 
 ## Built one field at a time, checked all the way
 
-With the shape available, a value can be assembled by parts that never meet. Building goes through a
-**partial record**, a companion type carrying, per field, whether that field is present yet:
+A **partial record** stores field values while its type tracks which fields have been supplied.
+The builder can merge several source records before producing the final struct:
 
 ```rust
 let app: App = App::builder()
@@ -71,12 +73,18 @@ let app: App = App::builder()
     .finalize_build();
 ```
 
-`builder()` produces the partial record with every field absent. Each `build_from` merges a smaller
-struct's fields into it, matching them by name and flipping each from absent to present. The types
-change at every step, tracking what has been filled in.
+Here `database` and `http` are smaller records whose fields together supply `App`. `builder()`
+creates a partial record with every field absent. Each `build_from` moves the source fields into
+matching target fields and returns a builder type that marks those fields present.
 
-That tracking is the whole safety argument. `finalize_build` exists **only** for the configuration with
-every field present, so finalizing early is not a runtime panic or a `None`. It does not compile:
+Merging requires matching names and value types. Every source field must be accepted by the target
+builder; `build_from` does not silently discard fields the target lacks. The source needs the
+whole-field and extraction support supplied by `CgpData`, and the target needs the builder support.
+The `CanBuildFrom` trait providing the method is imported from `cgp::core::field::impls`.
+
+`finalize_build` is available only when every field in the strict builder is present. If `App`
+requires an `http_timeout` field, supplying only the database configuration leaves construction
+incomplete:
 
 ```rust
 // `http_timeout` has never been set, so there is no `finalize_build` to call.
@@ -85,57 +93,65 @@ let app: App = App::builder()
     .finalize_build();
 ```
 
-And because presence is tracked per field rather than by position, the order the pieces arrive in does
-not matter.
+That final call fails to compile because the partial record does not implement the required
+finalization trait. The error occurs before the program runs, rather than producing a partially
+initialized `App` or a runtime failure.
+
+Independent field contributions can arrive in any order. A provider that reads a previously built
+field must still run after the provider that supplies it. The field-state types enforce that
+requirement as well as final completeness.
 
 ## The pattern this is for
 
-The machinery buys the **extensible builder**: each subsystem is a provider producing its own
-small struct, knowing nothing about the target or about its siblings, and a dispatcher runs them all and
-merges the outputs into the whole.
+The **extensible builder pattern** assembles a target from independent providers, each producing a
+small record. A dispatcher runs the providers, merges their outputs, and finalizes the target.
+Each provider needs to know its own output fields, but not the final target or the other contributors.
 
-The list of contributors is then wiring, so swapping a subsystem is a line, and a second application
-built from a different mix of the same providers is another table. The same thing as above guarantees
-the mix is complete: if the providers between them do not supply every field, the build does not
-finalize and the code does not compile.
+Wiring chooses the target and its contributors. Replacing a subsystem provider changes the assembly
+without changing the generic dispatcher, and another application can reuse the same providers for a
+different compatible target. The compiler checks that the chosen outputs supply the required fields.
 
-The dispatcher is one of the [dispatch combinators](./dispatching.md), which is where the general form
-of "run a handler per field" lives.
+[Dispatching](./dispatching.md) explains how `BuildWithHandlers`, `BuildAndSetField`, and
+`BuildAndMerge` sequence field computations. `BuildAndMergeOutputs` provides the related convenience
+form for assembling a target from provider outputs.
 
 ## What it costs
 
-**Only types that opted in.** All of this works on a struct that derives the shape. A struct from
-another crate that has not is invisible to it. That is the honest difference between this and runtime
-reflection, and the thing to say first when someone reads "generic over any type's structure".
+Generic construction requires the corresponding traits. Deriving `CgpData` supplies them for a
+supported struct, but a foreign struct without that support does not become accessible automatically.
+A local wrapper or explicit conversion may be needed at that boundary.
 
-**Fields match by name and type, with nothing checking intent.** Two subsystems that both produce a
-`timeout: u32` are producing the same field as far as merging is concerned. The decoupling depends on
-exactly that, and it means a rename in one place silently stops matching in another.
+Field names and types form the contract between contributors and the target. Two subsystems that
+use `timeout: u32` for different purposes still describe the same field. The compiler checks type
+compatibility and builder state, not the intended meaning. Renaming a required field breaks the
+merge or leaves the target incomplete when checked.
 
-**The error messages are the worst in CGP.** A missing field surfaces as an unsatisfiable bound over a
-partial record whose type spells out every field and its presence marker. It is accurate, it is long,
-and there is no version of it that reads like "you forgot `http_timeout`" without the toolchain's help.
+Partial-record types can produce verbose diagnostics. An error may include the target's fields and
+presence markers instead of a short message naming the omitted field. Checking smaller assembly
+steps can help locate the contribution that is missing or incompatible.
 
-**And it is a lot of machinery for a constructor.** An application assembled in one place, by code that
-is allowed to know the type, should be assembled with a struct literal. This earns its keep when the
-contributors must not know the whole: a plugin set, a framework building a user's type, or several
-applications sharing subsystems.
+The strict builder requires every field, even if an application considers some optional. An
+`Option<T>` field still needs a value such as `None`. CGP also provides optional-field and default
+extensions, but those use additional conventions beyond the strict construction shown here.
+
+A struct literal or ordinary constructor is simpler when the assembly code can name the target.
+Extensible construction is useful when a framework builds user-defined records or when several
+applications reuse independently written subsystem providers.
 
 ## Where to go next
 
-[Extensible variants](./extensible-variants.md) is the dual: an enum as a sum of named variants, with
-the same tracking used for exhaustiveness instead of completeness. [Dispatching](./dispatching.md) is
-what runs a handler per field and assembles the result, and is the page that makes the builder pattern
-above concrete.
+These pages explain related data operations and the traits used here:
 
-For the constructs, [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) is the umbrella
-derive and its slices are [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) for reading
-one field, [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) for the whole shape, and
-[`#[derive(BuildField)]`](/docs/reference/derives/derive_build_field) for the builder.
-[`HasFields`](/docs/reference/traits/shape/has_fields) is the whole-shape view those produce,
-[`HasBuilder`](/docs/reference/traits/builder/has_builder) is the builder family, and
-[`Field`](/docs/reference/types/field) and [`Symbol!`](/docs/reference/macros/symbol) are the pieces a
-shape is made of.
+- [Extensible variants](./extensible-variants.md): Tracking excluded enum variants to prove exhaustiveness.
+- [Dispatching](./dispatching.md): Running the providers that construct and merge fields.
+- [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data): The combined extensible-data derive.
+- [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) and
+  [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields): Individual field access and the
+  whole-structure representation.
+- [`#[derive(BuildField)]`](/docs/reference/derives/derive_build_field) and
+  [`HasBuilder`](/docs/reference/traits/builder/has_builder): Partial records and construction.
+- [`HasFields`](/docs/reference/traits/shape/has_fields), [`Field`](/docs/reference/types/field), and
+  [`Symbol!`](/docs/reference/macros/symbol): The types that describe a record's fields.
 
 ---
 

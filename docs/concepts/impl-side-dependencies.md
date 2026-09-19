@@ -5,17 +5,15 @@ sidebar_position: 3
 
 # Impl-side dependencies
 
-Declaring what an implementation needs in the implementation itself, so the requirement never
-reaches the callers of the interface.
-
-This page answers *how does an implementation say what it needs, without every caller having to know?*
-It starts from a technique already available in ordinary Rust, shows why CGP is built on it, and works
-through the three kinds of thing an implementation can ask its context for. It closes on what the
-arrangement costs, which is mostly paid in error messages.
+An **impl-side dependency** is a requirement stated on an implementation without being part of its
+trait interface. Callers can require the capability they use while the compiler checks the selected
+implementation's dependencies. This page starts with ordinary Rust blanket implementations, then
+shows how CGP providers require capabilities, field values, and context-selected types.
 
 ## What a `where` clause costs the callers above it
 
-A generic function that needs something says so in its signature, and that is the whole difficulty:
+A generic function exposes its requirements through its signature. This greeting function needs
+`HasName` to obtain the name it formats:
 
 ```rust
 pub trait HasName {
@@ -30,8 +28,8 @@ where
 }
 ```
 
-Nothing is wrong with this until something calls it. A caller that is itself generic cannot satisfy
-`Context: HasName` on its own, so it has to demand the same thing from *its* caller:
+A generic caller must establish that requirement too. If it has nothing else that implies
+`HasName`, it can add the same bound:
 
 ```rust
 pub fn greet_twice<Context>(context: &Context) -> String
@@ -42,17 +40,15 @@ where
 }
 ```
 
-`greet_twice` never touches a name. It declares the requirement because the function it calls does, and
-the function above `greet_twice` will declare it for the same reason. Add a requirement four layers
-down and every layer above grows a bound it has no interest in. This is why a mature generic API
-tends to accumulate signatures nobody can read, and why adding a dependency deep in a library is a
-change that reaches its users.
+`greet_twice` does not read the name itself, but its calls to `greet` require the bound.
+Further generic callers must also supply or imply it. Adding a dependency to `greet` can therefore
+require changes to callers that only forward the call. This is straightforward for a small API;
+it becomes harder to maintain when many layers repeat implementation-specific requirements.
 
 ## Moving the requirement onto the implementation
 
-Rust already has the answer, and most Rust programmers have used it without naming it. Put the logic in
-a **blanket implementation**, one `impl` covering every type that meets a bound, and the requirement
-moves out of the interface and onto the implementation:
+A blanket implementation lets callers depend on a capability without naming the dependencies used
+to implement it. The trait declares the operation, and the implementation states when it is available:
 
 ```rust
 pub trait CanGreet {
@@ -69,8 +65,9 @@ where
 }
 ```
 
-`CanGreet` mentions nothing. Any type with a `name` gets `greet` for free, and a caller says only what
-it actually uses:
+`CanGreet` promises a greeting method without requiring `HasName` as a supertrait. The blanket
+implementation supplies that method for every context implementing `HasName`. A generic caller
+can require only the greeting capability:
 
 ```rust
 pub fn greet_twice<Context>(context: &Context) -> String
@@ -81,24 +78,24 @@ where
 }
 ```
 
-The requirement did not disappear: the compiler still checks it, at the point where a concrete type
-meets the impl. It has only stopped being part of the contract. That is an **impl-side
-dependency**: something an implementation needs, stated where the implementation lives rather than
-where the interface is declared.
+The compiler still checks `HasName` when it uses that blanket implementation to establish
+`Context: CanGreet` for a concrete type. The requirement remains necessary for the implementation;
+it is absent from the caller's trait contract. That separation is the impl-side dependency.
 
-This is the construct CGP is built out of, which is worth saying plainly, because it makes the
-foundation something you already have. If you have used `Itertools` or `StreamExt`, you have used a
-blanket impl over every `Iterator` or every `Stream`. That is why a method appears on a type whose
-author never wrote it. CGP adds not the mechanism but the ability to have more than one of them and
-choose between them.
+Keeping the interface stable can protect generic callers from implementation changes. If greeting
+later needs another dependency, the blanket implementation can add a bound while `greet_twice`
+continues to require only `CanGreet`. Concrete contexts must still satisfy the new requirement,
+so this does not make every dependency change backward-compatible.
+
+Ordinary Rust already supports this technique. CGP adds separate provider types and wiring when
+several implementations need to coexist, including implementations whose context requirements overlap.
+[Consumer and provider traits](./consumer-and-provider-traits.md) explains that extension.
 
 ## Two providers, two sets of requirements, one interface
 
-The payoff arrives once a capability has more than one implementation, because each one asks for
-something different and the interface still says nothing.
-
-Two ways of sending email need entirely different things from the application. One needs a server
-address; the other needs somewhere to record what it would have sent:
+Each CGP provider can require different context capabilities while implementing the same interface.
+An email sender might need an SMTP server getter, while a test implementation needs access to a
+recording buffer:
 
 ```rust
 #[cgp_component(EmailSender)]
@@ -123,13 +120,13 @@ impl EmailSender {
 }
 ```
 
-`#[uses(...)]` is how a provider declares a capability it needs. It reads like an import, and that is
-the right way to take it: the provider is saying *this code relies on the context being able to do
-this*. Underneath it becomes a bound on the implementation, exactly as in the blanket impl above.
+`#[uses(HasSmtpServer)]` adds a context bound to `SendViaSmtp`'s implementation.
+`#[uses(HasSentEmails)]` adds a different bound to `RecordEmails`. Here `HasSmtpServer` supplies
+`smtp_server()`, and `HasSentEmails` supplies `sent_emails()` as a reference to a mutable recording
+buffer. The SMTP body is omitted; the recording body stores each message in that buffer.
 
-The consequence is worth stating precisely. `CanSendEmail` says nothing about SMTP servers. A
-function bounded on it accepts both applications, even though they satisfy it for reasons that have
-nothing in common:
+`CanSendEmail` exposes neither dependency. A caller needs only that trait, regardless of which
+provider supplies it:
 
 ```rust
 pub fn notify<Context>(context: &Context)
@@ -140,20 +137,24 @@ where
 }
 ```
 
-Both examples here wire a type standing for an application, `App` for production and `TestApp` for a
-test harness, rather than a piece of data. That is where most CGP code lives, and it makes the point
-clearly: the two applications differ in what they can supply, and the interface between them and
-`notify` does not record the difference.
+A production `App` can select `SendViaSmtp`, while a `TestApp` selects `RecordEmails`. These contexts
+represent applications and supply their chosen provider's dependencies. `notify` accepts either
+context through the same bound; the test context does not need an SMTP server merely because
+another provider uses one.
 
 ## The three things an implementation can ask for
 
-Everything above is one kind of requirement, a capability. There are three, they all work the same
-way, and each has a syntax that keeps the bound out of sight.
+Provider dependencies commonly describe capabilities, values, or types. CGP expresses them with
+attributes that generate the corresponding Rust bounds:
 
-**A capability** is the kind `#[uses]` declares, as above. It covers other CGP capabilities and ordinary
-Rust traits alike: `#[uses(AsRef<[u8]>)]` is as valid as `#[uses(HasSmtpServer)]`.
+- **Capabilities:** `#[uses(Trait)]` requires the context to implement a trait. It accepts ordinary
+  Rust traits such as `AsRef<[u8]>` as well as CGP consumer traits.
+- **Values:** An `#[implicit]` argument reads a field from the context and generates the field-access
+  requirement on the implementation.
+- **Types:** `#[use_type(Trait.Type)]` names an associated type chosen by the context and adds the
+  bound needed to use it. Whether that bound belongs in the interface depends on where the type appears.
 
-**A value** is a field the implementation reads; you declare it by writing it as an argument:
+An implicit argument lets the implementation ask for a value without adding a public method argument:
 
 ```rust
 #[cgp_impl(new GreetByName)]
@@ -164,18 +165,16 @@ impl Greeter {
 }
 ```
 
-The caller does not pass the `name` argument. The provider reads it from a `name` field on the context,
-and the macro turns the argument's name and type into a requirement on the implementation, so `greet()`
-still takes nothing from the outside. [Implicit arguments](./implicit-arguments.md) develops this one.
-
-**A type** is the third, and it buys the most, because it displaces not a leaked bound but a leaked
-*parameter*.
+`GreetByName` reads `name` through the context's field-access implementation. The macro removes the
+implicit argument from the method signature, so callers still use `greet()` without passing a name.
+[Implicit arguments](./implicit-arguments.md) explains how field names, types, and borrowing determine
+that generated requirement.
 
 ## Type dependencies, and why they need no parameter
 
-Suppose a job runner should not commit to an error type, a runtime, or a storage backend. The ordinary
-way to leave a type open is a generic parameter, and a parameter is an **input**: the caller supplies
-it, so it has to appear in the signature.
+Associated types let a context collect type choices that would otherwise be separate generic
+parameters. A job runner, for example, might leave its error type, runtime, and storage backend
+open. A function interface can expose those choices directly; with its body omitted, it looks like this:
 
 ```rust
 pub fn run_job<E, R, S>(store: &S, runtime: &R) -> Result<(), E>
@@ -188,14 +187,13 @@ where
 }
 ```
 
-This is the leak from the first section, and worse, because a parameter *cannot* be moved onto an impl.
-It is part of the interface by construction. Every intermediate function that merely passes a value
-along declares all three and repeats their bounds, and adding a fourth open type is a breaking change
-for every caller.
+A generic forwarding function may need to carry `E`, `R`, and `S` and establish the same bounds.
+Concrete callers can often infer or fix these types, so the declarations do not necessarily spread
+to every caller. The maintenance problem arises where intermediate generic layers must preserve
+choices they do not otherwise use.
 
-An **abstract type** inverts the direction. Rather than the caller supplying the type, the context
-determines it. It is an associated type on a trait the context implements, so an implementation can
-name it without anyone choosing it at a call site:
+A context-based interface can expose the operation while letting the context determine its error
+type. `HasErrorType` supplies an associated `Error`, which the component imports into its signature:
 
 ```rust
 #[cgp_component(JobRunner)]
@@ -205,8 +203,12 @@ pub trait CanRunJob {
 }
 ```
 
-`#[use_type(HasErrorType.Error)]` imports the context's error type and lets the signature name it as a
-bare `Error`. The intermediate layer then has nothing to declare at all:
+`CanRunJob` now has a `HasErrorType` supertrait because its return type names `Error`.
+This type dependency is part of the interface, not hidden on the implementation. The runtime and
+storage requirements can remain on the job provider if its public methods do not expose their types.
+
+A forwarding capability can use that same associated error without introducing a separate `E`
+parameter:
 
 ```rust
 #[cgp_fn]
@@ -218,58 +220,51 @@ pub fn run_jobs(&self) -> Result<(), Error> {
 }
 ```
 
-A parameter is an input and propagates everywhere; an abstract type is an output and propagates
-nowhere. That asymmetry is why a CGP codebase can keep accumulating type dependencies without its
-signatures growing: **the number of types a context decides can rise freely, because deciding is not
-passing.** [Abstract types](./abstract-types.md) is the page for that half.
+`run_jobs` still declares the requirements it uses: `CanRunJob` for calling the job and `HasErrorType`
+for naming its result. The `#[use_type]` attribute lets it write `Error` instead of a qualified
+associated-type projection. The context determines the concrete error type shared by both operations.
 
-One thing to be accurate about: when a capability's own signature names the type, the owning trait does
-become part of the contract: `CanRunJob` really does imply `HasErrorType`. But a caller bounding on
-`CanRunJob` gets that implication for free, never restates it, and names the type only if it handles
-one. Compare `trait CanRunJob<E>`, which forces `<E>` onto every caller and every caller's caller
-whether they touch an error or not. The bound is on the implementation; the parameter would be on
-everyone.
+A type used only inside a provider can remain an impl-side dependency. A type appearing in a public
+argument or result must be available through the interface. Associated types reduce separate type
+parameters and tie related choices to the context; they do not eliminate all type dependencies from
+signatures. [Abstract types](./abstract-types.md) explains that choice and its limits.
 
 ## What it costs
 
-**A hidden requirement is hidden from you too.** The point of all this is that `CanSendEmail` does not
-say what its implementations need, which also means reading the interface tells you nothing about what
-a context must supply. The answer is in the provider, and finding it means knowing which provider the
-context wired.
+The trait interface does not tell a context author everything a selected provider needs.
+To assemble a context, follow its wiring to the provider and inspect that provider's requirements.
+The smaller caller contract comes with more work when configuring an implementation.
 
-**The requirement is checked late.** Nothing verifies that a context can satisfy the provider it named
-until something uses the capability, so a context can be wired wrong and still compile. That is
-[lazy wiring](./check-traits.md), and it is the source of CGP's least pleasant errors.
+Wiring alone does not verify that the context satisfies the provider's dependencies. A missing
+capability or field can remain undetected until a check or use requires it. Changing a provider's
+bounds can also make an existing context stop compiling even if the consumer trait is unchanged.
 
-**When it does fail, the error is about a bound you did not write.** A missing `name` field surfaces as
-an unsatisfied field bound naming a type-level spelling of the field name, several layers from the line
-that caused it. [`check_components!`](/docs/reference/macros/check_components) forces the failure to the
-wiring line and names the actual gap, and
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) leads with the root cause for the
-classes it recognizes. It is a `v0.1.0-alpha` covering the core wiring errors rather than all of them.
-Both help substantially; neither makes the raw output pleasant.
+Errors may refer to generated bounds rather than the requirement as written in the provider.
+A missing implicit field, for example, can appear as an unsatisfied `HasField` bound with a
+nested type-level field name. [`check_components!`](/docs/reference/macros/check_components)
+checks selected components where you place it, usually beside the wiring, and helps expose the
+missing dependency. [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reports readable
+causes for recognized cases; its `v0.1.0-alpha` release covers core wiring errors rather than every
+class. [Checking your wiring](./check-traits.md) shows the diagnostics and their limits.
 
-**And it is more machinery than a plain function needs.** For a capability with one implementation, the
-blanket impl in the second section is the whole of what is useful here, and it is ordinary Rust.
-[`#[cgp_fn]`](/docs/reference/macros/cgp_fn) writes exactly that from a function, with no component and
-no wiring.
+A component and wiring are unnecessary when one blanket implementation provides all the reuse you
+need. Write that implementation in ordinary Rust, or use
+[`#[cgp_fn]`](/docs/reference/macros/cgp_fn) to generate a capability from a function. A plain generic
+function remains suitable when its explicit parameters and bounds are the interface callers should see.
 
 ## Where to go next
 
-The three legs each have a page. [Implicit arguments](./implicit-arguments.md) is the value leg, where a
-context field arrives as a function parameter. [Abstract types](./abstract-types.md) is the type leg,
-and the one that changes how a codebase's signatures age.
+These pages develop the dependency forms and explain how providers are selected and checked:
 
-[Consumer and provider traits](./consumer-and-provider-traits.md) is the other half of what a component
-is: this page covers how an implementation states what it needs, and that one covers how a call reaches
-the implementation at all. [Checking your wiring](./check-traits.md) takes up the cost above: why the
-check is late, and what to do about it.
-
-For the constructs themselves, [`#[uses]`](/docs/reference/attributes/uses) declares a capability,
-[`#[implicit]`](/docs/reference/attributes/implicit) a value, and
-[`#[use_type]`](/docs/reference/attributes/use_type) a type;
-[`#[blanket_trait]`](/docs/reference/macros/blanket_trait) generates the plain-Rust blanket impl this
-page starts from.
+- [Implicit arguments](./implicit-arguments.md): Reading context values without public method arguments.
+- [Abstract types](./abstract-types.md): Sharing context-selected types and deciding which reach the interface.
+- [Consumer and provider traits](./consumer-and-provider-traits.md): Connecting a caller to its implementation.
+- [Checking your wiring](./check-traits.md): Verifying the selected provider's requirements.
+- [`#[uses]`](/docs/reference/attributes/uses),
+  [`#[implicit]`](/docs/reference/attributes/implicit), and
+  [`#[use_type]`](/docs/reference/attributes/use_type): The dependency syntax used here.
+- [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) and
+  [`#[blanket_trait]`](/docs/reference/macros/blanket_trait): Generating blanket implementations.
 
 ---
 

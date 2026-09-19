@@ -5,18 +5,15 @@ sidebar_position: 8
 
 # Aggregate providers
 
-Bundling a group of wiring choices into one reusable provider that other contexts adopt as a unit.
-
-This page answers *how do several contexts share a set of choices without repeating them?* It shows the
-bundle, traces a call through it to establish the one fact everything else follows from, and ends on the
-rule about checking, which is the only place a bundle behaves unlike anything else. It closes on when to
-reach for the heavier alternative instead.
+An **aggregate provider** bundles wiring choices so several contexts can reuse them. Each context
+names the bundle for the components it needs, and the bundled providers still operate on that context.
+This page explains how delegation preserves the context, where to check the result, and when a
+namespace is a better fit.
 
 ## A table whose target is not a context
 
-A wiring table usually belongs to a context. It does not have to.
-
-Add `new` and the table gets a fresh type of its own:
+`delegate_components!` can give a wiring table to a provider type. The `new` keyword declares that
+type alongside its table:
 
 ```rust
 delegate_components! {
@@ -27,11 +24,11 @@ delegate_components! {
 }
 ```
 
-`GeometryComponents` is an **aggregate provider**: a zero-sized type whose entire content is that table.
-Nothing constructs it, it holds no data, and it does not stand for an application. It is a name for a
-group of decisions, so that the decisions can be adopted together.
+`GeometryComponents` groups the choices of `RectangleArea` and `RectanglePerimeter` under one name.
+It is a zero-sized marker used for delegation; the program does not construct it or store data in it.
+The context remains the type whose data those providers use.
 
-A context then takes the whole group in one line:
+A context adopts the group by delegating the relevant components to the bundle:
 
 ```rust
 delegate_components! {
@@ -44,51 +41,48 @@ delegate_components! {
 }
 ```
 
-`Rectangle` now has both capabilities, and the choices behind them live in one place. Change the bundle
-and every context using it changes with it.
+`Rectangle` gets both capabilities if it meets the bundled providers' requirements. The provider
+choices live in `GeometryComponents`, so changing that table changes the choices for every context
+that delegates those components to it.
 
 ## The context stays the context
 
-Everything else on this page follows from one fact, and tracing a call is the quickest way to establish
-it. When `rectangle.area()` resolves:
+Delegation through a bundle preserves the original context. The compiler resolves
+`rectangle.area()` through this chain:
 
-- `Rectangle` gets the capability because it implements the provider trait *for itself*;
-- it implements that because its table sends the component to `GeometryComponents`;
-- and `GeometryComponents` implements it because *its* table sends the component to `RectangleArea`.
+1. `Rectangle` delegates `AreaCalculatorComponent` to `GeometryComponents`.
+2. `GeometryComponents` delegates the same component to `RectangleArea`.
+3. `RectangleArea` calculates the area using `Rectangle` as its context.
 
-At every step the context is `Rectangle`. `GeometryComponents` only ever appears as the thing being
-delegated to. So when `RectangleArea` reads a `width`, it reads it from `Rectangle`. The bundle has no
-`width`, is never asked for one, and would not be consulted if it had one.
+When `RectangleArea` reads `width` and `height`, it reads them from `Rectangle`. The bundle selects
+the implementation but does not supply the field values. Another context can reuse the bundle if it
+satisfies the same provider requirements.
 
-This is why a bundle is a *provider* rather than a context: it is something delegated **to**, never
-something used **as**. Bundles nest for the same reason: a table entry may name another table, and
-resolution walks each in turn while the context argument stays fixed on the real context at the end of
-the chain.
+Bundles can delegate to other bundles using the same mechanism. The compiler follows each table
+while keeping the context argument fixed. It resolves the entire chain at compile time, without a
+runtime lookup for each table.
 
 ## Checking a bundle asks the wrong question
 
-There is one place a bundle behaves unlike anything else, and it is worth knowing before you meet it.
+Checking a bundle as a context does not verify that an application can use it. In particular,
+[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) checks the
+type receiving the table. Applied to `GeometryComponents`, it asks whether the bundle itself can
+supply everything its providers require.
 
-**Never wire a bundle with the fused
-[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components).** That macro
-derives a check asking whether the target can *use* each component as a context. For a bundle that is a
-question about a role it never plays, so the answer carries no information, and which answer comes back
-depends on what is inside:
+The result depends on those requirements:
 
-- If the bundled providers need nothing from their context, they implement the capability for *every*
-  context, the bundle included. The check passes. It has proved nothing, and it looks like it has.
-- If a bundled provider needs a field or a type, the check fails, reporting that `GeometryComponents`
-  does not have a `width`, blaming the bundle for something the real context would have supplied.
+- A provider without context dependencies accepts `GeometryComponents` as its context, so the check
+  passes without checking any application that will use the bundle.
+- A provider that needs `width` fails because `GeometryComponents` lacks that field, even if
+  `Rectangle` supplies it correctly.
 
-The silent case is the dangerous one. Wire a bundle with plain
-[`delegate_components!`](/docs/reference/macros/delegate_components) and let it be verified where the
-question means something.
+Define bundles with plain [`delegate_components!`](/docs/reference/macros/delegate_components).
+Verify their requirements against a context that will actually use them.
 
 ## Verifying one properly
 
-A bundle is checked through a context that uses it. Checking `Rectangle` walks the whole chain, through
-the bundle's table, down to `RectangleArea`'s requirements, against `Rectangle`'s fields, so a gap
-several bundles deep still surfaces:
+A check on `Rectangle` follows the bundle's delegation and checks the providers against
+`Rectangle`'s fields and capabilities:
 
 ```rust
 check_components! {
@@ -99,9 +93,11 @@ check_components! {
 }
 ```
 
-When the bundle itself needs pinning down, usually to find which layer of a nested stack is broken,
-the [`#[check_providers]`](/docs/reference/macros/check_components) form asserts the provider-side
-question instead, naming the bundle *for a concrete context*:
+This verifies the full chain, including nested bundles. A missing requirement fails at the check
+site even if the provider requiring it is several tables away.
+
+`#[check_providers]` lets you check the bundle and an individual provider separately against the
+same context. This helps locate a failure within a chain:
 
 ```rust
 check_components! {
@@ -115,52 +111,45 @@ check_components! {
 }
 ```
 
-Both routes go through a real context. Neither treats the bundle as one.
+Each named provider gets its own assertion for `Rectangle`. The bundle is checked in the role it
+serves: supplying an implementation for that context.
 
 ## When a namespace is the better tool
 
-A bundle and a [namespace](./namespaces.md) both package reusable wiring, and they differ in how a
-context takes it on.
+A bundle suits a small group whose components you want to name explicitly. The entry
+`[A, B]: TheBundle` shows which choices the context adopts. As the group grows, each context must
+still list every component it takes from the bundle.
 
-A context adopts a bundle by **delegating named components to it**, `[A, B]: TheBundle`, so the
-context spells out which components come from where. That is direct, obvious to read, and it scales
-linearly: twenty components from a bundle means twenty names in the brackets.
+A [namespace](./namespaces.md) lets a context inherit shared wiring by joining a named table.
+It also organizes lookups under paths, which helps when a library supplies wiring for many components.
+Customization requires the namespace to leave the relevant paths unbound; a direct context entry
+cannot override a key the inherited namespace already binds.
 
-A context adopts a namespace by **joining it**, after which everything it does not wire itself falls
-through, and a direct entry overrides just that key. You want that once the count is large or
-the defaults should be inherited and selectively replaced.
-
-Reach for a bundle when the group is small and you want the delegation visible. Reach for a namespace
-when the table has outgrown reading, or when a library is publishing defaults for applications to
-customize.
+Use a bundle for explicit delegation of a group of components. Consider a namespace when many
+contexts need a shared table and a path structure that separates fixed wiring from application choices.
 
 ## What it costs
 
-**It adds a hop.** Finding what answers a capability now means reading two tables instead of one, and
-nested bundles mean more. The wiring is still explicit and still greppable, and it is one more step
-between the call and the code.
+A bundle adds a table to inspect when tracing a capability. Nested bundles add further tables, even
+though the compiler resolves them statically. Keep a bundle when centralizing shared choices is worth
+that extra reading.
 
-**It pays only when the repetition is real.** A bundle used by one context is a table split in two for
-nothing. The threshold is a second context wanting the same group, not the anticipation of one.
+A bundle used by only one context may add little value. Repeated wiring across contexts gives a
+clear reason to introduce one; anticipated reuse alone may not justify it.
 
-**It is the construct whose checking rule is a genuine trap**, per the section above, and the failure
-mode is a check that passes. Nothing in the code marks a bundle as different from a context, since both
-are `delegate_components!` on a type, so the distinction has to be held by the person writing it.
-
-**And the type name carries no clue.** `GeometryComponents` is a struct like any other; only its usage
-says it is a bundle. Naming the group rather than a thing, with a `…Components` suffix, is the convention
-that keeps it legible.
+The type system does not distinguish a bundle from a context by declaration. Both can receive a
+delegation table, so the author must check the bundle against its intended context. A name such as
+`GeometryComponents` helps identify its role, but does not enforce it.
 
 ## Where to go next
 
-[Namespaces](./namespaces.md) is the heavier sibling, and the one to read if the reason you are here is
-a table that has grown too long. [Consumer and provider traits](./consumer-and-provider-traits.md) is
-where the provider-versus-context distinction this page rests on comes from, and
-[Checking your wiring](./check-traits.md) covers both check forms in full.
+These pages explain related wiring choices and checks:
 
-For the constructs, [`delegate_components!`](/docs/reference/macros/delegate_components) defines and
-consumes a bundle through its `new` keyword and its array-key form, and
-[`check_components!`](/docs/reference/macros/check_components) carries `#[check_providers]`.
+- [Namespaces](./namespaces.md): Sharing tables through paths and inheritance.
+- [Consumer and provider traits](./consumer-and-provider-traits.md): How delegation preserves the context.
+- [Checking your wiring](./check-traits.md): Context checks and checks on individual providers.
+- [`delegate_components!`](/docs/reference/macros/delegate_components): The `new` and grouped-key forms.
+- [`check_components!`](/docs/reference/macros/check_components): The `#[check_providers]` form.
 
 ---
 

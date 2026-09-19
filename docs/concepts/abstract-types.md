@@ -5,18 +5,15 @@ sidebar_position: 5
 
 # Abstract types
 
-Naming a type in generic code, such as an error type, a scalar, or a runtime, and letting each context
-decide what it actually is.
-
-This page answers *how does code name a type it does not choose?* It starts from the ordinary Rust
-feature that already does this, shows what CGP adds to it, and works through the two things abstract
-types buy: a type several pieces of code can agree on, and signatures that stop growing. It closes on
-the costs, which are mostly about what an abstract type is *not*.
+An **abstract type** lets generic code name a type while each context chooses its concrete form.
+Several providers can share the same scalar or error type without taking a separate type parameter
+for it. This page starts with Rust's associated types, explains how CGP wires and shares them, and
+ends with the limits of that abstraction.
 
 ## Rust already has this
 
-An abstract type in CGP is an ordinary associated type: a type a trait names but leaves each implementer
-to fill in. It is worth starting there, because half of what follows is a feature you already use:
+Rust's associated types let a trait name a type that each implementer supplies. For example,
+`HasScalarType` can leave the scalar open while two contexts make different choices:
 
 ```rust
 pub trait HasScalarType {
@@ -32,19 +29,18 @@ impl HasScalarType for Embedded {
 }
 ```
 
-Generic code names `Context::Scalar` and never commits to `f32` or `f64`. Each type answers for itself,
-the compiler resolves the answer where a concrete type is known, and nothing costs anything at runtime.
-That is the whole idea, and CGP does not replace it. A context can implement an abstract-type trait
-directly, exactly as above, and everything else on this page still works.
+Generic code with a `Context: HasScalarType` bound can use `Context::Scalar` without choosing `f32`
+or `f64`. The compiler resolves that associated type when the context is known. CGP uses this same
+mechanism, and a context can implement an abstract-type trait directly as shown above.
 
-The *direction* is worth noticing. A generic parameter is an input the caller supplies; an
-associated type is an output the implementing type determines. That difference is small in one function
-and decides how a codebase ages, which the last section of this page is about.
+A generic parameter lets a caller choose a type for each use; an associated type ties the choice to
+an implementing type. With `HasScalarType`, every use of `HighPrecision::Scalar` means `f64`.
+That shared choice becomes useful when several providers need to agree on a type.
 
 ## Choosing the type by wiring
 
-What CGP adds is that the choice can be made in the same place as every other choice a context makes.
-[`#[cgp_type]`](/docs/reference/macros/cgp_type) turns an abstract-type trait into a component:
+CGP lets a context select its associated types in the same table as its behavior providers.
+[`#[cgp_type]`](/docs/reference/macros/cgp_type) turns an associated-type trait into a component:
 
 ```rust
 #[cgp_type]
@@ -53,7 +49,8 @@ pub trait HasScalarType {
 }
 ```
 
-and a context then names its concrete type in its wiring table rather than in a hand-written impl:
+The generated `ScalarTypeProviderComponent` is the wiring key, and `UseType<T>` supplies the concrete
+type. These tables make the same choices as the direct implementations above:
 
 ```rust
 delegate_components! {
@@ -69,27 +66,19 @@ delegate_components! {
 }
 ```
 
-`UseType<f64>` says "the type is `f64`", and that is all it says. Every abstract type is answered the
-same trivial way, so `#[cgp_type]` generates that answer once and a context supplies the type as an
-argument to it. The bound on the associated type carries through, and the compiler enforces it on
-whatever the context chooses: wiring `UseType<String>` against a `Copy` scalar is an error reading
-`the trait bound String: Copy is not satisfied`. Like every other wiring choice it is
-[checked lazily](./check-traits.md), so that error appears where the component is checked or used rather
-than on the wiring line itself.
+`UseType<f64>` sets `Scalar` to `f64`. The macro generates the provider implementation that makes
+this work, so the context only needs to name the type. Other providers can compute the choice from
+further type information, but `UseType<T>` suffices for a fixed choice.
 
-This is a small win on its own. It buys two things. A context's type choices sit beside its behaviour
-choices, in one table, rather than scattered across `impl` blocks. And a type can be chosen by
-something more interesting than a fixed answer, since `UseType<T>` is just one provider among the ones a
-component can be wired to.
+The selected type must satisfy the associated type's bounds. Here `Scalar: Copy` accepts `f32` and
+`f64`, but rejects `String`. Wiring `UseType<String>` would produce a `String: Copy` error when the
+component is checked or used. Like other component wiring, the table is
+[checked lazily](./check-traits.md).
 
 ## One type, agreed on by everything that needs it
 
-The idea compounds as soon as more than one piece of code needs the same type, because they all name the
-*same* `Self::Scalar` and the context fixes it once.
-
-That matters most when the code that needs the type is generic over something else entirely. A shape
-calculator works over rectangles, circles, and whatever else, and none of those shapes should have to
-carry a scalar type or agree with the others about one:
+Providers that refer to the same context's `Scalar` share one type choice. An area-calculation
+component can use this to return a common scalar for several shape types:
 
 ```rust
 #[cgp_component(ShapeAreaCalculator)]
@@ -99,19 +88,35 @@ pub trait CanCalculateShapeArea<Shape> {
 }
 ```
 
-`Rectangle` declares nothing. The application declares the scalar, every shape interoperates through it,
-and switching the application from `UseType<f32>` to `UseType<f64>` changes the arithmetic for every
-shape at once. The application here is a type standing for the program rather than a piece of data, and
-`struct App;` with no fields is a complete one, which is the shape most CGP code is in.
+Here the context represents an application, while `Shape` is the data being measured. The application
+chooses the result type through `HasScalarType`; the shape types do not need to implement that trait.
+A fieldless `struct App;` can serve as the context if its providers need only its type choices and wiring.
 
-The `#[use_type(HasScalarType.Scalar)]` line lets the signature say `Scalar` instead of
-`<Self as HasScalarType>::Scalar`. It imports the type and adds the requirement in one line, and it
-reads like a `use` for a type because it is one.
+Changing the application's wiring from `UseType<f32>` to `UseType<f64>` changes the declared result
+type for every shape. The selected providers must support that choice: a provider restricted to
+`Scalar = f64` cannot also serve a context that selects `f32`. Abstracting the result type does not
+supply conversions or arithmetic implementations automatically.
 
-## The canonical one: a context's error type
+`#[use_type(HasScalarType.Scalar)]` lets the signature use `Scalar` as a local shorthand for
+`<Self as HasScalarType>::Scalar`. It also adds the required trait bound. On this component, that
+bound is part of the interface because its return type depends on it.
 
-The abstract type CGP leans on hardest is the error type, and it is the clearest case of code naming
-something it refuses to choose:
+## Type dependencies without extra parameters
+
+A context can collect type choices that would otherwise become separate generic parameters.
+Code that needs a scalar refers to `Context::Scalar`; it does not need an additional `Scalar`
+parameter alongside `Context`. Providers can use the same approach for an error type or a runtime.
+
+An implementation can keep a type dependency out of its caller's interface when the type is used
+only inside the implementation. If the type appears in a public argument or result, the interface
+must expose enough information to name it, as `CanCalculateShapeArea` does above.
+[Impl-side dependencies](./impl-side-dependencies.md) explains that distinction.
+
+## A shared error type {#the-canonical-one-a-contexts-error-type}
+
+`HasErrorType` gives fallible providers a common error type selected by their context. A provider
+can report a concrete source error through `CanRaiseError` while returning the context's abstract
+`Error`:
 
 ```rust
 #[cgp_component(Loader)]
@@ -133,56 +138,54 @@ impl Loader {
 }
 ```
 
-`LoadOrFail` fails, and never learns what failing means in this application. The context decides,
-whether `anyhow::Error`, a domain enum, or a plain `String`, and every fallible provider in that context
-refers to the same one, so errors compose instead of needing conversion at each boundary.
-[Modular error handling](./modular-error-handling.md) is the page for what else follows from that.
+`LoadOrFail` reports an empty path without choosing the application's error representation.
+The context supplies both the error type and a provider that converts the source `String` into it.
+The resulting type could be `anyhow::Error`, a domain enum, or `String`, provided the selected
+conversion supports it.
 
-## Two things called `UseType`
+Providers that return this context's `Error` can pass errors between them without converting at
+every boundary. Errors from external libraries still need conversion into that common type.
+[Modular error handling](./modular-error-handling.md) develops this example further.
 
-One collision is worth naming before you meet it in a compiler error, because the two are complementary
-and easy to conflate. **`UseType<T>` is a provider**: it goes in a wiring table and says what a
-context's abstract type is. **`#[use_type(...)]` is an attribute**: it goes on a definition and imports
-somebody's abstract type so the code can name it as a bare alias.
+## The provider and the import attribute {#two-things-called-usetype}
 
-A context uses the first; code that consumes an abstract type uses the second. They appear in the same
-program constantly and never in the same position.
+`UseType<T>` and `#[use_type(...)]` perform complementary jobs despite their similar names:
+
+- **`UseType<T>`:** A provider placed in a wiring table to select a concrete type.
+- **`#[use_type(...)]`:** An attribute placed on a definition to import an associated type and its bound.
+
+The wiring chooses the type; the import lets generic code refer to that choice by a short name.
 
 ## What it costs
 
-**It is deferral, not encapsulation.** An abstract type leaves the choice open; it does not hide the
-answer. Once a context wires `UseType<f64>`, code with that context in hand sees `f64` and can do
-anything `f64` allows. If the goal is that callers must *not* know the representation, that is Rust's
-module privacy, and an abstract type is the wrong tool for it. That distinction is worth being precise
-about with anyone arriving from ML modules.
+An abstract type defers the concrete choice without hiding its representation. Code that knows
+`HighPrecision` uses `f64` can use the operations available on `f64`. Use Rust's module privacy when
+callers must not access a representation.
 
-**A bound on the associated type is the only thing generic code can rely on.** `type Scalar: Copy` means
-generic code can copy a scalar and nothing else: no arithmetic and no comparison, unless those bounds are
-declared too. Adding one later is a change every context has to satisfy, so the bounds are worth
-thinking about when the trait is written.
+Generic code can rely only on the bounds available where it uses the type. `Scalar: Copy` permits
+copying but does not imply arithmetic or comparison. Those operations need additional bounds on the
+associated type or on the code that uses it. Adding a bound to the trait requires every context's
+chosen type to satisfy it.
 
-**The type is one per context, not one per use.** All the code in a context sharing one `Error` is the
-point, and it is also a constraint: a context needing two genuinely different error types needs two
-components, or two contexts.
+A non-generic abstract-type trait supplies one choice per context. If one context needs distinct
+error types for separate purposes, represent those choices with separate components or a tagged
+component, or use separate contexts.
 
-**And it is another thing that can be left unwired.** A context that never names its error type compiles
-until something needs one, at which point the failure is a missing type rather than a missing field, and
-looks much the same. [`check_components!`](/docs/reference/macros/check_components) catches it at the
-wiring line, like everything else.
+An abstract-type component can remain unwired until a use exposes the missing choice. Add
+[`check_components!`](/docs/reference/macros/check_components) beside the context's wiring to verify
+that the required type is available and satisfies its bounds.
 
 ## Where to go next
 
-[Impl-side dependencies](./impl-side-dependencies.md) puts this page in its place: an abstract type is
-the type-shaped version of a requirement stated on the implementation, beside the capability leg and the
-value leg. [Implicit arguments](./implicit-arguments.md) is that value leg.
+These pages explain related dependencies and the constructs used here:
 
-[Modular error handling](./modular-error-handling.md) develops the canonical case at length: the error
-type, how a foreign error becomes it, and what detail it carries, as three separate choices.
-
-For the constructs, [`#[cgp_type]`](/docs/reference/macros/cgp_type) defines an abstract-type component,
-[`UseType`](/docs/reference/providers/use_type) supplies the concrete type in a wiring table,
-[`#[use_type]`](/docs/reference/attributes/use_type) imports one into a definition, and
-[`HasType`](/docs/reference/components/has_type) is the built-in component the rest is built on.
+- [Impl-side dependencies](./impl-side-dependencies.md): Which requirements can stay inside a provider.
+- [Implicit arguments](./implicit-arguments.md): How a provider obtains values from its context.
+- [Modular error handling](./modular-error-handling.md): Sharing, constructing, and enriching errors.
+- [`#[cgp_type]`](/docs/reference/macros/cgp_type) and
+  [`UseType`](/docs/reference/providers/use_type): Declaring and selecting an abstract type.
+- [`#[use_type]`](/docs/reference/attributes/use_type): Importing an associated type into a definition.
+- [`HasType`](/docs/reference/components/has_type): The built-in component for tagged type choices.
 
 ---
 
