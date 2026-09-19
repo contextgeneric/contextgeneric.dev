@@ -13,8 +13,7 @@ CGP's single built-in abstract-type component: a tag-indexed type a context reso
 concrete one. An abstract type in CGP is a
 [trait](https://doc.rust-lang.org/book/ch10-02-traits.html) with a single
 [associated type](https://doc.rust-lang.org/reference/items/associated-items.html), and `HasType<Tag>`
-is the foundational, tag-indexed instance of that pattern. A **context**, the type a capability runs
-against, can carry many distinct abstract types, one per `Tag`, and resolve each to a concrete type
+is the foundational, tag-indexed instance of that pattern. A **context**, the type that implements the trait, can carry many distinct abstract types, one per `Tag`, and resolve each to a concrete type
 through wiring. Generic code names `Self::Type` (or the alias `TypeOf<Context, Tag>`), the concrete type
 stays hidden behind the tag, and any context that wires the tag to a type satisfies the bound.
 

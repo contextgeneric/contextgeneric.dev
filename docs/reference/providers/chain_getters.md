@@ -10,7 +10,7 @@ Compose a list of field getters into one, reaching a field several hops inside a
 ## Overview
 
 `ChainGetters<Getters>` reaches a field that does not live directly on the context but several levels
-inside it. The **context** is the type a capability runs against, and a single
+inside it. The **context** is the type a method runs on, and a single
 [`UseField`](use_field.md) reads one field of one context. But CGP contexts often nest: a context holds
 a config, the config holds a connection, the connection holds a timeout, and a getter may need the
 innermost value. Writing one provider that walks the whole path by hand is tedious and couples the

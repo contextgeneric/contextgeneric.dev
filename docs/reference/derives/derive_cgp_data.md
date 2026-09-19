@@ -104,7 +104,7 @@ constructors, and an extractor. Worked examples of each half are on the
 ## When to use it
 
 Use `CgpData` when generic code needs both a type's structure and its incremental operations. For
-reading individual values from a context (the type a capability runs against, which supplies values
+reading individual values from a context (the type a method runs on, which supplies values
 as fields), [`#[derive(HasField)]`](./derive_has_field.md) is sufficient.
 
 The full derive supports these uses:

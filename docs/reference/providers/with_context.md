@@ -10,7 +10,7 @@ The `WithProvider`-adapted spelling of `UseContext`, defined for completeness of
 ## Overview
 
 `WithContext` is the alias `WithProvider<UseContext>`. It pairs the [`WithProvider`](with_provider.md)
-adapter with [`UseContext`](use_context.md) on a **context**, the type a capability runs against.
+adapter with [`UseContext`](use_context.md) on a **context**, the type a method runs on.
 [`UseContext`](use_context.md) carries a foundational [`FieldGetter`](../traits/field-access/field_getter.md), and
 [`WithProvider`](with_provider.md) adapts a foundational provider into a named component's provider, so
 `WithContext` is the two composed. Like every CGP provider, it carries no runtime value.

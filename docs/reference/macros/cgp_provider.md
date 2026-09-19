@@ -12,7 +12,7 @@ declaring the provider struct.
 
 A provider trait is not shaped like the trait it came from. [`#[cgp_component]`](./cgp_component.md)
 moves the original `Self` into an explicit leading type parameter for the **context**. The context is
-the type the capability runs against, and it supplies the values it needs as its own fields. An
+the type the method runs on, and it supplies the values it needs as its own fields. An
 implementation targets a small named struct instead. Written out, a provider looks like this:
 
 ```rust

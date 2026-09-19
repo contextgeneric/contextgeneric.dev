@@ -6,9 +6,9 @@ sidebar_position: 3
 # Impl-side dependencies
 
 An **impl-side dependency** is a requirement stated on an implementation without being part of its
-trait interface. Callers can require the capability they use while the compiler checks the selected
+trait interface. Callers can require the trait they use while the compiler checks the selected
 implementation's dependencies. This page starts with ordinary Rust blanket implementations, then
-shows how CGP providers require capabilities, field values, and context-selected types.
+shows how CGP providers require traits, field values, and context-selected types.
 
 ## What a `where` clause costs the callers above it
 
@@ -47,7 +47,7 @@ it becomes harder to maintain when many layers repeat implementation-specific re
 
 ## Moving the requirement onto the implementation
 
-A blanket implementation lets callers depend on a capability without naming the dependencies used
+A blanket implementation lets callers depend on a trait without naming the dependencies used
 to implement it. The trait declares the operation, and the implementation states when it is available:
 
 ```rust
@@ -67,7 +67,7 @@ where
 
 `CanGreet` promises a greeting method without requiring `HasName` as a supertrait. The blanket
 implementation supplies that method for every context implementing `HasName`. A generic caller
-can require only the greeting capability:
+can require only the greeting trait:
 
 ```rust
 pub fn greet_twice<Context>(context: &Context) -> String
@@ -93,7 +93,7 @@ several implementations need to coexist, including implementations whose context
 
 ## Two providers, two sets of requirements, one interface
 
-Each CGP provider can require different context capabilities while implementing the same interface.
+Each CGP provider can require different traits of the context while implementing the same interface.
 An email sender might need an SMTP server getter, while a test implementation needs access to a
 recording buffer:
 
@@ -144,10 +144,10 @@ another provider uses one.
 
 ## The three things an implementation can ask for
 
-Provider dependencies commonly describe capabilities, values, or types. CGP expresses them with
+Provider dependencies commonly describe traits, values, or types. CGP expresses them with
 attributes that generate the corresponding Rust bounds:
 
-- **Capabilities:** `#[uses(Trait)]` requires the context to implement a trait. It accepts ordinary
+- **Traits:** `#[uses(Trait)]` requires the context to implement a trait. It accepts ordinary
   Rust traits such as `AsRef<[u8]>` as well as CGP consumer traits.
 - **Values:** An `#[implicit]` argument reads a field from the context and generates the field-access
   requirement on the implementation.
@@ -207,7 +207,7 @@ pub trait CanRunJob {
 This type dependency is part of the interface, not hidden on the implementation. The runtime and
 storage requirements can remain on the job provider if its public methods do not expose their types.
 
-A forwarding capability can use that same associated error without introducing a separate `E`
+A forwarding trait can use that same associated error without introducing a separate `E`
 parameter:
 
 ```rust
@@ -236,7 +236,7 @@ To assemble a context, follow its wiring to the provider and inspect that provid
 The smaller caller contract comes with more work when configuring an implementation.
 
 Wiring alone does not verify that the context satisfies the provider's dependencies. A missing
-capability or field can remain undetected until a check or use requires it. Changing a provider's
+trait or field can remain undetected until a check or use requires it. Changing a provider's
 bounds can also make an existing context stop compiling even if the consumer trait is unchanged.
 
 Errors may refer to generated bounds rather than the requirement as written in the provider.
@@ -249,7 +249,7 @@ class. [Checking your wiring](./check-traits.md) shows the diagnostics and their
 
 A component and wiring are unnecessary when one blanket implementation provides all the reuse you
 need. Write that implementation in ordinary Rust, or use
-[`#[cgp_fn]`](/docs/reference/macros/cgp_fn) to generate a capability from a function. A plain generic
+[`#[cgp_fn]`](/docs/reference/macros/cgp_fn) to generate a trait from a function. A plain generic
 function remains suitable when its explicit parameters and bounds are the interface callers should see.
 
 ## Where to go next

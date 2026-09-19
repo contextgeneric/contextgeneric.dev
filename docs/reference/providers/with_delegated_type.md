@@ -11,7 +11,7 @@ Resolve one or more abstract-type components from a shared table, through the `W
 
 `WithDelegatedType<Components>` is the alias `WithProvider<UseDelegatedType<Components>>`. It answers a
 context's abstract-type components by looking each type tag up in the `Components` table, on a
-**context**, the type a capability runs against, by adapting the foundational
+**context**, the type that implements the trait, by adapting the foundational
 [`UseDelegatedType`](use_delegated_type.md) provider through the [`WithProvider`](with_provider.md)
 layer. Like every CGP provider, it carries no runtime value.
 

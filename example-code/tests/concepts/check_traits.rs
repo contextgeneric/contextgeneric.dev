@@ -32,7 +32,7 @@ pub mod a_context_can_be_wrong_and_still_compile {
 
 /// ## Where the failure surfaces instead
 ///
-/// Calling the capability is the first thing that forces the question, so the error arrives at the
+/// Calling the trait's method is the first thing that forces the question, so the error arrives at the
 /// call rather than at the wiring — and names a field requirement the caller never wrote.
 ///
 /// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_1.rs`.
@@ -73,7 +73,7 @@ pub mod a_check_is_an_empty_impl {
     impl CanUseApp for App {}
 
     // What `check_components!` writes instead, which reports the missing requirement rather than
-    // only that the capability is unavailable.
+    // only that the trait is unavailable.
     mod generated_form {
         use super::*;
         check_components! {

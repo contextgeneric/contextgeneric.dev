@@ -10,20 +10,20 @@ target, and the key that wires them together.
 
 ## Overview
 
-You can apply `#[cgp_component]` to any Rust trait definition to give that trait the full set of
-CGP's capabilities. Applying it takes nothing away. The trait you wrote keeps working exactly as it
+You can apply `#[cgp_component]` to any Rust trait definition to make that trait wireable, with
+every implementation chosen per context. Applying it takes nothing away. The trait you wrote keeps working exactly as it
 did, now under the name CGP calls the **consumer trait**, and every call site that already uses it
 keeps compiling unchanged. The macro adds a matching **provider trait** for implementations to target,
-a small marker type called the **component** that names the capability for wiring, and a pair of
+a small marker type called the **component** that names the trait for wiring, and a pair of
 [**blanket implementations**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
 that connect them without requiring you to write anything.
 
-`#[cgp_component]` makes it possible to define several overlapping implementations of one capability
+`#[cgp_component]` makes it possible to define several overlapping implementations of one trait
 at once. An ordinary Rust trait does not allow this. A
 [trait](https://doc.rust-lang.org/book/ch10-02-traits.html) can have only one implementation per
 type, a rule called [coherence](/docs/concepts/coherence). That rule is usually the right one, because
 it lets the compiler resolve a `where T: Display` bound without anyone naming which implementation
-applies. But it also means a capability with several plausible implementations cannot hold the
+applies. But it also means a trait with several plausible implementations cannot hold the
 alternatives. A type can send real email or record it for a test, but never both at once. Switching
 between the two means editing the impl itself rather than choosing between them at the point of use.
 
@@ -35,12 +35,12 @@ implementation no longer target the same trait.
   kept exactly as you wrote it.
 - An implementation targets the **provider trait** instead. It repeats the same methods with `Self`
   moved into an explicit type parameter. So you write an implementation for a small named type of its
-  own, rather than for the type the capability is about.
+  own, rather than for the type the operation acts on.
 
 Moving `Self` into a parameter lets more than one implementation coexist, because each one now targets
 its own small type instead of the single `Self` slot every plain trait has. A **provider** is one of
 those targets: a zero-sized type such as `RectangleArea` without data of its own that exists only
-to name one implementation. The type the capability runs against is called the **context**. It
+to name one implementation. The type the methods run on is called the **context**. It
 supplies whatever values an implementation needs as its own fields, and it picks the provider it wants
 through [`delegate_components!`](./delegate_components.md). The generated blanket implementations then
 route a call on the consumer trait through to that choice automatically. This costs nothing at
@@ -48,8 +48,8 @@ runtime. Wiring fixes the provider once, at compile time, and the compiler turns
 direct, statically-dispatched call, exactly as if you had written the implementation yourself.
 
 The macro's remaining output is the **component** itself, a marker type such as
-`AreaCalculatorComponent` that names the capability and is the key `delegate_components!` wires
-against. You see it in every wiring entry and in most compiler errors that involve this capability, so
+`AreaCalculatorComponent` that names the trait and is the key `delegate_components!` wires
+against. You see it in every wiring entry and in most compiler errors that involve this trait, so
 learn to recognize it, even though you never write its definition yourself.
 
 ## Usage
@@ -125,7 +125,7 @@ so the macro rejects it with *Type equality constraints cannot be used in compon
 Every other form of the attribute works on a component exactly as it does elsewhere.
 
 For a supertrait without an associated type to import, use `#[extend(...)]` in preference to native
-`: Supertrait` syntax. `#[extend(HasName)]` reads as importing a capability, whereas
+`: Supertrait` syntax. `#[extend(HasName)]` reads as importing a trait, whereas
 `pub trait CanGreet: HasName` reads as inheritance, which a CGP supertrait is not. An associated type
 the trait declares *itself* is not imported and stays written as `Self::Output`.
 
@@ -181,13 +181,13 @@ does, and nothing else in the program changes.
 
 ## When to use it
 
-Use `#[cgp_component]` when a capability needs **more than one implementation, and the
+Use `#[cgp_component]` when a trait needs **more than one implementation, and the
 choice belongs to the type using it.** The macro exists for that case, and it has a cost: a component
 is a trait, a second trait, a marker type, and a line of wiring per type.
 
 Prefer something simpler when you can.
 
-- **One implementation, ever.** Use [`#[cgp_fn]`](./cgp_fn.md) instead. It builds the capability
+- **One implementation, ever.** Use [`#[cgp_fn]`](./cgp_fn.md) instead. It builds the trait
   straight from a function and does not need wiring. If a second implementation ever arrives, you
   promote it to a component and its call sites keep working unchanged. That makes it the right
   starting point rather than a lesser one.
@@ -197,7 +197,7 @@ Prefer something simpler when you can.
 - **A closed set of variants with fixed operations.** An `enum` and a `match` are clearer than any
   machinery.
 
-One more distinction matters. A capability may need several implementations while each individual
+One more distinction matters. A trait may need several implementations while each individual
 implementation serves exactly one type. In that case you can implement the consumer trait directly on
 each concrete type, as you would any Rust trait, and skip providers entirely. Named providers become
 worth their cost once a second type wants the *same* implementation, or once an implementation should
@@ -259,7 +259,7 @@ pub trait AreaCalculator<Context>:
 `IsProviderFor` *replaces* the supertrait list rather than joining it. Any supertrait the consumer
 trait had, whether written natively or added by `#[extend]` or `#[use_type]`, becomes a `where`
 predicate on the context instead. This follows from the `Self`-to-`Context` move: a supertrait
-constrains the type the capability is about, and on the provider side that type is the context
+constrains the type the operation acts on, and on the provider side that type is the context
 parameter. So `#[extend(HasName)]` on a `CanGreet` component produces:
 
 ```rust

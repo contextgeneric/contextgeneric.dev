@@ -61,7 +61,7 @@ use cgp::extra::field::impls::TransformMapDefault;
 ```
 
 There is nothing to call. The marker exists to be named in a
-[`TransformMapFields`](../type-level/transform_map_fields.md) bound, which is where a capability says *which*
+[`TransformMapFields`](../type-level/transform_map_fields.md) bound, which is where an operation says *which*
 conversion it drives:
 
 ```rust
@@ -103,8 +103,8 @@ Writing a marker of your own follows the same three-impl shape; the
 
 ## When to use it
 
-**Name it only when writing a capability that drives the defaulting conversion.** Everything else is
-served by the two capabilities already built on it.
+**Name it only when writing an operation that drives the defaulting conversion.** Everything else is
+served by the two operations already built on it.
 
 - **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** to finalize a partial record, defaulting
   gaps.
@@ -158,7 +158,7 @@ moment that field is unset, and the error names the missing `TransformMap` impl 
 **It always targets `IsPresent`.** It cannot be used to reach any other configuration; that is
 [`TransformOptional`](./transform_optional.md)'s job.
 
-**It is a marker, not a capability.** There is no method to call and nothing to wire. It is named in a
+**It is a marker, not an operation.** There is no method to call and nothing to wire. It is named in a
 bound.
 
 **A defaulted field is indistinguishable from one set to the default value** in the result, which is the
@@ -166,7 +166,7 @@ trade against [`FinalizeOptional`](./finalize_optional.md).
 
 ## Related constructs
 
-- [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the capability built directly on it.
+- [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the operation built directly on it.
 - [`CanBuildWithDefault`](./can_build_with_default.md): merge plus that finalize.
 - [`TransformOptional`](./transform_optional.md): the counterpart marker, targeting `IsOptional`.
 - [`TransformMap`](../type-level/transform_map.md): the trait it implements three times.
@@ -181,7 +181,7 @@ The ideas behind it:
 ## Source
 
 - [`build_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-field-extra/src/impls/build_default.rs):
-  `TransformMapDefault` and the capabilities built on it
+  `TransformMapDefault` and the operations built on it
 
 ---
 

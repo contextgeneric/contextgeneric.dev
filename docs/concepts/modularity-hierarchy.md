@@ -5,11 +5,11 @@ sidebar_position: 18
 
 # Modularity Hierarchy
 
-How much CGP does a capability need? The answer is a tier in a five-tier hierarchy, where each tier
+How much CGP does an operation need? The answer is a tier in a five-tier hierarchy, where each tier
 allows more independent implementations of one interface than the tier below, at a matching cost in
 syntax or coupling. The right tier is the lowest one that still expresses the problem.
 
-This page explains each tier in turn on one running capability, encoding a value, so the only thing
+This page explains each tier in turn on one running operation, encoding a value, so the only thing
 that changes from tier to tier is the modularity, not the problem. It then turns to the decision: how
 to pick a tier, when a plainer tool is the better choice, and what the machinery costs. If you are
 still deciding whether CGP is for you at all, read to the end of the decision guide.
@@ -48,7 +48,7 @@ impl<Value: AsRef<[u8]>> CanEncode for Value {
 
 Every type that is `AsRef<[u8]>` now encodes the same way, and no second strategy is possible.
 [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) builds this same tier from a plain function, and hides
-the bound behind a clean interface. Reach for tier 1 when a capability genuinely has one
+the bound behind a clean interface. Reach for tier 1 when a trait genuinely has one
 implementation for all types.
 
 ## Tier 2: one implementation per type
@@ -77,7 +77,7 @@ impl CanEncode for Vec<u8> {
 Each type varies, but the choice is global: once `u32` encodes one way, that is the only way for the
 whole program. A blanket implementation that would share logic across several types is rejected,
 because it could overlap. This is where Rust's coherence guarantee delivers its value, and also where
-it starts to bind. Tier 2 is the right tier for a capability that varies by type but never by
+it starts to bind. Tier 2 is the right tier for an operation that varies by type but never by
 application.
 
 ## Tier 3: many implementations, one wired per type
@@ -123,11 +123,11 @@ readers most often miss, because nothing in a signature marks it.
 
 In the **retrofit** shape the wired type is the data itself, as `u32` is above. That type is usually
 one you do not own, so it gets one wiring for the whole program. This is the right shape when the
-capability belongs to the data, or when an existing trait cannot change its signature.
+operation belongs to the data, or when an existing trait cannot change its signature.
 
 In the **application** shape the wired type stands for the application rather than for data, and it
 often has no fields at all. Here the "one wiring per type" limit stops mattering, because you decide
-how many application types exist. The capability is about the application, such as sending an email or
+how many application types exist. The operation is about the application, such as sending an email or
 querying a user, rather than about a value:
 
 ```rust
@@ -236,9 +236,9 @@ The guiding rule is to settle at the lowest tier that expresses the use case, be
 tier trades simplicity for modularity that may not be needed. Most code has one implementation of
 most things, and for that code a plain trait is the right answer rather than a compromise.
 
-Two questions place a capability faster than working through the tiers one by one.
+Two questions place an operation faster than working through the tiers one by one.
 
-**Is the capability about the data, or about the application?** About the data means the wired type
+**Is the operation about the data, or about the application?** About the data means the wired type
 *is* the thing being operated on, as `Rectangle: CanCalculateArea` is. About the application means the
 wired type is one you define to carry choices, often with no fields at all.
 
@@ -254,7 +254,7 @@ right answer to a different question.
 | About the application | **Application** (tier 3) | One choice per context you define, and you can define as many as you like. |
 | About a foreign type, differing per application | **Fully modular** (tiers 4–5) | One choice per context, per target type. |
 
-**The application shape is where most CGP code lives.** A capability about the application, such as
+**The application shape is where most CGP code lives.** An operation about the application, such as
 sending an email or running the server, wired per application with no type parameter anywhere, is the
 ordinary case rather than the elaborate one.
 
@@ -270,14 +270,14 @@ alternative wins, because in most rows it does.
 
 | The alternative | Prefer it when | Reach for CGP when |
 |---|---|---|
-| **A plain trait or generic** | A capability has one implementation, or one per type with a single global choice. **This is most code.** | The implementations multiply, the choice must differ per context, or threading a generic through every layer has started to hurt. |
+| **A plain trait or generic** | A trait has one implementation, or one per type with a single global choice. **This is most code.** | The implementations multiply, the choice must differ per context, or threading a generic through every layer has started to hurt. |
 | **A direct impl on the context** | A provider would have exactly one user. Two contexts that each have their own single implementation need no providers and no wiring at all. | A second context wants the *same* implementation, or the implementation should compose with a wrapper. |
 | **An enum** | The variant set is small, closed, and known, with fixed operations. A `match` is clearer than any machinery. | The variant set is open, or independent modules must each contribute one. |
 | **`dyn Trait`** | The set of implementations is not known until runtime. CGP gives up exactly that openness. | The set *is* known at build time, and you want the decoupling without the dispatch cost. |
 | **A dependency-injection crate** | You specifically want a container's lifecycle and object-graph semantics. | You want compile-time-checked, reflection-free injection, which is the traits-and-generics approach, not a framework. |
 | **A generic-programming library such as `frunk`** | A one-off manipulation of a heterogeneous list. The lighter, focused library is less to learn and enough. | The structural machinery is part of a larger component-and-wiring design. |
 | **A hand-rolled macro** | The generation is narrow and local. | You notice you are reinventing marker types plus a helper trait, which is CGP's own mechanism. |
-| **Waiting for a language feature** | A first-class facility would serve better and you can afford to wait. Rust's effects and reflection work is pursuing ground CGP covers. | You need the capability now, on stable Rust. CGP is complementary to what the language is building rather than a bet against it. |
+| **Waiting for a language feature** | A first-class facility would serve better and you can afford to wait. Rust's effects and reflection work is pursuing ground CGP covers. | You need the feature now, on stable Rust. CGP is complementary to what the language is building rather than a bet against it. |
 
 That last row is worth taking seriously rather than reading as a formality. Some of what CGP does is
 plausibly better as a language feature eventually, and a project that can wait should.
@@ -290,7 +290,7 @@ Four cases are not trade-offs. Naming them is more useful than any argument in C
 redefinition while the program runs. Its wiring is fixed at build time. That lives on the runtime
 side, where `dyn Trait` and the dynamic languages remain right.
 
-**Exactly one implementation.** A capability with one definition belongs in a plain trait, which is
+**Exactly one implementation.** A trait with one definition belongs in a plain trait, which is
 tier 1 or tier 2. If you want it to read like CGP anyway,
 [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) builds it from a function with no component, no provider,
 and no wiring, and it keeps working unchanged if a second implementation ever arrives.
@@ -317,7 +317,8 @@ Three things do pay with one context.
   application touches, not along its contexts, so a single application with several types to encode,
   serialize, or validate already has more than one implementation to place. That is
   [bypassing coherence](./coherence.md), and it needs no second context at all.
-- **The orphan-rule escape.** Adding a capability to a type from another crate needs one context and
+- **The orphan-rule escape.** Adding a trait implementation to a type from another crate needs one
+  context and
   a foreign type. No newtype wrapper, and no second application.
 - **Dependencies declared where the implementation is.** A `&self` method on a concrete struct may
   read any field and call any other method, so nothing short of reading the body tells you what it
@@ -328,7 +329,7 @@ And then the second context you probably already have: **the test harness.** It 
 to justify and the one nobody argues about.
 
 **If none of that applies, the honest recommendation is to stay put.** A codebase with one
-application, no capability needing more than one implementation, and no foreign type to extend is one
+application, no trait needing more than one implementation, and no foreign type to extend is one
 where CGP's central bargain does not pay. Reach for `#[cgp_fn]` alone, or nothing.
 
 ## "Won't I end up with a context per configuration?"
@@ -347,7 +348,7 @@ variations are worth their own type; the tools you already use handle the ones t
 
 There is a payoff here worth naming if you are writing a library. An enum you expose for supported
 backends is normally a ceiling on what downstream users can have: a new variant means a pull request
-or a fork. When the context-generic code is written against capabilities rather than against the
+or a fork. When the context-generic code is written against traits on the context rather than against the
 enum, a downstream crate defines its own wider enum and its own context and reuses everything, with
 nothing to petition for.
 
@@ -371,7 +372,7 @@ them. **Dramatically better and actively improving, not solved.**
 could not be cited. The honest reframing is that resolution costing at compile time is resolution
 that would otherwise cost at runtime or not be checked at all.
 
-**There is a learning curve.** The first useful thing, a capability written as a function used with
+**There is a learning curve.** The first useful thing, an operation written as a function used with
 no wiring, needs only ordinary Rust knowledge, so the first step is small. The curve past it is real.
 
 Three of those costs, the learning curve, decoding the diagnostics, and the volume of wiring to write
@@ -394,7 +395,7 @@ far*.
 through 5 are built on, and closes with the same costs stated for that construct specifically.
 
 If the answer here was "not yet", [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is the whole of what
-you need: a capability from a function, no wiring, nothing to reverse later. If it was "yes", the
+you need: a trait from a function, no wiring, nothing to reverse later. If it was "yes", the
 [Area calculation series](/docs/tutorials/area-calculation/) works up the tiers in order, and
 [`#[cgp_component]`](/docs/reference/macros/cgp_component) is where the component machinery starts.
 

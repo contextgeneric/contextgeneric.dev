@@ -9,7 +9,7 @@ Reading one field of a context by its type-level name, from code that cannot nam
 
 ## Overview
 
-A CGP implementation most often reads a value out of its **context**, the type a capability runs against,
+A CGP implementation most often reads a value out of its **context**, the type a method runs on,
 without naming that type. It reads the field by keying on the field's *name as a type*, so any context
 with a matching field satisfies the bound. These traits are the foundation
 the ergonomic surface stands on: an [`#[implicit]`](../../attributes/implicit.md) argument, a

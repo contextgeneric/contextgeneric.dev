@@ -1,6 +1,6 @@
 //! Code from `docs/concepts/modularity-hierarchy.md` — *Modularity Hierarchy*.
 //!
-//! One module per tier. The page walks the five tiers on one running capability — encoding a value —
+//! One module per tier. The page walks the five tiers on one running operation — encoding a value —
 //! so each module encodes the same kind of thing with more modularity than the one before it. The
 //! `CanEncode` / `Encoder` / `EncodeAsText` names are the site's shared encoding example, carried over
 //! from the front page and *Bypassing coherence*.

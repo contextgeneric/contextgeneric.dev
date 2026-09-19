@@ -21,7 +21,7 @@ whose base is the asynchronous infallible computer. You name it by hand only whe
 
 `PromoteAsyncComputer<Provider>` starts from a provider that implements `AsyncComputer`, the
 asynchronous infallible base, and fills in the rest of the handler family on a **context**, the type a
-capability runs against. It is the async-base counterpart of [`PromoteComputer`](promote_computer.md).
+method runs on. It is the async-base counterpart of [`PromoteComputer`](promote_computer.md).
 Like every CGP provider, it carries no runtime value.
 
 ## Usage

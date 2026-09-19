@@ -51,7 +51,7 @@ them, but the bundle does not need to supply those dependencies itself.
 
 ## Where the failure surfaces instead
 
-An unchecked wiring error appears when code first requires the capability. A call to
+An unchecked wiring error appears when code first requires the trait. A call to
 `app.send_email(to, body)` on `&BrokenApp` produces an error like this abbreviated diagnostic:
 
 ```text
@@ -114,13 +114,13 @@ note: required for `RecordEmails` to implement
 The error now identifies a missing `HasField` implementation and names `RecordEmails` as the
 provider requiring it. The expanded field names remain hard to read: `sent_emails` and `smtp_server`
 appear as nested character types. The headline also names the generated `CanUseComponent` bound
-rather than the public capability.
+rather than the public trait.
 
 ## Reading it through the toolchain
 
 [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) rewrites recognized CGP diagnostics
 with readable field names and dependency chains. For this missing-field case, its abbreviated output
-identifies both the unavailable capability and its cause:
+identifies both the unavailable trait and its cause:
 
 ```text
 error[E0277]: [CGP-E001] the consumer trait `CanSendEmail` is not implemented
@@ -135,7 +135,7 @@ error[E0277]: [CGP-E001] the consumer trait `CanSendEmail` is not implemented
 ```
 
 The root cause is now explicit: `BrokenApp` lacks `sent_emails`, which `RecordEmails` requires.
-The dependency chain connects that missing field to the `CanSendEmail` capability the application needs.
+The dependency chain connects that missing field to the `CanSendEmail` trait the application needs.
 
 The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
 next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.

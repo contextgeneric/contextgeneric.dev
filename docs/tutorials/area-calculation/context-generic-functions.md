@@ -41,7 +41,7 @@ pub struct PlainRectangle {
 }
 ```
 
-To enable context-generic capabilities on a context, we first need to apply `#[derive(HasField)]` on `PlainRectangle` to generate generic field access implementations. After that, we can just call `rectangle_area` on it:
+To let context-generic functions run on a context, we first need to apply `#[derive(HasField)]` on `PlainRectangle` to generate generic field access implementations. After that, we can just call `rectangle_area` on it:
 
 ```rust
 let rectangle = PlainRectangle {
@@ -70,9 +70,9 @@ pub fn scaled_rectangle_area(
 }
 ```
 
-Compared to `rectangle_area`, the implementation of `scaled_rectangle_area` contains an additional `#[uses(RectangleArea)]` attribute, which is used for us to "import" the capability to call `self.rectangle_area()`. The import identifier is in CamelCase, because `#[cgp_fn]` converts a function like `rectangle_area` into a *trait* called `RectangleArea`.
+Compared to `rectangle_area`, the implementation of `scaled_rectangle_area` contains an additional `#[uses(RectangleArea)]` attribute, which is used for us to "import" the trait so that we can call `self.rectangle_area()`. The import identifier is in CamelCase, because `#[cgp_fn]` converts a function like `rectangle_area` into a *trait* called `RectangleArea`.
 
-In the argument, we can also see that we only need to specify an implicit `scale_factor` argument. In general, there is no need for us to know which capabilities are required by an imported construct like `RectangleArea`. That is, we can just define `scaled_rectangle_area` without knowing the internal details of `rectangle_area`.
+In the argument, we can also see that we only need to specify an implicit `scale_factor` argument. In general, there is no need for us to know which fields or traits are required by an imported construct like `RectangleArea`. That is, we can just define `scaled_rectangle_area` without knowing the internal details of `rectangle_area`.
 
 With `scaled_rectangle_area` defined, we can now define a *second* `ScaledRectangle` context that contains both the rectangle fields and the `scale_factor` field:
 

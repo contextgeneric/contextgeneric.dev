@@ -31,7 +31,8 @@ how a type-level [`Symbol!`](../macros/symbol.md) and a `PhantomData` tag work. 
 all of that behind an argument that reads as `width: f64`, and the argument's *name* names the field.
 
 So `#[implicit]` is the recommended way to read a context's own field, and usually the first piece of
-CGP anyone writes. A reader who understands functions and arguments can write a working capability and
+CGP anyone writes. A reader who understands functions and arguments can write a working
+context-generic function and
 learn the machinery later, when they need it.
 
 ## Usage
@@ -109,7 +110,7 @@ a mutable field borrow rather than a mutable local copy.
 
 ## Examples
 
-A complete capability, and a context that qualifies for it by having the right fields:
+A complete trait, and a context that qualifies for it by having the right fields:
 
 ```rust
 use cgp::prelude::*;
@@ -166,7 +167,7 @@ A **getter trait** covers the cases an implicit argument cannot reach.
 - **The field is on a different type.** An implicit argument reads only from `self`, so a value living on
   a request, a payload, or any other type needs a getter that can be demanded as a bound on *that* type.
   The value does not live on `self` at all.
-- **The accessor must be a named capability.** When other code depends on "this context can tell you its
+- **The accessor must be a named trait.** When other code depends on "this context can tell you its
   name" rather than on a field, that dependency needs a trait to point at, importable with
   [`#[uses]`](uses.md) or usable as a supertrait.
 - **The getter carries a type inferred from the field.** A getter may declare an associated type and
@@ -287,13 +288,13 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
 
 ## Related constructs
 
-- [`#[cgp_fn]`](../macros/cgp_fn.md) — the usual host, turning a function into a capability.
+- [`#[cgp_fn]`](../macros/cgp_fn.md) — the usual host, turning a function into a trait.
 - [`#[cgp_impl]`](../macros/cgp_impl.md) — the other host, for a component's provider.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — what a context derives to qualify.
 - [`HasField`](../traits/field-access/has_field.md) — the trait the generated bounds are written against.
 - [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — the getter form, for the cases above.
 - [`#[cgp_getter]`](../macros/cgp_getter.md) — a getter whose source field is chosen by wiring.
-- [`#[uses]`](uses.md) — imports a capability rather than a value.
+- [`#[uses]`](uses.md) — imports a trait rather than a value.
 - [`#[use_type]`](use_type.md) — imports a type rather than a value.
 - [`Symbol!`](../macros/symbol.md) — the type-level field name the bounds are keyed on.
 

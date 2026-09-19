@@ -14,7 +14,7 @@ The transform marker that makes every field optional.
 **You are not expected to name `TransformOptional` directly.** It is the
 marker [`ToOptional`](./to_optional.md) and [`HasOptionalBuilder`](./has_optional_builder.md) drive, and
 calling one of those is what you write. This page explains the conversion behind them, and why it needs
-less of a field's type than its defaulting counterpart does. The one case for naming it is writing a capability of your own that drives the optional conversion.
+less of a field's type than its defaulting counterpart does. The one case for naming it is writing an operation of your own that drives the optional conversion.
 
 :::
 
@@ -64,7 +64,7 @@ use cgp::extra::field::impls::TransformOptional;
 ```
 
 There is nothing to call. The marker is named in a
-[`TransformMapFields`](../type-level/transform_map_fields.md) bound, which is where a capability says which
+[`TransformMapFields`](../type-level/transform_map_fields.md) bound, which is where an operation says which
 conversion it drives:
 
 ```rust
@@ -96,7 +96,7 @@ use cgp::prelude::*;
 
 Swap the marker for [`TransformMapDefault`](./transform_map_default.md) and the target for `IsPresent`,
 add a [`finalize_build`](../builder/finalize_build.md), and you have
-[`CanFinalizeWithDefault`](./can_finalize_with_default.md). The two capabilities differ by exactly that
+[`CanFinalizeWithDefault`](./can_finalize_with_default.md). The two operations differ by exactly that
 much.
 
 Writing a marker of your own follows the same shape; the
@@ -104,7 +104,7 @@ Writing a marker of your own follows the same shape; the
 
 ## When to use it
 
-**Name it only when writing a capability that drives the optional conversion.**
+**Name it only when writing an operation that drives the optional conversion.**
 
 - **[`ToOptional`](./to_optional.md)** to relax an existing partial value.
 - **[`HasOptionalBuilder`](./has_optional_builder.md)** to start an all-optional builder, which is
@@ -147,7 +147,7 @@ makes [`SetOptional`](./set_optional.md) resolve and the strict
 **It always targets `IsOptional`.** Reaching `IsPresent` is
 [`TransformMapDefault`](./transform_map_default.md)'s job.
 
-**It is a marker, not a capability.** There is no method and nothing to wire. It is named in a bound.
+**It is a marker, not an operation.** There is no method and nothing to wire. It is named in a bound.
 
 **It requires nothing of the field types**, which is the one place the two markers genuinely differ in
 what they can be applied to.

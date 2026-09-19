@@ -10,8 +10,8 @@ Run two handlers back to back, feeding the output of the first as the input of t
 ## Overview
 
 `ComposeHandlers<ProviderA, ProviderB>` is the fundamental sequencing combinator. It runs `ProviderA`,
-then runs `ProviderB` on `ProviderA`'s output, under one **context**, the type a capability runs
-against, and one `Code` tag. It implements every member of the handler family by threading the
+then runs `ProviderB` on `ProviderA`'s output, under one **context**, the type a method runs
+on, and one `Code` tag. It implements every member of the handler family by threading the
 intermediary value through both providers. Only the value flowing between them changes type. Like every
 CGP provider, it carries no runtime value; the two inner providers ride in `PhantomData`.
 

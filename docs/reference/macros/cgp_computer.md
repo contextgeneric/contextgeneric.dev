@@ -11,7 +11,7 @@ Define a `Computer` provider from a plain function.
 
 CGP models computation as a family of components varying along three axes: synchronous or async, fallible
 or not, taking an input or not. A provider in that family is a struct with one or more impls threading a
-**context** (the type the capability runs against, which supplies the values it needs as its fields), a
+**context** (the type the method runs on, which supplies the values it needs as its fields), a
 phantom `Code` tag, and an `Input`. Written by hand for a computation as small as "add two numbers", that is
 far more code than the task needs.
 
@@ -31,7 +31,7 @@ that makes the *same function* answer the whole family. That wiring is the part 
 implementing any of them.
 
 That last property is the whole reason for the macro. The family exists so a provider can declare exactly
-the capabilities it has, and the [promotion combinators](../providers/handler/index.md) exist so a
+the properties it has, and the [promotion combinators](../providers/handler/index.md) exist so a
 simpler provider can stand in where a more capable one is expected: an infallible computation is a
 fallible one that never fails, a synchronous one is an async one that never awaits. `#[cgp_computer]` picks
 the narrowest
@@ -146,17 +146,17 @@ exists for, and it is the simplest way into the handler family.
 - **Write the provider by hand with [`#[cgp_impl]`](./cgp_impl.md) when the body needs the context.** This
   is the real boundary. A `#[cgp_computer]` function has no receiver and no access to the context, so it can
   only transform its inputs. The moment the computation needs a field, an abstract type, or another
-  capability, it wants a provider impl of `Computer` or `Handler` written with `#[cgp_impl]`, where `self` is
+  trait, it wants a provider impl of `Computer` or `Handler` written with `#[cgp_impl]`, where `self` is
   the context and [`#[implicit]`](../attributes/implicit.md) and [`#[uses]`](../attributes/uses.md) work
   normally.
-- **Use [`#[cgp_fn]`](./cgp_fn.md) when you want a capability on the context, not a pipeline step.**
+- **Use [`#[cgp_fn]`](./cgp_fn.md) when you want a method on the context, not a pipeline step.**
   The two look similar and differ in what they produce: `#[cgp_fn]` gives a trait a context implements,
   called as `self.thing()`; `#[cgp_computer]` gives a *provider* that gets wired into a handler component and
   composed with combinators. If you are not building a pipeline, use `#[cgp_fn]` instead.
 - **Wire the [handler combinators](../providers/handler/index.md) directly for composition.** The macro
   produces one step; `PipeHandlers` and friends chain them.
 
-One thing not to do is use the handler family just because a capability happens to transform a value. The
+One thing not to do is use the handler family just because an operation happens to transform a value. The
 family is worth using when computations are *composed*: piped, dispatched on a `Code` tag, promoted between
 variants. A single transform with one caller is a method.
 
@@ -278,7 +278,7 @@ short-circuits.
 - [Handler combinators](../providers/handler/index.md) — the `Promote*` bundles this wires, plus
   `PipeHandlers` and `ComposeHandlers` for composing steps.
 - [`#[cgp_impl]`](./cgp_impl.md) — for a handler provider that needs its context.
-- [`#[cgp_fn]`](./cgp_fn.md) — for a capability on the context rather than a pipeline step.
+- [`#[cgp_fn]`](./cgp_fn.md) — for a method on the context rather than a pipeline step.
 - [`#[cgp_new_provider]`](./cgp_provider.md) — what the generated impl is emitted through.
 - [`#[cgp_auto_dispatch]`](./cgp_auto_dispatch.md) — generates per-variant computers from a trait.
 

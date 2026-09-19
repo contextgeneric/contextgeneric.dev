@@ -10,8 +10,7 @@ Give a context one shared, abstract `Error` type, so fallible generic code never
 ## Overview
 
 `HasErrorType` lets generic CGP code fail without committing to a concrete error type. A provider that
-may error has to produce *some* error, but it runs against a **context**, the type a capability runs
-against that supplies the values an implementation needs, and it cannot know whether that context wants
+may error has to produce *some* error, but it runs against a **context**, the type that implements the trait that supplies the values an implementation needs, and it cannot know whether that context wants
 `anyhow::Error`, `std::io::Error`, or an enum of its own. `HasErrorType` resolves this by giving the
 context one abstract `Self::Error` type that every fallible operation refers to. Generic code returns
 `Result<T, Self::Error>`, and the concrete error is decided once, at wiring time, by whichever error
@@ -108,12 +107,12 @@ Here [`#[use_type(HasErrorType.Error)]`](../attributes/use_type.md) adds `HasErr
 of `CanValidate` and rewrites the bare `Error` to `<Self as HasErrorType>::Error`, so `validate` returns
 the context's shared error without spelling `Self::Error`. `App` wires its error type to `String`, which
 satisfies the `Debug` bound. `App` is an **environmental context**, a type that stands for the
-application and carries its choices, and the capability targets that context rather than a value.
+application and carries its choices, and the component targets that context rather than a value.
 
 ## When to use it
 
 **Reach for `HasErrorType` in any fallible component whose error type the context should choose.** It is
-the foundation of CGP's error handling and is a supertrait of every other fallible capability, so a
+the foundation of CGP's error handling and is a supertrait of every other fallible trait, so a
 component that returns a `Result` almost always wants the context's abstract error rather than a
 concrete one. Import it with [`#[use_type(HasErrorType.Error)]`](../attributes/use_type.md) rather than
 writing a `: HasErrorType` supertrait and a `Self::Error` path by hand.

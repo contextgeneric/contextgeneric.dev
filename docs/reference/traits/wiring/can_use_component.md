@@ -22,11 +22,11 @@ failure is legible.
 ## Overview
 
 CGP's wiring is lazy: writing a wiring line does not check that the chosen implementation's own requirements
-are met. That check happens the first time the capability is actually called, which is usually somewhere far
+are met. That check happens the first time the trait is actually called, which is usually somewhere far
 from the wiring and produces a bad error when it fails.
 
 `CanUseComponent` is the bound that forces the check early, and it exists because the obvious way of asking
-does not work. Asking "does this **context** (the type the capability runs against) implement the consumer
+does not work. Asking "does this **context** (the type the method runs on) implement the consumer
 trait?" makes the compiler report the outermost unmet bound, usually a bare "the provider does not implement
 the provider trait", and hide the reasoning behind it. The root cause, often one absent field, never appears.
 

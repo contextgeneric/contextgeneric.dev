@@ -10,11 +10,11 @@ Hand out a borrow of the context's runtime value, so effectful code reaches it g
 ## Overview
 
 `HasRuntime` lets context-generic code obtain the runtime it runs against without naming a concrete one.
-A runtime here is whatever object provides the capabilities an application needs at execution time,
+A runtime here is whatever object provides the services an application needs at execution time,
 spawning tasks, sleeping, opening sockets, reading the clock, and different deployments want different
 runtimes: Tokio in production, a mock in tests, a single-threaded executor in a benchmark. Rather than
-thread a concrete runtime type through every signature, the **context**, the type a capability runs
-against that supplies the values an implementation needs as its own fields, stores one runtime value,
+thread a concrete runtime type through every signature, the **context**, the type a method runs
+on that supplies the values an implementation needs as its own fields, stores one runtime value,
 and `HasRuntime` is the getter that borrows it.
 
 `HasRuntime` answers *how to obtain the runtime value*; its companion
@@ -106,7 +106,7 @@ where
 `HasRuntime` by reading its `runtime` field through `UseField`. `runtime_of` names neither
 `TokioRuntime` nor any field, so swapping `UseType<TokioRuntime>` for `UseType<MockRuntime>` in a test
 context retargets it at the mock with no change to its body. `App` is an **environmental context**, and
-the capability targets it.
+the component targets it.
 
 ## When to use it
 
@@ -117,7 +117,7 @@ runtime, and it makes the same task-running code reusable across a Tokio context
 test executor with only a wiring change.
 
 Reach for [`HasRuntimeType`](./has_runtime_type.md) alone when code names the runtime type but never
-touches a value, which asks for exactly the capability it uses. Do not reach for `HasRuntime` when a
+touches a value, which asks for exactly the trait it uses. Do not reach for `HasRuntime` when a
 value the provider needs is not really the runtime but an ordinary context field, where an
 [`#[implicit]`](../attributes/implicit.md) argument is simpler.
 

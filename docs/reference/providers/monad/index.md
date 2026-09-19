@@ -15,7 +15,7 @@ The monad providers build [monadic handler composition](/docs/concepts/monadic-h
 "continue" case and a "stop" case be chained without pattern-matching each step by hand: the monad
 decides which case threads forward and which short-circuits. A built pipeline is itself a provider for
 `Computer`, `AsyncComputer`, `TryComputer`, and `Handler`, so it wires into a **context**, the type a
-capability runs against, exactly like any other handler.
+method runs on, exactly like any other handler.
 
 The providers divide into three groups:
 

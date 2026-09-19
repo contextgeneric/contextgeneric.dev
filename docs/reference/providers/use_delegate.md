@@ -28,7 +28,7 @@ It is expected to be deprecated once `open` is shown to cover every dispatch cas
 
 `UseDelegate` chooses a provider based on a type argument rather than on the component alone. An
 ordinary component picks its provider by looking the component name up in the **context**'s delegation
-table, where the context is the type the capability runs against. But when a provider trait carries an
+table, where the context is the type the method runs on. But when a provider trait carries an
 extra generic parameter, such as a `SourceError` to convert or a `Shape` to measure, the right provider
 often depends on which concrete type that parameter is. `UseDelegate` performs a second lookup: it
 treats one generic parameter as a key and reads the matching inner provider out of a table, so a single

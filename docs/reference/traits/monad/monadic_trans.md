@@ -29,7 +29,7 @@ It is one of four traits that give a monad marker its meaning, and it belongs wi
 composed provider, while [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) run
 each step.
 
-**This is a plain capability trait, not a CGP component.** It has no generated provider trait and is
+**This is a plain trait, not a CGP component.** It has no generated provider trait and is
 never wired.
 
 ## Definition

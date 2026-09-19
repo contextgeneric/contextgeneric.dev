@@ -15,7 +15,7 @@ automatically.
 field-producing providers rather than builder adapters. It wraps each provider in
 [`BuildAndMerge`](build_and_merge.md) for you, so a caller supplies result-producing providers and each
 one is merged into the builder without the caller writing the merge step. It runs on a **context**, the
-type a capability runs against. Like every CGP provider, it carries no runtime value.
+type a method runs on. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 

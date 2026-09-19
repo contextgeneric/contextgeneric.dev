@@ -21,7 +21,7 @@ family explicitly. This page explains what that wiring emits.
 
 `PromoteHandler<Provider>` starts from the most general base, a provider that implements
 [`Handler`](../../components/handler/handler.md), and fills in the rest of the family on a **context**, the
-type a capability runs against. Like every CGP provider, it carries no runtime value.
+type a method runs on. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 

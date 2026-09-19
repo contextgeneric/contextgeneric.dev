@@ -10,7 +10,7 @@ Wire a getter component to a field borrowed through `AsRef`, through the `WithPr
 ## Overview
 
 `WithFieldRef<Tag, Value>` is the alias `WithProvider<UseFieldRef<Tag, Value>>`. It implements a getter
-component by reading the field named by `Tag` from the **context**, the type a capability runs against,
+component by reading the field named by `Tag` from the **context**, the type a method runs on,
 and borrowing it through `AsRef` to produce a `&Value`, where the stored field type implements
 `AsRef<Value>`. It adapts the foundational [`UseFieldRef`](use_field_ref.md) getter through the
 [`WithProvider`](with_provider.md) layer. Like every CGP provider, it carries no runtime value.

@@ -18,7 +18,7 @@ parameter and nothing else, so `Index<0>`, `Index<1>`, and `Index<2>` are distin
 tuple struct's positional fields.
 
 Encoding the position as a type lets positional field access resolve through traits. Here a **context** is
-the type the capability runs against. It supplies the values the capability needs as its own fields.
+the type the method runs on. It supplies the values the method needs as its own fields.
 Because `Index<0>` is a type, a context can carry a
 [`HasField<Index<0>>`](../traits/field-access/has_field.md) impl for its first field and a
 `HasField<Index<1>>` impl for its second, side by side. The compiler selects the right one from the tag

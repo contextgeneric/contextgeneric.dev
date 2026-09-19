@@ -12,8 +12,8 @@ Attach a piece of detail to an error the context already holds, enriching it as 
 `CanWrapError<Detail>` enriches an error as it travels up a call stack. Where
 [`CanRaiseError`](./can_raise_error.md) converts a *foreign* error into the context's abstract error,
 `CanWrapError` takes an error the **context** already holds and folds a piece of `Detail` into it, a
-message, a span, a path, producing an enriched `Self::Error`. The context is the type a capability runs
-against, which supplies the values an implementation needs as its own fields, and it decides how detail
+message, a span, a path, producing an enriched `Self::Error`. The context is the type a method runs
+on, which supplies the values an implementation needs as its own fields, and it decides how detail
 is combined with an existing error. Together the two components cover the common error-handling motions
 in CGP: raise a foreign error in, then wrap context onto it as it bubbles up.
 
@@ -51,7 +51,7 @@ error plus a detail and returns a new error with the detail folded in:
 fn wrap_error(error: Error, detail: Detail) -> Error;
 ```
 
-A context gains the capability by wiring `ErrorWrapperComponent`, whose key lives under
+A context gains the operation by wiring `ErrorWrapperComponent`, whose key lives under
 `cgp::core::error`, to a provider. The trait dispatches per detail type, so the natural wiring is a
 table keyed on `Detail`, most idiomatically an [`open` statement](../macros/delegate_components.md):
 
@@ -102,7 +102,7 @@ The provider `LoadOrFail` first raises a `String` into the context's abstract er
 [`CanRaiseError`](./can_raise_error.md), then wraps a further message onto it with `CanWrapError`. Both
 dependencies are declared with [`#[uses]`](../attributes/uses.md), so neither appears on the public
 `CanLoad` signature, and any context that satisfies them makes `load` produce enriched errors in its own
-error type. The context is an **environmental context**, and the capability targets it.
+error type. The context is an **environmental context**, and the component targets it.
 
 ## When to use it
 

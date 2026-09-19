@@ -20,8 +20,8 @@ that implements the fallible synchronous base. You name it by hand only when wir
 ## Overview
 
 `PromoteTryComputer<Provider>` starts from a provider that implements `TryComputer`, the synchronous
-fallible base, and fills in the rest of the handler family on a **context**, the type a capability runs
-against. It first turns the fallible base into a plain computer, then derives the rest of the family
+fallible base, and fills in the rest of the handler family on a **context**, the type a method runs
+on. It first turns the fallible base into a plain computer, then derives the rest of the family
 from there. Like every CGP provider, it carries no runtime value.
 
 ## Usage

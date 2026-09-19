@@ -24,7 +24,7 @@ delegate_components! {
 ```
 
 Think of the result as a **table**: a compact list saying which implementation supplies each
-capability. But one point needs precision, because the analogy suggests a wrong conclusion. This looks
+trait. But one point needs precision, because the analogy suggests a wrong conclusion. This looks
 like an object's method table, but the compiler resolves it entirely at compile time: the keys and
 values are types, the lookup happens during trait resolution, and the result monomorphizes to a direct
 call. The compiled program contains neither a table nor dynamic dispatch, and the binary holds nothing
@@ -377,7 +377,7 @@ fn print_area(rect: &Rectangle) {
 }
 ```
 
-The benefit shows up when a second context wants the same capability answered differently. It
+The benefit shows up when a second context wants the same trait answered differently. It
 writes its own provider and its own table entry, and the code that calls `area()` does not change:
 
 ```rust
@@ -428,7 +428,7 @@ delegate_components! {
 Use `delegate_components!` whenever a context needs to choose providers, which is any time you use
 [`#[cgp_component]`](./cgp_component.md) at all. The real decision is not whether to wire but **how to
 check the wiring**, because CGP's wiring is *lazy*: a table with a missing or wrong entry still
-compiles, and the failure only surfaces later, where the capability is used.
+compiles, and the failure only surfaces later, where the trait is used.
 
 - **Pair it with [`check_components!`](./check_components.md)** for anything beyond simple wiring. A
   separate check gives you full control over what it asserts: concrete parameters for generic keys,
@@ -655,7 +655,7 @@ it finds.
 ## Common Mistakes
 
 **Wiring is lazy.** A table with a missing entry, or one naming a provider whose own dependencies are
-unmet, still compiles. The failure appears later, at the place where code uses the capability, often
+unmet, still compiles. The failure appears later, at the place where code uses the trait, often
 as a long error naming types you did not write. This is the single most common source of confusion with CGP. The
 answer is to check the table (see [`check_components!`](./check_components.md)) and to run
 [`cargo cgp check`](/docs/cargo-cgp/check) in place of `cargo check`, which leads with the root cause

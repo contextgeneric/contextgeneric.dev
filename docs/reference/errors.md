@@ -30,7 +30,7 @@ wrote it, this page says so and shows the raw form instead.
 knowing which one you are looking at decides whether there is a cause in the message to find at all.
 
 CGP wiring is lazy: [`delegate_components!`](./macros/delegate_components.md) records that a **context**
-— the type the capability runs against, which supplies the values it needs as its fields — uses some
+— the type the method runs on, which supplies the values it needs as its fields — uses some
 provider, and nothing checks that the provider's own requirements hold. That check happens later, and
 *how* it happens decides what you see.
 
@@ -191,7 +191,7 @@ cannot, because no field is implemented.
 
 ### When the missing bound is an ordinary Rust trait
 
-A provider's dependency may be a plain Rust trait rather than a CGP capability — `Scalar: Eq`,
+A provider's dependency may be a plain Rust trait rather than a CGP trait — `Scalar: Eq`,
 `Item: Ord` — unmet by the type the context wired. Here the tool deliberately keeps rustc's own headline,
 because it was already the clearest statement, and tidies only the frames beneath it:
 
@@ -552,10 +552,10 @@ A group with one cause: the body of a [`#[cgp_fn]`](./macros/cgp_fn.md) or
 anything the body calls must be *declared* as a bound on it. Rust's raw errors here are unhelpful because
 they talk about that generated parameter; the tool names the missing declaration instead.
 
-**A capability used without `#[uses]`:**
+**A trait used without `#[uses]`:**
 
 ```text
-error[E0599]: [CGP-E012] the capability `GetCount` is used but not declared as a dependency
+error[E0599]: [CGP-E012] the trait `GetCount` is used but not declared as a dependency
    |
 44 |     format!("{} ({})", self.get_name(), self.get_count())
    |                                              ^^^^^^^^^
@@ -617,10 +617,10 @@ code in the **root-cause tree** labels one link in the chain.
 | `CGP-E006` | More than one namespace joined on one context |
 | `CGP-E007` | An `open` redirect colliding with an explicit entry |
 | `CGP-E008` | The same key redirected twice |
-| `CGP-E009` | A non-component trait — a wrapper, or a `#[cgp_fn]` capability — blocked by a CGP dependency |
+| `CGP-E009` | A non-component trait — a wrapper, or a `#[cgp_fn]` blanket trait — blocked by a CGP dependency |
 | `CGP-E010` | The wiring recurses without terminating |
 | `CGP-E011` | An orphan-rule namespace registration |
-| `CGP-E012` | A capability used but not declared with `#[uses]` |
+| `CGP-E012` | A trait used but not declared with `#[uses]` |
 | `CGP-E013` | A consumer trait named in a provider impl header |
 | `CGP-E014` | `#[cgp_impl]` applied to a trait that is not a component |
 | `CGP-E015` | A consumer trait named in an inner-provider bound |

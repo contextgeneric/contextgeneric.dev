@@ -15,7 +15,7 @@ specific named component.
 component-agnostic mechanisms: a `TypeProvider` supplies *some* abstract type for *some* tag, and a
 `FieldGetter` reads *some* field for *some* output tag, without either knowing which named component it
 serves. A named component, by contrast, has a specific provider trait, such as `NameTypeProvider` or
-`NameGetter`, that a **context** wires to, where the context is the type the capability runs against.
+`NameGetter`, that a **context** wires to, where the context is the type the method runs on.
 `WithProvider<Provider>` is the adapter that lets a foundational provider stand in as the provider for
 one of those named components: it implements the component's provider trait by forwarding to the
 foundational provider's method.

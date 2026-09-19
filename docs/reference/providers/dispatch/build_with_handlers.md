@@ -13,7 +13,7 @@ the fully-populated result.
 `BuildWithHandlers<Output, Handlers>` is the entry point on the builder side. It starts from an empty
 partial record, pipes that builder through a list of builder adapters so each one sets its field, and
 finalizes the fully-populated result into the concrete `Output`. It runs on a **context**, the type a
-capability runs against. Because the finalize step is available only when every field is present,
+method runs on. Because the finalize step is available only when every field is present,
 omitting a handler for some field is a compile error rather than a runtime failure. Like every CGP
 provider, it carries no runtime value.
 

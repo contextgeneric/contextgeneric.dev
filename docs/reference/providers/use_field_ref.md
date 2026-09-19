@@ -10,8 +10,8 @@ stored type differs from the getter's return type.
 
 ## Overview
 
-`UseFieldRef<Tag, Value>` reads the field named by `Tag` from the **context** (the type the capability
-runs against, which supplies the field) and borrows it through `AsRef` to produce a `&Value`, where the
+`UseFieldRef<Tag, Value>` reads the field named by `Tag` from the **context** (the type the method
+runs on, which supplies the field) and borrows it through `AsRef` to produce a `&Value`, where the
 stored field type implements `AsRef<Value>`. It exists for a getter whose return type is reached
 *through* a field rather than being the field's own type: a `&Config` from a stored `Arc<Config>`, for
 example, where the field is not a `Config` but can be borrowed as one.

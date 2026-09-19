@@ -11,7 +11,7 @@ Run a task named at the type level to a `Result<(), Error>`, with the behavior c
 
 `CanRun<Code>` gives a context a uniform way to *execute a unit of work* selected at the type level. The
 unit of work is identified by a `Code` type parameter, a phantom tag rather than a value, so a single
-**context**, the type a capability runs against that supplies the values an implementation needs as its
+**context**, the type a method runs on that supplies the values an implementation needs as its
 own fields, can host many distinct tasks, one per `Code`, and dispatch each to its own provider. Running
 a task here means invoking the provider wired for that `Code` and awaiting an asynchronous
 `Result<(), Error>`: the task either completes or produces the context's abstract error. The component
@@ -54,7 +54,7 @@ Its attributes:
 async fn run(&self, _code: PhantomData<Code>) -> Result<(), Error>;
 ```
 
-A context gains the capability by wiring `RunnerComponent` to a provider. Because the component dispatches
+A context gains the operation by wiring `RunnerComponent` to a provider. Because the component dispatches
 on `Code`, the idiomatic way a context hosts several tasks is the `open` statement, routing each task tag
 to its own provider:
 

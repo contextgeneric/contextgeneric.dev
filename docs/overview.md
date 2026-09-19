@@ -5,7 +5,7 @@ sidebar_position: 2
 # Overview
 
 CGP lets you choose trait implementations at compile time and reuse application logic across those
-choices. This page explains its main capabilities, the problems they address, and the trade-offs to
+choices. This page explains its main features, the problems they address, and the trade-offs to
 consider. Each section links to a fuller explanation; for a working example, start with the
 [Hello World tutorial](/docs/tutorials/hello).
 
@@ -48,7 +48,7 @@ chain. It is an early pre-release and does not rewrite every kind of compiler er
 
 ### Abstract Over Every Dependency
 
-CGP lets reusable logic state the capabilities it needs while each application supplies concrete
+CGP lets reusable logic state the traits it needs while each application supplies concrete
 implementations. Those choices can include I/O, storage, error handling, and runtime operations.
 Providers declare their requirements where they use them, through
 [impl-side dependencies](/docs/concepts/impl-side-dependencies).
@@ -73,7 +73,7 @@ amount of separation your code needs.
 
 An abstract type lets each context choose a concrete type, such as its error type, without passing
 that choice as a separate generic parameter through every layer. Code names the associated type
-where it needs it. A caller that only invokes a capability can depend on that capability without
+where it needs it. A caller that only invokes a trait's method can depend on that trait without
 listing the types used inside its implementation.
 
 These are Rust associated types, so their guarantees depend on the bounds you declare. Using `f64`
@@ -103,7 +103,7 @@ function calls remain a simpler choice when a sequence has no need for interchan
 ## Problems Solved
 
 CGP is most useful when a program already needs several implementations or dependency choices. The
-following cases show how its capabilities address those needs.
+following cases show how its features address those needs.
 
 ### Error Handling
 
@@ -119,7 +119,7 @@ explicit; it does not invent conversions between arbitrary errors. See
 ### Async Runtime
 
 Application logic can depend on the runtime operations it uses without naming a particular executor.
-For example, a provider that needs a timer can require a timer capability, leaving the application to
+For example, a provider that needs a timer can require a timer trait, leaving the application to
 supply its implementation. Another application can reuse that provider with a different compatible
 timer implementation.
 
@@ -153,7 +153,7 @@ variant is still determined at runtime.
 
 ### Monolithic Traits
 
-A large trait can force every implementation to supply capabilities it never uses. CGP lets you
+A large trait can force every implementation to supply methods it never uses. CGP lets you
 split independently chosen behavior into smaller components, each with its own providers. A
 provider declares the dependencies its implementation needs, while callers depend on the interface
 they use.
@@ -167,7 +167,7 @@ See [impl-side dependencies](/docs/concepts/impl-side-dependencies) and the
 
 An error type, runtime, and storage backend can become generic parameters that intermediate code
 must repeat even when it only forwards a call. CGP lets the context select those types and expose
-the required operations as capabilities. Intermediate code can then name the capability it calls,
+the required operations as traits on the context. Intermediate code can then name the trait it calls,
 while the implementation names the dependencies it actually uses.
 
 Types that appear in an interface, such as a returned error, still belong in that interface.

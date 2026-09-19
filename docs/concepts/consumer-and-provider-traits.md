@@ -6,13 +6,13 @@ sidebar_position: 2
 # Consumer and provider traits
 
 CGP separates the trait callers use from the trait providers implement. A **consumer trait** exposes
-a capability on a context, while a **provider trait** lets reusable implementations supply that
-capability. This page motivates the split, traces a method call through its wiring, and shows the
+a set of methods on a context, while a **provider trait** lets reusable implementations supply those
+methods. This page motivates the split, traces a method call through its wiring, and shows the
 generated Rust before discussing the costs.
 
 ## What an ordinary Rust trait does, and where it stops
 
-An ordinary Rust trait connects a type to an implementation of a capability. A `T: Display` bound,
+An ordinary Rust trait connects a type to one implementation of its methods. A `T: Display` bound,
 for example, lets the compiler select the formatting implementation for `T`. This is sufficient when
 each type needs one implementation and you do not need to choose among reusable alternatives.
 
@@ -131,7 +131,7 @@ trait, provider trait, and that marker. The wiring maps its key to `SendViaSmtp`
 `RecordEmails` for `TestApp`.
 
 A method call follows the selected entry. For `app.send_email("a@b.c", "hi")`, the compiler resolves
-`App`'s email-sending capability through its table to `SendViaSmtp`, then checks that provider's
+`App`'s email-sending trait through its table to `SendViaSmtp`, then checks that provider's
 requirements against `App`. The call uses static dispatch; the compiled program does not need a
 runtime wiring table or provider lookup.
 
@@ -234,17 +234,17 @@ These are [impl-side dependencies](./impl-side-dependencies.md), which let imple
 different requirements without changing the caller's interface.
 
 A context can also implement the consumer trait directly, using the ordinary Rust form shown at
-the start of the page. For that capability it can omit providers and wiring. This allows adoption
-one capability at a time, subject to Rust's usual restriction against conflicting implementations.
+the start of the page. For that trait it can omit providers and wiring. This allows adoption
+one trait at a time, subject to Rust's usual restriction against conflicting implementations.
 
 ## What it costs
 
-A component adds declarations and wiring beyond a plain trait. For a capability with one
+A component adds declarations and wiring beyond a plain trait. For a trait with one
 implementation, use a plain trait or consider [`#[cgp_fn]`](/docs/reference/macros/cgp_fn), which
-creates a blanket-implemented capability from a function without component wiring.
+creates a blanket-implemented trait from a function without component wiring.
 
 Wiring does not immediately verify the selected provider's requirements. A missing entry or
-unsatisfied dependency can remain undetected until a caller needs the capability.
+unsatisfied dependency can remain undetected until a caller needs the trait.
 [`check_components!`](/docs/reference/macros/check_components) verifies the requirements where you
 place the check, usually beside the table.
 [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reports recognized failures with

@@ -14,10 +14,10 @@ The general computation component: asynchronous, fallible, and error-aware.
 family can: a computation that runs asynchronously *and* can fail. A handler that calls a remote service
 must await the response and must report failures, so it lives where the family is both async and
 fallible. It transforms an `Input` into an `Output` under a phantom `Code` tag, returning a `Result`
-against the **context's** abstract error type, where the context is the type a capability runs against
+against the **context's** abstract error type, where the context is the type a method runs on
 that supplies the values an implementation needs as its own fields.
 
-Every other handler component is a special case of `Handler` obtained by dropping one capability: drop
+Every other handler component is a special case of `Handler` obtained by dropping one property: drop
 the failure path and it becomes an [`AsyncComputer`](./computer.md); drop the asynchrony and it becomes
 a [`TryComputer`](./try_computer.md); drop both and it becomes a [`Computer`](./computer.md). This is why
 generic pipeline code bounds against `Handler`: it is the one bound *every* member of the family can
@@ -63,7 +63,7 @@ method is `async` and returns a `Result` against the context's error type:
 async fn handle(&self, _tag: PhantomData<Code>, input: Input) -> Result<Self::Output, Error>;
 ```
 
-A context gains the capability by wiring `HandlerComponent` to a provider. In practice most `Handler`
+A context gains the operation by wiring `HandlerComponent` to a provider. In practice most `Handler`
 implementations are not written directly but produced by *promoting* a simpler provider: a function
 written as a [`#[cgp_computer]`](../../macros/cgp_computer.md) or [`#[cgp_producer]`](../../macros/cgp_producer.md)
 wires the promotion table so the same function answers `CanHandle` too, and the
@@ -78,7 +78,7 @@ that its `handle_ref` method borrows the input as `&Input`.
 ## Examples
 
 A generic consumer that bounds its context by `CanHandle` accepts any wired computation, whatever its
-underlying capabilities:
+underlying properties:
 
 ```rust
 use core::marker::PhantomData;
@@ -105,7 +105,8 @@ pipeline code targets `Handler`. The example is **parameter-targeted**: the comp
 ## When to use it
 
 **Bound generic pipeline code against `CanHandle` when it should accept any computation regardless of
-which capabilities the provider actually uses.** Because every simpler member promotes up to a handler,
+which of those properties the provider actually has.** Because every simpler member promotes up to
+a handler,
 a consumer written against `Handler` is the most reusable, and it is the right target for I/O steps,
 request handlers, and composed pipelines.
 

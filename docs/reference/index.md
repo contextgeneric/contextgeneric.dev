@@ -26,12 +26,12 @@ these.
 | [`#[cgp_impl]`](./macros/cgp_impl.md) | Writes one of those implementations |
 | [`delegate_components!`](./macros/delegate_components.md) | Chooses which implementation a given type uses |
 | [`check_components!`](./macros/check_components.md) | Verifies that choice at compile time |
-| [`#[cgp_fn]`](./macros/cgp_fn.md) | Defines a capability that only ever needs one implementation |
+| [`#[cgp_fn]`](./macros/cgp_fn.md) | Defines a trait that only ever needs one implementation |
 | [`#[implicit]`](./attributes/implicit.md) | Reads a value out of the context as if it were a function argument |
 
 The first four are the full component cycle: define, implement, wire, verify. The last two are how
 most code avoids needing that cycle at all — reach for them first, and climb to a full component when
-a capability genuinely needs a second implementation.
+a trait genuinely needs a second implementation.
 
 ## By what you are trying to do
 
@@ -39,13 +39,13 @@ The rest of the reference is grouped by the job a construct does rather than by 
 is. If you know which *file* you want rather than which job, the sidebar groups the same pages by kind
 — macros, attributes, derives, and so on.
 
-### Define a capability, and implement it
+### Define a trait, and implement it
 
 [`#[cgp_component]`](./macros/cgp_component.md) is the foundational macro, turning one trait into the
 consumer trait callers use and the provider trait implementations target. A provider is then written
 with [`#[cgp_impl]`](./macros/cgp_impl.md), which keeps `self` and the consumer method signatures;
 [`#[cgp_provider]`](./macros/cgp_provider.md) is the lower-level form underneath it, which you will
-read in generated code more often than you write. When a capability needs only one implementation and
+read in generated code more often than you write. When a trait needs only one implementation and
 no wiring at all, [`#[cgp_fn]`](./macros/cgp_fn.md) builds it straight from a function, and
 [`#[blanket_trait]`](./macros/blanket_trait.md) does the same from a trait with default methods.
 [`#[async_trait]`](./macros/async_trait.md) is how a CGP trait declares an `async fn`.
@@ -85,7 +85,7 @@ chosen by wiring, through [`UseField` and its siblings](./providers/use_field.md
 ### Declare what an implementation needs
 
 These attributes state what an implementation needs, and they divide by whether the requirement stays
-private to it. [`#[uses]`](./attributes/uses.md) imports the capabilities the body depends on and
+private to it. [`#[uses]`](./attributes/uses.md) imports the traits the body depends on and
 [`#[use_provider]`](./attributes/use_provider.md) does the same for an inner provider in a higher-order
 provider — both landing on the implementation alone, so a caller never sees them. Where a requirement
 should instead be part of what the trait promises, [`#[extend]`](./attributes/extend.md) adds it as a

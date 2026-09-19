@@ -33,7 +33,8 @@ The trait reads as async code, and the declaration the compiler sees is the lint
 **The rewrite is a plain desugaring, not a framework.** Unlike the widely-used `async-trait` crate, nothing
 here boxes the future or allocates: it is return-position `impl Trait` in traits, so the future is exactly the
 one the body produces and the call costs what a hand-written future-returning method costs. That is why the
-macro is used throughout CGP wherever a capability is asynchronous: it is simply how an async method is
+macro is used throughout CGP wherever a trait's methods are asynchronous: it is simply how an async
+method is
 spelled.
 
 One thing it does *not* do is add a `Send` bound, and that omission has consequences the moment a future is
@@ -143,7 +144,7 @@ The decisions worth making are around it rather than about it.
   trait definitions. Harmless, but it suggests a misunderstanding of where the lint comes from.
 - **Use the `Send`-recovery pattern when a future is spawned**, not a different macro. No attribute
   can add the bound, for the reason in the [Common Mistakes](#common-mistakes).
-- **Consider whether the capability needs to be async at all.** The [handler family](./cgp_computer.md) has
+- **Consider whether the trait needs to be async at all.** The [handler family](./cgp_computer.md) has
   synchronous members, and the [promotion combinators](../providers/handler/index.md) lift a synchronous
   provider into an async one where a caller needs it. So a computation that does no I/O is better declared
   synchronous and promoted than declared async out of habit.

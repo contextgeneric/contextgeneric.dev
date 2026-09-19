@@ -13,7 +13,7 @@ string handling.
 `DebugError` implements both error components by redirecting through a string. Rather than producing the
 abstract error directly, it formats the source error or the detail with the `Debug` trait into a
 `String`, then forwards to the **context**'s own `CanRaiseError<String>` or `CanWrapError<String>`,
-where the context is the type a capability runs against. It does not know the context's error type: it
+where the context is the type a method runs on. It does not know the context's error type: it
 only knows how to turn a `Debug` value into a `String` and hand it off, leaving the final step to
 whatever string-handling provider the context already wires. Like every CGP provider, `DebugError`
 carries no runtime value.

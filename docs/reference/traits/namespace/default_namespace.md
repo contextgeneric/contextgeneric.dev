@@ -23,7 +23,7 @@ generates, including why a direct entry can shadow an inherited default without 
 ## Overview
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** (the
-type the capability runs against) can opt into and then selectively override. Resolving one of those
+type the method runs on) can opt into and then selectively override. Resolving one of those
 defaults means asking: *for this component, what does the namespace delegate to?*
 
 `DefaultNamespace` answers that. It is the simplest of three lookup traits, keyed on the component alone.

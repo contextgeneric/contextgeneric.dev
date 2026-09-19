@@ -37,7 +37,7 @@ CGP makes each of the three a wiring choice, and the code that fails makes none 
 
 ## Code that fails without knowing what failing means
 
-The capability names its error abstractly, and the provider raises into it:
+The trait names its error abstractly, and the provider raises into it:
 
 ```rust
 #[cgp_component(PortParser)]
@@ -129,7 +129,7 @@ the wiring rather than in any code that fails.
 ## An application's own error vocabulary
 
 None of this is confined to CGP's built-in components, and the clearest sign of that is defining your
-own. A service that wants every failure to carry an HTTP status declares a capability for it:
+own. A service that wants every failure to carry an HTTP status declares a component for it:
 
 ```rust
 #[cgp_component(HttpErrorRaiser)]

@@ -22,7 +22,7 @@ That reads as *`InnerCalculator` is an `AreaCalculator` for this context*, and i
 counterpart to [`#[uses]`](uses.md). `#[uses]` imports a consumer trait (or an ordinary Rust trait) that
 the **context** must satisfy. `#[use_provider]` imports a provider trait that a named provider must
 satisfy for the context. The context is the type the implementation runs against. Both attributes read
-as importing a dependency. They differ only in whether the dependency is a capability of the context or
+as importing a dependency. They differ only in whether the dependency is a trait of the context or
 a provider.
 
 The inner provider is a named type rather than a method on the context, so the body calls it as an
@@ -150,7 +150,7 @@ generated code and older wiring rather than write it.
 The choice against its neighbours turns on *what* the implementation depends on, and one distinction is
 easy to miss because both spellings compile.
 
-- **A capability of the context** is [`#[uses]`](uses.md), which imports a consumer trait or an ordinary
+- **A trait of the context** is [`#[uses]`](uses.md), which imports a consumer trait or an ordinary
   trait the context satisfies. `#[use_provider]` imports a provider trait instead, one that a separate
   provider satisfies for the context.
 - **Whatever the context already chose** needs no attribute at all. Calling `self.area()` in the body

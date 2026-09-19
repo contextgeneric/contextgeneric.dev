@@ -12,7 +12,7 @@ Register a provider as a namespace's default for a key.
 `#[default_impl(...)]` lets a *provider* register itself as a [namespace](/docs/concepts/namespaces)'s
 default for a key, at the point where the provider is defined. A namespace is a reusable table of default
 wirings that a **context** can opt into and then override entry by entry. (The context is the type the
-capability runs against.) Ordinarily you write a namespace's entries in its own body. This attribute
+method runs on.) Ordinarily you write a namespace's entries in its own body. This attribute
 moves one entry onto the provider:
 
 ```rust

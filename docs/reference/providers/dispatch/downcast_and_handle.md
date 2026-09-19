@@ -12,8 +12,8 @@ The adapter that matches a whole group of variants at once by narrowing to a sma
 `DowncastAndHandle<Inner, Provider>` is the matcher adapter that handles a *group* of variants in one
 step rather than a single variant. Instead of extracting one field, it tries to narrow the input to a
 smaller enum type `Inner`. On success it hands the whole `Inner` value to `Provider` and returns `Ok`;
-on failure it returns `Err` of the remainder. It runs on a **context**, the type a capability runs
-against, and lets a matcher delegate several variants to one sub-matcher in a single step. Like every
+on failure it returns `Err` of the remainder. It runs on a **context**, the type a method runs
+on, and lets a matcher delegate several variants to one sub-matcher in a single step. Like every
 CGP provider, it carries no runtime value.
 
 `Provider` defaults to [`UseContext`](../use_context.md).

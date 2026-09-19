@@ -189,7 +189,7 @@ a hand-written supertrait plus `Self::`-qualified paths in existing code rather 
 Its neighbours handle the requirements that are not types, and one of them declares the type this
 attribute imports.
 
-- **A capability** is [`#[uses]`](uses.md) for a private bound or [`#[extend]`](extend.md) for a
+- **A trait on the context** is [`#[uses]`](uses.md) for a private bound or [`#[extend]`](extend.md) for a
   supertrait. Use `#[extend]` specifically when the supertrait's methods matter and its associated
   types are not named in your signatures, the case where `#[use_type]` has nothing to rewrite.
 - **A value from a field** is an [`#[implicit]`](implicit.md) argument.
@@ -207,8 +207,8 @@ qualified, the imported one bare.
 
 Prefer an inferred parameter over an abstract type when the type only ever flows through values the
 body reads: [`#[impl_generics]`](./impl_generics.md) on a `#[cgp_fn]` is shorter and does not need
-wiring. Move to an abstract type when the type must be named in the capability's own signature, or when
-two capabilities have to
+wiring. Move to an abstract type when the type must be named in the trait's own signature, or when
+two traits have to
 [agree that they mean the same one](/docs/concepts/abstract-types#one-type-agreed-on-by-everything-that-needs-it).
 
 ## Under the hood
@@ -367,7 +367,7 @@ Write `Self::Output`, and do not list it in a `#[use_type]` attribute.
 - [`UseType`](../providers/use_type.md) — the provider a context wires to supply the concrete type; a
   different thing from this attribute despite the name.
 - [`HasType`](../components/has_type.md) — the built-in abstract-type component underneath.
-- [`#[uses]`](uses.md) — imports a capability rather than a type.
+- [`#[uses]`](uses.md) — imports a trait rather than a type.
 - [`#[extend]`](extend.md) — adds a supertrait without rewriting any type names.
 - [`#[implicit]`](implicit.md) — imports a value from a field.
 - [`#[cgp_fn]`](../macros/cgp_fn.md), [`#[cgp_impl]`](../macros/cgp_impl.md), and

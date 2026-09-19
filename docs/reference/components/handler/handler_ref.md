@@ -12,8 +12,8 @@ its input.
 
 `HandlerRef` is a [`Handler`](./handler.md) that takes its input by reference. It is asynchronous and
 fallible like the general handler, so it awaits and may return the **context's** abstract error, but its
-method receives `&Input` where `CanHandle` receives `Input`. The context is the type a capability runs
-against, which supplies the values an implementation needs as its own fields. `HandlerRef` is the
+method receives `&Input` where `CanHandle` receives `Input`. The context is the type a method runs
+on, which supplies the values an implementation needs as its own fields. `HandlerRef` is the
 owned-versus-borrowed variant of the family's most general member, differing on the input axis alone, for
 an async-and-fallible computation that reads rather than consumes its argument.
 
@@ -60,7 +60,7 @@ Its attributes:
 async fn handle_ref(&self, _tag: PhantomData<Code>, input: &Input) -> Result<Self::Output, Error>;
 ```
 
-A context gains the capability by wiring `HandlerRefComponent` to a provider, and it dispatches on both
+A context gains the operation by wiring `HandlerRefComponent` to a provider, and it dispatches on both
 the `Code` tag and the `Input` type. Because the consumer trait supertraits `HasErrorType`, the context
 must also wire an error type. A [`Handler`](./handler.md) is bridged to `HandlerRef` by the
 [`PromoteRef`](../../providers/handler/index.md) combinator, which supplies an owned input by dereferencing

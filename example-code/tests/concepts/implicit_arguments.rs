@@ -74,7 +74,7 @@ pub mod the_same_provider_as_a_function {
     }
 }
 
-/// ## A capability from a function alone
+/// ## A trait from a function alone
 ///
 /// `#[cgp_fn]` needs no trait, no provider, and no wiring — the blanket impl applies to any context
 /// carrying the fields.

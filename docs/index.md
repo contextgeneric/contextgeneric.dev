@@ -22,7 +22,7 @@ how this separation works.
 You can adopt CGP one component at a time. A consumer trait remains an ordinary Rust trait that you
 can implement directly. Providers and wiring become useful when you need interchangeable
 implementations or want to reuse an implementation across contexts. The
-[Overview](/docs/overview) covers those capabilities, along with abstract types, extensible data, and
+[Overview](/docs/overview) covers those features, along with abstract types, extensible data, and
 composable handlers.
 
 ## Current Status
@@ -38,7 +38,7 @@ other diagnostics retain the compiler's wording. CGP also publishes an
 [agent skill](/docs/ai/skills) to help coding assistants read, write, and debug CGP code. You still
 need to review the code an assistant produces.
 
-Start with a small part of your project whose implementation choices already vary. For a capability
+Start with a small part of your project whose implementation choices already vary. For a trait
 with one implementation, a plain trait may be enough. CGP particularly welcomes
 [early adopters and contributors](/docs/contribute) who want to experiment and help improve the
 library, tools, and documentation.

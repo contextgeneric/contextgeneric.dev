@@ -13,7 +13,7 @@ short-circuit on `Err`.
 `BindErr<M, Cont>` implements a single bind step of the err monad, the ordinary `?`-style behavior.
 [`PipeMonadic`](pipe_monadic.md) composes it for you when it folds a pipeline under
 [`ErrMonadic`](index.md#the-monad-markers), so most code never names it. It is usable directly as a
-handler provider on a **context**, the type a capability runs against, when a pipeline is built step by
+handler provider on a **context**, the type a method runs on, when a pipeline is built step by
 step through [`PipeHandlers`](../handler/pipe_handlers.md). Like every CGP provider, it carries no
 runtime value; the two parameters ride in `PhantomData`.
 

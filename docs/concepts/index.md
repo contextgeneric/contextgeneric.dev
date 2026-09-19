@@ -46,7 +46,8 @@ These pages explain the problem CGP addresses and the mechanism it uses:
 A provider can state requirements that its callers do not need to carry. These pages explain the
 forms those requirements take:
 
-- [Impl-side dependencies](./impl-side-dependencies.md): Capabilities required by an implementation
+- [Impl-side dependencies](./impl-side-dependencies.md): Traits, values, and types required by an
+  implementation
   without appearing in its public interface.
 - [Implicit arguments](./implicit-arguments.md): Values read from context fields.
 - [Abstract types](./abstract-types.md): Types selected by a context and shared by generic code.

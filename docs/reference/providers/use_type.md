@@ -23,7 +23,7 @@ different jobs.
 ## Overview
 
 `UseType<Type>` removes the need to hand-write a provider every time a **context** wants to fix an
-abstract type to a concrete one. The context is the type a capability runs against, and it decides what
+abstract type to a concrete one. The context is the type that implements the trait, and it decides what
 each abstract type resolves to. An abstract type in CGP is a trait with a single associated type,
 defined with [`#[cgp_type]`](../macros/cgp_type.md), such as `trait HasScalarType { type Scalar; }`.
 Generic code refers to the type without committing to any particular one, and a concrete context

@@ -25,8 +25,8 @@ this provider is legible.
 
 `RedirectLookup<Components, Path>` separates *which key* a component is looked up under from *which
 table* answers it. The ordinary provider blanket impl looks a component up in the **context**'s own
-delegation table, keyed by the component marker, where the context is the type the capability runs
-against. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed by a
+delegation table, keyed by the component marker, where the context is the type the method runs
+on. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed by a
 type-level `Path`, then delegates to whatever provider that entry holds. This indirection lets
 one component's resolution be redirected to a different key in a different table, which is the basis for
 organizing wiring into namespaces.

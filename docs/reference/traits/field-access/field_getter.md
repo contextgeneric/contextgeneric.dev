@@ -107,7 +107,7 @@ advanced case. Everything else is better served higher up.
 
 - **Use an [`#[implicit]`](../../attributes/implicit.md) argument** for a field an implementation reads from
   its own context. It generates a [`HasField`](./has_field.md) bound and involves no provider at all.
-- **Use [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md)** when the read must be a named capability,
+- **Use [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md)** when the read must be a named trait,
   keyed by the method name. It generates a blanket impl over `HasField` and needs no wiring.
 - **Use [`#[cgp_getter]`](../../macros/cgp_getter.md)** when the source field must be chosen per context.
   That is what makes the getter a full component with a `FieldGetter` provider trait, and it costs a

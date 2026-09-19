@@ -9,8 +9,8 @@ Define a reusable, inheritable wiring table that many contexts can join.
 
 ## Overview
 
-With [`delegate_components!`](./delegate_components.md) alone, every **context** (the type the capability
-runs against, which supplies the values it needs as its fields) spells out its own wiring entry by entry.
+With [`delegate_components!`](./delegate_components.md) alone, every **context** (the type the method
+runs on, which supplies the values it needs as its fields) spells out its own wiring entry by entry.
 Two contexts that should share the same providers repeat the same lines, and a table grows with the number
 of components until the wiring is the largest thing in the file.
 

@@ -122,7 +122,7 @@ pub mod the_same_providers_under_a_different_error_type {
     }
 }
 
-/// ## An application's own error capability
+/// ## An application's own error component
 ///
 /// Nothing about the pattern is confined to CGP's built-in components. A service that wants every
 /// failure to carry a status code declares its own, and wires it the same way.

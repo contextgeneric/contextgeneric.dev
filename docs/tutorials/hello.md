@@ -113,7 +113,7 @@ Notice that `greet` works identically for both contexts, even though `PersonWith
 
 ## Behind the Scenes
 
-The hello world example demonstrates how CGP unlocks new capabilities for writing context-generic constructs in Rust. You might wonder how the underlying machinery works, and whether CGP employs some magic that requires unsafe code or runtime overhead. This section offers a brief look at the mechanics to dispel those concerns.
+The hello world example demonstrates how CGP lets you write context-generic constructs in Rust. You might wonder how the underlying machinery works, and whether CGP employs some magic that requires unsafe code or runtime overhead. This section offers a brief look at the mechanics to dispel those concerns.
 
 A full explanation of how CGP works is beyond this tutorial, but you can think of the `greet` function as being roughly equivalent to the following plain Rust definition:
 
@@ -158,7 +158,7 @@ There is more advanced machinery involved in the actual desugared CGP code, but 
 
 The plain Rust expansion above illustrates a few key properties of CGP. Firstly, CGP makes heavy use of the existing machinery provided by Rust's trait system to implement context-generic abstractions. It is also worth understanding that CGP macros like `#[cgp_fn]` and `#[derive(HasField)]` act primarily as **syntactic sugar** that performs a straightforward desugaring of CGP code into plain Rust constructs, just as shown above.
 
-This means there is **no hidden logic at either compile time or runtime** used by CGP to resolve dependencies like `name`. The main contribution of CGP is that it introduces new language syntax and leverages Rust's trait system to enable new capabilities. You do not need to understand any new machinery beyond the trait system to understand how CGP works.
+This means there is **no hidden logic at either compile time or runtime** used by CGP to resolve dependencies like `name`. The main contribution of CGP is that it introduces new language syntax and leverages Rust's trait system to make that syntax work. You do not need to understand any new machinery beyond the trait system to understand how CGP works.
 
 Furthermore, implicit arguments like `#[implicit] name: &str` are automatically desugared by CGP to use getter traits similar to `HasName`. Contexts like `Person` implement those getter traits by simply returning a *reference* to the field value. This means that implicit argument access is **zero cost** and is as cheap as direct field access from a concrete context.
 

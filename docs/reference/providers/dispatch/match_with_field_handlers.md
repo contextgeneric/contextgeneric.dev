@@ -13,7 +13,7 @@ variant tag still attached.
 `MatchWithFieldHandlers<Provider>` synthesizes the per-variant handler list from the input type's own
 field list, like [`MatchWithValueHandlers`](match_with_value_handlers.md), but hands each matched
 payload to `Provider` as a `Field<Tag, Value>` with the variant name still attached rather than as a
-bare value. It runs on a **context**, the type a capability runs against. Reach for it when the handler
+bare value. It runs on a **context**, the type a method runs on. Reach for it when the handler
 needs to know which variant it received. Like every CGP provider, it carries no runtime value.
 
 The two matchers differ by exactly one [`HandleFieldValue`](handle_field_value.md) wrapper:

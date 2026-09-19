@@ -23,7 +23,7 @@ page explains what that wiring emits.
 
 `PromoteComputer<Provider>` starts from a provider that implements `Computer`, the by-value synchronous
 infallible base, and fills in every other member of the handler family by promotion, on a **context**,
-the type a capability runs against. It is a delegation table that routes each remaining handler
+the type a method runs on. It is a delegation table that routes each remaining handler
 component to the right single-step promotion. Like every CGP provider, it carries no runtime value.
 
 ## Usage

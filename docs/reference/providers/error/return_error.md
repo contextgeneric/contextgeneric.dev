@@ -10,7 +10,7 @@ Raise a source error that already is the context's abstract error, so raising is
 ## Overview
 
 `ReturnError` is the `ErrorRaiser` provider for the case where the source error is exactly the abstract
-error the **context** chose, where the context is the type a capability runs against. Raising then has
+error the **context** chose, where the context is the type a method runs on. Raising then has
 nothing to convert: it returns its argument untouched. A context uses it when generic code
 raises a value that is already of the context's own error type. Like every CGP provider, `ReturnError`
 carries no runtime value.

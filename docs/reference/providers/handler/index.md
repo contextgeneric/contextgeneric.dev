@@ -15,7 +15,7 @@ code is rarely written against all of them at once. A provider author writes a p
 [`Computer`](../../components/handler/computer.md), a fallible [`TryComputer`](../../components/handler/try_computer.md),
 or an async [`Handler`](../../components/handler/handler.md), depending on the computation. The combinators let
 those single-shape providers be wired where a different shape is expected, and let several providers be
-glued into a larger one, on a **context**, the type a capability runs against. Like every CGP provider,
+glued into a larger one, on a **context**, the type a method runs on. Like every CGP provider,
 each combinator is zero-sized: its type parameters are inner providers carried in `PhantomData`.
 
 ## The handler family

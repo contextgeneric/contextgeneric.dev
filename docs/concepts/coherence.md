@@ -178,7 +178,7 @@ explains when to use it and how it differs from the value-type wiring shown here
 ## What it costs
 
 A component introduces more declarations than a plain trait: a provider trait, a component marker,
-and wiring for the types that use it. For a capability with one implementation, a plain trait or
+and wiring for the types that use it. For a trait with one implementation, a plain trait or
 [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) may provide the required reuse without wiring.
 
 Provider selection belongs to CGP's component interface. It does not give an existing trait such as
@@ -189,7 +189,7 @@ Explicit wiring adds configuration to read and maintain. In the tables above, ea
 entry naming its provider. Shared bundles and namespaces can reduce repetition, but they introduce
 further places to inspect when tracing a choice.
 
-Wiring checks are deferred until the capability is checked or used. A table can name a provider
+Wiring checks are deferred until the trait is checked or used. A table can name a provider
 whose requirements the context does not satisfy, and a later call can produce a verbose error.
 [`check_components!`](/docs/reference/macros/check_components) verifies requirements beside the
 wiring. [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) makes recognized causes

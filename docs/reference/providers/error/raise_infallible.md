@@ -11,7 +11,7 @@ Absorb `core::convert::Infallible`, the error type that can never be constructed
 
 `RaiseInfallible` is the `ErrorRaiser` provider for `core::convert::Infallible`, an error type with no
 values. It lets generic code that is parameterized over a fallible operation be wired uniformly on a
-**context**, the type a capability runs against, even when the operation chosen for that context cannot
+**context**, the type a method runs on, even when the operation chosen for that context cannot
 fail. Because an `Infallible` value cannot exist, the raising method is never actually called at
 runtime. Like every CGP provider, `RaiseInfallible` carries no runtime value.
 

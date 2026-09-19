@@ -12,7 +12,7 @@ generate.
 
 CGP's wiring is **lazy**. A `delegate_components!` entry is accepted without checking that the provider
 it names can actually do the job, so a context with a missing field or an unmet dependency compiles
-fine and fails somewhere else entirely — usually at the first call to the capability, in a message
+fine and fails somewhere else entirely — usually at the first call to the trait's method, in a message
 about types you never wrote.
 
 Here is the whole of a mistake: a `Rectangle` that lost its `height` field while a provider still reads

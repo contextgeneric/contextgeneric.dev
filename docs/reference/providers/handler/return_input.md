@@ -9,7 +9,7 @@ The identity handler: return the input unchanged as the output.
 
 ## Overview
 
-`ReturnInput` ignores the **context**, the type a capability runs against, and the `Code` tag, and
+`ReturnInput` ignores the **context**, the type a method runs on, and the `Code` tag, and
 returns its input as its output. It is the neutral element of handler composition: putting it before or
 after any other handler leaves that handler's behavior unchanged. It fills a handler slot where no
 transformation is wanted, serves as the base case of a conditionally-built pipeline, and stands in as a

@@ -14,7 +14,7 @@ Applying one per-field transform across a whole partial record.
 **You are not expected to call `transform_map_fields` directly.** It is the
 recursion the optional-field layer is built from, and
 [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) and [`ToOptional`](../optional/to_optional.md) are what
-you call. This page explains the walk, which makes those two behave so symmetrically. The one case for bounding on it is writing a capability of your own that re-marks a whole record.
+you call. This page explains the walk, which makes those two behave so symmetrically. The one case for bounding on it is writing an operation of your own that re-marks a whole record.
 
 :::
 
@@ -92,7 +92,7 @@ Applying a transform of your own follows the same shape, with your marker in pla
 
 ## When to use it
 
-**Bound on it when writing a capability that re-marks a whole record.** Extending the optional-field
+**Bound on it when writing an operation that re-marks a whole record.** Extending the optional-field
 layer requires exactly that.
 
 - **Use [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) or
@@ -154,7 +154,7 @@ with [`HasBuilder`](../builder/has_builder.md) or [`IntoBuilder`](../builder/int
 - [`PartialData`](../builder/partial_data.md): what a partial value is, and the bound this requires.
 - [`FinalizeBuild`](../builder/finalize_build.md): what an all-`IsPresent` result is accepted by.
 - [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) and [`ToOptional`](../optional/to_optional.md): the
-  two capabilities built directly on this.
+  two operations built directly on this.
 - [`MapFields`](./map_fields.md): the type-level counterpart.
 - [`HasFields`](../shape/has_fields.md): the shape the walk follows.
 

@@ -10,8 +10,8 @@ Wrap an error by throwing the detail away and returning the error unchanged.
 ## Overview
 
 `DiscardDetail` is the `ErrorWrapper` provider that ignores whatever detail is attached and returns the
-error as it was. It satisfies the `CanWrapError` capability of a **context**, the type a capability runs
-against, without enriching the error. This is useful when a context's error type cannot carry extra
+error as it was. It satisfies the `CanWrapError` trait of a **context**, the type a method runs
+on, without enriching the error. This is useful when a context's error type cannot carry extra
 context, or when the wrapping detail is deliberately not kept. It is the wrapping counterpart of a no-op:
 the error propagates unchanged. Like every CGP provider, `DiscardDetail` carries no runtime value.
 
@@ -37,7 +37,7 @@ Wired this way, any call to `Context::wrap_error(error, detail)` on `App` return
 ## When to use it
 
 **Reach for `DiscardDetail` when a context's error type cannot hold extra detail, or when a call site
-attaches detail that this context has no use for.** It keeps the `CanWrapError` capability satisfiable
+attaches detail that this context has no use for.** It keeps the `CanWrapError` trait satisfiable
 without storing anything.
 
 Reach for [`DebugError`](debug_error.md) or [`DisplayError`](display_error.md) when the detail should be

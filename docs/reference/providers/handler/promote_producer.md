@@ -22,7 +22,7 @@ family explicitly. This page explains what that wiring emits.
 
 `PromoteProducer<Provider>` starts from a [`Producer`](../../components/handler/producer.md), a provider that
 takes no input, and fills in every input-taking member of the handler family on a **context**, the
-type a capability runs against. The single produced value flows out of every handler shape regardless
+type a method runs on. The single produced value flows out of every handler shape regardless
 of the input, which the promotion discards. Like every CGP provider, it carries no runtime value.
 
 ## Usage

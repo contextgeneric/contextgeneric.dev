@@ -122,7 +122,7 @@ Read the bounds together: the first says every field can be re-marked to `IsPres
 
 Its mirror image is [`ToOptional`](./to_optional.md), which runs the same
 [`TransformMapFields`](../type-level/transform_map_fields.md) walk with
-[`TransformOptional`](./transform_optional.md) toward `IsOptional`. **Both capabilities are the same
+[`TransformOptional`](./transform_optional.md) toward `IsOptional`. **Both operations are the same
 recursion with a different marker**, which is why the defaulted and optional workflows behave so
 symmetrically.
 

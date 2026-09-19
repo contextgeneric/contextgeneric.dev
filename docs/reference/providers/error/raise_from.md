@@ -9,8 +9,8 @@ Raise a source error by converting it into the context's error type through the 
 
 ## Overview
 
-`RaiseFrom` is the `ErrorRaiser` provider for the common case: the **context**, the type a capability
-runs against, already knows how to build its abstract `Error` from the source error through `From`.
+`RaiseFrom` is the `ErrorRaiser` provider for the common case: the **context**, the type a method
+runs on, already knows how to build its abstract `Error` from the source error through `From`.
 Wiring it means "convert every source error the abstract error has a `From` impl for". It is the default
 choice whenever that `From` impl exists, which covers most error raising in practice.
 

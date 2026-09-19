@@ -21,8 +21,8 @@ wiring error naming this trait is legible.
 
 ## Overview
 
-Wiring a **context** (the type the capability runs against, which supplies the values it needs as its
-fields) means recording which implementation it uses for each capability. `DelegateComponent` is the trait
+Wiring a **context** (the type the method runs on, which supplies the values it needs as its
+fields) means recording which implementation it uses for each trait. `DelegateComponent` is the trait
 that record is made of. One impl is one entry:
 
 ```rust
@@ -195,7 +195,7 @@ There are narrow reasons to name the trait yourself.
   and knowing the trait is how you read it.
 
 And the alternative to reach for instead: **implement the consumer trait directly on the context** when a
-capability has exactly one implementation for it. A CGP consumer trait is an ordinary trait, so
+trait has exactly one implementation for it. A CGP consumer trait is an ordinary trait, so
 `impl CanGreet for App { … }` is legal and needs no table entry at all. Wiring earns its keep when the
 implementation is one of several, or is shared, or should compose with a wrapper.
 

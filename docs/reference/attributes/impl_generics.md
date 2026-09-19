@@ -15,9 +15,9 @@ through a field and callers never name it.
 `#[cgp_fn]` puts every generic parameter you write on the function onto both the trait and its
 implementation. That is right for a type the caller chooses. But a body often needs a type that nobody
 chooses: a database handle, a name that only has to be printable, a scalar read from a field. The
-**context**, the type the capability runs against and the owner of the fields the body reads, already
+**context**, the type the method runs on and the owner of the fields the body reads, already
 fixes that type through the field. A parameter on the trait would then make every caller, and every
-capability built on this one, declare a parameter and repeat its bounds for a type they never touch.
+trait built on this one, declare a parameter and repeat its bounds for a type they never touch.
 
 With `#[impl_generics]`, the trait stays free of parameters, and the compiler infers the parameter from
 the field the body reads:
@@ -36,7 +36,7 @@ wiring or any declaration beyond the field itself.
 
 The cost is that the type is hidden rather than named. It exists only where a value of it flows
 through an [`#[implicit]`](./implicit.md) argument, so nothing else can refer to it: not this
-capability's own signature, not another capability, and not a second provider. When the type must be
+trait's own signature, not another trait, and not a second provider. When the type must be
 named, promote it to an abstract type with [`#[cgp_type]`](../macros/cgp_type.md) and import it with
 [`#[use_type]`](./use_type.md). [When to use it](#when-to-use-it) says where that boundary lies.
 
@@ -75,7 +75,7 @@ have an implementation of its own to carry one.
 
 ## Examples
 
-A capability whose one type dependency each context fixes through a field:
+A trait whose one type dependency each context fixes through a field:
 
 ```rust
 use cgp::prelude::*;
@@ -107,7 +107,7 @@ pub fn greet_both(person: &Person, robot: &Robot) {
 wiring. For `Person` the compiler resolves `Name` to `String`, and for `Robot` to `u32`. Neither type
 appears anywhere except in the field.
 
-A capability built on `greet` never learns that `Name` exists:
+A trait built on `greet` never learns that `Name` exists:
 
 ```rust
 #[cgp_fn]
@@ -127,24 +127,24 @@ the shortest form, it does not need wiring, and it reads as "this works with any
 compatible type". You must move to an abstract type once the type has to be *named* somewhere the
 inferred form cannot reach.
 
-- **The type appears in the capability's signature.** An impl-only parameter is not in scope on the
+- **The type appears in the trait's signature.** An impl-only parameter is not in scope on the
   trait, so a return type or an explicit parameter cannot mention it. This condition applies as soon as
-  a capability returns a value of the type to its caller.
-- **Two capabilities must agree on the type.** A transaction type only means something relative to
-  its database, so the capability that opens one and the capability that commits it must mean the
+  a method returns a value of the type to its caller.
+- **Two traits must agree on the type.** A transaction type only means something relative to
+  its database, so the trait that opens one and the trait that commits it must mean the
   same type. Each implementation infers its own parameter, so inferred parameters cannot state the
   agreement.
 
 In both cases declare the type with [`#[cgp_type]`](../macros/cgp_type.md), import it with
 [`#[use_type]`](./use_type.md), and let the context supply it by wiring. Do not answer either
 condition with a generic parameter on the function. Such a parameter lands on the trait, so every
-caller and every intermediate capability must declare it and repeat its bounds whether they touch it
+caller and every intermediate trait must declare it and repeat its bounds whether they touch it
 or not. It also puts the decision in the wrong place: `<Db>` on a trait says the caller chooses the
 database type, though the application determines it.
 
 Some neighbours cover what this attribute is not for.
 
-- **A bound on `Self`** is a capability dependency; write it with [`#[uses]`](./uses.md).
+- **A bound on `Self`** is a trait dependency; write it with [`#[uses]`](./uses.md).
 - **A bound on one of the trait's own parameters** that callers must see is
   [`#[extend_where]`](./extend_where.md)'s job, on the trait side.
 - **A type the caller should choose per call site** is a plain generic parameter on the function.
@@ -220,7 +220,7 @@ error[E0207]: the type parameter `Name` is not constrained by the impl trait, se
 Either read a field whose type mentions the parameter, or, if the caller should choose the type, make
 it a generic parameter on the function instead.
 
-**A parameter cannot appear in the capability's signature.** Only the implementation declares it, so a
+**A parameter cannot appear in the trait's signature.** Only the implementation declares it, so a
 return type or an explicit parameter that names it refers to nothing on the trait:
 
 ```rust
@@ -297,7 +297,7 @@ parameter in the block's own generic list, which is already impl-only.
 - [`#[implicit]`](./implicit.md) — the argument whose field type pins the parameter.
 - [`#[cgp_fn]`](../macros/cgp_fn.md) — the only host, and where the generics split is explained.
 - [`#[extend_where]`](./extend_where.md) — the trait-side sibling: a predicate callers must see.
-- [`#[uses]`](./uses.md) — a capability bound on `Self`, the other kind of private requirement.
+- [`#[uses]`](./uses.md) — a trait bound on `Self`, the other kind of private requirement.
 - [`#[use_type]`](./use_type.md) and [`#[cgp_type]`](../macros/cgp_type.md) — the abstract-type
   form to move to when the type must be named.
 - [`HasField`](../traits/field-access/has_field.md) — the bound that carries the inference.

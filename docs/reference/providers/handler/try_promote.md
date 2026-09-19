@@ -22,7 +22,7 @@ wiring the handler family one slot at a time. This page explains what that wirin
 
 `TryPromote<Provider>` unifies the two ways of expressing fallibility: a handler that *returns* a
 `Result`, and a genuinely fallible handler trait. It converts between them in both directions on a
-**context**, the type a capability runs against. Every impl requires the context to have an error type.
+**context**, the type a method runs on. Every impl requires the context to have an error type.
 Like every CGP provider, it carries no runtime value; the inner provider rides in `PhantomData`.
 
 ## Usage

@@ -43,7 +43,7 @@ pub trait CanCalculateArea<Shape> {
 
 A **context** then points the component at [`UseDelegate`](../providers/use_delegate.md) over a table
 naming one implementation per shape, and the generated dispatcher does the lookup. (The context is the
-type the capability runs against, and it also owns the wiring.)
+type the method runs on, and it also owns the wiring.)
 
 `open` replaced this because the indirection turned out to be unnecessary. Every
 [`#[cgp_component]`](../macros/cgp_component.md) already generates a

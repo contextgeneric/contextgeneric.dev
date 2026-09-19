@@ -11,7 +11,7 @@ branch.
 ## Overview
 
 `PipeMonadic<M, Providers>` composes a handler list `Providers` under a monad `M` into one
-short-circuiting handler, on a **context**, the type a capability runs against. Each step runs only on
+short-circuiting handler, on a **context**, the type a method runs on. Each step runs only on
 the previous step's continue branch, and the monad decides which branch that is. The result is a
 provider for `Computer`, `AsyncComputer`, `TryComputer`, and `Handler`, so it wires like any other
 handler. Like every CGP provider, it carries no runtime value; `M` and the list ride in `PhantomData`.

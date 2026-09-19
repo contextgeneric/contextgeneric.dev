@@ -9,7 +9,7 @@ Reading a field by a type-level name, from a context you cannot name.
 
 ## Overview
 
-An implementation written against a **context**, the type the capability runs against, which supplies
+An implementation written against a **context**, the type the method runs on, which supplies
 the values it needs as its fields, is generic over that context and cannot name its concrete type. So it
 cannot write `self.name`. Yet reading a value out of the context is the commonest thing such an
 implementation does.
@@ -98,7 +98,7 @@ delegate_components! {
 ```
 
 `Person` derives the access, so it satisfies exactly the bound `GreetHello` requires and the wiring
-compiles. **Value context, self-targeted**: the wired type is the data the capability runs against.
+compiles. **Value context, self-targeted**: the wired type is the data the method runs on.
 
 **Written idiomatically, none of that bound is visible.** The same read is an
 [`#[implicit]`](../../attributes/implicit.md) argument:
@@ -132,7 +132,7 @@ ordering is settled and worth following.
 - **Use an [`#[implicit]`](../../attributes/implicit.md) argument by default.** It reads a field of the
   implementation's own context as a plain parameter, generating this bound for you. It covers the common
   case, including a field several implementations each read.
-- **Use [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md)** when the read must be a *named* capability,
+- **Use [`#[cgp_auto_getter]`](../../macros/cgp_auto_getter.md)** when the read must be a *named* trait,
   when the field lives on a type other than the context, or when the getter should carry a type inferred
   from the field. An implicit argument cannot reach those cases.
 - **Use [`#[cgp_getter]`](../../macros/cgp_getter.md) with [`UseField`](../../providers/use_field.md)** only

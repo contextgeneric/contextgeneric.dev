@@ -24,7 +24,7 @@ handler family one slot at a time. This page explains what that wiring emits.
 
 `Promote<Provider>` re-exposes one inner provider under a more capable member of the handler family,
 treating a less capable provider as a more capable one without introducing error or async behavior
-itself. The **context**, the type a capability runs against, sees the promoted shape while the inner
+itself. The **context**, the type a method runs on, sees the promoted shape while the inner
 provider does the same work. Like every CGP provider, it carries no runtime value; the inner provider
 rides in `PhantomData`.
 
@@ -67,7 +67,7 @@ pub struct Promote<Provider>(pub PhantomData<Provider>);
 - As a `TryComputer`, it requires `Provider: Computer` and wraps the infallible result in `Ok`.
 - As a `Handler`, it requires `Provider: AsyncComputer` and wraps the awaited result in `Ok`.
 
-Each promotion adds the missing capability, either discarding an input or introducing an always-`Ok`
+Each promotion adds the missing behavior, either discarding an input or introducing an always-`Ok`
 result, without changing what the inner provider computes.
 
 ## Related constructs

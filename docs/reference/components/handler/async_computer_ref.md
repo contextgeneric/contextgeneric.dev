@@ -14,7 +14,7 @@ borrows its input.
 [`AsyncComputer`](./async_computer.md) and takes its input by reference like
 [`ComputerRef`](./computer_ref.md). A computation that must await and only *reads* its argument, while
 still never failing, fits it: its method is `async`, receives `&Input`, and returns the `Output` directly
-with no failure path. It runs against a **context**, the type a capability runs against that supplies the
+with no failure path. It runs against a **context**, the type a method runs on that supplies the
 values an implementation needs as its own fields.
 
 It is the async by-reference corner of the infallible computers. Like the other computers it never names
@@ -54,7 +54,7 @@ The method is `async` and borrows the input:
 async fn compute_async_ref(&self, _code: PhantomData<Code>, input: &Input) -> Self::Output;
 ```
 
-A context gains the capability by wiring `AsyncComputerRefComponent` to a provider, and it dispatches on
+A context gains the operation by wiring `AsyncComputerRefComponent` to a provider, and it dispatches on
 both the `Code` tag and the `Input` type. It is the least commonly wired member of the family, reached
 when a computation is at once async, infallible, and read-only over its input. A simpler variant is
 usually promoted into it through the [handler combinators](../../providers/handler/index.md).

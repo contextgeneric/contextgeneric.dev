@@ -155,7 +155,7 @@ layer's payoff comes from every field landing in one state, usually `IsPresent`.
   half of.
 - [`TransformMapDefault`](../optional/transform_map_default.md) and [`TransformOptional`](../optional/transform_optional.md):
   the two markers CGP ships, and the models to copy.
-- [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md): the capability built from the first of
+- [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md): the operation built from the first of
   them.
 - [`UpdateField`](../builder/update_field.md): the primitive the walk uses to take a field out and write it back.
 - [`FinalizeBuild`](../builder/finalize_build.md): what an all-`IsPresent` result is accepted by.

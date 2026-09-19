@@ -12,7 +12,7 @@ The runner variant whose returned future is `Send`, for work that must cross a t
 `CanSendRun<Code>` is [`CanRun`](./runner.md) with one added guarantee: the future its method returns is
 [`Send`](https://doc.rust-lang.org/std/marker/trait.Send.html), so it can be handed to a spawner such as
 `tokio::spawn`. It exists to solve a specific Rust limitation. A generic `async fn` over abstract
-**context** types (the context being the type a capability runs against that supplies the values an
+**context** types (the context being the type a method runs on that supplies the values an
 implementation needs as its own fields) cannot promise its future is `Send` without annotating `Send`
 bounds on every abstract type in scope, and those bounds pollute every interface.
 `CanSendRun<Code>` sidesteps that by returning an explicit
@@ -59,7 +59,7 @@ return, an explicit `Send` future rather than a plain `async fn`:
 fn send_run(&self, _code: PhantomData<Code>) -> impl Future<Output = Result<(), Error>> + Send;
 ```
 
-A context gains the capability by wiring `SendRunnerComponent`, or, in the common case, by supplying a
+A context gains the operation by wiring `SendRunnerComponent`, or, in the common case, by supplying a
 proxy impl on the concrete context that forwards to its own `run`. The proxy discharges the
 `Send` bound:
 

@@ -13,7 +13,7 @@ next.
 `PipeHandlers<Providers>` generalizes [`ComposeHandlers`](compose_handlers.md) from two handlers to a
 list of them. It takes a [`Product!`](../../macros/product.md) list of providers and folds the whole
 pipeline into one nested `ComposeHandlers`, so the input flows through each stage in turn, on one
-**context**, the type a capability runs against. It is the combinator to reach for when wiring a
+**context**, the type a method runs on. It is the combinator to reach for when wiring a
 multi-stage transformation: list the stages in order and let `PipeHandlers` build the composition. Like
 every CGP provider, it carries no runtime value; the list rides in `PhantomData`.
 

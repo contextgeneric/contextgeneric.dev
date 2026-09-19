@@ -10,14 +10,14 @@ Assert at compile time that a context can actually use each component it wires.
 ## Overview
 
 **CGP's wiring is lazy, and this macro is the answer to that.** The **context** is the type the
-capability runs against, and it supplies the values it needs as its own fields. When
+method runs on, and it supplies the values it needs as its own fields. When
 [`delegate_components!`](./delegate_components.md) records that a context delegates a component to some
 provider, nothing checks that the provider can do the job. The entry is stored as a type-level fact and
 believed. Whether the chosen provider's own requirements hold *for this context* is a separate question,
 and it is not asked until something tries to use the component.
 
 So a context can look completely wired, compile, and still be broken. Every entry is accepted, the struct
-compiles, the module compiles. Then the first call to the capability fails, often in a file far from
+compiles, the module compiles. Then the first call to the trait's method fails, often in a file far from
 the mistake.
 
 `check_components!` forces the question at a line you choose:
@@ -31,7 +31,7 @@ check_components! {
 ```
 
 That block has no runtime existence. It compiles if `Person` really can use the component and fails if it
-cannot, at the wiring site rather than wherever the capability first gets called.
+cannot, at the wiring site rather than wherever the trait first gets called.
 
 The other thing it gives you is a *readable* failure, and that is the part worth understanding. Asking the
 obvious question, "does `Person` implement `CanGreet`?", makes the compiler report only the last link in
@@ -368,7 +368,8 @@ error[E0428]: the name `__CheckPerson` is defined multiple times
 
 Use `#[check_trait(...)]` on one of them.
 
-**A passing check is not a claim that the capability is correct**, only that it resolves. It proves the
+**A passing check is not a claim that the implementation is correct**, only that it resolves. It
+proves the
 provider was found and its dependencies are satisfiable, not that the provider does what you meant.
 
 ## Related constructs

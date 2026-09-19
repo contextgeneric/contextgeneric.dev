@@ -13,7 +13,7 @@ the builder at once.
 `BuildAndMerge<Provider>` is the bulk counterpart of [`BuildAndSetField`](build_and_set_field.md).
 Instead of setting one field, it runs `Provider` over a reference to the builder to produce another
 record, then copies every shared field from that result into the builder in one step. It runs on a
-**context**, the type a capability runs against, and is the field-list analogue of setting a single
+**context**, the type a method runs on, and is the field-list analogue of setting a single
 field. Like every CGP provider, it carries no runtime value.
 
 ## Usage

@@ -29,7 +29,7 @@ trait, its per-type impls, and a derive on the enum.
 
 **Its value is narrower than it looks, and worth naming precisely.** It fits when the per-variant behaviour
 is *exactly* "call the same trait method on the payload". The moment a variant needs different handling, or
-the dispatch should be chosen by a **context** (the type the capability runs against) rather than fixed on
+the dispatch should be chosen by a **context** (the type the method runs on) rather than fixed on
 the enum, use the combinators directly. This is the convenient front end to
 [dispatching](../providers/dispatch/index.md), not a replacement for it.
 

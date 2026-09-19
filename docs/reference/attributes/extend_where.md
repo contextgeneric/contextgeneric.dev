@@ -12,13 +12,13 @@ Add `where` predicates to a generated trait's own definition, not just to its im
 `#[extend_where]` moves a `where` predicate onto the trait that a [`#[cgp_fn]`](../macros/cgp_fn.md)
 generates, so the predicate becomes a condition of naming the trait at all. By default, `#[cgp_fn]`
 treats the `where` clause you write on the function as an implementation detail: the bounds land on the
-generated implementation and never appear on the generated trait. That default keeps a capability's
+generated implementation and never appear on the generated trait. That default keeps a trait's
 requirements private to its implementation, and it is almost always right.
 
 The cost of that default is that an unsatisfiable requirement becomes invisible. A bound on the
 implementation only decides which **contexts** the implementation covers. (A context is the type the
-capability runs against, and it supplies the values the capability needs as its fields.) So the compiler
-accepts a caller that names the capability for a type that can never satisfy it. The bound stays
+method runs on, and it supplies the values the method needs as its fields.) So the compiler
+accepts a caller that names the trait for a type that can never satisfy it. The bound stays
 unproven, and the error appears later, at a different place. `#[extend_where]` puts the predicate where
 the compiler checks it as soon as the trait is named:
 
@@ -57,7 +57,7 @@ an ordinary `where` clause there.
 
 ## Examples
 
-A generic capability whose parameter carries a bound that belongs to the contract:
+A generic trait whose parameter carries a bound that belongs to the contract:
 
 ```rust
 use cgp::prelude::*;
@@ -78,7 +78,7 @@ checks it wherever `Scale<Scalar>` is named. `Scalar: Mul<Output = Scalar>` stay
 because multiplication is a detail of how *this* body computes a scale and no use site needs to know it.
 
 The promotion's effect is visible at the boundary. The compiler rejects a caller that names the
-capability for a type it cannot satisfy, at the place the bound is written, and names the trait that
+trait for a type it cannot satisfy, at the place the bound is written, and names the trait that
 demanded it:
 
 ```rust
@@ -110,13 +110,13 @@ where
 
 ## When to use it
 
-**Reach for `#[extend_where]` when a predicate is part of what the capability means**, and you want the
+**Reach for `#[extend_where]` when a predicate is part of what the trait means**, and you want the
 compiler to enforce it where the trait is named, rather than letting it narrow which contexts the
 implementation covers without a report. That is a real but uncommon need, and the default of leaving
 bounds on the implementation is right for almost everything.
 
 The useful test is who the bound is *about*. A bound describing how the body computes its answer belongs on
-the implementation. A bound describing what the capability requires of its own type parameters, something
+the implementation. A bound describing what the trait requires of its own type parameters, something
 that would be part of the signature if you were writing the trait by hand, belongs on the trait.
 
 Other constructs carry the requirements that belong elsewhere.
@@ -125,11 +125,11 @@ Other constructs carry the requirements that belong elsewhere.
   but a supertrait reads as what it is, and unlike a predicate Rust *does* hand it to callers by
   elaboration.
 - **A private requirement**, the overwhelmingly common case, belongs in the function's own `where` clause,
-  or in [`#[uses]`](uses.md) when it is a capability.
+  or in [`#[uses]`](uses.md) when it is a trait on the context.
 - **An abstract type pinned to a concrete one** is [`#[use_type]`](use_type.md)'s equality form, which adds
   the bound and lets the signature name the type as a bare word.
 
-Do not use it to spare callers a bound, because it has the opposite effect. If holding the capability
+Do not use it to spare callers a bound, because it has the opposite effect. If holding the trait
 should imply something, use a supertrait, which requires the bound to be on `Self`.
 
 ## Under the hood
@@ -234,7 +234,7 @@ has the effect this attribute exists to produce elsewhere.
 ## Related constructs
 
 - [`#[extend]`](extend.md) — the supertrait sibling, and the one callers do receive.
-- [`#[uses]`](uses.md) — a private capability bound on the implementation.
+- [`#[uses]`](uses.md) — a private trait bound on the implementation.
 - [`#[use_type]`](use_type.md) — for pinning an abstract type, which this could express but should not.
 - [`#[cgp_fn]`](../macros/cgp_fn.md) — the only host, and the reason the attribute exists.
 - [`#[implicit]`](implicit.md) — contributes the bounds that always sort last.

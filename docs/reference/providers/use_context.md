@@ -10,9 +10,9 @@ Satisfy a provider trait by routing back through the context's own consumer-trai
 ## Overview
 
 `UseContext` turns a context's existing consumer-trait implementation into a provider that other
-providers can call. The **context** is the type a capability runs against, and it normally *uses* a
+providers can call. The **context** is the type a method runs on, and it normally *uses* a
 provider through its consumer trait. Sometimes the implementation another provider wants for a
-capability is exactly the one the context already supplies that way. `UseContext` is that bridge: it is
+trait is exactly the one the context already supplies that way. `UseContext` is that bridge: it is
 a provider whose method bodies call the consumer method on the context, so handing a component
 `UseContext` means "use whatever this context already does for this trait."
 
@@ -26,7 +26,7 @@ consumer trait to a provider; the other forwards a provider trait back to the co
 `UseContext` matters most with [higher-order providers](/docs/concepts/higher-order-providers), which
 take another provider as a type parameter. Such a provider can default its inner-provider parameter to
 `UseContext`, so when no inner provider is named, the inner step falls back to whatever the context
-already wires for it. That inner step may be a different capability, or the same capability at a
+already wires for it. That inner step may be a different trait, or the same trait at a
 different type, as the example below shows by encoding a `Vec<T>` through the context's own encoder for
 `T`. Like every CGP provider, `UseContext` carries no runtime value: it is a unit marker whose `self`
 position is never read.
@@ -46,7 +46,7 @@ implementation, which is how the [dispatch combinators](dispatch/index.md) defau
 per-variant provider.
 
 `UseContext` stands in for a provider trait only where that trait resolves to a *different*
-implementation than the one being wired: a wrapper over another capability, or a per-type dispatch entry
+implementation than the one being wired: a wrapper over another trait, or a per-type dispatch entry
 for a different type.
 
 ## Examples
@@ -115,12 +115,12 @@ back to, and the inner provider must always be named.
 
 **Reach for `UseContext` as the default inner provider of a higher-order provider**, so the wrapper
 reuses the context's own wiring for the inner step when no inner provider is named. The inner step may
-be a different capability, or the same capability at a different type, as `EncodeVec` delegates
+be a different trait, or the same trait at a different type, as `EncodeVec` delegates
 `Encoder<Vec<T>>` to the context's `Encoder<T>`.
 
 The one shape `UseContext` cannot serve is a component whose only implementation on the context is that
 same delegation, which loops; [Common Mistakes](#common-mistakes) explains it. When you want a wrapper
-over the *same* capability and the *same* type, name the inner provider explicitly rather than
+over the *same* trait and the *same* type, name the inner provider explicitly rather than
 defaulting to `UseContext`.
 
 ## Under the hood
@@ -163,7 +163,7 @@ creates a cycle.** If `App` wired `@EncoderComponent.u32: UseContext`, then `App
 would be implemented by delegating to `UseContext`, whose `Encoder<u32>` impl in turn calls `App`'s
 `CanEncode<u32>`. The trait solver chases this in a loop and reports it as an overflow or an unsatisfied
 bound. `UseContext` belongs where the provider trait resolves to a *different* implementation, such as a
-wrapper over another capability or a per-type dispatch entry for a different type. The `EncodeVec`
+wrapper over another trait or a per-type dispatch entry for a different type. The `EncodeVec`
 example above is safe for exactly that reason: it is wired for `Vec<u32>`, but its inner `UseContext`
 resolves `Encoder<u32>`, a different entry.
 

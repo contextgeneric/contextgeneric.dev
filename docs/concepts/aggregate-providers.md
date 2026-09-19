@@ -41,7 +41,7 @@ delegate_components! {
 }
 ```
 
-`Rectangle` gets both capabilities if it meets the bundled providers' requirements. The provider
+`Rectangle` gets both traits if it meets the bundled providers' requirements. The provider
 choices live in `GeometryComponents`, so changing that table changes the choices for every context
 that delegates those components to it.
 
@@ -82,7 +82,7 @@ Verify their requirements against a context that will actually use them.
 ## Verifying one properly
 
 A check on `Rectangle` follows the bundle's delegation and checks the providers against
-`Rectangle`'s fields and capabilities:
+`Rectangle`'s fields and traits:
 
 ```rust
 check_components! {
@@ -130,7 +130,7 @@ contexts need a shared table and a path structure that separates fixed wiring fr
 
 ## What it costs
 
-A bundle adds a table to inspect when tracing a capability. Nested bundles add further tables, even
+A bundle adds a table to inspect when tracing a method call. Nested bundles add further tables, even
 though the compiler resolves them statically. Keep a bundle when centralizing shared choices is worth
 that extra reading.
 

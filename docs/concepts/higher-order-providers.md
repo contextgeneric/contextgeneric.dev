@@ -133,7 +133,7 @@ delegate_components! {
 
 `open ShapeAreaCalculatorComponent;` enables provider selection by the component's shape parameter.
 A call for `Vec<Rectangle>` selects `SumAreas`. Each inner call then asks for the `Rectangle`
-capability and reaches `RectangleArea`. The inner lookup is different from the collection lookup,
+trait and reaches `RectangleArea`. The inner lookup is different from the collection lookup,
 so it has an independent implementation to resolve to.
 
 An explicit `SumAreas<AnotherCalculator>` uses that provider directly for each element, bypassing
@@ -173,8 +173,8 @@ one transformation needs to work with independently selected implementations. A 
 with nothing to vary does not benefit from an extra provider parameter.
 
 `UseContext` can create a resolution cycle if the inner request selects the same wrapper again.
-For example, a wrapper wired for a capability cannot use that same capability as its only base
-implementation. The summing example avoids this by requesting the element capability from the
+For example, a wrapper wired for a component cannot use that same component as its only base
+implementation. The summing example avoids this by requesting the element trait from the
 collection provider. Ensure that the inner lookup resolves to an independently available implementation.
 
 A nested composition can make failures harder to locate. An error on `ScaledArea<RectangleArea>`

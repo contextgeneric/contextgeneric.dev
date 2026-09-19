@@ -13,7 +13,7 @@ The builder adapter that computes one field's value and sets it on a partial rec
 record, runs `Provider` over a *reference* to that builder to compute the value for `Tag`, then sets
 that field and returns the advanced builder. Because the provider sees `&Builder`, it can read fields
 already set on the partial record while computing the next one. It runs on a **context**, the type a
-capability runs against. Like every CGP provider, it carries no runtime value.
+method runs on. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 

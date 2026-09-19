@@ -11,8 +11,8 @@ The pure synchronous transform of the handler family: infallible, and the simple
 
 `Computer` is for computations that always succeed and need no error type. A computation that adds two
 numbers, formats a value, or projects a field never fails and never needs the **context's** abstract
-error, so forcing it to return a `Result` would be noise. The context is the type a capability runs
-against, which supplies the values an implementation needs as its own fields. `Computer` captures the
+error, so forcing it to return a `Result` would be noise. The context is the type a method runs
+on, which supplies the values an implementation needs as its own fields. `Computer` captures the
 succeeds-always case: a provider names an `Output` type and produces it from the context, a phantom
 `Code` tag, and an `Input`, with no failure path.
 
@@ -53,7 +53,7 @@ value, returning the associated `Output`:
 fn compute(&self, _code: PhantomData<Code>, input: Input) -> Self::Output;
 ```
 
-A context gains the capability by wiring `ComputerComponent` to a provider. In everyday code the
+A context gains the operation by wiring `ComputerComponent` to a provider. In everyday code the
 provider comes from [`#[cgp_computer]`](../../macros/cgp_computer.md), which turns a plain function such as
 `fn double(input: u64) -> u64` into a `Computer` provider and wires the promotion table so the same
 function also answers `CanTryCompute`, `CanComputeAsync`, `CanHandle`, and the by-reference forms.

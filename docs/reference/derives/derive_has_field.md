@@ -173,7 +173,7 @@ Choose the field-access syntax according to what the implementation needs:
 - **[`#[implicit]`](../attributes/implicit.md)**: use by default to read a field from the
   implementation's own context as a parameter, without declaring a getter trait.
 - **[`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md)**: use when the read should be a named
-  capability, the field belongs to another type, or the getter needs a type inferred from the field.
+  trait, the field belongs to another type, or the getter needs a type inferred from the field.
 - **A hand-written `HasField` bound**: use when the higher-level forms do not fit. Add `Value = T` to
   constrain the field type.
 - **[`#[derive(HasFields)]`](./derive_has_fields.md)**: use for processing the whole structure, such

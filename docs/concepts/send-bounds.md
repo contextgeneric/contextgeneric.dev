@@ -76,7 +76,7 @@ where
 ```
 
 `CanHandleApiSend` is **not a component**. It adds nothing to any wiring table and has no providers; it
-exists to carry a stronger signature. It inherits the whole capability from `CanHandleApi` as a
+exists to carry a stronger signature. It inherits the whole interface from `CanHandleApi` as a
 supertrait, additionally requires the response and the context to be `Send`, and writes `+ Send` on the
 future directly.
 
@@ -125,7 +125,7 @@ endpoints and two contexts writes sixteen forwarding bodies.
 generic blanket impl, and that does not compile. A macro could generate the impls, but they would still
 be there.
 
-**And it is a second trait to keep in step.** Adding a method to the capability means adding it here
+**And it is a second trait to keep in step.** Adding a method to the original trait means adding it here
 too, and nothing enforces that the two stay aligned beyond the supertrait.
 
 The one consolation is that the whole thing disappears when Return Type Notation stabilizes. This is a

@@ -5,13 +5,14 @@ sidebar_position: 5
 
 # `#[extend]`
 
-Add a capability as a supertrait of a generated trait, so callers can rely on it too.
+Add a trait as a supertrait of a generated trait, so callers can rely on it too.
 
 ## Overview
 
-`#[extend]` declares that a capability is part of what a trait *guarantees*, rather than something its
+`#[extend]` declares that a trait is part of what a generated trait *guarantees*, rather than
+something its
 implementation happens to need. Where [`#[uses]`](uses.md) adds a private requirement, `#[extend]` adds a
-supertrait. Every **context** implementing the trait, meaning every type the capability runs against,
+supertrait. Every **context** implementing the trait, meaning every type the method runs on,
 must also satisfy it, and every caller may rely on it.
 
 ```rust
@@ -20,13 +21,13 @@ must also satisfy it, and every caller may rely on it.
 
 **`#[extend]` relates to `#[uses]` as `pub use` relates to `use`.** This comparison is the clearest way
 to tell the pair apart. Both take the same syntax and both read as imports. But `#[uses]` imports a
-capability for the implementation's own use and keeps it private, whereas `#[extend]` re-exports it as
+trait for the implementation's own use and keeps it private, whereas `#[extend]` re-exports it as
 part of the contract.
 
 The same comparison explains why CGP prefers `#[extend]` over Rust's native supertrait syntax on a
 [`#[cgp_component]`](../macros/cgp_component.md). Writing `pub trait CanGreet: HasName` reads as
 inheritance from a parent, an is-a relationship that a CGP supertrait is not. `#[extend(HasName)]` reads
-as importing a capability the trait passes on, which is the accurate description. The two generate the
+as importing a trait that `CanGreet` passes on to its callers, which is the accurate description. The two generate the
 same trait, so this is a choice about how the definition reads.
 
 On [`#[cgp_fn]`](../macros/cgp_fn.md) the attribute is necessary, not only preferred. The `#[cgp_fn]`
@@ -69,12 +70,12 @@ pub trait CanLoad {
 }
 ```
 
-`#[extend]` is therefore for a **capability** supertrait, one whose methods matter and whose associated
+`#[extend]` is therefore for a **method** supertrait, one whose methods matter and whose associated
 types the signatures do not name.
 
 ## Examples
 
-A `#[cgp_fn]` capability that guarantees two getters alongside its own method:
+A `#[cgp_fn]` trait that guarantees two getters alongside its own method:
 
 ```rust
 use cgp::prelude::*;
@@ -100,7 +101,8 @@ The body can call both getters, and so can anyone holding a `T: FullLabel`. That
 `#[uses]`. A function that takes a labelled value can format its name without asking for `HasName`
 separately.
 
-On a component the effect is on the consumer trait, and the supertrait becomes part of the capability:
+On a component the effect is on the consumer trait, and the supertrait becomes part of the consumer
+trait's contract:
 
 ```rust
 #[cgp_component(Greeter)]
@@ -115,8 +117,8 @@ available, and so may every caller.
 
 ## When to use it
 
-**Reach for `#[extend]` when callers of the trait must be able to rely on the capability too**, and for
-a capability supertrait on a `#[cgp_component]` in preference to native `:` syntax. Use something else
+**Reach for `#[extend]` when callers of the trait must be able to rely on the supertrait too**, and for
+a method supertrait on a `#[cgp_component]` in preference to native `:` syntax. Use something else
 when the requirement belongs elsewhere. The choice turns on where the requirement should be visible.
 
 - **The implementation needs it privately.** Use [`#[uses]`](uses.md). This is the common case by a wide
@@ -129,7 +131,7 @@ when the requirement belongs elsewhere. The choice turns on where the requiremen
   clause.
 
 A supertrait widens the contract permanently, and that cost decides whether to promote a requirement.
-You cannot later remove it without breaking every implementor, and it demands the capability from
+You cannot later remove it without breaking every implementor, and it demands the supertrait from
 contexts that only call the one method the trait declares. Prefer `#[uses]` unless callers need the
 guarantee.
 
@@ -223,7 +225,8 @@ impl Greeter {
 error: cannot find attribute `extend` in this scope
 ```
 
-Expect a second error alongside it, because the bound was never added. The body's calls to the capability
+Expect a second error alongside it, because the bound was never added. The body's calls to the
+trait's method
 then fail with `E0599`, reporting that the method exists but its trait bounds were not satisfied. Both
 errors have the same cause, and one fix removes both: move the requirement to [`#[uses]`](uses.md), or
 onto the component's trait where supertraits belong.
@@ -239,7 +242,7 @@ is the practical reason to default to `#[uses]`.
 - [`#[use_type]`](use_type.md) — preferred when the supertrait exists to supply a type.
 - [`#[cgp_fn]`](../macros/cgp_fn.md) — where `#[extend]` is the only way to declare a supertrait.
 - [`#[cgp_component]`](../macros/cgp_component.md) — where it is preferred over native `:` syntax.
-- [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — defines the getter capabilities most often extended.
+- [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — defines the getter traits most often extended.
 
 The ideas behind it:
 

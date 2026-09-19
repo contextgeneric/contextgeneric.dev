@@ -13,7 +13,7 @@ The by-reference member of the handler family: a [`Computer`](./computer.md) tha
 synchronous, infallible computation that only *reads* its argument and should not take ownership of it
 fits `ComputerRef`, whose method receives `&Input` where `CanCompute` receives `Input`. Everything else
 is the same: it transforms toward an `Output` under a phantom `Code` tag, against a **context** (the type
-a capability runs against, which supplies the values an implementation needs as its own fields), and
+a method runs on, which supplies the values an implementation needs as its own fields), and
 returns the `Output` directly with no failure path.
 
 It is the owned-versus-borrowed variant of the pure computer, differing on the input axis alone. Like
@@ -52,7 +52,7 @@ borrows the input:
 fn compute_ref(&self, _code: PhantomData<Code>, input: &Input) -> Self::Output;
 ```
 
-A context gains the capability by wiring `ComputerRefComponent` to a provider, and it dispatches on both
+A context gains the operation by wiring `ComputerRefComponent` to a provider, and it dispatches on both
 the `Code` tag and the `Input` type. A provider that reads rather than consumes its input reaches for
 this variant; a [`Computer`](./computer.md) can also be bridged to it by the
 [`PromoteRef`](../../providers/handler/index.md) combinator, which supplies an owned input by

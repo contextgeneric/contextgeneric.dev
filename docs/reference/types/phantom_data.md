@@ -95,7 +95,7 @@ let name = self.get_field(PhantomData::<Symbol!("name")>);
 let output = context.compute(PhantomData::<Doubled>, input);
 ```
 
-Here the **context** is the type the capability runs against. It supplies the values the capability
+Here the **context** is the type the method runs on. It supplies the values the method
 needs as its own fields. The `PhantomData` argument carries nothing. It exists so that type
 inference selects the right [`HasField`](../traits/field-access/has_field.md) impl or the right
 handler. In effect, the call passes a type where a value is expected, and `PhantomData::<T>` is the

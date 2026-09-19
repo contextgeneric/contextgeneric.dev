@@ -13,7 +13,7 @@ The asynchronous, infallible member of the handler family: a [`Computer`](./comp
 already in memory is a [`Computer`](./computer.md); awaiting a timer or a channel that always yields is
 an `AsyncComputer`. It is the async point on the family's synchronicity axis with the failure path still
 absent, so it transforms an `Input` into an `Output` under a phantom `Code` tag, against a **context**
-(the type a capability runs against, which supplies the values an implementation needs as its own
+(the type a method runs on, which supplies the values an implementation needs as its own
 fields), and returns the `Output` directly rather than a `Result`.
 
 It sits between [`Computer`](./computer.md), which drops the asynchrony, and [`Handler`](./handler.md),
@@ -54,7 +54,7 @@ method is `async` and takes the input by value:
 async fn compute_async(&self, _code: PhantomData<Code>, input: Input) -> Self::Output;
 ```
 
-A context gains the capability by wiring `AsyncComputerComponent` to a provider, and it dispatches on
+A context gains the operation by wiring `AsyncComputerComponent` to a provider, and it dispatches on
 both the `Code` tag and the `Input` type. In everyday code the provider comes from
 [`#[cgp_computer]`](../../macros/cgp_computer.md), which wires the promotion table so a synchronous
 function also answers `CanComputeAsync`, and the crate ships a [`UseField`](../../providers/use_field.md)

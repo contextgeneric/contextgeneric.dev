@@ -12,7 +12,7 @@ The input-free member of the handler family: a synchronous, infallible source of
 `Producer` is for computations that take nothing to compute and simply yield a value. A handler that
 supplies a default configuration, a constant, or a value read entirely from the **context** has no
 `Input` to transform: it needs only the context and a phantom `Code` tag to know which value to produce.
-The context is the type a capability runs against, which supplies the values an implementation needs as
+The context is the type a method runs on, which supplies the values an implementation needs as
 its own fields. The rest of the [handler family](/docs/concepts/handlers) threads an `Input` through
 every method; `Producer` is the case where that input is absent. It is the simplest component in the
 family, synchronous and infallible, producing an `Output` directly.
@@ -52,7 +52,7 @@ method takes only the context and a `Code` tag, with no `Input`:
 fn produce(&self, _code: PhantomData<Code>) -> Self::Output;
 ```
 
-A context gains the capability by wiring `ProducerComponent` to a provider. In everyday use the provider
+A context gains the operation by wiring `ProducerComponent` to a provider. In everyday use the provider
 comes from [`#[cgp_producer]`](../../macros/cgp_producer.md), which turns a zero-argument function such as
 `fn magic_number() -> u64 { 42 }` into a `Producer` provider and wires `PromoteProducer<Self>` so the
 same function also answers the input-taking components. Because there is no input to dispatch on, the
@@ -91,7 +91,7 @@ fn run(app: &App) -> u64 {
 ```
 
 `MagicNumber` produces `42` from the `Code` tag alone, and `App` delegates `ProducerComponent` to it,
-giving `App` the `CanProduce<(), Output = u64>` capability. The example is **parameter-targeted**: the
+giving `App` the `CanProduce<(), Output = u64>` implementation. The example is **parameter-targeted**: the
 context decides which provider answers, and no value is operated on. In practice the provider is written
 with [`#[cgp_producer]`](../../macros/cgp_producer.md), which also wires the promotion so the same function
 answers the input-taking components while ignoring their input.

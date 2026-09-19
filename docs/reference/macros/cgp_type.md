@@ -20,7 +20,7 @@ An abstract type in CGP is exactly that trait and nothing more exotic. `#[cgp_ty
 fill the slot by **wiring** rather than by writing an impl. Without it, giving a context a
 concrete scalar means writing a provider by hand: a whole impl whose only content is
 `type Scalar = f64;`. Since every abstract-type provider has that same trivial shape, `#[cgp_type]`
-generates it once and for all. A **context** is the type the capability runs against, and it supplies
+generates it once and for all. A **context** is the type that implements the trait, and it supplies
 the values and types it needs. It names the concrete type directly in its wiring table:
 
 ```rust
@@ -156,7 +156,7 @@ impl HasScalarType for App {
 
 **Use `#[cgp_type]` whenever generic code has to name a type the context should choose.** The error
 type is the canonical instance. CGP's own [`HasErrorType`](../components/has_error_type.md) is defined
-exactly this way, which is why every fallible capability can say `Error` and mean whatever the
+exactly this way, which is why every fallible trait can say `Error` and mean whatever the
 application picked.
 
 The decision worth making deliberately is **whether the type needs to be abstract at all**, because
@@ -167,10 +167,10 @@ there is a cheaper option that does more than it looks.
   [`#[impl_generics]`](../attributes/impl_generics.md) on a `#[cgp_fn]` puts a parameter on
   the implementation alone. Nothing is wired, nothing is declared, and a context qualifies just by
   carrying a field of a compatible type.
-- **Move up to an abstract type when the type must be nameable.** Two things force it: the capability's own
-  signature has to mention the type, or two capabilities have to agree they mean the *same* type. An
+- **Move up to an abstract type when the type must be nameable.** Two things force it: the trait's own
+  signature has to mention the type, or two traits have to agree they mean the *same* type. An
   inferred parameter can do neither, since it exists only where a value of it passes through.
-- **Never thread it as a generic parameter on the capability.** A parameter is an input the caller
+- **Never thread it as a generic parameter on the trait.** A parameter is an input the caller
   supplies, so it lands in every intermediate signature whether that layer touches the type or not. An
   abstract type is determined by the context and propagates nowhere. That difference is the whole
   benefit of the construct, and it is why a context can decide many types without any signature

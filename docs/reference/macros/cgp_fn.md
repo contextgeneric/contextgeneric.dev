@@ -5,13 +5,13 @@ sidebar_position: 3
 
 # `#[cgp_fn]`
 
-Define a single-implementation capability as a blanket-impl trait, straight from a function.
+Define a trait with a single blanket implementation, straight from a function.
 
 ## Overview
 
 `#[cgp_fn]` is the simplest CGP construct that does anything useful. You write a plain function and
-mark the values it needs from the **context**. The context is the type the capability runs against,
-and it supplies those values as its own fields. The macro turns the function into a capability that
+mark the values it needs from the **context**. The context is the type the method runs on,
+and it supplies those values as its own fields. The macro turns the function into a trait that
 every type with those fields gets automatically:
 
 ```rust
@@ -29,11 +29,12 @@ covering every context that satisfies the field requirements.
 The macro makes one tradeoff, and you should know it. A
 [`#[cgp_component]`](./cgp_component.md) supports many interchangeable implementations, one chosen per
 context, and this costs extra boilerplate. `#[cgp_fn]` supports exactly one implementation, the function
-body, and costs nothing. Most capabilities have one natural definition, so `#[cgp_fn]` is the better
+body, and costs nothing. Most traits have one natural definition, so `#[cgp_fn]` is the better
 choice for them and the recommended place to start, rather than a lesser form of the real thing.
 
 It is also the easiest introduction to CGP, because nothing in it is unfamiliar. A reader who
-understands functions and arguments can write a working capability without first meeting trait bounds,
+understands functions and arguments can write a working context-generic function without first
+meeting trait bounds,
 blanket implementations, or type-level field names. An [`#[implicit]`](../attributes/implicit.md)
 parameter hides all of that and looks like an ordinary parameter.
 
@@ -86,7 +87,7 @@ most of what you need to learn about the macro.
 | [`#[extend_where(...)]`](../attributes/extend_where.md) | Both the trait and the impl |
 
 By default, generics land on both the trait and the impl, and the `where` clause lands on the impl
-alone. This hides a capability's requirements from its callers: a caller bounds on the clean trait,
+alone. This hides a trait's requirements from its callers: a caller bounds on the clean trait,
 and the constraints the body actually needs stay one level down on the implementation:
 
 ```rust
@@ -119,7 +120,7 @@ The `Describe` trait is not generic. A context becomes eligible purely by carryi
 some `Display` type, and the compiler resolves the type from that field.
 
 The type is then concealed rather than named, so it cannot appear in this function's own signature,
-and two capabilities cannot agree on it. The [`#[impl_generics]`](../attributes/impl_generics.md)
+and two traits cannot agree on it. The [`#[impl_generics]`](../attributes/impl_generics.md)
 page says when to promote such a type to an abstract type instead.
 
 ### Companion attributes
@@ -127,12 +128,12 @@ page says when to promote such a type to an abstract type instead.
 Several attributes shape what the macro generates, and together they are how a `#[cgp_fn]` states what
 it depends on.
 
-- [`#[uses(...)]`](../attributes/uses.md) imports the capabilities the body calls on `self`, reading
+- [`#[uses(...)]`](../attributes/uses.md) imports the traits the body calls on `self`, reading
   like a `use` statement rather than a hand-written `where Self: Trait` bound. It accepts ordinary Rust
   traits as readily as CGP ones.
 - [`#[use_type(Trait.Type)]`](../attributes/use_type.md) imports an abstract type so the signature can
   name it bare, and adds the owning trait as a supertrait.
-- [`#[extend(...)]`](../attributes/extend.md) adds a capability supertrait to the generated trait. Here
+- [`#[extend(...)]`](../attributes/extend.md) adds a method supertrait to the generated trait. Here
   it is the *only* way to add one, since a `where` clause in a `#[cgp_fn]` is an implementation detail
   rather than part of the interface.
 - [`#[extend_where(...)]`](../attributes/extend_where.md) puts a predicate on the generated trait's own
@@ -146,7 +147,7 @@ it depends on.
 
 ## Examples
 
-A capability, another capability built on it, and a context that gets both without wiring anything:
+A trait, another trait built on it, and a context that gets both without wiring anything:
 
 ```rust
 use cgp::prelude::*;
@@ -176,30 +177,30 @@ pub fn report(rect: &Rectangle) {
 ```
 
 `scaled_rectangle_area` calls `self.rectangle_area()` because `#[uses(RectangleArea)]` declared the
-dependency. It does not know or care how that capability is implemented. `Rectangle` derives
+dependency. It does not know or care how that trait is implemented. `Rectangle` derives
 [`HasField`](../derives/derive_has_field.md) and happens to carry the three fields the two functions
 read, and that is its entire qualification. This program does not use `delegate_components!`
 anywhere, and adding one would change nothing.
 
 ## When to use it
 
-**Use `#[cgp_fn]` first.** When a capability has one natural definition, this is the form to write.
+**Use `#[cgp_fn]` first.** When a trait has one natural definition, this is the form to write.
 Starting here costs nothing if that changes later, because the trait keeps its name and its method, so
 promoting it to a [`#[cgp_component]`](./cgp_component.md) leaves every call site untouched. At that
 point you add the component, a named provider, and a line of wiring per context.
 
 Use something else in these cases:
 
-- **The capability needs a second implementation, chosen per context.**
+- **The trait needs a second implementation, chosen per context.**
   [`#[cgp_component]`](./cgp_component.md) is for that, and `#[cgp_fn]` cannot provide it: its
   blanket impl already covers every context, so an alternative cannot coexist with it.
 - **The dependencies are traits rather than fields.** [`#[blanket_trait]`](./blanket_trait.md) builds
-  the same kind of single-implementation, no-wiring capability from a trait with supertraits and
-  default method bodies. Use it when the body needs other capabilities, and use `#[cgp_fn]` when it
+  the same kind of single-implementation, no-wiring trait from a trait with supertraits and
+  default method bodies. Use it when the body needs other traits, and use `#[cgp_fn]` when it
   needs values.
 - **A generic must vary per call.** A generic parameter here goes on the trait rather than the method,
   so whatever satisfies the bounds for a given context fixes it, rather than each call site choosing
-  it. A capability that needs a per-call type parameter needs a hand-written blanket impl or a
+  it. A trait that needs a per-call type parameter needs a hand-written blanket impl or a
   component instead.
 
 Make one decision inside the macro deliberately rather than by default: **where a type the body needs
@@ -207,9 +208,9 @@ should live.** Start with [`#[impl_generics]`](../attributes/impl_generics.md) w
 ever flows through implicit
 arguments. It is shorter, does not need wiring, and reads as "this works with any `database` field of
 a compatible type". Move up to an [abstract type](./cgp_type.md) when the type must appear in the
-capability's own signature, or when two capabilities must agree that they mean the same one. Avoid a
+trait's own signature, or when two traits must agree that they mean the same one. Avoid a
 plain generic parameter on the function in both cases: it lands on the trait and makes every caller,
-and every intermediate capability built on it, declare the parameter and repeat its bounds whether
+and every intermediate trait built on it, declare the parameter and repeat its bounds whether
 they touch it or not.
 
 ## Under the hood
@@ -329,7 +330,7 @@ error: a `&mut` implicit argument must be the only implicit argument, since its 
        borrow of the context conflicts with reading any other field
 ```
 
-**An `#[impl_generics]` parameter cannot appear in the capability's own signature.** Only the generated
+**An `#[impl_generics]` parameter cannot appear in the trait's own signature.** Only the generated
 impl declares it, so a return type or an explicit parameter that names it leaves it unresolved in the
 trait. A bare `Db` reports `E0425` and a qualified path such as `Db::Row` reports `E0433`, both under
 the headline *cannot find type `Db` in this scope*, so search for both codes. Either the type belongs
@@ -346,7 +347,7 @@ parameter. The [`#[impl_generics]`](../attributes/impl_generics.md) page shows b
 - [`#[blanket_trait]`](./blanket_trait.md) — the same idea built from a trait rather than a function.
 - [`#[cgp_impl]`](./cgp_impl.md) — shares the `#[implicit]` mechanism, for writing a component's provider.
 - [`#[derive(HasField)]`](../derives/derive_has_field.md) — what a context derives to satisfy the bounds.
-- [`#[async_trait]`](./async_trait.md) — how an `async fn` capability is declared.
+- [`#[async_trait]`](./async_trait.md) — how an `async fn` trait method is declared.
 
 The ideas behind it:
 

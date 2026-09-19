@@ -13,7 +13,7 @@ The pattern CGP is built on is an **extension trait**: a trait with a clean inte
 [blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) carries the
 real requirements in its `where` clause. A trait declared `FooBar: Foo + Bar` with a default `foo_bar` method
 exposes only `foo_bar` to callers, while the `Foo + Bar` requirements live on the impl. So any type
-satisfying them gains the capability, and nobody calling `foo_bar` has to know or repeat what it needed.
+satisfying them gains the trait, and nobody calling `foo_bar` has to know or repeat what it needed.
 
 That is worth doing rather than writing a generic function, because a function's `where` clause propagates:
 every generic caller repeats it, and so does every caller of *those*. Hiding the requirement on an impl stops
@@ -34,7 +34,7 @@ pub trait FooBar: Foo + Bar {
 ```
 
 **This is not a CGP component.** There is no consumer/provider split, no component marker, and no wiring:
-just an ordinary Rust trait and an ordinary blanket impl. It is the tool for a capability with exactly one
+just an ordinary Rust trait and an ordinary blanket impl. It is the tool for a trait with exactly one
 definition, where you want extension-trait ergonomics without committing to the component machinery. When a
 second implementation becomes necessary, the trait can be promoted to a
 [`#[cgp_component]`](./cgp_component.md).
@@ -61,8 +61,8 @@ pub trait FooBar: Foo + Bar {
 }
 ```
 
-The attribute takes an optional identifier naming the generic **context** type (the type the capability runs
-against) in the generated impl. Omitted, it is the reserved `__Context__`, chosen so it cannot collide with
+The attribute takes an optional identifier naming the generic **context** type (the type the method runs
+on) in the generated impl. Omitted, it is the reserved `__Context__`, chosen so it cannot collide with
 one of your own type parameters:
 
 ```rust
@@ -146,14 +146,14 @@ Any type that is `Foo + Bar` is now `FooBar`, and a signature can say so in one 
 
 ## When to use it
 
-**Use `#[blanket_trait]` when a capability has one definition and its dependencies are other traits.**
+**Use `#[blanket_trait]` when a trait has one definition and its dependencies are other traits.**
 That last clause is the real discriminator, separating this macro from its closest neighbour.
 
 - **[`#[cgp_fn]`](./cgp_fn.md) when the dependencies are context *fields*.** Both macros produce a
-  single-implementation capability with a blanket impl and no wiring, so the choice is about the input.
+  single-implementation trait with a blanket impl and no wiring, so the choice is about the input.
   `#[cgp_fn]` derives the trait and body from a function, reading values through
   [`#[implicit]`](../attributes/implicit.md) arguments; `#[blanket_trait]` takes a trait with supertraits and
-  default bodies. Values point to `#[cgp_fn]`, capabilities point here.
+  default bodies. Values point to `#[cgp_fn]`, trait dependencies point here.
 - **[`#[cgp_component]`](./cgp_component.md) when a second implementation is needed.** A blanket impl covers
   every type satisfying its bounds, which leaves nowhere for an alternative to live. Promoting later is
   cheap (the trait keeps its name and method), so starting here costs nothing if that changes.

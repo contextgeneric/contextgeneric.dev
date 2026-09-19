@@ -10,8 +10,9 @@ concrete error type the context chose.
 
 ## Overview
 
-The error providers supply common error-handling strategies to any **context**, the type a capability
-runs against. [`CanRaiseError`](../../components/can_raise_error.md) and [`CanWrapError`](../../components/can_wrap_error.md) define *what* a
+The error providers supply common error-handling strategies to any **context**, the type a method
+runs on. [`CanRaiseError`](../../components/can_raise_error.md) and
+[`CanWrapError`](../../components/can_wrap_error.md) define *what* a
 context can do with an error: turn a source error into its abstract `Self::Error`, or attach detail to
 one it already holds. They say nothing about *how*. These providers supply the how for the cases that
 need no particular error library. Each one is generic over the context, so it works with whatever error
@@ -76,7 +77,7 @@ still defined with [`#[derive_delegate]`](../../attributes/derive_delegate.md), 
 The ideas behind it:
 
 - [Modular error handling](/docs/concepts/modular-error-handling) — how the abstract error type, the
-  raise and wrap capabilities, and these strategies fit together as interchangeable wiring decisions.
+  raise and wrap components, and these strategies fit together as interchangeable wiring decisions.
 
 ## Source
 

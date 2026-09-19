@@ -17,7 +17,7 @@ is the fuller guide, for a reader who already knows the essentials.
 ## Reading a value from the context
 
 [`#[implicit]`](./implicit.md) marks a function argument that the macro reads from a same-named field
-on the context rather than from the caller. The context is the type the capability runs against. A
+on the context rather than from the caller. The context is the type the method runs on. A
 provider that needs a value then reads like an ordinary function that takes it. Almost every provider
 uses the attribute, and it is usually the first piece of CGP anyone writes.
 

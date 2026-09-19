@@ -53,7 +53,7 @@ to a component.
 ## The computation-family combinators
 
 The handler family has its own providers, which build, route, and lift computations rather than wire a
-single capability. The [error providers](./error/index.md) raise and wrap a context's abstract
+single trait. The [error providers](./error/index.md) raise and wrap a context's abstract
 error, the [handler combinators](./handler/index.md) compose and promote handlers across the
 family's synchronous, async, and fallible shapes, the [dispatch combinators](./dispatch/index.md)
 route an extensible-data value to per-field or per-variant handlers, and the

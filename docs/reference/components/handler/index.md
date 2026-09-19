@@ -8,7 +8,7 @@ sidebar_position: 0
 The handler family models a computation as a swappable component, so a pipeline step, an I/O call, or a
 type-level interpreter is wired and composed the same way as any other component. Every member
 transforms an `Input` into an `Output` under a phantom `Code` tag, against a **context**, the type a
-capability runs against that supplies the values an implementation needs as its own fields. The members
+method runs on that supplies the values an implementation needs as its own fields. The members
 differ along three axes: synchronous or async, infallible or fallible, and taking an input or not. This
 page maps the family; each member has its own page for the full detail.
 

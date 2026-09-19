@@ -15,7 +15,7 @@ type to one fixed `T`. But sometimes a single provider must answer several abstr
 once, or route each type tag to a different concrete type chosen elsewhere, such as when a namespace or
 a higher-order provider supplies a coherent bundle of types. Hand-writing one `UseType` entry per tag
 would scatter that decision; `UseDelegatedType` concentrates it into one `Components` table the provider
-consults. As always, the **context** (the type a capability runs against) points its type
+consults. As always, the **context** (the type that implements the trait) points its type
 components at the provider.
 
 The mechanism is the same indirection [`UseDelegate`](use_delegate.md) provides for behavioral

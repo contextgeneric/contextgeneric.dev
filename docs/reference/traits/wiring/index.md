@@ -9,7 +9,7 @@ The three traits every context's wiring rests on, and the ones a wiring error na
 
 ## Overview
 
-Wiring a **context**, the type a capability runs against, records which provider it uses for each
+Wiring a **context**, the type a method runs on, records which provider it uses for each
 component and checks that the provider's own requirements are met. These traits carry that, and you
 read them far more often than you write them, because a
 [`delegate_components!`](../../macros/delegate_components.md) table generates the first two and a

@@ -115,7 +115,7 @@ transform, and writes it back under `IsOptional`. The transform's own impls are 
 `IsPresent` becomes `Some(value)`, `IsNothing` becomes `None`, and `IsOptional` passes through.
 
 Its mirror image is [`CanFinalizeWithDefault`](./can_finalize_with_default.md), which runs the same walk
-with [`TransformMapDefault`](./transform_map_default.md) toward `IsPresent`. **Both capabilities are the
+with [`TransformMapDefault`](./transform_map_default.md) toward `IsPresent`. **Both operations are the
 same recursion with a different marker**, which is why the defaulted and optional workflows behave so
 symmetrically.
 

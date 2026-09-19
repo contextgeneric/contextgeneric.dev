@@ -13,7 +13,7 @@ string handling.
 `DisplayError` is the `Display` counterpart of [`DebugError`](debug_error.md). It implements both error
 components by formatting the source error or the detail with the `Display` trait into a `String`, then
 forwarding to the **context**'s own `CanRaiseError<String>` or `CanWrapError<String>`, where the context
-is the type a capability runs against. It carries the source's user-facing message rather than its debug
+is the type a method runs on. It carries the source's user-facing message rather than its debug
 representation. Like every CGP provider, `DisplayError` carries no runtime value.
 
 As with `DebugError`, it does not know the context's error type. It reduces any `Display` source to the

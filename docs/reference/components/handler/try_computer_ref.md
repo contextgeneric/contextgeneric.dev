@@ -13,7 +13,7 @@ that borrows its input.
 `TryComputerRef` is a [`TryComputer`](./try_computer.md) that takes its input by reference. A synchronous
 computation that can fail and only *reads* its argument fits it: its method receives `&Input` and returns
 `Result<Output, Error>`, where the error is the **context's** abstract error type. The context is the
-type a capability runs against, which supplies the values an implementation needs as its own fields.
+type a method runs on, which supplies the values an implementation needs as its own fields.
 `TryComputerRef` is the owned-versus-borrowed variant of the fallible synchronous computer, differing on
 the input axis alone.
 
@@ -58,7 +58,7 @@ method borrows the input and returns a `Result`:
 fn try_compute_ref(&self, _code: PhantomData<Code>, input: &Input) -> Result<Self::Output, Error>;
 ```
 
-A context gains the capability by wiring `TryComputerRefComponent` to a provider, and it dispatches on
+A context gains the operation by wiring `TryComputerRefComponent` to a provider, and it dispatches on
 both the `Code` tag and the `Input` type. Because the consumer trait supertraits `HasErrorType`, the
 context must also wire an error type before it can call `try_compute_ref`. A provider that reads rather
 than consumes its input reaches for this variant; the owned-input [`TryComputer`](./try_computer.md) is

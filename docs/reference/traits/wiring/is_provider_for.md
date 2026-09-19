@@ -20,8 +20,8 @@ names, and reading that error is the reason to know it exists.
 
 ## Overview
 
-An implementation in CGP states what it needs from its **context**, the type the capability runs against,
-in its own `where` clause: a field, an abstract type, another capability. When one of those requirements is
+An implementation in CGP states what it needs from its **context**, the type the method runs on,
+in its own `where` clause: a field, an abstract type, another trait. When one of those requirements is
 not met, you want the compiler to say *which*. Left to itself, it will not.
 
 The reason is a specific behaviour of Rust's diagnostics. Asking "does this provider implement the provider

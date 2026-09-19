@@ -59,7 +59,7 @@ pub trait CanGreet {
 }
 ```
 
-`AppNamespace` now knows that anything asking for this capability should look under
+`AppNamespace` now knows that anything asking for this component should look under
 `@app.GreeterComponent`. It does not know what it will find there. A context joins the namespace and
 supplies the answer at that path:
 
@@ -187,7 +187,7 @@ in CGP, because the mistake is not visible until a context wants to differ.
 **It is another hop, and a less obvious one.** With an
 [aggregate provider](./aggregate-providers.md) the context says which components come from the bundle.
 With a namespace it says nothing, since everything not wired locally falls through, so answering
-"where does this capability come from?" means knowing the namespace and its parents.
+"where does this implementation come from?" means knowing the namespace and its parents.
 
 **Paths are a second vocabulary.** `@app.GreeterComponent` is a type-level path, and it appears in
 error messages spelled out at length. The toolchain resugars it for the classes it recognizes; a plain

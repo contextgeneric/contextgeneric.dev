@@ -12,7 +12,7 @@ Turn a concrete source error into the context's abstract `Self::Error`.
 `CanRaiseError<SourceError>` lets generic CGP code produce its context's abstract error from any
 concrete error it meets. A provider that calls a fallible operation gets back a specific error type, a
 parse error, an I/O error, a string message, but it must return the **context's** abstract `Self::Error`,
-whose concrete identity it does not know. The context here is the type a capability runs against, which
+whose concrete identity it does not know. The context here is the type a method runs on, which
 supplies the values an implementation needs as its own fields, and it decides how each source error maps
 into its chosen error type. `CanRaiseError<SourceError>` bridges the gap: generic code writes
 `Context::raise_error(source)` and the context converts the concrete `SourceError` into `Self::Error`.
@@ -53,7 +53,7 @@ context type rather than of any particular value:
 fn raise_error(error: SourceError) -> Error;
 ```
 
-A context gains the capability by wiring `ErrorRaiserComponent`, whose key lives under
+A context gains the operation by wiring `ErrorRaiserComponent`, whose key lives under
 `cgp::core::error`, to a provider. Because the trait dispatches per source-error type, the natural
 wiring is a table keyed on `SourceError`, most idiomatically an
 [`open` statement](../macros/delegate_components.md) that routes each concrete error to a provider that
@@ -110,7 +110,7 @@ The provider `LoadOrFail` names neither the context nor its concrete error type.
 `CanRaiseError<String>` through [`#[uses]`](../attributes/uses.md) to turn a `String` message into the
 abstract error, and any wired context that satisfies that bound, typically by plugging in an error
 backend, makes `load` produce errors in that context's chosen type. The context is an **environmental
-context**, and the capability targets it rather than a value.
+context**, and the component targets it rather than a value.
 
 ## When to use it
 

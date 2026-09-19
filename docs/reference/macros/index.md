@@ -16,14 +16,14 @@ than here; this page is the fuller reference for once those six are familiar.
 
 ## Defining a component, and writing its providers
 
-[`#[cgp_component]`](./cgp_component.md) is the macro every wired capability starts from: it turns one
+[`#[cgp_component]`](./cgp_component.md) is the macro every wired trait starts from: it turns one
 trait into the consumer trait callers use, the provider trait implementations target, and the marker
 that wiring keys against. A provider is then written with [`#[cgp_impl]`](./cgp_impl.md), which keeps
 `self`, `Self`, and the consumer trait's own method signatures; [`#[cgp_provider]` and
 `#[cgp_new_provider]`](./cgp_provider.md) are the lower-level forms underneath it, mostly met in
 generated code rather than written by hand.
 
-When a capability has exactly one implementation and needs no wiring at all,
+When a trait has exactly one implementation and needs no wiring at all,
 [`#[cgp_fn]`](./cgp_fn.md) builds it straight from a function, and
 [`#[blanket_trait]`](./blanket_trait.md) does the same starting from a trait with default methods and
 supertrait dependencies. [`#[async_trait]`](./async_trait.md) is how any of these traits declares an
@@ -46,7 +46,7 @@ input to a per-type trait's own implementations.
 [`delegate_components!`](./delegate_components.md) is where a concrete type says which provider
 answers each component, in a table that is a compile-time fact rather than a runtime lookup. Because
 that wiring is lazy, [`check_components!`](./check_components.md) forces a missing or broken
-choice to fail at the table rather than wherever the capability is finally called, and
+choice to fail at the table rather than wherever the trait is finally called, and
 [`delegate_and_check_components!`](./delegate_and_check_components.md) fuses the two for a newcomer or
 a simple table, so the check cannot be forgotten. [`cgp_namespace!`](./cgp_namespace.md) lifts a table
 out of any one type and gives it a name other types can join, which is how CGP expresses reusable

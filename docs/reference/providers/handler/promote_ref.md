@@ -23,8 +23,8 @@ explains what that wiring emits.
 
 `PromoteRef<Provider>` lets a provider written to take a value serve a slot that takes a reference, and
 the reverse, without manual dereference code. It is the most thoroughly implemented promotion: it
-covers all four handler families in both directions, on a **context**, the type a capability runs
-against. Like every CGP provider, it carries no runtime value; the inner provider rides in
+covers all four handler families in both directions, on a **context**, the type a method runs
+on. Like every CGP provider, it carries no runtime value; the inner provider rides in
 `PhantomData`.
 
 ## Usage

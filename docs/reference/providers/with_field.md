@@ -10,7 +10,7 @@ Wire a getter component to a named context field, through the `WithProvider` ada
 ## Overview
 
 `WithField<Tag>` is the alias `WithProvider<UseField<Tag>>`. It implements a getter component by reading
-the context field named by `Tag`, on a **context**, the type a capability runs against, by adapting the
+the context field named by `Tag`, on a **context**, the type a method runs on, by adapting the
 foundational [`UseField<Tag>`](use_field.md) getter through the [`WithProvider`](with_provider.md) layer.
 It reads the same field the plain [`UseField`](use_field.md) provider does, and both are interchangeable
 in wiring. Like every CGP provider, it carries no runtime value.

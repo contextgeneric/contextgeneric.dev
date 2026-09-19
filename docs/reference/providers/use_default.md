@@ -19,7 +19,7 @@ dedicated provider.
 This keeps a default-only component consistent with the rest of wiring. Without it, a component whose
 methods are all defaulted would still need some provider type and some
 [`delegate_components!`](../macros/delegate_components.md) entry to take part in the table. `UseDefault`
-is the shared name for that role, so a **context** (the type the capability runs against) that wants
+is the shared name for that role, so a **context** (the type the method runs on) that wants
 the defaults wires the component to `UseDefault` and writes no method bodies of its own.
 
 `UseDefault` is a bare marker that CGP defines but does not implement for any trait. Unlike

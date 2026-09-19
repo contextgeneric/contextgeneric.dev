@@ -13,7 +13,7 @@ alongside the value.
 `MatchFirstWithHandlers<Handlers>` is the matcher for the calling convention where the input is a tuple
 `(Input, Args)`: the value being matched, together with extra arguments to pass to each handler. It
 threads `Args` through the loop unchanged, so on a miss both the shrinking remainder and the still-owned
-arguments carry to the next handler. It runs on a **context**, the type a capability runs against. The
+arguments carry to the next handler. It runs on a **context**, the type a method runs on. The
 "first" in the name reflects that the value being matched is the *first* element of the input tuple.
 Like every CGP provider, it carries no runtime value; the handler list rides in `PhantomData`.
 

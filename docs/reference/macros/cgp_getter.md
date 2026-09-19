@@ -15,7 +15,7 @@ always, and it has one hard limitation: a context that stores the value under a 
 getter at all.
 
 `#[cgp_getter]` removes that coupling by making the getter a real component. The **context** is the
-type the capability runs against, and it supplies the values it needs as its own fields. It then says
+type the method runs on, and it supplies the values it needs as its own fields. It then says
 in its wiring which field the getter should read:
 
 ```rust
@@ -157,12 +157,12 @@ the last resort, and the ordering is worth keeping whole:
 1. **An [`#[implicit]`](../attributes/implicit.md) argument** for a provider reading a field of its own
    context. No trait, no wiring. This covers most reads.
 2. **[`#[cgp_auto_getter]`](./cgp_auto_getter.md)** when the accessor has to exist as a *named
-   capability* other code depends on, when the field lives on another type, or when the getter carries a
+   trait* other code depends on, when the field lives on another type, or when the getter carries a
    type inferred from the field. One blanket impl, still no wiring.
 3. **`#[cgp_getter]`** only when a context must control *how the getter is satisfied*.
 
 That third condition is narrow, and it has two real forms. One is a **field name that differs per
-context**: the same capability reading `first_name` on one type and `display_name` on another. The other
+context**: the same trait reading `first_name` on one type and `display_name` on another. The other
 is a context that supplies the value **some way other than a plain field read**, through
 `WithProvider` or a hand-written impl, while other contexts still read a field.
 

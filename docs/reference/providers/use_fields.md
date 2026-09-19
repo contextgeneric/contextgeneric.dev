@@ -13,7 +13,7 @@ method.
 `UseFields` is the provider form of the convention "the method `name` reads the field `name`." A getter
 component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes one or more values the
 **context** can supply, and the most common arrangement is that each value lives in a same-named field.
-The context is the type the capability runs against, and it supplies those values as its own fields.
+The context is the type the method runs on, and it supplies those values as its own fields.
 `UseFields` is the provider that realizes the arrangement: wiring a getter to `UseFields` makes every
 method read the context field whose name equals the method name, looked up through
 [`HasField`](../traits/field-access/has_field.md) keyed by a [`Symbol!`](../macros/symbol.md).

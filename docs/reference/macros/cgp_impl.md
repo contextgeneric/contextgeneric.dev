@@ -12,7 +12,7 @@ already know.
 
 A [provider trait](./cgp_component.md) has a different shape from the trait it came from. The
 original `Self` has moved into an explicit leading type parameter, the implementation targets a small
-marker type rather than the type the capability is about, and the method receiver is a plain parameter.
+marker type rather than the type the operation acts on, and the method receiver is a plain parameter.
 Written by hand it looks like this:
 
 ```rust
@@ -29,7 +29,7 @@ where
 Every part of that is correct, and almost every part of it is unfamiliar. The trait carries a
 parameter you did not write, `Self` is a type without values, and the block does not mention `self`
 anywhere. Written this way, the code does not read as an implementation of `CanCalculateArea`, even
-though it is exactly that. The trait needs a `Self` it owns, instead of the type the capability is
+though it is exactly that. The trait needs a `Self` it owns, instead of the type the operation is
 really about, so that it can [bypass coherence](/docs/concepts/coherence).
 
 `#[cgp_impl]` gives you back the familiar shape. Write the implementation as though you were
@@ -52,7 +52,7 @@ Write providers this way. The macro performs the rewrite for you and produces th
 which you will see in generated code.
 
 This convenience has one rule you must keep in mind: **inside a `#[cgp_impl]` block, `self` and
-`Self` mean the context, not the provider.** The context is the type the capability runs against, and
+`Self` mean the context, not the provider.** The context is the type the method runs on, and
 it supplies the values it needs as its own fields. The provider is a type-level name without fields or
 values. The program never constructs it, and it holds nothing to read. The macro rewrites `self` to the
 context value and `Self` to the context type because the context is the only thing that exists when
@@ -174,7 +174,7 @@ they let an idiomatic provider state what it needs.
 
 - [`#[implicit]`](../attributes/implicit.md) on a parameter removes it from the signature and fills it
   from a same-named field on the context.
-- [`#[uses(...)]`](../attributes/uses.md) adds the capabilities the provider depends on, reading like
+- [`#[uses(...)]`](../attributes/uses.md) adds the traits the provider depends on, reading like
   a `use` statement instead of a hand-written `where Self: Trait` clause.
 - [`#[use_type(Trait.Type)]`](../attributes/use_type.md) imports an abstract type and rewrites its
   occurrences to fully qualified form.
@@ -278,7 +278,7 @@ any other. The `Self` form does not produce a provider at all.
 
 Use something else in these cases:
 
-- **The capability has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
+- **The trait has only one implementation.** [`#[cgp_fn]`](./cgp_fn.md) builds it from a plain
   function without a component, a provider, or wiring, which is the bottom tier of
   [Modularity Hierarchy](/docs/concepts/modularity-hierarchy).
 - **You want to implement the consumer trait directly on one concrete type.** Use the

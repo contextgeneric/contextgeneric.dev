@@ -10,9 +10,9 @@ Declare the abstract runtime *type* a context runs against, chosen per context t
 ## Overview
 
 `HasRuntimeType` lets context-generic code name the runtime type a context uses without committing to a
-concrete one. A runtime is whatever object supplies the capabilities an application needs at execution
+concrete one. A runtime is whatever object supplies the services an application needs at execution
 time, and different deployments want different runtimes: Tokio in production, a mock in tests, an
-executor in a benchmark. `HasRuntimeType` gives the **context**, the type a capability runs against that
+executor in a benchmark. `HasRuntimeType` gives the **context**, the type that implements the trait that
 supplies the values an implementation needs as its own fields, an abstract associated `Runtime` type,
 resolved to a concrete one at wiring time.
 
@@ -21,7 +21,7 @@ are independent. `HasRuntimeType` answers *what the runtime type is*, while its 
 [`HasRuntime`](./has_runtime.md) answers *how to obtain the runtime value* from a borrow of the context.
 Some code is generic only over the runtime type: it names types the runtime exposes but never touches a
 runtime value, and it needs `HasRuntimeType` alone. Keeping the type separate means such a bound asks
-for exactly the capability it uses.
+for exactly the trait it uses.
 
 ## Definition
 
@@ -89,12 +89,12 @@ where
 
 `App` resolves `HasRuntimeType` with `Runtime = TokioRuntime` through `UseType`, so `RuntimeOf<App>` is
 `TokioRuntime`. `describe` names only the runtime type and never a runtime value, which is exactly the
-case `HasRuntimeType` serves alone. `App` is an **environmental context**, and the capability targets it.
+case `HasRuntimeType` serves alone. `App` is an **environmental context**, and the component targets it.
 
 ## When to use it
 
 **Reach for `HasRuntimeType` when code names the runtime type but never touches a runtime value.** That
-is the narrower of the two runtime capabilities, and asking for it alone keeps a bound honest about what
+is the narrower of the two runtime components, and asking for it alone keeps a bound honest about what
 it uses. It is also the type half a context must wire before it can satisfy
 [`HasRuntime`](./has_runtime.md), because the getter borrows a value of this type.
 

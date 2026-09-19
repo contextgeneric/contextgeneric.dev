@@ -33,7 +33,7 @@ where
 This works, and everything in it is doing something. `Symbol!("name")` is the field's name as a type, so
 one trait can describe every field rather than needing one trait per field. `PhantomData` carries that
 type to the call so inference knows which field is meant. The bound is an
-[impl-side dependency](./impl-side-dependencies.md), which is why the capability's own trait says
+[impl-side dependency](./impl-side-dependencies.md), which is why the generated trait itself says
 nothing about names.
 
 It is also four unfamiliar things stacked in front of a one-line function, and a reader meeting them
@@ -63,10 +63,10 @@ the rest from it. Someone who understands functions and arguments can write a co
 meeting a type-level anything, which is why this is the recommended way to read a context field and the
 starting point most introductions to CGP should use.
 
-## A capability from a function alone
+## A trait from a function alone
 
 Combined with [`#[cgp_fn]`](/docs/reference/macros/cgp_fn), an implicit argument gets you a working CGP
-capability with no trait, no provider, and no wiring line:
+method with no hand-written trait, no provider, and no wiring line:
 
 ```rust
 #[cgp_fn]
@@ -76,7 +76,7 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 ```
 
 Any context with a `width` and a `height` can now call `rectangle_area()`. That is the whole program.
-There is no component to define and nothing to choose, because this capability has one implementation
+There is no component to define and nothing to choose, because this trait has one implementation
 and needs none. It is the smallest useful thing CGP does, and the right place to start a codebase that
 may never need more.
 
@@ -129,7 +129,7 @@ where
 ```
 
 `HasAuthHeader` there is a getter on `Request`, not on the application, and no implicit argument can
-express that. The accessor may also need to exist as a **named capability** that other code depends on
+express that. The accessor may also need to exist as a **named trait** that other code depends on
 through `#[uses(...)]` or a supertrait, because a name is something you can require and an argument is
 not. Or the getter may carry an **associated type inferred from the field**, so callers stay generic
 over what the value actually is.
@@ -170,7 +170,7 @@ this shape.
 
 For the constructs, [`#[implicit]`](/docs/reference/attributes/implicit) carries the full list of
 accepted forms and access rules, [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is the no-wiring
-capability, [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter) is the getter to reach for in
+trait, [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter) is the getter to reach for in
 the three cases above, and [`HasField`](/docs/reference/traits/field-access/has_field) is the trait underneath all of
 them.
 

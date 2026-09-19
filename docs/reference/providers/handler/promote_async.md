@@ -21,7 +21,7 @@ the handler family one slot at a time. This page explains what that wiring emits
 ## Overview
 
 `PromoteAsync<Provider>` runs a synchronous inner provider inside an async method, so a synchronous
-handler serves an asynchronous slot on a **context**, the type a capability runs against. The returned
+handler serves an asynchronous slot on a **context**, the type a method runs on. The returned
 future is ready immediately, so no actual asynchrony is added. Like every CGP provider, it carries no
 runtime value; the inner provider rides in `PhantomData`.
 

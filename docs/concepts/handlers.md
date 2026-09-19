@@ -174,7 +174,7 @@ an executor that requires `Send` needs an additional guarantee, described in
 
 A plain function is simpler when a computation does not need interchangeable stages or context-specific
 composition. [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) provides a lighter option when a single
-implementation needs values or capabilities from a context without handler wiring.
+implementation needs values or traits from a context without handler wiring.
 
 ## Where to go next
 

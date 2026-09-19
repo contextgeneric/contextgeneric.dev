@@ -22,7 +22,7 @@ HasField<Symbol!("name"), Value = String>
 ```
 
 Encoding a string as a type lets field access take part in trait resolution. A **context** is the type
-the capability runs against, and it supplies the values it needs as its own fields. It can carry a
+the method runs on, and it supplies the values it needs as its own fields. It can carry a
 `HasField<Symbol!("width")>` impl and a `HasField<Symbol!("height")>` impl side by side, and the compiler
 picks the right one from the tag alone. Nothing is compared at runtime, because there is nothing at runtime:
 the tag exists only during compilation.

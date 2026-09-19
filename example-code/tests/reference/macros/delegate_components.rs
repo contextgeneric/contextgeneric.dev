@@ -508,7 +508,7 @@ pub mod statements_come_first {
 
 /// ## Examples
 ///
-/// The two-context payoff the page builds to: the same capability answered differently by two
+/// The two-context payoff the page builds to: the same trait answered differently by two
 /// contexts, and a generic function serving both.
 pub mod examples {
     use cgp::prelude::*;

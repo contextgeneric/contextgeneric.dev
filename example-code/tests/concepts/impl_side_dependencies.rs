@@ -112,7 +112,7 @@ pub mod two_providers_two_requirements {
         check_components! { TestApp { EmailSenderComponent } }
     }
 
-    /// Neither requirement reaches a caller: this function bounds on the capability alone, and it
+    /// Neither requirement reaches a caller: this function bounds on the trait alone, and it
     /// accepts both contexts even though they satisfy it for entirely different reasons.
     pub fn notify<Context>(context: &Context)
     where

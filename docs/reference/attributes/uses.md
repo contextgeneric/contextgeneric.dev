@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # `#[uses]`
 
-Import the capabilities an implementation depends on, reading like a `use` statement.
+Import the traits an implementation depends on, reading like a `use` statement.
 
 ## Overview
 
@@ -17,13 +17,13 @@ against:
 #[uses(RectangleArea)]
 ```
 
-That reads as *this implementation uses the `RectangleArea` capability*, the same meaning a `use`
+That reads as *this implementation uses the `RectangleArea` trait*, the same meaning a `use`
 statement has for a name. The body can then call `self.rectangle_area()` as though it had imported
-the capability. `#[uses]` is the consumer-side counterpart to [`#[use_provider]`](use_provider.md).
+the trait. `#[uses]` is the consumer-side counterpart to [`#[use_provider]`](use_provider.md).
 `#[use_provider]` imports a provider trait that a named provider must satisfy for the context, whereas
 `#[uses]` imports a trait that the context itself must satisfy.
 
-The requirement stays private to the implementation. A caller who depends on the capability never sees
+The requirement stays private to the implementation. A caller who depends on the trait never sees
 it and never has to repeat it. That is the point of declaring the dependency where the implementation
 lives rather than on its public interface. Prefer `#[uses]` over a hand-written bound. The equivalent
 `where` clause is the older form you meet in existing code, and [Under the hood](#under-the-hood)
@@ -38,12 +38,12 @@ implementation:
 #[uses(RectangleArea, CanCalculateArea)]
 ```
 
-Each entry is a capability, optionally with type arguments: a bare `RectangleArea` becomes
+Each entry is a trait, optionally with type arguments: a bare `RectangleArea` becomes
 `Self: RectangleArea`, and `CanCompute<Code, Input>` becomes `Self: CanCompute<Code, Input>`.
 
 **The trait need not be a CGP construct.** `#[uses(Display)]` and `#[uses(AsRef<[u8]>)]` are accepted and
 preferred over the equivalent hand-written clause. The attribute only requires that the bound is one a
-context can satisfy, so an ordinary Rust trait imports exactly as a capability does.
+context can satisfy, so an ordinary Rust trait imports exactly as a CGP trait does.
 
 **Prefer one attribute carrying every dependency**, as in `#[uses(RectangleArea, Display)]`, because a
 single list reads as a single set of requirements. You may also split entries across several
@@ -52,7 +52,7 @@ attribute only when there is a reason.
 
 `#[uses(...)]` is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md) and on
 [`#[cgp_impl]`](../macros/cgp_impl.md). In both, it imports into the item being defined, and it does not
-matter how the imported capability was itself produced.
+matter how the imported trait was itself produced.
 
 ### Bounds beyond the simple form
 
@@ -69,7 +69,7 @@ type as a bare `Error`. To put a bound on the generated trait rather than only o
 
 ## Examples
 
-A capability built on top of a component, without knowing which provider supplies it:
+A trait built on top of a component, without knowing which provider supplies it:
 
 ```rust
 use cgp::prelude::*;
@@ -91,7 +91,7 @@ than on any particular provider, so every context that can calculate an area get
 regardless of how it does so. A context that swaps its area provider keeps `scaled_area` working
 unchanged.
 
-The same attribute inside a provider, this time importing a plain function-style capability:
+The same attribute inside a provider, this time importing a plain function-style trait:
 
 ```rust
 #[cgp_fn]
@@ -109,17 +109,17 @@ impl AreaCalculator {
 ```
 
 This provider is a short adapter: it satisfies the `AreaCalculator` component by calling whatever
-`rectangle_area` computes. Any context with the fields that capability needs can wire it.
+`rectangle_area` computes. Any context with the fields that trait needs can wire it.
 
 ## When to use it
 
-**Use `#[uses]` for every capability dependency**, in preference to writing the `Self:` bound by hand.
+**Use `#[uses]` for every trait dependency**, in preference to writing the `Self:` bound by hand.
 You read the hand-written form in existing code rather than write it.
 
 The choice between `#[uses]` and its neighbours turns on *what* the implementation depends on, and on
 *where* the requirement should be visible.
 
-- **A value from the context** is not a capability. Use an [`#[implicit]`](implicit.md) argument, which
+- **A value from the context** is not a trait. Use an [`#[implicit]`](implicit.md) argument, which
   reads a field directly rather than routing through a trait.
 - **A type from the context** is imported with [`#[use_type]`](use_type.md), which adds the bound and
   additionally lets the signature write the type as a bare name instead of a qualified path.
@@ -221,14 +221,14 @@ the missing argument.
 - [`#[cgp_fn]`](../macros/cgp_fn.md) and [`#[cgp_impl]`](../macros/cgp_impl.md) — the two hosts.
 - [`#[extend]`](extend.md) — the same syntax, but as a public supertrait rather than a private bound.
 - [`#[extend_where]`](extend_where.md) — a predicate on the generated trait's own `where` clause.
-- [`#[use_type]`](use_type.md) — imports a type rather than a capability, and rewrites its uses.
+- [`#[use_type]`](use_type.md) — imports a type rather than a trait, and rewrites its uses.
 - [`#[use_provider]`](use_provider.md) — imports an inner provider, filling in its context argument.
-- [`#[implicit]`](implicit.md) — imports a value from a field rather than a capability.
-- [`#[cgp_component]`](../macros/cgp_component.md) — defines the capabilities most often imported.
+- [`#[implicit]`](implicit.md) — imports a value from a field rather than a trait.
+- [`#[cgp_component]`](../macros/cgp_component.md) — defines the traits most often imported.
 
 The ideas behind it:
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — what an imported capability
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — what an imported trait
   becomes, and why callers never see it.
 
 ## Source

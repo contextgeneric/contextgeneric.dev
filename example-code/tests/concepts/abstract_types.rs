@@ -74,7 +74,7 @@ pub mod choosing_the_type_by_wiring {
 
 /// ## One type, agreed on by everything that needs it
 ///
-/// The shapes carry no scalar type of their own. The context supplies one, and every capability
+/// The shapes carry no scalar type of their own. The context supplies one, and every trait
 /// that mentions it means the same type.
 pub mod one_type_agreed_on_by_everything {
     use cgp::prelude::*;

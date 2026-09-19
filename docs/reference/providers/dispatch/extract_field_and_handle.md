@@ -13,7 +13,7 @@ The per-variant adapter that tries one variant and forwards its matched payload 
 tries to extract the variant named `Tag` from the input. On success it wraps the payload in a
 `Field<Tag, Value>` and hands it to `Provider`, returning `Ok` of the provider's output. On failure it
 returns `Err` of the remainder, the extractor with that variant ruled out. It runs on a **context**, the
-type a capability runs against. It returns the `Result<Output, Remainder>` shape the
+type a method runs on. It returns the `Result<Output, Remainder>` shape the
 matcher loop expects, so a [`Product!`](../../macros/product.md) of these adapters is the list a matcher
 consumes. Like every CGP provider, it carries no runtime value.
 

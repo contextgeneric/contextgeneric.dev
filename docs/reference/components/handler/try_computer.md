@@ -13,7 +13,7 @@ The fallible synchronous member of the handler family: a computer that can retur
 up a key, or checks an invariant may not be able to produce its output, and it needs a way to report the
 failure. Where [`Computer`](./computer.md) returns its `Output` directly, `TryComputer` returns
 `Result<Output, Error>`, where the error is the **context's** shared abstract error type. The context is
-the type a capability runs against, which supplies the values an implementation needs as its own fields.
+the type a method runs on, which supplies the values an implementation needs as its own fields.
 This places `TryComputer` one step up from `Computer` on the fallibility axis of the
 [handler family](/docs/concepts/handlers), still synchronous but now able to fail, and one step below
 [`Handler`](./handler.md), which adds asynchrony on top.
@@ -61,7 +61,7 @@ consumer method mirrors `compute` but returns a `Result`:
 fn try_compute(&self, _code: PhantomData<Code>, input: Input) -> Result<Self::Output, Error>;
 ```
 
-A context gains the capability by wiring `TryComputerComponent` to a provider. In everyday use the
+A context gains the operation by wiring `TryComputerComponent` to a provider. In everyday use the
 provider comes from [`#[cgp_computer]`](../../macros/cgp_computer.md), which turns a function returning
 `Result<u64, String>` into a `TryComputer` provider and wires the promotion table so the same function
 also answers `CanCompute`, `CanHandle`, and the by-reference forms.

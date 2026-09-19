@@ -11,7 +11,7 @@ Define a getter as a blanket impl over `HasField`, keyed by the method name.
 
 `#[cgp_auto_getter]` publishes a context field as a named, reusable accessor. You write a trait of getter
 methods, and the macro implements it for every **context** that happens to carry fields of the matching
-names. The context is the type the capability runs against, and it supplies the values it needs as its
+names. The context is the type the method runs on, and it supplies the values it needs as its
 own fields. For example:
 
 ```rust
@@ -33,7 +33,7 @@ able to state the same thing as `fn name(&self) -> &str;` is the point.
 **Use it sparingly.** For the ordinary case, a provider reading a field of its own context, an
 [`#[implicit]`](../attributes/implicit.md) argument does the same job with no trait to declare, using the
 same field access and the same conversion rules, so a getter trait declared only to read a field adds a
-name and gives nothing back. A getter trait *does* give you one thing: a capability other code can depend on by name.
+name and gives nothing back. A getter trait *does* give you one thing: an accessor other code can depend on by name.
 The cases where that matters are in
 [When to use it](#when-to-use-it).
 
@@ -216,7 +216,7 @@ A getter trait is worth declaring in a few cases an implicit argument cannot rea
 - **The field lives on another type.** An implicit argument reads only from `self`, so a value held by a
   request, a payload, or any other type needs a getter that can be demanded as a bound on *that* type,
   as in `Request: HasBasicAuthHeader<Self>`. There is no `self` field to read.
-- **The accessor must be a named capability.** When other code depends on "this context can tell you its
+- **The accessor must be a named trait.** When other code depends on "this context can tell you its
   name" rather than on a field, that dependency needs a trait to point at, importable with
   [`#[uses]`](../attributes/uses.md) or usable as a supertrait via [`#[extend]`](../attributes/extend.md).
 - **The getter carries a type inferred from the field.** The associated-type form above keeps the type
