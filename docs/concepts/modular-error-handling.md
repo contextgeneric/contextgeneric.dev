@@ -5,39 +5,34 @@ sidebar_position: 10
 
 # Modular error handling
 
-The error type, how a foreign error becomes it, and what detail it carries: three choices a context
-makes independently of the code that fails.
+CGP lets reusable fallible code use an error type chosen by its context. The context selects the
+error type, how source errors become that type, and how additional detail is attached. This page
+follows a port parser through those choices, then applies the pattern to application-specific errors
+and explains its costs.
 
-This page answers *how does fallible code avoid committing to an error type?* It separates the three
-decisions error handling actually contains, shows a provider that makes none of them, and ends with the
-same pattern applied to an application's own error vocabulary. It closes on where the separation stops
-paying.
+## Separating failure from error representation {#why-the-error-type-is-the-hard-one}
 
-## Why the error type is the hard one
+A reusable parser can detect a failure without deciding how every application should represent it.
+One application may want a string, another a domain enum, and another an error-library type. Fixing
+that choice inside the parser limits where the same implementation can be reused.
 
-Every fallible function has to return *something*, and generic code should not decide what. A
-provider parsing a port number does not know whether the application wants `anyhow::Error`, a domain
-enum, or a plain string, and hard-coding any of them commits every caller in every application to that
-choice.
+Ordinary Rust offers several ways to expose the choice. A function can return a concrete error for
+callers to convert, take a generic error parameter, or use an associated error type. CGP combines a
+shared associated type with interchangeable providers for constructing and enriching errors.
 
-The usual answers each cost something. A concrete error type in a library is a decision imposed on
-users. A generic `<E>` parameter is an input the caller supplies, so it lands in every intermediate
-signature along with its bounds, which is the leak [impl-side dependencies](./impl-side-dependencies.md)
-describes. Converting by hand at each boundary is the boilerplate error-handling crates exist to remove,
-and it comes back the moment the boundary is generic.
+The built-in components separate these responsibilities:
 
-This becomes tractable once you notice that "error handling" is not one decision but three, and that
-they are independent:
+- **`HasErrorType`:** Names the context's shared `Error` type, which must implement `Debug`.
+- **`CanRaiseError<SourceError>`:** Converts a source error into that shared type.
+- **`CanWrapError<Detail>`:** Attaches detail to an existing error.
 
-- **what the error type is**: a type the context names;
-- **how a foreign error becomes it**: `ParseIntError`, `io::Error`, or a `String` from a domain rule;
-- **what detail is attached** as it propagates.
+A provider declares the raising and wrapping operations it needs. The context then selects
+compatible implementations, so these choices can vary without changing the provider's source.
 
-CGP makes each of the three a wiring choice, and the code that fails makes none of them.
+## A parser with an abstract error type
 
-## Code that fails without knowing what failing means
-
-The trait names its error abstractly, and the provider raises into it:
+The parser names its return error abstractly and raises the concrete failures it encounters.
+This fragment assumes `cgp::prelude::*` and `core::num::ParseIntError` are imported:
 
 ```rust
 #[cgp_component(PortParser)]
@@ -63,16 +58,18 @@ impl PortParser {
 ```
 
 `Error` is the context's [abstract type](./abstract-types.md), imported by `#[use_type]`.
-`Self::raise_error` turns a concrete failure into it, and the `#[uses]` line declares which failures
-this provider raises, two of them, a parse error and a string, as requirements on the implementation
-rather than on the interface. A caller bounding on `CanParsePort` learns none of it.
+`Self::raise_error` converts either a `ParseIntError` or a `String` into it. The `#[uses]` line
+requires those conversions on the implementation; a caller bounded by `CanParsePort` needs only
+the parser interface and its shared error type.
 
-The provider calls `raise_error` on the *type* rather than on a value, because constructing an error is
-something the context knows how to do rather than something a particular value does.
+`raise_error` is an associated function called on the context type. Error construction therefore
+uses the context's selected implementation without requiring a context value.
 
-## Three sources, three strategies, one table
+## Selecting a strategy for each source
 
-The context supplies the answers, making the second and third decisions per source error type:
+The context can route different source errors through different providers. This table assumes an
+`App` context, the error component keys imported from `cgp::core::error`, and `RaiseFrom` and
+`DebugError` imported from `cgp::extra::error`:
 
 ```rust
 delegate_components! {
@@ -88,21 +85,19 @@ delegate_components! {
 }
 ```
 
-Three lines, three decisions. The error type is `String`. A raised `String` is converted straight
-through with `From`. A `ParseIntError` is formatted with `Debug` into a `String`, then handed back
-to the context's own `String` route, so the two compose rather than each needing to know the final
-type.
+`App` uses `String` as its error type. `RaiseFrom` converts a raised `String` through `From`, which
+returns the same string here. `DebugError` formats a `ParseIntError` into a string, then calls the
+context's `String` raiser. The formatting provider thus relies on the conversion selected by the
+context instead of naming the final error type itself.
 
-The per-source dispatch buys exactly that last point. A real application raises a dozen unrelated
-failures, and most of them want the same treatment; naming a strategy per source type lets the
-interesting ones differ without a match arm anywhere. CGP ships the strategies as ordinary providers:
-`RaiseFrom` for a `From` conversion, `DebugError` and `DisplayError` for formatting, `ReturnError` when
-the source already is the error type, and `RaiseInfallible` for a step that cannot fail. They stay
-generic over whatever error type the context chose.
+Other providers express different policies. `DisplayError` uses `Display` formatting,
+`ReturnError` accepts a source that already has the context's error type, and `RaiseInfallible`
+handles `Infallible`. Per-source dispatch lets a context combine these strategies where needed.
 
-## Changing the answer changes nothing else
+## Changing the error type
 
-Because the decisions are separate, moving to a different error type is a change to the table:
+The same parser can return a domain error when another context supplies compatible conversions.
+In this fragment, `AppError` must implement `Debug` and `From<String>`:
 
 ```rust
 delegate_components! {
@@ -118,18 +113,31 @@ delegate_components! {
 }
 ```
 
-`ParsePortFromStr` is the same provider, unmodified and un-recompiled in any meaningful sense. It never
-named `String`, so nothing in it referred to the thing that changed. Swapping `anyhow` for `eyre`, or a
-prototype's `String` for a real domain type, is this edit.
+`ParsePortFromStr` can be reused unchanged because it never fixed its return error to `String`.
+It still raises a `String` for an out-of-range port, and `RaiseFrom` now converts that message into
+`AppError`. Rust checks and monomorphizes the provider for the new context as usual.
 
-Concrete backends come as separate crates for the same reason: `cgp-error-anyhow` and its siblings each
-supply a type-setting provider and the raisers that go with it, so the dependency on `anyhow` lives in
-the wiring rather than in any code that fails.
+Error-library backends package compatible type providers, raisers, and wrappers. For example,
+`cgp-error-anyhow` supplies providers for `anyhow::Error`, while `cgp-error-eyre` supplies the
+corresponding `eyre` integration. Choosing a backend keeps those concrete dependencies in the
+application's wiring rather than in reusable providers.
+
+## Attaching detail as an error propagates
+
+`CanWrapError<Detail>` lets a provider enrich an error it did not construct. A caller might attach
+the configuration path after a port parser fails. The provider declares the wrapping requirement
+and calls `Self::wrap_error(error, detail)`; the context chooses how the detail is stored or formatted.
+
+Wrapping is separate from raising because a source error and propagation detail serve different
+purposes. A source explains what failed, while detail can identify which request or resource was
+involved. `DiscardDetail` can deliberately ignore that detail, and a backend wrapper can preserve it.
+The parser above only raises errors, so its context does not need a wrapper until another provider
+requires one.
 
 ## An application's own error vocabulary
 
-None of this is confined to CGP's built-in components, and the clearest sign of that is defining your
-own. A service that wants every failure to carry an HTTP status declares a component for it:
+Application-specific components can express failures that need more structure than a message.
+A service can define a raising operation that takes a status marker and detail:
 
 ```rust
 #[cgp_component(HttpErrorRaiser)]
@@ -139,49 +147,46 @@ pub trait CanRaiseHttpError<Code, Detail> {
 }
 ```
 
-`ErrUnauthorized` and `ErrNotFound` are empty structs standing for status codes, and a provider per code
-builds the concrete error. A handler deep in the request pipeline then writes
+Markers such as `ErrUnauthorized` and `ErrNotFound` identify domain failures. Providers map them to
+status codes and construct the context's error. A handler requiring the appropriate
+`CanRaiseHttpError` implementation can then call:
 
 ```rust
 Self::raise_http_error(ErrUnauthorized, "you must first login")
 ```
 
-and knows neither the status number nor the error type. The two are decided in the table, in the same
-place as everything else the application decides. This is the whole pattern, applied to a vocabulary
-the built-in components know nothing about.
+The handler names the failure and its detail. Its selected provider determines the numeric status
+and concrete error representation, just as the built-in raiser determines how a parse error is stored.
 
 ## What it costs
 
-**The imports are not in the prelude, deliberately.** `HasErrorType` and `CanRaiseError` are, but the
-wiring keys live under `cgp::core::error` and the strategy providers under `cgp::extra::error`. That is
-a real annoyance the first time, and it is the price of the error components not being forced on code
-that does not use them.
+The selected error type must satisfy every chosen provider's requirements. A formatting route can
+lose the original error's structure, and a `From` route requires a suitable conversion. Changing
+the type may therefore require changing strategies as well as the type-setting entry.
 
-**Three decisions means three ways to be under-wired.** A context can name an error type and forget a
-raiser for a source some provider raises, and it compiles until something raises one.
-[`check_components!`](/docs/reference/macros/check_components) catches it, as with any other
-wiring.
+Missing raisers and wrappers can remain undetected until the relevant operation is checked or used.
+Use [`check_components!`](/docs/reference/macros/check_components) to verify the parser and other
+application components against their contexts. Naming an error type alone does not establish that
+all required conversions exist.
 
-**The error type is one per context.** All the code in a context sharing one `Error` lets errors
-compose without conversion; it also means a context genuinely needing two unrelated error types needs
-two components or two contexts.
-
-**And it does not decide what a good error is.** CGP makes the type swappable and the construction
-routable. Whether your errors carry useful context, whether they are matchable, whether the messages
-help: all of that is the same design problem it always was, and wiring answers none of it.
+`HasErrorType` selects one shared error type per context. That makes component errors compose, but
+an application needing independent error types must model them with separate type components or
+contexts. CGP also leaves error design to the application: useful messages, preserved causes, and
+matchable variants depend on the chosen representations and providers.
 
 ## Where to go next
 
-[Abstract types](./abstract-types.md) is the mechanism the error type rests on, and worth reading first
-if `#[use_type]` above was unfamiliar. [Impl-side dependencies](./impl-side-dependencies.md) is why the
-`#[uses(CanRaiseError<…>)]` line does not reach callers, and
-[Dispatching](./dispatching.md) is the general form of the per-source routing.
+These pages explain the supporting mechanisms and available strategies:
 
-For the constructs, [`HasErrorType`](/docs/reference/components/has_error_type) is the abstract error
-type, [`CanRaiseError`](/docs/reference/components/can_raise_error) covers raising and wrapping, and
-[the error providers](/docs/reference/providers/error) is the catalogue of strategies with the
-bound each one places on the context.
-- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): why `raise_error` selects an interpretation but passes no control.
+- [Abstract types](./abstract-types.md): How the context selects a shared type.
+- [Impl-side dependencies](./impl-side-dependencies.md): Why conversion requirements stay on the
+  provider.
+- [Dispatching](./dispatching.md): Selecting providers by type.
+- [`HasErrorType`](/docs/reference/components/has_error_type) and
+  [`CanRaiseError` / `CanWrapError`](/docs/reference/components/can_raise_error): The error interfaces.
+- [Error providers](/docs/reference/providers/error): Strategies and their requirements.
+- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): Why raising selects an
+  interpretation while ordinary Rust control flow still propagates the error.
 
 ---
 

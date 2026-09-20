@@ -5,20 +5,17 @@ sidebar_position: 16
 
 # Type-level DSLs
 
-Encoding a small language as Rust types and interpreting it during compilation, with no interpreter
-left at runtime.
+A type-level domain-specific language represents a program as Rust types and uses CGP wiring to
+select implementations for its operations. The compiler checks and resolves the program's structure;
+the selected operations run when called. This page develops a small arithmetic language, explains
+how its syntax and interpretation can vary independently, and identifies the limits of the approach.
+It assumes familiarity with [handlers](./handlers.md).
 
-This page answers *what happens when the `Code` tag carries a whole program?* It is the furthest thing
-CGP's pieces are put to, and it assumes [handlers](./handlers.md). It shows a small language built from
-types, why separating its syntax from its meaning is the point, and how a third party extends it. It
-closes on the boundary: the programs this cannot express.
+## A program represented as a type
 
-## A program that is a type
-
-The [handler family](./handlers.md) threads a phantom `Code` tag so one context can host many
-computations. Nothing says the tag has to be small.
-
-Make it the program:
+The handler family's `Code` parameter can describe a whole program. Each syntax form becomes a
+marker type, and its parameters describe the program's structure. These fragments assume
+`PhantomData` and CGP's prelude are imported:
 
 ```rust
 pub struct Literal<const N: u64>;
@@ -26,45 +23,46 @@ pub struct Add<Left, Right>(pub PhantomData<(Left, Right)>);
 pub struct Multiply<Left, Right>(pub PhantomData<(Left, Right)>);
 ```
 
-Three structs with no data and no methods. They exist to be *named in a type*, and nesting them writes a
-program:
+Nesting the markers represents a compound expression:
 
 ```rust
 type Program = Multiply<Add<Literal<2>, Literal<3>>, Literal<4>>;
 ```
 
-That is `(2 + 3) * 4` as a type. It is the language's **abstract syntax**, and this is the whole idea:
-it says nothing at all about what any of it means.
+`Program` represents `(2 + 3) * 4`. The marker types form the language's **abstract syntax**:
+they describe the expression without implementing its evaluation. An evaluator can compute its
+value, while a different interpreter could format the same expression as text.
 
-For a real language the fragments carry more: a
-[`Product!`](/docs/reference/macros/product) list for a pipeline of stages, a
-[`Symbol!`](/docs/reference/macros/symbol) where a string literal would go, since a `&str` value cannot
-appear where only types are allowed.
+Larger languages can use type-level collections and strings within their syntax.
+[`Product!`](/docs/reference/macros/product) can hold a pipeline's stages, and
+[`Symbol!`](/docs/reference/macros/symbol) can represent a string in a type position.
+These describe the fixed program; handlers can still receive runtime values as their inputs.
 
-## The meaning is a set of providers
+## Providers give syntax its behavior
 
-Meaning arrives separately, one provider per fragment, each matching its own shape of `Code`:
+A provider implements one syntax form and asks the context to interpret its subexpressions.
+This addition provider assumes the `Computer` provider trait is imported from `cgp::extra::handler`:
 
 ```rust
-#[cgp_new_provider]
-impl<Context, Left, Right> Computer<Context, Add<Left, Right>, ()> for EvalAdd
-where
-    Context: CanCompute<Left, (), Output = u64> + CanCompute<Right, (), Output = u64>,
-{
+#[cgp_impl(new EvalAdd)]
+#[uses(CanCompute<Left, (), Output = u64>, CanCompute<Right, (), Output = u64>)]
+impl<Left, Right> Computer<Add<Left, Right>, ()> {
     type Output = u64;
 
-    fn compute(context: &Context, _code: PhantomData<Add<Left, Right>>, _input: ()) -> u64 {
-        context.compute(PhantomData::<Left>, ()) + context.compute(PhantomData::<Right>, ())
+    fn compute(&self, _code: PhantomData<Add<Left, Right>>, _input: ()) -> u64 {
+        self.compute(PhantomData::<Left>, ()) + self.compute(PhantomData::<Right>, ())
     }
 }
 ```
 
-`EvalAdd` interprets *any* addition, whatever its operands, and it evaluates them by asking the context.
-Asking the context, rather than evaluating the operands itself, both drives the recursion and keeps the
-provider from knowing the rest of the language. Its requirements say only "the context can evaluate my
-operands".
+`EvalAdd` handles any `Add<Left, Right>` whose operands the context can compute as `u64`.
+Its requirements describe those computations without naming the providers that perform them.
+Calling the context for each operand lets the addition provider work with syntax introduced by
+other crates.
 
-The context then assembles the language, one row per fragment:
+The context assembles an interpreter by selecting a provider for each syntax form. This fragment
+assumes an `Interpreter` context, matching `EvalLiteral` and `EvalMultiply` providers, and an import
+of `ComputerComponent`:
 
 ```rust
 delegate_components! {
@@ -78,74 +76,84 @@ delegate_components! {
 }
 ```
 
-And running a program is one call:
+Each generic entry covers a family of expressions. The addition entry applies to every
+`Add<Left, Right>` with unit input, subject to the selected provider's requirements. Running the
+program then uses the ordinary consumer method:
 
 ```rust
 Interpreter.compute(PhantomData::<Program>, ())   // 20
 ```
 
-Because the keys are types with structure, a single row captures a whole family of programs, every
-`Add<_, _>` there will ever be. A value-level lookup table cannot do that.
+## What the compiler resolves
 
-## What the separation buys
+Rust resolves provider selection recursively through the program type. For `Program`, it checks
+that multiplication can compute its operands, that addition can compute its operands, and that
+each literal has an implementation. The resulting calls use static dispatch without a runtime
+syntax-tree lookup or interpreter dispatch loop.
 
-There is no parser, no syntax tree walked at run time, and no dispatch loop. **Type checking the call
-is the interpretation**: the compiler resolves the wiring recursively through the program's structure,
-and only the arithmetic is left in the binary.
+The computation itself remains ordinary Rust execution. `compute` is not a `const fn`; type
+checking does not evaluate its arithmetic. An optimizer may fold this constant example, but the
+DSL does not guarantee that. A provider performing I/O or processing runtime input does that work
+when the program runs.
 
-The more interesting consequence is that syntax and meaning vary independently.
+## Syntax and interpretation can vary independently
 
-**One program, several meanings.** A second context wiring the same fragments to different providers
-interprets the same program differently: evaluate it, pretty-print it, cost it, or run it against a test
-double. Nothing in the program changes, because the program never said what it meant.
+Different contexts can assign different meanings to the same program type. One context may
+evaluate arithmetic while another pretty-prints it or estimates its cost. Each interpretation
+needs providers with mutually compatible input and output types; the syntax stays unchanged.
 
-**One meaning, extended syntax.** A crate that does not own the language defines a new fragment and a
-provider for it, and a context that wants both wires both. The base language is not patched, forked, or
-even recompiled. The extension is a row. That is the [expression problem](./extensible-variants.md)
-answered on the syntax side, and it is why a DSL built this way can have third-party dialects.
+An independent crate can extend the syntax by defining another marker and its provider.
+A context includes that form by adding wiring, without editing the base language's source.
+Existing providers such as `EvalAdd` can accept the new form as an operand when it satisfies their
+computation requirements. This addresses the syntax-extension side of the
+[expression problem](./extensible-variants.md).
 
-At scale the rows themselves become a [namespace](./namespaces.md), so a context joins a language rather
-than listing its fragments, and an extension is a namespace inheriting the base.
+Namespaces package a language's shared wiring for reuse. A child namespace can add entries for
+new forms while inheriting the base language. Alternative interpretations must still respect the
+[namespace rule](./namespaces.md#a-bound-entry-cannot-be-overridden): an inherited bound entry
+cannot be replaced, so paths that need different providers must remain open in the shared base.
 
-## A readable surface is optional
+## An optional surface syntax
 
-A procedural macro can sit on top, turning an infix pipe into a nested type or a string literal into a
-`Symbol!`. Such a macro does shallow token rewriting and emits the same types a programmer could write
-by hand.
+A procedural macro can make programs easier to write by translating syntax into the same marker
+types. For example, it might turn a pipeline expression into nested types or a string literal into
+`Symbol!`. Interpretation remains in the providers, so handwritten types and macro-generated types
+use the same implementations.
 
-Keeping it that thin is deliberate: because the macro carries no meaning, the language stays fully
-usable and fully extensible without it, and the grammar can evolve without touching either the macro or
-the interpreters.
+Separating syntax translation from execution keeps provider changes independent of the macro.
+A generic surface syntax may also accept new fragments without a macro change. New grammatical
+forms can still require changes to the parser or macro; type-level representation alone does not
+make every syntax extension automatic.
 
 ## What it costs
 
-**The program must be known at compile time.** This is the boundary, and it is absolute. A script read
-from a file, a pipeline configured at startup, or a user-supplied expression cannot be a type.
-If programs arrive at run time you need a runtime interpreter, and this technique is not one.
+The program's type structure must be known at compile time. Runtime inputs and branches inside
+providers are possible, but an arbitrary script loaded from a file cannot become a new Rust type
+inside the running binary. Such a script needs a runtime interpreter or a separate compilation step.
 
-**The diagnostics are the worst CGP produces.** A malformed program is a trait-resolution failure over a
-deeply nested type, reported in terms of the whole program rather than the fragment at fault. Checks
-localize it and the toolchain reshapes what it recognizes; a badly nested program is still hard reading.
+Nested program types can produce long trait-resolution errors. Missing wiring or incompatible
+operand outputs may appear through several layers of provider bounds. Checking smaller expressions
+before combining them helps locate the mismatch.
 
-**Compile times go up.** Every fragment of every program is resolution work, and a large program
-instantiated several ways is where CGP's compile-time cost is most visible.
-
-**And it is the most advanced thing here.** Everything else in this section is worth reaching for
-routinely. This is worth reaching for when a language is genuinely the right shape for a problem, such
-as build pipelines, protocol descriptions, or shell-like scripting, and when the programs are fixed when
-the binary is.
+Compilation must resolve the bounds and generate code for the concrete programs used. Large
+programs and multiple interpretations can increase compile time and generated code size. The
+tradeoff is most useful when reusable, extensible program descriptions justify those costs, such
+as fixed build pipelines or protocol descriptions. Direct Rust functions are simpler for a small
+set of fixed computations that does not need a language of its own.
 
 ## Where to go next
 
-[Handlers](./handlers.md) is the family this rests on, and the page to read first.
-[Dispatching](./dispatching.md) is the same routing applied to data rather than to programs, and
-[namespaces](./namespaces.md) is how a language is packaged once it outgrows a table.
+These pages explain the constructs used to build and package the language:
 
-For the constructs, [`Computer`](/docs/reference/components/handler/computer) and
-[`Handler`](/docs/reference/components/handler/handler) are the interpreter interfaces,
-[`delegate_components!`](/docs/reference/macros/delegate_components) carries the `open` statement and
-generic path keys, and [`Product!`](/docs/reference/macros/product) and
-[`Symbol!`](/docs/reference/macros/symbol) are how a real language carries lists and strings.
+- [Handlers](./handlers.md): Computations parameterized by `Code` and input.
+- [Dispatching](./dispatching.md): Type-directed selection applied to data.
+- [Namespaces](./namespaces.md): Sharing and extending interpreter wiring.
+- [`Computer`](/docs/reference/components/handler/computer) and
+  [`Handler`](/docs/reference/components/handler/handler): Synchronous and async fallible
+  interpreter interfaces.
+- [`delegate_components!`](/docs/reference/macros/delegate_components): `open` and generic path keys.
+- [`Product!`](/docs/reference/macros/product) and [`Symbol!`](/docs/reference/macros/symbol):
+  Type-level lists and strings.
 
 ---
 

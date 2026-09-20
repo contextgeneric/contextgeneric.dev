@@ -26,15 +26,13 @@ impl<Context, const N: u64> Computer<Context, Literal<N>, ()> for EvalLiteral {
     }
 }
 
-#[cgp_new_provider]
-impl<Context, Left, Right> Computer<Context, Add<Left, Right>, ()> for EvalAdd
-where
-    Context: CanCompute<Left, (), Output = u64> + CanCompute<Right, (), Output = u64>,
-{
+#[cgp_impl(new EvalAdd)]
+#[uses(CanCompute<Left, (), Output = u64>, CanCompute<Right, (), Output = u64>)]
+impl<Left, Right> Computer<Add<Left, Right>, ()> {
     type Output = u64;
 
-    fn compute(context: &Context, _code: PhantomData<Add<Left, Right>>, _input: ()) -> u64 {
-        context.compute(PhantomData::<Left>, ()) + context.compute(PhantomData::<Right>, ())
+    fn compute(&self, _code: PhantomData<Add<Left, Right>>, _input: ()) -> u64 {
+        self.compute(PhantomData::<Left>, ()) + self.compute(PhantomData::<Right>, ())
     }
 }
 
@@ -80,9 +78,9 @@ mod check_interpreter {
     }
 }
 
-/// ## Running a program is type checking it
+/// The program structure selects providers statically; calling them evaluates the expression.
 #[test]
-fn the_program_is_a_type_and_the_answer_is_computed_at_compile_time() {
+fn the_program_type_selects_the_providers_that_compute_the_answer() {
     // (2 + 3) * 4
     type Program = Multiply<Add<Literal<2>, Literal<3>>, Literal<4>>;
 

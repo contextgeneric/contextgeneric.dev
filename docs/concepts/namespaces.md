@@ -5,18 +5,15 @@ sidebar_position: 9
 
 # Namespaces
 
-Reusable, inheritable wiring tables that keep a context's own table short as the number of
-components grows.
+Namespaces share wiring across contexts while leaving selected provider choices to each context.
+They are useful when related contexts repeat large parts of the same table. This page explains
+path-based routing, inherited bindings, and the rule that determines what can vary: a context can
+fill an unbound path, but it cannot replace an inherited binding.
 
-This page answers *how does wiring stay readable once there is a lot of it?* It shows what a table
-looks like when it has outgrown its usefulness, the routing that fixes it, and the one rule that
-decides how a namespace has to be designed, a rule most people discover from a compiler error. It
-closes on when the lighter alternative is the better buy.
+## Repeated wiring obscures the differences
 
-## When a table stops being readable
-
-Wiring is meant to be the one place a context's choices are visible. That works while the table is
-short, and stops working when two contexts want almost the same table:
+Separate wiring tables can repeat choices that are intended to stay together. These fragments
+assume the named components, providers, and context types are defined, with CGP's prelude imported:
 
 ```rust
 delegate_components! {
@@ -36,18 +33,14 @@ delegate_components! {
 }
 ```
 
-Two entries out of three are duplicated, and nothing records that they are meant to stay the same.
-Scale that to the thirty components a real application accumulates and the interesting difference, one
-line, is buried in twenty-nine identical ones, which is the opposite of what the table was for.
-
-A **namespace** is a table lifted out of any one context and given a name, so that contexts can share
-it.
+Only the greeter differs, but each table repeats the shared farewell and announcer choices.
+As the shared portion grows, maintaining the tables requires checking that those entries still
+agree. A namespace gives the shared wiring a name that contexts can inherit.
 
 ## Lookups follow a path
 
-The mechanism that makes sharing work is that a namespace resolves **paths** rather than bare
-component names. A component registers itself at a path, and the path is a *route* rather than an
-answer:
+A namespace can register a route for a component while leaving the provider at its destination
+unspecified. This example registers the greeter under an application path:
 
 ```rust
 cgp_namespace! { new AppNamespace {} }
@@ -59,9 +52,8 @@ pub trait CanGreet {
 }
 ```
 
-`AppNamespace` now knows that anything asking for this component should look under
-`@app.GreeterComponent`. It does not know what it will find there. A context joins the namespace and
-supplies the answer at that path:
+`AppNamespace` routes requests for the greeter through `@app.GreeterComponent`. A context joins the
+namespace and supplies the provider at that path:
 
 ```rust
 delegate_components! {
@@ -73,16 +65,18 @@ delegate_components! {
 }
 ```
 
-The `namespace` line makes everything `App` does not wire itself fall through to `AppNamespace`.
-Routing through paths rather than flat keys also lets a whole group be redirected at once and makes
-inheritance possible, since a path has structure a name does not.
+The namespace supplies the route, and `App` supplies its destination binding. Rust resolves both
+at compile time. The context's entry must not overlap an entry the namespace already binds;
+joining a namespace does not give local entries priority over inherited ones.
 
-On its own this is more machinery for the same result. The payoff arrives next.
+Paths also let wiring redirect a group of related lookups. A shared prefix can route a subsystem
+to another prefix, with the remaining path identifying its component and parameters. The
+[`cgp_namespace!` reference](/docs/reference/macros/cgp_namespace) specifies that redirection syntax.
 
-## Binding what is shared, leaving open what varies
+## Bind shared choices and leave varying paths open
 
-A namespace can also **bind** a path, supplying the provider itself rather than routing to it. This
-turns it into a set of defaults:
+A child namespace can inherit routes and bind the choices its contexts share. Assume `Farewell`
+is registered in `AppNamespace` at `@app.FarewellComponent`, just as the greeter is registered above:
 
 ```rust
 cgp_namespace! {
@@ -92,26 +86,21 @@ cgp_namespace! {
 }
 ```
 
-`AppDefaults` inherits the routing from `AppNamespace` and answers the farewell path itself. A context
-joining it supplies only what is left:
+`AppDefaults` supplies the farewell provider and leaves the greeter path unbound. Contexts joining
+it choose only their greeter:
 
 ```rust
 delegate_components! { App     { namespace AppDefaults; @app.GreeterComponent: GreetHello } }
 delegate_components! { TestApp { namespace AppDefaults; @app.GreeterComponent: GreetQuietly } }
 ```
 
-The two contexts now differ by exactly the thing that differs between them. Everything they share is
-stated once, in a place that can be published by a library and adopted by applications that library has
-never heard of.
+Both contexts inherit `SayGoodbye`, and each states its own greeting choice. A library can publish
+this shared configuration for applications to use without knowing those applications' context types.
 
 ## A bound entry cannot be overridden
 
-Here is the rule, and it is worth learning from this page rather than from the error:
-**once a namespace binds a key, no one downstream can rebind it. Only a path the namespace leaves open
-is available to a context.**
-
-The natural thing to reach for, "the namespace sets this, I want something different", does not
-compile:
+A context or child namespace cannot rebind a key supplied by its parent namespace. The following
+separate example deliberately binds the greeter directly, then tries to replace that binding:
 
 ```rust
 cgp_namespace! {
@@ -131,32 +120,30 @@ delegate_components! {
 }
 ```
 
-The same rejection catches a child namespace redefining a key it inherits. The reason is coherence
-rather than policy: joining a namespace generates an implementation covering *every* key the namespace
-answers, and a specific entry for one of those keys overlaps it. The compiler cannot see that you meant
-the specific one to win.
+Rust rejects the overlapping implementations. Joining the namespace generates a forwarding
+implementation for its keys, and the direct `GreeterComponent` entry would implement the same
+lookup again. A child namespace redefining an inherited key has the same problem.
 
-So a namespace is designed around the question *what varies?*, and this is the practical shape:
-**bind what every context agrees on, and leave open what any context might need to differ on.** Where a
-key varies, do not bind it in the shared namespace at all. Inherit and bind it per configuration
-instead:
+Keep configurable paths unbound in the shared base. Returning to the path-based example, each
+configuration can bind the open greeter path in its own child namespace:
 
 ```rust
 cgp_namespace! { new ProductionDefaults: AppDefaults { @app.GreeterComponent: GreetHello  } }
 cgp_namespace! { new TestDefaults:       AppDefaults { @app.GreeterComponent: GreetQuietly } }
 ```
 
-Each child binds the open path rather than overriding a bound one, and a context becomes a single line
-naming which configuration it is.
+`ProductionDefaults` and `TestDefaults` both inherit the shared farewell choice and supply different
+greeters. A context then joins the configuration it needs. Neither child replaces a parent binding.
 
-## Namespaces are how CGP does presets
+## Presets and per-type dispatch
 
-There is no separate preset construct, and no `cgp_preset!` to look for. A preset, a curated bundle of
-defaults you adopt and then adjust, is exactly the inherit-and-adjust behaviour above, so a namespace
-*is* one.
+A namespace can serve as a preset by grouping shared choices and exposing unbound paths for
+configuration. Inheritance adds the remaining choices. The distinction between a fixed binding
+and an open path determines which parts an application can customize.
 
-The same machinery serves a much smaller case. Dispatching a single component per type, with the
-`open` statement, is path routing applied to one component on one context:
+The `open` statement uses related path routing for a smaller task: selecting a provider for each
+type parameter of one component. This standalone fragment assumes an encoder component without a
+namespace prefix:
 
 ```rust
 delegate_components! {
@@ -168,48 +155,45 @@ delegate_components! {
 }
 ```
 
-`open` roots a route at the bare component name and puts the per-type entries in the context's own
-table, with no shared namespace involved. It is the lightweight end of the same mechanism, and most
-code uses it, which is why [bypassing coherence](./coherence.md) and
-[dispatching](./dispatching.md) can use it without mentioning namespaces at all.
-
-The two do not combine for the same component: once a component is registered behind a namespace
-prefix, `open` would root the route at the wrong place, and only the full prefixed path reaches its
-entries.
+`open` roots the route at `EncoderComponent`, and the context supplies entries beneath that root.
+It does not require a shared namespace. Once a component is registered through a namespace prefix,
+its entries must use that full prefixed route instead; opening the same component at its bare name
+does not reach them.
 
 ## What it costs
 
-**The design decision comes first, and it is hard to revise.** Which keys a namespace binds and which
-it leaves open is fixed by the rule above, and changing your mind means changing the namespace, which
-reaches every context that joined it. A bundle of wiring is easier to get wrong here than anywhere else
-in CGP, because the mistake is not visible until a context wants to differ.
+Binding a shared key commits every joining context to that choice. If a later context needs a
+different provider, the namespace design must expose an unbound destination for it. Changing that
+design can affect existing contexts, so decide which choices vary before publishing the shared table.
 
-**It is another hop, and a less obvious one.** With an
-[aggregate provider](./aggregate-providers.md) the context says which components come from the bundle.
-With a namespace it says nothing, since everything not wired locally falls through, so answering
-"where does this implementation come from?" means knowing the namespace and its parents.
+Inherited wiring takes more work to trace. An [aggregate provider](./aggregate-providers.md)
+lets the context list which components it delegates to a bundle. A namespace can supply those
+routes through its registration and parent chain, so finding the selected provider may require
+reading several tables.
 
-**Paths are a second vocabulary.** `@app.GreeterComponent` is a type-level path, and it appears in
-error messages spelled out at length. The toolchain resugars it for the classes it recognizes; a plain
-`cargo check` still shows the raw form.
+Path types can make diagnostics longer, and joining a namespace does not verify every inherited
+component's dependencies. Use separate [`check_components!`](/docs/reference/macros/check_components)
+assertions for the components a concrete context needs.
 
-**And it pays only at scale.** For three components shared by two contexts, the duplication at the top
-of this page is fine and a namespace is not worth its cost. The threshold is a table that has outgrown
-reading, or a library publishing defaults for applications to adopt.
+Small tables often remain clearer when written directly. Namespaces become useful when sharing a
+configuration or grouping routes reduces enough repetition to justify the inheritance and path
+structure. An aggregate provider offers a simpler way to share a named group of implementations.
 
 ## Where to go next
 
-[Aggregate providers](./aggregate-providers.md) is the lighter way to package reusable wiring, and the
-right one until a table is genuinely long. [Bypassing coherence](./coherence.md) and
-[Dispatching](./dispatching.md) both use the `open` form of path routing without needing anything on
-this page.
+These pages cover simpler grouping and the namespace constructs:
 
-For the constructs, [`cgp_namespace!`](/docs/reference/macros/cgp_namespace) defines a namespace and
-carries the `#[prefix(...)]` registration attribute,
-[`delegate_components!`](/docs/reference/macros/delegate_components) carries the `namespace` and `open`
-statements, [`RedirectLookup`](/docs/reference/providers/redirect_lookup) is the provider doing the
-routing, and [`Path!`](/docs/reference/macros/path) is the path type underneath.
-- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): a namespace as a shared prototype whose bound entries cannot be shadowed.
+- [Aggregate providers](./aggregate-providers.md): Reusing selected groups of providers.
+- [Bypassing coherence](./coherence.md) and [Dispatching](./dispatching.md): Provider selection
+  and per-type dispatch.
+- [`cgp_namespace!`](/docs/reference/macros/cgp_namespace): Namespace definitions and inheritance.
+- [`#[prefix]`](/docs/reference/attributes/prefix): Registering component routes.
+- [`delegate_components!`](/docs/reference/macros/delegate_components): Joining a namespace and
+  using `open`.
+- [`RedirectLookup`](/docs/reference/providers/redirect_lookup) and
+  [`Path!`](/docs/reference/macros/path): The routing provider and path types.
+- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): Shared defaults and the
+  differences between namespace inheritance and runtime prototype lookup.
 
 ---
 

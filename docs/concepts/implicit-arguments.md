@@ -5,17 +5,16 @@ sidebar_position: 4
 
 # Implicit arguments
 
-Writing a provider as an ordinary function whose arguments are filled from fields of the context.
+Implicit arguments let a provider declare the context values it needs as function parameters.
+CGP reads those values from the context, so callers pass only the method's explicit arguments.
+This page explains the field access behind that shorthand, how argument types control borrowing
+and cloning, and when a getter trait is a better fit.
 
-This page answers *how does an implementation get a value out of its context, without that becoming a
-thing to learn?* It shows what reading a field costs when spelled out, the argument that replaces it,
-and the rules deciding how the value arrives. It closes on where an implicit argument stops working and
-a getter is the right tool instead.
+## Reading a field explicitly
 
-## What reading a field costs, spelled out
-
-A provider almost always needs data from its context, and the underlying mechanism is a trait keyed by
-the field's name lifted into a type:
+A generic provider reads a context field through `HasField`, a trait keyed by the field's name.
+The following fragment assumes a `Greeter` component with a `greet(&self) -> String` method and
+imports from `cgp::prelude::*`:
 
 ```rust
 #[cgp_impl(new GreetByName)]
@@ -30,19 +29,18 @@ where
 }
 ```
 
-This works, and everything in it is doing something. `Symbol!("name")` is the field's name as a type, so
-one trait can describe every field rather than needing one trait per field. `PhantomData` carries that
-type to the call so inference knows which field is meant. The bound is an
-[impl-side dependency](./impl-side-dependencies.md), which is why the generated trait itself says
-nothing about names.
+`HasField<Symbol!("name"), Value = String>` requires the context to expose a `String` field named
+`name`. `Symbol!("name")` represents the name as a type, and `PhantomData` supplies that type to
+`get_field` so Rust can select the field. The bound is an
+[impl-side dependency](./impl-side-dependencies.md): it constrains this provider without adding a
+field requirement to the consumer trait.
 
-It is also four unfamiliar things stacked in front of a one-line function, and a reader meeting them
-before they have a reason to care about type-level tags will conclude that CGP *is* that. The value the
-provider wants is a `String` called `name`; nothing in the paragraph above is about that.
+The explicit form separates the requirement from the read. For a provider that only needs a local
+value, an implicit argument can express both together.
 
-## The same provider, written as a function
+## The same provider with an implicit argument
 
-An **implicit argument** says the same thing as a parameter:
+An **implicit argument** names a field and declares the type the method body needs:
 
 ```rust
 #[cgp_impl(new GreetByName)]
@@ -53,20 +51,18 @@ impl Greeter {
 }
 ```
 
-Nobody passes the argument. `#[implicit]` removes it from the method's public signature, adds
-the field requirement to the implementation, and binds the value at the top of the body, so a caller
-still writes `app.greet()` with no arguments, and the body reads a plain local.
+`#[implicit]` removes `name` from the method's public signature and generates the field bound and
+read. The body receives a local `name`, while a caller still writes `app.greet()`. Here, `&str`
+borrows the contents of a `String` field.
 
-Nothing was hidden that was not already hidden. The bound, the tag, and the read are the same three
-things; the change is that the author writes the name of the value they want and the macro derives
-the rest from it. Someone who understands functions and arguments can write a complete provider without
-meeting a type-level anything, which is why this is the recommended way to read a context field and the
-starting point most introductions to CGP should use.
+Implicit arguments are the usual choice for reading fields from a provider's own context. They
+keep each value's name and type beside the method that uses it, while the macro supplies the
+`HasField` bound and tagged access.
 
 ## A trait from a function alone
 
-Combined with [`#[cgp_fn]`](/docs/reference/macros/cgp_fn), an implicit argument gets you a working CGP
-method with no hand-written trait, no provider, and no wiring line:
+[`#[cgp_fn]`](/docs/reference/macros/cgp_fn) combines implicit arguments with a single blanket
+implementation, so the operation needs neither a named provider nor wiring:
 
 ```rust
 #[cgp_fn]
@@ -75,46 +71,48 @@ pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) ->
 }
 ```
 
-Any context with a `width` and a `height` can now call `rectangle_area()`. That is the whole program.
-There is no component to define and nothing to choose, because this trait has one implementation
-and needs none. It is the smallest useful thing CGP does, and the right place to start a codebase that
-may never need more.
+The macro generates a `RectangleArea` trait and implements it for contexts exposing `width` and
+`height` through `HasField`, both with type `f64`. A struct can supply those implementations by
+carrying the matching fields and deriving [`HasField`](/docs/reference/derives/derive_has_field).
+Its values can then call `rectangle_area()`.
+
+This form suits an operation with one shared implementation. A component becomes useful when
+contexts need to select among alternative implementations of the same operation.
 
 ## The declared type decides how the field is read
 
-The type on the argument says what the body wants, and the macro inserts whatever bridges it to the
-field the context stores. Three cases cover nearly everything:
+The argument type determines whether the body receives an owned value or a borrow. These common
+forms follow the same access rules as CGP's automatic getters:
 
 ```rust
 #[cgp_fn]
 pub fn describe(
     &self,
-    // Owned: read by reference and cloned, so the context keeps its field.
+    // Cloned from the context's String field.
     #[implicit] name: String,
-    // `&str`: backed by a `String` field, borrowed rather than cloned.
+    // Borrows the contents of the context's String field.
     #[implicit] title: &str,
-    // Any other borrow: taken as it stands.
+    // Borrows the Vec field directly.
     #[implicit] tags: &Vec<String>,
 ) -> String {
     format!("{title} {name} {tags:?}")
 }
 ```
 
-The rule of thumb is that the body works with the declared type and the conversion is the
-macro's problem. Prefer a borrow where the body only reads, `&str` over `String`, since that is free
-while an owned argument clones. Further forms exist for options and slices, and they are enumerated on
-the [`#[implicit]`](/docs/reference/attributes/implicit) reference page rather than here.
+An owned argument calls `.clone()` on the field, leaving the stored value in the context. A `&str`
+argument reads a `String` field with `.as_str()`, and `&Vec<String>` borrows the vector directly.
+Prefer a borrow when the body only needs to read the value, especially when cloning would allocate
+or copy substantial data.
 
-These are the same rules a getter follows, so learning them once covers both.
+The macro supports specific access forms rather than arbitrary conversions between types. The
+[`#[implicit]` reference](/docs/reference/attributes/implicit) covers options, slices, mutable
+access, and the other supported forms.
 
-## When a getter trait is still the right thing
+## When a getter trait is useful
 
-An implicit argument reads from the provider's own `self`. That covers every value a provider wants
-from its own context, including one that several providers each read, declared as the same argument in
-each, so it is the default, and a getter trait is the exception.
-
-Three cases fall outside it. The value may live on a **type other than the context**, where there is no
-`self` field to read and the requirement is a bound on that other type:
+A getter trait is useful when field access must be expressed as a named interface. Implicit
+arguments read from the provider's own `self`, so they cannot directly read a field from a separate
+argument. For example, this provider requires a getter on `Request`:
 
 ```rust
 #[cgp_impl(new AuthenticateByHeader)]
@@ -128,53 +126,50 @@ where
 }
 ```
 
-`HasAuthHeader` there is a getter on `Request`, not on the application, and no implicit argument can
-express that. The accessor may also need to exist as a **named trait** that other code depends on
-through `#[uses(...)]` or a supertrait, because a name is something you can require and an argument is
-not. Or the getter may carry an **associated type inferred from the field**, so callers stay generic
-over what the value actually is.
+This fragment assumes `RequestAuthenticator` and `HasAuthHeader` are defined elsewhere.
+`HasAuthHeader` describes access on the request, while `self` is the application context. An
+implicit argument on `authenticate` would read the application instead.
 
-Outside those three, prefer the argument. A getter trait declared only so a provider can read a field of
-its own context is a trait, an impl, and an import bought for nothing.
+A named getter also lets other code require the accessor through a trait bound or supertrait.
+A getter with an associated type can keep the field's type abstract for callers. These are reasons
+to use [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter); sharing a context field
+between several providers alone is not. Each provider can declare the same implicit argument.
+
+A wireable getter supports a further choice: which field supplies the value in each context.
+Use [`#[cgp_getter]`](/docs/reference/macros/cgp_getter) when that mapping must vary, rather than
+fixing the field name in the implicit argument.
 
 ## What it costs
 
-**The field name is part of the interface, silently.** Renaming a struct field breaks every provider
-whose argument was named after it, and the failure surfaces as a missing-field error at whatever site
-forces the check rather than at the rename. Nothing in the struct definition marks the coupling.
+Field names become dependencies of providers. Renaming `name` breaks providers whose implicit
+argument requires that name, and the error appears where Rust checks the provider's requirements.
+The struct definition does not list the providers that depend on its fields.
 
-**The requirement is invisible at the call site.** `app.greet()` gives no hint that the context must
-carry a `name`. That is the point, since it keeps the requirement off the interface, and it is also
-why the answer to "what does this context need?" lives in the providers it wired rather than in the
-traits it implements.
+The call site omits those field requirements. `app.greet()` does not show that `GreetByName` needs
+`name`; you find that requirement in the selected provider. Rust checks the name and type, but it
+cannot tell whether two fields with the same name and type have the same intended meaning.
 
-**Matching by name is looser than matching by type.** Two unrelated values with the same name and type
-are the same implicit argument as far as the machinery is concerned, so a context that happens to have a
-field called `name` satisfies a provider written for something else. In practice that looseness makes
-the mechanism cheap; it is still worth knowing that nobody is checking your intent.
-
-**The clone is real.** An owned argument copies the field on every call. Usually that is nothing; on
-a large value in a hot path it is not, so declare a borrow.
+Owned arguments incur the cost of cloning on each call. For a small scalar this is a copy; for a
+`String` or a large collection it may allocate and copy data. Declare a borrow when ownership is
+unnecessary.
 
 ## Where to go next
 
-[Impl-side dependencies](./impl-side-dependencies.md) is the general idea an implicit argument is one leg
-of: a requirement stated on the implementation rather than on the interface.
-[Abstract types](./abstract-types.md) is the third leg, where what the implementation needs is a type
-rather than a value.
+These pages connect implicit arguments to the rest of CGP:
 
-To write this rather than read about it, the [Hello World tutorial](/docs/tutorials/hello) reaches an
-implicit argument within its first few minutes, and the
-[Area calculation series](/docs/tutorials/area-calculation/) builds up from plain functions of exactly
-this shape.
-
-For the constructs, [`#[implicit]`](/docs/reference/attributes/implicit) carries the full list of
-accepted forms and access rules, [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is the no-wiring
-trait, [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter) is the getter to reach for in
-the three cases above, and [`HasField`](/docs/reference/traits/field-access/has_field) is the trait underneath all of
-them.
-- [Comparison: Implicit parameters](/docs/comparisons/implicit-parameters): implicit arguments beside Scala's `using` and Haskell's `ImplicitParams`.
-- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): reading a context field as the dynamic-binding fragment of effect handlers.
+- [Impl-side dependencies](./impl-side-dependencies.md): Why a provider's field requirements stay
+  out of the consumer interface.
+- [Abstract types](./abstract-types.md): Context-selected types shared by generic code.
+- [Hello World](/docs/tutorials/hello) and [Area calculation](/docs/tutorials/area-calculation/):
+  Working examples built from functions with implicit arguments.
+- [`#[implicit]`](/docs/reference/attributes/implicit) and
+  [`#[cgp_fn]`](/docs/reference/macros/cgp_fn): Accepted forms and generated code.
+- [`HasField`](/docs/reference/traits/field-access/has_field): The field-access trait underlying
+  implicit arguments and automatic getters.
+- [Comparison: Implicit parameters](/docs/comparisons/implicit-parameters): How the design compares
+  with Scala's `using` and Haskell's `ImplicitParams`.
+- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): The relationship between
+  context field access and dynamic binding.
 
 ---
 
