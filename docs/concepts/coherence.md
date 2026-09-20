@@ -209,6 +209,8 @@ Choose the next page according to whether you want to evaluate, understand, or u
   [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), and
   [`delegate_components!`](/docs/reference/macros/delegate_components): The constructs used here.
 - [RustLab 2025 talk](/blog/rustlab-2025-coherence): A longer account of coherence and CGP's approach.
+- [Comparison: Type classes](/docs/comparisons/type-classes): the same coherence trade seen from Haskell, Agda, and Lean.
+- [Comparison: Rust's own proposals](/docs/comparisons/rust-language-proposals): what Rust itself has considered doing about its coherence rules.
 
 ---
 

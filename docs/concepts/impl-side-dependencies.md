@@ -265,6 +265,8 @@ These pages develop the dependency forms and explain how providers are selected 
   [`#[use_type]`](/docs/reference/attributes/use_type): The dependency syntax used here.
 - [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) and
   [`#[blanket_trait]`](/docs/reference/macros/blanket_trait): Generating blanket implementations.
+- [Comparison: Dependency injection](/docs/comparisons/dependency-injection): impl-side dependencies as constructor parameters, without a container.
+- [Comparison: Capabilities](/docs/comparisons/capabilities): requirements on the context read against the several senses of "capability".
 
 ---
 

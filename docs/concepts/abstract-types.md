@@ -186,6 +186,8 @@ These pages explain related dependencies and the constructs used here:
   [`UseType`](/docs/reference/providers/use_type): Declaring and selecting an abstract type.
 - [`#[use_type]`](/docs/reference/attributes/use_type): Importing an associated type into a definition.
 - [`HasType`](/docs/reference/components/has_type): The built-in component for tagged type choices.
+- [Comparison: ML modules](/docs/comparisons/ml-modules): abstract-type components beside a signature's abstract `type t`, and what sealing CGP does not do.
+- [Comparison: Implicit parameters](/docs/comparisons/implicit-parameters): an abstract type as a functional dependency: a type the context determines.
 
 ---
 

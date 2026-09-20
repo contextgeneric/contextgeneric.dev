@@ -165,6 +165,7 @@ These pages explain the related representations and operations:
   [`FromVariant`](/docs/reference/traits/variant/from_variant): Construction by variant name.
 - [`CanUpcast`](/docs/reference/traits/casting/can_upcast) and
   [`CanDowncast`](/docs/reference/traits/casting/can_downcast): Widening and narrowing compatible enums.
+- [Comparison: Row polymorphism](/docs/comparisons/row-polymorphism): variants as row-typed sums: injection, branching, and the expression problem.
 
 ---
 

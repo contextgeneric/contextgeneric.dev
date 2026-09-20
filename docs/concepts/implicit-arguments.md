@@ -173,6 +173,8 @@ accepted forms and access rules, [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) is
 trait, [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter) is the getter to reach for in
 the three cases above, and [`HasField`](/docs/reference/traits/field-access/has_field) is the trait underneath all of
 them.
+- [Comparison: Implicit parameters](/docs/comparisons/implicit-parameters): implicit arguments beside Scala's `using` and Haskell's `ImplicitParams`.
+- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): reading a context field as the dynamic-binding fragment of effect handlers.
 
 ---
 

@@ -197,6 +197,8 @@ These pages explain related forms of composition and their checks:
 - [`UseContext`](/docs/reference/providers/use_context): Forwarding to the context's consumer trait.
 - [`#[cgp_impl]`](/docs/reference/macros/cgp_impl): Provider definitions and explicit provider structs.
 - [`delegate_components!`](/docs/reference/macros/delegate_components): Wiring and `open` dispatch.
+- [Comparison: ML modules](/docs/comparisons/ml-modules): higher-order providers as functors, and the wiring table in place of functor application.
+- [Comparison: Policy-based design](/docs/comparisons/policy-based-design): a host template with policy parameters as a higher-order provider.
 
 ---
 

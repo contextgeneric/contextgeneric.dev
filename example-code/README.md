@@ -23,6 +23,7 @@ pulls in a module tree that mirrors that section's pages:
 - `tests/concepts_tests.rs` → `tests/concepts/`, mirroring `docs/concepts/`
 - `tests/reference_tests.rs` → `tests/reference/`, mirroring `docs/reference/`
 - `tests/cargo_cgp_tests.rs` → `tests/cargo_cgp/`, mirroring `docs/cargo-cgp/`
+- `tests/comparisons_tests.rs` → `tests/comparisons/`, mirroring `docs/comparisons/`
 - `tests/compile_fail_tests.rs` → `tests/compile_fail/`, the snippets the pages **reject** (see below)
 
 One file per page, at the matching path with the file name in `snake_case`:
@@ -32,6 +33,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 | `docs/concepts/` | complete — one file under `tests/concepts/` per page that shows code |
 | `docs/reference/` | partial — `errors.md`, `macros/cgp_namespace.md` and `macros/delegate_components.md`, the `attributes/` pages `default_impl.md`, `impl_generics.md`, and `prefix.md`, all of `derives/`, the `traits/` pages that show checkable code, most of `providers/` (the singletons, all of `error/`, `handler/`, and `monad/`, and the matcher-side of `dispatch/`), all of `components/` (each component page that shows code, including the `handler/` subsection), and all of `types/` (each type page that shows code, the `spines/` subsection included); the section is filled in lazily |
 | `docs/cargo-cgp/` | complete — the two pages that show Rust, under `tests/cargo_cgp/` |
+| `docs/comparisons/` | complete — one file per page under `tests/comparisons/`; only the CGP side of each page is checked here, since the other language's snippets are compiled against the toolchain the page names |
 | `docs/tutorials/` | none yet |
 | front page, orientation pages | none yet |
 

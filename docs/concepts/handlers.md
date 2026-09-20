@@ -191,6 +191,7 @@ These pages explain composition and specify the handler interfaces:
 - [`#[cgp_computer]`](/docs/reference/macros/cgp_computer) and
   [`#[cgp_producer]`](/docs/reference/macros/cgp_producer): Generating providers from functions.
 - [Handler combinators](/docs/reference/providers/handler): Composition and promotion adapters.
+- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): the handler family beside effect handlers, and the continuation CGP never captures.
 
 ---
 

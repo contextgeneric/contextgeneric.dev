@@ -268,6 +268,8 @@ These pages develop the trait model and show how to use it:
 - [`#[cgp_component]`](/docs/reference/macros/cgp_component),
   [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), and
   [`delegate_components!`](/docs/reference/macros/delegate_components): Exact syntax and generated code.
+- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): the wiring table read as a vtable that exists only at compile time.
+- [Comparison: Policy-based design](/docs/comparisons/policy-based-design): the same split in C++ policy classes and host templates.
 
 ---
 

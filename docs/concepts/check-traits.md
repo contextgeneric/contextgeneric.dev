@@ -212,6 +212,7 @@ These pages explain the dependencies being checked and the available check forms
   `#[check_providers]` assertions.
 - [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components): Combined
   wiring and checking, including its coverage limits.
+- [Comparison: Dependency injection](/docs/comparisons/dependency-injection): `check_components!` beside a container's startup validation and Dagger's build-time check.
 
 ---
 

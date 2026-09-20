@@ -9,6 +9,8 @@ description = "Compiled counterparts of the code shown on contextgeneric.dev. No
 cgp = "0.8.0-alpha"
 
 [dev-dependencies]
+anyhow = "1"
+cap-std = "3"
 futures = "0.3"
 trybuild = "1"
 

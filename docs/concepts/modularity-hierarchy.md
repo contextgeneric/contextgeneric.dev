@@ -398,6 +398,7 @@ If the answer here was "not yet", [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) i
 you need: a trait from a function, no wiring, nothing to reverse later. If it was "yes", the
 [Area calculation series](/docs/tutorials/area-calculation/) works up the tiers in order, and
 [`#[cgp_component]`](/docs/reference/macros/cgp_component) is where the component machinery starts.
+- [Comparison: Type classes](/docs/comparisons/type-classes): why keying selection on the context rather than the type is the decisive shape.
 
 ---
 

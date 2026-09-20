@@ -181,6 +181,7 @@ For the constructs, [`HasErrorType`](/docs/reference/components/has_error_type) 
 type, [`CanRaiseError`](/docs/reference/components/can_raise_error) covers raising and wrapping, and
 [the error providers](/docs/reference/providers/error) is the catalogue of strategies with the
 bound each one places on the context.
+- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): why `raise_error` selects an interpretation but passes no control.
 
 ---
 

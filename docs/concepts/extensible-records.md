@@ -152,6 +152,8 @@ These pages explain related data operations and the traits used here:
   [`HasBuilder`](/docs/reference/traits/builder/has_builder): Partial records and construction.
 - [`HasFields`](/docs/reference/traits/shape/has_fields), [`Field`](/docs/reference/types/field), and
   [`Symbol!`](/docs/reference/macros/symbol): The types that describe a record's fields.
+- [Comparison: Row polymorphism](/docs/comparisons/row-polymorphism): records as rows: containment, concatenation, and presence flags.
+- [Comparison: Reflection](/docs/comparisons/reflection): a derived shape beside runtime and compile-time reflection descriptors.
 
 ---
 

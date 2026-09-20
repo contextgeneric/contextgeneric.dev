@@ -209,6 +209,7 @@ carries the `#[prefix(...)]` registration attribute,
 [`delegate_components!`](/docs/reference/macros/delegate_components) carries the `namespace` and `open`
 statements, [`RedirectLookup`](/docs/reference/providers/redirect_lookup) is the provider doing the
 routing, and [`Path!`](/docs/reference/macros/path) is the path type underneath.
+- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): a namespace as a shared prototype whose bound entries cannot be shadowed.
 
 ---
 

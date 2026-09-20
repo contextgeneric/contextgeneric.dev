@@ -39,8 +39,11 @@ produced. It provides a record of contributions, not a guarantee that every stat
 
 **Human review varies by page.** The author sets the writing rules and priorities and reads the front
 page, Concepts explanation pages, reference index, this disclosure, and every blog post in full
-before publication. Individual construct reference pages follow a writing guide and receive spot
-checks; the author does not read each one line by line.
+before publication. On each Comparisons page, which describes another community's tool beside CGP,
+the author reads in full the two sections that judge that tool: what each approach costs, and where
+the other tool is the better choice. Individual construct reference pages, and the remaining sections
+of a comparison page, follow a writing guide and receive spot checks; the author does not read each
+one line by line.
 
 Source verification and human review serve different purposes. Checking a macro expansion against
 the source can reveal a technical mistake, while reading an explanation can reveal a misleading
