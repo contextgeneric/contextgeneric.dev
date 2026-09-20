@@ -212,7 +212,7 @@ check_components! { App { GreeterComponent } }
 
 `GreetHello` needs a `name` field, and `App` supplies it. `check_components!` verifies the field
 requirement for the selected provider; constructing `App { name }` supplies its runtime value.
-`App` is an environmental context representing an application, and the component is self-targeted.
+`App` is an [environmental context](/docs/reference/glossary#environmental-context) representing an application, and the component is [self-targeted](/docs/reference/glossary#self-targeted-component).
 This is a dependency relationship: the `String` does not confer protected authority.
 
 Contexts can also determine [abstract types](/docs/concepts/abstract-types), such as the error type

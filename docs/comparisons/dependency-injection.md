@@ -125,8 +125,8 @@ CGP addresses those cases with a shared context and separately named providers. 
 
 CGP separates a provider's dependency requirements from an application's implementation choices.
 The provider declares [impl-side dependencies](/docs/concepts/impl-side-dependencies), and the
-context supplies the required traits and fields. Every context below is an environmental context:
-a type representing an application, with self-targeted components that operate through it.
+context supplies the required traits and fields. Every context below is an [environmental context](/docs/reference/glossary#environmental-context):
+a type representing an application, with [self-targeted](/docs/reference/glossary#self-targeted-component) components that operate through it.
 The snippets omit supporting application types and some implementation bodies.
 
 ### Impl-side dependencies declare what an implementation needs

@@ -167,8 +167,8 @@ the related view of computations declaring what they require from an environment
 ## How CGP expresses it
 
 CGP represents an operation with a consumer trait and its implementation with a provider.
-The examples use environmental contexts: types representing applications and supplying the
-implementations for self-targeted components. Supporting declarations and imports are omitted
+The examples use [environmental contexts](/docs/reference/glossary#environmental-context): types representing applications and supplying the
+implementations for [self-targeted](/docs/reference/glossary#self-targeted-component) components. Supporting declarations and imports are omitted
 where they do not affect the comparison.
 
 ### Components declare operations; providers implement them

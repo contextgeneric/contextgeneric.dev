@@ -171,7 +171,7 @@ CGP preserves coherence while making provider selection explicit. Alternative pr
 to the same context, and the wiring chooses which one supplies the consumer trait. Defining a second
 conflicting entry for the same type and component remains an error.
 
-Separate application contexts allow independent choices for the same data type. That arrangement
+Separate [application contexts](/docs/reference/glossary#application-context) allow independent choices for the same data type. That arrangement
 requires moving the data into a component parameter; [Modularity Hierarchy](./modularity-hierarchy.md)
 explains when to use it and how it differs from the value-type wiring shown here.
 

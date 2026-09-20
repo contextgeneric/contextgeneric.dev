@@ -224,6 +224,10 @@ When wiring fails, three traits are what you will see named:
 name, and [`CanUseComponent`](./traits/wiring/can_use_component.md), which is what a check asserts. The
 [compile errors](./errors.md) page covers the recurring failures and how to read them.
 
+If what you are missing is a *word* rather than a construct — environmental context, impl-side
+dependency, type class — the [glossary](./glossary.md) defines the terms this documentation uses and
+links to the page that explains each one.
+
 ## Looking for a name you don't see?
 
 Almost every construct has a page of its own. The exceptions are names that are not separately

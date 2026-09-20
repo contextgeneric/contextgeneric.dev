@@ -201,8 +201,8 @@ impl<Value: AsRef<[u8]>> Encoder<Value> {
 more, because the provider trait is always implemented for a type the crate owns. This is the
 overlap and orphan relief specialization cannot give, since the two providers are equally general.
 The encoded value has moved from `Self` into the `Value` parameter, so `Self` is free to be an
-application: the contexts below are **environmental contexts**, types that stand for an application,
-and the component is parameter-targeted.
+application: the contexts below are **[environmental contexts](/docs/reference/glossary#environmental-context)**, types that stand for an application,
+and the component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
 
 ### An incoherent bound resolves through the context, not at each call site
 
@@ -299,7 +299,7 @@ app.greet();   // "Hello, World!"
 over exactly: the binding costs nothing at runtime, since a field read compiles to a load, and it is
 checked statically, since a missing field is a compile error that
 [`check_components!`](/docs/reference/macros/check_components) names at the wiring site. `App` here
-is an environmental context with one field, and `GreetHello` is self-targeted.
+is an environmental context with one field, and `GreetHello` is [self-targeted](/docs/reference/glossary#self-targeted-component).
 
 ### The context is the dictionary
 

@@ -145,7 +145,7 @@ check_components! {
 
 Reading the resolution: `app.greet()` looks up `GreeterComponent`. `App` does not wire it directly,
 so the lookup falls through to `DefaultNamespace`, which redirects to `@app.GreeterComponent`, and
-`App`'s own table binds that path to `GreetHello`. **Environmental context, self-targeted**: `App`
+`App`'s own table binds that path to `GreetHello`. **[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component)**: `App`
 exists to carry the wiring and a `name` field, and the operation is about `App` itself.
 
 A second context joins the same namespace and binds a different provider at the same path, without

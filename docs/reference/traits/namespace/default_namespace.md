@@ -92,7 +92,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, self-targeted.** The header forwards `App`'s unwired lookups through the
+**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** The header forwards `App`'s unwired lookups through the
 namespace, and the direct entry shadows whatever the namespace would otherwise supply for that one key,
 the inheritance-with-override shape presets rely on.
 

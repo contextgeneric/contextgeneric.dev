@@ -127,7 +127,7 @@ where
 ```
 
 This fragment assumes `RequestAuthenticator` and `HasAuthHeader` are defined elsewhere.
-`HasAuthHeader` describes access on the request, while `self` is the application context. An
+`HasAuthHeader` describes access on the request, while `self` is the [application context](/docs/reference/glossary#application-context). An
 implicit argument on `authenticate` would read the application instead.
 
 A named getter also lets other code require the accessor through a trait bound or supertrait.

@@ -95,7 +95,7 @@ delegate_components! {
 }
 ```
 
-`person.name()` now returns the `first_name` field. **Value context, self-targeted.**
+`person.name()` now returns the `first_name` field. **[Value context](/docs/reference/glossary#value-context), [self-targeted](/docs/reference/glossary#self-targeted-component).**
 
 A second context can answer the same getter from a different field by changing one wiring line, which
 the provider-side shape buys and a plain [`HasField`](./has_field.md) bound cannot express.

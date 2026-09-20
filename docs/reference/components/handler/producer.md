@@ -91,7 +91,7 @@ fn run(app: &App) -> u64 {
 ```
 
 `MagicNumber` produces `42` from the `Code` tag alone, and `App` delegates `ProducerComponent` to it,
-giving `App` the `CanProduce<(), Output = u64>` implementation. The example is **parameter-targeted**: the
+giving `App` the `CanProduce<(), Output = u64>` implementation. The example is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the
 context decides which provider answers, and no value is operated on. In practice the provider is written
 with [`#[cgp_producer]`](../../macros/cgp_producer.md), which also wires the promotion so the same function
 answers the input-taking components while ignoring their input.

@@ -143,7 +143,7 @@ pub struct Rectangle {
 ```
 
 `rectangle_area()` obtains `width` and `height` from `self`, so callers omit both arguments.
-`Rectangle` is a value context: the rectangle itself holds the data the method operates on.
+`Rectangle` is a [value context](/docs/reference/glossary#value-context): the rectangle itself holds the data the method operates on.
 The generated implementation requires field access with the matching names and types. Scala's
 `using Config` instead asks the compiler to resolve a contextual value by type; Haskell's `?cmp`
 refers to a named implicit binding. The
@@ -233,7 +233,7 @@ delegate_components! {
 ```
 
 `AppA` encodes `Vec<u8>` as hexadecimal text; `AppB` copies its bytes. Both are environmental
-contexts representing applications. The component is parameter-targeted: `Value` is the data being
+contexts representing applications. The component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component): `Value` is the data being
 encoded, while `self` supplies the application's choice of implementation.
 
 CGP records the provider choice in a wiring table and keeps Rust's coherence checks. Separate

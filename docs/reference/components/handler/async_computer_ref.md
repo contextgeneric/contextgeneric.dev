@@ -77,7 +77,7 @@ where
 ```
 
 `scan` awaits the computation while keeping ownership of the `String` with the caller. The example is
-**parameter-targeted**: the computation acts on the `Input`, while the context decides the provider.
+**[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the `Input`, while the context decides the provider.
 
 ## When to use it
 

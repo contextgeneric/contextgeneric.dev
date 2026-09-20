@@ -79,7 +79,7 @@ where
 ```
 
 `run` works for any context that wires an async computer for the given `Code` and `u64` input. The
-example is **parameter-targeted**: the computation acts on the `Input`, while the context decides the
+example is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the `Input`, while the context decides the
 provider. A provider is usually generated from a function with
 [`#[cgp_computer]`](../../macros/cgp_computer.md) rather than written by hand.
 

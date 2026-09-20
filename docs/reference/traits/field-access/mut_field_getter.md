@@ -85,7 +85,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, self-targeted.** The getter reads `request_count` though it is named `counter`,
+**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** The getter reads `request_count` though it is named `counter`,
 and because [`UseField`](../../providers/use_field.md) implements `MutFieldGetter` as well, a provider that
 holds `&mut App` can write through the same wiring.
 

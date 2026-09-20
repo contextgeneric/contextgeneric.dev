@@ -99,7 +99,7 @@ where
 `run_with` works for any context that wires a handler for the given `Code` and `String` input, whether
 the wired provider is a pure `Computer`, a fallible `TryComputer`, an `AsyncComputer`, or a genuine
 `Handler`, because the promotion combinators make each of them satisfy `CanHandle`. This is why generic
-pipeline code targets `Handler`. The example is **parameter-targeted**: the computation acts on the
+pipeline code targets `Handler`. The example is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the
 `Input` type, while the context decides which provider answers.
 
 ## When to use it

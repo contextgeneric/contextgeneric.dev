@@ -119,7 +119,7 @@ second requires access to a field named `name`. The method body may resemble duc
 but it relies on declared traits and generated bounds. Ordinary generic Rust can express these
 bounds too; CGP's macros supply the context parameter and supporting impls.
 
-A `Person` type with the required field and wiring is a value context in this example.
+A `Person` type with the required field and wiring is a [value context](/docs/reference/glossary#value-context) in this example.
 It is the value being greeted, rather than an application environment selecting behavior for a
 separate target. [Implicit arguments](/docs/concepts/implicit-arguments) explains the field-based form.
 
@@ -153,7 +153,7 @@ delegate_components! {
 // }
 ```
 
-`Rectangle` is a value context, and the self-targeted area component operates on that rectangle.
+`Rectangle` is a value context, and the [self-targeted](/docs/reference/glossary#self-targeted-component) area component operates on that rectangle.
 The compiler resolves `AreaCalculatorComponent` to `RectangleArea` through the shown trait impl.
 The program does not store or consult this wiring table at runtime. Components can group several
 methods, associated types, and consts, so an entry is not necessarily equivalent to one method slot.
@@ -230,7 +230,7 @@ delegate_components! {
 }
 ```
 
-`AppA` and `AppB` are environmental contexts representing applications. Their providers are found
+`AppA` and `AppB` are [environmental contexts](/docs/reference/glossary#environmental-context) representing applications. Their providers are found
 through [`RedirectLookup`](/docs/reference/providers/redirect_lookup), which follows type-level
 paths. This resembles sharing defaults through a prototype, but customization fills unbound paths
 rather than shadowing already-bound entries. An attempt to bind the same key again conflicts under

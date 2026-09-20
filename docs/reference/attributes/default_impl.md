@@ -130,7 +130,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, parameter-targeted**: `App` carries the wiring and the shown value is a
+**[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: `App` carries the wiring and the shown value is a
 parameter. The loop wires every type with a registered default, and the direct `u64` line shadows
 whatever the namespace would otherwise supply for that one type. `ShowWithDisplay` is wired directly
 rather than registered, because its impl is generic over `T`, and a generic impl cannot register a

@@ -76,6 +76,10 @@ These pages apply the same component model to errors, computations, and data:
 - [Type-level DSLs](./type-level-dsls.md): Representing a small language as types resolved by the compiler.
 - [Recovering `Send` bounds](./send-bounds.md): Requiring sendable futures when spawning async CGP tasks.
 
+If you came here because a page used a term you did not recognize, the
+[glossary](/docs/reference/glossary) defines the vocabulary used across this documentation and points
+at the page that explains each term.
+
 ---
 
 *An AI agent wrote this page using the CGP knowledge base. Its content was verified against the

@@ -76,7 +76,7 @@ where
 ```
 
 `measure` passes the input by reference, so the caller keeps ownership of the `String`. The example is
-**parameter-targeted**: the computation acts on the `Input`, while the context decides the provider.
+**[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the `Input`, while the context decides the provider.
 
 ## When to use it
 

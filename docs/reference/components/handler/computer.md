@@ -99,7 +99,7 @@ fn run(app: &App) -> u64 {
 
 `Double` implements the `Computer` provider trait for any context and any `Code`, fixing `Input` and
 `Output` to `u64`. `App` delegates `ComputerComponent` to it, and the call passes `PhantomData::<()>` as
-the `Code` tag. The example is **parameter-targeted**: the computation acts on the `Input` value, while
+the `Code` tag. The example is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the `Input` value, while
 the context decides the provider. In practice a provider like this is written with
 [`#[cgp_computer]`](../../macros/cgp_computer.md) rather than by hand.
 

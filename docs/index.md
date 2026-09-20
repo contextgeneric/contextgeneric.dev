@@ -54,6 +54,7 @@ Use the documentation according to the question you need to answer:
 - [Overview](/docs/overview): what CGP offers and where it helps.
 - [Concepts](/docs/concepts): how its ideas work and fit together.
 - [Reference](/docs/reference): the syntax and behavior of individual constructs.
+- [Glossary](/docs/reference/glossary): short definitions of the terms used across this documentation.
 - [Resources](/docs/resources): libraries, projects, talks, and further reading.
 
 The [Context-Generic Programming Patterns book](https://patterns.contextgeneric.dev/) develops CGP

@@ -96,7 +96,7 @@ where
 ```
 
 `App` wires `TypeProviderComponent` to `UseType<f64>`, so the `UseType` impl makes `App` implement
-`HasType<ScalarTag>` with `Type = f64`. `App` is an **environmental context** here, a type standing for
+`HasType<ScalarTag>` with `Type = f64`. `App` is an **[environmental context](/docs/reference/glossary#environmental-context)** here, a type standing for
 the application that carries its type choices. In real code you would write the named `#[cgp_type]`
 layer; this page documents the substrate it rests on.
 

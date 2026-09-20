@@ -102,7 +102,7 @@ The provider `LoadOrFail` first raises a `String` into the context's abstract er
 [`CanRaiseError`](./can_raise_error.md), then wraps a further message onto it with `CanWrapError`. Both
 dependencies are declared with [`#[uses]`](../attributes/uses.md), so neither appears on the public
 `CanLoad` signature, and any context that satisfies them makes `load` produce enriched errors in its own
-error type. The context is an **environmental context**, and the component targets it.
+error type. The context is an **[environmental context](/docs/reference/glossary#environmental-context)**, and the component targets it.
 
 ## When to use it
 

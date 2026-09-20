@@ -105,7 +105,7 @@ where
 `App` resolves `HasRuntimeType` with `Runtime = TokioRuntime` through `UseType`, and resolves
 `HasRuntime` by reading its `runtime` field through `UseField`. `runtime_of` names neither
 `TokioRuntime` nor any field, so swapping `UseType<TokioRuntime>` for `UseType<MockRuntime>` in a test
-context retargets it at the mock with no change to its body. `App` is an **environmental context**, and
+context retargets it at the mock with no change to its body. `App` is an **[environmental context](/docs/reference/glossary#environmental-context)**, and
 the component targets it.
 
 ## When to use it

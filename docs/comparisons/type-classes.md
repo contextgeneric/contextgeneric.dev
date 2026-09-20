@@ -200,8 +200,8 @@ the one-instance-per-type limit: because a provider implements the provider trai
 coherence never forbids a second one. The wiring line plays the role of resolution, explicitly, where
 Haskell's compiler would search for the canonical instance. A provider's `#[uses]` imports are the
 class constraints threaded by dictionary passing, and the context is the dictionary that carries them.
-`Rectangle` here is a **value context**: the type being measured also carries the wiring, and the
-component is self-targeted.
+`Rectangle` here is a **[value context](/docs/reference/glossary#value-context)**: the type being measured also carries the wiring, and the
+component is [self-targeted](/docs/reference/glossary#self-targeted-component).
 
 ### Overlapping instances are the default, with no heuristic
 
@@ -243,8 +243,8 @@ more specific. As providers all three compile, because each implements the provi
 own marker. There is no most-specific rule and therefore no ambiguity. The fragility
 GHC warns about, overlap silently producing incoherence, cannot arise, because the choice is never
 inferred. Here the encoded value has moved from `Self` into the `Value` parameter, so the contexts
-that wire these providers are **environmental contexts**, types standing for an application, and the
-component is parameter-targeted.
+that wire these providers are **[environmental contexts](/docs/reference/glossary#environmental-context)**, types standing for an application, and the
+component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
 
 ### Incoherent instances made deterministic and local
 

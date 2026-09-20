@@ -106,7 +106,7 @@ delegate_components! {
 Here [`#[use_type(HasErrorType.Error)]`](../attributes/use_type.md) adds `HasErrorType` as a supertrait
 of `CanValidate` and rewrites the bare `Error` to `<Self as HasErrorType>::Error`, so `validate` returns
 the context's shared error without spelling `Self::Error`. `App` wires its error type to `String`, which
-satisfies the `Debug` bound. `App` is an **environmental context**, a type that stands for the
+satisfies the `Debug` bound. `App` is an **[environmental context](/docs/reference/glossary#environmental-context)**, a type that stands for the
 application and carries its choices, and the component targets that context rather than a value.
 
 ## When to use it

@@ -104,7 +104,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, parameter-targeted.** The loop variable must still appear in the key, exactly as
+**[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** The loop variable must still appear in the key, exactly as
 for the one-type form.
 
 ## When to use it

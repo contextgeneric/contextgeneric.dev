@@ -97,7 +97,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, self-targeted.** [`ChainGetters`](../../providers/chain_getters.md) descends into
+**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** [`ChainGetters`](../../providers/chain_getters.md) descends into
 `inner` with `FieldMapper::map_field` and then applies the inner provider to what it finds, so
 `outer.name()` resolves to `outer.inner.name` with no lifetime obligations leaking into either type.
 

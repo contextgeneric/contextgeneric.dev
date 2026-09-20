@@ -105,7 +105,7 @@ delegate_components! {
 `ParseU64` returns its `u64` output or the context's abstract error, converting the concrete
 `ParseIntError` into that error with [`CanRaiseError`](../can_raise_error.md). Because the consumer trait
 supertraits `HasErrorType`, `App` must also wire an error type and an error raiser before it can call
-`try_compute`. The example is **parameter-targeted**: the computation acts on the `Input`, while the
+`try_compute`. The example is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the `Input`, while the
 context decides the provider and the error type.
 
 ## When to use it

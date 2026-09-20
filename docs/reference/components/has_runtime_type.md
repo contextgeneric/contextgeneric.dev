@@ -89,7 +89,7 @@ where
 
 `App` resolves `HasRuntimeType` with `Runtime = TokioRuntime` through `UseType`, so `RuntimeOf<App>` is
 `TokioRuntime`. `describe` names only the runtime type and never a runtime value, which is exactly the
-case `HasRuntimeType` serves alone. `App` is an **environmental context**, and the component targets it.
+case `HasRuntimeType` serves alone. `App` is an **[environmental context](/docs/reference/glossary#environmental-context)**, and the component targets it.
 
 ## When to use it
 

@@ -85,7 +85,7 @@ where
 ```
 
 `check` passes the input by reference, so the caller keeps the `String`, and returns the context's
-abstract error on failure. The example is **parameter-targeted**: the computation acts on the `Input`,
+abstract error on failure. The example is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: the computation acts on the `Input`,
 while the context decides the provider and the error type.
 
 ## When to use it

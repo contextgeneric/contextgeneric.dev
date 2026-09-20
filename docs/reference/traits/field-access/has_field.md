@@ -98,7 +98,7 @@ delegate_components! {
 ```
 
 `Person` derives the access, so it satisfies exactly the bound `GreetHello` requires and the wiring
-compiles. **Value context, self-targeted**: the wired type is the data the method runs on.
+compiles. **[Value context](/docs/reference/glossary#value-context), [self-targeted](/docs/reference/glossary#self-targeted-component)**: the wired type is the data the method runs on.
 
 **Written idiomatically, none of that bound is visible.** The same read is an
 [`#[implicit]`](../../attributes/implicit.md) argument:

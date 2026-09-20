@@ -104,7 +104,7 @@ where
 The spawner requires a `Send + 'static` future, which `context.send_run(PhantomData::<InCode>)`
 returns, so the bound `Self: CanSendRun<InCode>` makes the spawn type-check. None of the abstract
 task or error types carry `Send` bounds; that requirement is discharged only at the concrete
-[`CanSendRun`](./send_runner.md) proxy. `App` is an **environmental context**, and the task is a
+[`CanSendRun`](./send_runner.md) proxy. `App` is an **[environmental context](/docs/reference/glossary#environmental-context)**, and the task is a
 type-level `Code` selector the wiring dispatches on.
 
 ## When to use it

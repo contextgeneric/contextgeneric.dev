@@ -19,7 +19,7 @@ tool, and what to expect that differs.
 ## In your terms
 
 A **context** in CGP is the type the method runs on, which supplies the values it needs as its
-fields. On this page every context is a **value context**: the record being built or the enum being
+fields. On this page every context is a **[value context](/docs/reference/glossary#value-context)**: the record being built or the enum being
 cast is the type that carries the shape and the wiring, and each component targets `Self`.
 
 | In a row system | In CGP |

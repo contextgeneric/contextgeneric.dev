@@ -88,7 +88,7 @@ delegate_components! {
 }
 ```
 
-**Environmental context, self-targeted**: `App` stands for the application and carries the wiring.
+**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component)**: `App` stands for the application and carries the wiring.
 
 Mutable access passes through a smart pointer too, via a `DerefMut` forwarding impl, so a
 `Box<App>` resolves the write to the inner struct.

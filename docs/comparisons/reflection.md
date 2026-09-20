@@ -124,7 +124,7 @@ CGP reaches compile-time reflection's payoff by a different route. It encodes a 
 types and processes them with trait resolution, so the type system does the "reflection" rather than a
 routine inspecting a descriptor. The worked example below is a self-contained field writer modeled on
 [`cgp-serde`](https://github.com/contextgeneric/cgp-serde)'s `SerializeFields` provider, which does the
-same over serde's `Serializer`. Its context is an **environmental context**: the `App` that wires how
+same over serde's `Serializer`. Its context is an **[environmental context](/docs/reference/glossary#environmental-context)**: the `App` that wires how
 each field type is written stands for an application, and the written `Value` is a parameter.
 
 ### A type's shape becomes a type, not a descriptor

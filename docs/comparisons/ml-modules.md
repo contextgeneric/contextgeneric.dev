@@ -19,7 +19,7 @@ modules and also compares the proposed OCaml modular-implicits extension.
 ## In your terms
 
 A **context** is the type on which CGP's consumer methods operate. It supplies runtime data and
-selects providers for its components. An application context can gather the choices that an ML
+selects providers for its components. An [application context](/docs/reference/glossary#application-context) can gather the choices that an ML
 program records through module bindings and functor applications.
 
 The vocabulary maps by role, with limits explained below:
@@ -168,7 +168,7 @@ impl AreaCalculator {
 `CanCalculateArea` is the interface callers use, and `RectangleArea` implements its generated
 provider trait, `AreaCalculator`. The provider reads `width` and `height` from the context through
 [implicit arguments](/docs/concepts/implicit-arguments). A `Rectangle` wired to this provider is a
-**value context**: the value being measured also determines the implementation.
+**[value context](/docs/reference/glossary#value-context)**: the value being measured also determines the implementation.
 
 The consumer/provider split is specific to CGP's use of Rust traits. Distinct provider types can
 implement the same provider trait for a context while respecting Rust's coherence rules; wiring
@@ -247,7 +247,7 @@ delegate_components! {
 }
 ```
 
-`App` is an **environmental context** representing the application. Its `smtp_server` field supplies
+`App` is an **[environmental context](/docs/reference/glossary#environmental-context)** representing the application. Its `smtp_server` field supplies
 the runtime data used by `SendViaSmtp`, while the table selects behavior and the error type. The
 entry order has no execution meaning: the table does not construct objects or schedule startup.
 This is the part of functor assembly that the comparison covers, rather than all of Functoria's

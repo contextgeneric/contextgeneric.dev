@@ -224,7 +224,7 @@ EnglishApp.run();   // Hello, World!
 GermanApp.run();    // Hallo Welt!
 ```
 
-`EnglishApp` and `GermanApp` are fieldless **environmental contexts**. Their role is to choose
+`EnglishApp` and `GermanApp` are fieldless **[environmental contexts](/docs/reference/glossary#environmental-context)**. Their role is to choose
 behavior; an application with runtime configuration could store it in context fields. Both
 compositions use static provider selection, so policy calls need no runtime lookup or vtable.
 Whether the optimizer inlines a particular call remains a separate question.
@@ -310,7 +310,7 @@ impl Greeter {
 ```
 
 `GreetHello` asks its context for `name`; it does not contain a `name` field itself. A `Person` that
-stores the field and wires the greeter is a **value context**. The generated field-access bounds
+stores the field and wires the greeter is a **[value context](/docs/reference/glossary#value-context)**. The generated field-access bounds
 make the requirement explicit to Rust's type checker.
 
 This addresses a need that CRTP often serves: reusable behavior accessing the host's data. The

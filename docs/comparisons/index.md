@@ -51,6 +51,8 @@ proposal. CGP examples have compiled counterparts in the website's verification 
 The [Concepts](/docs/concepts/) pages explain CGP's own ideas without reference to another paradigm,
 and each comparison links the concept pages it rests on. The [tutorials](/docs/tutorials/hello) build
 working programs, and the [reference](/docs/reference/) specifies each construct a comparison names.
+The [glossary](/docs/reference/glossary) defines the terms used across all of them, CGP's own and the
+borrowed ones alike.
 
 ---
 
