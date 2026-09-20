@@ -44,7 +44,7 @@ pub trait HasArea {
 }
 ```
 
-The trait may have generic parameters and supertraits. Each method may take `self` by value, by shared
+The trait may have generic parameters and [supertraits](/docs/reference/glossary#supertrait). Each method may take `self` by value, by shared
 reference, or by mutable reference; may take further value or reference arguments; and may be `async`.
 
 A couple of restrictions are enforced when the macro expands:

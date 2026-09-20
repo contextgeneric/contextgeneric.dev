@@ -45,7 +45,7 @@ pub trait MapField<Tag>: HasField<Tag> {
 }
 ```
 
-It is a supertrait extension of [`HasField`](./has_field.md), so `Value` comes from the supertrait.
+It is a [supertrait](/docs/reference/glossary#supertrait) extension of [`HasField`](./has_field.md), so `Value` comes from the supertrait.
 `map_field` takes `&self`, the `PhantomData<Tag>` that names the field, and a `mapper` closure, and it
 returns `&T`. The higher-ranked `for<'a>` bound on the closure is the whole trick: the closure must work
 for *any* lifetime, so the compiler ties the returned borrow to the field's own lifetime rather than

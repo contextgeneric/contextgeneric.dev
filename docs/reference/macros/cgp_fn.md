@@ -5,7 +5,7 @@ sidebar_position: 3
 
 # `#[cgp_fn]`
 
-Define a trait with a single blanket implementation, straight from a function.
+Define a trait with a single [blanket implementation](/docs/reference/glossary#blanket-implementation), straight from a function.
 
 ## Overview
 
@@ -121,7 +121,7 @@ some `Display` type, and the compiler resolves the type from that field.
 
 The type is then concealed rather than named, so it cannot appear in this function's own signature,
 and two traits cannot agree on it. The [`#[impl_generics]`](../attributes/impl_generics.md)
-page says when to promote such a type to an abstract type instead.
+page says when to promote such a type to an [abstract type](/docs/reference/glossary#abstract-type) instead.
 
 ### Companion attributes
 
@@ -132,7 +132,7 @@ it depends on.
   like a `use` statement rather than a hand-written `where Self: Trait` bound. It accepts ordinary Rust
   traits as readily as CGP ones.
 - [`#[use_type(Trait.Type)]`](../attributes/use_type.md) imports an abstract type so the signature can
-  name it bare, and adds the owning trait as a supertrait.
+  name it bare, and adds the owning trait as a [supertrait](/docs/reference/glossary#supertrait).
 - [`#[extend(...)]`](../attributes/extend.md) adds a method supertrait to the generated trait. Here
   it is the *only* way to add one, since a `where` clause in a `#[cgp_fn]` is an implementation detail
   rather than part of the interface.
@@ -254,7 +254,7 @@ where
 
 Learn to recognize a few details of the real output. The context type parameter is literally
 `__Context__`, a reserved name chosen so it cannot collide with one of yours, and the impl refers to
-it as `Self`. [`Symbol!("width")`](./symbol.md) is a type-level string standing for the field name.
+it as `Self`. [`Symbol!("width")`](./symbol.md) is a [type-level string](/docs/reference/glossary#type-level-string) standing for the field name.
 The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and `cargo cgp expand`
 resugars it back to this. An *owned* implicit argument compiles to a trailing `.clone()`. A `&str`
 argument ends in `.as_str()` instead, and a plain `&T` in nothing at all.

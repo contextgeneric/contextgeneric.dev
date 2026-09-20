@@ -7,7 +7,7 @@ description: 'CGP read against OCaml and Standard ML signatures, structures, fun
 # ML modules and modular implicits
 
 CGP lets Rust programs assemble named implementations through a context's wiring table. For an
-ML programmer, its components, providers, and higher-order providers play roles similar to
+ML programmer, its components, providers, and [higher-order providers](/docs/reference/glossary#higher-order-provider) play roles similar to
 signatures, structures, and functors. The correspondence explains how to compose implementations;
 ML's sealing and module type identities need a separate account.
 
@@ -80,7 +80,7 @@ constraint such as `with type elt = O.t`. These equalities let independently des
 exchange values of the same type. [OCaml's functor guide](https://ocaml.org/docs/functors) develops
 the set example and dependency injection through modules.
 
-Functor application also determines which abstract types are equal. OCaml's applicative functors
+Functor application also determines which [abstract types](/docs/reference/glossary#abstract-type) are equal. OCaml's applicative functors
 can preserve result type equality across applications to the same module path. Generative functors
 can introduce fresh type identities; OCaml provides unit-parameter functors for this purpose.
 Standard ML uses generative semantics, but an explicitly shared or manifest type need not become
@@ -171,7 +171,7 @@ provider trait, `AreaCalculator`. The provider reads `width` and `height` from t
 **[value context](/docs/reference/glossary#value-context)**: the value being measured also determines the implementation.
 
 The consumer/provider split is specific to CGP's use of Rust traits. Distinct provider types can
-implement the same provider trait for a context while respecting Rust's coherence rules; wiring
+implement the same provider trait for a context while respecting Rust's [coherence](/docs/reference/glossary#coherence) rules; wiring
 then selects one for consumer calls. ML already names different structures satisfying a signature.
 The [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) page explains this
 split in detail.
@@ -282,7 +282,7 @@ functors adds another type-level concern. Tools such as Functoria organize that 
 CGP moves many assembly choices into a context, at the cost of generated traits and indirect
 dependency resolution. A reader may need to follow the wiring to find an implementation, and a
 failed bound can produce a long diagnostic. [`cargo cgp check`](/docs/cargo-cgp/check) helps explain
-the error classes it recognizes. Monomorphization can also increase compile time and generated code;
+the error classes it recognizes. [Monomorphization](/docs/reference/glossary#monomorphization) can also increase compile time and generated code;
 static provider selection permits direct calls but does not guarantee that every call is inlined.
 
 CGP wiring supplies neither ML sealing nor runtime module selection. Rust's ordinary abstraction

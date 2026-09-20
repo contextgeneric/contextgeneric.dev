@@ -44,7 +44,7 @@ Its attributes:
 - [`#[cgp_component]`](../macros/cgp_component.md) — turns the trait into a component: its argument names the provider trait `Runner` that implementations target and the wiring key `RunnerComponent`, while `CanRun` stays the consumer trait callers use.
 - [`#[async_trait]`](../macros/async_trait.md) — rewrites the `async fn` into a method returning `-> impl Future`, the lint-clean, allocation-free form.
 - [`#[derive_delegate]`](../attributes/derive_delegate.md) — generates a `UseDelegate` provider that dispatches on the `Code` type, so a context can route each `Code` to its own provider; the `open` statement is the modern sugar for the same dispatch.
-- [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a supertrait and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
+- [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a [supertrait](/docs/reference/glossary#supertrait) and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
 
 ## Usage
 

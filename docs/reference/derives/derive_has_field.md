@@ -47,7 +47,7 @@ It accepts any struct shape. The shapes differ only in how each field's tag is c
 
 ### Named fields
 
-A named field is keyed by [`Symbol!`](../macros/symbol.md), the type-level string of its identifier. The
+A named field is keyed by [`Symbol!`](../macros/symbol.md), the [type-level string](/docs/reference/glossary#type-level-string) of its identifier. The
 struct above gains access keyed by `Symbol!("name")` and `Symbol!("age")`.
 
 A field written as a [raw identifier](https://doc.rust-lang.org/reference/identifiers.html) is keyed by
@@ -160,7 +160,7 @@ The implicit form generates a `HasField` bound and reads the field for you. Pref
 ordinary field read; the explicit form is useful when reading generated code or diagnostics.
 
 Field access passes through smart pointers without an additional derive. `Box<Person>` and
-newtypes that dereference to `Person` can read its fields through the library's blanket implementations.
+newtypes that dereference to `Person` can read its fields through the library's [blanket implementations](/docs/reference/glossary#blanket-implementation).
 
 ## When to use it
 
@@ -171,7 +171,7 @@ derive, but its fields need corresponding trait implementations to support gener
 Choose the field-access syntax according to what the implementation needs:
 
 - **[`#[implicit]`](../attributes/implicit.md)**: use by default to read a field from the
-  implementation's own context as a parameter, without declaring a getter trait.
+  implementation's own context as a parameter, without declaring a [getter trait](/docs/reference/glossary#getter-trait).
 - **[`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md)**: use when the read should be a named
   trait, the field belongs to another type, or the getter needs a type inferred from the field.
 - **A hand-written `HasField` bound**: use when the higher-level forms do not fit. Add `Value = T` to
@@ -181,7 +181,7 @@ Choose the field-access syntax according to what the implementation needs:
 
 Incremental construction requires [`BuildField`](./derive_build_field.md). `HasField` provides access
 to existing fields; [`CgpData`](./derive_cgp_data.md) combines it with the representation and builder
-needed for an extensible record.
+needed for an [extensible record](/docs/reference/glossary#extensible-record).
 
 ## Under the hood
 

@@ -154,7 +154,7 @@ type takes the `Self` position instead. The inconsistency is the family's sharpe
 
 **There is no method.** Resolving a default is a type projection.
 
-**Registering into a foreign namespace is bound by the orphan rule.** See
+**Registering into a foreign namespace is bound by the [orphan rule](/docs/reference/glossary#orphan-rule).** See
 [`DefaultImpls1`](./default_impls1.md#when-to-use-it), where the
 [`#[default_impl]`](../../attributes/default_impl.md) attribute's placement constraint is worked out.
 

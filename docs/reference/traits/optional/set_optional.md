@@ -38,7 +38,7 @@ argument. `Value` is the field's declared type, so a caller passes an ordinary v
 `Option`. Both methods take `self` and return `Self`: the field's marker stays `IsOptional` before and
 after, so the builder's type does not change and an optional field can be set repeatedly. The two
 methods differ only in what they do with whatever was already there. `set` discards it; `set_optional`
-returns it as an `Option<Self::Value>` alongside the rebuilt builder. The trait has no supertrait. It is
+returns it as an `Option<Self::Value>` alongside the rebuilt builder. The trait has no [supertrait](/docs/reference/glossary#supertrait). It is
 not in the prelude; import it from `cgp-field-extra`.
 
 ## Usage

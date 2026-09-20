@@ -18,7 +18,7 @@ fields), and returns the `Output` directly rather than a `Result`.
 
 It sits between [`Computer`](./computer.md), which drops the asynchrony, and [`Handler`](./handler.md),
 which adds a failure path on top of the asynchrony. Like the pure computer, it never names an error type,
-so it does not supertrait [`HasErrorType`](../has_error_type.md). See the
+so it does not [supertrait](/docs/reference/glossary#supertrait) [`HasErrorType`](../has_error_type.md). See the
 [handler family overview](./index.md) for how the members relate and promote.
 
 ## Definition

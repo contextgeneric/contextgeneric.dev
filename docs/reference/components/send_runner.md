@@ -14,7 +14,7 @@ The runner variant whose returned future is `Send`, for work that must cross a t
 `tokio::spawn`. It exists to solve a specific Rust limitation. A generic `async fn` over abstract
 **context** types (the context being the type a method runs on that supplies the values an
 implementation needs as its own fields) cannot promise its future is `Send` without annotating `Send`
-bounds on every abstract type in scope, and those bounds pollute every interface.
+bounds on every [abstract type](/docs/reference/glossary#abstract-type) in scope, and those bounds pollute every interface.
 `CanSendRun<Code>` sidesteps that by returning an explicit
 `impl Future<Output = Result<(), Error>> + Send`, so the `Send` requirement lives on this one trait
 rather than spreading across the abstract types.
@@ -48,7 +48,7 @@ Its attributes:
 - [`#[cgp_component]`](../macros/cgp_component.md) — turns the trait into a component: its argument names the provider trait `SendRunner` that implementations target and the wiring key `SendRunnerComponent`, while `CanSendRun` stays the consumer trait callers use.
 - [`#[async_trait]`](../macros/async_trait.md) — the attribute CGP's async trait methods carry; it rewrites an `async fn` into a lint-clean `-> impl Future` method. Here `send_run` is already written in that form so it can add the `+ Send` bound that [`CanRun`](./runner.md)'s `run` omits.
 - [`#[derive_delegate]`](../attributes/derive_delegate.md) — generates a `UseDelegate` provider that dispatches on the `Code` type, so a context can route each `Code` to its own provider; the `open` statement is the modern sugar for the same dispatch.
-- [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a supertrait and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
+- [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a [supertrait](/docs/reference/glossary#supertrait) and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
 
 ## Usage
 

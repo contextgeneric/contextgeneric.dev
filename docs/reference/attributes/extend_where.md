@@ -33,7 +33,7 @@ against the trait instead of deferring it.
 
 `#[extend_where]` is the `where`-clause sibling of [`#[extend]`](extend.md). Both put a requirement into
 the trait's public interface. They differ in position, and in what the reader gets. `#[extend]` adds a
-**supertrait**, a bound on `Self`, which callers do receive, because Rust elaborates a supertrait bound
+**[supertrait](/docs/reference/glossary#supertrait)**, a bound on `Self`, which callers do receive, because Rust elaborates a supertrait bound
 automatically. `#[extend_where]` adds a **predicate**, which can bound anything, most usefully one of the
 trait's own generic parameters, which a supertrait cannot reach.
 
@@ -126,7 +126,7 @@ Other constructs carry the requirements that belong elsewhere.
   elaboration.
 - **A private requirement**, the overwhelmingly common case, belongs in the function's own `where` clause,
   or in [`#[uses]`](uses.md) when it is a trait on the context.
-- **An abstract type pinned to a concrete one** is [`#[use_type]`](use_type.md)'s equality form, which adds
+- **An [abstract type](/docs/reference/glossary#abstract-type) pinned to a concrete one** is [`#[use_type]`](use_type.md)'s equality form, which adds
   the bound and lets the signature name the type as a bare word.
 
 Do not use it to spare callers a bound, because it has the opposite effect. If holding the trait

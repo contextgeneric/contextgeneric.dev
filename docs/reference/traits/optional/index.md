@@ -10,7 +10,7 @@ Relaxing the strict record builder, so a field can be set in any order or left u
 ## Overview
 
 The core [record builder](../builder/index.md) is deliberately strict: a field is set once, and a
-partial record becomes its struct only when every field is present. That strictness catches a missing
+[partial record](/docs/reference/glossary#partial-record) becomes its struct only when every field is present. That strictness catches a missing
 field at compile time, and it is too rigid for a record whose fields arrive unpredictably or have
 sensible defaults. These traits, from `cgp-field-extra`, relax it while reusing the same machinery
 underneath. Nothing here is in the prelude. Import each from `cgp::extra::field::impls`.

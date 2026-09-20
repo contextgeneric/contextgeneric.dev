@@ -73,7 +73,7 @@ trait implementations. The error location may also be far from the wiring, in an
 ## Asking the question at a line you chose
 
 A check trait forces the compiler to verify a bound where you write its implementation. The basic
-technique uses an ordinary Rust supertrait and an empty implementation:
+technique uses an ordinary Rust [supertrait](/docs/reference/glossary#supertrait) and an empty implementation:
 
 ```rust
 trait CanUseApp: CanSendEmail {}

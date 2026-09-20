@@ -5,7 +5,7 @@ sidebar_position: 11
 
 # `UseDelegatedType`
 
-Resolve an abstract type by looking its tag up in a table, instead of fixing it to one concrete type.
+Resolve an [abstract type](/docs/reference/glossary#abstract-type) by looking its tag up in a table, instead of fixing it to one concrete type.
 
 ## Overview
 
@@ -13,7 +13,7 @@ Resolve an abstract type by looking its tag up in a table, instead of fixing it 
 should itself be decided by a table. The plain [`UseType<T>`](use_type.md) provider binds an abstract
 type to one fixed `T`. But sometimes a single provider must answer several abstract-type components at
 once, or route each type tag to a different concrete type chosen elsewhere, such as when a namespace or
-a higher-order provider supplies a coherent bundle of types. Hand-writing one `UseType` entry per tag
+a [higher-order provider](/docs/reference/glossary#higher-order-provider) supplies a coherent bundle of types. Hand-writing one `UseType` entry per tag
 would scatter that decision; `UseDelegatedType` concentrates it into one `Components` table the provider
 consults. As always, the **context** (the type that implements the trait) points its type
 components at the provider.

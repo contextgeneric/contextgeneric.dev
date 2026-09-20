@@ -22,7 +22,7 @@ that context.
 
 | In capability-oriented code | In CGP |
 | --- | --- |
-| A requirement on a computation's environment | An **impl-side dependency**, declared with `#[uses]` or `#[implicit]` |
+| A requirement on a computation's environment | An **[impl-side dependency](/docs/reference/glossary#impl-side-dependency)**, declared with `#[uses]` or `#[implicit]` |
 | An environment supplying a required value | A context value with the required field |
 | A capability value passed to an operation | A context field borrowed by a provider |
 | Checking that requirements are supplied | `check_components!` verifies declared dependencies |

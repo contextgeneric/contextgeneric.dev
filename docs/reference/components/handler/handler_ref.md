@@ -17,7 +17,7 @@ on, which supplies the values an implementation needs as its own fields. `Handle
 owned-versus-borrowed variant of the family's most general member, differing on the input axis alone, for
 an async-and-fallible computation that reads rather than consumes its argument.
 
-Because it can fail, it supertraits [`HasErrorType`](../has_error_type.md), which supplies the
+Because it can fail, it [supertraits](/docs/reference/glossary#supertrait) [`HasErrorType`](../has_error_type.md), which supplies the
 `Self::Error` it names in its `Result`. See the [handler family overview](./index.md) for how the members
 relate and promote.
 

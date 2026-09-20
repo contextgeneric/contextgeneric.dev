@@ -86,7 +86,7 @@ with one lifetime argument and one type argument. Anything else spelled `MRef` f
 and the macro clones it. This is the one place where a small change to the type changes the read without
 a warning.
 
-The same rules govern the getter traits, so learning them once covers everywhere CGP reads a field.
+The same rules govern the [getter traits](/docs/reference/glossary#getter-trait), so learning them once covers everywhere CGP reads a field.
 
 ### Mutable arguments
 
@@ -169,7 +169,7 @@ A **getter trait** covers the cases an implicit argument cannot reach.
   The value does not live on `self` at all.
 - **The accessor must be a named trait.** When other code depends on "this context can tell you its
   name" rather than on a field, that dependency needs a trait to point at, importable with
-  [`#[uses]`](uses.md) or usable as a supertrait.
+  [`#[uses]`](uses.md) or usable as a [supertrait](/docs/reference/glossary#supertrait).
 - **The getter carries a type inferred from the field.** A getter may declare an associated type and
   return it, which keeps the type abstract for callers in a way a concrete argument cannot.
 
@@ -216,7 +216,7 @@ where
 ```
 
 The macro inserts the bindings in argument order, ahead of every original statement, so the names are in
-scope for the whole body. [`Symbol!("width")`](../macros/symbol.md) is a type-level string standing for the
+scope for the whole body. [`Symbol!("width")`](../macros/symbol.md) is a [type-level string](/docs/reference/glossary#type-level-string) standing for the
 field name. The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and
 `cargo cgp expand` resugars it back. The context parameter is literally `__Context__`, a reserved name
 chosen so it cannot collide with one of yours.

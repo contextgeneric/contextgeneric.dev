@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # `StaticString`
 
-Recovering a type-level string as a compile-time `&'static str`.
+Recovering a [type-level string](/docs/reference/glossary#type-level-string) as a compile-time `&'static str`.
 
 ## Overview
 

@@ -35,7 +35,7 @@ crate rather than by hand.
 ## Let each context choose a type
 
 [`HasType`](./has_type.md) is CGP's single built-in abstract-type component: a tag-indexed trait whose
-associated type a context resolves to a concrete one through wiring. Every named abstract type a program
+associated type a context resolves to a concrete one through wiring. Every named [abstract type](/docs/reference/glossary#abstract-type) a program
 defines with [`#[cgp_type]`](../macros/cgp_type.md), including `HasErrorType` and
 [`HasRuntimeType`](./has_runtime_type.md) below, is built on this substrate, and the same
 [`UseType<T>`](../providers/use_type.md) marker resolves all of them. You reach for `HasType` directly

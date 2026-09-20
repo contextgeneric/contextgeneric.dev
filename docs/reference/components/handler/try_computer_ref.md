@@ -17,7 +17,7 @@ type a method runs on, which supplies the values an implementation needs as its 
 `TryComputerRef` is the owned-versus-borrowed variant of the fallible synchronous computer, differing on
 the input axis alone.
 
-Because it can fail, it supertraits [`HasErrorType`](../has_error_type.md), which supplies the
+Because it can fail, it [supertraits](/docs/reference/glossary#supertrait) [`HasErrorType`](../has_error_type.md), which supplies the
 `Self::Error` it names in its `Result` and ties it to the same error every other fallible component in
 the context uses. See the [handler family overview](./index.md) for how the members relate and promote.
 

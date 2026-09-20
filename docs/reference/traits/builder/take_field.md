@@ -10,7 +10,7 @@ Removing one currently-present field from a builder.
 ## Overview
 
 `TakeField` is the reverse of [`BuildField`](./build_field.md): it removes a field that is currently set,
-handing back the value and the partial record without it. The value comes out owned, and the remainder is
+handing back the value and the [partial record](/docs/reference/glossary#partial-record) without it. The value comes out owned, and the remainder is
 the partial record with that one field flipped back to absent, so it can no longer be finalized until the
 field is put back.
 

@@ -29,7 +29,7 @@ The vocabulary maps by role rather than by an exact translation of language feat
 | A policy class | A **provider** implementing a provider trait |
 | A policy interface, possibly expressed as a concept | A **component** declaring the interface as a trait |
 | The host object | The context value |
-| A template taking policy types | A **higher-order provider** taking provider types |
+| A template taking policy types | A **[higher-order provider](/docs/reference/glossary#higher-order-provider)** taking provider types |
 | Policy arguments selecting host behavior | Component choices in `delegate_components!`, or explicit provider parameters |
 | Access to the derived object through CRTP | Access to the context parameter, written as `self` inside `#[cgp_impl]` |
 | Checking constraints for a concrete instantiation | Checking trait bounds, with `check_components!` asserting a context's dependencies |
@@ -375,7 +375,7 @@ particular composition mechanism within Rust. For a small Rust API, ordinary tra
 can be the simpler choice.
 
 Runtime selection needs an additional representation in either language. Virtual interfaces or
-type erasure in C++, and trait objects in Rust, can support open sets of runtime implementations.
+type erasure in C++, and [trait objects](/docs/reference/glossary#trait-object) in Rust, can support open sets of runtime implementations.
 Variants and enums can represent closed sets. The [dynamic dispatch](./dynamic-dispatch.md) page
 explains how static wiring and runtime polymorphism can coexist.
 

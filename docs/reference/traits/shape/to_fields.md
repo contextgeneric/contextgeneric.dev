@@ -33,7 +33,7 @@ pub trait ToFields: HasFields {
 }
 ```
 
-It supertraits [`HasFields`](./has_fields.md), so `to_fields` returns that trait's `Fields` shape and a
+It [supertraits](/docs/reference/glossary#supertrait) [`HasFields`](./has_fields.md), so `to_fields` returns that trait's `Fields` shape and a
 bound on `ToFields` gives you `Fields` as well. The method takes `self` by value, so it consumes the
 value to produce the owned shape.
 

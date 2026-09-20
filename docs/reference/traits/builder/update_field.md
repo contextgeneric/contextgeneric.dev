@@ -5,7 +5,7 @@ sidebar_position: 5
 
 # `UpdateField`
 
-The primitive that moves one field of a partial record between states.
+The primitive that moves one field of a [partial record](/docs/reference/glossary#partial-record) between states.
 
 :::info
 

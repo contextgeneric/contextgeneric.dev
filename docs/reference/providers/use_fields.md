@@ -18,7 +18,7 @@ The context is the type the method runs on, and it supplies those values as its 
 method read the context field whose name equals the method name, looked up through
 [`HasField`](../traits/field-access/has_field.md) keyed by a [`Symbol!`](../macros/symbol.md).
 
-This is the provider analogue of the blanket implementation that
+This is the provider analogue of the [blanket implementation](/docs/reference/glossary#blanket-implementation) that
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) emits. `#[cgp_auto_getter]` produces a single
 blanket implementation that fires automatically for any context whose field names match the method
 names, with nothing to wire. `UseFields` packages the same field-by-method-name behavior as a provider
@@ -93,7 +93,7 @@ case where the getter is a full component rather than a blanket impl.
 
 Prefer [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) when the getter does not need to be a
 wireable component, and prefer an [`#[implicit]`](../attributes/implicit.md) argument when a provider
-simply needs a value from its own context, which is the common case and needs no getter trait at all.
+simply needs a value from its own context, which is the common case and needs no [getter trait](/docs/reference/glossary#getter-trait) at all.
 Reach for [`UseField<Tag>`](use_field.md) instead when the field name must differ from the method name.
 
 ## Under the hood

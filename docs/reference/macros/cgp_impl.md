@@ -151,7 +151,7 @@ provider becomes a tuple struct with one public
 generic parameters together, always `pub` and never with a default. You must write by hand anything
 the struct needs outside those shapes.
 
-The case you see most often is a default on a higher-order provider's inner parameter, so an
+The case you see most often is a default on a [higher-order provider](/docs/reference/glossary#higher-order-provider)'s inner parameter, so an
 application can omit the inner provider and fall back to
 [`UseContext`](../providers/use_context.md), which routes back through the context's own
 implementation of the component. If `ScaledAreaCalculator` from [Usage](#usage) should default this
@@ -176,10 +176,10 @@ they let an idiomatic provider state what it needs.
   from a same-named field on the context.
 - [`#[uses(...)]`](../attributes/uses.md) adds the traits the provider depends on, reading like
   a `use` statement instead of a hand-written `where Self: Trait` clause.
-- [`#[use_type(Trait.Type)]`](../attributes/use_type.md) imports an abstract type and rewrites its
+- [`#[use_type(Trait.Type)]`](../attributes/use_type.md) imports an [abstract type](/docs/reference/glossary#abstract-type) and rewrites its
   occurrences to fully qualified form.
 - [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound in a
-  higher-order provider.
+  [higher-order provider](/docs/reference/glossary#higher-order-provider).
 - [`#[default_impl(...)]`](../attributes/default_impl.md) registers the provider as a namespace's
   per-type default, emitting a delegation impl alongside it, for use with
   [`cgp_namespace!`](./cgp_namespace.md).
@@ -351,7 +351,7 @@ so a provider for `ComputerRef<Context, Code, Input>` gets
 provider that supplies `type Output`, because it gathers the block's own associated-type names first
 and skips any `Self::` path starting with one. In the emitted impl, `Self` is the provider struct,
 which is the type that declares `Output`, so the path still resolves. The macro still rewrites every
-other `Self` in the block, including one naming an abstract type the *context* supplies. The exemption
+other `Self` in the block, including one naming an [abstract type](/docs/reference/glossary#abstract-type) the *context* supplies. The exemption
 does not cover associated consts; see [Common Mistakes](#common-mistakes).
 
 **The rewrite is scoped to the block's own method bodies.** An item nested *inside* a body, such as a

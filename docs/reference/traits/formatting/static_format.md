@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # `StaticFormat`
 
-Writing a type-level string into a formatter: the trait behind `Display` on `Symbol`.
+Writing a [type-level string](/docs/reference/glossary#type-level-string) into a formatter: the trait behind `Display` on `Symbol`.
 
 :::info
 

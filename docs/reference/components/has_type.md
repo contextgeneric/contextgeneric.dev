@@ -10,7 +10,7 @@ CGP's single built-in abstract-type component: a tag-indexed type a context reso
 ## Overview
 
 `HasType<Tag>` lets generic code refer to a type that is chosen per context without committing to a
-concrete one. An abstract type in CGP is a
+concrete one. An [abstract type](/docs/reference/glossary#abstract-type) in CGP is a
 [trait](https://doc.rust-lang.org/book/ch10-02-traits.html) with a single
 [associated type](https://doc.rust-lang.org/reference/items/associated-items.html), and `HasType<Tag>`
 is the foundational, tag-indexed instance of that pattern. A **context**, the type that implements the trait, can carry many distinct abstract types, one per `Tag`, and resolve each to a concrete type

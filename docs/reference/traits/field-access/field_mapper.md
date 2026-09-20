@@ -47,7 +47,7 @@ pub trait FieldMapper<Context, Tag>: FieldGetter<Context, Tag> {
 }
 ```
 
-`Self` is the provider and `Context` is the type being read from. It is a supertrait extension of
+`Self` is the provider and `Context` is the type being read from. It is a [supertrait](/docs/reference/glossary#supertrait) extension of
 [`FieldGetter`](./field_getter.md), exactly as [`MapField`](./map_field.md) extends
 [`HasField`](./has_field.md), so `Value` comes from the supertrait. `map_field` takes the context by
 shared reference, the `PhantomData<Tag>` that names the field, and a `mapper` closure whose higher-ranked

@@ -5,7 +5,7 @@ sidebar_position: 5
 
 # `CanFinalizeWithDefault`
 
-Finalizing a partial record, filling whatever is unset from `Default`.
+Finalizing a [partial record](/docs/reference/glossary#partial-record), filling whatever is unset from `Default`.
 
 ## Overview
 
@@ -42,7 +42,7 @@ pub trait CanFinalizeWithDefault {
 from [`builder()`](../builder/has_builder.md) as well as an optional one from
 [`optional_builder()`](./has_optional_builder.md). `Output` is the concrete struct being built.
 `finalize_with_default` takes `self`, consuming the builder, and returns that struct with every unset
-field filled from `Default`. The trait has no supertrait; it is a blanket impl over the
+field filled from `Default`. The trait has no [supertrait](/docs/reference/glossary#supertrait); it is a blanket impl over the
 transform-then-finalize shown in [*Under the hood*](#under-the-hood). It is not in the prelude; import it
 from `cgp-field-extra`.
 

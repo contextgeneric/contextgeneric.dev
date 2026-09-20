@@ -60,12 +60,12 @@ Match the compiler's code and the shape of the message.
 | `E0119` conflicting implementations | Two wiring entries claim one key | [The wiring itself does not compile](#the-wiring-itself-does-not-compile) |
 | `E0428` the name … is defined multiple times | A generated name declared twice | [Two entries claim one key](#two-entries-claim-one-key) |
 | `E0275` overflow evaluating the requirement | A wiring or inheritance cycle | [A lookup that never terminates](#a-lookup-that-never-terminates) |
-| `E0210` / `E0117` orphan rule | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
+| `E0210` / `E0117` [orphan rule](/docs/reference/glossary#orphan-rule) | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
 | `E0207` type parameter is not constrained | A per-entry generic that never reaches the key | [A generic that reaches nothing](#a-generic-that-reaches-nothing) |
 | `E0107` trait takes N generic arguments but N+1 supplied | A consumer trait written where a provider trait belongs | [Naming the wrong half of a component](#naming-the-wrong-half-of-a-component) |
 | `E0433` / `E0425` cannot find type | A name the generated code cannot see | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 | `E0576` cannot find associated type … in trait | A `#[use_type]` import with a wrong name | [An imported type that does not exist](#an-imported-type-that-does-not-exist) |
-| `E0404` expected trait, found type parameter | An abstract type named after its own bound | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
+| `E0404` expected trait, found type parameter | An [abstract type](/docs/reference/glossary#abstract-type) named after its own bound | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 
 ## A dependency is not met
 
@@ -350,7 +350,7 @@ Two carets, two lines to reconcile. Related codes cover the neighbouring shapes:
 Two things are worth knowing when reading the raw form. A context-wiring entry generates *two* impls, so
 one duplicate prints a **pair** of `E0119`s — one conflict, not two. And a blanket-versus-specific
 collision often carries a "downstream crates may implement …" note: that is the compiler explaining that
-coherence must allow for impls a future crate could add, not a second problem.
+[coherence](/docs/reference/glossary#coherence) must allow for impls a future crate could add, not a second problem.
 
 A duplicate **name** rather than a duplicate key is an `E0428` instead, and passes through uncoded — it
 already points precisely at both definitions.
@@ -393,7 +393,7 @@ unclaimed in the namespace so the context can supply it, or change the binding i
 
 The same mistake one level up — a child namespace redefining a key it inherits — produces a bare
 `conflicting implementations of trait ChildNs<_> for type GreeterComponent`, which the tool does not yet
-rewrite. The tell is that the conflicting *self type* is a component marker rather than a context. The
+rewrite. The tell is that the conflicting *self type* is a [component marker](/docs/reference/glossary#component-marker) rather than a context. The
 fix there is to leave the key unbound in the base so each child can bind it.
 
 ### Registering into a namespace you do not own

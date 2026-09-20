@@ -123,7 +123,7 @@ still needs to satisfy the bound independently.
 
 The companion trait adds an interface to maintain. Methods that need the stronger guarantee need
 corresponding signatures and forwarding bodies. Other methods can remain available through the
-original supertrait without being duplicated.
+original [supertrait](/docs/reference/glossary#supertrait) without being duplicated.
 
 A companion trait is useful when the base interface must support both sendable and non-sendable
 futures. If every implementation must return a `Send` future, an explicit `impl Future + Send`

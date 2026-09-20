@@ -82,7 +82,7 @@ delegate_components! {
 
 `App` routes both its scalar and index type components through `WithDelegatedType<AppTypes>`. For `App`'s
 `Scalar` the provider finds `f64` in `AppTypes`, and for `Index` it finds `usize`. One provider entry on
-`App` answers two abstract types, with the concrete choices held in one place where they can be reused,
+`App` answers two [abstract types](/docs/reference/glossary#abstract-type), with the concrete choices held in one place where they can be reused,
 swapped, or supplied by a namespace.
 
 ## When to use it

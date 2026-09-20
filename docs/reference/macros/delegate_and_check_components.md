@@ -257,7 +257,7 @@ beginner-proof way to guarantee that for simple contexts; the two separate macro
 ## Under the hood
 
 The macro emits the delegation impls exactly as [`delegate_components!`](./delegate_components.md) would,
-then appends a check trait and one impl per non-skipped entry exactly as
+then appends a [check trait](/docs/reference/glossary#check-trait) and one impl per non-skipped entry exactly as
 [`check_components!`](./check_components.md) would. From this input:
 
 ```rust
@@ -345,7 +345,7 @@ component's check needs, and `#[skip_check]` wires the entry with no check at al
 
 ## Common Mistakes
 
-**Used on an aggregate provider, this macro reports a failure that describes nothing real.** A `new`-keyword
+**Used on an [aggregate provider](/docs/reference/glossary#aggregate-provider), this macro reports a failure that describes nothing real.** A `new`-keyword
 bundle is not a context, so the derived check asks whether the *bundle* satisfies the leaf provider's
 dependencies. When the bundled provider needs nothing, the check passes and proves nothing; when it needs
 anything from its context, the check fails and blames the bundle:

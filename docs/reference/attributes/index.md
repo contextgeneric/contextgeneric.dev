@@ -29,13 +29,13 @@ dependencies belong on the implementation, where callers never see them. `#[exte
 rely on it.
 
 [`#[uses]`](./uses.md) imports a consumer trait, or an ordinary Rust trait, that the context must
-satisfy. This is the common case. [`#[use_type]`](./use_type.md) imports an abstract type that another
+satisfy. This is the common case. [`#[use_type]`](./use_type.md) imports an [abstract type](/docs/reference/glossary#abstract-type) that another
 component supplies, such as an error type, and lets the signature name it as a bare word instead of a
 qualified path. [`#[use_provider]`](./use_provider.md) imports a provider trait that a named inner
-provider must satisfy, which is the dependency a higher-order provider declares.
+provider must satisfy, which is the dependency a [higher-order provider](/docs/reference/glossary#higher-order-provider) declares.
 
 [`#[extend]`](./extend.md) and [`#[extend_where]`](./extend_where.md) put the requirement on the generated
-trait rather than on the implementation, so every caller inherits it. `#[extend]` adds a supertrait, and
+trait rather than on the implementation, so every caller inherits it. `#[extend]` adds a [supertrait](/docs/reference/glossary#supertrait), and
 `#[extend_where]` adds a `where` predicate that a supertrait cannot express.
 
 ## Naming a type the body needs

@@ -16,7 +16,7 @@ trait is exactly the one the context already supplies that way. `UseContext` is 
 a provider whose method bodies call the consumer method on the context, so handing a component
 `UseContext` means "use whatever this context already does for this trait."
 
-This makes `UseContext` the exact dual of the consumer-trait blanket implementation that
+This makes `UseContext` the exact dual of the consumer-trait [blanket implementation](/docs/reference/glossary#blanket-implementation) that
 [`#[cgp_component]`](../macros/cgp_component.md) generates. That blanket impl runs in the
 consumer-to-provider direction: a context implements `CanEncode` by delegating to whichever provider
 implements `Encoder` for it. `UseContext` runs the other way: it implements the provider trait
@@ -34,7 +34,7 @@ position is never read.
 ## Usage
 
 `UseContext` is in the prelude, so `use cgp::prelude::*;` is enough. It takes no type parameter and
-appears in two places. Most often it is a higher-order provider's default inner provider, written in
+appears in two places. Most often it is a [higher-order provider](/docs/reference/glossary#higher-order-provider)'s default inner provider, written in
 the provider's struct definition:
 
 ```rust
@@ -127,7 +127,7 @@ defaulting to `UseContext`.
 
 [`#[cgp_component]`](../macros/cgp_component.md) emits a `UseContext` implementation of the provider
 trait for every component it defines, alongside the consumer blanket impl, the provider blanket impl,
-the component marker, and the [`RedirectLookup`](redirect_lookup.md) impl. The generated impl bounds the
+the [component marker](/docs/reference/glossary#component-marker), and the [`RedirectLookup`](redirect_lookup.md) impl. The generated impl bounds the
 context on the consumer trait and forwards each method to it. For a component such as
 
 ```rust
@@ -153,7 +153,7 @@ where
 The provider method takes the context explicitly and calls the context's own `CanGreet::greet`. Each
 `UseContext` impl is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl
 carrying the same `where` clause, so delegation propagates the dependency and a check reports a missing
-consumer-trait implementation precisely. Any supertrait bound on the consumer trait is reproduced in the
+consumer-trait implementation precisely. Any [supertrait](/docs/reference/glossary#supertrait) bound on the consumer trait is reproduced in the
 `where` clause, so a context must satisfy it before `UseContext` can stand in as a provider.
 
 ## Common Mistakes

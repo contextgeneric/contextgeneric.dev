@@ -34,7 +34,7 @@ generic builder code knows what it is building before the build is complete.
 
 ## The ideas behind them
 
-- [Extensible records](/docs/concepts/extensible-records): partial records and the extensible builder
+- [Extensible records](/docs/concepts/extensible-records): [partial records](/docs/reference/glossary#partial-record) and the extensible builder
   pattern.
 
 ---

@@ -5,7 +5,7 @@ sidebar_position: 9
 
 # `Chars`
 
-One character of a type-level string: the list that spells a field name out one character at a time so
+One character of a [type-level string](/docs/reference/glossary#type-level-string): the list that spells a field name out one character at a time so
 the name can be a type.
 
 ## Overview

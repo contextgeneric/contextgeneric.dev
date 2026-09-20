@@ -12,7 +12,7 @@ sidebar_position: 4
 Generic code needs traits to read and assemble fields across different structs. A type parameter alone
 does not let it refer to a field such as `first_name`.
 
-`#[derive(CgpRecord)]` supplies those traits, making the struct an **extensible record**. It generates
+`#[derive(CgpRecord)]` supplies those traits, making the struct an **[extensible record](/docs/reference/glossary#extensible-record)**. It generates
 per-field access, a representation of the whole struct, and a builder that fills fields individually.
 Generic code can use these operations without naming the concrete struct.
 

@@ -219,7 +219,7 @@ the unsatisfied bound, but you cannot ask for it directly.
 
 ## Under the hood
 
-A check table expands to one marker trait plus one empty impl per entry. The trait's supertrait *is* the
+A check table expands to one marker trait plus one empty impl per entry. The trait's [supertrait](/docs/reference/glossary#supertrait) *is* the
 assertion; the impl has nothing of its own to prove, so it compiles exactly when the supertrait holds. From
 this input:
 
@@ -324,7 +324,7 @@ is no diagnostic, and it is worth a second look if a table appears to pass witho
 
 ## Common Mistakes
 
-**A check on an aggregate provider asks the wrong question, and how it fails depends on the provider.** A
+**A check on an [aggregate provider](/docs/reference/glossary#aggregate-provider) asks the wrong question, and how it fails depends on the provider.** A
 `new`-keyword bundle is not a context, so a context-side check demands that the *bundle* satisfy the leaf
 provider's dependencies. If that provider has none, the check passes vacuously and proves nothing. If it
 needs anything from its context, such as a field or a type, the check fails, blaming the bundle:

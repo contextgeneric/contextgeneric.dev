@@ -61,11 +61,11 @@ entry may nonetheless be any bound a `where` clause accepts: an associated-type 
 `HasErrorType<Error = anyhow::Error>`, a higher-ranked bound, or a lifetime bound. Each lands on the
 `where` clause verbatim.
 
-Use that generality sparingly, and prefer a more specific tool where one exists. To pin an abstract type
+Use that generality sparingly, and prefer a more specific tool where one exists. To pin an [abstract type](/docs/reference/glossary#abstract-type)
 to a concrete one, [`#[use_type]`](use_type.md)'s equality form
 `#[use_type(HasErrorType.{Error = anyhow::Error})]` adds the same bound *and* lets the signature name the
 type as a bare `Error`. To put a bound on the generated trait rather than only on its implementation, use
-[`#[extend]`](extend.md) for a supertrait or [`#[extend_where]`](extend_where.md) for a predicate.
+[`#[extend]`](extend.md) for a [supertrait](/docs/reference/glossary#supertrait) or [`#[extend_where]`](extend_where.md) for a predicate.
 
 ## Examples
 
@@ -123,7 +123,7 @@ The choice between `#[uses]` and its neighbours turns on *what* the implementati
   reads a field directly rather than routing through a trait.
 - **A type from the context** is imported with [`#[use_type]`](use_type.md), which adds the bound and
   additionally lets the signature write the type as a bare name instead of a qualified path.
-- **An inner provider** in a higher-order provider needs [`#[use_provider]`](use_provider.md), because a
+- **An inner provider** in a [higher-order provider](/docs/reference/glossary#higher-order-provider) needs [`#[use_provider]`](use_provider.md), because a
   provider trait carries a context argument that `#[uses]` would not fill in.
 - **A requirement callers should see** belongs on the trait rather than on the implementation:
   [`#[extend]`](extend.md) makes it a supertrait, and [`#[extend_where]`](extend_where.md) a predicate.

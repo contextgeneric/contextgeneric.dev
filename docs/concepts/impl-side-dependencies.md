@@ -7,7 +7,7 @@ sidebar_position: 3
 
 An **impl-side dependency** is a requirement stated on an implementation without being part of its
 trait interface. Callers can require the trait they use while the compiler checks the selected
-implementation's dependencies. This page starts with ordinary Rust blanket implementations, then
+implementation's dependencies. This page starts with ordinary Rust [blanket implementations](/docs/reference/glossary#blanket-implementation), then
 shows how CGP providers require traits, field values, and context-selected types.
 
 ## What a `where` clause costs the callers above it
@@ -65,7 +65,7 @@ where
 }
 ```
 
-`CanGreet` promises a greeting method without requiring `HasName` as a supertrait. The blanket
+`CanGreet` promises a greeting method without requiring `HasName` as a [supertrait](/docs/reference/glossary#supertrait). The blanket
 implementation supplies that method for every context implementing `HasName`. A generic caller
 can require only the greeting trait:
 

@@ -28,7 +28,7 @@ pub trait HasFieldMut<Tag>: HasField<Tag> {
 }
 ```
 
-It is a **supertrait extension** rather than an alternative: `HasFieldMut<Tag>` requires `HasField<Tag>`,
+It is a **[supertrait](/docs/reference/glossary#supertrait) extension** rather than an alternative: `HasFieldMut<Tag>` requires `HasField<Tag>`,
 so the field's type comes from that supertrait's `Value`, and bounding on the mutable form gives you the
 read as well. `get_field_mut` takes `&mut self` and returns `&mut Self::Value`, with the
 `PhantomData<Tag>` argument naming the field exactly as [`HasField`](./has_field.md)'s `get_field` does.

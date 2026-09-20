@@ -20,7 +20,7 @@ and `HasRuntime` is the getter that borrows it.
 `HasRuntime` answers *how to obtain the runtime value*; its companion
 [`HasRuntimeType`](./has_runtime_type.md) answers *what the runtime type is*. The two are split because
 the questions are independent: some code names only the runtime type and never touches a value, and
-needs `HasRuntimeType` alone, while code that performs effects needs `HasRuntime`, which supertraits
+needs `HasRuntimeType` alone, while code that performs effects needs `HasRuntime`, which [supertraits](/docs/reference/glossary#supertrait)
 `HasRuntimeType` so the value's type is always in scope. `HasRuntime` is the seam where context-generic
 logic meets the concrete async machinery, which is why it underpins the [`CanRun`](./runner.md) family
 of task runners.
@@ -45,7 +45,7 @@ Its attributes:
 ## Usage
 
 `HasRuntime` is imported from `cgp::extra::runtime`. It is a getter component: its method borrows the
-runtime value out of a borrow of the context, returning `&Runtime`, where `Runtime` is the abstract type
+runtime value out of a borrow of the context, returning `&Runtime`, where `Runtime` is the [abstract type](/docs/reference/glossary#abstract-type)
 supplied by [`HasRuntimeType`](./has_runtime_type.md):
 
 ```rust

@@ -42,7 +42,7 @@ its own small type instead of the single `Self` slot every plain trait has. A **
 those targets: a zero-sized type such as `RectangleArea` without data of its own that exists only
 to name one implementation. The type the methods run on is called the **context**. It
 supplies whatever values an implementation needs as its own fields, and it picks the provider it wants
-through [`delegate_components!`](./delegate_components.md). The generated blanket implementations then
+through [`delegate_components!`](./delegate_components.md). The generated [blanket implementations](/docs/reference/glossary#blanket-implementation) then
 route a call on the consumer trait through to that choice automatically. This costs nothing at
 runtime. Wiring fixes the provider once, at compile time, and the compiler turns the call into a
 direct, statically-dispatched call, exactly as if you had written the implementation yourself.
@@ -87,7 +87,7 @@ for setting `provider` alone.
 | Key | What it sets | Default |
 |---|---|---|
 | `provider` | The provider trait's name | *required* |
-| `name` | The component marker type | The provider name plus `Component` |
+| `name` | The [component marker](/docs/reference/glossary#component-marker) type | The provider name plus `Component` |
 | `context` | The identifier used for the generated context type parameter | `__Context__` |
 
 The `context` default is deliberately unusual so that it cannot collide with a type parameter of your
@@ -101,7 +101,7 @@ comma-separated list inside one attribute.
 
 | Attribute | What it adds |
 |---|---|
-| [`#[use_type(Trait.Type)]`](../attributes/use_type.md) | Imports an abstract type: adds the supertrait *and* rewrites the bare name in your signatures |
+| [`#[use_type(Trait.Type)]`](../attributes/use_type.md) | Imports an [abstract type](/docs/reference/glossary#abstract-type): adds the [supertrait](/docs/reference/glossary#supertrait) *and* rewrites the bare name in your signatures |
 | [`#[extend(Trait)]`](../attributes/extend.md) | Adds a supertrait with no type to import |
 | [`#[derive_delegate(...)]`](../attributes/derive_delegate.md) | Generates dispatch impls for a component generic over a parameter |
 | [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) | Registers the component into a namespace under a type-level path |

@@ -73,7 +73,7 @@ delegate_components! {
 }
 ```
 
-Use this form to build an **aggregate provider**: a zero-sized provider whose only job is to hold a
+Use this form to build an **[aggregate provider](/docs/reference/glossary#aggregate-provider)**: a zero-sized provider whose only job is to hold a
 table dispatching each component to a sub-provider, so that other contexts can delegate a whole group
 of components to it as one unit. An aggregate provider is a *provider*, not a context. It forwards
 each component's provider trait onward, and a call never resolves with the bundle in the context
@@ -180,7 +180,7 @@ redirect: the per-value slots an `open` statement opens, or the prefixed routes 
 [namespace](./cgp_namespace.md) registers. `@AreaCalculatorComponent.Rectangle: RectangleArea` stores
 `RectangleArea` where the `AreaCalculatorComponent` redirect lands when the dispatch type is
 `Rectangle`. Segments follow [`Path!`](./path.md)'s convention: a lowercase, non-primitive identifier
-becomes a type-level string, and anything else names a type. A segment may also carry generics, as in
+becomes a [type-level string](/docs/reference/glossary#type-level-string), and anything else names a type. A segment may also carry generics, as in
 `@SomeComponent.<'a, T> &'a T: SomeProvider`.
 
 Two grouping forms expand one path key into several, and **they are not interchangeable**:
@@ -688,7 +688,7 @@ end.
 [`#[cgp_impl]`](./cgp_impl.md) *without* the `new` keyword and never declared it separately. The error
 names an unresolved type rather than anything about wiring.
 
-**Two entries claiming one key conflict**, and the compiler reports it as a coherence error rather than
+**Two entries claiming one key conflict**, and the compiler reports it as a [coherence](/docs/reference/glossary#coherence) error rather than
 as a wiring one. This covers the obvious duplicate, an `open` header colliding with an explicit mapping
 for the same component, and a generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a
 specific `AreaCalculatorComponent<Rectangle>` one. The same applies to a direct entry for a path a

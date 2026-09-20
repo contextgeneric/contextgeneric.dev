@@ -66,7 +66,7 @@ A namespace body accepts two kinds of entry, and they do different things.
 Redirection makes namespaces composable: because a lookup is keyed by a *path* rather than a bare
 component name, a whole subtree can be rerouted at once, and a more specific path takes precedence over an
 inherited one. Paths are written with the `@` sigil as dotted sequences, such as `@MyFooComponent`,
-`@app.ErrorRaiserComponent`, and `@cgp.core.error`, where lowercase segments become type-level strings and
+`@app.ErrorRaiserComponent`, and `@cgp.core.error`, where lowercase segments become [type-level strings](/docs/reference/glossary#type-level-string) and
 capitalized segments name types. [`Path!`](./path.md) covers the syntax in full.
 
 ### The rest of the body grammar

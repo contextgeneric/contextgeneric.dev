@@ -29,7 +29,7 @@ one entry to a product and [`ConcatProduct`](concat_product.md) splices two toge
 
 ## The ideas behind them
 
-- [Extensible records](/docs/concepts/extensible-records): presence tracking on a partial record.
+- [Extensible records](/docs/concepts/extensible-records): presence tracking on a [partial record](/docs/reference/glossary#partial-record).
 - [Extensible variants](/docs/concepts/extensible-variants): possibility tracking on a partial variant.
 
 ---

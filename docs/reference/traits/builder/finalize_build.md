@@ -5,7 +5,7 @@ sidebar_position: 6
 
 # `FinalizeBuild`
 
-Turning a fully-built partial record back into the concrete struct.
+Turning a fully-built [partial record](/docs/reference/glossary#partial-record) back into the concrete struct.
 
 ## Overview
 
@@ -24,7 +24,7 @@ let person = Person::builder()
 Delete a middle line and this does not compile. There is nothing to run and nothing to panic: the method
 is simply not in scope for a value with a field still absent.
 
-The destination type comes from its supertrait [`PartialData`](./partial_data.md), which every
+The destination type comes from its [supertrait](/docs/reference/glossary#supertrait) [`PartialData`](./partial_data.md), which every
 configuration implements. That division is deliberate: **one names where you are going, the other says
 you have arrived.**
 

@@ -18,7 +18,7 @@ with no failure path. It runs against a **context**, the type a method runs on t
 values an implementation needs as its own fields.
 
 It is the async by-reference corner of the infallible computers. Like the other computers it never names
-an error type, so it does not supertrait [`HasErrorType`](../has_error_type.md). See the
+an error type, so it does not [supertrait](/docs/reference/glossary#supertrait) [`HasErrorType`](../has_error_type.md). See the
 [handler family overview](./index.md) for how the members relate and promote.
 
 ## Definition

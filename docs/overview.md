@@ -24,7 +24,7 @@ callers.
 
 CGP separates the trait callers use, the consumer trait, from the provider trait that named
 implementations implement. Each provider uses its own marker type, so the implementations remain
-distinct under Rust's coherence rules. Read
+distinct under Rust's [coherence](/docs/reference/glossary#coherence) rules. Read
 [consumer and provider traits](/docs/concepts/consumer-and-provider-traits) for the mechanism and
 [coherence](/docs/concepts/coherence) for the rules it works within.
 
@@ -62,7 +62,7 @@ service on its target platform.
 
 CGP's macros generate ordinary Rust traits and implementations that compile on stable Rust. You can
 implement a consumer trait directly, introduce providers where you need them, and keep the rest of
-your project unchanged. Contexts can contain ordinary generic types, enums, and trait objects.
+your project unchanged. Contexts can contain ordinary generic types, enums, and [trait objects](/docs/reference/glossary#trait-object).
 
 The additional structure has a cost: you need to learn the provider model and maintain the wiring.
 For an interface with a single implementation, an ordinary trait often supplies all the abstraction
@@ -71,7 +71,7 @@ amount of separation your code needs.
 
 ### Abstract Types
 
-An abstract type lets each context choose a concrete type, such as its error type, without passing
+An [abstract type](/docs/reference/glossary#abstract-type) lets each context choose a concrete type, such as its error type, without passing
 that choice as a separate generic parameter through every layer. Code names the associated type
 where it needs it. A caller that only invokes a trait's method can depend on that trait without
 listing the types used inside its implementation.
@@ -130,7 +130,7 @@ choices but does not make runtime APIs interchangeable by itself.
 
 ### Overlapping Implementations
 
-Rust rejects blanket implementations that could apply to the same type, even when different
+Rust rejects [blanket implementations](/docs/reference/glossary#blanket-implementation) that could apply to the same type, even when different
 applications want different choices. CGP gives each implementation a provider name and makes the
 choice explicit in the context's wiring. A crate can also implement a provider trait for its own
 provider type even when the trait and the data being handled come from other crates.

@@ -8,7 +8,7 @@ sidebar_position: 4
 Implicit arguments let a provider declare the context values it needs as function parameters.
 CGP reads those values from the context, so callers pass only the method's explicit arguments.
 This page explains the field access behind that shorthand, how argument types control borrowing
-and cloning, and when a getter trait is a better fit.
+and cloning, and when a [getter trait](/docs/reference/glossary#getter-trait) is a better fit.
 
 ## Reading a field explicitly
 
@@ -130,7 +130,7 @@ This fragment assumes `RequestAuthenticator` and `HasAuthHeader` are defined els
 `HasAuthHeader` describes access on the request, while `self` is the [application context](/docs/reference/glossary#application-context). An
 implicit argument on `authenticate` would read the application instead.
 
-A named getter also lets other code require the accessor through a trait bound or supertrait.
+A named getter also lets other code require the accessor through a trait bound or [supertrait](/docs/reference/glossary#supertrait).
 A getter with an associated type can keep the field's type abstract for callers. These are reasons
 to use [`#[cgp_auto_getter]`](/docs/reference/macros/cgp_auto_getter); sharing a context field
 between several providers alone is not. Each provider can declare the same implicit argument.

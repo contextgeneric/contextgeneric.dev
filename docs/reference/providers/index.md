@@ -16,7 +16,7 @@ is the fuller map for once the essentials are familiar.
 ## Wiring an everyday component
 
 [`UseContext`](./use_context.md) implements a provider trait by routing back through the context's own
-consumer-trait implementation. A higher-order provider falls back to it, and a dispatch combinator
+consumer-trait implementation. A [higher-order provider](/docs/reference/glossary#higher-order-provider) falls back to it, and a dispatch combinator
 routes each matched case through it as its default per-variant provider.
 [`UseType`](./use_type.md) supplies a concrete type for an abstract-type component, so a context binds
 its error type or runtime with one wiring line.
@@ -46,7 +46,7 @@ Both are read in wiring far more often than written.
 a getter that returns a view of a field the context stores as a different type.
 [`ChainGetters`](./chain_getters.md) composes a list of getters to reach a field several hops inside a
 nested context.
-[`UseDelegatedType`](./use_delegated_type.md) resolves an abstract type through a table rather than
+[`UseDelegatedType`](./use_delegated_type.md) resolves an [abstract type](/docs/reference/glossary#abstract-type) through a table rather than
 fixing it to one concrete type. Each is reached through [`WithProvider`](./with_provider.md) when wired
 to a component.
 

@@ -34,7 +34,7 @@ let base_area = InnerCalculator::area(self);
 
 `#[use_provider]` writes the bound behind that call. It does not rewrite the call. Writing `self.area()`
 instead would route through whatever provider the context has itself wired for `AreaCalculator`, which is
-a different choice and usually not what a higher-order provider wants.
+a different choice and usually not what a [higher-order provider](/docs/reference/glossary#higher-order-provider) wants.
 
 ## Usage
 

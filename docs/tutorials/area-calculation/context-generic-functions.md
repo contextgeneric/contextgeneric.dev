@@ -179,7 +179,7 @@ As we can see from the desugared code, there are actually very little magic happ
 
 First, a `RectangleArea` trait is defined with the CamelCase name derived from the function name. The trait contains similar function signature as `rectangle_area`, except that the implicit arguments are removed from the interface.
 
-Secondly, a *getter trait* that resembles the `RectangleFields` above is used to access the `width` and `height` fields of a generic context.
+Secondly, a *[getter trait](/docs/reference/glossary#getter-trait)* that resembles the `RectangleFields` above is used to access the `width` and `height` fields of a generic context.
 
 Finally, a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) of `RectangleArea` is defined to work with any `Context` type that contains both the `width` and `height` fields. This means that there is no need for any context type to implement `RectangleArea` manually.
 
@@ -222,7 +222,7 @@ impl RectangleFields for PlainRectangle {
 }
 ```
 
-With the getter traits implemented, the requirements for the blanket implementation of `RectangleArea` are satisfied. And thus we can now call `rectangle_area()` on a `PlainRectangle` value.
+With the getter traits implemented, the requirements for the [blanket implementation](/docs/reference/glossary#blanket-implementation) of `RectangleArea` are satisfied. And thus we can now call `rectangle_area()` on a `PlainRectangle` value.
 
 ### Zero cost field access
 
@@ -281,7 +281,7 @@ where
 
 Compared to `rectangle_area`, the desugared code for `scaled_rectangle_area` contains an additional trait bound `Self: RectangleArea`, which is generated from the `#[uses(RectangleArea)]` attribute. This also shows that importing a CGP construct is equivalent to applying it as a trait bound on `Self`.
 
-It is also worth noting that trait bounds like `RectangleFields` only appear in the `impl` block but not on the trait definition. This implies that they are *impl-side dependencies* that hide the dependencies behind a trait impl without revealing it in the trait interface.
+It is also worth noting that trait bounds like `RectangleFields` only appear in the `impl` block but not on the trait definition. This implies that they are *[impl-side dependencies](/docs/reference/glossary#impl-side-dependency)* that hide the dependencies behind a trait impl without revealing it in the trait interface.
 
 Aside from that, `ScaledRectangleArea` also depends on field access traits that are equivalent to `ScaleFactorField` to retrieve the `scale_factor` field from the context. In actual, it also uses `HasField` to retrieve the `scale_factor` field value, and there is no extra getter trait generated.
 
@@ -291,4 +291,4 @@ In this tutorial, we have introduced `#[cgp_fn]` and the `#[implicit]` attribute
 
 Throughout, all of this happened through ordinary Rust traits and blanket implementations. The `#[cgp_fn]` macro is purely syntactic sugar — the desugared code it generates is straightforward Rust that follows the zero-cost abstraction principle.
 
-In the next tutorial, Static Dispatch, we will extend the area calculation example to support a second shape — the circle — and introduce the `CanCalculateArea` trait as a unified interface for all shapes. We will encounter Rust's coherence restrictions when trying to write blanket implementations for overlapping cases, and see how CGP's `#[cgp_component]` macro and named providers resolve this problem cleanly, enabling configurable static dispatch with `delegate_components!`.
+In the next tutorial, Static Dispatch, we will extend the area calculation example to support a second shape — the circle — and introduce the `CanCalculateArea` trait as a unified interface for all shapes. We will encounter Rust's [coherence](/docs/reference/glossary#coherence) restrictions when trying to write blanket implementations for overlapping cases, and see how CGP's `#[cgp_component]` macro and named providers resolve this problem cleanly, enabling configurable static dispatch with `delegate_components!`.

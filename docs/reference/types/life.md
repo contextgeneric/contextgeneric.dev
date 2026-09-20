@@ -104,7 +104,7 @@ carries a lifetime.
 invariance keeps the compiler from confusing providers wired for different lifetimes, so it is intended
 rather than an over-restriction.
 
-**A higher-order provider with a lifetime loses its dependency propagation.** When the component carries a
+**A [higher-order provider](/docs/reference/glossary#higher-order-provider) with a lifetime loses its dependency propagation.** When the component carries a
 lifetime, the inner-provider bound of such a stack does not get a marker counterpart, because the rewrite
 reads the bound's first generic argument as the context and finds a lifetime there. The stack still
 compiles and runs. But it loses the propagation that lets `#[check_providers]` localize a broken layer.

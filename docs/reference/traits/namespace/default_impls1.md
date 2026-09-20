@@ -160,7 +160,7 @@ same projection.
   [`#[default_impl]`](../../attributes/default_impl.md) accepts any path, so these three are conveniences
   rather than the only options.
 
-**One constraint decides where a `#[default_impl]` may be written, and it is Rust's orphan rule rather
+**One constraint decides where a `#[default_impl]` may be written, and it is Rust's [orphan rule](/docs/reference/glossary#orphan-rule) rather
 than anything CGP chose.** The emitted impl is `impl Namespace<..> for Key`, and Rust accepts it when
 the crate owns the namespace trait, or when a local type appears in the impl header ahead of the table
 parameter. That local type may be the key itself, or the component named inside the namespace path, so

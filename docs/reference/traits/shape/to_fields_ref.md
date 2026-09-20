@@ -30,7 +30,7 @@ pub trait ToFieldsRef: HasFieldsRef {
 }
 ```
 
-It supertraits [`HasFieldsRef`](./has_fields_ref.md) rather than [`HasFields`](./has_fields.md), which is
+It [supertraits](/docs/reference/glossary#supertrait) [`HasFieldsRef`](./has_fields_ref.md) rather than [`HasFields`](./has_fields.md), which is
 the one structural difference from its owning counterpart [`ToFields`](./to_fields.md): the borrowed shape
 and the owned shape are named by two independent traits, and each conversion supertraits the one it
 produces. The method borrows `self` for `'a` and returns the borrowed

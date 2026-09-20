@@ -41,7 +41,7 @@ pub struct Field<Tag, Value> {
 ```
 
 `Tag` is the type-level name of the field. It appears only inside `PhantomData<Tag>`, never in a stored
-field. It is usually a type-level string such as `Symbol!("name")` for a named field, or a type-level
+field. It is usually a [type-level string](/docs/reference/glossary#type-level-string) such as `Symbol!("name")` for a named field, or a type-level
 number such as `Index<0>` for a tuple position. `Value` is the field's actual type, and `value` is the
 only data the struct keeps. Apart from the tag, a `Field` is a thin wrapper around its `Value`.
 

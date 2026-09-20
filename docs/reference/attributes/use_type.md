@@ -29,7 +29,7 @@ The method never names any of those. The context names one, in its wiring.
 `#[use_type]` reads like a `use` statement for a type, and [Under the hood](#under-the-hood) shows how
 the bare name resolves. It also has advanced forms that a bare identifier could not express, covered
 [below](#importing-from-another-type): pinning the type to a concrete one, importing it from a
-parameter rather than the context, and tying two abstract types together.
+parameter rather than the context, and tying two [abstract types](/docs/reference/glossary#abstract-type) together.
 
 ## Usage
 
@@ -144,7 +144,7 @@ impl AreaCalculator {
 }
 ```
 
-The component gains `HasScalarType` as a supertrait, and the provider gains it as a bound. Every
+The component gains `HasScalarType` as a [supertrait](/docs/reference/glossary#supertrait), and the provider gains it as a bound. Every
 `Scalar` in both becomes the same qualified projection, so the fields the provider reads and the value it
 returns are guaranteed to agree on whatever scalar the context chose.
 

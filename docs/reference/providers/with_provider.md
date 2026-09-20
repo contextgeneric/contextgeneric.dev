@@ -12,7 +12,7 @@ specific named component.
 
 `WithProvider<Provider>` bridges CGP's two layers of provider trait. Foundational traits like
 [`TypeProvider`](../components/has_type.md) and [`FieldGetter`](../traits/field-access/field_getter.md) are generic,
-component-agnostic mechanisms: a `TypeProvider` supplies *some* abstract type for *some* tag, and a
+component-agnostic mechanisms: a `TypeProvider` supplies *some* [abstract type](/docs/reference/glossary#abstract-type) for *some* tag, and a
 `FieldGetter` reads *some* field for *some* output tag, without either knowing which named component it
 serves. A named component, by contrast, has a specific provider trait, such as `NameTypeProvider` or
 `NameGetter`, that a **context** wires to, where the context is the type the method runs on.
@@ -135,7 +135,7 @@ where
 }
 ```
 
-In both cases the bound names the foundational trait, keyed by the component marker, and the method or
+In both cases the bound names the foundational trait, keyed by the [component marker](/docs/reference/glossary#component-marker), and the method or
 associated type forwards to it. `#[cgp_getter]` generates the `WithProvider` impl only when the getter
 has exactly one method, since a single foundational getter cannot serve several methods at once. Each
 impl is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.

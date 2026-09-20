@@ -23,7 +23,7 @@ Path!(@app.error.ErrorRaiserComponent)
 ```
 
 It is the path-shaped sibling of CGP's other type-level construction macros. Where
-[`Symbol!`](./symbol.md) turns a literal into a type-level string and [`Product!`](./product.md) and
+[`Symbol!`](./symbol.md) turns a literal into a [type-level string](/docs/reference/glossary#type-level-string) and [`Product!`](./product.md) and
 [`Sum!`](./sum.md) build record and variant lists, `Path!` builds the routing list, sharing their right-nested,
 `Nil`-terminated shape.
 

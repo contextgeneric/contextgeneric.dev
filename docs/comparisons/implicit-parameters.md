@@ -27,7 +27,7 @@ provider choices determined by the context's type.
 | A type-class interface | A consumer trait within a **component** |
 | A type-class implementation | A **provider**: a named implementation |
 | Instance selection | **Wiring**, written in a `delegate_components!` table |
-| A functional dependency (`m -> e`) or associated type family | An abstract type determined by the context |
+| A functional dependency (`m -> e`) or associated type family | An [abstract type](/docs/reference/glossary#abstract-type) determined by the context |
 
 ## The idea, briefly
 
@@ -114,7 +114,7 @@ dictionary. This explains how generic code can invoke an operation without namin
 
 Haskell and Scala differ in how they select those dictionaries. Haskell ordinarily uses a global
 instance for a class and its type arguments, with overlapping instances controlled by extensions.
-Scala selects contextual values using scope and priority rules. Coherence concerns whether valid
+Scala selects contextual values using scope and priority rules. [Coherence](/docs/reference/glossary#coherence) concerns whether valid
 resolutions agree in meaning; global instance uniqueness is one way to support it, rather than a
 rule shared unchanged by both languages. The [type classes](./type-classes.md) comparison develops
 these distinctions.
@@ -181,7 +181,7 @@ pub trait HasErrorType {
 
 Both forms avoid making the error type an independent choice at every use. Haskell determines `e`
 from `m`; Rust refers to the associated `Error` of the context. A CGP consumer trait can require
-`HasErrorType` as a supertrait, making that requirement available to generic callers through their
+`HasErrorType` as a [supertrait](/docs/reference/glossary#supertrait), making that requirement available to generic callers through their
 consumer-trait bound. The type dependency still exists; its relationship to the context makes it
 unnecessary to carry a separate error-type parameter.
 

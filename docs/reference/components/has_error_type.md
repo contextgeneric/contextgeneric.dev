@@ -18,7 +18,7 @@ backend the context plugs in.
 
 Putting the error type on one component also keeps errors composable. If each fallible trait declared
 its own associated `Error`, a context bounded by several of them would face several unrelated `Self::Error`
-types with no way to unify them. Because the fallible components all supertrait `HasErrorType`, every one
+types with no way to unify them. Because the fallible components all [supertrait](/docs/reference/glossary#supertrait) `HasErrorType`, every one
 of them names the *same* `Self::Error`, so their results combine. This single shared abstract error is
 the anchor that [`CanRaiseError`](./can_raise_error.md) and [`CanWrapError`](./can_wrap_error.md) build
 on.
@@ -39,7 +39,7 @@ pub type ErrorOf<Context> = <Context as HasErrorType>::Error;
 
 Its attributes:
 
-- [`#[cgp_type]`](../macros/cgp_type.md) — makes this an abstract-type component rather than a plain trait: it generates the provider trait, the component marker, and a [`UseType`](../providers/use_type.md) impl, so a context binds the concrete type by wiring.
+- [`#[cgp_type]`](../macros/cgp_type.md) — makes this an abstract-type component rather than a plain trait: it generates the provider trait, the [component marker](/docs/reference/glossary#component-marker), and a [`UseType`](../providers/use_type.md) impl, so a context binds the concrete type by wiring.
 - [`#[prefix]`](../macros/cgp_namespace.md) — registers the generated names into the `@cgp.core.error` path of `DefaultNamespace`, so a context that joins the namespace inherits the wiring by default.
 
 ## Usage

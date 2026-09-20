@@ -149,7 +149,7 @@ The decisions worth making are around it rather than about it.
   provider into an async one where a caller needs it. So a computation that does no I/O is better declared
   synchronous and promoted than declared async out of habit.
 - **Use the `async-trait` crate instead only if you need `dyn` compatibility.** Boxing makes an
-  async trait object-safe, and this macro deliberately does not box. CGP resolves providers statically, so it
+  async [trait object](/docs/reference/glossary#trait-object)-safe, and this macro deliberately does not box. CGP resolves providers statically, so it
   does not need `dyn`; a codebase that does for other reasons is outside what this macro is for.
 
 ## Under the hood

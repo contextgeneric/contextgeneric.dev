@@ -9,7 +9,7 @@ description: 'CGP read against specialization, named impls, dictionary passing, 
 CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
 library on stable Rust in which a trait can have several named implementations and each context
 selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who has
-followed Rust's own debate about relaxing coherence: *specialization*, the *dictionary-passing*
+followed Rust's own debate about relaxing [coherence](/docs/reference/glossary#coherence): *specialization*, the *dictionary-passing*
 account of traits, *named or incoherent impls*, and *contexts and capabilities*. It shows which
 fragment of each proposal CGP provides today, how the correspondence runs construct by construct,
 and the two places where CGP cannot follow the proposals. It ends with what to expect that differs
@@ -25,14 +25,14 @@ type you define to stand for an application.
 | --- | --- |
 | A named impl (`impl Name<T> = Trait<T> for T`) | A **provider**: a zero-sized type that implements a component's provider trait |
 | An `incoherent trait` bound passed at a call | A consumer-trait bound on the context, resolved by the context's **wiring** |
-| An impl passed as a parameter (`impl TDrop: Drop<T>` in Cairo) | A **higher-order provider**, bound with `#[use_provider]` |
+| An impl passed as a parameter (`impl TDrop: Drop<T>` in Cairo) | A **[higher-order provider](/docs/reference/glossary#higher-order-provider)**, bound with `#[use_provider]` |
 | A capability in a `with` clause | An `#[implicit]` argument read from a context field |
 | The `with` block that binds everything | The definition of a context type and its `delegate_components!` table |
 | The root dictionary of a dictionary-passing elaboration | The context itself |
 
 ## The idea, briefly
 
-Rust's Reference gives the two rules every proposal here relaxes. The *orphan rule* says an
+Rust's Reference gives the two rules every proposal here relaxes. The *[orphan rule](/docs/reference/glossary#orphan-rule)* says an
 `impl<P1..=Pn> Trait<T1..=Tn> for T0` is valid only if `Trait` is a local trait, or at least one of
 the types `T0..=Tn` is a local type and no uncovered type parameter appears before it. The *overlap
 rule* rejects two implementations that "can be instantiated with the same type"

@@ -136,7 +136,7 @@ where
 }
 ```
 
-The plain-Rust version is considerably more verbose, but it can be understood with a straightforward explanation. `HasName` is a *getter trait* that a context implements to expose its `name` value. `Greet` is defined as a trait with a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) that works for any context type `T` that implements `HasName`.
+The plain-Rust version is considerably more verbose, but it can be understood with a straightforward explanation. `HasName` is a *[getter trait](/docs/reference/glossary#getter-trait)* that a context implements to expose its `name` value. `Greet` is defined as a trait with a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) that works for any context type `T` that implements `HasName`.
 
 When we use `#[derive(HasField)]` on a context like `Person`, we are effectively automatically implementing the `HasName` trait for it:
 

@@ -177,7 +177,7 @@ assertions for the components a concrete context needs.
 
 Small tables often remain clearer when written directly. Namespaces become useful when sharing a
 configuration or grouping routes reduces enough repetition to justify the inheritance and path
-structure. An aggregate provider offers a simpler way to share a named group of implementations.
+structure. An [aggregate provider](/docs/reference/glossary#aggregate-provider) offers a simpler way to share a named group of implementations.
 
 ## Where to go next
 

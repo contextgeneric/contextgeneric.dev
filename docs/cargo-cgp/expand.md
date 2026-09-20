@@ -131,7 +131,7 @@ where you learn it exists.
 CGP's generated code is dominated by *type-level constructs*, and a general expander prints them as the
 compiler stores them.
 
-**A field name is the clearest case.** CGP encodes it as a type-level string — one type parameter per
+**A field name is the clearest case.** CGP encodes it as a [type-level string](/docs/reference/glossary#type-level-string) — one type parameter per
 character. Expanded generically, the `height` tag above reads:
 
 ```text

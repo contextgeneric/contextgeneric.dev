@@ -5,7 +5,7 @@ sidebar_position: 8
 
 # `BuildAndSetField`
 
-The builder adapter that computes one field's value and sets it on a partial record.
+The builder adapter that computes one field's value and sets it on a [partial record](/docs/reference/glossary#partial-record).
 
 ## Overview
 

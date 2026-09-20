@@ -25,7 +25,7 @@ layers of delegation lead to the provider.
 | An interface declaring methods | A consumer trait within a **component** |
 | An implementation of that interface | A **provider** |
 | A method table or vtable | A **wiring table**, resolved by the compiler |
-| Shared behavior reached through delegation | An aggregate provider or namespace |
+| Shared behavior reached through delegation | An [aggregate provider](/docs/reference/glossary#aggregate-provider) or namespace |
 | Checking that a receiver supports an operation | Trait bounds and `check_components!` |
 
 ## The idea, briefly
@@ -126,7 +126,7 @@ separate target. [Implicit arguments](/docs/concepts/implicit-arguments) explain
 ### Implementation choice is deferred to wiring
 
 A generic caller can invoke `context.area()` through `CanCalculateArea` without choosing an
-implementation. The context's wiring supplies that choice, and monomorphization resolves the route
+implementation. The context's wiring supplies that choice, and [monomorphization](/docs/reference/glossary#monomorphization) resolves the route
 to a static call. This allows provider selection after the generic caller has been written,
 while keeping that selection fixed for each concrete context type.
 
@@ -234,7 +234,7 @@ delegate_components! {
 through [`RedirectLookup`](/docs/reference/providers/redirect_lookup), which follows type-level
 paths. This resembles sharing defaults through a prototype, but customization fills unbound paths
 rather than shadowing already-bound entries. An attempt to bind the same key again conflicts under
-Rust's coherence rules.
+Rust's [coherence](/docs/reference/glossary#coherence) rules.
 
 ## What each approach costs
 

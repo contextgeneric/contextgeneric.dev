@@ -106,7 +106,7 @@ Writing a marker of your own follows the same three-impl shape; the
 **Name it only when writing an operation that drives the defaulting conversion.** Everything else is
 served by the two operations already built on it.
 
-- **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** to finalize a partial record, defaulting
+- **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** to finalize a [partial record](/docs/reference/glossary#partial-record), defaulting
   gaps.
 - **[`CanBuildWithDefault`](./can_build_with_default.md)** to merge from a source and default the rest, in
   one call.

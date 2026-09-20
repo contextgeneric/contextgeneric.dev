@@ -213,7 +213,7 @@ Rust reads the key as the bare `Shape`. That is why the table's entries are writ
 the table is `__Components__` and the looked-up entry `__Delegate__`, alongside the provider trait's own
 `__Context__`.
 
-**A component's supertraits carry into the dispatcher.** The provider trait records each supertrait as a
+**A component's [supertraits](/docs/reference/glossary#supertrait) carry into the dispatcher.** The provider trait records each supertrait as a
 `Context:` predicate, and because the dispatcher reuses the provider trait's generics that predicate
 appears here too, so a component declaring an error type through
 [`#[use_type]`](use_type.md) yields a dispatcher whose `where` clause also requires
@@ -261,7 +261,7 @@ The usual cause is putting the attribute on a component that has no type paramet
 there is nothing for it to do.
 
 **One component gets one dispatch mechanism.** Wiring the same component both with `open` and with a
-`UseDelegate` table is a coherence conflict, because each produces its own table entry for that key. A
+`UseDelegate` table is a [coherence](/docs/reference/glossary#coherence) conflict, because each produces its own table entry for that key. A
 wiring entry expands to two impls, and both of them collide, so the compiler reports the conflict twice, once
 for `IsProviderFor` and once for `DelegateComponent`. The `DelegateComponent` report is the readable
 one, because its trait argument names the component at issue:

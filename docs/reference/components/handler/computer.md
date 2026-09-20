@@ -62,7 +62,7 @@ The component dispatches on both the `Code` tag and the `Input` type. It has thr
 differing from `Computer` by one axis and documented on its own page:
 [`ComputerRef`](./computer_ref.md) borrows the input, [`AsyncComputer`](./async_computer.md) is the async
 counterpart, and [`AsyncComputerRef`](./async_computer_ref.md) combines the two. None of the four
-supertrait [`HasErrorType`](../has_error_type.md), because none of them can fail.
+[supertrait](/docs/reference/glossary#supertrait) [`HasErrorType`](../has_error_type.md), because none of them can fail.
 
 ## Examples
 

@@ -54,13 +54,13 @@ of the macros built on it, [`#[cgp_type]`](../macros/cgp_type.md) and
 | `in` | Required keyword. |
 | `NamespacePath` | The namespace to register into: `DefaultNamespace`, or one defined with [`cgp_namespace!`](../macros/cgp_namespace.md). It may be a qualified path and may carry generic arguments. |
 
-**The path is a prefix, and the macro appends the component marker for you.**
+**The path is a prefix, and the macro appends the [component marker](/docs/reference/glossary#component-marker) for you.**
 `#[prefix(@app in DefaultNamespace)]` on `CanGreet` registers `GreeterComponent` at
 `@app.GreeterComponent`. Writing the marker yourself doubles it. See
 [Common Mistakes](#common-mistakes).
 
 Segments follow [`Path!`](../macros/path.md)'s convention. A lowercase identifier that is not a
-primitive type name becomes a type-level string, so `@app` and `@cgp.core.error` are strings. Any
+primitive type name becomes a [type-level string](/docs/reference/glossary#type-level-string), so `@app` and `@cgp.core.error` are strings. Any
 other segment names a type, so `@MyApp.MyBarComponent` is two types. Case decides the meaning. A
 segment cannot declare generic parameters, and the parser accepts neither of the `[…]` and `{…}`
 grouping forms a [`delegate_components!`](../macros/delegate_components.md) key allows. One
@@ -83,7 +83,7 @@ appends them to the path, so a context joining the namespace wires a `CanShow<T>
 do not appear in the path.
 
 **Any crate may register its own components into any namespace.** The emitted impl is for the
-component's marker, a type the component's crate owns, so Rust's orphan rule is satisfied even when
+component's marker, a type the component's crate owns, so Rust's [orphan rule](/docs/reference/glossary#orphan-rule) is satisfied even when
 the namespace comes from another crate. That is why an application can register into
 `DefaultNamespace`. It is also the difference from [`#[default_impl]`](./default_impl.md), whose key
 on a prefixed component is a foreign path.
@@ -93,7 +93,7 @@ on a prefixed component is a foreign path.
 A prefix is part of the component's public surface, and costly to change once wiring depends on
 it. So choose it with every implementation the component might have in mind, not only the one you are
 writing now. Give components separate sub-paths whenever they are likely to need separate providers,
-even when the current wiring happens to treat them alike. Abstract types belong under a `types` sub-path
+even when the current wiring happens to treat them alike. [Abstract types](/docs/reference/glossary#abstract-type) belong under a `types` sub-path
 of their layer, such as `@app.auth.types`, because a production context typically points the logic
 under `@app.auth` at a database while leaving the types on the same concrete choices.
 

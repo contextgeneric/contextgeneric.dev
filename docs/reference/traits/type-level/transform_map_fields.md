@@ -5,7 +5,7 @@ sidebar_position: 4
 
 # `TransformMapFields`
 
-Applying one per-field transform across a whole partial record.
+Applying one per-field transform across a whole [partial record](/docs/reference/glossary#partial-record).
 
 :::info
 

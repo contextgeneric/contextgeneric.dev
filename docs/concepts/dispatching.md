@@ -23,7 +23,7 @@ payload or to produce the field's value.
 Matching and building use these pieces differently:
 
 - **Matching:** Try variants until the current one is found, then run its handler.
-- **Building:** Run handlers in sequence, adding their outputs to a partial record until it can be finalized.
+- **Building:** Run handlers in sequence, adding their outputs to a [partial record](/docs/reference/glossary#partial-record) until it can be finalized.
 
 Dispatchers implement the same computation interfaces as other
 [handler providers](./handlers.md). They can be selected through context wiring, composed with other
@@ -104,7 +104,7 @@ pub trait CanDescribe {
 ```
 
 If `Circle` and `Rectangle` implement `CanDescribe`, a `Shape` enum with the required extensible-data
-support gains the trait through a generated blanket implementation. A call to `shape.describe()`
+support gains the trait through a generated [blanket implementation](/docs/reference/glossary#blanket-implementation). A call to `shape.describe()`
 forwards to the current payload's implementation without application wiring or a handwritten `match`.
 Deriving `CgpData` on `Shape` supplies that data support.
 

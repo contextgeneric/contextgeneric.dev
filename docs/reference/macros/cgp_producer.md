@@ -120,7 +120,7 @@ within it there is nothing simpler.
   same macro with the restrictions lifted, and it handles generics, `async`, and `Result` returns.
 - **Write the provider by hand with [`#[cgp_impl]`](./cgp_impl.md) when the value comes from the context.**
   This is the boundary that matters. A `#[cgp_producer]` function has no receiver, so it cannot read a field,
-  name an abstract type, or call another trait. It can only return something it computes from nothing. A
+  name an [abstract type](/docs/reference/glossary#abstract-type), or call another trait. It can only return something it computes from nothing. A
   producer that draws on its context is an impl of `Producer` written with `#[cgp_impl]`, where `self` is the
   context and [`#[implicit]`](../attributes/implicit.md) works normally. **In practice that covers most
   producers**, which makes this macro narrower than it first looks: it is for constants and pure seeds.

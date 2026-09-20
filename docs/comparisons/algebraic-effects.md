@@ -26,7 +26,7 @@ Rust type rather than installed on the runtime call stack.
 | An operation | A method of the consumer trait |
 | A handler interpreting an operation | A **provider** implementing the corresponding method |
 | Installing a handler | **Wiring** a provider on a context |
-| Requirements recorded in an effect row | **Impl-side dependencies**, with a narrower guarantee than effect typing |
+| Requirements recorded in an effect row | **[Impl-side dependencies](/docs/reference/glossary#impl-side-dependency)**, with a narrower guarantee than effect typing |
 | Checking that required operations have handlers | `check_components!` verifies declared provider dependencies |
 | A captured continuation | Without a direct counterpart; provider methods use ordinary Rust control flow |
 

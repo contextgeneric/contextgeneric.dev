@@ -40,7 +40,7 @@ Its attributes:
 - [`#[cgp_component]`](../macros/cgp_component.md) — turns the trait into a component: its argument names the provider trait `ErrorWrapper` that implementations target and the wiring key `ErrorWrapperComponent`, while `CanWrapError` stays the consumer trait callers use.
 - [`#[prefix]`](../macros/cgp_namespace.md) — registers the generated names into the `@cgp.core.error` path of `DefaultNamespace`, so a context that joins the namespace inherits the wiring by default.
 - [`#[derive_delegate]`](../attributes/derive_delegate.md) — generates a `UseDelegate` provider that dispatches on the `Detail` type, so a context can route each `Detail` to its own provider; the `open` statement is the modern sugar for the same dispatch.
-- [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a supertrait and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
+- [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a [supertrait](/docs/reference/glossary#supertrait) and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
 
 ## Usage
 

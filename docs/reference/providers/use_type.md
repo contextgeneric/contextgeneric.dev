@@ -13,7 +13,7 @@ Supply a concrete type as the value of an abstract-type component, binding it pu
 
 This page documents the `UseType` **provider**, the struct `UseType<Type>`. It is a different construct
 from the [`#[use_type]` attribute](../attributes/use_type.md), which rewrites bare type names inside a
-definition and adds the owning trait as a bound. The attribute is about *referring to* an abstract type
+definition and adds the owning trait as a bound. The attribute is about *referring to* an [abstract type](/docs/reference/glossary#abstract-type)
 ergonomically; the provider here is about *choosing the concrete type* an abstract type resolves to.
 They share a name because both concern abstract types, but they live in different places and do
 different jobs.
@@ -52,7 +52,7 @@ delegate_components! {
 ```
 
 A `#[cgp_type]` trait such as `HasScalarType` generates the provider trait `ScalarTypeProvider` and the
-component marker `ScalarTypeProviderComponent`; wiring that marker to `UseType<f64>` sets the context's
+[component marker](/docs/reference/glossary#component-marker) `ScalarTypeProviderComponent`; wiring that marker to `UseType<f64>` sets the context's
 `Scalar` to `f64`. Any bound on the associated type, such as `type Scalar: Copy`, is enforced against
 the concrete type at the wiring site.
 

@@ -23,7 +23,7 @@ constructs and manages those values.
 | --- | --- |
 | An implementation bound to an interface | A **provider**: a named, interchangeable implementation |
 | A configuration class or module | **Wiring**, written in a `delegate_components!` table |
-| A constructor dependency | An **impl-side dependency**, declared with `#[uses]` or `#[implicit]` |
+| A constructor dependency | An **[impl-side dependency](/docs/reference/glossary#impl-side-dependency)**, declared with `#[uses]` or `#[implicit]` |
 | The interface a bean implements | A consumer trait, grouped with its provider trait into a **component** |
 | Graph validation at startup or build time | `check_components!`, at compile time |
 | Container-managed instances and lifetimes | Context fields and ordinary Rust construction, ownership, and borrowing |

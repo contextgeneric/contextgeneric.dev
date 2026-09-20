@@ -25,7 +25,7 @@ and the reflected struct is a value the context operates on.
 | In a reflection system | In CGP |
 | --- | --- |
 | A type descriptor: `TypeInfo`, `Shape`, `std.builtin.Type`, `FieldId` | A `#[derive(HasFields)]` type's `Fields`, a type rather than a value |
-| A field's name, as a runtime or `comptime` string | `Tag::VALUE`, a `&'static str` recovered from a type-level string |
+| A field's name, as a runtime or `comptime` string | `Tag::VALUE`, a `&'static str` recovered from a [type-level string](/docs/reference/glossary#type-level-string) |
 | A field's type, as an opaque `TypeId` or `Shape` | The field's type, carried as a real type parameter |
 | `inline for` over `@typeInfo`, or a walk over a descriptor | A trait recursion over the `Cons`/`Nil` field list |
 | A registry mapping types to behavior | The **wiring table**, written with `delegate_components!` |
@@ -253,7 +253,7 @@ through the *context's* wiring, so the same type is written differently under di
 contexts, the [per-context choice](/docs/concepts/coherence) that facet, serde, and the MVP do not
 have.
 
-The costs are equally clear. Unlike facet, CGP does not solve the monomorphization problem: the
+The costs are equally clear. Unlike facet, CGP does not solve the [monomorphization](/docs/reference/glossary#monomorphization) problem: the
 recursion instantiates per field list, so it produces specialized code per type as serde's output
 does. What it saves is the authoring duplication, and what it gains is configurability, not binary
 size. And unlike the Rust MVP, CGP requires the `#[derive(HasFields)]` opt-in and cannot see a foreign

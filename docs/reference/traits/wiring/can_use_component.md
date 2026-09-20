@@ -74,7 +74,7 @@ The trait is in the prelude. You do not name it directly; you assert it through 
 ### Asserting it
 
 You assert it through a macro. A [`check_components!`](../../macros/check_components.md) table reduces to one
-impl of a private check trait per entry, whose supertrait is this bound, so the impl compiles only if the
+impl of a private [check trait](/docs/reference/glossary#check-trait) per entry, whose [supertrait](/docs/reference/glossary#supertrait) is this bound, so the impl compiles only if the
 bound holds:
 
 ```rust

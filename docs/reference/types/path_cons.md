@@ -25,7 +25,7 @@ size. A product list keys a struct's fields, and its elements are always sized v
 lookup, and its segments are pure type-level markers that never need to be `Sized`.
 
 The segments are the markers CGP uses elsewhere. A lowercase dotted name becomes a
-[`Symbol`](chars.md) type-level string, and a capitalized name becomes that named type, usually a
+[`Symbol`](chars.md) [type-level string](/docs/reference/glossary#type-level-string), and a capitalized name becomes that named type, usually a
 component key such as `FooProviderComponent` or a namespace marker. So a path interleaves symbols and
 component names, in the form `@a.B.c`, assembled into a `PathCons` chain. You write paths through the
 [`Path!`](../macros/path.md) macro. This page covers the list type, and that macro's page covers the

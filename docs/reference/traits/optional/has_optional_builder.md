@@ -10,7 +10,7 @@ Starting a builder in which every field is already optional.
 ## Overview
 
 The core [builder family](../builder/has_builder.md) is deliberately strict: a field is set exactly once, and a
-partial record becomes its concrete struct only when **every** field is present. That strictness is what
+[partial record](/docs/reference/glossary#partial-record) becomes its concrete struct only when **every** field is present. That strictness is what
 catches a missing field at compile time, and it is too rigid for a record whose fields arrive in an
 unpredictable order, or more than once.
 
@@ -39,7 +39,7 @@ pub trait HasOptionalBuilder {
 `Builder` names the partial companion type the derive generated, with every field marked `IsOptional`.
 It is the same companion the core builder produces, at a configuration the core builder never starts
 from. `optional_builder` is an associated function with no receiver, so a caller writes
-`Context::optional_builder()`. The trait carries no supertrait, and it is implemented as a blanket impl
+`Context::optional_builder()`. The trait carries no [supertrait](/docs/reference/glossary#supertrait), and it is implemented as a blanket impl
 over the core builder machinery, so any record that derives the builder gains it. It is not in the
 prelude; the whole optional-field layer lives in `cgp-field-extra`.
 

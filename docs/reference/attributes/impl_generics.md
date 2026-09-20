@@ -37,7 +37,7 @@ wiring or any declaration beyond the field itself.
 The cost is that the type is hidden rather than named. It exists only where a value of it flows
 through an [`#[implicit]`](./implicit.md) argument, so nothing else can refer to it: not this
 trait's own signature, not another trait, and not a second provider. When the type must be
-named, promote it to an abstract type with [`#[cgp_type]`](../macros/cgp_type.md) and import it with
+named, promote it to an [abstract type](/docs/reference/glossary#abstract-type) with [`#[cgp_type]`](../macros/cgp_type.md) and import it with
 [`#[use_type]`](./use_type.md). [When to use it](#when-to-use-it) says where that boundary lies.
 
 ## Usage
@@ -103,7 +103,7 @@ pub fn greet_both(person: &Person, robot: &Robot) {
 }
 ```
 
-`Person` and `Robot` both implement `Greet` through the one blanket implementation, without any
+`Person` and `Robot` both implement `Greet` through the one [blanket implementation](/docs/reference/glossary#blanket-implementation), without any
 wiring. For `Person` the compiler resolves `Name` to `String`, and for `Robot` to `u32`. Neither type
 appears anywhere except in the field.
 

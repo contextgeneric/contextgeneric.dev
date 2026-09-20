@@ -10,7 +10,7 @@ CGP is a language extension for Rust, with pluggable trait implementations at co
 library on stable Rust in which a trait can have several named implementations and each context
 selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who knows type
 classes from Haskell, Agda, or Lean. Rust traits are Rust's type classes, so CGP already lives inside
-a type-class system, and its one change is to the *coherence* rule: it makes instances first-class
+a type-class system, and its one change is to the *[coherence](/docs/reference/glossary#coherence)* rule: it makes instances first-class
 values selected explicitly per context, which is the freedom overlapping and incoherent instances
 reach for without making it safe. The page covers the class and instance correspondence, the
 coherence trade, where coherent type classes remain the better tool, and what a type-class reader
@@ -26,9 +26,9 @@ fields. In the dictionary-passing account it is the dictionary that carries ever
 | A class | A **component**: one trait with many possible implementations |
 | An instance, anonymous and canonical | A **provider**: a named, selectable implementation |
 | Instance resolution by the compiler | **Wiring**, written by hand in a `delegate_components!` table |
-| A class constraint on a function | An **impl-side dependency**, declared with `#[uses]` |
+| A class constraint on a function | An **[impl-side dependency](/docs/reference/glossary#impl-side-dependency)**, declared with `#[uses]` |
 | The dictionary passed as a hidden argument | The context |
-| A class's associated type | An abstract type, chosen by the context |
+| A class's associated type | An [abstract type](/docs/reference/glossary#abstract-type), chosen by the context |
 
 ## The idea, briefly
 
@@ -66,7 +66,7 @@ The canonical benefit is a `Set` of an ordered element type: with one `Ord` for 
 inserted under one ordering and read under another can never disagree.
 
 Rust makes the same choice and *enforces* it where Haskell advises. Rust traits are type classes with
-a hard orphan rule, so an impl is allowed only when the crate owns the trait or the type
+a hard [orphan rule](/docs/reference/glossary#orphan-rule), so an impl is allowed only when the crate owns the trait or the type
 ([RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)). That strictness
 is the rule CGP is built to work within, and the [Rust proposals](./rust-language-proposals.md) page
 covers what Rust itself has considered doing about it.

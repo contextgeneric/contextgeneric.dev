@@ -37,7 +37,7 @@ need neither. The [When to use it](#when-to-use-it) section draws the line.
 
 ## Usage
 
-Apply the attribute to a getter trait, exactly as with [`#[cgp_auto_getter]`](./cgp_auto_getter.md). It
+Apply the attribute to a [getter trait](/docs/reference/glossary#getter-trait), exactly as with [`#[cgp_auto_getter]`](./cgp_auto_getter.md). It
 accepts the same method forms: every receiver shape, including a
 [typed reference to another type](./cgp_auto_getter.md#reading-a-field-of-another-type) in place of
 `self` and an [optional `PhantomData` argument](./cgp_auto_getter.md#an-optional-phantomdata-argument);

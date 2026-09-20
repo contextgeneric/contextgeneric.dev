@@ -25,7 +25,7 @@ so a context picks the field by writing `UseField<Symbol!("...")>` in its wiring
 itself is the general provider underneath: it works for any tag the context's
 [`HasField`](../traits/field-access/has_field.md) implementation supports.
 
-The `Tag` is usually a type-level string built with [`Symbol!`](../macros/symbol.md), such as
+The `Tag` is usually a [type-level string](/docs/reference/glossary#type-level-string) built with [`Symbol!`](../macros/symbol.md), such as
 `Symbol!("name")`, or a type-level integer wrapped in `Index<N>` for a tuple field. These are the tags
 that [`#[derive(HasField)]`](../derives/derive_has_field.md) produces `HasField` implementations for.
 Like every CGP provider, `UseField<Tag>` carries no runtime value: it is a `PhantomData` marker named
@@ -97,7 +97,7 @@ needs full control over which field a getter reads from. That is the advanced ca
 
 For the common case of reading a field, prefer an [`#[implicit]`](../attributes/implicit.md) argument
 instead, which reads a same-named field and looks like an ordinary function parameter with no getter
-trait at all. Where a getter trait is genuinely needed but the field name matches the method name, use
+trait at all. Where a [getter trait](/docs/reference/glossary#getter-trait) is genuinely needed but the field name matches the method name, use
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md), or wire [`UseFields`](use_fields.md), which keys
 each method on its own name. The [`#[cgp_getter]`](../macros/cgp_getter.md) page works the choice
 through in full.
@@ -136,7 +136,7 @@ the returned reference is to the real field.
 
 `UseField<Tag>` also implements the mutable getter [`MutFieldGetter`](../traits/field-access/mut_field_getter.md)
 the same way, requiring `Context: HasFieldMut<Tag>` and returning `&mut Value`. And it implements
-[`TypeProvider`](../components/has_type.md), reporting the field's `Value` type as an abstract type, so
+[`TypeProvider`](../components/has_type.md), reporting the field's `Value` type as an [abstract type](/docs/reference/glossary#abstract-type), so
 the *type* of a field can itself be wired as a context's abstract type. Each implementation is paired
 with an [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation carrying the same `HasField`
 bound, so delegation propagates the dependency and a check reports a missing field precisely.

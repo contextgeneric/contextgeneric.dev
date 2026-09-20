@@ -26,7 +26,7 @@ generated code rather than written by hand.
 When a trait has exactly one implementation and needs no wiring at all,
 [`#[cgp_fn]`](./cgp_fn.md) builds it straight from a function, and
 [`#[blanket_trait]`](./blanket_trait.md) does the same starting from a trait with default methods and
-supertrait dependencies. [`#[async_trait]`](./async_trait.md) is how any of these traits declares an
+[supertrait](/docs/reference/glossary#supertrait) dependencies. [`#[async_trait]`](./async_trait.md) is how any of these traits declares an
 `async fn` without tripping the lint a bare one produces.
 
 A few macros specialize `#[cgp_component]` for a narrower job. [`#[cgp_type]`](./cgp_type.md) is for a

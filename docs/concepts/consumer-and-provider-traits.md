@@ -51,7 +51,7 @@ impl CanSendEmail for TestApp {
 an application and carrying the data its implementation needs. The SMTP body is omitted here;
 `TestApp` shows the recording behavior in full.
 
-Overlapping blanket implementations prevent those behaviors from being offered as interchangeable
+Overlapping [blanket implementations](/docs/reference/glossary#blanket-implementation) prevent those behaviors from being offered as interchangeable
 trait implementations. If the SMTP implementation applies to every type with `HasSmtpConfig`, and
 the recording implementation applies to every type with `HasRecordedEmails`, they conflict:
 
@@ -171,7 +171,7 @@ the application value on which the caller invoked the method.
 
 [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for) carries the provider's dependency
 bounds for checking. The provider macros generate an implementation with those bounds, and the
-provider trait also requires it as a supertrait. Explicit component checks use this path to expose
+provider trait also requires it as a [supertrait](/docs/reference/glossary#supertrait). Explicit component checks use this path to expose
 missing requirements that a consumer-trait error can hide.
 
 The listings simplify generated names for readability. Actual expansions use `__Context__` and

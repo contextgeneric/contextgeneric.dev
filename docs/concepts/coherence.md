@@ -7,7 +7,7 @@ sidebar_position: 1
 
 Rust's coherence rules keep trait implementation selection unambiguous. CGP works within those rules
 by giving alternative implementations separate provider types, then letting each context select one.
-This page explains what coherence provides, why overlapping blanket implementations are rejected,
+This page explains what coherence provides, why overlapping [blanket implementations](/docs/reference/glossary#blanket-implementation) are rejected,
 and how the provider arrangement allows reuse without ambiguous calls.
 
 ## The trait system is already a dependency-injection mechanism
@@ -177,7 +177,7 @@ explains when to use it and how it differs from the value-type wiring shown here
 
 ## What it costs
 
-A component introduces more declarations than a plain trait: a provider trait, a component marker,
+A component introduces more declarations than a plain trait: a provider trait, a [component marker](/docs/reference/glossary#component-marker),
 and wiring for the types that use it. For a trait with one implementation, a plain trait or
 [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) may provide the required reuse without wiring.
 

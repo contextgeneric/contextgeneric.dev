@@ -28,7 +28,7 @@ cast is the type that carries the shape and the wiring, and each component targe
 | A row variable, "the rest of the fields" | The context type variable, constrained by trait bounds and never named as a row |
 | Row containment (`ρ₁ ≲ ρ₂`) | A `HasField<Symbol!("name")>` bound, usually written as an `#[implicit]` argument |
 | Record concatenation (`ρ₁ ⊙ ρ₂ ~ ρ₃`) | `CanBuildFrom` and the `ConcatProduct` type-level operation |
-| A presence flag per label | The `IsPresent` and `IsNothing` markers on a partial record |
+| A presence flag per label | The `IsPresent` and `IsNothing` markers on a [partial record](/docs/reference/glossary#partial-record) |
 | A row-typed sum | An enum's derived `Fields`, a `Sum!` over `Either` and `Void` |
 | Variant injection and branching | `CanUpcast`, and the extensible visitor's dispatch |
 
@@ -104,7 +104,7 @@ let to_int = function
 (* inferred: [< `Number of int | `Off | `On ] -> int *)
 ```
 
-Extensible records and variants are the classic answer to Wadler's *expression problem*: adding both
+[Extensible records](/docs/reference/glossary#extensible-record) and variants are the classic answer to Wadler's *expression problem*: adding both
 new cases to a datatype and new operations over it "without recompiling existing code, and while
 retaining static type safety" ([Wadler, 1998](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt)).
 Haskell's *Data types à la carte* is the constraint-based route for sums: a coproduct of signature
@@ -131,7 +131,7 @@ constraints the trait solver resolves, in the Gaster and Jones style, carried by
 ### A struct is a closed row; `HasField` is row containment
 
 `#[derive(HasFields)]` gives a struct the type-level equivalent of a closed row, one
-`Field<Tag, Value>` entry per field, tagged by a type-level string:
+`Field<Tag, Value>` entry per field, tagged by a [type-level string](/docs/reference/glossary#type-level-string):
 
 ```rust
 #[derive(HasField, HasFields)]

@@ -177,7 +177,7 @@ the provider is written.** The alternatives differ in where the entry lives.
   not.
 - **Do not use a namespace at all** until the top-level wiring is long enough to be a problem.
 
-**Rust's orphan rule, not a CGP choice, decides where you may write the attribute.** The emitted impl is
+**Rust's [orphan rule](/docs/reference/glossary#orphan-rule), not a CGP choice, decides where you may write the attribute.** The emitted impl is
 `impl Namespace<..> for Key`, and Rust accepts it when the crate owns the namespace trait, or when a
 local type appears in the impl header ahead of the table parameter. That local type may be the key
 itself, or a component named inside the namespace path, so a crate that owns `ShowImplComponent` may

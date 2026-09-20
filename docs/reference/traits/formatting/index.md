@@ -17,7 +17,7 @@ is the group's sharpest edge: one is in the prelude and the other two each need 
 - [`StaticString`](static_string.md) decodes a [`Symbol!`](../../macros/symbol.md) into a compile-time
   `&'static str` constant. This is the one to reach for when you need a name as data. Import it from
   `cgp::core::field::traits`.
-- [`StaticFormat`](static_format.md) writes a type-level string into a formatter, and backs the
+- [`StaticFormat`](static_format.md) writes a [type-level string](/docs/reference/glossary#type-level-string) into a formatter, and backs the
   `Display` impl on `Symbol`, so a `Display` bound is usually all you need. Reach for the trait itself
   only where there is no value to format. Import it from `cgp::core::base::traits`.
 - [`ConcatPath`](concat_path.md) joins two type-level [`Path!`](../../macros/path.md) routes, the

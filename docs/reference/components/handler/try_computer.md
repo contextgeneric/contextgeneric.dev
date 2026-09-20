@@ -20,7 +20,7 @@ This places `TryComputer` one step up from `Computer` on the fallibility axis of
 
 Returning the *context's* abstract error rather than a concrete one keeps a `TryComputer`
 provider generic. A provider does not commit to `anyhow::Error` or `std::io::Error`; it returns
-`Self::Error`, and the concrete type is decided at wiring time. This is why the component supertraits
+`Self::Error`, and the concrete type is decided at wiring time. This is why the component [supertraits](/docs/reference/glossary#supertrait)
 [`HasErrorType`](../has_error_type.md): the supertrait supplies the `Self::Error` it names in its
 `Result`, and it ties every fallible component in a context to the same error so their results compose.
 

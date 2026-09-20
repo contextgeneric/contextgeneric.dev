@@ -91,7 +91,7 @@ where
 
 The bound is the "get"; `<Table as DelegateComponent<Key>>::Delegate` is the value it returns. Because Rust
 forbids two impls of one trait for the same `Self` and `Key`, each key maps to exactly one value. This
-makes the structure a map rather than a relation, and it turns a duplicate wiring entry into a coherence
+makes the structure a map rather than a relation, and it turns a duplicate wiring entry into a [coherence](/docs/reference/glossary#coherence)
 error rather than a silent overwrite.
 
 ### What can be a key
@@ -188,7 +188,7 @@ the error message.
 There are narrow reasons to name the trait yourself.
 
 - **Reading an entry in generic code.** A provider that must resolve a key itself (a dispatcher, a
-  higher-order provider walking a table) bounds on `DelegateComponent<Key>` and projects `Delegate`. This
+  [higher-order provider](/docs/reference/glossary#higher-order-provider) walking a table) bounds on `DelegateComponent<Key>` and projects `Delegate`. This
   is the one legitimate hand-written use, and it is a *read*.
 - **Recognizing it in an error.** `the trait bound App: DelegateComponent<GreeterComponent> is not
   satisfied` means the context never wired that component. That is the most common wiring error there is,

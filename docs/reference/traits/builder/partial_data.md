@@ -21,7 +21,7 @@ where that projection comes from. The one case for bounding on it is generic cod
 
 ## Overview
 
-A partial record is a companion type (`__PartialPerson<IsNothing, IsPresent>`), and generic code holding
+A [partial record](/docs/reference/glossary#partial-record) is a companion type (`__PartialPerson<IsNothing, IsPresent>`), and generic code holding
 one often needs to know what it will *become* before it is complete: to name the return type of a
 routine, to state a bound, to decide what to do next. `PartialData` answers that: its single `Target`
 associated type is the concrete struct or enum the partial value corresponds to. **It is implemented for
@@ -69,7 +69,7 @@ directly.
 
 ## Examples
 
-Its most visible use is as [`FinalizeBuild`](./finalize_build.md)'s supertrait, which is how a finalize
+Its most visible use is as [`FinalizeBuild`](./finalize_build.md)'s [supertrait](/docs/reference/glossary#supertrait), which is how a finalize
 knows what to return:
 
 ```rust

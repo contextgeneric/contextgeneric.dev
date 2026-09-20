@@ -17,7 +17,7 @@ a method runs on, which supplies the values an implementation needs as its own f
 returns the `Output` directly with no failure path.
 
 It is the owned-versus-borrowed variant of the pure computer, differing on the input axis alone. Like
-`Computer` it never names an error type, so it does not supertrait
+`Computer` it never names an error type, so it does not [supertrait](/docs/reference/glossary#supertrait)
 [`HasErrorType`](../has_error_type.md). See the [handler family overview](./index.md) for how the members
 relate.
 

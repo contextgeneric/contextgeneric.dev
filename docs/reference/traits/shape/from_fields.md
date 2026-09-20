@@ -25,7 +25,7 @@ pub trait FromFields: HasFields {
 }
 ```
 
-It supertraits [`HasFields`](./has_fields.md), so `from_fields` takes that trait's `Fields` shape and a
+It [supertraits](/docs/reference/glossary#supertrait) [`HasFields`](./has_fields.md), so `from_fields` takes that trait's `Fields` shape and a
 bound on `FromFields` gives you `Fields` as well. It is an associated function rather than a method,
 because there is no value to call it on, so the call reads `Person::from_fields(fields)`, or
 `T::from_fields(fields)` in generic code.

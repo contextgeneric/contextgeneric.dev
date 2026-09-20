@@ -38,7 +38,7 @@ pub type RuntimeOf<Context> = <Context as HasRuntimeType>::Runtime;
 
 Its attributes:
 
-- [`#[cgp_type]`](../macros/cgp_type.md) — makes this an abstract-type component rather than a plain trait: it generates the provider trait, the component marker, and a [`UseType`](../providers/use_type.md) impl, so a context binds the concrete type by wiring.
+- [`#[cgp_type]`](../macros/cgp_type.md) — makes this an abstract-type component rather than a plain trait: it generates the provider trait, the [component marker](/docs/reference/glossary#component-marker), and a [`UseType`](../providers/use_type.md) impl, so a context binds the concrete type by wiring.
 
 ## Usage
 
@@ -99,7 +99,7 @@ it uses. It is also the type half a context must wire before it can satisfy
 [`HasRuntime`](./has_runtime.md), because the getter borrows a value of this type.
 
 Reach for [`HasRuntime`](./has_runtime.md) instead when a provider actually performs an effect and needs
-the runtime *value*, since `HasRuntime` supertraits this one and gives access to both. For an abstract
+the runtime *value*, since `HasRuntime` [supertraits](/docs/reference/glossary#supertrait) this one and gives access to both. For an abstract
 type that is not the runtime, define your own component with [`#[cgp_type]`](../macros/cgp_type.md)
 rather than reusing this one.
 

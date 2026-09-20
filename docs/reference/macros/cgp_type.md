@@ -16,7 +16,7 @@ written once for many applications cannot decide which. Rust's answer is an
 `trait HasScalarType { type Scalar; }`, and code written against it says `Self::Scalar` while leaving the
 actual type open.
 
-An abstract type in CGP is exactly that trait and nothing more exotic. `#[cgp_type]` adds the ability to
+An [abstract type](/docs/reference/glossary#abstract-type) in CGP is exactly that trait and nothing more exotic. `#[cgp_type]` adds the ability to
 fill the slot by **wiring** rather than by writing an impl. Without it, giving a context a
 concrete scalar means writing a provider by hand: a whole impl whose only content is
 `type Scalar = f64;`. Since every abstract-type provider has that same trivial shape, `#[cgp_type]`

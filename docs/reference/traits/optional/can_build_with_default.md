@@ -33,7 +33,7 @@ pub trait CanBuildWithDefault<Source> {
 
 `Source` is the narrower record and `Self` is the target. `build_with_default` is an associated function
 with no receiver, and it returns a fully built `Self`. The trait declares no associated type and no
-supertrait; it is a blanket impl chaining a builder, a merge, and a defaulted finalize, shown in
+[supertrait](/docs/reference/glossary#supertrait); it is a blanket impl chaining a builder, a merge, and a defaulted finalize, shown in
 [*Under the hood*](#under-the-hood). Two requirements follow from that chain: the source needs
 [`HasFields`](../shape/has_fields.md), because the merge walks its field list, and every field the source
 does not supply needs `Default`, because the finalize fills it. It is not in the prelude; import it from

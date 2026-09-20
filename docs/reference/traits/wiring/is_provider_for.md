@@ -5,7 +5,7 @@ sidebar_position: 2
 
 # `IsProviderFor`
 
-The marker supertrait that makes a provider's missing dependency show up by name.
+The marker [supertrait](/docs/reference/glossary#supertrait) that makes a provider's missing dependency show up by name.
 
 :::info
 
@@ -21,7 +21,7 @@ names, and reading that error is the reason to know it exists.
 ## Overview
 
 An implementation in CGP states what it needs from its **context**, the type the method runs on,
-in its own `where` clause: a field, an abstract type, another trait. When one of those requirements is
+in its own `where` clause: a field, an [abstract type](/docs/reference/glossary#abstract-type), another trait. When one of those requirements is
 not met, you want the compiler to say *which*. Left to itself, it will not.
 
 The reason is a specific behaviour of Rust's diagnostics. Asking "does this provider implement the provider
@@ -149,7 +149,7 @@ an error and, occasionally, assert it through a check.
 
 Two situations do put its name in your hands, and both are about diagnosis rather than construction.
 
-- **Localizing a broken layer in a higher-order provider stack.** Checking the context proves *something*
+- **Localizing a broken layer in a [higher-order provider](/docs/reference/glossary#higher-order-provider) stack.** Checking the context proves *something*
   in the stack is unsatisfied. `#[check_providers(...)]` asserts `IsProviderFor` on each named provider
   instead, so a dependency missing only from the outer wrapper errors on its line alone while one missing
   from the inner provider errors on both, which pins the layer.

@@ -5,7 +5,7 @@ sidebar_position: 5
 
 # `#[extend]`
 
-Add a trait as a supertrait of a generated trait, so callers can rely on it too.
+Add a trait as a [supertrait](/docs/reference/glossary#supertrait) of a generated trait, so callers can rely on it too.
 
 ## Overview
 

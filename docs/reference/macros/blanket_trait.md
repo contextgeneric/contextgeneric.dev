@@ -5,7 +5,7 @@ sidebar_position: 11
 
 # `#[blanket_trait]`
 
-Generate a blanket impl from a trait with default methods and supertrait dependencies.
+Generate a blanket impl from a trait with default methods and [supertrait](/docs/reference/glossary#supertrait) dependencies.
 
 ## Overview
 
@@ -33,7 +33,7 @@ pub trait FooBar: Foo + Bar {
 }
 ```
 
-**This is not a CGP component.** There is no consumer/provider split, no component marker, and no wiring:
+**This is not a CGP component.** There is no consumer/provider split, no [component marker](/docs/reference/glossary#component-marker), and no wiring:
 just an ordinary Rust trait and an ordinary blanket impl. It is the tool for a trait with exactly one
 definition, where you want extension-trait ergonomics without committing to the component machinery. When a
 second implementation becomes necessary, the trait can be promoted to a
@@ -164,7 +164,7 @@ That last clause is the real discriminator, separating this macro from its close
   and no caller is generic over the type, a function with a `where` clause is simpler and the propagation
   problem never arises.
 
-One caution specific to this construct: a blanket impl is **coherence-visible**, so it competes with any
+One caution specific to this construct: a blanket impl is **[coherence](/docs/reference/glossary#coherence)-visible**, so it competes with any
 other impl of the same trait. That is why the pattern admits exactly one definition, and why two
 `#[blanket_trait]` traits whose bounds can both hold for one type cannot both cover that type for the same
 trait. Needing that is the signal to move to a component.

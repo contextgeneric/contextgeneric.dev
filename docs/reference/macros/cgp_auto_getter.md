@@ -27,12 +27,12 @@ wired and no impl is written: the macro emits one
 covering every qualifying context, keyed on each method's own name.
 
 It hides the field-access trait CGP reads fields through, which is precise and unpleasant to write by
-hand: a bound naming the field as a type-level string, and a `PhantomData` tag at every read. Being
+hand: a bound naming the field as a [type-level string](/docs/reference/glossary#type-level-string), and a `PhantomData` tag at every read. Being
 able to state the same thing as `fn name(&self) -> &str;` is the point.
 
 **Use it sparingly.** For the ordinary case, a provider reading a field of its own context, an
 [`#[implicit]`](../attributes/implicit.md) argument does the same job with no trait to declare, using the
-same field access and the same conversion rules, so a getter trait declared only to read a field adds a
+same field access and the same conversion rules, so a [getter trait](/docs/reference/glossary#getter-trait) declared only to read a field adds a
 name and gives nothing back. A getter trait *does* give you one thing: an accessor other code can depend on by name.
 The cases where that matters are in
 [When to use it](#when-to-use-it).
@@ -218,7 +218,7 @@ A getter trait is worth declaring in a few cases an implicit argument cannot rea
   as in `Request: HasBasicAuthHeader<Self>`. There is no `self` field to read.
 - **The accessor must be a named trait.** When other code depends on "this context can tell you its
   name" rather than on a field, that dependency needs a trait to point at, importable with
-  [`#[uses]`](../attributes/uses.md) or usable as a supertrait via [`#[extend]`](../attributes/extend.md).
+  [`#[uses]`](../attributes/uses.md) or usable as a [supertrait](/docs/reference/glossary#supertrait) via [`#[extend]`](../attributes/extend.md).
 - **The getter carries a type inferred from the field.** The associated-type form above keeps the type
   abstract for callers in a way a concrete implicit parameter cannot.
 
@@ -259,7 +259,7 @@ where
 ```
 
 A few things to recognize. The context parameter is literally `__Context__`, a reserved name chosen so it
-cannot collide with one of yours. [`Symbol!("name")`](./symbol.md) is a type-level string standing for the
+cannot collide with one of yours. [`Symbol!("name")`](./symbol.md) is a [type-level string](/docs/reference/glossary#type-level-string) standing for the
 field name. The compiler prints its expanded `Symbol<4, Chars<'n', …>>` form in errors, and
 `cargo cgp expand` resugars it back to this. And because the return type is `&str`, the bound asks for a
 `String` field and the body appends `.as_str()`, which is the conversion table in action.

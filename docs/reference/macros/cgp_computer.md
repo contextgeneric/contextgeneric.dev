@@ -145,7 +145,7 @@ exists for, and it is the simplest way into the handler family.
   drawn from the context alone. It is the input-free sibling and produces a `Producer`.
 - **Write the provider by hand with [`#[cgp_impl]`](./cgp_impl.md) when the body needs the context.** This
   is the real boundary. A `#[cgp_computer]` function has no receiver and no access to the context, so it can
-  only transform its inputs. The moment the computation needs a field, an abstract type, or another
+  only transform its inputs. The moment the computation needs a field, an [abstract type](/docs/reference/glossary#abstract-type), or another
   trait, it wants a provider impl of `Computer` or `Handler` written with `#[cgp_impl]`, where `self` is
   the context and [`#[implicit]`](../attributes/implicit.md) and [`#[uses]`](../attributes/uses.md) work
   normally.

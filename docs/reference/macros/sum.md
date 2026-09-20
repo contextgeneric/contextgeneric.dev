@@ -71,7 +71,7 @@ pub enum Shape {
 // }
 ```
 
-A couple of things to notice. The variant names are [`Symbol!`](./symbol.md) type-level strings, exactly as field names
+A couple of things to notice. The variant names are [`Symbol!`](./symbol.md) [type-level strings](/docs/reference/glossary#type-level-string), exactly as field names
 are. And a struct-like variant nests a [`Product!`](./product.md) of its own fields, so an enum's full shape is
 a sum of variants whose payloads may themselves be records. Generic code walks the `Sum!` to find which variant
 a value holds, then walks the nested `Product!` to reach that variant's fields.

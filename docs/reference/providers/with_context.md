@@ -17,7 +17,7 @@ adapter with [`UseContext`](use_context.md) on a **context**, the type a method 
 
 `WithContext` is distinct from the bare [`UseContext`](use_context.md), and the two play different
 roles. `UseContext` implements a component's provider trait *directly* by routing back to the context's
-consumer trait, which is how it serves as a higher-order provider's default inner provider. `WithContext`
+consumer trait, which is how it serves as a [higher-order provider](/docs/reference/glossary#higher-order-provider)'s default inner provider. `WithContext`
 instead wraps `UseContext` in the [`WithProvider`](with_provider.md) adapter. It is the least-used member
 of the `With…` family: the library defines it for completeness, and the common ways to serve a component
 from the context's own state are the constructs named below rather than this alias.

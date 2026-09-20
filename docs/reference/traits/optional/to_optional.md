@@ -35,7 +35,7 @@ pub trait ToOptional {
 
 `Self` is any partial builder, and `Output` is the same partial companion type with every marker set to
 `IsOptional`. `to_optional` takes `self`, consuming the builder and returning the re-marked one. The
-trait has no supertrait; it is a blanket impl over
+trait has no [supertrait](/docs/reference/glossary#supertrait); it is a blanket impl over
 [`TransformMapFields`](../type-level/transform_map_fields.md), so any partial value whose fields can be
 re-marked gains it, with nothing to implement by hand. It is not in the prelude; the optional-field
 layer lives in `cgp-field-extra`.

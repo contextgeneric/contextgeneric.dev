@@ -24,7 +24,7 @@ rather than when the builder is created:
 
 ## Definition
 
-`FinalizeOptional` supertraits [`PartialData`](../builder/partial_data.md) and finalizes an optional
+`FinalizeOptional` [supertraits](/docs/reference/glossary#supertrait) [`PartialData`](../builder/partial_data.md) and finalizes an optional
 builder into its concrete struct:
 
 ```rust
@@ -33,7 +33,7 @@ pub trait FinalizeOptional: PartialData {
 }
 ```
 
-The `PartialData` supertrait supplies `Target`, the concrete struct being built, so the method projects
+The `PartialData` [supertrait](/docs/reference/glossary#supertrait) supplies `Target`, the concrete struct being built, so the method projects
 its return type through it and declares no associated type of its own. `finalize_optional` takes `self`,
 consuming the builder, and returns `Result<Self::Target, &'static str>`: the built struct on success,
 or, on failure, the first missing field's own name, recovered from its type-level tag as a `&'static

@@ -103,7 +103,7 @@ pub struct SpawnAndRun<InCode>(pub ::core::marker::PhantomData<InCode>);
 This is also the limit of what the attribute form can express, and the reason `#[cgp_provider]` is
 still needed. A struct that needs a **default** generic parameter has to be written by hand, and so does
 one shared by several impls. The common shape is
-`pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`, which a higher-order provider uses so it
+`pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`, which a [higher-order provider](/docs/reference/glossary#higher-order-provider) uses so it
 can fall back to the context's own wiring.
 
 ## Examples

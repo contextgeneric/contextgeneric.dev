@@ -24,15 +24,15 @@ The tiers differ in where a program can select an implementation:
 | **2** | One implementation per target type | A plain Rust trait | Selection follows the trait and target type |
 | **3** | One provider per wired type | A CGP component and wiring | Each wired type still has one choice for that component |
 | **4** | One provider per target type in each context | A parameter-targeted component and `open` | The interface must separate context from target |
-| **5** | An inner provider chosen by an enclosing provider | A higher-order provider | The enclosing provider depends on the inner provider interface |
+| **5** | An inner provider chosen by an enclosing provider | A [higher-order provider](/docs/reference/glossary#higher-order-provider) | The enclosing provider depends on the inner provider interface |
 
-All tiers obey Rust's coherence rules. CGP permits reusable alternatives by placing their
+All tiers obey Rust's [coherence](/docs/reference/glossary#coherence) rules. CGP permits reusable alternatives by placing their
 implementations on distinct provider types, then using wiring to select one unambiguously.
 Tier 5 adds a local composition choice rather than relaxing another coherence rule.
 
 ## Tier 1: one implementation for matching types
 
-A blanket implementation shares one body across every type satisfying its bounds. Here, all
+A [blanket implementation](/docs/reference/glossary#blanket-implementation) shares one body across every type satisfying its bounds. Here, all
 byte-like values encode by copying their bytes:
 
 ```rust
@@ -83,7 +83,7 @@ that trait is used for that type. Blanket implementations remain possible where 
 overlap other impls; coherence prevents ambiguous combinations.
 
 This tier fits behavior that varies by type but does not need an independent choice per application.
-Rust's orphan rules also determine which crate may supply an implementation.
+Rust's [orphan rules](/docs/reference/glossary#orphan-rule) also determine which crate may supply an implementation.
 
 ## Tier 3: reusable providers, one selected per wired type
 
@@ -286,7 +286,7 @@ alongside CGP:
 | **A local macro** | The generated pattern is narrow and specific to the crate. | Repeated helper traits and marker types amount to a reusable component system. |
 
 Runtime choices can live inside a CGP context. For example, a provider can call through a trait
-object stored in a field. Static wiring selects that provider; the trait object still performs
+object stored in a field. Static wiring selects that provider; the [trait object](/docs/reference/glossary#trait-object) still performs
 its own runtime dispatch.
 
 ## Where provider wiring does not help
@@ -348,7 +348,7 @@ checked near the wiring. `cargo cgp check` leads with the root cause for the cla
 and the tool is a v0.1.0-alpha that does not yet reshape every class. The
 [cargo-cgp documentation](/docs/cargo-cgp/) explains the checking workflow.
 
-Macros, trait resolution, and monomorphization add compile-time work. The effect depends on the
+Macros, trait resolution, and [monomorphization](/docs/reference/glossary#monomorphization) add compile-time work. The effect depends on the
 program and should be measured for the codebase being evaluated. Static dispatch removes runtime
 provider lookup, but that does not mean every added compilation cost replaces a runtime cost.
 

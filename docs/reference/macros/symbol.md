@@ -5,7 +5,7 @@ sidebar_position: 16
 
 # `Symbol!`
 
-A type-level string, used as a field-name tag.
+A [type-level string](/docs/reference/glossary#type-level-string), used as a field-name tag.
 
 ## Overview
 

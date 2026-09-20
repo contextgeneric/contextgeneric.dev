@@ -43,7 +43,7 @@ which turn a plain function into a provider and wire the promotion table so one 
 whole family, and they are composed and routed with the
 [handler combinators](../../providers/handler/index.md), the
 [dispatch combinators](../../providers/dispatch/index.md), and the
-[monad providers](../../providers/monad/index.md). A fallible member supertraits
+[monad providers](../../providers/monad/index.md). A fallible member [supertraits](/docs/reference/glossary#supertrait)
 [`HasErrorType`](../has_error_type.md), and an effectful one reaches the runtime through
 [`HasRuntime`](../has_runtime.md).
 

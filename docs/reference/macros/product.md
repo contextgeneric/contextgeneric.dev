@@ -72,7 +72,7 @@ pub struct Person {
 // }
 ```
 
-The names are [`Symbol!`](./symbol.md) type-level strings and each entry is a [`Field`](../types/field.md), so
+The names are [`Symbol!`](./symbol.md) [type-level strings](/docs/reference/glossary#type-level-string) and each entry is a [`Field`](../types/field.md), so
 the whole `Product!` is a complete type-level description of `Person`'s layout. Generic code walks that list to
 build or read a `Person` without being written against `Person`.
 

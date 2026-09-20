@@ -137,7 +137,7 @@ The loop variables appear only in that bound and in the key, so **the key must m
 the parameter is unconstrained and the compiler rejects the impl with `E0207`.
 
 The registration impl carries only the parameters naming the key and provider plus the table, never the
-provider's own `where` clause, so a provider with impl-side dependencies registers cleanly and its bounds
+provider's own `where` clause, so a provider with [impl-side dependencies](/docs/reference/glossary#impl-side-dependency) registers cleanly and its bounds
 are checked when a real context resolves it.
 
 Because nothing in the library emits this trait, there is no generated code to compare against. The
