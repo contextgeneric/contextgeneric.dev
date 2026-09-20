@@ -1,6 +1,6 @@
 //! Code from `docs/comparisons/implicit-parameters.md` — *Implicit parameters*.
 
-/// ## Implicit arguments are implicit value parameters
+/// ## Implicit arguments read named context fields
 pub mod implicit_arguments_are_implicit_value_parameters {
     use cgp::prelude::*;
 
@@ -25,7 +25,7 @@ pub mod implicit_arguments_are_implicit_value_parameters {
     }
 }
 
-/// ## Abstract types are implicit type parameters
+/// ## Abstract types are determined by the context
 pub mod abstract_types_are_implicit_type_parameters {
     use core::fmt::Debug;
 
@@ -38,7 +38,7 @@ pub mod abstract_types_are_implicit_type_parameters {
     }
 }
 
-/// ## Components and wiring are type classes without coherence
+/// ## Components and wiring make instance selection explicit
 pub mod components_and_wiring_are_type_classes {
     use core::fmt::Display;
 

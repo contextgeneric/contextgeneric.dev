@@ -11,7 +11,7 @@ pub mod without_a_framework {
     }
 }
 
-/// ## Impl-side dependencies are the injected constructor parameters
+/// ## Impl-side dependencies declare what an implementation needs
 pub mod impl_side_dependencies_are_constructor_parameters {
     use cgp::prelude::*;
 
@@ -106,8 +106,8 @@ pub mod impl_side_dependencies_are_constructor_parameters {
     }
 }
 
-/// ## Wiring is the container configuration
-/// ## Checking replaces the container's startup validation
+/// ## Wiring selects implementations for an application
+/// ## Checking validates the declared dependencies
 pub mod wiring_is_the_container_configuration {
     use cgp::prelude::*;
 

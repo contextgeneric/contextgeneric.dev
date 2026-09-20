@@ -68,7 +68,7 @@ pub mod abstract_type_components {
     }
 }
 
-/// ## `delegate_components!` replaces manual functor application
+/// ## `delegate_components!` records the assembly choices
 pub mod delegate_components_replaces_functor_application {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::prelude::*;

@@ -1,60 +1,59 @@
 ---
 sidebar_label: 'Capabilities'
 sidebar_position: 11
-description: 'The five things "capability" names, and which of them CGP resembles: object capabilities, capability-based security, effects as capabilities, and the Rust community''s uses.'
+description: 'Distinguish capability models and compare their guarantees with CGP dependency checks and context fields.'
 ---
 
 # Capabilities
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
-library on stable Rust in which a trait can have several named implementations and each context
-selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who knows
-"capabilities" in one of the several senses the word carries: the object-capability model of E and
-Pony, capability-based security in seL4, WASI, or `cap-std`, effects as capabilities in Effekt and
-Scala, or the Rust community's use of the word for an allocator or runtime a function should receive
-without a parameter. CGP is capability-like in the last two senses and is not a capability system in
-the first. The page separates the senses, says which requirements CGP meets, and gives a compact way
-to say "capability-like, but not a capability system".
+CGP can declare dependencies and carry capability values, but it does not enforce a security
+boundary. It is a language extension for Rust, with pluggable trait implementations at
+compile-time, implemented as a library on stable Rust whose consumer traits are ordinary Rust
+traits; the [Introduction](/docs/) covers the basics. This page separates object capabilities,
+effects as capabilities, and other uses of the term, then explains which properties CGP shares
+and which must come from another system.
 
 ## In your terms
 
-A **context** in CGP is the type the method runs on, which supplies the values it needs as its
-fields. In most CGP code it is a type you define to stand for an application.
+A **context** is the type a CGP method runs on, supplying data through fields and implementations
+through wiring. In these examples it represents an application. A context field can hold an
+object-capability value, while a provider's declared dependencies describe what it needs from
+that context.
 
-| In a capability system | In CGP |
+| In capability-oriented code | In CGP |
 | --- | --- |
-| A requirement a computation places on its context (Effekt, Scala) | An **impl-side dependency**: `#[uses]` for a trait, `#[implicit]` for a value |
-| The handler or scope that supplies it | The context, and constructing a value of it |
-| A capability value passed to code that needs it | A field of the context, read by the providers that declare it |
-| Static discharge of every requirement | `check_components!` |
-| An unforgeable reference (E, Pony, WASI) | No counterpart: a CGP bound is a requirement, not a token |
-| Removal of ambient authority | No counterpart: Rust keeps `std` and globals reachable |
+| A requirement on a computation's environment | An **impl-side dependency**, declared with `#[uses]` or `#[implicit]` |
+| An environment supplying a required value | A context value with the required field |
+| A capability value passed to an operation | A context field borrowed by a provider |
+| Checking that requirements are supplied | `check_components!` verifies declared dependencies |
+| An unforgeable authority-bearing reference | Must be supplied by the field's value type; a trait bound alone does not provide it |
+| Excluding ambient authority | Not enforced by CGP; ordinary Rust APIs and globals remain accessible |
 
 ## The idea, briefly
 
-"Capability" names at least five different things, and a reader who asks for capabilities in Rust
-rarely says which. The senses are separated below by the property each insists on.
+The word capability describes several different mechanisms. Object capabilities concern authority
+over resources; effect capabilities concern operations available in a scope; other uses concern
+privileges, ownership, or implicit dependencies. Their different guarantees determine how each
+relates to CGP.
 
 ### The object-capability model
 
-A capability, in the sense Dennis and Van Horn introduced in 1966 and Mark Miller made precise for
-programming languages, is "a communicable, unforgeable token of authority" that refers to an object
-together with the rights to use it ([Wikipedia, *Capability-based security*](https://en.wikipedia.org/wiki/Capability-based_security)).
-The object-capability model identifies that token with an ordinary object reference: to hold the
-reference is to hold the authority. Three properties define it. *No designation without authority*:
-naming a resource and being allowed to use it are the same act. *No ambient authority*: a request
-either carries a capability or fails, so global functions such as `open()` are the counterexample
-([Miller, Yee & Shapiro, *Capability Myths Demolished*](https://papers.agoric.com/assets/pdf/papers/capability-myths-demolished.pdf)).
-And authority spreads only along existing references: "only connectivity begets connectivity"
-([Miller, *Robust Composition*](https://papers.agoric.com/assets/pdf/papers/robust-composition.pdf)),
-so reachability in the object graph bounds what any object can do, which is the reasoning the
-*principle of least authority* rests on. Delegation is passing the reference, attenuation is wrapping
-it, and revocation is closing a gate in the wrapper, all runtime acts on runtime values. The languages
-built on the model, E, Pony, Newspeak, Austral, and Hardened JavaScript, remove global mutable state
-and global I/O, because a global is ambient authority. Pony's tutorial states the rule: global
-variables are "ambient authority", so Pony has none, and a program obtains file access only from the
-`env.root` authority its `Main` actor is handed
-([Pony tutorial, *Object Capabilities*](https://tutorial.ponylang.io/object-capabilities/object-capabilities.html)):
+An object capability combines a reference to a resource with authority to use it. Code obtains
+access through references it is given or can derive from existing authority. This makes the
+reference graph relevant to the principle of least authority: give each component only the access
+it needs. [Miller's account](https://papers.agoric.com/assets/pdf/papers/robust-composition.pdf)
+and [Capability Myths Demolished](https://papers.agoric.com/assets/pdf/papers/capability-myths-demolished.pdf)
+explain the model and its security properties.
+
+A capability-safe environment excludes ambient authority that would bypass those references.
+An unrestricted global file-opening function would violate that rule. Passing a reference delegates
+authority; a wrapper can expose fewer operations or mediate access so it can later revoke it.
+These are properties of the supplied objects and their environment, rather than of a dependency
+annotation alone.
+
+Pony gives its main actor an environment from which it obtains authority. The following fragment
+uses `env.root` to create file access, following the
+[Pony tutorial](https://tutorial.ponylang.io/object-capabilities/object-capabilities.html):
 
 ```pony
 use "files"
@@ -72,25 +71,22 @@ actor Main
 
 ### Capability-based security in systems
 
-The same model applied below the language gives a process handles to kernel objects and no other way
-to name them: KeyKOS, seL4, Fuchsia, and Capsicum, with CHERI moving it into hardware
-([CHERI](https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/)). WASI "has no ambient
-authorities" and its handles "are unforgeable"
-([WASI design principles](https://github.com/WebAssembly/WASI/blob/main/docs/DesignPrinciples.md)).
-Rust's `cap-std` brings the discipline to the standard library's surface: its APIs "don't access
-files, directories, network addresses, clocks, or other external resources implicitly, but instead
-operate on handles that are explicitly passed in", the one exercise of ambient authority is marked by
-an explicit `ambient_authority()` argument, and the crate is candid that it "can't prevent arbitrary
-Rust code from using `std::fs`'s path-oriented APIs"
-([Gohman, *Introducing cap-std*](https://blog.sunfishcode.online/introducing-cap-std/)). Compiled with
-`cap-std` 3:
+Capability systems can enforce authority below the language level. Examples include kernel-object
+handles in seL4, hardware support in [CHERI](https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/),
+and the handles supplied through [WASI](https://github.com/WebAssembly/WASI/blob/main/docs/DesignPrinciples.md).
+Their enforcement mechanisms differ, so a library that accepts handles should not be assumed to
+provide the same isolation as an operating system or sandbox.
+
+Rust's `cap-std` exposes resource access through explicit handles. Its `Dir` API limits file
+operations to a directory, while opening a directory through ambient authority requires an explicit
+marker. This fragment illustrates the distinction:
 
 ```rust
 use cap_std::ambient_authority;
 use cap_std::fs::Dir;
 
 fn read_config(dir: &Dir) -> std::io::Result<String> {
-    // `dir` is the only authority this function holds; it cannot reach outside it.
+    // File access through `dir` stays within the directory it represents.
     let mut text = String::new();
     std::io::Read::read_to_string(&mut dir.open("config.txt")?, &mut text)?;
     Ok(text)
@@ -102,29 +98,33 @@ read_config(&dir)?;
 dir.open("../secret.txt")   // Err: a path led outside of the filesystem
 ```
 
-### Two senses that share only the word
+The confinement applies to operations performed through `dir`. Arbitrary Rust code can still call
+`std::fs` directly if its execution environment permits it. The
+[cap-std README](https://github.com/bytecodealliance/cap-std) explains both the handle-based APIs and
+the limit of a library-level discipline.
 
-Linux "capabilities" divide the superuser's privileges into units such as `CAP_NET_BIND_SERVICE`,
-held as a per-thread attribute ([capabilities(7)](https://man7.org/linux/man-pages/man7/capabilities.7.html)).
-They are privilege bits, not references to resources. Pony's *reference capabilities*, `iso`, `trn`,
-`ref`, `val`, `box`, and `tag`, are aliasing qualifiers whose purpose is data-race freedom
-([Pony tutorial, *Reference Capabilities*](https://tutorial.ponylang.io/reference-capabilities/)). A
-Rust reader already has that second thing as ownership, `&`, and `&mut`. Neither sense enters the CGP
-comparison.
+### Privilege bits and reference qualifiers
+
+Linux capabilities divide superuser privileges into units such as `CAP_NET_BIND_SERVICE`.
+They are per-thread privilege attributes, rather than references to individual resources. The
+[capabilities manual](https://man7.org/linux/man-pages/man7/capabilities.7.html) describes that model.
+
+Pony's reference capabilities describe aliasing and access to values. Qualifiers such as `iso`,
+`val`, and `ref` support safe sharing and data-race prevention. Rust ownership and borrowing address
+related concerns through different rules. The
+[Pony reference-capability tutorial](https://tutorial.ponylang.io/reference-capabilities/)
+explains these qualifiers. Neither these qualifiers nor Linux privilege bits are mechanisms CGP adds.
 
 ### Effects as capabilities
 
-Effekt's designers describe their language as "effects as capabilities": "effect types express which
-capabilities a computation requires from its context", given semantics by translation to a calculus in
-explicit capability-passing style
-([Brachthäuser, Schuster & Ostermann, OOPSLA 2020](https://dl.acm.org/doi/10.1145/3428194)). A
-capability here is a value a handler introduces and that must be in scope for an operation to be
-performed, and to keep this sound Effekt treats capabilities as second-class: passable down, not
-returned or stored. Scala 3's experimental *capture checking* reaches the same place: a capability is
-a parameter or local whose type carries a capture set, and the checker prevents it escaping the scope
-that introduced it ([Scala 3 Reference, *Capture Checking*](https://docs.scala-lang.org/scala3/reference/experimental/cc.html)).
-The concrete application is `CanThrow`, an erased class: a `throw` requires a `CanThrow[E]`, and a
-`try` creates one. Compiled with Scala 3.8.4:
+Effect-capability systems make an operation depend on access to a handler-provided capability.
+Effekt expresses the capabilities a computation requires through its effect types and controls
+how they can escape their scope. The paper
+[Effects as Capabilities](https://dl.acm.org/doi/10.1145/3428194) develops this approach.
+
+Scala's capture checking tracks references to capabilities in types, while its safer-exceptions
+feature uses `CanThrow` to express permission to throw a checked exception. The following example
+uses the experimental safer-exceptions feature in Scala 3.8.4:
 
 ```scala
 import language.experimental.saferExceptions
@@ -139,50 +139,54 @@ try println(List(1.0, 2.0, 3.0).map(f).sum)   // the try supplies the CanThrow c
 catch case ex: LimitExceeded => println("too large")
 ```
 
-This sense keeps one thing from the object-capability model, that authority to perform an operation is
-a value the context supplies, and drops the runtime half. It is a *static* discipline, which is why it
-is the sense CGP can be compared with directly.
+The surrounding `try` supplies the `CanThrow` evidence needed by `f`. This illustrates static
+permission to perform an operation, rather than a runtime operating-system privilege. See Scala's
+[CanThrow documentation](https://docs.scala-lang.org/scala3/reference/experimental/canthrow.html)
+and [capture-checking reference](https://docs.scala-lang.org/scala3/reference/experimental/cc.html).
+CGP's declared requirements resemble part of this structure, but CGP does not supply capture checking.
 
-### The Rust community's word
+### Capabilities in Rust discussions
 
-Rust programmers use the word in three threads. The first is *implicit values*: Tyler Mandry's
-contexts-and-capabilities proposal declares a `capability` such as an arena and lets an impl require it
-in a `with` clause, so an allocator or logger need not be threaded through every signature
-([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)), and Yoshua Wuyts
-describes the pain: "the global allocator acts, in a capability-sense, as an ambient authority"
-([Wuyts, *Nesting Allocators*](https://blog.yoshuawuyts.com/nesting-allocators)). The second is
-*sandboxing*, the object-capability sense proper, as in `cap-std` and WASI. The third is *ownership
-tokens*: the embedded Rust book makes each peripheral a value obtained once, so that "to call the
-`read_speed()` method, we must have ownership or a reference to a `SerialPort` structure"
-([Embedded Rust Book](https://docs.rust-embedded.org/book/peripherals/singletons.html)), and PermRust
-generalizes the idea into a token-based permission system
-([Gehring, Rehms & Tschorsch](https://arxiv.org/abs/2506.11701)). A reader who wants "capabilities in
-Rust" may mean any of the three.
+Rust discussions use capability terminology for implicit dependencies, sandboxed resources, and
+ownership tokens. The intended guarantee matters more than the shared word:
 
-### The properties that tell the senses apart
+- **Implicit dependencies:** the contexts-and-capabilities proposal supplies values such as an
+  arena through a context, reducing parameter forwarding. See
+  [Mandry's proposal](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/).
+- **Sandboxed resources:** `cap-std` and WASI express access through handles, with different
+  enforcement boundaries.
+- **Ownership tokens:** a value with a controlled constructor represents access to a resource,
+  such as a peripheral. The [Embedded Rust Book](https://docs.rust-embedded.org/book/peripherals/singletons.html)
+  explains the singleton pattern, and [PermRust](https://arxiv.org/abs/2506.11701) explores token-based
+  permissions.
 
-| Property | Object capabilities | Effects as capabilities | Rust contexts proposal | Ownership tokens |
-| --- | --- | --- | --- | --- |
-| Designation and authority are one reference | yes | partly | no: a named implicit value | yes, for the resource the token stands for |
-| No ambient authority, enforced | yes, by removing globals | no, unless the language also removes them | no | no |
-| Unforgeable | yes | yes, by private constructors or erasure | not addressed | yes, by a private constructor |
-| Provisioned at runtime | yes | value at runtime, scope lexical | value at runtime, binding lexical | value at runtime |
-| Delegation, attenuation, revocation | all three, at runtime | delegation and attenuation; no revocation | delegation by scope | delegation by move or borrow |
-| Confinement reasoning | reachability in the object graph | capture sets bound escape | not addressed | ownership bounds aliasing |
+A request for capabilities in Rust can therefore mean either a more convenient API or a stronger
+restriction on what code may do. CGP addresses dependency declaration and selection; its wiring
+alone does not impose the latter restriction.
+
+### The properties that distinguish the models
+
+The following properties help identify which mechanism a program needs:
+
+| Mechanism | What it represents | Where its guarantee comes from |
+| --- | --- | --- |
+| Object capability | Authority carried by a reference | Controlled references and an environment that excludes bypasses |
+| Effect capability | Access to an operation or handler | The language's effect, scope, or capture rules |
+| Rust contexts proposal | An implicitly supplied dependency | The proposed context-binding and type-checking rules |
+| Ownership token | Access represented by a value | Controlled construction and ownership or borrowing |
+| CGP dependency | A trait or field an implementation requires | Rust trait checking against the selected context |
 
 ## How CGP expresses it
 
-CGP shares the effects-as-capabilities reading almost exactly and the object-capability reading only in
-part. A provider's [impl-side dependencies](/docs/concepts/impl-side-dependencies) are the requirements
-a computation places on its context, the context supplies them, and
-[`check_components!`](/docs/reference/macros/check_components) verifies that every requirement is met.
-CGP does not remove ambient authority, does not make its requirements unforgeable, and does not
-provision them at runtime.
+CGP declares what a provider needs from its context and checks that the context supplies it.
+Those requirements may include authority-bearing values, but CGP does not make every dependency
+an authority token. It also does not restrict access to globals or check the escape of capability
+references beyond Rust's ordinary type and lifetime rules.
 
-### A requirement on the context is a capability in the effect-system sense
+### Providers declare requirements on a context
 
-A provider declares what it needs with `#[uses]` for traits and `#[implicit]` for values, and the
-consumer trait a caller invokes hides both:
+A provider uses `#[uses]` for trait dependencies and `#[implicit]` for field dependencies.
+This fragment assumes a `CanGreet` component whose method returns a `String`:
 
 ```rust
 #[cgp_impl(new GreetHello)]
@@ -206,19 +210,19 @@ delegate_components! {
 check_components! { App { GreeterComponent } }
 ```
 
-Read as an effect type, `GreetHello` requires one thing of its context, a `name` field, and `App`
-supplies it. Constructing `App { name }` is the `try` that supplies a `CanThrow`, or the `with` block
-that supplies Mandry's arena. The parallel extends to the type level: an
-[abstract type](/docs/concepts/abstract-types) such as a context's `Error` is a requirement the
-context discharges by wiring, which no capability system expresses. `App` here is an **environmental
-context**, a type standing for an application, and `GreetHello` is self-targeted.
+`GreetHello` needs a `name` field, and `App` supplies it. `check_components!` verifies the field
+requirement for the selected provider; constructing `App { name }` supplies its runtime value.
+`App` is an environmental context representing an application, and the component is self-targeted.
+This is a dependency relationship: the `String` does not confer protected authority.
+
+Contexts can also determine [abstract types](/docs/concepts/abstract-types), such as the error type
+shared by their providers. Selecting such a type is separate from supplying an authority-bearing
+value of that type. A type choice alone does not grant access to a resource.
 
 ### An object capability can live in the context
 
-Where the value a provider requires is itself an object capability, CGP carries it and adds a static
-check that it reaches the code that needs it. A `cap-std` `Dir` stored as a context field is an object
-capability in the model's sense, and a provider that reads configuration through it holds no other
-filesystem authority in its body. This compiles against `cgp` `0.8.0-alpha` and `cap-std` 3:
+A context can carry a `cap-std` directory handle to a provider that declares it as a dependency.
+This example reads configuration using that handle:
 
 ```rust
 use cap_std::fs::Dir;
@@ -251,114 +255,105 @@ delegate_components! {
 check_components! { App { ConfigReaderComponent } }
 ```
 
-The division of labor is the point. `cap-std` supplies the unforgeable handle and the runtime
-confinement; CGP supplies the declaration that `ReadConfigFromDir` needs a `Dir` and the compile-time
-check that `App` has one. The same arrangement serves an arena-allocating deserializer, where the
-arena is a context field and the provider reads it as an implicit argument, which the
-[Rust proposals](./rust-language-proposals.md) page relates to Mandry's example.
+`cap-std` constrains file access performed through `config_dir`, while CGP verifies that `App`
+supplies the required field. `App` is again an environmental context with a self-targeted component.
+The mechanisms compose: the value type supplies resource-access behavior, and CGP supplies the
+dependency declaration and static wiring check. An allocator or arena can be passed through a context
+field in the same way, as discussed in [Rust's own proposals](./rust-language-proposals.md).
 
 ### CGP does not remove ambient authority
 
-The property that makes a language capability-safe is that code can reach only what it is handed, and
-Rust does not have it. `ReadConfigFromDir` could call `std::fs::File::open("/etc/passwd")` in its
-body and CGP would neither notice nor object. The provider's declared requirements bound what it
-reaches *through the context*, which is useful for reading and for testing, but they do not bound what
-it reaches through `std`, through statics, or through the global allocator. A capability-safe language
-forbids the global; CGP is a library in a language that permits it. A page that suggested a CGP
-provider is confined to its declared dependencies would be claiming something Rust cannot deliver.
+A provider can access ordinary Rust APIs beyond its context dependencies. `ReadConfigFromDir`
+could call `std::fs::File::open(...)` directly if the execution environment allows it, and CGP
+would not reject the call. Its declared bounds describe requirements on the context, not a complete
+list of effects or authority exercised by the body.
 
-### A requirement is not an unforgeable token
+### A trait bound does not create an authority token
 
-An object capability is unforgeable because the only way to obtain the reference is to be given it. A
-CGP requirement is a trait bound on the context, and any context that carries a field of the right
-name and type satisfies a `HasField<Symbol!("config_dir")>` bound. The bound says what the provider
-needs; it does not certify who may construct the context. Authority, where there is any, lives in the
-*value* stored in the field: a `Dir` is unforgeable because `cap-std` made it so, and a `String` named
-`name` is not a capability at all. Rust can express unforgeable tokens as types with private
-constructors, and CGP can carry such a token as a field or fix one as an abstract type, but the token
-pattern is Rust's.
+A `HasField` bound establishes access to a field of a particular name and type. It does not
+establish who may create the field's value. When the field contains a capability, the relevant
+construction and access restrictions come from that value's type and execution environment.
+Rust types with private constructors can implement controlled tokens; CGP can carry those tokens
+without changing their guarantees.
 
-### Provisioning is fixed per context type
+### Wiring is static; capability values can vary at runtime
 
-In the object-capability model authority is provisioned at runtime and the graph changes while the
-program runs. In CGP the set of requirements a context satisfies, and the providers it satisfies them
-with, are part of the context *type*, fixed when `delegate_components!` is written. Only the field
-*values* are dynamic: two `App` values may carry two different `Dir` handles, and a test may carry a
-`Dir` opened on a temporary directory. That is provisioning of values, not of authority structure.
-Attenuation means a [higher-order provider](/docs/concepts/higher-order-providers) that wraps an inner
-one, decided statically; revocation has no counterpart; and bindings are flat, with no nested scope in
-which a provider could be shadowed.
+A concrete context type fixes its provider selections and field types. Its values can still hold
+different handles: two `App` instances can refer to different directories, including a temporary
+directory used by a test. Their filesystem authority therefore differs even though their wiring
+is identical.
+
+Delegation, attenuation, and revocation must come from the capability implementation. A context
+can hold a wrapper that limits access or checks whether access has been revoked. A
+[higher-order provider](/docs/concepts/higher-order-providers) can also wrap behavior, but wrapping
+alone is not proof of attenuation if other access paths remain available. CGP does not add these
+security properties or prevent runtime capability values from implementing them.
 
 ## What each approach costs
 
-Object capabilities are valued for what their reasoning buys: least authority as a property of the
-object graph rather than a policy someone maintains, structural immunity to confused-deputy attacks,
-and delegation and attenuation as ordinary programming
-([Miller, *Robust Composition*](https://papers.agoric.com/assets/pdf/papers/robust-composition.pdf)).
-The effects-as-capabilities line is valued for lightweight effect polymorphism
-([Brachthäuser, Schuster & Ostermann, 2020](https://dl.acm.org/doi/10.1145/3428194)). Their costs,
-as their users state them, are the costs of removing what everyone is used to. Ambient authority is
-convenient, and passing an allocator by hand "doesn't exactly seem ideal"
-([Wuyts](https://blog.yoshuawuyts.com/nesting-allocators)). Retrofitting is hard: `cap-std` cannot
-sandbox code that still has `std::fs`, and Pony and Austral removed globals from the language, which
-no established ecosystem can do after the fact. The effect-system designs pay in restrictions and
-maturity: Effekt's capabilities cannot be returned or stored, and Scala's capture checking is, by its
-own documentation, "still highly experimental and unstable". And the word itself is a cost, since the
-senses are conflated so often that a 2003 paper set out to demolish the resulting myths
-([Miller, Yee & Shapiro](https://papers.agoric.com/assets/pdf/papers/capability-myths-demolished.pdf)).
+Object capabilities support reasoning about authority through references, but that reasoning needs
+an enforcement boundary. Retrofitting a handle-based API into an unrestricted language does not
+remove other APIs that exercise ambient authority. Applications must account for those bypasses
+or use an environment that excludes them. The
+[cap-std documentation](https://github.com/bytecodealliance/cap-std) makes this library-level limit
+explicit.
 
-CGP's costs on this page are the properties it lacks. A reader who wants confinement gets none from
-CGP alone and must bring `cap-std`, WASI, or a token type of their own. A reader who wants nested
-scopes that shadow a binding gets a single flat context. A reader who wants a capability that can be
-returned, stored, and revoked gets a field value with none of those semantics attached. Beyond these,
-the ordinary costs apply: the wiring is code somebody writes, and the raw diagnostics are trait-solver
-output over generated types. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for
-the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The
-[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs CGP's costs against the
-alternatives.
+Effect-capability systems add scope and escape rules that programmers must understand.
+Effekt's second-class treatment restricts where capabilities can be stored or returned, while
+Scala's capture checking tracks their use through types. These rules support guarantees that a
+plain dependency declaration does not provide. The
+[Effekt paper](https://dl.acm.org/doi/10.1145/3428194) and
+[Scala reference](https://docs.scala-lang.org/scala3/reference/experimental/cc.html) explain the
+respective designs.
+
+CGP adds declarations, wiring, and compile-time work without supplying confinement or capture
+checking. Programs that need those properties must obtain them elsewhere. Its generated trait
+machinery also affects diagnostics: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root
+cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every
+class. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) compares this machinery
+with simpler Rust abstractions.
 
 ## Where a capability system is the better choice
 
-Where a program needs a capability-safe language, Pony, Austral, or Hardened JavaScript is the tool,
-and where it needs sandboxed I/O in Rust, `cap-std` and WASI are. Where it needs privilege bits or
-aliasing control, Linux capabilities and Rust's ownership already exist and CGP does not touch them.
-CGP is the better tool where a program wants its implementations to state what they require and a
-compiler to check that each context supplies it, on stable Rust, with the choice of implementation made
-per application, and it combines with the object-capability libraries rather than competing with them.
+Use an enforcing capability system when the requirement is to limit what code may access.
+A capability-safe language or sandbox can exclude ambient access paths. Within Rust, `cap-std`
+helps express handle-based access, while an appropriate sandbox is needed to constrain code that
+could otherwise bypass those handles. Ownership tokens address controlled access to resources
+through Rust's construction and borrowing rules.
+
+CGP fits the separate requirement of reusable implementations with declared dependencies and
+choices per context. It can carry capability values from those systems, but a wiring check is not
+a security audit or proof of confinement.
 
 ## What to expect that differs
 
-**CGP does not remove ambient authority.** A provider's bounds bound what it reaches through the
-context, and nothing else. Rust's `std` and globals remain reachable from any body.
+CGP checks declared context requirements rather than all authority used by a body.
+Ordinary Rust globals and APIs remain available unless another mechanism restricts them.
 
-**A CGP bound is a requirement, not a token.** Any context with the right field satisfies it. Where
-authority matters, it lives in the field's value, and a type with a private constructor is how Rust
-makes such a value unforgeable.
+A field dependency identifies a value the implementation needs. Whether that value grants
+protected authority depends on its type and how it was obtained. A `String` and a directory handle
+can both be dependencies without having the same security meaning.
 
-**The authority structure is fixed per context type.** Field values vary at runtime; which providers
-a context has, and what they require, does not. There is no runtime delegation, attenuation, or
-revocation, and there is no nested scope.
+The context type fixes wiring, while runtime values determine which resources its handles reach.
+Any delegation or revocation behavior belongs to those handles and wrappers, not to the wiring
+macro.
 
-**There is no escape check.** A context field can be cloned out and used elsewhere. Effekt's
-second-class capabilities and Scala's capture sets prevent that; CGP does not.
+CGP does not add an escape checker. Rust's ownership, borrowing, and lifetime rules still apply,
+and a value can be cloned or moved only when its type and the surrounding code permit it.
+CGP adds neither Effekt's second-class restriction nor Scala's capture sets.
 
-**CGP does not "give Rust capabilities" in any single sense.** If the reader means implicit passing of
-an allocator or a runtime, CGP's implicit arguments do that now, and the
-[Rust proposals](./rust-language-proposals.md) page says what the contexts proposal would add. If the
-reader means sandboxing, `cap-std` and WASI are the tools and CGP carries their handles. If the reader
-means ownership tokens, Rust already has them and CGP can fix one as an abstract type. In CGP's own
-vocabulary, a component defines a *trait*, a provider *requires* traits and *reads* fields, and a
-context *supplies* what providers need; none of these is called a capability.
+CGP terminology keeps these distinctions visible. A component defines a trait, a provider requires
+traits and reads fields, and a context supplies those requirements. The term capability is reserved
+for the external mechanisms and values whose properties justify it.
 
 ## Where to go next
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): the construct this page reads as a
-  capability requirement.
-- [Implicit arguments](/docs/concepts/implicit-arguments): reading a value from the context.
-- [Algebraic effects](./algebraic-effects.md): the effects-as-capabilities fragment from the effect
-  handler side.
-- [Rust's own proposals](./rust-language-proposals.md): the contexts-and-capabilities proposal in
-  full.
+These pages explain the dependencies and related language proposals:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): requirements declared by providers.
+- [Implicit arguments](/docs/concepts/implicit-arguments): reading values from context fields.
+- [Algebraic effects](./algebraic-effects.md): operations, handlers, and the continuation boundary.
+- [Rust's own proposals](./rust-language-proposals.md): the contexts-and-capabilities proposal.
 
 ## Sources
 

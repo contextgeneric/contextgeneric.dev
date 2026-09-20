@@ -1,46 +1,45 @@
 ---
 sidebar_label: 'Dependency injection'
 sidebar_position: 8
-description: 'CGP read against Spring, Guice, and Dagger: injection without a container, reflection, or runtime graph.'
+description: 'Compare CGP with Spring, Guice, Dagger, and plain Rust injection: dependency declarations, wiring, validation, and runtime values.'
 ---
 
 # Dependency injection
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
-library on stable Rust in which a trait can have several named implementations and each context
-selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who knows
-dependency injection (DI) from Spring, Guice, Dagger, or their kin. CGP solves the same decoupling
-problem, at compile time and without a container, and the vocabulary maps almost directly. The page
-covers that mapping, what changes when resolution moves from runtime to types, where a DI framework
-remains the better tool, and what to expect that differs.
+CGP supports dependency injection through reusable providers selected by each application. It is a language extension for Rust, with pluggable trait implementations at
+compile-time, implemented as a library on stable Rust whose consumer traits are ordinary Rust
+traits; the [Introduction](/docs/) explains the basics. For readers familiar with Spring, Guice,
+Dagger, or constructor injection, this page compares dependency declarations, wiring, validation,
+and the cases that still call for a container.
 
 ## In your terms
 
-A **context** in CGP is the type the method runs on, which supplies the values it needs as its
-fields. In DI terms it is the assembled object graph, made a type you define to stand for an
-application.
+A **context** is the type a CGP method runs on, supplying its data through fields and its
+implementations through wiring. In the examples here, it represents an application and holds the
+runtime values its providers need. The compiler resolves provider selection, while application code
+constructs and manages those values.
 
 | In a DI framework | In CGP |
 | --- | --- |
-| A bean or a binding | A **provider**: an interchangeable implementation of a trait |
-| The `@Configuration` class or the Guice module | **Wiring**, written in a `delegate_components!` table |
-| A constructor parameter | An **impl-side dependency**, declared with `#[uses]` or `#[implicit]` |
-| The interface a bean is bound to | A **component**: one trait with many possible implementations |
+| An implementation bound to an interface | A **provider**: a named, interchangeable implementation |
+| A configuration class or module | **Wiring**, written in a `delegate_components!` table |
+| A constructor dependency | An **impl-side dependency**, declared with `#[uses]` or `#[implicit]` |
+| The interface a bean implements | A consumer trait, grouped with its provider trait into a **component** |
 | Graph validation at startup or build time | `check_components!`, at compile time |
-| The container | The type system; nothing exists at runtime |
+| Container-managed instances and lifetimes | Context fields and ordinary Rust construction, ownership, and borrowing |
 
 ## The idea, briefly
 
-Dependency injection gives an object its collaborators from the outside instead of letting it
-construct them. A class that names only the *interfaces* it needs can be handed fakes in a test and
-different implementations in a different deployment, and never changes. The frameworks automate the
-supplying, which in a large object graph is elaborate enough that they exist for it.
+Dependency injection supplies an object's collaborators from outside the object. A class that
+requires a storage interface can receive a production client or a test fake without changing its
+business logic. DI frameworks automate the construction and connection of these objects, which
+becomes useful as the dependency graph grows.
 
 ### The IoC container and beans
 
-Spring's core is an *inversion-of-control container* that instantiates, configures, and connects the
-application's objects, its *beans*. A class becomes a bean with an annotation, and a `@Configuration`
-class spells out which implementation stands in for an interface:
+Spring's inversion-of-control container constructs, configures, and connects application objects
+called beans. An annotation can register a class for discovery, while a configuration class can
+provide a factory for a particular interface. These fragments illustrate both forms:
 
 ```java
 @Service
@@ -59,8 +58,8 @@ public class AppConfig {
 
 ### Constructor, setter, and field injection
 
-The container injects each bean's dependencies by one of three mechanisms. *Constructor injection*
-passes them as constructor arguments, so they are required and the fields can be `final`:
+Constructor injection makes required dependencies visible in the constructor's signature. The
+container passes them as arguments, and the object can keep them in `final` fields:
 
 ```java
 @Service
@@ -75,15 +74,16 @@ public class ProfilePictureService {
 }
 ```
 
-*Setter injection* supplies a dependency after construction, and *field injection* writes it into a
-private field by reflection, marked `@Autowired`. The Spring reference and the wider community
-recommend constructor injection for required dependencies, because it makes a class's dependencies
-explicit in its signature and lets the object be built without a container in a test
-([Spring Framework reference](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html)).
+Setter and field injection supply dependencies after construction. A setter exposes an assignment
+method; field injection lets the framework populate an annotated field. Spring recommends
+constructor injection for required dependencies because it supports immutable objects and ensures
+that an object starts with those dependencies supplied. The same constructor can be called directly
+in a test. See the
+[Spring reference](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html).
 
 ### Modules and bindings
 
-Guice and Dagger express the same wiring by explicit *bindings* in a *module*:
+Guice modules explicitly bind interfaces to implementations. This module selects a storage client:
 
 ```java
 public class StorageModule extends AbstractModule {
@@ -94,15 +94,16 @@ public class StorageModule extends AbstractModule {
 }
 ```
 
-Spring and Guice resolve bindings at runtime through reflection. Dagger resolves them at *compile
-time*: its annotation processor generates the wiring code during the build, so a missing binding is a
-compile error and there is no reflection at runtime. That split is the sharpest axis of variation
-among DI frameworks, and CGP sits at the compile-time end of it.
+DI frameworks differ in when and how they resolve bindings. Spring and Guice commonly assemble
+objects at runtime, using reflective mechanisms. Dagger generates construction and wiring code at
+compile time and validates the bindings needed by a component. CGP also resolves implementation
+choices at compile time, but uses Rust's trait system rather than an annotation processor. See the
+[Dagger developer guide](https://dagger.dev/dev-guide/).
 
 ### Dependency injection without a framework
 
-Rust practitioners generally hold that the language needs no DI framework, because traits and
-generics already decouple a component from its collaborators:
+Rust traits and generics already support dependency injection. A service can receive any storage
+value implementing its required interface:
 
 ```rust
 trait StorageClient {
@@ -114,29 +115,24 @@ struct ProfilePictureService<S: StorageClient> {
 }
 ```
 
-This is dependency injection in the original sense, with the compiler doing the checking
-([jmmv.dev, *Rust traits and dependency injection*](https://jmmv.dev/2022/04/rust-traits-and-dependency-injection.html)).
-Its limitation is the one CGP lifts. A bound like `S: StorageClient` leaks into every caller's
-signature, and coherence permits one `impl StorageClient` per type, so offering several
-interchangeable implementations of one interface runs into the rules the
-[Bypassing coherence](/docs/concepts/coherence) page explains. CGP is the next step along the line
-Rust already accepts, not an import of the container model.
+This design is often sufficient. Different storage types can implement `StorageClient`, so replacing
+one collaborator does not itself require CGP. The additional work appears when generic parameters
+spread through enclosing types, or when reusable implementations overlap for the same target type.
+CGP addresses those cases with a shared context and separately named providers. The
+[coherence explanation](/docs/concepts/coherence) develops the latter problem.
 
 ## How CGP expresses it
 
-CGP performs dependency injection through two mechanisms working together. A provider declares what
-it needs as [impl-side dependencies](/docs/concepts/impl-side-dependencies), and a context supplies
-them by wiring each component to a provider. Both are resolved by the compiler, so the "container"
-has no runtime existence. Every context below is an **environmental context**: a type standing for an
-application, carrying the application's choices and dependencies rather than being the data operated
-on.
+CGP separates a provider's dependency requirements from an application's implementation choices.
+The provider declares [impl-side dependencies](/docs/concepts/impl-side-dependencies), and the
+context supplies the required traits and fields. Every context below is an environmental context:
+a type representing an application, with self-targeted components that operate through it.
+The snippets omit supporting application types and some implementation bodies.
 
-### Impl-side dependencies are the injected constructor parameters
+### Impl-side dependencies declare what an implementation needs
 
-Where a Spring service lists `StorageClient` and `UserRepository` as constructor parameters, a CGP
-provider lists its trait dependencies with `#[uses]` and its value dependencies as `#[implicit]`
-arguments. A user-creation provider that needs a database connection and a censorship service declares
-both:
+A CGP provider declares trait dependencies with `#[uses]` and field dependencies with `#[implicit]`.
+This user-creation implementation needs a username-censorship operation and a database value:
 
 ```rust
 #[cgp_impl(new PostgresUserManager)]
@@ -156,20 +152,17 @@ impl UserManager {
 }
 ```
 
-`#[uses(CanCensorUsername)]` injects a *trait dependency*, the role a `UserRepository` collaborator
-plays in the constructor. The `#[implicit] database` argument injects a *value* pulled from the
-context's `database` field, the role a configuration bean plays. Neither appears in the
-`CanManageUser` consumer trait a caller invokes, so, unlike a leaked generic bound, they do not
-cascade to callers. That is the decoupling a DI framework promises, delivered by declaring the
-requirements one level down in the provider rather than in a container. `Error` here is the
-application's own enum, and the insert body is elided.
+`#[uses(CanCensorUsername)]` requires the context to implement the censorship trait. The
+`#[implicit] database` parameter borrows the context's `database` field. Neither requirement appears
+in the `CanManageUser` consumer trait, so a generic caller can require that trait without repeating
+the database and censorship bounds. The dependencies remain explicit in the implementation and are
+checked when the concrete context's wiring is checked or used. `Error` is the application's enum;
+the database insertion is omitted here.
 
-### Wiring is the container configuration
+### Wiring selects implementations for an application
 
-A context selects which provider satisfies each component in a
-[`delegate_components!`](/docs/reference/macros/delegate_components) table, the direct analogue of a
-`@Configuration` class or a Guice module. Two contexts map the same component to different providers
-with no conflict, because the choice is keyed on the context type:
+A [`delegate_components!`](/docs/reference/macros/delegate_components) table selects a provider
+for each component. These contexts choose different storage implementations for the same interface:
 
 ```rust
 #[cgp_component(StorageObjectFetcher)]
@@ -190,18 +183,16 @@ delegate_components! {
 }
 ```
 
-`FetchS3Object` and `FetchGCloudObject` are interchangeable providers of the same trait, the
-equivalent of two beans bound to one interface, and the wiring picks one per context. Because the
-selection is resolved during type checking and monomorphized to a direct call, the `App` binary
-contains only the S3 code path and the `GCloudApp` binary only the GCloud one. A container makes the
-same substitution by holding both implementations and choosing at startup.
+`App` routes storage calls to `FetchS3Object`, while `GCloudApp` routes them to `FetchGCloudObject`.
+The compiler resolves both routes statically. A program may use either context or both; the wiring
+does not require separate binaries or guarantee that one implementation is absent from a binary.
+The providers identify behavior, while the contexts hold values such as client connections and
+bucket names.
 
-### Checking replaces the container's startup validation
+### Checking validates the declared dependencies
 
-A container discovers a missing or ambiguous binding when it assembles the graph: at startup for
-Spring and Guice, at build time for Dagger. CGP's counterpart is
-[`check_components!`](/docs/reference/macros/check_components), which asserts at compile time that a
-context's wiring is complete and every provider's transitive dependencies are satisfied:
+[`check_components!`](/docs/reference/macros/check_components) verifies that the selected provider's
+transitive requirements are satisfied for a context:
 
 ```rust
 check_components! {
@@ -211,76 +202,81 @@ check_components! {
 }
 ```
 
-If `FetchS3Object` needs a field or trait the `App` context does not supply, this fails to compile
-with the missing dependency named, rather than surfacing as a startup exception or a null reference
-deep in a request. It is the guarantee Dagger gives, reached through the trait system instead of an
-annotation processor. CGP wiring is [lazy](/docs/concepts/check-traits), so this check turns a latent gap into an
-early error.
+This check fails to compile if `FetchS3Object` needs a field or trait that `App` does not supply.
+Like Dagger's graph validation, it catches missing declared dependencies during the build. It does
+not validate credentials, network availability, or other runtime conditions. CGP wiring is
+[lazy](/docs/concepts/check-traits), so an explicit check catches a missing dependency even before
+application code calls the component.
 
 ## What each approach costs
 
-DI frameworks are valued for decoupling components from their collaborators, which makes code testable
-and swappable, for centralizing wiring in one readable place, and, in Spring's case, for the ecosystem
-keyed off the same bean model. Their costs, as their users state them, cluster around the runtime,
-reflective nature of the popular frameworks. Dependencies can become hidden: with field injection a
-class's signature says nothing about what it needs, and a missing binding is a runtime failure rather
-than a compile error, which is why the community steers toward constructor injection
-([Nuri, *Field injection is not recommended*](https://blog.marcnuri.com/field-injection-is-not-recommended)).
-Classpath scanning and reflective graph construction cost startup time, which is why Dagger's
-compile-time generation exists. And the frameworks do so much automatically that when something goes
-wrong the developer has little visibility into why
-([Shore, *The Problem With Dependency Injection Frameworks*](https://www.jamesshore.com/v2/blog/2023/the-problem-with-dependency-injection-frameworks)).
+DI frameworks centralize object construction and wiring, but their automation takes work to trace.
+Field injection can hide dependencies from a class's constructor, and runtime graph assembly can
+report missing bindings only when that graph is built. Constructor injection makes dependencies
+visible; compile-time generation, as in Dagger, moves binding validation into the build. These costs
+therefore depend on the framework and injection style. The
+[Spring reference](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html)
+explains the injection trade-offs, and
+[Shore's critique](https://www.jamesshore.com/v2/blog/2023/the-problem-with-dependency-injection-frameworks)
+argues that framework automation can make a dependency graph harder to follow.
 
-CGP resolves everything at compile time, and that is its central cost as well as its benefit. It
-cannot reconfigure an application without recompiling, load plugins chosen at startup from a config
-file, or build a graph whose shape is not known until the program runs. It is confined to Rust. Its
-machinery, the consumer and provider split, the wiring, and the type-level tables, has a learning
-curve of its own. And its raw diagnostics are trait-solver output over generated types:
+CGP requires declarations, wiring, and compile-time trait resolution. Developers must learn the
+consumer/provider split and trace dependencies through the context. Its wiring selects providers
+statically; runtime reconfiguration requires ordinary Rust mechanisms, such as enums or trait
+objects, inside or alongside that wiring. CGP also leaves object construction and lifecycle
+management to the application.
+
+CGP's raw errors can be difficult to read because they include generated traits and types.
 [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
 and the tool is a v0.1.0-alpha that does not yet reshape every class. The
-[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs against the
-alternatives, including plain traits and generics.
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) weighs the additional machinery against
+plain traits, generics, and other alternatives.
 
 ## Where a DI framework is the better choice
 
-A DI framework remains the better choice when the application needs runtime reconfiguration, when it
-lives in a JVM or .NET ecosystem whose libraries assume the container, or when the team's familiarity
-with the framework outweighs the benefits of static wiring. Within Rust, plain traits and generics are
-the better choice when one implementation per type suffices and the bound does not spread far. CGP is
-the better tool where the graph is known at build time and the guarantees and zero runtime cost
-matter: systems programming, latency-sensitive services, and libraries that must not impose a runtime.
+A DI framework fits applications that rely on its object lifecycle support, runtime configuration,
+or surrounding ecosystem. A JVM application built around Spring's bean model already has reasons
+to use that model beyond selecting implementations. Dagger is an option when that application wants
+compile-time graph validation.
+
+Plain Rust traits and generics fit dependencies that can be expressed without extensive parameter
+propagation or overlapping implementations. CGP becomes useful when reusable providers need
+independent implementation choices per context and static wiring justifies the extra declarations.
+A build-time dependency graph alone does not make CGP necessary.
 
 ## What to expect that differs
 
-**There is no container object.** A DI reader will look for something holding the graph and resolving
-dependencies by reflection at startup. CGP's container is the type system, the graph is a set of
-trait impls, and the resolution happens during compilation and compiles to direct calls. There is no
-runtime cost and no runtime failure mode to look for.
+CGP resolves provider selection without a container object. The wiring consists of trait impls;
+context fields still contain runtime values that application code must construct and manage.
 
-**There is no scanning or auto-registration.** CGP asks for explicit wiring. There is no classpath
-scan, no `@Component` discovery, and no runtime rebinding, and the graph must be known at compile
-time. This is the price of the guarantees, the same trade Dagger made, carried to its conclusion.
+CGP uses declared wiring rather than classpath scanning or bean discovery. Changing a wiring entry
+requires compilation. Runtime choices can be represented by values or dispatch mechanisms that a
+selected provider uses.
 
-**The same interface can resolve differently per context.** A single global binding graph cannot
-express two applications binding one interface two ways. In CGP that is one wiring line each.
+Each context type can choose a different provider for the same component. DI frameworks can also
+support separate configurations or graphs; CGP records this distinction in Rust types.
 
-**Dependencies are never hidden.** They are stated in `#[uses]` and `#[implicit]` and enforced by the
-compiler, which gives the explicitness the community prizes in constructor injection by default.
+Provider declarations expose their context dependencies. These declarations do not describe every
+possible influence on the body: a provider can still access globals or perform I/O through ordinary
+Rust APIs.
 
 ## Where to go next
 
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): the construct this page maps onto
-  constructor parameters.
-- [Checking your wiring](/docs/concepts/check-traits): why wiring is lazy and what the check catches.
-- [Implicit arguments](/docs/concepts/implicit-arguments): value injection from context fields.
-- [ML modules](./ml-modules.md) and [Policy-based design](./policy-based-design.md): the same
-  centralized wiring seen from two other traditions.
+These pages explain the mechanisms behind the comparison:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): requirements declared by an
+  implementation and hidden behind its consumer trait.
+- [Checking your wiring](/docs/concepts/check-traits): why wiring is lazy and what a check verifies.
+- [Implicit arguments](/docs/concepts/implicit-arguments): reading values from context fields.
+- [ML modules](./ml-modules.md) and [Policy-based design](./policy-based-design.md): other approaches
+  to choosing implementations and assembling dependencies.
 
 ## Sources
 
 The CGP snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!` assertion per
 wired context. The Java snippets follow the framework documentation cited below.
 
+- [Dagger developer guide](https://dagger.dev/dev-guide/): generated wiring, component graphs, and compile-time validation.
 - [Spring Framework reference, *Dependency Injection*](https://docs.spring.io/spring-framework/reference/core/beans/dependencies/factory-collaborators.html): the IoC container, beans, and the constructor and setter injection mechanisms.
 - [Baeldung, *Inversion of Control and Dependency Injection in Spring*](https://www.baeldung.com/inversion-control-and-dependency-injection-in-spring): the distinction between IoC and DI and `@Autowired` resolution by type.
 - [Comparing Dependency Injection Frameworks](https://medium.com/@AlexanderObregon/comparing-dependency-injection-frameworks-spring-guice-and-dagger-a614dccd5859) and [Dagger vs Guice](https://www.hackingnote.com/en/versus/dagger-vs-guice/): the runtime-versus-compile-time split across frameworks.

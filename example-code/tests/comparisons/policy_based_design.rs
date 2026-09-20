@@ -126,7 +126,7 @@ pub mod policies_as_type_parameters {
     }
 }
 
-/// ## `#[cgp_impl]` is CRTP with the cast done for you
+/// ## Providers access the context without an inheritance cast
 pub mod cgp_impl_is_crtp {
     use cgp::prelude::*;
 

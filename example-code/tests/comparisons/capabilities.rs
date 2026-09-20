@@ -1,6 +1,6 @@
 //! Code from `docs/comparisons/capabilities.md` — *Capabilities*.
 
-/// ## A requirement on the context is a capability in the effect-system sense
+/// ## Providers declare requirements on a context
 pub mod a_requirement_on_the_context {
     use cgp::prelude::*;
 

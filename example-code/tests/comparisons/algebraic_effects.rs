@@ -1,6 +1,6 @@
 //! Code from `docs/comparisons/algebraic-effects.md` — *Algebraic effects and handlers*.
 
-/// ## Components are effect signatures; providers are tail-resumptive handlers
+/// ## Components declare operations; providers implement them
 pub mod components_are_effect_signatures {
     use cgp::prelude::*;
 
@@ -26,7 +26,7 @@ pub mod components_are_effect_signatures {
     }
 }
 
-/// ## Reading from the context is dynamic binding, exactly
+/// ## Context fields supply an environment value
 pub mod reading_from_the_context_is_dynamic_binding {
     use cgp::prelude::*;
 
@@ -49,8 +49,8 @@ pub mod reading_from_the_context_is_dynamic_binding {
     }
 }
 
-/// ## Raising an error looks like `raise` but passes a value, not control
-/// ## Impl-side dependencies are the effect row; `check_components!` is "all effects handled"
+/// ## Raising an error constructs a value
+/// ## Dependency checks verify the selected providers
 pub mod raising_an_error {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;

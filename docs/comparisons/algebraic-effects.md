@@ -1,81 +1,78 @@
 ---
 sidebar_label: 'Algebraic effects'
 sidebar_position: 6
-description: 'CGP read against the effect handlers of Koka, OCaml 5, Flix, and Eff: the exactly-once fragment it shares and the continuation power it does not.'
+description: 'Compare CGP providers with algebraic effect handlers: shared operation interfaces, static selection, and the continuation boundary.'
 ---
 
 # Algebraic effects and handlers
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
-library on stable Rust in which a trait can have several named implementations and each context
-selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who knows
-algebraic effects and handlers from Koka, OCaml 5, Flix, or Eff. CGP shares the split between an
-operation and its interpretation, and the idea of choosing the interpretation from the surroundings,
-but it keeps only the fragment in which the continuation is used exactly once and in place. The
-literature identifies that fragment as dynamic binding, and CGP resolves it statically per context
-rather than dynamically down a call stack. The page covers the correspondence, the boundary, where
-effect handlers remain the only tool, and what to expect that differs.
+CGP separates operations from their implementations, much as algebraic effects separate operations
+from handlers, but CGP does not capture continuations. It is a language extension for Rust, with
+pluggable trait implementations at compile-time, implemented as a library on stable Rust whose
+consumer traits are ordinary Rust traits; the [Introduction](/docs/) covers the basics. For readers
+familiar with Koka, OCaml 5, Flix, or Eff, this page develops the correspondence with handlers that
+resume in place, its limits, and the costs of each approach.
 
 ## In your terms
 
-A **context** in CGP is the type the method runs on, which supplies the values it needs as its
-fields. In most CGP code it is a type you define to stand for an application, and it plays the part
-of the dynamic scope in which handlers are installed.
+A **context** is the type a CGP method runs on, supplying data through fields and implementations
+through wiring. In these examples it represents an application and selects the implementations its
+operations use. This plays part of a handler environment's role, but the choices are attached to a
+Rust type rather than installed on the runtime call stack.
 
 | In an effect system | In CGP |
 | --- | --- |
-| An effect signature | A **component**: one trait with many possible implementations |
-| An operation | A method of that trait |
-| A handler | A **provider**: a named implementation, always tail-resumptive |
-| Installing a handler with `with` or `run ... with handler` | **Wiring** the provider on a context |
-| The effect row a function performs | The provider's **impl-side dependencies**, declared with `#[uses]` |
-| A type error for an unhandled effect | A `check_components!` failure at the wiring site |
-| The continuation | Nothing: a provider returns exactly once |
+| An effect signature | A **component**, with a consumer trait declaring operations |
+| An operation | A method of the consumer trait |
+| A handler interpreting an operation | A **provider** implementing the corresponding method |
+| Installing a handler | **Wiring** a provider on a context |
+| Requirements recorded in an effect row | **Impl-side dependencies**, with a narrower guarantee than effect typing |
+| Checking that required operations have handlers | `check_components!` verifies declared provider dependencies |
+| A captured continuation | Without a direct counterpart; provider methods use ordinary Rust control flow |
 
 ## The idea, briefly
 
-Algebraic effects let code perform an effect without fixing how the effect is carried out. A function
-that reads configuration, logs, throws, or suspends normally commits to a concrete mechanism, and
-that commitment leaks into its type. With algebraic effects the function *performs an operation*
-named by an abstract effect, and a *handler* installed up the call stack gives the operation its
-meaning, so the same code runs against a real logger, a test collector, or a no-op.
+Algebraic effects let a computation request an operation without choosing its implementation.
+A handler supplies the operation's meaning and can control how the computation continues. This lets
+the same computation use different implementations of configuration access, logging, state, or
+more general control flow.
 
 ### Operations, handlers, and the continuation
 
-An *effect* is a signature of *operations*, and a computation produces the effect by performing one
-of them. Plotkin and Power founded the idea, and the account is *algebraic* because each effect came
-with an equational theory whose free model induces the monad for that effect
-([Plotkin & Pretnar, *Handling Algebraic Effects*](https://homepages.inf.ed.ac.uk/gdp/publications/handling-algebraic-effects.pdf)).
-A *handler* interprets the operations, and its defining power is that it receives the *continuation*:
-the suspended rest of the computation from the point where the operation was performed
-([Pretnar, *An Introduction to Algebraic Effects and Handlers*](https://www.eff-lang.org/handlers-tutorial.pdf)).
-An exception handler can only abandon the computation; an effect handler can resume it.
+An effect signature declares operations, while a handler interprets them. In the algebraic account,
+equations describe relationships between operations; the resulting theory connects effects to
+monads. [Plotkin and Pretnar](https://homepages.inf.ed.ac.uk/gdp/publications/handling-algebraic-effects.pdf)
+develop this account and the interpretation of operations by handlers.
 
-How many times a handler invokes the continuation determines the effect it realizes, and the three
-cases mark where CGP can and cannot follow:
+A general effect handler receives the continuation: the suspended remainder of the computation.
+It can decide whether and when to resume that computation, subject to the language's restrictions.
+[Pretnar's tutorial](https://www.eff-lang.org/handlers-tutorial.pdf) explains the main possibilities:
 
-- **Zero times.** The handler discards the continuation. This is exception behavior.
-- **Once.** The handler resumes with a result. This is the ordinary case: reading state, dynamic
-  binding, logging, any call that yields a value and lets the caller carry on.
-- **Many times.** The handler resumes more than once. This is nondeterminism, generators, and
-  cooperative scheduling, and it cannot be expressed as an ordinary function return.
+- **Discard it:** abort the suspended computation, as an exception handler does.
+- **Resume it once:** continue with a supplied result, either immediately or after suspension.
+- **Resume it more than once:** explore alternatives, as in nondeterministic search.
+
+Resuming once does not necessarily mean resuming in place. A scheduler can store a continuation and
+resume it later, and a generator can suspend before its next resumption. CGP's closest correspondence
+is narrower: an operation completes and its caller continues through an ordinary return.
 
 ### Effect typing
 
-Languages differ sharply in whether a computation's type records the effects it may perform. Koka
-types effects as a *row*, so `<exn,div>` in a signature means the function may throw and diverge
-([Leijen, *Algebraic Effects for Functional Programming*](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/08/algeff-tr-2016-v2.pdf));
-the [row polymorphism](./row-polymorphism.md) page covers the row machinery. Flix types effects as a
-set and uses the result for purity reflection
-([Madsen et al., *Programming with Purity Reflection*](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ECOOP.2023.18)).
-Eff and OCaml 5 track no effects in types: the OCaml manual states that "the compiler does not
-statically ensure that all the effects performed by the program are handled", and an unhandled effect
-raises `Effect.Unhandled` at run time ([OCaml manual](https://ocaml.org/manual/5.5/effects.html)).
+Effect typing records which effects a computation may perform, but languages differ in whether
+they provide it. Koka uses effect rows; Flix uses effect sets and supports purity reflection.
+These systems can check whether a computation's effects are handled. See
+[Leijen's Koka account](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/08/algeff-tr-2016-v2.pdf)
+and [Madsen et al. on Flix](https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.ECOOP.2023.18).
+
+OCaml 5 and Eff provide handlers without statically tracking all performed effects in function
+types. In OCaml, an unhandled effect raises `Effect.Unhandled` at runtime. The
+[OCaml manual](https://ocaml.org/manual/5.5/effects.html) states this limit, while the
+[row polymorphism](./row-polymorphism.md) comparison explains the row machinery used by Koka.
 
 ### The same effect in three languages
 
-In **Koka**, an operation is declared `ctl` (may resume any number of times), `fun` (resumes exactly
-once in place), or `val`. A handler is installed with `with`:
+Koka distinguishes operations by their control-flow behavior. A `fun` operation resumes once in
+place; `ctl` allows general resumption. This `ask` handler supplies a value:
 
 ```koka
 effect fun ask() : int      // one `fun` operation; the effect is also named `ask`
@@ -88,10 +85,8 @@ fun main() : console ()
   println( add-twice() )    // 42
 ```
 
-The Koka book describes `with fun ask() 21` as a "statically typed dynamic binding" and notes that a
-`fun` operation "behaves just like a regular function without changing the control-flow"
-([Koka book](https://koka-lang.github.io/koka/doc/book.html#sec-opfun)). A `ctl` operation is the
-multi-shot form; the book's `choice` handler resumes twice to collect every outcome:
+A Koka `ctl` handler can resume more than once. The following handler explores both results of a
+Boolean choice and concatenates the outcomes:
 
 ```koka
 effect ctl choice() : bool
@@ -103,9 +98,12 @@ fun choice-all(action : () -> <choice|e> a) : e list<a>
   action()
 ```
 
-In **OCaml 5**, an effect extends the type `Effect.t`, is performed with `perform`, and is handled
-with a `match` whose `effect` cases bind the continuation `k`. The `effect` pattern syntax arrived in
-OCaml 5.3; earlier code used `Effect.Deep.try_with`:
+The [Koka book](https://koka-lang.github.io/koka/doc/book.html#sec-opfun) explains why `fun` operations
+behave like ordinary calls and how `ctl` provides additional control over resumption.
+
+OCaml 5 declares operations by extending `Effect.t` and performs them with `perform`. An effect
+pattern binds a continuation that the handler can resume. This syntax requires OCaml 5.3 or later;
+earlier code uses functions such as `Effect.Deep.try_with`:
 
 ```ocaml
 open Effect
@@ -123,11 +121,13 @@ let () =
   print_int result   (* 42 *)
 ```
 
-OCaml's continuations are one-shot: "every captured continuation must be resumed either with a
-`continue` or `discontinue` exactly once" ([OCaml manual](https://ocaml.org/manual/5.5/effects.html)).
+OCaml continuations are one-shot: they cannot be resumed repeatedly to explore alternatives.
+They can still be suspended and resumed later, which is sufficient for uses such as cooperative
+scheduling. The [manual](https://ocaml.org/manual/5.5/effects.html) also explains the need to resume
+or discontinue a captured continuation to release its resources.
 
-In **Flix**, an effect is declared with `eff`, appears in a function type after a backslash, and is
-handled with `run ... with handler`:
+Flix declares an effect with `eff` and records it after a backslash in a function's type. A handler
+supplies the result and resumes the continuation:
 
 ```flix
 eff Ask {
@@ -146,33 +146,35 @@ def main(): Unit \ IO =
     println(result)   // 42
 ```
 
-`\ Ask` is part of `addTwice`'s type, and `main` must discharge it
-([Flix documentation](https://doc.flix.dev/effects-and-handlers.html)).
+`addTwice` performs `Ask`, while the handler in `main` handles that effect. Flix supports multiple
+resumptions as well as the single resumption shown here. See the
+[Flix documentation](https://doc.flix.dev/effects-and-handlers.html).
 
 ### The fragment CGP corresponds to
 
-A handler that resumes the continuation exactly once, in tail position, is dynamic binding. The
-literature names its canonical example outright: **the canonical tail-resumptive handler is dynamic
-binding** ([Xie et al., *Effect Handlers, Evidently*](https://www.microsoft.com/en-us/research/wp-content/uploads/2020/07/evidently-5f0b7dbc1a998.pdf)).
-Such a handler never needs to capture the continuation, so a compiler can run the operation in place
-and replace the dynamic search for a handler with a constant-offset lookup into an *evidence vector*
-passed down like a dictionary ([Xie & Leijen, *Generalized Evidence Passing*](https://xnning.github.io/papers/multip.pdf)).
-The efficient compilation of the exactly-once fragment *is* dictionary passing, and that is the
-fragment CGP occupies directly, with no dynamic search underneath. Effekt and Scala's capture checking
-describe the same fragment as *effects as capabilities*; the [capabilities](./capabilities.md) page
-places CGP against that reading.
+Tail-resumptive handlers provide the closest comparison to CGP. They resume exactly once in tail
+position, so the operation can run in place without capturing the rest of the computation.
+[Xie et al.](https://www.microsoft.com/en-us/research/wp-content/uploads/2020/07/evidently-5f0b7dbc1a998.pdf)
+identify dynamic binding as the canonical example. Evidence-passing implementations can make
+handler selection efficient by passing evidence of the selected handler, as developed in
+[Generalized Evidence Passing](https://xnning.github.io/papers/multip.pdf).
+
+CGP uses a related separation of operation and implementation, with selection resolved through
+Rust traits. This is a comparison of programming structure, not a claim that CGP implements the
+same effect calculus or dynamic scoping rules. The [capabilities](./capabilities.md) page explores
+the related view of computations declaring what they require from an environment.
 
 ## How CGP expresses it
 
-CGP reproduces the operations-and-handlers structure with its consumer and provider split, and every
-CGP "handler" is an ordinary function that returns once. The correspondence is exact for the
-tail-resumptive case and stops wherever an effect would reach for the continuation. The contexts below
-are **environmental contexts**: the `App` that installs a `Loader` or a `Greeter` stands for an
-application, as a handler's dynamic scope does, and every component shown is self-targeted.
+CGP represents an operation with a consumer trait and its implementation with a provider.
+The examples use environmental contexts: types representing applications and supplying the
+implementations for self-targeted components. Supporting declarations and imports are omitted
+where they do not affect the comparison.
 
-### Components are effect signatures; providers are tail-resumptive handlers
+### Components declare operations; providers implement them
 
-Declaring a component names an operation without giving it meaning, and a provider interprets it:
+A component declares an operation independently of its implementation. A context then selects a
+provider through wiring:
 
 ```rust
 #[cgp_component(Greeter)]
@@ -190,16 +192,16 @@ impl Greeter {
 delegate_components! { App { GreeterComponent: GreetHello } }
 ```
 
-`CanGreet` is the effect signature, `greet` the operation, `GreetHello` the handler, and the wiring
-line its installation. The provider's body receives no continuation and cannot choose whether to
-resume: it computes a value and returns, and the caller resumes in place, exactly once. In Koka's
-terms every CGP provider is a `fun` operation and never a `ctl` one.
+`CanGreet` declares `greet`, `GreetHello` implements it, and `App` selects that implementation.
+The provider receives the context rather than a continuation. If the method returns normally,
+its caller continues once at the call site. Like any Rust function, the method can also panic or
+diverge; CGP does not enforce termination or an exactly-once return guarantee.
 
-### Reading from the context is dynamic binding, exactly
+### Context fields supply an environment value
 
-Koka's `with fun ask() 21` installs a tail-resumptive handler that supplies a value to deeply nested
-code without threading it through every call. CGP's [implicit arguments](/docs/concepts/implicit-arguments)
-do the same by reading a field from the context that every provider receives as `self`:
+CGP's [implicit arguments](/docs/concepts/implicit-arguments) let nested implementations read
+values from a shared context. This resembles a reader effect whose handler supplies an environment
+value:
 
 ```rust
 #[cgp_fn]
@@ -208,17 +210,16 @@ pub fn greet(&self, #[implicit] name: &str) -> String {
 }
 ```
 
-The context supplies `name`, not the caller, as the enclosing `ask` handler supplies Koka's `ask()`.
-The equivalence is exact rather than an analogy: the reader effect is the canonical tail-resumptive
-handler, and reading a context field is CGP's whole realization of it. The two part ways on how the
-value is found. Koka searches the dynamic handler stack; CGP reads a field of a statically known
-context. The [implicit parameters](./implicit-parameters.md) page covers the same pattern from
-Scala's side.
+The `name` argument comes from the context's field. Koka's `ask` example supplies a value through
+an installed handler; CGP supplies it through `self`. The similarity is that intermediate callers
+do not forward the individual value. The difference is selection: a CGP field dependency is
+resolved against a context type, without dynamic handler installation. The
+[implicit parameters](./implicit-parameters.md) comparison develops that distinction.
 
-### Raising an error looks like `raise` but passes a value, not control
+### Raising an error constructs a value
 
-CGP's error handling shows the boundary most sharply. `CanRaiseError<SourceError>` reads like the
-`raise` operation, and a provider raises without knowing the concrete error type:
+CGP's error components choose how to construct an error, while Rust's `Result` controls propagation.
+This provider can produce an error without fixing the context's concrete error type:
 
 ```rust
 #[cgp_component(Loader)]
@@ -240,8 +241,7 @@ impl Loader {
 }
 ```
 
-The raise components dispatch per source type, so a context routes each source error to a different
-strategy, which reads like installing one exception handler per exception type:
+The context chooses both the error type and the provider used for each source error type:
 
 ```rust
 delegate_components! {
@@ -256,19 +256,17 @@ delegate_components! {
 }
 ```
 
-The resemblance stops at *selection*. An effect `raise` is the zero-resume handler: it abandons the
-continuation and unwinds to the handler. CGP's `raise_error` unwinds nothing. It constructs and
-returns a value of the abstract `Error` type, and the abort is Rust's own `return` or `?`, outside
-the wiring. CGP selects the interpretation of the error and leaves the control flow to `Result`. The
-[Modular error handling](/docs/concepts/modular-error-handling) page develops the construct.
+`Self::raise_error(...)` returns an error value; the surrounding `return Err(...)` exits `load`.
+A caller can then propagate that result with `?`. An aborting effect handler instead abandons the
+captured continuation. CGP's wiring supplies error-construction behavior without adding that
+control-flow mechanism. [Modular error handling](/docs/concepts/modular-error-handling) explains
+the error components in detail.
 
-### Impl-side dependencies are the effect row; `check_components!` is "all effects handled"
+### Dependency checks verify the selected providers
 
-A provider states its needs as [impl-side dependencies](/docs/concepts/impl-side-dependencies), such
-as the `#[uses(CanRaiseError<String>)]` above. That list is CGP's counterpart of the effect row Koka
-would infer for a function that performs `raise`, and a generic provider is effect-polymorphic in a
-loose sense, since the context type variable stands for "whatever else this context can do".
-[`check_components!`](/docs/reference/macros/check_components) is the discharge check:
+A provider's impl-side dependencies state the traits and fields it needs from a context.
+For example, `LoadOrFail` requires `CanRaiseError<String>`. A check verifies those requirements
+transitively for the selected implementation:
 
 ```rust
 check_components! {
@@ -278,15 +276,16 @@ check_components! {
 }
 ```
 
-This asserts that `App` supplies every trait `LoadOrFail` transitively needs, and it fails to compile
-naming the missing one if not. That is Koka's guarantee that an unhandled effect is a type error, and
-the opposite of OCaml's runtime `Effect.Unhandled`.
+The compiler rejects this check if `App` cannot satisfy a required dependency. This resembles
+checking that required operations have implementations, but it is not an effect-row check.
+CGP does not track every effect a provider body can perform: the body may still print, mutate
+state, or panic through ordinary Rust APIs. The
+[impl-side dependencies](/docs/concepts/impl-side-dependencies) page explains the guarantee.
 
 ### Configuring abstract types through the same wiring
 
-CGP extends the operations-and-handlers wiring to something effect systems do not touch: abstract
-*types*. Alongside choosing the provider for an operation, a context chooses the concrete type behind
-an [abstract type](/docs/concepts/abstract-types) through the same table:
+CGP wiring can select associated types as well as operation implementations. This independent
+configuration chooses the context's error type:
 
 ```rust
 use cgp::core::error::ErrorTypeProviderComponent;
@@ -298,89 +297,80 @@ delegate_components! {
 }
 ```
 
-An effect handler interprets operations, which are values and computations. It has no notion of
-supplying a *type member* the way `HasErrorType` supplies `Error`. The table that says "raise errors
-this way" also says "and the error type is `anyhow::Error`".
+The same table can therefore select error-construction behavior and the concrete `Error` type.
+This follows from Rust's associated types and CGP's
+[abstract-type components](/docs/concepts/abstract-types). It is an additional use of the wiring
+mechanism, separate from the comparison with handlers interpreting operations.
 
-### A closer theoretical fit: coeffects
+### A related theoretical view: coeffects
 
-The *coeffect* framework may describe CGP more precisely than the effect framework does. Where an
-effect describes what a computation produces or performs, a coeffect describes what a computation
-*requires from its environment* ([Petricek, *Coeffects*](https://tomasp.net/coeffects/)). A CGP
-context carries exactly such requirements, resolved all at once when a concrete context is defined,
-and the framing also accounts for the abstract-type extension above, which an effect handler has no
-place for. The connection is a pointer rather than a developed account.
+Coeffects offer another way to describe CGP's declared context dependencies. An effect describes
+what a computation does; a coeffect describes what it requires from its environment.
+[Petricek's coeffects work](https://tomasp.net/coeffects/) develops that distinction. CGP's field
+and trait requirements suggest such a comparison, but CGP does not implement a coeffect calculus.
 
 ## What each approach costs
 
-Algebraic effects are valued for ending *function coloring*, since code between the operation and its
-handler needs no awareness of the effect
-([Abramov, *Algebraic Effects for the Rest of Us*](https://overreacted.io/algebraic-effects-for-the-rest-of-us/)),
-for separating an effect's interface from its semantics, and for composing handlers where monad
-transformers are painful ([*Why Algebraic Effects?*, Ante](https://antelang.org/blog/why_effects/)).
-Their costs, as their users state them, fall into three clusters. Unfamiliarity and control-flow
-opacity: following control from a `perform` to the handler that catches it is as hard as reasoning
-about a distant exception handler ([Ante](https://antelang.org/blog/why_effects/)). Performance:
-general handlers must capture continuations, and non-tail handlers remain more expensive than native
-control flow even after evidence passing ([Xie & Leijen, 2021](https://xnning.github.io/papers/multip.pdf)).
-And, in the untyped designs, an unhandled effect is a runtime crash rather than a compile error, and
-OCaml's one-shot restriction rules out the multi-shot uses ([OCaml manual](https://ocaml.org/manual/5.5/effects.html)).
-Readers who reach effects from Haskell know the type-class-based effect libraries and their
-n²-instances problem, which handler-based systems avoid
-([`fused-effects`](https://hackage.haskell.org/package/fused-effects)).
+Effect handlers separate operation use from interpretation and support reusable control-flow
+abstractions. Their flexibility also makes control flow less local: understanding a `perform` may
+require locating the handler and following its resumption behavior. The
+[Ante language's account](https://antelang.org/blog/why_effects/) discusses both the modularity
+benefit and the difficulty of following effects across a program.
 
-CGP's costs are the ordinary ones. A component has to be declared before it can have providers, and
-the wiring is code somebody writes. The compile-time work is real. And the raw diagnostics are
-trait-solver output over generated types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the
-root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape
-every class. CGP also keeps even less of the "algebraic" than the practical effect languages do: it
-has no equational theory relating its operations. Since Koka, OCaml, and Flix mostly drop the laws
-too, this is a shared simplification. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
-page weighs CGP's costs against the alternatives.
+Handler costs depend on the language and the resumption pattern. General handlers may capture
+continuations, while tail-resumptive handlers admit simpler compilation. The evidence-passing
+research documents those implementation choices and their performance trade-offs
+([Xie and Leijen](https://xnning.github.io/papers/multip.pdf)). OCaml additionally restricts
+continuations to one use and reports unhandled effects at runtime. Effect-typed languages move
+that handling check into the type system.
 
-## Where effect handlers are the only tool
+CGP requires component declarations, wiring, and compile-time trait resolution. It also requires
+readers to learn the consumer/provider split. Its raw diagnostics expose generated types:
+[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+and the tool is a v0.1.0-alpha that does not yet reshape every class. CGP does not provide
+continuation handling, effect typing, or checked algebraic laws for its operations. The
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) weighs its machinery against simpler
+Rust abstractions.
 
-When a program needs the continuation, for a scheduler, a generator, a backtracking solver, or a
-suspendable coroutine, algebraic effects are the right and only tool of the two. Emulating them with
-CGP is not possible, because a provider never captures a continuation. CGP does have an
-[async handler family](/docs/concepts/handlers) and [type-level DSLs](/docs/concepts/type-level-dsls)
-that interpret a `Code` tag by dispatching to a provider, which is the closest CGP comes to the
-operations-and-interpreters shape, but even there the interpretation is a straight call chain resolved
-at compile time. Async in CGP is Rust's own `async` and `await` threaded through provider calls.
+## Where effect handlers are the better choice
+
+Effect handlers fit abstractions that need access to the suspended computation, such as a
+scheduler, generator, or backtracking interpreter. The chosen language must support the required
+resumption pattern; one-shot handlers do not provide multi-shot search directly. CGP wiring alone
+cannot supply this control over a continuation.
+
+CGP can still participate in asynchronous Rust programs. Its
+[async handler family](/docs/concepts/handlers) uses Rust futures and `async`/`await`, and its
+[type-level DSLs](/docs/concepts/type-level-dsls) select interpreters through providers. These
+constructs compose ordinary Rust computations; they do not add general algebraic effect handlers.
 
 ## What to expect that differs
 
-**A provider returns exactly once.** There is no `resume` to call zero times or twice, because there
-is no reified continuation. CGP takes the fragment of effect handlers the literature identifies as
-dynamic binding, the fragment that compiles to direct calls, and builds everything on it.
+Provider calls use ordinary Rust control flow. A provider receives its context rather than a captured continuation it could
+store or resume repeatedly. Normal return resumes the caller in place, while panic and divergence
+retain their usual Rust meanings.
 
-**Handlers are chosen by the context's type, not by dynamic scope.** The nearest handler on the
-runtime stack does not win, because there is no stack of handlers. A CGP provider is fixed once in a
-wiring table and resolved through the trait system.
+The context type determines provider selection. CGP does not choose the nearest handler on the
+runtime stack. Different context values may carry different data while sharing the same wiring.
 
-**The wiring is a set, not a stack.** An effect handler stack is ordered, and reordering handlers
-changes results: state over nondeterminism and nondeterminism over state compute different things
-([Kammar, Lindley & Oury, *Handlers in Action*](https://denotational.co.uk/publications/kammar-lindley-oury-handlers-in-action.pdf)).
-CGP's table has one provider per component with no nesting to shadow an outer handler and no order to
-permute, and because dispatch is exactly-once and resume-in-place, the non-commutativity never arises.
+A wiring table does not impose a handler-stack order. Each entry selects a provider for its key.
+Provider composition can still be order-sensitive: a wrapper may act before or after an inner
+provider. Static selection does not make arbitrary operations commute.
 
-**Abstract types are a requirement kind effect systems lack.** A context fixes a type as well as an
-operation's interpretation, through the same table.
-
-**CGP is not an effect system.** It has no continuations, no dynamic scope, and no effect kind in the
-type system. It is the exactly-once, resume-in-place fragment of effect handlers, which is dynamic
-binding, made into a compile-time, per-context, type-directed wiring mechanism that also configures
-abstract types.
+Dependency checks cover declared requirements rather than every effect in a method body.
+They establish that the selected providers can be used with a context. They do not establish
+purity or confinement, and they do not turn CGP into an effect system.
 
 ## Where to go next
 
-- [Modular error handling](/docs/concepts/modular-error-handling): the error type, its raising, and
-  its wrapping as three wiring decisions.
-- [Implicit arguments](/docs/concepts/implicit-arguments): the dynamic-binding fragment on its own
-  terms.
-- [Handlers](/docs/concepts/handlers): CGP's computation family, and where async lives in it.
-- [Capabilities](./capabilities.md): the effects-as-capabilities reading of the same fragment.
-- [Row polymorphism](./row-polymorphism.md): the row types Koka uses for its effect rows.
+These pages expand the CGP mechanisms and nearby comparisons:
+
+- [Modular error handling](/docs/concepts/modular-error-handling): selecting error types and
+  error-construction behavior.
+- [Implicit arguments](/docs/concepts/implicit-arguments): reading values from a context.
+- [Handlers](/docs/concepts/handlers): CGP's computation family and its async forms.
+- [Capabilities](./capabilities.md): requirements on an environment and the limits of that analogy.
+- [Row polymorphism](./row-polymorphism.md): the row types used by effect-typed languages.
 
 ## Sources
 

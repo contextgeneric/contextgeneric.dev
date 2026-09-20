@@ -1,46 +1,45 @@
 ---
 sidebar_label: 'Implicit parameters'
 sidebar_position: 5
-description: "CGP read against Scala's given and using, Haskell's ImplicitParams, and the type-class resolution both build on."
+description: 'Compare CGP context fields and wiring with Scala contextual parameters, Haskell implicit parameters, and type-class selection.'
 ---
 
 # Implicit parameters
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
-library on stable Rust in which a trait can have several named implementations and each context
-selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who knows
-implicit parameters: Scala's `given` and `using`, Haskell's `ImplicitParams`, and the type-class
-resolution both languages build on. CGP shares the goal of threading context through code without
-explicit plumbing, and supplies the values from a context's fields and wiring rather than from a
-compiler-driven search. The page covers the correspondence, the coherence trade underneath it, where
-implicit resolution remains the better tool, and what to expect that differs.
+CGP supplies implicit arguments from a context's fields and selects implementations through wiring.
+It is a language extension for Rust, with pluggable trait implementations at compile-time,
+implemented as a library on stable Rust whose consumer traits are ordinary Rust traits; the
+[Introduction](/docs/) explains the basics. For readers familiar with Scala's `given` and `using`,
+Haskell's `ImplicitParams`, or `Reader`, this page compares how dependencies travel through a
+program, how implementations are selected, and what each approach costs.
 
 ## In your terms
 
-A **context** in CGP is the type the method runs on, which supplies the values it needs as its
-fields. It is the implicit environment you already reason about, the set of `given`s in scope or
-the `Reader` you thread, made a single explicit type that every provider receives.
+A **context** is the type a CGP method runs on, supplying data through fields and implementations
+through wiring. It gives providers an explicit environment through `self`. This serves some of the
+same purposes as contextual parameters or a `Reader` environment, with the available fields and
+provider choices determined by the context's type.
 
 | In Scala or Haskell | In CGP |
 | --- | --- |
 | A `using` parameter or a `?x` implicit parameter | An `#[implicit]` argument, read from a context field |
-| A `given` value in scope | A field of the context |
-| A type class | A **component**: one trait with many possible implementations |
-| An instance | A **provider**: a named implementation |
-| Instance resolution by the compiler | **Wiring**, written in a `delegate_components!` table |
-| A functional dependency (`m -> e`) or associated type family | An abstract type, chosen by the context |
+| An implicit environment value | A field of the context |
+| A type-class interface | A consumer trait within a **component** |
+| A type-class implementation | A **provider**: a named implementation |
+| Instance selection | **Wiring**, written in a `delegate_components!` table |
+| A functional dependency (`m -> e`) or associated type family | An abstract type determined by the context |
 
 ## The idea, briefly
 
-Some values are needed everywhere and interesting nowhere: a configuration, a logger, a comparison
-strategy, an error type. Passing them through every function that transitively needs them clutters
-signatures and forces intermediate functions to forward parameters they only pass along. Implicit
-parameters remove that: the caller omits the argument, the compiler fills it in from scope, and the
-declaration still records the dependency in the type.
+Implicit parameters let callers omit arguments that the compiler can supply from the surrounding
+scope. Configuration, loggers, and comparison strategies can pass through a call chain without an
+explicit argument at every call. Functions still declare the dependencies in their types, and the
+language's resolution rules determine which values reach them.
 
 ### Context parameters in Scala
 
-Scala 3 marks a parameter list `using`, and the compiler supplies a matching `given` from scope:
+Scala 3 marks a contextual parameter list with `using`. When a caller omits that list, the compiler
+searches for matching `given` values:
 
 ```scala
 case class Config(port: Int, baseUrl: String)
@@ -55,10 +54,11 @@ given Config = Config(8080, "docs.scala-lang.org")
 renderWebsite("/home")     // the given Config is supplied automatically
 ```
 
-The same mechanism serves type classes. A `given` can be defined for a type, and a method with a
-`using` parameter of that type resolves the instance from the call site. Scala 3.6 changed the syntax
-for a given with a body to a colon form; the older `given Comparator[Int] with` is still accepted
-([Scala 3 Reference, *Given Instances*](https://docs.scala-lang.org/scala3/reference/contextual/givens.html)):
+Scala uses contextual parameters for type classes as well as configuration values. A
+`given Comparator[Int]` supplies the implementation required by a `using Comparator[A]` parameter.
+Scala 3.6 introduced the colon form for a given with a body; the older
+`given Comparator[Int] with` form is also accepted. See the
+[Scala reference](https://docs.scala-lang.org/scala3/reference/contextual/givens.html).
 
 ```scala
 trait Comparator[A]:
@@ -73,17 +73,17 @@ def max[A](x: A, y: A)(using c: Comparator[A]): A =
 max(1, 2)     // Comparator[Int] resolved and passed implicitly
 ```
 
-Scala 2 wrote all of this with the single `implicit` keyword, and Scala 3 split it into `given` and
-`using` because the one keyword was overloaded
-([Baeldung, *Scala 3 Implicit Redesign*](https://www.baeldung.com/scala/scala-3-implicit-redesign)).
-Rust's own contexts-and-capabilities proposal is the nearest thing to a `using Config` for Rust; the
-[Rust proposals](./rust-language-proposals.md) page compares it.
+Scala's selection depends on scope as well as type. Different scopes can supply different givens
+for the same requested type, and a caller can pass a contextual argument explicitly. CGP's
+per-context choice therefore differs in how it is recorded, rather than being a choice Scala cannot
+express. Scala 2 uses `implicit` where Scala 3 distinguishes `given` definitions from `using`
+parameters. Rust's proposed equivalent is discussed in [Rust's own proposals](./rust-language-proposals.md).
 
 ### Implicit parameters in Haskell
 
-Haskell's `ImplicitParams` extension is the more literal form. A function names a dynamically bound
-variable `?x`, which appears as a constraint on its signature and is filled from the binding in
-scope. This version uses the real `Data.List.sortBy` and compiles with GHC 9.10:
+Haskell's `ImplicitParams` extension binds named parameters such as `?cmp` through constraints.
+The following example passes a comparison function to `sort` and `least`, then supplies it in a
+`let` binding:
 
 ```haskell
 {-# LANGUAGE ImplicitParams #-}
@@ -99,35 +99,35 @@ min' :: Ord a => [a] -> a
 min' = let ?cmp = compare in least
 ```
 
-The constraint propagates to any caller that does not bind it, and a `let` binding discharges it.
-The GHC User's Guide records the restrictions: the constraints leak into every signature, there is no
-way to declare a default, an implicit parameter may not appear in a class or instance context, and the
-monomorphism restriction applies
-([GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/implicit_parameters.html)).
-Haskell programmers reach for the `Reader` monad or for type classes instead.
+The `?cmp` constraint propagates to callers that do not supply a binding. The extension does not
+provide default bindings, and implicit parameters cannot appear in class or instance declaration
+contexts. Type inference and the monomorphism restriction also affect which bindings remain
+polymorphic. The [GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/implicit_parameters.html)
+explains these restrictions. `Reader` and type classes offer other ways to pass dependencies in
+Haskell, with different rules for binding and propagation.
 
 ### Type classes as implicit dictionary passing
 
-Type classes are the mechanism both languages use for implicit resolution in practice. A `class`
-declares an interface, an `instance` provides it for a type, and a constrained call receives the
-instance as a hidden *dictionary* argument. The resolution is type-directed and automatic, and it is
-governed by *coherence*: for a given type there is exactly one instance, so the compiler can inject
-it silently without two pieces of code disagreeing. Its price is the one CGP was built to escape. A
-program cannot have two legitimate orderings of `Int` as first-class instances without a `newtype`,
-and a module cannot add an instance for a type and class it does not own. The
-[type classes](./type-classes.md) page develops the mechanism and its extensions.
+Type classes pass implementations as implicit dictionaries of methods. A class declares an
+interface, an instance implements it for a type, and a constrained function receives the selected
+dictionary. This explains how generic code can invoke an operation without naming its implementation.
+
+Haskell and Scala differ in how they select those dictionaries. Haskell ordinarily uses a global
+instance for a class and its type arguments, with overlapping instances controlled by extensions.
+Scala selects contextual values using scope and priority rules. Coherence concerns whether valid
+resolutions agree in meaning; global instance uniqueness is one way to support it, rather than a
+rule shared unchanged by both languages. The [type classes](./type-classes.md) comparison develops
+these distinctions.
 
 ## How CGP expresses it
 
-CGP threads context through code and lets deep code read what it needs, through the context that is
-already the `self` of every provider rather than through a scope search. Two constructs map onto the
-two forms of implicit parameter: an `#[implicit]` argument corresponds to an implicit *value*
-parameter, and a component with its wiring corresponds to a type class.
+CGP makes a context available to generic implementations through `self`. An `#[implicit]` argument
+reads a value from that context, while component wiring selects an implementation. Both choices are
+checked through Rust traits; neither requires searching the caller's lexical scope for a value.
 
-### Implicit arguments are implicit value parameters
+### Implicit arguments read named context fields
 
-An `#[implicit]` argument is written as an ordinary function parameter but is supplied from the
-context's fields rather than by the caller:
+An `#[implicit]` parameter names a field that the implementation reads from its context:
 
 ```rust
 #[cgp_fn]
@@ -142,34 +142,30 @@ pub struct Rectangle {
 }
 ```
 
-Where Scala's `renderWebsite` obtains its `Config` from a `given`, this function obtains `width` and
-`height` from the context threaded through it as `self`. The parameter disappears from the public
-signature and is bound from the surroundings before the body runs, which is why CGP calls the feature
-by the same name. The difference is where "the surroundings" live. A `using` parameter searches the
-implicit scope by type; an `#[implicit]` argument reads the context field of the matching name, so
-resolution is by *field*, decided when the context is defined. `Rectangle` here is a **value
-context**: the type carrying `width` and `height` is the rectangle itself. The
-[Implicit arguments](/docs/concepts/implicit-arguments) page develops the construct.
+`rectangle_area()` obtains `width` and `height` from `self`, so callers omit both arguments.
+`Rectangle` is a value context: the rectangle itself holds the data the method operates on.
+The generated implementation requires field access with the matching names and types. Scala's
+`using Config` instead asks the compiler to resolve a contextual value by type; Haskell's `?cmp`
+refers to a named implicit binding. The
+[Implicit arguments](/docs/concepts/implicit-arguments) page explains CGP's field access and borrowing.
 
-### A shared context value is a threaded environment
+### A shared context carries a common environment
 
-When several pieces of code must agree on one value, Scala uses a single `given Config` and Haskell
-the `Reader` monad. CGP has them all read the same field or the same abstract type from the shared
-context. CGP's error type is the standing instance: every fallible provider imports the context's
-error type with `#[use_type(HasErrorType.Error)]` and names it as the bare `Error`, so all of them
-agree on one type the context supplies once. That is a threaded `Reader` environment at the type
-level, resolved at compile time.
+Several providers can read the same runtime value from a shared context. For example, a context
+can store configuration once and expose it to each implementation that declares the corresponding
+field dependency. This serves the environment-passing role of `Reader` without requiring each
+intermediate call to forward individual values.
 
-### Abstract types are implicit type parameters
+A context can also determine types shared by its providers. Fallible implementations can import
+`HasErrorType.Error` and use the alias `Error`, agreeing on the type selected for that context.
+Runtime fields and associated types serve different roles, but both keep related choices attached
+to one context.
 
-The correspondence runs one level up, and a reader from these languages will recognize this half
-fastest. An [abstract type](/docs/concepts/abstract-types) is a type the context determines rather
-than one a caller supplies. Haskell's `mtl` achieves the same with a functional dependency: in
-`class MonadReader r m | m -> r` the environment type is fixed *by* the monad, and
-`MonadError e m | m -> e` says the same for the error type
-([`mtl`, `Control.Monad.Error.Class`](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Error-Class.html)).
-An associated type family states it more directly still, and is the closest thing in either language
-to a `#[cgp_type]` component:
+### Abstract types are determined by the context
+
+A CGP [abstract type](/docs/concepts/abstract-types) is an associated type supplied by the context.
+Haskell's functional dependencies express a related relationship: `m -> e` in `MonadError` says
+that the monad determines its error type. These declarations illustrate the two forms:
 
 ```haskell
 class Monad m => MonadError e m | m -> e where
@@ -183,21 +179,23 @@ pub trait HasErrorType {
 }
 ```
 
-Both exist for the same reason. A plain type *parameter* propagates: a signature that mentions `e`
-and `r` carries them through every intermediate function that only passes a value along, as a Rust
-generic function's `where` clause does. Making the type determined by the context, whether by a
-functional dependency, an associated type, or a CGP abstract type, stops it propagating, because a
-determined type is an output rather than an input. Two differences follow the same axes as the value
-case. On *selection*, an `mtl` instance for a given monad is unique program-wide, whereas CGP's is a
-wiring entry and two contexts may bind the same abstract type differently. On *propagation*, CGP
-hides more: a CGP consumer trait declares the abstract-type trait as a supertrait, so a caller
-bounding on the consumer gets it implied without restating it.
+Both forms avoid making the error type an independent choice at every use. Haskell determines `e`
+from `m`; Rust refers to the associated `Error` of the context. A CGP consumer trait can require
+`HasErrorType` as a supertrait, making that requirement available to generic callers through their
+consumer-trait bound. The type dependency still exists; its relationship to the context makes it
+unnecessary to carry a separate error-type parameter.
 
-### Components and wiring are type classes without coherence
+Different contexts can select different error types, just as different Haskell monads can determine
+different error types. CGP additionally lets a context choose the provider for its abstract-type
+component through the same wiring mechanism it uses for operations. See
+[`mtl`'s `MonadError` documentation](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Error-Class.html)
+for the functional-dependency form.
 
-A CGP component is a type class, a provider is an instance, and wiring is the resolution step. Because
-a provider's `Self` is its own marker type, many providers for the same component coexist, which
-instances cannot do. Two encoders that both apply to `Vec<u8>` are selected per context:
+### Components and wiring make instance selection explicit
+
+CGP gives each interchangeable implementation its own provider type. Rust therefore treats these
+as distinct impls, even when both providers support the same target. The following fragments define
+two encoders and select one for each application:
 
 ```rust
 #[cgp_component(Encoder)]
@@ -234,76 +232,77 @@ delegate_components! {
 }
 ```
 
-The `Comparator[Int]` that Scala can define once becomes any number of interchangeable providers,
-each selected per context. `AppA` and `AppB` are **environmental contexts**, types standing for an
-application, and the component is parameter-targeted: `Self` is the application and the encoded value
-is the `Value` parameter. The freedom has the cost the type-class trade predicts: CGP will not
-*find* the provider for you by type. A context names its choice in a table, where Scala and
-Haskell would resolve the instance from the type.
+`AppA` encodes `Vec<u8>` as hexadecimal text; `AppB` copies its bytes. Both are environmental
+contexts representing applications. The component is parameter-targeted: `Value` is the data being
+encoded, while `self` supplies the application's choice of implementation.
+
+CGP records the provider choice in a wiring table and keeps Rust's coherence checks. Separate
+provider types let alternatives coexist; they do not permit conflicting entries for the same key
+on one context. Scala can express alternative implementations through scoped givens, while CGP
+attaches the selection to the context type.
 
 ## What each approach costs
 
-Implicit parameters and the type classes built on them are valued for erasing boilerplate: a
-`Config` or a comparator threads through a deep call graph without appearing at every call, and one
-generic function works over any type with an instance. Their costs, as their users state them, come
-from the same generality. The recurring Scala complaint is that a value appears from nowhere, and tracking
-down which `given` was selected, or why an expected one was not, takes time; Scala 2's single
-overloaded keyword made it worse, and Scala 3 split the keyword apart to address it
-([Baeldung](https://www.baeldung.com/scala/scala-3-implicit-redesign)). Haskell's `ImplicitParams`
-is little used for the concrete reasons its manual records: leaking constraints, no defaults, and the
-monomorphism restriction
-([GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/implicit_parameters.html)).
-And coherence itself is a persistent source of friction: the orphan rule shapes module structure, and
-the one-instance-per-type limit forces `newtype` wrappers whenever a second interpretation of a type
-is wanted ([Yang, 2014](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)).
+Implicit resolution reduces argument passing but requires readers to trace the selected binding.
+Scala's givens can come from local scope, imports, or implicit scope, so understanding a call may
+require following the search rules. The
+[Scala reference](https://docs.scala-lang.org/scala3/reference/contextual/using-clauses.html)
+describes how arguments are supplied. Haskell's `ImplicitParams` makes dependencies visible as
+constraints, which must propagate until a binding supplies them; its inference restrictions can
+also affect behavior. See the
+[GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/implicit_parameters.html).
 
-CGP pays with the wiring itself. There is no automatic search, so the choice must be written down,
-once per context, and a component must be declared before it can have providers. The compile-time
-work is real. And the raw diagnostics are trait-solver output over generated types:
-[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class. The
-[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs against the
-alternatives.
+Global type-class instances favor a canonical interpretation of a type. In Haskell, an alternative
+ordering or rendering often needs a `newtype` to distinguish it from the existing instance.
+That trade differs from Scala's scoped selection. The
+[coherence analysis by Yang](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)
+separates global uniqueness from coherence and confluence.
+
+CGP requires component declarations and provider selection through wiring or declared defaults.
+This adds code to maintain and trait-resolution work during compilation. Tracing a selection can
+also require following delegation through several tables. Raw diagnostics expose generated traits
+and types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
+recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) weighs these costs against simpler forms.
 
 ## Where implicit resolution is the better choice
 
-When a program wants one canonical instance per type, one `Ord`, one `Show`, one serialization, and
-values automatic resolution above all, type classes are the better tool, and fighting their coherence
-with CGP-style wiring would be over-engineering. The same holds in Rust: a trait with one
-implementation per type is an ordinary trait. CGP's explicit wiring is the better tool when a program
-needs several interchangeable implementations, per-deployment or per-context choice, or must
-implement a behavior for types and traits it does not own.
+Implicit resolution fits code that benefits from the surrounding language's instance conventions
+or local contextual bindings. Haskell type classes work well for a canonical ordering or rendering;
+Scala's givens support contextual choices without a separate CGP-style wiring table. Within Rust,
+an ordinary trait is sufficient when one implementation per type expresses the intended behavior.
+
+CGP helps when Rust code needs separately reusable implementations and explicit choices per context.
+Those benefits must justify its additional declarations. It does not replace the scope rules or
+inference mechanisms of Scala and Haskell.
 
 ## What to expect that differs
 
-**CGP does not find the provider by type.** A reader used to `given` resolution will expect the
-compiler to locate the implementation. In CGP the provider is named in a table, once per context.
-Because CGP does not resolve by type, it is free of coherence, and that freedom lets it host the
-overlapping instances these languages forbid.
+CGP selects providers through type-level wiring, including any declared defaults and delegation.
+It does not search a caller's scope for an implicit value. Rust still rejects overlapping impls;
+CGP separates implementations by giving them distinct provider types.
 
-**Which implementation was chosen is a line you can read.** The value still arrives without being
-threaded by hand, but the choice is a wiring entry rather than the outcome of a scope search, so there
-are no priority rules and no ambiguity to debug.
+A provider choice can be traced from a context's wiring. A direct entry names it immediately;
+forwarding entries and namespaces require following the route. Explicit wiring makes the route
+inspectable without making every route short.
 
-**An abstract type is chosen per context, not per type.** An `mtl` instance fixes the environment
-type once for a monad program-wide. A CGP abstract type is a wiring entry, and two contexts may bind
-it differently.
+An abstract type is determined by the context type. Two contexts may choose different error types,
+but two values of the same concrete context type share the same associated error type.
 
-**Resolution is by field name, not by type.** An `#[implicit]` argument reads the context field with
-the matching name. Two fields of the same type are distinct arguments, where a `using` parameter of
-that type would be ambiguous.
+An implicit argument selects a field by name and checks its type. Two fields of the same type can
+supply distinct arguments, such as `width` and `height`. Scala's contextual search instead resolves
+a requested type using its scope and priority rules.
 
 ## Where to go next
 
-- [Implicit arguments](/docs/concepts/implicit-arguments): the construct this page maps onto a
-  `using` parameter, with its borrowing rules.
-- [Abstract types](/docs/concepts/abstract-types): why a determined type propagates nowhere while a
-  parameter propagates everywhere.
-- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): how a provider's requirements
-  stay out of the caller's signature.
-- [Type classes](./type-classes.md): the coherence trade in full.
-- [Rust's own proposals](./rust-language-proposals.md): the contexts-and-capabilities proposal as
-  Rust's `using Config`.
+These pages develop the mechanisms and related comparisons:
+
+- [Implicit arguments](/docs/concepts/implicit-arguments): field selection and borrowing rules.
+- [Abstract types](/docs/concepts/abstract-types): types determined by a context.
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies): keeping implementation
+  requirements out of a consumer interface.
+- [Type classes](./type-classes.md): dictionary passing and instance selection.
+- [Rust's own proposals](./rust-language-proposals.md): the contexts-and-capabilities proposal.
 
 ## Sources
 
@@ -315,7 +314,7 @@ context.
 - [Baeldung, *Scala 3 Implicit Redesign*](https://www.baeldung.com/scala/scala-3-implicit-redesign): the rename from `implicit` to `given`/`using` and the reasons for it.
 - [GHC User's Guide, *Implicit Parameters*](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/implicit_parameters.html): the `?x` syntax, `let` binding, propagation, and the documented restrictions.
 - [Type class (Wikipedia)](https://en.wikipedia.org/wiki/Type_class) and [okmij.org, *Implementing, and Understanding Type Classes*](https://okmij.org/ftp/Computation/typeclass.html): type classes as dictionary-passing elaboration.
-- [Yang, *Type classes: confluence, coherence and global uniqueness*](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/) and [Bottu et al., *Coherence of Type Class Resolution*](https://xnning.github.io/papers/coherence-class.pdf): the definition of coherence and why it constrains instances to one per type.
+- [Yang, *Type classes: confluence, coherence and global uniqueness*](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/) and [Bottu et al., *Coherence of Type Class Resolution*](https://xnning.github.io/papers/coherence-class.pdf): the distinctions between coherence, confluence, and global instance uniqueness.
 - [`mtl`, `Control.Monad.Error.Class`](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Error-Class.html): the `MonadError e m | m -> e` functional dependency.
 
 ---

@@ -1,7 +1,7 @@
 //! Code from `docs/comparisons/dynamic-dispatch.md` — *Dynamic dispatch, dynamic typing, and
 //! prototypal inheritance*.
 
-/// ## CGP code reads like a duck-typed program
+/// ## Provider code calls methods on a generic receiver
 pub mod cgp_code_reads_like_a_duck_typed_program {
     use cgp::prelude::*;
 
@@ -50,8 +50,8 @@ pub mod cgp_code_reads_like_a_duck_typed_program {
     }
 }
 
-/// ## `DelegateComponent` is a compile-time vtable
-/// ## Component delegation is delegation, with `self` bound
+/// ## Wiring serves the selection role of a vtable
+/// ## Delegation preserves the original context
 pub mod delegate_component_is_a_compile_time_vtable {
     use cgp::prelude::*;
 
@@ -120,7 +120,7 @@ pub mod delegate_component_is_a_compile_time_vtable {
     }
 }
 
-/// ## Namespaces are shared prototypes with open slots, not shadowable ones
+/// ## Namespaces share bindings and leave paths for contexts to fill
 pub mod namespaces_are_shared_prototypes {
     use cgp::prelude::*;
 
