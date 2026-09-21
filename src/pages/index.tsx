@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Head from '@docusaurus/Head';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import HomepageFeatures from '@site/src/components/HomepageFeatures';
@@ -171,11 +171,24 @@ function CallToActionSection() {
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={siteConfig.tagline}
-      description="Context-Generic Programming (CGP) - A modular programming paradigm for Rust">
+      description="A language extension for Rust, with pluggable trait implementations at compile-time. Give one interface several implementations and choose per application.">
+      {/*
+        The front page names the project first, which Docusaurus's own title formatter cannot do:
+        passing `title` to Layout renders `{title} | {siteTitle}`, so the project name could only ever
+        come last. Setting the tag here replaces that entirely, and og:title is set with it so a
+        shared link carries the same words.
+      */}
+      <Head>
+        <title>
+          Context-Generic Programming (CGP) - Pluggable trait implementations for Rust
+        </title>
+        <meta
+          property="og:title"
+          content="Context-Generic Programming (CGP) - Pluggable trait implementations for Rust"
+        />
+      </Head>
       <main>
         <HeroBanner />
         <HomepageFeatures />

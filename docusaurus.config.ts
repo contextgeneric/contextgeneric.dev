@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'Context-Generic Programming',
+  title: 'CGP — Context-Generic Programming',
   tagline: 'A language extension for Rust, with pluggable trait implementations at compile-time',
   favicon: 'img/favicon.png',
 

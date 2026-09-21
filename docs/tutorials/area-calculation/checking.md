@@ -1,5 +1,5 @@
 ---
-title: 'Checking and debugging CGP wiring errors'
+title: 'Checking and debugging your wiring'
 sidebar_label: 'Checking and Debugging'
 sidebar_position: 3
 description: 'Wiring is lazy, so a mis-wired context still compiles. Catch the mistake where you made it with check_components!, and read the error with cargo cgp check.'
