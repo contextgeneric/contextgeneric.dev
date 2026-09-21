@@ -26,6 +26,10 @@ pulls in a module tree that mirrors that section's pages:
 - `tests/comparisons_tests.rs` → `tests/comparisons/`, mirroring `docs/comparisons/`
 - `tests/compile_fail_tests.rs` → `tests/compile_fail/`, the snippets the pages **reject** (see below)
 
+**A standalone page gets a test binary of its own instead**, since there is no section tree for it to
+sit in: `tests/quickstart.rs` answers `docs/quickstart.md`. Use this form only for a page that has no
+section — a page inside one belongs in that section's module tree.
+
 One file per page, at the matching path with the file name in `snake_case`:
 
 | Section | Coverage |
@@ -35,7 +39,8 @@ One file per page, at the matching path with the file name in `snake_case`:
 | `docs/cargo-cgp/` | complete — the two pages that show Rust, under `tests/cargo_cgp/` |
 | `docs/comparisons/` | complete — one file per page under `tests/comparisons/`; only the CGP side of each page is checked here, since the other language's snippets are compiled against the toolchain the page names |
 | `docs/tutorials/` | none yet |
-| front page, orientation pages | none yet |
+| `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |
+| front page, remaining orientation pages | none yet |
 
 Within a covered section the mapping is mechanical: `docs/concepts/coherence.md` is answered by
 `tests/concepts/coherence.rs`, and `docs/concepts/consumer-and-provider-traits.md` by
