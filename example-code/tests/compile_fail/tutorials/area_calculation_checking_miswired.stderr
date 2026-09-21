@@ -1,0 +1,37 @@
+error[E0277]: the trait bound `PlainCircle: CanUseComponent<AreaCalculatorComponent>` is not satisfied
+  --> tests/compile_fail/tutorials/area_calculation_checking_miswired.rs:66:9
+   |
+66 |         AreaCalculatorComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is not implemented for `PlainCircle`
+      but trait `HasField<Symbol<6, cgp::prelude::Chars<'r', cgp::prelude::Chars<'a', cgp::prelude::Chars<'d', cgp::prelude::Chars<'i', cgp::prelude::Chars<'u', cgp::prelude::Chars<'s', Nil>>>>>>>>` is implemented for it
+  --> tests/compile_fail/tutorials/area_calculation_checking_miswired.rs:49:9
+   |
+49 |     pub radius: f64,
+   |         ^^^^^^
+note: required for `PlainCircle` to implement `RectangleArea`
+  --> tests/compile_fail/tutorials/area_calculation_checking_miswired.rs:10:1
+   |
+10 | #[cgp_fn]
+   | ^^^^^^^^^
+11 | pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+   |        ^^^^^^^^^^^^^^
+note: required for `RectangleAreaCalculator` to implement `IsProviderFor<AreaCalculatorComponent, PlainCircle>`
+  --> tests/compile_fail/tutorials/area_calculation_checking_miswired.rs:25:1
+   |
+25 | #[cgp_impl(new RectangleAreaCalculator)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+26 | #[uses(RectangleArea)]
+   |        ------------- unsatisfied trait bound introduced here
+   = note: required for `PlainCircle` to implement `CanUseComponent<AreaCalculatorComponent>`
+note: required by a bound in `__CheckPlainCircle`
+  --> tests/compile_fail/tutorials/area_calculation_checking_miswired.rs:64:1
+   |
+64 | / check_components! {
+65 | |     PlainCircle {
+66 | |         AreaCalculatorComponent,
+67 | |     }
+68 | | }
+   | |_^ required by this bound in `__CheckPlainCircle`
+   = note: this error originates in the attribute macro `cgp_fn` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -607,7 +607,7 @@ This also shows that CGP providers are just plain Rust types. By leveraging gene
 
 ## Summary
 
-Over the course of this tutorial series, we have worked through the full arc from plain Rust code to configurable static dispatch with CGP.
+Over the course of this tutorial so far, we have worked through the arc from plain Rust code to configurable static dispatch with CGP.
 
 In the introduction, we identified the two fundamental limitations of conventional Rust approaches: explicit parameter threading and tight coupling between methods and concrete context structs.
 
@@ -616,3 +616,5 @@ In the first tutorial, we addressed those limitations with `#[cgp_fn]`, which le
 In this tutorial, we resolved the remaining boilerplate using CGP components. We annotated `CanCalculateArea` with `#[cgp_component]` to generate a provider trait, defined named provider implementations with `#[cgp_impl]`, and wired them to contexts using `delegate_components!`. We then saw how `#[use_provider]` enables providers to compose with other providers, and how higher-order providers like `ScaledAreaCalculator` use Rust generics to work across all inner calculators without duplication.
 
 Every step of this process is safe, zero-cost Rust: all wiring happens at compile time through the trait system, with no runtime overhead and no unsafe code.
+
+One question remains unasked. Every context we wired happened to be wired correctly — so what happens when one is not? In [Checking and Debugging](/docs/tutorials/area-calculation/checking), we will make that mistake on purpose and find out where Rust reports it.
