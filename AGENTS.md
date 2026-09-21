@@ -108,9 +108,14 @@ decision recorded in the [new-website post](https://contextgeneric.dev/blog/new-
 no React beyond the landing page, so that effort goes into Markdown rather than theming. An agent
 adding site machinery is working against a stated policy and should raise it rather than assume it.
 
-Run `yarn start` for a live-reloading dev server and `yarn build` to produce the static output.
-Deployment runs from the GitHub Actions workflows in `.github/`, publishing to GitHub Pages under the
-domain fixed by `static/CNAME`.
+Run `yarn start` for a live-reloading dev server and `yarn build` to produce the static output. Where
+`yarn` is not on the path, `node_modules/.bin/docusaurus start` and `node_modules/.bin/docusaurus build`
+are the same commands. **Check the build's exit status rather than its output.** A failed build leaves
+the previous run's `build/` directory in place, so inspecting the generated files after a failure
+reports the old site and reads as success. The likeliest cause is a YAML error in front matter — an
+unescaped apostrophe inside a single-quoted `title` or `description` is the one that has actually
+happened, and it is escaped by doubling it. Deployment runs from the GitHub Actions workflows in
+`.github/`, publishing to GitHub Pages under the domain fixed by `static/CNAME`.
 
 Three configuration details matter when editing. `onBrokenLinks` is set to `throw`, so a dangling
 internal link fails the build — a change that renames or moves a page must fix every reference to it in
