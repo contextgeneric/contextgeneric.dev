@@ -6,7 +6,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 const config: Config = {
   title: 'Context-Generic Programming',
-  tagline: 'Modular programming paradigm for Rust',
+  tagline: 'A language extension for Rust, with pluggable trait implementations at compile-time',
   favicon: 'img/favicon.png',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -114,7 +114,7 @@ const config: Config = {
     announcementBar: {
       id: 'announcement',
       content:
-        '🚀 <b>New Release:</b> <a href="/blog/v0.7.0-release">Supercharge Rust functions with implicit arguments using CGP v0.7.0</a> 🚀',
+        '🚀 <b>New Release:</b> <a href="/blog/v0.8.0-release">Group components with namespaces and paths in CGP v0.8.0</a> 🚀',
       backgroundColor: '#fcefe1',
       textColor: '#5D0705',
       isCloseable: true,

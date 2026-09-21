@@ -11,7 +11,7 @@ In this tutorial, we will build a small working program that greets people by na
 To get started, first include the latest version of the [`cgp` crate](https://crates.io/crates/cgp) as your dependency in `Cargo.toml`:
 
 ```toml title="Cargo.toml"
-cgp = "0.7.0"
+cgp = "0.8.0"
 ```
 
 ## The CGP Prelude
