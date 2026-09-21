@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_component] — define a component'
 sidebar_label: '#[cgp_component]'
 sidebar_position: 1
+description: 'Turn one Rust trait into a CGP component: the consumer trait callers use, the provider trait implementations target, and the key that wires them together.'
 ---
 
 # `#[cgp_component]`

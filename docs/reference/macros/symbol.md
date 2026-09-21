@@ -1,6 +1,8 @@
 ---
+title: 'Symbol! — type-level strings'
 sidebar_label: 'Symbol!'
 sidebar_position: 16
+description: 'A type-level string, used as the tag that names a struct field in CGP''s field-access traits.'
 ---
 
 # `Symbol!`

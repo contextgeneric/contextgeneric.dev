@@ -1,6 +1,8 @@
 ---
+title: 'ConcatPath — join two type-level paths'
 sidebar_label: 'ConcatPath'
 sidebar_position: 3
+description: 'Join two type-level paths, which CGP''s namespace machinery uses to address a component. You are not expected to call it directly.'
 ---
 
 # `ConcatPath`

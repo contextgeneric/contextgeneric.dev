@@ -1,6 +1,8 @@
 ---
+title: '#[derive(HasFields)] — a type''s whole shape'
 sidebar_label: '#[derive(HasFields)]'
 sidebar_position: 2
+description: 'Generate a structural representation of a struct or enum and the conversions to and from it, exposing its whole field or variant list to generic code.'
 ---
 
 # `#[derive(HasFields)]`

@@ -1,6 +1,8 @@
 ---
+title: 'HasBuilder — start an empty builder'
 sidebar_label: 'HasBuilder'
 sidebar_position: 1
+description: 'Start an empty builder for a record, as the entry point to assembling a struct field by field rather than through a struct literal that names the type.'
 ---
 
 # `HasBuilder`

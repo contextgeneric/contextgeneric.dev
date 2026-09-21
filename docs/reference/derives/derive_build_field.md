@@ -1,6 +1,8 @@
 ---
+title: '#[derive(BuildField)] — a typed struct builder'
 sidebar_label: '#[derive(BuildField)]'
 sidebar_position: 6
+description: 'Generate a builder that tracks in its own type which fields of a struct have been supplied, so an incomplete record cannot be finalized.'
 ---
 
 # `#[derive(BuildField)]`

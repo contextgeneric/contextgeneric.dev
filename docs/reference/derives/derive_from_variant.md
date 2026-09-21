@@ -1,6 +1,8 @@
 ---
+title: '#[derive(FromVariant)] — construct a variant'
 sidebar_label: '#[derive(FromVariant)]'
 sidebar_position: 8
+description: 'Let generic code construct an enum variant selected by a type-level tag, without naming the variant or the enum.'
 ---
 
 # `#[derive(FromVariant)]`

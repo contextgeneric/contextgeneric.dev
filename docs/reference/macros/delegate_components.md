@@ -1,6 +1,8 @@
 ---
+title: 'delegate_components! — wire a context'
 sidebar_label: 'delegate_components!'
 sidebar_position: 4
+description: 'Build a context''s wiring table, naming the provider that implements each component, plus the operators, path keys and statements its body accepts.'
 ---
 
 # `delegate_components!`

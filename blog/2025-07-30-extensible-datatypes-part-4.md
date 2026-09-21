@@ -3,6 +3,7 @@ slug: extensible-datatypes-part-4
 title: 'Programming Extensible Data Types in Rust with CGP - Part 4: Implementing Extensible Variants'
 authors: [soares]
 tags: [deepdive]
+description: 'How extensible variants are implemented: the empty Void type, exhaustive extraction, the enum casts, and the monadic visitor dispatchers.'
 ---
 
 This is the **fourth** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1), [second](/blog/extensible-datatypes-part-2) and [third](/blog/extensible-datatypes-part-3) parts here.

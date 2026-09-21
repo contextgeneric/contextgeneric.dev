@@ -3,6 +3,7 @@ slug: cgp-serde-release
 title: 'Announcing cgp-serde: A modular serialization library for Serde powered by CGP'
 authors: [soares]
 tags: [release]
+description: 'cgp-serde rebuilds Serde''s Serialize and Deserialize as CGP components, so two applications can encode the same data in different formats.'
 ---
 
 I am excited to announce the release of [**cgp-serde**](https://github.com/contextgeneric/cgp-serde), a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).

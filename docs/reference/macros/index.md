@@ -1,6 +1,8 @@
 ---
+title: 'Macro reference'
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'Every CGP macro grouped by the job it does: defining a component and its providers, wiring and checking a context, and building type-level values.'
 ---
 
 # Macros

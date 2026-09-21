@@ -1,6 +1,8 @@
 ---
+title: 'ToFields — take a value apart into its shape'
 sidebar_label: 'ToFields'
 sidebar_position: 3
+description: 'Produce a value in the shape HasFields names, taking a struct or enum apart into an anonymous list of named entries.'
 ---
 
 # `ToFields`

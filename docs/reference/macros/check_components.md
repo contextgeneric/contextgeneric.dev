@@ -1,6 +1,8 @@
 ---
+title: 'check_components! — verify a context''s wiring'
 sidebar_label: 'check_components!'
 sidebar_position: 5
+description: 'Assert at compile time that a context can use the components it wires, so a missing dependency fails at the assertion rather than at a distant call site.'
 ---
 
 # `check_components!`

@@ -1,6 +1,8 @@
 ---
+title: 'HasFieldMut — mutable field access by tag'
 sidebar_label: 'HasFieldMut'
 sidebar_position: 2
+description: 'Mutable tag-keyed field access, letting an implementation change a field of a context it cannot name, as the mutable counterpart of HasField.'
 ---
 
 # `HasFieldMut`

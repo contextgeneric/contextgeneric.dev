@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_producer] — a Producer from a function'
 sidebar_label: '#[cgp_producer]'
 sidebar_position: 14
+description: 'Define a Producer provider from an input-free function, for a computation that takes only a context and a code tag.'
 ---
 
 # `#[cgp_producer]`

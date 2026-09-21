@@ -1,6 +1,8 @@
 ---
+title: '#[derive_delegate] — the legacy dispatch table'
 sidebar_label: '#[derive_delegate]'
 sidebar_position: 10
+description: 'Generate the UseDelegate dispatcher for a component generic over a parameter. Superseded by the open statement, and documented for reading existing code.'
 ---
 
 # `#[derive_delegate]`

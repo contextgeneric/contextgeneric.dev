@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_computer] — a Computer from a function'
 sidebar_label: '#[cgp_computer]'
 sidebar_position: 13
+description: 'Define a Computer provider from a plain Rust function, with the promotion tables that let one function answer the rest of the handler family.'
 ---
 
 # `#[cgp_computer]`

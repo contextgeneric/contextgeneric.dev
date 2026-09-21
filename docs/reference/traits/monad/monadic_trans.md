@@ -1,6 +1,8 @@
 ---
+title: 'MonadicTrans — stack one monad on another'
 sidebar_label: 'MonadicTrans'
 sidebar_position: 4
+description: 'Stack one monad on top of another, which the monadic handler combinators resolve for you rather than asking you to name the stack yourself.'
 ---
 
 # `MonadicTrans`

@@ -1,6 +1,8 @@
 ---
+title: 'BuildField — set one field of a builder'
 sidebar_label: 'BuildField'
 sidebar_position: 3
+description: 'Set a currently-absent field on a partial record, which is the direction of the builder family you write most when assembling a struct field by field.'
 ---
 
 # `BuildField`

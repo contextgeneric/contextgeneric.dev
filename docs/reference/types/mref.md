@@ -1,6 +1,8 @@
 ---
+title: 'MRef — a borrowed or owned value'
 sidebar_label: 'MRef'
 sidebar_position: 11
+description: 'A value that is either a borrow of a T or an owned T, so one getter signature serves both the context that stores a value and the one that computes it.'
 ---
 
 # `MRef`

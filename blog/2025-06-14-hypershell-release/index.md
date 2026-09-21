@@ -3,6 +3,7 @@ slug: hypershell-release
 title: 'Hypershell: A Type-Level DSL for Shell-Scripting in Rust'
 authors: [soares]
 tags: [release, deepdive]
+description: 'Hypershell is a type-level DSL for shell-scripting in Rust, where a program is a type the compiler interprets. Built with CGP, with its costs stated.'
 ---
 
 I am thrilled to introduce [**Hypershell**](https://github.com/contextgeneric/hypershell), a modular, *type-level* domain-specific language (DSL) for writing shell-script-like programs in Rust. Hypershell is powered by [**context-generic programming**](/) (CGP), which makes it possible for users to *extend* or *modify* both the language syntax and semantics.

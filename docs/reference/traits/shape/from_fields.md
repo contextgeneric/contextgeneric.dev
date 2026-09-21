@@ -1,6 +1,8 @@
 ---
+title: 'FromFields — rebuild a value from its shape'
 sidebar_label: 'FromFields'
 sidebar_position: 4
+description: 'Rebuild a concrete struct or enum from the anonymous shape ToFields produced, as the return journey of a structural operation.'
 ---
 
 # `FromFields`

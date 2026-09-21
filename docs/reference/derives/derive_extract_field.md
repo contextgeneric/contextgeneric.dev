@@ -1,6 +1,8 @@
 ---
+title: '#[derive(ExtractField)] — a typed enum extractor'
 sidebar_label: '#[derive(ExtractField)]'
 sidebar_position: 7
+description: 'Generate an extractor that tracks in its own type which variants of an enum remain, so exhaustiveness is checked without a wildcard arm.'
 ---
 
 # `#[derive(ExtractField)]`

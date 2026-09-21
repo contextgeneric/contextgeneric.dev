@@ -1,6 +1,8 @@
 ---
+title: 'FieldMapper — the provider side of MapField'
 sidebar_label: 'FieldMapper'
 sidebar_position: 6
+description: 'The provider-side mirror of MapField, generated as a blanket implementation over every field getter. You meet it in an expansion rather than call it.'
 ---
 
 # `FieldMapper`

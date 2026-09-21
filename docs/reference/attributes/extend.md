@@ -1,6 +1,8 @@
 ---
+title: '#[extend] — add a supertrait'
 sidebar_label: '#[extend]'
 sidebar_position: 5
+description: 'Add a trait as a supertrait of a generated trait, so callers can rely on it too, which is the only way to declare one on a CGP function.'
 ---
 
 # `#[extend]`

@@ -1,6 +1,8 @@
 ---
+title: '#[implicit] — arguments from context fields'
 sidebar_label: '#[implicit]'
 sidebar_position: 1
+description: 'Source a function argument from a same-named field on the context, so an implementation reads what it needs without the caller passing it.'
 ---
 
 # `#[implicit]`

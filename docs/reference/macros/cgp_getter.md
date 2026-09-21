@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_getter] — getters chosen by wiring'
 sidebar_label: '#[cgp_getter]'
 sidebar_position: 9
+description: 'Define a getter as a full CGP component, so the field it reads is chosen when a context is wired rather than fixed to the method name.'
 ---
 
 # `#[cgp_getter]`

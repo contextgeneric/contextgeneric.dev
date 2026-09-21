@@ -1,6 +1,8 @@
 ---
+title: 'HasFields — a type''s whole shape'
 sidebar_label: 'HasFields'
 sidebar_position: 1
+description: 'Name a type''s whole shape as a single type, every field with its name and type, so generic code can walk a struct or enum it cannot name.'
 ---
 
 # `HasFields`

@@ -1,6 +1,8 @@
 ---
+title: 'HasFieldsRef — a borrowed whole shape'
 sidebar_label: 'HasFieldsRef'
 sidebar_position: 2
+description: 'Name a type''s whole shape with every value borrowed, so generic code can read a struct or enum without consuming it. Derived rather than written.'
 ---
 
 # `HasFieldsRef`

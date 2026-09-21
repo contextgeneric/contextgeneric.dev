@@ -1,6 +1,8 @@
 ---
+title: '#[use_provider] — depend on a provider'
 sidebar_label: '#[use_provider]'
 sidebar_position: 4
+description: 'Depend on another provider by name in a higher-order provider, importing the provider trait it must satisfy.'
 ---
 
 # `#[use_provider]`

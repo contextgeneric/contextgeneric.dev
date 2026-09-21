@@ -3,6 +3,7 @@ slug: extensible-datatypes-part-2
 title: 'Programming Extensible Data Types in Rust with CGP - Part 2: Modular Interpreters and Extensible Visitors'
 authors: [soares]
 tags: [deepdive]
+description: 'Extensible variants applied to the expression problem: a modular arithmetic interpreter built with the extensible visitor pattern.'
 ---
 
 This is the **second** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first part here](/blog/extensible-datatypes-part-1).

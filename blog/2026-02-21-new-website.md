@@ -1,6 +1,7 @@
 ---
 authors: [soares]
 tags: [release]
+description: 'Why the CGP site moved from Zola to Docusaurus, the decision to keep the installation stock, and how LLM assistance was used in the redesign.'
 ---
 
 # CGP has a new website, and why we moved from Zola to Docusaurus

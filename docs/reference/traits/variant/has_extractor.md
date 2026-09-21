@@ -1,6 +1,8 @@
 ---
+title: 'HasExtractor — an enum as an extractor'
 sidebar_label: 'HasExtractor'
 sidebar_position: 2
+description: 'Turn an enum into the extractor the variant-narrowing traits operate on, and back, since ExtractField narrows an extractor rather than an enum.'
 ---
 
 # `HasExtractor`

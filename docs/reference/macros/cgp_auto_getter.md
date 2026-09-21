@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_auto_getter] — getters from field names'
 sidebar_label: '#[cgp_auto_getter]'
 sidebar_position: 8
+description: 'Define a getter as a blanket implementation over HasField, keyed by the method name, for reading a field from any context that has one.'
 ---
 
 # `#[cgp_auto_getter]`

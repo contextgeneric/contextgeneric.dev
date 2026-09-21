@@ -1,6 +1,8 @@
 ---
+title: 'Derive reference'
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The derives that let generic code access, describe, build and deconstruct a struct or enum without naming its concrete type.'
 ---
 
 # Derives

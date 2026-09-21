@@ -1,6 +1,8 @@
 ---
+title: 'ToFieldsRef — read a shape without consuming'
 sidebar_label: 'ToFieldsRef'
 sidebar_position: 5
+description: 'Walk a value''s shape without consuming it, for code that only reads the fields of a struct or enum it cannot name.'
 ---
 
 # `ToFieldsRef`

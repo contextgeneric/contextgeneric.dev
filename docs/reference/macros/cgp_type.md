@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_type] — abstract types per context'
 sidebar_label: '#[cgp_type]'
 sidebar_position: 7
+description: 'Define an abstract-type component whose concrete type each context chooses for itself, for an error type, a runtime, or any type generic code has to name.'
 ---
 
 # `#[cgp_type]`

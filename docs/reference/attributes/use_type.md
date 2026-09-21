@@ -1,6 +1,8 @@
 ---
+title: '#[use_type] — import an abstract type'
 sidebar_label: '#[use_type]'
 sidebar_position: 3
+description: 'Import an abstract associated type into an implementation and write it as a bare name, with the equality form that pins it to a concrete type.'
 ---
 
 # `#[use_type]`

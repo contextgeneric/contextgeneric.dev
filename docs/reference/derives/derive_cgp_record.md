@@ -1,6 +1,8 @@
 ---
+title: '#[derive(CgpRecord)] — extensible records'
 sidebar_label: '#[derive(CgpRecord)]'
 sidebar_position: 4
+description: 'Generate field access, a structural representation, and a builder for a struct, as the record half of the extensible-data derives.'
 ---
 
 # `#[derive(CgpRecord)]`

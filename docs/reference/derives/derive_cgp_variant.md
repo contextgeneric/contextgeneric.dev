@@ -1,6 +1,8 @@
 ---
+title: '#[derive(CgpVariant)] — extensible variants'
 sidebar_label: '#[derive(CgpVariant)]'
 sidebar_position: 5
+description: 'Generate a structural representation, constructors, and an extractor for an enum, as the variant half of the extensible-data derives.'
 ---
 
 # `#[derive(CgpVariant)]`

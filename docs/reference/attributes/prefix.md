@@ -1,6 +1,8 @@
 ---
+title: '#[prefix] — register into a namespace'
 sidebar_label: '#[prefix]'
 sidebar_position: 8
+description: 'Register a component into a namespace under a type-level path, so every context joining that namespace addresses the component by that path.'
 ---
 
 # `#[prefix(...)]`

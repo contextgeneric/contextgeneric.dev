@@ -1,6 +1,8 @@
 ---
+title: '#[impl_generics] — a parameter on the impl alone'
 sidebar_label: '#[impl_generics]'
 sidebar_position: 7
+description: 'Declare a generic parameter on the generated implementation alone, so a context supplies the type through a field and callers never name it.'
 ---
 
 # `#[impl_generics(...)]`

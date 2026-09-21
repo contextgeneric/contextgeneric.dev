@@ -1,6 +1,8 @@
 ---
+title: '#[async_trait] — async methods in CGP traits'
 sidebar_label: '#[async_trait]'
 sidebar_position: 12
+description: 'Rewrite a trait''s async fn declarations into the lint-clean impl Future form that CGP''s async methods use, without allocating.'
 ---
 
 # `#[async_trait]`

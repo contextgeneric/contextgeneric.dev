@@ -3,6 +3,7 @@ slug: extensible-datatypes-part-3
 title: 'Programming Extensible Data Types in Rust with CGP - Part 3: Implementing Extensible Records'
 authors: [soares]
 tags: [deepdive]
+description: 'How extensible records are implemented: partial records, constraint propagation, and the builder dispatchers underneath them.'
 ---
 
 This is the **third** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1) and [second](/blog/extensible-datatypes-part-2) parts here.

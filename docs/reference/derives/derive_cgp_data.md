@@ -1,6 +1,8 @@
 ---
+title: '#[derive(CgpData)] — all extensible-data traits'
 sidebar_label: '#[derive(CgpData)]'
 sidebar_position: 3
+description: 'Generate structural access and the incremental building and extraction operations for a struct or enum, as the umbrella over the narrower derives.'
 ---
 
 # `#[derive(CgpData)]`

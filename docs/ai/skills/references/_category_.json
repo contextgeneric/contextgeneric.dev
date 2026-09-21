@@ -1,6 +1,7 @@
 {
   "label": "References",
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "description": "The CGP agent skill's reference pages, published from the cgp-skills repository for assistants to read."
   }
 }

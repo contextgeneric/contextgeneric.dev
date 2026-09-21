@@ -3,6 +3,7 @@ slug: extensible-datatypes-part-1
 title: 'Programming Extensible Data Types in Rust with CGP - Part 1: Modular App Construction and Extensible Builders'
 authors: [soares]
 tags: [release, deepdive]
+description: 'Extensible records in CGP v0.4.2: code that works on any struct with the right fields, safe enum casting, and apps built from independent providers.'
 ---
 
 I’m excited to announce the release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), a major milestone that significantly expands the expressive power of generic programming in Rust. With this release, CGP introduces full support for **extensible records and variants**, unlocking a range of new capabilities for developers working with highly modular and reusable code.

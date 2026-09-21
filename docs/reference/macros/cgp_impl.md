@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_impl] — write a provider'
 sidebar_label: '#[cgp_impl]'
 sidebar_position: 2
+description: 'Write a CGP provider in ordinary consumer-trait shape, keeping self, Self and the method signatures you already know, instead of the inside-out form.'
 ---
 
 # `#[cgp_impl]`

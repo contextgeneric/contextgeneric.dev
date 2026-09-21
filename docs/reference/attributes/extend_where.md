@@ -1,6 +1,8 @@
 ---
+title: '#[extend_where] — bounds on a generated trait'
 sidebar_label: '#[extend_where]'
 sidebar_position: 6
+description: 'Add where predicates to a generated trait''s own definition rather than only to its implementation, for bounds callers must prove.'
 ---
 
 # `#[extend_where]`

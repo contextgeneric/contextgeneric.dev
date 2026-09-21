@@ -1,6 +1,8 @@
 ---
+title: 'Product! — type-level lists'
 sidebar_label: 'Product! & product!'
 sidebar_position: 17
+description: 'A type-level list and its value-level counterpart, used for the field lists of a record and for handler pipelines.'
 ---
 
 # `Product!` & `product!`

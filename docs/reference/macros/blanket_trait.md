@@ -1,6 +1,8 @@
 ---
+title: '#[blanket_trait] — generate a blanket impl'
 sidebar_label: '#[blanket_trait]'
 sidebar_position: 11
+description: 'Generate a blanket implementation from a Rust trait with default methods and supertrait dependencies.'
 ---
 
 # `#[blanket_trait]`

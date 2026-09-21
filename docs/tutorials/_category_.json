@@ -2,6 +2,7 @@
   "label": "Tutorials",
   "position": 4,
   "link": {
-    "type": "generated-index"
+    "type": "generated-index",
+    "description": "Guided walkthroughs that build working CGP programs, from a first greeting to wiring a context and debugging it."
   }
 }

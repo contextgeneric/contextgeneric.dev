@@ -1,6 +1,8 @@
 ---
+title: 'cgp_namespace! — reusable wiring tables'
 sidebar_label: 'cgp_namespace!'
 sidebar_position: 10
+description: 'Define a reusable, inheritable wiring table that many contexts can join, so a configuration stays short as the component count grows.'
 ---
 
 # `cgp_namespace!`

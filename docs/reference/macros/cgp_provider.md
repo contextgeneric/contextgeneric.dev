@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_provider] and #[cgp_new_provider]'
 sidebar_label: '#[cgp_provider] & #[cgp_new_provider]'
 sidebar_position: 20
+description: 'Implement a provider trait directly, in the inside-out shape the ergonomic macros desugar to, with or without declaring the provider struct.'
 ---
 
 # `#[cgp_provider]` & `#[cgp_new_provider]`

@@ -1,6 +1,8 @@
 ---
+title: 'delegate_and_check_components! — wire and check'
 sidebar_label: 'delegate_and_check_components!'
 sidebar_position: 6
+description: 'Wire a context and check that wiring in one macro, for getting started and for plain Component: Provider tables. Wrong for an aggregate provider.'
 ---
 
 # `delegate_and_check_components!`

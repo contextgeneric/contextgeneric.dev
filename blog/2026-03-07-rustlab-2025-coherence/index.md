@@ -1,6 +1,7 @@
 ---
 slug: 'rustlab-2025-coherence'
 authors: [soares]
+description: 'The RustLab 2025 talk, with slides and full transcript: why Rust''s coherence rules exist, and how provider traits let implementations coexist.'
 ---
 
 # How to stop fighting with coherence and start writing context-generic trait impls - RustLab 2025 transcript

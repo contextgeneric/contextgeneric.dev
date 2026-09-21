@@ -1,6 +1,8 @@
 ---
+title: 'Attribute reference'
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The modifier attributes that refine what a CGP macro generates: declaring dependencies, importing abstract types, and sourcing arguments from fields.'
 ---
 
 # Attributes

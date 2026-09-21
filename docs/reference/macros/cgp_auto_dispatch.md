@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_auto_dispatch] — dispatch over variants'
 sidebar_label: '#[cgp_auto_dispatch]'
 sidebar_position: 15
+description: 'Generate a handler that dispatches over an extensible-data input from a per-type trait, routing each variant to its own implementation.'
 ---
 
 # `#[cgp_auto_dispatch]`

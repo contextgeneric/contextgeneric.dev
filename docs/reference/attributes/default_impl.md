@@ -1,6 +1,8 @@
 ---
+title: '#[default_impl] — a namespace''s default provider'
 sidebar_label: '#[default_impl]'
 sidebar_position: 9
+description: 'Register a provider as a namespace''s default for a key, from the provider''s own definition rather than from the namespace table.'
 ---
 
 # `#[default_impl(...)]`

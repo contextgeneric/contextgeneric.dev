@@ -1,6 +1,8 @@
 ---
+title: '#[derive(HasField)] — field access by tag'
 sidebar_label: '#[derive(HasField)]'
 sidebar_position: 1
+description: 'Generate shared and mutable accessors for every field of a struct, keyed by type-level tags, which is what lets an implicit argument find a field.'
 ---
 
 # `#[derive(HasField)]`

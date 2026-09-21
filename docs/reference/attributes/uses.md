@@ -1,6 +1,8 @@
 ---
+title: '#[uses] — declare trait dependencies'
 sidebar_label: '#[uses]'
 sidebar_position: 2
+description: 'Import the traits an implementation depends on, reading like a use statement, instead of writing the bounds out in a where clause.'
 ---
 
 # `#[uses]`

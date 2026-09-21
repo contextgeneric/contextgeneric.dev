@@ -1,6 +1,8 @@
 ---
+title: '#[cgp_fn] — a trait from a function'
 sidebar_label: '#[cgp_fn]'
 sidebar_position: 3
+description: 'Turn a plain Rust function into a trait with a single blanket implementation, so it runs on any context that supplies the fields it needs.'
 ---
 
 # `#[cgp_fn]`

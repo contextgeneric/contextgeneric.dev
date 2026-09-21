@@ -3,6 +3,7 @@ slug: early-preview-announcement
 title: 'Announcing Context-Generic Programming (Early Preview)'
 authors: [soares]
 tags: [release]
+description: 'The launch post for context-generic programming: what CGP is, the Hermes relayer work it grew out of, and the modular Rust it was built to enable.'
 ---
 
 Welcome everyone! This blog post marks the launch of the _context-generic programming_ (CGP) project,

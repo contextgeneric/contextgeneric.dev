@@ -1,6 +1,8 @@
 ---
+title: 'Sum! — type-level sums'
 sidebar_label: 'Sum!'
 sidebar_position: 18
+description: 'A type-level sum, the dual of Product!, used for the variant lists of an extensible enum.'
 ---
 
 # `Sum!`
