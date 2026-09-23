@@ -1,30 +1,28 @@
 ---
 sidebar_label: 'Row polymorphism'
 sidebar_position: 7
-description: "CGP's extensible records and variants read against PureScript rows, OCaml polymorphic variants, structural typing, and row theory."
+description: "How CGP expresses field access, record building, and variant operations compared with row polymorphism."
 ---
 
 # Row polymorphism, structural typing, and extensible data types
 
-CGP gives Rust's nominal structs and enums some of the flexibility of row polymorphism. It derives
-their shape as types and uses trait bounds to match fields and variants. CGP is a language extension
-built as a [stable Rust library](/docs/), with pluggable trait implementations at compile time and
-ordinary Rust consumer traits. This page compares CGP with PureScript rows, OCaml polymorphic variants, and
-structural typing. It shows which row operations CGP supports and where a row system works better.
+CGP gives Rust structs and enums selected forms of structural reuse through derived field lists and
+trait bounds. It is a language extension built as a [stable Rust library](/docs/) , with pluggable
+implementations behind ordinary Rust traits. This page compares its field access, builders, and
+variant operations with PureScript rows and OCaml polymorphic variants.
 
 ## In your terms
 
-A **context** is the type a CGP method runs on. It supplies data through fields and chooses
-implementations through wiring. Every context on this page is a
-**[value context](/docs/reference/glossary#value-context)**: the record being built or the enum
-being cast carries both the shape and the wiring, and each component targets `Self`.
+A **context** is the type a CGP method runs on. The examples here operate directly on records and
+enums, so their contexts are [value contexts](/docs/reference/glossary#value-context) . Field access
+uses derived traits; component-based operations can also use wiring to select providers.
 
 The row operations map onto CGP constructs as follows:
 
 | In a row system | In CGP |
 | --- | --- |
 | A closed row | A struct's derived `Fields`, a `Product!` of `Field<Tag, Value>` entries |
-| A row variable, "the rest of the fields" | The context type variable, constrained by trait bounds and never named as a row |
+| An open row with required fields | A context type variable with field-access bounds; the remaining fields are not represented by a row variable |
 | Row containment (`ρ₁ ≲ ρ₂`) | A `HasField<Symbol!("name")>` bound, usually written as an `#[implicit]` argument |
 | Record concatenation (`ρ₁ ⊙ ρ₂ ~ ρ₃`) | `CanBuildFrom` and the `ConcatProduct` type-level operation |
 | A presence flag per label | The `IsPresent` and `IsNothing` markers on a [partial record](/docs/reference/glossary#partial-record) |
@@ -39,24 +37,21 @@ CGP offers selected forms of that flexibility within Rust's nominal type system.
 
 ### Structural versus nominal typing
 
-A structural type system decides compatibility by a type's members rather than its name
-([Wikipedia, *Structural type system*](https://en.wikipedia.org/wiki/Structural_type_system)).
-TypeScript is the most widely used example: an object satisfies an interface by having the required
-members ([TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-oop.html)),
-though TypeScript only approximates row polymorphism
-([Bornea](https://medium.com/@gabriel-bornea/approximating-row-type-polymorphism-in-typescript-495ebd5a623d)).
-Rust's structs and enums are nominal, and row polymorphism "is notably absent from Rust's struct
-system" ([Andreas, *Structural vs Nominal Typing in Rust*](https://felixandreas.me/blog/nominal-vs-structural-types/)).
-CGP works within that nominal system rather than replacing it.
+Structural typing makes types compatible when they have the required members. For example,
+TypeScript accepts an object as an interface when its members satisfy that interface ([TypeScript
+Handbook](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-oop.html)). Row
+polymorphism adds a way to name and preserve the remaining fields. Rust structs and enums have
+nominal identities even when their fields match; CGP adds structural operations through traits.
 
 ### Row polymorphism in PureScript
 
 Row polymorphism uses a *row variable* to describe the fields a function does not name. The function
 accepts any record with its required fields, while the variable carries the remaining fields
 ([Wikipedia, *Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism)). In PureScript a
-*row* is "an unordered collection of named types", of kind `Row k`, and a record is a row wrapped by
-`Record` ([PureScript language reference](https://github.com/purescript/documentation/blob/master/language/Types.md)).
-An open row adds a tail variable after a pipe:
+*row* is "an unordered collection of named types", of kind `Row k` , and a record is a row wrapped
+by `Record` ([PureScript language
+reference](https://github.com/purescript/documentation/blob/master/language/Types.md)). An open row
+adds a tail variable after a pipe:
 
 ```purescript
 -- accepts any record that has at least firstName and lastName;
@@ -68,31 +63,30 @@ fullName { firstName: "Ada", lastName: "Lovelace" }              -- ok
 fullName { firstName: "Ada", lastName: "Lovelace", age: 36 }     -- also ok; age flows through `r`
 ```
 
-The `Prim.Row` type classes `Cons`, `Union`, `Nub`, and `Lacks` govern the row operations, and the
-compiler resolves them during type checking
-([Pursuit, *Prim.Row*](https://pursuit.purescript.org/builtins/docs/Prim.Row)). PureScript's design
-descends from Wand's row variables (1987), Rémy's principal types for rows (1989), and Leijen's
-scoped labels (2005), which PureScript adopts directly
-([Leijen, *Extensible records with scoped labels*](https://www.microsoft.com/en-us/research/publication/extensible-records-with-scoped-labels/)).
+PureScript checks row operations through the `Prim.Row` classes `Cons` , `Union` , `Nub` , and
+`Lacks` ([Pursuit, *Prim.Row*](https://pursuit.purescript.org/builtins/docs/Prim.Row)). PureScript's
+design descends from Wand's row variables (1987), Rémy's principal types for rows (1989), and
+Leijen's scoped labels (2005), which PureScript adopts directly ([Leijen, *Extensible records with
+scoped
+labels*](https://www.microsoft.com/en-us/research/publication/extensible-records-with-scoped-labels/)).
 
 ### Rows as a kind or as predicates
 
-Row polymorphism has two main designs. PureScript makes rows a *built-in kind* with its own
-unification. Gaster and Jones instead encode rows through *qualified types*: a function is
-polymorphic over an ordinary type variable, and the *lacks* and *has* predicates it requires are
-discharged by the machinery that resolves type-class instances, without a new kind
-([Gaster & Jones](http://web.cecs.pdx.edu/~mpj/pubs/polyrec.html)).
+Row systems can represent field requirements through built-in rows or through predicates. PureScript
+gives rows their own kind and unification rules. Gaster and Jones use *qualified types*: ordinary
+type variables constrained by predicates such as *has* and *lacks*, checked through instance
+resolution ([Gaster & Jones](http://web.cecs.pdx.edu/~mpj/pubs/polyrec.html)).
 
-CGP resembles the predicate design. It has no row kind or row variable. Instead, a
-`HasField<Symbol!("name"), Value = String>` bound says that a context has a field, and Rust's trait
-solver checks it. CGP also uses markers like Rémy's presence flags to track which fields are present.
+CGP resembles the predicate design. A `HasField<Symbol!("name"), Value = String>` bound says that a
+context has a field, and Rust's trait solver checks it. CGP uses ordinary Rust types throughout,
+without a separate row kind or row variable.
 
 ### Extensible variants
 
-Variants are the dual of records. A row-polymorphic record function accepts "at least these
-fields", while a row-polymorphic variant value promises "at most these cases". OCaml's *polymorphic
-variants* provide these variants in a production language, without a central type declaration.
-OCaml 5.5 infers the type shown in the comment:
+Variants are the dual of records. A row-polymorphic record function accepts "at least these fields",
+while a row-polymorphic variant value promises "at most these cases". OCaml's *polymorphic variants*
+provide these variants in a production language, without a central type declaration. OCaml 5.5
+infers the type shown in the comment:
 
 ```ocaml
 (* no type declaration needed; the variant type is inferred and reusable *)
@@ -105,33 +99,36 @@ let to_int = function
 
 [Extensible records](/docs/reference/glossary#extensible-record) and variants are a standard answer
 to Wadler's *expression problem*: adding both new cases to a datatype and new operations over it
-"without recompiling existing code, and while retaining static type safety"
-([Wadler, 1998](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt)). Haskell's
-*Data types à la carte* solves the sum side with constraints. It builds a coproduct of signature
-functors with a `:<:` constraint whose evidence supplies an injection `inj` and a partial projection
-`prj` ([Swierstra](https://www.cs.tufts.edu/~nr/cs257/archive/wouter-swierstra/DataTypesALaCarte.pdf)).
+"without recompiling existing code, and while retaining static type safety" ([Wadler,
+1998](https://homepages.inf.ed.ac.uk/wadler/papers/expression/expression.txt)). Haskell's *Data
+types à la carte* solves the sum side with constraints. It builds a coproduct of signature functors
+with a `:<:` constraint whose evidence supplies an injection `inj` and a partial projection `prj`
+([Swierstra](https://www.cs.tufts.edu/~nr/cs257/archive/wouter-swierstra/DataTypesALaCarte.pdf)).
 
-### The unifying theory
+### Combination, containment, and their implementations {#the-unifying-theory}
 
-Morris and McKinna's *rows by any other name* generalizes these designs into *row theories*, "a
-monoidal generalization of row types", with two predicates: **combination** `ρ₁ ⊙ ρ₂ ~ ρ₃` and
-**containment** `ρ₁ ≲ ρ₂`. Records are built by combination and read by containment; variants are
-built by containment and consumed by combination. The idea most relevant to CGP is that "evidence
-for type qualifiers has computational content": the proof that a row contains a label *is* the
-projection code ([Morris & McKinna, POPL 2019](https://dl.acm.org/doi/10.1145/3290325)). Koka applies
-rows to effects ([Leijen, *Koka*](https://arxiv.org/pdf/1406.2061)), which the
-[algebraic effects](./algebraic-effects.md) page covers.
+Row theory connects records and variants through combination and containment. In Morris and
+McKinna's *rows by any other name*, **combination** (`ρ₁ ⊙ ρ₂ ~ ρ₃`) describes joining rows, and
+**containment** (`ρ₁ ≲ ρ₂`) describes one row fitting inside another. Records use combination to
+build values and containment to read them; variants reverse those roles ([Morris & McKinna, POPL
+2019](https://dl.acm.org/doi/10.1145/3290325)).
+
+The evidence for these relationships can also implement the operation. Evidence that a record
+contains a field supplies the code that reads it. This connection matters for CGP because its trait
+implementations both satisfy constraints and perform field access or conversion. Rows also describe
+effect sets, as in [Koka](https://arxiv.org/pdf/1406.2061) ; the
+[algebraic effects](./algebraic-effects.md) page covers that use.
 
 ## How CGP expresses it
 
 CGP derives type-level shapes for Rust's nominal structs and enums. Trait bounds then express the
 field and variant requirements that row predicates express in a row system.
 
-### A struct is a closed row; `HasField` is row containment
+### Field lists and field requirements {#a-struct-is-a-closed-row-hasfield-is-row-containment}
 
 `#[derive(HasFields)]` gives a struct the type-level equivalent of a closed row, with one
 `Field<Tag, Value>` entry per field, each tagged by a
-[type-level string](/docs/reference/glossary#type-level-string):
+[type-level string](/docs/reference/glossary#type-level-string) :
 
 ```rust
 #[derive(HasField, HasFields)]
@@ -148,8 +145,8 @@ pub struct Person {
 ```
 
 PureScript's `fullName` names its required fields with an open row. A CGP function names them as
-[implicit arguments](/docs/concepts/implicit-arguments), and any context with those fields satisfies
-it:
+[implicit arguments](/docs/concepts/implicit-arguments) , and any context with those fields
+satisfies it:
 
 ```rust
 #[cgp_fn]
@@ -168,12 +165,12 @@ person.full_name();     // "Ada Lovelace"
 employee.full_name();   // "Ada Lovelace"; `badge` plays the part of `r`
 ```
 
-Each implicit argument desugars to a bound such as `HasField<Symbol!("first_name"), Value = String>`,
-which is the containment predicate. The context's other fields play the role of the tail variable.
+Each implicit argument desugars to a bound such as `HasField<Symbol!("first_name"), Value = String>`
+, which is the containment predicate. The context's other fields play the role of the tail variable.
 Unlike PureScript, CGP never names the row variable. It does not infer or carry a residual row; it
 resolves each containment bound against the concrete context in use.
 
-### Building a record is row combination
+### Combining fields in a builder {#building-a-record-is-row-combination}
 
 Assembling a struct field by field is CGP's form of record concatenation. The
 [builder family](/docs/reference/traits/builder/has_builder) takes a *partial record* from empty to
@@ -187,23 +184,23 @@ let combined: FooBarBaz = FooBarBaz::builder()
     .finalize_build();                                 // exists only when the row is complete
 ```
 
-The underlying type-level operations form a row algebra that is evaluated during type checking.
+Type-level operations describe how fields combine.
 [`ConcatProduct`](/docs/reference/traits/type-level/concat_product) joins two products,
 `AppendProduct` adds one field, and `MapFields` rewrites every entry. `finalize_build` type-checks
 only when every field is present, which gives generic Rust the completeness guarantee of a closed
 row. The [Extensible records](/docs/concepts/extensible-records) page develops the pattern.
 
-### Presence markers are presence polymorphism
+### Tracking which fields are present {#presence-markers-are-presence-polymorphism}
 
 CGP tracks field presence with a flag per field, as Rémy's presence polymorphism does. The flags are
 [`MapType`](/docs/reference/traits/type-level/map_type) markers on a partial record: `IsPresent`
 stores the value, `IsNothing` stores nothing, and the
-[optional-field extensions](/docs/reference/traits/optional/) add `IsOptional`. A builder starts with
-every field marked `IsNothing`, and each step changes one marker. `FinalizeBuild` is implemented only
-when every marker is `IsPresent`. On the variant side, `IsVoid` marks a case that extraction has
-ruled out.
+[optional-field extensions](/docs/reference/traits/optional/) add `IsOptional` . A builder starts
+with every field marked `IsNothing` , and each step changes one marker. `FinalizeBuild` is
+implemented only when every marker is `IsPresent` . On the variant side, `IsVoid` marks a case that
+extraction has ruled out.
 
-### An enum is a row-typed sum; upcast and downcast are injection and branching
+### Widening, narrowing, and handling variants {#an-enum-is-a-row-typed-sum-upcast-and-downcast-are-injection-and-branching}
 
 The variant side mirrors the record side. The derive represents an enum as a `Sum!` of `Field`
 entries, and the [structural casts](/docs/reference/traits/casting/can_upcast) implement the
@@ -232,21 +229,20 @@ let wide = Reading::Temperature(21).upcast(PhantomData::<ExtendedReading>);
 ExtendedReading::Flag(true).downcast(PhantomData::<Reading>).is_err();   // true
 ```
 
-Branching, the sum side's combination predicate, is CGP's
-[extensible visitor](/docs/concepts/extensible-variants). The `MatchWithValueHandlers` dispatcher
-derives one extract-and-handle step per variant from the enum's shape and runs the steps as a
-pipeline. Each failed extraction rules out a variant at the type level, so the final match is
-provably exhaustive without a wildcard arm. In *Data types à la carte* terms, `CanUpcast` is `inj`
-and `CanDowncast` is `prj`. À la carte's `prj` returns a `Maybe` without an exhaustiveness check,
-while CGP's branching consumes the whole sum and proves that every case was handled.
+CGP's [extensible visitor](/docs/concepts/extensible-variants) combines handlers to cover every
+variant, corresponding to branching in row theory. The `MatchWithValueHandlers` dispatcher derives
+one extract-and-handle step per variant from the enum's shape and runs the steps as a pipeline. Each
+failed extraction rules out a variant at the type level, so the final match is provably exhaustive
+without a wildcard arm. `CanUpcast` and `CanDowncast` play roles similar to `inj` and `prj` in *Data
+types à la carte*. A projection can fail; exhaustiveness comes from combining handlers that cover
+the whole sum.
 
-### Providers are the theory's computational evidence
+### Trait implementations supply the evidence {#providers-are-the-theorys-computational-evidence}
 
-CGP makes visible the evidence that Morris and McKinna describe. In a row-typed language, the
-compiler elaborates the evidence for a row predicate internally. In CGP the evidence is ordinary code
-that a programmer can read: the `HasField` impl a derive generates *is* the projection code, the
-`CanBuildFrom` recursion *is* the concatenation code, and a wired provider *is* the witness that a
-context can perform an operation.
+CGP's trait implementations connect constraints to executable code. A generated `HasField` impl both
+proves that a field is available and reads it. `CanBuildFrom` both requires compatible fields and
+copies or moves them into a builder. These are concrete examples of the computational evidence
+described by row theory; the correspondence does not give CGP a full row type system.
 
 ## What each approach costs
 
@@ -256,31 +252,33 @@ such as codec-free JSON decoding and type-safe bindings
 ([Nguyen](https://hgiasac.github.io/posts/2018-11-18-Record-Row-Type-and-Row-Polymorphism.html)).
 
 Row systems can make errors and domain models harder to understand. Row unification can produce very
-large diagnostics; a PureScript discussion reports outputs around 152 KB
-([PureScript Discourse](https://discourse.purescript.org/t/upcoming-changes-to-error-messages-for-large-records-rows/3696)).
+large diagnostics; a PureScript discussion reports outputs around 152 KB ([PureScript
+Discourse](https://discourse.purescript.org/t/upcoming-changes-to-error-messages-for-large-records-rows/3696)).
 One user who modeled a domain with extensible records later preferred separate functions for nominal
-types ([PureScript Discourse](https://discourse.purescript.org/t/when-to-use-extensible-types-when-modeling-a-domain/217)).
+types ([PureScript
+Discourse](https://discourse.purescript.org/t/when-to-use-extensible-types-when-modeling-a-domain/217)).
 Structural compatibility can also admit a call that makes little sense for the domain
 ([Fowler](https://jadon.io/blog/row-polymorphism/)). OCaml's manual warns that polymorphic variants
-"result in a weaker type discipline" and recommends core variants for simple programs
-([OCaml manual](https://ocaml.org/manual/5.5/polyvariant.html)).
+"result in a weaker type discipline" and recommends core variants for simple programs ([OCaml
+manual](https://ocaml.org/manual/5.5/polyvariant.html)).
 
-Two languages have moved away from rows. PureScript replaced its row-typed effect monad because
-"getting the effect rows to line up was sometimes quite tricky"
+Some languages have narrowed their use of rows. PureScript replaced its row-typed effect monad
+because "getting the effect rows to line up was sometimes quite tricky"
 ([PureScript-Resources](https://purescript-resources.readthedocs.io/en/latest/eff-to-effect.html)),
-and Gleam removed row-typed records to become "less structural and more nominal in style"
-([Gleam v0.4](https://gleam.run/news/gleam-v0.4-released/)).
+and Gleam removed row-typed records to become "less structural and more nominal in style" ([Gleam
+v0.4](https://gleam.run/news/gleam-v0.4-released/)).
 
-CGP trades row inference for derives, type-level tags, and wiring. An incomplete operation can
-produce a long trait error over generated types.
-[`check_components!`](/docs/reference/macros/check_components)
-checks wiring at its definition, and [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root
-cause for errors it recognizes. Diagnostics can still be heavier than those of a nominal `match`.
+CGP requires derives and type-level tags, plus wiring for operations supplied by components. Missing
+dependencies can produce long trait errors.
+[`check_components!`](/docs/reference/macros/check_components) checks the listed components beside
+the wiring. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
+recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. A direct `match`
+can still be easier to understand and debug.
 
-CGP limits accidental structural matches for components. A provider applies only to a context whose
-wiring selects it, so matching fields alone do not add that behavior. A `#[cgp_fn]` function such as
-`full_name` is different: its single blanket implementation
-applies to any context with the named fields, as a row-polymorphic function does. The
+CGP separates a provider's field requirements from the context's choice to use it. Matching fields
+can satisfy the requirements, but they do not automatically select the provider. A `#[cgp_fn]`
+function such as `full_name` is different: its single blanket implementation applies to any context
+with the named fields, as a row-polymorphic function does. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs against the
 alternatives.
 
@@ -295,23 +293,17 @@ trait bounds and derives without changing Rust's type system.
 
 ## What to expect that differs
 
-**CGP does not infer rows.** It has no row variable and no row inference. A provider names its
-required fields as bounds, and a context's shape comes from a derive. Because CGP does not unify open
-rows, it does not produce row-unification errors either; its long errors come from trait resolution
-and have different mitigations.
+CGP expresses structural requirements within Rust's existing type system:
 
-**Wiring decides which components a context has.** A provider reads a context's fields
-structurally, but which providers a context uses is a nominal decision recorded in its wiring. This
-keeps a component's behavior tied to the contexts that chose it. A `#[cgp_fn]` blanket trait is the
-exception, since it applies wherever the fields exist.
-
-**Shapes are opt-in.** Only a type that derives `HasFields` or `CgpData` exposes its fields as a
-type-level list, so CGP cannot see the shape of a foreign type without the derive.
-
-**The predicates are traits.** A `HasField` bound is a has-predicate, `CanUpcast` and `CanDowncast`
-correspond to `inj` and `prj`, and the trait solver does the work of qualified-type inference.
-Readers who know the Gaster and Jones design or Haskell's `row-types` library will recognize the
-mechanism.
+- **Field requirements are trait bounds.** Rust checks each `HasField` bound without inferring a
+  residual row. Errors therefore come from trait resolution, rather than row unification.
+- **Component behavior requires selection.** Matching fields can satisfy a provider's requirements,
+  but the context must select that provider. A `#[cgp_fn]` blanket implementation applies wherever
+  its bounds hold and does not require wiring.
+- **Shapes must be exposed.** `HasFields` and `CgpData` derives supply the structural traits. CGP
+  cannot inspect an arbitrary foreign type without the required implementations.
+- **Structural operations keep nominal identities.** Builders and casts operate between declared
+  Rust types; they do not introduce anonymous record types or full row inference.
 
 ## Where to go next
 
@@ -329,8 +321,8 @@ These pages develop the patterns and the neighbouring comparisons:
 
 ## Sources
 
-The PureScript snippet was compiled with PureScript 0.15.15 against the prelude and the OCaml snippet
-with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0-alpha`.
+The PureScript snippet was compiled with PureScript 0.15.15 against the prelude and the OCaml
+snippet with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0-alpha` .
 
 - [Wikipedia, *Structural type system*](https://en.wikipedia.org/wiki/Structural_type_system), [*Nominal type system*](https://en.wikipedia.org/wiki/Nominal_type_system), and [*Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism): the definitions and their contrast.
 - [PureScript language reference, *Types*](https://github.com/purescript/documentation/blob/master/language/Types.md), [Pursuit, *Prim*](https://pursuit.purescript.org/builtins/docs/Prim), and [*Prim.Row*](https://pursuit.purescript.org/builtins/docs/Prim.Row): rows, records, open-row syntax, and the row type classes.

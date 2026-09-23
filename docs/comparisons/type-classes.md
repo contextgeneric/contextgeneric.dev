@@ -1,16 +1,15 @@
 ---
 sidebar_label: 'Type classes'
 sidebar_position: 3
-description: 'CGP read against Haskell, Agda, and Lean type classes, coherence, and the overlapping and incoherent instance extensions.'
+description: 'How CGP provider selection compares with type classes, coherence, and overlapping instances in Haskell, Agda, and Lean.'
 ---
 
 # Type classes
 
-CGP lets a context choose among named implementations of a Rust trait. It is a language extension
-built as a [stable Rust library](/docs/), with pluggable trait implementations at compile time and
-ordinary Rust consumer traits. This page maps type classes and instances from Haskell, Agda, and Lean onto
-CGP. It explains how explicit selection compares with coherent, overlapping, and incoherent
-instances, and when ordinary traits are enough.
+CGP lets each context select named implementations at compile time. It is a language extension built
+as a [stable Rust library](/docs/) , with ordinary Rust traits as its caller interfaces. This page
+compares explicit wiring with type-class resolution in Haskell, Agda, and Lean, and explains when a
+single canonical implementation is the simpler choice.
 
 ## In your terms
 
@@ -22,10 +21,10 @@ The type-class vocabulary maps onto CGP as follows:
 
 | In a type-class language | In CGP |
 | --- | --- |
-| A class | A **component**: one trait with many possible implementations |
-| An instance, anonymous and canonical | A **provider**: a named, selectable implementation |
+| A class interface | A component's consumer trait, used by callers |
+| A class instance | A **provider**: a named implementation of the provider trait |
 | Instance resolution by the compiler | **Wiring**, written by hand in a `delegate_components!` table |
-| A class constraint on a function | An **[impl-side dependency](/docs/reference/glossary#impl-side-dependency)**, declared with `#[uses]` |
+| A constraint needed by an implementation | An [impl-side dependency](/docs/reference/glossary#impl-side-dependency), often declared with `#[uses]` |
 | The dictionary passed as a hidden argument | The context |
 | A class's associated type | An [abstract type](/docs/reference/glossary#abstract-type), chosen by the context |
 
@@ -33,8 +32,8 @@ The type-class vocabulary maps onto CGP as follows:
 
 Type classes let a compiler choose an implementation for a type. A class declares an interface, an
 instance implements it for a type, and a constrained function works for every type with an instance.
-Wadler and Blott introduced them to "make ad-hoc polymorphism less ad hoc"
-([Wadler & Blott, 1989](https://dl.acm.org/doi/10.1145/75277.75283)):
+Wadler and Blott introduced them to "make ad-hoc polymorphism less ad hoc" ([Wadler & Blott,
+1989](https://dl.acm.org/doi/10.1145/75277.75283)):
 
 ```haskell
 class Show a where
@@ -50,30 +49,29 @@ describe x = "value: " ++ show x
 
 Dictionary passing explains how a class constraint supplies behavior. The class becomes a record of
 methods, an instance supplies that record, and `describe` receives it as a hidden argument. CGP
-uses the same idea, with the context carrying the choices. The [algebraic effects](./algebraic-effects.md)
-and [row polymorphism](./row-polymorphism.md) pages compare other forms of passed evidence.
+organizes choices through a context and resolves calls statically, without runtime dictionaries. The
+[algebraic effects](./algebraic-effects.md) and [row polymorphism](./row-polymorphism.md) pages
+compare other forms of passed evidence.
 
 ### Coherence and canonical instances
 
-*Coherence* makes automatic resolution predictable: uses of a class constraint should agree on the
-instance they select. That goal has distinct parts: *confluence*, *coherence*, and
-*global uniqueness*. GHC guarantees the first two within a compilation but does not enforce global
-uniqueness across a whole program
-([Yang, *Type classes: confluence, coherence and global uniqueness*](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)).
-The standard example of the benefit is a `Set` of an ordered element type. With one `Ord` for that
-type, values inserted under one ordering can never be read back under another.
+Coherence keeps implementation choices consistent as generic code is compiled and composed. A `Set`
+, for example, relies on insertion and lookup agreeing on its element ordering. Global uniqueness of
+instances is one way to support that agreement. GHC's guarantees within a compilation are distinct
+from enforcing uniqueness across every separately compiled part of a program ([Yang, *Type classes:
+confluence, coherence and global
+uniqueness*](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)).
 
-Rust makes the same choice and enforces it more strictly. Rust traits are type classes with a hard
-[orphan rule](/docs/reference/glossary#orphan-rule): an impl is allowed only when the crate owns the
-trait or the type ([RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)),
-while GHC permits orphan instances and can warn about them. CGP is built to work within Rust's
-rule, and the [Rust proposals](./rust-language-proposals.md) page covers what Rust itself has
-considered doing about it.
+Rust enforces coherence through overlap and [orphan rules](/docs/reference/glossary#orphan-rule) .
+An impl needs a local trait or a qualifying local type, subject to restrictions on uncovered type
+parameters ([RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)). GHC
+permits orphan instances and can warn about them. CGP works within Rust's rules; the
+[Rust proposals](./rust-language-proposals.md) page explores proposed alternatives.
 
 ### Overlapping instances
 
-GHC's first extension to the rule lets instances overlap when one is strictly more specific. It is
-enabled through per-instance pragmas:
+GHC permits some overlapping instances when one is more specific than another. Per-instance pragmas
+control which overlaps are allowed:
 
 ```haskell
 instance {-# OVERLAPPABLE #-} Show a => Show [a] where   -- lists in general
@@ -83,25 +81,24 @@ instance {-# OVERLAPPING #-} Show [Char] where           -- but strings speciall
   show s = s
 ```
 
-Resolution commits to an instance only when it is strictly more specific than every other match.
-GHC's own manual warns that "overlapping instances must be used with care as they can give rise to
-incoherence (different instance choices are made in different parts of the program)"
-([GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)).
+GHC normally requires a single most-specific candidate and may defer resolution if a type variable
+could allow a competing match. Its manual warns that overlapping instances can still produce
+inconsistent choices across a program ([GHC User's
+Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)).
 
 ### Incoherent instances
 
-The second extension lets the compiler commit to an instance even when the choice is not unique. An
-instance marked `{-# INCOHERENT #-}` may be selected where a more specific one could later apply, so
-different parts of a program can resolve the same constraint to different dictionaries. The manual
-states the danger: GHC's optimiser "assumes that type-classes are coherent, and hence it may replace
-any type-class dictionary argument with another dictionary of the same type", so incoherence "may
-cause unexpected results" ([GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)).
+`INCOHERENT` relaxes resolution further, allowing a choice even when later type information could
+favor another instance. Different parts of a program can then use different dictionaries for the
+same constraint. GHC's optimizer assumes coherence and may substitute dictionaries of the same type,
+so such choices can lead to unexpected results ([GHC User's
+Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)).
 
 ### Instance arguments in Agda
 
 Agda provides class-style overloading without a class construct and without coherence. A record
-plays the role of the class, and a double-braced argument is resolved from the scope at the call site
-([Devriese & Piessens, 2011](https://dl.acm.org/doi/10.1145/2034574.2034796)):
+plays the role of the class, and a double-braced argument is resolved from the scope at the call
+site ([Devriese & Piessens, 2011](https://dl.acm.org/doi/10.1145/2034574.2034796)):
 
 ```agda
 record Show (A : Set) : Set where
@@ -132,12 +129,12 @@ instance : Show Bool where
 #eval Show.display true   -- "true"
 ```
 
-Lean allows multiple instances, so the same constraint can be satisfied in more than one way. When
-two resolution paths disagree, which is called a *diamond*, inference can pick the wrong instance or
-diverge ([Selsam, Ullrich & de Moura, *Tabled Typeclass Resolution*](https://arxiv.org/pdf/2001.04301)).
-In a proof assistant, two instances that are not definitionally equal break proofs that assume they
-coincide. The Mathlib community therefore keeps overlapping instances definitionally equal as a
-standing practice ([Baanen, 2022](https://arxiv.org/pdf/2202.01629)).
+Lean allows multiple instances, so the same constraint can be satisfied in more than one way.
+Multiple resolution paths can form a *diamond*. If they produce instances that are not
+definitionally equal, code expecting those instances to coincide can fail ([Selsam, Ullrich & de
+Moura, *Tabled Typeclass Resolution*](https://arxiv.org/pdf/2001.04301)). Mathlib therefore keeps
+overlapping instances definitionally equal as a standing practice ([Baanen,
+2022](https://arxiv.org/pdf/2202.01629)).
 
 ### Modular type classes
 
@@ -150,22 +147,23 @@ The paper identifies a tension between **canonicity and modularity**. A canonica
 implicit resolution predictable, but two modules can each supply a different instance. The designs
 make different choices:
 
-- **Haskell:** Fully implicit resolution, global coherence, and one instance per type.
+- **Haskell:** Implicit resolution with a preference for a canonical instance and extensions that
+  relax the rules.
 - **Modular type classes, OCaml's modular implicits, Agda instance arguments, and Scala implicits:**
   Implicit resolution with canonicity scoped or dropped, at the cost of possible ambiguity.
-- **CGP:** No canonicity and no search. Each context selects its implementations explicitly.
+- **CGP:** Each context selects providers explicitly, and Rust resolves the resulting trait bounds.
 
 The [ML modules](./ml-modules.md) page develops the module side.
 
 ## How CGP expresses it
 
 CGP makes implementation choice explicit per context. A component has a consumer trait for callers
-and a provider trait for implementations. The consumer trait is an ordinary Rust trait; providers and
-wiring make several implementations selectable.
+and a provider trait for implementations. The consumer trait is an ordinary Rust trait; providers
+and wiring make several implementations selectable.
 
-### A component is a class; a provider is a first-class instance
+### Components define interfaces; providers name implementations {#a-component-is-a-class-a-provider-is-a-first-class-instance}
 
-Declaring a component declares a class:
+A component declares the interface callers use and generates a provider trait for implementations:
 
 ```rust
 #[cgp_component(AreaCalculator)]
@@ -195,20 +193,20 @@ pub struct Rectangle {
 delegate_components! { Rectangle { AreaCalculatorComponent: RectangleArea } }
 ```
 
-Implementing the provider trait on a provider type, rather than on the context, removes the
-one-instance-per-type limit. Each provider implements the provider trait for its *own* type, so
-coherence does not forbid a second provider. The wiring line takes the place of resolution: it states
-the choice that Haskell's compiler would find by searching for the canonical instance. A provider's
-`#[uses]` imports correspond to the class constraints that dictionary passing threads through, and
-the context carries them. `Rectangle` here is a
-**[value context](/docs/reference/glossary#value-context)**: the type being measured also carries
-the wiring, and the component is [self-targeted](/docs/reference/glossary#self-targeted-component).
+Separate provider types let alternative implementations coexist under Rust's coherence rules. The
+wiring selects `RectangleArea` for `Rectangle` ; another provider could implement the same provider
+trait on its own marker type.
 
-### Overlapping providers need no specificity rule
+This example still makes one choice for `Rectangle` . It is a
+[value context](/docs/reference/glossary#value-context) : the measured type also carries the wiring,
+and the component is [self-targeted](/docs/reference/glossary#self-targeted-component) . Independent
+choices for the same value type require moving selection to separate contexts, as the next example
+does.
 
-Haskell needs pragmas and a most-specific rule to permit overlap. CGP allows any number of
-overlapping providers, and a context chooses among them by name rather than by specificity. Three
-encoders that apply to overlapping sets of types compile side by side:
+### Providers can accept overlapping sets of types {#overlapping-providers-need-no-specificity-rule}
+
+CGP gives each encoder its own provider type, so their accepted value types can overlap. These
+providers illustrate distinct choices for display output, raw bytes, and hexadecimal output:
 
 ```rust
 #[cgp_component(Encoder)]
@@ -238,23 +236,19 @@ impl<Value: AsRef<[u8]>> Encoder<Value> {
 }
 ```
 
-As type-class instances these would conflict: `String` matches the first pair, and `Vec<u8>` matches
-the second. Even with `OVERLAPPING`, the compiler would need one instance to be strictly more
-specific. As providers, all three compile, because each implements the provider trait for its own
-marker type. CGP has no most-specific rule, so the overlap creates no ambiguity. The problem GHC
-warns about, overlap that silently produces incoherence, does not arise here, because CGP never
-infers the choice.
+These providers accept overlapping inputs: `String` supports display and byte access, while
+`Vec<u8>` supports both byte encoders. A Haskell-style instance system would need a way to
+distinguish those choices; constraints alone do not make one instance more specific. CGP keeps the
+choices separate through provider types and records the selection in wiring.
 
-The encoded value is the `Value` parameter rather than `Self`, so the contexts that wire these
-providers are **[environmental contexts](/docs/reference/glossary#environmental-context)**, types that
-stand for an application. The component is
-[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
+The encoded value is the `Value` parameter rather than `Self` , so the contexts that wire these
+providers are **[environmental contexts](/docs/reference/glossary#environmental-context)**, types
+that stand for an application. The component is
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component) .
 
-### Incoherent choices made explicit and local
+### Selecting a provider per context and value type {#incoherent-choices-made-explicit-and-local}
 
-CGP allows several implementations for one type, the situation that type-class languages guard
-against, and makes it safe by moving the choice from a global search to an explicit table in each
-context:
+Separate application contexts can select different providers for the same value type:
 
 ```rust
 pub struct AppA;
@@ -277,52 +271,50 @@ delegate_components! {
 }
 ```
 
-Each context selects one provider per component and per value type. Two contexts can therefore
-resolve the same type differently *on purpose*, while the choice within one context is unambiguous
-and fixed. `AppA` encodes a `Vec<u8>` as hexadecimal and `AppB` passes the bytes through, and each
-context is consistent on its own terms. In Haskell, different choices in different parts of a program
-are a hazard, and in Lean they produce a diamond. In CGP each choice is written in a context's table,
-so a reader can see which one applies. The `open` statement and the `@`-path keys are documented on
-the [`delegate_components!`](/docs/reference/macros/delegate_components) page.
+`AppA` encodes `Vec<u8>` as hexadecimal, while `AppB` returns its bytes directly. Each choice is
+fixed for the context, component, and value type. This makes the difference explicit without
+relaxing Rust's coherence rules. The `open` statement and `@` paths are explained in
+[`delegate_components!`](/docs/reference/macros/delegate_components) .
 
 ### Providers avoid orphan conflicts and newtypes
 
-A provider's `Self` is always a type that its crate owns, and this removes two common workarounds.
-The orphan rule is always satisfied, so a downstream crate can supply a provider for a component and
-a type it did not define. A second behavior for a type is a second provider, named directly, so the
-type does not need a newtype such as the `Sum` and `Product` wrappers around `Int`. The
-[Bypassing coherence](/docs/concepts/coherence) page shows both on the encoder example.
+A downstream crate can define a provider for a foreign component and value type by owning the
+provider's marker type. This satisfies the orphan rule without wrapping the value in a newtype.
+Alternative behaviors get their own provider types, rather than wrappers such as Haskell's `Sum` and
+`Product` . The [Bypassing coherence](/docs/concepts/coherence) page develops this pattern.
 
 ## What each approach costs
 
-Type classes are valued for principled, inferred overloading and for global uniqueness. The costs
-their users describe follow from the same rules. The one-instance-per-type limit requires the
-newtype workaround, which "breaks down when the type is embedded in another type"
-([Yang, 2014](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)).
-The orphan rule shapes module structure ([Queensland FP Lab](https://qfpl.io/posts/orphans-and-fundeps/)).
-Overlapping instances are subtle, and incoherent instances, by GHC's own account, "may cause
-unexpected results" ([GHC User's Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)).
-Haskell has no simple form of local instance, because local instances reintroduce a coherence
-problem.
+Canonical instances simplify calls but make alternative implementations harder to use. A newtype can
+select another instance, though that workaround becomes awkward when the wrapped type appears inside
+other types ([Yang,
+2014](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)). The
+orphan rule shapes module structure ([Queensland FP
+Lab](https://qfpl.io/posts/orphans-and-fundeps/)). Overlapping instances are subtle, and incoherent
+instances, by GHC's own account, "may cause unexpected results" ([GHC User's
+Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)). Local instances
+also require a way to preserve consistency when values cross scopes.
 
-In Agda and Lean, which do not enforce coherence, the costs appear as the diamond problem and the work
-of keeping overlapping instances definitionally equal ([Baanen, 2022](https://arxiv.org/pdf/2202.01629)).
-Some practitioners argue that the coherence bargain is the wrong one and prefer explicit dictionaries
-([Chiusano, *The trouble with typeclasses*](https://pchiusano.github.io/2018-02-13/typeclasses.html)).
-A recent survey compares where Swift, Rust, Scala, and Haskell each draw the line
-([Racordon, Flesselle & Pham, 2025](https://arxiv.org/pdf/2502.20546)).
+Systems that allow multiple instances must manage ambiguity or disagreement between resolution
+paths. Mathlib addresses this by keeping overlapping instances definitionally equal ([Baanen,
+2022](https://arxiv.org/pdf/2202.01629)). Some practitioners argue that the coherence bargain is the
+wrong one and prefer explicit dictionaries ([Chiusano, *The trouble with
+typeclasses*](https://pchiusano.github.io/2018-02-13/typeclasses.html)). A 2025 survey compares
+where Swift, Rust, Scala, and Haskell each draw the line ([Racordon, Flesselle & Pham,
+2025](https://arxiv.org/pdf/2502.20546)).
 
-CGP requires explicit wiring because it does not search for an implementation. Providers also need
-a component declared with [`#[cgp_component]`](/docs/reference/macros/cgp_component), adding code
-beyond a plain trait. Trait resolution adds compile-time work and can produce long errors over
-generated types. [`cargo cgp check`](/docs/cargo-cgp/check) identifies the root cause for errors it
-recognizes. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page compares these
-costs with simpler approaches.
+CGP requires explicit wiring to choose providers. Providers also need a component declared with
+[`#[cgp_component]`](/docs/reference/macros/cgp_component), adding code beyond a plain trait. Trait
+resolution adds compile-time work and can produce long errors over generated types.
+[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page compares these costs with simpler
+approaches.
 
 ## Where coherent type classes are the better choice
 
 Coherent type classes fit programs that need one canonical instance per type, such as the `Ord` used
-by a `Set`. The compiler keeps generic code consistent without wiring. In Rust, an ordinary trait
+by a `Set` . The compiler keeps generic code consistent without wiring. In Rust, an ordinary trait
 already provides that guarantee. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
 page starts from this simpler case.
 
@@ -331,25 +323,18 @@ context. Providers can also cover types the program does not own without orphan-
 
 ## What to expect that differs
 
-**CGP does not find the instance by type.** A context names the provider in its table. Because CGP
-does not search for an instance, it does not depend on each type having a unique one, so it can hold
-the overlapping and orphan implementations that Haskell forbids or treats as fragile.
+CGP changes where implementation choices are recorded:
 
-**Uniqueness is per context, not program-wide.** A type-class reader may expect that once a type has
-an instance, it is the instance everywhere. CGP guarantees one choice within a context and lets two
-contexts differ, so two applications can encode one type in two ways without conflict.
-
-**Selection can be keyed on the context rather than the type.** Haskell keys `Show Bool` on `Bool`,
-so there is one such instance. The encoder example moves the type being operated on into a
-parameter and keys the choice on the context. Changing the key makes per-context selection different
-from per-type instances, rather than a new name for them. CGP can also key the choice on the type, as
-the `Rectangle` example does, and then it has the same one-choice-per-type limit. The
-[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page works out the difference between the
-two arrangements.
-
-**Wiring checks take the place of instance resolution's checks.** A type-class compiler proves that
-an instance exists at each use. [`check_components!`](/docs/reference/macros/check_components)
-proves that a context's wiring is complete, and it names any missing dependency at the wiring site.
+- **Wiring selects providers.** Rust still resolves trait bounds, but a context names the provider
+  instead of relying on a globally canonical implementation for the value type.
+- **Consistency is scoped to the context and key.** Two contexts can encode the same type
+  differently. Code that needs shared behavior must use the same selection.
+- **Context placement controls flexibility.** Wiring on `Rectangle` gives that type one choice.
+  Wiring on `AppA` and `AppB`, with the value passed separately, permits independent choices. The
+  [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) explains these arrangements.
+- **Explicit checks validate dependencies early.** A delegation entry alone does not prove that
+  its provider can be used. [`check_components!`](/docs/reference/macros/check_components) asserts
+  the required components and parameters beside the wiring; ordinary calls also force checking.
 
 ## Where to go next
 
