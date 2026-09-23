@@ -6,19 +6,16 @@ description: 'CGP read against specialization, named impls, dictionary passing, 
 
 # Rust's own proposals
 
-CGP provides, as a library, part of what several proposals to relax Rust's
-[coherence](/docs/reference/glossary#coherence) rules would add to the language. It is a language
-extension for Rust, with pluggable trait implementations at compile-time, implemented as a library
-on stable Rust whose consumer traits are ordinary Rust traits; the [Introduction](/docs/) covers the
-basics. For readers who follow *specialization*, the *dictionary-passing* account of traits, *named
-or incoherent impls*, and *contexts and capabilities*, this page shows which part of each proposal
-CGP provides, maps the constructs one by one, and states where CGP cannot follow the proposals.
+CGP overlaps with Rust proposals for trait selection and values supplied by a caller's environment.
+It is a language extension built as a [stable Rust library](/docs/), with pluggable trait
+implementations at compile time and ordinary Rust consumer traits. This page compares CGP with
+specialization, dictionary passing, named impls, and contexts and capabilities. It shows where the
+designs meet and what CGP cannot express.
 
 ## In your terms
 
-A **context** is the type a CGP method runs on, supplying its data through fields and its
-implementations through wiring. In most CGP code it is a type you define to stand for an
-application.
+A **context** is the type a CGP method runs on. It supplies data through fields and chooses
+implementations through wiring. Often it is a type defined to represent an application.
 
 The proposals' constructs map onto CGP as follows:
 
@@ -33,7 +30,8 @@ The proposals' constructs map onto CGP as follows:
 
 ## The idea, briefly
 
-Every proposal on this page relaxes one or both of the coherence rules in the Rust Reference. The
+The proposals on this page explore changes to trait selection or how values reach generic code.
+Rust's coherence rules set the starting point. The
 *[orphan rule](/docs/reference/glossary#orphan-rule)* says an `impl<P1..=Pn> Trait<T1..=Tn> for T0`
 is valid only if `Trait` is a local trait, or at least one of the types `T0..=Tn` is a local type and
 no uncovered type parameter appears before it. The *overlap rule* rejects two implementations that
@@ -41,8 +39,8 @@ no uncovered type parameter appears before it. The *overlap rule* rejects two im
 ([Rust Reference](https://doc.rust-lang.org/reference/items/implementations.html);
 [RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)).
 
-Together the two rules guarantee that any trait lookup finds exactly one impl. That guarantee lets
-generic code resolve `T: Hash` transitively and keeps a `HashMap<K, V>` sound. The
+Together the rules give each trait lookup one impl. Generic code can therefore use `T: Hash`
+consistently, including inside a `HashMap<K, V>`. The
 [type classes](./type-classes.md) page covers why coherence exists in the wider type-class
 tradition; this page takes it as given.
 
@@ -168,8 +166,9 @@ imports decide which implementation it uses.
 
 ## How CGP expresses it
 
-The correspondence can be stated construct by construct. The main difference is where bindings live. The proposals bind an impl at a call site or
-within a scope, while CGP records every binding in one place: the context.
+CGP records provider choices on a context. Named-impl designs can instead select an impl at a call
+site, and capability designs can bind a value within a scope. The examples below show the practical
+effect of that difference.
 
 ### A named impl is a provider
 
@@ -237,12 +236,11 @@ delegate_components! {
 }
 ```
 
-CGP provides the proposal's incoherence with a different resolution point. Boxy and Cairo resolve at
-the call site, explicitly or from what is in scope. CGP resolves at the context, so every call
-through `ApiServer` uses the same choice. This also answers the `HashMap` concern: a context selects
-one provider per component, so all code sharing a context uses one impl. The proposal gets the same
-property by moving `Hash` onto the type definition. The [type classes](./type-classes.md) page
-develops this comparison with Haskell's incoherent instances.
+CGP makes the choice on the context, so every call through `ApiServer` uses the same provider.
+Boxy's design selects explicitly at a call, while Cairo infers from the impls in scope. A context
+selects one provider per component, keeping code that shares that context consistent. The proposal
+addresses the `HashMap` concern by putting `Hash` on the type definition. The
+[type classes](./type-classes.md) page develops the comparison with Haskell's incoherent instances.
 
 ### Passing an impl explicitly is a higher-order provider
 
@@ -326,42 +324,34 @@ instantiation order: the context is one stable root from which all of them are r
 
 ## What each approach costs
 
-The proposals are language changes that have not shipped, and their authors name their costs.
-Specialization has an accepted RFC, a soundness hole open since 2016, and no announced path to
-stabilization ([tracking issue #31844](https://github.com/rust-lang/rust/issues/31844)). The
-named-impl and dictionary-passing designs are blog posts and design sketches. Their authors list the
-open problems: syntax, ergonomics, migration of the existing ecosystem, and the loss of the
-guarantees that coherence provides automatically
+These proposals have different levels of maturity and different open questions. Specialization has
+an accepted RFC but remains unstable because of a soundness problem
+([tracking issue #31844](https://github.com/rust-lang/rust/issues/31844)). Named impls and dictionary
+passing remain design sketches whose authors discuss syntax, ergonomics, migration, and coherence
 ([Boxy](https://www.boxyuwu.blog/posts/an-incoherent-rust/);
 [Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)). Contexts and
-capabilities is a research direction from 2021, with open questions about thread boundaries and
-scope ([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)). Cairo's
-resolution from scope means that a caller must import every impl a generic impl needs, directly or
-indirectly, and two call sites in one project can resolve the same type differently.
+capabilities has open questions about thread boundaries and scope
+([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)). Cairo's
+scope-based resolution requires the caller to import the needed impls; two call sites can then
+resolve the same type differently.
 
-CGP's costs are the ordinary ones. A provider trait must be defined through
-[`#[cgp_component]`](/docs/reference/macros/cgp_component), so CGP cannot retrofit an existing
-foreign trait such as `serde::Serialize` without a parallel component, while a language change would
-apply to every trait. The wiring is code that someone writes and reads, where a language feature
-would infer it. Trait resolution over the wiring adds compile-time work. The raw diagnostics are
-trait-solver output over generated types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the
-root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape
-every class. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs
-against the alternatives in full.
+CGP requires a component definition and explicit wiring. A provider trait created by
+[`#[cgp_component]`](/docs/reference/macros/cgp_component) cannot retrofit a foreign trait such as
+`serde::Serialize` without a parallel component. Wiring adds compile-time work and can produce long
+trait errors over generated types. [`cargo cgp check`](/docs/cargo-cgp/check) identifies the root
+cause for errors it recognizes. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page
+weighs these costs against simpler approaches.
 
 ## Where a proposal, or a smaller tool, is the better choice
 
-A smaller tool fits a program that needs only a specialized fast path for one type under a blanket
-impl. `min_specialization` on nightly, or a manual dispatch technique on stable, handles that case,
-while CGP would require wiring that specialization infers. Coherence as it stands fits a program
-that needs one globally consistent implementation, such as the `Ord` that a map's keys rely on;
-CGP's per-context choice does not improve that arrangement. A program that can wait for a language
-feature may get one that infers the impl from scope or nests bindings dynamically, which would
-express these patterns with less ceremony than a library can.
+A smaller tool fits a single specialized fast path under a blanket impl. `min_specialization` on
+nightly, or manual dispatch on stable Rust, handles that case without CGP wiring. Ordinary coherence
+fits a program that needs one global implementation, such as the `Ord` used by map keys. A future
+language feature may express scoped or inferred choices with less code than a library can.
 
-CGP fits a program that needs several equally valid impls chosen per application, impls for types
-the program does not own, or environment values that reach deep code without extra parameters. It
-provides these on stable Rust today, and its explicit wiring is the cost.
+CGP fits programs that need several valid implementations chosen per application, providers for
+foreign types, or environment values available in deep code. It offers these choices on stable Rust
+through explicit wiring.
 
 ## What to expect that differs
 
