@@ -39,8 +39,8 @@ pub mod a_component_is_a_class {
     }
 }
 
-/// ## Overlapping instances are the default, with no heuristic
-/// ## Incoherent instances made deterministic and local
+/// ## Overlapping providers need no specificity rule
+/// ## Incoherent choices made explicit and local
 pub mod overlapping_instances {
     use core::fmt::Display;
 

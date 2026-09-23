@@ -117,7 +117,7 @@ pub mod passing_an_impl_explicitly {
     }
 }
 
-/// ## A capability is a context field; the `with` block is the context
+/// ## A `with` clause becomes a context field
 pub mod a_capability_is_a_context_field {
     use cgp::prelude::*;
 

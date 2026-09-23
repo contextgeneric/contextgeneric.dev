@@ -22,7 +22,7 @@ pub mod a_types_shape_becomes_a_type {
     }
 }
 
-/// ## Reflection-driven serialization in the trait system
+/// ## Serializing through the trait system
 pub mod reflection_driven_serialization {
     use core::fmt::Debug;
 

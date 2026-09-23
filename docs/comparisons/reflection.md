@@ -6,21 +6,21 @@ description: "CGP's type-level shapes read against Bevy's runtime reflection, Zi
 
 # Reflection and compile-time introspection
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
-library on stable Rust in which a trait can have several named implementations and each context
-selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who thinks in
-`TypeInfo`, `@typeInfo`, or `TypeId::field`: Bevy's runtime reflection, Zig's `comptime`, Go or
-Java reflection, or Rust's own compile-time reflection effort. CGP reaches the same payoff as
-compile-time reflection, one generic routine that works over any type's fields, but takes the
-structure not as data a routine inspects but as *types* the trait system resolves against. The page
-covers the spectrum from runtime to compile-time reflection, where CGP sits on it, what the type-level
-encoding buys and costs, and what to expect that differs.
+CGP lets one generic routine work over any type's fields, as compile-time reflection does, but it
+represents a type's structure as types rather than as data a routine inspects. It is a language
+extension for Rust, with pluggable trait implementations at compile-time, implemented as a library
+on stable Rust whose consumer traits are ordinary Rust traits; the [Introduction](/docs/) covers the
+basics. For readers familiar with Bevy's `TypeInfo`, Zig's `@typeInfo`, Go or Java reflection, or
+Rust's `TypeId::field` work, this page places CGP among runtime and compile-time reflection systems,
+compares a field writer in each style, and states what the type-level encoding gains and costs.
 
 ## In your terms
 
-A **context** in CGP is the type the method runs on, which supplies the values it needs as its
-fields. On this page the context is an application type that wires how each field type is written,
-and the reflected struct is a value the context operates on.
+A **context** is the type a CGP method runs on, supplying its data through fields and its
+implementations through wiring. On this page the context is an application type that chooses how
+each field type is written, and the struct being reflected over is a value passed to it.
+
+The reflection vocabulary maps onto CGP by role:
 
 | In a reflection system | In CGP |
 | --- | --- |
@@ -33,37 +33,43 @@ and the reflected struct is a value the context operates on.
 
 ## The idea, briefly
 
-Reflection lets one piece of code work over the *shape* of a type it was not written for. Serializers,
-DI containers, ORMs, editors, and debuggers all need to walk an arbitrary type's fields by name and
-type, and reflection supplies that by making a type's structure available as something the program can
-read. Systems span a spectrum. At the runtime end a type carries metadata the program inspects while it
-runs (Java, Go, C#, Python, Bevy). In the middle a derive generates a static descriptor that runtime
-code walks (Rust's facet). At the compile-time end the compiler evaluates the introspection and emits
-only the specialized result (Zig's `comptime`, D, C++26's static reflection
-([P2996](https://isocpp.org/files/papers/P2996R13.html)), and Rust's nightly effort). CGP sits just
-past the compile-time end, where the structure is not even a compile-time *value* but a *type*.
+Reflection lets code work over the shape of a type it was not written for. Serializers, DI
+containers, ORMs, editors, and debuggers all walk an arbitrary type's fields by name and type, and
+reflection makes that structure available for the program to read. Systems differ in when the
+structure is read:
+
+- **At runtime:** A type carries metadata that the program inspects while it runs, as in Java, Go,
+  C#, Python, and Bevy.
+- **Through a generated descriptor:** A derive generates a static descriptor that runtime code
+  walks, as in Rust's facet crate.
+- **At compile time:** The compiler evaluates the introspection and emits only the specialized
+  result, as in Zig's `comptime`, D, C++26's static reflection
+  ([P2996](https://isocpp.org/files/papers/P2996R13.html)), and Rust's nightly work.
+
+CGP belongs with the compile-time systems, with one difference: the structure is a type rather than
+a compile-time value.
 
 ### Runtime reflection: Bevy
 
-`bevy_reflect` is the prominent Rust runtime-reflection system. A type opts in with
-`#[derive(Reflect)]`, after which a value can be handled as a `Box<dyn Reflect>`, accessed by string
-field name through the `Struct` trait, and downcast back to its concrete type at runtime
-([`bevy_reflect` documentation](https://docs.rs/bevy_reflect/latest/bevy_reflect/)). Behind the
-dynamic access is `TypeInfo`, a description of a type's shape available without an instance, and a
-runtime `TypeRegistry` that maps types to their `TypeInfo` and to associated behavior, so Bevy can
-serialize an arbitrary registered component into a scene or drive an editor over types it was never
-specialized for ([`TypeRegistry`](https://docs.rs/bevy/latest/bevy/reflect/struct.TypeRegistry.html)).
-Every reflective access goes through dynamic dispatch, a downcast, or a registry lookup, and a
-mismatch surfaces at run time as a `None` or a panic.
+`bevy_reflect` is a widely used runtime-reflection system in Rust. A type opts in with
+`#[derive(Reflect)]`. A value can then be handled as a `Box<dyn Reflect>`, accessed by string field
+name through the `Struct` trait, and downcast to its concrete type at runtime
+([`bevy_reflect` documentation](https://docs.rs/bevy_reflect/latest/bevy_reflect/)). `TypeInfo`
+describes a type's shape without an instance, and a runtime `TypeRegistry` maps types to their
+`TypeInfo` and to associated behavior. With these, Bevy can serialize any registered component into
+a scene or drive an editor over types it was not specialized for
+([`TypeRegistry`](https://docs.rs/bevy/latest/bevy/reflect/struct.TypeRegistry.html)). Every
+reflective access goes through dynamic dispatch, a downcast, or a registry lookup, so a mismatch
+surfaces at runtime as a `None` or a panic.
 
 ### Compile-time metaprogramming: Zig's `comptime`
 
-Zig's `comptime` is the reference design for compile-time reflection. Types are ordinary compile-time
-values, `@typeInfo(T)` decomposes a type into a `std.builtin.Type` describing its shape, `inline for`
-unrolls a loop over a compile-time collection, and `@field` accesses a field by a compile-time-known
-name ([Zig language reference](https://ziglang.org/documentation/master/#typeInfo)). Since Zig 0.14
-the type tags are lowercase, so a struct is matched as `.@"struct"`. This writes any struct as a
-JSON-like object and compiles with Zig 0.16:
+Zig's `comptime` is the usual reference design for compile-time reflection. Types are ordinary
+compile-time values: `@typeInfo(T)` decomposes a type into a `std.builtin.Type` describing its
+shape, `inline for` unrolls a loop over a compile-time collection, and `@field` accesses a field by a
+name known at compile time ([Zig language reference](https://ziglang.org/documentation/master/#typeInfo)).
+From Zig 0.14 the type tags are lowercase, so a struct is matched as `.@"struct"`. This function
+writes any struct as a JSON-like object and compiles with Zig 0.16:
 
 ```zig
 const std = @import("std");
@@ -78,23 +84,26 @@ fn jsonStringify(value: anytype, writer: anytype) !void {
 }
 ```
 
-Because `inline for` unrolls at compile time and `@field` resolves statically, it compiles to the
-code a hand-written serializer would. `@Type` runs the introspection in reverse and constructs a type
-from a `std.builtin.Type` value, which CGP cannot do. The defining trade of `comptime` is that it is
-zero-cost but checked late: a `comptime` routine is fully type-checked only when applied to a concrete
-type, so an error surfaces at the use site, per instantiation, as with C++ templates.
+The loop unrolls at compile time and `@field` resolves statically, so the function compiles to the
+code a hand-written serializer would contain. `@Type` runs the introspection in reverse: it
+constructs a type from a `std.builtin.Type` value, which CGP cannot do.
+
+`comptime` costs nothing at runtime, but its checks happen late. A `comptime` routine is fully
+type-checked only when it is applied to a concrete type, so an error surfaces at the use site, once
+per instantiation, as with C++ templates.
 
 ### Compile-time reflection comes to Rust
 
-Rust filled the absence of reflection with derive macros that generate specialized code per type. The
-[facet](https://fasterthanli.me/articles/introducing-facet-reflection-for-rust) crate objects to the
-cost: serde's derives monomorphize the serializer anew for every type, so facet's derive generates
-*data* instead, a `const SHAPE` descriptor that shared runtime reflection code walks once.
+Rust programs have used derive macros that generate specialized code per type in place of
+reflection. The [facet](https://fasterthanli.me/articles/introducing-facet-reflection-for-rust)
+crate responds to the cost of that approach. serde's derives monomorphize the serializer anew for
+every type, so facet's derive generates *data* instead: a `const SHAPE` descriptor that shared
+runtime reflection code walks.
 
-The nightly compiler effort is the more consequential development, and it is unstable and will
-change. Under `#![feature(type_info)]`, `TypeId::of::<T>()` gains query methods that reach a type's
-variants and fields by source order, each `FieldId` answering `name()`, `type_id()`, and `offset()`.
-The source's own doc tests read:
+The nightly compiler work goes further, and it is unstable and subject to change. Under
+`#![feature(type_info)]`, `TypeId::of::<T>()` gains query methods that reach a type's variants and
+fields in source order. Each `FieldId` answers `name()`, `type_id()`, and `offset()`. The source's
+own doc tests read:
 
 ```rust
 #![feature(type_info)]
@@ -107,30 +116,32 @@ assert_eq!(const { TypeId::of::<Point>().field(0, 0).name() }, "x");
 assert_eq!(const { TypeId::of::<Point>().field(0, 0).type_id() }, TypeId::of::<u32>());
 ```
 
-The single most important design decision is that this reflection is callable *only at compile time*:
-every query carries a `#[rustc_comptime]` marker, because supporting runtime calls would require "some
-global table somewhere that maps all `TypeId`s to their repr"
+These queries can be called only at compile time, and that restriction shapes the whole design.
+Each query carries a `#[rustc_comptime]` marker, because supporting runtime calls would require
+"some global table somewhere that maps all `TypeId`s to their repr"
 ([Rust project goal, *Reflection and comptime*](https://rust-lang.github.io/rust-project-goals/2026/reflection-and-comptime.html)).
-The goal names Zig as the model and declines full `comptime` for now, estimating the architectural
-change at more than five years away. The [tracking issue](https://github.com/rust-lang/rust/issues/146922)
-lists every stabilization step as open, and the plan runs from 2026 to 2028, with the ambition that
-crates like Bevy will work with arbitrary types instead of requiring a derive. Everything in this
-subsection was read from the compiler source and tracking issues on the day of writing; check them
-before relying on a detail.
+The goal names Zig as its model but does not pursue full `comptime` for now, estimating that
+architectural change as more than five years away. The
+[tracking issue](https://github.com/rust-lang/rust/issues/146922) lists every stabilization step as
+open. The plan runs from 2026 to 2028, with the aim that crates such as Bevy can work with arbitrary
+types instead of requiring a derive. The details in this subsection come from the compiler source and
+the tracking issue as they stood when this page was written, so check them before relying on one.
 
 ## How CGP expresses it
 
-CGP reaches compile-time reflection's payoff by a different route. It encodes a type's structure as
-types and processes them with trait resolution, so the type system does the "reflection" rather than a
-routine inspecting a descriptor. The worked example below is a self-contained field writer modeled on
-[`cgp-serde`](https://github.com/contextgeneric/cgp-serde)'s `SerializeFields` provider, which does the
-same over serde's `Serializer`. Its context is an **[environmental context](/docs/reference/glossary#environmental-context)**: the `App` that wires how
-each field type is written stands for an application, and the written `Value` is a parameter.
+CGP encodes a type's structure as types and processes it with trait resolution. The trait system
+therefore does the work that a reflection routine does when it inspects a descriptor. The example
+below is a self-contained field writer modeled on
+[`cgp-serde`](https://github.com/contextgeneric/cgp-serde)'s `SerializeFields` provider, which does
+the same over serde's `Serializer`. Its context is an
+[environmental context](/docs/reference/glossary#environmental-context): `App` stands for an
+application and chooses how each field type is written. The written `Value` is a type parameter, so
+the component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
 
 ### A type's shape becomes a type, not a descriptor
 
-`#[derive(HasFields)]` lifts a struct's structure into the type system as a type-level list, CGP's form
-of the `TypeInfo`, `Shape`, and `FieldId` descriptors the reflection systems build:
+`#[derive(HasFields)]` represents a struct's structure as a type-level list. The list plays the role
+of the `TypeInfo`, `Shape`, and `FieldId` descriptors above:
 
 ```rust
 #[derive(HasFields)]
@@ -148,15 +159,15 @@ pub struct Config {
 // }
 ```
 
-This is the same information a descriptor carries, each field's name and type, but it is a *type*.
-The Rust MVP's `FieldId` answers `type_id()` with an opaque `TypeId` value. CGP's `Field<Tag, Value>`
-carries the field's actual type as a type parameter, and that difference lets CGP dispatch on
-it. The [Extensible records](/docs/concepts/extensible-records) page develops the derive.
+The list carries the same information as a descriptor, each field's name and type, but it is a
+*type*. The Rust MVP's `FieldId` answers `type_id()` with an opaque `TypeId` value. CGP's
+`Field<Tag, Value>` carries the field's actual type as a type parameter, so CGP can dispatch on it.
+The [Extensible records](/docs/concepts/extensible-records) page develops the derive.
 
-### Reflection-driven serialization in the trait system
+### Serializing through the trait system
 
-One generic writer works over any `HasFields` type, the counterpart of the Zig `jsonStringify`
-above. It delegates to a trait that recurses over the field list:
+One generic writer works over any `HasFields` type, as the Zig `jsonStringify` above works over any
+struct. It delegates to a trait that recurses over the field list:
 
 ```rust
 #[cgp_component(ValueWriter)]
@@ -176,9 +187,9 @@ where
 }
 ```
 
-The `FieldsWriter` trait is the `inline for` of CGP: a recursion over the
-[`Cons`/`Nil`](/docs/reference/types/cons) list, with a step for a non-empty list and a base case for
-the empty one:
+The `FieldsWriter` trait takes the place of `inline for`. It recurses over the
+[`Cons`/`Nil`](/docs/reference/types/cons) list, with one impl for a non-empty list and a base case
+for the empty one:
 
 ```rust
 pub trait FieldsWriter<Context, Value> {
@@ -208,13 +219,17 @@ impl<Context, Value> FieldsWriter<Context, Value> for Nil {
 }
 ```
 
-Every reflection concept has a counterpart here. The recursion over `Cons`/`Nil` is the loop over the
-field list. `Tag::VALUE`, recovered through the
-[`StaticString`](/docs/reference/traits/formatting/static_string) trait, is the `field.name` a
-reflection system reads, produced with no runtime metadata. `value.get_field(PhantomData)` is the
-by-name access, resolved statically through [`HasField`](/docs/reference/traits/field-access/has_field).
-And `Context: CanWriteValue<FieldValue>` is the recursive step: writing each field's value by
-dispatching on the field's type, through the context's wiring:
+Each step of a reflective serializer has a counterpart in this code:
+
+- **The loop over fields:** The recursion over `Cons` and `Nil`.
+- **The field name:** `Tag::VALUE`, recovered through the
+  [`StaticString`](/docs/reference/traits/formatting/static_string) trait without runtime metadata.
+- **Access by name:** `value.get_field(PhantomData)`, resolved statically through
+  [`HasField`](/docs/reference/traits/field-access/has_field).
+- **Writing each field's value:** The `Context: CanWriteValue<FieldValue>` bound, which dispatches
+  on the field's type through the context's wiring.
+
+The context's wiring then chooses a writer for each type:
 
 ```rust
 delegate_components! {
@@ -229,122 +244,136 @@ delegate_components! {
 App.write_value(&config);   // {"host": "localhost", "port": 8080}
 ```
 
-The struct also derives `HasField` so the recursion can read each field; `WriteWithDebug` formats a
-value with `Debug`. `cgp-serde`'s [`SerializeFields`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde/src/providers/fields.rs)
-is this same recursion over a `serde::Serializer`, and its deserialization dual reads a field name as
-a runtime string and compares it against each field's compile-time `Tag::VALUE`.
+The struct also derives `HasField` so the recursion can read each field, and `WriteWithDebug`
+formats a value with `Debug`. `cgp-serde`'s
+[`SerializeFields`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde/src/providers/fields.rs)
+performs the same recursion over a `serde::Serializer`. Its deserialization counterpart reads a
+field name as a runtime string and compares it with each field's compile-time `Tag::VALUE`.
 
 ### Against facet and the reflection MVP
 
-Four approaches solve the same problem, writing serialization once rather than per type, and comparing
-what each turns a type's shape into shows where CGP sits. serde's derive generates *code*, a bespoke
-impl per struct. facet generates *data*, a `const SHAPE` walked by a shared runtime routine, which
-avoids re-monomorphizing per type at the cost of runtime reflection work. The Rust MVP has the
-compiler provide the data, consumed by `const`-evaluated code with no derive. CGP generates
-*type-level data*, walked by a shared compile-time routine that monomorphizes to direct code.
+serde, facet, the Rust MVP, and CGP all let serialization be written once rather than per type.
+They differ in what they turn a type's shape into and in what walks the result:
 
-Two differences make CGP's position distinct. First, the field's type is preserved as a type. Facet's
-`Shape` and the MVP's `FieldId::type_id()` carry it as an opaque descriptor from which a generic
-function cannot be instantiated directly, so recursion into a field's own type is mediated by stored
-function pointers or is not yet expressible. CGP's `Field<Tag, FieldValue>` carries `FieldValue` as a
-real type parameter, so `WriteFields` can require `Context: CanWriteValue<FieldValue>` and recurse
-into a fully typed, statically checked writer for the field's type. Second, CGP dispatches each field
-through the *context's* wiring, so the same type is written differently under different application
-contexts, the [per-context choice](/docs/concepts/coherence) that facet, serde, and the MVP do not
-have.
+| Approach | What the type's shape becomes | What processes it |
+| --- | --- | --- |
+| serde | Code: a separate generated impl per struct | Nothing; the generated impl is the serializer |
+| facet | Data: a `const SHAPE` generated by a derive | A shared routine, at runtime |
+| Rust MVP | Data provided by the compiler, without a derive | `const`-evaluated code, at compile time |
+| CGP | Type-level data generated by a derive | A shared trait recursion, monomorphized to direct code |
 
-The costs are equally clear. Unlike facet, CGP does not solve the [monomorphization](/docs/reference/glossary#monomorphization) problem: the
-recursion instantiates per field list, so it produces specialized code per type as serde's output
-does. What it saves is the authoring duplication, and what it gains is configurability, not binary
-size. And unlike the Rust MVP, CGP requires the `#[derive(HasFields)]` opt-in and cannot see a foreign
-type that did not derive it.
+CGP's position differs from facet's and the MVP's in two ways. The field's type stays a type.
+facet's `Shape` and the MVP's `FieldId::type_id()` carry it as an opaque descriptor, and a generic
+function cannot be instantiated directly from a descriptor, so recursing into a field's own type
+needs stored function pointers or is not yet expressible. CGP's `Field<Tag, FieldValue>` carries
+`FieldValue` as a real type parameter. `WriteFields` can therefore require
+`Context: CanWriteValue<FieldValue>` and recurse into a typed, statically checked writer for the
+field's type. CGP also dispatches each field through the *context's* wiring, so the same type can be
+written differently under different application contexts. facet, serde, and the MVP do not provide
+this [per-context choice](/docs/concepts/coherence).
 
-### Checked when the code is written, not when it is instantiated
+The encoding also has costs. Unlike facet, CGP does not reduce
+[monomorphization](/docs/reference/glossary#monomorphization): the recursion is instantiated per
+field list, so it produces specialized code per type, as serde's output does. CGP removes the
+duplicated authoring and adds configurability, but it does not reduce binary size. Unlike the Rust
+MVP, CGP requires the `#[derive(HasFields)]` opt-in and cannot see a foreign type that does not
+derive it.
+
+### Checked where the code is written, not where it is instantiated
 
 Zig's `comptime` and the MVP's `const fn` reflection are checked at instantiation: a routine is fully
-checked only when applied to a concrete type, so an error surfaces at the use site. CGP's generic code
-is checked at its definition. The `where` clause on the `FieldsWriter` impl is verified once against
-the bounds, and [`check_components!`](/docs/reference/macros/check_components) verifies that a context
-supplies everything its wiring transitively needs. This is the modular checking traits give and
-templates do not, and the [type classes](./type-classes.md) page draws it out against Haskell's
-neighbours.
+checked only when it is applied to a concrete type, so an error surfaces at the use site. CGP's
+generic code is checked where it is defined. The compiler checks the `FieldsWriter` impl once against
+the bounds in its `where` clause, as it checks any generic Rust impl. Wiring is
+[lazy](/docs/concepts/check-traits), so [`check_components!`](/docs/reference/macros/check_components)
+verifies that a context supplies everything its wiring transitively needs and reports a missing
+dependency at the wiring site. Trait bounds give this modular checking, and templates do not. The
+[type classes](./type-classes.md) page compares CGP with the type-class systems that Rust's traits
+come from.
 
-### Reflection that also selects behavior and configures types
+### Selecting behavior and types through the same wiring
 
-CGP applies the same type-level idea to two things a structural reflection facility does not directly
-address. Frameworks do select behavior by reflection, Spring by annotations and Bevy through
-`TypeData` in its registry, but as a runtime, registry-mediated act layered on the introspection. CGP
-folds behavior selection into the same compile-time table that carries its structural information, and
-the [`#[cgp_type]`](/docs/reference/macros/cgp_type) machinery lets a context fix an abstract *type*
-through that table too. The `Context: CanWriteValue<FieldValue>` bound above shows it: the reflection
-that walks the shape and the wiring that interprets each field are one mechanism.
+CGP uses the same type-level mechanism for two jobs that a structural reflection facility does not
+handle directly. Frameworks do select behavior through reflection, Spring through annotations and
+Bevy through `TypeData` in its registry, but they do so at runtime, through a registry built on top
+of the introspection. CGP selects behavior at compile time through the context's wiring, which trait
+resolution processes together with the structure. The [`#[cgp_type]`](/docs/reference/macros/cgp_type)
+machinery also lets a context fix an abstract *type* through the same wiring. The
+`Context: CanWriteValue<FieldValue>` bound above shows the combination: one mechanism walks the shape
+and chooses how each field is written.
 
 ## What each approach costs
 
-Reflection is relied upon because a framework written once works over every user type, and runtime
-reflection additionally works on types the framework author never saw. Compile-time reflection is
-valued for "the expressiveness of runtime reflection with the performance of hand-written code"
-([*Compile-Time Reflection with @typeInfo*](https://hive.blog/hive-196387/@scipio/learn-zig-series-32-compile-time-reflection-with-typeinfo)),
-and facet and the Rust effort are motivated by cutting derive codegen's compile-time and binary cost.
-The costs, as their users state them, split by when the reflection runs. Runtime reflection pays in
-performance, since Go's `encoding/json` re-inspects types on every call
-([*The Hidden Cost of Reflection in Go*](https://dev.to/devflex-pro/the-hidden-cost-of-reflection-in-go-why-your-code-is-slower-than-you-think-41ee)),
-in type safety, since a field named by a string tag fails at runtime
-([Go reflection guide](https://medium.com/@mojimich2015/golang-reflection-the-guide-to-runtime-type-inspection-manipulation-and-best-practices-303087684576)),
-and in tooling, since renaming a field silently breaks reflective access. Compile-time reflection
-answers those and trades them for instantiation-time error messages, added compile-time work, and, as
-the Rust tracking issue itself asks, the risk of "monomorphization-time errors" deep inside
-instantiation.
+Reflection is widely used because a framework written once works over every user type, and runtime
+reflection also works on types the framework author never saw. Compile-time reflection is valued for
+"the expressiveness of runtime reflection with the performance of hand-written code"
+([*Compile-Time Reflection with @typeInfo*](https://hive.blog/hive-196387/@scipio/learn-zig-series-32-compile-time-reflection-with-typeinfo)).
+facet and the Rust effort aim to reduce the compile-time and binary-size cost of derive-generated
+code.
 
-CGP's costs are the ordinary ones plus two specific to this page. It introspects only types that opted
-in by deriving its machinery, and only at compile time. It does not reduce the specialized code per
-type the way facet does. Its wiring is code somebody writes. And its raw diagnostics are trait-solver
-output over generated types, which for a deep field recursion can be long:
-[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+The costs users describe depend on when the reflection runs. Runtime reflection costs performance,
+because Go's `encoding/json` re-inspects types on every call
+([*The Hidden Cost of Reflection in Go*](https://dev.to/devflex-pro/the-hidden-cost-of-reflection-in-go-why-your-code-is-slower-than-you-think-41ee)).
+It weakens type safety, because a field named by a string tag fails at runtime
+([Go reflection guide](https://medium.com/@mojimich2015/golang-reflection-the-guide-to-runtime-type-inspection-manipulation-and-best-practices-303087684576)).
+It also affects tooling, because renaming a field can silently break reflective access. Compile-time
+reflection addresses these costs but has its own: errors appear at instantiation, compilation does
+more work, and, as the Rust tracking issue itself asks, "monomorphization-time errors" can arise deep
+inside an instantiation.
+
+Two of CGP's costs are specific to this comparison. CGP introspects only types that derive its
+machinery, and only at compile time. It also does not reduce the specialized code per type, as facet
+does. Its other costs are the ordinary ones: the wiring is code someone writes and maintains, and the
+raw diagnostics are trait-solver output over generated types, which can be long for a deep field
+recursion. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
+recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs against the
 alternatives.
 
 ## Where reflection is the better choice
 
-When a program must inspect types at runtime, to deserialize into a type chosen from a config file,
-serialize a heterogeneous registry of components, build an editor or a debugger over live values, or
-reflect over a foreign type that cannot be made to derive anything, runtime reflection is the right
-and only tool of the two, and `bevy_reflect` or facet is the tool to reach for. When a program needs to
-construct a new nominal type from computed structure, Zig's `@Type` and C++26's splicers do what CGP's
-type-level lists cannot. CGP is the better tool when a program wants generic-over-structure code that
-costs nothing at runtime, is checked when written, recurses into field types with full type
-information, and drives behavior and type selection as well as data walking.
+Runtime reflection is the right tool when a program must inspect types at runtime, which CGP cannot
+do. Examples include deserializing into a type chosen from a configuration file, serializing a
+heterogeneous registry of components, building an editor or debugger over live values, and
+reflecting over a foreign type that cannot be made to derive anything. `bevy_reflect` and facet serve
+these cases. A program that must construct a new nominal type from computed structure needs Zig's
+`@Type` or C++26's splicers, since CGP's type-level lists cannot do it. CGP fits generic code over a
+type's structure that costs nothing at runtime, is checked where it is written, recurses into field
+types with full type information, and selects behavior and types as well as walking data.
 
-CGP and Rust's emerging compile-time reflection are more complementary than competing. The MVP
-produces reflection as *const values*, which value-reflection libraries consume natively. CGP consumes
-reflection as *types*, a different projection the MVP does not supply, so for CGP to shed its derive
-the compiler would need to expose a type's shape as types. Until then CGP's derive stands in for the
-compiler-provided reflection Rust is still building.
+CGP and Rust's emerging compile-time reflection complement each other more than they compete. The
+MVP produces reflection as *const values*, which libraries that reflect over values can consume
+directly. CGP consumes reflection as *types*, which the MVP does not supply. For CGP to drop its
+derive, the compiler would need to expose a type's shape as types. Until then, CGP's derive stands in
+for that compiler-provided view.
 
 ## What to expect that differs
 
-**There is no reflection API.** No `TypeInfo` to hold, no field list to iterate imperatively, no
-`TypeId::of::<T>()` to call. The structure is a type that trait impls dispatch on, so reflecting over
-it means writing a recursive impl.
+**CGP has no reflection API.** It has no `TypeInfo` value to hold, no field list to iterate
+imperatively, and no `TypeId::of::<T>()` to call. The structure is a type that trait impls dispatch
+on, so reflecting over it means writing a recursive impl.
 
-**A field's type is a type, not a `TypeId`.** This is why CGP can recurse into a typed, checked
-writer for each field and the raw MVP cannot yet.
+**A field's type is a type, not a `TypeId`.** This lets CGP recurse into a typed, checked writer for
+each field, which the MVP's `TypeId`-based API cannot yet do.
 
-**Shapes are opt-in.** A type exposes its structure only by deriving `HasFields` or `CgpData`. A
-foreign type without the derive is invisible.
+**Shapes are opt-in.** A type exposes its structure only by deriving `HasFields` or `CgpData`, so CGP
+cannot see the fields of a foreign type without the derive.
 
-**No type synthesis.** CGP's `Product!` and `Sum!` are the `@typeInfo` result reified as types, and
-its trait recursion is the `inline for`, but CGP cannot `@Type`-construct a new nominal type.
+**CGP cannot synthesize types.** `Product!` and `Sum!` correspond to the result of `@typeInfo`, and
+trait recursion corresponds to `inline for`, but CGP has no counterpart to `@Type` for constructing a
+new nominal type.
 
-**CGP is not a reflection system.** It is compile-time structural reflection encoded as types,
-resolved by the trait system, checked at the definition site, and erased before runtime.
+**CGP is not a reflection system.** It encodes a type's structure as types, resolves operations
+over it with the trait system, checks generic code where it is defined, and leaves no reflection
+metadata in the compiled program.
 
 ## Where to go next
 
+These pages develop the constructs and the neighbouring comparisons:
+
 - [Extensible records](/docs/concepts/extensible-records) and
   [Extensible variants](/docs/concepts/extensible-variants): the derives and what they enable.
-- [Row polymorphism](./row-polymorphism.md): the structural-typing theory beneath the type-level
+- [Row polymorphism](./row-polymorphism.md): the structural-typing theory behind the type-level
   shapes.
 - [Dynamic dispatch](./dynamic-dispatch.md): the runtime-mechanism counterpart to this page.
 - [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields),

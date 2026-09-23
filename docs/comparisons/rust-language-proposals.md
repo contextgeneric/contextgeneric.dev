@@ -6,20 +6,21 @@ description: 'CGP read against specialization, named impls, dictionary passing, 
 
 # Rust's own proposals
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time: a
-library on stable Rust in which a trait can have several named implementations and each context
-selects one. The [Introduction](/docs/) covers the basics. This page is for the reader who has
-followed Rust's own debate about relaxing [coherence](/docs/reference/glossary#coherence): *specialization*, the *dictionary-passing*
-account of traits, *named or incoherent impls*, and *contexts and capabilities*. It shows which
-fragment of each proposal CGP provides today, how the correspondence runs construct by construct,
-and the two places where CGP cannot follow the proposals. It ends with what to expect that differs
-and where to read further.
+CGP provides, as a library, part of what several proposals to relax Rust's
+[coherence](/docs/reference/glossary#coherence) rules would add to the language. It is a language
+extension for Rust, with pluggable trait implementations at compile-time, implemented as a library
+on stable Rust whose consumer traits are ordinary Rust traits; the [Introduction](/docs/) covers the
+basics. For readers who follow *specialization*, the *dictionary-passing* account of traits, *named
+or incoherent impls*, and *contexts and capabilities*, this page shows which part of each proposal
+CGP provides, maps the constructs one by one, and states where CGP cannot follow the proposals.
 
 ## In your terms
 
-The proposals and CGP share a vocabulary once the names are lined up. A **context** in CGP is the
-type the method runs on, which supplies the values it needs as its fields; in most CGP code it is a
-type you define to stand for an application.
+A **context** is the type a CGP method runs on, supplying its data through fields and its
+implementations through wiring. In most CGP code it is a type you define to stand for an
+application.
+
+The proposals' constructs map onto CGP as follows:
 
 | In the proposals | In CGP |
 | --- | --- |
@@ -32,21 +33,23 @@ type you define to stand for an application.
 
 ## The idea, briefly
 
-Rust's Reference gives the two rules every proposal here relaxes. The *[orphan rule](/docs/reference/glossary#orphan-rule)* says an
-`impl<P1..=Pn> Trait<T1..=Tn> for T0` is valid only if `Trait` is a local trait, or at least one of
-the types `T0..=Tn` is a local type and no uncovered type parameter appears before it. The *overlap
-rule* rejects two implementations that "can be instantiated with the same type"
+Every proposal on this page relaxes one or both of the coherence rules in the Rust Reference. The
+*[orphan rule](/docs/reference/glossary#orphan-rule)* says an `impl<P1..=Pn> Trait<T1..=Tn> for T0`
+is valid only if `Trait` is a local trait, or at least one of the types `T0..=Tn` is a local type and
+no uncovered type parameter appears before it. The *overlap rule* rejects two implementations that
+"can be instantiated with the same type"
 ([Rust Reference](https://doc.rust-lang.org/reference/items/implementations.html);
-[RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)). Together they
-guarantee that any trait lookup finds exactly one impl, and that guarantee lets generic code resolve
-`T: Hash` transitively and keeps a `HashMap<K, V>` sound. The
-[type classes](./type-classes.md) page covers why coherence exists in the wider tradition; this page
-takes it as given.
+[RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)).
+
+Together the two rules guarantee that any trait lookup finds exactly one impl. That guarantee lets
+generic code resolve `T: Hash` transitively and keeps a `HashMap<K, V>` sound. The
+[type classes](./type-classes.md) page covers why coherence exists in the wider type-class
+tradition; this page takes it as given.
 
 ### Specialization
 
 RFC 1210 proposes letting two impls overlap when one is *strictly more specific*, with the compiler
-picking the specific one. Its own example refines a blanket `AddAssign`:
+choosing the more specific one. Its own example refines a blanket `AddAssign`:
 
 ```rust
 impl<R, T: Add<R> + Clone> AddAssign<R> for T {
@@ -60,22 +63,23 @@ impl<R, T: Add<R> + Clone> AddAssign<R> for T {
 The `default` keyword marks an item that a more specific impl may override
 ([RFC 1210](https://rust-lang.github.io/rfcs/1210-impl-specialization.html)). The feature has been
 unstable since 2016. Its tracking issue states that the full feature "as implemented currently is
-*unsound*", because dispatch information about lifetimes is erased before code generation, and the
-`min_specialization` subset the standard library uses internally is the usable fragment
-([tracking issue #31844](https://github.com/rust-lang/rust/issues/31844)). On a stable toolchain
-the snippet above fails with `E0658`.
+*unsound*", because dispatch information about lifetimes is erased before code generation. The
+`min_specialization` subset, which the standard library uses internally, is the usable part
+([tracking issue #31844](https://github.com/rust-lang/rust/issues/31844)). On a stable toolchain the
+snippet above fails with `E0658`.
 
-Specialization also does not address the case CGP starts from. Two impls of equal generality, such as
-`Hash for T: Display` and `Hash for T: AsRef<[u8]>`, are not ordered by specificity, so specialization
-rejects them as coherence does. And generic code can bind a blanket impl through a bound that never
-mentions the trait, so by the time the concrete type is known the specialization is invisible. The
-[RustLab 2025 talk](/blog/rustlab-2025-coherence) builds this argument on a hash-table example.
+Specialization also does not address the case CGP starts from. Two impls of equal generality, such
+as `Hash for T: Display` and `Hash for T: AsRef<[u8]>`, are not ordered by specificity, so
+specialization rejects them as coherence does. In addition, generic code can select a blanket impl
+through a bound that never mentions the trait. By the time the concrete type is known, that code can
+no longer see the more specific impl. The [RustLab 2025 talk](/blog/rustlab-2025-coherence) develops
+this argument with a hash-table example.
 
 ### Dictionary passing
 
-A second line of thought treats the trait system as sugar over *dictionary passing*: a trait becomes
-a struct of function pointers, an impl becomes a value of that struct, and a trait bound becomes an
-argument the caller passes. Nadrieril works it out for Rust:
+Another line of work treats the trait system as a shorthand for *dictionary passing*. A trait
+becomes a struct of function pointers, an impl becomes a value of that struct, and a trait bound
+becomes an argument the caller passes. Nadrieril works this out for Rust:
 
 ```rust
 struct Clone<Self> {
@@ -85,19 +89,19 @@ struct Clone<Self> {
 const CLONE_U32: Clone<u32> = Clone { clone: |x: &u32| *x };
 ```
 
-Trait solving is then the process that supplies these values, and coherence is the point of
-friction, since a global impl constrains a caller in ways the caller cannot see
+In this account, trait solving is the process that supplies these values. Coherence becomes a source
+of friction, because a global impl constrains a caller in ways the caller cannot see
 ([Nadrieril, *Dictionary-passing style*](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)).
-Once impls are values, *choosing* an impl is passing a different value, which is the freedom
-coherence forbids.
+Once impls are values, choosing a different impl means passing a different value, and coherence
+forbids exactly that choice.
 
 ### Named and incoherent impls
 
-Boxy's *An Incoherent Rust* proposes dropping the coherence rules in favour of explicit impl
-selection. The motivation is *ecosystem evolution*: once a foundational crate such as `serde`
-establishes the trait impls for common types, an alternative cannot gain adoption, because downstream
-crates cannot implement the competing trait for types they do not own. The sketch names an impl and
-passes it where a bound is required:
+Boxy's *An Incoherent Rust* proposes replacing the coherence rules with explicit impl selection. The
+motivation is *ecosystem evolution*. The post argues that once a foundational crate such as `serde`
+establishes the trait impls for common types, an alternative cannot gain adoption, because
+downstream crates cannot implement the competing trait for types they do not own. The sketch names an
+impl and passes it where a bound is required:
 
 ```rust
 impl Name<T> = Trait<T> for T { /* ... */ }
@@ -105,18 +109,18 @@ impl Name<T> = Trait<T> for T { /* ... */ }
 function::<T + TraitImpl<T> + OtherTraitImpl<T>>(/* ... */)
 ```
 
-The post answers the two classic justifications for coherence on their own terms. The `HashMap`
-problem is solved by moving the `Hash` and `Eq` bounds onto the type definition, so every operation
-on one map agrees on one impl. Associated-type soundness holds because the impl is part of the type.
-It names the remaining challenges as substantial: syntax, ergonomics, migration, and whether the
-complexity is worth it ([Boxy, *An Incoherent Rust*](https://www.boxyuwu.blog/posts/an-incoherent-rust/)).
+The post answers the two classic justifications for coherence directly. It solves the `HashMap`
+problem by moving the `Hash` and `Eq` bounds onto the type definition, so every operation on one map
+uses the same impl. It keeps associated types sound by making the impl part of the type. It names
+the remaining challenges as substantial: syntax, ergonomics, migration, and whether the added
+complexity is worthwhile ([Boxy, *An Incoherent Rust*](https://www.boxyuwu.blog/posts/an-incoherent-rust/)).
 
 ### Contexts and capabilities
 
-Tyler Mandry's 2021 proposal addresses a different limitation: a function or impl cannot reach a value
-from its caller's environment, such as an allocator or a logger, except by threading it as a
-parameter or storing it in a global. A `with` clause on a declaration names the context it requires,
-and a `with` block at a call site supplies it:
+Tyler Mandry's 2021 proposal addresses a different limitation. A function or impl can reach a value
+from its caller's environment, such as an allocator or a logger, only by taking it as a parameter or
+reading a global. The proposal adds a `with` clause on a declaration, which names the context value
+it requires, and a `with` block at a call site, which supplies it:
 
 ```rust
 fn deserialize<'a>(bytes: &[u8]) -> Result<&'a Foo, Error>
@@ -131,22 +135,23 @@ with arena::basic_arena = &arena::BasicArena::new() {
 }
 ```
 
-The distinctive power is a *context-dependent trait impl*, valid only when a given capability is in
-scope. The mechanism compiles to ordinary function arguments, so it costs nothing at runtime, and the
-open questions concern thread boundaries and scope validity
+The proposal's distinctive feature is a *context-dependent trait impl*, which is valid only while a
+given capability is in scope. The mechanism compiles to ordinary function arguments, so it adds no
+runtime cost. Its open questions concern thread boundaries and scope validity
 ([Mandry, *Contexts and capabilities in Rust*](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)).
 The proposal borrows the word "capability" from a security model whose other properties it does not
-claim; the [capabilities](./capabilities.md) page separates the senses. Nadrieril's follow-up extends
-dictionary passing so a trait bound may carry a runtime value, and names the difficulties that follow:
-ownership modes for the carried value, the same type satisfying a trait differently in different
-scopes, and methods that become closures
+claim; the [capabilities](./capabilities.md) page separates the senses.
+
+Nadrieril's follow-up extends dictionary passing so that a trait bound can carry a runtime value. It
+names the difficulties that follow: ownership modes for the carried value, the same type satisfying a
+trait differently in different scopes, and methods that become closures
 ([*What If Traits Carried Values*](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html)).
 
 ### Cairo: a Rust-like language that shipped named impls
 
-Cairo borrows Rust's surface syntax and gives every impl a name, so it is the nearest thing to a
-shipped Incoherent Rust. A generic function may take an impl as an explicit parameter, named or
-anonymous:
+Cairo borrows Rust's surface syntax and gives every impl a name, which makes it the closest shipped
+counterpart to Incoherent Rust. A generic function can take an impl as an explicit parameter, named
+or anonymous:
 
 ```rust
 // Cairo
@@ -155,25 +160,25 @@ fn largest_list<T, impl TDrop: Drop<T>>(l1: Array<T>, l2: Array<T>) -> Array<T> 
 fn smallest_element<T, +PartialOrd<T>, +Copy<T>, +Drop<T>>(list: @Array<T>) -> T { /* ... */ }
 ```
 
-A caller does not pass the impl: the compiler infers it from the impls visible at the call site
+A caller does not pass the impl. The compiler infers it from the impls visible at the call site
 ([Cairo Book, *Traits*](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html);
-[*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html)). That
-inference is the design decision that matters for the comparison, because resolving from scope means
-the set of imports decides which implementation a call uses.
+[*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html)). This
+inference matters for the comparison: because resolution uses what is in scope, a call site's
+imports decide which implementation it uses.
 
 ## How CGP expresses it
 
-CGP provides a fragment of each proposal as a library, and the correspondence is close enough to
-state construct by construct. What the proposals would add to the language, CGP adds as a library,
-with one standing restriction: every binding lives in one place, the context.
+The correspondence can be stated construct by construct. The main difference is where bindings live. The proposals bind an impl at a call site or
+within a scope, while CGP records every binding in one place: the context.
 
 ### A named impl is a provider
 
-A CGP provider is the thing Boxy's proposal names with `impl Name<T> = Trait<T> for T`. Every
-implementation gets its own zero-sized type, so two overlapping impls of one trait coexist because
-each implements the provider trait for its own name. The encoder pair from the
-[Introduction](/docs/) shows it. Rust rejects two blanket impls of one trait for `T: Display` and
-`T: AsRef<[u8]>`, since `String` satisfies both. As providers, both compile:
+A CGP provider corresponds to an impl named with `impl Name<T> = Trait<T> for T` in Boxy's proposal.
+Each implementation has its own zero-sized type. Overlapping implementations of one trait can
+therefore coexist, because each implements the provider trait for its own type. The encoder pair
+from the [Introduction](/docs/) shows this. Rust rejects two blanket impls of one trait for
+`T: Display` and `T: AsRef<[u8]>`, since `String` satisfies both. Written as providers, both
+compile:
 
 ```rust
 #[cgp_component(Encoder)]
@@ -197,18 +202,21 @@ impl<Value: AsRef<[u8]>> Encoder<Value> {
 ```
 
 `EncodeWithDisplay` and `EncodeBytes` are named impls in the proposal's sense. They overlap on
-`String`, they are selected by name, and a crate that owns neither `Display` nor `String` may define
-more, because the provider trait is always implemented for a type the crate owns. This is the
-overlap and orphan relief specialization cannot give, since the two providers are equally general.
-The encoded value has moved from `Self` into the `Value` parameter, so `Self` is free to be an
-application: the contexts below are **[environmental contexts](/docs/reference/glossary#environmental-context)**, types that stand for an application,
-and the component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
+`String`, and a context selects one by name. A crate that owns neither `Display` nor `String` can
+define more of them, because each provider trait is implemented for a provider type the defining
+crate owns. Specialization cannot provide this relief from the overlap and orphan rules, because the
+two providers are equally general.
+
+The encoded value is the `Value` parameter rather than `Self`, so `Self` can stand for an
+application. The contexts below are
+**[environmental contexts](/docs/reference/glossary#environmental-context)**, and the component is
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
 
 ### An incoherent bound resolves through the context, not at each call site
 
 Boxy's `function::<T + TraitImpl<T>>` passes the impl at every call. CGP lets generic code require
-the consumer trait on the context and defers the choice to the place the context is defined. Two
-applications answer differently for the same type:
+the consumer trait on the context and makes the choice where the context is defined. Two
+applications can choose differently for the same type:
 
 ```rust
 pub struct ApiServer;
@@ -229,19 +237,19 @@ delegate_components! {
 }
 ```
 
-This is the proposal's incoherence with a different resolution point. Boxy and Cairo resolve at the
-call site, explicitly or from what is in scope. CGP resolves at the context, so every call through
-`ApiServer` agrees. That is also how CGP answers the `HashMap` concern: a context selects one
-provider per component, so all code sharing a context agrees on one impl, which is the property the
-proposal recovers by moving `Hash` onto the type definition. The [type classes](./type-classes.md)
-page develops this as incoherent instances made deterministic.
+CGP provides the proposal's incoherence with a different resolution point. Boxy and Cairo resolve at
+the call site, explicitly or from what is in scope. CGP resolves at the context, so every call
+through `ApiServer` uses the same choice. This also answers the `HashMap` concern: a context selects
+one provider per component, so all code sharing a context uses one impl. The proposal gets the same
+property by moving `Hash` onto the type definition. The [type classes](./type-classes.md) page
+develops this comparison with Haskell's incoherent instances.
 
 ### Passing an impl explicitly is a higher-order provider
 
-Where the proposals and Cairo let a caller pass an impl as a parameter, CGP has
-[higher-order providers](/docs/concepts/higher-order-providers). A provider takes another provider as
-a type parameter and binds it with `#[use_provider]`, which is Cairo's `impl TDrop: Drop<T>` as a
-Rust generic:
+Where the proposals and Cairo let a caller pass an impl as a parameter, CGP uses
+[higher-order providers](/docs/concepts/higher-order-providers). A provider takes another provider
+as a type parameter and binds it with `#[use_provider]`, which corresponds to Cairo's
+`impl TDrop: Drop<T>` written as a Rust generic:
 
 ```rust
 #[cgp_impl(new ScaledArea<InnerCalculator>)]
@@ -253,19 +261,19 @@ impl<InnerCalculator> AreaCalculator {
 }
 ```
 
-A context wires `AreaCalculatorComponent: ScaledArea<RectangleArea>`, naming the inner impl where a
-Cairo caller would have the compiler infer it. Assembling providers at every call site is possible in
-CGP but verbose, and idiomatic CGP defers the assembly to the context. A higher-order provider is the
-form for a provider that must fix its inner choice locally, and it defaults its inner parameter to
-[`UseContext`](/docs/reference/providers/use_context) so the context's wiring is the fallback. The
-wired type here is a `ScaledRectangle` carrying `width`, `height`, and `scale_factor`, a **value
-context**: the type being measured also carries the wiring.
+A context wires `AreaCalculatorComponent: ScaledArea<RectangleArea>`, naming the inner impl that a
+Cairo compiler would infer. CGP can assemble providers at each call site, but doing so is verbose,
+and idiomatic CGP leaves the assembly to the context. A higher-order provider suits a provider that
+must fix its inner choice locally. Such providers often default the inner parameter to
+[`UseContext`](/docs/reference/providers/use_context), so that the context's wiring is the fallback.
+The wired type here is a `ScaledRectangle` with `width`, `height`, and `scale_factor` fields. It is a
+**value context**: the type being measured also carries the wiring.
 
-### A capability is a context field; the `with` block is the context
+### A `with` clause becomes a context field
 
 Mandry's `with arena: &BasicArena` clause declares a value the function needs from its environment.
-CGP declares the same thing as an [implicit argument](/docs/concepts/implicit-arguments), which
-reads a field of the context every provider receives as `self`:
+CGP declares the same need as an [implicit argument](/docs/concepts/implicit-arguments), which reads
+a field of the context that every provider receives as `self`:
 
 ```rust
 #[cgp_impl(new GreetHello)]
@@ -276,8 +284,8 @@ impl Greeter {
 }
 ```
 
-The `with` block that supplies the capability becomes a context type carrying the field, and the
-binding happens when a value of that type is constructed:
+The `with` block that supplies the value becomes a context type that carries the field. Constructing
+a value of that type makes the binding:
 
 ```rust
 #[derive(HasField)]
@@ -295,89 +303,97 @@ let app = App { name: "World".to_owned() };
 app.greet();   // "Hello, World!"
 ```
 
-`App` is the context, and constructing it is the `with` binding. Two properties of the proposal carry
-over exactly: the binding costs nothing at runtime, since a field read compiles to a load, and it is
-checked statically, since a missing field is a compile error that
-[`check_components!`](/docs/reference/macros/check_components) names at the wiring site. `App` here
-is an environmental context with one field, and `GreetHello` is [self-targeted](/docs/reference/glossary#self-targeted-component).
+`App` is the context, and constructing it plays the role of the `with` block. Two properties of the
+proposal carry over. The binding adds no runtime cost, since a field read compiles to a load. It is
+also checked statically: a missing field is a compile error, which
+[`check_components!`](/docs/reference/macros/check_components) reports at the wiring site. `App` here
+is an environmental context with one field, and the greeter component is
+[self-targeted](/docs/reference/glossary#self-targeted-component).
 
 ### The context is the dictionary
 
 The dictionary-passing account and CGP meet in one observation: the context is the top-level
-dictionary. In Nadrieril's elaboration every dictionary is a value passed alongside the data. In CGP
-every provider receives the context, and the context's wiring table is a type-level record of
-dictionaries, one `DelegateComponent` entry per component. Lowering a CGP program to
-dictionary-passing form turns the context into a struct whose fields are the other dictionaries, with
-a near one-to-one correspondence between a `delegate_components!` entry and a field of that struct.
-The arrangement has a practical consequence the proposals have to solve separately: because every
-dictionary reaches the others through the context, a dependency graph with cycles resolves without
-an instantiation order, since the context is one stable root from which all of them are reachable.
-The [ML modules](./ml-modules.md) page contrasts this with manual functor application.
+dictionary. In Nadrieril's elaboration, every dictionary is a value passed alongside the data. In
+CGP, every provider receives the context, and the context's wiring table is a type-level record of
+dictionaries, with one `DelegateComponent` entry per component. Lowering a CGP program to
+dictionary-passing form would turn the context into a struct whose fields are the other
+dictionaries, with close to one field per `delegate_components!` entry.
+
+This arrangement also handles a problem the proposals must solve separately. Every dictionary
+reaches the others through the context, so components that depend on each other resolve without an
+instantiation order: the context is one stable root from which all of them are reachable. The
+[ML modules](./ml-modules.md) page contrasts this with manual functor application.
 
 ## What each approach costs
 
-The proposals are language changes that have not shipped, and their costs are the ones their authors
-name. Specialization has an accepted RFC, a soundness hole open since 2016, and no path to
+The proposals are language changes that have not shipped, and their authors name their costs.
+Specialization has an accepted RFC, a soundness hole open since 2016, and no announced path to
 stabilization ([tracking issue #31844](https://github.com/rust-lang/rust/issues/31844)). The
-named-impl and dictionary-passing designs are blog posts and design sketches, and their authors list
-syntax, ergonomics, migration of the existing ecosystem, and the loss of the guarantees coherence
-gives for free as the open problems ([Boxy](https://www.boxyuwu.blog/posts/an-incoherent-rust/);
-[Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)). Contexts
-and capabilities is a research direction from 2021 with open questions about thread boundaries and
+named-impl and dictionary-passing designs are blog posts and design sketches. Their authors list the
+open problems: syntax, ergonomics, migration of the existing ecosystem, and the loss of the
+guarantees that coherence provides automatically
+([Boxy](https://www.boxyuwu.blog/posts/an-incoherent-rust/);
+[Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)). Contexts and
+capabilities is a research direction from 2021, with open questions about thread boundaries and
 scope ([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)). Cairo's
-scope-based inference means a caller must import the whole chain of impls a generic impl needs, and
-two call sites in one project can resolve the same type differently.
+resolution from scope means that a caller must import every impl a generic impl needs, directly or
+indirectly, and two call sites in one project can resolve the same type differently.
 
-CGP's costs are the ordinary ones. The provider trait has to be defined through
+CGP's costs are the ordinary ones. A provider trait must be defined through
 [`#[cgp_component]`](/docs/reference/macros/cgp_component), so CGP cannot retrofit an existing
-foreign trait such as `serde::Serialize` without a parallel component, where a language change would
-apply to every trait. The wiring is code somebody writes and reads, where a language feature would
-infer it. The compile-time work is real. And the raw diagnostics are trait-solver output over
-generated types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes
-it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The
-[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page is where these costs are weighed
+foreign trait such as `serde::Serialize` without a parallel component, while a language change would
+apply to every trait. The wiring is code that someone writes and reads, where a language feature
+would infer it. Trait resolution over the wiring adds compile-time work. The raw diagnostics are
+trait-solver output over generated types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the
+root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape
+every class. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs
 against the alternatives in full.
 
 ## Where a proposal, or a smaller tool, is the better choice
 
-Where a program needs exactly a specialized fast path for one type under a blanket impl,
-`min_specialization` on nightly, or a manual dispatch trick on stable, is the smaller tool, and CGP
-would add wiring specialization would infer. Where a program needs one globally consistent
-implementation, such as the `Ord` a map's keys rely on, coherence as it stands is the right
-arrangement and CGP's per-context choice is not an improvement on it. And where a program can wait,
-a language feature that infers the impl from scope or nests bindings dynamically would express these
-patterns with less ceremony than a library can. Where the need is several equally valid impls chosen
-per application, impls for types the program does not own, or environment values reaching deep code
-without parameters, CGP is the one option available on stable Rust today, and its explicitness is the
-price of that.
+A smaller tool fits a program that needs only a specialized fast path for one type under a blanket
+impl. `min_specialization` on nightly, or a manual dispatch technique on stable, handles that case,
+while CGP would require wiring that specialization infers. Coherence as it stands fits a program
+that needs one globally consistent implementation, such as the `Ord` that a map's keys rely on;
+CGP's per-context choice does not improve that arrangement. A program that can wait for a language
+feature may get one that infers the impl from scope or nests bindings dynamically, which would
+express these patterns with less ceremony than a library can.
+
+CGP fits a program that needs several equally valid impls chosen per application, impls for types
+the program does not own, or environment values that reach deep code without extra parameters. It
+provides these on stable Rust today, and its explicit wiring is the cost.
 
 ## What to expect that differs
 
-**CGP does not infer an impl from scope.** Cairo and the named-impl sketch let the compiler pick an
-impl from those visible at a call site. CGP has no such search: a context names every provider it
-uses in its wiring table. This is deliberate, and it keeps two call sites in one program from
-resolving the same type differently by accident.
+**CGP does not infer an impl from scope.** Cairo and the named-impl sketch let the compiler choose
+among the impls visible at a call site. CGP has no such search: a context names every provider it
+uses in its wiring table. This design prevents two call sites in one program from resolving the same
+type differently by accident.
 
-**Bindings are flat.** Mandry's `with` blocks nest, and an inner scope can shadow an outer binding. In
-CGP every binding lives at the one place the concrete context is defined, so an inner scope cannot
-shadow a provider without defining a new context type. All bindings for a context are readable in one
-place, and that is the trade.
+**Bindings are flat.** Mandry's `with` blocks nest, and an inner scope can shadow an outer binding.
+In CGP every binding lives where the concrete context is defined, so an inner scope cannot replace a
+provider without defining a new context type. In return, all bindings for a context can be read in
+one place.
 
-**A provider receives `&self`.** A capability that must be `&mut` or owned needs interior mutability
-or cloning, rather than the ownership-aware design the proposals discuss.
+**Providers share one context value.** A provider method can take `&self` or `&mut self`, but a
+`&mut self` method can borrow only one field mutably through its implicit arguments. A value that
+several providers must mutate or own independently needs interior mutability or cloning; the
+proposals discuss designs that track ownership modes directly.
 
-**CGP is not specialization for stable Rust.** It does not pick a more specific impl, it does not
-touch existing traits, and it asks for wiring specialization would infer. It addresses the two
-problems specialization leaves open, equally general overlap and orphans, by naming implementations
-and choosing them per context.
+**CGP is not specialization for stable Rust.** It does not choose a more specific impl, it does not
+change existing traits, and it asks for wiring that specialization would infer. It addresses the two
+problems specialization leaves open, overlap between equally general impls and the orphan rule, by
+naming implementations and choosing them per context.
 
 ## Where to go next
+
+These pages develop the constructs and the neighbouring comparisons:
 
 - [Bypassing coherence](/docs/concepts/coherence): the coherence rules and the provider move, without
   reference to the proposals.
 - [Higher-order providers](/docs/concepts/higher-order-providers) and
   [implicit arguments](/docs/concepts/implicit-arguments): the two constructs this page maps onto
-  passed impls and capabilities.
+  passed impls and `with` clauses.
 - [Type classes](./type-classes.md): the same trade seen from Haskell's side, including the
   `INCOHERENT` and overlapping-instance extensions.
 - [RustLab 2025 talk](/blog/rustlab-2025-coherence): why coherence exists and why specialization does
