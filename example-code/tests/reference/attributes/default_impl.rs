@@ -3,7 +3,8 @@
 /// ## Examples
 ///
 /// The page's chain: a per-type default registered on the provider and pulled into a context by a
-/// `for … in` loop, with one direct override. `ShowWithDisplay` is named by the page without being
+/// `for … in` loop, with one direct entry for `u64`, which the registry does not cover.
+/// `ShowWithDisplay` is named by the page without being
 /// introduced, so it is declared here.
 pub mod examples {
     use core::fmt::Display;
@@ -53,7 +54,7 @@ pub mod examples {
     }
 
     #[test]
-    fn default_and_override_resolve() {
+    fn default_and_direct_entry_resolve() {
         assert_eq!(App.show(&"text".to_owned()), "text");
         assert_eq!(App.show(&7u64), "7");
     }

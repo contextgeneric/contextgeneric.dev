@@ -214,8 +214,8 @@ Two further facts about the generated impls are worth carrying away. Each entry 
 is both resolvable and checkable, and [`CanUseComponent`](./can_use_component.md) then combines the pair
 into a single assertion. And a namespace's
 `namespace N;` header emits not one entry but a *blanket* `DelegateComponent` impl that forwards every key
-through the namespace, which is how a context inherits a whole table while still letting a direct entry
-shadow one key.
+through the namespace, which is how a context inherits a whole table while still adding direct entries
+at the keys the namespace leaves open.
 
 ## Common Mistakes
 
@@ -225,9 +225,9 @@ elsewhere, through [`IsProviderFor`](./is_provider_for.md). Reading which one yo
 add a wiring line or supply a dependency.
 
 **Two entries for the same key is a coherence error, not an override.** Wiring one component twice on one
-context reports `E0119` conflicting implementations. A namespace *can* be shadowed by a direct entry,
-because the namespace side is a blanket impl rather than a second concrete one, but two concrete entries
-always conflict.
+context reports `E0119` conflicting implementations. A direct entry for a key the context's namespace
+binds conflicts the same way, with the namespace's blanket impl, so a context adds entries only at keys
+the namespace leaves open.
 
 **`Self` is not always a context.** A provider bundle declared with `new` owns a table too, and reading an
 error that names one as the table's `Self` does not mean something is being used as a context.

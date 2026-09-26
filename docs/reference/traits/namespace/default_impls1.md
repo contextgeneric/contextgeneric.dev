@@ -88,8 +88,8 @@ simply whatever you wrote inside the path. The same rule is why the `for … in`
 
 ## Examples
 
-The whole chain, from a provider declaring itself a default to a context pulling it in and overriding one
-entry:
+The whole chain, from a provider declaring itself a default to a context pulling it in and adding an entry
+for a type the registry does not cover:
 
 ```rust
 use cgp::core::component::DefaultImpls1;
@@ -124,15 +124,16 @@ delegate_components! {
             @test.ShowImplComponent.T: Provider,
         }
 
-        @test.ShowImplComponent.u64: ShowWithDisplay,   // overrides the inherited default
+        @test.ShowImplComponent.u64: ShowWithDisplay,   // u64 has no registered default
     }
 }
 ```
 
 **[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** `App` carries the wiring and the shown value is a
 parameter. The loop wires every type with a registered default by projecting
-`T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>`, and the direct `u64` line shadows
-whatever the namespace would otherwise supply for that one type.
+`T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>`. Only `String` has a registered default,
+so the direct `u64` line adds a type beside it. Had `u64` a registered default too, the loop's impl and
+the direct entry would both cover its path, and the compiler would reject them with `E0119`.
 
 A whole namespace can also be the loop target:
 
@@ -205,7 +206,8 @@ resolves it.
 **`#[default_impl]` on a prefixed component is confined to the namespace's crate**, by the orphan rule.
 Put downstream wiring in the namespace body instead.
 
-**A default is a fallback, not an assignment.** A direct entry silently shadows it.
+**A registered default cannot be overridden from the context.** A direct entry for a type the loop
+already wires overlaps the loop's impl and is rejected with `E0119`.
 
 **The registration impl carries none of the provider's bounds**, which is deliberate: they are checked
 where the provider is used rather than where it is registered.

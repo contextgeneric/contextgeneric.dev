@@ -27,14 +27,16 @@ cgp_namespace! {
 ```
 
 A context then **joins** it with one line inside its own table, after which every lookup it does not wire
-directly falls through to the namespace. Its own entries win, so a namespace behaves like a base
-configuration each context specializes: most of the wiring for free, and a handful of overrides where they
-matter.
+directly falls through to the namespace. Its own entries fill the paths the namespace leaves open, so a
+namespace behaves like a base configuration each context completes: most of the wiring for free, and a
+handful of choices where they matter. A context cannot replace an entry the namespace binds; see
+[Common Mistakes](#common-mistakes).
 
-That inherit-and-override behaviour is why **a namespace is how CGP expresses presets.** There is no
-separate preset construct: a library publishes a namespace of sensible defaults, an application joins it and
-changes the few entries it cares about. Namespaces can also inherit from one another, so a base can be
-extended into a richer one that every downstream context picks up.
+That inherit-and-complete behaviour is why **a namespace is how CGP expresses presets.** There is no
+separate preset construct: a library publishes a namespace that binds what every application shares and
+leaves open what each chooses, and an application joins it and supplies those choices. Namespaces can
+also inherit from one another, so a base can be extended into a richer one that every downstream context
+picks up.
 
 One structural point saves confusion later: **a namespace is not a context.** It is a trait, named after
 the namespace, carrying a `Delegate` associated type and implemented once per key. Nothing instantiates it,
@@ -88,7 +90,7 @@ is why the two forms in the table above are the ones worth writing, and why the 
 - **`open Component;`** is accepted and generates exactly what `Component => @Component,` generates; it is
   occasionally a convenient spelling for rooting a component's route at its own name.
 - **`namespace Other;`** is accepted, but inheritance is written with the `: ParentNamespace` header
-  above. That is the form overriding and the cycle diagnostics are defined in terms of.
+  above. That is the form the override rule and the cycle diagnostics are defined in terms of.
 - **A nested table value**, `UseDelegate<new Inner { … }>`, works, and is the one legacy form with a
   reason to keep in a namespace: the macro lifts the inner table out into its own struct and impls, so
   every context joining the namespace inherits the per-type dispatch without restating it. It still
@@ -350,12 +352,12 @@ The `#[prefix(...)]` attribute, which registers a component into a namespace and
 ## Common Mistakes
 
 **A context cannot override a path its namespace itself terminates.** Joining with `namespace N;` emits a
-blanket `DelegateComponent` impl covering every path `N` resolves, so a direct entry for one of those paths
-is a second impl for the same key and the compiler rejects the overlap with `E0119`. Overriding works only on
-a path the namespace *routes to* without binding, which is why the example above has the namespace own the
-route and the context own the provider. A path the namespace binds with a `:` entry or a `#[default_impl]`
-has to be changed in the namespace instead. The same restriction stops a child namespace from redefining a
-key its parent binds.
+blanket `DelegateComponent` impl covering every path `N` resolves, so a direct entry for one of those
+paths is a second impl for the same key and the compiler rejects the overlap with `E0119`. A context can
+wire only a path the namespace *routes to* without binding, which is why the example above has the
+namespace own the route and the context own the provider. A path the namespace binds with a `:` entry or
+a `#[default_impl]` has to be changed in the namespace instead. The same restriction stops a child
+namespace from redefining a key its parent binds.
 
 **Joining two namespaces on one context conflicts, for the same reason.** Each namespace produces a blanket
 forwarding impl covering every key, so joining two collides them:

@@ -155,7 +155,8 @@ library example.
 
 **A `for … in` loop's key must mention the loop variables**, or the impl is rejected with `E0207`.
 
-**A default is a fallback, not an assignment.** A direct entry silently shadows it.
+**A registered default cannot be overridden from the context.** A direct entry for a pair the loop
+already wires overlaps the loop's impl and is rejected with `E0119`.
 
 **Two keys are usually one key too many.** If the second type is fixed for a whole application, a
 [`DefaultImpls1`](./default_impls1.md) default plus a wiring entry is easier to read.

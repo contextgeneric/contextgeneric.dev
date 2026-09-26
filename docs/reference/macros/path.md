@@ -15,10 +15,11 @@ A type-level path, used by namespaces and redirected lookups.
 Read left to right, each segment narrows a lookup one step: through a namespace, through a prefix, down to a
 component key.
 
-CGP needs such routes because [namespaces](./cgp_namespace.md) resolve lookups by path rather than by bare
-component name, which lets a whole subtree be rerouted at once and a single inherited entry be shadowed
-without disturbing the rest. Written as the underlying list, those routes are unreadable
-(`PathCons<…, PathCons<…, Nil>>` nested several deep), so `Path!` lets one be written the way it reads:
+CGP needs such routes because [namespaces](./cgp_namespace.md) resolve lookups by path rather than by
+bare component name, which lets a whole subtree be rerouted at once and a context supply a single path
+the namespace leaves open without disturbing the rest. Written as the underlying list, those routes are
+unreadable (`PathCons<…, PathCons<…, Nil>>` nested several deep), so `Path!` lets one be written the way
+it reads:
 
 ```rust
 Path!(@app.error.ErrorRaiserComponent)

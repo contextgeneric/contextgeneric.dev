@@ -13,9 +13,9 @@ Register a provider as a namespace's default for a key.
 
 `#[default_impl(...)]` lets a *provider* register itself as a [namespace](/docs/concepts/namespaces)'s
 default for a key, at the point where the provider is defined. A namespace is a reusable table of default
-wirings that a **context** can opt into and then override entry by entry. (The context is the type the
-method runs on.) Ordinarily you write a namespace's entries in its own body. This attribute
-moves one entry onto the provider:
+wirings that a **context** can opt into and then complete with the entries it leaves open. (The context
+is the type the method runs on.) Ordinarily you write a namespace's entries in its own body. This
+attribute moves one entry onto the provider:
 
 ```rust
 #[cgp_impl(new ShowString)]
@@ -127,14 +127,14 @@ delegate_components! {
             @test.ShowImplComponent.T: Provider,
         }
 
-        @test.ShowImplComponent.u64: ShowWithDisplay,   // overrides the inherited default
+        @test.ShowImplComponent.u64: ShowWithDisplay,   // u64 has no registered default
     }
 }
 ```
 
 **[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: `App` carries the wiring and the shown value is a
-parameter. The loop wires every type with a registered default, and the direct `u64` line shadows
-whatever the namespace would otherwise supply for that one type. `ShowWithDisplay` is wired directly
+parameter. The loop wires every type with a registered default, only `String` here, and the direct
+`u64` line adds a type the registry does not cover. `ShowWithDisplay` is wired directly
 rather than registered, because its impl is generic over `T`, and a generic impl cannot register a
 default (see [Common Mistakes](#common-mistakes)).
 
@@ -297,8 +297,9 @@ error[E0119]: conflicting implementations of trait `DefaultImpls1<ShowImplCompon
    |                ^^^^^^ conflicting implementation for `String`
 ```
 
-**A registered default is a fallback, not an assignment.** A context's direct entry shadows it without
-a warning.
+**A registered default cannot be overridden from the context.** A direct entry for a type the registry
+already covers overlaps the loop's impl and is rejected with `E0119`; wire directly only the types the
+registry leaves out.
 
 **On the `#[cgp_impl(Self)]` form the macro emits the registration with `Delegate = Self`.** That form
 does not build a provider, so the macro fills the delegate with `Self`, which inside the registration

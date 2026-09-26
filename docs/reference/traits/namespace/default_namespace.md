@@ -16,14 +16,15 @@ Resolving a namespace's default provider for a component.
 [`#[prefix(...)]`](../../attributes/prefix.md) attribute emit the impls. You name the trait in exactly
 one place, a `namespace` header inside
 [`delegate_components!`](../../macros/delegate_components.md), and this page explains what that header
-generates, including why a direct entry can shadow an inherited default without conflicting with it.
+generates, including why a direct entry can fill a path the namespace leaves open but cannot replace
+one it binds.
 
 :::
 
 ## Overview
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** (the
-type the method runs on) can opt into and then selectively override. Resolving one of those
+type the method runs on) can opt into and then complete. Resolving one of those
 defaults means asking: *for this component, what does the namespace delegate to?*
 
 `DefaultNamespace` answers that. It is the simplest of three lookup traits, keyed on the component alone.
@@ -87,14 +88,14 @@ delegate_components! {
     App {
         namespace DefaultNamespace;
 
-        @test.ShowImplComponent.u64: ShowWithDisplay,   // overrides the inherited default
+        @test.ShowImplComponent.u64: ShowWithDisplay,   // fills a path the namespace leaves open
     }
 }
 ```
 
-**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** The header forwards `App`'s unwired lookups through the
-namespace, and the direct entry shadows whatever the namespace would otherwise supply for that one key,
-the inheritance-with-override shape presets rely on.
+**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** The header forwards `App`'s lookups through the
+namespace. `DefaultNamespace` routes `ShowImplComponent` to `@test.ShowImplComponent` but binds no
+provider there, so the direct entry supplies the one for `u64`.
 
 ## When to use it
 
@@ -130,21 +131,23 @@ where
 paired with the matching [`IsProviderFor`](../wiring/is_provider_for.md) forwarding so dependencies stay
 diagnosable.
 
-**That blanket makes override work.** A directly-wired entry is a *concrete* impl for one key,
-and a concrete impl is more specific than the blanket, so it resolves first, shadowing the inherited
-default for that key and leaving the rest untouched. Two *concrete* entries for one key would conflict; a
-concrete entry against a blanket does not.
+**That blanket is why a context cannot override a namespace entry.** A directly-wired entry is a second
+`DelegateComponent` impl for its key, and Rust has no specialization to prefer one impl over another.
+Where the namespace binds that key, the blanket covers it too, and the compiler rejects the overlap with
+`E0119`. A direct entry compiles only for a key the blanket does not cover: a path the namespace routes
+to but leaves unbound, like `@test.ShowImplComponent.u64` above.
 
 Inheritance composes on top. A namespace declared `new Child: Parent { … }` emits a blanket impl
 forwarding any key the parent resolves, so the child resolves everything the parent does plus its own
-entries, and a context's direct entry still shadows either. All of it is projections, resolved at
+entries. The same rule holds at each level: a child cannot rebind a key its parent binds, and a context
+cannot rebind a key either one binds. All of it is projections, resolved at
 compile time, with nothing at run time.
 
 ## Common Mistakes
 
-**A namespace default is a fallback, not an assignment.** It resolves only for keys the context does not
-wire directly, which is the intent, and it means a stray direct entry can silently shadow a default you
-expected to apply.
+**A namespace entry cannot be overridden from the context.** A direct entry for a key the namespace
+binds is rejected with `E0119` rather than preferred. To vary a choice between contexts, leave its path
+unbound in the namespace and wire it on each context, or give the contexts different namespaces.
 
 **`Self` is the component here**, as you would expect, but **not** in
 [`DefaultImpls1`](./default_impls1.md) and [`DefaultImpls2`](./default_impls2.md), where the instance

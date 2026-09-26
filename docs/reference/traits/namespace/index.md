@@ -10,10 +10,10 @@ The lookup traits behind a namespace and a per-type default.
 ## Overview
 
 A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a context opts into
-and then selectively overrides. Resolving one of those defaults means asking, for a given key, what the
-namespace delegates to, and these three traits answer it, differing only in how many types take part
-in the key. You name them where the syntax requires it: a `namespace` header or a `for … in` loop
-inside [`delegate_components!`](../../macros/delegate_components.md), and the
+and then completes with the entries the namespace leaves open. Resolving one of those defaults means
+asking, for a given key, what the namespace delegates to, and these three traits answer it, differing
+only in how many types take part in the key. You name them where the syntax requires it: a `namespace`
+header or a `for … in` loop inside [`delegate_components!`](../../macros/delegate_components.md), and the
 [`#[default_impl]`](../../attributes/default_impl.md) attribute. The macros generate the impls.
 
 - [`DefaultNamespace`](default_namespace.md) keys a default on the component alone, the common case that
