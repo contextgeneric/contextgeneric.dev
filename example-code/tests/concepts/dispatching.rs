@@ -6,7 +6,7 @@ pub mod matching_one_handler_per_variant {
 
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::dispatch::MatchWithValueHandlers;
-    use cgp::extra::handler::{ComputerComponent, UseInputDelegate};
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     #[derive(CgpData)]
@@ -38,19 +38,17 @@ pub mod matching_one_handler_per_variant {
 
     delegate_components! {
         App {
+            open ComputerComponent;
+
             ErrorTypeProviderComponent: UseType<Infallible>,
 
-            ComputerComponent: UseInputDelegate<
-                // The whole enum routes to the matcher; each variant's payload routes to its own
-                // handler. No indirection is needed here — a *recursive* language, where a
-                // variant's payload contains the enum again, is the case that needs a thin
-                // wrapper between the two to break the resolution cycle.
-                new AreaComponents {
-                    Shape: MatchWithValueHandlers,
-                    Circle: CircleArea,
-                    Rectangle: RectangleArea,
-                }
-            >,
+            // The whole enum routes to the matcher; each variant's payload routes to its own
+            // handler. No indirection is needed here — a *recursive* language, where a variant's
+            // payload contains the enum again, is the case that needs a thin wrapper between the
+            // two to break the resolution cycle.
+            @ComputerComponent.<Code> Code.Shape: MatchWithValueHandlers,
+            @ComputerComponent.<Code> Code.Circle: CircleArea,
+            @ComputerComponent.<Code> Code.Rectangle: RectangleArea,
         }
     }
 

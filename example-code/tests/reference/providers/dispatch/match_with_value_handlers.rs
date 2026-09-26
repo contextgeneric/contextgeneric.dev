@@ -3,7 +3,7 @@
 /// ## Usage and Examples
 ///
 /// `MatchWithValueHandlers` builds the per-variant handler list from the enum's own fields and passes
-/// each payload as a bare value. Wired through `UseInputDelegate`, it is selected when the input is a
+/// each payload as a bare value. Wired by input type with `open`, it is selected when the input is a
 /// `Shape`, and each payload routes back through the context's own `ComputerComponent` to its handler.
 pub mod matching_by_value {
     use core::convert::Infallible;
@@ -11,7 +11,7 @@ pub mod matching_by_value {
 
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::dispatch::MatchWithValueHandlers;
-    use cgp::extra::handler::{Computer, ComputerComponent, UseInputDelegate};
+    use cgp::extra::handler::{Computer, ComputerComponent};
     use cgp::prelude::*;
 
     #[derive(CgpData)]
@@ -51,13 +51,12 @@ pub mod matching_by_value {
 
     delegate_components! {
         App {
+            open ComputerComponent;
+
             ErrorTypeProviderComponent: UseType<Infallible>,
 
-            ComputerComponent: UseInputDelegate<new AreaComputers {
-                Shape: MatchWithValueHandlers,
-                Circle: ComputeArea,
-                Rectangle: ComputeArea,
-            }>,
+            @ComputerComponent.<Code> Code.[Circle, Rectangle]: ComputeArea,
+            @ComputerComponent.<Code> Code.Shape: MatchWithValueHandlers,
         }
     }
 

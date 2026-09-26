@@ -148,9 +148,12 @@ delegate_components! {
 `ComputeNegated`. This table names a code tag followed by the input type for each entry, so the
 compiler can resolve the requested pair.
 
-Input-driven dispatch can instead use `UseInputDelegate` with a table keyed by input type.
-[Dispatching](./dispatching.md) uses that form to route an enum and its payloads to different
-providers. The tag can also describe a larger program, as in [type-level DSLs](./type-level-dsls.md).
+Dispatch on the input alone uses a generic first segment: `@ComputerComponent.<Code> Code.i64`
+matches every code and selects by the input type. [Dispatching](./dispatching.md) uses that form to
+route an enum and its payloads to different providers. A shorter or generic key covers every key it
+matches, so that entry could not share a table with the two above, since it also covers
+`@ComputerComponent.Doubled.i64`. The tag can also describe a larger program, as in
+[type-level DSLs](./type-level-dsls.md).
 
 ## What it costs
 

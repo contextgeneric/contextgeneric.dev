@@ -48,6 +48,28 @@ pub mod dispatching_on_the_input_type {
         }
     }
 
+    /// The same dispatch in the current form, with `open` keys whose generic first segment matches
+    /// any code. The page names the providers `ComputeCircleArea` and `ComputeRectangleArea`.
+    pub struct OpenApp;
+
+    delegate_components! {
+        OpenApp {
+            open ComputerComponent;
+
+            @ComputerComponent.<Code> Code.Circle: CircleArea,
+            @ComputerComponent.<Code> Code.Rectangle: RectangleArea,
+        }
+    }
+
+    mod check_open_app {
+        use super::*;
+        check_components! {
+            OpenApp {
+                ComputerComponent: [((), Circle), ((), Rectangle)],
+            }
+        }
+    }
+
     #[test]
     fn each_input_reaches_its_own_handler() {
         use cgp::extra::handler::CanCompute;

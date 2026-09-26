@@ -122,8 +122,9 @@ defined with [`#[derive_delegate]`](../attributes/derive_delegate.md), including
 handler families. The dispatching-per-type choice is worked through in
 [`#[derive_delegate]`](../attributes/derive_delegate.md).
 
-For dispatching on the *input* type of a handler rather than a `Code` parameter, the sibling provider is
-[`UseInputDelegate`](handler/use_input_delegate.md).
+For dispatching on the *input* type of a handler rather than a `Code` parameter, the legacy sibling
+provider is [`UseInputDelegate`](handler/use_input_delegate.md). The `open` statement covers that case
+too, with a key that has one path segment per type parameter.
 
 ## Under the hood
 

@@ -165,17 +165,17 @@ dispatch on the same parameter and resolve to the same implementations.
 [`delegate_components!`](../macros/delegate_components.md), which needs neither an attribute nor a table
 type.
 
-A few situations still involve the attribute, and only the dispatcher that `open` cannot express is a
-reason to write it.
+A few situations still involve the attribute, though none of them is a reason to write it on a new
+component.
 
 - **Keeping compatibility with existing wiring.** The attribute makes
   `UseDelegate<new Table { … }>` wiring possible, so removing it from a published component is a breaking
   change for any downstream user who wires that way. Removing it is still the right direction, but it is a
   breaking change to schedule rather than a cleanup to make in passing.
-- **A dispatcher `open` cannot express.** `open` resolves through the `RedirectLookup` impl a component
-  generates, which keys on the parameter that impl dispatches on. A *second*, independently keyed
-  dispatcher, the `UseInputDelegate<Input>` case above, has no `open` equivalent, so a component wanting
-  one still declares it here.
+- **Dispatch on a later parameter.** This needs no attribute either. The `RedirectLookup` impl that
+  `open` resolves through appends every type parameter of the component to the lookup path, so a key
+  with one segment per parameter dispatches on any of them. `@ComputerComponent.<Code> Code.Circle`
+  selects by the input whatever the code, which is what a `UseInputDelegate<Input>` table does.
 - **Reading existing code.** CGP's own error and handler components are defined with this attribute, so
   `UseDelegate` tables appear in wiring you did not write. Understanding the form matters more than being
   able to author it.

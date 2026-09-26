@@ -30,26 +30,27 @@ The borrowed and multi-argument variants are `MatchWithValueHandlersRef` (over `
 ## Usage
 
 It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one optional type parameter, the
-per-variant provider, and is most often wired through
-[`UseInputDelegate`](../handler/use_input_delegate.md) so it is selected when the input is a given enum:
+per-variant provider, and is most often wired by input type with the
+[`open` statement](../../macros/delegate_components.md#choosing-a-provider-per-type-the-open-statement),
+so it is selected when the input is a given enum:
 
 ```rust
 delegate_components! {
     App {
-        ComputerComponent: UseInputDelegate<new AreaComputers {
-            Circle: ComputeArea,
-            Rectangle: ComputeArea,
-            Shape: MatchWithValueHandlers,
-        }>,
+        open ComputerComponent;
+
+        @ComputerComponent.<Code> Code.[Circle, Rectangle]: ComputeArea,
+        @ComputerComponent.<Code> Code.Shape: MatchWithValueHandlers,
     }
 }
 ```
 
-A `Circle` input is handled directly by `ComputeArea`, while a `Shape` input is handled by
-`MatchWithValueHandlers`, which synthesizes an adapter for each variant and routes each payload back
-through the context's own `ComputerComponent`, so the `Circle` and `Rectangle` payloads reach
-`ComputeArea` after all. `UseInputDelegate` is the correct wiring here because it keys on the input
-type; it has no `open`-statement equivalent.
+Each key has one segment per type parameter of `CanCompute<Code, Input>`, and the generic first
+segment matches any code, so the second selects by the input type. A `Circle` input is handled
+directly by `ComputeArea`, while a `Shape` input is handled by `MatchWithValueHandlers`, which
+synthesizes an adapter for each variant and routes each payload back through the context's own
+`ComputerComponent`, so the `Circle` and `Rectangle` payloads reach `ComputeArea` after all. Older
+code wires the same dispatch as a [`UseInputDelegate`](../handler/use_input_delegate.md) table.
 
 ## When to use it
 

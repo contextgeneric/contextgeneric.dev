@@ -420,6 +420,91 @@ pub mod choosing_a_provider_per_type_the_open_statement {
             ],
         }
     }
+
+    /// A component with two type parameters, dispatched on the input alone and on both parameters
+    /// in one table. Its own module, so its provider names do not clash with the ones above.
+    pub mod later_parameters {
+        use cgp::extra::handler::{Computer, ComputerComponent};
+        use cgp::prelude::*;
+
+        pub struct Area;
+        pub struct Perimeter;
+
+        pub struct Circle {
+            pub radius: f64,
+        }
+
+        pub struct Rectangle {
+            pub width: f64,
+            pub height: f64,
+        }
+
+        #[cgp_impl(new DescribeCircle)]
+        impl<Code> Computer<Code, Circle> {
+            type Output = f64;
+
+            fn compute(&self, _code: PhantomData<Code>, circle: Circle) -> f64 {
+                circle.radius
+            }
+        }
+
+        #[cgp_impl(new RectangleArea)]
+        impl Computer<Area, Rectangle> {
+            type Output = f64;
+
+            fn compute(&self, _code: PhantomData<Area>, rectangle: Rectangle) -> f64 {
+                rectangle.width * rectangle.height
+            }
+        }
+
+        #[cgp_impl(new RectanglePerimeter)]
+        impl Computer<Perimeter, Rectangle> {
+            type Output = f64;
+
+            fn compute(&self, _code: PhantomData<Perimeter>, rectangle: Rectangle) -> f64 {
+                2.0 * (rectangle.width + rectangle.height)
+            }
+        }
+
+        pub struct MyApp;
+
+        delegate_components! {
+            MyApp {
+                open ComputerComponent;
+
+                @ComputerComponent.<Code> Code.Circle: DescribeCircle,
+                @ComputerComponent.Area.Rectangle: RectangleArea,
+                @ComputerComponent.Perimeter.Rectangle: RectanglePerimeter,
+            }
+        }
+
+        check_components! {
+            MyApp {
+                ComputerComponent: [
+                    (Area, Circle),
+                    (Perimeter, Circle),
+                    (Area, Rectangle),
+                    (Perimeter, Rectangle),
+                ],
+            }
+        }
+
+        #[test]
+        fn the_input_or_both_parameters_select_the_provider() {
+            use cgp::extra::handler::CanCompute;
+
+            let app = MyApp;
+            let rectangle = || Rectangle {
+                width: 2.0,
+                height: 3.0,
+            };
+
+            assert_eq!(app.compute(PhantomData::<Area>, Circle { radius: 1.5 }), 1.5);
+            assert_eq!(app.compute(PhantomData::<Perimeter>, Circle { radius: 1.5 }), 1.5);
+            assert_eq!(app.compute(PhantomData::<Area>, rectangle()), 6.0);
+            assert_eq!(app.compute(PhantomData::<Perimeter>, rectangle()), 10.0);
+        }
+    }
 }
 
 /// ## Statements come first

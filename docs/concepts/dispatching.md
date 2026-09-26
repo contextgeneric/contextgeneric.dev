@@ -33,27 +33,28 @@ depend on the dispatcher and the providers it contains.
 ## Matching, and why it is exhaustive
 
 A matcher selects the handler for an enum's current variant. For a `Shape` enum deriving `CgpData`
-with `Circle(Circle)` and `Rectangle(Rectangle)` variants, input-based wiring can select both the
-matcher and the payload handlers:
+with `Circle(Circle)` and `Rectangle(Rectangle)` variants, wiring keyed on the input type can select
+both the matcher and the payload handlers:
 
 ```rust
 delegate_components! {
     App {
-        ComputerComponent: UseInputDelegate<
-            new AreaComponents {
-                Shape: MatchWithValueHandlers,
-                Circle: CircleArea,
-                Rectangle: RectangleArea,
-            }
-        >,
+        open ComputerComponent;
+
+        @ComputerComponent.<Code> Code.Shape: MatchWithValueHandlers,
+        @ComputerComponent.<Code> Code.Circle: CircleArea,
+        @ComputerComponent.<Code> Code.Rectangle: RectangleArea,
     }
 }
 ```
 
-`UseInputDelegate` selects a provider by the input type. A call to `app.compute(code, shape)` first
-reaches `MatchWithValueHandlers`. The matcher extracts the current variant's payload and delegates
-it through the same context: a `Circle` reaches `CircleArea`, and a `Rectangle` reaches
-`RectangleArea`. The application does not write a `match` over `Shape`.
+The [`open` statement](/docs/reference/macros/delegate_components#choosing-a-provider-per-type-the-open-statement)
+keys each entry by one path segment per type parameter of `CanCompute<Code, Input>`. The first
+segment, `<Code> Code`, matches any code, so the second segment selects a provider by the input type
+alone. A call to `app.compute(code, shape)` first reaches `MatchWithValueHandlers`. The matcher
+extracts the current variant's payload and delegates it through the same context: a `Circle` reaches
+`CircleArea`, and a `Rectangle` reaches `RectangleArea`. The application does not write a `match`
+over `Shape`.
 
 The matcher tracks unhandled variants through the extractor's remainder type. Each extraction
 attempt returns either a payload to handle or a remainder that excludes that variant. The next

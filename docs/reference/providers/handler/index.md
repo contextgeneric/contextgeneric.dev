@@ -66,7 +66,8 @@ wire automatically:
 
 **Input dispatch** chooses a handler by the type of the value:
 
-- [`UseInputDelegate`](use_input_delegate.md) keys a lookup table on the handler's `Input` type.
+- [`UseInputDelegate`](use_input_delegate.md) keys a lookup table on the handler's `Input` type. It is
+  the legacy form; the `open` statement of `delegate_components!` dispatches on the input directly.
 
 ## Related constructs
 

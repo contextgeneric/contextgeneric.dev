@@ -292,6 +292,36 @@ Braces are optional when opening a single component, so `open AreaCalculatorComp
 `open { AreaCalculatorComponent };` are the same. The braced list is needed to open several at once,
 and the macro rejects a braceless header naming more than one component.
 
+**A key has one path segment per type parameter of the component, so `open` dispatches on any of
+them.** The redirect appends every type parameter to the lookup path, in declaration order, so a
+lookup of `CanCompute<Code, Input>` follows `@ComputerComponent.Code.Input`. A key that stops after
+the first segment matches that value of the first parameter with every value of the rest, and a
+per-entry generic in a segment matches any value there. A handler can therefore be chosen by its
+input alone, by its code alone, or by both:
+
+```rust
+delegate_components! {
+    MyApp {
+        open ComputerComponent;
+
+        @ComputerComponent.<Code> Code.Circle: DescribeCircle,
+        @ComputerComponent.Area.Rectangle: RectangleArea,
+        @ComputerComponent.Perimeter.Rectangle: RectanglePerimeter,
+    }
+}
+```
+
+A `Circle` input reaches `DescribeCircle` whatever code the caller passes, while a `Rectangle` input
+is dispatched on both parameters. This replaces the legacy
+[`UseInputDelegate`](../providers/handler/use_input_delegate.md) table, and a
+[`UseDelegate`](../providers/use_delegate.md) table nested around `UseInputDelegate` tables.
+
+**A shorter key covers every longer key beneath it.** Each key ends in a wildcard, and a generic
+segment matches every value in its position. So `@ComputerComponent.Area` overlaps
+`@ComputerComponent.Area.Rectangle`, and it also overlaps `@ComputerComponent.<Code> Code.Circle`,
+which covers `Area` among its codes. Within one table, key a first-parameter value either on its own
+or per later parameter, never both.
+
 `open` does not need an extra attribute on the component, because it works through the
 [`RedirectLookup`](../providers/redirect_lookup.md) impl that every `#[cgp_component]` already
 generates. It is a lightweight special case of the full [namespace](./cgp_namespace.md) feature, suited
@@ -692,8 +722,10 @@ names an unresolved type rather than anything about wiring.
 
 **Two entries claiming one key conflict**, and the compiler reports it as a [coherence](/docs/reference/glossary#coherence) error rather than
 as a wiring one. This covers the obvious duplicate, an `open` header colliding with an explicit mapping
-for the same component, and a generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a
-specific `AreaCalculatorComponent<Rectangle>` one. The same applies to a direct entry for a path a
+for the same component, a generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a
+specific `AreaCalculatorComponent<Rectangle>` one, and a path key covering a longer one, as
+`@ComputerComponent.Area` beside `@ComputerComponent.Area.Rectangle` or
+`@ComputerComponent.<Code> Code.Circle`. The same applies to a direct entry for a path a
 joined namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#common-mistakes).
 
 ## Related constructs

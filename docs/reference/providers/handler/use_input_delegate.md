@@ -19,7 +19,10 @@ input-specific providers. Like every CGP provider, it holds no runtime value; th
 It is the sibling of [`UseDelegate`](../use_delegate.md). Where `UseDelegate` keys on the first generic
 parameter of a provider trait, the `Code` for a handler, `UseInputDelegate` keys on the `Input`
 parameter, so the provider that handles a value is chosen by the type of that value. The handler
-components enable both dispatchers at once.
+components enable both dispatchers at once. Both are legacy forms: the `open` statement of
+[`delegate_components!`](../../macros/delegate_components.md#choosing-a-provider-per-type-the-open-statement)
+dispatches on the code, the input, or both with no table type, as the next section shows for the
+input.
 
 ## Usage
 
@@ -40,18 +43,30 @@ delegate_components! {
 ```
 
 The outer entry routes the handler component to `UseInputDelegate<AppComputers>`, and the inner table
-maps each input type to the provider responsible for it. Unlike the per-`Code` dispatch of
-[`UseDelegate`](../use_delegate.md), input dispatch has no `open`-statement equivalent, so the nested
-table is the current form rather than a legacy one.
+maps each input type to the provider responsible for it. The current form stores the same entries on
+the context with `open`. Each key has one path segment per type parameter of
+`CanCompute<Code, Input>`, and a generic first segment matches any code, so the second selects by the
+input type:
+
+```rust
+delegate_components! {
+    App {
+        open ComputerComponent;
+
+        @ComputerComponent.<Code> Code.Circle: ComputeCircleArea,
+        @ComputerComponent.<Code> Code.Rectangle: ComputeRectangleArea,
+    }
+}
+```
 
 ## When to use it
 
-**Reach for `UseInputDelegate` when a handler should run a different provider depending on the type of
-its input**, which is common in the [dispatch combinators](../dispatch/index.md), where a matcher routes
-each variant of an enum to a handler chosen by the payload type. For dispatch on the `Code` selector
-rather than the input, use the `open` statement of
-[`delegate_components!`](../../macros/delegate_components.md), or the legacy
-[`UseDelegate`](../use_delegate.md) it supersedes.
+**Read `UseInputDelegate` when you meet it in existing code, and write the `open` form instead.**
+Dispatch by input type is common with the [dispatch combinators](../dispatch/index.md), where a matcher
+routes each variant of an enum to a handler chosen by the payload type, and `open` expresses it
+without a table type. The table form still works, since every handler component keeps the
+`#[derive_delegate(UseInputDelegate<Input>)]` that generates it, so existing wiring does not need to
+change.
 
 ## Under the hood
 
