@@ -69,7 +69,10 @@ base's document for each post lists exactly what is stale in it, and its
 a removal ledger that dates every renamed or deleted construct in one table. The safest source of
 verified snippets is the knowledge base's
 [`examples/`](https://github.com/contextgeneric/cgp-knowledge-base/tree/main/examples) directory,
-which exists partly to be quoted.
+which exists partly to be quoted. When a page quotes a project built with CGP, such as a crate of
+`cgp-examples`, check the snippet against that project's section under
+[`projects/`](https://github.com/contextgeneric/cgp-knowledge-base/tree/main/projects), which records
+the project's current code and whether it uses current idioms.
 
 ## Consult the communication strategy before writing public prose
 

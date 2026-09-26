@@ -61,8 +61,8 @@ the same trait pass through unchanged, so a trait can mix them freely.
 
 When stacked with another macro, the order follows what that macro needs, and the two cases differ.
 
-With [`#[cgp_component]`](./cgp_component.md), put `#[async_trait]` **outermost**, so it rewrites the trait
-before the component macro reads it:
+With [`#[cgp_component]`](./cgp_component.md), the conventional placement is **outermost**, so it rewrites
+the trait before the component macro reads it:
 
 ```rust
 #[async_trait]
@@ -71,6 +71,11 @@ pub trait CanFetchStorageObject {
     async fn fetch_storage_object(&self, object_id: &str) -> Result<Vec<u8>, String>;
 }
 ```
+
+Placing it after `#[cgp_component]` also works, because the component macro copies an attribute it does
+not recognize onto each trait it generates, where `#[async_trait]` then rewrites it. The async components
+of the [`transfer`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/transfer/src/interfaces/finance.rs)
+example are written that way.
 
 With [`#[cgp_fn]`](./cgp_fn.md), which *generates* the trait from a function, put it **below** `#[cgp_fn]` on
 the `async fn`. `#[cgp_fn]` copies the attribute onto both items it generates:
