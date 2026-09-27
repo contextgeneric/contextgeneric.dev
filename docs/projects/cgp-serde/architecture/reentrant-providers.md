@@ -154,7 +154,7 @@ giving one of them a distinct type.
 
 ## Where to go next
 
--  [Derive-free records](./derive-free-records.md): the struct providers that re-enter for each
+- [Derive-free records](./derive-free-records.md): the struct providers that re-enter for each
   field.
 - [`messages`](../examples/messages.md): re-entry through three levels of nesting, and the `i64`
   entry left out.

@@ -36,12 +36,12 @@ Reading needs the context too, and `serde_json`'s `from_str` has no place for on
 offers three ways in. The choice depends on where the input comes from and whether the result
 borrows from it:
 
--  **`deserialize_json_string`**, a method on the context from
+- **`deserialize_json_string`**, a method on the context from
   [`CanDeserializeJsonString`](../reference/types/can_deserialize_json_string.md). It takes a `&str`
   and needs no `TryComputer` entries, only an error type. Annotate the result's type, as in
   `let payload: Payload = app.deserialize_json_string(&text)?;`, since the method takes no
   turbofish. The result cannot borrow from the string.
--  **[`DeserializeFromJsonReader`](../reference/providers/deserialize_from_json_reader.md)**, a
+- **[`DeserializeFromJsonReader`](../reference/providers/deserialize_from_json_reader.md)**, a
   provider wired under `@TryComputerComponent.<T> DeserializeJson<T>` and called with `try_compute`.
   It takes any `serde_json` reader: a `StrRead` for a string, a `SliceRead` for bytes, or an
   `IoRead` for a stream. A result can borrow from a string or byte input.

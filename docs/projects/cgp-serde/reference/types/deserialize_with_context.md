@@ -78,7 +78,7 @@ checks for trailing input itself.
 
 ## The ideas behind it
 
--  [The bridge to
+- [The bridge to
   Serde](../../architecture/serde-bridge.md#going-out-handing-a-context-to-a-serde-api): why reading
   needs a seed.
 - [Using a format](../../guides/formats.md#read-with-another-format): the seed with RON.

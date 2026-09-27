@@ -77,7 +77,7 @@ type, [`SerializeToJsonString`](../providers/serialize_to_json_string.md) wraps 
 
 ## The ideas behind it
 
--  [The bridge to
+- [The bridge to
   Serde](../../architecture/serde-bridge.md#going-out-handing-a-context-to-a-serde-api): how a
   context reaches a Serde API.
 - [Re-entrant providers](../../architecture/reentrant-providers.md#re-entering-through-an-adapter):

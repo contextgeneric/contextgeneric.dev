@@ -98,7 +98,7 @@ writing the code rather than compiling it.
 - [Context services](./context-services.md): deserializers that take something from the context
   while they work.
 - [`basic`](../examples/basic.md): a derive-free struct written to JSON and read back.
--  [Extensible records](/docs/concepts/extensible-records): the CGP idea behind reading and building
+- [Extensible records](/docs/concepts/extensible-records): the CGP idea behind reading and building
   a struct generically.
 - [Reflection](/docs/comparisons/reflection): how this compares with Serde's derive and with
   reflection in other languages.

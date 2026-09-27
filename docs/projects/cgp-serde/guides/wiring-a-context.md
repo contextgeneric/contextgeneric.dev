@@ -70,10 +70,10 @@ List the types a traversal touches, not only the types the data names. Start fro
 type, and follow what each provider asks the context for, which each provider's
 [reference page](../reference/index.md) states:
 
--  **A struct** wired to [`SerializeFields`](../reference/providers/serialize_fields.md) or
+- **A struct** wired to [`SerializeFields`](../reference/providers/serialize_fields.md) or
   [`DeserializeRecordFields`](../reference/providers/deserialize_record_fields.md) needs an entry
   for each field's type.
--  **A collection** needs an entry of its own, besides its item type's. Writing one with
+- **A collection** needs an entry of its own, besides its item type's. Writing one with
   [`SerializeIterator`](../reference/providers/serialize_iterator.md) also asks for the item as a
   reference, which one generic entry covers:
   `@ValueSerializerComponent.<'a, T> &'a T: SerializeDeref`.

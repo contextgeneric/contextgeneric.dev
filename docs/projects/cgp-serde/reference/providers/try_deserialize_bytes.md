@@ -66,7 +66,7 @@ it without the conversion.
 
 ## The ideas behind it
 
--  [Wiring a
+- [Wiring a
   context](../../guides/wiring-a-context.md#3-write-keys-for-references-lifetimes-and-arrays): why
   an array is keyed on an alias.
 

@@ -210,13 +210,13 @@ traversal reaches, not only for the fields in the data. Four entries exist for t
 
 - **Each vector of structs** gets `SerializeIterator`. A `Vec<EncryptedMessage>` is a value the
   traversal reaches, so it needs an entry of its own besides the one for `EncryptedMessage`.
--  **The generic reference entry**, `<'a, T> &'a T`, sends every reference to
+- **The generic reference entry**, `<'a, T> &'a T`, sends every reference to
   [`SerializeDeref`](../reference/providers/serialize_deref.md), which serializes the value behind
   it. Walking a borrowed `Vec<EncryptedMessage>` yields `&EncryptedMessage`, and this one entry
   covers every such reference.
 - **`String`** is wired, although no field is a `String`, because the hex, base64, and RFC 3339
   providers each produce a string and ask the context to serialize it.
--  **`i64`** is wired in `AppB`, although no field is an `i64`, because `SerializeTimestamp` turns
+- **`i64`** is wired in `AppB`, although no field is an `i64`, because `SerializeTimestamp` turns
   the date into an `i64` and asks the context to serialize that.
 
 The last point is the easiest to miss, and the change at the end of this page shows what happens

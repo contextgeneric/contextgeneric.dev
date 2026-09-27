@@ -98,7 +98,7 @@ are two ways, and the choice depends on who makes the nested call:
 - **Converting to another type.** Call `self.serialize(&converted, serializer)` or
   `self.deserialize(deserializer)` yourself, and declare what you need with
   [`#[uses]`](/docs/reference/attributes/uses), as `SerializeMillis` does for `u64`.
--  **Passing items to one of Serde's compound writers or readers.** Wrap each item in
+- **Passing items to one of Serde's compound writers or readers.** Wrap each item in
   [`SerializeWithContext`](../reference/types/serialize_with_context.md) for `serialize_element` or
   `serialize_entry`, or pass a
   [`DeserializeWithContext`](../reference/types/deserialize_with_context.md) seed to

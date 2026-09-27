@@ -97,7 +97,7 @@ it in a reader itself.
 
 ## The ideas behind it
 
--  [The bridge to
+- [The bridge to
   Serde](../../architecture/serde-bridge.md#going-out-handing-a-context-to-a-serde-api): why reading
   needs a seed and a format's own deserializer.
 - [Modular error handling](/docs/concepts/modular-error-handling): raising into the context's error
