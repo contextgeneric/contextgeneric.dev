@@ -1,0 +1,11 @@
+error: cannot find attribute `uses` in this scope
+  --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_misplaced_uses.rs:12:3
+   |
+12 | #[uses(HasName)]
+   |   ^^^^
+   |
+help: a built-in attribute with a similar name exists
+   |
+12 - #[uses(HasName)]
+12 + #[used(HasName)]
+   |

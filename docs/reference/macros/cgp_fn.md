@@ -30,9 +30,10 @@ covering every context that satisfies the field requirements.
 
 The macro makes one tradeoff, and you should know it. A
 [`#[cgp_component]`](./cgp_component.md) supports many interchangeable implementations, one chosen per
-context, and this costs extra boilerplate. `#[cgp_fn]` supports exactly one implementation, the function
-body, and costs nothing. Most traits have one natural definition, so `#[cgp_fn]` is the better
-choice for them and the recommended place to start, rather than a lesser form of the real thing.
+context, and this costs extra boilerplate. `#[cgp_fn]` supports exactly one implementation, the
+function body, and needs no component, provider, or wiring. Most traits have one natural definition,
+so `#[cgp_fn]` is the better choice for them and the recommended place to start, rather than a lesser
+form of the real thing.
 
 It is also the easiest introduction to CGP, because nothing in it is unfamiliar. A reader who
 understands functions and arguments can write a working context-generic function without first
@@ -147,6 +148,9 @@ it depends on.
 - [`#[async_trait]`](./async_trait.md) goes directly beneath `#[cgp_fn]` on an `async fn`. The macro
   copies it onto both generated items, so the trait ends up declaring a lint-clean `-> impl Future`.
 
+Each attribute may be repeated, and each also takes a comma-separated list inside one attribute, as
+in `#[uses(RectangleArea, HasName)]`. `#[use_provider]` is the exception in practice, because its
+argument ends in a bound list that would swallow a second entry, so write one per inner provider.
 ## Examples
 
 A trait, another trait built on it, and a context that gets both without wiring anything:
@@ -182,7 +186,10 @@ pub fn report(rect: &Rectangle) {
 dependency. It does not know or care how that trait is implemented. `Rectangle` derives
 [`HasField`](../derives/derive_has_field.md) and happens to carry the three fields the two functions
 read, and that is its entire qualification. This program does not use `delegate_components!`
-anywhere, and adding one would change nothing.
+anywhere, and adding one would change nothing. `Rectangle` is a
+[value context](/docs/reference/glossary#value-context) here, the shape whose area is computed; a
+type such as `App` that stands for an application gets the method the same way, by carrying the
+fields.
 
 ## When to use it
 
@@ -263,8 +270,7 @@ argument ends in `.as_str()` instead, and a plain `&T` in nothing at all.
 
 The generics split shows up in the same impl. Given the `scale` function above, the generic goes on
 both items while the function's `where` bound stays on the impl, ordered *before* the implicit field
-bounds. Attribute-contributed predicates always come first, and the macro appends the implicit ones
-last:
+bound:
 
 ```rust
 pub trait Scale<Scalar> {
@@ -291,7 +297,16 @@ The companion attributes layer into these same two items, and each lands in a fi
 - `#[use_type(Trait.Type)]` adds the supertrait and rewrites every bare mention of the type into its
   fully qualified form.
 
-The macro appends the implicit-argument bounds last, after whatever the attributes contributed.
+The impl's `where` clause is assembled in a fixed order, which helps when reading an expansion:
+
+1. the function's own `where` clause;
+2. one `Self:` predicate joining every `#[extend]` bound and then every `#[uses]` bound;
+3. the `#[extend_where]` predicates;
+4. the implicit-argument `HasField` bounds;
+5. the predicates `#[use_type]` and then `#[use_provider]` contribute.
+
+So the field bounds are not the last entries when a function imports an abstract type or a
+provider.
 
 Two smaller placements matter because neither is visible in the source you wrote. **The
 function's visibility becomes the trait's**, and the impl's method keeps inherited visibility. So
@@ -328,8 +343,7 @@ exclusively, so it cannot coexist with any other field read. Immutable implicit 
 this restriction and combine freely, in any number:
 
 ```text
-error: a `&mut` implicit argument must be the only implicit argument, since its mutable
-       borrow of the context conflicts with reading any other field
+error: a `&mut` implicit argument must be the only implicit argument, since its mutable borrow of the context conflicts with reading any other field
 ```
 
 **An `#[impl_generics]` parameter cannot appear in the trait's own signature.** Only the generated

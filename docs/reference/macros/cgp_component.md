@@ -12,22 +12,23 @@ target, and the key that wires them together.
 
 ## Overview
 
-You can apply `#[cgp_component]` to any Rust trait definition to make that trait wireable, with
-every implementation chosen per context. Applying it takes nothing away. The trait you wrote keeps working exactly as it
-did, now under the name CGP calls the **consumer trait**, and every call site that already uses it
-keeps compiling unchanged. The macro adds a matching **provider trait** for implementations to target,
-a small marker type called the **component** that names the trait for wiring, and a pair of
+`#[cgp_component]` turns an ordinary Rust trait into a component, so that each type using the trait
+chooses which implementation it gets. Applying it takes nothing away. The trait you wrote keeps
+working exactly as it did, now under the name CGP calls the **consumer trait**, and every call site
+that already uses it keeps compiling unchanged. The macro adds a matching **provider trait** for
+implementations to target, a small marker type called the **component** that names the trait for
+wiring, and a pair of
 [**blanket implementations**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
 that connect them without requiring you to write anything.
 
-`#[cgp_component]` makes it possible to define several overlapping implementations of one trait
-at once. An ordinary Rust trait does not allow this. A
-[trait](https://doc.rust-lang.org/book/ch10-02-traits.html) can have only one implementation per
-type, a rule called [coherence](/docs/concepts/coherence). That rule is usually the right one, because
-it lets the compiler resolve a `where T: Display` bound without anyone naming which implementation
-applies. But it also means a trait with several plausible implementations cannot hold the
-alternatives. A type can send real email or record it for a test, but never both at once. Switching
-between the two means editing the impl itself rather than choosing between them at the point of use.
+The macro lets one trait have several overlapping implementations at the same time, which an
+ordinary Rust trait does not allow. A [trait](https://doc.rust-lang.org/book/ch10-02-traits.html)
+can have only one implementation per type, a rule called [coherence](/docs/concepts/coherence).
+That rule is usually the right one, because it lets the compiler resolve a `where T: Display` bound
+without anyone naming which implementation applies. But it also means a trait with several plausible
+implementations cannot hold the alternatives. A type can send real email or record it for a test,
+but not both. Switching between the two means editing the impl itself rather than choosing between
+them at the point of use.
 
 `#[cgp_component]` solves that by splitting the one trait into two, the
 [consumer and provider traits](/docs/concepts/consumer-and-provider-traits), so that a caller and an
@@ -42,12 +43,13 @@ implementation no longer target the same trait.
 Moving `Self` into a parameter lets more than one implementation coexist, because each one now targets
 its own small type instead of the single `Self` slot every plain trait has. A **provider** is one of
 those targets: a zero-sized type such as `RectangleArea` without data of its own that exists only
-to name one implementation. The type the methods run on is called the **context**. It
-supplies whatever values an implementation needs as its own fields, and it picks the provider it wants
-through [`delegate_components!`](./delegate_components.md). The generated [blanket implementations](/docs/reference/glossary#blanket-implementation) then
-route a call on the consumer trait through to that choice automatically. This costs nothing at
-runtime. Wiring fixes the provider once, at compile time, and the compiler turns the call into a
-direct, statically-dispatched call, exactly as if you had written the implementation yourself.
+to name one implementation. The type the methods run on is called the **context**, and it supplies
+the values an implementation needs as its fields. The context picks the provider it wants through
+[`delegate_components!`](./delegate_components.md), and the generated
+[blanket implementations](/docs/reference/glossary#blanket-implementation) route a call on the
+consumer trait through to that choice. Selecting the provider adds no runtime cost: the compiler
+resolves the choice when it compiles the call and turns it into a direct, statically dispatched call,
+as if you had written the implementation on the context yourself.
 
 The macro's remaining output is the **component** itself, a marker type such as
 `AreaCalculatorComponent` that names the trait and is the key `delegate_components!` wires
@@ -93,13 +95,21 @@ for setting `provider` alone.
 | `context` | The identifier used for the generated context type parameter | `__Context__` |
 
 The `context` default is deliberately unusual so that it cannot collide with a type parameter of your
-own.
+own. The `name` key also accepts a list of generic parameters, as in
+`name: AreaCalculatorComponent<Shape>`, for a component whose marker should carry the trait's own
+parameters; [Formal grammar](#formal-grammar) gives the rules.
+
+The trait body may declare any number of methods, associated types, and associated consts, and the
+macro reproduces every one of them on the provider trait. The one declaration it refuses is a const
+generic parameter on the trait itself, for the reason given under
+[Common Mistakes](#common-mistakes).
 
 ### Companion attributes
 
 The attributes below may be written above the trait, beside `#[cgp_component]`, and each changes what
-the macro generates. Any of them may be repeated, and all except `#[prefix]` also accept a
-comma-separated list inside one attribute.
+the macro generates. Any of them may be repeated. `#[use_type]` and `#[extend]` also accept a
+comma-separated list inside one attribute, while `#[derive_delegate]` and `#[prefix]` take a single
+entry each, so a second one needs a second attribute.
 
 | Attribute | What it adds |
 |---|---|
@@ -142,7 +152,7 @@ component is a supertrait, written with `#[extend]`.
 
 ## Examples
 
-A component, a provider for it, and a type that wires the two together:
+A component, a provider for it, and a type that wires the two together and checks the wiring:
 
 ```rust
 use cgp::prelude::*;
@@ -171,6 +181,12 @@ delegate_components! {
     }
 }
 
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
+    }
+}
+
 fn print_area(rect: &Rectangle) {
     println!("area = {}", rect.area());
 }
@@ -179,7 +195,15 @@ fn print_area(rect: &Rectangle) {
 `rect.area()` is an ordinary method call on the consumer trait. It resolves through `Rectangle`'s
 table, which maps `AreaCalculatorComponent` to `RectangleArea`, and `RectangleArea::area` reads the two
 fields to compute the result. Swapping the provider in that one wiring line changes what `rect.area()`
-does, and nothing else in the program changes.
+does, and nothing else in the program changes. The
+[`check_components!`](./check_components.md) block makes a missing field fail at the wiring rather
+than at the first call.
+
+`Rectangle` here is a [value context](/docs/reference/glossary#value-context): the wired type is the
+shape whose area is computed. Most CGP code instead wires an
+[environmental context](/docs/reference/glossary#environmental-context), a type such as `App` that
+stands for one application and carries its choices. The component is written the same way for
+either.
 
 ## When to use it
 
@@ -187,7 +211,7 @@ Use `#[cgp_component]` when a trait needs **more than one implementation, and th
 choice belongs to the type using it.** The macro exists for that case, and it has a cost: a component
 is a trait, a second trait, a marker type, and a line of wiring per type.
 
-Prefer something simpler when you can.
+Prefer something simpler when you can:
 
 - **One implementation, ever.** Use [`#[cgp_fn]`](./cgp_fn.md) instead. It builds the trait
   straight from a function and does not need wiring. If a second implementation ever arrives, you
@@ -204,6 +228,25 @@ implementation serves exactly one type. In that case you can implement the consu
 each concrete type, as you would any Rust trait, and skip providers entirely. Named providers become
 worth their cost once a second type wants the *same* implementation, or once an implementation should
 compose with a wrapper.
+
+### What the trait is about
+
+Decide what goes in `Self` before writing the trait, because the choice cannot be revised later
+without changing every caller. A component is
+[self-targeted](/docs/reference/glossary#self-targeted-component) when its operation acts on `Self`,
+as `CanCalculateArea` does. It is
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component) when the operation acts
+on a type parameter and `Self` only supplies the choices, as in `CanEncodeValue<Value>`. A parameter
+alone does not settle this: in `CanCompute<Code, Input>` the target is `Input`, while `Code` is a
+selector the wiring dispatches on.
+
+The choice decides how far the wiring can vary. A self-targeted component's wiring is keyed on the
+type the operation acts on, so that type gets one provider for the whole program. That is no limit
+when `Self` stands for an application you define, since a second application is a second type. So
+default to a self-targeted operation on an environmental context. Move the target into a parameter
+only when the operation is about a type you do not own *and* different applications must treat that
+type differently. [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) works through the
+choice.
 
 ### How many items should a component have?
 
@@ -258,6 +301,10 @@ pub trait AreaCalculator<Context>:
 }
 ```
 
+An associated type the trait declares for itself is the one `Self` the rewrite leaves alone. A
+`Self::Output` in the consumer trait stays `Self::Output` in the provider trait, where it names the
+provider's own `Output`, so each provider chooses the type it returns.
+
 `IsProviderFor` *replaces* the supertrait list rather than joining it. Any supertrait the consumer
 trait had, whether written natively or added by `#[extend]` or `#[use_type]`, becomes a `where`
 predicate on the context instead. This follows from the `Self`-to-`Context` move: a supertrait
@@ -285,7 +332,8 @@ rewritten but still a default. The consumer trait keeps its copy too, so the bod
 expansion.
 
 This is why an **empty provider impl** is meaningful, and it is how
-[`UseDefault`](../providers/use_default.md) works:
+[`UseDefault`](../providers/use_default.md) works. `UseDefault` is not in the prelude; import it from
+`cgp::core::component`:
 
 ```rust
 #[cgp_impl(UseDefault)]
@@ -342,30 +390,45 @@ always emits the `UseContext` and `RedirectLookup` impls, and it generates the `
 namespace impls one per attribute:
 
 - A [`UseContext`](../providers/use_context.md) impl, so the provider trait can be satisfied by
-  routing back through the context's own implementation. Its only bound is
-  `Context: CanCalculateArea`, and each method forwards to the consumer method.
+  routing back through the context's own implementation. It requires `Context: CanCalculateArea`
+  on top of any supertrait predicate the provider trait carries, and each method forwards to the
+  consumer method.
 - A [`RedirectLookup`](../providers/redirect_lookup.md) impl, which the `open` statement and
-  [namespaces](./cgp_namespace.md) resolve through.
+  [namespaces](./cgp_namespace.md) resolve through. It is written for
+  `RedirectLookup<__Components__, __Path__>` and looks the component up as
+  `__Components__: DelegateComponent<__Path__>`.
 - One [`UseDelegate`](../providers/use_delegate.md) impl per
   [`#[derive_delegate(...)]`](../attributes/derive_delegate.md) attribute.
 - One namespace impl per [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, binding the
   component's key inside that namespace to a redirect down the given path.
+
+Each of the first three comes with a matching `IsProviderFor` impl under the same `where` clause, so
+a component wired to `UseContext`, reached through `open`, or dispatched through `UseDelegate` still
+reports a missing dependency by name. The `RedirectLookup` one additionally requires the provider it
+redirects to to be `IsProviderFor` the component, which is how a missing dependency is reported
+through an `open` entry or a namespace path. The namespace impls carry none, since they are table
+entries rather than providers.
 
 The `RedirectLookup` impl puts a component's own type parameters into a path, and it makes per-type
 wiring such as `@AreaCalculatorComponent.Rectangle` resolve. That entry presumes a generic
 `CanCalculateArea<Shape>`, as in the table below, rather than the parameterless component this page
 defines. For such a component the impl does not look the incoming path up directly. It appends the
 parameters to the path first, so a lookup for `CanCalculateArea<Rectangle>` that arrives at
-`@AreaCalculatorComponent` ends up looking for `@AreaCalculatorComponent.Rectangle`. Only *type*
-parameters take part. A lifetime or a const parameter cannot key a path, so the impl leaves it out.
+`@AreaCalculatorComponent` ends up looking for `@AreaCalculatorComponent.Rectangle`. Several type
+parameters are appended in declaration order. Only *type* parameters take part: a lifetime or a const
+parameter cannot key a path, so the impl leaves it out.
 
 Some details of the real output differ from the listings above, and each is easy to misread in an
 error. The generated parameters carry **reserved names**: the context is literally `__Context__`
-unless you override it, and the provider parameter is `__Provider__`. The readable `Context` and
-`Provider` here are for legibility only. Also, a component with parameters of its own appends them
-*after* the context in the provider trait. Lifetimes are the exception, because Rust requires them to
-lead. The macro also groups those parameters into the `IsProviderFor` parameter tuple. That tuple
-holds types, so it lifts a lifetime into [`Life<'a>`](../types/life.md):
+unless you override it, and the provider parameter is `__Provider__`. The provider trait's receiver
+is `__context__`, the context name in snake case. A name that does not already start with an
+underscore is wrapped in double underscores, so `context: Ctx` gives a `__ctx__` receiver. The
+readable `Context`, `context`, and `Provider` here are for legibility only.
+
+A component with parameters of its own appends them *after* the context in the provider trait.
+Lifetimes are the exception, because Rust requires them to lead. The macro also groups those
+parameters into the `IsProviderFor` parameter tuple. That tuple holds types, so it lifts a lifetime
+into [`Life<'a>`](../types/life.md):
 
 | Component | Provider trait | `IsProviderFor` params |
 |---|---|---|
@@ -374,9 +437,19 @@ holds types, so it lifts a lifetime into [`Life<'a>`](../types/life.md):
 | `CanEncode<Value, Format>` | `Encoder<__Context__, Value, Format>` | `(Value, Format)` |
 | `HasReference<'a, T>` | `ReferenceGetter<'a, __Context__, T>` | `(Life<'a>, T)` |
 
-The tuple drops bounds and defaults, and it names the parameters positionally and nothing more. A
-const parameter cannot appear in it at all, which is why the macro rejects one; see
+The tuple drops bounds and defaults, and it names the parameters positionally and nothing more. The
+single-parameter `(Shape)` has no trailing comma, so it is the type `Shape` in parentheses rather
+than a one-element tuple, and every place the macro writes the tuple agrees on that. A const
+parameter cannot appear in it at all, which is why the macro rejects one; see
 [Common Mistakes](#common-mistakes).
+
+**Attributes on a trait method are copied to the provider trait's declaration of that method.** The
+generated impls' methods carry none, and for `#[track_caller]` that is enough, because Rust applies
+the attribute on a trait method's declaration to every impl of it. It therefore reaches the blanket
+impls, the `UseContext`, `RedirectLookup`, and `UseDelegate` impls, and every provider, so
+`Location::caller()` inside a provider reports the line that called the consumer method.
+[`CanRaiseError`](../components/can_raise_error.md) relies on this so that an error library records
+where an error was raised.
 
 ## Formal grammar
 
@@ -393,19 +466,33 @@ KeyValueArg      -> `name` `:` ComponentName
                   | `provider` `:` IDENTIFIER
                   | `context` `:` IDENTIFIER
 
-ComponentName    -> IDENTIFIER GenericArgs?
+ComponentName    -> IDENTIFIER ( `<` NameParam ( `,` NameParam )* `,`? `>` )?
+
+NameParam        -> LIFETIME_OR_LABEL
+                  | IDENTIFIER
+                  | `const` IDENTIFIER `:` Type
 ```
 
 `ProviderName` is shorthand for setting `provider` alone. In the key/value form each key may appear at
-most once, in any order, and `provider` is required. `IDENTIFIER` is a Rust identifier token, and
-`GenericArgs` is the Rust grammar's `< … >` argument list, so the component name may carry generic
-parameters while the provider name may not.
+most once, in any order, and `provider` is required. The parser rejects a repeated key with
+*duplicate key is not allowed*, an unrecognized one with *unknown key*, and a missing `provider`
+with ``the `provider` key must be given``. `IDENTIFIER` is a Rust identifier token. The provider
+name and the context name take no generics.
 
-The component name's parameters must be bare names, such as `name: ShapeComponent<Shape>`, which the
-marker struct then declares. A bound fails with ``trait bounds (`A: Clone`) are not allowed in type
-generics``, a default with ``default type parameters (`A = B`) are not allowed in type generics``,
-and a concrete type does not parse. A provider for such a component names the component explicitly,
-as in `#[cgp_impl(new SquareArea: AreaCalculatorComponent<Square>)]`, because the default
+The component name's parameters are bare names, such as `name: ShapeComponent<Shape>`, which the
+marker struct then declares. Each must be one of the trait's own parameters, since the macro writes
+the name wherever the component appears. The parser rejects anything more:
+
+- a bound fails with ``trait bounds (`A: Clone`) are not allowed in type generics``, and a lifetime
+  bound with ``lifetime bounds (`'a: 'b`) are not allowed in type generics``;
+- a default fails with ``default type parameters (`A = B`) are not allowed in type generics``;
+- a type that is not a single identifier, such as `Vec<u8>`, fails to parse. A single identifier
+  such as `u32` is read as a parameter name rather than as the type;
+- a const parameter parses, per the grammar, but then fails inside the macro, as
+  [Common Mistakes](#common-mistakes) records.
+
+A provider for such a component names the component explicitly, as in
+`#[cgp_impl(new SquareArea: AreaCalculatorComponent<Square>)]`, because the default
 `{Provider}Component` name carries no arguments. The attribute delimiter, `(...)` for the bare form and
 `{...}` for the key/value form, is ordinary Rust attribute syntax and does not change how the macro
 parses the arguments inside.
@@ -445,17 +532,32 @@ parser, but the name is then used in type positions, where the const parameter c
 the macro fails with ``failed to parse internal tokens to type `syn::generics::TypeParamBound` ``.
 Keep the name's parameters to bare type names, as the component's own parameters are.
 
-**The attribute must be applied to a trait.** The macro refuses a struct, an enum, or a free function
-at parse time, with an error that names the trait it expected, instead of lowering it into code that
-fails to compile later.
+**A `name:` parameter the trait does not declare fails in the generated code.** In
+`#[cgp_component { provider: Shape, name: ShapeComponent<T> }]` on a trait without a `T`, the parser
+accepts the name, and the compiler then reports ``error[E0425]: cannot find type `T` in this scope``
+at the `T`, followed by a confusing `E0034` about the generated impls. List only the trait's own
+parameters in the name.
 
-**The compiler, not the macro, reports a misplaced companion attribute, and it reports it several
-times.** The macro carries an attribute it does not recognize onto *every* item it generates: the
-consumer trait, the provider trait, and the impls built from each. For `#[allow(...)]` or a doc
-comment, that repetition is welcome. For `#[uses(HasName)]` written above a component trait, it means
-one *cannot find attribute* resolution error per generated item, and none of them mentions
-`#[cgp_component]`. Read the repetition as the signal. It is the same error a typo in an attribute
-name gives, so the fix is to move the attribute rather than to add an import.
+**The attribute must be applied to a trait.** The macro refuses a struct, an enum, or a free function
+at parse time with ``expected `trait` ``, instead of lowering it into code that fails to compile
+later.
+
+**Two `#[use_type]` rejections are met most often on a component.** Beside the equality form covered
+in [Companion attributes](#companion-attributes), two imports may not resolve to the same bare name
+or alias, since the rewrite could keep only one: that fails with *Multiple abstract types cannot
+share the same identifier or alias*. Imports may also not resolve through one another in a cycle.
+The [`#[use_type]`](../attributes/use_type.md) page covers both.
+
+**The compiler, not the macro, reports a misplaced companion attribute, and the error does not name
+`#[cgp_component]`.** The macro carries an attribute it does not recognize onto the items it
+generates from the trait: the consumer trait, the provider trait, the two blanket impls, and the
+`UseContext`, `RedirectLookup`, and `UseDelegate` impls. For `#[allow(...)]` or a doc comment, that
+is what you want.
+For `#[uses(HasName)]` written above a component trait, it means a *cannot find attribute `uses` in
+this scope* error on the attribute's line, which the compiler reports once because every copy shares
+the attribute's span. The compiler may even suggest a built-in attribute with a similar name, such as
+`#[used]`. It is the same error a typo in an attribute name gives, so the fix is to move the
+attribute rather than to add an import.
 
 ## Related constructs
 
@@ -482,6 +584,7 @@ The ideas behind it:
 
 - Entry point: [`cgp_component.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/cgp_component.rs)
 - Implementation: [`types/cgp_component/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_component/)
+- Companion attributes: [`cgp_component_attributes.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/cgp_component_attributes.rs)
 
 ---
 

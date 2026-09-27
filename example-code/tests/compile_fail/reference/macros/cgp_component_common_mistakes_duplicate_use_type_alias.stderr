@@ -1,0 +1,5 @@
+error: Multiple abstract types cannot share the same identifier or alias
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_duplicate_use_type_alias.rs:7:46
+  |
+7 | #[use_type(HasErrorType.Error, HasErrorType.{Error})]
+  |                                              ^^^^^

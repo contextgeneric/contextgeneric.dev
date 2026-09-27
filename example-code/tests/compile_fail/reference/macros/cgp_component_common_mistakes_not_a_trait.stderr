@@ -1,0 +1,5 @@
+error: expected `trait`
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_not_a_trait.rs:7:5
+  |
+7 | pub struct Rectangle {
+  |     ^^^^^^

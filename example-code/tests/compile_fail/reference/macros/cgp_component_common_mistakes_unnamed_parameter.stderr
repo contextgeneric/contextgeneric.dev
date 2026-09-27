@@ -1,0 +1,12 @@
+error: expected identifier, found keyword `_`
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_unnamed_parameter.rs:8:21
+  |
+8 |     fn count(&self, _: u32) -> u32;
+  |                     ^
+
+error: failed to parse internal tokens to type `proc_macro2::Ident`:
+       _
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_unnamed_parameter.rs:8:21
+  |
+8 |     fn count(&self, _: u32) -> u32;
+  |                     ^

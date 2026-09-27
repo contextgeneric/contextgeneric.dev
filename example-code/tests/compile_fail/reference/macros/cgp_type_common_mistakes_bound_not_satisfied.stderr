@@ -1,0 +1,25 @@
+error[E0277]: the trait bound `String: Copy` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_bound_not_satisfied.rs:21:9
+   |
+21 |         ScalarTypeProviderComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Copy` is not implemented for `String`
+   |
+note: required for `cgp::prelude::UseType<String>` to implement `IsProviderFor<ScalarTypeProviderComponent, App>`
+  --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_bound_not_satisfied.rs:6:1
+   |
+ 6 | #[cgp_type]
+   | ^^^^^^^^^^^
+ 7 | pub trait HasScalarType {
+ 8 |     type Scalar: Copy;
+   |                  ---- unsatisfied trait bound introduced here
+   = note: required for `App` to implement `CanUseComponent<ScalarTypeProviderComponent>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_bound_not_satisfied.rs:19:1
+   |
+19 | / check_components! {
+20 | |     App {
+21 | |         ScalarTypeProviderComponent,
+22 | |     }
+23 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the attribute macro `cgp_type` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

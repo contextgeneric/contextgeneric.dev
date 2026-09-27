@@ -1,0 +1,5 @@
+error: Expected context type to be specified
+  --> tests/compile_fail/reference/macros/cgp_impl_common_mistakes_self_form_without_for.rs:12:1
+   |
+12 | impl CanCalculateArea {
+   | ^^^^

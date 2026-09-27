@@ -15,7 +15,8 @@ already know.
 A [provider trait](./cgp_component.md) has a different shape from the trait it came from. The
 original `Self` has moved into an explicit leading type parameter, the implementation targets a small
 marker type rather than the type the operation acts on, and the method receiver is a plain parameter.
-Written by hand it looks like this:
+Written by hand, with `HasDimensions` standing for a trait that supplies `width()` and `height()`, it
+looks like this:
 
 ```rust
 impl<Context> AreaCalculator<Context> for RectangleArea
@@ -40,10 +41,8 @@ trait, and put the provider's name in the attribute:
 
 ```rust
 #[cgp_impl(new RectangleArea)]
-impl AreaCalculator
-where
-    Self: HasDimensions,
-{
+#[uses(HasDimensions)]
+impl AreaCalculator {
     fn area(&self) -> f64 {
         self.width() * self.height()
     }
@@ -51,7 +50,8 @@ where
 ```
 
 Write providers this way. The macro performs the rewrite for you and produces the form shown earlier,
-which you will see in generated code.
+which you will see in generated code. [`#[uses(HasDimensions)]`](../attributes/uses.md) states the
+dependency the hand-written form put in its `where` clause.
 
 This convenience has one rule you must keep in mind: **inside a `#[cgp_impl]` block, `self` and
 `Self` mean the context, not the provider.** The context is the type the method runs on, and
@@ -63,16 +63,14 @@ the method runs.
 ## Usage
 
 Apply the attribute to an `impl` block. Its argument names the provider. The argument has the parts
-listed below, and only the name is required.
+listed below, and only the name is required. This provider reads the context's `width` and `height`
+fields through [`#[implicit]`](../attributes/implicit.md) arguments, the usual way to read a field:
 
 ```rust
 #[cgp_impl(new RectangleArea)]
-impl AreaCalculator
-where
-    Self: HasDimensions,
-{
-    fn area(&self) -> f64 {
-        self.width() * self.height()
+impl AreaCalculator {
+    fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+        width * height
     }
 }
 ```
@@ -87,7 +85,8 @@ The `for Context` clause is optional. Omitting it, as most examples on this page
 insert a generic context parameter for you: write `impl AreaCalculator`, not
 `impl<Context> AreaCalculator for Context`. Name the context explicitly only to bound it in a way the
 omitted form cannot express, such as a lifetime or a higher-ranked bound, or to serve one *concrete*
-context alone, as in `impl AreaCalculator for Rectangle`.
+context alone, as in `impl AreaCalculator for Rectangle`. That provider then implements
+`AreaCalculator<Rectangle>` and nothing else, and a context still wires it like any other.
 [When to use it](#when-to-use-it) says more about choosing between these forms.
 
 Without `new`, the provider struct must already exist. A wiring entry naming a struct nothing
@@ -186,10 +185,12 @@ they let an idiomatic provider state what it needs.
   per-type default, emitting a delegation impl alongside it, for use with
   [`cgp_namespace!`](./cgp_namespace.md).
 
-Each may be repeated. All except `#[use_provider]` also take a comma-separated list inside one
-attribute, which is the form to prefer: `#[uses(HasName, CanRaiseError<String>)]` reads as one
-dependency list. `#[use_provider]` is the exception because its own argument already ends in a bound
-list, so the parser could not tell where a second pair begins. Write one attribute per inner provider.
+Each attribute may be repeated. `#[uses]` and `#[use_type]` also take a comma-separated list inside
+one attribute, which is the form to prefer: `#[uses(HasName, CanRaiseError<String>)]` reads as one
+dependency list. `#[use_provider]` and `#[default_impl]` take one entry per attribute.
+`#[use_provider]`'s own argument ends in a bound list, so the parser cannot tell where a second pair
+begins, and `#[default_impl]` reads a single `Key in Namespace` spec. Write one attribute per inner
+provider and one per registration.
 
 `#[cgp_impl]` does not read `#[extend]`, `#[extend_where]`, or
 [`#[impl_generics]`](../attributes/impl_generics.md), although you may see them on other CGP macros.
@@ -205,9 +206,10 @@ Naming `Self` as the provider bypasses the rewrite entirely and emits the block 
 ordinary consumer-trait impl on a concrete type. This form requires the `for Context` clause. The
 macro rejects an omitted clause with an `Expected context type to be specified` error, because it then
 lacks a context to find. The form is useful when you want a hand-written impl while still applying the
-companion attributes. Because the macro does not generate a provider struct here, `new` and the
-component override do nothing; see [Common Mistakes](#common-mistakes) for what happens if you write
-them anyway.
+companion attributes, which the macro processes before it looks at the provider, so `#[implicit]`,
+`#[uses]`, `#[use_type]`, and `#[use_provider]` all work here. Because the macro does not generate a
+provider struct here, `new` and the component override do nothing; see
+[Common Mistakes](#common-mistakes) for what happens if you write them anyway.
 
 ```rust
 #[cgp_impl(Self)]
@@ -218,6 +220,11 @@ impl CanCalculateArea for Rectangle {
     }
 }
 ```
+
+A direct impl competes with the consumer blanket impl that
+[`#[cgp_component]`](./cgp_component.md#under-the-hood) generates, so the same type must not also
+wire the component in `delegate_components!`. Doing both makes the two impls overlap, and the compiler
+rejects them with `E0119`, *conflicting implementations of trait `CanCalculateArea`*.
 
 ## Examples
 
@@ -242,7 +249,8 @@ impl AreaCalculator {
 
 The macro removes the two `#[implicit]` parameters from the signature and replaces them with reads of
 the `width` and `height` fields, so the provider requires a context that has them. The `new` keyword
-defines `RectangleArea`. A concrete type then wires the component and calls through it:
+defines `RectangleArea`. A concrete type then wires the component, checks the wiring, and calls
+through it:
 
 ```rust
 #[derive(HasField)]
@@ -257,10 +265,21 @@ delegate_components! {
     }
 }
 
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
+    }
+}
+
 fn print_area(rect: &Rectangle) {
     println!("area = {}", rect.area());
 }
 ```
+
+`Rectangle` is a [value context](/docs/reference/glossary#value-context) here: the wired type is the
+shape whose area is computed. A provider is written the same way for an
+[environmental context](/docs/reference/glossary#environmental-context), a type such as `App` that
+stands for one application.
 
 ## When to use it
 
@@ -270,7 +289,8 @@ that call for something else are narrower than they look.
 Prefer the unqualified header from [Usage](#usage), `impl AreaCalculator` without `for Context`, and
 let the macro insert the context parameter. This keeps a provider reading like an ordinary trait impl.
 Name the context explicitly only when the short form cannot express a bound, such as a lifetime or a
-higher-ranked bound.
+higher-ranked bound. State a trait the context must implement with `#[uses]`, not with a
+`where Self: Trait` clause.
 
 Naming a *concrete* type as that context, as in `impl AreaCalculator for Rectangle`, is a different
 choice. Keep it distinct from the
@@ -285,7 +305,8 @@ Use something else in these cases:
   [Modularity Hierarchy](/docs/concepts/modularity-hierarchy).
 - **You want to implement the consumer trait directly on one concrete type.** Use the
   [`#[cgp_impl(Self)]` form](#implementing-the-consumer-trait-directly), which keeps the companion
-  attributes while emitting an ordinary impl.
+  attributes while emitting an ordinary impl. Switch to a named provider once a second type wants the
+  same implementation.
 
 Needing to [declare the provider struct separately](#declaring-the-provider-struct-separately) is not
 by itself a reason to drop to [`#[cgp_provider]`](./cgp_provider.md). Use the raw form only when
@@ -323,22 +344,50 @@ pub struct ValueToString;
 ```
 
 A few things changed. The trait gained `Context` as its leading argument. The `Self` type became the
-provider. `&self` became the explicit parameter `__context__: &Context`. The receiver identifier is
-the snake-cased context type wrapped in double underscores, so both `Context` and the default
-`__Context__` become `__context__`. The macro rewrites every `self` in a body to that identifier, and
-every `Self` to the context type.
+provider. `&self` became the explicit parameter `__context__: &Context`. The macro rewrites every
+`self` in a body to that identifier, and every `Self` to the context type.
+
+The receiver identifier is the context type's name in snake case, wrapped in double underscores
+unless it already starts with an underscore. Both `Context` and the default `__Context__` become
+`__context__`, and a concrete context gets its own name, so `for Rectangle` gives `__rectangle__`. A
+context that is not a single identifier, such as `App<'a>`, falls back to `__context__`.
 
 When you omit `for Context`, the only difference is that the inserted parameter is `__Context__`. The
-earlier `RectangleArea` example is exactly equivalent to writing it out:
+`RectangleArea` provider from the [Overview](#overview) expands to:
 
 ```rust
-#[cgp_new_provider]
 impl<__Context__> AreaCalculator<__Context__> for RectangleArea
 where
     __Context__: HasDimensions,
 {
     fn area(__context__: &__Context__) -> f64 {
         __context__.width() * __context__.height()
+    }
+}
+
+impl<__Context__> IsProviderFor<AreaCalculatorComponent, __Context__, ()> for RectangleArea
+where
+    __Context__: HasDimensions,
+{}
+
+pub struct RectangleArea;
+```
+
+The companion attributes run first. `#[uses(HasDimensions)]` became the `__Context__: HasDimensions`
+bound above. An [`#[implicit]`](../attributes/implicit.md) argument becomes a `HasField` bound on the
+context and a `get_field` read at the top of the body, cloned when the argument is owned. So the
+[Examples](#examples) provider expands, with `Symbol!` standing for the type-level field names, to:
+
+```rust
+impl<__Context__> AreaCalculator<__Context__> for RectangleArea
+where
+    __Context__: HasField<Symbol!("width"), Value = f64>
+        + HasField<Symbol!("height"), Value = f64>,
+{
+    fn area(__context__: &__Context__) -> f64 {
+        let width: f64 = __context__.get_field(PhantomData::<Symbol!("width")>).clone();
+        let height: f64 = __context__.get_field(PhantomData::<Symbol!("height")>).clone();
+        width * height
     }
 }
 ```
@@ -406,8 +455,19 @@ distinguishes the two meanings of `self`, and only the value form is rewritten.
 **The compiler, not the macro, reports a misplaced companion attribute.** The macro re-attaches an
 attribute it does not recognize to the generated provider impl rather than dropping it, so
 `#[allow(...)]` and similar attributes carry over unaffected. A stray `#[extend(HasName)]` therefore
-produces a *cannot find attribute* resolution error pointing at the impl, and it does not mention
-`#[cgp_impl]`.
+produces a *cannot find attribute `extend` in this scope* error on the attribute's own line, and it
+does not mention `#[cgp_impl]`.
+
+**A `#[default_impl]` registration works only when the header omits `for Context`.** The
+registration copies the impl's generic parameters as written, before the macro inserts the context.
+On the explicit `impl<Context> ShowImpl<String> for Context` form, the copied `Context` appears
+nowhere in the registration, and the compiler rejects it:
+
+```text
+error[E0207]: the type parameter `Context` is not constrained by the impl trait, self type, or predicates
+```
+
+Write the header as `impl ShowImpl<String>` instead.
 
 **The `Self` form accepts `new` and a component override, then ignores both.** Writing
 `#[cgp_impl(new Self)]` or `#[cgp_impl(Self: SomeComponent)]` parses and compiles, but has exactly the

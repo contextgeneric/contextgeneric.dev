@@ -1,0 +1,5 @@
+error: unexpected token
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_new_keyword.rs:11:20
+   |
+11 | #[cgp_provider(new RectangleArea)]
+   |                    ^^^^^^^^^^^^^

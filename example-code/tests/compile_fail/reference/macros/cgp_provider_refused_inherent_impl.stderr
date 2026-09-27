@@ -1,0 +1,5 @@
+error: expect provider trait name to be present
+  --> tests/compile_fail/reference/macros/cgp_provider_refused_inherent_impl.rs:13:1
+   |
+13 | impl RectangleArea {
+   | ^^^^

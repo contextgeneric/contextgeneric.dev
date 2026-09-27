@@ -72,27 +72,34 @@ Which of the two you use depends only on whether the struct already exists.
 
 Both accept the same single optional argument: the **component type** to use in the generated marker
 impl. Omitted, it defaults to the provider trait's name plus `Component`, so implementing
-`AreaCalculator` targets `AreaCalculatorComponent`. Pass it explicitly when the trait's name does not
-follow that convention:
+`AreaCalculator` targets `AreaCalculatorComponent`. Pass it explicitly when the component's marker
+does not follow that convention, as when the component renamed it with the `name:` key:
 
 ```rust
-#[cgp_provider(RunnerComponent)]
-impl<Context, Code> Runner<Context, Code> for RunWithFooBar
-where
-    Context: CanFetchFoo + CanFetchBar,
-{
-    fn run(context: &Context, _code: PhantomData<Code>) -> Result<(), Context::Error> {
-        /* ... */
+#[cgp_component {
+    name: AreaComponent,
+    provider: AreaCalculator,
+}]
+pub trait CanCalculateArea {
+    fn area(&self) -> f64;
+}
+
+#[cgp_provider(AreaComponent)]
+impl<Context> AreaCalculator<Context> for UnitArea {
+    fn area(_context: &Context) -> f64 {
+        1.0
     }
 }
 ```
 
 ### The struct `#[cgp_new_provider]` declares
 
-The struct's shape is taken from the `Self` type of the impl. A plain name yields a unit struct. A
-generic provider yields a tuple struct holding a
+The struct's shape is taken from the `Self` type of the impl, which must be a provider name followed
+by bare generic parameter names. A plain name yields a unit struct. A generic provider yields a tuple
+struct holding one public
 [`PhantomData`](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) over its parameters, so
-that the parameters are bound:
+that the parameters are bound. Several parameters share one tuple, and a lifetime is lifted into
+[`Life<'a>`](../types/life.md), since `PhantomData` needs a type:
 
 ```rust
 // from `... for RectangleArea`
@@ -100,6 +107,12 @@ pub struct RectangleArea;
 
 // from `... for SpawnAndRun<InCode>`
 pub struct SpawnAndRun<InCode>(pub ::core::marker::PhantomData<InCode>);
+
+// from `... for LabelPair<A, B>`
+pub struct LabelPair<A, B>(pub ::core::marker::PhantomData<(A, B)>);
+
+// from `... for LabelWithLife<'a>`
+pub struct LabelWithLife<'a>(pub ::core::marker::PhantomData<Life<'a>>);
 ```
 
 This is also the limit of what the attribute form can express, and the reason `#[cgp_provider]` is
@@ -139,8 +152,9 @@ where
 }
 ```
 
-A context wires it exactly as it would any provider. The derived marker impl makes a missing `width`
-field report itself as a missing field:
+A context wires it exactly as it would any provider, and the check verifies the wiring. The derived
+marker impl makes a missing `width` field report itself as a missing field. `Rectangle` is a
+[value context](/docs/reference/glossary#value-context) here, the shape whose area is computed:
 
 ```rust
 #[derive(HasField)]
@@ -152,6 +166,12 @@ pub struct Rectangle {
 delegate_components! {
     Rectangle {
         AreaCalculatorComponent: RectangleArea,
+    }
+}
+
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
     }
 }
 ```
@@ -215,7 +235,8 @@ subtle.
 ## Under the hood
 
 `#[cgp_provider]` emits two items: your impl, passed through unchanged, and a marker impl derived from
-it. From this input:
+it. From this input, where `ComputerRef` and `ComputerRefComponent` come from
+`cgp::extra::handler`:
 
 ```rust
 #[cgp_provider]
@@ -262,7 +283,9 @@ arguments were written in.
 
 **The macro rewrites one bound instead of copying it**, and this is the mechanism that makes a nested
 provider stack diagnosable. A bound naming *this component's provider trait*, the inner-provider bound
-of a [higher-order provider](../attributes/use_provider.md), gains its marker counterpart alongside it:
+of a [higher-order provider](../attributes/use_provider.md), gains its marker counterpart alongside it,
+whether it is written in the `where` clause or inline on the type parameter, as in
+`impl<Context, Inner: AreaCalculator<Context>>`:
 
 ```rust
 #[cgp_new_provider]
@@ -293,12 +316,19 @@ described [above](#the-struct-cgp_new_provider-declares).
 
 ### Input the macros refuse
 
-Both macros reject several shapes at expansion, rather than lowering them into code that fails later. An
-**inherent impl**, with no trait, has no provider trait to read the component and context from. A
-**provider trait with no type argument** leaves nothing to be the context. A **const argument** in the
-provider trait's argument list has nowhere to live in the type-only params tuple. This is about the
-*trait's* arguments, not about a const generic on the provider struct, which passes through untouched.
-And an item that is not an `impl` is refused outright. Each message names what was missing.
+Both macros reject several shapes at expansion, rather than lowering them into code that fails later,
+and each message names what was missing:
+
+- An **inherent impl**, with no trait, has no provider trait to read the component and context from.
+  It fails with *expect provider trait name to be present* when the component is left to its
+  default, and with *provider impl should contain trait path* when a component type is given.
+- A **provider trait with no type argument** leaves nothing to be the context, and fails with
+  *provider impl should contain trait path containing at least one generic type parameter*.
+- A **const argument** in the provider trait's argument list has nowhere to live in the type-only
+  params tuple, and fails with *const arguments are not supported in provider impl trait arguments*.
+  This is about the *trait's* arguments, not about a const generic on the provider struct, which
+  passes through untouched.
+- An item that is not an `impl` is refused by the parser.
 
 ## Formal grammar
 
@@ -326,7 +356,8 @@ error[E0428]: the name `RectangleArea` is defined multiple times
 ```
 
 **`new` is not part of this attribute's grammar.** `#[cgp_provider(new RectangleArea)]` does not
-declare the struct. It fails to parse, because the argument holds a component type and nothing else.
+declare the struct. It fails to parse with *unexpected token* at `RectangleArea`, because the argument
+holds a component type and nothing else, and `new` has already been read as that type.
 Which macro you invoke decides whether the struct is declared, so use
 `#[cgp_new_provider]`. The `new` keyword you may have seen belongs to
 [`#[cgp_impl]`](./cgp_impl.md#usage).
@@ -339,10 +370,15 @@ inner provider no longer surfaces at the outer one, and `#[check_providers(...)]
 layer of such a stack is at fault. Components without lifetime parameters are unaffected.
 
 **The macro does not check the component argument against the trait.** Passing a component that does
-not belong to the provider trait you are implementing produces a marker impl for the wrong key, so the
-provider silently fails to satisfy the wiring that names it. The error appears at the wiring site,
-saying the provider is not a provider for that component. Omit the argument unless the trait's name
-departs from the `{Trait}Component` convention.
+not belong to the provider trait you are implementing produces a marker impl for the wrong key. The
+provider trait's own `IsProviderFor` supertrait names the real component, so the compiler rejects the
+provider impl itself:
+
+```text
+error[E0277]: the trait bound `UnitArea: IsProviderFor<AreaCalculatorComponent, Context>` is not satisfied
+```
+
+Omit the argument unless the component's marker departs from the `{Trait}Component` convention.
 
 **A provider's own associated const or type still needs qualifying**, though for a different reason than
 in [`#[cgp_impl]`](./cgp_impl.md#common-mistakes). Here `Self` really is the provider, and nothing rewrites it.

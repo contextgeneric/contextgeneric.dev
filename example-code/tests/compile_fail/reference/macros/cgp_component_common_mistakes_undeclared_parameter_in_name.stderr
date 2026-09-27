@@ -1,0 +1,35 @@
+error[E0425]: cannot find type `T` in this scope
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_undeclared_parameter_in_name.rs:6:57
+  |
+6 | #[cgp_component { provider: Shape, name: ShapeComponent<T> }]
+  |                                                         ^ not found in this scope
+
+error[E0034]: multiple applicable items in scope
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_undeclared_parameter_in_name.rs:8:8
+  |
+8 |     fn shape(&self);
+  |        ^^^^^ multiple `shape` found
+  |
+note: candidate #1 is defined in the trait `Shape`
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_undeclared_parameter_in_name.rs:8:5
+  |
+8 |     fn shape(&self);
+  |     ^^^^^^^^^^^^^^^^
+note: candidate #2 is defined in an impl of the trait `CanShape` for the type `__Context__`
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_undeclared_parameter_in_name.rs:6:1
+  |
+6 | #[cgp_component { provider: Shape, name: ShapeComponent<T> }]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use fully-qualified syntax to disambiguate
+  |
+6 - #[cgp_component { provider: Shape, name: ShapeComponent<T> }]
+7 - pub trait CanShape {
+8 -     fn shape(&self);
+6 + <<__Components__ as DelegateComponent<__Path__>>::Delegate as Shape>::shape(&self);
+  |
+6 - #[cgp_component { provider: Shape, name: ShapeComponent<T> }]
+7 - pub trait CanShape {
+8 -     fn shape(&self);
+6 + CanShape::shape(&self);
+  |

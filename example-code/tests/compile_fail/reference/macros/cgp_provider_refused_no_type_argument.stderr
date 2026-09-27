@@ -1,0 +1,7 @@
+error: provider impl should contain trait path containing at least one generic type parameter
+  --> tests/compile_fail/reference/macros/cgp_provider_refused_no_type_argument.rs:12:1
+   |
+12 | #[cgp_provider(SomeComponent)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cgp_provider` (in Nightly builds, run with -Z macro-backtrace for more info)

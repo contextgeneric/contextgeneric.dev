@@ -1,0 +1,44 @@
+error[E0277]: the trait bound `UnitArea: IsProviderFor<AreaCalculatorComponent, Context>` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_wrong_component.rs:19:43
+   |
+19 | impl<Context> AreaCalculator<Context> for UnitArea {
+   |                                           ^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, Context, ()>` is not implemented for `UnitArea`
+      but trait `IsProviderFor<PerimeterCalculatorComponent, Context, ()>` is implemented for it
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_wrong_component.rs:19:1
+   |
+19 | impl<Context> AreaCalculator<Context> for UnitArea {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `PerimeterCalculatorComponent`, found `AreaCalculatorComponent`
+note: required by a bound in `AreaCalculator`
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_wrong_component.rs:6:1
+   |
+ 6 | #[cgp_component(AreaCalculator)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `AreaCalculator`
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `UnitArea: IsProviderFor<AreaCalculatorComponent, Square>` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_wrong_component.rs:35:9
+   |
+35 |         AreaCalculatorComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, Square, ()>` is not implemented for `UnitArea`
+      but trait `IsProviderFor<PerimeterCalculatorComponent, Square, ()>` is implemented for it
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_wrong_component.rs:19:1
+   |
+19 | impl<Context> AreaCalculator<Context> for UnitArea {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `PerimeterCalculatorComponent`, found `AreaCalculatorComponent`
+   = note: required for `Square` to implement `CanUseComponent<AreaCalculatorComponent>`
+note: required by a bound in `__CheckSquare`
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_wrong_component.rs:33:1
+   |
+33 | / check_components! {
+34 | |     Square {
+35 | |         AreaCalculatorComponent,
+36 | |     }
+37 | | }
+   | |_^ required by this bound in `__CheckSquare`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

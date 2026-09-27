@@ -1,0 +1,5 @@
+error: a `&mut` implicit argument must be the only implicit argument, since its mutable borrow of the context conflicts with reading any other field
+ --> tests/compile_fail/reference/macros/cgp_fn_common_mistakes_mutable_implicit_not_alone.rs:7:13
+  |
+7 | pub fn grow(&mut self, #[implicit] width: &mut f64, #[implicit] height: f64) {
+  |             ^^^^^^^^^

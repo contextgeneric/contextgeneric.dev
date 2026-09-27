@@ -59,10 +59,6 @@ Like [`#[cgp_component]`](./cgp_component.md), the component needs a provider tr
 `ScalarTypeProviderComponent`. This is worth fixing in mind, because every other macro derives its
 default from the trait name.
 
-The companion attributes of `#[cgp_component]` apply unchanged, so
-[`#[prefix(...)]`](../attributes/prefix.md) registers the abstract type into a namespace. CGP's own
-`HasErrorType` carries `#[prefix(@cgp.core.error in DefaultNamespace)]` this way.
-
 Pass an identifier to override it, exactly as with `#[cgp_component]`:
 
 ```rust
@@ -74,6 +70,16 @@ pub trait HasScalarType {
 
 The keyed form works here too, so `name`, `provider`, and `context` can each be set explicitly. Only the
 default for `provider` differs.
+
+The companion attributes of `#[cgp_component]` apply unchanged, so
+[`#[prefix(...)]`](../attributes/prefix.md) registers the abstract type into a namespace. CGP's own
+`HasErrorType` carries `#[prefix(@cgp.core.error in DefaultNamespace)]` this way.
+
+The trait may carry generic parameters, which the macro handles exactly as `#[cgp_component]` does:
+they follow the context in the provider trait, and a context chooses the type per parameter value,
+through `open` or [`#[derive_delegate]`](../attributes/derive_delegate.md). So
+`pub trait HasLabelType<Kind> { type Label; }` lets a context wire
+`@LabelTypeProviderComponent.u32: UseType<String>`.
 
 ### Bounds on the associated type
 
@@ -113,6 +119,12 @@ pub struct App;
 delegate_components! {
     App {
         ScalarTypeProviderComponent: UseType<f64>,
+    }
+}
+
+check_components! {
+    App {
+        ScalarTypeProviderComponent,
     }
 }
 
@@ -216,8 +228,8 @@ where
 
 Read it as: `UseType<T>` is a provider that supplies `T`. Wiring a context's component to `UseType<f64>`
 therefore gives it `Scalar = f64` with nothing written. Note the declaration's `Copy` bound copied into
-the impl's `where` clause: it turns an unsuitable concrete type into an error where the wiring
-names it.
+the impl's `where` clause: it turns an unsuitable concrete type into an error wherever the context is
+required to implement the trait, which a `check_components!` block makes the wiring site.
 
 The second addition is a [`WithProvider`](../providers/with_provider.md) impl, which adapts CGP's
 foundational abstract-type machinery into this component:
@@ -264,7 +276,7 @@ derived from the **associated type's** name plus `TypeProvider`, so `type Scalar
 ## Common Mistakes
 
 **The trait must contain exactly one associated type and nothing else.** A method beside the type, a
-second type, or no type at all all report the same thing:
+second type, or no type at all each report the same thing:
 
 ```text
 error: type trait should contain exactly one associated type item
@@ -283,7 +295,21 @@ error: generic associated type and where clause are not supported
 **The default provider name comes from the type, not the trait.** `HasScalarType` declaring
 `type Scalar` yields `ScalarTypeProviderComponent`, not `HasScalarTypeComponent`, so a wiring entry
 guessed from the trait name names a component that does not exist, and the error is an unresolved type
-rather than anything about wiring.
+rather than anything about wiring:
+
+```text
+error[E0425]: cannot find type `HasScalarTypeComponent` in this scope
+```
+
+**Do not give the associated type the name of the trait that bounds it.** In
+`type Database: Database`, the bound resolves to the associated type being declared, which the
+generated impls have turned into a type parameter, rather than to the trait of that name:
+
+```text
+error[E0404]: expected trait, found type parameter `Database`
+```
+
+Name the two apart, as in `type Db: Database`.
 
 **A bound on the type is not enforced at the wiring line.** Wiring `UseType<String>` for a type declared
 `Copy` compiles; nothing complains until a check evaluates the lookup, and then the primary span is the
@@ -291,15 +317,17 @@ component name in the `check_components!` block rather than the offending wiring
 
 ```text
 error[E0277]: the trait bound `String: Copy` is not satisfied
- --> src/main.rs:5:27
-  |
-5 | check_components! { App { ScalarTypeProviderComponent } }
-  |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Copy` is not implemented for `String`
-  |
-note: required for `UseType<String>` to implement `IsProviderFor<ScalarTypeProviderComponent, App>`
-  |
-2 | #[cgp_type] pub trait HasScalarType { type Scalar: Copy; }
-  | ^^^^^^^^^^^                                        ---- unsatisfied trait bound introduced here
+   |
+   |         ScalarTypeProviderComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Copy` is not implemented for `String`
+   |
+note: required for `cgp::prelude::UseType<String>` to implement `IsProviderFor<ScalarTypeProviderComponent, App>`
+   |
+   | #[cgp_type]
+   | ^^^^^^^^^^^
+   | pub trait HasScalarType {
+   |     type Scalar: Copy;
+   |                  ---- unsatisfied trait bound introduced here
 ```
 
 The offending type and the declaration that demanded the bound are both in the notes rather than the

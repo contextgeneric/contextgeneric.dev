@@ -1,0 +1,16 @@
+error[E0425]: cannot find type `HasScalarTypeComponent` in this scope
+  --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_guessed_component_name.rs:15:9
+   |
+15 |         HasScalarTypeComponent: UseType<f64>,
+   |         ^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+   |
+help: you might be missing a type parameter
+   |
+15 |         HasScalarTypeComponent<HasScalarTypeComponent>: UseType<f64>,
+   |                               ++++++++++++++++++++++++
+
+error[E0425]: cannot find type `HasScalarTypeComponent` in this scope
+  --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_guessed_component_name.rs:15:9
+   |
+15 |         HasScalarTypeComponent: UseType<f64>,
+   |         ^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
