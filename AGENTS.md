@@ -25,7 +25,7 @@ The sibling repositories worth knowing about are the same ones the knowledge bas
 [`cgp`](https://github.com/contextgeneric/cgp) is the library and the ground truth for any code claim,
 [`cargo-cgp`](https://github.com/contextgeneric/cargo-cgp) is the error toolchain,
 [`cgp-skills`](https://github.com/contextgeneric/cgp-skills) is the source of the agent skill this
-site inlines under `docs/ai/`, and [`hypershell`](https://github.com/contextgeneric/hypershell) and
+site publishes under `docs/ai/skills/` through a submodule, and [`hypershell`](https://github.com/contextgeneric/hypershell) and
 [`cgp-serde`](https://github.com/contextgeneric/cgp-serde) are the projects built with CGP.
 
 ## Never link from a published page into the knowledge base
@@ -63,7 +63,8 @@ ones that merely still parse.
 **Never copy current syntax out of an existing blog post on this site.** Almost every post predates
 the current release, and the drift is not cosmetic — posts from as recently as 2026 show
 `#[cgp_context]`, `cgp_preset!`, `#[cgp_inherit]`, `HasCgpProvider`, the `Async` trait, `ProvideType`,
-`symbol!`, and inside-out `#[cgp_provider]` implementations, none of which are current. The knowledge
+and `symbol!`, none of which exist in the current release, and inside-out `#[cgp_provider]`
+implementations, which still compile but are what current code reads rather than writes. The knowledge
 base's document for each post lists exactly what is stale in it, and its
 [`releases/`](https://github.com/contextgeneric/cgp-knowledge-base/tree/main/releases) section carries
 a removal ledger that dates every renamed or deleted construct in one table. The safest source of
@@ -137,9 +138,11 @@ existing release slugs are inconsistent — dash-separated versions through v0.6
 so match a new post to its neighbours rather than assuming one rule.
 
 Docs pages set `sidebar_position` and are grouped by directory, with each directory's label and
-position in its `_category_.json`. The `docs/ai/` tree is a **published copy** of the agent skill from
-[`cgp-skills`](https://github.com/contextgeneric/cgp-skills); never fix the skill by editing the copy —
-correct it upstream and re-inline the result, or the two versions diverge.
+position in its `_category_.json`. The pages under `docs/ai/skills/` other than `index.md` are
+**symlinks** into the [`cgp-skills`](https://github.com/contextgeneric/cgp-skills) submodule at the
+repository root, pinned to one revision. Never edit them, since an edit lands in the submodule's
+working tree; correct the skill in `cgp-skills`, and leave the submodule pointer for the author to
+advance.
 
 The `notes/` directory is working material rather than site content: a local mirror of the
 [Diátaxis](https://diataxis.fr/) documentation framework, and a research note comparing CGP's implicit
