@@ -12,7 +12,7 @@ This page lists some resources related to CGP. More resources will be added as t
 - [`cgp-error-anyhow`](https://crates.io/crates/cgp-error-anyhow) - A CGP crate for handling modular errors using `anyhow`.
 - [`cgp-error-eyre`](https://crates.io/crates/cgp-error-eyre) - The same, using `eyre`.
 - [`cgp-error-std`](https://crates.io/crates/cgp-error-std) - The same, using only the standard library.
-- [`cgp-serde`](https://crates.io/crates/cgp-serde) - Modular serialization library for Serde.
+- [`cgp-serde`](https://crates.io/crates/cgp-serde) - Modular serialization library for Serde. Documented on this site in the [Projects](/docs/projects/cgp-serde/) section, with its examples walked through as short tutorials.
 
 ## Tooling
 

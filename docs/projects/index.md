@@ -21,6 +21,9 @@ can judge the evidence for what it is.
 - **[Hypershell](./hypershell/index.md)** — a shell-scripting language whose programs are Rust
   types, interpreted at compile time through CGP wiring. A proof of concept that builds on nightly
   Rust, and the most complete example of a type-level language built with CGP.
+- **[cgp-serde](./cgp-serde/index.md)** — Serde's `Serialize` and `Deserialize` rebuilt as CGP
+  components, so each application chooses how a type is encoded. A proof of concept on stable Rust,
+  and the clearest example of CGP letting two applications choose differently for the same types.
 
 ## Find a pattern
 
@@ -38,14 +41,20 @@ the Concepts page that explains the idea:
 | Providers bundled into an aggregate provider that routes point at | [`http_checksum_native`](./hypershell/examples/http-checksum-native.md) | [Aggregate providers](/docs/concepts/aggregate-providers) |
 | Nested expressions, each resolved through the context | [`github_issues`](./hypershell/examples/github-issues.md) | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
 | One context extended with its own wiring entries, including a new error type | [`bluesky_websocket`](./hypershell/examples/bluesky-websocket.md) | [Modular error handling](/docs/concepts/modular-error-handling) |
+| A struct encoded with no serialization derive, by providers that read its fields | [`basic`](./cgp-serde/examples/basic.md) | [Extensible records](/docs/concepts/extensible-records) |
+| An operation made fallible in the context's own error type | [`basic`](./cgp-serde/examples/basic.md) | [Modular error handling](/docs/concepts/modular-error-handling) |
+| Two applications choosing different implementations for the same types | [`messages`](./cgp-serde/examples/messages.md) | [Coherence](/docs/concepts/coherence) |
+| A provider chosen by the type of the value it is given, from a table per context | [`messages`](./cgp-serde/examples/messages.md) | [Modularity hierarchy](/docs/concepts/modularity-hierarchy) |
+| Providers that hand nested values back to the context, so one choice reaches every level | [`messages`](./cgp-serde/examples/messages.md) | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
 
 ## Where to start
 
 - **To see CGP's ideas in a real program**, read [`hello`](./hypershell/examples/hello.md), then
   follow the examples in order.
-- **To weigh whether CGP holds up past a toy**, read the [Hypershell
-  overview](./hypershell/index.md) and its [limitations](./hypershell/limitations.md), which state
-  the costs first.
+- **To weigh whether CGP holds up past a toy**, read the [Hypershell](./hypershell/index.md) and
+  [cgp-serde](./cgp-serde/index.md) overviews and their limitations pages, which state the costs
+  first. cgp-serde's [comparison with Serde](./cgp-serde/serde-comparison.md) sets it beside the
+  library it rebuilds.
 - **To learn CGP from the beginning**, start with the [Hello World tutorial](/docs/tutorials/hello)
   instead; these pages assume it rather than teach it.
 
