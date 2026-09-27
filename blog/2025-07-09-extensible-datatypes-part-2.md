@@ -6,6 +6,15 @@ tags: [deepdive]
 description: 'Extensible variants applied to the expression problem: a modular arithmetic interpreter built with the extensible visitor pattern.'
 ---
 
+:::note
+
+This post's code predates the current design of CGP. The interpreter it develops is documented as
+it is now in the [`expression` pages](/docs/projects/cgp-examples/expression/) of the Projects
+section, one page per context, and [Extensible variants](/docs/concepts/extensible-variants)
+explains the current design of the feature.
+
+:::
+
 This is the **second** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first part here](/blog/extensible-datatypes-part-1).
 
 In this second part of the series, we will explore the use of **extensible variants**, by examining how it can be used in an **extensible visitor pattern** to build a modular interpreter for a toy math expression language.

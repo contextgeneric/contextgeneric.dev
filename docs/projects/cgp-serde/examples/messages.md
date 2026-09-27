@@ -299,6 +299,12 @@ from Serde's derive with none of this.
   how to check the table.
 - [Coherence](/docs/concepts/coherence): the Rust rule that gives a type one impl, and how CGP
   restores choice one context at a time.
+- [Announcing cgp-serde](/blog/cgp-serde-release#modular-serialization-demo): the post that
+  announced the library, which presents this two-application demo. Its code predates the current
+  design.
+- [How to stop fighting with coherence (RustLab
+  2025)](/blog/rustlab-2025-coherence#45---the-cgp-serde-crate): the talk that used this demo live,
+  with a transcript.
 
 ---
 

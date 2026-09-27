@@ -175,6 +175,9 @@ against its context, as above, is worth doing.
   program.
 - [Checking your wiring](/docs/concepts/check-traits): why CGP wiring is checked lazily, and what
   `check_components!` forces.
+- [Hypershell: a type-level DSL for shell-scripting in
+  Rust](/blog/hypershell-release#variable-parameters): the post that announced Hypershell, which
+  introduced this program. Its code predates the current design.
 
 ---
 

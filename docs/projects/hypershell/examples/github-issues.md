@@ -146,6 +146,8 @@ reported at the end of a long chain of lookups, which is why checking the progra
   every kind of argument.
 - [Impl-side dependencies](/docs/concepts/impl-side-dependencies): the requirements that make nested
   interpretation work.
+- [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release): the post
+  that announced Hypershell, with the project's motivation. Its code predates the current design.
 
 ---
 

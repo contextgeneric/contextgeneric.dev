@@ -187,6 +187,8 @@ reused, rather than in the enums, which stay ordinary closed Rust enums.
   its own wrapper.
 - [Extensible variants](/docs/concepts/extensible-variants): the CGP idea that lets one provider
   serve several enums.
+- [Extensible data types, part 2](/blog/extensible-datatypes-part-2#extending-mathexpr): the post
+  that introduced this extension. Its code predates the current design.
 
 ---
 

@@ -194,6 +194,9 @@ more about what this means.
 - [Assembly](../architecture/assembly.md): the bundles and routes the base language is built from.
 - [Namespaces](/docs/concepts/namespaces): inheriting a namespace, and why an inherited binding
   cannot be overridden.
+- [Hypershell: a type-level DSL for shell-scripting in
+  Rust](/blog/hypershell-release#extending-hypershell): the post that announced Hypershell, whose
+  last part builds this extension. Its code predates the current design.
 
 ---
 

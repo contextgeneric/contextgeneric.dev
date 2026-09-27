@@ -146,6 +146,9 @@ by following that wiring rather than by reading a declaration.
   and how a context joins the language.
 - [Handlers](/docs/concepts/handlers): how a computation's output type follows from its code and
   input.
+- [Hypershell: a type-level DSL for shell-scripting in
+  Rust](/blog/hypershell-release#json-encoding): the post that announced Hypershell, which
+  introduced this program. Its code predates the current design.
 
 ---
 

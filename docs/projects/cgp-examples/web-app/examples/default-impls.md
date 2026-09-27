@@ -185,6 +185,8 @@ every context that joins; where it is wrong, the fix is a different namespace, n
   bound entries.
 - [Namespaces](/docs/concepts/namespaces): the CGP idea behind shared defaults, and why a bound
   entry cannot be overridden.
+- [CGP v0.8.0](/blog/v0.8.0-release#default-implementations): the release post that develops this
+  application stage by stage.
 
 ---
 

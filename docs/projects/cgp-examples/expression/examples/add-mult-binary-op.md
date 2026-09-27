@@ -186,6 +186,8 @@ multiply.
   the design.
 - [Extensible records](/docs/concepts/extensible-records): the CGP idea behind reading a struct's
   fields by name.
+- [Extensible data types, part 2](/blog/extensible-datatypes-part-2#binary-operator-provider): the
+  post that introduced this provider. Its code predates the current design.
 
 ---
 

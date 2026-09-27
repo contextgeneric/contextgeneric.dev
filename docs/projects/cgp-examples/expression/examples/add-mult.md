@@ -322,6 +322,8 @@ the `match` is simpler and better.
   dispatch, and why each needs its wrapper.
 - [Extensible variants](/docs/concepts/extensible-variants): the CGP idea behind handling one
   variant of any enum.
+- [Extensible data types, part 2](/blog/extensible-datatypes-part-2#evaluator-computer): the post
+  that developed this interpreter. Its code predates the current design.
 
 ---
 

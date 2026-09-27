@@ -72,6 +72,8 @@ satisfies every component it wires. The stage pages make one change each and sho
 - [`coarse_grained`](./examples/coarse-grained.md): the first stage, and the one to read first.
 - [Namespaces](/docs/concepts/namespaces): the CGP idea the later stages build to.
 - [Hello World](/docs/tutorials/hello): a first CGP program, for a reader new to CGP.
+- [CGP v0.8.0](/blog/v0.8.0-release): the release post that develops this application stage by
+  stage, and introduces namespaces.
 
 ---
 

@@ -194,6 +194,8 @@ every context. The [next stage](./namespaces.md) removes that.
 - [web-app overview](../index.md): the four stages side by side.
 - [Higher-order providers](/docs/concepts/higher-order-providers): the CGP idea behind the filter
   wrappers.
+- [CGP v0.8.0](/blog/v0.8.0-release#fine-grained-traits): the release post that develops this
+  application stage by stage.
 
 ---
 

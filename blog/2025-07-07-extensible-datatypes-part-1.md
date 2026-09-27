@@ -6,6 +6,15 @@ tags: [release, deepdive]
 description: 'Extensible records in CGP v0.4.2: code that works on any struct with the right fields, safe enum casting, and apps built from independent providers.'
 ---
 
+:::note
+
+This post's code predates the current design of CGP. [Extensible
+records](/docs/concepts/extensible-records) explains the current design of the feature, and the
+application builder this post develops is one of the [cgp-examples](/docs/projects/cgp-examples/)
+crates in the Projects section.
+
+:::
+
 I’m excited to announce the release of [**CGP v0.4.2**](https://github.com/contextgeneric/cgp/releases/tag/v0.4.2), a major milestone that significantly expands the expressive power of generic programming in Rust. With this release, CGP introduces full support for **extensible records and variants**, unlocking a range of new capabilities for developers working with highly modular and reusable code.
 
 Extensible records and variants allow developers to write code that operates on *any struct containing specific fields* or *any enum containing specific variants*, without needing their concrete definition. This makes it possible to write truly generic and flexible logic that is decoupled from rigid type definitions.

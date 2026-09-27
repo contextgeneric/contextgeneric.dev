@@ -166,7 +166,7 @@ version of CGP with a different design, and the code on these pages does not com
 - [Type-level DSLs](/docs/concepts/type-level-dsls): the CGP technique behind Hypershell, explained
   with a smaller language.
 - [Hello World](/docs/tutorials/hello): a first CGP program, for a reader new to CGP.
-- [Hypershell: a type-level DSL for shell-scripting](/blog/hypershell-release): the post that
+- [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release): the post that
   announced the project, with its history and motivation. Its code predates the current design.
 
 ---

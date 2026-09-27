@@ -113,6 +113,8 @@ a compile error at the call rather than from a declaration.
   each stage accepts and produces.
 - [Handlers](/docs/concepts/handlers): the computation interface whose output type the program's
   signature follows from.
+- [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release): the post
+  that announced Hypershell, with the project's motivation. Its code predates the current design.
 
 ---
 

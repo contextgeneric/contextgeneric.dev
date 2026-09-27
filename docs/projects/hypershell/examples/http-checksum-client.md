@@ -179,6 +179,9 @@ once the converters have an entry for it, which is a change to the language, not
 - [`UseField`](/docs/reference/providers/use_field): the provider behind the client field.
 - [Handlers](/docs/concepts/handlers): the computation interface whose second parameter, the input,
   the dispatch keys on.
+- [Hypershell: a type-level DSL for shell-scripting in
+  Rust](/blog/hypershell-release#native-http-request): the post that announced Hypershell, which
+  introduced this program. Its code predates the current design.
 
 ---
 

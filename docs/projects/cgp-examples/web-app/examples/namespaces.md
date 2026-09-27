@@ -176,6 +176,8 @@ stage](./default-impls.md) moves that into the namespace too.
 - [`default_impls`](./default-impls.md): the next stage, a namespace that supplies the defaults.
 - [web-app overview](../index.md): the four stages side by side.
 - [Namespaces](/docs/concepts/namespaces): the CGP idea behind paths and the lookups they route.
+- [CGP v0.8.0](/blog/v0.8.0-release#introducing-cgp-namespaces-and-paths): the release post that
+  develops this application stage by stage.
 
 ---
 

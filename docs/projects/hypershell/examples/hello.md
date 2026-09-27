@@ -172,6 +172,9 @@ replaceable.
   rules.
 - [Assembly](../architecture/assembly.md): how `HypershellNamespace` routes each piece of syntax.
 - [Type-level DSLs](/docs/concepts/type-level-dsls): the CGP technique behind the language.
+- [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release#hello-world):
+  the post that announced Hypershell, which opens with this program. Its code predates the current
+  design.
 
 ---
 

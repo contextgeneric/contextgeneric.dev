@@ -113,6 +113,8 @@ reports; a stalled feed here looks the same as a quiet one.
   streaming stage runs and reports failure.
 - [Type-level DSLs](/docs/concepts/type-level-dsls): how a program fixed at compile time still
   processes data as it arrives.
+- [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release): the post
+  that announced Hypershell, with the project's motivation. Its code predates the current design.
 
 ---
 

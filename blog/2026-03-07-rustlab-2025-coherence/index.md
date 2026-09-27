@@ -6,6 +6,15 @@ description: 'The RustLab 2025 talk, with slides and full transcript: why Rust''
 
 # How to stop fighting with coherence and start writing context-generic trait impls - RustLab 2025 transcript
 
+:::note
+
+The [cgp-serde](/docs/projects/cgp-serde/) library this talk uses as its demonstration is
+documented as it is now in the Projects section, including the [two-application
+demo](/docs/projects/cgp-serde/examples/messages), and [Coherence](/docs/concepts/coherence)
+explains the idea the talk presents.
+
+:::
+
 <p>
 <center>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/gXIfP-W9074?si=Q1qztb6J2PQ0b-jd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>

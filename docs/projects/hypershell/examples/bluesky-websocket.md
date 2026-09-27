@@ -181,6 +181,9 @@ above.
   type and how source errors reach it.
 - [Assembly](../architecture/assembly.md#a-context-joins-the-namespace): context entries and
   extension namespaces.
+- [Hypershell: a type-level DSL for shell-scripting in
+  Rust](/blog/hypershell-release#extending-hypershell): the post that announced Hypershell, whose
+  last part covers extending the language. Its code predates the current design.
 
 ---
 

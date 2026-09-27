@@ -6,6 +6,16 @@ tags: [deepdive]
 description: 'How extensible variants are implemented: the empty Void type, exhaustive extraction, the enum casts, and the monadic visitor dispatchers.'
 ---
 
+:::note
+
+This post's code predates the current design of CGP. [Extensible
+variants](/docs/concepts/extensible-variants) explains the current design of the feature, the
+[reference](/docs/reference/) documents the extraction and casting traits this post walks through,
+and the [`expression` pages](/docs/projects/cgp-examples/expression/) show the feature in a running
+interpreter.
+
+:::
+
 This is the **fourth** part of the blog series on **Programming Extensible Data Types in Rust with CGP**. You can read the [first](/blog/extensible-datatypes-part-1), [second](/blog/extensible-datatypes-part-2) and [third](/blog/extensible-datatypes-part-3) parts here.
 
 In the third part of the series, [**Implementing Extensible Records**](/blog/extensible-datatypes-part-3), we have walked through the internal implementation of extensible records, and learned about concepts such as partial records and builder dispatchers.

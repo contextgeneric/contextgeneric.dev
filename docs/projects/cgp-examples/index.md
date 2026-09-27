@@ -50,6 +50,9 @@ crate's tests. Each crate's pages give the command for its programs.
 - [`web-app`](./web-app/index.md): one application's wiring at four scales.
 - [Projects](../index.md): the other projects on this site, and a table from each CGP pattern to an
   example that shows it.
+- [Extensible data types, part 1](/blog/extensible-datatypes-part-1) and
+  [part 2](/blog/extensible-datatypes-part-2): the posts that developed the `builder` and
+  `expression` crates. Their code predates the current design.
 
 ---
 

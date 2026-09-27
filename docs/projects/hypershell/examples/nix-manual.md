@@ -133,6 +133,8 @@ in a URL, a reader looks at how URLs are produced, rather than at one definition
   every kind of argument and where it may appear.
 - [Impl-side dependencies](/docs/concepts/impl-side-dependencies): how each interpreter asks the
   context for what it needs.
+- [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release): the post
+  that announced Hypershell, with the project's motivation. Its code predates the current design.
 
 ---
 

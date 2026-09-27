@@ -185,6 +185,8 @@ method is called, as `add_mult` does, keeps the table shorter when there are onl
   dispatch, side by side.
 - [Handlers](/docs/concepts/handlers): CGP's computation interfaces, and the `Code` marker they
   share.
+- [Extensible data types, part 2](/blog/extensible-datatypes-part-2#code-based-dispatching): the
+  post that introduced this dispatch. Its code predates the current design.
 
 ---
 

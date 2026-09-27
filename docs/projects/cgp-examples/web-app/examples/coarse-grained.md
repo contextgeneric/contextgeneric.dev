@@ -183,6 +183,8 @@ requirement to a provider.
 - [web-app overview](../index.md): the four stages side by side.
 - [Impl-side dependencies](/docs/concepts/impl-side-dependencies): how a provider's requirements are
   declared and resolved.
+- [CGP v0.8.0](/blog/v0.8.0-release#an-example-social-media-web-app): the release post that develops
+  this application stage by stage.
 
 ---
 

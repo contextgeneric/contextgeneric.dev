@@ -279,6 +279,9 @@ that encodes each type one way, Serde's derive is shorter.
 - [Wiring a context](../guides/wiring-a-context.md): how to build and check a table like `App`'s.
 - [Coherence](/docs/concepts/coherence): why moving the value out of `Self` lets implementations
   overlap.
+- [Announcing cgp-serde](/blog/cgp-serde-release#derive-free-serialization-with-derivecgpdata): the
+  post that announced the library, including derive-free serialization. Its code predates the
+  current design.
 
 ---
 

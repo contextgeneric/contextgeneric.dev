@@ -157,6 +157,9 @@ stage between them.
   the dispatchers.
 - [Handlers](/docs/concepts/handlers): CGP's family of computation components, including the
   combinators that compose them.
+- [Hypershell: a type-level DSL for shell-scripting in
+  Rust](/blog/hypershell-release#streaming-handlers): the post that announced Hypershell, which
+  introduced this pipeline. Its code predates the current design.
 
 ---
 
