@@ -22,6 +22,21 @@ stage belongs to.
 
 :::
 
+## The problem
+
+The task is to download a web page and print its SHA-256 digest by piping three commands together,
+`curl`, `sha256sum`, and `cut`, with all three running at once so the page streams through them
+rather than being held in memory.
+
+### Without CGP
+
+In a shell, this is one line, and for a pipeline run by hand the shell is the right tool. In Rust,
+the same pipeline with `std::process::Command` or Tokio's process API means spawning each command,
+connecting each one's output to the next one's input by hand, and waiting on all of them and
+checking each exit status, so the plumbing outweighs the pipeline. This page declares the pipeline
+as a type and leaves the plumbing to the providers that interpret it, which also check that the
+stages fit.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

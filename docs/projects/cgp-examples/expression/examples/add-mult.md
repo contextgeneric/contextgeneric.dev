@@ -23,6 +23,42 @@ either.
 
 :::
 
+## The problem
+
+The task is an interpreter for a small arithmetic language, with two operations over it: evaluating
+an expression to a number, and converting it to Lisp. On its own, that is easy. What makes it
+interesting is the requirement that the interpreter stay open: new operators and new operations
+should be addable later, from code that cannot edit what is already written, such as a second crate.
+
+### Without CGP
+
+The crate keeps the ordinary Rust version in its `classic` module, and it is the right design for a
+language that will not change:
+
+```rust
+pub enum Expr {
+    Plus(Box<Expr>, Box<Expr>),
+    Times(Box<Expr>, Box<Expr>),
+    Literal(u64),
+}
+
+pub fn eval(expr: Expr) -> u64 {
+    match expr {
+        Expr::Plus(a, b) => eval(*a) + eval(*b),
+        Expr::Times(a, b) => eval(*a) * eval(*b),
+        Expr::Literal(value) => value,
+    }
+}
+```
+
+A new operation is easy here: another function with its own `match`. A new operator is not. It
+means adding a variant to `Expr` and an arm to every `match` over it, and a crate that does not own
+`Expr` cannot do it at all. The other common Rust design, a trait with one method per operation and
+one impl per operator, has the opposite problem: new operators are easy, and every new operation is
+an edit to every impl. Keeping both directions open at once, with the compiler still checking that
+every case is handled, is known as the expression problem, and it is what this page's design
+addresses.
+
 ## Run it
 
 From the root of the [cgp-examples repository](https://github.com/contextgeneric/cgp-examples):

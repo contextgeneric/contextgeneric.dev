@@ -23,6 +23,19 @@ input and its code.
 
 :::
 
+## The problem
+
+The task is to post a Rust value to the Rust Playground's gist API as JSON and decode the reply into
+another Rust value. Unlike the earlier examples, the program's input and its output are both Rust
+values, not bytes, so the pipeline has to start and end in Rust's types.
+
+### Without CGP
+
+With `reqwest`, the whole task is one chain: `.json(&request)` to encode and send, and
+`.json::<Response>()` to decode, and for a single call that is simpler than a pipeline. This page
+writes the same steps as three stages, encoding, the request, and decoding, so each is a stage the
+language provides and the compiler checks that each stage's output is what the next one reads.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

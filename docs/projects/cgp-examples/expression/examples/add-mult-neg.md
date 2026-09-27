@@ -24,6 +24,22 @@ several enums.
 
 :::
 
+## The problem
+
+The task is to add subtraction and negation to the language, and to evaluate the larger language,
+without editing the base language's types or any of its existing providers. This is the half of the
+expression problem that a plain Rust enum makes hardest: adding a new kind of expression.
+
+### Without CGP
+
+With an enum and a `match`, adding `Minus` and `Negate` means adding two variants to `Expr` and an
+arm to every function that matches on it, which only the crate that owns `Expr` can do. The usual
+workaround for a downstream crate is a new enum that wraps the old one, with a variant for the old
+language and one for each new operator. It breaks as soon as the operators mix: the old `Plus` holds
+operands of the old `Expr`, so a sum whose operand is a negation cannot be written, and making it
+possible means copying every old operator into the new enum along with the code that handles it.
+This page adds the operators so that every existing provider works for the new language unchanged.
+
 ## Run it
 
 From the root of the [cgp-examples repository](https://github.com/contextgeneric/cgp-examples):

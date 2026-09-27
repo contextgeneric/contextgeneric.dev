@@ -23,6 +23,24 @@ providers](/docs/concepts/aggregate-providers) explains the bundles.
 
 :::
 
+## The problem
+
+The task is the same backend as the [coarse stage](./coarse-grained.md), rewired so that each
+operation carries only the requirements it uses. That asks for three things at once: an operation
+per component, so reading users does not need a censor; the content checks separated from the
+storage code, so a check can wrap any way of creating users; and a way to group the result, so an
+application does not wire nine components one by one.
+
+### Without CGP
+
+Plain Rust can do each of these. A trait per operation splits the requirements, and a decorator, a
+struct generic over an inner creator that runs the check and then calls it, separates the check from
+the storage. The cost is in putting them together. Each decorator holds its inner value and its
+dependencies as fields, so assembling the application means constructor code that builds every layer
+by hand in the right order, and a second configuration of the application is a second constructor
+that repeats the layers it shares with the first. This stage expresses the same layering as wiring,
+where the compiler checks each piece.
+
 ## Check it
 
 From the root of the [cgp-examples repository](https://github.com/contextgeneric/cgp-examples):

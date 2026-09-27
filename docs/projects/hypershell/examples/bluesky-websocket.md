@@ -24,6 +24,22 @@ the context chooses the error type, and explains what it needs of it.
 
 :::
 
+## The problem
+
+The task is the same firehose, read with a native WebSocket stage instead of the `websocat` command.
+The WebSocket stage is an extension the base language does not include, and it can fail in ways the
+base language's error handling does not know about, so the task is to add it, and its errors, to a
+single program without changing the language for everyone else.
+
+### Without CGP
+
+In a language whose program is an enum interpreted by a `match`, a new stage is an edit to the
+language's crate, and its errors are a new case in the language's error type, so the change reaches
+every user. Without a language at all, the WebSocket client is a loop written by hand that reads
+messages and writes them to the next command's input. This page adds the stage to one context with
+two wiring entries, one for the stage and one for its error, and leaves the language and every other
+context unchanged.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

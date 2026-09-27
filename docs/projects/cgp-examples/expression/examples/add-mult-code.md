@@ -24,6 +24,22 @@ carry.
 
 :::
 
+## The problem
+
+The task is to run two operations, evaluation and conversion to Lisp, over the same language. In
+[`add_mult`](./add-mult.md), each operation has a method of its own, `compute` and `compute_ref`.
+That is fine for two operations, but it ties each operation to a method, and a language with many
+operations would want one entry point that takes the operation as a parameter, with each operation's
+providers still listed separately, operator by operator.
+
+### Without CGP
+
+In plain Rust, two operations are two functions, and that is the simplest design while there are
+only a few. Choosing an operation by a type instead means a trait with one impl per operation, each
+carrying its own `match` over the language, so the question "what does this operation do with this
+operator?" is answered inside a different function for every operation. What this page shows is a
+single table that answers it for every pair of operation and operator, keyed on both at once.
+
 ## Run it
 
 This context has no test of its own in the repository, so running it takes a test of your own. Save

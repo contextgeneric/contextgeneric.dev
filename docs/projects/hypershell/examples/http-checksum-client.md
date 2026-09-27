@@ -23,6 +23,21 @@ the page explains what it does here without assuming that reference.
 
 :::
 
+## The problem
+
+The task is the same digest with `curl` replaced by an HTTP request made from Rust, whose response
+streams into the `sha256sum` and `cut` commands. The difficulty is at the join: the HTTP library
+produces its body as one kind of stream, and a command's input is fed from another kind, so the two
+do not connect directly.
+
+### Without CGP
+
+In plain Rust, the join is written by hand: the response body is adapted into the reader type the
+command's input needs, with a compatibility wrapper, and the adapting code is tied to the two stages
+it sits between. Swap the HTTP stage for a file, or the command for another native stage, and that
+code changes too. This page has each stage choose how to convert its input by the input's type, so
+any stage can follow any other that produces something it can read.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

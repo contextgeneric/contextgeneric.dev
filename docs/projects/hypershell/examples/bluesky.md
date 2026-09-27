@@ -23,6 +23,20 @@ processes data at run time.
 
 :::
 
+## The problem
+
+The task is to read the Bluesky firehose, a live stream of every public post, and print the events
+that mention a keyword, for as long as the program runs. The pipeline never finishes on its own, so
+every stage has to process data as it arrives and keep running.
+
+### Without CGP
+
+In a shell, `websocat … | grep "$keyword"` does exactly this, and it is the right tool for watching
+a feed by hand. In Rust, the same pipeline means spawning both commands and connecting them by hand,
+as in [`http_checksum_cli`](./http-checksum-cli.md), with the added need that nothing waits for a
+stage to finish before the next one starts. This page shows the same streaming stages running a
+pipeline that has no end.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

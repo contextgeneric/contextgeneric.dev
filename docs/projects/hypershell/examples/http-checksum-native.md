@@ -23,6 +23,21 @@ inherit, and explains what it needs of them.
 
 :::
 
+## The problem
+
+The task is the same digest again, with every stage native: an HTTP request, a SHA-256 checksum, and
+hexadecimal encoding. The base language has no checksum stage, so the task is really to extend a
+language from outside the crates that define it, and to run the extended language with as little
+change as possible.
+
+### Without CGP
+
+A language whose program is an enum of instructions, interpreted by a `match`, can gain a checksum
+instruction only in the crate that owns the enum: someone adds the variant, adds an arm to the
+interpreter, and releases a new version. A user who cannot wait forks it. This page adds the
+checksum stages in crates of their own, with their own syntax and providers, and a program joins the
+extended language by naming a different namespace.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

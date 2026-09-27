@@ -23,6 +23,23 @@ which is what two applications here get around. This page can be read without th
 
 :::
 
+## The problem
+
+The task is to serialize the same data, an archive of messages with byte fields and dates, for two
+applications that disagree about how it should look: one wants bytes as hex and dates as RFC 3339
+strings, the other bytes as base64 and dates as Unix timestamps. Both applications use the same Rust
+types, and the choice has to apply at every level of nesting.
+
+### Without CGP
+
+With Serde, a type has one `Serialize` impl in the whole program. `Vec<u8>` and `DateTime<Utc>`
+already have theirs, in `serde` and in `chrono`, and Rust's orphan rule stops an application from
+writing another. So the encoding is chosen per field, with `#[serde(with = …)]` attributes or
+wrapper types, and each struct definition carries one set of choices. Two applications that want
+different choices need two sets of structs, or code that converts the shared structs into
+application-specific copies before serializing. This page keeps one set of structs and gives each
+application its own choices.
+
 ## Run it
 
 From the root of the [cgp-serde repository](https://github.com/contextgeneric/cgp-serde), run the
@@ -119,7 +136,7 @@ pub struct MessagesArchive {
 Byte fields appear at every level, and dates in the innermost struct. Nothing in the structs says
 how either is written. [`CgpData`](/docs/reference/derives/derive_cgp_data) only exposes the fields
 to generic code, and `Vec<u8>` and `DateTime<Utc>` belong to other crates, so in Serde their
-encoding would be whatever those crates' `Serialize` impls chose.
+encoding would be whatever their existing `Serialize` impls chose.
 
 ## Each application is a context with its own table
 

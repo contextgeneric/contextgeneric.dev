@@ -23,6 +23,23 @@ smaller program. [Coherence](/docs/concepts/coherence) explains why Rust gives a
 
 :::
 
+## The problem
+
+The task is ordinary: write a struct to JSON and read it back, with its byte field written as a hex
+string rather than as a list of numbers. Two requirements make it more than that. The struct should
+derive nothing from Serde, so the crate that defines it need not depend on `serde`. And the byte
+encoding should be chosen by the application that serializes the struct, not fixed where the struct
+is defined.
+
+### Without CGP
+
+With Serde, the struct derives `Serialize` and `Deserialize`, and the byte field carries a
+`#[serde(with = …)]` attribute naming a helper module that writes and reads hex. For one program
+that encodes the struct one way, that is short, clear, and the right tool. Its costs are the two the
+requirements rule out: the struct's crate depends on `serde`, and the hex encoding is written into
+the struct's definition, so an application that wants base64 needs a different struct. This page
+moves both decisions out of the struct and into the application's wiring.
+
 ## Run it
 
 From the root of the [cgp-serde repository](https://github.com/contextgeneric/cgp-serde):

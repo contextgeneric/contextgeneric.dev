@@ -22,6 +22,22 @@ explains what a component is, which is what this stage sizes. This page can be r
 
 :::
 
+## The problem
+
+The task is the backend of a small social-media service: create, read, and update users and posts,
+store them in Postgres, and reject a username or a post that a content filter flags. This stage
+writes it the way most applications start, with one trait per domain, and the problem it shows is
+the one that starting point hides: a requirement of one method becomes a requirement of all of them.
+
+### Without CGP
+
+In plain Rust, the same design is a `UserManager` trait implemented by a Postgres type that holds
+its database and its censor, or takes the censor as a generic parameter. It has the same cost. Only
+`create_user` uses the censor, yet every value of the Postgres manager has to be built with one, so
+code that only reads users, such as a report generator, still has to supply a censor it never calls.
+Splitting the trait fixes it in plain Rust too, which is what the [next stage](./fine-grained.md)
+does with CGP. This stage exists to make the cost visible first.
+
 ## Check it
 
 From the root of the [cgp-examples repository](https://github.com/contextgeneric/cgp-examples):

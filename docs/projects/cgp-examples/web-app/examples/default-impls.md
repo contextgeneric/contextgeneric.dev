@@ -22,6 +22,23 @@ World tutorial](/docs/tutorials/hello) introduces wiring, and
 
 :::
 
+## The problem
+
+The task is to supply the backend's usual choices as defaults, so that an application built on it
+wires only what it varies, here its content filters, and gets the storage and the checks without
+naming them. This is what a library wants to offer its users: a working configuration, open at the
+points where applications differ.
+
+### Without CGP
+
+In plain Rust, defaults are usually supplied at run time: a builder or a constructor with default
+values and optional overrides, or a `Default` implementation for a configuration struct. That is
+flexible, and it is often the right answer. What it does not give is a compile-time check that a
+configuration is complete, since the configuration is assembled from values when the program runs.
+Trait default methods are compile-time, but they give each trait one default for every implementer,
+not a set of defaults an application opts into. This stage publishes the defaults as a namespace an
+application joins.
+
 ## Check it
 
 From the root of the [cgp-examples repository](https://github.com/contextgeneric/cgp-examples):

@@ -23,6 +23,23 @@ than this one.
 
 :::
 
+## The problem
+
+The task itself is trivial on purpose: run `echo hello world!` and print what it prints. The problem
+this page is about is the shape of the program, not its output. Hypershell's aim is a shell pipeline
+written as a value that the compiler checks, that different interpreters can run differently, and
+that anyone can extend with new kinds of stage.
+
+### Without CGP
+
+For this task alone, a shell script, `echo hello world!`, or a few lines of Rust with
+`std::process::Command` are simpler, and they are what a reader should use to run one command.
+Neither makes the program a thing of its own that can be inspected or reinterpreted: the shell reads
+text, and the Rust code runs the command where it is written. The usual way to make a program a
+value in Rust is an enum of its instructions and an interpreter that matches on it, and that design
+is closed: a new kind of instruction means editing the enum and the interpreter, in the crate that
+owns them. This page shows the smallest program in a language that avoids both limits.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):
@@ -145,8 +162,8 @@ it.
 
 The costs are the ones that come with the technique. A program is fixed at compile time, the
 compiler does real work to resolve a large program, and a mistake in one is a compile error that can
-be long to read. For a single fixed command, `std::process::Command` is simpler; Hypershell pays off
-when a program's parts should be reusable and its meaning replaceable.
+be long to read. Hypershell pays off when a program's parts should be reusable and its meaning
+replaceable.
 
 ## Where to go next
 

@@ -24,6 +24,21 @@ for what it needs.
 
 :::
 
+## The problem
+
+The task is to download a web page, convert it to upper case, and print the lines that mention a
+keyword chosen at run time. The interesting part is the command lines: `tr` takes fixed arguments,
+while `grep` takes a mix of a fixed flag and a value from the running application.
+
+### Without CGP
+
+In a shell, this is `curl … | tr '[:lower:]' '[:upper:]' | grep -i "$keyword"`, one line that
+mixes literals and a variable freely, and for a one-off search it is the simpler tool. In Rust, each
+command's argument list is built as a vector of strings before the command is spawned, so the mix of
+fixed and runtime values is assembled by hand, in code that sits apart from the pipeline it feeds.
+This page writes each argument list inside the program, with each argument saying where its value
+comes from.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

@@ -8,9 +8,8 @@ description: 'A Hypershell program that reads a runtime value from a field of it
 
 This program runs `echo` with a greeting whose name comes from a field of the context, the type the
 program runs on, at run time. It is an example from [Hypershell](../index.md), a shell-scripting
-language whose programs are Rust types, built with [CGP](/docs/). Because a program is a type, it
-cannot hold a value such as a name or a URL; this page shows where such values live instead, and
-what the compiler reports when one is missing.
+language whose programs are Rust types, built with [CGP](/docs/). This page shows where such runtime
+values live, and what the compiler reports when one is missing.
 
 :::tip
 
@@ -22,6 +21,20 @@ same idea in its simplest form, and [Implicit arguments](/docs/concepts/implicit
 reading fields in ordinary CGP code.
 
 :::
+
+## The problem
+
+The task is to greet a name that is known only when the program runs. A Hypershell program is a
+type, so it can name a value it needs but cannot contain one, and the value has to come from
+somewhere the program's interpreter can reach while it runs.
+
+### Without CGP
+
+A shell script reads the name from a variable, `echo "Hello, $name"`, and a Rust function takes it
+as an argument. In a program that is interpreted, the usual answer is an environment passed to every
+step of the interpreter, which each step reads from, so every step's signature carries the whole
+environment whether it uses it or not. This page puts the value in a field of the context that runs
+the program, and only the step that needs the field asks for it.
 
 ## Run it
 

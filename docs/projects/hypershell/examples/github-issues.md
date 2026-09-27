@@ -22,6 +22,21 @@ arguments nest.
 
 :::
 
+## The problem
+
+The task is to fetch a repository's open issues from the GitHub API and decode them into Rust
+values. The request needs a URL assembled from a base URL and two path segments that must be
+URL-encoded, and a `User-Agent` header, and the reply has to become a typed value rather than bytes.
+
+### Without CGP
+
+In plain Rust, `reqwest` and `serde` do this in a few lines: format the URL, set the header, send
+the request, and decode the body with `.json::<Vec<Issue>>()`. For a one-off call, that is the right
+approach, and simpler than this one. What it gives up is the program as a unit of its own: the URL's
+parts, the header, and the decoding target are spread through code tied to one HTTP client. This
+page writes all three into the program, where each URL part says where its value comes from and the
+decoding target is a type the program names.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):

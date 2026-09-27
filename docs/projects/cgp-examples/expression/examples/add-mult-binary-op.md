@@ -24,6 +24,22 @@ the new provider relies on.
 
 :::
 
+## The problem
+
+The task is to convert `+` and `*` expressions to Lisp. The two conversions are identical except for
+the operator's symbol: each converts its left and right operands and builds a list headed by the
+symbol. Written as one provider per operator, as in [`add_mult`](./add-mult.md), the two providers
+are copies of each other, and each new binary operator would be a third copy.
+
+### Without CGP
+
+In plain Rust, the duplication is removed with a helper function that takes the symbol and the two
+operands, and the `match` arm for each operator calls it. That works because the `match` has already
+taken the variant apart, so it can hand the helper the operands. A provider that stands on its own
+has no `match` around it to do that. To serve every binary operator, it needs a way to reach the
+operands of whatever operator it is given, without being written for any one of them, and a way to
+receive the symbol from outside. This page shows both.
+
 ## Run it
 
 This context has no test of its own in the repository, so running it takes a test of your own. Save

@@ -22,6 +22,23 @@ reuses. For CGP itself, the [Hello World tutorial](/docs/tutorials/hello) introd
 
 :::
 
+## The problem
+
+The task is to run the backend in two configurations, a production one with AI-backed content
+filters and a test one with placeholder filters, while keeping each configuration's wiring short
+enough that the difference between them is obvious. With nine components, the [fine-grained
+stage](./fine-grained.md) already names every component in every context, and a second context would
+repeat all nine keys to change two of them.
+
+### Without CGP
+
+In plain Rust, two configurations are usually one application type made generic over the parts that
+vary, such as `App<F: ContentFilters>`, with a type alias or a constructor for each configuration.
+That works well while one parameter varies. As more parts vary, the application gains a parameter
+for each, every function that names the type repeats them, and the configurations are told apart by
+reading their constructors. This stage groups the parts under paths instead, so each configuration
+is two lines that differ in one.
+
 ## Check it
 
 From the root of the [cgp-examples repository](https://github.com/contextgeneric/cgp-examples):

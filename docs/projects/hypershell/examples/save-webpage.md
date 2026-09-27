@@ -22,6 +22,19 @@ types a pipeline chains.
 
 :::
 
+## The problem
+
+The task is to download a web page into a file, writing it as it arrives rather than holding the
+whole page in memory, with the URL and the file path both chosen when the program runs.
+
+### Without CGP
+
+`curl -o manual.html <url>` does this in a shell, and it is the simpler tool for a download run by
+hand. In Rust, streaming a response to disk means a loop that reads the body chunk by chunk and
+writes each chunk to a file, with the URL and the path passed in as arguments. This page expresses
+the download as a two-stage pipeline whose last stage writes to a file and produces nothing, so a
+download is one more program in the language rather than a loop written for the occasion.
+
 ## Run it
 
 From the root of the [Hypershell repository](https://github.com/contextgeneric/hypershell):
