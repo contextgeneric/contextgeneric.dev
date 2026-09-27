@@ -71,7 +71,8 @@ is tagged `Symbol!("type")`. The macro itself performs no stripping. It takes th
 
 ## Examples
 
-The everyday appearance is a wiring entry that points a getter at a particular field:
+The everyday appearance is a wiring entry that points a getter at a particular field. `Person` is a
+value context here, the type whose own field the getter reads:
 
 ```rust
 use cgp::prelude::*;
@@ -89,6 +90,12 @@ pub struct Person {
 delegate_components! {
     Person {
         NameGetterComponent: UseField<Symbol!("first_name")>,
+    }
+}
+
+check_components! {
+    Person {
+        NameGetterComponent,
     }
 }
 ```

@@ -43,9 +43,11 @@ Sum![u32, String, bool]
 Sum![]   // the empty sum
 ```
 
-Each listed type is one possible variant, and a value of the sum type carries exactly one of them. There are no
-options and no value-level counterpart. Unlike [`Product!`](./product.md), which has `product!`, a sum value is
-constructed through the variant machinery rather than by a literal.
+Each listed type is one possible variant, and a value of the sum type carries exactly one of them.
+There are no options and no value-level counterpart: unlike [`Product!`](./product.md), which has
+`product!`, a sum has no literal macro. A value is built with `Either`'s own constructors, as
+`Either::Right(Either::Left(b))` for the second variant, or, for a derived enum, through
+[`FromVariant`](../traits/variant/from_variant.md).
 
 ## Examples
 
