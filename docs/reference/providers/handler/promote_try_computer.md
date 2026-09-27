@@ -19,15 +19,15 @@ that implements the fallible synchronous base. You name it by hand only when wir
 
 ## Overview
 
-`PromoteTryComputer<Provider>` starts from a provider that implements `TryComputer`, the synchronous
-fallible base, and fills in the rest of the handler family on a **context**, the type a method runs
-on. It first turns the fallible base into a plain computer, then derives the rest of the family
+`PromoteTryComputer<Provider>` starts from a `Computer` whose output is a `Result`, the base
+[`#[cgp_computer]`](../../macros/cgp_computer.md) generates for a function returning `Result`, and fills in the rest of the handler family on a **context**, the type a method runs
+on. It turns that base into a `TryComputer` through [`TryPromote`](try_promote.md), then derives the rest of the family
 from there. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
 It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-`TryComputer` provider:
+provider, a `Computer` returning `Result`:
 
 ```rust
 delegate_components! {
@@ -39,7 +39,7 @@ delegate_components! {
 
 ## When to use it
 
-**Reach for `PromoteTryComputer` when the base provider is a synchronous fallible `TryComputer`** and
+**Reach for `PromoteTryComputer` when the base provider is a synchronous `Computer` returning `Result`** and
 you wire its family by hand. For a plain `Computer` base use [`PromoteComputer`](promote_computer.md);
 for the other bases use [`PromoteProducer`](promote_producer.md),
 [`PromoteAsyncComputer`](promote_async_computer.md), or [`PromoteHandler`](promote_handler.md).

@@ -13,9 +13,12 @@ Fill in every member of the handler family from a provider that implements `Comp
 
 **You are not expected to name `PromoteComputer` directly.**
 [`#[cgp_computer]`](../../macros/cgp_computer.md) wires it across the family for the provider it
-generates, so one written `Computer` impl answers the whole handler surface. You name
-`PromoteComputer<MyProvider>` by hand only when wiring a hand-written computer's family explicitly. This
-page explains what that wiring emits.
+generates, so one written `Computer` impl answers the whole handler surface. A bundle
+expects its parameter to be a provider wired to that same bundle, as the macro does with `Self`, because
+some entries reach the base through a sibling: the `Handler` entry is `PromoteAsync<Provider>`, which
+needs `Provider` to be a `TryComputer`. To lift a hand-written `Computer` without wiring it to the
+bundle, chain the one-step adapters, as in `PromoteAsync<Promote<MyComputer>>`. This page explains what
+the bundle emits.
 
 :::
 
@@ -61,7 +64,7 @@ from a `TryComputer`, [`PromoteProducer`](promote_producer.md) from a `Producer`
 `PromoteComputer` is defined with [`delegate_components!`](../../macros/delegate_components.md) over a
 generic inner `Provider`. It routes the fallible slot to [`Promote`](promote.md) (wrap in `Ok`), the
 async slots to [`PromoteAsync`](promote_async.md) (run synchronously in an async method), and every
-`…Ref` slot to [`PromoteRef`](promote_ref.md) (dereference, then defer to the base):
+`…Ref` slot to [`PromoteRef`](promote_ref.md) (pass the borrow to the base as its input):
 
 ```rust
 delegate_components! {

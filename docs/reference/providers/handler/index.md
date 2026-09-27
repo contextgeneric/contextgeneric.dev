@@ -33,8 +33,8 @@ operation, and an input, producing an associated `Output`. The members differ on
 
 Each of the first four has a `…Ref` companion whose method takes the input by reference. The promotion
 combinators trade on the natural orderings among these: a `Computer` is also a valid `TryComputer` and a
-valid `AsyncComputer`, a `TryComputer` is a valid `Handler`, and a value handler can serve a reference
-handler by dereferencing.
+valid `AsyncComputer`, a `TryComputer` is a valid `Handler`, and a reference handler can serve a value
+handler by dereferencing the input.
 
 ## The combinators, by role
 

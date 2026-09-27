@@ -45,11 +45,11 @@ exactly when you expected it to stop: **`OkMonadic` continues on `Err`, and `Err
 `Ok`**. `ErrMonadic` is the one that behaves like `?`.
 
 **`OkMonadicTrans<M>`** and **`ErrMonadicTrans<M>`** are transformer forms that apply the same behavior
-on top of a base monad `M`, so monads can stack over nested result types. Writing
-`OkMonadicTrans<ErrMonadic>` builds a monad that short-circuits on an outer `Ok` while threading an
-inner `Result` through the err monad beneath it. A single layer of branching needs no explicit
-transformer, because the bare markers produce their own transformer form over `IdentMonadic` when used
-as transformers. The trait layer that gives a marker its meaning is documented under
+on top of a base monad `M`, so monads can stack over nested result types. In
+`OkMonadicTrans<ErrMonadic>`, the err monad handles the outer `Result` of each output and the ok layer
+the inner one, so over `Result<Result<T, E1>, E2>` it stops on an outer `Err` or an inner `Ok` and
+continues with the `E1` of an `Ok(Err(e1))`. A single layer of branching needs no explicit
+transformer: used on its own, each bare marker binds as its transformer over `IdentMonadic`. The trait layer that gives a marker its meaning is documented under
 [`MonadicBind`](../../traits/monad/monadic_bind.md) and [`MonadicTrans`](../../traits/monad/monadic_trans.md).
 
 ## Related constructs
