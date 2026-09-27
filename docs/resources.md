@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 10
 ---
 
 # Resources
@@ -52,4 +52,4 @@ beyond small examples, this is the codebase to read.
 ## Projects
 
 - [CGP Examples](https://github.com/contextgeneric/cgp-examples) - A repository hosting various examples of using CGP.
-- [Hypershell](https://github.com/contextgeneric/hypershell) - A type-level DSL for shell-scripting in Rust, built with CGP.
+- [Hypershell](https://github.com/contextgeneric/hypershell) - A type-level DSL for shell-scripting in Rust, built with CGP. Documented on this site in the [Projects](/docs/projects/hypershell/) section, with its examples walked through as short tutorials.
