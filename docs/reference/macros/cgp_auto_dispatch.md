@@ -285,8 +285,8 @@ error[E0599]: the method `area` exists for reference `&Plain`, but its trait bou
 
 **The generated impl is a blanket impl over every type that implements `HasExtractor`.** This lets
 it cover any extensible enum whose payloads implement the trait. A hand-written impl for a type
-outside that set, such as the payload structs themselves, coexists with it, but one for another
-extensible enum collides:
+outside that set, such as the payload structs themselves, coexists with it, but one for any
+extensible enum collides, including the enum the trait was written for:
 
 ```text
 error[E0119]: conflicting implementations of trait `HasArea` for type `Shape`

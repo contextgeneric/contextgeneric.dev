@@ -23,6 +23,28 @@ pub mod usage {
         }
     }
 
+    /// A destructuring parameter and an omitted return type, which the page states in prose.
+    pub mod patterns_and_unit_output {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::Computer;
+        use cgp::prelude::*;
+
+        #[cgp_computer]
+        fn sum_pair((a, b): (u64, u64)) -> u64 {
+            a + b
+        }
+
+        #[cgp_computer]
+        fn log_value(_value: u64) {}
+
+        #[test]
+        fn only_the_types_are_read() {
+            assert_eq!(SumPair::compute(&(), PhantomData::<()>, (1, 2)), 3);
+            let () = LogValue::compute(&(), PhantomData::<()>, 5);
+        }
+    }
+
     pub mod explicit_name {
         use core::marker::PhantomData;
 

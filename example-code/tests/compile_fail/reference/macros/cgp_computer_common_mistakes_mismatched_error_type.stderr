@@ -1,0 +1,55 @@
+error[E0271]: type mismatch resolving `<App as HasErrorType>::Error == String`
+  --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_mismatched_error_type.rs:24:13
+   |
+24 |     let _ = CheckedAdd::try_compute(&App, PhantomData::<()>, (1, 2));
+   |             ^^^^^^^^^^ expected `String`, found `u32`
+   |
+   = note: required for `TryPromote<CheckedAdd>` to implement `IsProviderFor<cgp::prelude::TryComputerComponent, App, (_, (u64, u64))>`
+   = note: 1 redundant requirement hidden
+   = note: required for `CheckedAdd` to implement `IsProviderFor<cgp::prelude::TryComputerComponent, App, (_, (u64, u64))>`
+note: required by a bound in `cgp::prelude::TryComputer::try_compute`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-handler/src/components/try_compute.rs:8:1
+   |
+ 8 | #[cgp_component(TryComputer)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `TryComputer::try_compute`
+...
+16 |     fn try_compute(&self, _code: PhantomData<Code>, input: Input) -> Result<Self::Output, Error>;
+   |        ----------- required by a bound in this associated function
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `TryPromote<CheckedAdd>: TryComputer<App, (), (u64, u64)>` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_mismatched_error_type.rs:24:13
+   |
+24 |     let _ = CheckedAdd::try_compute(&App, PhantomData::<()>, (1, 2));
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `TryComputer<App, (), (u64, u64)>` is not implemented for `TryPromote<CheckedAdd>`
+   |
+help: the trait `TryComputer<Context, Code, Input>` is conditionally implemented for `TryPromote<Provider>`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-handler/src/providers/try_promote.rs:11:1
+   |
+11 | / impl<Context, Code, Input, Output, Provider> TryComputer<Context, Code, Input>
+12 | |     for TryPromote<Provider>
+13 | | where
+14 | |     Context: HasErrorType,
+15 | |     Provider: Computer<Context, Code, Input, Output = Result<Output, Context::Error>>,
+   | |______________________________________________---------------------------------------_^
+   |                                                |
+   |                                                unsatisfied requirement introduced here: `<CheckedAdd as cgp::prelude::Computer<App, (), (u64, u64)>>::Output == Result<_, <App as HasErrorType>::Error>`
+   = note: required for `CheckedAdd` to implement `TryComputer<App, (), (u64, u64)>`
+
+error[E0271]: type mismatch resolving `<CheckedAdd as Computer<App, (), (u64, u64)>>::Output == Result<u64, u32>`
+  --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_mismatched_error_type.rs:24:13
+   |
+24 |     let _ = CheckedAdd::try_compute(&App, PhantomData::<()>, (1, 2));
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<CheckedAdd as Computer<App, (), (u64, u64)>>::Output == Result<u64, u32>`
+   |
+note: expected this to be `Result<u64, u32>`
+  --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_mismatched_error_type.rs:11:35
+   |
+11 | fn checked_add(a: u64, b: u64) -> Result<u64, String> {
+   |                                   ^^^^^^^^^^^^^^^^^^^
+   = note: expected enum `Result<u64, u32>`
+              found enum `Result<u64, String>`
+   = note: required for `TryPromote<CheckedAdd>` to implement `IsProviderFor<cgp::prelude::TryComputerComponent, App, ((), (u64, u64))>`
+   = note: 1 redundant requirement hidden
+   = note: required for `CheckedAdd` to implement `IsProviderFor<cgp::prelude::TryComputerComponent, App, ((), (u64, u64))>`
+   = note: required for `CheckedAdd` to implement `TryComputer<App, (), (u64, u64)>`

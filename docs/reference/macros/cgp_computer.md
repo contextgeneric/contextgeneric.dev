@@ -62,8 +62,9 @@ The function's shape decides everything else:
 
 - **Its parameters become the input.** Several parameters are collected into one tuple, so
   `fn add(a: u64, b: u64)` has input `(u64, u64)`. A single parameter's input is its bare type, and
-  no parameters give `()`.
-- **Its return type becomes the output.**
+  no parameters give `()`. Only the parameter *types* matter, so a destructuring pattern such as
+  `(a, b): (u64, u64)` is accepted and the input is that tuple type.
+- **Its return type becomes the output**, and an omitted return type is `()`.
 - **It must not take `self`.** A handler provider has no receiver; the context is supplied separately by
   the handler machinery.
 - **It may be `async`**, and it may return a `Result`. Those two choices select the base trait.
@@ -123,8 +124,8 @@ pub fn demo() {
 }
 ```
 
-`App` is an [environmental context](/docs/reference/glossary#environmental-context) with no fields:
-it exists to supply the error type.
+`App` is an [environmental context](/docs/reference/glossary#environmental-context) with no
+fields.
 
 Because the function returns a plain `u64`, the fallible forms always succeed. Switching it to return a
 `Result` changes which bundle is wired and therefore what those forms mean, with no change at the call
@@ -292,6 +293,18 @@ error: expected `,`
 ```
 
 Write the full `Result<T, E>` form in a fallible computer's signature.
+
+**A `Result` function's error type must be the context's error type.** The fallible bundles pass
+the `Err` through unchanged rather than converting it, so a function returning
+`Result<u64, String>` needs a context whose error type is `String`, and any other type fails the
+fallible members:
+
+```text
+error[E0271]: type mismatch resolving `<App as HasErrorType>::Error == String`
+```
+
+Convert inside the function, or write a `TryComputer` provider by hand that raises its own error
+through the context.
 
 **A function with a receiver is rejected**, with *Computer functions cannot have a receiver*.
 

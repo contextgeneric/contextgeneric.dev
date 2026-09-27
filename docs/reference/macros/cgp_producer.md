@@ -50,7 +50,8 @@ fn magic_number() -> u64 {
 ```
 
 Omitted, the provider struct takes the function name in PascalCase: `magic_number` becomes `MagicNumber`.
-Given, the argument is used verbatim. The function's return type becomes the producer's output.
+Given, the argument is used verbatim. The function's return type becomes the producer's output, and
+an omitted return type is `()`.
 
 **The function is constrained tightly, to exactly what a producer can be.** Each restriction is
 enforced at expansion time with its own message:
@@ -105,8 +106,9 @@ type wired into it lets the fallible forms build their `Result`, and the produce
 `Ok`.
 
 The typical use is as the first step of a pipeline, where a producer seeds the value the later steps
-transform. With `Double` a `#[cgp_computer]` that doubles its input, and `ComputerComponent` and
-`PipeHandlers` imported from `cgp::extra::handler`, `app.compute(PhantomData::<()>, ())` returns 84:
+transform. With `Double` a `#[cgp_computer]` that doubles its input, and `CanCompute`,
+`ComputerComponent`, and `PipeHandlers` imported from `cgp::extra::handler`,
+`App.compute(PhantomData::<()>, ())` returns 84:
 
 ```rust
 delegate_components! {

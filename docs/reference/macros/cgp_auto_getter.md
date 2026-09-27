@@ -389,7 +389,7 @@ bounds the field as `Option<[u8]>`:
 error[E0277]: the size for values of type `[u8]` cannot be known at compilation time
 ```
 
-Return `Option<&Vec<T>>` from a `Vec` field, or read the option with `&Option<Vec<T>>` and convert
+From an `Option<Vec<T>>` field, return `Option<&Vec<T>>`, or return `&Option<Vec<T>>` and convert
 at the call site.
 
 **`#[prefix]` and `#[derive_delegate]` are accepted and dropped.** The macro runs the attribute

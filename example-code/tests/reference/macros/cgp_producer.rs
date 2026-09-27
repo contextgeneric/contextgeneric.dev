@@ -24,6 +24,22 @@ pub mod usage {
         }
     }
 
+    /// An omitted return type, which the page states in prose.
+    pub mod unit_output {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::Producer;
+        use cgp::prelude::*;
+
+        #[cgp_producer]
+        fn nothing() {}
+
+        #[test]
+        fn the_output_is_unit() {
+            let () = Nothing::produce(&(), PhantomData::<()>);
+        }
+    }
+
     pub mod explicit_name {
         use core::marker::PhantomData;
 
