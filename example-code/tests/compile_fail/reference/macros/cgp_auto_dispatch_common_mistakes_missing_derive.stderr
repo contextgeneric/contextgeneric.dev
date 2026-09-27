@@ -1,0 +1,39 @@
+error[E0599]: the method `area` exists for reference `&Plain`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:36:11
+   |
+20 | pub enum Plain {
+   | -------------- doesn't satisfy `Plain: HasArea` or `Plain: cgp::prelude::HasExtractor`
+...
+36 |     shape.area()
+   |           ^^^^ method cannot be called on `&Plain` due to unsatisfied trait bounds
+   |
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
+   |
+19 | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
+   | ----------------------------------------------------------- doesn't satisfy `<_ as Computer<(), (), &&Plain>>::Output = f64`, `<_ as Computer<(), (), &Plain>>::Output = f64`, `_: Computer<(), (), &&Plain>` or `_: Computer<(), (), &Plain>`
+   |
+note: the following trait bounds were not satisfied:
+      `&Plain: cgp::prelude::HasExtractor`
+      `<cgp::prelude::MatchWithValueHandlersRef<ComputeArea> as cgp::prelude::Computer<(), (), &'__a__ &Plain>>::Output = f64`
+      `<cgp::prelude::MatchWithValueHandlersRef<ComputeArea> as cgp::prelude::Computer<(), (), &'__a__ Plain>>::Output = f64`
+      `Plain: cgp::prelude::HasExtractor`
+      `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>: cgp::prelude::Computer<(), (), &'__a__ &Plain>`
+      `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>: cgp::prelude::Computer<(), (), &'__a__ Plain>`
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:24:1
+   |
+24 | #[cgp_auto_dispatch]
+   | ^^^^^^^^^^^^^^^^^^^^
+25 | pub trait HasArea {
+   |           ^^^^^^^
+note: the trait `cgp::prelude::HasExtractor` must be implemented
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:6:1
+   |
+ 6 | pub trait HasExtractor {
+   | ^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `HasArea` defines an item `area`, perhaps you need to implement it
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:25:1
+   |
+25 | pub trait HasArea {
+   | ^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)

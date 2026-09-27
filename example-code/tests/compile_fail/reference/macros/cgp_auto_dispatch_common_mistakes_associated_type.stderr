@@ -1,0 +1,5 @@
+error: Only function items are allowed in a dispatch trait
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_associated_type.rs:22:5
+   |
+22 |     type Unit;
+   |     ^^^^

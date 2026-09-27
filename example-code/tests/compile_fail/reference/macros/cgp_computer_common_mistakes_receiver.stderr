@@ -1,0 +1,5 @@
+error: Computer functions cannot have a receiver
+ --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_receiver.rs:9:12
+  |
+9 |     fn add(&self, a: u64, b: u64) -> u64 {
+  |            ^

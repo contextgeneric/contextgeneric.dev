@@ -11,11 +11,11 @@ Rewrite a trait's `async fn` declarations into the lint-clean `-> impl Future` f
 
 ## Overview
 
-Writing a bare `async fn` inside a trait compiles on stable Rust, and the compiler warns about it. The
-`async_fn_in_trait` lint fires because the future such a method returns is *opaque*: a caller working through
-the trait cannot name it, so they cannot require anything of it, most importantly that it is `Send`. The
-hand-written way to silence the lint is to declare the method as a future-returning function instead, which
-is correct and obscures the intent:
+Writing a bare `async fn` inside a public trait compiles on stable Rust, and the compiler warns
+about it. The `async_fn_in_trait` lint fires because the future such a method returns is *opaque*: a
+caller working through the trait cannot name it, so they cannot require anything of it, most
+importantly that it is `Send`. The hand-written way to silence the lint is to declare the method as
+a future-returning function instead, which is correct and obscures the intent:
 
 ```rust
 fn fetch(&self, id: &str) -> impl Future<Output = Result<Vec<u8>, String>>;
@@ -32,12 +32,11 @@ pub trait CanFetch {
 
 The trait reads as async code, and the declaration the compiler sees is the lint-clean one.
 
-**The rewrite is a plain desugaring, not a framework.** Unlike the widely-used `async-trait` crate, nothing
-here boxes the future or allocates: it is return-position `impl Trait` in traits, so the future is exactly the
-one the body produces and the call costs what a hand-written future-returning method costs. That is why the
-macro is used throughout CGP wherever a trait's methods are asynchronous: it is simply how an async
-method is
-spelled.
+**The rewrite is a plain desugaring, not a framework.** Unlike the widely-used `async-trait` crate,
+nothing here boxes the future or allocates: it is return-position `impl Trait` in traits, so the
+future is exactly the one the body produces and the call costs what a hand-written future-returning
+method costs. That is why the macro is used throughout CGP wherever a trait's methods are
+asynchronous: it is how an async method is spelled.
 
 One thing it does *not* do is add a `Send` bound, and that omission has consequences the moment a future is
 spawned. It is covered under [Common Mistakes](#common-mistakes).
@@ -132,7 +131,16 @@ delegate_components! {
         StorageObjectFetcherComponent: FetchFromBucket,
     }
 }
+
+check_components! {
+    App {
+        StorageObjectFetcherComponent,
+    }
+}
 ```
+
+`App` is an [environmental context](/docs/reference/glossary#environmental-context): it stands for
+the application and holds the bucket name the provider reads.
 
 Notice the provider needs no `#[async_trait]` of its own. An `async fn` is already legal in an impl block,
 since only a trait *declaration* trips the lint, so the provider keeps the natural body while the trait carries
@@ -228,10 +236,11 @@ the rewrite produces a bare `impl Future<Output = T>`, the future is `Send` only
 happens to be, and the trait does not require it. So code that spawns the future onto a multi-threaded,
 work-stealing executor cannot express what it needs through this trait.
 
-The bound you would want to write is Return Type Notation (`App: CanFetch<fetch(..): Send>`), which is not
-stabilized, so it cannot be written today. The workaround is to declare a second, ordinary trait whose method
-spells `+ Send` on its return type directly, and to implement it for each concrete context. That pattern is
-mechanical but unavoidable; the opacity that makes the rewrite zero-cost is the same opacity that hides the
+The bound you would want to write is Return Type Notation (`App: CanFetch<fetch(..): Send>`), which
+is not stabilized, so stable Rust rejects it with *return type notation is experimental* (`E0658`).
+The workaround is to declare a second, ordinary trait whose method spells `+ Send` on its return
+type directly, and to implement it for each concrete context. That pattern is mechanical but
+unavoidable; the opacity that makes the rewrite zero-cost is the same opacity that hides the
 auto-traits.
 
 **A default-bodied async method is mishandled.** The macro rewrites the *signature* and never the body, so a

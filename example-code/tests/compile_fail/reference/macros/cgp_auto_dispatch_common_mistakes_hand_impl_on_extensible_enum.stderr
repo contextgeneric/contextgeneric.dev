@@ -1,0 +1,12 @@
+error[E0119]: conflicting implementations of trait `HasArea` for type `Shape`
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_hand_impl_on_extensible_enum.rs:20:1
+   |
+20 | #[cgp_auto_dispatch]
+   | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `Shape`
+...
+25 | impl HasArea for Shape {
+   | ---------------------- first implementation here
+   |
+   = note: upstream crates may add a new impl of trait `cgp::prelude::IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ Shape)>` for type `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` in future versions
+   = note: upstream crates may add a new impl of trait `cgp::prelude::IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ Shape)>` for type `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` in future versions
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)

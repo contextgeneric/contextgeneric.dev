@@ -1,0 +1,5 @@
+error: getter method must contain exactly one `&self` argument
+ --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_third_argument.rs:7:13
+  |
+7 |     fn name(&self, index: usize, count: usize) -> &str;
+  |             ^

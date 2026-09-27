@@ -73,14 +73,21 @@ natural. The field's type is inferred from what you return:
 |---|---|---|
 | `&T` | `T` | by reference, no conversion |
 | `&str` | `String` | `.as_str()` |
-| `&[T]` | anything `AsRef<[T]>` | `.as_ref()` |
+| `&[T]` | any `'static` type implementing `AsRef<[T]>` | `.as_ref()` |
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
 | `Option<&str>` | `Option<String>` | `.as_deref()` |
 | [`MRef<'_, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
 | An owned type (`f64`, `String`, a tuple, an array) | the same type | by reference, then `.clone()` |
 
-A `&mut self` receiver reads mutably, and each reference form has a mutable mirror: `&mut T`, `&mut [T]`
-through `AsMut<[T]>`, `Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` via `.as_deref_mut()`.
+A `&mut self` receiver reads mutably, through `HasFieldMut`, and each reference form has a mutable
+mirror: `&mut T`, `&mut str` from a `String` via `.as_mut_str()`, `&mut [T]` through `AsMut<[T]>`,
+`Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` via `.as_deref_mut()`. A `&mut` anywhere
+in the return type needs that receiver, and under `&self` the macro rejects it with
+*&mut self is required for mutable field reference*.
+
+Two combinations fall outside the table. `Option<&[T]>` has no rule of its own, so the `Option<&T>`
+rule applies and asks for an unsized `Option<[T]>` field, which the compiler rejects. And a shared
+`Option` return under `&mut self` does not compile, as [Common Mistakes](#common-mistakes) records.
 
 The `&str` row is the one most often wanted and least obvious: the context stores a `String` and the
 getter hands out a borrow of it, so no context ever has to hold a `&str`. **These are the same rules an
@@ -123,7 +130,8 @@ pub trait HasFoo {
 
 It is forwarded to the generated method untouched and plays no part in the field lookup; it is there so a
 getter can carry a type-level argument in its signature. Anything else in that position is rejected with
-*only PhantomData is allowed as second argument*, and a third argument is rejected outright.
+*only PhantomData is allowed as second argument*, and a third argument with
+*getter method must contain exactly one `&self` argument*.
 
 ### A type inferred from the field
 
@@ -140,8 +148,35 @@ pub trait HasName {
 ```
 
 The bound is enforced on whatever the field holds. When an associated type is present the trait must
-contain **exactly one** getter method, whose return type is `&Self::AssocType`. There is only one field
-for the type to be inferred from.
+contain **exactly one** getter method, whose return type reads that type, most often as
+`&Self::AssocType`. There is only one field for the type to be inferred from. A second associated
+type, a generic associated type, a second method, or a return type that reads some other type is
+rejected.
+
+### Companion attributes and trait generics
+
+The macro runs the attribute collector of [`#[cgp_component]`](./cgp_component.md), so
+[`#[extend(...)]`](../attributes/extend.md) and [`#[use_type(...)]`](../attributes/use_type.md)
+apply. Each becomes a bound on the context in the blanket impl, alongside any supertrait written
+natively, and `#[use_type]` rewrites a bare abstract type in the signatures:
+
+```rust
+#[cgp_auto_getter]
+#[use_type(HasScalarType.Scalar)]
+pub trait HasSide {
+    fn side(&self) -> &Scalar;
+}
+```
+
+A trait may also carry generic parameters, which stay on the blanket impl and flow into the field
+bound, so `trait HasValue<T> { fn value(&self) -> &T; }` reads a `value` field of any type.
+
+### Methods the macro rejects
+
+A getter method is a plain signature, and the macro rejects anything more with a message naming the
+problem: a `const`, `async`, or `unsafe` method, a method with generic parameters or a `where`
+clause, a method without a return type, and a by-value `self` receiver. So is any trait item other
+than a method or the one associated type.
 
 ## Examples
 
@@ -335,6 +370,27 @@ error: #[cgp_auto_getter] does not accept any attribute argument
 **The trait still has to be in scope to call its method.** That is ordinary Rust, but it surprises readers
 here, because nothing else about the getter had to be declared. A missing `use` reports the method as not
 found rather than the trait as not imported.
+
+**A `&mut self` getter cannot return a shared `Option`.** The macro picks the conversion from the
+receiver, so `fn maybe(&mut self) -> Option<&u32>` reads with `.as_mut()`, produces an
+`Option<&mut u32>`, and fails, because that type does not coerce to `Option<&u32>`:
+
+```text
+error[E0308]: mismatched types
+```
+
+The plain reference, `&str`, slice, and `MRef` forms are unaffected, because a `&mut` result
+coerces to the shared one. Return `Option<&mut T>` from a `&mut self` getter, or take `&self`.
+
+**`Option<&[T]>` is not a supported return type.** It falls through to the `Option<&T>` rule, which
+bounds the field as `Option<[u8]>`:
+
+```text
+error[E0277]: the size for values of type `[u8]` cannot be known at compilation time
+```
+
+Return `Option<&Vec<T>>` from a `Vec` field, or read the option with `&Option<Vec<T>>` and convert
+at the call site.
 
 **`#[prefix]` and `#[derive_delegate]` are accepted and dropped.** The macro runs the attribute
 collector of [`#[cgp_component]`](./cgp_component.md) so that `#[extend]` and `#[use_type]` apply, but

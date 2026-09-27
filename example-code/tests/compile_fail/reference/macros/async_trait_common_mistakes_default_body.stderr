@@ -1,0 +1,10 @@
+error[E0277]: `{integer}` is not a future
+ --> tests/compile_fail/reference/macros/async_trait_common_mistakes_default_body.rs:6:1
+  |
+6 | #[async_trait]
+  | ^^^^^^^^^^^^^^ `{integer}` is not a future
+...
+9 |         1
+  |         - return type was inferred to be `{integer}` here
+  |
+  = help: the trait `Future` is not implemented for `{integer}`

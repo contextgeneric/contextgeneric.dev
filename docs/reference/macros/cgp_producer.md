@@ -28,7 +28,7 @@ family member whose method takes only a **context** (the type the method runs on
 `Code` tag, with no input value at all.
 
 A dedicated macro is worth having because **a producer can stand in for any handler**: a handler that
-ignores its input is just a producer with an unused parameter. So the macro wires the
+ignores its input behaves as a producer with an unused parameter. So the macro wires the
 generated provider into every member of the family, and one function definition answers `produce`,
 `compute`, `try_compute`, `compute_async`, `handle`, and their by-reference forms, every one of them
 yielding the same value regardless of what it is handed.
@@ -87,19 +87,26 @@ delegate_components! {
     }
 }
 
-// The single `magic_number` definition answers every shape, all yielding 42:
-// MagicNumber::produce(&App, PhantomData::<()>)           == 42
-// MagicNumber::compute(&App, PhantomData::<()>, &())      == 42
-// MagicNumber::try_compute(&App, PhantomData::<()>, &())  == Ok(42)
-// MagicNumber::handle(&App, PhantomData::<()>, &())       resolves to Ok(42)
+pub fn demo() {
+    // The single `magic_number` definition answers every shape, each yielding 42.
+    assert_eq!(MagicNumber::produce(&App, PhantomData::<()>), 42);
+    assert_eq!(MagicNumber::compute(&App, PhantomData::<()>, ()), 42);
+    assert_eq!(MagicNumber::try_compute(&App, PhantomData::<()>, "ignored"), Ok(42));
+
+    // The future resolves to Ok(42).
+    let _future = MagicNumber::handle(&App, PhantomData::<()>, ());
+}
 ```
 
-The computer and handler forms accept an input argument and discard it, since the underlying producer takes
-none. The error type wired into `App` lets the fallible forms build their `Result`; the produced
-value is always `Ok`.
+The computer and handler forms accept an input of any type and discard it, since the underlying
+producer takes none. `App` is an
+[environmental context](/docs/reference/glossary#environmental-context) with no fields. The error
+type wired into it lets the fallible forms build their `Result`, and the produced value is always
+`Ok`.
 
 The typical use is as the first step of a pipeline, where a producer seeds the value the later steps
-transform:
+transform. With `Double` a `#[cgp_computer]` that doubles its input, and `ComputerComponent` and
+`PipeHandlers` imported from `cgp::extra::handler`, `app.compute(PhantomData::<()>, ())` returns 84:
 
 ```rust
 delegate_components! {
@@ -143,7 +150,7 @@ pub fn magic_number() -> u64 {
 }
 ```
 
-it produces the base impl, whose method ignores both of its parameters and simply calls the function:
+it produces the base impl, whose method ignores both of its parameters and calls the function:
 
 ```rust
 #[cgp_new_provider]

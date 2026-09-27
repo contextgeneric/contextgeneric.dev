@@ -1,0 +1,5 @@
+error: only PhantomData is allowed as second argument
+ --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_second_argument_not_phantom.rs:7:20
+  |
+7 |     fn name(&self, index: usize) -> &str;
+  |                    ^^^^^

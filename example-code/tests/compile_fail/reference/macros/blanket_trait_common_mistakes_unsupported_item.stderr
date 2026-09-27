@@ -1,0 +1,13 @@
+error: unsupported trait item
+  --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_unsupported_item.rs:13:5
+   |
+13 |     no_items!();
+   |     ^^^^^^^^^^^^
+
+warning: unused macro definition: `no_items`
+ --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_unsupported_item.rs:7:14
+  |
+7 | macro_rules! no_items {
+  |              ^^^^^^^^
+  |
+  = note: `#[warn(unused_macros)]` (part of `#[warn(unused)]`) on by default

@@ -37,7 +37,8 @@ the enum, use the combinators directly. This is the convenient front end to
 
 ## Usage
 
-Write the attribute above a trait definition. It takes no arguments:
+Write the attribute above a trait definition. It takes no arguments, and any tokens given as one
+are ignored:
 
 ```rust
 #[cgp_auto_dispatch]
@@ -46,16 +47,19 @@ pub trait HasArea {
 }
 ```
 
-The trait may have generic parameters and [supertraits](/docs/reference/glossary#supertrait). Each method may take `self` by value, by shared
-reference, or by mutable reference; may take further value or reference arguments; and may be `async`.
+The trait may have generic parameters. Each method may take `self` by value, by shared reference, or
+by mutable reference; may take further value or reference arguments; and may be `async`.
 
-A couple of restrictions are enforced when the macro expands:
+The macro enforces three restrictions when it expands:
 
 - **Every trait item must be a method.** Associated types and constants are rejected.
+- **Every method must have a `self` receiver**, since the receiver is the enum value being matched.
 - **A method may not have non-lifetime generic parameters.** Lifetimes are fine. The reason is in the
   [Common Mistakes](#common-mistakes), and it is a real limitation rather than an oversight.
 
-Each method must have a `self` receiver, since the receiver is the enum value being matched.
+Two further shapes are accepted and then fail to compile: a
+[supertrait](/docs/reference/glossary#supertrait) on the trait, and a method that needs two distinct
+lifetimes. [Common Mistakes](#common-mistakes) covers both.
 
 The enum also has to be made extensible, with [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or the
 narrower variant derives, so the machinery can take it apart one variant at a time.
@@ -156,8 +160,9 @@ the operation from scratch and expect contexts to configure it, start with a
 The macro keeps the trait unchanged and appends two kinds of item: one per-method computer, and one blanket
 impl of the trait for a fresh enum parameter.
 
-For each method it emits a free function turned into a provider by
-[`#[cgp_computer]`](./cgp_computer.md), named `Compute` plus the method name in PascalCase:
+For each method it emits a free function, named after the method, which
+[`#[cgp_computer]`](./cgp_computer.md) turns into a provider named `Compute` plus the method name in
+PascalCase:
 
 ```rust
 #[cgp_computer(ComputeArea)]
@@ -166,7 +171,7 @@ fn area<'__a__, __Variants__: HasArea>(__Variants__: &'__a__ __Variants__) -> f6
 }
 ```
 
-The body just calls the trait method on the payload, which makes the per-variant handler "invoke
+The body calls the trait method on the payload, which makes the per-variant handler "invoke
 `HasArea::area` on whatever this variant holds". It is bound by `__Variants__: HasArea` so it applies to every
 payload type implementing the trait, and borrows through a fresh `'__a__` lifetime to mirror the `&self`
 receiver.
@@ -181,7 +186,7 @@ where
     __Variants__: HasExtractor,
 {
     fn area(&self) -> f64 {
-        MatchWithValueHandlersRef::<ComputeArea>::compute(
+        <MatchWithValueHandlersRef<ComputeArea> as Computer<_, _, _>>::compute(
             &(),
             PhantomData::<()>,
             self,
@@ -190,11 +195,13 @@ where
 }
 ```
 
-A few things are worth reading off that. The matcher is invoked with a **unit context and unit code**
-(`&()` and `PhantomData::<()>`), because the per-variant logic depends only on the payload, which is exactly
-why a context cannot influence it. The `__Variants__: HasExtractor` bound requires the enum to be
-extensible. And **the first `where` bound is where a missing variant impl is reported**: it says the matcher
-must be a `Computer` over this enum, which holds only if every variant's payload can be handled.
+A few things are worth reading off that. The matcher is invoked with a **unit context and unit
+code** (`&()` and `PhantomData::<()>`), because the per-variant logic depends only on the payload,
+which is exactly why a context cannot influence it. The call names the provider trait, with its
+arguments inferred, so it stays unambiguous in a module that also imports `CanCompute`. The
+`__Variants__: HasExtractor` bound requires the enum to be extensible. And **the first `where` bound
+is where a missing variant impl is reported**: it says the matcher must be a `Computer` over this
+enum, which holds only if every variant's payload can be handled.
 
 Which matcher is chosen depends on the method's receiver and argument list, and every choice comes from the
 value-handler family so the per-variant computer receives the bare payload:
@@ -211,7 +218,7 @@ With arguments, the receiver and the arguments are bundled into the matcher's in
 // where MatchFirstWithValueHandlersRef<ComputeContains>:
 //     for<'__a__> Computer<(), (), (&'__a__ __Variants__, (f64, f64)), Output = bool>
 fn contains(&self, arg_0: f64, arg_1: f64) -> bool {
-    MatchFirstWithValueHandlersRef::<ComputeContains>::compute(
+    <MatchFirstWithValueHandlersRef<ComputeContains> as Computer<_, _, _>>::compute(
         &(),
         PhantomData::<()>,
         (self, (arg_0, arg_1)),
@@ -227,8 +234,7 @@ the result.
 **A trait method cannot be generic**, and the macro explains why in the message itself:
 
 ```text
-error: Dispatch trait methods cannot contain non-lifetime generic parameters due to the lack of
-       quantified constraints in Rust
+error: Dispatch trait methods cannot contain non-lifetime generic parameters due to the lack of quantified constraints in Rust
 ```
 
 The blanket impl would need a quantified bound ("for every instantiation of the method's type parameter,
@@ -242,18 +248,49 @@ parameters are fine.
 error: Only function items are allowed in a dispatch trait
 ```
 
+**A method without a receiver is rejected**, with *Dispatcher method must have a self argument*.
+
+**A supertrait breaks the expansion.** The blanket impl implements the trait for every
+`__Variants__` without requiring the supertrait, so Rust rejects it:
+
+```text
+error[E0277]: the trait bound `__Variants__: Named` is not satisfied
+```
+
+Declare the dependency on each payload's impl instead of as a supertrait.
+
+**A method needing two distinct lifetimes fails to compile.** The macro quantifies the generated
+bound over only one lifetime, so `fn lookup<'a>(&'a self, key: &str) -> &'a str`, which pairs a
+named `'a` with the lifetime the macro gives the elided `&str`, reports
+``error[E0261]: use of undeclared lifetime name `'__a__` ``. Name every reference with the same
+lifetime, or elide them all.
+
+**The helper function takes the method's name.** Each method's per-variant function is a free
+function called, for example, `area`, in the module where the trait is declared, so a module that
+already has an `area` item fails with ``error[E0428]: the name `area` is defined multiple times``.
+Declare the trait in a module of its own when the names clash.
+
 **The enum must derive the extensible-data machinery.** Without
-[`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or the variant derives, the `HasExtractor` bound fails
-and the error names that trait rather than the missing derive.
+[`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or the variant derives, the call fails with
+the error below, and a note names `HasExtractor` rather than the missing derive:
 
-**A missing variant impl is reported at the use site, against the matcher.** Forgetting `HasArea for Circle`
-does not fail where the impl should have been; it fails where `shape.area()` is called, as an unsatisfied
-bound on `MatchWithValueHandlersRef<ComputeArea>`. The variant that is missing is somewhere in the chain
-rather than in the headline.
+```text
+error[E0599]: the method `area` exists for reference `&Plain`, but its trait bounds were not satisfied
+```
 
-**The generated impl is a blanket impl over every type**, not just your enum. This lets it cover any
-extensible enum whose payloads implement the trait, and it means the trait cannot also be implemented by
-hand for some other type without colliding with it.
+**A missing variant impl is reported at the use site, against the matcher.** Forgetting
+`HasArea for Rectangle` does not fail where the impl should have been. It fails where
+`shape.area()` is called, with the same `E0599` headline, and the notes list unsatisfied bounds on
+`MatchWithValueHandlersRef<ComputeArea>` without naming the variant that lacks an impl.
+
+**The generated impl is a blanket impl over every type that implements `HasExtractor`.** This lets
+it cover any extensible enum whose payloads implement the trait. A hand-written impl for a type
+outside that set, such as the payload structs themselves, coexists with it, but one for another
+extensible enum collides:
+
+```text
+error[E0119]: conflicting implementations of trait `HasArea` for type `Shape`
+```
 
 ## Related constructs
 

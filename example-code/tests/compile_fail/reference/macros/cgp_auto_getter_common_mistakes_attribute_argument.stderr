@@ -1,0 +1,7 @@
+error: #[cgp_auto_getter] does not accept any attribute argument
+ --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_attribute_argument.rs:5:1
+  |
+5 | #[cgp_auto_getter(NameGetter)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cgp_auto_getter` (in Nightly builds, run with -Z macro-backtrace for more info)

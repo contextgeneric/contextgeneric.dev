@@ -1,0 +1,5 @@
+error: Producer functions cannot be async
+ --> tests/compile_fail/reference/macros/cgp_producer_common_mistakes_async.rs:6:1
+  |
+6 | async fn magic_number() -> u64 {
+  | ^^^^^

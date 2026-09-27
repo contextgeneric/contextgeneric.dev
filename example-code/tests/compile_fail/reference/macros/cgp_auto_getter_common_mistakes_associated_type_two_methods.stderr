@@ -1,0 +1,5 @@
+error: if associated type is defined, exactly one getter method must be defined
+ --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_associated_type_two_methods.rs:6:1
+  |
+6 | pub trait HasName {
+  | ^^^

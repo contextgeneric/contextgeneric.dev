@@ -1,0 +1,5 @@
+error: getter method must not be async fn
+ --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_rejected_method_shape.rs:7:5
+  |
+7 |     async fn name(&self) -> &str;
+  |     ^^^^^

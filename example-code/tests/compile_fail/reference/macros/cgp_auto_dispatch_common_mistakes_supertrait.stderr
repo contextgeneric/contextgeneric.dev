@@ -1,0 +1,16 @@
+error[E0277]: the trait bound `__Variants__: Named` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_supertrait.rs:24:1
+   |
+24 | #[cgp_auto_dispatch]
+   | ^^^^^^^^^^^^^^^^^^^^ the trait `Named` is not implemented for `__Variants__`
+   |
+note: required by a bound in `HasArea`
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_supertrait.rs:25:20
+   |
+25 | pub trait HasArea: Named {
+   |                    ^^^^^ required by this bound in `HasArea`
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider further restricting type parameter `__Variants__` with trait `Named`
+   |
+24 | #[cgp_auto_dispatch], __Variants__: Named
+   |                     +++++++++++++++++++++

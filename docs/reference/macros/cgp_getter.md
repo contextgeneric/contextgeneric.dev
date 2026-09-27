@@ -54,13 +54,12 @@ pub trait HasName {
 }
 ```
 
-Because `#[cgp_getter]` builds on [`#[cgp_component]`](./cgp_component.md), it needs a provider trait name
-and derives one from the **trait** name: a leading `Has` is stripped and `Getter` appended, so `HasName`
-yields the provider trait `NameGetter` and the marker `NameGetterComponent`. The macro is therefore at its
-most ergonomic when getter traits follow the `Has{Field}` convention.
-
-The companion attributes of `#[cgp_component]` apply here too, so
-[`#[prefix(...)]`](../attributes/prefix.md) registers the getter into a namespace.
+Because `#[cgp_getter]` builds on [`#[cgp_component]`](./cgp_component.md), it needs a provider
+trait name and derives one from the **trait** name: a leading `Has` is stripped and `Getter`
+appended, so `HasName` yields the provider trait `NameGetter` and the marker `NameGetterComponent`.
+The macro is therefore at its most ergonomic when getter traits follow the `Has{Field}` convention.
+A trait whose name does not start with `Has`, or is exactly `Has`, gets no default, and must name
+its provider.
 
 Pass an identifier to override it, as with `#[cgp_component]`:
 
@@ -74,6 +73,9 @@ pub trait HasName {
 Here the provider trait is `GetName` and the component `GetNameComponent`. The keyed
 `name` / `provider` / `context` form works too; only the default for `provider` differs from
 `#[cgp_component]`.
+
+The companion attributes of `#[cgp_component]` apply here too, so
+[`#[prefix(...)]`](../attributes/prefix.md) registers the getter into a namespace.
 
 ### What a context can wire it to
 
@@ -116,6 +118,12 @@ delegate_components! {
     }
 }
 
+check_components! {
+    Person {
+        NameGetterComponent,
+    }
+}
+
 pub fn greet(person: &Person) {
     println!("Hello, {}!", person.name());
 }
@@ -123,11 +131,17 @@ pub fn greet(person: &Person) {
 
 `person.name()` returns `first_name`, because the wiring said so. A second context can store it under yet
 another name and wire accordingly, with `HasName` and every caller unchanged. This is the whole
-difference from the blanket-impl getter.
+difference from the blanket-impl getter. `Person` is a
+[value context](/docs/reference/glossary#value-context) here, the person whose name is read.
 
 Where the names *do* line up, `UseFields` gives the auto-getter behaviour without giving up the component:
 
 ```rust
+#[derive(HasField)]
+pub struct Employee {
+    pub name: String,
+}
+
 delegate_components! {
     Employee {
         NameGetterComponent: UseFields,
@@ -183,11 +197,12 @@ Use something else in these cases.
 
 ## Under the hood
 
-`#[cgp_getter]` emits everything [`#[cgp_component]`](./cgp_component.md) would: the consumer trait, the
-provider trait, the two blanket impls, the marker, and the standard
+`#[cgp_getter]` emits everything [`#[cgp_component]`](./cgp_component.md) would: the consumer trait,
+the provider trait, the two blanket impls, the marker, and the standard
 [`UseContext`](../providers/use_context.md) and [`RedirectLookup`](../providers/redirect_lookup.md)
-impls. It then adds the getter providers below. The macro always emits `UseFields`; it emits `UseField`
-and `WithProvider` only when the trait has exactly one method, since both presuppose a single field.
+impls. It then adds the getter providers below, in the order `UseFields`, `UseField`,
+`WithProvider`. The macro always emits `UseFields`; it emits `UseField` and `WithProvider` only when
+the trait has exactly one method, since both presuppose a single field.
 
 The important addition is the **`UseField` impl**, which decouples the field from the method name.
 From this trait:
@@ -246,6 +261,12 @@ where
 }
 ```
 
+The `WithProvider` bound follows the getter's shape. A `&mut self` getter bounds on
+`MutFieldGetter` instead of `FieldGetter` and reads through `get_field_mut`, and a slice getter
+returning `&[T]` bounds the value as `Value: AsRef<[T]> + 'static` rather than fixing it with
+`Value =`. The `UseField` and `UseFields` bounds change the same way, to `HasFieldMut` and to the
+`AsRef` bound.
+
 Each of these is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl carrying the
 same bounds, so a missing field is reported by name when the component is checked.
 
@@ -271,16 +292,20 @@ for a single-method trait, because each supplies one field. Wiring a two-method 
 with the tag expanded into its raw list:
 
 ```text
-error[E0277]: the trait bound `UseField<Symbol<5, Chars<'w', ...>>>: IsProviderFor<..., ...>`
-              is not satisfied
+error[E0277]: the trait bound `cgp::prelude::UseField<cgp::prelude::Symbol<5, cgp::prelude::Chars<'w', …>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
 ```
 
 Nothing in that says the trait had too many methods, which is the actual cause. Use `UseFields`, or split
 the trait into one component per field.
 
-**The macro derives the provider name by stripping `Has`.** `HasName` yields `NameGetterComponent`, so
-a trait *not* named `Has…` produces a component whose name may surprise you: `Dimensions` yields
-`DimensionsGetterComponent`. Pass the name explicitly when the convention does not fit.
+**A trait not named `Has…` must name its provider.** The default comes from stripping a leading
+`Has`, so a trait such as `Dimensions` has nothing to strip, and a bare `#[cgp_getter]` on it fails:
+
+```text
+error: the `provider` key must be given
+```
+
+Pass the provider name, as in `#[cgp_getter(DimensionsGetter)]`.
 
 **Wiring `UseFields` everywhere means the component was unnecessary.** If no context ever names a
 different field, [`#[cgp_auto_getter]`](./cgp_auto_getter.md) does the same job with no wiring at all, and
@@ -291,11 +316,16 @@ returning `&str` requires `first_name` to be a `String`; a `&'static str` field 
 tag chose the field and not the conversion:
 
 ```text
-error[E0271]: type mismatch resolving `<P as HasField<Symbol<10, Chars<'f', ...>>>>::Value == String`
+error[E0271]: type mismatch resolving `<Person as HasField<Symbol<10, Chars<'f', …>>>>::Value == String`
 ```
 
 The `Symbol<10, …>` in that message is `first_name` with its length in bytes, worth being able to read
 since the tag tells you which field the mismatch is about.
+
+**A `&mut self` getter cannot return a shared `Option`, and `Option<&[T]>` is unsupported.** Both
+come from the method parsing this macro shares with `#[cgp_auto_getter]`, which documents them under
+[Common Mistakes](./cgp_auto_getter.md#common-mistakes): the first fails with `E0308` in every
+generated provider, and the second reaches the compiler as an unsized bound.
 
 ## Related constructs
 

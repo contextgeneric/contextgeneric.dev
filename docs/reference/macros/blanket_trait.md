@@ -36,7 +36,7 @@ pub trait FooBar: Foo + Bar {
 ```
 
 **This is not a CGP component.** There is no consumer/provider split, no [component marker](/docs/reference/glossary#component-marker), and no wiring:
-just an ordinary Rust trait and an ordinary blanket impl. It is the tool for a trait with exactly one
+only an ordinary Rust trait and an ordinary blanket impl. It is the tool for a trait with exactly one
 definition, where you want extension-trait ergonomics without committing to the component machinery. When a
 second implementation becomes necessary, the trait can be promoted to a
 [`#[cgp_component]`](./cgp_component.md).
@@ -72,8 +72,10 @@ one of your own type parameters:
 pub trait FooBar: Foo + Bar { /* ... */ }
 ```
 
-The trait may carry generic parameters, which are copied onto the impl, and associated types, which get the
-special treatment described next.
+The trait may carry generic parameters, which are copied onto the impl ahead of the context
+parameter, so `pub trait Scaled<T: Copy>: Foo` gets
+`impl<T: Copy, __Context__> Scaled<T> for __Context__`. It may also carry associated types, which
+get the special treatment described next. A trait with no supertraits gets an impl for every type.
 
 ### Lifting an associated type out of a supertrait
 
@@ -159,17 +161,17 @@ That last clause is the real discriminator, separating this macro from its close
 - **[`#[cgp_component]`](./cgp_component.md) when a second implementation is needed.** A blanket impl covers
   every type satisfying its bounds, which leaves nowhere for an alternative to live. Promoting later is
   cheap (the trait keeps its name and method), so starting here costs nothing if that changes.
-- **A trait alias, when one exists.** The empty-body form above is a workaround for a language feature Rust
-  does not have on stable; it is the right workaround, but do not use the macro if a plain supertrait
-  bound reads fine at the use site.
+- **A plain bound, when it reads well.** The empty-body form stands in for trait aliases, which
+  stable Rust lacks. If writing `Foo + Bar` where the bound is needed reads well, that needs no macro.
 - **Nothing at all, for a plain generic function.** If the requirement belongs in the signature
   and no caller is generic over the type, a function with a `where` clause is simpler and the propagation
   problem never arises.
 
-One caution specific to this construct: a blanket impl is **[coherence](/docs/reference/glossary#coherence)-visible**, so it competes with any
-other impl of the same trait. That is why the pattern admits exactly one definition, and why two
-`#[blanket_trait]` traits whose bounds can both hold for one type cannot both cover that type for the same
-trait. Needing that is the signal to move to a component.
+One caution specific to this construct: a blanket impl is
+**[coherence](/docs/reference/glossary#coherence)-visible**, so it competes with any other impl of
+the same trait. That is why the pattern admits exactly one definition: a hand-written impl for a
+type that could satisfy the bounds conflicts with it. Needing a different implementation for some
+type is the signal to move to a component.
 
 ## Under the hood
 
@@ -243,7 +245,10 @@ the lifted parameter, which makes it a requirement on the *underlying* type rath
 about the alias.
 
 Associated constants are forwarded like methods: their default expressions become the impl's definitions. A
-method or constant with no usable default is an error, since the macro has nothing to forward.
+method or constant with no usable default is an error, since the macro has nothing to forward. The
+`Self::FooBar` rewrite reaches the whole trait, so a method that names the lifted type, such as
+`fn clone_foo(value: &Self::FooBar) -> Self::FooBar`, reads the impl's `FooBar` parameter in the
+impl's copy.
 
 ## Formal grammar
 
@@ -268,8 +273,8 @@ reported as an unknown attribute rather than as a missing import:
 error: cannot find attribute `blanket_trait` in this scope
 ```
 
-Add `use cgp::core::macros::blanket_trait;`. This is the one macro on this page's family that needs it:
-`#[cgp_fn]`, `#[cgp_component]`, and the rest are all re-exported by the prelude.
+Add `use cgp::core::macros::blanket_trait;`. It is the one macro in this section that needs an
+import: `#[cgp_fn]`, `#[cgp_component]`, and the rest are all re-exported by the prelude.
 
 **A method without a default body is an error.** The macro forwards defaults into the impl, so a bare
 declaration leaves it nothing to emit. This is the opposite of an ordinary trait, where a bodiless method is
@@ -284,8 +289,14 @@ mirror each item into the impl and knows only those three shapes.
 trait and in the impl. Harmless, but worth knowing when reading an expansion and wondering whether the macro
 duplicated something by mistake.
 
-**The blanket impl blocks any hand-written impl of the same trait.** Because it covers every type satisfying
-its bounds, implementing the trait manually for a type that also satisfies them is a coherence conflict.
+**The blanket impl blocks any hand-written impl of the same trait.** Because it covers every type
+satisfying its bounds, implementing the trait manually for a type that also satisfies them is a
+coherence conflict:
+
+```text
+error[E0119]: conflicting implementations of trait `FooExt` for type `Ctx`
+```
+
 Where a type needs different behaviour, the trait wants to be a [component](./cgp_component.md) instead.
 
 ## Related constructs

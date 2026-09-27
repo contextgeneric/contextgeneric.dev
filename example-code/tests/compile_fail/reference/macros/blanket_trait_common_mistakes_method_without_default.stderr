@@ -1,0 +1,5 @@
+error: function item require implementation block
+  --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_method_without_default.rs:11:5
+   |
+11 |     fn foo_twice(&self);
+   |     ^^^^^^^^^^^^^^^^^^^^

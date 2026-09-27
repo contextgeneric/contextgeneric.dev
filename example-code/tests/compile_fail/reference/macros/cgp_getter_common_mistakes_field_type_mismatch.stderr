@@ -1,0 +1,28 @@
+error[E0271]: type mismatch resolving `<Person as HasField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>>>::Value == String`
+  --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_field_type_mismatch.rs:23:9
+   |
+23 |         NameGetterComponent,
+   |         ^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<Person as HasField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>>>::Value == String`
+   |
+note: expected this to be `String`
+  --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_field_type_mismatch.rs:12:21
+   |
+12 |     pub first_name: &'static str,
+   |                     ^^^^^^^^^^^^
+note: required for `cgp::prelude::UseField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` to implement `IsProviderFor<NameGetterComponent, Person>`
+  --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_field_type_mismatch.rs:5:1
+   |
+ 5 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+   = note: associated types for the current `impl` cannot be restricted in `where` clauses
+   = note: required for `Person` to implement `CanUseComponent<NameGetterComponent>`
+note: required by a bound in `__CheckPerson`
+  --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_field_type_mismatch.rs:21:1
+   |
+21 | / check_components! {
+22 | |     Person {
+23 | |         NameGetterComponent,
+24 | |     }
+25 | | }
+   | |_^ required by this bound in `__CheckPerson`
+   = note: this error originates in the attribute macro `cgp_getter` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

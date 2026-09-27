@@ -1,0 +1,32 @@
+error[E0599]: the method `name` exists for reference `&Person`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_field_name_mismatch.rs:16:12
+   |
+11 | pub struct Person {
+   | ----------------- doesn't satisfy `<_ as HasField<Symbol<4, Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>::Value = String`, `Person: HasName` or `_: HasField<Symbol<4, Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>`
+...
+16 |     person.name()
+   |            ^^^^ method cannot be called on `&Person` due to unsatisfied trait bounds
+   |
+note: the following trait bounds were not satisfied:
+      `&Person: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+      `<&Person as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `<Person as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `Person: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+  --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_field_name_mismatch.rs:5:1
+   |
+ 5 | #[cgp_auto_getter]
+   | ^^^^^^^^^^^^^^^^^^
+ 6 | pub trait HasName {
+   |           ^^^^^^^
+note: the trait `cgp::prelude::HasField` must be implemented
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/has_field.rs:46:1
+   |
+46 | pub trait HasField<Tag> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `HasName` defines an item `name`, perhaps you need to implement it
+  --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_field_name_mismatch.rs:6:1
+   |
+ 6 | pub trait HasName {
+   | ^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_auto_getter` (in Nightly builds, run with -Z macro-backtrace for more info)

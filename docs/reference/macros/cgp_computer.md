@@ -32,13 +32,12 @@ that makes the *same function* answer the whole family. That wiring is the part 
 `compute`, `try_compute`, `compute_async`, and `handle`, along with their by-reference forms, without you
 implementing any of them.
 
-That last property is the whole reason for the macro. The family exists so a provider can declare exactly
-the properties it has, and the [promotion combinators](../providers/handler/index.md) exist so a
-simpler provider can stand in where a more capable one is expected: an infallible computation is a
-fallible one that never fails, a synchronous one is an async one that never awaits. `#[cgp_computer]` picks
-the narrowest
-base that fits your function and wires the promotions for the rest, so you write one body and get every
-shape.
+That last property is the whole reason for the macro. The family exists so a provider can declare
+exactly the properties it has, and the [promotion combinators](../providers/handler/index.md) exist
+so a simpler provider can stand in where a more capable one is expected: an infallible computation
+is a fallible one that never fails, a synchronous one is an async one that never awaits.
+`#[cgp_computer]` picks the narrowest base that fits your function and wires the promotions for the
+rest, so you write one body and get every shape.
 
 ## Usage
 
@@ -62,7 +61,8 @@ argument is used verbatim.
 The function's shape decides everything else:
 
 - **Its parameters become the input.** Several parameters are collected into one tuple, so
-  `fn add(a: u64, b: u64)` has input `(u64, u64)`.
+  `fn add(a: u64, b: u64)` has input `(u64, u64)`. A single parameter's input is its bare type, and
+  no parameters give `()`.
 - **Its return type becomes the output.**
 - **It must not take `self`.** A handler provider has no receiver; the context is supplied separately by
   the handler machinery.
@@ -82,9 +82,13 @@ promotion bundle:
 | `async fn f(..) -> T` | `AsyncComputer` | `PromoteAsyncComputer<Self>` |
 | `async fn f(..) -> Result<T, E>` | `AsyncComputer` | `PromoteHandler<Self>` |
 
-The `Result` row is worth a careful read. The base trait stays `Computer`, and its `Output` is simply the
+The `Result` row is worth a careful read. The base trait stays `Computer`, and its `Output` is the
 `Result` type as written. Only the *bundle* changes, and it makes `try_compute` and `handle`
 surface the `Ok`/`Err` outcome as success or failure rather than handing back a `Result` as a plain value.
+
+The macro recognizes a `Result` by its spelling, not its meaning: the return type must be written
+`Result<T, E>`, with `Result` as the whole path and two arguments.
+[Common Mistakes](#common-mistakes) covers the spellings it misses.
 
 ## Examples
 
@@ -108,12 +112,19 @@ delegate_components! {
     }
 }
 
-// All four are answered by the single `add` definition:
-// Add::compute(&App, PhantomData::<()>, (1, 2))        == 3
-// Add::try_compute(&App, PhantomData::<()>, (1, 2))    == Ok(3)
-// Add::compute_async(&App, PhantomData::<()>, (1, 2))  resolves to 3
-// Add::handle(&App, PhantomData::<()>, (1, 2))         resolves to Ok(3)
+pub fn demo() {
+    // All four are answered by the single `add` definition.
+    assert_eq!(Add::compute(&App, PhantomData::<()>, (1, 2)), 3);
+    assert_eq!(Add::try_compute(&App, PhantomData::<()>, (1, 2)), Ok(3));
+
+    // These futures resolve to 3 and Ok(3).
+    let _future = Add::compute_async(&App, PhantomData::<()>, (1, 2));
+    let _future = Add::handle(&App, PhantomData::<()>, (1, 2));
+}
 ```
+
+`App` is an [environmental context](/docs/reference/glossary#environmental-context) with no fields:
+it exists to supply the error type.
 
 Because the function returns a plain `u64`, the fallible forms always succeed. Switching it to return a
 `Result` changes which bundle is wired and therefore what those forms mean, with no change at the call
@@ -262,9 +273,27 @@ input is `(T)`, which Rust treats as plain `T`.
 **The fallible forms need an error type on the context.** `try_compute` and `handle` name the context's
 abstract error, so a context wiring the provider without an
 [`ErrorTypeProviderComponent`](../components/has_error_type.md) fails on those members while `compute` works
-fine. This is an error about the error type, arriving only for part of the family. Note also that the wiring key is
-**not in the prelude**: it has to be imported from `cgp::core::error`, and forgetting that reports the
-component as an unresolved type rather than as a missing import.
+fine. This is an error about the error type, arriving only for part of the family:
+
+```text
+error[E0277]: the trait bound `App: DelegateComponent<ErrorTypeProviderComponent>` is not satisfied
+```
+
+The wiring key is **not in the prelude**: it has to be imported from `cgp::core::error`, and
+forgetting that reports the component as an unresolved type rather than as a missing import.
+
+**Only a `Result<T, E>` spelled exactly that way selects the fallible bundle.** Any other spelling,
+such as `core::result::Result<u64, String>` or `anyhow::Result<u64>`, is treated as a plain value,
+so `try_compute` wraps the whole result in `Ok` instead of propagating its error. A one-argument
+alias written `Result<u64>`, such as the one `use anyhow::Result;` brings in, fails outright:
+
+```text
+error: expected `,`
+```
+
+Write the full `Result<T, E>` form in a fallible computer's signature.
+
+**A function with a receiver is rejected**, with *Computer functions cannot have a receiver*.
 
 **A `Result` return changes the bundle, not the base trait.** The `Computer` impl's `Output` *is* the
 `Result`, so `compute` hands back a `Result` as an ordinary value while `try_compute` treats its `Err` as
