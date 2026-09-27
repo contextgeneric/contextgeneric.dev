@@ -78,8 +78,8 @@ The companion attributes of `#[cgp_component]` apply unchanged, so
 The trait may carry generic parameters, which the macro handles exactly as `#[cgp_component]` does:
 they follow the context in the provider trait, and a context chooses the type per parameter value,
 through `open` or [`#[derive_delegate]`](../attributes/derive_delegate.md). So
-`pub trait HasLabelType<Kind> { type Label; }` lets a context wire
-`@LabelTypeProviderComponent.u32: UseType<String>`.
+`pub trait HasLabelType<Kind> { type Label; }` lets a context that declares
+`open LabelTypeProviderComponent;` wire `@LabelTypeProviderComponent.u32: UseType<String>`.
 
 ### Bounds on the associated type
 
@@ -158,7 +158,8 @@ and changing its `UseType<f32>` to `UseType<f64>` changes the scalar for every s
 `Scalar` in that signature is [`#[use_type]`](../attributes/use_type.md) at work, which is how an
 abstract type is *imported* wherever it is used.
 
-Direct implementation stays available, and is often clearer for a single context:
+Direct implementation stays available in place of the wiring, and is often clearer for a single
+context. A context takes one or the other, since the two impls would overlap:
 
 ```rust
 impl HasScalarType for App {
@@ -174,12 +175,12 @@ exactly this way, which is why every fallible trait can say `Error` and mean wha
 application picked.
 
 The decision worth making deliberately is **whether the type needs to be abstract at all**, because
-there is a cheaper option that does more than it looks.
+a cheaper option often covers the case.
 
 - **Prefer an inferred impl parameter while the type only flows through values.** If the type appears
   solely because a provider reads a field of it,
   [`#[impl_generics]`](../attributes/impl_generics.md) on a `#[cgp_fn]` puts a parameter on
-  the implementation alone. Nothing is wired, nothing is declared, and a context qualifies just by
+  the implementation alone. Nothing is wired, nothing is declared, and a context qualifies by
   carrying a field of a compatible type.
 - **Move up to an abstract type when the type must be nameable.** Two things force it: the trait's own
   signature has to mention the type, or two traits have to agree they mean the *same* type. An

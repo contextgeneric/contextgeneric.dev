@@ -149,8 +149,10 @@ it depends on.
   copies it onto both generated items, so the trait ends up declaring a lint-clean `-> impl Future`.
 
 Each attribute may be repeated, and each also takes a comma-separated list inside one attribute, as
-in `#[uses(RectangleArea, HasName)]`. `#[use_provider]` is the exception in practice, because its
-argument ends in a bound list that would swallow a second entry, so write one per inner provider.
+in `#[uses(RectangleArea, HasName)]`. `#[use_provider]` is the exception: its argument ends in a
+bound list joined by `+`, so a comma after it fails to parse with *expected `+`*. Write one
+`#[use_provider]` per inner provider.
+
 ## Examples
 
 A trait, another trait built on it, and a context that gets both without wiring anything:

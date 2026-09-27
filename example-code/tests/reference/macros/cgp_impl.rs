@@ -7,7 +7,9 @@
 ///
 /// The hand-written provider impl and the `#[cgp_impl]` block that replaces it. The page names
 /// `HasDimensions` without declaring it; it is an auto getter over two `f64` fields here, and each
-/// form gets its own module since both declare `RectangleArea`.
+/// form gets its own module since both declare `RectangleArea`. The page shows the hand-written
+/// impl bare, as the shape `#[cgp_impl]` produces; here it carries `#[cgp_provider]`, which adds the
+/// `IsProviderFor` impl a provider needs to be wired, and which the page introduces separately.
 pub mod overview {
     pub mod hand_written {
         use cgp::prelude::*;
@@ -402,8 +404,43 @@ pub mod implementing_the_consumer_trait_directly {
         }
     }
 
+    /// `#[uses]` and `#[use_type]` on the `Self` form, which the page lists among the attributes
+    /// that still apply. `CanDescribe` is declared here.
+    #[cgp_auto_getter]
+    pub trait HasLabel {
+        fn label(&self) -> &str;
+    }
+
+    #[cgp_component(Describer)]
+    #[use_type(HasErrorType.Error)]
+    pub trait CanDescribe {
+        fn describe(&self) -> Result<String, Error>;
+    }
+
+    #[derive(HasField)]
+    pub struct Labeled {
+        pub label: String,
+    }
+
+    impl HasErrorType for Labeled {
+        type Error = String;
+    }
+
+    #[cgp_impl(Self)]
+    #[uses(HasLabel)]
+    #[use_type(HasErrorType.Error)]
+    impl CanDescribe for Labeled {
+        fn describe(&self) -> Result<String, Error> {
+            Ok(self.label().to_owned())
+        }
+    }
+
     #[test]
     fn the_direct_impls_apply() {
+        let labeled = Labeled {
+            label: "l".to_owned(),
+        };
+        assert_eq!(labeled.describe(), Ok("l".to_owned()));
         let rect = Rectangle {
             width: 2.0,
             height: 3.0,

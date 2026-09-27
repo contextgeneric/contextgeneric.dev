@@ -238,7 +238,7 @@ as `CanCalculateArea` does. It is
 [parameter-targeted](/docs/reference/glossary#parameter-targeted-component) when the operation acts
 on a type parameter and `Self` only supplies the choices, as in `CanEncodeValue<Value>`. A parameter
 alone does not settle this: in `CanCompute<Code, Input>` the target is `Input`, while `Code` is a
-selector the wiring dispatches on.
+[selector](/docs/reference/glossary#selector) the wiring dispatches on.
 
 The choice decides how far the wiring can vary. A self-targeted component's wiring is keyed on the
 type the operation acts on, so that type gets one provider for the whole program. That is no limit
@@ -404,8 +404,8 @@ namespace impls one per attribute:
 
 Each of the first three comes with a matching `IsProviderFor` impl under the same `where` clause, so
 a component wired to `UseContext`, reached through `open`, or dispatched through `UseDelegate` still
-reports a missing dependency by name. The `RedirectLookup` one additionally requires the provider it
-redirects to to be `IsProviderFor` the component, which is how a missing dependency is reported
+reports a missing dependency by name. The `RedirectLookup` one also requires the provider at the end
+of the redirect to be `IsProviderFor` the component, which is how a missing dependency is reported
 through an `open` entry or a namespace path. The namespace impls carry none, since they are table
 entries rather than providers.
 

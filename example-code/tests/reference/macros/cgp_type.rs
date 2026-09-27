@@ -176,9 +176,13 @@ pub mod usage {
 /// ## Examples
 ///
 /// The abstract scalar with its check, the generic `zero`, and the area component importing the
-/// scalar. The page names `Rectangle` and `Circle` without declaring them; they are declared and
-/// wired per shape here, with the context supplying `f64`.
+/// scalar. The page names `Rectangle` and `Circle` without declaring them. They are declared here
+/// with `f32` fields, and the providers compute in whatever `Scalar` the context wires, so two
+/// contexts differing only in `UseType<f32>` and `UseType<f64>` test the page's claim that one
+/// wiring line changes the scalar for every shape.
 pub mod examples {
+    use core::ops::Mul;
+
     use cgp::prelude::*;
 
     #[cgp_type]
@@ -190,18 +194,13 @@ pub mod examples {
 
     delegate_components! {
         App {
-            open AreaCalculatorComponent;
-
             ScalarTypeProviderComponent: UseType<f64>,
-            @AreaCalculatorComponent.Rectangle: RectangleArea,
-            @AreaCalculatorComponent.Circle: CircleArea,
         }
     }
 
     check_components! {
         App {
             ScalarTypeProviderComponent,
-            AreaCalculatorComponent: [Rectangle, Circle],
         }
     }
 
@@ -220,39 +219,84 @@ pub mod examples {
     }
 
     pub struct Rectangle {
-        pub width: f64,
-        pub height: f64,
+        pub width: f32,
+        pub height: f32,
     }
 
     pub struct Circle {
-        pub radius: f64,
+        pub radius: f32,
     }
 
     #[cgp_impl(new RectangleArea)]
-    #[use_type(HasScalarType.{Scalar = f64})]
-    impl AreaCalculator<Rectangle> {
+    #[use_type(HasScalarType.Scalar)]
+    impl AreaCalculator<Rectangle>
+    where
+        Scalar: From<f32> + Mul<Output = Scalar>,
+    {
         fn area(&self, shape: &Rectangle) -> Scalar {
-            shape.width * shape.height
+            Scalar::from(shape.width) * Scalar::from(shape.height)
         }
     }
 
     #[cgp_impl(new CircleArea)]
-    #[use_type(HasScalarType.{Scalar = f64})]
-    impl AreaCalculator<Circle> {
+    #[use_type(HasScalarType.Scalar)]
+    impl AreaCalculator<Circle>
+    where
+        Scalar: From<f32> + Mul<Output = Scalar>,
+    {
         fn area(&self, shape: &Circle) -> Scalar {
-            core::f64::consts::PI * shape.radius * shape.radius
+            Scalar::from(core::f32::consts::PI) * Scalar::from(shape.radius) * Scalar::from(shape.radius)
+        }
+    }
+
+    pub struct ShapesF32;
+
+    pub struct ShapesF64;
+
+    delegate_components! {
+        ShapesF32 {
+            open AreaCalculatorComponent;
+
+            ScalarTypeProviderComponent: UseType<f32>,
+            @AreaCalculatorComponent.Rectangle: RectangleArea,
+            @AreaCalculatorComponent.Circle: CircleArea,
+        }
+    }
+
+    delegate_components! {
+        ShapesF64 {
+            open AreaCalculatorComponent;
+
+            ScalarTypeProviderComponent: UseType<f64>,
+            @AreaCalculatorComponent.Rectangle: RectangleArea,
+            @AreaCalculatorComponent.Circle: CircleArea,
+        }
+    }
+
+    check_components! {
+        ShapesF32 {
+            AreaCalculatorComponent: [Rectangle, Circle],
+        }
+    }
+
+    check_components! {
+        ShapesF64 {
+            AreaCalculatorComponent: [Rectangle, Circle],
         }
     }
 
     #[test]
-    fn the_context_decides_the_scalar() {
-        assert_eq!(zero::<App>(), 0.0);
+    fn one_wiring_line_decides_the_scalar() {
+        assert_eq!(zero::<App>(), 0.0f64);
         let rect = Rectangle {
             width: 2.0,
             height: 3.0,
         };
-        assert_eq!(App.area(&rect), 6.0);
-        assert!(App.area(&Circle { radius: 1.0 }) > 3.14);
+        let as_f32: f32 = ShapesF32.area(&rect);
+        let as_f64: f64 = ShapesF64.area(&rect);
+        assert_eq!(as_f32, 6.0);
+        assert_eq!(as_f64, 6.0);
+        let _: f64 = ShapesF64.area(&Circle { radius: 1.0 });
     }
 }
 

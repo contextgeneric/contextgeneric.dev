@@ -188,17 +188,17 @@ they let an idiomatic provider state what it needs.
 Each attribute may be repeated. `#[uses]` and `#[use_type]` also take a comma-separated list inside
 one attribute, which is the form to prefer: `#[uses(HasName, CanRaiseError<String>)]` reads as one
 dependency list. `#[use_provider]` and `#[default_impl]` take one entry per attribute.
-`#[use_provider]`'s own argument ends in a bound list, so the parser cannot tell where a second pair
-begins, and `#[default_impl]` reads a single `Key in Namespace` spec. Write one attribute per inner
-provider and one per registration.
+`#[use_provider]`'s own argument ends in a bound list joined by `+`, so a comma after it fails to
+parse with *expected `+`*, and `#[default_impl]` reads a single `Key in Namespace` spec. Write one
+attribute per inner provider and one per registration.
 
 `#[cgp_impl]` does not read `#[extend]`, `#[extend_where]`, or
 [`#[impl_generics]`](../attributes/impl_generics.md), although you may see them on other CGP macros.
 Each of them acts on a *generated trait definition*, which a provider impl does not have, so they
 belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
 [`#[cgp_component]`](./cgp_component.md). Writing one here leaves a name nothing resolves; see
-[Common Mistakes](#common-mistakes). An impl-side bound that really is impl-side goes in the block's
-own `where` clause, which passes through untouched.
+[Common Mistakes](#common-mistakes). A bound the implementation needs goes in `#[uses]`, or in the
+block's own `where` clause, which passes through untouched.
 
 ### Implementing the consumer trait directly
 
@@ -223,8 +223,8 @@ impl CanCalculateArea for Rectangle {
 
 A direct impl competes with the consumer blanket impl that
 [`#[cgp_component]`](./cgp_component.md#under-the-hood) generates, so the same type must not also
-wire the component in `delegate_components!`. Doing both makes the two impls overlap, and the compiler
-rejects them with `E0119`, *conflicting implementations of trait `CanCalculateArea`*.
+wire the component in `delegate_components!`. Doing both makes the two impls overlap, and the
+compiler rejects them with `E0119`, *conflicting implementations of trait `CanCalculateArea`*.
 
 ## Examples
 
@@ -457,6 +457,17 @@ attribute it does not recognize to the generated provider impl rather than dropp
 `#[allow(...)]` and similar attributes carry over unaffected. A stray `#[extend(HasName)]` therefore
 produces a *cannot find attribute `extend` in this scope* error on the attribute's own line, and it
 does not mention `#[cgp_impl]`.
+
+**The macro does not check a `: ComponentType` override against the trait.** A component that
+does not belong to the provider trait registers the provider under the wrong key, and the provider
+trait's own `IsProviderFor` supertrait, which names the real component, rejects the generated impl:
+
+```text
+error[E0277]: the trait bound `Wrong: IsProviderFor<AreaCalculatorComponent, __Context__>` is not satisfied
+```
+
+Leave the override out unless the component's marker departs from the `{Trait}Component`
+convention.
 
 **A `#[default_impl]` registration works only when the header omits `for Context`.** The
 registration copies the impl's generic parameters as written, before the macro inserts the context.

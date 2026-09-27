@@ -1,0 +1,23 @@
+error[E0277]: the trait bound `Wrong: IsProviderFor<AreaCalculatorComponent, __Context__>` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_impl_common_mistakes_wrong_component_override.rs:16:16
+   |
+16 | #[cgp_impl(new Wrong: PerimeterCalculatorComponent)]
+   |                ^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, __Context__, ()>` is not implemented for `Wrong`
+      but trait `IsProviderFor<PerimeterCalculatorComponent, __Context__, ()>` is implemented for it
+  --> tests/compile_fail/reference/macros/cgp_impl_common_mistakes_wrong_component_override.rs:17:1
+   |
+17 | / impl AreaCalculator {
+18 | |     fn area(&self) -> f64 {
+19 | |         1.0
+20 | |     }
+21 | | }
+   | |_^
+   = help: for that trait implementation, expected `PerimeterCalculatorComponent`, found `AreaCalculatorComponent`
+note: required by a bound in `AreaCalculator`
+  --> tests/compile_fail/reference/macros/cgp_impl_common_mistakes_wrong_component_override.rs:6:1
+   |
+ 6 | #[cgp_component(AreaCalculator)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `AreaCalculator`
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -84,6 +84,8 @@ pub trait CanCalculateArea {
     fn area(&self) -> f64;
 }
 
+pub struct UnitArea;
+
 #[cgp_provider(AreaComponent)]
 impl<Context> AreaCalculator<Context> for UnitArea {
     fn area(_context: &Context) -> f64 {
@@ -99,7 +101,8 @@ by bare generic parameter names. A plain name yields a unit struct. A generic pr
 struct holding one public
 [`PhantomData`](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) over its parameters, so
 that the parameters are bound. Several parameters share one tuple, and a lifetime is lifted into
-[`Life<'a>`](../types/life.md), since `PhantomData` needs a type:
+[`Life<'a>`](../types/life.md), because `PhantomData` takes a type argument and a lifetime is not
+one:
 
 ```rust
 // from `... for RectangleArea`
@@ -223,7 +226,7 @@ A couple of cases call for writing the raw form yourself:
   that `new` cannot declare, such as one carrying a default generic parameter
   (`pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`) or one shared by several impls, is
   *not* by itself a reason to write the raw form: declare the struct yourself and keep writing the body
-  with `#[cgp_impl(ProviderName)]`, just without `new`.
+  with `#[cgp_impl(ProviderName)]`, without `new`.
 - **Reading, rather than writing.** A confusing provider error names types from this shape, and
   `cargo cgp expand` prints it. Recognizing the form is the main reason to read this page.
 
@@ -281,11 +284,11 @@ occupy its slot in the tuple, which holds types. A provider for `ReferenceGetter
 derives `IsProviderFor<ReferenceGetterComponent, Context, (Life<'a>, T)>`, keeping the order the
 arguments were written in.
 
-**The macro rewrites one bound instead of copying it**, and this is the mechanism that makes a nested
-provider stack diagnosable. A bound naming *this component's provider trait*, the inner-provider bound
-of a [higher-order provider](../attributes/use_provider.md), gains its marker counterpart alongside it,
-whether it is written in the `where` clause or inline on the type parameter, as in
-`impl<Context, Inner: AreaCalculator<Context>>`:
+**The macro rewrites one bound instead of copying it**, and this is the mechanism that makes a
+nested provider stack diagnosable. A bound naming *this component's provider trait*, the
+inner-provider bound of a [higher-order provider](../attributes/use_provider.md), gains its marker
+counterpart alongside it, whether it is written in the `where` clause or inline on the type
+parameter, as in `impl<Context, Inner: AreaCalculator<Context>>`:
 
 ```rust
 #[cgp_new_provider]
@@ -356,11 +359,10 @@ error[E0428]: the name `RectangleArea` is defined multiple times
 ```
 
 **`new` is not part of this attribute's grammar.** `#[cgp_provider(new RectangleArea)]` does not
-declare the struct. It fails to parse with *unexpected token* at `RectangleArea`, because the argument
-holds a component type and nothing else, and `new` has already been read as that type.
-Which macro you invoke decides whether the struct is declared, so use
-`#[cgp_new_provider]`. The `new` keyword you may have seen belongs to
-[`#[cgp_impl]`](./cgp_impl.md#usage).
+declare the struct. It fails to parse with *unexpected token* at `RectangleArea`, because the
+argument holds a component type and nothing else, and `new` has already been read as that type.
+Which macro you invoke decides whether the struct is declared, so use `#[cgp_new_provider]`. The
+`new` keyword you may have seen belongs to [`#[cgp_impl]`](./cgp_impl.md#usage).
 
 **A higher-order provider over a lifetime-carrying component loses the inner marker bound.** The
 rewrite above finds the context by reading the inner bound's first argument. On a component with a
