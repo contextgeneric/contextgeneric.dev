@@ -121,9 +121,9 @@ cargo cgp expand --lib > expanded.rs
 cargo cgp expand --lib | rg 'Symbol!'
 ```
 
-`cargo cgp expand --help` forwards like everything else, so what you get is `cargo rustc`'s own help —
-which does **not** mention `--item`, since that flag is the tool's rather than cargo's. This page is
-where you learn it exists.
+`cargo cgp expand --help` is the one argument the tool answers itself rather than forwarding: it
+prints the expand options, including `--item`, with examples. For cargo's own target-selection
+options, run `cargo rustc --help`.
 
 ## Why not `cargo-expand`
 
