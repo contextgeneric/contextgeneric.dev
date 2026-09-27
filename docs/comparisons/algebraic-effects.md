@@ -244,6 +244,9 @@ impl Loader {
 The context chooses both the error type and the provider used for each source error type:
 
 ```rust
+use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
+use cgp::extra::error::RaiseFrom;
+
 delegate_components! {
     App {
         open ErrorRaiserComponent;

@@ -57,7 +57,7 @@ The impls are blanket ones over the core builder machinery, so any record derivi
 [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md)) gets this for free. There is no separate derive.
 
 **Two endings are available**, and picking between them at the call site is the layer's real payoff:
-[`FinalizeOptional`](./finalize_optional.md) requires every field and reports the first missing one, while
+[`FinalizeOptional`](./finalize_optional.md) requires every field and reports a missing one, while
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) fills unset fields from `Default`.
 
 ## Examples

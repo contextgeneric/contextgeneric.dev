@@ -165,9 +165,10 @@ A [`delegate_components!`](/docs/reference/macros/delegate_components) table sel
 for each component. These contexts choose different storage implementations for the same interface:
 
 ```rust
+#[async_trait]
 #[cgp_component(StorageObjectFetcher)]
 pub trait CanFetchStorageObject {
-    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+    async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
 delegate_components! {

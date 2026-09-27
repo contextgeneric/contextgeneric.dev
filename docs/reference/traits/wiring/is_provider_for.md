@@ -43,12 +43,9 @@ the mechanism [`check_components!`](../../macros/check_components.md) leans on t
 
 ## Definition
 
-`IsProviderFor` is an empty marker trait with three type parameters and a diagnostic note:
+`IsProviderFor` is an empty marker trait with three type parameters:
 
 ```rust
-#[diagnostic::on_unimplemented(
-    note = "You need to add `#[cgp_provider({Component})]` on the impl block for CGP provider traits"
-)]
 pub trait IsProviderFor<Component, Context, Params: ?Sized = ()> {}
 ```
 
@@ -60,8 +57,6 @@ several parameters are grouped is covered under [How `Params` is filled](#how-pa
 trait has no method and no associated item. [`#[cgp_component]`](../../macros/cgp_component.md) attaches
 it as a supertrait on every provider trait, so using a provider trait requires establishing
 `IsProviderFor` first, which is why probing the marker probes the provider trait's whole dependency set.
-The `#[diagnostic::on_unimplemented]` note points a reader at the missing `#[cgp_provider]` attribute when
-the marker impl is absent.
 
 ## Usage
 
@@ -159,8 +154,8 @@ Two situations do put its name in your hands, and both are about diagnosis rathe
 
 If you find yourself wanting to implement it by hand, the thing you actually want is
 [`#[cgp_provider]`](../../macros/cgp_provider.md) or [`#[cgp_impl]`](../../macros/cgp_impl.md) on the impl block.
-The trait's own diagnostic says so, which is the one case where a missing marker impl is the reported
-problem rather than the hidden one.
+A provider-trait impl written without either attribute is the one case where a missing marker impl is
+the reported problem rather than the hidden one.
 
 ## Under the hood
 
@@ -228,7 +223,7 @@ lifetime in a type position, so it is lifted.
 
 **A missing marker impl usually means a missing attribute.** If the compiler says a provider does not
 implement `IsProviderFor`, the likeliest cause is a provider-trait impl written without
-[`#[cgp_provider]`](../../macros/cgp_provider.md). The trait's own diagnostic note says exactly this.
+[`#[cgp_provider]`](../../macros/cgp_provider.md).
 
 **Read it as "because", not as "instead".** `GreetHello: IsProviderFor<…> is not satisfied` does not mean the
 marker is the problem; it means the provider trait is not implemented *because* the named dependency is

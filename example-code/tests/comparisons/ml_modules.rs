@@ -63,6 +63,7 @@ pub mod abstract_type_components {
     // The page shows CGP's own `HasErrorType`; declaring it locally shows the shape the library's
     // definition has, and the local name shadows the prelude's within this module.
     #[cgp_type]
+    #[prefix(@cgp.core.error in DefaultNamespace)]
     pub trait HasErrorType {
         type Error: Debug;
     }

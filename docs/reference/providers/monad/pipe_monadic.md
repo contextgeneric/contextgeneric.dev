@@ -50,8 +50,9 @@ PipeMonadic::<ErrMonadic, Product![Increment, Increment, Increment]>::compute(&c
 ```
 
 Stacking monads handles nested results. Composing handlers that return `Result<Result<(), u8>, &str>`
-under `OkMonadicTrans<ErrMonadic>` short-circuits on the outer `Ok` while threading the inner `Result`
-through the err monad, and the same list composed under `OkMonadic` can be driven through the fallible
+under `OkMonadicTrans<ErrMonadic>` stops on an outer `Err` or an inner `Ok`: the err monad handles the
+outer `Result` and the ok layer the one inside it. The same list composed under `OkMonadic` can be
+driven through the fallible
 `try_compute` and async `handle` entry points, because `PipeMonadic` implements `TryComputer` and
 `Handler` as well:
 

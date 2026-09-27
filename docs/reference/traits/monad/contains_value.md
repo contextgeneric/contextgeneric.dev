@@ -77,8 +77,9 @@ So under `ErrMonadic` a step's continuation receives the `Ok` payload, the ordin
 under `OkMonadic` it receives the `Err` payload, which is the inverted, run-until-something-succeeds
 behaviour.
 
-**The transformer forms peel one layer.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` remove their own
-`Result` layer and hand the rest to `M`, requiring `M: ContainsValue<V, Value = Result<…>>`. A two-layer
+**The transformer forms peel one layer.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` let `M` unwrap the
+outer layers and then remove their own `Result` from the value `M` exposes, requiring
+`M: ContainsValue<V, Value = Result<…>>`. A two-layer
 stack therefore unwraps two `Result` layers in order, and an *n*-layer stack unwraps *n*, with no code
 specific to any depth.
 

@@ -87,8 +87,9 @@ over a `Result`:
 So `ErrMonadic` gives the ordinary `?` behaviour, and `OkMonadic` the inverted one that runs until
 something succeeds, useful for a fallback chain.
 
-**The transformer forms delegate one layer down.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` bind their
-own `Result` layer and hand the rest to `M`, which is how a stack reaches arbitrary depth.
+**The transformer forms delegate to their base.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` wrap their
+own bind provider for the inner `Result` layer and hand it to `M`, which binds the outer layers, and
+that is how a stack reaches arbitrary depth.
 
 ## When to use it
 

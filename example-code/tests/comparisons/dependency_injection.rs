@@ -111,14 +111,15 @@ pub mod impl_side_dependencies_are_constructor_parameters {
 pub mod wiring_is_the_container_configuration {
     use cgp::prelude::*;
 
+    #[async_trait]
     #[cgp_component(StorageObjectFetcher)]
     pub trait CanFetchStorageObject {
-        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+        async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
     #[cgp_impl(new FetchS3Object)]
     impl StorageObjectFetcher {
-        fn fetch_storage_object(
+        async fn fetch_storage_object(
             &self,
             #[implicit] s3_bucket: &str,
             object_id: &str,
@@ -130,7 +131,7 @@ pub mod wiring_is_the_container_configuration {
 
     #[cgp_impl(new FetchGCloudObject)]
     impl StorageObjectFetcher {
-        fn fetch_storage_object(
+        async fn fetch_storage_object(
             &self,
             #[implicit] gcloud_bucket: &str,
             object_id: &str,
@@ -178,6 +179,7 @@ pub mod wiring_is_the_container_configuration {
 
     #[test]
     fn two_deployments_two_bindings() {
+        use futures::executor::block_on;
         let app = App {
             s3_bucket: "pictures".to_owned(),
         };
@@ -185,11 +187,11 @@ pub mod wiring_is_the_container_configuration {
             gcloud_bucket: "pictures".to_owned(),
         };
         assert_eq!(
-            app.fetch_storage_object("ada.png").unwrap(),
+            block_on(app.fetch_storage_object("ada.png")).unwrap(),
             b"s3://pictures/ada.png".to_vec()
         );
         assert_eq!(
-            gcloud.fetch_storage_object("ada.png").unwrap(),
+            block_on(gcloud.fetch_storage_object("ada.png")).unwrap(),
             b"gs://pictures/ada.png".to_vec()
         );
     }

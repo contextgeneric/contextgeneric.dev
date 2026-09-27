@@ -186,6 +186,7 @@ An abstract-type component lets generic code use a type that the context supplie
 
 ```rust
 #[cgp_type]
+#[prefix(@cgp.core.error in DefaultNamespace)]
 pub trait HasErrorType {
     type Error: Debug;
 }

@@ -33,6 +33,7 @@ pub mod abstract_types_are_implicit_type_parameters {
 
     // The page shows CGP's own `HasErrorType`; the local declaration shadows the prelude's here.
     #[cgp_type]
+    #[prefix(@cgp.core.error in DefaultNamespace)]
     pub trait HasErrorType {
         type Error: Debug;
     }

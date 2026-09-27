@@ -49,10 +49,7 @@ type so a bound can pin it or leave it open: `HasField<Symbol!("name")>` accepts
 while `HasField<Symbol!("name"), Value = String>` requires a `String`. `get_field` takes `&self` and
 returns `&Self::Value`, a borrow of the field; its `PhantomData<Tag>` argument carries no data and only
 lets a call site say *which* field it means when several `HasField` impls are in scope, which is why a
-read is written `self.get_field(PhantomData::<Symbol!("name")>)`. The trait also carries a
-`#[diagnostic::on_unimplemented]` note pointing at
-[`#[derive(HasField)]`](../../derives/derive_has_field.md), so a missing field reads as a missing derive
-rather than an opaque trait failure.
+read is written `self.get_field(PhantomData::<Symbol!("name")>)`.
 
 ## Usage
 

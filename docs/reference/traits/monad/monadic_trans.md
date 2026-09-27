@@ -45,9 +45,9 @@ pub trait MonadicTrans<M> {
 ```
 
 `Self` is the monad being applied, the `M` parameter is the base monad being transformed, and the
-associated `M`, which shares the parameter's name, is the resulting stack. That lets `OkMonadic` be
-written as `OkMonadicTrans<ErrMonadic>` when a pipeline operates over a nested result, layering one
-behaviour on top of another.
+associated `M`, which shares the parameter's name, is the resulting stack. Applying `OkMonadic` to
+`ErrMonadic` gives `OkMonadicTrans<ErrMonadic>`, for a pipeline that operates over a nested result:
+the err monad handles the outer `Result` of each output, and the ok layer the `Result` inside it.
 
 ## Usage
 
@@ -69,12 +69,13 @@ What each marker's impl says decides how deeply a pipeline can reach.
 it the neutral element of a stack as well as of a pipeline.
 
 **The transformer forms compose.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` implement the running
-traits by peeling their own `Result` layer and handing the rest to `M`, and their `MonadicTrans` impls
-compose in the same order, so a stack like `OkMonadicTrans<ErrMonadic>` resolves layer by layer:
+traits by letting `M` unwrap the outer layers and then peeling their own `Result` from the value `M`
+exposes, and their `MonadicTrans` impls compose in the same order, so a stack like
+`OkMonadicTrans<ErrMonadic>` resolves layer by layer:
 
 ```rust
-// conceptually: unwrap the outer Result the OkMonadic way,
-// then hand the inner Result to ErrMonadic
+// conceptually: ErrMonadic unwraps the outer Result,
+// then the Ok layer handles the Result inside it
 type Stacked = OkMonadicTrans<ErrMonadic>;
 ```
 

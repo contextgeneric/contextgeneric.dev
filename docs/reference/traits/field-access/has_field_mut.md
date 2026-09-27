@@ -52,9 +52,8 @@ An implementation that mutates declares the bound on `Self` the same way it decl
 Self: HasFieldMut<Symbol!("counter"), Value = u64>
 ```
 
-Like its supertrait it carries a diagnostic note pointing at
-[`#[derive(HasField)]`](../../derives/derive_has_field.md), so an unsatisfied bound reads as a missing
-derive.
+[`#[derive(HasField)]`](../../derives/derive_has_field.md) generates it beside `HasField` for every
+field.
 
 ## Examples
 

@@ -108,7 +108,7 @@ forgot, and it is the only place the compiler names it.
   from `Default` rather than rejected. It re-marks every field to `IsPresent` and then calls this, so the
   strict check still runs and always passes.
 - **Use [`FinalizeOptional`](../optional/finalize_optional.md)** when absence should be *reported* at run time
-  rather than caught at compile time. It returns a `Result` naming the first missing field.
+  rather than caught at compile time. It returns a `Result` naming a missing field.
 - **Stay with `FinalizeBuild`** when every field is genuinely required. Moving to either of the other two
   gives up the compile-time completeness check, which is the reason the family exists.
 

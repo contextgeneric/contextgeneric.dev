@@ -11,19 +11,22 @@ Rewriting every entry of a type-level list through one marker.
 
 ### Generated machinery
 
-**You are not expected to use `MapFields` directly.** It is the type-level operation
-behind a [partial record](/docs/reference/glossary#partial-record)'s shape, computed by the machinery
-[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) generates. You will most likely meet it in an error
-message; this page explains what it produces, and how it differs from the two similarly-named traits
-beside it. The one case for naming it is generic code that must describe a uniformly re-wrapped shape.
+**You are not expected to use `MapFields` directly.** CGP uses it to rewrite lists of providers:
+[`PipeMonadic`](../../providers/monad/pipe_monadic.md) maps its handler list through a promotion
+marker, and the record builder's `BuildAndMergeOutputs` maps its handler list the same way. You will
+most likely meet it in an error message from one of those; this page explains what it produces, and
+how it differs from the two similarly-named traits beside it. The one case for naming it is generic
+code that must describe a uniformly re-wrapped shape.
 
 :::
 
 ## Overview
 
-A partial record is the same record with every field's storage changed the same way: each value wrapped
-in an `Option`, or replaced by `()`, or left alone. Describing that as a type means rewriting every entry
-of the shape uniformly, and `MapFields<Mapper>` is that operation.
+Some type-level lists need every entry changed the same way: each value wrapped in an `Option`, or
+replaced by `()`, or each provider wrapped in an adapter. Describing that as a type means rewriting
+every entry of the list uniformly, and `MapFields<Mapper>` is that operation. The partial records and
+enums of the extensible-data derives are not computed with it; [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md)
+generates those types directly.
 
 The list's length and order never change. Each entry type `T` becomes `Mapper::Map<T>`, where the mapper
 is a [`MapType`](./map_type.md) marker, so **the marker decides the whole effect**. With `IsPresent` it
@@ -31,8 +34,8 @@ is the identity; with `IsNothing` every entry collapses to `()`; with `IsOptiona
 `Option<_>`; with `IsVoid` every entry becomes uninhabited.
 
 It is the transforming member of the three product operations, and the only one defined over **both**
-lists: it walks `Cons`/`Nil` for a product and `Either`/`Void` for a sum. That lets one
-operation produce both a partial record and a partial enum.
+lists: it walks `Cons`/`Nil` for a product and `Either`/`Void` for a sum, so one marker applies to
+either.
 
 ## Definition
 
@@ -63,8 +66,7 @@ use cgp::core::field::traits::MapFields;
 
 ## Examples
 
-Applying `IsOptional` turns a product of values into a product of optionals, the shape a partial builder
-uses to track what is not yet filled:
+Applying `IsOptional` turns a product of values into a product of optionals:
 
 ```rust
 use cgp::core::field::impls::IsOptional;
@@ -77,8 +79,7 @@ type Optional = <Fields as MapFields<IsOptional>>::Mapped;
 // = Product![Option<String>, Option<u16>, Option<bool>]
 ```
 
-The same marker applies over a sum, which makes one operation serve both halves of the
-extensible-data machinery:
+The same marker applies over a sum:
 
 ```rust
 type Variants = Sum![String, u16];
@@ -89,8 +90,8 @@ type OptionalVariants = <Variants as MapFields<IsOptional>>::Mapped;
 
 ## When to use it
 
-**Reach for it when generic code must name a uniformly re-wrapped shape**, the form a partial
-representation takes, and essentially never otherwise.
+**Reach for it when generic code must name a uniformly re-wrapped list**, such as a list of
+providers each wrapped in the same adapter, and essentially never otherwise.
 
 - **Reach for [`AppendProduct`](./append_product.md) or [`ConcatProduct`](./concat_product.md)** when the
   shape grows rather than changing its wrapping.
@@ -139,7 +140,7 @@ needs its own import from `cgp::core::field::impls`.
 [`ConcatProduct`](./concat_product.md) both expose `Output`, and this one does not.
 
 **It computes types, not values.** A `MapFields<IsOptional>` result does not wrap anything at run time.
-Something still has to build the wrapped values, which on a partial record is
+Something still has to build the wrapped values, such as
 [`TransformMapFields`](./transform_map_fields.md).
 
 **A marker with no `MapType` impl does not resolve**, and the error names the missing `MapType` bound
@@ -165,8 +166,9 @@ width.
 
 The ideas behind it:
 
-- [Extensible records](/docs/concepts/extensible-records): presence tracking on a partial record.
-- [Extensible variants](/docs/concepts/extensible-variants): possibility tracking on a partial variant.
+- [Monadic handlers](/docs/concepts/monadic-handlers): the handler pipelines whose provider lists it
+  rewrites.
+- [Extensible records](/docs/concepts/extensible-records): the builder whose handler list it rewrites.
 
 ## Source
 

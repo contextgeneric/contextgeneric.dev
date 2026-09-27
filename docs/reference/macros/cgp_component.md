@@ -399,7 +399,14 @@ ComponentName    -> IDENTIFIER GenericArgs?
 `ProviderName` is shorthand for setting `provider` alone. In the key/value form each key may appear at
 most once, in any order, and `provider` is required. `IDENTIFIER` is a Rust identifier token, and
 `GenericArgs` is the Rust grammar's `< … >` argument list, so the component name may carry generic
-parameters while the provider name may not. The attribute delimiter, `(...)` for the bare form and
+parameters while the provider name may not.
+
+The component name's parameters must be bare names, such as `name: ShapeComponent<Shape>`, which the
+marker struct then declares. A bound fails with ``trait bounds (`A: Clone`) are not allowed in type
+generics``, a default with ``default type parameters (`A = B`) are not allowed in type generics``,
+and a concrete type does not parse. A provider for such a component names the component explicitly,
+as in `#[cgp_impl(new SquareArea: AreaCalculatorComponent<Square>)]`, because the default
+`{Provider}Component` name carries no arguments. The attribute delimiter, `(...)` for the bare form and
 `{...}` for the key/value form, is ordinary Rust attribute syntax and does not change how the macro
 parses the arguments inside.
 
@@ -419,6 +426,24 @@ The rule does not affect an associated `const` *item*. `const LIMIT: u64;` as a 
 parameter, and a provider supplies it in the ordinary way. Naming your own associated const from
 *inside* a [`#[cgp_impl]`](./cgp_impl.md) body has one complication of its own, covered in that page's
 [Common Mistakes](./cgp_impl.md#common-mistakes).
+
+**Every method parameter needs a plain name.** The impls the macro generates forward each argument to
+the provider by name, so a `_` parameter, which Rust allows in a trait method without a body, or a
+destructuring pattern such as `(a, b): (u32, u32)` in a default method fails inside the macro:
+
+```text
+error: expected identifier, found keyword `_`
+error: failed to parse internal tokens to type `proc_macro2::Ident`:
+       _
+```
+
+Name the parameter instead, as in `_value: u32`, and destructure inside a default method's body.
+
+**A const parameter in the `name:` list fails inside the macro.**
+`#[cgp_component { provider: Buffer, name: BufferComponent<const N: usize> }]` is accepted by the
+parser, but the name is then used in type positions, where the const parameter cannot appear, and
+the macro fails with ``failed to parse internal tokens to type `syn::generics::TypeParamBound` ``.
+Keep the name's parameters to bare type names, as the component's own parameters are.
 
 **The attribute must be applied to a trait.** The macro refuses a struct, an enum, or a free function
 at parse time, with an error that names the trait it expected, instead of lowering it into code that

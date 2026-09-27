@@ -26,7 +26,7 @@ converts an existing builder into one.
 because an optional field's marker does not change when it is written.
 
 The **two endings** are chosen at the finalize call rather than when the builder is made.
-[`FinalizeOptional`](finalize_optional.md) requires every field and reports the first missing one, while
+[`FinalizeOptional`](finalize_optional.md) requires every field and reports a missing one, while
 [`CanFinalizeWithDefault`](can_finalize_with_default.md) fills a missing field from `Default`.
 [`CanBuildWithDefault`](can_build_with_default.md) chains a merge and a defaulted finalize into one call.
 

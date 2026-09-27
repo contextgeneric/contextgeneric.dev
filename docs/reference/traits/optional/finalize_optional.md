@@ -5,14 +5,14 @@ sidebar_position: 4
 
 # `FinalizeOptional`
 
-Finalizing an optional builder, reporting the first missing field.
+Finalizing an optional builder, reporting a missing field.
 
 ## Overview
 
 An [optional builder](./has_optional_builder.md) has given up the compile-time completeness check: every
 field is `IsOptional`, so the type no longer records what has been set. Something has to check at run
 time instead, and `FinalizeOptional` is the strict way to do it: it succeeds only if every field holds a
-value, and otherwise reports the first missing field by name.
+value, and otherwise reports a missing field by name.
 
 It is one of two endings for an optional builder, and the choice between them is made at the call site
 rather than when the builder is created:
@@ -36,7 +36,7 @@ pub trait FinalizeOptional: PartialData {
 The `PartialData` [supertrait](/docs/reference/glossary#supertrait) supplies `Target`, the concrete struct being built, so the method projects
 its return type through it and declares no associated type of its own. `finalize_optional` takes `self`,
 consuming the builder, and returns `Result<Self::Target, &'static str>`: the built struct on success,
-or, on failure, the first missing field's own name, recovered from its type-level tag as a `&'static
+or, on failure, a missing field's own name, recovered from its type-level tag as a `&'static
 str` with no allocation. The trait carries no other parameter. It is not in the prelude; import it from
 `cgp-field-extra`.
 
@@ -107,7 +107,8 @@ Unlike its defaulting sibling, `FinalizeOptional` does **not** go through
 [`TransformMapFields`](../type-level/transform_map_fields.md). It walks the target's
 [`HasFields`](../shape/has_fields.md) list directly, and the reason is that it has to be able to *stop*.
 
-For each field it pulls the `Option` out with [`UpdateField`](../builder/update_field.md), and:
+It checks the rest of the list before the current field, so the fields are checked from last to
+first. For each field it pulls the `Option` out with [`UpdateField`](../builder/update_field.md), and:
 
 - if it is `Some`, writes the value back as `IsPresent` with [`BuildField`](../builder/build_field.md) and
   continues;
@@ -121,14 +122,16 @@ Only if every field yields a value does the walk reach the all-present configura
 becomes a concrete struct.** Everything in this layer simply guarantees that configuration is reached
 before it is invoked, or reports why it could not be.
 
-That short-circuiting is also why only the *first* missing field is named: the walk stops at it rather
-than collecting.
+That short-circuiting is also why only one missing field is named: the walk stops at the first
+`None` it meets rather than collecting. Because the walk runs from the last field back, that is the
+last unset field in declaration order: with nothing set on `struct Context { foo: String, bar: u64 }`,
+the error is `"bar"`.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 
-**The error is a `&'static str`.** It names the first missing field and is not a structured error, so it
+**The error is a `&'static str`.** It names one missing field and is not a structured error, so it
 cannot be matched on beyond string comparison.
 
 **It reports only the first.** A builder missing three fields yields one name.
@@ -139,8 +142,8 @@ finalizes at compile time or does not.
 **It supertraits [`PartialData`](../builder/partial_data.md)**, so `Target` is projected from there and naming
 both in a bound is redundant.
 
-**Field order decides which name you get**, since the walk follows declaration order and stops at the
-first `None`.
+**Field order decides which name you get**, since the walk runs from the last declared field back and
+stops at the first `None` it meets, so the name is the last unset field in declaration order.
 
 ## Related constructs
 

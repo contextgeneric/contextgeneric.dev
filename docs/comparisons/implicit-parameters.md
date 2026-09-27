@@ -174,6 +174,7 @@ class Monad m => MonadError e m | m -> e where
 
 ```rust
 #[cgp_type]
+#[prefix(@cgp.core.error in DefaultNamespace)]
 pub trait HasErrorType {
     type Error: Debug;
 }
