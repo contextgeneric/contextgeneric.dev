@@ -253,12 +253,13 @@ A few lighter tools cover most cases, and it is worth knowing where each stops.
   when inheritance is wanted, or when a library is publishing defaults for applications it does not know
   about.
 
-The last two also combine. A context that joins a namespace can forward a whole path to an aggregate
-provider in one entry, as `@app.core.user: UserComponents`, and the bundle then answers every component
-registered under that path. The lookup reaches the bundle keyed by the bare component name, so a bundle
-keyed by bare names needs nothing more. A bundle that groups several paths, such as a `CoreComponents`
-holding `@app.core.user: UserComponents`, is keyed by paths and must itself join the namespace, or the
-check fails with `CoreComponents: DelegateComponent<GreeterComponent>` unsatisfied.
+A namespace and an aggregate provider also combine. A context that joins a namespace can forward a
+whole path to an aggregate provider in one entry, as `@app.core.user: UserComponents`, and the
+bundle then answers every component registered under that path. The lookup reaches the bundle keyed
+by the bare component name, so a bundle keyed by bare names needs nothing more. A bundle that groups
+several paths, such as a `CoreComponents` holding `@app.core.user: UserComponents`, is keyed by
+paths and must itself join the namespace, or the check fails reporting that `CoreComponents` has no
+`DelegateComponent` entry for the component's bare name.
 
 A couple of things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
 entries still have to exist somewhere. And it is not how one component gets per-type dispatch, which is
