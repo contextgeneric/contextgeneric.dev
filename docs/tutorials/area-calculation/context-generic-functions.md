@@ -189,7 +189,7 @@ Inside the function body, the macro desugars the implicit arguments into local `
 
 ### Borrowed vs owned implicit arguments
 
-The `width()` and `height()` methods on `RectangleFields` return a borrowed `&f64`. This is because all field access are by default done through borrowing the field value from `&self`. However, when the implicit argument is an *owned value*, CGP will automatically copy on the field value and require that the `Copy` bound of the type is satisfied.
+The `width()` and `height()` methods on `RectangleFields` return a borrowed `&f64`. This is because all field access are by default done through borrowing the field value from `&self`. However, when the implicit argument is an *owned value*, CGP will automatically call `.clone()` on the borrowed field value, so the field's type must implement `Clone`.
 
 We can rewrite the `rectangle_area` to accept the implicit `width` and `height` arguments as *borrowed* references, such as:
 
