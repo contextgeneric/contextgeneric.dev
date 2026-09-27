@@ -1,0 +1,5 @@
+error: cannot combine #[skip_check] with #[check_params]
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_attributes_on_a_list_key_merge_skip_with_params.rs:32:28
+   |
+32 |             #[check_params(Rectangle)]
+   |                            ^^^^^^^^^

@@ -1,0 +1,5 @@
+error: Multiple `#[check_trait]` attributes found. Expected at most one.
+  --> tests/compile_fail/reference/macros/check_components_formal_grammar_repeated_attribute.rs:20:5
+   |
+20 |     #[check_trait(CheckPersonAgain)]
+   |     ^

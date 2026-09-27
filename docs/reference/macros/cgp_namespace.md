@@ -68,9 +68,10 @@ A namespace body accepts two kinds of entry, and they do different things.
 | `Key: Provider` | **Bind.** Asked for `Key`, resolve straight to `Provider`, as in `delegate_components!`. |
 
 Redirection makes namespaces composable: because a lookup is keyed by a *path* rather than a bare
-component name, a whole subtree can be rerouted at once, and a more specific path takes precedence over an
-inherited one. Paths are written with the `@` sigil as dotted sequences, such as `@MyFooComponent`,
-`@app.ErrorRaiserComponent`, and `@cgp.core.error`, where lowercase segments become [type-level strings](/docs/reference/glossary#type-level-string) and
+component name, a whole subtree can be rerouted at once, and a context can fill one path the
+namespace leaves open without disturbing the rest. Paths are written with the `@` sigil as dotted
+sequences, such as `@MyFooComponent`, `@app.ErrorRaiserComponent`, and `@cgp.core.error`, where
+lowercase segments become [type-level strings](/docs/reference/glossary#type-level-string) and
 capitalized segments name types. [`Path!`](./path.md) covers the syntax in full.
 
 ### The rest of the body grammar
@@ -110,8 +111,12 @@ cgp_namespace! {
 }
 ```
 
-The parent may itself be parameterized. The child's entries layer on top, and a path-rewriting entry like
-the one above reroutes a whole subtree of the parent's namespace rather than a single component.
+The parent may itself be parameterized, and may be named by a path. The child's entries sit beside
+everything it inherits: they may add keys the parent does not resolve, but not redefine one it does, as
+[Common Mistakes](#common-mistakes) explains. A path-rewriting entry like the one above qualifies when
+the parent routes the `@cgp.core.error` prefix onward without binding it, as a parent inheriting
+`DefaultNamespace` does for CGP's error components, and it reroutes a whole subtree of those routes
+rather than a single component.
 
 A namespace with nothing of its own to add may stop at the header. The braces are optional when the body
 would be empty, which is the usual shape of a namespace that exists only to inherit:
@@ -122,9 +127,11 @@ cgp_namespace! {
 }
 ```
 
-This is the same as writing `{}` after the parent, and `new BaseNamespace` on its own emits just the
-trait and struct the same way. Only the end of the input may follow the header; any other token there is
-an `expected curly braces` error. The shorthand is this macro's alone, since
+This is the same as writing `{}` after the parent, and `new BaseNamespace` on its own, with no parent
+and no braces, emits only the trait and struct. Only the end of the input may follow the header; any other token there is
+an `expected curly braces` error. Without `new`, a header-only `ExtendedNamespace: BaseNamespace` emits
+only the inheritance impl, so it compiles only where the `ExtendedNamespace` trait and its
+`__ExtendedNamespaceComponents` struct are already declared. The shorthand is this macro's alone, since
 [`delegate_components!`](./delegate_components.md) keeps its braces even when its table is empty.
 
 ### The other two halves: registering, and joining
@@ -246,14 +253,22 @@ A few lighter tools cover most cases, and it is worth knowing where each stops.
   when inheritance is wanted, or when a library is publishing defaults for applications it does not know
   about.
 
+The last two also combine. A context that joins a namespace can forward a whole path to an aggregate
+provider in one entry, as `@app.core.user: UserComponents`, and the bundle then answers every component
+registered under that path. The lookup reaches the bundle keyed by the bare component name, so a bundle
+keyed by bare names needs nothing more. A bundle that groups several paths, such as a `CoreComponents`
+holding `@app.core.user: UserComponents`, is keyed by paths and must itself join the namespace, or the
+check fails with `CoreComponents: DelegateComponent<GreeterComponent>` unsatisfied.
+
 A couple of things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
 entries still have to exist somewhere. And it is not how one component gets per-type dispatch, which is
 `open`'s job; the two do not combine on the same component, as the [Common Mistakes](#common-mistakes) explain.
 
 ## Under the hood
 
-`cgp_namespace!` emits, in order, an optional backing struct, an optional lookup trait, and one impl of that
-trait per entry, plus one inheritance impl when a parent is named. From this input:
+`cgp_namespace!` emits, in order, an optional backing struct, an optional lookup trait, the structs of any
+nested tables, and then the impls: one inheritance impl first when a parent is named, one impl of the trait
+per entry, and the nested tables' own impls. From this input:
 
 ```rust
 cgp_namespace! {
@@ -308,7 +323,9 @@ where
 ```
 
 For any key the parent resolves, the child resolves it to the same value. The child's own entries are emitted
-after this impl and win where their keys are more specific.
+after this impl and sit beside it rather than overriding it, since Rust has no rule that lets a more
+specific impl win. A child entry must therefore be keyed on a path the parent does not resolve, and a
+longer path beneath one the parent resolves overlaps it too, because every path key ends in a wildcard.
 
 A couple of naming details appear verbatim in errors and are worth recognizing: the table parameter is literally
 `__Table__`, and the inheritance impl uses `__Key__` and `__Value__`. And every `@` path is a
@@ -356,8 +373,17 @@ blanket `DelegateComponent` impl covering every path `N` resolves, so a direct e
 paths is a second impl for the same key and the compiler rejects the overlap with `E0119`. A context can
 wire only a path the namespace *routes to* without binding, which is why the example above has the
 namespace own the route and the context own the provider. A path the namespace binds with a `:` entry or
-a `#[default_impl]` has to be changed in the namespace instead. The same restriction stops a child
-namespace from redefining a key its parent binds.
+a `#[default_impl]` has to be changed in the namespace instead.
+
+The same restriction stops a child namespace from redefining a key its parent resolves, and a more
+specific path does not escape it. With the parent routing `@app => @base`, a child entry
+`@app.Seg => @child` still overlaps, because the parent's key ends in a wildcard that covers `@app.Seg`:
+
+```text
+error[E0119]: conflicting implementations of trait `ExtendedNamespace<_>` for type `PathCons<Symbol<3, Chars<'a', …>>, PathCons<Seg, _>>`
+```
+
+The `Chars` nest, which spells `app`, is shortened here.
 
 **Joining two namespaces on one context conflicts, for the same reason.** Each namespace produces a blanket
 forwarding impl covering every key, so joining two collides them:
@@ -368,6 +394,11 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<_>` for ty
 
 A bare-key `for` loop (`for <Key, Value> in Table { Key: Value }`) alongside a `namespace` join collides the
 same way, which is why a loop's key is normally embedded in a path, as in `@app.SomeComponent.Key: Value`.
+
+**The `namespace` statement takes a bare name.** A namespace from another module cannot be written as a
+path there: `namespace some_mod::AppNamespace;` fails with ``expected `;` `` at the `::`. Import the
+namespace first and join it by its name. The inheritance header and a `for` loop's `in` clause both accept
+a path.
 
 **`open` does not combine with a prefixed component in a joined namespace.** Once a component's lookups are
 routed under a prefix, `open`, which roots the route at the bare component name, no longer reaches those
@@ -397,13 +428,12 @@ context compiles regardless. Only a [`check_components!`](./check_components.md)
 reports is the *path* failing to resolve rather than a provider being absent:
 
 ```text
-error[E0277]: the trait bound `PathCons<Symbol<4, Chars<'s', ...>>, ...>: AppNamespace<...>`
-              is not satisfied
+error[E0277]: the trait bound `PathCons<Symbol<4, Chars<'s', …>>, PathCons<ShowImplComponent, Nil>>: AppNamespace<MyApp>` is not satisfied
 ```
 
-The `Symbol<4, …>` is the prefix, `show`, so the message is saying "this route is not something the
-namespace resolves". This is the lazy-wiring problem in a namespace setting, and the answer is the same: check
-the context.
+The `Symbol<4, …>` is the prefix, `show`, with its `Chars` nest shortened here, so the message is
+saying "this route is not something the namespace resolves". This is the lazy-wiring problem in a
+namespace setting, and the answer is the same: check the context.
 
 ## Related constructs
 

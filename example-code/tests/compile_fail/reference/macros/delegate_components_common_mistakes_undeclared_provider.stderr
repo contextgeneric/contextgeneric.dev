@@ -1,0 +1,5 @@
+error[E0425]: cannot find type `SquareArea` in this scope
+  --> tests/compile_fail/reference/macros/delegate_components_common_mistakes_undeclared_provider.rs:25:34
+   |
+25 |         AreaCalculatorComponent: SquareArea,
+   |                                  ^^^^^^^^^^ not found in this scope

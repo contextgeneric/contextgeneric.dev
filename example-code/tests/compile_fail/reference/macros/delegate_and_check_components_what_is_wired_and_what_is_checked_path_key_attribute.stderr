@@ -1,0 +1,5 @@
+error: unsupported attribute: skip_check
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_what_is_wired_and_what_is_checked_path_key_attribute.rs:26:9
+   |
+26 |         #[skip_check]
+   |         ^

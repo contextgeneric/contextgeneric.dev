@@ -1,0 +1,5 @@
+error: `#[check_providers(...)]` requires at least one provider type.
+  --> tests/compile_fail/reference/macros/check_components_common_mistakes_empty_check_providers.rs:19:5
+   |
+19 |     #[check_providers()]
+   |     ^

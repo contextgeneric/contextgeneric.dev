@@ -12,7 +12,7 @@ impl<T> FooProvider<T> {
 
 pub struct App;
 
-// error: expected `:`
+// error: expected `:`, on the dot after the closing brace
 delegate_components! {
     App {
         open FooProviderComponent;

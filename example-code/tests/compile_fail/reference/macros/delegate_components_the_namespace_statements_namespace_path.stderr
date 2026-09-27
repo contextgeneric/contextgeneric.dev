@@ -1,0 +1,13 @@
+error: expected `;`
+  --> tests/compile_fail/reference/macros/delegate_components_the_namespace_statements_namespace_path.rs:12:27
+   |
+12 |         namespace some_mod::SomeNamespace;
+   |                           ^
+
+warning: unused import: `cgp::prelude::DefaultNamespace as SomeNamespace`
+ --> tests/compile_fail/reference/macros/delegate_components_the_namespace_statements_namespace_path.rs:4:13
+  |
+4 |     pub use cgp::prelude::DefaultNamespace as SomeNamespace;
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

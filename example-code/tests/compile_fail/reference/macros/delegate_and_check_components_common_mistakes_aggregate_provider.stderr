@@ -1,0 +1,32 @@
+error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>` is not satisfied
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:24:9
+   |
+24 |         AreaCalculatorComponent: RectangleArea,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `cgp::prelude::HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is not implemented for `GeometryComponents`
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:23:9
+   |
+23 |     new GeometryComponents {
+   |         ^^^^^^^^^^^^^^^^^^
+help: the trait `cgp::prelude::HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is implemented for `Rectangle`
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:17:9
+   |
+17 |     pub width: f64,
+   |         ^^^^^
+note: required for `RectangleArea` to implement `IsProviderFor<AreaCalculatorComponent, GeometryComponents>`
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:8:1
+   |
+ 8 | #[cgp_impl(new RectangleArea)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `GeometryComponents` to implement `CanUseComponent<AreaCalculatorComponent>`
+note: required by a bound in `__CanUseGeometryComponents`
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:22:1
+   |
+22 | / delegate_and_check_components! {
+23 | |     new GeometryComponents {
+24 | |         AreaCalculatorComponent: RectangleArea,
+25 | |     }
+26 | | }
+   | |_^ required by this bound in `__CanUseGeometryComponents`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `delegate_and_check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

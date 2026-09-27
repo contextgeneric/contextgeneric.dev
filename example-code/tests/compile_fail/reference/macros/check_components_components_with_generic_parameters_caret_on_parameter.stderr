@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, MyApp, Circle>` is not satisfied
+  --> tests/compile_fail/reference/macros/check_components_components_with_generic_parameters_caret_on_parameter.rs:29:46
+   |
+29 |         AreaCalculatorComponent: [Rectangle, Circle],
+   |                                              ^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, MyApp, Circle>` is not implemented for `RectangleArea`
+      but trait `IsProviderFor<AreaCalculatorComponent, MyApp, Rectangle>` is implemented for it
+  --> tests/compile_fail/reference/macros/check_components_components_with_generic_parameters_caret_on_parameter.rs:12:1
+   |
+12 | / impl AreaCalculator<Rectangle> {
+13 | |     fn area(&self, _shape: &Rectangle) -> f64 {
+14 | |         1.0
+15 | |     }
+16 | | }
+   | |_^
+   = help: for that trait implementation, expected `Rectangle`, found `Circle`
+   = note: required for `MyApp` to implement `CanUseComponent<AreaCalculatorComponent, Circle>`
+note: required by a bound in `__CheckMyApp`
+  --> tests/compile_fail/reference/macros/check_components_components_with_generic_parameters_caret_on_parameter.rs:27:1
+   |
+27 | / check_components! {
+28 | |     MyApp {
+29 | |         AreaCalculatorComponent: [Rectangle, Circle],
+30 | |     }
+31 | | }
+   | |_^ required by this bound in `__CheckMyApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -34,8 +34,8 @@ writing both macros by hand would emit.
 
 **It is aimed at simple wiring and at getting started, not at being the default everywhere.** Its value is
 that a newcomer cannot forget the check and then run into the confusing errors lazy wiring produces. The
-derivation understands only a mapping keyed on a component *name*, though, so a codebase whose wiring grows
-past that keeps the two macros separate. The reasons are in
+derivation understands only `:` and `->` mappings keyed on a component *name*, though, so a codebase whose
+wiring grows past that keeps the two macros separate. The reasons are in
 [When to use it](#when-to-use-it).
 
 ## Usage
@@ -59,7 +59,8 @@ works".
 
 The derived trait is named `__CanUse{Context}` (`__CanUseScaledRectangle`). That deliberately differs from
 the `__Check{Context}` name [`check_components!`](./check_components.md) derives, so both macros can be used
-once each in the same module without colliding. Override it with a table-level `#[check_trait(Name)]`:
+once each in the same module without colliding. Override it with a table-level `#[check_trait(Name)]`,
+the one attribute the table accepts:
 
 ```rust
 delegate_and_check_components! {
@@ -70,6 +71,9 @@ delegate_and_check_components! {
 }
 ```
 
+A second table attribute fails with `Expected exactly one attribute for the check trait name`, and any
+other attribute with ``Expected `#[check_trait]` attribute for specifying the check trait name``.
+
 ### Components with generic parameters
 
 A component with type parameters needs `#[check_params(...)]` on its entry. The delegation half does not
@@ -79,26 +83,21 @@ macro cannot infer what from the delegation alone:
 ```rust
 delegate_and_check_components! {
     MyApp {
-        #[check_params(
-            Rectangle,
-            Circle,
-        )]
-        AreaCalculatorComponent:
-            UseDelegate<new AreaCalculatorComponents {
-                Rectangle: RectangleArea,
-                Circle: CircleArea,
-            }>,
+        #[check_params(Rectangle, Circle)]
+        AreaCalculatorComponent: ShapeArea, // a provider generic over the shape
     }
 }
 ```
 
-The same single-versus-tuple convention as `check_components!` applies: one parameter bare, several as a
-tuple.
+Each listed parameter produces its own check, and the same single-versus-tuple convention as
+`check_components!` applies: one parameter bare, several as a tuple. Leave the attribute off and the
+check tests the component at unit parameters instead, as [Common Mistakes](#common-mistakes)
+describes.
 
 ### Skipping one entry's check
 
 `#[skip_check]` wires an entry and generates no check for it, for a component verified elsewhere. It saves
-splitting out a second plain `delegate_components!` block just to leave one component unchecked:
+splitting out a second plain `delegate_components!` block only to leave one component unchecked:
 
 ```rust
 delegate_and_check_components! {
@@ -110,7 +109,10 @@ delegate_and_check_components! {
 ```
 
 The two per-entry attributes are **mutually exclusive**, and at most one may appear on a given key. A
-second one is rejected, as is any other attribute, and `#[skip_check]` takes no arguments.
+second one fails with ``Expected at most one `#[check_params]` or `#[skip_check]` attribute``, any
+other attribute with
+``Expected either `#[skip_check]` or `#[check_params]` attribute for specifying the check generics``,
+and `#[skip_check]` given arguments with `` `#[skip_check]` does not take any arguments ``.
 
 ### Attributes on a list key merge
 
@@ -139,14 +141,22 @@ they ask for opposite things:
 error: cannot combine #[skip_check] with #[check_params]
 ```
 
+Merged lists concatenate rather than deduplicate, so a parameter named at both levels is checked twice,
+and the two identical check impls conflict with `E0119`.
+
 ### Two forms that quietly check nothing
 
 An **empty** `#[check_params()]` has no parameters to iterate over, so it skips the entry exactly as
-`#[skip_check]` would, without saying so. Write `#[skip_check]` to say so directly.
+`#[skip_check]` would, without saying so. Write `#[skip_check]` to say so directly. A table whose every
+entry is skipped this way, or is empty, still emits the check trait, with no impls, and so verifies
+nothing.
 
 A key carrying **only generics** is the opposite case and is easy to assume away: it *is* still checked,
-with its generics bound on the check impl and unit parameters. `<I> FooKey<I>: FooProvider` derives
-`impl<I> __CanUseContext<FooKey<I>, ()> for Context {}`, which keeps `I` from appearing unbound.
+with its generics bound on the check impl and unit parameters. `<I> FooKeyComponent<I>: AnyFoo` derives
+`impl<I> __CanUseApp<FooKeyComponent<I>, ()> for App {}`, which keeps `I` from appearing unbound. For a
+component whose marker carries the trait's own parameter, those unit parameters do not match what the
+provider implements, so the check fails with `E0277` on `AnyFoo: IsProviderFor<FooKeyComponent<I>, App>`.
+Name the key's generic as the parameter instead, with `#[check_params(I)]`.
 
 ### What is wired, and what is checked
 
@@ -168,13 +178,15 @@ literally the same evaluation.
 | `open` / `namespace` / `for` | yes | **no** |
 
 Nothing warns about the rows that are not checked: the block compiles, the wiring is correct, and those
-components simply go unverified. That silence is the practical reason to split the macros once a table uses
-more than plain entries. A standalone [`check_components!`](./check_components.md) block can name the
+components go unverified. That silence is the practical reason to split the macros once a table uses more
+than plain entries. A standalone [`check_components!`](./check_components.md) block can name the
 concrete parameters an opened component needs and cover what a namespace brought in.
 
 Attributes are accepted only where they mean something. `#[check_params(...)]` and `#[skip_check]` attach
-to the table's single and list keys; on an `@`-path key, or inside a `for` loop, they are rejected outright
-rather than read and ignored.
+to the table's single and list keys of `:` and `->` mappings. On an `@`-path key, on the key of a `=>`
+mapping, or inside a `for` loop they fail with the `unsupported attribute: …` error
+`delegate_components!` raises, rather than being read and ignored. The one place an attribute is dropped
+instead is a key inside a nested table, as [Common Mistakes](#common-mistakes) records.
 
 ## Examples
 
@@ -203,31 +215,33 @@ delegate_and_check_components! {
 If `MyContext` were missing the `name` field, the derived check would fail here, naming the missing field,
 rather than letting the gap survive to some later call to `name()`.
 
-Mixing checked and skipped entries lets a nested delegation be verified more precisely elsewhere while the
-rest is checked inline:
+Mixing checked and skipped entries lets a nested provider stack be verified more precisely elsewhere while
+the rest is checked inline. Here the perimeter entry is checked inline, and the scaled area calculator is
+checked one layer at a time by a standalone block:
 
 ```rust
 delegate_and_check_components! {
     ScaledRectangle {
-        AreaCalculatorComponent:
-            ScaledArea<RectangleArea>,
+        PerimeterCalculatorComponent:
+            RectanglePerimeter,
 
         #[skip_check]
-        TransformCalculatorComponent:
-            ComplexTransform<RectangleArea>,
+        AreaCalculatorComponent:
+            ScaledArea<RectangleArea>,
     }
 }
 
 check_components! {
-    #[check_providers(RectangleArea, ComplexTransform<RectangleArea>)]
+    #[check_providers(RectangleArea, ScaledArea<RectangleArea>)]
     ScaledRectangle {
-        TransformCalculatorComponent,
+        AreaCalculatorComponent,
     }
 }
 ```
 
 That pairing is the usual reason to use `#[skip_check]`: the fused derivation can only check the
-context, and a nested stack is better checked per layer.
+context, and a nested stack is better checked per layer, where a dependency missing from the inner
+`RectangleArea` fails on both providers and one missing only from `ScaledArea` fails on it alone.
 
 ## When to use it
 
@@ -318,7 +332,10 @@ A generic table threads its generics through both halves, so `<T> MyContext<T> {
 `impl<T> DelegateComponent<…> for MyContext<T>` alongside
 `impl<T> __CanUseMyContext<…, ()> for MyContext<T> {}`. A key carrying its own generics is bound on the
 derived check the same way, so `<I> BarGetterAtComponent<I>: UseField<Symbol!("dummy")>` checks as
-`impl<I> __CanUse…<BarGetterAtComponent<I>, ()> for MyContext {}`.
+`impl<I> __CanUse…<BarGetterAtComponent<I>, ()> for MyContext {}`, and a `#[check_params(...)]` value
+that mentions the key's generic is bound the same way: `#[check_params((I, Index<0>))]` on that entry
+checks as `impl<I> __CanUse…<BarGetterAtComponent<I>, (I, Index<0>)> for MyContext {}`. So a component
+with a generic marker can be wired and checked in one step.
 
 ## Formal grammar
 
@@ -326,7 +343,7 @@ The body is [`delegate_components!`](./delegate_components.md)'s table shape plu
 Rust Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
 
 ```ebnf
-DelegateAndCheck -> TableAttr* Generics? `new`? TargetType `{` TableBody `}`
+DelegateAndCheck -> TableAttr? Generics? `new`? TargetType `{` TableBody `}`
 
 TableAttr        -> `#` `[` `check_trait` `(` IDENTIFIER `)` `]`
 
@@ -335,15 +352,19 @@ TableBody        -> Statement* ( CheckedMapping ( `,` CheckedMapping )* `,`? )?
 CheckedMapping   -> EntryAttr? Mapping    // Mapping, Key, ProviderValue, Statement
                                           // see delegate_components!
 
-EntryAttr        -> `#` `[` `check_params` `(` Type ( `,` Type )* `,`? `)` `]`
+EntryAttr        -> `#` `[` `check_params` `(` ( Type ( `,` Type )* `,`? )? `)` `]`
                   | `#` `[` `skip_check` `]`
 ```
 
 The `Mapping`, `Key`, `ProviderValue`, and `Statement` productions are exactly
 [`delegate_components!`](./delegate_components.md)'s; only the attributes differ. The table-level
-`#[check_trait(...)]` overrides the derived `__CanUse{Context}` name. Each mapping may carry at most one
-`EntryAttr`, and the two are mutually exclusive: `#[check_params(...)]` supplies the parameters a generic
-component's check needs, and `#[skip_check]` wires the entry with no check at all.
+`#[check_trait(...)]` overrides the derived `__CanUse{Context}` name, and it is the only attribute the
+table accepts. Each mapping may carry at most one `EntryAttr`, and the two are mutually exclusive:
+`#[check_params(...)]` supplies the parameters a generic component's check needs, and `#[skip_check]`
+wires the entry with no check at all. An `EntryAttr` is accepted on a single key, on a list key, and on a
+single key inside a list, and only for a `:` or `->` mapping. The grammar is therefore more permissive
+than the derivation, as [What is wired, and what is checked](#what-is-wired-and-what-is-checked)
+explains.
 
 ## Common Mistakes
 
@@ -353,13 +374,13 @@ dependencies. When the bundled provider needs nothing, the check passes and prov
 anything from its context, the check fails and blames the bundle:
 
 ```text
-error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>`
-              is not satisfied
-note: required for `RectangleArea` to implement
-      `IsProviderFor<AreaCalculatorComponent, GeometryComponents>`
+error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>` is not satisfied
+note: required for `RectangleArea` to implement `IsProviderFor<AreaCalculatorComponent, GeometryComponents>`
 ```
 
-Neither outcome is informative, and neither says the target was never meant to be a context. Use plain
+The help line between them says the bundle does not implement `HasField` for the field
+`RectangleArea` reads, which is the real context's job. Neither outcome is informative, and neither
+says the target was never meant to be a context. Use plain
 [`delegate_components!`](./delegate_components.md) for a bundle.
 
 **The two per-entry attributes cannot be combined**, and the macro says so rather than picking one:
@@ -368,18 +389,24 @@ Neither outcome is informative, and neither says the target was never meant to b
 error: Expected at most one `#[check_params]` or `#[skip_check]` attribute
 ```
 
-**A generic component without `#[check_params(...)]` cannot be checked, and the error does not say so.** The
-delegation succeeds; the derived check is emitted with an empty parameter tuple, which a component expecting a
-type parameter can never satisfy. An ordinary unsatisfied-marker complaint against the
-provider surfaces instead:
+**A generic component without `#[check_params(...)]` is checked at unit parameters**, and the result says
+little either way. The derived check tests `CanCalculateArea<()>`, the component with `()` in place of
+the shape. A provider generic over every shape passes it vacuously, proving nothing about the shapes the
+context uses. A provider written for particular shapes fails it, with an error that reads like a broken
+provider rather than an incomplete check:
 
 ```text
-error[E0277]: the trait bound `RectArea: IsProviderFor<AreaCalculatorComponent, App2>` is not satisfied
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, MyApp>` is not satisfied
 ```
 
-Nothing in it mentions the missing parameters, so it reads like a broken provider rather than an incomplete
-check. Add `#[check_params(...)]`, or move the entry to a standalone
+Only a help line hints at the cause, noting that the provider implements the marker for `Rectangle` but
+not for `()`. Add `#[check_params(...)]`, or move the entry to a standalone
 [`check_components!`](./check_components.md).
+
+**An attribute on a key inside a nested table is silently dropped.** In
+`UseDelegate<new AreaCalculatorComponents { #[skip_check] Rectangle: RectangleArea }>`, the inner
+`#[skip_check]` compiles and does nothing, where `delegate_components!` would reject it. The inner table's
+entries are never checked in any case, since only the outer key becomes a check.
 
 **An inherited, opened, or redirected component is not covered.** A `namespace` header, an `open`
 statement, an `@`-path key, and a `=>` redirect are all accepted in the table and all wired, but the

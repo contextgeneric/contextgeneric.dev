@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `Person: CanUseComponent<GreeterComponent>` is not satisfied
+  --> tests/compile_fail/reference/macros/check_components_examples_wrong_field_name.rs:29:9
+   |
+29 |         GreeterComponent,
+   |         ^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` is not implemented for `Person`
+      but trait `HasField<Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is implemented for it
+  --> tests/compile_fail/reference/macros/check_components_examples_wrong_field_name.rs:17:9
+   |
+17 |     pub first_name: String, // GreetHello needs `name`
+   |         ^^^^^^^^^^
+note: required for `GreetHello` to implement `IsProviderFor<GreeterComponent, Person>`
+  --> tests/compile_fail/reference/macros/check_components_examples_wrong_field_name.rs:8:1
+   |
+ 8 | #[cgp_impl(new GreetHello)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Person` to implement `CanUseComponent<GreeterComponent>`
+note: required by a bound in `__CheckPerson`
+  --> tests/compile_fail/reference/macros/check_components_examples_wrong_field_name.rs:27:1
+   |
+27 | / check_components! {
+28 | |     Person {
+29 | |         GreeterComponent,
+30 | |     }
+31 | | }
+   | |_^ required by this bound in `__CheckPerson`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

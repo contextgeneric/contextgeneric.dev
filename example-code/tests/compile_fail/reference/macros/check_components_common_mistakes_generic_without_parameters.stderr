@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, MyApp>` is not satisfied
+  --> tests/compile_fail/reference/macros/check_components_common_mistakes_generic_without_parameters.rs:28:9
+   |
+28 |         AreaCalculatorComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, MyApp, ()>` is not implemented for `RectangleArea`
+      but trait `IsProviderFor<AreaCalculatorComponent, MyApp, Rectangle>` is implemented for it
+  --> tests/compile_fail/reference/macros/check_components_common_mistakes_generic_without_parameters.rs:11:1
+   |
+11 | / impl AreaCalculator<Rectangle> {
+12 | |     fn area(&self, _shape: &Rectangle) -> f64 {
+13 | |         1.0
+14 | |     }
+15 | | }
+   | |_^
+   = help: for that trait implementation, expected `Rectangle`, found `()`
+   = note: required for `MyApp` to implement `CanUseComponent<AreaCalculatorComponent>`
+note: required by a bound in `__CheckMyApp`
+  --> tests/compile_fail/reference/macros/check_components_common_mistakes_generic_without_parameters.rs:26:1
+   |
+26 | / check_components! {
+27 | |     MyApp {
+28 | |         AreaCalculatorComponent,
+29 | |     }
+30 | | }
+   | |_^ required by this bound in `__CheckMyApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

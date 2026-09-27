@@ -1,0 +1,5 @@
+error: expected `:`
+  --> tests/compile_fail/reference/macros/delegate_components_common_mistakes_statements_lead.rs:27:14
+   |
+27 |         open PerimeterCalculatorComponent;
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,5 +1,5 @@
 error: expected `:`
-  --> tests/compile_fail/reference/macros/delegate_components_gotchas.rs:20:44
+  --> tests/compile_fail/reference/macros/delegate_components_common_mistakes_braced_group_then_path.rs:20:44
    |
 20 |         @FooProviderComponent.{String, u32}.bool: DummyFoo,
    |                                            ^

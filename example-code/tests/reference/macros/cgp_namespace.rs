@@ -67,6 +67,72 @@ pub mod usage {
     }
 }
 
+/// ### The rest of the body grammar
+///
+/// The two shared forms the section says are worth writing in a namespace: `open`, which is
+/// another spelling of `Component => @Component`, and a nested table, which every joining context
+/// inherits. The page names no types here; they are declared.
+pub mod the_rest_of_the_body_grammar {
+    use cgp::prelude::*;
+
+    #[cgp_component(ShapeArea)]
+    #[derive_delegate(UseDelegate<Shape>)]
+    pub trait CanShapeArea<Shape> {
+        fn shape_area(&self, shape: &Shape) -> f64;
+    }
+
+    #[cgp_component(Greeter)]
+    pub trait CanGreet {
+        fn greet(&self) -> String;
+    }
+
+    #[cgp_impl(new AnyArea)]
+    impl<Shape> ShapeArea<Shape> {
+        fn shape_area(&self, _shape: &Shape) -> f64 {
+            1.0
+        }
+    }
+
+    #[cgp_impl(new GreetHello)]
+    impl Greeter {
+        fn greet(&self) -> String {
+            "hello".to_owned()
+        }
+    }
+
+    cgp_namespace! {
+        new AppNamespace {
+            open GreeterComponent;
+
+            ShapeAreaComponent:
+                UseDelegate<new ShapeTable {
+                    u32: AnyArea,
+                    String: AnyArea,
+                }>,
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            namespace AppNamespace;
+
+            @GreeterComponent: GreetHello,
+        }
+    }
+
+    mod check_app {
+        use super::*;
+        check_components! {
+            App {
+                GreeterComponent,
+                ShapeAreaComponent: [u32, String],
+            }
+        }
+    }
+}
+
 /// ## Inheriting from a parent
 ///
 /// The child that rewrites the `@cgp.core.error` prefix onto `@app`, and the header-only child
@@ -144,6 +210,22 @@ pub mod inheriting_from_a_parent {
             }
         }
     }
+}
+
+/// A header-only child written without `new`, which emits only the inheritance impl, so the trait
+/// and struct it names are declared by hand.
+pub mod header_without_new {
+    use cgp::prelude::*;
+
+    cgp_namespace! { new BaseNamespace {} }
+
+    pub trait ExtendedNamespace<__Table__> {
+        type Delegate;
+    }
+
+    pub struct __ExtendedNamespaceComponents;
+
+    cgp_namespace! { ExtendedNamespace: BaseNamespace }
 }
 
 /// ## The other two halves: registering, and joining
@@ -280,6 +362,75 @@ pub mod examples {
     }
 }
 
+/// ## When to use it
+///
+/// An aggregate provider behind a namespace path, in both shapes the section names: a bundle keyed
+/// by bare component names, and a bundle grouping paths, which must join the namespace itself.
+pub mod when_to_use_it {
+    use cgp::prelude::*;
+
+    cgp_namespace! { new AppNamespace {} }
+
+    #[cgp_component(Greeter)]
+    #[prefix(@app.core.user in AppNamespace)]
+    pub trait CanGreet {
+        fn greet(&self) -> u8;
+    }
+
+    #[cgp_impl(new GreetOne)]
+    impl Greeter {
+        fn greet(&self) -> u8 {
+            1
+        }
+    }
+
+    delegate_components! {
+        new UserComponents {
+            GreeterComponent: GreetOne,
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            namespace AppNamespace;
+
+            @app.core.user: UserComponents,
+        }
+    }
+
+    delegate_components! {
+        new CoreComponents {
+            namespace AppNamespace;
+
+            @app.core.user: UserComponents,
+        }
+    }
+
+    pub struct CoreApp;
+
+    delegate_components! {
+        CoreApp {
+            namespace AppNamespace;
+
+            @app.core: CoreComponents,
+        }
+    }
+
+    mod check_apps {
+        use super::*;
+        check_components! { App { GreeterComponent } }
+        check_components! { CoreApp { GreeterComponent } }
+    }
+
+    #[test]
+    fn both_bundles_answer_through_the_path() {
+        assert_eq!(App.greet(), 1);
+        assert_eq!(CoreApp.greet(), 1);
+    }
+}
+
 /// ## Under the hood
 ///
 /// The input whose expansion the page walks through. Only the input is checked here; the generated
@@ -304,9 +455,7 @@ pub mod under_the_hood {
 
 /// ## Common Mistakes
 ///
-/// The page quotes four errors; three carry a snippet the compiler must refuse, each a trybuild
-/// fixture. The fourth, a registered component with no provider bound anywhere, is the fixture on
-/// the `#[prefix(...)]` page.
+/// Every error the page quotes has a trybuild fixture.
 ///
 /// Joining two namespaces on one context, `E0119` —
 /// `tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_two_namespaces_joined.rs`.
@@ -316,6 +465,19 @@ pub mod under_the_hood {
 ///
 /// A namespace inheriting itself, `E0207` —
 /// `tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_self_inheriting.rs`.
+///
+/// A context overriding a key its namespace binds, `E0119` —
+/// `tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_context_overrides_bound_key.rs`.
+///
+/// A child namespace adding a longer path beneath one its parent routes, `E0119` —
+/// `tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_child_redefines_parent_path.rs`.
+///
+/// A registered component whose route nothing binds, `E0277` —
+/// `tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_unbound_route.rs`.
+///
+/// A `namespace` statement written with a path, ``expected `;` `` — shared with the
+/// `delegate_components!` page, as
+/// `tests/compile_fail/reference/macros/delegate_components_the_namespace_statements_namespace_path.rs`.
 ///
 /// The *Inheriting from a parent* section also states that only the end of the input may follow a
 /// header written without braces; the macro's `expected curly braces` rejection of a stray token is

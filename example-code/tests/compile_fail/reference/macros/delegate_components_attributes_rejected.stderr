@@ -1,0 +1,5 @@
+error: unsupported attribute: allow
+  --> tests/compile_fail/reference/macros/delegate_components_attributes_rejected.rs:25:9
+   |
+25 |         #[allow(unused)]
+   |         ^

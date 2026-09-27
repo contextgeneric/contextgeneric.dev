@@ -57,7 +57,8 @@ check_components! {
 }
 ```
 
-Several tables may appear in one invocation, each with its own context type and attributes.
+Several tables may appear in one invocation, one after another with no separator, each with its own
+context type and attributes. An invocation with no table at all is accepted and emits nothing.
 
 ### Components with generic parameters
 
@@ -85,15 +86,21 @@ check_components! {
 }
 ```
 
-That is four checks from one entry. A table may also carry a leading `<...>` generic list and a trailing
-`where` clause, to introduce and constrain generics the checked parameters use.
+That is four checks from one entry. A table may also carry a leading `<...>` generic list and a `where`
+clause after the context type, to introduce and constrain generics the checked parameters use, and a
+parameter may carry a generic list of its own, as in `AreaCalculatorComponent: <'a> &'a Rectangle`.
+
+A failed check points at the entry it came from. The caret lands on the component, or on the
+parameter when a bracketed value lists more parameters than its key names components, so
+`AreaCalculatorComponent: [Rectangle, Circle]` shows which of the two shapes failed.
 
 ### Naming the check trait
 
 The macro derives a trait name of the form `__Check{Context}` (`__CheckPerson`) from the **final segment**
 of the context's path, so `some_mod::Person` also yields `__CheckPerson`. Override it with
 `#[check_trait(Name)]` on the table. You need this when two tables in one module would otherwise
-collide:
+collide, and when the context is not a path at all, such as `&'a Person`, from which no name can be
+derived:
 
 ```rust
 check_components! {
@@ -130,20 +137,18 @@ check_components! {
 **This localizes a broken layer of a nested provider stack**, and it is the main reason to keep
 `check_components!` separate from the wiring. A dependency missing only from the outer wrapper fails the
 wrapper's line alone, while one missing from the inner provider fails both. The pattern of failures
-tells you which layer to look at. It must list at least one provider, and may appear at most once per table.
+tells you which layer to look at. It must list at least one provider, and may appear at most once per
+table. The listed providers are checked against the table's context type as written, so this form needs a
+concrete context rather than a generic table, as [Common Mistakes](#common-mistakes) explains.
 
 ## Examples
 
-A check that catches a real mistake. The provider needs a `name` field, and the context has the wrong field
+A check that catches a real mistake. The provider reads a `name` field through an
+[`#[implicit]`](../attributes/implicit.md) argument, and the context stores the value under another
 name:
 
 ```rust
 use cgp::prelude::*;
-
-#[cgp_auto_getter]
-pub trait HasName {
-    fn name(&self) -> &str;
-}
 
 #[cgp_component(Greeter)]
 pub trait CanGreet {
@@ -151,10 +156,9 @@ pub trait CanGreet {
 }
 
 #[cgp_impl(new GreetHello)]
-#[uses(HasName)]
 impl Greeter {
-    fn greet(&self) {
-        println!("Hello, {}!", self.name());
+    fn greet(&self, #[implicit] name: &str) {
+        println!("Hello, {name}!");
     }
 }
 
@@ -177,8 +181,13 @@ check_components! {
 ```
 
 The `delegate_components!` block compiles on its own, because wiring is lazy. The `check_components!` block
-does not. It fails *here*, naming the missing field, rather than at some later `person.greet()` in
-another file.
+does not. It fails *here*, with `E0277` at the `GreeterComponent` entry, and the compiler's help names
+the cause: `Person` does not implement `HasField` for the `name` tag, which rustc prints as the nested
+`Symbol<4, Chars<'n', …>>` type. The mismatch is reported at the wiring rather than at some later
+`person.greet()` in another file. [`cargo cgp check`](/docs/cargo-cgp/check) reports the same failure
+with the root cause first, as ``[CGP-E106] missing field `name` on `Person` ``. `cargo cgp check`
+leads with the root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not
+yet reshape every class.
 
 A generic component supplies its parameters, and the bracketed form checks several at once:
 
@@ -208,7 +217,8 @@ choice of macro scales with the wiring's complexity.
   read: the `open` statement, `@`-path keys, and [namespaces](./cgp_namespace.md).
 - **Use [`delegate_and_check_components!`](./delegate_and_check_components.md) while getting started, or for
   plain `Component: Provider` tables.** It fuses wiring and checking so the check cannot be forgotten. A
-  newcomer needs exactly that. Its derivation understands only the plain entry form.
+  newcomer needs exactly that. Its derivation understands only `:` and `->` entries keyed on a component
+  name.
 - **Do not check an [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time) as
   though it were a context.** A `new`-keyword bundle is delegated *to*; it has no fields and never stands in
   the context position, so a context-side check on it asks the wrong question. Verify it through a real
@@ -288,7 +298,7 @@ The input is one or more check tables, in the Rust Reference's
 [notation](https://doc.rust-lang.org/reference/notation.html):
 
 ```ebnf
-CheckComponents -> CheckTable+
+CheckComponents -> CheckTable*
 
 CheckTable      -> TableAttr* Generics? ContextType WhereClause? `{` CheckEntries `}`
 
@@ -310,14 +320,17 @@ CheckValue      -> CheckParam
 CheckParam      -> Generics? Type
 ```
 
-One invocation may carry several `CheckTable`s, written one after another with no separator. This is how
-a module checks two contexts from one block. Both `TableAttr`s are optional, each may appear at most once,
-and any other attribute is rejected by name rather than ignored. `#[check_trait(...)]` overrides the derived
-`__Check{Context}` name, and `#[check_providers(...)]` switches the assertion to the listed providers. A
-`CheckEntry`'s value is omitted for a component with no generic parameters; when present, a bracketed
-`CheckKey` or `CheckValue` expands to the cartesian product. A `CheckParam` may carry its own generic list,
-which is merged with the table's before the impl is emitted. `Generics`, `WhereClause`, and `Type` are Rust
-grammar productions.
+One invocation may carry several `CheckTable`s, written one after another with no separator, or none
+at all. This is how a module checks two contexts from one block. Both `TableAttr`s are optional, in
+either order, and each may appear at most once: a repeat fails with
+``Multiple `#[check_trait]` attributes found. Expected at most one.`` or its `check_providers` twin.
+Any other attribute is rejected by name, as `Invalid attribute #[allow(unused)]`, rather than
+ignored. `#[check_trait(...)]` overrides the derived `__Check{Context}` name, and
+`#[check_providers(...)]` switches the assertion to the listed providers. A `CheckEntry`'s value is
+omitted for a component with no generic parameters; when present, a bracketed `CheckKey` or
+`CheckValue` expands to the cartesian product. A `CheckParam` may carry its own generic list, which
+is merged with the table's before the impl is emitted. `Generics`, `WhereClause`, and `Type` are
+Rust grammar productions.
 
 Both bracketed lists accept **zero** elements, and the empty forms behave differently. An empty value
 list, `FooComponent: []`, falls back to the no-parameter check, exactly as omitting the colon would. An
@@ -332,26 +345,26 @@ provider's dependencies. If that provider has none, the check passes vacuously a
 needs anything from its context, such as a field or a type, the check fails, blaming the bundle:
 
 ```text
-error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>`
-              is not satisfied
-note: required for `RectangleArea` to implement
-      `IsProviderFor<AreaCalculatorComponent, GeometryComponents>`
+error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculatorComponent>` is not satisfied
+note: required for `RectangleArea` to implement `IsProviderFor<AreaCalculatorComponent, GeometryComponents>`
 ```
 
 Nothing there says the target was never meant to be a context. Wire the bundle with plain
 [`delegate_components!`](./delegate_components.md) and check it through a real context instead.
 
-**A component with generic parameters cannot be checked without them, and the error does not say so.**
-Omitting the value emits a check with an empty parameter tuple, which a component expecting a `Shape` can
-never satisfy. You get an ordinary unsatisfied-wiring complaint that never mentions the
-parameters:
+**A component with generic parameters checked without them is checked at `()`.** Omitting the value
+emits a check with unit parameters, which asks whether the context can use `CanCalculateArea<()>`. A
+provider generic over every shape passes that vacuously, proving nothing about the shapes the context
+uses. A provider written for particular shapes fails it, with a complaint that reads like a broken
+provider:
 
 ```text
-error[E0277]: the trait bound `App: CanUseComponent<AreaCalculatorComponent>` is not satisfied
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, MyApp>` is not satisfied
 ```
 
-That looks identical to a broken wiring. If a check fails on a generic component and the wiring
-looks right, the missing value is the first thing to suspect.
+Only a help line hints at the cause, noting that the provider implements the marker for `Rectangle`
+but not for `()`. If a check on a generic component fails or passes too easily, the missing value is
+the first thing to suspect.
 
 **`#[check_providers(...)]` must list at least one provider**, and is rejected rather than treated as a
 no-op:
@@ -359,6 +372,16 @@ no-op:
 ```text
 error: `#[check_providers(...)]` requires at least one provider type.
 ```
+
+**`#[check_providers(...)]` does not work on a generic table.** The generated trait names the context
+type in its supertrait, `IsProviderFor<__Component__, Gen<T>, __Params__>`, but the table's generics
+reach only the impls, so `#[check_providers(RectangleArea)] <T> Gen<T> { … }` fails with `E0425`,
+``cannot find type `T` in this scope``, and an `E0207` beside it. Check a concrete instantiation such
+as `Gen<u32>` instead.
+
+**Listing one check twice conflicts.** The same component and parameters named twice, directly or
+through a bracketed list such as `[AreaCalculatorComponent, AreaCalculatorComponent]`, emit two
+identical impls and fail with `E0119`.
 
 **Two tables in one module can collide on the derived name.** The name comes from the context's *last* path
 segment, so `a::Person` and `b::Person` both derive `__CheckPerson`, and so do two tables for the same
@@ -370,9 +393,12 @@ error[E0428]: the name `__CheckPerson` is defined multiple times
 
 Use `#[check_trait(...)]` on one of them.
 
-**A passing check is not a claim that the implementation is correct**, only that it resolves. It
-proves the
-provider was found and its dependencies are satisfiable, not that the provider does what you meant.
+**A context that is not a path needs a named trait.** A reference context such as `&'a Person` gives
+the macro no identifier to derive a name from, and the table fails with `expected identifier` at the
+context type, which does not say a name is missing. Add `#[check_trait(Name)]`.
+
+**A passing check is not a claim that the implementation is correct**, only that it resolves. It proves
+the provider was found and its dependencies are satisfiable, not that the provider does what you meant.
 
 ## Related constructs
 

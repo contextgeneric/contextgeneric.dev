@@ -1,0 +1,5 @@
+error[E0747]: constant provided when a type was expected
+  --> tests/compile_fail/reference/macros/delegate_components_common_mistakes_const_new_target.rs:17:37
+   |
+17 |     <const N: usize> new ArrayTable<N> {
+   |                                     ^

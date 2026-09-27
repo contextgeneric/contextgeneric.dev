@@ -1,0 +1,14 @@
+error[E0119]: conflicting implementations of trait `__CanUseMyApp<AreaCalculatorComponent, Rectangle>` for type `MyApp`
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_attributes_on_a_list_key_merge_duplicate_parameter.rs:28:1
+   |
+28 | / delegate_and_check_components! {
+29 | |     MyApp {
+30 | |         #[check_params(Rectangle)]
+...  |
+33 | |             AreaCalculatorComponent,
+   | |                                   ^
+   | |                                   |
+   | |___________________________________first implementation here
+   |                                     conflicting implementation for `MyApp`
+   |
+   = note: this error originates in the macro `delegate_and_check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

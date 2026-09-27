@@ -1,0 +1,5 @@
+error: expected `,`
+  --> tests/compile_fail/reference/macros/delegate_components_formal_grammar_inner_table_bound.rs:27:42
+   |
+27 |         <T> WidthKey<T>: UseDelegate<new WidthValue<T: Clone> {
+   |                                          ^^^^^^^^^^

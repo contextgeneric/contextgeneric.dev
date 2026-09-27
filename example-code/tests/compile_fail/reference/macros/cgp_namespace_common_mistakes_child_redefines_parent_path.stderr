@@ -1,0 +1,7 @@
+error[E0119]: conflicting implementations of trait `ExtendedNamespace<_>` for type `PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', Nil>>>>, PathCons<Seg, _>>`
+  --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_child_redefines_parent_path.rs:14:14
+   |
+13 |     new ExtendedNamespace: BaseNamespace {
+   |                            ------------- first implementation here
+14 |         @app.Seg => @child,
+   |              ^^^ conflicting implementation for `PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', Nil>>>>, PathCons<Seg, _>>`
