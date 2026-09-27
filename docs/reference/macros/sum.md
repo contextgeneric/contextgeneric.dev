@@ -61,7 +61,7 @@ pub enum Shape {
     Rectangle { width: f64, height: f64 },
 }
 
-// generated (schematically):
+// generated, among other impls:
 // impl HasFields for Shape {
 //     type Fields = Sum![
 //         Field<Symbol!("Circle"), f64>,
@@ -73,10 +73,20 @@ pub enum Shape {
 // }
 ```
 
-A couple of things to notice. The variant names are [`Symbol!`](./symbol.md) [type-level strings](/docs/reference/glossary#type-level-string), exactly as field names
-are. And a struct-like variant nests a [`Product!`](./product.md) of its own fields, so an enum's full shape is
-a sum of variants whose payloads may themselves be records. Generic code walks the `Sum!` to find which variant
-a value holds, then walks the nested `Product!` to reach that variant's fields.
+A couple of things to notice. The variant names are [`Symbol!`](./symbol.md)
+[type-level strings](/docs/reference/glossary#type-level-string), exactly as field names are. And a
+variant's payload follows its fields, so an enum's full shape is a sum of variants whose payloads may
+themselves be records:
+
+- **A single unnamed field** is the payload type itself, as `Circle(f64)` gives `f64`.
+- **Named fields** nest a [`Product!`](./product.md) of `Field` entries, as `Rectangle` does.
+- **Several unnamed fields** nest a `Product!` keyed by [`Index`](../types/index_type.md), so
+  `Pair(f64, f64)` gives `Product![Field<Index<0>, f64>, Field<Index<1>, f64>]`.
+- **A unit variant** carries `Nil`.
+
+Generic code walks the `Sum!` to find which variant a value holds, then walks a nested `Product!` to
+reach that variant's fields. `#[derive(HasFields)]` accepts all four shapes; the variant derives that
+build and take apart values accept only the first, as [Common Mistakes](#common-mistakes) explains.
 
 A standalone sum can be written directly, which is mostly useful for illustration:
 
@@ -121,7 +131,7 @@ the rest of the chain. So a value of `Either<A, Either<B, Either<C, Void>>>` is 
 The terminator is `Void`, an **empty enum that can never be constructed**, and choosing it rather than `Nil` is
 the essential decision here. Reaching the `Void` position would mean the value matched none of the listed
 types, which is impossible. So the type system knows the chain is exhausted. An empty `Sum![]` is therefore
-just `Void`: a type with no values.
+`Void`: a type with no values.
 
 That is precisely the asymmetry with [`Product!`](./product.md). A product terminates in `Nil` because an empty
 record is a perfectly good value; a sum terminates in `Void` because an empty choice is *uninhabited*, there
@@ -161,9 +171,17 @@ name-tagged [`Field`](../types/field.md)s and the operations match on names, so 
 But the *types* are still different, and a cast between two enums works through the name matching rather than
 by position.
 
-**A derivable enum's variants must each hold exactly one unnamed field.** That is a restriction of the
-extensible-data derives rather than of `Sum!` itself, and it is why richer payloads are wrapped in a dedicated
-struct: the variant's payload type has to be a single nameable type for the sum entry to carry it.
+**The variant derives need each variant to hold exactly one unnamed field.**
+[`#[derive(CgpData)]`](../derives/derive_cgp_data.md), `CgpVariant`, `ExtractField`, and `FromVariant`
+reject a struct-like, multi-field, or unit variant, while `#[derive(HasFields)]` accepts all of them:
+
+```text
+error: Expected variant to contain exactly one unnamed field
+```
+
+That is a restriction of those derives rather than of `Sum!` itself, and it is why richer payloads are
+wrapped in a dedicated struct, as `Rectangle(Rectangle)`: constructing or extracting a variant hands
+over its payload as one value, so the payload has to be a single type.
 
 ## Related constructs
 

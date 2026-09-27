@@ -1,0 +1,23 @@
+error: macro expansion ignores `,` and any tokens following
+ --> tests/compile_fail/reference/macros/symbol_common_mistakes_value_position.rs:5:24
+  |
+5 |     let _tag = Symbol!("name");
+  |                --------^^^^^^- caused by the macro expansion here
+  |
+  = note: the usage of `Symbol!` is likely invalid in expression context
+
+error[E0369]: binary operation `<` cannot be applied to type `fn(PhantomData<_>) -> cgp::prelude::Symbol<_, _> {cgp::prelude::Symbol::<_, _>}`
+ --> tests/compile_fail/reference/macros/symbol_common_mistakes_value_position.rs:5:24
+  |
+5 |     let _tag = Symbol!("name");
+  |                        ^^^^^^
+
+error[E0308]: mismatched types
+ --> tests/compile_fail/reference/macros/symbol_common_mistakes_value_position.rs:5:16
+  |
+5 |     let _tag = Symbol!("name");
+  |                ^^^^^^^^^^^^^^^ expected struct constructor, found integer
+  |
+  = note: expected struct constructor `fn(PhantomData<_>) -> cgp::prelude::Symbol<_, _> {cgp::prelude::Symbol::<_, _>}`
+                           found type `{integer}`
+  = note: this error originates in the macro `Symbol` (in Nightly builds, run with -Z macro-backtrace for more info)

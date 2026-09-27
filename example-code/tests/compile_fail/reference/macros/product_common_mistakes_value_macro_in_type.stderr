@@ -1,0 +1,11 @@
+error[E0214]: parenthesized type parameters may only be used with a `Fn` trait
+ --> tests/compile_fail/reference/macros/product_common_mistakes_value_macro_in_type.rs:4:16
+  |
+4 | pub type Row = product![u32, bool];
+  |                ^^^^^^^^^^^^^^^^^^^ only `Fn` traits may use parentheses
+  |
+  = note: this error originates in the macro `product` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use angle brackets instead
+  |
+4 | pub type Row = <product![u32, bool]>;
+  |                +                   +

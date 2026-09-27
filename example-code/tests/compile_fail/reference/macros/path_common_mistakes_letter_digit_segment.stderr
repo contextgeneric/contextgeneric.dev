@@ -1,0 +1,10 @@
+error[E0425]: cannot find type `f` in this scope
+ --> tests/compile_fail/reference/macros/path_common_mistakes_letter_digit_segment.rs:4:29
+  |
+4 | pub type Route = Path!(@app.f);
+  |                             ^ not found in this scope
+  |
+help: you might be missing a type parameter
+  |
+4 | pub type Route<f> = Path!(@app.f);
+  |               +++

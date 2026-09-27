@@ -1,0 +1,5 @@
+error: Expected variant to contain exactly one unnamed field
+ --> tests/compile_fail/reference/macros/sum_common_mistakes_variant_derive_shape.rs:7:5
+  |
+7 |     Rectangle { width: f64, height: f64 },
+  |     ^^^^^^^^^

@@ -65,7 +65,7 @@ pub struct Person {
     pub age: u8,
 }
 
-// generated:
+// generated, among other impls:
 // impl HasFields for Person {
 //     type Fields = Product![
 //         Field<Symbol!("name"), String>,
@@ -74,12 +74,15 @@ pub struct Person {
 // }
 ```
 
-The names are [`Symbol!`](./symbol.md) [type-level strings](/docs/reference/glossary#type-level-string) and each entry is a [`Field`](../types/field.md), so
-the whole `Product!` is a complete type-level description of `Person`'s layout. Generic code walks that list to
-build or read a `Person` without being written against `Person`.
+The names are [`Symbol!`](./symbol.md) [type-level strings](/docs/reference/glossary#type-level-string)
+and each entry is a [`Field`](../types/field.md), so the whole `Product!` is a complete type-level
+description of `Person`'s layout. Generic code walks that list to build or read a `Person` without being
+written against `Person`. The derive emits the same list again for `HasFieldsRef`, over references, along
+with the `ToFields`, `ToFieldsRef`, and `FromFields` conversions.
 
 You write `Product!` yourself in a handler pipeline, where the list *is* the program: the steps run
-left to right:
+left to right. Here `Multiply<Tag>` and `Add<Tag>` stand for computers that read a `u64` field named by
+`Tag`, so `MyContext` computes `((input * foo) + bar) * baz`:
 
 ```rust
 delegate_components! {
@@ -132,7 +135,7 @@ Cons<A, Cons<B, Cons<C, Nil>>>
 
 Both building blocks are ordinary types. `Cons<Head, Tail>` is a tuple struct holding the first element and the
 rest of the list (`Cons<Head, Tail>(pub Head, pub Tail)`), and `Nil` is a unit struct terminating it. Chaining
-through the tail gives a list of any length, and the empty `Product![]` is simply `Nil`. The macro builds the
+through the tail gives a list of any length, and the empty `Product![]` is `Nil`. The macro builds the
 chain by folding the elements right to left onto `Nil`.
 
 `product!` folds identically but produces a value, using `Cons`'s tuple-struct constructor:
@@ -176,12 +179,19 @@ type macro in expression position fails inside the macro's own parser, which is 
 message is a list of type-position tokens with no hint that the lowercase macro was wanted:
 
 ```text
-error: expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`,
-       square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+error: expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
 ```
 
-**A one-element list is not a wrapper.** `Product![T]` is `Cons<T, Nil>`, which is a distinct type from `T`,
-so a pipeline of one step still needs the list, and unwrapping it is a type error rather than a no-op.
+The reverse slip is no clearer. `product!` in type position expands to the constructor call
+`Cons(u32, …)`, which rustc reads as a parenthesized type argument:
+
+```text
+error[E0214]: parenthesized type parameters may only be used with a `Fn` trait
+```
+
+**A one-element list is still a list.** `Product![T]` is `Cons<T, Nil>`, which is a distinct type
+from `T`, so a pipeline of one step still needs the list, and unwrapping it is a type error rather
+than a no-op.
 
 **The empty list is `Nil`, a real value.** That is the difference from [`Sum!`](./sum.md), whose empty form is
 the uninhabited `Void`. An empty record exists; an empty choice cannot.

@@ -16,3 +16,7 @@ pub mod cgp_type;
 pub mod check_components;
 pub mod delegate_and_check_components;
 pub mod delegate_components;
+pub mod path;
+pub mod product;
+pub mod sum;
+pub mod symbol;

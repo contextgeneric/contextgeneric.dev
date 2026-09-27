@@ -46,8 +46,11 @@ Symbol!("first_name")
 Symbol!("")
 ```
 
-Any valid string literal is accepted, including the empty string and multi-byte Unicode
-(`Symbol!("世界")`). Most often it appears inside a field bound:
+Any string literal is accepted, including the empty string and multi-byte Unicode
+(`Symbol!("世界")`). A raw string or an escape spells the characters it denotes, so `Symbol!(r"raw")`
+is the same type as `Symbol!("raw")`. Anything else fails: a byte string or an identifier with
+`expected string literal`, and a second token after the literal with `unexpected token`. Most often
+the macro appears inside a field bound:
 
 ```rust
 Self: HasField<Symbol!("name"), Value = String>
@@ -119,6 +122,11 @@ let s = <Symbol!("hello")>::default();
 assert_eq!(s.to_string(), "hello");
 ```
 
+The same text is available as a constant through
+[`StaticString`](../traits/formatting/static_string.md), imported from `cgp::core::field::traits`:
+`<Symbol!("hello") as StaticString>::VALUE` is `"hello"`. That trait is the reason the expansion
+records a length, as [Under the hood](#under-the-hood) explains.
+
 ## When to use it
 
 **Write `Symbol!` when a wiring entry has to name a field**, and let the macros produce it everywhere else.
@@ -167,16 +175,19 @@ Symbol!("世界你好")   // Symbol<12, Chars<'世', ...>>  — 12 bytes, 4 char
 ```
 
 The character list has one `Chars` node per Unicode scalar value, so those two numbers disagree for any
-non-ASCII string. `LEN` is there so length-dependent code can read the size off the type instead of recursing
-through the list.
+non-ASCII string. `LEN` is there so length-dependent code can read the size off the type instead of
+recursing through the list. `StaticString` is that code: it decodes the characters into a `[u8; LEN]`
+buffer at compile time, and an array's size must be a constant.
 
 The expansion is built by folding the characters right to left onto `Nil` and wrapping the result, so the empty
 string `Symbol!("")` becomes `Symbol<0, Nil>`.
 
 **What this means for reading errors** is the practical benefit. A missing field on a context is reported
 against the expanded tag, so an error mentioning
-`HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` is telling you the field `width` is missing. Counting the
-characters is enough to decode it, and `cargo cgp check` resugars the common cases.
+`HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` is telling you the field `width` is missing. Reading
+the characters in order is enough to decode it, and [`cargo cgp check`](/docs/cargo-cgp/check) names
+the field directly, as ``missing field `width` ``. `cargo cgp check` leads with the root cause for the
+classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class.
 
 ## Formal grammar
 
@@ -187,9 +198,9 @@ The input is a single string literal, in the Rust Reference's
 SymbolInput -> STRING_LITERAL
 ```
 
-`STRING_LITERAL` is the Rust string-literal token, so any valid string literal is accepted, including the
-empty string and multi-byte Unicode. The macro is used in type position, and this single literal is the whole
-of its input.
+`STRING_LITERAL` is the Rust string-literal token, so any string literal is accepted, raw strings
+included, while a byte string or a C string is not. The macro is used in type position, and this single
+literal is the whole of its input: a token after it fails with `unexpected token`.
 
 ## Common Mistakes
 
@@ -204,9 +215,17 @@ types, and the derive generates the second, so the first matches nothing.
 unrelated types, and a mismatch reports as a missing `HasField` bound rather than as a typo. This is the usual
 cause of a getter that "should" work.
 
-**It is a type, so it goes in type position.** Writing `Symbol!("name")` where a value is expected does not
-work; the `PhantomData::<Symbol!("name")>` form is how the tag is passed to `get_field`, and the tag is the
-type argument rather than the value.
+**It is a type, so it goes in type position.** Writing `Symbol!("name")` where a value is expected
+fails with errors that do not mention the macro, because the expanded `Symbol<4, Chars<…>>` parses as a
+chain of comparisons:
+
+```text
+error: macro expansion ignores `,` and any tokens following
+```
+
+followed by an `E0369` and an `E0308` about `<` and struct constructors. The
+`PhantomData::<Symbol!("name")>` form is how the tag is passed to `get_field`, and the tag is the type
+argument rather than the value.
 
 ## Related constructs
 

@@ -1,0 +1,5 @@
+error: unexpected token
+ --> tests/compile_fail/reference/macros/symbol_formal_grammar_trailing_token.rs:4:32
+  |
+4 | pub type Tag = Symbol!("first" "name");
+  |                                ^^^^^^

@@ -13,8 +13,9 @@ building the type-level values (strings, lists, paths) that the rest of the syst
 page groups every macro in this section by the kind of work it does, in roughly the order most CGP
 code uses them.
 
-If you are new to CGP, start with the [reference overview](/docs/reference/)'s six essentials rather
-than here; this page is the fuller reference for once those six are familiar.
+If you are new to CGP, start with the [six essentials](/docs/reference/#start-with-these-six) on the
+reference overview rather than here; this page is the fuller reference for once those six are
+familiar.
 
 ## Defining a component, and writing its providers
 
@@ -28,8 +29,9 @@ generated code rather than written by hand.
 When a trait has exactly one implementation and needs no wiring at all,
 [`#[cgp_fn]`](./cgp_fn.md) builds it straight from a function, and
 [`#[blanket_trait]`](./blanket_trait.md) does the same starting from a trait with default methods and
-[supertrait](/docs/reference/glossary#supertrait) dependencies. [`#[async_trait]`](./async_trait.md) is how any of these traits declares an
-`async fn` without tripping the lint a bare one produces.
+[supertrait](/docs/reference/glossary#supertrait) dependencies. [`#[async_trait]`](./async_trait.md)
+is how any of these traits declares an `async fn` without tripping the lint a bare one produces in a
+public trait.
 
 A few macros specialize `#[cgp_component]` for a narrower job. [`#[cgp_type]`](./cgp_type.md) is for a
 component that supplies a type a context chooses rather than a value it computes.
@@ -60,7 +62,14 @@ presets without a separate construct for them.
 [`Product!`](./product.md) and its value-level twin `product!` build a type-level list for a struct's
 fields or a handler pipeline's steps, [`Sum!`](./sum.md) builds the dual list for an enum's variants,
 and [`Path!`](./path.md) builds the routing list that namespaces and redirected lookups resolve
-against. All of them are mostly generated for you, by a derive, by the ergonomic macros above, or by the
-`open` statement inside `delegate_components!`, and the useful skill is reading one back out of
-a compiler error rather than writing it, since a diagnostic actually prints the raw list each expands
-to (`Cons`/`Nil`, `Either`/`Void`, `PathCons`).
+against. You write two of them by hand in ordinary code, `Symbol!` in a `UseField` wiring entry and
+`Product!` in a handler pipeline, and the derives, the ergonomic macros above, and the `open`
+statement inside `delegate_components!` generate the rest. The skill all four ask for is reading one
+back out of a compiler error, since a diagnostic prints the raw list each expands to:
+`Symbol<…, Chars<…>>`, `Cons`/`Nil`, `Either`/`Void`, or `PathCons`.
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

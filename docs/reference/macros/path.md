@@ -27,8 +27,8 @@ Path!(@app.error.ErrorRaiserComponent)
 
 It is the path-shaped sibling of CGP's other type-level construction macros. Where
 [`Symbol!`](./symbol.md) turns a literal into a [type-level string](/docs/reference/glossary#type-level-string) and [`Product!`](./product.md) and
-[`Sum!`](./sum.md) build record and variant lists, `Path!` builds the routing list, sharing their right-nested,
-`Nil`-terminated shape.
+[`Sum!`](./sum.md) build record and variant lists, `Path!` builds the routing list. It shares their
+right-nested shape and, like `Product!`, ends in `Nil`.
 
 **You will more often write the syntax than the macro.** The same `@`-path form is embedded directly in
 [`cgp_namespace!`](./cgp_namespace.md) entries, in `#[prefix(...)]` attributes, and in the `@`-path keys of
@@ -48,14 +48,16 @@ Path!(@app.error.ErrorRaiserComponent)
 
 ### How a segment is encoded
 
-Each segment is parsed as a type, and **its first character decides how it is treated**. This is the one rule
-worth learning, because it lets a path mix names and types without any extra syntax:
+Each segment is parsed as a type, and **its spelling decides how it is treated**: a bare lowercase
+identifier becomes a string, and anything else stays a type. This is the one rule worth learning,
+because it lets a path mix names and types without any extra syntax:
 
 | The segment | Becomes |
 |---|---|
-| A single lowercase identifier (`app`, `error`) | a [`Symbol`](./symbol.md) type-level string |
+| A single identifier starting with a lowercase ASCII letter (`app`, `my_app`) | a [`Symbol`](./symbol.md) type-level string |
 | A capitalized name (`ErrorRaiserComponent`) | that named type |
 | A primitive type name (`u32`, `bool`, `str`) | that type, *not* a symbol |
+| Any other type (`Vec<u8>`, `some_mod::Marker`, `&'static str`) | that type |
 
 So lowercase segments read as namespace and prefix names, capitalized ones as component keys or marker types,
 and the primitive exception keeps `@u32` meaning the type `u32` rather than the string `"u32"`. Mixing is
@@ -70,6 +72,7 @@ Used directly, `Path!` names a route that a [`RedirectLookup`](../providers/redi
 a table:
 
 ```rust
+use cgp::core::error::ErrorRaiserComponent;
 use cgp::prelude::*;
 
 type ErrorRoute = Path!(@app.error.ErrorRaiserComponent);
@@ -113,7 +116,8 @@ delegate_components! {
 ```
 
 All four build the same kind of list. The macro and the embedded syntax are two places to write it, not two
-different things.
+different things, with one difference in the last: a `delegate_components!` path key ends in a wildcard
+parameter rather than `Nil`, so it also matches longer paths beneath it.
 
 ## When to use it
 
@@ -187,11 +191,12 @@ PathInput   -> `@` PathSegment ( `.` PathSegment )*
 PathSegment -> Type
 ```
 
-The leading `` `@` `` is required and at least one segment must follow. Each `PathSegment` is parsed as a Rust
-`Type`, but its encoding is decided semantically: a single lowercase identifier that is not a primitive type name
-becomes a `Symbol` type-level string, while every other segment (a capitalized name or a primitive) is kept as
-the named type. [`cgp_namespace!`](./cgp_namespace.md) entries and `#[prefix(...)]`
-attributes embed this same grammar, where it appears as the `Path` production.
+The leading `` `@` `` is required and at least one segment must follow. Each `PathSegment` is parsed
+as a Rust `Type`, but its encoding is decided semantically: a single identifier starting with a
+lowercase ASCII letter that is not primitive-shaped becomes a `Symbol` type-level string, while
+every other segment (a capitalized name, a primitive, or any type with a path, generic arguments, or
+other structure) is kept as the type. [`cgp_namespace!`](./cgp_namespace.md) entries and
+`#[prefix(...)]` attributes embed this same grammar, where it appears as the `Path` production.
 
 ## Common Mistakes
 
@@ -201,15 +206,33 @@ attributes embed this same grammar, where it appears as the `Path` production.
 error: expected `@`
 ```
 
-**Case decides meaning, silently.** `@app` and `@App` are entirely different segments (a type-level string
-versus a named type), and both are valid, so a capitalization slip produces a path that compiles and routes
-somewhere else. The failure surfaces later as a lookup that resolves to nothing, with no hint that the cause was
-a capital letter.
+**Case decides meaning, silently.** `@app` and `@App` are entirely different segments (a type-level
+string versus a named type), and wherever a type `App` exists both are valid, so a capitalization
+slip produces a path that compiles and routes somewhere else. The failure surfaces later as a lookup
+that resolves to nothing, with no hint that the cause was a capital letter.
 
 **A lowercase primitive is the type, not a string.** `@u32`, `@bool`, and `@str` name those types. That is
 almost always what you want, and it means a path segment cannot be the *string* `"u32"` through this syntax.
 
-**A path that routes nowhere still compiles.** A route is just a type; nothing checks that anything is bound at
+**The primitive check also catches names that are not primitives.** It treats `char`, `bool`,
+`usize`, `isize`, `str`, and any `i`, `u`, or `f` followed only by digits as a primitive, which
+includes the bare `i`, `u`, and `f` and names such as `u2`. So `@app.f` keeps `f` as a type instead
+of the string `"f"`, and fails unless a type `f` is in scope:
+
+```text
+error[E0425]: cannot find type `f` in this scope
+```
+
+Avoid one-letter and letter-digit segments of that shape in a path.
+
+**A path needs a segment after the `@` and after every dot.** `@` alone, or a trailing dot as in
+`@app.`, fails while parsing the missing segment as a type, with a message that lists type tokens:
+
+```text
+error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+```
+
+**A path that routes nowhere still compiles.** A route is only a type; nothing checks that anything is bound at
 its end. An unbound route is reported only when a [`check_components!`](./check_components.md) evaluates the
 lookup, as an unsatisfied bound naming the expanded path. This is why namespace mistakes tend to surface at
 the check rather than at the definition.
