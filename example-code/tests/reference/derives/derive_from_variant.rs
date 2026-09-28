@@ -153,6 +153,22 @@ pub mod examples_upcast {
         Literal(Literal),
     }
 
+    /// A target that derives only `FromVariant`, which is all the cast needs of it.
+    #[derive(FromVariant, Debug, PartialEq)]
+    pub enum IdentOrLiteral {
+        Ident(Ident),
+        Literal(Literal),
+    }
+
+    #[test]
+    fn test_the_target_needs_only_constructors() {
+        use cgp::core::field::impls::CanUpcast;
+
+        let value = LispSubExpr::Ident(Ident("x".to_owned())).upcast(PhantomData::<IdentOrLiteral>);
+
+        assert_eq!(value, IdentOrLiteral::Ident(Ident("x".to_owned())));
+    }
+
     #[test]
     fn test_upcast_from_the_narrow_enum() {
         use cgp::core::field::impls::CanUpcast;

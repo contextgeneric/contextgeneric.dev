@@ -112,10 +112,12 @@ The `FromVariant<Tag>` bound connects each tag to its payload type and construct
 interface, `Shape::Circle` and `Shape::Rectangle` remain separate expressions with different argument
 types.
 
-Upcasting lets an implementation construct a small local enum and convert it into a larger one, so the
-implementation only needs to know the variants it constructs. Here both enums derive
-[`CgpData`](./derive_cgp_data.md), which supplies the constructors and the representation the cast
-reads:
+Upcasting lets an implementation construct a small local enum and convert it into a larger one, so
+the implementation only needs to know the variants it constructs. The cast walks the source enum's
+representation with its extractor and builds each variant with the target's `FromVariant`
+constructors, so the source needs [`HasFields`](./derive_has_fields.md) and
+[`ExtractField`](./derive_extract_field.md) while the target needs only `FromVariant`. Both enums
+derive [`CgpData`](./derive_cgp_data.md) here, which covers either side:
 
 ```rust
 use cgp::core::field::impls::CanUpcast;   // not in the prelude

@@ -295,6 +295,8 @@ field's attributes but none of the struct's derives, so a helper attribute such 
 a struct that does not derive `Serialize`:
 
 ```rust
+use serde::Serialize;
+
 #[derive(Serialize, BuildField)]
 pub struct Person {
     #[serde(rename = "name")]

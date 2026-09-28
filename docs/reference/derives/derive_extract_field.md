@@ -314,6 +314,8 @@ variant's attributes but none of the enum's derives, so a helper attribute such 
 enum that does not derive `Serialize`:
 
 ```rust
+use serde::Serialize;
+
 #[derive(Serialize, ExtractField)]
 pub enum Shape {
     #[serde(rename = "circle")]

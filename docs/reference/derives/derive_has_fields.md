@@ -295,9 +295,9 @@ different orders have different `Fields` types. Structural conversions that matc
 code written against a literal `Cons` chain does not.
 
 **Variants named `Fields` or `FieldsRef` make generated paths ambiguous.** The implementations use
-`Self::Fields` and `Self::FieldsRef`, which conflict with variants of those names. The compiler
-reports `ambiguous associated item`, a lint that denies the build by default, at the derive, and points
-to the offending variant in a note.
+`Self::Fields` and `Self::FieldsRef`, which conflict with variants of those names. The compiler reports
+`ambiguous associated item` at the derive and points to the offending variant in a note. The error
+comes from a lint that denies the build by default.
 Rename that variant. The [extractor](./derive_extract_field.md) and
 [constructor](./derive_from_variant.md) derives reserve additional names, so check their restrictions
 when deriving the full family.
