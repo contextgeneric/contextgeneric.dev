@@ -1,6 +1,8 @@
 ---
+title: 'FinalizeBuild — end a build'
 sidebar_label: 'FinalizeBuild'
 sidebar_position: 6
+description: 'Turn a partial record with every field present back into the concrete struct; the impl exists only at that configuration.'
 ---
 
 # `FinalizeBuild`
@@ -22,7 +24,7 @@ let person = Person::builder()
 ```
 
 Delete a middle line and this does not compile. There is nothing to run and nothing to panic: the method
-is simply not in scope for a value with a field still absent.
+is not in scope for a value with a field still absent.
 
 The destination type comes from its [supertrait](/docs/reference/glossary#supertrait) [`PartialData`](./partial_data.md), which every
 configuration implements. That division is deliberate: **one names where you are going, the other says
@@ -52,51 +54,52 @@ this page works out.
 `finalize_build` consumes the partial value and returns `Self::Target`. It takes no arguments. There is
 nothing left to decide by the time it applies.
 
-Bounding on it is how generic builder code says it will produce a finished value:
-
-```rust
-fn assemble<Partial, Target>(partial: Partial) -> Target
-where
-    Partial: FinalizeBuild<Target = Target>,
-{
-    partial.finalize_build()
-}
-```
+Bounding on it is how generic builder code says it will produce a finished value, as the
+`assemble` function in the [example](#examples) does with `FinalizeBuild<Target = Target>`.
 
 The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.md), which emits exactly one
 per record.
 
 ## Examples
 
-The ordinary ending of a build chain:
+A generic finalize over any complete builder, including a fieldless record:
 
 ```rust
 use cgp::prelude::*;
 
-#[derive(BuildField)]
+#[derive(Debug, PartialEq, BuildField)]
 pub struct Person {
     pub first_name: String,
     pub last_name: String,
 }
 
-let person = Person::builder()
-    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
-    .build_field(PhantomData::<Symbol!("last_name")>, "Chen".to_owned())
-    .finalize_build();
+#[derive(Debug, PartialEq, BuildField)]
+pub struct Empty {}
+
+pub fn assemble<Partial, Target>(partial: Partial) -> Target
+where
+    Partial: FinalizeBuild<Target = Target>,
+{
+    partial.finalize_build()
+}
+
+pub fn demo() {
+    let person: Person = assemble(
+        Person::builder()
+            .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
+            .build_field(PhantomData::<Symbol!("last_name")>, "Chen".to_owned()),
+    );
+    assert_eq!(person.last_name, "Chen");
+
+    // A fieldless record's builder is complete from the start.
+    let empty: Empty = assemble(Empty::builder());
+    assert_eq!(empty, Empty {});
+}
 ```
 
-And the failure it exists to produce, omitting a field:
-
-```rust
-// error: no method named `finalize_build` found for struct
-//        `__PartialPerson<IsPresent, IsNothing>`
-let person = Person::builder()
-    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
-    .finalize_build();
-```
-
-**Read the partial type in the message to see which marker is still `IsNothing`.** That is the field you
-forgot, and it is the only place the compiler names it.
+`assemble` names only `FinalizeBuild`, yet it can bind `Target`, because the projection comes from
+the supertrait [`PartialData`](./partial_data.md). `Empty` has no markers to fill, so its builder is
+already at the one configuration the impl covers.
 
 ## When to use it
 
@@ -114,40 +117,54 @@ forgot, and it is the only place the compiler names it.
 
 ## Under the hood
 
-The derive emits one impl, with every marker fixed:
+The derive emits one impl, with every marker fixed. `cargo cgp expand` on the example's `Person`
+shows it beside its supertrait's impl, which leaves every marker generic:
 
 ```rust
+impl<__F0__: MapType, __F1__: MapType> PartialData for __PartialPerson<__F0__, __F1__> {
+    type Target = Person;
+}
 impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
-    // ...
+    fn finalize_build(self) -> Self::Target {
+        Person {
+            first_name: self.first_name,
+            last_name: self.last_name,
+        }
+    }
 }
 ```
 
-Compare its supertrait, which leaves every marker generic:
-
-```rust
-// impl<F0: MapType, F1: MapType> PartialData for __PartialPerson<F0, F1> {
-//     type Target = Person;
-// }
-```
-
 So a partial value always knows its destination and only sometimes has a way to reach it. Because
-`IsPresent::Map<T>` is `T`, the all-present companion holds exactly the concrete struct's fields in the
-same order, and the body is a field-by-field move with nothing to unwrap.
-
-**This is why the error is a missing method rather than a missing field.** Method resolution looks for
-`finalize_build` on `__PartialPerson<IsPresent, IsNothing>`, finds no impl, and reports that. The
-compiler has no way to say "you forgot `last_name`", because nothing in the failed lookup mentions field
-names. The marker list in the type is the diagnostic.
+`IsPresent::Map<T>` is `T`, the body is a field-by-field move with nothing to unwrap. **This is why
+the error for an incomplete build is a missing method rather than a missing field**: method
+resolution looks for `finalize_build` on `__PartialPerson<IsPresent, IsNothing>`, finds no impl, and
+reports that, so the marker list in the type is the diagnostic.
 
 The optional layer reaches this same impl rather than replacing it:
 [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) runs a
-[`TransformMapFields`](../type-level/transform_map_fields.md) to `IsPresent` first, so **the strict, all-present impl
-remains the only way a partial value becomes a concrete struct.**
+[`TransformMapFields`](../type-level/transform_map_fields.md) walk to `IsPresent` first, so **the
+strict, all-present impl remains the only way a partial value becomes a concrete struct.**
 
 ## Common Mistakes
 
-**"No method named `finalize_build`" is the expected error for an incomplete build.** Read the partial
-type in the message: the field whose marker is still `IsNothing` is the one missing.
+**"No method named `finalize_build`" is the expected error for an incomplete build.** Setting only
+`first_name` on the example's `Person` and finalizing:
+
+```rust
+let person: Person = Person::builder()
+    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
+    .finalize_build();
+```
+
+fails with:
+
+```text
+error[E0599]: no method named `finalize_build` found for struct `__PartialPerson<__F0__, __F1__>` in the current scope
+...
+   | |         -^^^^^^^^^^^^^^ method not found in `__PartialPerson<IsPresent, IsNothing>`
+```
+
+The field whose marker is still `IsNothing` is the one missing.
 
 **It consumes the partial value**, so the builder cannot be reused afterwards.
 

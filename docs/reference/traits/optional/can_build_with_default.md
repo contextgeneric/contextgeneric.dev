@@ -1,6 +1,8 @@
 ---
+title: 'CanBuildWithDefault — widen a record'
 sidebar_label: 'CanBuildWithDefault'
 sidebar_position: 6
+description: 'Build a wider record from a narrower one in one call, copying the shared fields by name and filling the rest from Default.'
 ---
 
 # `CanBuildWithDefault`
@@ -51,33 +53,39 @@ It is an **associated function**, called on the target: `Point3d::build_with_def
 
 ## Examples
 
-Widening a record with no field named anywhere:
+Widening a record with no field named anywhere, in one call and as the three calls it stands for:
 
 ```rust
-use cgp::extra::field::impls::CanBuildWithDefault;
 use cgp::prelude::*;
+use cgp::core::field::impls::CanBuildFrom;
+use cgp::extra::field::impls::{CanBuildWithDefault, CanFinalizeWithDefault};
 
 #[derive(Debug, Clone, Eq, PartialEq, CgpData)]
-struct Point2d { x: u64, y: u64 }
+pub struct Point2d {
+    pub x: u64,
+    pub y: u64,
+}
 
 #[derive(Debug, Clone, Eq, PartialEq, CgpData)]
-struct Point3d { x: u64, y: u64, z: u64 }
+pub struct Point3d {
+    pub x: u64,
+    pub y: u64,
+    pub z: u64,
+}
 
-let point_3d = Point3d::build_with_default(Point2d { x: 1, y: 2 });
+pub fn demo() {
+    let point_3d = Point3d::build_with_default(Point2d { x: 1, y: 2 });
+    assert_eq!(point_3d, Point3d { x: 1, y: 2, z: 0 });
 
-assert_eq!(point_3d, Point3d { x: 1, y: 2, z: 0 });   // z defaulted
+    let written_out: Point3d = Point3d::builder()
+        .build_from(Point2d { x: 1, y: 2 })
+        .finalize_with_default();
+    assert_eq!(written_out, point_3d);
+}
 ```
 
 Neither struct knows about the other. They share field *names*, matched at the type level, and `z` is
 filled because `u64: Default`.
-
-Written out, the same thing is three calls:
-
-```rust
-let point_3d: Point3d = Point3d::builder()
-    .build_from(Point2d { x: 1, y: 2 })
-    .finalize_with_default();
-```
 
 ## When to use it
 
@@ -95,45 +103,103 @@ in between needs to happen.
 
 ## Under the hood
 
-The impl chains the three steps and constrains each with a bound:
+The trait's one impl chains the three steps and constrains each with a bound:
 
 ```rust
-// conceptually:
-//   Self: HasBuilder,
-//   Self::Builder: CanBuildFrom<Source>,
-//   <Self::Builder as CanBuildFrom<Source>>::Output: CanFinalizeWithDefault<Output = Self>
-//
-//   fn build_with_default(source: Source) -> Self {
-//       Self::builder().build_from(source).finalize_with_default()
-//   }
+impl<Source, Target, Builder> CanBuildWithDefault<Source> for Target
+where
+    Target: HasBuilder<Builder = Builder>,
+    Builder: CanBuildFrom<Source>,
+    Builder::Output: CanFinalizeWithDefault<Output = Target>,
+{
+    fn build_with_default(source: Source) -> Target {
+        Target::builder().build_from(source).finalize_with_default()
+    }
+}
 ```
 
-Each bound is where one of the requirements comes from: [`CanBuildFrom`](../casting/can_build_from.md) brings the
-[`HasFields`](../shape/has_fields.md) obligation on the source, and
+Each bound is where one of the requirements comes from:
+[`CanBuildFrom`](../casting/can_build_from.md) brings the [`HasFields`](../shape/has_fields.md)
+obligation on the source and needs every source field to exist on the target, and
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md) brings the `Default` obligation on the
-remaining fields, through a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying
-[`TransformMapDefault`](./transform_map_default.md).
+remaining fields, through a [`TransformMapFields`](../type-level/transform_map_fields.md) walk
+carrying [`TransformMapDefault`](./transform_map_default.md).
 
-So an unsatisfied bound here is always really an unsatisfied bound one layer down, which is worth knowing
-because the error names that layer rather than this trait.
+So an unsatisfied bound here is always really an unsatisfied bound one layer down. Because the call
+is an associated function checked against these `where` clauses, not a method looked up on a
+receiver, rustc follows the chain to the root cause and prints each layer as a `required for` note.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 
-**The source needs [`HasFields`](../shape/has_fields.md), not just a builder.** Deriving only
+**The source needs [`HasFields`](../shape/has_fields.md), not only a builder.** Deriving only
 [`BuildField`](../../derives/derive_build_field.md) on both looks symmetric and fails, the same trap
 [`CanBuildFrom`](../casting/can_build_from.md) carries.
 
-**Every field the source does not supply needs `Default`.** The error names the missing
-[`TransformMap`](../type-level/transform_map.md) impl rather than the field.
+**Every field the source does not supply needs `Default`.** Building a `Server` from a `Host` that
+lacks its `port`, where `Port` has no `Default`:
+
+```rust
+pub struct Port(pub u16);
+
+#[derive(CgpData)]
+pub struct Host {
+    pub host: String,
+}
+
+#[derive(CgpData)]
+pub struct Server {
+    pub host: String,
+    pub port: Port,
+}
+
+let _ = Server::build_with_default(Host {
+    host: "localhost".to_owned(),
+});
+```
+
+names the type and the conversion that needs it:
+
+```text
+error[E0277]: the trait bound `Port: Default` is not satisfied
+...
+   = note: required for `TransformMapDefault` to implement `TransformMap<IsNothing, IsPresent, Port>`
+```
+
+The later notes climb the chain from there, through `TransformMapFields` and
+`CanFinalizeWithDefault`, to ``required for `Server` to implement `CanBuildWithDefault<Host>` ``.
 
 **It is an associated function on the target.** `Point3d::build_with_default(source)`, not a method on
 the source.
 
 **There is no place to set a field explicitly.** If one field needs a real value, use the three-call form.
 
-**A field the target lacks is silently dropped**, since the merge matches on the target's slots.
+**A source field the target lacks is an error, not dropped.** The merge walks the *source's* fields
+and builds each into the target, so a `label` that `Point3d` does not declare:
+
+```rust
+#[derive(CgpData)]
+pub struct LabeledPoint2d {
+    pub x: u64,
+    pub y: u64,
+    pub label: String,
+}
+
+let _ = Point3d::build_with_default(LabeledPoint2d {
+    x: 1,
+    y: 2,
+    label: "origin".to_owned(),
+});
+```
+
+has no slot to go into:
+
+```text
+error[E0277]: the trait bound `__PartialPoint3d<IsPresent, IsPresent, IsNothing>: UpdateField<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>, IsPresent>` is not satisfied
+```
+
+The widening runs one way only: the target may have fields the source lacks, never the reverse.
 
 ## Related constructs
 

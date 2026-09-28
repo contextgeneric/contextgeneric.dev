@@ -1,6 +1,8 @@
 ---
+title: 'ToOptional — relax an existing builder'
 sidebar_label: 'ToOptional'
 sidebar_position: 2
+description: 'Re-mark every field of a core builder as optional, keeping set fields as Some, so the rest can arrive in any order and the build can end either way.'
 ---
 
 # `ToOptional`
@@ -52,39 +54,43 @@ You call it on a partial value, as `builder.to_optional()`.
 
 ## Examples
 
-Relaxing a partly-filled core builder so the remaining fields can arrive in any order:
+Relaxing a partly filled core builder, and then a complete value:
 
 ```rust
-use cgp::extra::field::impls::{FinalizeOptional, SetOptional, ToOptional};
 use cgp::prelude::*;
+use cgp::extra::field::impls::{FinalizeOptional, SetOptional, ToOptional};
 
-#[derive(CgpData)]
+#[derive(Debug, PartialEq, CgpData)]
 pub struct Context {
     pub foo: String,
     pub bar: u64,
 }
 
-let builder = Context::builder()
-    .build_field(PhantomData::<Symbol!("foo")>, "foo".to_owned())
-    .to_optional();                                    // foo is Some, bar is None
+pub fn demo() {
+    // `foo` is set before the conversion and survives it as `Some`.
+    let context = Context::builder()
+        .build_field(PhantomData::<Symbol!("foo")>, "foo".to_owned())
+        .to_optional()
+        .set(PhantomData::<Symbol!("bar")>, 42)
+        .finalize_optional()
+        .unwrap();
+    assert_eq!(context.foo, "foo");
 
-let context = builder
-    .set(PhantomData::<Symbol!("bar")>, 42)
-    .finalize_optional()
-    .unwrap();
-
-assert_eq!(context.bar, 42);
+    // Every field of a complete value becomes `Some`, so one can be overwritten.
+    let context = context
+        .into_builder()
+        .to_optional()
+        .set(PhantomData::<Symbol!("bar")>, 7)
+        .finalize_optional()
+        .unwrap();
+    assert_eq!(context.bar, 7);
+}
 ```
 
-The already-set `foo` survives the conversion as `Some("foo")`, which distinguishes this from
-starting over with [`optional_builder()`](./has_optional_builder.md).
-
-Converting a *complete* value works too, by way of
-[`into_builder`](../builder/into_builder.md):
-
-```rust
-let builder = context.into_builder().to_optional();   // every field Some
-```
+The already-set `foo` survives the first conversion as `Some("foo")`, which distinguishes this from
+starting over with [`optional_builder()`](./has_optional_builder.md). The second conversion starts
+from [`into_builder`](../builder/into_builder.md), so every field is `Some` and `set` overwrites
+`bar`.
 
 ## When to use it
 
@@ -101,18 +107,28 @@ let builder = context.into_builder().to_optional();   // every field Some
 
 ## Under the hood
 
-`ToOptional` is a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying the
-[`TransformOptional`](./transform_optional.md) marker, targeting `IsOptional`:
+`ToOptional` is a blanket impl over a [`TransformMapFields`](../type-level/transform_map_fields.md)
+walk carrying the [`TransformOptional`](./transform_optional.md) marker, targeting `IsOptional`:
 
 ```rust
-// conceptually:
-//   self.transform_map_fields::<TransformOptional, IsOptional>()
+impl<Context> ToOptional for Context
+where
+    Context: TransformMapFields<TransformOptional, IsOptional>,
+{
+    type Output = Context::Output;
+
+    fn to_optional(self) -> Self::Output {
+        self.transform_map_fields()
+    }
+}
 ```
 
 That walk visits each field of the target's [`HasFields`](../shape/has_fields.md) shape, uses
-[`UpdateField`](../builder/update_field.md) to take the field out and learn its current marker, applies the
-transform, and writes it back under `IsOptional`. The transform's own impls are what decide the value:
-`IsPresent` becomes `Some(value)`, `IsNothing` becomes `None`, and `IsOptional` passes through.
+[`UpdateField`](../builder/update_field.md) to take the field out and learn its current marker,
+applies the transform, and writes it back under `IsOptional`. The transform's impls decide the
+value: `IsPresent` becomes `Some(value)` and `IsNothing` becomes `None`. **There is no impl from
+`IsOptional`**, so a builder that is already optional cannot be converted again, as [Common
+Mistakes](#common-mistakes) shows.
 
 Its mirror image is [`CanFinalizeWithDefault`](./can_finalize_with_default.md), which runs the same walk
 with [`TransformMapDefault`](./transform_map_default.md) toward `IsPresent`. **Both operations are the
@@ -130,6 +146,23 @@ symmetrically.
 
 **Converting gives up the compile-time completeness check** for the fields that were still absent. From
 here a missing field is an `Err` or a default rather than a compile error.
+
+**It does not apply to a builder that is already optional.** Converting the result of
+`optional_builder()` again:
+
+```rust
+let _ = Context::optional_builder().to_optional();
+```
+
+finds no [`TransformOptional`](./transform_optional.md) conversion from `IsOptional`, and fails
+with:
+
+```text
+error[E0599]: the method `to_optional` exists for struct `__PartialContext<IsOptional, IsOptional>`, but its trait bounds were not satisfied
+...
+   = note: the following trait bounds were not satisfied:
+           `__PartialContext<IsOptional, IsOptional>: TransformMapFields<TransformOptional, IsOptional>`
+```
 
 **It is not reversible.** There is no `from_optional`; getting back to a strict configuration means
 finalizing, through [`FinalizeOptional`](./finalize_optional.md) or

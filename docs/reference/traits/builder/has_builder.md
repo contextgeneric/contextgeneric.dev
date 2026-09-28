@@ -64,12 +64,11 @@ about whether you are assembling a record or redistributing one.
 
 ## Examples
 
-The everyday shape is `builder()`, some `build_field` calls, and `finalize_build`, with
-[`build_from`](../casting/can_build_from.md) copying every shared field from another record in one step:
+A record extended from a narrower one, and a field read back off a still-incomplete builder:
 
 ```rust
-use cgp::core::field::impls::CanBuildFrom;
 use cgp::prelude::*;
+use cgp::core::field::impls::CanBuildFrom;
 
 // `build_from` walks the *source's* field list, so the source needs `HasFields` too.
 #[derive(HasFields, BuildField)]
@@ -78,35 +77,44 @@ pub struct FooBar {
     pub bar: String,
 }
 
-#[derive(BuildField)]
+#[derive(Debug, PartialEq, BuildField)]
 pub struct FooBarBaz {
     pub foo: u64,
     pub bar: String,
     pub baz: bool,
 }
 
-fn extend(foo_bar: FooBar) -> FooBarBaz {
-    FooBarBaz::builder()                                     // all absent
-        .build_from(foo_bar)                                 // foo, bar now present
-        .build_field(PhantomData::<Symbol!("baz")>, true)     // baz now present
-        .finalize_build()                                    // only the all-present impl applies
+pub fn extend(foo_bar: FooBar) -> FooBarBaz {
+    FooBarBaz::builder()
+        .build_from(foo_bar)
+        .build_field(PhantomData::<Symbol!("baz")>, true)
+        .finalize_build()
+}
+
+pub fn demo() {
+    // A set field can be read back off a still-incomplete builder.
+    let partial = FooBarBaz::builder().build_field(PhantomData::<Symbol!("baz")>, true);
+    assert!(*partial.get_field(PhantomData::<Symbol!("baz")>));
+
+    let foo_bar_baz = extend(FooBar {
+        foo: 1,
+        bar: "bar".to_owned(),
+    });
+    assert_eq!(
+        foo_bar_baz,
+        FooBarBaz {
+            foo: 1,
+            bar: "bar".to_owned(),
+            baz: true,
+        }
+    );
 }
 ```
 
-Every line changes the partial *type*, and the last one type-checks only because every marker has reached
-present. Reorder them so `finalize_build` runs before `baz` is set and it is a compile error.
-
-A field that has been set can be read back mid-build, because the derive emits a
-[`HasField`](../field-access/has_field.md) impl on the partial type gated on presence:
-
-```rust
-let partial = Person::builder()
-    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned());
-
-assert_eq!(partial.get_field(PhantomData::<Symbol!("first_name")>), "Alice");
-```
-
-Asking for `last_name` there would not compile.
+Every step changes the partial *type*, and `finalize_build` type-checks only because every marker
+has reached present; moving it before the `baz` step is a compile error. A set field can be read
+back mid-build because the derive emits a [`HasField`](../field-access/has_field.md) impl on the
+partial type for each field once it is present.
 
 ## When to use it
 
@@ -131,9 +139,9 @@ are a different family: [`ExtractField`](../variant/extract_field.md) for taking
 
 ## Under the hood
 
-The derive generates a companion struct, `__Partial{Name}`, that is your struct with one
-[`MapType`](../type-level/map_type.md) parameter added per field and each field's type wrapped in that parameter's
-projection:
+`#[derive(BuildField)]` generates a companion struct, `__Partial{Name}`, with one
+[`MapType`](../type-level/map_type.md) parameter per field and each field's type wrapped in that
+parameter's projection. `cargo cgp expand` on a two-field `Person` shows it:
 
 ```rust
 pub struct __PartialPerson<__F0__: MapType, __F1__: MapType> {
@@ -142,12 +150,17 @@ pub struct __PartialPerson<__F0__: MapType, __F1__: MapType> {
 }
 ```
 
-`HasBuilder` then fixes the starting configuration to all-absent:
+`HasBuilder` fixes the starting configuration to all-absent, where each field is stored as `()`:
 
 ```rust
 impl HasBuilder for Person {
-    type Builder = __PartialPerson<IsNothing, IsNothing>;      // the empty builder
-    // ...
+    type Builder = __PartialPerson<IsNothing, IsNothing>;
+    fn builder() -> Self::Builder {
+        __PartialPerson {
+            first_name: (),
+            last_name: (),
+        }
+    }
 }
 ```
 
@@ -155,27 +168,81 @@ and [`FinalizeBuild`](./finalize_build.md) exists only at the opposite end:
 
 ```rust
 impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
-    // ...
+    fn finalize_build(self) -> Self::Target {
+        Person {
+            first_name: self.first_name,
+            last_name: self.last_name,
+        }
+    }
 }
 ```
 
 That pair is the whole safety argument. `builder()` starts at all-absent, each
-[`build_field`](./build_field.md) flips one marker, and there is no check to run at the end: the impl
-simply is not there for an incomplete value.
-
-Everything between the two ends reduces to one primitive, [`UpdateField`](./update_field.md), which is
-what the derive actually writes; [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are
-library blanket impls over it in opposite directions.
+[`build_field`](./build_field.md) flips one marker, and there is no check to run at the end: the
+impl is absent for an incomplete value. Everything between the two ends reduces to one primitive,
+[`UpdateField`](./update_field.md), which is what the derive writes per field;
+[`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are library blanket impls over
+it in opposite directions.
 
 ## Common Mistakes
 
-**"No method named `finalize_build`" is the expected error for an incomplete build.** A missing field
-means the all-present impl does not apply, so the compiler reports a missing method rather than a missing
-field. Read the partial type in the message to see which marker is still `IsNothing`.
+**"No method named `finalize_build`" is the expected error for an incomplete build.** A missing
+field means the all-present impl does not apply, so the compiler reports a missing method rather
+than a missing field. Finalizing a `Person` with only `first_name` set:
 
-**The partial type cannot be printed or cloned.** The derive clears the original's attributes, so no
-`Debug`, no `Clone`, whatever the record derives. Read a set field through the partial type's
-[`HasField`](../field-access/has_field.md) impl instead.
+```rust
+let person: Person = Person::builder()
+    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
+    .finalize_build();
+```
+
+fails with:
+
+```text
+error[E0599]: no method named `finalize_build` found for struct `__PartialPerson<__F0__, __F1__>` in the current scope
+...
+   | |         -^^^^^^^^^^^^^^ method not found in `__PartialPerson<IsPresent, IsNothing>`
+```
+
+The marker still `IsNothing` is the missing field, here `last_name`.
+
+**`build_from` needs [`HasFields`](../shape/has_fields.md) on the source.** It walks the source's
+field list, so a source with only `#[derive(BuildField)]`:
+
+```rust
+#[derive(BuildField)]
+pub struct FooBar {
+    pub foo: u64,
+}
+
+#[derive(BuildField)]
+pub struct FooBaz {
+    pub foo: u64,
+    pub baz: bool,
+}
+
+let _ = FooBaz::builder()
+    .build_from(FooBar { foo: 1 })
+    .build_field(PhantomData::<Symbol!("baz")>, true)
+    .finalize_build();
+```
+
+fails on the source rather than on the builder:
+
+```text
+error[E0277]: the trait bound `FooBar: HasFields` is not satisfied
+...
+   = note: required for `__PartialFooBaz<IsNothing, IsNothing>` to implement `CanBuildFrom<FooBar>`
+```
+
+The [example](#examples) derives both on its `FooBar`.
+
+**The partial type cannot be printed or cloned.** The derive drops the original's struct-level
+attributes, so no `Debug`, no `Clone`, whatever the record derives. Read a set field through the
+partial type's [`HasField`](../field-access/has_field.md) impl instead. Field-level attributes, by
+contrast, are copied onto the partial type, so a field helper attribute such as
+`#[serde(rename = "...")]` breaks the build; see
+[`#[derive(BuildField)]`](../../derives/derive_build_field.md#common-mistakes).
 
 **There are no defaults and no validation.** Presence is all that is tracked. A field with a sensible
 default still has to be set, unless you reach for the
@@ -184,8 +251,8 @@ default still has to be set, unless you reach for the
 **`builder()` is an associated function.** There is no receiver, so it is `Person::builder()` rather than
 anything called on a value. Starting from a value is [`IntoBuilder`](./into_builder.md).
 
-**A fieldless struct's builder is immediately finalizable**, since there is nothing to track. That is
-legal and useless.
+**A fieldless struct's builder is immediately finalizable**, since there is nothing to track.
+`Empty::builder().finalize_build()` compiles for a `struct Empty {}`, which is legal and useless.
 
 ## Related constructs
 

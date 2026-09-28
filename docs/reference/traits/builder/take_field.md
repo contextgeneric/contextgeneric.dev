@@ -1,6 +1,8 @@
 ---
+title: 'TakeField — remove one field of a builder'
 sidebar_label: 'TakeField'
 sidebar_position: 4
+description: 'Take a present field out of a partial record, getting the value and a remainder that cannot be finalized until the field is put back.'
 ---
 
 # `TakeField`
@@ -59,24 +61,43 @@ remainder second.**
 
 ## Examples
 
-Taking a field out and putting it back, which is the shape generic redistributing code has:
+Taking a field out of a full builder, changing it, and putting it back:
 
 ```rust
-use cgp::core::field::traits::TakeField;
 use cgp::prelude::*;
+use cgp::core::field::traits::TakeField;
 
-let builder = person.into_builder();                         // all present
+#[derive(Debug, PartialEq, BuildField)]
+pub struct Person {
+    pub first_name: String,
+    pub last_name: String,
+}
 
-let (first_name, remainder) = builder.take_field(PhantomData::<Symbol!("first_name")>);
-// `remainder` is missing first_name, so it cannot be finalized
+pub fn shout_first_name(person: Person) -> Person {
+    let (first_name, remainder) = person
+        .into_builder()
+        .take_field(PhantomData::<Symbol!("first_name")>);
 
-let person = remainder
-    .build_field(PhantomData::<Symbol!("first_name")>, first_name)
-    .finalize_build();                                       // all present again
+    remainder
+        .build_field(
+            PhantomData::<Symbol!("first_name")>,
+            first_name.to_uppercase(),
+        )
+        .finalize_build()
+}
+
+pub fn demo() {
+    let person = Person {
+        first_name: "Alice".to_owned(),
+        last_name: "Chen".to_owned(),
+    };
+
+    assert_eq!(shout_first_name(person).first_name, "ALICE");
+}
 ```
 
-Dropping the `build_field` line makes `finalize_build` fail to resolve, which is the guarantee: a field
-taken out and not replaced cannot be forgotten silently.
+Dropping the `build_field` step makes `finalize_build` fail to resolve, which is the guarantee: a
+field taken out and not replaced cannot be forgotten silently.
 
 ## When to use it
 
@@ -95,35 +116,50 @@ merging one record into another, already uses it for you.
 
 ## Under the hood
 
-`TakeField` is a **library blanket impl** over [`UpdateField`](./update_field.md), the mirror image of
+`TakeField` is a library blanket impl over [`UpdateField`](./update_field.md), the mirror image of
 [`BuildField`](./build_field.md#under-the-hood):
 
 ```rust
-// conceptually:
-//   impl<Tag, Partial> TakeField<Tag> for Partial
-//   where Partial: UpdateField<Tag, IsNothing, Mapper = IsPresent>
+impl<Context, Tag> TakeField<Tag> for Context
+where
+    Context: UpdateField<Tag, IsNothing, Mapper = IsPresent>,
+{
+    type Value = Context::Value;
+
+    type Remainder = Context::Output;
+
+    fn take_field(self, tag: PhantomData<Tag>) -> (Self::Value, Self::Remainder) {
+        self.update_field(tag, ())
+    }
+}
 ```
 
-The target marker is `IsNothing` and the constraint on the reported source marker is `IsPresent`, both
-swapped relative to `BuildField`. Since `Mapper` is an *output* of the primitive, constraining it selects
-only those partial types whose field is currently set.
-
-The primitive's signature makes one trait serve both directions: `update_field` takes the new
-storage in and hands the old storage back, so under this transition it takes `()` in and hands the real
-value back.
-
-**Its heaviest user is [`CanBuildFrom`](../casting/can_build_from.md).** That recursion walks the source's field
-list, taking each field out with `take_field` and writing it into the target with
-[`build_field`](./build_field.md), threading the shrinking source and the growing target through, which
-is why a merge needs [`HasFields`](../shape/has_fields.md) on the source as well as a builder.
+The target marker is `IsNothing` and the constraint on the reported source marker is `IsPresent`,
+both swapped relative to `BuildField`, so under this transition the primitive takes `()` in and
+hands the real value back. **Its heaviest user is [`CanBuildFrom`](../casting/can_build_from.md)**,
+whose recursion walks the source's field list, taking each field out with `take_field` and writing
+it into the target with [`build_field`](./build_field.md), which is why a merge needs
+[`HasFields`](../shape/has_fields.md) on the source as well as a builder.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`. Every other trait in the core
 builder family is.
 
-**Taking an absent field does not compile.** The second take of the same field finds `Mapper = IsNothing`
-and no impl, reported as a missing method rather than as anything about absence.
+**Taking an absent field does not compile.** Taking `first_name` from an empty builder:
+
+```rust
+let _ = Person::builder().take_field(PhantomData::<Symbol!("first_name")>);
+```
+
+finds `Mapper = IsNothing` where the blanket impl requires `IsPresent`, reported as a mismatch
+rather than as anything about absence:
+
+```text
+error[E0271]: type mismatch resolving `<__PartialPerson<IsNothing, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsNothing>>::Mapper == IsPresent`
+...
+note: expected this to be `IsPresent`
+```
 
 **It returns `(value, remainder)`, in that order.** Reversing the binding is a type error, but a
 confusing one when both are generic.

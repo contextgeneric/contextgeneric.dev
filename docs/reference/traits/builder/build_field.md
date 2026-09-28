@@ -55,36 +55,52 @@ position. `Value` is the field's declared type, so what you pass is an ordinary 
 
 ## Examples
 
-The everyday chain, one call per field:
+A record built one field at a time, in either order, and a wider record built from it plus one
+field:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::impls::CanBuildFrom;
 
-#[derive(BuildField)]
+#[derive(Debug, PartialEq, HasFields, BuildField)]
 pub struct Person {
     pub first_name: String,
     pub last_name: String,
 }
 
-let person = Person::builder()
-    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
-    .build_field(PhantomData::<Symbol!("last_name")>, "Chen".to_owned())
-    .finalize_build();
+#[derive(Debug, PartialEq, BuildField)]
+pub struct Employee {
+    pub first_name: String,
+    pub last_name: String,
+    pub employee_id: u64,
+}
+
+pub fn demo() {
+    // Order does not matter: `last_name` is set first here.
+    let person = Person::builder()
+        .build_field(PhantomData::<Symbol!("last_name")>, "Chen".to_owned())
+        .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
+        .finalize_build();
+
+    let employee = Employee::builder()
+        .build_from(person)
+        .build_field(PhantomData::<Symbol!("employee_id")>, 7)
+        .finalize_build();
+
+    assert_eq!(
+        employee,
+        Employee {
+            first_name: "Alice".to_owned(),
+            last_name: "Chen".to_owned(),
+            employee_id: 7,
+        }
+    );
+}
 ```
 
-**Order does not matter**, because each impl constrains only its own field's marker and leaves the rest
-generic. Setting `last_name` first compiles identically.
-
-Mixing it with a merge is the usual shape once more than one source contributes:
-
-```rust
-use cgp::core::field::impls::CanBuildFrom;
-
-let employee = Employee::builder()
-    .build_from(person)                                       // the shared fields
-    .build_field(PhantomData::<Symbol!("employee_id")>, 7)    // and the one it did not carry
-    .finalize_build();
-```
+Each impl constrains only its own field's marker, so setting `last_name` first compiles identically.
+[`build_from`](../casting/can_build_from.md) copies the shared fields from `person`, which is why
+`Person` also derives [`HasFields`](../shape/has_fields.md).
 
 ## When to use it
 
@@ -102,30 +118,52 @@ the record.**
 
 ## Under the hood
 
-`BuildField` is a **library blanket impl** over [`UpdateField`](./update_field.md), pinning the target
+`BuildField` is a library blanket impl over [`UpdateField`](./update_field.md), pinning the target
 marker to `IsPresent` and constraining the reported source marker to `IsNothing`:
 
 ```rust
-// conceptually:
-//   impl<Tag, Partial> BuildField<Tag> for Partial
-//   where Partial: UpdateField<Tag, IsPresent, Mapper = IsNothing>
+impl<Context, Tag> BuildField<Tag> for Context
+where
+    Context: UpdateField<Tag, IsPresent, Mapper = IsNothing>,
+{
+    type Value = Context::Value;
+
+    type Output = Context::Output;
+
+    fn build_field(self, tag: PhantomData<Tag>, value: Self::Value) -> Self::Output {
+        self.update_field(tag, value).1
+    }
+}
 ```
 
-The `Mapper = IsNothing` constraint does the checking. `Mapper` is an *output* of the primitive (the
-marker the field was in), so constraining it selects only those partial types whose field is
-currently absent. A field already set has `Mapper = IsPresent`, no impl matches, and the call fails to
-resolve.
-
-`update_field` returns the old value alongside the new partial; `build_field` discards it, which is sound
-because the old value under `IsNothing` is `()`.
-
-[`TakeField`](./take_field.md) is the mirror image (the same primitive with `IsNothing` as the target
-and `Mapper = IsPresent`), which is why the two read as opposites and share every mechanism.
+The `Mapper = IsNothing` constraint does the checking. `Mapper` is an output of the primitive, the
+marker the field was in, so constraining it selects only the partial types whose field is absent. A
+field already set has `Mapper = IsPresent`, and the constraint fails. `build_field` discards the old
+value the primitive returns, which is sound because under `IsNothing` it is `()`.
+[`TakeField`](./take_field.md) is the mirror image: the same primitive, with `IsNothing` as the
+target and `Mapper = IsPresent`.
 
 ## Common Mistakes
 
-**Building a field twice does not compile.** The second call finds `Mapper = IsPresent` and no impl. That
-is the guarantee, and the error is a missing-method one rather than anything mentioning "already set".
+**Building a field twice does not compile.** On the two-field `Person` of the
+[example](#examples), setting `first_name` a second time:
+
+```rust
+let _ = Person::builder()
+    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned())
+    .build_field(PhantomData::<Symbol!("first_name")>, "Bob".to_owned());
+```
+
+makes the second call find `Mapper = IsPresent` where the blanket impl requires `IsNothing`, and
+rustc reports the mismatch on the partial type, whose markers show the field already set:
+
+```text
+error[E0271]: type mismatch resolving `<__PartialPerson<IsPresent, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsPresent>>::Mapper == IsNothing`
+...
+note: expected this to be `IsNothing`
+```
+
+Nothing in the message says "already set"; the first `IsPresent` in the partial type does.
 
 **`Output` is a different type from `Self`.** A builder cannot be stored in a variable of fixed type
 across a chain, and it cannot be filled in a loop. The chain is unrolled by construction.
@@ -140,7 +178,8 @@ detectable at the end, since any prefix of a chain is a legal partial value.
 `PhantomData::<Symbol!("name")>` in full.
 
 **Nothing implements it directly**, so an unsatisfied `BuildField` bound is really an unsatisfied
-[`UpdateField`](./update_field.md) one, which the error names.
+[`UpdateField`](./update_field.md) one, which the error names, as a mismatch on `Mapper` for a field
+already set or a missing impl for a field the record lacks.
 
 ## Related constructs
 

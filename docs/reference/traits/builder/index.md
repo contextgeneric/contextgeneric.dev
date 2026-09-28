@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The traits that assemble a struct one field at a time, with each field''s presence tracked in the type so an incomplete record cannot be finalized.'
 ---
 
 # Record builders

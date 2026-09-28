@@ -1,6 +1,8 @@
 ---
+title: 'PartialData — the type a builder becomes'
 sidebar_label: 'PartialData'
 sidebar_position: 7
+description: 'Name the concrete struct a partial record will become, at every configuration, so generic code can mention the destination mid-build.'
 ---
 
 # `PartialData`
@@ -51,16 +53,8 @@ read the destination through this projection rather than declaring one of their 
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-You bound on it when a signature must mention the destination while holding a partial value:
-
-```rust
-fn describe<Partial>(partial: Partial) -> &'static str
-where
-    Partial: PartialData,
-{
-    core::any::type_name::<Partial::Target>()
-}
-```
+You bound on it when a signature must mention the destination while holding a partial value, as
+`Partial::Target` in the `target_name` function of the [example](#examples).
 
 The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.md) for a record and
 [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) for an enum. **Both** partial families
@@ -69,21 +63,35 @@ directly.
 
 ## Examples
 
-Its most visible use is as [`FinalizeBuild`](./finalize_build.md)'s [supertrait](/docs/reference/glossary#supertrait), which is how a finalize
-knows what to return:
+A generic function naming the destination of a partial value, at two configurations:
 
 ```rust
-pub trait FinalizeBuild: PartialData {
-    fn finalize_build(self) -> Self::Target;
+use cgp::prelude::*;
+
+#[derive(Debug, PartialEq, BuildField)]
+pub struct Person {
+    pub first_name: String,
+    pub last_name: String,
+}
+
+pub fn target_name<Partial>(_partial: &Partial) -> &'static str
+where
+    Partial: PartialData,
+{
+    core::any::type_name::<Partial::Target>()
+}
+
+pub fn demo() {
+    let empty = Person::builder();
+    assert!(target_name(&empty).ends_with("Person"));
+
+    let half = empty.build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned());
+    assert!(target_name(&half).ends_with("Person"));
 }
 ```
 
-`Self::Target` in that signature comes from here. Without it the finalize would need its own associated
-type, and the destination would be unnameable until the value was complete.
-
-The same appears in [`FinalizeOptional`](../optional/finalize_optional.md), which returns
-`Result<Self::Target, &'static str>`, again projecting the destination through this trait rather than
-declaring one of its own.
+`Partial::Target` is `Person` for the empty builder and the half-built one alike, since the impl
+covers every configuration.
 
 ## When to use it
 
@@ -101,24 +109,20 @@ traits otherwise.
 
 ## Under the hood
 
-The derive emits one impl covering every configuration at once, by leaving the markers generic:
+The derive emits one impl covering every configuration at once, by leaving the markers generic.
+`cargo cgp expand` on a two-field `Person` shows:
 
 ```rust
-// conceptually, for the record companion:
-//   impl<F0: MapType, F1: MapType> PartialData for __PartialPerson<F0, F1> {
-//       type Target = Person;
-//   }
+impl<__F0__: MapType, __F1__: MapType> PartialData for __PartialPerson<__F0__, __F1__> {
+    type Target = Person;
+}
 ```
 
-Nothing about the markers is constrained, so the destination stays available at every step of
-a build. Contrast [`FinalizeBuild`](./finalize_build.md), whose impl fixes every marker to `IsPresent`.
-
-Splitting the two lets generic builder code work against a destination it can name while
-still being *unable* to finalize prematurely: the type is known, the conversion is not available. A
-single trait carrying both would have to choose one or the other.
-
-The enum side implements it identically on its extraction companions, with `Target` naming the original
-enum, which is how [`HasExtractor`](../variant/has_extractor.md)'s round trip knows what to rebuild.
+Nothing about the markers is constrained, so the destination stays available at every step of a
+build. Contrast [`FinalizeBuild`](./finalize_build.md), whose impl fixes every marker to
+`IsPresent`. Splitting the two lets generic builder code name a destination while still being unable
+to finalize early. The enum side implements it the same way on its extraction companions, with
+`Target` naming the original enum.
 
 ## Common Mistakes
 

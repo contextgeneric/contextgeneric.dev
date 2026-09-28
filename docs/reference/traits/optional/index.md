@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'Traits that relax the strict record builder, so a field can be set in any order, more than once, or left unset and then defaulted or reported.'
 ---
 
 # Optional and defaulted fields

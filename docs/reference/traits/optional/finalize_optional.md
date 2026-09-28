@@ -1,6 +1,8 @@
 ---
+title: 'FinalizeOptional — finalize or name the gap'
 sidebar_label: 'FinalizeOptional'
 sidebar_position: 4
+description: 'End an optional build at run time: the concrete struct if every field holds a value, or the name of a missing field as an Err.'
 ---
 
 # `FinalizeOptional`
@@ -36,8 +38,8 @@ pub trait FinalizeOptional: PartialData {
 The `PartialData` [supertrait](/docs/reference/glossary#supertrait) supplies `Target`, the concrete struct being built, so the method projects
 its return type through it and declares no associated type of its own. `finalize_optional` takes `self`,
 consuming the builder, and returns `Result<Self::Target, &'static str>`: the built struct on success,
-or, on failure, a missing field's own name, recovered from its type-level tag as a `&'static
-str` with no allocation. The trait carries no other parameter. It is not in the prelude; import it from
+or, on failure, a missing field's own name, recovered from its type-level tag as a
+`&'static str` with no allocation. The trait carries no other parameter. It is not in the prelude; import it from
 `cgp-field-extra`.
 
 ## Usage
@@ -48,41 +50,50 @@ str` with no allocation. The trait carries no other parameter. It is not in the 
 use cgp::extra::field::impls::FinalizeOptional;
 ```
 
-`Self` must be an optional builder, from
-[`optional_builder()`](./has_optional_builder.md) or [`to_optional()`](./to_optional.md).
+`Self` must be an optional builder, from [`optional_builder()`](./has_optional_builder.md) or
+[`to_optional()`](./to_optional.md). The record also needs [`HasFields`](../shape/has_fields.md),
+since the walk runs over its field list;
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) supplies it along with the builder.
 
 ## Examples
 
 The strict ending, succeeding and failing:
 
 ```rust
-use cgp::extra::field::impls::{FinalizeOptional, HasOptionalBuilder, SetOptional};
 use cgp::prelude::*;
+use cgp::extra::field::impls::{FinalizeOptional, HasOptionalBuilder, SetOptional};
 
-#[derive(CgpData)]
+#[derive(Debug, PartialEq, CgpData)]
 pub struct Context {
     pub foo: String,
     pub bar: u64,
 }
 
-let context = Context::optional_builder()
-    .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
-    .set(PhantomData::<Symbol!("bar")>, 42)
-    .finalize_optional()
-    .unwrap();
+pub fn demo() {
+    let complete = Context::optional_builder()
+        .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
+        .set(PhantomData::<Symbol!("bar")>, 42)
+        .finalize_optional();
+    assert_eq!(
+        complete,
+        Ok(Context {
+            foo: "foo".to_owned(),
+            bar: 42,
+        })
+    );
 
-assert_eq!(context.foo, "foo");
+    let missing_bar = Context::optional_builder()
+        .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
+        .finalize_optional();
+    assert_eq!(missing_bar, Err("bar"));
+
+    // With both unset, the walk from the last field back stops at `bar`.
+    assert_eq!(Context::optional_builder().finalize_optional(), Err("bar"));
+}
 ```
 
-Leave `bar` unset and it reports the name:
-
-```rust
-let result = Context::optional_builder()
-    .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
-    .finalize_optional();
-
-assert_eq!(result.err(), Some("bar"));
-```
+With both fields unset the error is still `"bar"`: the walk checks the last declared field first and
+stops at the first `None` it meets.
 
 ## When to use it
 
@@ -105,21 +116,51 @@ which field is missing and not enough to match on programmatically.
 
 Unlike its defaulting sibling, `FinalizeOptional` does **not** go through
 [`TransformMapFields`](../type-level/transform_map_fields.md). It walks the target's
-[`HasFields`](../shape/has_fields.md) list directly, and the reason is that it has to be able to *stop*.
+[`HasFields`](../shape/has_fields.md) list directly, and the reason is that it has to be able to
+*stop*. The trait's one impl hands the walk the builder and finalizes whatever comes back:
+
+```rust
+impl<ContextA, ContextB, Target> FinalizeOptional for ContextA
+where
+    ContextA: PartialData<Target = Target>,
+    Target: HasFields,
+    Target::Fields: FinalizeOptionalImpl<ContextA, Output = ContextB>,
+    ContextB: FinalizeBuild<Target = Target>,
+{
+    fn finalize_optional(self) -> Result<Self::Target, &'static str> {
+        let context = Target::Fields::finalize_optional(self)?;
+        Ok(context.finalize_build())
+    }
+}
+```
+
+The walk is a private helper trait, implemented for `Nil` as the identity and for each `Cons` cell
+as:
+
+```rust
+fn finalize_optional(context: ContextA) -> Result<Self::Output, &'static str> {
+    let context = Rest::finalize_optional(context)?;
+    let (m_value, context) = context.update_field(PhantomData, ());
+
+    let value = m_value.ok_or(Tag::VALUE)?;
+    let context = context.build_field(PhantomData, value);
+
+    Ok(context)
+}
+```
 
 It checks the rest of the list before the current field, so the fields are checked from last to
-first. For each field it pulls the `Option` out with [`UpdateField`](../builder/update_field.md), and:
-
-- if it is `Some`, writes the value back as `IsPresent` with [`BuildField`](../builder/build_field.md) and
-  continues;
-- if it is `None`, returns `Err(Tag::VALUE)` immediately, the field's name recovered as a static string
-  through [`StaticString`](../formatting/static_string.md).
+first. For each field, [`UpdateField`](../builder/update_field.md) moves it from `IsOptional` to
+`IsNothing` and hands back the `Option`. A `Some` is written back as `IsPresent` with
+[`BuildField`](../builder/build_field.md); a `None` returns `Err(Tag::VALUE)`, the field's name
+recovered as a static string through [`StaticString`](../formatting/static_string.md), and the `?`
+stops the walk.
 
 Only if every field yields a value does the walk reach the all-present configuration and call
 [`finalize_build`](../builder/finalize_build.md).
 
 **The strict, all-present [`FinalizeBuild`](../builder/finalize_build.md) remains the only way a partial value
-becomes a concrete struct.** Everything in this layer simply guarantees that configuration is reached
+becomes a concrete struct.** Everything in this layer guarantees that configuration is reached
 before it is invoked, or reports why it could not be.
 
 That short-circuiting is also why only one missing field is named: the walk stops at the first
@@ -134,16 +175,29 @@ the error is `"bar"`.
 **The error is a `&'static str`.** It names one missing field and is not a structured error, so it
 cannot be matched on beyond string comparison.
 
-**It reports only the first.** A builder missing three fields yields one name.
+**It reports only one.** A builder missing three fields yields one name, the last of them in
+declaration order.
 
-**It does not apply to a core builder.** The fields must be `IsOptional`; a core builder either
-finalizes at compile time or does not.
+**It does not apply to a core builder.** Calling it on a builder from `builder()`:
+
+```rust
+let _ = Context::builder().finalize_optional();
+```
+
+fails method resolution, and the notes list only the unmet bounds for the autoref'd receivers, with
+nothing about `IsOptional`:
+
+```text
+error[E0599]: the method `finalize_optional` exists for struct `__PartialContext<IsNothing, IsNothing>`, but its trait bounds were not satisfied
+```
+
+The fields must be `IsOptional`; a core builder either finalizes at compile time or does not.
 
 **It supertraits [`PartialData`](../builder/partial_data.md)**, so `Target` is projected from there and naming
 both in a bound is redundant.
 
-**Field order decides which name you get**, since the walk runs from the last declared field back and
-stops at the first `None` it meets, so the name is the last unset field in declaration order.
+**Field order decides which name you get.** Reordering a struct's fields changes which missing
+field is reported, so a test asserting on the name depends on the declaration order.
 
 ## Related constructs
 

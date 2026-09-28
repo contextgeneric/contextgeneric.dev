@@ -1,6 +1,8 @@
 ---
+title: 'UpdateField — move one field between states'
 sidebar_label: 'UpdateField'
 sidebar_position: 5
+description: 'The per-field primitive of the builder family: change one field''s presence marker and hand back what was stored there before.'
 ---
 
 # `UpdateField`
@@ -62,37 +64,54 @@ directions.
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-The `M` parameter is the target marker, and it is usually inferred from the value you pass: supplying a
-`String` where the field's type is `String` means `M = IsPresent`, and supplying `()` means
-`M = IsNothing`.
+The `M` parameter is the target marker, and **it is not inferred from the value you pass**: a
+`String` could be the storage of `IsPresent` or of any other marker that maps to it, so a direct
+call names the trait with the marker, as
+`UpdateField::<Symbol!("first_name"), IsPresent>::update_field(builder, PhantomData, value)`.
+[`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) pin the marker for you, which is
+one reason to call them instead.
 
 The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.md), one per field.
 
 ## Examples
 
-You almost always reach it through the two directions rather than directly:
+The two transitions `BuildField` and `TakeField` pin, written as direct calls with the target marker
+named:
 
 ```rust
 use cgp::prelude::*;
 
-// BuildField: IsNothing -> IsPresent
-let partial = Person::builder()
-    .build_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned());
+#[derive(Debug, PartialEq, BuildField)]
+pub struct Person {
+    pub first_name: String,
+    pub last_name: String,
+}
+
+pub fn demo() {
+    // IsNothing -> IsPresent: the old storage is `()`.
+    let (old, partial) = UpdateField::<Symbol!("first_name"), IsPresent>::update_field(
+        Person::builder(),
+        PhantomData,
+        "Alice".to_owned(),
+    );
+    assert_eq!(old, ());
+
+    // IsPresent -> IsNothing: the old storage is the value.
+    let (taken, partial) =
+        UpdateField::<Symbol!("first_name"), IsNothing>::update_field(partial, PhantomData, ());
+    assert_eq!(taken, "Alice");
+
+    let person = partial
+        .build_field(PhantomData::<Symbol!("first_name")>, "Bob".to_owned())
+        .build_field(PhantomData::<Symbol!("last_name")>, "Chen".to_owned())
+        .finalize_build();
+    assert_eq!(person.first_name, "Bob");
+}
 ```
 
-Naming `UpdateField` yourself is for a transition neither direction covers, which in practice means one
-involving `IsOptional`:
-
-```rust
-// the shape SetOptional uses: IsOptional -> IsOptional, so the type does not change
-let (previous, builder) = builder.update_field(
-    PhantomData::<Symbol!("first_name")>,
-    Some("Bob".to_owned()),
-);
-```
-
-Because both markers are `IsOptional` here, `Output` is the same type as `Self`, which is exactly what
-lets an optional field be set repeatedly, unlike the core `build_field` that consumes an absent slot once.
+Under `IsNothing` a field is stored as `()`, so setting it hands back `()` and taking it hands back
+the value. Naming the trait with the marker is required: the marker is not inferred from the value,
+as [Common Mistakes](#common-mistakes) shows.
 
 ## When to use it
 
@@ -110,31 +129,41 @@ call site.
 
 ## Under the hood
 
-The derive emits one impl per field, and the key property is visible in the generics: **only the named
-field's marker moves, while every other stays generic.**
+The derive emits one impl per field, and the key property is visible in the generics: only the
+named field's marker moves, while every other stays generic. `cargo cgp expand` on the example's
+`Person` shows the `first_name` impl:
 
 ```rust
-impl<__M1__: MapType, __M2__: MapType, __F1__: MapType>
-    UpdateField<Symbol!("first_name"), __M2__> for __PartialPerson<__M1__, __F1__>
-{
+impl<
+    __M1__: MapType,
+    __M2__: MapType,
+    __F1__: MapType,
+> UpdateField<Symbol!("first_name"), __M2__> for __PartialPerson<__M1__, __F1__> {
     type Value = String;
-    type Mapper = __M1__;                          // the marker before
-    type Output = __PartialPerson<__M2__, __F1__>; // and after
-    // ...
+    type Mapper = __M1__;
+    type Output = __PartialPerson<__M2__, __F1__>;
+    fn update_field(
+        self,
+        _tag: ::core::marker::PhantomData<Symbol!("first_name")>,
+        value: __M2__::Map<Self::Value>,
+    ) -> (__M1__::Map<Self::Value>, Self::Output) {
+        (
+            self.first_name,
+            __PartialPerson {
+                first_name: value,
+                last_name: self.last_name,
+            },
+        )
+    }
 }
 ```
 
-`__M1__` is unconstrained, so the impl applies whatever state the field is currently in, and `__F1__`
-passes through untouched. That is precisely why fields can be built in any order: no impl cares about the
-other fields' states.
-
-Because `Mapper` is an *output* rather than an input, the two directional traits can pin a transition
-by constraining it. [`BuildField`](./build_field.md) is a blanket impl over
-`UpdateField<Tag, IsPresent, Mapper = IsNothing>` and [`TakeField`](./take_field.md) over
-`UpdateField<Tag, IsNothing, Mapper = IsPresent>`: same primitive, opposite constraints.
-
-Nothing here changes a value's runtime layout beyond moving it in or out of the slot; the markers are
-zero-sized and the wrapping is a type-level fiction.
+`__M1__` is unconstrained, so the impl applies whatever state the field is in, and `__F1__` passes
+through untouched, which is why fields can be built in any order. Because `Mapper` is an output, the
+two directional traits pin a transition by constraining it: [`BuildField`](./build_field.md) is a
+blanket impl over `UpdateField<Tag, IsPresent, Mapper = IsNothing>` and
+[`TakeField`](./take_field.md) over `UpdateField<Tag, IsNothing, Mapper = IsPresent>`. The markers
+are zero-sized, so nothing changes at run time beyond moving the value in or out of its slot.
 
 ## Common Mistakes
 
@@ -153,8 +182,35 @@ fine, but the shape catches people expecting the builder alone.
 **Reaching for it where [`BuildField`](./build_field.md) would do makes the code harder to read** for no
 gain. The directional traits exist because they say what is happening.
 
-**A field not declared on the record has no impl**, and the error names the missing `UpdateField` bound
-with the tag fully expanded rather than saying the field does not exist.
+**The marker must be named.** Calling the method without it:
+
+```rust
+let (_old, _partial) =
+    Person::builder().update_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned());
+```
+
+leaves `M` to inference, which cannot recover it from the value:
+
+```text
+error[E0284]: type annotations needed for `((), __PartialPerson<_, IsNothing>)`
+...
+   = note: cannot satisfy `<_ as MapType>::Map<String> == String`
+```
+
+**A field not declared on the record has no impl.** Setting an `age` that `Person` does not declare:
+
+```rust
+let _ = Person::builder().build_field(PhantomData::<Symbol!("age")>, 42_u8);
+```
+
+reports the missing `UpdateField` bound with the tag spelled out, rather than saying the field does
+not exist, and lists the fields that do have impls:
+
+```text
+error[E0277]: the trait bound `__PartialPerson<IsNothing, IsNothing>: UpdateField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>, IsPresent>` is not satisfied
+...
+help: the following other types implement trait `UpdateField<Tag, M>`
+```
 
 ## Related constructs
 

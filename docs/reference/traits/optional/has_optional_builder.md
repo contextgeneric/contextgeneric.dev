@@ -1,6 +1,8 @@
 ---
+title: 'HasOptionalBuilder — an all-optional builder'
 sidebar_label: 'HasOptionalBuilder'
 sidebar_position: 1
+description: 'Start a builder whose every field is an Option, set in any order and as often as you like, with the choice of ending deferred to the finalize call.'
 ---
 
 # `HasOptionalBuilder`
@@ -62,40 +64,49 @@ The impls are blanket ones over the core builder machinery, so any record derivi
 
 ## Examples
 
-An all-optional builder, set in any order and finalized strictly:
+An all-optional builder, set in any order and finished by each of the two endings:
 
 ```rust
-use cgp::extra::field::impls::{FinalizeOptional, HasOptionalBuilder, SetOptional};
 use cgp::prelude::*;
+use cgp::extra::field::impls::{
+    CanFinalizeWithDefault, FinalizeOptional, HasOptionalBuilder, SetOptional,
+};
 
-#[derive(CgpData)]
+#[derive(Debug, PartialEq, CgpData)]
 pub struct Context {
     pub foo: String,
     pub bar: u64,
 }
 
-let builder = Context::optional_builder()
-    .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
-    .set(PhantomData::<Symbol!("bar")>, 42);
+pub fn demo() {
+    let context = Context::optional_builder()
+        .set(PhantomData::<Symbol!("bar")>, 42)
+        .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
+        .finalize_optional();
+    assert_eq!(
+        context,
+        Ok(Context {
+            foo: "foo".to_owned(),
+            bar: 42,
+        })
+    );
 
-let context = builder.finalize_optional().unwrap();
+    // The same kind of builder, with `bar` left unset, finalized each way.
+    let defaulted = Context::optional_builder()
+        .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
+        .finalize_with_default();
+    assert_eq!(defaulted.bar, 0);
 
-assert_eq!(context.foo, "foo");
+    let missing = Context::optional_builder()
+        .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
+        .finalize_optional();
+    assert_eq!(missing, Err("bar"));
+}
 ```
 
-Leave a field unset and the two endings diverge, which is the point of deferring the choice:
-
-```rust
-use cgp::extra::field::impls::CanFinalizeWithDefault;
-
-let context = Context::optional_builder()
-    .set(PhantomData::<Symbol!("foo")>, "foo".to_owned())
-    .finalize_with_default();
-
-assert_eq!(context.bar, 0);   // defaulted
-```
-
-Had that used `finalize_optional`, it would have returned `Err("bar")` instead.
+The fields are set in reverse declaration order, which the core builder also allows; what it does
+not allow is ending an incomplete build any way but a compile error. Here the same unfinished
+builder either fills `bar` with `0` or reports it by name, chosen at the finalize call.
 
 ## When to use it
 
@@ -115,17 +126,27 @@ Had that used `finalize_optional`, it would have returned `Err("bar")` instead.
 
 ## Under the hood
 
-`optional_builder()` is [`HasBuilder`](../builder/has_builder.md)'s `builder()` followed by
-[`ToOptional`](./to_optional.md): start at all-`IsNothing`, then re-mark every field to `IsOptional`
-with a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying the
-[`TransformOptional`](./transform_optional.md) marker.
-
-So the resulting type is the same partial companion the core builder uses, at a configuration the core
-builder never reaches on its own:
+The trait's one impl is a blanket impl over the core builder and [`ToOptional`](./to_optional.md):
 
 ```rust
-// __PartialContext<IsOptional, IsOptional>
+impl<Context, Builder> HasOptionalBuilder for Context
+where
+    Context: HasBuilder,
+    Context::Builder: ToOptional<Output = Builder>,
+{
+    type Builder = Builder;
+
+    fn optional_builder() -> Self::Builder {
+        Self::builder().to_optional()
+    }
+}
 ```
+
+So `optional_builder()` starts at the all-`IsNothing` configuration and re-marks every field to
+`IsOptional` with a [`TransformMapFields`](../type-level/transform_map_fields.md) walk carrying the
+[`TransformOptional`](./transform_optional.md) marker. For the example's `Context`, the result is
+`__PartialContext<IsOptional, IsOptional>`, the same partial companion the core builder uses, at a
+configuration the core builder never reaches on its own.
 
 Nothing about the companion type is special to this layer. What changes is the marker, and with it which
 operations apply: [`SetOptional`](./set_optional.md) resolves where
@@ -143,7 +164,9 @@ compile error; here it is an `Err` or a silently substituted default. That is th
 making consciously.
 
 **The builder's type does not record what you have set.** Every field stays `IsOptional` throughout,
-which allows re-setting and is why finalizing has to check at run time.
+which allows re-setting and is why finalizing has to check at run time. It also means
+[`finalize_with_default`](./can_finalize_with_default.md#common-mistakes) needs `Default` on every
+field's type, set or not.
 
 **`optional_builder()` is an associated function**, so it is `Context::optional_builder()` with no
 receiver.

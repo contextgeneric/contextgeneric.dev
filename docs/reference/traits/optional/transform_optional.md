@@ -1,6 +1,8 @@
 ---
+title: 'TransformOptional — make every field optional'
 sidebar_label: 'TransformOptional'
 sidebar_position: 8
+description: 'The transform marker behind ToOptional: two per-field conversions that wrap a present field in Some and turn an absent one into None.'
 ---
 
 # `TransformOptional`
@@ -41,8 +43,8 @@ pub struct TransformOptional;
 ```
 
 It carries no data. It becomes a transform by implementing
-[`TransformMap`](../type-level/transform_map.md) once for each state a field might currently be in, both
-impls targeting `IsOptional`:
+[`TransformMap`](../type-level/transform_map.md) once for each state a core builder's field can be
+in, both impls targeting `IsOptional`:
 
 | a field currently | becomes |
 |---|---|
@@ -77,30 +79,43 @@ to records the defaulting path does not.
 
 ## Examples
 
-You meet it in the bound behind [`ToOptional`](./to_optional.md):
+A generic function that drives the optional conversion across any builder, and a partly built core
+builder passed through it:
 
 ```rust
-use cgp::core::field::traits::TransformMapFields;
-use cgp::extra::field::impls::TransformOptional;
 use cgp::prelude::*;
+use cgp::core::field::impls::IsOptional;
+use cgp::core::field::traits::TransformMapFields;
+use cgp::extra::field::impls::{FinalizeOptional, SetOptional, TransformOptional};
 
-// conceptually:
-//   impl<Builder> ToOptional for Builder
-//   where Builder: TransformMapFields<TransformOptional, IsOptional>
-//   {
-//       fn to_optional(self) -> Self::Output {
-//           self.transform_map_fields()
-//       }
-//   }
+#[derive(Debug, PartialEq, CgpData)]
+pub struct Context {
+    pub foo: String,
+    pub bar: u64,
+}
+
+pub fn relax<Builder>(builder: Builder) -> Builder::Output
+where
+    Builder: TransformMapFields<TransformOptional, IsOptional>,
+{
+    builder.transform_map_fields()
+}
+
+pub fn demo() {
+    let optional =
+        relax(Context::builder().build_field(PhantomData::<Symbol!("foo")>, "foo".to_owned()));
+    let context = optional
+        .set(PhantomData::<Symbol!("bar")>, 42)
+        .finalize_optional()
+        .unwrap();
+    assert_eq!(context.foo, "foo");
+}
 ```
 
-Swap the marker for [`TransformMapDefault`](./transform_map_default.md) and the target for `IsPresent`,
-add a [`finalize_build`](../builder/finalize_build.md), and you have
-[`CanFinalizeWithDefault`](./can_finalize_with_default.md). The two operations differ by exactly that
-much.
-
-Writing a marker of your own follows the same shape; the
-[`TransformMap`](../type-level/transform_map.md#examples) page shows one with three impls.
+`relax` is [`ToOptional`](./to_optional.md)'s whole impl written as a function. Swap the marker for
+[`TransformMapDefault`](./transform_map_default.md) and the target for `IsPresent`, add a
+[`finalize_build`](../builder/finalize_build.md), and you have
+[`CanFinalizeWithDefault`](./can_finalize_with_default.md).
 
 ## When to use it
 
@@ -115,21 +130,29 @@ Writing a marker of your own follows the same shape; the
 
 ## Under the hood
 
-The marker is zero-sized and carries [`TransformMap`](../type-level/transform_map.md) impls distinguished by their
-source marker, each targeting `IsOptional`:
+The marker is zero-sized and carries two [`TransformMap`](../type-level/transform_map.md) impls,
+distinguished by their source marker, each targeting `IsOptional`:
 
 ```rust
-// IsPresent -> IsOptional: wrap
-//   fn transform_mapped(value: T) -> Option<T> { Some(value) }
-//
-// IsNothing -> IsOptional: nothing to wrap
-//   fn transform_mapped(_value: ()) -> Option<T> { None }
+impl<T> TransformMap<IsPresent, IsOptional, T> for TransformOptional {
+    fn transform_mapped(value: T) -> Option<T> {
+        Some(value)
+    }
+}
+
+impl<T> TransformMap<IsNothing, IsOptional, T> for TransformOptional {
+    fn transform_mapped(_value: ()) -> Option<T> {
+        None
+    }
+}
 ```
 
 Note what is absent: **no `Default` bound anywhere.** Its counterpart
-[`TransformMapDefault`](./transform_map_default.md) needs one on two of its three impls, because filling
-an absent field means producing a value from nothing. Producing `None` does not, so this conversion
-applies to every field type.
+[`TransformMapDefault`](./transform_map_default.md) needs one on two of its three impls, because
+filling an absent field means producing a value from nothing. Producing `None` does not, so this
+conversion applies to every field type. Also absent is an impl from `IsOptional`, which
+[`TransformMapDefault`](./transform_map_default.md) has: a field that is already optional has no
+conversion here, so the marker cannot be applied to an optional builder.
 
 [`TransformMapFields`](../type-level/transform_map_fields.md#under-the-hood) applies it, visiting each field
 of the target's [`HasFields`](../shape/has_fields.md) shape and using
@@ -146,6 +169,9 @@ makes [`SetOptional`](./set_optional.md) resolve and the strict
 
 **It always targets `IsOptional`.** Reaching `IsPresent` is
 [`TransformMapDefault`](./transform_map_default.md)'s job.
+
+**It has no conversion from `IsOptional`**, so a builder that is already optional cannot be relaxed
+again; [`ToOptional`](./to_optional.md#common-mistakes) shows the error.
 
 **It is a marker, not an operation.** There is no method and nothing to wire. It is named in a bound.
 
