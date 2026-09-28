@@ -96,15 +96,15 @@ so callers never name it.
 
 ### Let each context choose a type
 
-[`#[cgp_type]`](./macros/cgp_type.md) defines an abstract-type component — an error type, a runtime, a
-scalar — that each context fills in by wiring the component to
+[`#[cgp_type]`](./macros/cgp_type.md) defines an abstract-type component — an error type, a runtime,
+a scalar — that each context fills in by wiring the component to
 [`UseType<T>`](./providers/use_type.md), or to
 [`UseDelegatedType`](./providers/use_delegated_type.md) to resolve it through a table. Generic code
-names such a type by importing it with [`#[use_type]`](./attributes/use_type.md), which is a different
-thing from the `UseType` provider despite the shared name. All of it rests on
-[`HasType`](./components/has_type.md), CGP's built-in abstract-type component, and
-[`WithProvider`](./providers/with_provider.md) is the adapter that lets a foundational provider stand
-in as a named component's.
+names such a type by importing it with [`#[use_type]`](./attributes/use_type.md), which is a
+different thing from the `UseType` provider despite the shared name. Beside the named components
+sits [`HasType`](./components/has_type.md), CGP's tag-indexed abstract-type component, and
+[`WithProvider`](./providers/with_provider.md) is the adapter that lets a foundational provider
+stand in as a named component's.
 
 ### Handle errors
 

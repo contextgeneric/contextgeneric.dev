@@ -246,10 +246,11 @@ where
 }
 ```
 
-[`HasType` / `TypeProvider`](../components/has_type.md) is CGP's single built-in abstract-type component,
-and `UseType` is itself a `TypeProvider`. This impl lets one `UseType<T>` satisfy both the
-built-in component and any `#[cgp_type]` component you declare, instead of needing a separate provider
-per component.
+[`HasType` / `TypeProvider`](../components/has_type.md) is CGP's tag-indexed abstract-type component,
+and this impl lets any `TypeProvider` back the named component when the context wires
+`WithProvider<P>`, with the component's own key as the tag. A provider written once for
+`TypeProvider`, such as [`UseDelegatedType`](../providers/use_delegated_type.md), then serves every
+`#[cgp_type]` component. `UseType<T>` needs no adapter, since the first addition covers it directly.
 
 Each generated provider impl is paired with a matching
 [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl carrying the same bounds, as everywhere else.
@@ -341,7 +342,8 @@ headline, so read downward. **Without a check the mistake is silent**, which is 
 - [`UseType`](../providers/use_type.md) — the provider a context wires to supply the concrete type.
 - [`#[use_type]`](../attributes/use_type.md) — imports an abstract type so its name can be written bare;
   a different construct from the `UseType` provider despite the shared name.
-- [`HasType`](../components/has_type.md) — CGP's built-in abstract-type component, which this builds on.
+- [`HasType`](../components/has_type.md) — CGP's tag-indexed abstract-type component, which the
+  generated `WithProvider` impl adapts.
 - [`HasErrorType`](../components/has_error_type.md) — the canonical abstract type, defined this way.
 - [`UseDelegatedType`](../providers/use_delegated_type.md) — resolves the type through a table rather than
   fixing it.
