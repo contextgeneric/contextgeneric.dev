@@ -1,0 +1,5 @@
+error: expected `@`
+ --> tests/compile_fail/reference/traits/concat_path_common_mistakes_missing_at.rs:4:24
+  |
+4 | pub type Outer = Path!(a.b);
+  |                        ^

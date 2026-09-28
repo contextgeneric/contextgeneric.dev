@@ -1,0 +1,42 @@
+error[E0283]: type annotations needed for `__PartialPoint<_>`
+  --> tests/compile_fail/reference/traits/transform_map_fields_common_mistakes_bare_call.rs:19:9
+   |
+19 |     let _ = Point { x: 1 }.into_builder().transform_map_fields();
+   |         ^                                 -------------------- type must be known at this point
+   |
+   = note: the type must implement `MapType`
+   = help: the following types implement trait `MapType`:
+             IsNothing
+             IsOptional
+             IsVoid
+             ToBuildAndMergeHandler
+             TryPromoteProviders
+             cgp::prelude::IsPresent
+   = note: required for `Cons<cgp::prelude::Field<Symbol<1, cgp::prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<cgp::prelude::IsPresent>, _, _>`
+   = note: required for `__PartialPoint<cgp::prelude::IsPresent>` to implement `TransformMapFields<_, _>`
+help: consider giving this pattern a type, where the type for type parameter `TargetMap` is specified
+   |
+19 |     let _: __PartialPoint<__M2__> = Point { x: 1 }.into_builder().transform_map_fields();
+   |          ++++++++++++++++++++++++
+
+error[E0283]: type annotations needed
+  --> tests/compile_fail/reference/traits/transform_map_fields_common_mistakes_bare_call.rs:19:43
+   |
+19 |     let _ = Point { x: 1 }.into_builder().transform_map_fields();
+   |                                           ^^^^^^^^^^^^^^^^^^^^
+   |
+note: multiple `impl`s satisfying `_: TransformMap<cgp::prelude::IsPresent, _, u32>` found
+  --> tests/compile_fail/reference/traits/transform_map_fields_common_mistakes_bare_call.rs:6:1
+   |
+ 6 | impl<T> TransformMap<IsPresent, IsPresent, T> for Keep {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: and more `impl`s found in the following crates: `cgp_field_extra`:
+           - impl<T> TransformMap<cgp::prelude::IsPresent, IsOptional, T> for TransformOptional;
+           - impl<T> TransformMap<cgp::prelude::IsPresent, cgp::prelude::IsPresent, T> for TransformMapDefault;
+   = note: required for `Cons<cgp::prelude::Field<Symbol<1, cgp::prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<cgp::prelude::IsPresent>, _, _>`
+   = note: required for `__PartialPoint<cgp::prelude::IsPresent>` to implement `TransformMapFields<_, _>`
+help: try using a fully qualified path to specify the expected types
+   |
+19 -     let _ = Point { x: 1 }.into_builder().transform_map_fields();
+19 +     let _ = <__PartialPoint<cgp::prelude::IsPresent> as TransformMapFields<Transform, TargetMap>>::transform_map_fields(Point { x: 1 }.into_builder());
+   |

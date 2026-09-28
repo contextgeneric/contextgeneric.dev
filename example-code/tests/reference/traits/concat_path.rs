@@ -1,8 +1,8 @@
-//! Code from `docs/reference/traits/concat_path.md` — *`ConcatPath`*.
+//! Code from `docs/reference/traits/formatting/concat_path.md` — `ConcatPath`.
 //!
-//! Paths are unsized markers, so there is no value to build: naming the joined type and coercing it
-//! to the expected one is the check. The absence of any `use` beyond the prelude is the page's claim
-//! that this trait, unlike its neighbours, is re-exported there.
+//! Paths are unsized markers, so there is no value to build: the check is a type equality, and the
+//! prelude-only import pins that the trait is re-exported there. `Path!` without its `@` is a
+//! trybuild fixture.
 
 /// ## Examples
 pub mod examples {
@@ -13,8 +13,17 @@ pub mod examples {
 
     pub type Joined = <Outer as ConcatPath<Inner>>::Output;
 
-    #[allow(dead_code)]
-    pub fn assert_joined(path: PhantomData<&Joined>) -> PhantomData<&Path!(@a.b.c.d)> {
+    // Compiles only if the joined path is `@a.b.c.d`.
+    pub fn assert_joined(path: PhantomData<Joined>) -> PhantomData<Path!(@a.b.c.d)> {
         path
+    }
+
+    // A generic signature naming the composed route.
+    pub fn descend<Outer: ?Sized, Inner: ?Sized>(
+    ) -> PhantomData<<Outer as ConcatPath<Inner>>::Output>
+    where
+        Outer: ConcatPath<Inner>,
+    {
+        PhantomData
     }
 }

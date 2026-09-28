@@ -20,6 +20,14 @@ pub mod examples {
         fields
     }
 
+    /// A generic signature naming the shape a routine will produce.
+    pub fn with_extra_field<Fields, Extra>() -> PhantomData<<Fields as AppendProduct<Extra>>::Output>
+    where
+        Fields: AppendProduct<Extra>,
+    {
+        PhantomData
+    }
+
     /// The base case the page states under *Using it*: appending onto `Nil` yields a one-element list.
     pub fn assert_nil_base_case(
         fields: <Nil as AppendProduct<Field<Symbol!("host"), String>>>::Output,

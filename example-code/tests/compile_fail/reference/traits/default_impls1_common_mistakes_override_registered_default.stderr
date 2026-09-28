@@ -1,0 +1,20 @@
+error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>, _, _>` for type `App`
+  --> tests/compile_fail/reference/traits/default_impls1_common_mistakes_override_registered_default.rs:37:33
+   |
+33 |             @test.ShowImplComponent.T: Provider,
+   |                                     - first implementation here
+...
+37 |         @test.ShowImplComponent.String: ShowWithDisplay,
+   |                                 ^^^^^^ conflicting implementation for `App`
+   |
+   = note: downstream crates may implement trait `cgp::prelude::IsProviderFor<cgp::prelude::PathCons<cgp::prelude::Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::prelude::PathCons<ShowImplComponent, cgp::prelude::PathCons<std::string::String, _>>>, _, _>` for type `ShowString`
+   = note: downstream crates may implement trait `cgp::prelude::IsProviderFor<cgp::prelude::PathCons<cgp::prelude::Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::prelude::PathCons<ShowImplComponent, cgp::prelude::PathCons<std::string::String, _>>>, _, _>` for type `ShowWithDisplay`
+
+error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>>` for type `App`
+  --> tests/compile_fail/reference/traits/default_impls1_common_mistakes_override_registered_default.rs:37:33
+   |
+33 |             @test.ShowImplComponent.T: Provider,
+   |                                     - first implementation here
+...
+37 |         @test.ShowImplComponent.String: ShowWithDisplay,
+   |                                 ^^^^^^ conflicting implementation for `App`

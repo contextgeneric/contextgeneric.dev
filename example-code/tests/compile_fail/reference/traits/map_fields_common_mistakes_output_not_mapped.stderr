@@ -1,0 +1,16 @@
+error[E0576]: cannot find associated type `Output` in trait `MapFields`
+ --> tests/compile_fail/reference/traits/map_fields_common_mistakes_output_not_mapped.rs:5:64
+  |
+5 | pub type Mapped = <Product![u8, u16] as MapFields<IsPresent>>::Output;
+  |                                                                ^^^^^^ not found in `MapFields`
+  |
+ ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/map_fields.rs:5:5
+  |
+5 |     type Mapped;
+  |     ----------- associated type `Mapped` defined here
+  |
+help: maybe you meant this associated type
+  |
+5 - pub type Mapped = <Product![u8, u16] as MapFields<IsPresent>>::Output;
+5 + pub type Mapped = <Product![u8, u16] as MapFields<IsPresent>>::Mapped;
+  |
