@@ -40,13 +40,13 @@ pub mod examples {
         }
     }
 
-    #[test]
-    fn test_chain_getters_reaches_nested_field() {
-        let app = App {
-            config: Config {
-                name: "test".to_owned(),
-            },
-        };
+    pub fn demo() {
+        let app = App { config: Config { name: "test".to_owned() } };
         assert_eq!(app.name(), "test");
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
     }
 }

@@ -1,4 +1,6 @@
 ---
+title: 'UseDelegatedType — look a type up in a table'
+description: 'The type provider that resolves an abstract type by looking its tag up in a delegate_components! table, instead of fixing it to one concrete type.'
 sidebar_label: 'UseDelegatedType'
 sidebar_position: 11
 ---
@@ -15,8 +17,8 @@ type to one fixed `T`. But sometimes a single provider must answer several abstr
 once, or route each type tag to a different concrete type chosen elsewhere, such as when a namespace or
 a [higher-order provider](/docs/reference/glossary#higher-order-provider) supplies a coherent bundle of types. Hand-writing one `UseType` entry per tag
 would scatter that decision; `UseDelegatedType` concentrates it into one `Components` table the provider
-consults. As always, the **context** (the type that implements the trait) points its type
-components at the provider.
+consults. As always, the [**context**](/docs/reference/glossary#context) (the type that implements the trait)
+points its type components at the provider.
 
 The mechanism is the same indirection [`UseDelegate`](use_delegate.md) provides for behavioral
 components, lifted to the type level. Where `UseDelegate<Components>` dispatches a *method call* to
@@ -27,16 +29,57 @@ and the other yields a type. Like every CGP provider, it carries no runtime valu
 
 ## Usage
 
-`UseDelegatedType` supplies only the foundational [`TypeProvider`](../components/has_type.md), so it is
-wired through its [`WithDelegatedType`](with_delegated_type.md) alias rather than named directly. See
-[`WithDelegatedType`](with_delegated_type.md) for the import, the wiring form, and a worked example; the
-mechanism those rest on is described under [Under the hood](#under-the-hood) below.
+`UseDelegatedType` implements only the foundational [`TypeProvider`](../components/has_type.md), so a
+[`#[cgp_type]`](../macros/cgp_type.md) component is wired to it through its
+[`WithDelegatedType`](with_delegated_type.md) alias; see that page for the wiring form and a worked
+example. Neither name is in the prelude, and both are imported from `cgp::core::types`.
+
+The one place it is named directly is the built-in `TypeProviderComponent`, also imported from
+`cgp::core::types`. There the lookup key is the `Tag` of `HasType<Tag>`, so the table maps tag types
+to concrete types:
+
+```rust
+use core::marker::PhantomData;
+use cgp::prelude::*;
+use cgp::core::types::{TypeProviderComponent, UseDelegatedType};
+
+pub struct ScalarTag;
+pub struct IndexTag;
+
+pub struct AppTypes;
+
+delegate_components! {
+    AppTypes {
+        ScalarTag: f64,
+        IndexTag: usize,
+    }
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        TypeProviderComponent: UseDelegatedType<AppTypes>,
+    }
+}
+
+pub fn types(
+    scalar: PhantomData<<App as HasType<ScalarTag>>::Type>,
+    index: PhantomData<<App as HasType<IndexTag>>::Type>,
+) -> (PhantomData<f64>, PhantomData<usize>) {
+    (scalar, index)
+}
+```
+
+`App` answers `HasType<ScalarTag>` with `f64` and `HasType<IndexTag>` with `usize`, and `types`
+compiles only because they are those types. `App` is an
+[environmental context](/docs/reference/glossary#environmental-context), and `AppTypes` is a plain
+table whose values are types rather than providers.
 
 ## When to use it
 
-You choose `UseDelegatedType` by wiring its [`WithDelegatedType`](with_delegated_type.md) alias, so the
-guidance on when to answer several abstract types from one shared table — rather than fixing each one
-with [`UseType`](use_type.md) — lives with that alias, on
+You choose `UseDelegatedType` by wiring its [`WithDelegatedType`](with_delegated_type.md) alias, so the guidance on when to answer several abstract types from one shared table, rather than fixing
+each one with [`UseType`](use_type.md), lives with that alias, on
 [`WithDelegatedType`](with_delegated_type.md).
 
 ## Under the hood

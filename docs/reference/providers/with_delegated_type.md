@@ -1,4 +1,6 @@
 ---
+title: 'WithDelegatedType — types from a shared table'
+description: 'The alias WithProvider<UseDelegatedType<Table>>: several #[cgp_type] components answered from one table keyed by their component markers.'
 sidebar_label: 'WithDelegatedType'
 sidebar_position: 6.5
 ---
@@ -10,14 +12,14 @@ Resolve one or more abstract-type components from a shared table, through the `W
 ## Overview
 
 `WithDelegatedType<Components>` is the alias `WithProvider<UseDelegatedType<Components>>`. It answers a
-context's abstract-type components by looking each type tag up in the `Components` table, on a
-**context**, the type that implements the trait, by adapting the foundational
+context's abstract-type components by looking each type tag up in the `Components` table, on a [**context**](/docs/reference/glossary#context), the type that implements the trait, by adapting the foundational
 [`UseDelegatedType`](use_delegated_type.md) provider through the [`WithProvider`](with_provider.md)
 layer. Like every CGP provider, it carries no runtime value.
 
-Unlike [`WithType`](with_type.md), this alias is not an alternative to a directly-wireable provider: the
-bare [`UseDelegatedType`](use_delegated_type.md) supplies only the foundational
-[`TypeProvider`](../components/has_type.md), so `WithDelegatedType` is the form you wire.
+Unlike [`WithType`](with_type.md), this alias is not an alternative to a directly-wireable provider
+on a `#[cgp_type]` component: the bare [`UseDelegatedType`](use_delegated_type.md) supplies only the
+foundational [`TypeProvider`](../components/has_type.md), so `WithDelegatedType` is the form you wire
+there. The bare form serves only the built-in `TypeProviderComponent`, as its page shows.
 
 ## Usage
 
@@ -38,9 +40,11 @@ delegate_components! {
 }
 ```
 
-The `Components` parameter is a type that maps each type tag to a concrete type, built as an ordinary
-[`delegate_components!`](../macros/delegate_components.md) table. Any tag the table has no entry for is
-unresolved, and the context does not implement `HasType` for it.
+The `Components` parameter is a type that maps each component marker to a concrete type, built as an
+ordinary [`delegate_components!`](../macros/delegate_components.md) table. The key is the marker
+because the `WithProvider` impl `#[cgp_type]` generates asks its inner provider for
+`TypeProvider<Context, ScalarTypeProviderComponent>`. A component the table has no entry for is
+unresolved, and the context does not implement that abstract type.
 
 ## Examples
 
@@ -75,7 +79,14 @@ delegate_components! {
         [
             ScalarTypeProviderComponent,
             IndexTypeProviderComponent,
-        ]: WithDelegatedType<AppTypes>,
+                ]: WithDelegatedType<AppTypes>,
+    }
+}
+
+check_components! {
+    App {
+        ScalarTypeProviderComponent,
+        IndexTypeProviderComponent,
     }
 }
 ```

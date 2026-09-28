@@ -1,4 +1,6 @@
 ---
+title: 'UseDelegate — legacy per-type dispatch table'
+description: 'The legacy provider that routes a component to a different inner provider per generic-parameter type through a nested table; open replaces it.'
 sidebar_label: 'UseDelegate'
 sidebar_position: 7
 ---
@@ -27,8 +29,8 @@ It is expected to be deprecated once `open` is shown to cover every dispatch cas
 ## Overview
 
 `UseDelegate` chooses a provider based on a type argument rather than on the component alone. An
-ordinary component picks its provider by looking the component name up in the **context**'s delegation
-table, where the context is the type the method runs on. But when a provider trait carries an
+ordinary component picks its provider by looking the component name up in the [**context**](/docs/reference/glossary#context)'s delegation
+table, where the context is the type the implementation runs against. But when a provider trait carries an
 extra generic parameter, such as a `SourceError` to convert or a `Shape` to measure, the right provider
 often depends on which concrete type that parameter is. `UseDelegate` performs a second lookup: it
 treats one generic parameter as a key and reads the matching inner provider out of a table, so a single
@@ -77,8 +79,30 @@ pub trait CanCalculateArea<Shape> {
     fn area(&self, shape: &Shape) -> f64;
 }
 
-pub struct Rectangle;
-pub struct Circle;
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[cgp_impl(new RectangleArea)]
+impl AreaCalculator<Rectangle> {
+    fn area(&self, shape: &Rectangle) -> f64 {
+        shape.width * shape.height
+    }
+}
+
+#[cgp_impl(new CircleArea)]
+impl AreaCalculator<Circle> {
+    fn area(&self, shape: &Circle) -> f64 {
+        core::f64::consts::PI * shape.radius * shape.radius
+    }
+}
+
+pub struct MyApp;
 
 delegate_components! {
     MyApp {
@@ -89,6 +113,16 @@ delegate_components! {
             }>,
     }
 }
+
+check_components! {
+    MyApp {
+        AreaCalculatorComponent: [Rectangle, Circle],
+    }
+}
+
+pub fn demo() {
+    assert_eq!(MyApp.area(&Rectangle { width: 2.0, height: 3.0 }), 6.0);
+}
 ```
 
 The wiring reads in two layers. `MyApp` delegates `AreaCalculatorComponent` to
@@ -96,7 +130,10 @@ The wiring reads in two layers. `MyApp` delegates `AreaCalculatorComponent` to
 table. The inner table maps the `Rectangle` type to `RectangleArea` and the `Circle` type to
 `CircleArea`. The result is that `MyApp` implements `CanCalculateArea<Rectangle>` through
 `RectangleArea` and `CanCalculateArea<Circle>` through `CircleArea`, with `UseDelegate` selecting between
-them by the `Shape` argument. Adding a shape is one more entry in the inner table.
+them by the `Shape` argument. Adding a shape is one more entry in the inner table. `MyApp` is an
+[environmental context](/docs/reference/glossary#environmental-context), and the component is
+**[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: it measures the
+`Shape`, while `MyApp` decides which provider measures each one.
 
 The same dispatch, written with `open` for new code, folds the entries into the context's own table:
 
@@ -130,27 +167,27 @@ too, with a key that has one path segment per type parameter.
 
 The [`#[derive_delegate(UseDelegate<Param>)]`](../attributes/derive_delegate.md) attribute on a
 component generates the `UseDelegate` provider impl, which uses `Components` as the table and the named
-parameter as the key. For a component such as `CanRaiseError<SourceError>` (provider `ErrorRaiser`) with
-a `#[derive_delegate(UseDelegate<SourceError>)]` attribute, the generated impl is:
+parameter as the key. For the `CanCalculateArea<Shape>` component above, with its
+`#[derive_delegate(UseDelegate<Shape>)]` attribute, `cargo cgp expand` shows:
 
 ```rust
-impl<Context, SourceError, Components, Delegate> ErrorRaiser<Context, SourceError>
-    for UseDelegate<Components>
+impl<__Context__, Shape, __Components__, __Delegate__> AreaCalculator<__Context__, Shape>
+for UseDelegate<__Components__>
 where
-    Context: HasErrorType,
-    Components: DelegateComponent<SourceError, Delegate = Delegate>,
-    Delegate: ErrorRaiser<Context, SourceError>,
+    __Components__: DelegateComponent<(Shape), Delegate = __Delegate__>,
+    __Delegate__: AreaCalculator<__Context__, Shape>,
 {
-    fn raise_error(error: SourceError) -> Context::Error {
-        Delegate::raise_error(error)
+    fn area(__context__: &__Context__, shape: &Shape) -> f64 {
+        __Delegate__::area(__context__, shape)
     }
 }
 ```
 
 The mechanism is a single [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on
-`SourceError`. `UseDelegate<Components>` implements `ErrorRaiser` for a given `SourceError` exactly when
-`Components` maps that `SourceError` to a delegate that itself implements `ErrorRaiser`, and the method
-forwards to it. Only the parameter named inside `UseDelegate<...>` is the key; the rest pass through
+`(Shape)`, which is the bare type `Shape` rather than a one-element tuple; `UseDelegate<(A, B)>` keys
+on a real tuple of two parameters. `UseDelegate<Components>` implements `AreaCalculator` for a given
+`Shape` exactly when `Components` maps that `Shape` to a delegate that itself implements
+`AreaCalculator`, and the method forwards to it. Only the parameter named inside `UseDelegate<...>` is the key; the rest pass through
 unchanged. Each impl is paired with an [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl so
 dependencies propagate to a check. A component may derive more than one dispatcher when different
 parameters should be routed differently.

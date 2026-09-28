@@ -1,7 +1,8 @@
 //! Code from `docs/reference/providers/with_field.md` — *`WithField`*.
 //!
 //! Pins that the `WithField<Symbol!("first_name")>` alias wires a `name` getter to read the
-//! `first_name` field, the same as the plain `UseField`.
+//! `first_name` field, the same as the plain `UseField`, and gives a `#[cgp_type]` component a
+//! field's type, which the plain `UseField` cannot.
 
 /// ## Examples
 pub mod examples {
@@ -30,11 +31,47 @@ pub mod examples {
         }
     }
 
-    #[test]
-    fn test_with_field_reads_first_name() {
-        let person = Person {
-            first_name: "Alice".to_owned(),
-        };
+    pub fn demo() {
+        let person = Person { first_name: "Alice".to_owned() };
         assert_eq!(person.name(), "Alice");
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
+    }
+
+    /// The type-component form: `WithField` gives a `#[cgp_type]` component a field's type.
+    pub mod type_component {
+        use core::marker::PhantomData;
+
+        use cgp::core::field::impls::WithField;
+        use cgp::prelude::*;
+
+        #[cgp_type]
+        pub trait HasWidthType {
+            type Width;
+        }
+
+        #[derive(HasField)]
+        pub struct Rectangle {
+            pub width: f32,
+        }
+
+        delegate_components! {
+            Rectangle {
+                WidthTypeProviderComponent: WithField<Symbol!("width")>,
+            }
+        }
+
+        check_components! {
+            Rectangle {
+                WidthTypeProviderComponent,
+            }
+        }
+
+        pub fn width_type(width: PhantomData<<Rectangle as HasWidthType>::Width>) -> PhantomData<f32> {
+            width
+        }
     }
 }

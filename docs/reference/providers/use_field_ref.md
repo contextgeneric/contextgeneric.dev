@@ -1,4 +1,6 @@
 ---
+title: 'UseFieldRef — borrow a field as another type'
+description: 'The foundational field getter that borrows a field through AsRef or AsMut as a different type, wired to a getter through the WithFieldRef alias.'
 sidebar_label: 'UseFieldRef'
 sidebar_position: 9
 ---
@@ -10,8 +12,8 @@ stored type differs from the getter's return type.
 
 ## Overview
 
-`UseFieldRef<Tag, Value>` reads the field named by `Tag` from the **context** (the type the method
-runs on, which supplies the field) and borrows it through `AsRef` to produce a `&Value`, where the
+`UseFieldRef<Tag, Value>` reads the field named by `Tag` from the [**context**](/docs/reference/glossary#context) (the type the method runs on, which supplies
+the values it needs as its fields) and borrows it through `AsRef` to produce a `&Value`, where the
 stored field type implements `AsRef<Value>`. It exists for a getter whose return type is reached
 *through* a field rather than being the field's own type: a `&Config` from a stored `Arc<Config>`, for
 example, where the field is not a `Config` but can be borrowed as one.
@@ -22,10 +24,11 @@ component's own provider, so it is wired through its [`WithFieldRef`](with_field
 [`#[cgp_getter]`](../macros/cgp_getter.md) generates a getter-component implementation for directly.
 
 Most borrowed-view getters do not need `UseFieldRef` at all, and this is the key thing to know before
-reaching for it. When a getter's return type is one of the shorthands the getter macros recognize,
-`&str` or `&[u8]`, the generated [`UseField`](use_field.md) implementation already borrows for you: it
-reads the field and calls `as_str()` or `as_ref()`, so a `&str` getter over a `String` field, or a
-`&[u8]` getter over a `Vec<u8>` field, is wired with a plain `UseField`. `UseFieldRef` is for the
+reaching for it. When a getter's return type is one of the shorthands the getter macros recognize, the generated
+[`UseField`](use_field.md) implementation already borrows for you: a `&str` getter reads a `String`
+field through `.as_str()`, a `&[T]` getter reads any `'static` field implementing `AsRef<[T]>`, such
+as a `Vec<u8>`, through `.as_ref()`, and an `Option<&T>` or `Option<&str>` getter reads an
+`Option<T>` or `Option<String>` field. Each is wired with a plain `UseField`. `UseFieldRef` is for the
 remaining case, a getter that returns `&T` for some type `T` the field is not stored as but can be
 borrowed as. Like every CGP provider, it carries no runtime value.
 
@@ -38,10 +41,9 @@ those rest on is described under [Under the hood](#under-the-hood) below.
 
 ## When to use it
 
-You choose `UseFieldRef` by wiring its [`WithFieldRef`](with_field_ref.md) alias, so the guidance on when
-a borrowed-view getter needs it — rather than the plain [`UseField`](use_field.md) or an
-[`#[implicit]`](../attributes/implicit.md) argument — lives with that alias, on
-[`WithFieldRef`](with_field_ref.md).
+You choose `UseFieldRef` by wiring its [`WithFieldRef`](with_field_ref.md) alias, so the guidance on when a borrowed-view getter needs it, rather than the plain
+[`UseField`](use_field.md) or an [`#[implicit]`](../attributes/implicit.md) argument, lives with that
+alias, on [`WithFieldRef`](with_field_ref.md).
 
 ## Under the hood
 
@@ -65,8 +67,8 @@ where
 The `where` clause carries the defining constraint: the context's field at `Tag` must implement
 `AsRef<Value>`, so the stored type can be borrowed as the exposed type. As in
 [`UseField`](use_field.md), `OutTag` is the tag the component asks under and is ignored, while the field
-is read at `Tag`. The body reads the field and calls `as_ref()`. The `'static` bound on the field type
-lets Rust infer the borrow's lifetime through the `AsRef` call.
+is read at `Tag`. The body reads the field and calls `as_ref()`. The stored field type must also be `'static`, so a
+field holding a borrowed reference cannot be read this way.
 
 `UseFieldRef` also implements the mutable getter [`MutFieldGetter`](../traits/field-access/mut_field_getter.md),
 requiring the field type to implement both `AsRef<Value>` and `AsMut<Value>` and returning `&mut Value`

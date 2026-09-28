@@ -1,0 +1,53 @@
+error[E0277]: the trait bound `__Context__: HasName` is not satisfied
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:19:1
+   |
+19 | #[cgp_impl(UseDefault)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^ the trait `DelegateComponent<NameGetterComponent>` is not implemented for `__Context__`
+   |
+note: required for `__Context__` to implement `NameGetter<__Context__>`
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:4:1
+   |
+ 4 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+note: required for `__Context__` to implement `HasName`
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:4:1
+   |
+ 4 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+ 5 | pub trait HasName {
+   |           ^^^^^^^
+note: required by a bound in `Greeter`
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:12:10
+   |
+11 | #[cgp_component(Greeter)]
+   |                 ------- required by a bound in this trait
+12 | #[extend(HasName)]
+   |          ^^^^^^^ required by this bound in `Greeter`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the attribute macro `cgp_getter` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `__Context__: HasName` is not satisfied
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:19:1
+   |
+19 | #[cgp_impl(UseDefault)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^ the trait `IsProviderFor<NameGetterComponent, __Context__>` is not implemented for `__Context__`
+   |
+note: required for `__Context__` to implement `NameGetter<__Context__>`
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:4:1
+   |
+ 4 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+note: required for `__Context__` to implement `HasName`
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:4:1
+   |
+ 4 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+ 5 | pub trait HasName {
+   |           ^^^^^^^
+note: required by a bound in `Greeter`
+  --> tests/compile_fail/reference/providers/use_default_common_mistakes_missing_uses.rs:12:10
+   |
+11 | #[cgp_component(Greeter)]
+   |                 ------- required by a bound in this trait
+12 | #[extend(HasName)]
+   |          ^^^^^^^ required by this bound in `Greeter`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the attribute macro `cgp_getter` (in Nightly builds, run with -Z macro-backtrace for more info)

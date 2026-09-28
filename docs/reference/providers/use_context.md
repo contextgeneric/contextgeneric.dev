@@ -1,4 +1,6 @@
 ---
+title: 'UseContext — reuse the context''s own impl'
+description: 'The provider that implements a provider trait by calling the context''s own consumer trait, usually as a higher-order provider''s default inner provider.'
 sidebar_label: 'UseContext'
 sidebar_position: 1
 ---
@@ -10,11 +12,12 @@ Satisfy a provider trait by routing back through the context's own consumer-trai
 ## Overview
 
 `UseContext` turns a context's existing consumer-trait implementation into a provider that other
-providers can call. The **context** is the type a method runs on, and it normally *uses* a
-provider through its consumer trait. Sometimes the implementation another provider wants for a
-trait is exactly the one the context already supplies that way. `UseContext` is that bridge: it is
-a provider whose method bodies call the consumer method on the context, so handing a component
-`UseContext` means "use whatever this context already does for this trait."
+providers can call. The [**context**](/docs/reference/glossary#context) is the type the
+implementation runs against, and it normally *uses* a provider through its consumer trait. Sometimes
+the implementation another provider wants for a trait is exactly the one the context already
+supplies that way. `UseContext` is that bridge: it is a provider whose method bodies call the
+consumer method on the context, so handing a component `UseContext` means "use whatever this context
+already does for this trait."
 
 This makes `UseContext` the exact dual of the consumer-trait [blanket implementation](/docs/reference/glossary#blanket-implementation) that
 [`#[cgp_component]`](../macros/cgp_component.md) generates. That blanket impl runs in the
@@ -41,9 +44,11 @@ the provider's struct definition:
 pub struct EncodeVec<Inner = UseContext>(pub PhantomData<Inner>);
 ```
 
-It also appears directly in a wiring entry to route a component through the context's own
-implementation, which is how the [dispatch combinators](dispatch/index.md) default their
-per-variant provider.
+It also appears as a type argument inside a wiring entry, where a provider that takes an inner
+provider is given `UseContext` explicitly. The [dispatch combinators](dispatch/index.md), such as
+`MatchWithValueHandlers<Provider = UseContext>`, default their per-variant provider to it. It is
+never the whole value of an entry for the component it implements, which is the cycle
+[Common Mistakes](#common-mistakes) describes.
 
 `UseContext` stands in for a provider trait only where that trait resolves to a *different*
 implementation than the one being wired: a wrapper over another trait, or a per-type dispatch entry
@@ -93,19 +98,32 @@ delegate_components! {
         open EncoderComponent;
 
         @EncoderComponent.u32: EncodeAsText,
-        @EncoderComponent.Vec<u32>: EncodeVec,
+                @EncoderComponent.Vec<u32>: EncodeVec,
     }
+}
+
+check_components! {
+    App {
+        EncoderComponent: [u32, Vec<u32>],
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.encode(&vec![1u32, 2, 3]), b"123");
 }
 ```
 
-`App` uses the [`open` statement](../macros/delegate_components.md) to wire the `Encoder` component per
-value type, giving `Vec<u32>` a bare `EncodeVec` whose `Inner` defaults to `UseContext`. Encoding a
-`Vec<u32>` runs `EncodeVec`, which calls `Inner::encode(self, item)` on each element; `Inner` resolves
-through `UseContext` to `App`'s own `CanEncode<u32>`, wired to `EncodeAsText`. So encoding
-`vec![1u32, 2, 3]` produces the bytes of `"123"`. There is no cycle, because the element lookup is for a
-*different* type (`u32`) than the wired one (`Vec<u32>`). Naming an explicit inner provider in place of
-the `UseContext` default binds the element encoder directly and bypasses the context's `CanEncode<u32>`
-wiring.
+`App` is an [environmental context](/docs/reference/glossary#environmental-context), and the
+component is **[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: it
+encodes the `Value`, while `App` chooses the encoder for each value type. `App` uses the
+[`open` statement](../macros/delegate_components.md) to wire the `Encoder` component per value type,
+giving `Vec<u32>` a bare `EncodeVec` whose `Inner` defaults to `UseContext`. Encoding a `Vec<u32>`
+runs `EncodeVec`, which calls `Inner::encode(self, item)` on each element; `Inner` resolves through
+`UseContext` to `App`'s own `CanEncode<u32>`, wired to `EncodeAsText`. So encoding
+`vec![1u32, 2, 3]` produces the bytes of `"123"`. There is no cycle, because the element lookup is
+for a *different* type (`u32`) than the wired one (`Vec<u32>`). Naming an explicit inner provider in
+place of the `UseContext` default binds the element encoder directly and bypasses the context's
+`CanEncode<u32>` wiring.
 
 `UseContext` acts as a default only when the provider's struct definition gives it as the default
 generic parameter, as `EncodeVec` does. A provider without such a default has no inner provider to fall
@@ -150,22 +168,36 @@ where
 }
 ```
 
-The provider method takes the context explicitly and calls the context's own `CanGreet::greet`. Each
-`UseContext` impl is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl
-carrying the same `where` clause, so delegation propagates the dependency and a check reports a missing
-consumer-trait implementation precisely. Any [supertrait](/docs/reference/glossary#supertrait) bound on the consumer trait is reproduced in the
-`where` clause, so a context must satisfy it before `UseContext` can stand in as a provider.
+The provider method takes the context explicitly and calls the context's own `CanGreet::greet`. The
+impl is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl carrying
+the same `where` clause, so delegation propagates the dependency and a check reports a missing
+consumer-trait implementation precisely:
+
+```rust
+impl<__Context__> IsProviderFor<GreeterComponent, __Context__, ()> for UseContext
+where
+    __Context__: CanGreet,
+{}
+```
+
+Any [supertrait](/docs/reference/glossary#supertrait) bound on the consumer trait is reproduced in
+the `where` clause, so a context must satisfy it before `UseContext` can stand in as a provider.
 
 ## Common Mistakes
 
 **Wiring a component to `UseContext` on the context whose only implementation is that same delegation
 creates a cycle.** If `App` wired `@EncoderComponent.u32: UseContext`, then `App`'s `CanEncode<u32>`
 would be implemented by delegating to `UseContext`, whose `Encoder<u32>` impl in turn calls `App`'s
-`CanEncode<u32>`. The trait solver chases this in a loop and reports it as an overflow or an unsatisfied
-bound. `UseContext` belongs where the provider trait resolves to a *different* implementation, such as a
+`CanEncode<u32>`. The trait solver chases this in a loop, and a check reports the overflow:
+
+```text
+error[E0275]: overflow evaluating the requirement `App: IsProviderFor<EncoderComponent, App, u32>`
+```
+
+`UseContext` belongs where the provider trait resolves to a *different* implementation, such as a
 wrapper over another trait or a per-type dispatch entry for a different type. The `EncodeVec`
-example above is safe for exactly that reason: it is wired for `Vec<u32>`, but its inner `UseContext`
-resolves `Encoder<u32>`, a different entry.
+example above is safe for exactly that reason: it is wired for `Vec<u32>`, but its inner
+`UseContext` resolves `Encoder<u32>`, a different entry.
 
 ## Related constructs
 

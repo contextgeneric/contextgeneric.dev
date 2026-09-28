@@ -1,4 +1,6 @@
 ---
+title: 'WithType — fix a type through WithProvider'
+description: 'The alias WithProvider<UseType<T>>, which binds an abstract-type component to a concrete type exactly as the plain UseType<T> does.'
 sidebar_label: 'WithType'
 sidebar_position: 6.2
 ---
@@ -10,7 +12,8 @@ Bind an abstract-type component to a concrete type, through the `WithProvider` a
 ## Overview
 
 `WithType<Type>` is the alias `WithProvider<UseType<Type>>`. It binds an abstract-type component to the
-concrete `Type` on a **context**, the type that implements the trait, by adapting the foundational
+concrete `Type` on a [**context**](/docs/reference/glossary#context), the type that implements the
+trait, by adapting the foundational
 [`UseType<Type>`](use_type.md) provider through the [`WithProvider`](with_provider.md) layer. It sets
 the same [abstract type](/docs/reference/glossary#abstract-type) the plain [`UseType`](use_type.md) provider does, and both are interchangeable in
 wiring. Like every CGP provider, it carries no runtime value.
@@ -49,21 +52,28 @@ pub struct App;
 
 delegate_components! {
     App {
-        ScalarTypeProviderComponent: WithType<f64>,
+                ScalarTypeProviderComponent: WithType<f64>,
+    }
+}
+
+check_components! {
+    App {
+        ScalarTypeProviderComponent,
     }
 }
 ```
 
 `App` wires `ScalarTypeProviderComponent` to `WithType<f64>`, so `App` implements `HasScalarType` with
-`Scalar = f64`. The `Copy` bound on the associated type is checked against `f64` where the wiring is
-written.
+`Scalar = f64`. The check confirms that `f64` meets the `Copy` bound on the associated type; without
+it, a type that breaks the bound is reported only when the component is used, as
+[`UseType`](use_type.md#common-mistakes) shows.
 
 ## When to use it
 
 **Prefer the plain [`UseType<T>`](use_type.md) form.** It binds the same type and is the idiomatic
-value for a [`#[cgp_type]`](../macros/cgp_type.md) component's wiring entry. `WithType` exists for the
-case where a component is reached only through the [`WithProvider`](with_provider.md) adapter, and it
-reads as a single wiring choice where spelling out `WithProvider<UseType<f64>>` would not.
+value for a [`#[cgp_type]`](../macros/cgp_type.md) component's wiring entry. The two are equivalent on every `#[cgp_type]` component, because the macro generates both a `UseType`
+impl and a [`WithProvider`](with_provider.md) impl; `WithType` completes the `With…` family and reads
+as a single wiring choice where spelling out `WithProvider<UseType<f64>>` would not.
 
 For an abstract type resolved through a table rather than fixed to one concrete type, use
 [`WithDelegatedType`](with_delegated_type.md).

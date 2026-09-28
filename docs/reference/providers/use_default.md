@@ -1,4 +1,6 @@
 ---
+title: 'UseDefault — wire a trait''s default bodies'
+description: 'The marker provider for a component whose implementation is the consumer trait''s own default method bodies, given meaning by an empty #[cgp_impl] block.'
 sidebar_label: 'UseDefault'
 sidebar_position: 5
 ---
@@ -16,11 +18,12 @@ the component can be wired. `UseDefault` is that empty provider: wiring a compon
 selects an implementation whose method bodies come from the trait's defaults rather than from a
 dedicated provider.
 
-This keeps a default-only component consistent with the rest of wiring. Without it, a component whose
-methods are all defaulted would still need some provider type and some
-[`delegate_components!`](../macros/delegate_components.md) entry to take part in the table. `UseDefault`
-is the shared name for that role, so a **context** (the type the method runs on) that wants
-the defaults wires the component to `UseDefault` and writes no method bodies of its own.
+This keeps a default-only component consistent with the rest of wiring. Without it, a component
+whose methods are all defaulted would still need some provider type and some
+[`delegate_components!`](../macros/delegate_components.md) entry to take part in the table.
+`UseDefault` is the shared name for that role, so a [**context**](/docs/reference/glossary#context)
+(the type the implementation runs against) that wants the defaults wires the component to
+`UseDefault` and writes no method bodies of its own.
 
 `UseDefault` is a bare marker that CGP defines but does not implement for any trait. Unlike
 [`UseContext`](use_context.md) or the getter providers, no macro generates a provider implementation
@@ -55,8 +58,8 @@ delegate_components! {
 }
 ```
 
-Because `UseDefault` has no generated impls, the author controls precisely which components it serves.
-A type with no provider impl written for a component is simply not a provider for it; there is no
+Because `UseDefault` has no generated impls, the author controls precisely which components it
+serves. A type with no provider impl written for a component is not a provider for it; there is no
 automatic fallback, and the empty-body `#[cgp_impl]` is the explicit opt-in.
 
 ## Examples
@@ -76,7 +79,8 @@ pub trait HasName {
 }
 
 #[cgp_component(Greeter)]
-pub trait CanGreet: HasName {
+#[extend(HasName)]
+pub trait CanGreet {
     fn greet(&self) -> String {
         format!("Hello, {}!", self.name())
     }
@@ -97,15 +101,27 @@ delegate_components! {
             NameGetterComponent,
             GreeterComponent,
         ]:
-            UseDefault,
+                        UseDefault,
     }
+}
+
+check_components! {
+    App {
+        NameGetterComponent,
+        GreeterComponent,
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.greet(), "Hello, John!");
 }
 ```
 
 The first `#[cgp_impl]` makes `UseDefault` a `NameGetter` provider whose `name` is the trait default
 `"John"`; the second makes it a `Greeter` provider whose `greet` is the trait default that formats
-around `self.name()`. The `Greeter` impl restates its consumer-side dependency with
-[`#[uses(HasName)]`](../attributes/uses.md), because the default body of `greet` calls `name`. `App`
+around `self.name()`. The `Greeter` impl restates its dependency with [`#[uses(HasName)]`](../attributes/uses.md), because
+the default body of `greet` calls `name`; [`#[extend(HasName)]`](../attributes/extend.md) on the
+trait does not give the provider that bound, as [Common Mistakes](#common-mistakes) shows. `App`
 then delegates both components to `UseDefault` in one array entry, so `App.greet()` produces
 `"Hello, John!"` entirely from the two default bodies, with no method implemented on `App` or on a
 dedicated provider.
@@ -135,6 +151,23 @@ matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation c
 clause. That is the same pair any `#[cgp_impl]` produces; the only thing special about `UseDefault` is
 the empty body and the shared, conventional name.
 
+## Common Mistakes
+
+**An empty impl still has to state what the default bodies call.** `#[extend(HasName)]` makes
+`HasName` a supertrait of `CanGreet`, which the provider trait `Greeter` carries as a `where`
+predicate on the context. A generic `#[cgp_impl(UseDefault)] impl Greeter {}` must prove that
+predicate, so without `#[uses(HasName)]` the impl itself fails:
+
+```text
+error[E0277]: the trait bound `__Context__: HasName` is not satisfied
+  --> src/main.rs:19:1
+   |
+19 | #[cgp_impl(UseDefault)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^ the trait `DelegateComponent<NameGetterComponent>` is not implemented for `__Context__`
+```
+
+Add `#[uses(HasName)]` to the impl, as the example does.
+
 ## Related constructs
 
 - [`#[cgp_impl]`](../macros/cgp_impl.md) — writes the empty-body provider impl that gives `UseDefault`
@@ -152,9 +185,8 @@ The ideas behind it:
 
 ## Source
 
-- Struct:
+- Struct, the only item in its file:
   [`use_default.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-component/src/providers/use_default.rs)
-  — the file contains only the bare struct, with no generated impls.
 
 ---
 

@@ -1,0 +1,19 @@
+error[E0119]: conflicting implementations of trait `IsProviderFor<GreeterComponent, _, _>` for type `App`
+  --> tests/compile_fail/reference/providers/redirect_lookup_common_mistakes_bare_key.rs:22:9
+   |
+20 |         namespace DefaultNamespace;
+   |                   ---------------- first implementation here
+21 |
+22 |         GreeterComponent: GreetHello,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `App`
+   |
+   = note: downstream crates may implement trait `cgp::prelude::IsProviderFor<GreeterComponent, _, _>` for type `cgp::prelude::RedirectLookup<App, cgp::prelude::PathCons<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', cgp::prelude::Nil>>>>, cgp::prelude::PathCons<GreeterComponent, cgp::prelude::Nil>>>`
+
+error[E0119]: conflicting implementations of trait `DelegateComponent<GreeterComponent>` for type `App`
+  --> tests/compile_fail/reference/providers/redirect_lookup_common_mistakes_bare_key.rs:22:9
+   |
+20 |         namespace DefaultNamespace;
+   |                   ---------------- first implementation here
+21 |
+22 |         GreeterComponent: GreetHello,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `App`

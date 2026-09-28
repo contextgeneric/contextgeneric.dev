@@ -1,4 +1,6 @@
 ---
+title: 'UseField — a getter that reads a named field'
+description: 'The provider that implements a getter by reading the context field a type-level tag names, so the field name is a wiring choice, not the method name.'
 sidebar_label: 'UseField'
 sidebar_position: 3
 ---
@@ -12,8 +14,8 @@ decision rather than the method name.
 
 `UseField<Tag>` decouples a getter's method name from the field it reads. A getter component defined
 with [`#[cgp_getter]`](../macros/cgp_getter.md) describes a value the context can supply, such as
-`fn name(&self) -> &str`. The **context** is the type the method runs on, and it supplies
-that value as one of its own fields. But the context may store the value under a different field name,
+`fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the type the method runs on, which supplies
+the values it needs as its fields. But the context may store the value under a different field name,
 say `first_name`, and different contexts may store it under different names. `UseField<Tag>` carries
 the field name as its type parameter, so wiring a getter to `UseField<Symbol!("first_name")>` makes it
 read `first_name` even though the method is `name`. The field name lives in the wiring, not in the
@@ -77,14 +79,22 @@ delegate_components! {
     }
 }
 
-fn greet(person: &Person) {
-    println!("Hello, {}!", person.name()); // reads the first_name field
+check_components! {
+    Person {
+        NameGetterComponent,
+    }
+}
+
+pub fn demo() {
+    let person = Person { first_name: "Alice".to_owned() };
+    assert_eq!(person.name(), "Alice"); // reads the first_name field
 }
 ```
 
-`Person` wires `NameGetterComponent` to `UseField<Symbol!("first_name")>`, so `person.name()` reads
-the `first_name` field. The method name and the field name diverge, and the field name comes entirely
-from the wiring.
+`Person` is a [value context](/docs/reference/glossary#value-context): the getter reads its own
+data. It wires `NameGetterComponent` to `UseField<Symbol!("first_name")>`, so `person.name()` reads
+the `first_name` field. The method name and the field name diverge, and the field name comes
+entirely from the wiring.
 
 The same binding can be written with the [`WithField`](with_field.md) alias, which routes through
 [`WithProvider`](with_provider.md).
@@ -111,9 +121,39 @@ inside a nested context, use [`ChainGetters`](chain_getters.md).
 
 ## Under the hood
 
-`UseField<Tag>` implements three provider traits, each forwarding to the context's
-[`HasField`](../traits/field-access/has_field.md) implementation for `Tag`. The central one is the provider-side
-getter [`FieldGetter`](../traits/field-access/field_getter.md), which reads the field by reference:
+`UseField<Tag>` is implemented in four places, each forwarding to the context's
+[`HasField`](../traits/field-access/has_field.md) implementation for `Tag`.
+
+**The getter component's own provider trait.** For a single-method getter,
+[`#[cgp_getter]`](../macros/cgp_getter.md) generates a `UseField` implementation with the field tag
+left free, and this is the implementation a direct `UseField<Symbol!("...")>` wiring uses. For the
+`HasName` getter above, `cargo cgp expand` shows:
+
+```rust
+impl<__Context__, __Tag__> NameGetter<__Context__> for UseField<__Tag__>
+where
+    __Context__: HasField<__Tag__, Value = String>,
+{
+    fn name(__context__: &__Context__) -> &str {
+        __context__.get_field(::core::marker::PhantomData::<__Tag__>).as_str()
+    }
+}
+
+impl<__Context__, __Tag__> IsProviderFor<NameGetterComponent, __Context__, ()>
+for UseField<__Tag__>
+where
+    __Context__: HasField<__Tag__, Value = String>,
+{}
+```
+
+The `&str` return reads a `String` field and appends `.as_str()`, the getter macros' return-type
+shorthand. The paired [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation carries
+the same `HasField` bound, so a check names a missing field precisely. A getter with more than one
+method gets no `UseField` implementation, since one tag cannot name several fields;
+[Common Mistakes](#common-mistakes) shows the error.
+
+**The foundational field getters.** `UseField<Tag>` implements
+[`FieldGetter`](../traits/field-access/field_getter.md), which reads the field by reference:
 
 ```rust
 impl<Context, OutTag, Tag, Value> FieldGetter<Context, OutTag> for UseField<Tag>
@@ -128,18 +168,38 @@ where
 }
 ```
 
-Two tags appear for a reason. `OutTag` is the tag the *component* asks under, the getter's own name,
-while `Tag` is the *field* tag the provider was parameterized with. The implementation ignores `OutTag`
-and reads `Tag` from the context, which is the decoupling: the component's identity and the field name
-are independent. The associated `Value` comes from the context's `HasField<Tag>` implementation, so
-the returned reference is to the real field.
+Two tags appear for a reason. `OutTag` is the tag the *component* asks under, the getter's own
+marker, while `Tag` is the *field* tag the provider was parameterized with. The implementation
+ignores `OutTag` and reads `Tag` from the context, which is the decoupling: the component's identity
+and the field name are independent. The mutable getter
+[`MutFieldGetter`](../traits/field-access/mut_field_getter.md) is implemented the same way, requiring
+`Context: HasFieldMut<Tag>` and returning `&mut Value`. These are plain traits rather than
+components, so the implementations carry no `IsProviderFor` pair; a getter component reaches them
+through [`WithField<Tag>`](with_field.md), whose `WithProvider` wrapper does.
 
-`UseField<Tag>` also implements the mutable getter [`MutFieldGetter`](../traits/field-access/mut_field_getter.md)
-the same way, requiring `Context: HasFieldMut<Tag>` and returning `&mut Value`. And it implements
-[`TypeProvider`](../components/has_type.md), reporting the field's `Value` type as an [abstract type](/docs/reference/glossary#abstract-type), so
-the *type* of a field can itself be wired as a context's abstract type. Each implementation is paired
-with an [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation carrying the same `HasField`
-bound, so delegation propagates the dependency and a check reports a missing field precisely.
+**[`TypeProvider`](../components/has_type.md).** `UseField<Tag>` reports the field's `Value` type as an
+[abstract type](/docs/reference/glossary#abstract-type), with a matching `IsProviderFor` implementation,
+so the *type* of a field can be wired as a context's abstract type. The built-in
+`TypeProviderComponent` takes `UseField<Symbol!("width")>` directly, while a
+[`#[cgp_type]`](../macros/cgp_type.md) component takes it as `WithField<Symbol!("width")>`, because
+the macro generates `UseType` and `WithProvider` implementations but no `UseField` one.
+
+**The handler family.** `Computer` and `AsyncComputer` are implemented for `UseField<Tag>` by
+forwarding the computation to the value stored in the field, which must itself implement the
+consumer trait; see [`Computer`](../components/handler/computer.md#usage).
+
+## Common Mistakes
+
+**A getter with more than one method cannot be wired to `UseField`.** `#[cgp_getter]` generates the
+`UseField` implementation only for a single-method getter, so wiring a two-method `HasFooBar` getter
+to `UseField<Symbol!("foo")>` fails at the check:
+
+```text
+error[E0277]: the trait bound `cgp::prelude::UseField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'f', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>>: IsProviderFor<FooBarGetterComponent, App>` is not satisfied
+```
+
+Wire such a getter to [`UseFields`](use_fields.md) when each method reads a same-named field, or split
+it into single-method getters when the field names differ.
 
 ## Related constructs
 

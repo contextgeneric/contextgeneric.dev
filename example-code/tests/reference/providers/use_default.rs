@@ -1,7 +1,45 @@
 //! Code from `docs/reference/providers/use_default.md` — *`UseDefault`*.
 //!
 //! Pins that empty-body `#[cgp_impl(UseDefault)]` blocks make the trait's default method bodies the
-//! implementation, and that both components can be delegated to `UseDefault` in one array entry.
+//! implementation, and that both components can be delegated to `UseDefault` in one array entry. The
+//! impl without `#[uses(HasName)]` from Common Mistakes is a trybuild fixture.
+
+/// ## Usage
+///
+/// The two steps the section shows: an empty `#[cgp_impl(UseDefault)]` block, then the wiring entry.
+pub mod usage {
+    use cgp::core::component::UseDefault;
+    use cgp::prelude::*;
+
+    #[cgp_component(Greeter)]
+    pub trait CanGreet {
+        fn greet(&self) -> String {
+            "Hello!".to_owned()
+        }
+    }
+
+    #[cgp_impl(UseDefault)]
+    impl Greeter {}
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            GreeterComponent: UseDefault,
+        }
+    }
+
+    check_components! {
+        App {
+            GreeterComponent,
+        }
+    }
+
+    #[test]
+    fn the_default_body_answers() {
+        assert_eq!(App.greet(), "Hello!");
+    }
+}
 
 /// ## Examples
 pub mod examples {
@@ -16,7 +54,8 @@ pub mod examples {
     }
 
     #[cgp_component(Greeter)]
-    pub trait CanGreet: HasName {
+    #[extend(HasName)]
+    pub trait CanGreet {
         fn greet(&self) -> String {
             format!("Hello, {}!", self.name())
         }
@@ -48,9 +87,12 @@ pub mod examples {
         }
     }
 
+    pub fn demo() {
+        assert_eq!(App.greet(), "Hello, John!");
+    }
+
     #[test]
-    fn test_use_default() {
-        let app = App;
-        assert_eq!(app.greet(), "Hello, John!");
+    fn test_demo() {
+        demo();
     }
 }

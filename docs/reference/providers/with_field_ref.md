@@ -1,4 +1,6 @@
 ---
+title: 'WithFieldRef — borrow a field through AsRef'
+description: 'The alias WithProvider<UseFieldRef<Tag, Value>>: a getter returning &Value reads a field whose stored type implements AsRef<Value>.'
 sidebar_label: 'WithFieldRef'
 sidebar_position: 6.4
 ---
@@ -10,8 +12,7 @@ Wire a getter component to a field borrowed through `AsRef`, through the `WithPr
 ## Overview
 
 `WithFieldRef<Tag, Value>` is the alias `WithProvider<UseFieldRef<Tag, Value>>`. It implements a getter
-component by reading the field named by `Tag` from the **context**, the type a method runs on,
-and borrowing it through `AsRef` to produce a `&Value`, where the stored field type implements
+component by reading the field named by `Tag` from the [**context**](/docs/reference/glossary#context), the type the method runs on, and borrowing it through `AsRef` to produce a `&Value`, where the stored field type implements
 `AsRef<Value>`. It adapts the foundational [`UseFieldRef`](use_field_ref.md) getter through the
 [`WithProvider`](with_provider.md) layer. Like every CGP provider, it carries no runtime value.
 
@@ -71,8 +72,19 @@ pub struct App {
 
 delegate_components! {
     App {
-        ConfigGetterComponent: WithFieldRef<Symbol!("config"), Config>,
+                ConfigGetterComponent: WithFieldRef<Symbol!("config"), Config>,
     }
+}
+
+check_components! {
+    App {
+        ConfigGetterComponent,
+    }
+}
+
+pub fn demo() {
+    let app = App { config: StoredConfig(Config { port: 8080 }) };
+    assert_eq!(app.config().port, 8080);
 }
 ```
 
@@ -86,9 +98,10 @@ delegate_components! {
 borrows as `T` through `AsRef`.** The stored type and the exposed type differ, and neither the plain
 [`WithField`](with_field.md) nor an [`#[implicit]`](../attributes/implicit.md) argument can bridge them.
 
-For the common borrowed-view getters — a `-> &str` getter over a `String` field, a `-> &[u8]` getter
-over a `Vec<u8>` field — the plain [`UseField`](use_field.md) or [`WithField`](with_field.md) already
-borrows for you through the return-type shorthands, so no `WithFieldRef` is needed. For a field returned
+The common borrowed-view getters need no `WithFieldRef`: a `-> &str` getter over a `String` field, a
+`-> &[T]` getter over a field implementing `AsRef<[T]>` such as a `Vec<u8>`, and an `Option<&T>` getter
+over an `Option<T>` field are all served by the plain [`UseField`](use_field.md) or
+[`WithField`](with_field.md) through the getter macros' return-type shorthands. For a field returned
 as its own type, an `#[implicit]` argument is simpler still.
 
 ## Under the hood

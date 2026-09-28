@@ -1,4 +1,6 @@
 ---
+title: 'UseFields — getters for same-named fields'
+description: 'The provider that implements every method of a getter component by reading the context field named after the method, for any number of methods.'
 sidebar_label: 'UseFields'
 sidebar_position: 4
 ---
@@ -10,13 +12,14 @@ method.
 
 ## Overview
 
-`UseFields` is the provider form of the convention "the method `name` reads the field `name`." A getter
-component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes one or more values the
-**context** can supply, and the most common arrangement is that each value lives in a same-named field.
-The context is the type the method runs on, and it supplies those values as its own fields.
-`UseFields` is the provider that realizes the arrangement: wiring a getter to `UseFields` makes every
-method read the context field whose name equals the method name, looked up through
-[`HasField`](../traits/field-access/has_field.md) keyed by a [`Symbol!`](../macros/symbol.md).
+`UseFields` is the provider form of the convention "the method `name` reads the field `name`." A
+getter component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes one or more
+values the **context** can supply, and the most common arrangement is that each value lives in a
+same-named field. The [context](/docs/reference/glossary#context) is the type the method runs on,
+which supplies the values it needs as its fields. `UseFields` is the provider that realizes the
+arrangement: wiring a getter to `UseFields` makes every method read the context field whose name
+equals the method name, looked up through [`HasField`](../traits/field-access/has_field.md) keyed by
+a [`Symbol!`](../macros/symbol.md).
 
 This is the provider analogue of the [blanket implementation](/docs/reference/glossary#blanket-implementation) that
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) emits. `#[cgp_auto_getter]` produces a single
@@ -27,8 +30,9 @@ participates in CGP wiring can still opt into the auto-getter convention when it
 its methods.
 
 `UseFields` is distinct from its sibling [`UseField`](use_field.md), and the singular-versus-plural
-naming marks the difference. `UseField<Tag>` keys on a tag the wiring chooses, letting one method read
-a field of any name; `UseFields` takes no parameter and keys every method on its own name. Reach for
+naming marks the difference. `UseField<Tag>` keys on a tag the wiring chooses, letting one method read a field of any name, and it
+exists only for single-method getters; `UseFields` takes no parameter, keys every method on its own
+name, and works for any number of methods. Reach for
 `UseField` when the field name must differ from the method name, and for `UseFields` when the
 convention holds. Like every CGP provider, `UseFields` carries no runtime value: it is a marker named
 in wiring.
@@ -53,37 +57,49 @@ macros support apply here too, so a `&str` return reads a `String` field and app
 
 ## Examples
 
-A context whose field name matches the getter method can be wired to `UseFields` to get the auto-getter
-convention inside a `#[cgp_getter]` component. The method `foo` and the field `foo` share a name:
+A getter with two methods, each read from its same-named field, which is the case `UseField` cannot
+serve:
 
 ```rust
 use cgp::prelude::*;
 
 #[cgp_getter]
-pub trait HasFoo {
+pub trait HasFooBar {
     fn foo(&self) -> &str;
+    fn bar(&self) -> &u8;
 }
 
 #[derive(HasField)]
 pub struct App {
     pub foo: String,
+    pub bar: u8,
 }
 
 delegate_components! {
     App {
-        FooGetterComponent: UseFields,
+        FooBarGetterComponent: UseFields,
     }
 }
 
-fn describe(app: &App) -> &str {
-    app.foo() // reads the `foo` field
+check_components! {
+    App {
+        FooBarGetterComponent,
+    }
+}
+
+pub fn demo() {
+    let app = App { foo: "hi".to_owned(), bar: 7 };
+
+    assert_eq!(app.foo(), "hi"); // reads the `foo` field
+    assert_eq!(*app.bar(), 7); // reads the `bar` field
 }
 ```
 
-Because `App` wires `FooGetterComponent` to `UseFields`, the getter reads `App`'s `foo` field, the
-field whose name equals the method `foo`. If the value were stored under a differently named field,
-this wiring would not apply, and the context would wire [`UseField<Symbol!("...")>`](use_field.md) with
-the actual field name instead.
+Because `App` wires `FooBarGetterComponent` to `UseFields`, each method reads the field whose name
+equals its own. `App` is a [value context](/docs/reference/glossary#value-context): the getters read
+its own data. If one value were stored under a differently named field, that method would need a
+single-method getter of its own, wired to [`UseField<Symbol!("...")>`](use_field.md) with the actual
+field name.
 
 ## When to use it
 
@@ -92,48 +108,43 @@ the wired counterpart of the [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md
 case where the getter is a full component rather than a blanket impl.
 
 Prefer [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) when the getter does not need to be a
-wireable component, and prefer an [`#[implicit]`](../attributes/implicit.md) argument when a provider
-simply needs a value from its own context, which is the common case and needs no [getter trait](/docs/reference/glossary#getter-trait) at all.
+wireable component, and prefer an [`#[implicit]`](../attributes/implicit.md) argument when a provider needs a value from its own context, which is the common case and needs no [getter trait](/docs/reference/glossary#getter-trait) at all.
 Reach for [`UseField<Tag>`](use_field.md) instead when the field name must differ from the method name.
 
 ## Under the hood
 
 [`#[cgp_getter]`](../macros/cgp_getter.md) generates a `UseFields` implementation of the getter's
 provider trait, reading each method's value from the field whose name matches the method, keyed by a
-`Symbol!`. For a single-method getter such as
+`Symbol!`. For the `HasFooBar` getter above, `cargo cgp expand` shows this implementation for the
+generated `FooBarGetter` provider trait, with the macro's real placeholder identifiers:
 
 ```rust
-#[cgp_getter]
-pub trait HasFoo {
-    fn foo(&self) -> &str;
-}
-```
-
-the macro emits this `UseFields` implementation for the generated `FooGetter` provider trait (shown
-with the macro's real placeholder identifiers, and with `Symbol!("foo")` in sugared form):
-
-```rust
-impl<__Context__> FooGetter<__Context__> for UseFields
+impl<__Context__> FooBarGetter<__Context__> for UseFields
 where
     __Context__: HasField<Symbol!("foo"), Value = String>,
+    __Context__: HasField<Symbol!("bar"), Value = u8>,
 {
     fn foo(__context__: &__Context__) -> &str {
-        __context__.get_field(PhantomData::<Symbol!("foo")>).as_str()
+        __context__.get_field(::core::marker::PhantomData::<Symbol!("foo")>).as_str()
+    }
+
+    fn bar(__context__: &__Context__) -> &u8 {
+        __context__.get_field(::core::marker::PhantomData::<Symbol!("bar")>)
     }
 }
 ```
 
-Each method becomes a `HasField` bound keyed on the method name as a `Symbol!`, and the body reads that
-field. The `&str` return makes the field `Value` a `String` and appends `.as_str()`, the same shorthand
-[`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) uses. When a getter has several methods, the
-implementation carries one `HasField` bound and one body per method, each keyed by its own name. The
-implementation is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md), so a check
-reports a missing field precisely.
+Each method becomes a `HasField` bound keyed on the method name as a `Symbol!`, and the body reads
+that field. The `&str` return makes the field `Value` a `String` and appends `.as_str()`, the same
+shorthand [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) uses. The implementation carries one
+`HasField` bound and one body per method, each keyed by its own name. The implementation is paired
+with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md), so a check reports a missing
+field precisely.
 
-This is one of three provider implementations `#[cgp_getter]` generates for a getter component. The
-other two are [`UseField`](use_field.md), for a wiring-chosen field name, and
-[`WithProvider`](with_provider.md), for adapting a foundational field getter. A context picks among
-them at wiring time.
+This is one of three provider implementations `#[cgp_getter]` generates for a getter component, and
+the only one a getter with several methods gets. The other two, [`UseField`](use_field.md) for a
+wiring-chosen field name and [`WithProvider`](with_provider.md) for adapting a foundational field
+getter, are generated for single-method getters alone. A context picks among them at wiring time.
 
 ## Related constructs
 

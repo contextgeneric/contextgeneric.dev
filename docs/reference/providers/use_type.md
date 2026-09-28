@@ -1,4 +1,6 @@
 ---
+title: 'UseType — fix an abstract type by wiring'
+description: 'The provider that sets an abstract-type component to a concrete type, so a context chooses its error, scalar, or runtime type with one wiring line.'
 sidebar_label: 'UseType'
 sidebar_position: 2
 ---
@@ -23,13 +25,14 @@ different jobs.
 ## Overview
 
 `UseType<Type>` removes the need to hand-write a provider every time a **context** wants to fix an
-abstract type to a concrete one. The context is the type that implements the trait, and it decides what
-each abstract type resolves to. An abstract type in CGP is a trait with a single associated type,
-defined with [`#[cgp_type]`](../macros/cgp_type.md), such as `trait HasScalarType { type Scalar; }`.
-Generic code refers to the type without committing to any particular one, and a concrete context
-decides what it actually is. Without `UseType`, making that decision would mean writing a small
-provider whose only content is `type Scalar = f64;`, repeated for every abstract type and every
-concrete choice.
+abstract type to a concrete one. The context is the
+[type that implements the trait](/docs/reference/glossary#context), and it decides what each
+abstract type resolves to. An abstract type in CGP is a trait with a single associated type, defined
+with [`#[cgp_type]`](../macros/cgp_type.md), such as `trait HasScalarType { type Scalar; }`. Generic
+code refers to the type without committing to any particular one, and a concrete context decides
+what it actually is. Without `UseType`, making that decision would mean writing a small provider
+whose only content is `type Scalar = f64;`, repeated for every abstract type and every concrete
+choice.
 
 `UseType<T>` captures that trivial shape once. It is a [`TypeProvider`](../components/has_type.md) that
 reports its type parameter `T` as the abstract type, so wiring a context's type component to
@@ -51,17 +54,20 @@ delegate_components! {
 }
 ```
 
-A `#[cgp_type]` trait such as `HasScalarType` generates the provider trait `ScalarTypeProvider` and the
-[component marker](/docs/reference/glossary#component-marker) `ScalarTypeProviderComponent`; wiring that marker to `UseType<f64>` sets the context's
-`Scalar` to `f64`. Any bound on the associated type, such as `type Scalar: Copy`, is enforced against
-the concrete type at the wiring site.
+A `#[cgp_type]` trait such as `HasScalarType` generates the provider trait `ScalarTypeProvider` and
+the [component marker](/docs/reference/glossary#component-marker) `ScalarTypeProviderComponent`;
+wiring that marker to `UseType<f64>` sets the context's `Scalar` to `f64`. Any bound on the
+associated type, such as `type Scalar: Copy`, is checked against the concrete type when the
+component is used or checked, not where the entry is written, since wiring is lazy;
+[Common Mistakes](#common-mistakes) shows the consequence.
 
 `UseType<Type>` also has an alias, [`WithType<Type>`](with_type.md), the `WithProvider`-adapted form
 imported from `cgp::core::types`. Both bind the same type; prefer the plain `UseType<Type>` form.
 
 ## Examples
 
-A complete use defines an abstract type, wires a concrete type with `UseType`, and reads it back:
+A complete use defines an abstract type, wires a concrete type with `UseType`, checks the wiring,
+and reads the type back in generic code:
 
 ```rust
 use cgp::prelude::*;
@@ -75,14 +81,34 @@ pub struct App;
 
 delegate_components! {
     App {
-        ScalarTypeProviderComponent: UseType<f64>,
+                ScalarTypeProviderComponent: UseType<f64>,
     }
+}
+
+check_components! {
+    App {
+        ScalarTypeProviderComponent,
+    }
+}
+
+pub fn zero<Context>() -> Context::Scalar
+where
+    Context: HasScalarType,
+    Context::Scalar: Default,
+{
+    Default::default()
+}
+
+pub fn demo() {
+    let scalar: f64 = zero::<App>();
+    assert_eq!(scalar, 0.0);
 }
 ```
 
 `App` wires `ScalarTypeProviderComponent` to `UseType<f64>`, so `App` implements `HasScalarType` with
-`Scalar = f64`. The `Copy` bound on the associated type is checked against `f64` where the wiring is
-written.
+`Scalar = f64`, and `zero::<App>()` returns an `f64`. The check confirms that `f64` meets the `Copy`
+bound on the associated type. `zero` names the type only as `Context::Scalar`, so it serves any
+context whatever scalar type that context wires.
 
 The same binding can be written with the [`WithType`](with_type.md) alias, which routes through
 [`WithProvider`](with_provider.md).
@@ -112,25 +138,45 @@ impl<Context, Tag, Type> TypeProvider<Context, Tag> for UseType<Type> {
 ```
 
 The implementation is unconditional in `Context` and `Tag`: `UseType<f64>` is a `TypeProvider` whose
-`Type` is `f64` regardless of which context or type tag asks. `HasType<Tag>` is the consumer trait that
-reads this, so once a context's type component is wired to `UseType<f64>`, the context implements
-`HasType<Tag>` with `Type = f64`.
+`Type` is `f64` regardless of which context or type tag asks. `HasType<Tag>` is the consumer trait
+that reads this, so once a context wires `TypeProviderComponent` to `UseType<f64>`, the context
+implements `HasType<Tag>` with `Type = f64` for every `Tag`.
 
 [`#[cgp_type]`](../macros/cgp_type.md) targets the same provider. For
-`#[cgp_type] trait HasScalarType { type Scalar; }`, the macro generates a `UseType` implementation for
-the component's own provider trait:
+`#[cgp_type] trait HasScalarType { type Scalar: Copy; }`, the macro generates a `UseType`
+implementation for the component's own provider trait:
 
 ```rust
-impl<Scalar, __Context__> ScalarTypeProvider<__Context__> for UseType<Scalar> {
+impl<Scalar, __Context__> ScalarTypeProvider<__Context__> for UseType<Scalar>
+where
+    Scalar: Copy,
+{
     type Scalar = Scalar;
 }
 ```
 
-so wiring `ScalarTypeProviderComponent` to `UseType<f64>` sets `Scalar = f64`. The built-in
-`TypeProvider` impl and the per-component impl are the two faces of the same `UseType<Type>` struct: the
-first makes it a provider for the built-in `HasType` component, the second for a user-defined
+Wiring `ScalarTypeProviderComponent` to `UseType<f64>` therefore sets `Scalar = f64`. The built-in
+`TypeProvider` impl and the per-component impl are the two faces of the same `UseType<Type>` struct:
+the first makes it a provider for the built-in `HasType` component, the second for a user-defined
 abstract-type component. A bound on the associated type is copied into the generated impl's `where`
-clause, so the concrete type must satisfy it at the wiring site.
+clause, as the `Copy` above shows, so the concrete type must satisfy it wherever the component is
+used or checked.
+
+## Common Mistakes
+
+**A concrete type that breaks the associated type's bound is not reported where it is wired.**
+Wiring `ScalarTypeProviderComponent: UseType<String>` for the `type Scalar: Copy` declaration above
+compiles, because a delegation entry alone checks nothing. The mismatch surfaces only when something
+needs `App: HasScalarType`, or at a [`check_components!`](../macros/check_components.md) block
+naming the component:
+
+```text
+error[E0277]: the trait bound `String: Copy` is not satisfied
+...
+note: required for `cgp::prelude::UseType<String>` to implement `IsProviderFor<ScalarTypeProviderComponent, App>`
+```
+
+Check every context's abstract-type components, so the bound is tested next to the wiring.
 
 ## Related constructs
 

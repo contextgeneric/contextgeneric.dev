@@ -73,15 +73,12 @@ pub mod examples {
         }
     }
 
+    pub fn demo() {
+        assert_eq!(MyApp.area(&Rectangle { width: 2.0, height: 3.0 }), 6.0);
+    }
+
     #[test]
-    fn test_use_delegate_dispatch() {
-        let app = MyApp;
-        assert_eq!(
-            app.area(&Rectangle {
-                width: 2.0,
-                height: 3.0
-            }),
-            6.0
-        );
+    fn test_demo() {
+        demo();
     }
 }

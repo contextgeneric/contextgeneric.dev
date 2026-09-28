@@ -1,4 +1,6 @@
 ---
+title: 'RedirectLookup — look up a component by path'
+description: 'The generated provider that answers a component by looking a type-level path up in a table, the mechanism behind namespaces and the open statement.'
 sidebar_label: 'RedirectLookup'
 sidebar_position: 8
 ---
@@ -24,9 +26,10 @@ this provider is legible.
 ## Overview
 
 `RedirectLookup<Components, Path>` separates *which key* a component is looked up under from *which
-table* answers it. The ordinary provider blanket impl looks a component up in the **context**'s own
-delegation table, keyed by the [component marker](/docs/reference/glossary#component-marker), where the context is the type the method runs
-on. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed by a
+table* answers it. The ordinary provider blanket impl looks a component up in the
+[**context**](/docs/reference/glossary#context)'s own delegation table, keyed by the
+[component marker](/docs/reference/glossary#component-marker), where the context is the type the
+implementation runs against. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed by a
 type-level `Path`, then delegates to whatever provider that entry holds. This indirection lets
 one component's resolution be redirected to a different key in a different table, which is the basis for
 organizing wiring into namespaces.
@@ -46,31 +49,46 @@ generated entries is where this provider appears. Like every CGP provider, it ca
 ## Usage
 
 `RedirectLookup` is in the prelude, but you do not name it directly. It appears where the namespace and
-`open` machinery generate it. A component is registered under a path with the
-[`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, and a context joins a namespace
-or opens a component for per-type dispatch:
+`open` machinery generate it. A component registers under a path with the
+[`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, and a context that joins the
+namespace binds the component's provider at that path, in its own table:
 
 ```rust
 delegate_components! {
     App {
         namespace DefaultNamespace;
 
-        @bar.baz: TestProvider,
+        @app.GreeterComponent: GreetHello,
     }
 }
 ```
 
-A `RedirectLookup` later walks the path-keyed entry above (`@bar.baz`). The path itself is a
-[`PathCons`](../types/path_cons.md) chain of [`Symbol!`](../macros/symbol.md) segments, most
-easily written with [`Path!`](../macros/path.md).
+The path is a [`PathCons`](../types/path_cons.md) chain of [`Symbol!`](../macros/symbol.md) segments
+and a component marker, written with the `@`-path syntax [`Path!`](../macros/path.md) also uses. The
+declared struct is `RedirectLookup<Key, Components>`, but every generated impl and entry passes the
+table first and the path second, as `RedirectLookup<Components, Path>`, so read the parameter names
+as swapped.
 
 ## Examples
 
-`RedirectLookup` appears in the delegate the namespace machinery generates, where a component is
-registered under a path and reached through it:
+A component registers itself under `@app` in `DefaultNamespace`, and a context binds its provider at
+that path:
 
 ```rust
 use cgp::prelude::*;
+
+#[cgp_component(Greeter)]
+#[prefix(@app in DefaultNamespace)]
+pub trait CanGreet {
+    fn greet(&self) -> String;
+}
+
+#[cgp_impl(new GreetHello)]
+impl Greeter {
+    fn greet(&self) -> String {
+        "hello".into()
+    }
+}
 
 pub struct App;
 
@@ -78,18 +96,26 @@ delegate_components! {
     App {
         namespace DefaultNamespace;
 
-        @bar.baz: TestProvider,
+        @app.GreeterComponent: GreetHello,
     }
+}
+
+check_components! {
+    App {
+        GreeterComponent,
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.greet(), "hello");
 }
 ```
 
-This registers `TestProvider` under the path `bar` then `baz` in `App`'s default namespace. When a
-component is later resolved against `App` through that namespace, its delegate is a
-`RedirectLookup<App, Path>` whose `Path` is the `PathCons` chain `bar`, then `baz`, then the component
-marker. The lookup follows that path into `App`'s table, matches the entry above, and dispatches to
-`TestProvider`. The component marker never keys the context directly; it is the tail of a path that
-`RedirectLookup` walks. This is the indirection that lets namespaces organize wiring by path while still
-resolving to ordinary providers.
+`#[prefix]` makes `DefaultNamespace` route `GreeterComponent` to a `RedirectLookup` over the path
+`@app.GreeterComponent`. The `namespace` statement makes `App` resolve its components through that
+namespace, so `App.greet()` looks the path `@app.GreeterComponent` up in `App`'s own table and finds
+`GreetHello`. The component marker is the last segment of the path rather than a key of its own. `App`
+is an [environmental context](/docs/reference/glossary#environmental-context) with no fields.
 
 ## When to use it
 
@@ -134,15 +160,59 @@ where
 The mechanism is one [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on `__Path__`
 rather than on the component marker. `RedirectLookup<Components, Path>` implements `Greeter` whenever
 `Components` maps `Path` to a delegate that itself implements `Greeter`, and the method forwards to that
-delegate. When the consumer trait carries generic type parameters, the impl additionally constrains
-`Path` with [`ConcatPath`](../traits/formatting/concat_path.md) so the parameters are appended to the path before
-the lookup, letting the redirected key encode the generic arguments. As always, the impl is paired with a matching
+delegate. When the consumer trait carries generic type parameters, the impl first appends every one of them to
+the path with [`ConcatPath`](../traits/formatting/concat_path.md), in declaration order, skipping
+lifetime and const parameters. For `CanCalculateArea<Shape>`, `cargo cgp expand` shows, with the
+path resugared as `Path!(@Shape)`:
+
+```rust
+impl<__Context__, Shape, __Components__, __Path__> AreaCalculator<__Context__, Shape>
+for RedirectLookup<__Components__, __Path__>
+where
+    __Path__: ConcatPath<Path!(@Shape)>,
+    __Components__: DelegateComponent<<__Path__ as ConcatPath<Path!(@Shape)>>::Output>,
+    <__Components__ as DelegateComponent<
+        <__Path__ as ConcatPath<Path!(@Shape)>>::Output,
+    >>::Delegate: AreaCalculator<__Context__, Shape>,
+{
+    fn area(__context__: &__Context__, shape: &Shape) -> f64 {
+        <__Components__ as DelegateComponent<
+            <__Path__ as ConcatPath<Path!(@Shape)>>::Output,
+        >>::Delegate::area(__context__, shape)
+    }
+}
+```
+
+The lookup is still a single `DelegateComponent` query on the whole extended path, not a walk
+segment by segment. A table answers a shorter prefix of the path because
+[`delegate_components!`](../macros/delegate_components.md) generates entries generic over the
+remaining segments, which is how the `open` statement's key forms work. As always, the impl is paired with a matching
 [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.
 
 The [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute populates the path side: it
 generates a namespace impl whose delegate is `RedirectLookup<Components, Path>`, with the prefix path
 joined onto the component marker, so resolving the component under that namespace follows the
 prefixed path into the table.
+
+## Common Mistakes
+
+**A context that joins a namespace cannot also bind a registered component at its bare key.** Joining
+`DefaultNamespace` already gives `App` an entry for `GreeterComponent`, the one that redirects to
+`@app.GreeterComponent`, so adding `GreeterComponent: GreetHello` to the same table is a second impl
+for the same key:
+
+```text
+error[E0119]: conflicting implementations of trait `IsProviderFor<GreeterComponent, _, _>` for type `App`
+  --> src/main.rs:22:9
+   |
+20 |         namespace DefaultNamespace;
+   |                   ---------------- first implementation here
+21 |
+22 |         GreeterComponent: GreetHello,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `App`
+```
+
+Bind the provider at the registered path, `@app.GreeterComponent: GreetHello`, as the example does.
 
 ## Related constructs
 
@@ -155,8 +225,7 @@ prefixed path into the table.
 - [`delegate_components!`](../macros/delegate_components.md) — the `open` and `namespace` statements that
   generate the redirect entries.
 - [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
-- [`Path!`](../macros/path.md) and [`PathCons`](../types/path_cons.md) — the type-level path it
-  walks.
+- [`Path!`](../macros/path.md) and [`PathCons`](../types/path_cons.md) — the type-level path it looks up.
 - [`UseContext`](use_context.md) — the other `#[cgp_component]`-generated provider, routing back to the
   context.
 
