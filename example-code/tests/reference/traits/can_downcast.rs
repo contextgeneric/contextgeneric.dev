@@ -1,11 +1,12 @@
-//! Code from `docs/reference/traits/can_downcast.md` — *`CanDowncast`*.
+//! Code from `docs/reference/traits/casting/can_downcast.md` — `CanDowncast`.
 //!
-//! The page's snippets, run. What this pins is the import path — the trait is not in the prelude —
-//! and the two halves of the page's claim: a downcast succeeds for a shared variant and returns a
-//! remainder for one the target lacks.
+//! Pins the Examples program: a downcast succeeding for a shared variant and handing back a
+//! remainder for one the target lacks. A target variant the source lacks, and a second `downcast`
+//! on a remainder, are trybuild fixtures.
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::CanDowncast;
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq, CgpData)]
@@ -21,27 +22,19 @@ pub mod examples {
         Baz(bool),
     }
 
-    #[test]
-    fn test_downcast_succeeds_for_a_shared_variant() {
-        use cgp::core::field::impls::CanDowncast;
-        use core::marker::PhantomData;
-
+    pub fn demo() {
         assert_eq!(
             FooBarBaz::Bar("hi".to_owned())
                 .downcast(PhantomData::<FooBar>)
                 .ok(),
             Some(FooBar::Bar("hi".to_owned())),
         );
+
+        assert_eq!(FooBarBaz::Baz(true).downcast(PhantomData::<FooBar>).ok(), None);
     }
 
     #[test]
-    fn test_downcast_fails_for_a_variant_the_target_lacks() {
-        use cgp::core::field::impls::CanDowncast;
-        use core::marker::PhantomData;
-
-        assert_eq!(
-            FooBarBaz::Baz(true).downcast(PhantomData::<FooBar>).ok(),
-            None,
-        );
+    fn test_demo() {
+        demo();
     }
 }

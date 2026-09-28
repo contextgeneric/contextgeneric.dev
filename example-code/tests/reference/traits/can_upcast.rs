@@ -1,33 +1,38 @@
-//! Code from `docs/reference/traits/can_upcast.md` — *`CanUpcast`*.
+//! Code from `docs/reference/traits/casting/can_upcast.md` — `CanUpcast`.
 //!
-//! The page's snippet, run. What this pins beyond "it compiles" is the import path — the trait is
-//! not in the prelude — and the totality claim: an upcast into a wider enum always succeeds, so
-//! `upcast` returns the target directly rather than a `Result`.
+//! Pins the Examples program: a narrow enum widened into a wider one, with each side deriving only
+//! what the cast needs. A target that lacks a source variant is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::CanUpcast;
     use cgp::prelude::*;
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
+    // The source is walked and taken apart, so it needs its shape and its extractor.
+    #[derive(Debug, Eq, PartialEq, HasFields, ExtractField)]
     pub enum FooBar {
         Foo(u64),
         Bar(String),
     }
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
+    // The target is only built into, one variant at a time.
+    #[derive(Debug, Eq, PartialEq, FromVariant)]
     pub enum FooBarBaz {
         Foo(u64),
         Bar(String),
         Baz(bool),
     }
 
-    #[test]
-    fn test_upcast_always_succeeds() {
-        use cgp::core::field::impls::CanUpcast;
-        use core::marker::PhantomData;
-
+    pub fn demo() {
         let wide = FooBar::Foo(1).upcast(PhantomData::<FooBarBaz>);
-
         assert_eq!(wide, FooBarBaz::Foo(1));
+
+        let wide = FooBar::Bar("hi".to_owned()).upcast(PhantomData::<FooBarBaz>);
+        assert_eq!(wide, FooBarBaz::Bar("hi".to_owned()));
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
     }
 }

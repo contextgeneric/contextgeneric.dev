@@ -1,0 +1,28 @@
+error[E0599]: the method `finalize_extract_result` exists for enum `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_one_step_early.rs:27:10
+   |
+16 |   pub enum Shape {
+   |   -------------- doesn't satisfy `__PartialShape<IsPresent, IsVoid>: FinalizeExtract`
+...
+24 |       let _rect = shape
+   |  _________________-
+25 | |         .to_extractor()
+26 | |         .extract_field(PhantomData::<Symbol!("Rectangle")>)
+27 | |         .finalize_extract_result();
+   | |         -^^^^^^^^^^^^^^^^^^^^^^^ method cannot be called due to unsatisfied trait bounds
+   | |_________|
+   |
+   |
+  ::: $RUST/core/src/result.rs
+   |
+   |   pub enum Result<T, E> {
+   |   --------------------- doesn't satisfy `_: FinalizeExtractResult`
+   |
+   = note: the following trait bounds were not satisfied:
+           `__PartialShape<IsPresent, IsVoid>: FinalizeExtract`
+           which is required by `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>: FinalizeExtractResult`
+note: the trait `FinalizeExtract` must be implemented
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:38:1
+   |
+38 | pub trait FinalizeExtract {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^

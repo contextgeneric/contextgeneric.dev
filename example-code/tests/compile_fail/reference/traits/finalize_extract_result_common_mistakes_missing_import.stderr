@@ -1,0 +1,22 @@
+error[E0599]: no method named `finalize_extract_result` found for enum `Result<T, E>` in the current scope
+  --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_missing_import.rs:25:10
+   |
+22 |       let _circle = shape
+   |  ___________________-
+23 | |         .to_extractor()
+24 | |         .extract_field(PhantomData::<Symbol!("Circle")>)
+25 | |         .finalize_extract_result();
+   | |         -^^^^^^^^^^^^^^^^^^^^^^^ method not found in `Result<Circle, __PartialShape<IsVoid>>`
+   | |_________|
+   |
+   |
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:57:8
+   |
+57 |       fn finalize_extract_result(self) -> Self::Output;
+   |          ----------------------- the method is available for `Result<Circle, __PartialShape<IsVoid>>` here
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FinalizeExtractResult` which provides `finalize_extract_result` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use cgp::cgp_core::cgp_field::traits::FinalizeExtractResult;
+   |

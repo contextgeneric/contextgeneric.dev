@@ -1,0 +1,17 @@
+error[E0599]: no method named `finalize_extract` found for enum `__PartialShape<__F0__, __F1__>` in the current scope
+  --> tests/compile_fail/reference/traits/finalize_extract_common_mistakes_finalize_early.rs:25:37
+   |
+15 | pub enum Shape {
+   | -------------- method `finalize_extract` not found for this enum
+...
+25 |         Err(remainder) => remainder.finalize_extract(),
+   |                                     ^^^^^^^^^^^^^^^^ method not found in `__PartialShape<IsPresent, IsVoid>`
+   |
+note: the method `finalize_extract` exists on the type `<IsVoid as MapType>::Map<Rectangle>`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:39:5
+   |
+39 |     fn finalize_extract<T>(self) -> T;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+   = note: the following trait defines an item `finalize_extract`, perhaps you need to implement it:
+           candidate #1: `cgp::prelude::FinalizeExtract`

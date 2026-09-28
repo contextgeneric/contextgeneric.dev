@@ -1,0 +1,68 @@
+error[E0369]: binary operation `==` cannot be applied to type `Result<Circle, __PartialShape<IsVoid, IsPresent>>`
+  --> tests/compile_fail/reference/traits/extract_field_common_mistakes_compare_result.rs:23:5
+   |
+23 | /     assert_eq!(
+24 | |         shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>),
+25 | |         Ok(Circle { radius: 1.0 })
+26 | |     );
+   | |     ^
+   | |     |
+   | |_____Result<Circle, __PartialShape<IsVoid, IsPresent>>
+   |       Result<Circle, __PartialShape<IsVoid, IsPresent>>
+   |
+note: an implementation of `PartialEq` might be missing for `__PartialShape<IsVoid, IsPresent>`
+  --> tests/compile_fail/reference/traits/extract_field_common_mistakes_compare_result.rs:15:1
+   |
+15 | pub enum Shape {
+   | ^^^^^^^^^^^^^^ must implement `PartialEq`
+help: consider annotating `__PartialShape<IsVoid, IsPresent>` with `#[derive(PartialEq)]`
+   |
+15 + #[derive(PartialEq)]
+16 | pub enum Shape {
+   |
+
+error[E0277]: `__PartialShape<IsVoid, IsPresent>` doesn't implement `Debug`
+  --> tests/compile_fail/reference/traits/extract_field_common_mistakes_compare_result.rs:23:5
+   |
+23 | /     assert_eq!(
+24 | |         shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>),
+25 | |         Ok(Circle { radius: 1.0 })
+26 | |     );
+   | |_____^ the trait `Debug` is not implemented for `__PartialShape<IsVoid, IsPresent>`
+   |
+help: the trait `Debug` is conditionally implemented for `Result<T, E>`
+  --> $RUST/core/src/result.rs
+   |
+   | #[derive(Copy, Debug, Hash)]
+   |                ^^^^^
+...
+   | pub enum Result<T, E> {
+   |                    - unsatisfied requirement introduced here: `__PartialShape<IsVoid, IsPresent>: Debug`
+help: consider annotating `__PartialShape<IsVoid, IsPresent>` with `#[derive(Debug)]`
+   |
+15 + #[derive(Debug)]
+16 | pub enum Shape {
+   |
+
+error[E0277]: `__PartialShape<IsVoid, IsPresent>` doesn't implement `Debug`
+  --> tests/compile_fail/reference/traits/extract_field_common_mistakes_compare_result.rs:23:5
+   |
+23 | /     assert_eq!(
+24 | |         shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>),
+25 | |         Ok(Circle { radius: 1.0 })
+26 | |     );
+   | |_____^ the trait `Debug` is not implemented for `__PartialShape<IsVoid, IsPresent>`
+   |
+help: the trait `Debug` is conditionally implemented for `Result<T, E>`
+  --> $RUST/core/src/result.rs
+   |
+   | #[derive(Copy, Debug, Hash)]
+   |                ^^^^^
+...
+   | pub enum Result<T, E> {
+   |                    - unsatisfied requirement introduced here: `__PartialShape<IsVoid, IsPresent>: Debug`
+help: consider annotating `__PartialShape<IsVoid, IsPresent>` with `#[derive(Debug)]`
+   |
+15 + #[derive(Debug)]
+16 | pub enum Shape {
+   |

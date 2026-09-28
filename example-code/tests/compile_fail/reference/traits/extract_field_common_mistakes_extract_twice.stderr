@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/compile_fail/reference/traits/extract_field_common_mistakes_extract_twice.rs:24:41
+   |
+24 |         let _ = remainder.extract_field(PhantomData::<Symbol!("Circle")>);
+   |                           ------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `9`, found `6`
+   |                           |
+   |                           arguments to this method are incorrect
+   |
+   = note: expected struct `std::marker::PhantomData<cgp::prelude::Symbol<9, cgp::prelude::Chars<'R', cgp::prelude::Chars<'e', cgp::prelude::Chars<'c', cgp::prelude::Chars<'t', cgp::prelude::Chars<'a', cgp::prelude::Chars<'n', cgp::prelude::Chars<'g', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>`
+              found struct `std::marker::PhantomData<cgp::prelude::Symbol<6, cgp::prelude::Chars<'C', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>`
+note: method defined here
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:35:8
+   |
+35 |     fn extract_field(self, _tag: PhantomData<Tag>) -> Result<Self::Value, Self::Remainder>;
+   |        ^^^^^^^^^^^^^

@@ -1,0 +1,22 @@
+error[E0277]: the trait bound `__PartialFooBar<IsVoid, IsPresent>: ExtractField<Symbol<3, cgp::prelude::Chars<'Q', cgp::prelude::Chars<'u', cgp::prelude::Chars<'x', Nil>>>>>` is not satisfied
+  --> tests/compile_fail/reference/traits/can_downcast_common_mistakes_source_lacks_target_variant.rs:18:28
+   |
+18 |     let _ = FooBar::Foo(1).downcast(PhantomData::<FooQux>);
+   |                            ^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `ExtractField<Symbol<3, cgp::prelude::Chars<'Q', cgp::prelude::Chars<'u', cgp::prelude::Chars<'x', Nil>>>>>` is not implemented for `__PartialFooBar<IsVoid, IsPresent>`
+  --> tests/compile_fail/reference/traits/can_downcast_common_mistakes_source_lacks_target_variant.rs:5:1
+   |
+ 5 | pub enum FooBar {
+   | ^^^^^^^^^^^^^^^
+help: the following other types implement trait `ExtractField<Tag>`
+  --> tests/compile_fail/reference/traits/can_downcast_common_mistakes_source_lacks_target_variant.rs:6:5
+   |
+ 6 |     Foo(u64),
+   |     ^^^ `__PartialFooBar<IsPresent, __F1__>` implements `ExtractField<Symbol<3, cgp::prelude::Chars<'F', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>>`
+ 7 |     Bar(String),
+   |     ^^^ `__PartialFooBar<__F0__, IsPresent>` implements `ExtractField<Symbol<3, cgp::prelude::Chars<'B', cgp::prelude::Chars<'a', cgp::prelude::Chars<'r', Nil>>>>>`
+   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::prelude::Chars<'Q', cgp::prelude::Chars<'u', cgp::prelude::Chars<'x', Nil>>>>, char>, Void>` to implement `FieldsExtractor<__PartialFooBar<IsVoid, IsPresent>, FooQux>`
+   = note: 1 redundant requirement hidden
+   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::prelude::Chars<'F', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>, u64>, Either<cgp::prelude::Field<Symbol<3, cgp::prelude::Chars<'Q', cgp::prelude::Chars<'u', cgp::prelude::Chars<'x', Nil>>>>, char>, Void>>` to implement `FieldsExtractor<__PartialFooBar<IsPresent, IsPresent>, FooQux>`
+   = note: required for `FooBar` to implement `CanDowncast<FooQux>`

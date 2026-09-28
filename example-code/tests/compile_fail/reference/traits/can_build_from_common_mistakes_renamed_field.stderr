@@ -1,0 +1,21 @@
+error[E0277]: the trait bound `__PartialEmployee<IsPresent, IsNothing>: UpdateField<Symbol<7, cgp::prelude::Chars<'s', cgp::prelude::Chars<'u', cgp::prelude::Chars<'r', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>, IsPresent>` is not satisfied
+  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_renamed_field.rs:19:10
+   |
+19 |         .build_from(Person {
+   |          ^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `UpdateField<Symbol<7, cgp::prelude::Chars<'s', cgp::prelude::Chars<'u', cgp::prelude::Chars<'r', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>, IsPresent>` is not implemented for `__PartialEmployee<IsPresent, IsNothing>`
+  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_renamed_field.rs:12:1
+   |
+12 | pub struct Employee {
+   | ^^^^^^^^^^^^^^^^^^^
+help: the following other types implement trait `UpdateField<Tag, M>`
+  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_renamed_field.rs:13:9
+   |
+13 |     pub first_name: String,
+   |         ^^^^^^^^^^ `__PartialEmployee<__M1__, __F1__>` implements `UpdateField<Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>, __M2__>`
+14 |     pub last_name: String,
+   |         ^^^^^^^^^ `__PartialEmployee<__F0__, __M1__>` implements `UpdateField<Symbol<9, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>, __M2__>`
+   = note: required for `__PartialEmployee<IsPresent, IsNothing>` to implement `BuildField<Symbol<7, cgp::prelude::Chars<'s', cgp::prelude::Chars<'u', cgp::prelude::Chars<'r', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>`
+   = note: required for `Cons<cgp::prelude::Field<Symbol<7, cgp::prelude::Chars<'s', cgp::prelude::Chars<'u', cgp::prelude::Chars<'r', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>, String>, Nil>` to implement `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder<__PartialPerson<IsNothing, IsPresent>, __PartialEmployee<IsPresent, IsNothing>>`
+   = note: required for `__PartialEmployee<IsNothing, IsNothing>` to implement `CanBuildFrom<Person>`

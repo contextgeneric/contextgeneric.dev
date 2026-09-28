@@ -1,0 +1,15 @@
+error[E0271]: type mismatch resolving `<Foo32Bar as FromVariant<Symbol<3, Chars<'F', Chars<'o', Chars<'o', Nil>>>>>>::Value == u64`
+  --> tests/compile_fail/reference/traits/can_upcast_common_mistakes_payload_mismatch.rs:17:34
+   |
+17 |     let _ = Foo64::Foo(1).upcast(PhantomData::<Foo32Bar>);
+   |                           ------ ^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<Foo32Bar as FromVariant<Symbol<3, Chars<'F', Chars<'o', Chars<'o', Nil>>>>>>::Value == u64`
+   |                           |
+   |                           required by a bound introduced by this call
+   |
+note: expected this to be `u64`
+  --> tests/compile_fail/reference/traits/can_upcast_common_mistakes_payload_mismatch.rs:12:9
+   |
+12 |     Foo(u32),
+   |         ^^^
+   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::prelude::Chars<'F', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>, u64>, Void>` to implement `FieldsExtractor<__PartialFoo64<IsPresent>, Foo32Bar>`
+   = note: required for `Foo64` to implement `CanUpcast<Foo32Bar>`

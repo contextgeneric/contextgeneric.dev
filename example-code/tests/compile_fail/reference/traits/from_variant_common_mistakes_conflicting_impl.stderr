@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `cgp::prelude::FromVariant<cgp::prelude::Symbol<6, cgp::prelude::Chars<'C', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>` for type `Shape`
+  --> tests/compile_fail/reference/traits/from_variant_common_mistakes_conflicting_impl.rs:14:5
+   |
+14 |     Circle(Circle),
+   |     ^^^^^^ conflicting implementation for `Shape`
+...
+19 | impl FromVariant<Symbol!("Circle")> for Shape {
+   | --------------------------------------------- first implementation here

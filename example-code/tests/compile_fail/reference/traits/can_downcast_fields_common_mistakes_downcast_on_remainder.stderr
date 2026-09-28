@@ -1,0 +1,30 @@
+error[E0599]: the method `downcast` exists for enum `__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/traits/can_downcast_fields_common_mistakes_downcast_on_remainder.rs:25:27
+   |
+ 5 | pub enum FooBarBaz {
+   | ------------------ method `downcast` not found for this enum because it doesn't satisfy `<_ as HasExtractor>::Extractor = _`, `_: CanDowncast<_>` or `_: HasExtractor`
+...
+25 |         let _ = remainder.downcast(PhantomData::<JustBar>);
+   |                           ^^^^^^^^
+   |
+   = note: the following trait bounds were not satisfied:
+           `<__PartialFooBarBaz<IsVoid, IsPresent, IsPresent> as HasExtractor>::Extractor = _`
+           which is required by `__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
+           `__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: HasExtractor`
+           which is required by `__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
+           `<&__PartialFooBarBaz<IsVoid, IsPresent, IsPresent> as HasExtractor>::Extractor = _`
+           which is required by `&__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
+           `&__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: HasExtractor`
+           which is required by `&__PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
+           `<&mut __PartialFooBarBaz<IsVoid, IsPresent, IsPresent> as HasExtractor>::Extractor = _`
+           which is required by `&mut __PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
+           `&mut __PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: HasExtractor`
+           which is required by `&mut __PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
+note: the trait `HasExtractor` must be implemented
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:6:1
+   |
+ 6 | pub trait HasExtractor {
+   | ^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+   = note: the following trait defines an item `downcast`, perhaps you need to implement it:
+           candidate #1: `CanDowncast`
