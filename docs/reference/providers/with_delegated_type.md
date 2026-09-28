@@ -11,10 +11,11 @@ Resolve one or more abstract-type components from a shared table, through the `W
 
 ## Overview
 
-`WithDelegatedType<Components>` is the alias `WithProvider<UseDelegatedType<Components>>`. It answers a
-context's abstract-type components by looking each type tag up in the `Components` table, on a [**context**](/docs/reference/glossary#context), the type that implements the trait, by adapting the foundational
-[`UseDelegatedType`](use_delegated_type.md) provider through the [`WithProvider`](with_provider.md)
-layer. Like every CGP provider, it carries no runtime value.
+`WithDelegatedType<Components>` is the alias `WithProvider<UseDelegatedType<Components>>`. It
+answers a context's abstract-type components by looking each type tag up in the `Components` table,
+on a [**context**](/docs/reference/glossary#context), the type that implements the trait, by
+adapting the foundational [`UseDelegatedType`](use_delegated_type.md) provider through the
+[`WithProvider`](with_provider.md) layer. Like every CGP provider, it carries no runtime value.
 
 Unlike [`WithType`](with_type.md), this alias is not an alternative to a directly-wireable provider
 on a `#[cgp_type]` component: the bare [`UseDelegatedType`](use_delegated_type.md) supplies only the
@@ -79,7 +80,7 @@ delegate_components! {
         [
             ScalarTypeProviderComponent,
             IndexTypeProviderComponent,
-                ]: WithDelegatedType<AppTypes>,
+        ]: WithDelegatedType<AppTypes>,
     }
 }
 

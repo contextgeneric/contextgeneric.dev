@@ -101,7 +101,7 @@ delegate_components! {
             NameGetterComponent,
             GreeterComponent,
         ]:
-                        UseDefault,
+            UseDefault,
     }
 }
 
@@ -119,12 +119,12 @@ pub fn demo() {
 
 The first `#[cgp_impl]` makes `UseDefault` a `NameGetter` provider whose `name` is the trait default
 `"John"`; the second makes it a `Greeter` provider whose `greet` is the trait default that formats
-around `self.name()`. The `Greeter` impl restates its dependency with [`#[uses(HasName)]`](../attributes/uses.md), because
-the default body of `greet` calls `name`; [`#[extend(HasName)]`](../attributes/extend.md) on the
-trait does not give the provider that bound, as [Common Mistakes](#common-mistakes) shows. `App`
-then delegates both components to `UseDefault` in one array entry, so `App.greet()` produces
-`"Hello, John!"` entirely from the two default bodies, with no method implemented on `App` or on a
-dedicated provider.
+around `self.name()`. The `Greeter` impl restates its dependency with
+[`#[uses(HasName)]`](../attributes/uses.md), because the default body of `greet` calls `name`;
+[`#[extend(HasName)]`](../attributes/extend.md) on the trait does not give the provider that bound,
+as [Common Mistakes](#common-mistakes) shows. `App` then delegates both components to `UseDefault`
+in one array entry, so `App.greet()` produces `"Hello, John!"` entirely from the two default bodies,
+with no method implemented on `App` or on a dedicated provider.
 
 ## When to use it
 

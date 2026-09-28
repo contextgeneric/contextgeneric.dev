@@ -12,12 +12,13 @@ Resolve an [abstract type](/docs/reference/glossary#abstract-type) by looking it
 ## Overview
 
 `UseDelegatedType<Components>` is for the case where the concrete type an abstract type resolves to
-should itself be decided by a table. The plain [`UseType<T>`](use_type.md) provider binds an abstract
-type to one fixed `T`. But sometimes a single provider must answer several abstract-type components at
-once, or route each type tag to a different concrete type chosen elsewhere, such as when a namespace or
-a [higher-order provider](/docs/reference/glossary#higher-order-provider) supplies a coherent bundle of types. Hand-writing one `UseType` entry per tag
-would scatter that decision; `UseDelegatedType` concentrates it into one `Components` table the provider
-consults. As always, the [**context**](/docs/reference/glossary#context) (the type that implements the trait)
+should itself be decided by a table. The plain [`UseType<T>`](use_type.md) provider binds an
+abstract type to one fixed `T`. But sometimes a single provider must answer several abstract-type
+components at once, or route each type tag to a different concrete type chosen elsewhere, such as
+when a namespace or a [higher-order provider](/docs/reference/glossary#higher-order-provider)
+supplies a coherent bundle of types. Hand-writing one `UseType` entry per tag would scatter that
+decision; `UseDelegatedType` concentrates it into one `Components` table the provider consults. As
+always, the [**context**](/docs/reference/glossary#context) (the type that implements the trait)
 points its type components at the provider.
 
 The mechanism is the same indirection [`UseDelegate`](use_delegate.md) provides for behavioral
@@ -78,8 +79,9 @@ table whose values are types rather than providers.
 
 ## When to use it
 
-You choose `UseDelegatedType` by wiring its [`WithDelegatedType`](with_delegated_type.md) alias, so the guidance on when to answer several abstract types from one shared table, rather than fixing
-each one with [`UseType`](use_type.md), lives with that alias, on
+You choose `UseDelegatedType` by wiring its [`WithDelegatedType`](with_delegated_type.md) alias, so
+the guidance on when to answer several abstract types from one shared table, rather than fixing each
+one with [`UseType`](use_type.md), lives with that alias, on
 [`WithDelegatedType`](with_delegated_type.md).
 
 ## Under the hood

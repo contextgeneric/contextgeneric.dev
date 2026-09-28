@@ -1,0 +1,47 @@
+error[E0277]: the trait bound `cgp::prelude::UseField<cgp::prelude::Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>: IsProviderFor<WidthTypeProviderComponent, Rectangle>` is not satisfied
+  --> tests/compile_fail/reference/providers/with_field_examples_bare_use_field_on_type_component.rs:21:9
+   |
+21 |         WidthTypeProviderComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+   = help: the trait `IsProviderFor<WidthTypeProviderComponent, Rectangle>` is not implemented for `cgp::prelude::UseField<cgp::prelude::Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>`
+help: the following other types implement trait `IsProviderFor<Component, Context, Params>`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-handler/src/components/async_computer.rs:31:1
+   |
+31 | / impl<Context, Code, Input, Tag, Output> AsyncComputer<Context, Code, Input> for UseField<Tag>
+32 | | where
+33 | |     Context: HasField<Tag>,
+34 | |     Context::Value: CanComputeAsync<Code, Input, Output = Output>,
+   | |__________________________________________________________________^ `cgp::prelude::UseField<Tag>` implements `IsProviderFor<AsyncComputerComponent, Context, (Code, Input)>`
+   |
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/impls/use_field.rs:69:1
+   |
+69 | / impl<Context, TypeTag, FieldTag, Field> IsProviderFor<TypeProviderComponent, Context, TypeTag>
+70 | |     for UseField<FieldTag>
+71 | | where
+72 | |     Context: HasField<FieldTag, Value = Field>,
+   | |_______________________________________________^ `cgp::prelude::UseField<FieldTag>` implements `IsProviderFor<TypeProviderComponent, Context, TypeTag>`
+   |
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-handler/src/components/computer.rs:29:1
+   |
+29 | / impl<Context, Code, Input, Tag, Output> Computer<Context, Code, Input> for UseField<Tag>
+30 | | where
+31 | |     Context: HasField<Tag>,
+32 | |     Context::Value: CanCompute<Code, Input, Output = Output>,
+   | |_____________________________________________________________^ `cgp::prelude::UseField<Tag>` implements `IsProviderFor<ComputerComponent, Context, (Code, Input)>`
+   |
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-runtime/src/traits/has_runtime.rs:5:1
+   |
+ 5 |   #[cgp_getter]
+   |   ^^^^^^^^^^^^^ `cgp::prelude::UseField<__Tag__>` implements `IsProviderFor<RuntimeGetterComponent, __Context__>`
+   = note: required for `Rectangle` to implement `CanUseComponent<WidthTypeProviderComponent>`
+note: required by a bound in `__CheckRectangle`
+  --> tests/compile_fail/reference/providers/with_field_examples_bare_use_field_on_type_component.rs:19:1
+   |
+19 | / check_components! {
+20 | |     Rectangle {
+21 | |         WidthTypeProviderComponent,
+22 | |     }
+23 | | }
+   | |_^ required by this bound in `__CheckRectangle`
+   = note: this error originates in the attribute macro `cgp_getter` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -13,15 +13,16 @@ specific named component.
 ## Overview
 
 `WithProvider<Provider>` bridges CGP's two layers of provider trait. Foundational traits like
-[`TypeProvider`](../components/has_type.md) and [`FieldGetter`](../traits/field-access/field_getter.md) are generic,
-component-agnostic mechanisms: a `TypeProvider` supplies *some* [abstract type](/docs/reference/glossary#abstract-type) for *some* tag, and a
-`FieldGetter` reads *some* field for *some* output tag, without either knowing which named component it
-serves. A named component, by contrast, has a specific provider trait, such as `NameTypeProvider` or
-`NameGetter`, that a [**context**](/docs/reference/glossary#context) wires to, where the context is the type the
-implementation runs against.
-`WithProvider<Provider>` is the adapter that lets a foundational provider stand in as the provider for
-one of those named components: it implements the component's provider trait by forwarding to the
-foundational provider's method.
+[`TypeProvider`](../components/has_type.md) and
+[`FieldGetter`](../traits/field-access/field_getter.md) are generic, component-agnostic mechanisms:
+a `TypeProvider` supplies *some* [abstract type](/docs/reference/glossary#abstract-type) for *some*
+tag, and a `FieldGetter` reads *some* field for *some* output tag, without either knowing which
+named component it serves. A named component, by contrast, has a specific provider trait, such as
+`NameTypeProvider` or `NameGetter`, that a [**context**](/docs/reference/glossary#context) wires to,
+where the context is the type the implementation runs against. `WithProvider<Provider>` is the
+adapter that lets a foundational provider stand in as the provider for one of those named
+components: it implements the component's provider trait by forwarding to the foundational
+provider's method.
 
 This adapter lets the foundational layer be wired without each foundational provider
 implementing every component trait by hand. A field getter written once as a `FieldGetter` can serve any
@@ -74,7 +75,7 @@ pub struct Person {
 
 delegate_components! {
     Person {
-                NameGetterComponent: WithField<Symbol!("first_name")>,
+        NameGetterComponent: WithField<Symbol!("first_name")>,
     }
 }
 
@@ -105,11 +106,12 @@ the type through a table.
 [`WithField<Tag>`](with_field.md) and [`UseField<Tag>`](use_field.md) on every single-method getter,
 so prefer the plain provider there. `WithField` is the form to wire when a `#[cgp_type]` component
 should take a field's type, since such a component has no `UseField` impl.
-[`WithContext`](with_context.md) is not interchangeable with [`UseContext`](use_context.md): wired to
-a component, `UseContext` calls the context's own consumer trait for that component, which loops,
-while `WithContext` reads the context's `HasField` or `HasType` entry keyed by the component. [`WithFieldRef`](with_field_ref.md) and [`WithDelegatedType`](with_delegated_type.md)
-have no plain wireable form, because their inner providers are foundational, so you wire the alias.
-Each alias is documented on its own page, linked from the table above.
+[`WithContext`](with_context.md) is not interchangeable with [`UseContext`](use_context.md): wired
+to a component, `UseContext` calls the context's own consumer trait for that component, which loops,
+while `WithContext` reads the context's `HasField` or `HasType` entry keyed by the component.
+[`WithFieldRef`](with_field_ref.md) and [`WithDelegatedType`](with_delegated_type.md) have no plain
+wireable form, because their inner providers are foundational, so you wire the alias. Each alias is
+documented on its own page, linked from the table above.
 
 Write `WithProvider<Provider>` in full only when adapting a foundational provider that has no ready
 alias.

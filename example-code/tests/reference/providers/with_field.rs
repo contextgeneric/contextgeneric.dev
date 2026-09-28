@@ -2,7 +2,8 @@
 //!
 //! Pins that the `WithField<Symbol!("first_name")>` alias wires a `name` getter to read the
 //! `first_name` field, the same as the plain `UseField`, and gives a `#[cgp_type]` component a
-//! field's type, which the plain `UseField` cannot.
+//! field's type, which the plain `UseField` cannot; the bare `UseField` on that component is a trybuild
+//! fixture.
 
 /// ## Examples
 pub mod examples {

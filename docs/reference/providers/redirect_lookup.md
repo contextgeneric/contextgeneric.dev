@@ -27,12 +27,12 @@ this provider is legible.
 
 `RedirectLookup<Components, Path>` separates *which key* a component is looked up under from *which
 table* answers it. The ordinary provider blanket impl looks a component up in the
-[**context**](/docs/reference/glossary#context)'s own delegation table, keyed by the
-[component marker](/docs/reference/glossary#component-marker), where the context is the type the
-implementation runs against. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed by a
-type-level `Path`, then delegates to whatever provider that entry holds. This indirection lets
-one component's resolution be redirected to a different key in a different table, which is the basis for
-organizing wiring into namespaces.
+[**context**](/docs/reference/glossary#context)'s own delegation table, keyed by the [component
+marker](/docs/reference/glossary#component-marker), where the context is the type the implementation
+runs against. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed
+by a type-level `Path`, then delegates to whatever provider that entry holds. This indirection lets
+one component's resolution be redirected to a different key in a different table, which is the basis
+for organizing wiring into namespaces.
 
 The redirection makes namespaces work. A namespace groups a context's components under a path
 prefix so several related components can be wired in one place and addressed by a shared path.
@@ -157,13 +157,14 @@ where
 }
 ```
 
-The mechanism is one [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on `__Path__`
-rather than on the component marker. `RedirectLookup<Components, Path>` implements `Greeter` whenever
-`Components` maps `Path` to a delegate that itself implements `Greeter`, and the method forwards to that
-delegate. When the consumer trait carries generic type parameters, the impl first appends every one of them to
-the path with [`ConcatPath`](../traits/formatting/concat_path.md), in declaration order, skipping
-lifetime and const parameters. For `CanCalculateArea<Shape>`, `cargo cgp expand` shows, with the
-path resugared as `Path!(@Shape)`:
+The mechanism is one [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on
+`__Path__` rather than on the component marker. `RedirectLookup<Components, Path>` implements
+`Greeter` whenever `Components` maps `Path` to a delegate that itself implements `Greeter`, and the
+method forwards to that delegate. When the consumer trait carries generic type parameters, the impl
+first appends every one of them to the path with
+[`ConcatPath`](../traits/formatting/concat_path.md), in declaration order, skipping lifetime and
+const parameters. For `CanCalculateArea<Shape>`, `cargo cgp expand` shows, with the path resugared
+as `Path!(@Shape)`:
 
 ```rust
 impl<__Context__, Shape, __Components__, __Path__> AreaCalculator<__Context__, Shape>
@@ -186,8 +187,8 @@ where
 The lookup is still a single `DelegateComponent` query on the whole extended path, not a walk
 segment by segment. A table answers a shorter prefix of the path because
 [`delegate_components!`](../macros/delegate_components.md) generates entries generic over the
-remaining segments, which is how the `open` statement's key forms work. As always, the impl is paired with a matching
-[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.
+remaining segments, which is how the `open` statement's key forms work. As always, the impl is
+paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl.
 
 The [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute populates the path side: it
 generates a namespace impl whose delegate is `RedirectLookup<Components, Path>`, with the prefix path
@@ -225,7 +226,8 @@ Bind the provider at the registered path, `@app.GreeterComponent: GreetHello`, a
 - [`delegate_components!`](../macros/delegate_components.md) — the `open` and `namespace` statements that
   generate the redirect entries.
 - [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
-- [`Path!`](../macros/path.md) and [`PathCons`](../types/path_cons.md) — the type-level path it looks up.
+- [`Path!`](../macros/path.md) and [`PathCons`](../types/path_cons.md) — the type-level path it
+  looks up.
 - [`UseContext`](use_context.md) — the other `#[cgp_component]`-generated provider, routing back to the
   context.
 

@@ -14,12 +14,12 @@ decision rather than the method name.
 
 `UseField<Tag>` decouples a getter's method name from the field it reads. A getter component defined
 with [`#[cgp_getter]`](../macros/cgp_getter.md) describes a value the context can supply, such as
-`fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the type the method runs on, which supplies
-the values it needs as its fields. But the context may store the value under a different field name,
-say `first_name`, and different contexts may store it under different names. `UseField<Tag>` carries
-the field name as its type parameter, so wiring a getter to `UseField<Symbol!("first_name")>` makes it
-read `first_name` even though the method is `name`. The field name lives in the wiring, not in the
-trait.
+`fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the type the method
+runs on, which supplies the values it needs as its fields. But the context may store the value under
+a different field name, say `first_name`, and different contexts may store it under different names.
+`UseField<Tag>` carries the field name as its type parameter, so wiring a getter to
+`UseField<Symbol!("first_name")>` makes it read `first_name` even though the method is `name`. The
+field name lives in the wiring, not in the trait.
 
 This is the provider that [`#[cgp_getter]`](../macros/cgp_getter.md) targets. That macro generates a
 `UseField` implementation for the getter's provider trait with the field tag left as a free parameter,
@@ -177,9 +177,9 @@ and the field name are independent. The mutable getter
 components, so the implementations carry no `IsProviderFor` pair; a getter component reaches them
 through [`WithField<Tag>`](with_field.md), whose `WithProvider` wrapper does.
 
-**[`TypeProvider`](../components/has_type.md).** `UseField<Tag>` reports the field's `Value` type as an
-[abstract type](/docs/reference/glossary#abstract-type), with a matching `IsProviderFor` implementation,
-so the *type* of a field can be wired as a context's abstract type. The built-in
+**[`TypeProvider`](../components/has_type.md).** `UseField<Tag>` reports the field's `Value` type as
+an [abstract type](/docs/reference/glossary#abstract-type), with a matching `IsProviderFor`
+implementation, so the *type* of a field can be wired as a context's abstract type. The built-in
 `TypeProviderComponent` takes `UseField<Symbol!("width")>` directly, while a
 [`#[cgp_type]`](../macros/cgp_type.md) component takes it as `WithField<Symbol!("width")>`, because
 the macro generates `UseType` and `WithProvider` implementations but no `UseField` one.

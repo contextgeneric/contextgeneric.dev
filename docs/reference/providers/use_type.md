@@ -81,7 +81,7 @@ pub struct App;
 
 delegate_components! {
     App {
-                ScalarTypeProviderComponent: UseType<f64>,
+        ScalarTypeProviderComponent: UseType<f64>,
     }
 }
 

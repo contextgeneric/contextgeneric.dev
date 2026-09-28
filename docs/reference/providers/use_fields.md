@@ -30,12 +30,12 @@ participates in CGP wiring can still opt into the auto-getter convention when it
 its methods.
 
 `UseFields` is distinct from its sibling [`UseField`](use_field.md), and the singular-versus-plural
-naming marks the difference. `UseField<Tag>` keys on a tag the wiring chooses, letting one method read a field of any name, and it
-exists only for single-method getters; `UseFields` takes no parameter, keys every method on its own
-name, and works for any number of methods. Reach for
+naming marks the difference. `UseField<Tag>` keys on a tag the wiring chooses, letting one method
+read a field of any name, and it exists only for single-method getters; `UseFields` takes no
+parameter, keys every method on its own name, and works for any number of methods. Reach for
 `UseField` when the field name must differ from the method name, and for `UseFields` when the
-convention holds. Like every CGP provider, `UseFields` carries no runtime value: it is a marker named
-in wiring.
+convention holds. Like every CGP provider, `UseFields` carries no runtime value: it is a marker
+named in wiring.
 
 ## Usage
 
@@ -108,8 +108,10 @@ the wired counterpart of the [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md
 case where the getter is a full component rather than a blanket impl.
 
 Prefer [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) when the getter does not need to be a
-wireable component, and prefer an [`#[implicit]`](../attributes/implicit.md) argument when a provider needs a value from its own context, which is the common case and needs no [getter trait](/docs/reference/glossary#getter-trait) at all.
-Reach for [`UseField<Tag>`](use_field.md) instead when the field name must differ from the method name.
+wireable component, and prefer an [`#[implicit]`](../attributes/implicit.md) argument when a
+provider needs a value from its own context, which is the common case and needs no [getter
+trait](/docs/reference/glossary#getter-trait) at all. Reach for [`UseField<Tag>`](use_field.md)
+instead when the field name must differ from the method name.
 
 ## Under the hood
 

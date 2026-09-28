@@ -2,7 +2,8 @@
 //!
 //! `WithFieldRef` (`WithProvider<UseFieldRef<..>>`) is the form that wires the foundational
 //! `UseFieldRef` getter. This pins that a `-> &Config` getter reads a stored `AsRef<Config>` field,
-//! and that the borrowed views When to use it names need only the plain `UseField`.
+//! and that the borrowed views When to use it names need only the plain `UseField`. The unsized
+//! `str` value from Common Mistakes is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {

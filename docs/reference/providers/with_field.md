@@ -11,12 +11,13 @@ Wire a getter component to a named context field, through the `WithProvider` ada
 
 ## Overview
 
-`WithField<Tag>` is the alias `WithProvider<UseField<Tag>>`. It implements a getter component by reading
-the context field named by `Tag`, on a [**context**](/docs/reference/glossary#context), the type the method runs on, by adapting the
-foundational [`UseField<Tag>`](use_field.md) getter through the [`WithProvider`](with_provider.md) layer.
-On a getter it reads the same field the plain [`UseField`](use_field.md) provider does, and the two
-are interchangeable there. On a [`#[cgp_type]`](../macros/cgp_type.md) component only `WithField`
-works, and it sets the abstract type to the field's type. Like every CGP provider, it carries no runtime value.
+`WithField<Tag>` is the alias `WithProvider<UseField<Tag>>`. It implements a getter component by
+reading the context field named by `Tag`, on a [**context**](/docs/reference/glossary#context), the
+type the method runs on, by adapting the foundational [`UseField<Tag>`](use_field.md) getter through
+the [`WithProvider`](with_provider.md) layer. On a getter it reads the same field the plain
+[`UseField`](use_field.md) provider does, and the two are interchangeable there. On a
+[`#[cgp_type]`](../macros/cgp_type.md) component only `WithField` works, and it sets the abstract
+type to the field's type. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
@@ -57,7 +58,7 @@ pub struct Person {
 
 delegate_components! {
     Person {
-                NameGetterComponent: WithField<Symbol!("first_name")>,
+        NameGetterComponent: WithField<Symbol!("first_name")>,
     }
 }
 
@@ -97,8 +98,9 @@ delegate_components! {
 ```
 
 `Rectangle`'s `Width` is `f32`, the type of its `width` field. `#[cgp_type]` generates a
-`WithProvider` impl but no `UseField` impl, so `WidthTypeProviderComponent: UseField<Symbol!("width")>`
-fails with `E0277`, while `UseField`'s own `TypeProvider` impl serves it through `WithField`.
+`WithProvider` impl but no `UseField` impl, so
+`WidthTypeProviderComponent: UseField<Symbol!("width")>` fails with `E0277`, while `UseField`'s own
+`TypeProvider` impl serves it through `WithField`.
 
 ## When to use it
 

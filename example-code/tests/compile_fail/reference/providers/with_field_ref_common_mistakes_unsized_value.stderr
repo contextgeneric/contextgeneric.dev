@@ -1,0 +1,83 @@
+error[E0277]: the size for values of type `str` cannot be known at compilation time
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:14:1
+   |
+14 | / delegate_components! {
+15 | |     Person {
+16 | |         NameGetterComponent: WithFieldRef<Symbol!("name"), str>,
+17 | |     }
+18 | | }
+   | |_^ doesn't have a size known at compile-time
+   |
+   = help: the trait `Sized` is not implemented for `str`
+note: required by an implicit `Sized` bound in `UseFieldRef`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/impls/use_ref.rs:7:29
+   |
+ 7 | pub struct UseFieldRef<Tag, Value>(pub PhantomData<(Tag, Value)>);
+   |                             ^^^^^ required by the implicit `Sized` requirement on this type parameter in `UseFieldRef`
+   = note: this error originates in the macro `delegate_components` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0271]: type mismatch resolving `<UseFieldRef<Symbol<4, Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>, str> as FieldGetter<Person, NameGetterComponent>>::Value == String`
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:22:9
+   |
+22 |         NameGetterComponent,
+   |         ^^^^^^^^^^^^^^^^^^^ expected `String`, found `str`
+   |
+note: required for `WithProvider<UseFieldRef<cgp::prelude::Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>, str>>` to implement `IsProviderFor<NameGetterComponent, Person>`
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:4:1
+   |
+ 4 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+   = note: associated types for the current `impl` cannot be restricted in `where` clauses
+   = note: required for `Person` to implement `CanUseComponent<NameGetterComponent>`
+note: required by a bound in `__CheckPerson`
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:20:1
+   |
+20 | / check_components! {
+21 | |     Person {
+22 | |         NameGetterComponent,
+23 | |     }
+24 | | }
+   | |_^ required by this bound in `__CheckPerson`
+   = note: this error originates in the attribute macro `cgp_getter` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the size for values of type `str` cannot be known at compilation time
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:22:9
+   |
+22 |         NameGetterComponent,
+   |         ^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+   |
+   = help: the trait `Sized` is not implemented for `str`
+   = note: required for `UseFieldRef<cgp::prelude::Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>, str>` to implement `cgp::prelude::FieldGetter<Person, NameGetterComponent>`
+note: required for `WithProvider<UseFieldRef<cgp::prelude::Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>, str>>` to implement `IsProviderFor<NameGetterComponent, Person>`
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:4:1
+   |
+ 4 | #[cgp_getter]
+   | ^^^^^^^^^^^^^
+   = note: required for `Person` to implement `CanUseComponent<NameGetterComponent>`
+note: required by a bound in `__CheckPerson`
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:20:1
+   |
+20 | / check_components! {
+21 | |     Person {
+22 | |         NameGetterComponent,
+23 | |     }
+24 | | }
+   | |_^ required by this bound in `__CheckPerson`
+   = note: this error originates in the attribute macro `cgp_getter` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider relaxing the implicit `Sized` restriction
+   |
+24 | }: ?Sized
+   |  ++++++++
+
+error[E0277]: the size for values of type `str` cannot be known at compilation time
+  --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:16:30
+   |
+16 |         NameGetterComponent: WithFieldRef<Symbol!("name"), str>,
+   |                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+   |
+   = help: the trait `Sized` is not implemented for `str`
+note: required by an implicit `Sized` bound in `UseFieldRef`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/impls/use_ref.rs:7:29
+   |
+ 7 | pub struct UseFieldRef<Tag, Value>(pub PhantomData<(Tag, Value)>);
+   |                             ^^^^^ required by the implicit `Sized` requirement on this type parameter in `UseFieldRef`

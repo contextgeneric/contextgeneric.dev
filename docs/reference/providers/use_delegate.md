@@ -29,12 +29,13 @@ It is expected to be deprecated once `open` is shown to cover every dispatch cas
 ## Overview
 
 `UseDelegate` chooses a provider based on a type argument rather than on the component alone. An
-ordinary component picks its provider by looking the component name up in the [**context**](/docs/reference/glossary#context)'s delegation
-table, where the context is the type the implementation runs against. But when a provider trait carries an
-extra generic parameter, such as a `SourceError` to convert or a `Shape` to measure, the right provider
-often depends on which concrete type that parameter is. `UseDelegate` performs a second lookup: it
-treats one generic parameter as a key and reads the matching inner provider out of a table, so a single
-wiring entry can fan out to many type-specific providers.
+ordinary component picks its provider by looking the component name up in the
+[**context**](/docs/reference/glossary#context)'s delegation table, where the context is the type
+the implementation runs against. But when a provider trait carries an extra generic parameter, such
+as a `SourceError` to convert or a `Shape` to measure, the right provider often depends on which
+concrete type that parameter is. `UseDelegate` performs a second lookup: it treats one generic
+parameter as a key and reads the matching inner provider out of a table, so a single wiring entry
+can fan out to many type-specific providers.
 
 This lets context-generic providers stay generic even when their implementations would otherwise overlap
 on a parameter. Rather than one provider matching every possible `Shape`, you write a small provider per
@@ -183,14 +184,15 @@ where
 }
 ```
 
-The mechanism is a single [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed on
-`(Shape)`, which is the bare type `Shape` rather than a one-element tuple; `UseDelegate<(A, B)>` keys
-on a real tuple of two parameters. `UseDelegate<Components>` implements `AreaCalculator` for a given
-`Shape` exactly when `Components` maps that `Shape` to a delegate that itself implements
-`AreaCalculator`, and the method forwards to it. Only the parameter named inside `UseDelegate<...>` is the key; the rest pass through
-unchanged. Each impl is paired with an [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl so
-dependencies propagate to a check. A component may derive more than one dispatcher when different
-parameters should be routed differently.
+The mechanism is a single [`DelegateComponent`](../traits/wiring/delegate_component.md) lookup keyed
+on `(Shape)`, which is the bare type `Shape` rather than a one-element tuple; `UseDelegate<(A, B)>`
+keys on a real tuple of two parameters. `UseDelegate<Components>` implements `AreaCalculator` for a
+given `Shape` exactly when `Components` maps that `Shape` to a delegate that itself implements
+`AreaCalculator`, and the method forwards to it. Only the parameter named inside `UseDelegate<...>`
+is the key; the rest pass through unchanged. Each impl is paired with an
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl so dependencies propagate to a check. A
+component may derive more than one dispatcher when different parameters should be routed
+differently.
 
 ## Related constructs
 

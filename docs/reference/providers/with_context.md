@@ -50,8 +50,8 @@ What the entry needs from the context depends on the component's kind:
   imported from `cgp::core::types`, is the usual way to supply it; wired to `UseType<String>`, it
   answers every tag with `String`.
 - **A single-method [`#[cgp_getter]`](../macros/cgp_getter.md) component**, such as `HasName`, reads
-  the context's `HasField<NameGetterComponent>` entry. No derive generates a `HasField` impl keyed by a
-  component marker, so the context implements it by hand.
+  the context's `HasField<NameGetterComponent>` entry. No derive generates a `HasField` impl keyed
+  by a component marker, so the context implements it by hand.
 
 ## Examples
 
@@ -114,11 +114,11 @@ usually fit better:
 pub type WithContext = WithProvider<UseContext>;
 ```
 
-The [`WithProvider`](with_provider.md) impl that `#[cgp_type]` generates bounds its inner provider by
-`TypeProvider<__Context__, NameTypeProviderComponent>`, and the one `#[cgp_getter]` generates bounds it
-by `FieldGetter<__Context__, NameGetterComponent>`. `UseContext` implements both by asking the
-context, the first through the `UseContext` impl `#[cgp_component]` generates for `HasType` and the
-second through a hand-written impl beside `FieldGetter`:
+The [`WithProvider`](with_provider.md) impl that `#[cgp_type]` generates bounds its inner provider
+by `TypeProvider<__Context__, NameTypeProviderComponent>`, and the one `#[cgp_getter]` generates
+bounds it by `FieldGetter<__Context__, NameGetterComponent>`. `UseContext` implements both by asking
+the context, the first through the `UseContext` impl `#[cgp_component]` generates for `HasType` and
+the second through a hand-written impl beside `FieldGetter`:
 
 ```rust
 impl<Context, Tag, Field> FieldGetter<Context, Tag> for UseContext

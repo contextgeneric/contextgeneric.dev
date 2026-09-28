@@ -52,7 +52,7 @@ pub struct App;
 
 delegate_components! {
     App {
-                ScalarTypeProviderComponent: WithType<f64>,
+        ScalarTypeProviderComponent: WithType<f64>,
     }
 }
 
@@ -71,9 +71,10 @@ it, a type that breaks the bound is reported only when the component is used, as
 ## When to use it
 
 **Prefer the plain [`UseType<T>`](use_type.md) form.** It binds the same type and is the idiomatic
-value for a [`#[cgp_type]`](../macros/cgp_type.md) component's wiring entry. The two are equivalent on every `#[cgp_type]` component, because the macro generates both a `UseType`
-impl and a [`WithProvider`](with_provider.md) impl; `WithType` completes the `With…` family and reads
-as a single wiring choice where spelling out `WithProvider<UseType<f64>>` would not.
+value for a [`#[cgp_type]`](../macros/cgp_type.md) component's wiring entry. The two are equivalent
+on every `#[cgp_type]` component, because the macro generates both a `UseType` impl and a
+[`WithProvider`](with_provider.md) impl; `WithType` completes the `With…` family and reads as a
+single wiring choice where spelling out `WithProvider<UseType<f64>>` would not.
 
 For an abstract type resolved through a table rather than fixed to one concrete type, use
 [`WithDelegatedType`](with_delegated_type.md).

@@ -98,7 +98,7 @@ delegate_components! {
         open EncoderComponent;
 
         @EncoderComponent.u32: EncodeAsText,
-                @EncoderComponent.Vec<u32>: EncodeVec,
+        @EncoderComponent.Vec<u32>: EncodeVec,
     }
 }
 

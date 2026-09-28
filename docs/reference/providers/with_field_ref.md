@@ -11,9 +11,11 @@ Wire a getter component to a field borrowed through `AsRef`, through the `WithPr
 
 ## Overview
 
-`WithFieldRef<Tag, Value>` is the alias `WithProvider<UseFieldRef<Tag, Value>>`. It implements a getter
-component by reading the field named by `Tag` from the [**context**](/docs/reference/glossary#context), the type the method runs on, and borrowing it through `AsRef` to produce a `&Value`, where the stored field type implements
-`AsRef<Value>`. It adapts the foundational [`UseFieldRef`](use_field_ref.md) getter through the
+`WithFieldRef<Tag, Value>` is the alias `WithProvider<UseFieldRef<Tag, Value>>`. It implements a
+getter component by reading the field named by `Tag` from the
+[**context**](/docs/reference/glossary#context), the type the method runs on, and borrowing it
+through `AsRef` to produce a `&Value`, where the stored field type implements `AsRef<Value>`. It
+adapts the foundational [`UseFieldRef`](use_field_ref.md) getter through the
 [`WithProvider`](with_provider.md) layer. Like every CGP provider, it carries no runtime value.
 
 Unlike [`WithField`](with_field.md), this alias is not an alternative to a directly-wireable provider:
@@ -72,7 +74,7 @@ pub struct App {
 
 delegate_components! {
     App {
-                ConfigGetterComponent: WithFieldRef<Symbol!("config"), Config>,
+        ConfigGetterComponent: WithFieldRef<Symbol!("config"), Config>,
     }
 }
 
@@ -99,8 +101,8 @@ borrows as `T` through `AsRef`.** The stored type and the exposed type differ, a
 [`WithField`](with_field.md) nor an [`#[implicit]`](../attributes/implicit.md) argument can bridge them.
 
 The common borrowed-view getters need no `WithFieldRef`: a `-> &str` getter over a `String` field, a
-`-> &[T]` getter over a field implementing `AsRef<[T]>` such as a `Vec<u8>`, and an `Option<&T>` getter
-over an `Option<T>` field are all served by the plain [`UseField`](use_field.md) or
+`-> &[T]` getter over a field implementing `AsRef<[T]>` such as a `Vec<u8>`, and an `Option<&T>`
+getter over an `Option<T>` field are all served by the plain [`UseField`](use_field.md) or
 [`WithField`](with_field.md) through the getter macros' return-type shorthands. For a field returned
 as its own type, an `#[implicit]` argument is simpler still.
 
@@ -118,6 +120,21 @@ provider's foundational method, and [`UseFieldRef<Tag, Value>`](use_field_ref.md
 The `UseFieldRef` mechanism, including its mutable form, is documented on the
 [`UseFieldRef`](use_field_ref.md) page, and the generated `WithProvider` impl on the
 [`WithProvider`](with_provider.md) page.
+
+## Common Mistakes
+
+**`WithFieldRef` cannot serve a `-> &str` getter.** `Value` must be sized, and a `&str` return
+already makes the getter macros expect a `String` field, so `WithFieldRef<Symbol!("name"), str>` fails
+twice over:
+
+```text
+error[E0277]: the size for values of type `str` cannot be known at compilation time
+...
+error[E0271]: type mismatch resolving `<UseFieldRef<Symbol<4, Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>, str> as FieldGetter<Person, NameGetterComponent>>::Value == String`
+```
+
+Wire a `&str` getter over a `String` field to the plain [`UseField`](use_field.md), which borrows
+through `.as_str()`.
 
 ## Related constructs
 
