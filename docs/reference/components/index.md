@@ -1,6 +1,6 @@
 ---
 title: 'Component reference'
-description: 'The components CGP ships, grouped by job: the abstract error type and its raising and wrapping, abstract types, the handler family, and runtimes and runners.'
+description: 'The components CGP ships, grouped by job: the abstract error type, raising and wrapping errors, abstract types, the handler family, runtimes, and runners.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---

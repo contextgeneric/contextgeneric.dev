@@ -1,6 +1,6 @@
 ---
-title: 'HasErrorType — a context''s abstract error type'
-description: 'The component that gives a context one shared, abstract Error type, so fallible generic code never names a concrete error and the context chooses it by wiring.'
+title: 'HasErrorType — the context''s error type'
+description: 'The component that gives a context one abstract Error type, so fallible generic code never names a concrete error and the context chooses it by wiring.'
 sidebar_label: 'HasErrorType'
 sidebar_position: 1
 ---

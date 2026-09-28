@@ -1,6 +1,6 @@
 ---
 title: 'HasRuntime — borrow the context''s runtime'
-description: 'The getter component that borrows the runtime value a context stores, so effectful generic code reaches Tokio, a mock, or a test executor without naming it.'
+description: 'The getter component that borrows the runtime value a context stores, so effectful generic code reaches Tokio, a mock, or a test executor generically.'
 sidebar_label: 'HasRuntime'
 sidebar_position: 6
 ---

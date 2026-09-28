@@ -1,6 +1,6 @@
 ---
 title: 'HasRuntimeType — the abstract runtime type'
-description: 'The abstract-type component that declares the runtime type a context runs against, chosen per context by wiring, for code that names the type but not a value.'
+description: 'The abstract-type component that declares the runtime type a context runs against, chosen by wiring, for code that names the type but not a value.'
 sidebar_label: 'HasRuntimeType'
 sidebar_position: 7
 ---
