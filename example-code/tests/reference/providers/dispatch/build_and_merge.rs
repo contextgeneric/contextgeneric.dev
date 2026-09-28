@@ -1,77 +1,105 @@
 //! Code from `docs/reference/providers/dispatch/build_and_merge.md` — `BuildAndMerge`.
 //!
-//! Pins that `BuildAndMerge<Provider>` copies a whole sub-record's shared fields into the builder at
-//! once, beside a single-field `BuildAndSetField`, under `BuildWithHandlers`.
+//! Pins the Examples program: two `BuildAndMerge` steps copy the fields of two sub-records into one
+//! `App` builder, each sub-record built by a provider that reads its configuration from the context.
 
 /// ## Examples
 pub mod examples {
-    use core::marker::PhantomData;
-
-    use cgp::extra::dispatch::{BuildAndMerge, BuildAndSetField, BuildWithHandlers};
-    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::dispatch::{BuildAndMerge, BuildWithHandlers};
+    use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
-    pub struct FooBarBaz {
-        pub foo: u64,
-        pub bar: String,
-        pub baz: bool,
+    #[derive(Debug, PartialEq, CgpData)]
+    pub struct App {
+        pub db_url: String,
+        pub max_connections: u32,
+        pub user_agent: String,
     }
 
     #[derive(CgpData)]
-    pub struct FooBar {
-        pub foo: u64,
-        pub bar: String,
+    pub struct DatabaseConfig {
+        pub db_url: String,
+        pub max_connections: u32,
     }
 
-    #[cgp_producer]
-    fn build_foo_bar() -> FooBar {
-        FooBar {
-            foo: 1,
-            bar: "bar".to_owned(),
-        }
+    #[derive(HasField)]
+    pub struct AppBuilder {
+        pub db_path: String,
+        pub agent_name: String,
     }
 
-    #[cgp_producer(BuildBaz)]
-    fn build_baz() -> bool {
-        true
-    }
+    #[cgp_impl(new BuildDatabaseConfig)]
+    impl<Code, Input> Computer<Code, Input> {
+        type Output = DatabaseConfig;
 
-    // `BuildAndMerge<BuildFooBar>` copies `foo` and `bar`; `BuildAndSetField` sets `baz`.
-    pub type Handlers =
-        Product![BuildAndMerge<BuildFooBar>, BuildAndSetField<Symbol!("baz"), BuildBaz>];
-
-    pub struct App;
-
-    delegate_components! {
-        App {
-            ComputerComponent: BuildWithHandlers<FooBarBaz, Handlers>,
-        }
-    }
-
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: ((), ()),
+        fn compute(
+            &self,
+            _code: PhantomData<Code>,
+            _input: Input,
+            #[implicit] db_path: &str,
+        ) -> DatabaseConfig {
+            DatabaseConfig {
+                db_url: format!("sqlite://{db_path}"),
+                max_connections: 4,
             }
         }
     }
 
-    #[test]
-    fn test_build_and_merge() {
-        use cgp::extra::handler::CanCompute;
+    #[derive(CgpData)]
+    pub struct HttpConfig {
+        pub user_agent: String,
+    }
 
-        let app = App;
-        let code = PhantomData::<()>;
+    #[cgp_impl(new BuildHttpConfig)]
+    impl<Code, Input> Computer<Code, Input> {
+        type Output = HttpConfig;
+
+        fn compute(
+            &self,
+            _code: PhantomData<Code>,
+            _input: Input,
+            #[implicit] agent_name: &str,
+        ) -> HttpConfig {
+            HttpConfig {
+                user_agent: format!("{agent_name}/1.0"),
+            }
+        }
+    }
+
+    delegate_components! {
+        AppBuilder {
+            ComputerComponent:
+                BuildWithHandlers<App, Product![
+                    BuildAndMerge<BuildDatabaseConfig>,
+                    BuildAndMerge<BuildHttpConfig>,
+                ]>,
+        }
+    }
+
+    check_components! {
+        AppBuilder {
+            ComputerComponent: ((), ()),
+        }
+    }
+
+    pub fn demo() {
+        let builder = AppBuilder {
+            db_path: "app.db".to_owned(),
+            agent_name: "reader".to_owned(),
+        };
 
         assert_eq!(
-            app.compute(code, ()),
-            FooBarBaz {
-                foo: 1,
-                bar: "bar".to_owned(),
-                baz: true,
+            builder.compute(PhantomData::<()>, ()),
+            App {
+                db_url: "sqlite://app.db".to_owned(),
+                max_connections: 4,
+                user_agent: "reader/1.0".to_owned(),
             },
         );
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
     }
 }

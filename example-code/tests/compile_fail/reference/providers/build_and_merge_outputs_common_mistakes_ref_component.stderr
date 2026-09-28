@@ -1,0 +1,47 @@
+error[E0277]: the trait bound `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDatabaseConfig>, Cons<BuildAndMerge<BuildHttpConfig>, Nil>>>: IsProviderFor<cgp::prelude::ComputerRefComponent, AppBuilder, ((), ())>` is not satisfied
+  --> tests/compile_fail/reference/providers/build_and_merge_outputs_common_mistakes_ref_component.rs:46:9
+   |
+46 |         ComputerRefComponent: ((), ()),
+   |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+   = help: the trait `IsProviderFor<cgp::prelude::ComputerRefComponent, AppBuilder, ((), ())>` is not implemented for `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDatabaseConfig>, Cons<BuildAndMerge<BuildHttpConfig>, Nil>>>`
+help: `BuildWithHandlers<Output, Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/with_handlers/build_with_handlers.rs:10:1
+   |
+10 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Computer<Context, Code, Input>
+11 | |     for BuildWithHandlers<Output, Handlers>
+12 | | where
+13 | |     Output: HasBuilder<Builder = Builder>,
+14 | |     PipeHandlers<Handlers>: Computer<Context, Code, Builder, Output = Res>,
+15 | |     Res: FinalizeBuild<Target = Output>,
+   | |________________________________________^ `IsProviderFor<cgp::prelude::ComputerComponent, Context, (Code, Input)>`
+...
+25 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> TryComputer<Context, Code, Input>
+26 | |     for BuildWithHandlers<Output, Handlers>
+27 | | where
+28 | |     Context: HasErrorType,
+29 | |     Output: HasBuilder<Builder = Builder>,
+30 | |     PipeHandlers<Handlers>: TryComputer<Context, Code, Builder, Output = Res>,
+31 | |     Res: FinalizeBuild<Target = Output>,
+   | |________________________________________^ `IsProviderFor<cgp::prelude::TryComputerComponent, Context, (Code, Input)>`
+...
+45 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Handler<Context, Code, Input>
+46 | |     for BuildWithHandlers<Output, Handlers>
+47 | | where
+48 | |     Context: HasErrorType,
+49 | |     Output: HasBuilder<Builder = Builder>,
+50 | |     PipeHandlers<Handlers>: Handler<Context, Code, Builder, Output = Res>,
+51 | |     Res: FinalizeBuild<Target = Output>,
+   | |________________________________________^ `IsProviderFor<cgp::prelude::HandlerComponent, Context, (Code, Input)>`
+   = note: required for `BuildAndMergeOutputs<App, Cons<BuildDatabaseConfig, Cons<BuildHttpConfig, Nil>>>` to implement `IsProviderFor<cgp::prelude::ComputerRefComponent, AppBuilder, ((), ())>`
+   = note: required for `AppBuilder` to implement `CanUseComponent<cgp::prelude::ComputerRefComponent, ((), ())>`
+note: required by a bound in `__CheckAppBuilder`
+  --> tests/compile_fail/reference/providers/build_and_merge_outputs_common_mistakes_ref_component.rs:44:1
+   |
+44 | / check_components! {
+45 | |     AppBuilder {
+46 | |         ComputerRefComponent: ((), ()),
+47 | |     }
+48 | | }
+   | |_^ required by this bound in `__CheckAppBuilder`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

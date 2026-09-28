@@ -1,72 +1,84 @@
 //! Code from `docs/reference/providers/dispatch/downcast_and_handle.md` — `DowncastAndHandle`.
 //!
-//! Pins that `DowncastAndHandle<Inner, Provider>` matches a group of variants at once by narrowing to a
-//! smaller enum, beside a single-variant `ExtractFieldAndHandle`, inside one `MatchWithHandlers` list.
+//! Pins the Examples program: `DowncastAndHandle` narrows a `Shape` to the smaller `Quadrilateral`
+//! enum and hands both of its variants to one handler, beside a single-variant arm for `Circle`.
 
 /// ## Examples
 pub mod examples {
-    use core::marker::PhantomData;
-
     use cgp::extra::dispatch::{
         DowncastAndHandle, ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers,
     };
-    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
-    pub enum FooBarBaz {
-        Foo(u64),
-        Bar(String),
-        Baz(bool),
+    pub struct Circle {
+        pub radius: f64,
     }
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
-    pub enum FooBar {
-        Foo(u64),
-        Bar(String),
+    pub struct Square {
+        pub side: f64,
+    }
+
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    #[derive(CgpData)]
+    pub enum Shape {
+        Circle(Circle),
+        Square(Square),
+        Rectangle(Rectangle),
+    }
+
+    #[derive(CgpData)]
+    pub enum Quadrilateral {
+        Square(Square),
+        Rectangle(Rectangle),
     }
 
     #[cgp_computer]
-    fn show_foo_bar(input: FooBar) -> String {
-        format!("FooBar::{input:?}")
+    pub fn count_circle_corners(_circle: Circle) -> u32 {
+        0
     }
 
     #[cgp_computer]
-    fn show_baz(input: bool) -> String {
-        format!("Baz({input:?})")
+    pub fn count_quadrilateral_corners(_shape: Quadrilateral) -> u32 {
+        4
     }
-
-    // `Foo` and `Bar` are handled together by narrowing to `FooBar`; `Baz` is matched on its own.
-    pub type Computers = Product![
-        ExtractFieldAndHandle<Symbol!("Baz"), HandleFieldValue<ShowBaz>>,
-        DowncastAndHandle<FooBar, ShowFooBar>,
-    ];
 
     pub struct App;
 
     delegate_components! {
         App {
-            ComputerComponent: MatchWithHandlers<Computers>,
+            ComputerComponent:
+                MatchWithHandlers<Product![
+                    ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<CountCircleCorners>>,
+                    DowncastAndHandle<Quadrilateral, CountQuadrilateralCorners>,
+                ]>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: ((), FooBarBaz),
-            }
+    check_components! {
+        App {
+            ComputerComponent: ((), Shape),
         }
+    }
+
+    pub fn demo() {
+        let code = PhantomData::<()>;
+
+        assert_eq!(App.compute(code, Shape::Circle(Circle { radius: 1.0 })), 0);
+        assert_eq!(App.compute(code, Shape::Square(Square { side: 2.0 })), 4);
+        let rectangle = Shape::Rectangle(Rectangle {
+            width: 3.0,
+            height: 4.0,
+        });
+        assert_eq!(App.compute(code, rectangle), 4);
     }
 
     #[test]
-    fn test_downcast_and_handle() {
-        use cgp::extra::handler::CanCompute;
-
-        let app = App;
-        let code = PhantomData::<()>;
-
-        assert_eq!(app.compute(code, FooBarBaz::Foo(1)), "FooBar::Foo(1)");
-        assert_eq!(app.compute(code, FooBarBaz::Baz(true)), "Baz(true)");
+    fn test_demo() {
+        demo();
     }
 }

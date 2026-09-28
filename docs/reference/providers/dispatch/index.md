@@ -1,90 +1,101 @@
 ---
+description: 'The dispatch combinators: match an enum one variant at a time, and build a record one field at a time, with a handler per variant or field.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
 
 # Dispatch combinators
 
-The providers that route an extensible-data value (a record or a variant) to per-field or per-variant
-handlers, and assemble or finalize the result.
+The providers that route an extensible-data value (an enum or a record) to per-variant or per-field
+handlers: the matchers take an enum apart, and the builders assemble a record.
 
 ## Overview
 
-The dispatch combinators handle an arbitrary record or enum generically, where the set of fields or
-variants is not known at the call site and the handling logic for each one lives in a separate
-provider. A hand-written `match` names every variant in one place; these combinators instead drive the
-extractor and builder trait families to do the same work over a value whose shape is only known at the
-type level, dispatching each field or variant to a handler chosen by type. They run on a **context**,
-the type a method runs on, and are all [`Computer`](../../components/handler/computer.md)-family
-providers, several also [`Handler`](../../components/handler/handler.md) and
-[`TryComputer`](../../components/handler/try_computer.md) providers. Like every CGP provider, each is zero-sized.
+The dispatch combinators handle an enum or a record generically, where the logic for each variant
+or field lives in its own provider. A hand-written `match` names every variant in one place. These
+combinators drive the extractor and builder traits instead, trying one variant or filling one field
+at a time on a [**context**](/docs/reference/glossary#context), the type the implementation runs
+against, and they prove at compile time that every variant is matched or every field is set. Like
+every CGP provider, each is zero-sized: its type parameters ride in `PhantomData`.
 
-The combinators divide into two halves.
+The two halves implement different members of the handler family. The matchers and their adapters
+implement [`Computer`](../../components/handler/computer.md) and
+[`AsyncComputer`](../../components/handler/async_computer.md) only, so a fallible slot takes them
+through a [promotion](../handler/index.md). The builders implement `Computer`,
+[`TryComputer`](../../components/handler/try_computer.md), and
+[`Handler`](../../components/handler/handler.md), propagating a step's error in the fallible forms.
 
-The **matcher** half consumes a sum type. It tries each variant in turn, hands the matched payload to a
-handler, and proves the match exhaustive without a wildcard arm:
+The value matchers `MatchWithValueHandlers`, `MatchWithValueHandlersRef`,
+`MatchWithValueHandlersMut`, and their `MatchFirstWith…` counterparts are in the prelude. Every
+other name here is imported from `cgp::extra::dispatch`.
 
-- [`MatchWithHandlers`](match_with_handlers.md) runs a spelled-out list of per-variant handlers over an
-  owned input.
-- [`MatchFirstWithHandlers`](match_first_with_handlers.md) does the same for the multi-argument calling
-  convention, where the input carries extra arguments alongside the value.
+## The matchers
+
+A **matcher** consumes an enum. It tries each variant in turn, hands the matched payload to a
+handler, and needs no wildcard arm, because a variant with no handler is a compile error:
+
+- [`MatchWithHandlers`](match_with_handlers.md) runs a spelled-out list of per-variant handlers,
+  over an owned or a borrowed input.
+- [`MatchFirstWithHandlers`](match_first_with_handlers.md) does the same for an `(Input, Args)`
+  input, passing the extra arguments to every handler.
 - [`MatchWithValueHandlers`](match_with_value_handlers.md) and
-  [`MatchWithFieldHandlers`](match_with_field_handlers.md) build that list automatically from the input
-  type's own field list.
+  [`MatchWithFieldHandlers`](match_with_field_handlers.md) build that list from the enum's own
+  variants, passing each payload bare or tagged with its variant name.
 
-The per-variant list a matcher runs is normally a list of **adapters**, each trying one variant and
-forwarding the payload:
+The list a matcher runs is a list of **adapters**, each trying one variant or group:
 
-- [`ExtractFieldAndHandle`](extract_field_and_handle.md) extracts one variant and hands the payload,
-  still tagged, to an inner provider.
-- [`HandleFieldValue`](handle_field_value.md) strips the tag so the inner provider receives the bare
-  value.
-- [`DowncastAndHandle`](downcast_and_handle.md) matches a whole group of variants at once.
+- [`ExtractFieldAndHandle`](extract_field_and_handle.md) extracts one variant and hands its payload,
+  tagged, to an inner provider.
+- [`HandleFieldValue`](handle_field_value.md) strips the tag, so the inner provider receives the
+  bare payload.
+- [`DowncastAndHandle`](downcast_and_handle.md) narrows the input to a smaller enum and hands a
+  whole group of variants to one provider.
 
-The **builder** half produces a product type. It starts from an empty builder, runs a handler per field,
-and finalizes the fully-populated record:
+## The builders
 
+A **builder** produces a record. It starts from an empty
+[partial record](/docs/reference/glossary#partial-record), runs a step per field or group of
+fields, and finalizes the record once every field is set:
+
+- [`BuildWithHandlers`](build_with_handlers.md) runs a list of builder steps and finalizes.
 - [`BuildAndSetField`](build_and_set_field.md) computes and sets one field.
-- [`BuildAndMerge`](build_and_merge.md) copies a whole record's worth of fields in at once.
-- [`BuildWithHandlers`](build_with_handlers.md) is the entry point that runs a list of builder adapters
-  and finalizes.
-- [`BuildAndMergeOutputs`](build_and_merge_outputs.md) is the wrapper for a list of plain field-producing
-  providers.
+- [`BuildAndMerge`](build_and_merge.md) builds a sub-record and copies its fields in.
+- [`BuildAndMergeOutputs`](build_and_merge_outputs.md) takes a list of sub-record providers and adds
+  the merge step to each.
 
-Both halves are handler providers, so they compose with the [handler combinators](../handler/index.md),
-nest inside [`UseInputDelegate`](../handler/use_input_delegate.md), and can be wired into a context with
-[`delegate_components!`](../../macros/delegate_components.md). The matcher loop they share is
-`DispatchMatchers`, a type alias for [`PipeMonadic`](../monad/pipe_monadic.md) under the `OkMonadic`
-monad; it is an implementation detail rather than a construct a user names, and it is explained under
-the hood on [`MatchWithHandlers`](match_with_handlers.md).
+Both halves are handler providers, so they compose with the
+[handler combinators](../handler/index.md) and wire into a context with
+[`delegate_components!`](../../macros/delegate_components.md).
 
 ## Related constructs
 
-- [`#[cgp_auto_dispatch]`](../../macros/cgp_auto_dispatch.md) — generates a matcher-backed handler impl
-  automatically.
-- [`extract_field`](../../traits/variant/extract_field.md), [`has_extractor`](../../traits/variant/has_extractor.md),
-  [`finalize_extract`](../../traits/variant/finalize_extract.md) — the enum-deconstruction traits the matchers
-  stand on.
-- [`has_builder`](../../traits/builder/has_builder.md), [`build_field`](../../traits/builder/build_field.md),
-  [`finalize_build`](../../traits/builder/finalize_build.md) — the record-assembly traits the builders stand on.
-- [`UseInputDelegate`](../handler/use_input_delegate.md) — the input dispatcher the convenience matchers
-  use.
-- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — the derive that gives a type the shape these
-  operate over.
+- [`#[cgp_auto_dispatch]`](../../macros/cgp_auto_dispatch.md) — generates a matcher-backed trait
+  impl for an enum.
+- [`ExtractField`](../../traits/variant/extract_field.md),
+  [`HasExtractor`](../../traits/variant/has_extractor.md),
+  [`FinalizeExtract`](../../traits/variant/finalize_extract.md) — the enum-deconstruction traits the
+  matchers stand on.
+- [`HasBuilder`](../../traits/builder/has_builder.md),
+  [`BuildField`](../../traits/builder/build_field.md),
+  [`FinalizeBuild`](../../traits/builder/finalize_build.md) — the record-assembly traits the
+  builders stand on.
+- [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) — the derive that gives a type the shape
+  these operate over.
 
 The ideas behind it:
 
-- [Dispatching](/docs/concepts/dispatching) — routing an extensible-data value to per-field and
-  per-variant handlers.
-- [Extensible records](/docs/concepts/extensible-records) and
-  [Extensible variants](/docs/concepts/extensible-variants) — the data patterns the builders and matchers
-  serve.
+- [Dispatching](/docs/concepts/dispatching) — routing an extensible-data value to per-variant and
+  per-field handlers.
+- [Extensible variants](/docs/concepts/extensible-variants) and
+  [Extensible records](/docs/concepts/extensible-records) — the data patterns the matchers and
+  builders serve.
 
 ## Source
 
 - The provider structs are in `cgp-dispatch` under
-  [`providers/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-dispatch/src/providers).
-  The prelude re-exports the value-handler matchers; the rest are reached through `cgp::extra::dispatch`.
+  [`providers/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-dispatch/src/providers),
+  and the prelude re-exports the value matchers from
+  [`cgp-extra`](https://github.com/contextgeneric/cgp/blob/main/crates/main/cgp-extra/src/prelude.rs).
 
 ---
 

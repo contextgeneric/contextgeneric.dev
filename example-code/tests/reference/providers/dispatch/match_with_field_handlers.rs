@@ -1,72 +1,117 @@
 //! Code from `docs/reference/providers/dispatch/match_with_field_handlers.md` — `MatchWithFieldHandlers`.
+//!
+//! Pins the Examples program: one handler over `Field<Tag, Value>` reads the variant name from the
+//! tag, and the same wiring serves a second enum with no new arm.
 
-/// ## Usage and Examples
+/// ## Usage
 ///
-/// `MatchWithFieldHandlers` builds the per-variant list from the enum's fields like
-/// `MatchWithValueHandlers`, but hands each payload to the provider as a `Field<Tag, Value>` with the
-/// variant tag still attached. Here one handler over `Field<Tag, Value>` serves every variant, and the
-/// same wiring serves a wider enum with no new arm.
-pub mod matching_with_the_tag_attached {
-    use core::convert::Infallible;
+/// `MatchWithFieldHandlersRef` hands the provider a `Field<Tag, &Value>`, so the same generic
+/// provider serves a borrowed enum.
+pub mod usage {
     use core::fmt::Display;
 
-    use cgp::core::error::ErrorTypeProviderComponent;
-    use cgp::extra::dispatch::MatchWithFieldHandlers;
-    use cgp::extra::handler::ComputerComponent;
+    use cgp::core::field::traits::StaticString;
+    use cgp::extra::dispatch::MatchWithFieldHandlersRef;
+    use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
+    #[derive(CgpData)]
     pub enum Reading {
-        Temperature(u64),
+        Temperature(i32),
         Label(String),
     }
 
-    #[derive(Debug, Eq, PartialEq, CgpData)]
-    pub enum ExtendedReading {
-        Temperature(u64),
-        Label(String),
-        Flag(bool),
-    }
-
-    // The payload arrives as a `Field<Tag, Value>`, so the handler still has the variant tag.
     #[cgp_computer]
-    pub fn field_to_string<Tag, Value>(Field { value, .. }: Field<Tag, Value>) -> String
+    pub fn describe<Tag, Value>(field: Field<Tag, Value>) -> String
     where
+        Tag: StaticString,
         Value: Display,
     {
-        value.to_string()
+        format!("{}: {}", Tag::VALUE, field.value)
     }
 
     pub struct App;
 
     delegate_components! {
         App {
-            ErrorTypeProviderComponent: UseType<Infallible>,
-            ComputerComponent: MatchWithFieldHandlers<FieldToString>,
+            ComputerComponent: MatchWithFieldHandlersRef<Describe>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: [((), Reading), ((), ExtendedReading)],
-            }
+    check_components! {
+        App {
+            ComputerComponent: <'a> ((), &'a Reading),
         }
     }
 
     #[test]
-    fn one_handler_serves_every_variant_of_two_enums() {
-        use cgp::extra::handler::CanCompute;
+    fn the_borrowed_form_tags_a_borrowed_payload() {
+        let reading = Reading::Temperature(21);
 
-        let app = App;
+        assert_eq!(App.compute(PhantomData::<()>, &reading), "Temperature: 21");
+    }
+}
+
+/// ## Examples
+pub mod examples {
+    use core::fmt::Display;
+
+    use cgp::core::field::traits::StaticString;
+    use cgp::extra::dispatch::MatchWithFieldHandlers;
+    use cgp::extra::handler::CanCompute;
+    use cgp::prelude::*;
+
+    #[derive(CgpData)]
+    pub enum Reading {
+        Temperature(i32),
+        Label(String),
+    }
+
+    #[derive(CgpData)]
+    pub enum Event {
+        Started(u64),
+        Stopped(bool),
+    }
+
+    #[cgp_computer]
+    pub fn describe<Tag, Value>(field: Field<Tag, Value>) -> String
+    where
+        Tag: StaticString,
+        Value: Display,
+    {
+        format!("{}: {}", Tag::VALUE, field.value)
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerComponent: MatchWithFieldHandlers<Describe>,
+        }
+    }
+
+    check_components! {
+        App {
+            ComputerComponent: [((), Reading), ((), Event)],
+        }
+    }
+
+    pub fn demo() {
         let code = PhantomData::<()>;
 
-        assert_eq!(app.compute(code, Reading::Temperature(21)), "21");
         assert_eq!(
-            app.compute(code, Reading::Label("north".to_owned())),
-            "north"
+            App.compute(code, Reading::Temperature(21)),
+            "Temperature: 21"
         );
-        assert_eq!(app.compute(code, ExtendedReading::Flag(true)), "true");
+        assert_eq!(
+            App.compute(code, Reading::Label("north".to_owned())),
+            "Label: north"
+        );
+        assert_eq!(App.compute(code, Event::Stopped(true)), "Stopped: true");
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
     }
 }

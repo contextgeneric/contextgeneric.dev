@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `__PartialShape<IsVoid, IsPresent>: FinalizeExtract` is not satisfied
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:51:9
+   |
+51 |         ComputerComponent: ((), Shape),
+   |         ^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `FinalizeExtract` is not implemented for `__PartialShape<IsVoid, IsPresent>`
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:14:1
+   |
+14 | pub enum Shape {
+   | ^^^^^^^^^^^^^^
+help: the trait `FinalizeExtract` is implemented for `__PartialShape<IsVoid, IsVoid>`
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:14:10
+   |
+14 | pub enum Shape {
+   |          ^^^^^
+   = note: required for `MatchWithHandlers<Cons<ExtractFieldAndHandle<cgp::prelude::Symbol<6, cgp::prelude::Chars<'C', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeArea>>, Nil>>` to implement `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), Shape)>`
+   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerComponent, ((), Shape)>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:49:1
+   |
+49 | / check_components! {
+50 | |     App {
+51 | |         ComputerComponent: ((), Shape),
+52 | |     }
+53 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

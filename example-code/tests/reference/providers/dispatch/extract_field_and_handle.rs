@@ -1,23 +1,13 @@
 //! Code from `docs/reference/providers/dispatch/extract_field_and_handle.md` — `ExtractFieldAndHandle`.
+//!
+//! Pins the Examples program, which calls two adapters by hand to show the `Result` shape a matcher
+//! loop consumes: a hit returns `Ok` of the handler's output, and a miss returns the remainder, which
+//! the next adapter takes as its input.
 
-/// ## Usage and Examples
-///
-/// `ExtractFieldAndHandle<Tag, Provider>` is the per-variant adapter a matcher's list is built from. It
-/// tries to extract the variant named `Tag`; on success it hands the payload, still tagged, to
-/// `Provider`. Here each variant of `Shape` gets its own adapter, wrapped in `HandleFieldValue` so the
-/// handler receives the bare payload.
-pub mod one_adapter_per_variant {
-    use core::marker::PhantomData;
-
-    use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
-    use cgp::extra::handler::{Computer, ComputerComponent};
+/// ## Examples
+pub mod examples {
+    use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue};
     use cgp::prelude::*;
-
-    #[derive(CgpData)]
-    pub enum Shape {
-        Circle(Circle),
-        Rectangle(Rectangle),
-    }
 
     pub struct Circle {
         pub radius: f64,
@@ -26,6 +16,12 @@ pub mod one_adapter_per_variant {
     pub struct Rectangle {
         pub width: f64,
         pub height: f64,
+    }
+
+    #[derive(CgpData)]
+    pub enum Shape {
+        Circle(Circle),
+        Rectangle(Rectangle),
     }
 
     #[cgp_new_provider]
@@ -46,44 +42,36 @@ pub mod one_adapter_per_variant {
         }
     }
 
+    pub type CircleArm = ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<ComputeArea>>;
+    pub type RectangleArm =
+        ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<ComputeArea>>;
+
     pub struct App;
 
-    delegate_components! {
-        App {
-            ComputerComponent: MatchWithHandlers<
-                Product![
-                    ExtractFieldAndHandle<Symbol!("Circle"), HandleFieldValue<ComputeArea>>,
-                    ExtractFieldAndHandle<Symbol!("Rectangle"), HandleFieldValue<ComputeArea>>,
-                ]
-            >,
-        }
-    }
+    pub fn demo() {
+        let code = PhantomData::<()>;
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: ((), Shape),
+        // A hit: the circle arm extracts its variant and returns `Ok` of the area.
+        let circle = Shape::Circle(Circle { radius: 1.0 });
+        let hit = CircleArm::compute(&App, code, circle.to_extractor());
+        assert_eq!(hit.ok(), Some(core::f64::consts::PI));
+
+        // A miss: the circle arm hands back the remainder, which the rectangle arm takes.
+        let rectangle = Shape::Rectangle(Rectangle {
+            width: 3.0,
+            height: 4.0,
+        });
+        match CircleArm::compute(&App, code, rectangle.to_extractor()) {
+            Ok(_) => panic!("a rectangle is not a circle"),
+            Err(remainder) => {
+                let area = RectangleArm::compute(&App, code, remainder);
+                assert_eq!(area.ok(), Some(12.0));
             }
         }
     }
 
     #[test]
-    fn the_adapter_extracts_its_variant_and_forwards_the_payload() {
-        use cgp::extra::handler::CanCompute;
-
-        let app = App;
-        let code = PhantomData::<()>;
-
-        assert_eq!(
-            app.compute(
-                code,
-                Shape::Rectangle(Rectangle {
-                    width: 2.0,
-                    height: 5.0
-                })
-            ),
-            10.0,
-        );
+    fn test_demo() {
+        demo();
     }
 }

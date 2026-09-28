@@ -1,87 +1,161 @@
 //! Code from `docs/reference/providers/dispatch/match_first_with_handlers.md` — `MatchFirstWithHandlers`.
 //!
 //! Pins the multi-argument calling convention: the input is `(Input, Args)`, and each per-variant
-//! handler receives the matched payload together with the shared `Args`.
+//! handler receives the matched payload together with the shared `Args`, both through the explicit
+//! list and through the `MatchFirstWithValueHandlers` convenience alias.
 
 /// ## Examples
 pub mod examples {
-    use core::marker::PhantomData;
-
     use cgp::extra::dispatch::{
         ExtractFirstFieldAndHandle, HandleFirstFieldValue, MatchFirstWithHandlers,
     };
-    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
 
-    #[derive(Debug, PartialEq, CgpData)]
-    pub enum Shape {
-        Circle(Circle),
-        Rectangle(Rectangle),
-    }
-
-    #[derive(Debug, PartialEq)]
     pub struct Circle {
         pub radius: f64,
     }
 
-    #[derive(Debug, PartialEq)]
     pub struct Rectangle {
         pub width: f64,
         pub height: f64,
     }
 
-    pub trait Container {
-        fn contains(self, x: f64, y: f64) -> bool;
+    #[derive(CgpData)]
+    pub enum Shape {
+        Circle(Circle),
+        Rectangle(Rectangle),
     }
 
-    impl Container for Circle {
-        fn contains(self, _x: f64, _y: f64) -> bool {
-            true
+    #[cgp_new_provider]
+    impl<Context, Code> Computer<Context, Code, (Circle, f64)> for ScaledArea {
+        type Output = f64;
+
+        fn compute(
+            _context: &Context,
+            _code: PhantomData<Code>,
+            (circle, scale): (Circle, f64),
+        ) -> f64 {
+            core::f64::consts::PI * circle.radius * circle.radius * scale * scale
         }
     }
 
-    impl Container for Rectangle {
-        fn contains(self, _x: f64, _y: f64) -> bool {
-            true
+    #[cgp_provider]
+    impl<Context, Code> Computer<Context, Code, (Rectangle, f64)> for ScaledArea {
+        type Output = f64;
+
+        fn compute(
+            _context: &Context,
+            _code: PhantomData<Code>,
+            (rectangle, scale): (Rectangle, f64),
+        ) -> f64 {
+            rectangle.width * rectangle.height * scale * scale
         }
     }
-
-    // A computer that takes the payload plus the shared `(x, y)` argument.
-    #[cgp_computer]
-    fn contains<T: Container>(shape: T, (x, y): (f64, f64)) -> bool {
-        shape.contains(x, y)
-    }
-
-    pub type Handlers = Product![
-        ExtractFirstFieldAndHandle<Symbol!("Circle"), HandleFirstFieldValue<Contains>>,
-        ExtractFirstFieldAndHandle<Symbol!("Rectangle"), HandleFirstFieldValue<Contains>>,
-    ];
 
     pub struct App;
 
     delegate_components! {
         App {
-            ComputerComponent: MatchFirstWithHandlers<Handlers>,
+            ComputerComponent:
+                MatchFirstWithHandlers<Product![
+                    ExtractFirstFieldAndHandle<Symbol!("Circle"), HandleFirstFieldValue<ScaledArea>>,
+                    ExtractFirstFieldAndHandle<Symbol!("Rectangle"), HandleFirstFieldValue<ScaledArea>>,
+                ]>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: ((), (Shape, (f64, f64))),
-            }
+    check_components! {
+        App {
+            ComputerComponent: ((), (Shape, f64)),
+        }
+    }
+
+    pub fn demo() {
+        let code = PhantomData::<()>;
+        let rectangle = Shape::Rectangle(Rectangle {
+            width: 3.0,
+            height: 4.0,
+        });
+
+        assert_eq!(App.compute(code, (rectangle, 2.0)), 48.0); // 12 * 2 * 2
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
+    }
+}
+
+/// ## When to use it
+///
+/// `MatchFirstWithValueHandlers` builds the same list from the enum's variants.
+pub mod when_to_use_it {
+    use cgp::extra::handler::CanCompute;
+    use cgp::prelude::*;
+
+    pub struct Circle {
+        pub radius: f64,
+    }
+
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    #[derive(CgpData)]
+    pub enum Shape {
+        Circle(Circle),
+        Rectangle(Rectangle),
+    }
+
+    #[cgp_new_provider]
+    impl<Context, Code> Computer<Context, Code, (Circle, f64)> for ScaledArea {
+        type Output = f64;
+
+        fn compute(
+            _context: &Context,
+            _code: PhantomData<Code>,
+            (circle, scale): (Circle, f64),
+        ) -> f64 {
+            core::f64::consts::PI * circle.radius * circle.radius * scale * scale
+        }
+    }
+
+    #[cgp_provider]
+    impl<Context, Code> Computer<Context, Code, (Rectangle, f64)> for ScaledArea {
+        type Output = f64;
+
+        fn compute(
+            _context: &Context,
+            _code: PhantomData<Code>,
+            (rectangle, scale): (Rectangle, f64),
+        ) -> f64 {
+            rectangle.width * rectangle.height * scale * scale
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerComponent: MatchFirstWithValueHandlers<ScaledArea>,
+        }
+    }
+
+    check_components! {
+        App {
+            ComputerComponent: ((), (Shape, f64)),
         }
     }
 
     #[test]
-    fn test_match_first_with_handlers() {
-        use cgp::extra::handler::CanCompute;
+    fn the_alias_builds_the_same_list() {
+        let rectangle = Shape::Rectangle(Rectangle {
+            width: 3.0,
+            height: 4.0,
+        });
 
-        let app = App;
-        let code = PhantomData::<()>;
-        let circle = Shape::Circle(Circle { radius: 5.0 });
-
-        assert!(app.compute(code, (circle, (1.0, 2.0))));
+        assert_eq!(App.compute(PhantomData::<()>, (rectangle, 2.0)), 48.0);
     }
 }
