@@ -29,11 +29,15 @@ pub mod usage {
         raw.parse().map_err(|_| format!("bad port: {raw}"))
     }
 
-    #[test]
-    fn test_error_only_supplies_an_error_type() {
+    pub fn demo() {
         let context = ErrorOnly::<String>::default();
         assert_eq!(parse_port(&context, "80"), Ok(80));
         assert_eq!(parse_port(&context, "x"), Err("bad port: x".to_owned()));
+    }
+
+    #[test]
+    fn test_error_only_supplies_an_error_type() {
+        demo();
         assert_eq!(core::mem::size_of::<ErrorOnly<String>>(), 0);
     }
 }

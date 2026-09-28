@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'The complete reference for every CGP construct, grouped by the job it does, with the handful a newcomer needs first and a lookup table for names without a page.'
+description: 'The complete reference for every CGP construct, grouped by job, with the constructs a newcomer needs first and a lookup table for names without a page.'
 ---
 
 # Reference
@@ -81,7 +81,9 @@ where a chained `get_field` would need a lifetime bound on the field's type.
 Getter traits are the sparing alternative, for the cases an implicit argument cannot reach.
 [`#[cgp_auto_getter]`](./macros/cgp_auto_getter.md) generates one from the method name;
 [`#[cgp_getter]`](./macros/cgp_getter.md) makes the getter a full component so the field it reads is
-chosen by wiring, through [`UseField` and its siblings](./providers/use_field.md).
+chosen by wiring, through [`UseField`](./providers/use_field.md), its borrowing form
+[`UseFieldRef`](./providers/use_field_ref.md), or [`UseFields`](./providers/use_fields.md), which
+reads the field named after each method.
 [`ChainGetters`](./providers/chain_getters.md) reaches a field on a nested context, and
 [`MRef`](./types/mref.md) is the return type of a getter that may lend or produce its value.
 
@@ -107,7 +109,10 @@ names such a type by importing it with [`#[use_type]`](./attributes/use_type.md)
 different thing from the `UseType` provider despite the shared name. Beside the named components
 sits [`HasType`](./components/has_type.md), CGP's tag-indexed abstract-type component, and
 [`WithProvider`](./providers/with_provider.md) is the adapter that lets a foundational provider
-stand in as a named component's.
+stand in as a named component's, usually written through one of its aliases:
+[`WithType`](./providers/with_type.md), [`WithField`](./providers/with_field.md),
+[`WithFieldRef`](./providers/with_field_ref.md), [`WithContext`](./providers/with_context.md), and
+[`WithDelegatedType`](./providers/with_delegated_type.md).
 
 ### Handle errors
 

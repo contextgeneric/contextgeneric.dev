@@ -554,8 +554,8 @@ error: ambiguous associated item
 and its notes say the name "could refer to the variant defined here" or "could also refer to the
 associated type defined here". Under [`#[derive(ExtractField)]`](./derives/derive_extract_field.md)
 both notes point at the derive attribute, so nothing names the variant to rename. The seven reserved
-names are listed on that page and on [`#[derive(HasFields)]`](./derives/derive_has_fields.md) and
-[`#[derive(FromVariant)]`](./derives/derive_from_variant.md). Rename the variant.
+names are listed on [`#[derive(CgpVariant)]`](./derives/derive_cgp_variant.md#common-mistakes), and
+each derive's own page names the ones it reserves. Rename the variant.
 
 ### A field-type shorthand without a rule
 

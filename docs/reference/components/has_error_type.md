@@ -92,6 +92,7 @@ fallible function that reads nothing from its context:
 
 ```rust
 use cgp::core::error::{ErrorOf, ErrorOnly};
+use cgp::prelude::*;
 
 pub fn parse_port<Context: HasErrorType<Error = String>>(
     _context: &Context,
@@ -100,8 +101,11 @@ pub fn parse_port<Context: HasErrorType<Error = String>>(
     raw.parse().map_err(|_| format!("bad port: {raw}"))
 }
 
-let context = ErrorOnly::<String>::default();
-assert_eq!(parse_port(&context, "80"), Ok(80));
+pub fn demo() {
+    let context = ErrorOnly::<String>::default();
+    assert_eq!(parse_port(&context, "80"), Ok(80));
+    assert_eq!(parse_port(&context, "x"), Err("bad port: x".to_owned()));
+}
 ```
 
 ## Examples
