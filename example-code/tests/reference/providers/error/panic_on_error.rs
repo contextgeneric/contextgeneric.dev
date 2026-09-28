@@ -1,11 +1,10 @@
 //! Code from `docs/reference/providers/error/panic_on_error.md` — `PanicOnError`.
+//!
+//! Pins the Examples program: a raise on `TestApp` panics with the source's `Debug` output. The
+//! `#[should_panic]` test is what pins that behavior.
 
-/// ## Usage and Examples
-///
-/// `PanicOnError` raises by panicking with the source error's `Debug` output rather than returning
-/// an error value. It suits a context that treats an error as a fault to abort on, such as a test
-/// harness. The `#[should_panic]` test is what pins that behavior.
-pub mod aborting_on_error {
+/// ## Examples
+pub mod examples {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::PanicOnError;
     use cgp::prelude::*;
@@ -35,14 +34,19 @@ pub mod aborting_on_error {
         }
     }
 
-    mod check_test_app {
-        use super::*;
-        check_components! { TestApp { RunnerComponent } }
+    check_components! {
+        TestApp {
+            RunnerComponent,
+        }
+    }
+
+    pub fn demo() {
+        let _ = TestApp.run(); // panics with "\"unrecoverable\""
     }
 
     #[test]
-    #[should_panic]
-    fn raising_aborts_the_program() {
-        let _ = TestApp.run();
+    #[should_panic(expected = "\"unrecoverable\"")]
+    fn test_demo() {
+        demo();
     }
 }

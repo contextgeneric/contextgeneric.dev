@@ -1,12 +1,11 @@
 //! Code from `docs/reference/providers/error/raise_infallible.md` — `RaiseInfallible`.
+//!
+//! Pins the Examples program: a provider raises an `Infallible` error uniformly, and the context fills
+//! that raiser slot with `RaiseInfallible`. The value is never constructed, so the raise path is wired
+//! but never taken.
 
-/// ## Usage and Examples
-///
-/// `RaiseInfallible` fills the raiser slot for `core::convert::Infallible` on a context whose
-/// operation cannot fail. The `Infallible` value is never constructed, so the raise path is wired
-/// but never taken at run time; `check_components!` is what proves the wiring resolves. A second
-/// source, a `String`, uses `RaiseFrom` beside it.
-pub mod absorbing_an_impossible_error {
+/// ## Examples
+pub mod examples {
     use core::convert::Infallible;
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
@@ -24,8 +23,7 @@ pub mod absorbing_an_impossible_error {
     #[use_type(HasErrorType.Error)]
     impl Runner {
         fn run(&self) -> Result<(), Error> {
-            // A step that cannot fail. Its `Infallible` error is raised uniformly, which lets this
-            // provider be wired the same way as one whose step can fail.
+            // A step that cannot fail, raised the same way a fallible step would be.
             let outcome: Result<(), Infallible> = Ok(());
             outcome.map_err(Self::raise_error)?;
             Ok(())
@@ -46,13 +44,18 @@ pub mod absorbing_an_impossible_error {
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! { App { RunnerComponent } }
+    check_components! {
+        App {
+            RunnerComponent,
+        }
+    }
+
+    pub fn demo() {
+        assert_eq!(App.run(), Ok(()));
     }
 
     #[test]
-    fn the_infallible_step_runs() {
-        assert_eq!(App.run(), Ok(()));
+    fn test_demo() {
+        demo();
     }
 }

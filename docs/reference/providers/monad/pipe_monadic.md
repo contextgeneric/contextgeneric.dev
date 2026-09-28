@@ -1,4 +1,6 @@
 ---
+title: 'PipeMonadic — a short-circuiting pipeline'
+description: 'The provider that composes a Product! list of handlers under a monad marker, so each step runs only on the previous step''s continue case.'
 sidebar_label: 'PipeMonadic'
 sidebar_position: 1
 ---
@@ -11,10 +13,11 @@ branch.
 ## Overview
 
 `PipeMonadic<M, Providers>` composes a handler list `Providers` under a monad `M` into one
-short-circuiting handler, on a **context**, the type a method runs on. Each step runs only on
-the previous step's continue branch, and the monad decides which branch that is. The result is a
-provider for `Computer`, `AsyncComputer`, `TryComputer`, and `Handler`, so it wires like any other
-handler. Like every CGP provider, it carries no runtime value; `M` and the list ride in `PhantomData`.
+short-circuiting handler, on a [**context**](/docs/reference/glossary#context), the type the
+implementation runs against. Each step runs only on the previous step's continue branch, and the
+monad decides which branch that is. The result is a provider for `Computer`, `AsyncComputer`,
+`TryComputer`, and `Handler`, so it wires like any other handler. Like every CGP provider, it
+carries no runtime value; `M` and the list ride in `PhantomData`.
 
 ## Usage
 
@@ -40,25 +43,107 @@ there is worth re-reading, since `ErrMonadic` is the `?`-style monad.
 
 ## Examples
 
-Composing a homogeneous list under a base monad. With an `Increment` computer that returns
-`Result<u8, &str>`, `Ok` on success and `Err("overflow")` on overflow, three under `ErrMonadic` chain on
-the `Ok` value and stop at the first error:
+A pipeline of three fallible computers, wired under `ErrMonadic` and called through the consumer
+trait:
 
 ```rust
-PipeMonadic::<ErrMonadic, Product![Increment, Increment, Increment]>::compute(&context, code, 253)
-// 253 -> Ok(254) -> Ok(255) -> Err("overflow")
+use cgp::prelude::*;
+use cgp::extra::handler::CanCompute;
+use cgp::extra::monad::monadic::err::ErrMonadic;
+use cgp::extra::monad::providers::PipeMonadic;
+
+#[cgp_computer]
+pub fn increment(value: u8) -> Result<u8, &'static str> {
+    value.checked_add(1).ok_or("overflow")
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ComputerComponent: PipeMonadic<ErrMonadic, Product![Increment, Increment, Increment]>,
+    }
+}
+
+check_components! {
+    App {
+        ComputerComponent: ((), u8),
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.compute(PhantomData::<()>, 1), Ok(4));
+    // 253 -> Ok(254) -> Ok(255) -> Err("overflow")
+    assert_eq!(App.compute(PhantomData::<()>, 253), Err("overflow"));
+}
 ```
 
-Stacking monads handles nested results. Composing handlers that return `Result<Result<(), u8>, &str>`
-under `OkMonadicTrans<ErrMonadic>` stops on an outer `Err` or an inner `Ok`: the err monad handles the
-outer `Result` and the ok layer the one inside it. The same list composed under `OkMonadic` can be
-driven through the fallible
-`try_compute` and async `handle` entry points, because `PipeMonadic` implements `TryComputer` and
-`Handler` as well:
+Each `Increment` returns `Result<u8, &str>`, and under `ErrMonadic` each step runs on the previous
+step's `Ok` value, so the first overflow becomes the pipeline's output and the remaining steps do not
+run. `App` is an [environmental context](/docs/reference/glossary#environmental-context), and
+`Increment` comes from [`#[cgp_computer]`](../../macros/cgp_computer.md).
+
+Stacking monads handles nested results. These handlers return `Result<Result<(), u8>, &str>`, and
+under `OkMonadicTrans<ErrMonadic>` the err monad handles the outer `Result` while the ok layer handles
+the one inside it, so the pipeline stops on an outer `Err` or an inner `Ok`:
 
 ```rust
-PipeMonadic::<OkMonadic, Product![ReturnOkErr, ReturnOkOk, ReturnOkErr]>::try_compute(&context, code, 1)
+use cgp::prelude::*;
+use cgp::core::error::ErrorTypeProviderComponent;
+use cgp::extra::monad::monadic::err::ErrMonadic;
+use cgp::extra::monad::monadic::ok::{OkMonadic, OkMonadicTrans};
+use cgp::extra::monad::providers::PipeMonadic;
+
+#[cgp_computer]
+pub fn return_ok_ok(_value: u8) -> Result<Result<(), u8>, &'static str> {
+    Ok(Ok(()))
+}
+
+#[cgp_computer]
+pub fn return_ok_err(value: u8) -> Result<Result<(), u8>, &'static str> {
+    Ok(Err(value))
+}
+
+#[cgp_computer]
+pub fn return_err(_value: u8) -> Result<Result<(), u8>, &'static str> {
+    Err("error")
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ErrorTypeProviderComponent: UseType<&'static str>,
+    }
+}
+
+pub fn demo() {
+    let code = PhantomData::<()>;
+
+    // An inner `Ok` stops the pipeline; the last step never runs.
+    assert_eq!(
+        PipeMonadic::<OkMonadicTrans<ErrMonadic>, Product![ReturnOkErr, ReturnOkOk, ReturnOkErr]>::compute(&App, code, 1),
+        Ok(Ok(())),
+    );
+
+    // An outer `Err` stops it too.
+    assert_eq!(
+        PipeMonadic::<OkMonadicTrans<ErrMonadic>, Product![ReturnErr, ReturnOkOk, ReturnOkErr]>::compute(&App, code, 1),
+        Err("error"),
+    );
+
+    // Through the fallible bridge, plain `OkMonadic` behaves the same way.
+    assert_eq!(
+        PipeMonadic::<OkMonadic, Product![ReturnOkErr, ReturnOkOk, ReturnOkErr]>::try_compute(&App, code, 1),
+        Ok(Ok(())),
+    );
+}
 ```
+
+The pipelines are called on the provider directly, through the `Computer` and `TryComputer` provider
+traits the prelude supplies, rather than wired. The last call goes through `try_compute`, where
+`PipeMonadic` stacks `OkMonadic` over `ErrMonadic` itself and takes the context's error, here
+`&'static str`, from the outer `Result`; that is why `App` wires an error type.
 
 ## When to use it
 
@@ -77,8 +162,11 @@ pub struct PipeMonadic<M, Providers>(pub PhantomData<(M, Providers)>);
 ```
 
 It implements `ComputerComponent` and `AsyncComputerComponent` by folding the list: an internal
-`BindProviders<M>` computation walks the list so the first provider runs on the input and its result is
-bound, through the monad, to the monadically-composed rest of the list.
+`BindProviders<M>` computation walks the list so the first provider runs on the input and its result
+is bound, through the monad, to the monadically-composed rest of the list. For `[A, B, C]` the
+result is `ComposeHandlers<A, Bind<ComposeHandlers<B, Bind<C>>>>`, where `Bind<P>` is the bind step
+the monad produces, such as `BindErr<IdentMonadic, P>` for `ErrMonadic`. A one-element list is its
+only provider, and an empty list builds nothing.
 
 For the fallible components `TryComputerComponent` and `HandlerComponent`, it bridges through the err
 monad. It first maps every provider to [`TryPromote`](../handler/try_promote.md), demoting fallible

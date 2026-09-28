@@ -1,4 +1,6 @@
 ---
+title: 'RaiseFrom — raise an error through From'
+description: 'The error raiser that converts a source error into the context''s error type with From, so one wiring covers every source that error can absorb.'
 sidebar_label: 'RaiseFrom'
 sidebar_position: 1
 ---
@@ -9,19 +11,20 @@ Raise a source error by converting it into the context's error type through the 
 
 ## Overview
 
-`RaiseFrom` is the `ErrorRaiser` provider for the common case: the **context**, the type a method
-runs on, already knows how to build its abstract `Error` from the source error through `From`.
-Wiring it means "convert every source error the abstract error has a `From` impl for". It is the default
-choice whenever that `From` impl exists, which covers most error raising in practice.
+`RaiseFrom` is the `ErrorRaiser` provider for the common case: the abstract error of the
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, already
+knows how to build itself from the source error through `From`. Wiring it means "convert every source
+error the abstract error has a `From` impl for". It is the default choice whenever that `From` impl
+exists, which covers most error raising in practice.
 
-Because the bound is on the abstract error rather than on one source type, a single wiring of `RaiseFrom`
-covers every source error the context's error can absorb. Like every CGP provider, `RaiseFrom` carries
-no runtime value.
+Because the bound is on the abstract error rather than on one source type, a single wiring of
+`RaiseFrom` covers every source error the context's error can absorb. Like every CGP provider,
+`RaiseFrom` carries no runtime value.
 
 ## Usage
 
 Import the provider from `cgp::extra::error` and the wiring key `ErrorRaiserComponent` from
-`cgp::core::error`. It takes no type parameter:
+`cgp::core::error`; neither is in the prelude. It takes no type parameter:
 
 ```rust
 use cgp::core::error::ErrorRaiserComponent;
@@ -35,35 +38,97 @@ delegate_components! {
 ```
 
 Wired this way, any provider that calls `Context::raise_error(source)` on `App` succeeds for every
-`source` whose type the `App` error implements `From` for.
+`source` whose type the `App` error implements `From` for. A context whose error cannot absorb every
+source wires `RaiseFrom` per source type instead, with the `open` statement, beside other raisers
+such as [`DebugError`](debug_error.md).
 
 ## Examples
 
-`RaiseFrom` is most often one entry in a per-source dispatch table, alongside the formatting providers
-for the source types the error cannot absorb directly. Here a raised `String` is converted straight
-into the abstract error, while a `ParseIntError` is formatted first:
+One `RaiseFrom` entry raises two different source types, each through its own `From` impl on the
+context's `AppError`:
 
 ```rust
-use cgp::core::error::ErrorRaiserComponent;
-use cgp::extra::error::{DebugError, RaiseFrom};
+use core::num::ParseIntError;
+use cgp::prelude::*;
+use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
+use cgp::extra::error::RaiseFrom;
+
+#[derive(Debug, PartialEq)]
+pub enum AppError {
+    Parse(ParseIntError),
+    Message(String),
+}
+
+impl From<ParseIntError> for AppError {
+    fn from(e: ParseIntError) -> Self {
+        AppError::Parse(e)
+    }
+}
+
+impl From<String> for AppError {
+    fn from(message: String) -> Self {
+        AppError::Message(message)
+    }
+}
+
+#[cgp_component(PortParser)]
+#[use_type(HasErrorType.Error)]
+pub trait CanParsePort {
+    fn parse_port(&self, raw: &str) -> Result<u16, Error>;
+}
+
+#[cgp_impl(new ParsePort)]
+#[uses(CanRaiseError<ParseIntError>, CanRaiseError<String>)]
+#[use_type(HasErrorType.Error)]
+impl PortParser {
+    fn parse_port(&self, raw: &str) -> Result<u16, Error> {
+        let port: u16 = raw.parse().map_err(Self::raise_error)?;
+
+        if port == 0 {
+            return Err(Self::raise_error("port 0 is reserved".to_owned()));
+        }
+
+        Ok(port)
+    }
+}
+
+pub struct App;
 
 delegate_components! {
     App {
-        open ErrorRaiserComponent;
-
-        @ErrorRaiserComponent.String: RaiseFrom,
-        @ErrorRaiserComponent.ParseIntError: DebugError,
+        ErrorTypeProviderComponent: UseType<AppError>,
+        ErrorRaiserComponent: RaiseFrom,
+        PortParserComponent: ParsePort,
     }
+}
+
+check_components! {
+    App {
+        PortParserComponent,
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.parse_port("8080"), Ok(8080));
+    assert_eq!(
+        App.parse_port("0"),
+        Err(AppError::Message("port 0 is reserved".to_owned()))
+    );
+    assert!(matches!(App.parse_port("http"), Err(AppError::Parse(_))));
 }
 ```
 
-[`DebugError`](debug_error.md) formats the `ParseIntError` into a `String` and forwards it back through the
-`String` entry, which `RaiseFrom` handles.
+`ParsePort` names neither the context nor its error type; it raises a `ParseIntError` and a `String`
+and leaves the conversion to the context. `App` is an
+[environmental context](/docs/reference/glossary#environmental-context) that sets its error to
+`AppError` and wires `RaiseFrom` once, which converts both sources through `AppError`'s two `From`
+impls.
 
 ## When to use it
 
-**Reach for `RaiseFrom` whenever the abstract error already has a `From` impl for the source.** It is the
-plainest raiser and the one to try first.
+**Reach for `RaiseFrom` whenever the abstract error already has a `From` impl for the source.** It is
+the plainest raiser and the one to try first, and it keeps the source as a value rather than
+flattening it to a string.
 
 Reach for [`ReturnError`](return_error.md) instead when the source *is* the abstract error, for
 [`RaiseInfallible`](raise_infallible.md) when the source is `Infallible`, and for
@@ -91,6 +156,22 @@ The bound `Context::Error: From<E>` makes one wiring cover many source types. Th
 [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same clause, so a
 [check](../../macros/check_components.md) reports a missing `From` impl at the wiring site.
 
+## Common Mistakes
+
+**`RaiseFrom` accepts only sources the error has a `From` impl for.** Wiring
+`ErrorRaiserComponent: RaiseFrom` on a context whose error is `String` and raising a `ParseIntError`
+fails at the check, since `String` has no `From<ParseIntError>`:
+
+```text
+error[E0277]: the trait bound `RaiseFrom: ErrorRaiser<App, ParseIntError>` is not satisfied
+...
+error[E0277]: the trait bound `String: From<ParseIntError>` is not satisfied
+```
+
+Add the `From` impl to an error type you own, or route that source to [`DebugError`](debug_error.md)
+or [`DisplayError`](display_error.md) with the `open` statement, keeping `RaiseFrom` for the
+`String` key.
+
 ## Related constructs
 
 - [`CanRaiseError`](../../components/can_raise_error.md) — the component `RaiseFrom` supplies, through
@@ -98,7 +179,8 @@ The bound `Context::Error: From<E>` makes one wiring cover many source types. Th
 - [`ReturnError`](return_error.md), [`RaiseInfallible`](raise_infallible.md) — the other pure raisers.
 - [`DebugError`](debug_error.md), [`DisplayError`](display_error.md) — format a non-convertible source
   into a `String` that `RaiseFrom` can then convert.
-- [`UseDelegate`](../use_delegate.md) — dispatches `RaiseFrom` per source-error type.
+- [`delegate_components!`](../../macros/delegate_components.md) — its `open` statement dispatches
+  raisers per source type.
 
 The ideas behind it:
 

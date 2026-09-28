@@ -1,14 +1,11 @@
 //! Code from `docs/reference/providers/error/discard_detail.md` — `DiscardDetail`.
+//!
+//! Pins the Examples program: an error is raised, wrapped with a detail string, and the wrapper
+//! `DiscardDetail` drops the detail so the base error propagates unchanged.
 
-/// ## Usage and Examples
-///
-/// `DiscardDetail` satisfies the wrapping trait by returning the error and dropping the detail.
-/// Here a base error is raised and then wrapped with a detail string; because the wrapper is
-/// `DiscardDetail`, the detail is discarded and the base error propagates unchanged.
-pub mod wrapping_by_discarding {
-    use cgp::core::error::{
-        ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapperComponent,
-    };
+/// ## Examples
+pub mod examples {
+    use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapperComponent};
     use cgp::extra::error::{DiscardDetail, RaiseFrom};
     use cgp::prelude::*;
 
@@ -18,14 +15,13 @@ pub mod wrapping_by_discarding {
         fn load(&self) -> Result<(), Error>;
     }
 
-    #[cgp_impl(new LoadWithContext)]
+    #[cgp_impl(new LoadConfig)]
     #[uses(CanRaiseError<String>, CanWrapError<String>)]
     #[use_type(HasErrorType.Error)]
     impl Loader {
         fn load(&self) -> Result<(), Error> {
-            let base = Self::raise_error("disk offline".to_owned());
-            // The detail is attached here, but the wrapper is free to drop it.
-            Err(Self::wrap_error(base, "while loading config".to_owned()))
+            let error = Self::raise_error("disk offline".to_owned());
+            Err(Self::wrap_error(error, "while loading config".to_owned()))
         }
     }
 
@@ -33,23 +29,25 @@ pub mod wrapping_by_discarding {
 
     delegate_components! {
         App {
-            open ErrorRaiserComponent;
-
             ErrorTypeProviderComponent: UseType<String>,
+            ErrorRaiserComponent: RaiseFrom,
             ErrorWrapperComponent: DiscardDetail,
-            LoaderComponent: LoadWithContext,
-
-            @ErrorRaiserComponent.String: RaiseFrom,
+            LoaderComponent: LoadConfig,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! { App { LoaderComponent } }
+    check_components! {
+        App {
+            LoaderComponent,
+        }
+    }
+
+    pub fn demo() {
+        assert_eq!(App.load(), Err("disk offline".to_owned()));
     }
 
     #[test]
-    fn the_detail_is_dropped_and_the_error_is_unchanged() {
-        assert_eq!(App.load().unwrap_err(), "disk offline");
+    fn test_demo() {
+        demo();
     }
 }

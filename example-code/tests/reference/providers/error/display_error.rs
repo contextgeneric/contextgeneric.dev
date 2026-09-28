@@ -1,29 +1,29 @@
 //! Code from `docs/reference/providers/error/display_error.md` — `DisplayError`.
+//!
+//! Pins the Examples program: a `ParseIntError` is formatted with `Display` and forwarded to the
+//! `String` entry, which `RaiseFrom` converts. The `String` key wired to `DisplayError` itself,
+//! from Common Mistakes, is a trybuild fixture.
 
-/// ## Usage and Examples
-///
-/// `DisplayError` formats a `Display` source into a `String` through `to_string()` and forwards it
-/// to the context's `String` route. A `String` entry must be present for it to forward to.
-pub mod formatting_through_display {
+/// ## Examples
+pub mod examples {
     use core::num::ParseIntError;
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::{DisplayError, RaiseFrom};
     use cgp::prelude::*;
 
-    #[cgp_component(Parser)]
+    #[cgp_component(PortParser)]
     #[use_type(HasErrorType.Error)]
-    pub trait CanParse {
-        fn parse(&self, raw: &str) -> Result<u32, Error>;
+    pub trait CanParsePort {
+        fn parse_port(&self, raw: &str) -> Result<u16, Error>;
     }
 
-    #[cgp_impl(new ParseNumber)]
+    #[cgp_impl(new ParsePort)]
     #[uses(CanRaiseError<ParseIntError>)]
     #[use_type(HasErrorType.Error)]
-    impl Parser {
-        fn parse(&self, raw: &str) -> Result<u32, Error> {
-            let parsed = raw.parse().map_err(Self::raise_error)?;
-            Ok(parsed)
+    impl PortParser {
+        fn parse_port(&self, raw: &str) -> Result<u16, Error> {
+            raw.parse().map_err(Self::raise_error)
         }
     }
 
@@ -34,25 +34,29 @@ pub mod formatting_through_display {
             open ErrorRaiserComponent;
 
             ErrorTypeProviderComponent: UseType<String>,
-            ParserComponent: ParseNumber,
+            PortParserComponent: ParsePort,
 
             @ErrorRaiserComponent.String: RaiseFrom,
             @ErrorRaiserComponent.ParseIntError: DisplayError,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! { App { ParserComponent } }
+    check_components! {
+        App {
+            PortParserComponent,
+        }
+    }
+
+    pub fn demo() {
+        assert_eq!(App.parse_port("8080"), Ok(8080));
+        assert_eq!(
+            App.parse_port("http"),
+            Err("invalid digit found in string".to_owned())
+        );
     }
 
     #[test]
-    fn a_parse_error_is_carried_as_its_display_message() {
-        assert_eq!(App.parse("42").unwrap(), 42);
-        // The `Display` of `ParseIntError` reads "invalid digit found in string".
-        assert_eq!(
-            App.parse("nope").unwrap_err(),
-            "invalid digit found in string"
-        );
+    fn test_demo() {
+        demo();
     }
 }

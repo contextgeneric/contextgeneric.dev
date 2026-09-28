@@ -1,30 +1,29 @@
 //! Code from `docs/reference/providers/error/debug_error.md` — `DebugError`.
+//!
+//! Pins the Examples program: a `ParseIntError` is formatted with `Debug` and forwarded to the
+//! `String` entry, which `RaiseFrom` converts. The `String` key wired to `DebugError` itself,
+//! from Common Mistakes, is a trybuild fixture.
 
-/// ## Usage and Examples
-///
-/// `DebugError` formats a `Debug` source into a `String` and forwards it to the context's own
-/// `String` route, which `RaiseFrom` converts. A `String` entry must be present for it to forward
-/// to.
-pub mod formatting_through_debug {
+/// ## Examples
+pub mod examples {
     use core::num::ParseIntError;
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::{DebugError, RaiseFrom};
     use cgp::prelude::*;
 
-    #[cgp_component(Parser)]
+    #[cgp_component(PortParser)]
     #[use_type(HasErrorType.Error)]
-    pub trait CanParse {
-        fn parse(&self, raw: &str) -> Result<u32, Error>;
+    pub trait CanParsePort {
+        fn parse_port(&self, raw: &str) -> Result<u16, Error>;
     }
 
-    #[cgp_impl(new ParseNumber)]
+    #[cgp_impl(new ParsePort)]
     #[uses(CanRaiseError<ParseIntError>)]
     #[use_type(HasErrorType.Error)]
-    impl Parser {
-        fn parse(&self, raw: &str) -> Result<u32, Error> {
-            let parsed = raw.parse().map_err(Self::raise_error)?;
-            Ok(parsed)
+    impl PortParser {
+        fn parse_port(&self, raw: &str) -> Result<u16, Error> {
+            raw.parse().map_err(Self::raise_error)
         }
     }
 
@@ -35,21 +34,29 @@ pub mod formatting_through_debug {
             open ErrorRaiserComponent;
 
             ErrorTypeProviderComponent: UseType<String>,
-            ParserComponent: ParseNumber,
+            PortParserComponent: ParsePort,
 
             @ErrorRaiserComponent.String: RaiseFrom,
             @ErrorRaiserComponent.ParseIntError: DebugError,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! { App { ParserComponent } }
+    check_components! {
+        App {
+            PortParserComponent,
+        }
+    }
+
+    pub fn demo() {
+        assert_eq!(App.parse_port("8080"), Ok(8080));
+        assert_eq!(
+            App.parse_port("http"),
+            Err("ParseIntError { kind: InvalidDigit }".to_owned())
+        );
     }
 
     #[test]
-    fn a_parse_error_is_carried_as_its_debug_output() {
-        assert_eq!(App.parse("42").unwrap(), 42);
-        assert!(App.parse("nope").unwrap_err().contains("ParseIntError"));
+    fn test_demo() {
+        demo();
     }
 }

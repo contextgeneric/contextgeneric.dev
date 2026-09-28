@@ -1,0 +1,68 @@
+error[E0277]: the trait bound `RaiseFrom: ErrorRaiser<App, ParseIntError>` is not satisfied
+  --> tests/compile_fail/reference/providers/raise_from_common_mistakes_missing_from.rs:34:9
+   |
+34 |         PortParserComponent,
+   |         ^^^^^^^^^^^^^^^^^^^ the trait `ErrorRaiser<App, ParseIntError>` is not implemented for `RaiseFrom`
+   |
+help: the trait `ErrorRaiser<Context, E>` is conditionally implemented for `RaiseFrom`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-error-extra/src/impls/raise_from.rs:5:1
+   |
+ 5 | / impl<Context, E> ErrorRaiser<Context, E> for RaiseFrom
+ 6 | | where
+ 7 | |     Context: HasErrorType,
+ 8 | |     Context::Error: From<E>,
+   | |_____________________-------^
+   |                       |
+   |                       unsatisfied requirement introduced here: `<App as cgp::prelude::HasErrorType>::Error: From<ParseIntError>`
+   = note: required for `App` to implement `ErrorRaiser<App, ParseIntError>`
+   = note: required for `App` to implement `cgp::prelude::CanRaiseError<ParseIntError>`
+note: required for `ParsePort` to implement `IsProviderFor<PortParserComponent, App>`
+  --> tests/compile_fail/reference/providers/raise_from_common_mistakes_missing_from.rs:13:1
+   |
+13 | #[cgp_impl(new ParsePort)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 | #[uses(CanRaiseError<ParseIntError>)]
+   |        ---------------------------- unsatisfied trait bound introduced here
+   = note: required for `App` to implement `CanUseComponent<PortParserComponent>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/providers/raise_from_common_mistakes_missing_from.rs:32:1
+   |
+32 | / check_components! {
+33 | |     App {
+34 | |         PortParserComponent,
+35 | |     }
+36 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `String: From<ParseIntError>` is not satisfied
+  --> tests/compile_fail/reference/providers/raise_from_common_mistakes_missing_from.rs:34:9
+   |
+34 |         PortParserComponent,
+   |         ^^^^^^^^^^^^^^^^^^^ the trait `From<ParseIntError>` is not implemented for `String`
+   |
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+   = note: required for `RaiseFrom` to implement `IsProviderFor<ErrorRaiserComponent, App, ParseIntError>`
+   = note: 1 redundant requirement hidden
+   = note: required for `App` to implement `IsProviderFor<ErrorRaiserComponent, App, ParseIntError>`
+   = note: required for `App` to implement `ErrorRaiser<App, ParseIntError>`
+   = note: required for `App` to implement `cgp::prelude::CanRaiseError<ParseIntError>`
+   = note: 1 redundant requirement hidden
+   = note: required for `ParsePort` to implement `IsProviderFor<PortParserComponent, App>`
+   = note: required for `App` to implement `CanUseComponent<PortParserComponent>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/providers/raise_from_common_mistakes_missing_from.rs:32:1
+   |
+32 | / check_components! {
+33 | |     App {
+34 | |         PortParserComponent,
+35 | |     }
+36 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

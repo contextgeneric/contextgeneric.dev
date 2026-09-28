@@ -1,4 +1,5 @@
 ---
+description: 'PipeMonadic and its bind providers, which chain handlers under a monad marker so the pipeline stops on an Err, on the first Ok, or never.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
@@ -10,12 +11,15 @@ appropriate branch.
 
 ## Overview
 
-The monad providers build [monadic handler composition](/docs/concepts/monadic-handlers) on top of the
-[`Computer`](../../components/handler/computer.md) family. They let a sequence of handlers whose outputs carry a
-"continue" case and a "stop" case be chained without pattern-matching each step by hand: the monad
-decides which case threads forward and which short-circuits. A built pipeline is itself a provider for
-`Computer`, `AsyncComputer`, `TryComputer`, and `Handler`, so it wires into a **context**, the type a
-method runs on, exactly like any other handler.
+The monad providers build [monadic handler composition](/docs/concepts/monadic-handlers) on top of
+the [`Computer`](../../components/handler/computer.md) family. They let a sequence of handlers whose
+outputs carry a "continue" case and a "stop" case be chained without pattern-matching each step by
+hand: the monad decides which case threads forward and which short-circuits. A built pipeline is
+itself a provider for `Computer`, `AsyncComputer`, `TryComputer`, and `Handler`, so it wires into a
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, exactly
+like any other handler. None of the names on these pages is in the prelude: `PipeMonadic` is
+imported from `cgp::extra::monad::providers`, and the markers and bind providers from
+`cgp::extra::monad::monadic::{ident, ok, err}`.
 
 The providers divide into three groups:
 

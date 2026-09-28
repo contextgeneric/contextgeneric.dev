@@ -1,19 +1,34 @@
 //! Code from `docs/reference/providers/error/raise_from.md` — `RaiseFrom`.
+//!
+//! Pins the Usage wiring and the Examples program, in which one `ErrorRaiserComponent: RaiseFrom`
+//! entry raises two different source types through the error's `From` impls. The source with no
+//! `From` impl, from Common Mistakes, is a trybuild fixture.
 
-/// ## Usage and Examples
-///
-/// The page shows `RaiseFrom` wired on its own, then dispatched per source type beside a formatter.
-/// One program covers both: a `String` is converted straight through `RaiseFrom` (the abstract error
-/// *is* `String`, and `String: From<String>`), while a `ParseIntError` is formatted by `DebugError`
-/// and forwarded back through the same `String` route.
-///
-/// The page's illustrative `ParseError` key is a real `ParseIntError` here, so the parse can run.
-pub mod raising_through_from {
+/// ## Examples
+pub mod examples {
     use core::num::ParseIntError;
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
-    use cgp::extra::error::{DebugError, RaiseFrom};
+    use cgp::extra::error::RaiseFrom;
     use cgp::prelude::*;
+
+    #[derive(Debug, PartialEq)]
+    pub enum AppError {
+        Parse(ParseIntError),
+        Message(String),
+    }
+
+    impl From<ParseIntError> for AppError {
+        fn from(e: ParseIntError) -> Self {
+            AppError::Parse(e)
+        }
+    }
+
+    impl From<String> for AppError {
+        fn from(message: String) -> Self {
+            AppError::Message(message)
+        }
+    }
 
     #[cgp_component(PortParser)]
     #[use_type(HasErrorType.Error)]
@@ -26,14 +41,13 @@ pub mod raising_through_from {
     #[use_type(HasErrorType.Error)]
     impl PortParser {
         fn parse_port(&self, raw: &str) -> Result<u16, Error> {
-            let parsed: u32 = raw.parse().map_err(Self::raise_error)?;
+            let port: u16 = raw.parse().map_err(Self::raise_error)?;
 
-            if parsed > u16::MAX as u32 {
-                // Raised as a `String`, converted straight through by `RaiseFrom`.
-                return Err(Self::raise_error(format!("port {parsed} out of range")));
+            if port == 0 {
+                return Err(Self::raise_error("port 0 is reserved".to_owned()));
             }
 
-            Ok(parsed as u16)
+            Ok(port)
         }
     }
 
@@ -41,31 +55,29 @@ pub mod raising_through_from {
 
     delegate_components! {
         App {
-            open ErrorRaiserComponent;
-
-            ErrorTypeProviderComponent: UseType<String>,
+            ErrorTypeProviderComponent: UseType<AppError>,
+            ErrorRaiserComponent: RaiseFrom,
             PortParserComponent: ParsePort,
-
-            @ErrorRaiserComponent.String: RaiseFrom,
-            @ErrorRaiserComponent.ParseIntError: DebugError,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! { App { PortParserComponent } }
+    check_components! {
+        App {
+            PortParserComponent,
+        }
+    }
+
+    pub fn demo() {
+        assert_eq!(App.parse_port("8080"), Ok(8080));
+        assert_eq!(
+            App.parse_port("0"),
+            Err(AppError::Message("port 0 is reserved".to_owned()))
+        );
+        assert!(matches!(App.parse_port("http"), Err(AppError::Parse(_))));
     }
 
     #[test]
-    fn a_string_is_converted_and_a_parse_error_is_formatted() {
-        assert_eq!(App.parse_port("8080").unwrap(), 8080);
-        assert_eq!(
-            App.parse_port("70000").unwrap_err(),
-            "port 70000 out of range"
-        );
-        assert!(App
-            .parse_port("nope")
-            .unwrap_err()
-            .contains("ParseIntError"));
+    fn test_demo() {
+        demo();
     }
 }

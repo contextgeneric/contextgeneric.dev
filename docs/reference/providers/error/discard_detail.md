@@ -1,4 +1,6 @@
 ---
+title: 'DiscardDetail — wrap by dropping the detail'
+description: 'The error wrapper that ignores the attached detail and returns the error unchanged, for an error type that cannot carry extra context.'
 sidebar_label: 'DiscardDetail'
 sidebar_position: 6
 ---
@@ -10,15 +12,16 @@ Wrap an error by throwing the detail away and returning the error unchanged.
 ## Overview
 
 `DiscardDetail` is the `ErrorWrapper` provider that ignores whatever detail is attached and returns the
-error as it was. It satisfies the `CanWrapError` trait of a **context**, the type a method runs
-on, without enriching the error. This is useful when a context's error type cannot carry extra
-context, or when the wrapping detail is deliberately not kept. It is the wrapping counterpart of a no-op:
-the error propagates unchanged. Like every CGP provider, `DiscardDetail` carries no runtime value.
+error as it was. It satisfies the `CanWrapError` trait of a
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, without
+enriching the error. This is useful when a context's error type cannot carry extra context, or when
+the wrapping detail is deliberately not kept. It is the wrapping counterpart of a no-op: the error
+propagates unchanged. Like every CGP provider, `DiscardDetail` carries no runtime value.
 
 ## Usage
 
 Import the provider from `cgp::extra::error` and the wiring key `ErrorWrapperComponent` from
-`cgp::core::error`. It takes no type parameter and accepts any detail type:
+`cgp::core::error`; neither is in the prelude. It takes no type parameter and accepts any detail type:
 
 ```rust
 use cgp::core::error::ErrorWrapperComponent;
@@ -34,15 +37,68 @@ delegate_components! {
 Wired this way, any call to `Context::wrap_error(error, detail)` on `App` returns `error` and drops
 `detail`, for every detail type.
 
+## Examples
+
+A provider raises an error and wraps it with a detail string, and the context's wrapper drops the
+detail:
+
+```rust
+use cgp::prelude::*;
+use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapperComponent};
+use cgp::extra::error::{DiscardDetail, RaiseFrom};
+
+#[cgp_component(Loader)]
+#[use_type(HasErrorType.Error)]
+pub trait CanLoad {
+    fn load(&self) -> Result<(), Error>;
+}
+
+#[cgp_impl(new LoadConfig)]
+#[uses(CanRaiseError<String>, CanWrapError<String>)]
+#[use_type(HasErrorType.Error)]
+impl Loader {
+    fn load(&self) -> Result<(), Error> {
+        let error = Self::raise_error("disk offline".to_owned());
+        Err(Self::wrap_error(error, "while loading config".to_owned()))
+    }
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ErrorTypeProviderComponent: UseType<String>,
+        ErrorRaiserComponent: RaiseFrom,
+        ErrorWrapperComponent: DiscardDetail,
+        LoaderComponent: LoadConfig,
+    }
+}
+
+check_components! {
+    App {
+        LoaderComponent,
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.load(), Err("disk offline".to_owned()));
+}
+```
+
+`LoadConfig` attaches `"while loading config"`, but `App`, an
+[environmental context](/docs/reference/glossary#environmental-context), wires `DiscardDetail`, so
+the error arrives as the bare `"disk offline"`. Wiring a wrapper that keeps the detail instead changes
+the result without touching `LoadConfig`.
+
 ## When to use it
 
 **Reach for `DiscardDetail` when a context's error type cannot hold extra detail, or when a call site
 attaches detail that this context has no use for.** It keeps the `CanWrapError` trait satisfiable
 without storing anything.
 
-Reach for [`DebugError`](debug_error.md) or [`DisplayError`](display_error.md) when the detail should be
-kept as a formatted string, or for a backend provider when the concrete error type can carry structured
-context.
+Reach for [`DebugError`](debug_error.md) or [`DisplayError`](display_error.md) when the detail should
+be kept as a formatted string, or for a backend provider when the concrete error type can carry
+structured context.
 
 ## Under the hood
 
@@ -60,16 +116,18 @@ where
 }
 ```
 
-The detail is bound only so the method can accept it; the body returns the error untouched. The
-generated [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same `HasErrorType` bound.
+`Detail` is unconstrained, so any type is accepted, and the body returns the error untouched. The
+generated [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same
+`HasErrorType` bound.
 
 ## Related constructs
 
-- [`CanWrapError`](../../components/can_wrap_error.md) — the component `DiscardDetail` supplies, through
-  the `ErrorWrapper` provider trait.
+- [`CanWrapError`](../../components/can_wrap_error.md) — the component `DiscardDetail` supplies,
+  through the `ErrorWrapper` provider trait.
 - [`DebugError`](debug_error.md), [`DisplayError`](display_error.md) — wrap by keeping the detail as a
   formatted string instead of discarding it.
-- [`UseDelegate`](../use_delegate.md) — dispatches wrappers per detail type.
+- [`delegate_components!`](../../macros/delegate_components.md) — its `open` statement dispatches
+  wrappers per detail type.
 
 The ideas behind it:
 

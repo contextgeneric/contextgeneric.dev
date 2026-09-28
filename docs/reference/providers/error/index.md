@@ -1,4 +1,5 @@
 ---
+description: 'The seven error providers CGP ships, from RaiseFrom to DisplayError: raising and wrapping strategies generic over the context''s error type.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
@@ -10,17 +11,19 @@ concrete error type the context chose.
 
 ## Overview
 
-The error providers supply common error-handling strategies to any **context**, the type a method
-runs on. [`CanRaiseError`](../../components/can_raise_error.md) and
-[`CanWrapError`](../../components/can_wrap_error.md) define *what* a
-context can do with an error: turn a source error into its abstract `Self::Error`, or attach detail to
-one it already holds. They say nothing about *how*. These providers supply the how for the cases that
-need no particular error library. Each one is generic over the context, so it works with whatever error
-type the context's [`HasErrorType`](../../components/has_error_type.md) names.
+The error providers supply common error-handling strategies to any
+[**context**](/docs/reference/glossary#context), the type the implementation runs against.
+[`CanRaiseError`](../../components/can_raise_error.md) and
+[`CanWrapError`](../../components/can_wrap_error.md) define *what* a context can do with an error:
+turn a source error into its abstract `Self::Error`, or attach detail to one it already holds. They
+say nothing about *how*. These providers supply the how for the cases that need no particular error
+library. Each one is generic over the context, so it works with whatever error type the context's
+[`HasErrorType`](../../components/has_error_type.md) names.
 
-Each provider implements one or both of two provider traits. `CanRaiseError`'s provider trait is
-`ErrorRaiser`, wired with `ErrorRaiserComponent`. `CanWrapError`'s provider trait is `ErrorWrapper`,
-wired with `ErrorWrapperComponent`. A provider that implements `ErrorRaiser` supplies raising; one that
+Each provider implements one or both of two provider traits, all reached through `cgp::extra::error`
+and none in the prelude. `CanRaiseError`'s provider trait is `ErrorRaiser`, wired with
+`ErrorRaiserComponent`. `CanWrapError`'s provider trait is `ErrorWrapper`, wired with
+`ErrorWrapperComponent`. A provider that implements `ErrorRaiser` supplies raising; one that
 implements `ErrorWrapper` supplies wrapping; two of them supply both.
 
 These are the in-tree counterparts to the standalone backends in `cgp-error-anyhow`, `cgp-error-eyre`,
@@ -57,12 +60,18 @@ The remaining two act on the wrapping and raising components directly:
 ## Wiring them
 
 A context gains an error strategy by wiring one of these providers to `ErrorRaiserComponent` or
-`ErrorWrapperComponent`, exactly like any other component, and the provider's `where` clause decides
-when that wiring type-checks. Because both components dispatch on the source-error or detail type, a
-context commonly wires several providers at once, one per source error type. The modern form is the
-`open` statement of [`delegate_components!`](../../macros/delegate_components.md); the error family is
-still defined with [`#[derive_delegate]`](../../attributes/derive_delegate.md), so a nested
+`ErrorWrapperComponent`, both imported from `cgp::core::error`, and the provider's `where` clause
+decides when that wiring type-checks. Because both components dispatch on the source-error or detail
+type, a context commonly wires several providers at once, one per source error type. The modern form
+is the `open` statement of [`delegate_components!`](../../macros/delegate_components.md); the error
+family is still defined with [`#[derive_delegate]`](../../attributes/derive_delegate.md), so a nested
 [`UseDelegate`](../use_delegate.md) table is the form you will read in existing code.
+
+The string-formatting providers compose with the rest rather than replacing them. `DebugError` and
+`DisplayError` turn a value into a `String` and raise or wrap it through the context's own `String`
+key, so the context wires one concrete rule for `String`, such as `RaiseFrom`, and routes the other
+source types to the formatters. The `String` key itself must never go to a formatter, since the
+formatter would then forward to itself (`E0275`).
 
 ## Related constructs
 
@@ -70,7 +79,8 @@ still defined with [`#[derive_delegate]`](../../attributes/derive_delegate.md), 
   implement, through the `ErrorRaiser` and `ErrorWrapper` provider traits.
 - [`HasErrorType`](../../components/has_error_type.md) — names the abstract `Self::Error` every provider
   here produces.
-- [`UseDelegate`](../use_delegate.md) — the table that dispatches these providers per source-error type.
+- [`UseDelegate`](../use_delegate.md) — the legacy table that dispatches these providers per
+  source-error type, which the `open` statement replaces.
 - [`delegate_components!`](../../macros/delegate_components.md) and
   [`check_components!`](../../macros/check_components.md) — wire and verify them.
 

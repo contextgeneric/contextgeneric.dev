@@ -1,12 +1,41 @@
 //! Code from `docs/reference/providers/error/return_error.md` — `ReturnError`.
+//!
+//! Pins the Examples program: an `AppError` source is raised through `ReturnError` by returning it,
+//! beside a `String` converted by `RaiseFrom` and a `ParseIntError` formatted by `DebugError`.
 
-/// ## Usage and Examples
+/// ## Usage
 ///
-/// `ReturnError` raises a source that already *is* the context's error type, so it returns its
-/// argument. Here the context's error is `AppError`: an `AppError` source is raised through
-/// `ReturnError`, and a `ParseIntError` is formatted and forwarded to the `String` route that
-/// `RaiseFrom` converts (`AppError: From<String>`).
-pub mod returning_the_error_itself {
+/// The whole-component wiring the section shows: every raise on the context goes to `ReturnError`,
+/// which type-checks only for the source equal to the context's error.
+pub mod usage {
+    use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
+    use cgp::extra::error::ReturnError;
+    use cgp::prelude::*;
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ErrorTypeProviderComponent: UseType<String>,
+            ErrorRaiserComponent: ReturnError,
+        }
+    }
+
+    pub fn raise_own_error<Context>(message: String) -> Context::Error
+    where
+        Context: CanRaiseError<String>,
+    {
+        Context::raise_error(message)
+    }
+
+    #[test]
+    fn the_source_is_returned_unchanged() {
+        assert_eq!(raise_own_error::<App>("reserved".to_owned()), "reserved");
+    }
+}
+
+/// ## Examples
+pub mod examples {
     use core::num::ParseIntError;
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
@@ -24,27 +53,26 @@ pub mod returning_the_error_itself {
         }
     }
 
-    #[cgp_component(Checker)]
+    #[cgp_component(PortChecker)]
     #[use_type(HasErrorType.Error)]
-    pub trait CanCheck {
-        fn check(&self, raw: &str) -> Result<u16, Error>;
+    pub trait CanCheckPort {
+        fn check_port(&self, raw: &str) -> Result<u16, Error>;
     }
 
     #[cgp_impl(new CheckPort)]
     #[uses(CanRaiseError<AppError>, CanRaiseError<ParseIntError>)]
     #[use_type(HasErrorType.{Error = AppError})]
-    impl Checker {
-        fn check(&self, raw: &str) -> Result<u16, AppError> {
-            let parsed: u32 = raw.parse().map_err(Self::raise_error)?;
+    impl PortChecker {
+        fn check_port(&self, raw: &str) -> Result<u16, AppError> {
+            let port: u16 = raw.parse().map_err(Self::raise_error)?;
 
-            if parsed == 0 {
-                // Already an `AppError`, raised by returning it.
+            if port == 0 {
                 return Err(Self::raise_error(AppError {
                     message: "port 0 is reserved".to_owned(),
                 }));
             }
 
-            Ok(parsed as u16)
+            Ok(port)
         }
     }
 
@@ -55,7 +83,7 @@ pub mod returning_the_error_itself {
             open ErrorRaiserComponent;
 
             ErrorTypeProviderComponent: UseType<AppError>,
-            CheckerComponent: CheckPort,
+            PortCheckerComponent: CheckPort,
 
             @ErrorRaiserComponent.AppError: ReturnError,
             @ErrorRaiserComponent.String: RaiseFrom,
@@ -63,19 +91,23 @@ pub mod returning_the_error_itself {
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! { App { CheckerComponent } }
+    check_components! {
+        App {
+            PortCheckerComponent,
+        }
+    }
+
+    pub fn demo() {
+        assert_eq!(App.check_port("8080"), Ok(8080));
+        assert_eq!(
+            App.check_port("0"),
+            Err(AppError { message: "port 0 is reserved".to_owned() })
+        );
+        assert!(App.check_port("http").unwrap_err().message.contains("ParseIntError"));
     }
 
     #[test]
-    fn an_app_error_source_is_returned_unchanged() {
-        assert_eq!(App.check("8080").unwrap(), 8080);
-        assert_eq!(
-            App.check("0").unwrap_err(),
-            AppError {
-                message: "port 0 is reserved".to_owned()
-            },
-        );
+    fn test_demo() {
+        demo();
     }
 }

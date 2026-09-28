@@ -1,0 +1,28 @@
+error[E0275]: overflow evaluating the requirement `DisplayError: ErrorRaiser<App, String>`
+  --> tests/compile_fail/reference/providers/display_error_common_mistakes_string_key_cycle.rs:35:9
+   |
+35 |         LoaderComponent,
+   |         ^^^^^^^^^^^^^^^
+   |
+   = note: required for `RedirectLookup<App, PathCons<ErrorRaiserComponent, Nil>>` to implement `ErrorRaiser<App, String>`
+   = note: 1 redundant requirement hidden
+   = note: required for `App` to implement `ErrorRaiser<App, String>`
+   = note: required for `App` to implement `cgp::prelude::CanRaiseError<String>`
+note: required for `LoadOrFail` to implement `IsProviderFor<LoaderComponent, App>`
+  --> tests/compile_fail/reference/providers/display_error_common_mistakes_string_key_cycle.rs:11:1
+   |
+11 | #[cgp_impl(new LoadOrFail)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | #[uses(CanRaiseError<String>)]
+   |        --------------------- unsatisfied trait bound introduced here
+   = note: required for `App` to implement `CanUseComponent<LoaderComponent>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/providers/display_error_common_mistakes_string_key_cycle.rs:33:1
+   |
+33 | / check_components! {
+34 | |     App {
+35 | |         LoaderComponent,
+36 | |     }
+37 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
