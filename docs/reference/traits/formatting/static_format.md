@@ -1,6 +1,8 @@
 ---
+title: 'StaticFormat — write a type-level string'
 sidebar_label: 'StaticFormat'
 sidebar_position: 2
+description: 'Write a type-level string''s characters into a formatter without a value to format; the trait behind Display on Symbol and Chars.'
 ---
 
 # `StaticFormat`
@@ -29,7 +31,7 @@ type-level string can be printed with `{}` or `to_string()` because of this trai
 
 ## Definition
 
-`StaticFormat` carries a single associated function and no data:
+`StaticFormat` carries a single associated function and nothing else:
 
 ```rust
 pub trait StaticFormat {
@@ -37,7 +39,7 @@ pub trait StaticFormat {
 }
 ```
 
-Note the absent `self`: there is no runtime value, only the type, so `fmt` takes the formatter alone and
+Note the absent `self`: the string exists only as a type, so `fmt` takes the formatter alone and
 writes the type's characters into it. The trait is implemented for the type-level string itself, by
 recursion over the character list, and the terminator writes nothing.
 
@@ -54,8 +56,8 @@ neighbours: [`StaticString`](./static_string.md) comes from `cgp::core::field::t
 [`ConcatPath`](./concat_path.md), which lives in the same crate as this trait, is in the prelude.
 Three neighbouring traits, three different imports.
 
-Most of the time you reach the effect rather than the trait. Any type-level string can be interpolated
-or turned into an owned `String` with no import at all:
+Most of the time you reach the effect rather than the trait. Any type-level string can be
+interpolated or turned into an owned `String` without any import:
 
 ```rust
 use cgp::prelude::*;
@@ -71,39 +73,48 @@ delegating to its inner list. Every type-level string therefore formats, includi
 
 ## Examples
 
-A diagnostic or a log line wants formatting, where the name appears once. A `Display` bound is
-usually enough, and needs no import:
+Formatting through `Display`, a `Display` bound in generic code, and the one case for the trait
+itself:
 
 ```rust
+use core::fmt::{self, Display, Formatter};
 use cgp::prelude::*;
+use cgp::core::base::traits::StaticFormat;
 
-fn describe<Tag: Default + core::fmt::Display>(_tag: core::marker::PhantomData<Tag>) -> String {
+// A `Display` bound is all that formatting a name needs.
+pub fn describe<Tag: Default + Display>(_tag: PhantomData<Tag>) -> String {
     format!("missing field `{}`", Tag::default())
 }
 
-let message = describe(core::marker::PhantomData::<Symbol!("height")>);
+// A wrapper holds only `PhantomData`, so it formats its tag through the trait.
+pub struct FieldName<Tag>(pub PhantomData<Tag>);
 
-assert_eq!(message, "missing field `height`");
-```
+impl<Tag: StaticFormat> Display for FieldName<Tag> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        Tag::fmt(f)
+    }
+}
 
-You reach for the trait itself when there is no *value* to call `Display` on. The
-method is an associated function, so it writes a type's characters without one:
+pub fn demo() {
+    let s = <Symbol!("hello")>::default();
+    assert_eq!(s.to_string(), "hello");
+    assert_eq!(format!("field: {s}"), "field: hello");
 
-```rust
-use cgp::core::base::traits::StaticFormat;
+    assert_eq!(
+        describe(PhantomData::<Symbol!("height")>),
+        "missing field `height`"
+    );
 
-fn write_name<Tag: StaticFormat>(f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-    Tag::fmt(f)
+    let name = FieldName(PhantomData::<Symbol!("width")>);
+    assert_eq!(format!("[{name}]"), "[width]");
 }
 ```
 
-For a name used more than once, the eager form is cheaper and is bounded differently again:
-
-```rust
-use cgp::core::field::traits::StaticString;
-
-assert_eq!(<Symbol!("height") as StaticString>::VALUE, "height");
-```
+`describe` needs nothing imported: a `Display` bound is all that formatting a name takes.
+`FieldName` is the narrow case the trait exists for. It holds only a `PhantomData`, so there is no
+symbol value to call `Display` on, and its own `Display` impl writes the tag's characters through
+`Tag::fmt`. For a name used more than once, [`StaticString`](./static_string.md)'s constant is
+cheaper.
 
 ## When to use it
 
@@ -113,36 +124,53 @@ more than once, and this trait only when you need to write characters without a 
 - **`Display` / `to_string()`** when the name goes straight into a message. This is what `StaticFormat`
   exists to power, and it is the form to prefer.
 - **[`StaticString`](./static_string.md)** for a constant, a key, or a comparison. It is computed at
-  compile time, so there is no per-call work.
-- **`StaticFormat`** when a formatter has to be written into from a type with no value, such as
-  implementing `Display` for a wrapper over a type-level string. This is the narrow case, and it is why
-  the method takes no `self`.
+  compile time, so it costs nothing per call.
+- **`StaticFormat`** when a formatter has to be written into from a type without a value, such as
+  implementing `Display` for a wrapper over a type-level string. This is the narrow case, and it is
+  why the method does not take `self`.
 - **[`ConcatPath`](./concat_path.md)** when the thing being composed is a path rather than a string.
 
 ## Under the hood
 
-Each character node writes itself and defers to the tail:
+Each character node writes itself and defers to the tail, and the terminator writes nothing:
 
 ```rust
 impl<const CHAR: char, Tail> StaticFormat for Chars<CHAR, Tail>
 where
     Tail: StaticFormat,
 {
-    fn fmt(f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
+    fn fmt(f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{CHAR}")?;
         Tail::fmt(f)
     }
 }
 
-impl StaticFormat for Nil { /* writes nothing */ }
+impl StaticFormat for Nil {
+    fn fmt(_f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        Ok(())
+    }
+}
 ```
 
-Because both `Symbol` and `Chars` implement `Display` by delegating to this, any type-level string can be
-interpolated or turned into an owned `String`, and the string is *reconstructed* on each call rather
-than read out of storage, since there is no `&str` inside a `Symbol` to read.
+`Symbol` implements it by delegating to its inner character list, and both `Symbol` and `Chars`
+implement `Display` by calling it:
 
-That per-call reconstruction is the difference from [`StaticString`](./static_string.md), which does the
-same decoding once, at compile time, into a `&'static str` constant.
+```rust
+impl<const LEN: usize, Chars> Display for Symbol<LEN, Chars>
+where
+    Self: StaticFormat,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        <Self as StaticFormat>::fmt(f)
+    }
+}
+```
+
+So any type-level string can be interpolated or turned into an owned `String`, and the string is
+*reconstructed* on each call rather than read out of storage, since a `Symbol` does not store a
+`&str` to read. That per-call reconstruction is the difference from
+[`StaticString`](./static_string.md), which does the same decoding once, at compile time, into a
+`&'static str` constant.
 
 ## Common Mistakes
 
@@ -151,15 +179,15 @@ same decoding once, at compile time, into a `&'static str` constant.
 [`ConcatPath`](./concat_path.md), defined in the same crate as this one, is in the prelude. Reaching for
 the wrong module is the usual first failure.
 
-**Prefer a `Display` bound where one will do.** Any code that only needs to *format* a type-level string
-should require `Display`, which needs no import and is what the trait produces.
+**Prefer a `Display` bound where one will do.** Any code that only needs to *format* a type-level
+string should require `Display`, which needs nothing imported and is what the trait produces.
 
 **`Display` reconstructs the string on every call.** For a name used repeatedly,
 [`StaticString`](./static_string.md)'s `VALUE` is the cheaper choice.
 
-**There is no `self`.** The trait's method is an associated function, because a type-level string has no
-value. That is why the `Display` impl goes through a `Default`-constructed marker, and why you need a
-bound on this trait when there is no value to construct.
+**The method does not take `self`.** It is an associated function, because a type-level string
+lacks a value. Formatting through `Display` therefore needs a value, which for a symbol is
+`<Symbol!("name")>::default()`, and code holding only the type bounds on this trait instead.
 
 ## Related constructs
 

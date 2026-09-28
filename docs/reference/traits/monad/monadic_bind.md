@@ -1,6 +1,8 @@
 ---
+title: 'MonadicBind — build one bind step'
 sidebar_label: 'MonadicBind'
 sidebar_position: 1
+description: 'The monad trait that turns a continuation provider into the bind step running it, BindErr for ErrMonadic and BindOk for OkMonadic.'
 ---
 
 # `MonadicBind`
@@ -31,15 +33,15 @@ It is one of four traits that give a monad marker its meaning, alongside
 [`ContainsValue`](./contains_value.md), [`LiftValue`](./lift_value.md), and
 [`MonadicTrans`](./monadic_trans.md). Keeping them apart lets one marker serve all four roles.
 
-**This is a plain trait, not a CGP component.** It has no generated provider trait, no
+**This is a plain trait, not a CGP component.** It lacks a generated provider trait and a
 `…Component` marker, and is never wired through
-[`delegate_components!`](../../macros/delegate_components.md): the
-[monad providers](../../providers/monad/index.md) consume it as an ordinary trait bound while folding a
+[`delegate_components!`](../../macros/delegate_components.md): the [monad
+providers](../../providers/monad/index.md) consume it as an ordinary trait bound while folding a
 pipeline at compile time.
 
 ## Definition
 
-`MonadicBind` carries a single associated type and no method:
+`MonadicBind` carries a single associated type and nothing else:
 
 ```rust
 pub trait MonadicBind<Provider> {
@@ -61,35 +63,59 @@ use cgp::extra::monad::traits::MonadicBind;
 ```
 
 In practice you import it only when **defining a monad of your own**. Using the existing ones means
-naming [`PipeMonadic`](../../providers/monad/pipe_monadic.md) and a marker in a wiring entry, with no trait in
-sight.
+naming [`PipeMonadic`](../../providers/monad/pipe_monadic.md) and a marker in a wiring entry,
+without naming a trait.
 
-There is no method. The whole trait is a type-level function from a continuation to the provider that
+The trait lacks a method: it is a type-level function from a continuation to the provider that
 binds it.
 
 ## Examples
 
-The trait is consumed rather than called, so read what each marker's impl *says*, because that decides
-how a pipeline behaves.
+The bind provider each shipped marker wraps a continuation in, checked as type equalities:
 
-**`IdentMonadic` implements it as the identity**: `MonadicBind<Provider>::Provider` is `Provider`
-unchanged. Nothing wraps the continuation, nothing branches, and a pipeline under `IdentMonadic` is
-therefore just function composition.
+```rust
+use cgp::prelude::*;
+use cgp::extra::monad::monadic::err::{BindErr, ErrMonadic};
+use cgp::extra::monad::monadic::ident::IdentMonadic;
+use cgp::extra::monad::monadic::ok::{BindOk, OkMonadic};
+use cgp::extra::monad::traits::MonadicBind;
 
-**`ErrMonadic` and `OkMonadic` wrap the continuation in a bind provider**, and the two are mirror images
-over a `Result`:
+// A continuation provider; any type stands in for one here.
+pub struct Next;
+
+// Each function compiles only if the projection is the type on its right.
+pub fn ident(
+    p: PhantomData<<IdentMonadic as MonadicBind<Next>>::Provider>,
+) -> PhantomData<Next> {
+    p
+}
+
+pub fn err(
+    p: PhantomData<<ErrMonadic as MonadicBind<Next>>::Provider>,
+) -> PhantomData<BindErr<IdentMonadic, Next>> {
+    p
+}
+
+pub fn ok(
+    p: PhantomData<<OkMonadic as MonadicBind<Next>>::Provider>,
+) -> PhantomData<BindOk<IdentMonadic, Next>> {
+    p
+}
+```
+
+**`IdentMonadic` implements it as the identity**: the continuation comes back unchanged, so nothing
+branches, and a pipeline under `IdentMonadic` is plain composition. **`ErrMonadic` and `OkMonadic`
+wrap the continuation in a bind provider**, and the two are mirror images over a `Result`:
 
 | | continue branch | short-circuits on | bind provider |
 |---|---|---|---|
-| `ErrMonadic` | `Ok` | `Err` | `BindOk` |
-| `OkMonadic` | `Err` | `Ok` | `BindErr` |
+| `ErrMonadic` | `Ok` | `Err` | `BindErr` |
+| `OkMonadic` | `Err` | `Ok` | `BindOk` |
 
-So `ErrMonadic` gives the ordinary `?` behaviour, and `OkMonadic` the inverted one that runs until
-something succeeds, useful for a fallback chain.
-
-**The transformer forms delegate to their base.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` wrap their
-own bind provider for the inner `Result` layer and hand it to `M`, which binds the outer layers, and
-that is how a stack reaches arbitrary depth.
+Each bind provider is named for the branch it stops on. So `ErrMonadic` gives the ordinary `?`
+behaviour, and `OkMonadic` the inverted one that runs until something succeeds, useful for a
+fallback chain. **The transformer forms delegate to their base**: `ErrMonadicTrans<M>` asks `M` to
+bind a `BindErr<M, Provider>`, which is how a stack reaches arbitrary depth.
 
 ## When to use it
 
@@ -111,27 +137,46 @@ And the alternatives to prefer when you do *not* need short-circuiting:
 
 ## Under the hood
 
-[`PipeMonadic`](../../providers/monad/pipe_monadic.md) walks the handler list and, for each step, asks the monad
-to turn the continuation built so far into a bind step, which is this trait. Because the walk proceeds
-from the end of the list backwards, `Provider` at each stage is everything that follows the current step,
-and the result is a single nested provider by the time the list is exhausted.
+[`PipeMonadic`](../../providers/monad/pipe_monadic.md) folds its handler list with a private helper
+trait, and this trait is what the fold asks at each step:
 
-[`MonadicTrans`](./monadic_trans.md) is what applies one monad as a transformer over another while that
-fold happens, so a stacked monad is resolved *before* any binding does. The pair is therefore the
-list-folding half of the four traits, while [`ContainsValue`](./contains_value.md) and
-[`LiftValue`](./lift_value.md) are the step-running half.
+```rust
+impl<M, ProviderA, ProviderB, RestProviders, OutProviders> BindProviders<M>
+    for Cons<ProviderA, Cons<ProviderB, RestProviders>>
+where
+    Cons<ProviderB, RestProviders>: BindProviders<M, Provider = OutProviders>,
+    M: MonadicBind<OutProviders>,
+{
+    type Provider = ComposeHandlers<ProviderA, M::Provider>;
+}
 
-The whole fold happens during trait resolution. A monadic pipeline is not a runtime structure, and the
-provider it resolves to implements the [`Computer`](../../components/handler/computer.md) family like any other
-handler.
+impl<M, Provider> BindProviders<M> for Cons<Provider, Nil> {
+    type Provider = Provider;
+}
+```
+
+The fold recurses into the rest of the list first, so `OutProviders` at each stage is everything
+that follows the current step, and the monad binds it: the first handler runs plainly and its output
+is handed to a bind step over the rest. By the time the list is exhausted the result is one nested
+provider, built from [`ComposeHandlers`](../../providers/handler/compose_handlers.md) and the bind
+providers.
+
+For the fallible components, `PipeMonadic` first stacks the chosen monad over `ErrMonadic` with
+[`MonadicTrans`](./monadic_trans.md), so a stacked monad is resolved *before* any binding does. The
+pair is therefore the list-folding half of the four traits, while
+[`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) are the step-running half.
+
+The whole fold happens during trait resolution. A monadic pipeline is not a runtime structure, and
+the provider it resolves to implements the [`Computer`](../../components/handler/computer.md) family
+like any other handler.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 
-**It is not a component and cannot be wired.** There is no `…Component` marker, so it never appears in a
-[`delegate_components!`](../../macros/delegate_components.md) block. What gets wired is the provider that
-consumes it.
+**It is not a component and cannot be wired.** It lacks a `…Component` marker, so it never appears
+in a [`delegate_components!`](../../macros/delegate_components.md) block. What gets wired is the
+provider that consumes it.
 
 **`OkMonadic` short-circuits on `Ok`, not on `Err`.** The naming reads as "the monad *for* `Ok`" and means
 "the monad whose continue branch is `Err`". [`ErrMonadic`](../../providers/monad/index.md) is the one

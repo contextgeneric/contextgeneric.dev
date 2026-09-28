@@ -1,6 +1,8 @@
 ---
+title: 'ContainsValue — the value a monad threads'
 sidebar_label: 'ContainsValue'
 sidebar_position: 2
+description: 'The monad trait naming the value beneath a step''s output that the monad threads forward: the Ok payload under ErrMonadic, the error under OkMonadic.'
 ---
 
 # `ContainsValue`
@@ -31,12 +33,12 @@ It is one of four traits that give a monad marker its meaning, and it pairs with
 back *in*. The other two, [`MonadicBind`](./monadic_bind.md) and
 [`MonadicTrans`](./monadic_trans.md), fold the pipeline rather than run a step of it.
 
-**This is a plain trait, not a CGP component.** It has no generated provider trait and is
+**This is a plain trait, not a CGP component.** It lacks a generated provider trait and is
 never wired.
 
 ## Definition
 
-`ContainsValue` carries a single associated type and no method:
+`ContainsValue` carries a single associated type and nothing else:
 
 ```rust
 pub trait ContainsValue<Output> {
@@ -56,38 +58,53 @@ layer unwraps it further.
 use cgp::extra::monad::traits::ContainsValue;
 ```
 
-You import it only when **defining a monad of your own**. There is no method. The trait is a type-level
-projection from an output type to the value beneath the wrapper.
+You import it only when **defining a monad of your own**. The trait lacks a method: it is a
+type-level projection from an output type to the value beneath the wrapper.
 
 ## Examples
 
-What each marker's impl says decides how a pipeline behaves.
+The value each shipped marker reads beneath an output, including a two-layer stack, checked as type
+equalities:
 
-**`IdentMonadic` is the identity**: `ContainsValue<T>::Value` is `T`. Nothing is wrapped, so nothing is
-unwrapped, and every value threads forward.
+```rust
+use cgp::extra::monad::monadic::err::ErrMonadic;
+use cgp::extra::monad::monadic::ident::IdentMonadic;
+use cgp::extra::monad::monadic::ok::{OkMonadic, OkMonadicTrans};
+use cgp::extra::monad::traits::ContainsValue;
 
-**`ErrMonadic` and `OkMonadic` are mirror images over a `Result`**, and the mirroring is the whole design:
+pub fn ident(value: <IdentMonadic as ContainsValue<u8>>::Value) -> u8 {
+    value
+}
 
-| Monad | `ContainsValue<Result<T, E>>::Value` | continue branch |
-|---|---|---|
-| `ErrMonadic` | `T` | the `Ok` payload threads forward |
-| `OkMonadic` | `E` | the `Err` payload threads forward |
+// `ErrMonadic` continues on `Ok`, so the value is the `Ok` payload.
+pub fn err(value: <ErrMonadic as ContainsValue<Result<u8, String>>>::Value) -> u8 {
+    value
+}
 
-So under `ErrMonadic` a step's continuation receives the `Ok` payload, the ordinary `?` behaviour, and
-under `OkMonadic` it receives the `Err` payload, which is the inverted, run-until-something-succeeds
-behaviour.
+// `OkMonadic` continues on `Err`, so the value is the error.
+pub fn ok(value: <OkMonadic as ContainsValue<Result<u8, String>>>::Value) -> String {
+    value
+}
 
-**The transformer forms peel one layer.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` let `M` unwrap the
-outer layers and then remove their own `Result` from the value `M` exposes, requiring
-`M: ContainsValue<V, Value = Result<…>>`. A two-layer
-stack therefore unwraps two `Result` layers in order, and an *n*-layer stack unwraps *n*, with no code
-specific to any depth.
+// The outer layer is `ErrMonadic`'s, the inner one the `Ok` layer's.
+pub fn stacked(
+    value: <OkMonadicTrans<ErrMonadic> as ContainsValue<Result<Result<u8, String>, bool>>>::Value,
+) -> String {
+    value
+}
+```
+
+Under `ErrMonadic` the value is the `Ok` payload and under `OkMonadic` the error, the mirror image
+that is the whole design. The transformer form peels one layer after its base: `ErrMonadic` unwraps
+the outer `Result` to `Result<u8, String>`, and the `Ok` layer then takes its error, `String`. An
+*n*-layer stack unwraps *n* layers the same way, without code specific to any depth.
 
 ## When to use it
 
-**Reach for the [monad providers](../../providers/monad/index.md), not this trait.** A pipeline is built
-by wiring [`PipeMonadic`](../../providers/monad/pipe_monadic.md) with a marker and a handler list; this is what
-the bind providers bound on internally.
+**Reach for the [monad providers](../../providers/monad/index.md), not this trait.** A pipeline is
+built by wiring [`PipeMonadic`](../../providers/monad/pipe_monadic.md) with a marker and a handler
+list; this is what the bind providers bound on internally, to relate each continuation's output to
+the step's.
 
 The one real reason to name it is **defining a new monad**: short-circuiting over an `Option`, or over a
 custom two-branch enum. Implement it alongside [`LiftValue`](./lift_value.md), since the two are the pair
@@ -100,17 +117,38 @@ of this.
 
 ## Under the hood
 
-The [`BindOk` and `BindErr`](../../providers/monad/index.md) providers use `ContainsValue` in their
-[`Computer`](../../components/handler/computer.md) and `AsyncComputer` impls. Running one bind step means: take the
-step's output, ask the monad what value sits beneath its wrapper, and hand that to the continuation. This
-trait is the second half of that sentence.
+The bind providers bound on `ContainsValue` in their
+[`Computer`](../../components/handler/computer.md) and `AsyncComputer` impls. `BindErr`'s, the step
+`ErrMonadic` builds, is:
 
-[`LiftValue`](./lift_value.md) then puts a result back into the output type: `lift_value` for the
-branch that short-circuits, `lift_output` for the branch that forwarded to the continuation. So the two
-traits bracket one step: unwrap, run, re-wrap.
+```rust
+#[cgp_provider]
+impl<Context, Code, T1, T2, E, M, Cont> Computer<Context, Code, Result<T1, E>> for BindErr<M, Cont>
+where
+    Cont: Computer<Context, Code, T1>,
+    M: ContainsValue<Cont::Output, Value = Result<T2, E>> + LiftValue<Result<T2, E>, Cont::Output>,
+{
+    type Output = M::Output;
 
-Because the transformer forms implement it by delegating to the base monad, the unwrapping composes
-without any depth-specific code.
+    fn compute(context: &Context, code: PhantomData<Code>, input: Result<T1, E>) -> Self::Output {
+        match input {
+            Ok(value) => M::lift_output(Cont::compute(context, code, value)),
+            Err(err) => M::lift_value(Err(err)),
+        }
+    }
+}
+```
+
+The step matches the incoming `Result` itself; `ContainsValue` is not what unwraps it. What this
+trait does is constrain the **continuation's output**: `M` is the monad the step sits inside
+(`IdentMonadic` for a single-layer pipeline), and
+`M: ContainsValue<Cont::Output, Value = Result<T2, E>>` requires that what `M` sees beneath the
+continuation's output is a `Result` with the same error type `E`. That is what lets the
+short-circuit branch lift its `Err(err)` into the same output type the continue branch produces.
+
+[`LiftValue`](./lift_value.md) is the other half of the bound, and supplies the two functions the
+branches call. Because the transformer forms implement both by delegating to the base monad after
+handling their own layer, the constraint composes without any depth-specific code.
 
 ## Common Mistakes
 

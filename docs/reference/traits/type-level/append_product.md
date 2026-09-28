@@ -1,22 +1,13 @@
 ---
+title: 'AppendProduct — add an entry to a product'
 sidebar_label: 'AppendProduct'
 sidebar_position: 5
+description: 'Name the type-level product list with one more entry at the end, so generic code can describe in a signature the shape it will produce.'
 ---
 
 # `AppendProduct`
 
 Adding one entry to the end of a type-level product list.
-
-:::info
-
-### Generated machinery
-
-**You are not expected to use `AppendProduct` directly.** It is a type-level
-operation the extensible-data machinery computes with. The builder and merge recursions are its callers
-in practice. You will most likely meet it in an error message from code that walks a shape; this page
-explains what it produces so that message is legible. The one case for naming it is generic code that must describe in a signature the shape it *will* produce.
-
-:::
 
 ## Overview
 
@@ -28,8 +19,9 @@ to return.
 `AppendProduct<Item>` is that computation for a single entry. It takes a product and an item and names
 the product with that item added **at the end**.
 
-**This is one of the least user-facing traits in the reference.** You meet it if you write generic code
-over shapes, and otherwise only in an error message from code that does.
+**This is one of the least user-facing traits in the reference, and CGP itself never uses it.** It
+is provided for generic code of your own that computes shapes, and you meet it only there or in an
+error message from such code.
 
 ## Definition
 
@@ -41,10 +33,10 @@ pub trait AppendProduct<Item: ?Sized> {
 }
 ```
 
-`Self` is the existing product, `Item` is the entry to add, and `Output` is the resulting product. `Item`
-may be unsized. There is no method, because there is nothing to execute: `Output` is an associated type
-the trait solver evaluates while the compiler type-checks, so it carries no runtime cost and imposes no
-ordering.
+`Self` is the existing product, `Item` is the entry to add, and `Output` is the resulting product.
+`Item` may be unsized. The trait lacks a method, because nothing needs executing: `Output` is an
+associated type the trait solver evaluates while the compiler type-checks, so it costs nothing at
+run time.
 
 ## Usage
 
@@ -60,34 +52,49 @@ when reading a bound.
 
 ## Examples
 
-The results are types, so the check is a type equality rather than a value comparison:
+The results are types, so the check is a type equality: each function compiles only if the computed
+`Output` is the type it is returned as.
 
 ```rust
-use cgp::core::field::traits::AppendProduct;
 use cgp::prelude::*;
+use cgp::core::field::traits::AppendProduct;
 
-type Base = Product![Field<Symbol!("host"), String>];
+pub type Base = Product![Field<Symbol!("host"), String>];
 
-type WithPort = <Base as AppendProduct<Field<Symbol!("port"), u16>>>::Output;
-// = Product![Field<Symbol!("host"), String>, Field<Symbol!("port"), u16>]
-```
+pub type WithPort = <Base as AppendProduct<Field<Symbol!("port"), u16>>>::Output;
 
-In generic code the same thing appears as a bound whose projection names the routine's result shape:
+/// The page's claim about `WithPort`.
+pub fn assert_with_port(
+    fields: WithPort,
+) -> Product![Field<Symbol!("host"), String>, Field<Symbol!("port"), u16>] {
+    fields
+}
 
-```rust
-fn with_extra_field<Fields, Extra>() -> <Fields as AppendProduct<Extra>>::Output
+/// A generic signature naming the shape a routine will produce.
+pub fn with_extra_field<Fields, Extra>() -> PhantomData<<Fields as AppendProduct<Extra>>::Output>
 where
     Fields: AppendProduct<Extra>,
 {
-    todo!()
+    PhantomData
+}
+
+/// The base case the page states under *Using it*: appending onto `Nil` yields a one-element list.
+pub fn assert_nil_base_case(
+    fields: <Nil as AppendProduct<Field<Symbol!("host"), String>>>::Output,
+) -> Base {
+    fields
 }
 ```
 
+`with_extra_field` is the generic form: its return type names the shape the routine promises,
+computed from its parameters. Appending onto `Nil` yields a one-element list, the recursion's base
+case.
+
 ## When to use it
 
-**Reach for it when a routine must describe the shape it *will* produce** (in a signature, an associated
-type, or a `where` clause) and essentially never otherwise. It is a building block the extensible-data
-machinery uses; application code touches the machinery itself.
+**Reach for it when a routine must describe the shape it *will* produce** (in a signature, an
+associated type, or a `where` clause) and essentially never otherwise. Nothing in CGP names it, so
+it matters only to code of your own that computes shapes.
 
 - **Reach for [`ConcatProduct`](./concat_product.md)** to splice a whole list rather than one entry.
   Append is its single-entry special case, so if you find yourself appending in a loop, you wanted
@@ -98,7 +105,7 @@ machinery uses; application code touches the machinery itself.
   moving *values* through a shape. This never touches a value, so if you want something to happen at run
   time, it is the wrong layer.
 
-There is no `AppendSum`. Growing a sum is not an operation this layer provides.
+`AppendSum` does not exist. Growing a sum is not an operation this layer provides.
 
 ## Under the hood
 
@@ -122,7 +129,7 @@ Because the recursion only ever rebuilds the list, order is structurally preserv
 appending yields a *different* type from prepending, and why two products with the same entries in
 different orders are unrelated types.
 
-All of this is resolved during type checking. There is no `fn` anywhere on this page.
+All of this is resolved during type checking. Nothing on this page is a `fn`.
 
 ## Common Mistakes
 
@@ -133,7 +140,7 @@ wrong when reaching for it.
 the three product operations is easy to forget, and reaching for the wrong name is a plain
 unresolved-associated-type error.
 
-**It is product-only.** There is no sum equivalent.
+**It is product-only.** It lacks a sum equivalent.
 
 **Order is part of the type.** Appending is not commutative with prepending, and nothing reorders a list
 to make two shapes match.

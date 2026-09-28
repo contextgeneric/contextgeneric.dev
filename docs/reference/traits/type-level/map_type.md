@@ -1,6 +1,8 @@
 ---
+title: 'MapType — the storage of one field'
 sidebar_label: 'MapType'
 sidebar_position: 1
+description: 'The marker trait whose Map<T> decides how one field of a partial record or enum is stored: its value, nothing, an uninhabited type, or an Option.'
 ---
 
 # `MapType`
@@ -35,7 +37,7 @@ fields are filled, and refuses to finalize an incomplete one.
 
 ## Definition
 
-`MapType` carries a single generic associated type and no method:
+`MapType` carries a single generic associated type and nothing else:
 
 ```rust
 pub trait MapType {
@@ -73,30 +75,53 @@ value-level side, carrying the functions that actually convert a field from one 
 
 ## Examples
 
-You mostly meet the markers inside the partial types that
-[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) generates, where a builder's type reads
-`__PartialPerson<IsNothing, IsPresent>` and tells you at a glance which fields are set.
-
-Generic partial-type machinery bounds on the trait:
+What each standard marker stores, checked as type equalities, and generic code bounded on the trait:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::impls::IsOptional;
 
-fn storage_of<M, T>(value: M::Map<T>) -> M::Map<T>
-where
-    M: MapType,
-{
+// Each function compiles only if the projection is the type on its right.
+pub fn present(value: <IsPresent as MapType>::Map<String>) -> String {
     value
+}
+
+pub fn nothing(value: <IsNothing as MapType>::Map<String>) -> () {
+    value
+}
+
+pub fn void(value: <IsVoid as MapType>::Map<String>) -> Void {
+    value
+}
+
+pub fn optional(value: <IsOptional as MapType>::Map<String>) -> Option<String> {
+    value
+}
+
+// Generic over any marker, the way the builder and extractor families are.
+pub fn store<M: MapType, T>(value: M::Map<T>) -> M::Map<T> {
+    value
+}
+
+// A bound that pins the storage names the generic associated type with its argument.
+pub fn unwrap_present<M: MapType<Map<String> = String>>(value: M::Map<String>) -> String {
+    value
+}
+
+pub fn demo() {
+    assert_eq!(present("a".to_owned()), "a");
+    assert_eq!(optional(None), None);
+    assert_eq!(store::<IsOptional, u8>(Some(1)), Some(1));
+    assert_eq!(unwrap_present::<IsPresent>("b".to_owned()), "b");
 }
 ```
 
-and a projection names one marker's storage directly:
-
-```rust
-// IsPresent::Map<String> is String
-// IsNothing::Map<String> is ()
-// IsVoid::Map<String>    is Void
-```
+Each of the first four functions compiles only because the projection is the type on its right, so
+the file is itself the table of what the markers store. You mostly meet the markers inside the
+partial types [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) generates, where a builder's
+type reads `__PartialPerson<IsNothing, IsPresent>` and tells you at a glance which fields are set.
+`unwrap_present` shows the bound that pins a generic associated type, with the argument written
+inside the equality.
 
 ## When to use it
 
@@ -111,9 +136,11 @@ The trait itself has narrower uses.
   partial-type machinery.
 - **Implement [`TransformMap`](./transform_map.md)** rather than this trait to define a new per-field
   conversion. That is the extension point of the whole scheme, and it is genuinely usable.
-- **Do not implement `MapType` for a new marker** expecting the derives to use it. The generated partial
-  types are parameterized over markers, but only the four standard ones have transforms and finalize
-  impls behind them; a fifth marker is a type with no machinery attached.
+- **Do not implement `MapType` for a new marker** expecting the rest of CGP to use it. The generated
+  [`UpdateField`](../builder/update_field.md) impls are generic over any marker, so `update_field`
+  moves a field into a custom state, and a [`TransformMap`](./transform_map.md) can convert to and
+  from it. But finalizing, reading a set field, and the optional layer are written against the
+  standard markers, so a fifth marker leaves every one of them unavailable.
 - **Reach for the [optional-field layer](../optional/has_optional_builder.md)** if what you want is defaulted or
   optional finalization. Both already exist, built on exactly this.
 
@@ -153,8 +180,9 @@ two families have been crossed.
 storage, against one marker applied across a whole list. The names are close and the jobs are not.
 [`MapField`](../field-access/map_field.md), singular, with no *s*, is a third, unrelated thing again.
 
-**A new marker gets you a type and nothing else.** Implementing `MapType` is easy; the derives' finalize
-and transform impls are written against the standard markers, so a custom one has no machinery behind it.
+**A new marker gets you `update_field` and nothing more.** Implementing `MapType` is easy, and the
+generic `UpdateField` impls accept it, but the finalize impls, the `HasField` impls on a partial
+type, and the optional layer are written against the standard markers.
 
 **`Map<T>` is a generic associated type**, so pinning it in a bound needs the
 `Map<String> = String` form rather than a plain associated-type equality.

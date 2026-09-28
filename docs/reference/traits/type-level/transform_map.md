@@ -1,6 +1,8 @@
 ---
+title: 'TransformMap — convert a fields storage'
 sidebar_label: 'TransformMap'
 sidebar_position: 3
+description: 'The per-field function converting a value from one marker''s storage to another''s, and the extension point for a new way to re-mark a record.'
 ---
 
 # `TransformMap`
@@ -44,21 +46,22 @@ use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::TransformMap;
 ```
 
-The trait is implemented on a **transform marker**, a zero-sized type you declare. It carries no data
+The trait is implemented on a **transform marker**, a zero-sized type you declare. It stores nothing
 and exists only to name the set of conversions, exactly as a provider does elsewhere in CGP.
 
-**A transform needs an impl for every source marker a field might currently be in.** That is the rule
-that decides how many impls you write, and getting it wrong is the usual failure: the walk does
-not resolve, and the error names the missing `TransformMap` impl rather than the field.
+**A transform needs an impl for every source marker a field might currently be in.** That rule
+decides how many impls you write, and getting it wrong is the usual failure, shown in
+[Common Mistakes](#common-mistakes).
 
 ## Examples
 
-A marker that fills absent fields from `Default` is one impl per source state:
+A marker that fills absent fields from `Default`, one impl per source state, applied to a builder
+with one field set:
 
 ```rust
-use cgp::core::field::impls::IsOptional;
-use cgp::core::field::traits::TransformMap;
 use cgp::prelude::*;
+use cgp::core::field::impls::IsOptional;
+use cgp::core::field::traits::{TransformMap, TransformMapFields};
 
 pub struct FillDefaults;
 
@@ -79,19 +82,39 @@ impl<T: Default> TransformMap<IsOptional, IsPresent, T> for FillDefaults {
         value.unwrap_or_default()
     }
 }
+
+#[derive(Debug, PartialEq, CgpData)]
+pub struct Config {
+    pub port: u16,
+    pub verbose: bool,
+}
+
+pub fn with_defaults() -> Config {
+    let partial = Config::builder().build_field(PhantomData::<Symbol!("port")>, 8080);
+
+    TransformMapFields::<FillDefaults, IsPresent>::transform_map_fields(partial)
+        .finalize_build()
+}
+
+pub fn demo() {
+    assert_eq!(
+        with_defaults(),
+        Config {
+            port: 8080,
+            verbose: false,
+        }
+    );
+}
 ```
 
-Read that as three cases of one rule: a present field passes through, an absent one becomes its default,
-and an optional one becomes its contents or the default. Note how each signature's argument type is the
-source marker's `Map<T>` (`T`, then `()`, then `Option<T>`), which makes the three impls
-non-overlapping.
-
+Read the impls as three cases of one rule: a present field passes through, an absent one becomes its
+default, and an optional one becomes its contents or the default. Each argument type is the source
+marker's `Map<T>` (`T`, then `()`, then `Option<T>`), which keeps the three impls from overlapping.
 Because all three target `IsPresent`, applying `FillDefaults` through
-[`transform_map_fields`](./transform_map_fields.md) leaves every field present, which is precisely the
-configuration [`FinalizeBuild`](../builder/finalize_build.md) accepts.
+[`transform_map_fields`](./transform_map_fields.md) leaves every field present, the configuration
+[`FinalizeBuild`](../builder/finalize_build.md) accepts, so `verbose` comes out as `false`.
 
-**That is not hypothetical: it is how [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) works**,
-and reading it here is the shortest route to understanding that layer.
+**That is not hypothetical: it is how [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) works**, and reading it here is the shortest route to understanding that layer.
 
 ## When to use it
 
@@ -105,9 +128,9 @@ and reading it here is the shortest route to understanding that layer.
   logs, or one that fills from something other than `Default`.
 - **Use [`TransformMapFields`](./transform_map_fields.md)** to apply what you have written. This trait
   converts one field; that one walks a whole record.
-- **Do not implement [`MapType`](./map_type.md) for a new marker** and expect the derives to use it. A
-  fifth state marker has no machinery behind it; a new *transform* marker, by contrast, works
-  immediately.
+- **Do not implement [`MapType`](./map_type.md) for a new marker** and expect the derives to use it.
+  A fifth state marker is reachable only through `update_field` and a transform; a new *transform*
+  marker, by contrast, works immediately.
 
 ## Under the hood
 
@@ -126,16 +149,33 @@ The transform must have an impl for **every** source marker a field might curren
 `FillDefaults` above needs three rather than one. And the walk is driven by the *target's* shape, so it
 re-marks exactly the fields the concrete struct declares.
 
-Nothing here has a runtime representation beyond the field values themselves: the markers are zero-sized,
-and `transform_mapped` is an associated function with no receiver.
+Nothing here has a runtime representation beyond the field values themselves: the markers are
+zero-sized, and `transform_mapped` is an associated function without a receiver.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 
-**It needs an impl per source state.** Writing only the `IsNothing` case leaves the recursion
-unresolvable for a record with any field already present, and the error names the missing
-`TransformMap` impl rather than the field that caused it.
+**It needs an impl per source state.** Writing only the `IsNothing` case, as
+`pub struct OnlyAbsent;` with a single `TransformMap<IsNothing, IsPresent, T>` impl, and applying it
+to a `Config` builder whose `port` is already set:
+
+```rust
+let partial = Config::builder().build_field(PhantomData::<Symbol!("port")>, 8080);
+let _ = TransformMapFields::<OnlyAbsent, IsPresent>::transform_map_fields(partial);
+```
+
+fails with two errors. The first is a misleading mismatch on the walk's internal `UpdateField`
+step; the second names the missing impl, identifying the field by its value type rather than its
+name:
+
+```text
+error[E0271]: type mismatch resolving `<__PartialConfig<IsPresent, IsPresent> as UpdateField<Symbol<4, Chars<'p', Chars<'o', Chars<'r', Chars<'t', Nil>>>>>, IsNothing>>::Mapper == IsNothing`
+...
+error[E0277]: the trait bound `OnlyAbsent: TransformMap<cgp::prelude::IsPresent, cgp::prelude::IsPresent, u16>` is not satisfied
+```
+
+Read the second: the source marker is the case to add.
 
 **The argument type is the source marker's projection**, not `T`. An impl from `IsNothing` takes `()`,
 one from `IsOptional` takes `Option<T>`. Writing `T` there is the most common mistake.
@@ -146,7 +186,8 @@ one from `IsOptional` takes `Option<T>`. Writing `T` there is the most common mi
 **A transform whose impls do not all target the same marker will not compose into a finalize.** The
 layer's payoff comes from every field landing in one state, usually `IsPresent`.
 
-**It is an associated function, not a method.** There is no receiver; the marker exists only as a name.
+**It is an associated function, not a method.** It does not take a receiver; the marker exists only
+as a name.
 
 ## Related constructs
 

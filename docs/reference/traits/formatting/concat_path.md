@@ -2,7 +2,7 @@
 title: 'ConcatPath — join two type-level paths'
 sidebar_label: 'ConcatPath'
 sidebar_position: 3
-description: 'Join two type-level paths, which CGP''s namespace machinery uses to address a component. You are not expected to call it directly.'
+description: 'Join two type-level paths, as the generated lookup behind namespaces and open does to append a component''s type parameters to its route.'
 ---
 
 # `ConcatPath`
@@ -14,24 +14,26 @@ Joining two type-level paths.
 ### Generated machinery
 
 **You are not expected to call `ConcatPath` directly.**
-[`cgp_namespace!`](../../macros/cgp_namespace.md) and [`RedirectLookup`](../../providers/redirect_lookup.md)
-use it to extend a route one segment at a time, and [`ChainGetters`](../../providers/chain_getters.md) to
-descend into a nested context. This page explains the operation, so that a composed path in an
-expansion or an error message is legible. The one case for naming it is generic code that composes paths rather than writing one out.
+[`#[cgp_component]`](../../macros/cgp_component.md) uses it in the
+[`RedirectLookup`](../../providers/redirect_lookup.md) impl it generates for every component, to
+append the component's type parameters to the lookup path that namespaces and the `open` statement
+route along. This page explains the operation, so that a composed path in an expansion or an error
+message is legible. The one case for naming it is generic code that composes paths rather than
+writing one out.
 
 :::
 
 ## Overview
 
-A [`Path!`](../../macros/path.md) is a type-level list of segments: the route a namespaced component
-lookup is redirected along, or the chain of field names a nested getter descends. Composing two such
-routes means splicing one list onto the end of another, and `ConcatPath` is that operation. It is the
-path-level analogue of [`ConcatProduct`](../type-level/concat_product.md), with the same two-impl
-recursion over a different list.
+A [`Path!`](../../macros/path.md) is a type-level list of segments: the route a namespaced or
+`open`-dispatched component lookup is redirected along. Composing two such routes means splicing one
+list onto the end of another, and `ConcatPath` is that operation. It is the path-level analogue of
+[`ConcatProduct`](../type-level/concat_product.md), with the same two-impl recursion over a
+different list.
 
 ## Definition
 
-`ConcatPath` carries a single associated type and no method:
+`ConcatPath` carries a single associated type and nothing else:
 
 ```rust
 pub trait ConcatPath<Other: ?Sized> {
@@ -39,54 +41,60 @@ pub trait ConcatPath<Other: ?Sized> {
 }
 ```
 
-`Self` is the first path and `Other` the second, and `Output` is the first path's segments followed by
-the second's. **Both sides may be unsized**, since path types are markers rather than types anything is
-instantiated at. There is no method and no value: `ConcatPath` is a pure type-level computation resolved
-during trait resolution, so it names the combined path type and nothing runs.
+`Self` is the first path and `Other` the second, and `Output` is the first path's segments followed
+by the second's. **Both sides may be unsized**, since path types are markers rather than types
+anything is instantiated at. The trait has neither a method nor a value: `ConcatPath` is a pure
+type-level computation resolved during trait resolution, so it names the combined path type and
+nothing runs.
 
 ## Usage
 
-**`ConcatPath` is in the prelude**: `use cgp::prelude::*;` names it, which makes it the one member of
-the type-level recovery group that needs no import. Its two neighbours each need a different one:
-[`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
+**`ConcatPath` is in the prelude**: `use cgp::prelude::*;` names it, which makes it the one member
+of the type-level recovery group that comes with the prelude. Its two neighbours each need a
+different one: [`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
 [`StaticFormat`](./static_format.md), defined in the same crate as this trait, from
 `cgp::core::base::traits`.
 
 ## Examples
 
-Two paths composed at the type level, which is the operation behind chaining nested accessors:
+Two paths joined at the type level, and a generic signature naming a composed route:
 
 ```rust
 use cgp::prelude::*;
 
-type Outer = Path!(@a.b);
-type Inner = Path!(@c.d);
+pub type Outer = Path!(@a.b);
+pub type Inner = Path!(@c.d);
 
-type Joined = <Outer as ConcatPath<Inner>>::Output;   // the path @a.b.c.d
-```
+pub type Joined = <Outer as ConcatPath<Inner>>::Output;
 
-Note the leading `@`: [`Path!`](../../macros/path.md) requires it, and `Path!(a.b)` does not parse.
+// Compiles only if the joined path is `@a.b.c.d`.
+pub fn assert_joined(path: PhantomData<Joined>) -> PhantomData<Path!(@a.b.c.d)> {
+    path
+}
 
-In generic code the projection usually appears in a bound rather than a type alias, naming the route a
-composed getter will take:
-
-```rust
-fn descend<Outer, Inner>() -> <Outer as ConcatPath<Inner>>::Output
+// A generic signature naming the composed route.
+pub fn descend<Outer: ?Sized, Inner: ?Sized>(
+) -> PhantomData<<Outer as ConcatPath<Inner>>::Output>
 where
     Outer: ConcatPath<Inner>,
 {
-    todo!()
+    PhantomData
 }
 ```
 
+`assert_joined` compiles only because the joined path is `@a.b.c.d`. Note the leading `@`:
+[`Path!`](../../macros/path.md) requires it, and `Path!(a.b)` does not parse. The `?Sized` bounds on
+`descend` are needed because a path is an unsized marker.
+
 ## When to use it
 
-**Reach for it when composing paths in generic code**, which is nested-accessor territory. If you are
-writing a path literally, [`Path!`](../../macros/path.md) already gives you the whole thing and there is
-nothing to concatenate.
+**Reach for it when composing paths in generic code**, which is rare outside the generated lookup
+impls. If you are writing a path literally, [`Path!`](../../macros/path.md) already gives you the
+whole thing and there is nothing to concatenate.
 
-- **Use [`ChainGetters`](../../providers/chain_getters.md)** rather than composing paths by hand when the
-  goal is reaching a field on a nested context. That provider is the construct this operation serves.
+- **Use [`ChainGetters`](../../providers/chain_getters.md)** to reach a field on a nested context.
+  It chains getters through a [`Product!`](../../macros/product.md) list, not a path, so this trait
+  is not involved.
 - **Use [`ConcatProduct`](../type-level/concat_product.md)** for field lists rather than paths. The two recursions
   are the same shape over different lists and are not interchangeable.
 - **Use [`StaticString`](./static_string.md)** if what you want is the segments as *text*. This produces
@@ -94,8 +102,8 @@ nothing to concatenate.
 
 ## Under the hood
 
-Two impls, one per list node. Each node keeps its head segment and rebuilds the tail; the terminator
-becomes the other path outright:
+Two impls, one per list node. Each node keeps its head segment and rebuilds the tail; the
+terminator becomes the other path outright:
 
 ```rust
 impl<Head: ?Sized, Tail: ?Sized, Other: ?Sized> ConcatPath<Other> for PathCons<Head, Tail>
@@ -106,23 +114,50 @@ where
 }
 
 impl<Other: ?Sized> ConcatPath<Other> for Nil {
-    type Output = Other;   // the second path is substituted whole
+    type Output = Other;
 }
 ```
 
-Note the `?Sized` on every parameter, including the associated type: that lets both operands
-be the unsized markers a path is built from, and it is the one way this recursion differs from
-[`ConcatProduct`](../type-level/concat_product.md)'s otherwise identical shape.
+Note the `?Sized` on every parameter, including the associated type: that lets both operands be the
+unsized markers a path is built from, and it is the one way this recursion differs from
+[`ConcatProduct`](../type-level/concat_product.md)'s otherwise identical shape. So the result is the
+first path's segments followed by the second's, in order, with the cost of resolution proportional
+to the first path's length.
 
-So the result is the first path's segments followed by the second's, in order, with the cost of
-resolution proportional to the first path's length.
+Its one consumer shows the job. For a component `Show<T>`, `#[cgp_component]` generates a
+[`RedirectLookup`](../../providers/redirect_lookup.md) provider impl that appends `T` to the path it
+was given before reading the table; `cargo cgp expand` shows the bounds:
 
-It never touches a value; it only names the combined path type, which a getter or a
-[`RedirectLookup`](../../providers/redirect_lookup.md) then uses to descend.
+```rust
+impl<__Context__, T, __Components__, __Path__> ShowImpl<__Context__, T>
+for RedirectLookup<__Components__, __Path__>
+where
+    __Path__: ConcatPath<Path!(@T)>,
+    __Components__: DelegateComponent<<__Path__ as ConcatPath<Path!(@T)>>::Output>,
+    <__Components__ as DelegateComponent<
+        <__Path__ as ConcatPath<Path!(@T)>>::Output,
+    >>::Delegate: ShowImpl<__Context__, T>,
+{
+    fn show(__context__: &__Context__, value: &T) -> String {
+        <__Components__ as DelegateComponent<
+            <__Path__ as ConcatPath<Path!(@T)>>::Output,
+        >>::Delegate::show(__context__, value)
+    }
+}
+```
+
+That is how `@test.ShowImplComponent` becomes `@test.ShowImplComponent.u64` for a `u64` value, the
+key a namespaced or `open` entry is written at.
 
 ## Common Mistakes
 
-**[`Path!`](../../macros/path.md) requires a leading `@`.** `Path!(a.b)` does not parse; `Path!(@a.b)` does.
+**[`Path!`](../../macros/path.md) requires a leading `@`.** `Path!(@a.b)` parses, and
+`pub type Outer = Path!(a.b);` fails with:
+
+```text
+error: expected `@`
+```
+
 This is the most common way an otherwise-correct `ConcatPath` example fails to build.
 
 **It produces a type, not a joined string.** This is path composition for trait resolution. If you want
@@ -145,9 +180,10 @@ normalizes them.
 - [`StaticString`](./static_string.md): recovering a segment's name as text.
 - [`StaticFormat`](./static_format.md): the lazy formatting counterpart.
 - [`RedirectLookup`](../../providers/redirect_lookup.md): the provider that follows a path.
-- [`ChainGetters`](../../providers/chain_getters.md): nested accessors, the setting path composition
-  serves.
+- [`#[cgp_component]`](../../macros/cgp_component.md): generates the one impl that uses it.
 - [`cgp_namespace!`](../../macros/cgp_namespace.md): where paths key a namespace's entries.
+- [`ChainGetters`](../../providers/chain_getters.md): nested accessors, which chain getters rather
+  than paths.
 
 The ideas behind it:
 

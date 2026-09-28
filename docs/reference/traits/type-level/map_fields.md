@@ -1,6 +1,8 @@
 ---
+title: 'MapFields — rewrite every entry of a list'
 sidebar_label: 'MapFields'
 sidebar_position: 7
+description: 'Rewrite every entry of a type-level product or sum through one MapType marker, as CGP does to wrap each provider in a pipeline''s list.'
 ---
 
 # `MapFields`
@@ -47,10 +49,10 @@ pub trait MapFields<Mapper> {
 }
 ```
 
-`Self` is the list, `Mapper` is the [`MapType`](./map_type.md) marker to apply, and the result is exposed
-as `Mapped`. Note the name, which differs from the `Output` its two siblings
-[`AppendProduct`](./append_product.md) and [`ConcatProduct`](./concat_product.md) expose. There is no
-method, because there is nothing to execute.
+`Self` is the list, `Mapper` is the [`MapType`](./map_type.md) marker to apply, and the result is
+exposed as `Mapped`. Note the name, which differs from the `Output` its two siblings
+[`AppendProduct`](./append_product.md) and [`ConcatProduct`](./concat_product.md) expose. The trait
+lacks a method, because nothing needs executing.
 
 ## Usage
 
@@ -66,27 +68,47 @@ use cgp::core::field::traits::MapFields;
 
 ## Examples
 
-Applying `IsOptional` turns a product of values into a product of optionals:
+One marker applied over a product and over a sum, checked as type equalities:
 
 ```rust
+use cgp::prelude::*;
 use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::MapFields;
-use cgp::prelude::*;
 
-type Fields = Product![String, u16, bool];
+pub type Fields = Product![String, u16, bool];
 
-type Optional = <Fields as MapFields<IsOptional>>::Mapped;
-// = Product![Option<String>, Option<u16>, Option<bool>]
+pub type Optional = <Fields as MapFields<IsOptional>>::Mapped;
+
+pub fn assert_optional(
+    fields: Optional,
+) -> Product![Option<String>, Option<u16>, Option<bool>] {
+    fields
+}
+
+pub type Variants = Sum![String, u16];
+
+pub type OptionalVariants = <Variants as MapFields<IsOptional>>::Mapped;
+
+pub fn assert_optional_variants(
+    variants: OptionalVariants,
+) -> Sum![Option<String>, Option<u16>] {
+    variants
+}
+
+/// The page's claim that `IsPresent` is the identity, and that `IsNothing` collapses each entry.
+pub fn assert_present(fields: <Fields as MapFields<IsPresent>>::Mapped) -> Fields {
+    fields
+}
+
+pub fn assert_nothing(
+    fields: <Fields as MapFields<IsNothing>>::Mapped,
+) -> Product![(), (), ()] {
+    fields
+}
 ```
 
-The same marker applies over a sum:
-
-```rust
-type Variants = Sum![String, u16];
-
-type OptionalVariants = <Variants as MapFields<IsOptional>>::Mapped;
-// = Sum![Option<String>, Option<u16>]
-```
+`IsOptional` wraps each entry, `IsPresent` leaves the list unchanged, and `IsNothing` collapses each
+entry to `()`. The sum is rewritten by the same marker, since `MapFields` covers both lists.
 
 ## When to use it
 
@@ -138,15 +160,27 @@ needs its own import from `cgp::core::field::impls`.
 
 **The result is `Mapped`, not `Output`.** [`AppendProduct`](./append_product.md) and
 [`ConcatProduct`](./concat_product.md) both expose `Output`, and this one does not.
+`<Product![u8, u16] as MapFields<IsPresent>>::Output` fails with:
+
+```text
+error[E0576]: cannot find associated type `Output` in trait `MapFields`
+```
 
 **It computes types, not values.** A `MapFields<IsOptional>` result does not wrap anything at run time.
 Something still has to build the wrapped values, such as
 [`TransformMapFields`](./transform_map_fields.md).
 
-**A marker with no `MapType` impl does not resolve**, and the error names the missing `MapType` bound
-rather than the marker's role.
+**A marker without a `MapType` impl does not resolve.** Mapping through a plain
+`pub struct Wrapped;`, as `<Product![u8, u16] as MapFields<Wrapped>>::Mapped`, names the missing
+bound and the list that needed it:
 
-**It is the only one of the three that covers sums.** There is no `AppendSum` or `ConcatSum`.
+```text
+error[E0277]: the trait bound `Wrapped: MapType` is not satisfied
+...
+   = note: required for `Cons<u8, Cons<u16, Nil>>` to implement `MapFields<Wrapped>`
+```
+
+**It is the only one of the three that covers sums.** Neither `AppendSum` nor `ConcatSum` exists.
 
 **A long list means a deep recursion**, so mapping a wide shape costs compile time proportional to its
 width.

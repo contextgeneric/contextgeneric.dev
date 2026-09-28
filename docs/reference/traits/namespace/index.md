@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The lookup traits that resolve a namespace''s default provider for a key: by component alone, or per type through one or two further type parameters.'
 ---
 
 # Namespaces and defaults

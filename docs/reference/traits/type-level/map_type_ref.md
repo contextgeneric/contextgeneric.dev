@@ -1,6 +1,8 @@
 ---
+title: 'MapTypeRef — storage in a borrowed view'
 sidebar_label: 'MapTypeRef'
 sidebar_position: 2
+description: 'The marker trait deciding how a borrowed extractor holds each payload, by shared reference, by mutable reference, or by value, at a lifetime.'
 ---
 
 # `MapTypeRef`
@@ -33,7 +35,7 @@ be matched without being moved, with the narrowing working identically.
 
 ## Definition
 
-`MapTypeRef` carries a single generic associated type and no method:
+`MapTypeRef` carries a single generic associated type and nothing else:
 
 ```rust
 pub trait MapTypeRef {
@@ -59,46 +61,73 @@ impl MapTypeRef for IsOwned { type Map<'a, T: 'a> = T; }
 
 :::warning
 
-**`IsOwned` has no consumer in CGP.** No derive emits it and no provider resolves against it. It is
-available for a borrowed view that holds its payloads by value, and at present that view exists only if
-you write the machinery yourself.
+**Nothing in CGP consumes `IsOwned`.** No derive emits it and no provider resolves against it. It is
+available for a borrowed view that holds its payloads by value, and at present that view exists only
+if you write the machinery yourself.
 
 :::
 
 ## Examples
 
-You meet these markers inside the borrowed companion types the derives generate. Reading a variant
-through a shared borrow leaves the value intact:
+What each standard marker stores at a lifetime, and the two borrowed extractors that fix it:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::impls::IsOwned;
 
-#[derive(ExtractField)]
+pub fn by_ref<'a>(value: <IsRef as MapTypeRef>::Map<'a, String>) -> &'a String {
+    value
+}
+
+pub fn by_mut<'a>(value: <IsMut as MapTypeRef>::Map<'a, String>) -> &'a mut String {
+    value
+}
+
+pub fn owned<'a>(value: <IsOwned as MapTypeRef>::Map<'a, String>) -> String {
+    value
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(Debug, PartialEq, ExtractField)]
 pub enum Shape {
     Circle(Circle),
     Rectangle(Rectangle),
 }
 
-let radius = shape
-    .extractor_ref()                                        // outer marker is IsRef
-    .extract_field(PhantomData::<Symbol!("Circle")>)
-    .map(|circle| circle.radius)
-    .ok();
-```
+pub fn demo() {
+    let mut shape = Shape::Circle(Circle { radius: 1.0 });
 
-and the mutable form changes a payload in place:
+    // The outer marker is `IsRef`, so the payload comes out as `&Circle`.
+    let radius = shape
+        .extractor_ref()
+        .extract_field(PhantomData::<Symbol!("Circle")>)
+        .map(|circle| circle.radius)
+        .ok();
+    assert_eq!(radius, Some(1.0));
 
-```rust
-if let Ok(circle) = shape
-    .extractor_mut()                                        // outer marker is IsMut
-    .extract_field(PhantomData::<Symbol!("Circle")>)
-{
-    circle.radius = 5.0;
+    // The outer marker is `IsMut`, so the payload comes out as `&mut Circle`.
+    if let Ok(circle) = shape
+        .extractor_mut()
+        .extract_field(PhantomData::<Symbol!("Circle")>)
+    {
+        circle.radius = 5.0;
+    }
+    assert_eq!(shape, Shape::Circle(Circle { radius: 5.0 }));
 }
 ```
 
-Neither call names a marker. What the markers do is decide the type the payload comes out as (`&Circle`
-in the first case, `&mut Circle` in the second) while the per-field
+Neither extractor call names a marker. What the markers decide is the type the payload comes out as,
+`&Circle` through `extractor_ref` and `&mut Circle` through `extractor_mut`, while the per-field
 [`MapType`](./map_type.md) markers track which variants are still possible.
 
 ## When to use it
@@ -121,31 +150,31 @@ what this page is for: an error mentioning `IsRef` is telling you the value is b
 
 ## Under the hood
 
-A borrowed companion enum carries the outer marker as an extra parameter alongside the per-variant ones,
-and each payload slot projects through both:
+A borrowed companion enum carries the outer marker as an extra parameter alongside the per-variant
+ones, and each payload slot projects through both. `cargo cgp expand` on a
+`Shape { Circle(Circle), Rectangle(Rectangle) }` deriving `ExtractField` shows it:
 
 ```rust
-// conceptually, for `enum Shape { Circle(Circle), Rectangle(Rectangle) }`
-//
-// pub enum __PartialRefShape<'a, R: MapTypeRef, F0: MapType, F1: MapType> {
-//     Circle(F0::Map<R::Map<'a, Circle>>),
-//     Rectangle(F1::Map<R::Map<'a, Rectangle>>),
-// }
+pub enum __PartialRefShape<'__a__, __R__: MapTypeRef, __F0__: MapType, __F1__: MapType> {
+    Circle(<__F0__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Circle>>),
+    Rectangle(<__F1__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Rectangle>>),
+}
 ```
 
-Read the nesting outward: `R::Map<'a, T>` decides *how* the payload is held, and `F::Map<…>` decides
-*whether* it is there at all. Fixing `R = IsRef` gives a shared-borrow extractor; flipping an `F` from
-`IsPresent` to `IsVoid` rules that variant out. The two axes are independent, which is why narrowing
-behaves identically through a borrow and through an owned value.
+Read the nesting outward: `__R__`'s `Map<'a, T>` decides *how* the payload is held, and each
+`__F__`'s `Map<…>` decides *whether* it is there at all. Fixing `__R__` to `IsRef` gives a
+shared-borrow extractor; flipping an `__F__` from `IsPresent` to `IsVoid` rules that variant out.
+The two axes are independent, which is why narrowing behaves identically through a borrow and
+through an owned value.
 
-The `T: 'a` bound and the `: 'a` bound on the associated type are what keep the projection well-formed:
-a payload cannot be borrowed for longer than it lives, and the resulting storage type cannot outlive the
-borrow either.
+The `T: 'a` bound and the `: 'a` bound on the associated type are what keep the projection
+well-formed: a payload cannot be borrowed for longer than it lives, and the resulting storage type
+cannot outlive the borrow either.
 
 ## Common Mistakes
 
-**`IsOwned` is unused by CGP.** It is a legal marker with no consumer, so selecting it means writing the
-machinery that uses it yourself.
+**`IsOwned` is unused by CGP.** It is a legal marker that nothing consumes, so selecting it means
+writing the machinery that uses it yourself.
 
 **`IsOwned` is not in the prelude.** Import it from `cgp::core::field::impls`. `IsRef` and `IsMut` are.
 
@@ -156,9 +185,8 @@ usually means the owned and borrowed forms have been crossed.
 **The associated type takes a lifetime as well as a type.** A bound over it is more verbose than a
 `MapType` bound, and eliding the lifetime rarely works.
 
-**A mutable extractor cannot coexist with another borrow of the same value**, which is ordinary borrow
-checking rather than anything CGP adds, but it surfaces as an error about the companion type, which
-reads as though the machinery is at fault.
+**A mutable extractor cannot coexist with another borrow of the same value**, which is ordinary
+borrow checking rather than anything CGP adds.
 
 ## Related constructs
 

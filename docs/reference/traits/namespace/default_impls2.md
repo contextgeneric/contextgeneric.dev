@@ -1,6 +1,8 @@
 ---
+title: 'DefaultImpls2 — a default keyed on two types'
 sidebar_label: 'DefaultImpls2'
 sidebar_position: 3
+description: 'The lookup trait for a namespace default keyed on a component and a pair of types, reachable through default_impl and a for loop.'
 ---
 
 # `DefaultImpls2`
@@ -25,7 +27,7 @@ per-type default needs. `DefaultImpls2` is the same idea under a **pair** of typ
 
 ## Definition
 
-`DefaultImpls2` carries a single associated type and no method:
+`DefaultImpls2` carries a single associated type and nothing else:
 
 ```rust
 pub trait DefaultImpls2<T1, T2, Components> {
@@ -33,18 +35,19 @@ pub trait DefaultImpls2<T1, T2, Components> {
 }
 ```
 
-`Self` is the key being looked up, `T1` and `T2` are the two further lookup types the attribute fills
-from the namespace path, `Components` is the table, and `Delegate` is the resolved provider. There is no
-method and no data, so resolving a default projects `Delegate` from the matching impl.
+`Self` is the key being looked up, `T1` and `T2` are the two further lookup types the attribute
+fills from the namespace path, `Components` is the table, and `Delegate` is the resolved provider.
+The trait has neither a method nor data, so resolving a default projects `Delegate` from the
+matching impl.
 
 Three traits exist rather than one variadic trait because each fixes the key's arity at the type level,
 which lets the projection resolve cleanly. This is the widest of the three.
 
 :::warning
 
-**Nothing inside CGP emits or consumes it.** It is reachable and tested, and it is a provided extension
-point rather than a construct the generated code relies on, so there is no library-generated example to
-pattern-match against. The [next section](#usage) shows what a use looks like.
+**Nothing inside CGP emits or consumes it.** It is reachable and tested, and it is a provided
+extension point rather than a construct the generated code relies on, so the library generates
+nothing to pattern-match against. The [next section](#usage) shows what a use looks like.
 
 :::
 
@@ -62,50 +65,71 @@ path.** So `#[default_impl(Key in DefaultImpls2<Component, Other>)]` emits
 
 ```rust
 impl<Components> DefaultImpls2<Component, Other, Components> for Key {
-    type Delegate = /* the provider */;
+    type Delegate = Provider;
 }
 ```
 
-Registration is [`#[default_impl(...)]`](../../attributes/default_impl.md), which accepts an arbitrary
-namespace path and therefore needed no new construct to support this trait. Consumption is a `for … in`
-loop inside [`delegate_components!`](../../macros/delegate_components.md), whose bound projects `Delegate`
-the same way the one-type form does.
+where `Provider` is the provider the attribute sits on.
+
+Registration is [`#[default_impl(...)]`](../../attributes/default_impl.md), which accepts an
+arbitrary namespace path and therefore did not need a new construct to support this trait.
+Consumption is a `for … in` loop inside
+[`delegate_components!`](../../macros/delegate_components.md), whose bound projects `Delegate` the
+same way the one-type form does.
 
 ## Examples
 
-A two-type key registered and then consumed:
+A two-parameter component, a default registered under a pair, and a context pulling in every default
+for one target type:
 
 ```rust
-use cgp::core::component::DefaultImpls2;
 use cgp::prelude::*;
+use cgp::core::component::DefaultImpls2;
 
-#[cgp_impl(new ConvertStringToU64)]
+#[cgp_component(Converter)]
+#[prefix(@test in DefaultNamespace)]
+pub trait CanConvert<Source, Target> {
+    fn convert(&self, value: &Source) -> Target;
+}
+
+#[cgp_impl(new ParseU64)]
 #[default_impl(String in DefaultImpls2<ConverterComponent, u64>)]
-impl Converter<u64> {
+impl Converter<String, u64> {
     fn convert(&self, value: &String) -> u64 {
         value.parse().unwrap_or_default()
     }
 }
-```
 
-and a context pulling every registered pair in:
-
-```rust
 pub struct App;
 
 delegate_components! {
     App {
         namespace DefaultNamespace;
 
+        // Every source type with a registered default into `u64`.
         for <T, Provider> in DefaultImpls2<ConverterComponent, u64> {
-            @test.ConverterComponent.T: Provider,
+            @test.ConverterComponent.T.u64: Provider,
         }
     }
 }
+
+check_components! {
+    App {
+        ConverterComponent: (String, u64),
+    }
+}
+
+pub fn demo() {
+    let parsed: u64 = App.convert(&"42".to_owned());
+    assert_eq!(parsed, 42);
+}
 ```
 
-**[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** The loop variable must still appear in the key, exactly as
-for the one-type form.
+**[Environmental context](/docs/reference/glossary#environmental-context),
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** The component's two
+parameters each take a path segment, so the loop's key is `@test.ConverterComponent.T.u64`, with the
+loop variable in the first and the fixed target in the second. The loop variable must appear in the
+key, exactly as for the one-type form.
 
 ## When to use it
 
@@ -126,27 +150,37 @@ and is worked out on [its page](./default_impls1.md#when-to-use-it).
 
 ## Under the hood
 
-A `for … in` loop emits a [`DelegateComponent`](../wiring/delegate_component.md) impl whose `where` clause
-projects the default:
+Registration and consumption follow the one-type form exactly. `cargo cgp expand` on the example
+shows the registration impl the attribute emits, with `String` in the `Self` position and both path
+arguments leading:
 
 ```rust
-where T: DefaultImpls2<Component, Other, App, Delegate = Provider>
+impl<__Components__> DefaultImpls2<ConverterComponent, u64, __Components__> for String {
+    type Delegate = ParseU64;
+}
 ```
 
-The loop variables appear only in that bound and in the key, so **the key must mention them**, otherwise
-the parameter is unconstrained and the compiler rejects the impl with `E0207`.
+The `for … in` loop emits a [`DelegateComponent`](../wiring/delegate_component.md) impl whose
+`where` clause projects the default:
 
-The registration impl carries only the parameters naming the key and provider plus the table, never the
-provider's own `where` clause, so a provider with [impl-side dependencies](/docs/reference/glossary#impl-side-dependency) registers cleanly and its bounds
-are checked when a real context resolves it.
+```rust
+where T: DefaultImpls2<ConverterComponent, u64, App, Delegate = Provider>
+```
 
-Because nothing in the library emits this trait, there is no generated code to compare against. The
-impls you see are the ones you or the attribute wrote.
+The loop variables appear only in that bound and in the key, so **the key must mention them**,
+otherwise the parameters are unconstrained and the compiler rejects the impl with `E0207`, as
+[`DefaultImpls1`](./default_impls1.md#common-mistakes) shows.
+
+The registration impl carries only the parameters naming the key and provider plus the table, never
+the provider's own `where` clause, so a provider with
+[impl-side dependencies](/docs/reference/glossary#impl-side-dependency) registers cleanly and its
+bounds are checked when a real context resolves it. Because nothing in the library emits this trait,
+the impls you see are the ones you or the attribute wrote.
 
 ## Common Mistakes
 
-**Nothing inside CGP uses it.** There is no generated code to pattern-match against, and no worked
-library example.
+**Nothing inside CGP uses it.** The library emits nothing to pattern-match against and does not ship
+a worked example.
 
 **It is not in the prelude.** Import from `cgp::core::component`.
 

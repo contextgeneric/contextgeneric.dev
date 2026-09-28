@@ -1,6 +1,8 @@
 ---
+title: 'DefaultNamespace — the default lookup table'
 sidebar_label: 'DefaultNamespace'
 sidebar_position: 1
+description: 'The namespace trait a context joins with a namespace header, resolving each component''s default route; prefix registers components into it.'
 ---
 
 # `DefaultNamespace`
@@ -36,7 +38,7 @@ the forwarding, so this page is mostly about reading what they generate.
 
 ## Definition
 
-`DefaultNamespace` carries a single associated type and no method:
+`DefaultNamespace` carries a single associated type and nothing else:
 
 ```rust
 pub trait DefaultNamespace<Components> {
@@ -45,9 +47,9 @@ pub trait DefaultNamespace<Components> {
 ```
 
 `Self` is the component being looked up. `Components` is the table the lookup runs against, threaded
-through as a parameter so one key can resolve differently for each context. `Delegate` is the resolved
-value: the provider the key maps to. There is no method and no data, so resolving a default projects
-`Delegate` from the matching impl, exactly as with
+through as a parameter so one key can resolve differently for each context. `Delegate` is the
+resolved value: the provider the key maps to. The trait has neither a method nor data, so resolving
+a default projects `Delegate` from the matching impl, exactly as with
 [`DelegateComponent`](../wiring/delegate_component.md).
 
 ## Usage
@@ -71,9 +73,11 @@ registers into one with the [`#[prefix(...)]`](../../attributes/prefix.md) attri
 
 ## Examples
 
-A component registered into the namespace, and a context joining it:
+A component registered into the namespace, and a context joining it and filling the path it leaves
+open:
 
 ```rust
+use core::fmt::Display;
 use cgp::prelude::*;
 
 #[cgp_component(ShowImpl)]
@@ -82,20 +86,41 @@ pub trait Show<T> {
     fn show(&self, value: &T) -> String;
 }
 
+#[cgp_impl(new ShowWithDisplay)]
+impl<T: Display> ShowImpl<T> {
+    fn show(&self, value: &T) -> String {
+        value.to_string()
+    }
+}
+
 pub struct App;
 
 delegate_components! {
     App {
         namespace DefaultNamespace;
 
-        @test.ShowImplComponent.u64: ShowWithDisplay,   // fills a path the namespace leaves open
+        // The namespace routes the component to this path and binds nothing there.
+        @test.ShowImplComponent.u64: ShowWithDisplay,
     }
+}
+
+check_components! {
+    App {
+        ShowImplComponent: u64,
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.show(&5u64), "5");
 }
 ```
 
-**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** The header forwards `App`'s lookups through the
-namespace. `DefaultNamespace` routes `ShowImplComponent` to `@test.ShowImplComponent` but binds no
-provider there, so the direct entry supplies the one for `u64`.
+**[Environmental context](/docs/reference/glossary#environmental-context),
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** `App` carries the
+wiring and the shown value is a parameter. The header forwards `App`'s lookups through the
+namespace. `#[prefix]` makes `DefaultNamespace` route `ShowImplComponent` to the path
+`@test.ShowImplComponent` but leaves the paths beneath it unbound, so the direct entry supplies the
+one for `u64`, and the check confirms it resolves.
 
 ## When to use it
 
@@ -116,38 +141,77 @@ where the syntax requires it.** It appears in a `namespace` header and nowhere e
 ## Under the hood
 
 A `namespace N;` header does not emit one entry. It emits a **blanket**
-[`DelegateComponent`](../wiring/delegate_component.md) impl on the context that forwards every key through the
-namespace:
+[`DelegateComponent`](../wiring/delegate_component.md) impl on the context that forwards every key
+through the namespace, paired with the matching [`IsProviderFor`](../wiring/is_provider_for.md)
+forwarding so dependencies stay diagnosable. `cargo cgp expand` on the example's `App` shows both:
 
 ```rust
-impl<Key, Value> DelegateComponent<Key> for App
+impl<__Key__, __Value__> DelegateComponent<__Key__> for App
 where
-    Key: N<App, Delegate = Value>,
+    __Key__: DefaultNamespace<App, Delegate = __Value__>,
 {
-    type Delegate = Value;
+    type Delegate = __Value__;
+}
+impl<
+    __Key__,
+    __Value__,
+    __Context__,
+    __Params__,
+> IsProviderFor<__Key__, __Context__, __Params__> for App
+where
+    __Key__: DefaultNamespace<App, Delegate = __Value__>,
+    __Value__: IsProviderFor<__Key__, __Context__, __Params__>,
+{}
+```
+
+The namespace's own entries come from [`#[prefix(...)]`](../../attributes/prefix.md), which
+implements the trait for the component with a [`RedirectLookup`](../../providers/redirect_lookup.md)
+as the `Delegate`, re-routing the component to its path:
+
+```rust
+impl<__Components__> DefaultNamespace<__Components__> for ShowImplComponent {
+    type Delegate = RedirectLookup<__Components__, Path!(@test.ShowImplComponent)>;
 }
 ```
 
-paired with the matching [`IsProviderFor`](../wiring/is_provider_for.md) forwarding so dependencies stay
-diagnosable.
-
-**That blanket is why a context cannot override a namespace entry.** A directly-wired entry is a second
-`DelegateComponent` impl for its key, and Rust has no specialization to prefer one impl over another.
-Where the namespace binds that key, the blanket covers it too, and the compiler rejects the overlap with
-`E0119`. A direct entry compiles only for a key the blanket does not cover: a path the namespace routes
-to but leaves unbound, like `@test.ShowImplComponent.u64` above.
+**That blanket is why a context cannot override a namespace entry.** A directly wired entry is a
+second `DelegateComponent` impl for its key, and Rust lacks the specialization that would prefer one
+impl over another. Where the namespace binds that key, the blanket covers it too, and the compiler
+rejects the overlap with `E0119`. A direct entry compiles only for a key the blanket does not cover:
+a path the namespace routes to but leaves unbound, like `@test.ShowImplComponent.u64` above.
 
 Inheritance composes on top. A namespace declared `new Child: Parent { … }` emits a blanket impl
 forwarding any key the parent resolves, so the child resolves everything the parent does plus its own
-entries. The same rule holds at each level: a child cannot rebind a key its parent binds, and a context
-cannot rebind a key either one binds. All of it is projections, resolved at
-compile time, with nothing at run time.
+entries. The same rule holds at each level: a child cannot rebind a key its parent binds, and a
+context cannot rebind a key either one binds. All of it is projections, resolved at compile time,
+with nothing at run time.
 
 ## Common Mistakes
 
 **A namespace entry cannot be overridden from the context.** A direct entry for a key the namespace
-binds is rejected with `E0119` rather than preferred. To vary a choice between contexts, leave its path
-unbound in the namespace and wire it on each context, or give the contexts different namespaces.
+binds is rejected rather than preferred. Wiring the example's component by its bare name:
+
+```rust
+delegate_components! {
+    App {
+        namespace DefaultNamespace;
+
+        ShowImplComponent: ShowWithDisplay,
+    }
+}
+```
+
+conflicts with the namespace's entry for `ShowImplComponent`, twice, once per generated trait:
+
+```text
+error[E0119]: conflicting implementations of trait `IsProviderFor<ShowImplComponent, _, _>` for type `App`
+...
+error[E0119]: conflicting implementations of trait `DelegateComponent<ShowImplComponent>` for type `App`
+```
+
+The form that works is the component's path, as the example wires `@test.ShowImplComponent.u64`. To
+vary a choice between contexts, leave its path unbound in the namespace and wire it on each context,
+or give the contexts different namespaces.
 
 **`Self` is the component here**, as you would expect, but **not** in
 [`DefaultImpls1`](./default_impls1.md) and [`DefaultImpls2`](./default_impls2.md), where the instance
@@ -155,7 +219,7 @@ type takes the `Self` position instead. The inconsistency is the family's sharpe
 
 **It is in the prelude while its two siblings are not.** They come from `cgp::core::component`.
 
-**There is no method.** Resolving a default is a type projection.
+**It lacks a method.** Resolving a default is a type projection.
 
 **Registering into a foreign namespace is bound by the [orphan rule](/docs/reference/glossary#orphan-rule).** See
 [`DefaultImpls1`](./default_impls1.md#when-to-use-it), where the

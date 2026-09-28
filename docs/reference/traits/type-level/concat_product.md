@@ -1,22 +1,13 @@
 ---
+title: 'ConcatProduct — join two product lists'
 sidebar_label: 'ConcatProduct'
 sidebar_position: 6
+description: 'Name the type-level product list formed by one product''s entries followed by another''s, the general form of appending a single entry.'
 ---
 
 # `ConcatProduct`
 
 Splicing one type-level product list onto the end of another.
-
-:::info
-
-### Generated machinery
-
-**You are not expected to use `ConcatProduct` directly.** It is a type-level
-operation the extensible-data machinery computes with, and you will most likely meet it in an error
-message from code that walks a shape rather than in code you wrote. This page explains what it
-produces. The one case for naming it is generic code that must describe the shape produced by combining two others.
-
-:::
 
 ## Overview
 
@@ -24,8 +15,9 @@ Merging two records means merging their shapes, and the shapes are type-level li
 [`Product!`](../../macros/product.md) of named fields each. `ConcatProduct<Items>` names the list you get by
 following one product with another.
 
-It is the general form of [`AppendProduct`](./append_product.md): **append is the single-entry special
-case of concat**, and that is the shortest way to hold both in mind.
+It is the general form of [`AppendProduct`](./append_product.md): **append is the single-entry
+special case of concat**, and that is the shortest way to hold both in mind. Like append, CGP itself
+never uses it; it is provided for generic code of your own.
 
 ## Definition
 
@@ -38,9 +30,9 @@ pub trait ConcatProduct<Items> {
 }
 ```
 
-`Self` is the first product, `Items` is the second, and `Output` is the first's entries followed by the
-second's, in order. There is no method, because there is nothing to execute: `Output` is an associated
-type the trait solver evaluates during type checking, so it costs nothing at run time.
+`Self` is the first product, `Items` is the second, and `Output` is the first's entries followed by
+the second's, in order. The trait lacks a method, because nothing needs executing: `Output` is an
+associated type the trait solver evaluates during type checking, so it costs nothing at run time.
 
 ## Usage
 
@@ -56,24 +48,44 @@ unchanged.
 
 ## Examples
 
-The results are types, so the check is a type equality:
+The results are types, so the check is a type equality, here for the worked concatenation and the
+two `Nil` identities:
 
 ```rust
-use cgp::core::field::traits::{AppendProduct, ConcatProduct};
 use cgp::prelude::*;
+use cgp::core::field::traits::{AppendProduct, ConcatProduct};
 
-type Base = Product![Field<Symbol!("host"), String>];
+pub type Base = Product![Field<Symbol!("host"), String>];
 
-type WithPort = <Base as AppendProduct<Field<Symbol!("port"), u16>>>::Output;
+pub type WithPort = <Base as AppendProduct<Field<Symbol!("port"), u16>>>::Output;
 
-type Extra = Product![Field<Symbol!("tls"), bool>];
+pub type Extra = Product![Field<Symbol!("tls"), bool>];
 
-type Full = <WithPort as ConcatProduct<Extra>>::Output;
-// = Product![host, port, tls]
+pub type Full = <WithPort as ConcatProduct<Extra>>::Output;
+
+/// The page's claim about `Full`.
+pub fn assert_full(
+    fields: Full,
+) -> Product![
+       Field<Symbol!("host"), String>,
+       Field<Symbol!("port"), u16>,
+       Field<Symbol!("tls"), bool>,
+   ] {
+    fields
+}
+
+/// The `Nil` identities the page states under *Using it*.
+pub fn assert_left_identity(fields: <Nil as ConcatProduct<Base>>::Output) -> Base {
+    fields
+}
+
+pub fn assert_right_identity(fields: <Base as ConcatProduct<Nil>>::Output) -> Base {
+    fields
+}
 ```
 
-Which is the type-level counterpart of what [`CanBuildFrom`](../casting/can_build_from.md) does with values: this
-names the combined shape, that moves the fields into it.
+This is the type-level counterpart of what [`CanBuildFrom`](../casting/can_build_from.md) does with
+values: this names the combined shape, that moves the fields into it.
 
 ## When to use it
 
@@ -88,7 +100,7 @@ routine that extends a record with a caller-supplied set of fields) and essentia
 - **Note that [`ConcatPath`](../formatting/concat_path.md) is the path-level analogue**, doing the same job for the
   segment lists behind [`Path!`](../../macros/path.md), with the same two-impl recursion.
 
-There is no `ConcatSum`. Combining two sums is not an operation this layer provides.
+`ConcatSum` does not exist. Combining two sums is not an operation this layer provides.
 
 ## Under the hood
 

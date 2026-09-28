@@ -1,6 +1,8 @@
 ---
+title: 'DefaultImpls1 — a per-type namespace default'
 sidebar_label: 'DefaultImpls1'
 sidebar_position: 2
+description: 'The lookup trait for a namespace default keyed on a component and one type, which default_impl registers into and a for loop reads back.'
 ---
 
 # `DefaultImpls1`
@@ -27,7 +29,7 @@ needs: the same component resolving differently for `String` than for `u64`.
 
 ## Definition
 
-`DefaultImpls1` carries a single associated type and no method:
+`DefaultImpls1` carries a single associated type and nothing else:
 
 ```rust
 pub trait DefaultImpls1<T, Components> {
@@ -37,7 +39,8 @@ pub trait DefaultImpls1<T, Components> {
 
 `Self` is the key being looked up, the *instance* type, such as `String`. `T` is the further lookup
 type, which the attribute fills with the component name. `Components` is the table the lookup runs
-against, and `Delegate` is the resolved provider. There is no method and no data, so resolving a default
+against, and `Delegate` is the resolved provider. The trait has
+neither a method nor data, so resolving a default
 projects `Delegate` from the matching impl, exactly as with
 [`DelegateComponent`](../wiring/delegate_component.md).
 
@@ -82,19 +85,20 @@ impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
 
 The rule that governs this comes from the attribute rather than the trait, and once you have it the
 positions stop being surprising. **`#[default_impl(Key in NamespacePath)]` makes `Key` the impl's
-`Self`** and appends the table parameter to whatever `NamespacePath` names, so the leading arguments are
-simply whatever you wrote inside the path. The same rule is why the `for … in` loop's bound reads
-`T: DefaultImpls1<Component, App, Delegate = Provider>`, with the loop variable in the `Self` position.
+`Self`** and appends the table parameter to whatever `NamespacePath` names, so the leading arguments
+are whatever you wrote inside the path. The same rule is why the `for … in` loop's bound reads
+`T: DefaultImpls1<Component, App, Delegate = Provider>`, with the loop variable in the `Self`
+position.
 
 ## Examples
 
-The whole chain, from a provider declaring itself a default to a context pulling it in and adding an entry
-for a type the registry does not cover:
+The whole chain, from a provider declaring itself the `String` default to a context pulling
+registered defaults in and adding an entry for a type the registry does not cover:
 
 ```rust
-use cgp::core::component::DefaultImpls1;
-use cgp::prelude::*;
 use core::fmt::Display;
+use cgp::prelude::*;
+use cgp::core::component::DefaultImpls1;
 
 #[cgp_component(ShowImpl)]
 #[prefix(@test in DefaultNamespace)]
@@ -106,14 +110,17 @@ pub trait Show<T> {
 #[default_impl(String in DefaultImpls1<ShowImplComponent>)]
 impl ShowImpl<String> {
     fn show(&self, value: &String) -> String {
-        value.clone()
+        format!("{value:?}")
     }
 }
-```
 
-Then the context:
+#[cgp_impl(new ShowWithDisplay)]
+impl<T: Display> ShowImpl<T> {
+    fn show(&self, value: &T) -> String {
+        value.to_string()
+    }
+}
 
-```rust
 pub struct App;
 
 delegate_components! {
@@ -124,18 +131,32 @@ delegate_components! {
             @test.ShowImplComponent.T: Provider,
         }
 
-        @test.ShowImplComponent.u64: ShowWithDisplay,   // u64 has no registered default
+        // `u64` has no registered default, so the context supplies one.
+        @test.ShowImplComponent.u64: ShowWithDisplay,
     }
+}
+
+check_components! {
+    App {
+        ShowImplComponent: [String, u64],
+    }
+}
+
+pub fn demo() {
+    assert_eq!(App.show(&"hi".to_owned()), "\"hi\"");
+    assert_eq!(App.show(&5u64), "5");
 }
 ```
 
-**[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** `App` carries the wiring and the shown value is a
-parameter. The loop wires every type with a registered default by projecting
-`T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>`. Only `String` has a registered default,
-so the direct `u64` line adds a type beside it. Had `u64` a registered default too, the loop's impl and
-the direct entry would both cover its path, and the compiler would reject them with `E0119`.
+**[Environmental context](/docs/reference/glossary#environmental-context),
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).** `App` carries the
+wiring and the shown value is a parameter. The loop wires every type with a registered default by
+projecting `T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>`. Only `String` has a
+registered default, so the direct `u64` line adds a type beside it; had `u64` a registered default
+too, the loop's impl and the direct entry would both cover its path, and the compiler would reject
+them, as [Common Mistakes](#common-mistakes) shows.
 
-A whole namespace can also be the loop target:
+A whole namespace can also be the loop target. After
 
 ```rust
 cgp_namespace! {
@@ -145,8 +166,8 @@ cgp_namespace! {
 }
 ```
 
-Pointing `for <T, Provider> in DefaultShowComponents { … }` at this wires the listed types through the
-same projection.
+a `for <T, Provider> in DefaultShowComponents { … }` loop wires the listed types through the same
+projection.
 
 ## When to use it
 
@@ -174,24 +195,44 @@ body of the crate that owns it, or into a local namespace that inherits the fore
 ## Under the hood
 
 A `for <T, Provider> in DefaultImpls1<Component> { … }` loop emits a
-[`DelegateComponent`](../wiring/delegate_component.md) impl whose `where` clause projects the default:
+[`DelegateComponent`](../wiring/delegate_component.md) impl, with its
+[`IsProviderFor`](../wiring/is_provider_for.md) pair, whose `where` clause projects the default.
+`cargo cgp expand` on the example's `App` shows the first:
 
 ```rust
-where T: DefaultImpls1<Component, App, Delegate = Provider>
+impl<
+    __Wildcard__,
+    T,
+    Provider,
+> DelegateComponent<
+    PathCons<Symbol!("test"), PathCons<ShowImplComponent, PathCons<T, __Wildcard__>>>,
+> for App
+where
+    T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>,
+{
+    type Delegate = Provider;
+}
 ```
 
 Read it as: for each type `T` that has a default, wire that key to the projected `Provider`.
-
 **Because the loop variables appear only in that bound and in the key, the key must mention `T`**,
-otherwise the parameter is unconstrained and the compiler rejects the impl with `E0207`, which reads as a
-puzzling error about a generic parameter rather than about the loop.
+otherwise the parameters are unconstrained and the compiler rejects the impl with `E0207`, which
+reads as a puzzling error about generic parameters rather than about the loop.
 
-The registration side is the mirror. [`#[default_impl]`](../../attributes/default_impl.md) emits an impl of
-this trait for the key type, carrying **only** the parameters naming the key and provider plus the table,
-never the provider's own `where` clause. A provider whose bounds come from `#[use_type]`, `#[uses]`,
-`#[implicit]`, or `#[use_provider]` therefore registers cleanly, because those bounds stay on the
-provider's impl and its [`IsProviderFor`](../wiring/is_provider_for.md), and are checked when a real context
-resolves it.
+The registration side is the mirror. [`#[default_impl]`](../../attributes/default_impl.md) emits an
+impl of this trait for the key type:
+
+```rust
+impl<__Components__> DefaultImpls1<ShowImplComponent, __Components__> for String {
+    type Delegate = ShowString;
+}
+```
+
+It carries **only** the parameters naming the key and provider plus the table, never the provider's
+own `where` clause. A provider whose bounds come from `#[use_type]`, `#[uses]`, `#[implicit]`, or
+`#[use_provider]` therefore registers cleanly, because those bounds stay on the provider's impl and
+its [`IsProviderFor`](../wiring/is_provider_for.md), and are checked when a real context resolves
+it.
 
 ## Common Mistakes
 
@@ -201,13 +242,35 @@ resolves it.
 **`Self` is the instance type, not the component.** The parameter names suggest otherwise. Read
 `#[default_impl(Key in Path)]` as "`Key` becomes `Self`" and the positions follow.
 
-**A `for … in` loop's key must mention the loop variable**, or the impl is rejected with `E0207`.
+**A `for … in` loop's key must mention the loop variable.** Writing a fixed type where the variable
+belongs:
+
+```rust
+for <T, Provider> in DefaultImpls1<ShowImplComponent> {
+    @test.ShowImplComponent.String: Provider,
+}
+```
+
+leaves both loop variables unconstrained:
+
+```text
+error[E0207]: the type parameter `T` is not constrained by the impl trait, self type, or predicates
+...
+error[E0207]: the type parameter `Provider` is not constrained by the impl trait, self type, or predicates
+```
 
 **`#[default_impl]` on a prefixed component is confined to the namespace's crate**, by the orphan rule.
 Put downstream wiring in the namespace body instead.
 
-**A registered default cannot be overridden from the context.** A direct entry for a type the loop
-already wires overlaps the loop's impl and is rejected with `E0119`.
+**A registered default cannot be overridden from the context.** Adding
+`@test.ShowImplComponent.String: ShowWithDisplay` beside the example's loop, for a type the loop
+already wires through its registered default, overlaps the loop's impl:
+
+```text
+error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>, _, _>` for type `App`
+...
+error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>>` for type `App`
+```
 
 **The registration impl carries none of the provider's bounds**, which is deliberate: they are checked
 where the provider is used rather than where it is registered.

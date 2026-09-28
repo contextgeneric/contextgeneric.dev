@@ -2,7 +2,7 @@
 title: 'MonadicTrans — stack one monad on another'
 sidebar_label: 'MonadicTrans'
 sidebar_position: 4
-description: 'Stack one monad on top of another, which the monadic handler combinators resolve for you rather than asking you to name the stack yourself.'
+description: 'The monad trait applying one monad as a transformer over another, so a pipeline can peel a nested Result; PipeMonadic uses it for fallible steps.'
 ---
 
 # `MonadicTrans`
@@ -31,12 +31,12 @@ It is one of four traits that give a monad marker its meaning, and it belongs wi
 composed provider, while [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) run
 each step.
 
-**This is a plain trait, not a CGP component.** It has no generated provider trait and is
+**This is a plain trait, not a CGP component.** It lacks a generated provider trait and is
 never wired.
 
 ## Definition
 
-`MonadicTrans` carries a single associated type and no method:
+`MonadicTrans` carries a single associated type and nothing else:
 
 ```rust
 pub trait MonadicTrans<M> {
@@ -57,32 +57,50 @@ the err monad handles the outer `Result` of each output, and the ok layer the `R
 use cgp::extra::monad::traits::MonadicTrans;
 ```
 
-You import it only when **defining a monad of your own**, and specifically when giving it a transformer
-form so it can stack. There is no method; the trait is a type-level function from a base monad to a
-composed one.
+You import it only when **defining a monad of your own**, and specifically when giving it a
+transformer form so it can stack. The trait lacks a method: it is a type-level function from a base
+monad to a composed one.
 
 ## Examples
 
-What each marker's impl says decides how deeply a pipeline can reach.
-
-**`IdentMonadic` returns `M` unchanged**, so applying it as a transformer changes nothing, which makes
-it the neutral element of a stack as well as of a pipeline.
-
-**The transformer forms compose.** `OkMonadicTrans<M>` and `ErrMonadicTrans<M>` implement the running
-traits by letting `M` unwrap the outer layers and then peeling their own `Result` from the value `M`
-exposes, and their `MonadicTrans` impls compose in the same order, so a stack like
-`OkMonadicTrans<ErrMonadic>` resolves layer by layer:
+What applying each shipped marker as a transformer produces, checked as type equalities:
 
 ```rust
-// conceptually: ErrMonadic unwraps the outer Result,
-// then the Ok layer handles the Result inside it
-type Stacked = OkMonadicTrans<ErrMonadic>;
+use cgp::prelude::*;
+use cgp::extra::monad::monadic::err::{ErrMonadic, ErrMonadicTrans};
+use cgp::extra::monad::monadic::ident::IdentMonadic;
+use cgp::extra::monad::monadic::ok::{OkMonadic, OkMonadicTrans};
+use cgp::extra::monad::traits::MonadicTrans;
+
+// `IdentMonadic` leaves the base unchanged.
+pub fn ident(
+    m: PhantomData<<IdentMonadic as MonadicTrans<ErrMonadic>>::M>,
+) -> PhantomData<ErrMonadic> {
+    m
+}
+
+// `OkMonadic` over `ErrMonadic`, the stack `PipeMonadic` builds for a fallible pipeline.
+pub fn ok_over_err(
+    m: PhantomData<<OkMonadic as MonadicTrans<ErrMonadic>>::M>,
+) -> PhantomData<OkMonadicTrans<ErrMonadic>> {
+    m
+}
+
+// Transformers compose: the outer one wraps whatever the inner one produces.
+pub fn nested(
+    m: PhantomData<<ErrMonadicTrans<OkMonadic> as MonadicTrans<IdentMonadic>>::M>,
+) -> PhantomData<ErrMonadicTrans<OkMonadicTrans<IdentMonadic>>> {
+    m
+}
 ```
 
-An *n*-layer stack unwraps *n* layers with no code specific to any depth, which is the whole payoff.
-
-**Layer order is meaningful.** `OkMonadicTrans<ErrMonadic>` and `ErrMonadicTrans<OkMonadic>` unwrap their
-`Result` layers in opposite orders and are not interchangeable.
+`IdentMonadic` leaves the base unchanged, so it is the neutral element of a stack as well as of a
+pipeline. `OkMonadic` over `ErrMonadic` is the stack
+[`PipeMonadic`](../../providers/monad/pipe_monadic.md) builds for a fallible pipeline: the err layer
+handles the outer `Result` of each output and the ok layer the `Result` inside it. And the
+transformer forms compose, so a stack resolves layer by layer. **Layer order is meaningful**:
+`OkMonadicTrans<ErrMonadic>` and `ErrMonadicTrans<OkMonadic>` unwrap their `Result` layers in
+opposite orders.
 
 ## When to use it
 
@@ -95,26 +113,47 @@ The reasons to name it are narrow.
 - **Defining a new monad that should stack.** The three other traits give a marker meaning on its own;
   this one lets it sit over another. A marker without it works as a base monad and cannot be a
   transformer.
-- **Reading a stacked marker in an error.** A resolution failure over a nested result usually names this
-  trait, and knowing it is the composition step rather than the running step tells you the
-  problem is the stack's shape rather than a step's types.
+- **Reading a stacked marker in an error.** A fallible pipeline's types carry an
+  `OkMonadicTrans<ErrMonadic>`-shaped stack that `PipeMonadic` built with this trait, and knowing it
+  is the composition step rather than the running step helps read the bound.
 
 If your pipeline runs over a single-layer output, you do not need a transformer at all. Use the base
 marker directly.
 
 ## Under the hood
 
-`MonadicTrans` is applied to the **monads** rather than to the handlers, and it runs *before* any binding
-does. [`PipeMonadic`](../../providers/monad/pipe_monadic.md) resolves the stacked monad first, then walks the
-handler list asking [`MonadicBind`](./monadic_bind.md) to turn each continuation into a bind step.
+`MonadicTrans` is applied to the **monads** rather than to the handlers, and it runs *before* any
+binding does. Its one consumer is [`PipeMonadic`](../../providers/monad/pipe_monadic.md)'s wiring
+for the fallible components, which stacks the chosen monad over `ErrMonadic` and promotes each
+handler first:
+
+```rust
+delegate_components! {
+    <
+        Provider,
+        M1: MonadicTrans<ErrMonadic, M = M2>,
+        M2,
+        ProvidersA: MapFields<TryPromoteProviders, Mapped = ProvidersB>,
+        ProvidersB: BindProviders<M2, Provider = Provider>,
+    >
+    PipeMonadic<M1, ProvidersA> {
+        TryComputerComponent: TryPromote<Provider>,
+        HandlerComponent: TryPromote<Provider>,
+    }
+}
+```
+
+A `TryComputer` step returns `Result<Output, Error>`, so under a user's monad `M1` its outputs carry
+one more `Result` layer, the context's error; stacking `M1` over `ErrMonadic` lets the error layer
+short-circuit on that while `M1` handles the layer inside. The `Computer` and `AsyncComputer`
+entries use the chosen monad directly.
 
 Because the transformer forms implement [`ContainsValue`](./contains_value.md) and
 [`LiftValue`](./lift_value.md) by delegating to the base monad after handling their own layer, a
 two-layer stack unwraps two `Result` layers in order and re-wraps them in reverse, and the same code
-serves any depth. That is the sense in which stacking is composition rather than a special case: the
-resolved stack is just another marker, and everything downstream treats it as one.
-
-The whole fold happens during trait resolution, so a stacked monadic pipeline is not a runtime structure.
+serves any depth. The resolved stack is another marker, and everything downstream treats it as
+one. The whole fold happens during trait resolution, so a stacked monadic pipeline is not a runtime
+structure.
 
 ## Common Mistakes
 
@@ -130,8 +169,8 @@ short-circuits on the wrong layer.
 which reads oddly in a projection like `<Self as MonadicTrans<M>>::M` and is easy to misread when
 debugging a bound.
 
-**A base marker without this impl cannot be transformed.** The error names the missing `MonadicTrans`
-bound rather than saying the marker is not stackable.
+**A base marker without this impl cannot be transformed**, so a monad of your own used with a
+fallible pipeline needs it even if you never stack it by hand.
 
 **A new monad needs all four traits**, and this one only if it should stack.
 

@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The four traits that give a monad marker its meaning in a monadic handler pipeline: how a step binds, which value continues, and how values are lifted.'
 ---
 
 # Monad interface
@@ -9,13 +10,13 @@ The traits that give a monad marker its meaning for monadic handler composition.
 
 ## Overview
 
-A [monadic pipeline](/docs/concepts/monadic-handlers) chains handlers where each step may continue or
-short-circuit, the `?`-style behaviour, expressed as composable providers. A monad in CGP is a
+A [monadic pipeline](/docs/concepts/monadic-handlers) chains handlers where each step may continue
+or short-circuit, the `?`-style behaviour, expressed as composable providers. A monad in CGP is a
 zero-sized marker, and these four traits are what give that marker meaning. They are plain traits
-rather than CGP components: they have no generated provider trait and are never wired. The
-[monad providers](../../providers/monad/index.md) consume them as ordinary bounds while folding a
-pipeline at compile time, so you name a trait here only when defining a monad of your own. Import each
-from `cgp::extra::monad::traits`.
+rather than CGP components: they lack a generated provider trait and are never wired. The [monad
+providers](../../providers/monad/index.md) consume them as ordinary bounds while folding a pipeline
+at compile time, so you name a trait here only when defining a monad of your own. Import each from
+`cgp::extra::monad::traits`.
 
 They split into the pair that folds the pipeline and the pair that runs one step.
 
