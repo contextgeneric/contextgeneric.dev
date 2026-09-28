@@ -45,12 +45,15 @@ Every member's wiring key is in the prelude, and so are the provider traits `Com
 `AsyncComputer`, `AsyncComputerRef`, `TryComputer`, `Handler`, and `Producer`. The consumer traits
 (`CanCompute`, `CanTryCompute`, `CanHandle`, `CanProduce`, and their siblings), the provider traits
 `ComputerRef`, `TryComputerRef`, and `HandlerRef`, and the one-step promotion providers are imported
-from `cgp::extra::handler`. Because a context that delegates a member also implements its provider
-trait, calling a method on a concrete context by its bare name, as `App::compute(&App, …)`, is
-ambiguous (`E0034`) whenever that provider trait is in scope; method syntax, `App.compute(…)`, is
-not. Every member registers under `@cgp.extra.handler` in `DefaultNamespace`, so a context that
-joins that namespace binds a member at a path such as `@cgp.extra.handler.ComputerComponent`, since
-a bare-key entry would conflict with the namespace's own (`E0119`).
+from `cgp::extra::handler`.
+
+Two wiring details apply to every member. Because a context that delegates a member also implements
+its provider trait, calling a method on a concrete context by its bare name, as
+`App::compute(&App, …)`, is ambiguous (`E0034`) whenever the consumer trait and that provider trait
+are both in scope; method syntax, `App.compute(…)`, is not. Every member registers under
+`@cgp.extra.handler` in `DefaultNamespace`, so a context that joins that namespace binds a member at
+a path such as `@cgp.extra.handler.ComputerComponent`, since a bare-key entry would conflict with
+the namespace's own (`E0119`).
 
 You rarely implement a member of this family by hand. Providers come from
 [`#[cgp_computer]`](../../macros/cgp_computer.md) and

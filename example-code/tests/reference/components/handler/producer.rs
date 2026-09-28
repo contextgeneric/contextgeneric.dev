@@ -1,8 +1,8 @@
 //! Code from `docs/reference/components/handler/producer.md` — `Producer`.
 //!
 //! Pins the `MagicNumber` provider from the page's Examples, wired onto a context and invoked through
-//! `CanProduce`, and the `#[cgp_producer]` provider the page's Usage section wires into the
-//! input-taking components. The hand-written producer behind a bundle, from Common Mistakes, is a
+//! `CanProduce`, the `#[cgp_producer]` provider the page's Usage section wires into the input-taking
+//! components, and the pipeline it seeds from When to use it. The hand-written producer behind a bundle, from Common Mistakes, is a
 //! trybuild fixture.
 
 /// ## Usage
@@ -83,6 +83,45 @@ pub mod examples {
     #[test]
     fn test_demo() {
         demo();
+    }
+}
+
+/// ## When to use it
+///
+/// A producer seeds a `PipeHandlers` pipeline, since its promoted computer ignores the input.
+pub mod when_to_use_it {
+    use core::marker::PhantomData;
+
+    use cgp::extra::handler::{CanCompute, PipeHandlers};
+    use cgp::prelude::*;
+
+    #[cgp_producer]
+    fn default_port() -> u16 {
+        8080
+    }
+
+    #[cgp_computer]
+    fn next_port(port: u16) -> u16 {
+        port + 1
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerComponent: PipeHandlers<Product![DefaultPort, NextPort]>,
+        }
+    }
+
+    check_components! {
+        App {
+            ComputerComponent: ((), ()),
+        }
+    }
+
+    #[test]
+    fn the_producer_seeds_the_pipeline() {
+        assert_eq!(App.compute(PhantomData::<()>, ()), 8081);
     }
 }
 

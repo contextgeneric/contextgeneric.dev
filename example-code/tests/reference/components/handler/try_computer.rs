@@ -1,8 +1,8 @@
 //! Code from `docs/reference/components/handler/try_computer.md` — `TryComputer`.
 //!
 //! Pins the `ParseU64` provider from the page's Examples, wired onto a context that supplies its error
-//! type and raiser, and the `#[cgp_computer]` function whose `Result` output the page's Usage section
-//! describes.
+//! type and raiser, and the Usage section's claims: the `#[cgp_computer]` function whose `Result`
+//! output `TryPromote` reads, and `TryPromote` presenting a `TryComputer` as a `Computer`.
 
 /// ## Usage
 ///
@@ -43,6 +43,52 @@ pub mod usage {
             App.try_compute(PhantomData::<()>, u64::MAX),
             Err("overflow".to_owned())
         );
+    }
+
+    /// `TryPromote` also presents a `TryComputer` as a `Computer` whose `Output` is the `Result`.
+    pub mod try_promote {
+        use core::marker::PhantomData;
+
+        use cgp::core::error::ErrorTypeProviderComponent;
+        use cgp::extra::handler::{CanCompute, TryPromote};
+        use cgp::prelude::*;
+
+        #[cgp_impl(new NonZero)]
+        #[uses(CanRaiseError<String>)]
+        #[use_type(HasErrorType.Error)]
+        impl<Code> TryComputer<Code, u64> {
+            type Output = u64;
+
+            fn try_compute(&self, _code: PhantomData<Code>, input: u64) -> Result<u64, Error> {
+                if input == 0 {
+                    return Err(Self::raise_error("zero".to_owned()));
+                }
+
+                Ok(input)
+            }
+        }
+
+        pub struct App;
+
+        delegate_components! {
+            App {
+                ErrorTypeProviderComponent: UseType<String>,
+                cgp::core::error::ErrorRaiserComponent: cgp::extra::error::RaiseFrom,
+                ComputerComponent: TryPromote<NonZero>,
+            }
+        }
+
+        check_components! {
+            App {
+                ComputerComponent: ((), u64),
+            }
+        }
+
+        #[test]
+        fn compute_returns_the_result() {
+            assert_eq!(App.compute(PhantomData::<()>, 3), Ok(3));
+            assert_eq!(App.compute(PhantomData::<()>, 0), Err("zero".to_owned()));
+        }
     }
 }
 

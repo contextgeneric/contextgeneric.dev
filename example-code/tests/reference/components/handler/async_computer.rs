@@ -1,7 +1,8 @@
 //! Code from `docs/reference/components/handler/async_computer.md` — `AsyncComputer`.
 //!
 //! Pins the `DoubleAsync` provider from the page's Examples, wired onto a context and awaited through
-//! `CanComputeAsync`, and the promoted synchronous computer the page's Usage section describes.
+//! `CanComputeAsync`, and the providers the page's Usage section lists: a promoted synchronous
+//! computer, a `#[cgp_computer]` async function, and `UseField`.
 
 /// ## Usage
 ///
@@ -39,6 +40,59 @@ pub mod usage {
     fn the_promoted_computer_answers_compute_async() {
         let output = futures::executor::block_on(App.compute_async(PhantomData::<()>, 21));
         assert_eq!(output, 42);
+    }
+
+    /// `#[cgp_computer]` on an `async fn` implements `AsyncComputer` directly, and `UseField<Tag>`
+    /// forwards the async computation to a field whose value computes it.
+    pub mod sources {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::CanComputeAsync;
+        use cgp::prelude::*;
+
+        #[cgp_computer]
+        async fn double_later(input: u64) -> u64 {
+            input * 2
+        }
+
+        pub struct Doubler;
+
+        delegate_components! {
+            Doubler {
+                AsyncComputerComponent: DoubleLater,
+            }
+        }
+
+        #[derive(HasField)]
+        pub struct App {
+            pub doubler: Doubler,
+        }
+
+        delegate_components! {
+            App {
+                AsyncComputerComponent: UseField<Symbol!("doubler")>,
+            }
+        }
+
+        check_components! {
+            App {
+                AsyncComputerComponent: ((), u64),
+            }
+        }
+
+        #[test]
+        fn both_sources_answer_compute_async() {
+            let app = App { doubler: Doubler };
+
+            assert_eq!(
+                futures::executor::block_on(Doubler.compute_async(PhantomData::<()>, 21)),
+                42
+            );
+            assert_eq!(
+                futures::executor::block_on(app.compute_async(PhantomData::<()>, 21)),
+                42
+            );
+        }
     }
 }
 

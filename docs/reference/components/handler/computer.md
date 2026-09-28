@@ -171,7 +171,8 @@ context.
 
 **Calling `compute` on a concrete context by its bare name is ambiguous.** A context that delegates
 `ComputerComponent` also implements the `Computer` provider trait, which the prelude brings into
-scope, so `App::compute(&App, PhantomData::<()>, 21)` has two candidates:
+scope, so once `CanCompute` is imported as well, `App::compute(&App, PhantomData::<()>, 21)` has two
+candidates:
 
 ```text
 error[E0034]: multiple applicable items in scope
@@ -187,7 +188,7 @@ error[E0034]: multiple applicable items in scope
 Use method syntax, as in `App.compute(PhantomData::<()>, 21)`, since only the consumer trait takes
 `self`, or name the consumer trait, as in
 `<App as CanCompute<(), u64>>::compute(&App, PhantomData, 21)`. The same holds for every member of
-the family whose provider trait is in scope.
+the family whose consumer and provider traits are both in scope.
 
 ## Related constructs
 

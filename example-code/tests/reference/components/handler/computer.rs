@@ -1,9 +1,9 @@
 //! Code from `docs/reference/components/handler/computer.md` — `Computer`.
 //!
 //! Pins the `Double` provider from the page's Examples, wired onto a context directly and through the
-//! `PromoteComputer` bundle, and the wiring the page's Usage section shows for a context that joins
-//! `DefaultNamespace`. The ambiguous associated-function call from Common Mistakes is a trybuild
-//! fixture.
+//! `PromoteComputer` bundle, and the Usage section's claims: the wiring for a context that joins
+//! `DefaultNamespace`, and `UseField` forwarding to a field that computes. The ambiguous
+//! associated-function call from Common Mistakes is a trybuild fixture.
 
 /// ## Usage
 ///
@@ -46,6 +46,54 @@ pub mod usage {
     #[test]
     fn the_prefixed_path_binds_the_provider() {
         assert_eq!(App.compute(PhantomData::<()>, 21), 42);
+    }
+
+    /// `UseField<Tag>` forwards the computation to the context's `Tag` field, whose value computes it.
+    pub mod use_field {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::CanCompute;
+        use cgp::prelude::*;
+
+        #[cgp_new_provider]
+        impl<Context, Code> Computer<Context, Code, u64> for Double {
+            type Output = u64;
+
+            fn compute(_context: &Context, _code: PhantomData<Code>, input: u64) -> u64 {
+                input * 2
+            }
+        }
+
+        pub struct Doubler;
+
+        delegate_components! {
+            Doubler {
+                ComputerComponent: Double,
+            }
+        }
+
+        #[derive(HasField)]
+        pub struct App {
+            pub doubler: Doubler,
+        }
+
+        delegate_components! {
+            App {
+                ComputerComponent: UseField<Symbol!("doubler")>,
+            }
+        }
+
+        check_components! {
+            App {
+                ComputerComponent: ((), u64),
+            }
+        }
+
+        #[test]
+        fn the_field_value_computes() {
+            let app = App { doubler: Doubler };
+            assert_eq!(app.compute(PhantomData::<()>, 21), 42);
+        }
     }
 }
 
