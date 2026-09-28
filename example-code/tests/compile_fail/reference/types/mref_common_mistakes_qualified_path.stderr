@@ -1,0 +1,5 @@
+error[E0637]: `'_` cannot be used here
+ --> tests/compile_fail/reference/types/mref_common_mistakes_qualified_path.rs:9:46
+  |
+9 |     fn greeting(&self) -> cgp::prelude::MRef<'_, String>;
+  |                                              ^^ `'_` is a reserved lifetime name

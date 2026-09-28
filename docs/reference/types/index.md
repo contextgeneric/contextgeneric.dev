@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The type-level building blocks CGP is made of, the markers and recursive lists that carry names, positions, and shapes, plus the MRef getter type.'
 ---
 
 # Types
@@ -40,9 +41,9 @@ these lists through the macros ([`Product!`](../macros/product.md), [`Sum!`](../
 [`Symbol!`](../macros/symbol.md), and [`Path!`](../macros/path.md)) and read them in expansions and
 errors.
 
-[`MRef`](mref.md) is the one type here that is not a building block. It is an ordinary runtime value, the
-owned-or-borrowed return type of a getter. It belongs in this section because it is the one type here that
-you write yourself.
+[`MRef`](mref.md) is the one type here that is not a building block. It is an ordinary runtime
+value, the owned-or-borrowed return type of a getter. It belongs in this section because it is a
+type rather than a trait or a provider, and you name it yourself as a getter's return type.
 
 ## The ideas behind them
 

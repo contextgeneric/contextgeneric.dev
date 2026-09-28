@@ -1,58 +1,46 @@
 //! Code from `docs/reference/types/chars.md` — *`Chars`*.
 //!
-//! A `Symbol!` wraps a `Chars` chain. The page reads a field by its `Symbol!` tag and rebuilds the
-//! string from the type; both run here. The greet provider duplicates the one on the `PhantomData`
-//! page, which the crate prefers over a shared helper so each file answers for its own page.
+//! A `Symbol!` wraps a `Chars` chain. The Examples program reads a field through its `Symbol!` tag,
+//! checks the chain a symbol expands to (with its byte length for a non-ASCII name), and rebuilds the
+//! string through `Display`. The raw error for a missing field, whose `Chars` chain the page shows how
+//! to read, is a trybuild fixture under `tests/compile_fail/reference/types/`.
 
 /// ## Examples
-///
-/// A field-name tag drives a getter, and a `Symbol!` rebuilds its string through `Display`.
 pub mod examples {
     use cgp::prelude::*;
 
-    #[cgp_component(Greeter)]
-    pub trait CanGreet {
-        fn greet(&self);
-    }
-
-    #[cgp_impl(new GreetHello)]
-    impl Greeter
+    // The tag names the field the function reads.
+    pub fn name_of<Context>(context: &Context) -> &str
     where
-        Self: HasField<Symbol!("name"), Value = String>,
+        Context: HasField<Symbol!("name"), Value = String>,
     {
-        fn greet(&self) {
-            println!("Hello, {}!", self.get_field(PhantomData::<Symbol!("name")>));
-        }
+        context.get_field(PhantomData::<Symbol!("name")>)
     }
 
     #[derive(HasField)]
-    pub struct App {
+    pub struct Person {
         pub name: String,
     }
 
-    delegate_components! {
-        App {
-            GreeterComponent: GreetHello,
-        }
-    }
-
-    check_components! {
-        App {
-            GreeterComponent
-        }
-    }
-
-    #[test]
-    fn test_a_symbol_rebuilds_its_string() {
-        let s = <Symbol!("hello")>::default();
-        assert_eq!(s.to_string(), "hello");
-    }
-
-    #[test]
-    fn test_greet_reads_the_name_field() {
-        let app = App {
-            name: "World".to_owned(),
+    pub fn demo() {
+        let person = Person {
+            name: "Alice".to_owned(),
         };
-        app.greet();
+        assert_eq!(name_of(&person), "Alice");
+
+        // `Symbol!` spells the string out as a `Chars` chain, with its byte length in front.
+        let _: PhantomData<Symbol<3, Chars<'a', Chars<'b', Chars<'c', Nil>>>>> =
+            PhantomData::<Symbol!("abc")>;
+        let _: PhantomData<Symbol<6, Chars<'世', Chars<'界', Nil>>>> = PhantomData::<Symbol!("世界")>;
+
+        // `Display` walks the chain to rebuild the text.
+        let symbol = <Symbol!("hello")>::default();
+        assert_eq!(symbol.to_string(), "hello");
+        assert_eq!(core::mem::size_of::<Symbol!("hello")>(), 0);
+    }
+
+    #[test]
+    fn test_demo() {
+        demo();
     }
 }

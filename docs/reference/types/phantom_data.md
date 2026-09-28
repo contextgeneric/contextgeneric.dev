@@ -1,6 +1,8 @@
 ---
+title: 'PhantomData — carry a type without a value'
 sidebar_label: 'PhantomData'
 sidebar_position: 1
+description: 'The standard-library marker that lets a type carry a type parameter without storing a value of it, and lets a call pass a type where a value is expected.'
 ---
 
 # `PhantomData`
@@ -60,17 +62,18 @@ that it stores nowhere. `PhantomData` compiles anyway because the compiler knows
 unused-parameter rule, and every other marker type can use it. Those types satisfy the rule by *holding* a
 `PhantomData` field rather than by being one.
 
-The parameter is `?Sized`, so `T` may be any type, sized or not. A value of `PhantomData<T>` occupies no
-space and holds nothing. Its only content is the type `T`, recorded in its own type. You construct one by
-writing `PhantomData`. Where inference cannot supply the type, you name it with a turbofish, as in
-`PhantomData::<u32>`.
+The parameter is `?Sized`, so `T` may be any type, sized or not. A value of `PhantomData<T>` is
+zero-sized and holds nothing. Its only content is the type `T`, recorded in its own type. You
+construct one by writing `PhantomData`. Where inference cannot supply the type, you name it with a
+turbofish, as in `PhantomData::<u32>`. CGP re-exports it through the prelude, so
+`use cgp::prelude::*;` brings it into scope.
 
-`PhantomData<T>` also tells the compiler how the surrounding type relates to `T`, beyond satisfying the
-used-parameter rule. It sets **variance** (whether a longer lifetime may stand in for a shorter one), drop
-checking, and the auto traits such as `Send` and `Sync`. Most CGP markers do not depend on which
-relationship they get, so they use the plain `PhantomData<T>`. [`Life`](life.md) is the exception. It
-wraps its lifetime as `PhantomData<*mut &'a ()>` to force invariance, so that the compiler treats two
-lifetime instantiations as different types. That page explains why.
+`PhantomData<T>` also tells the compiler how the surrounding type relates to `T`, beyond satisfying
+the used-parameter rule. It sets **variance** (whether a longer lifetime may stand in for a shorter
+one), drop checking, and the auto traits such as `Send` and `Sync`. Most CGP markers do not depend
+on which relationship they get, so they use the plain `PhantomData<T>`. [`Life`](life.md) is the
+exception. It wraps its lifetime as `PhantomData<*mut &'a ()>`, which makes it invariant in the
+lifetime and neither `Send` nor `Sync`. That page explains the consequences.
 
 ## How CGP uses it
 
@@ -95,17 +98,18 @@ let name = self.get_field(PhantomData::<Symbol!("name")>);
 let output = context.compute(PhantomData::<Doubled>, input);
 ```
 
-Here the **context** is the type the method runs on. It supplies the values the method
-needs as its own fields. The `PhantomData` argument carries nothing. It exists so that type
-inference selects the right [`HasField`](../traits/field-access/has_field.md) impl or the right
-handler. In effect, the call passes a type where a value is expected, and `PhantomData::<T>` is the
-empty value that stands for the type `T`.
+Here the **context** is the type the method runs on, which supplies the values it needs as its
+fields. The `PhantomData` argument carries nothing. It exists so that type inference selects the
+right [`HasField`](../traits/field-access/has_field.md) impl or the right handler. The call passes a
+type where a value is expected, and `PhantomData::<T>` is the empty value that stands for the type
+`T`.
 
 **You rarely write either role yourself, because a higher-level construct produces each for you.**
 
 - On the declaring side, the `new` keyword of [`#[cgp_impl]`](../macros/cgp_impl.md) declares the
-  provider struct: a `PhantomData` field per generic parameter, or a bare `struct Foo;` when there are
-  none.
+  provider struct: a bare `struct Foo;` when the provider lacks generic parameters, and otherwise
+  one `PhantomData` field over the parameter, or over a tuple of all of them when there are several,
+  with each lifetime wrapped as [`Life<'a>`](life.md).
 - On the passing side, [`#[implicit]`](../attributes/implicit.md) and
   [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) read a context field without the tag, so your code
   does not contain a `get_field(PhantomData::<...>)` call.
@@ -114,31 +118,65 @@ You meet `PhantomData` directly only when you work below these constructs.
 
 ## Examples
 
-At a call site, `PhantomData::<Tag>` selects which field a getter reads:
+A provider generic over the field it reads uses `PhantomData` on both sides. `new` declares the
+struct with a `PhantomData<Tag>` field, and the body passes the tag to `get_field` as
+`PhantomData::<Tag>`:
 
 ```rust
 use cgp::prelude::*;
 
-#[cgp_impl(new GreetHello)]
-impl Greeter
-where
-    Self: HasField<Symbol!("name"), Value = String>,
-{
-    fn greet(&self) {
-        let name = self.get_field(PhantomData::<Symbol!("name")>);
-        println!("Hello, {name}!");
+#[cgp_component(Greeter)]
+pub trait CanGreet {
+    fn greet(&self) -> String;
+}
+
+// `new` declares `pub struct GreetField<Tag>(pub PhantomData<Tag>);`
+#[cgp_impl(new GreetField<Tag>)]
+#[uses(HasField<Tag, Value = String>)]
+impl<Tag> Greeter {
+    fn greet(&self) -> String {
+        let name = self.get_field(PhantomData::<Tag>);
+        format!("Hello, {name}!")
     }
+}
+
+#[derive(HasField)]
+pub struct Person {
+    pub name: String,
+}
+
+delegate_components! {
+    Person {
+        GreeterComponent: GreetField<Symbol!("name")>,
+    }
+}
+
+check_components! {
+    Person {
+        GreeterComponent,
+    }
+}
+
+// A marker over two parameters holds one `PhantomData` over a tuple.
+pub struct Add<Left, Right>(pub PhantomData<(Left, Right)>);
+
+pub fn demo() {
+    let person = Person {
+        name: "World".to_owned(),
+    };
+    assert_eq!(person.greet(), "Hello, World!");
+
+    // Both markers occupy no space.
+    assert_eq!(core::mem::size_of::<GreetField<Symbol!("name")>>(), 0);
+    assert_eq!(core::mem::size_of::<Add<u32, String>>(), 0);
 }
 ```
 
-You meet this form in an expansion rather than write it. The idiomatic version uses an
-[`#[implicit]`](../attributes/implicit.md) argument and does not show `PhantomData` at all.
-
-A type with several parameters uses one `PhantomData` over a tuple:
-
-```rust
-pub struct Add<Left, Right>(pub PhantomData<(Left, Right)>);
-```
+`Person` is a value context, and `CanGreet` is self-targeted: the greeting reads the person it is
+called on. The wiring names the tag once, in `GreetField<Symbol!("name")>`, and the provider carries
+it as a type. The idiomatic way to read a field of the context is an
+[`#[implicit]`](../attributes/implicit.md) argument, which hides the tag. `GreetField` passes the
+tag explicitly because the field it reads is a parameter chosen by the wiring.
 
 ## When to use it
 
@@ -152,8 +190,10 @@ Everywhere else the macros insert it for you.
 - **Pass `PhantomData::<T>`** at a call site that takes a type-level selector, such as `get_field` or a
   handler's `compute`. This is the common case you write yourself, and the turbofish names the type when
   inference cannot.
-- **Use [`Life`](life.md), not a bare `PhantomData`, for a lifetime** that must stay invariant. A plain
-  `PhantomData<&'a ()>` is covariant, which is the wrong relationship for a dependency marker.
+- **Hold a lifetime as `PhantomData<Life<'a>>`** to match what `#[cgp_new_provider]` declares for a
+  lifetime parameter. A plain `PhantomData<&'a ()>` also satisfies the unused-parameter rule, but it
+  is covariant in `'a` and keeps the struct `Send` and `Sync`, where the macro's form is invariant
+  and neither.
 
 ## Common Mistakes
 
@@ -161,18 +201,37 @@ Everywhere else the macros insert it for you.
 `PhantomData` fields is still zero-sized, and a `PhantomData` argument compiles to nothing. A
 `PhantomData` in a signature does not mean a hidden allocation.
 
-**`PhantomData` and `PhantomData::<T>` differ only by whether the type is inferred.** In a struct field
-the type comes from the field's declared type, so plain `PhantomData` is enough. At a call site where
-nothing fixes `T`, the turbofish `PhantomData::<T>` states it, and omitting it gives a
-"type annotations needed" error rather than a wrong result.
+**Leaving the tag to inference fails when nothing fixes it.** In a struct field the type comes from
+the field's declared type, so plain `PhantomData` is enough. At a call site the turbofish states it.
+A `get_field` call on a context with two fields cannot infer which one is meant:
 
-**A bare `PhantomData<&'a ()>` is covariant.** If you write a lifetime marker yourself and let a longer
-lifetime stand in for a shorter one, the compiler may pick a provider wired for a different lifetime.
-Use [`Life<'a>`](life.md), whose `PhantomData<*mut &'a ()>` forces invariance, when the lifetime is an
-exact identity.
+```rust
+#[derive(HasField)]
+pub struct Person {
+    pub name: String,
+    pub age: u8,
+}
 
-**A generic marker needs its `PhantomData` field.** A struct that is generic over a `T` without storing a
-value of it fails to compile with `error[E0392]`.
+pub fn print_name(person: &Person) {
+    let name = person.get_field(PhantomData);
+    println!("{name}");
+}
+```
+
+The compiler reports two errors, headed `error[E0284]: type annotations needed` and
+`error[E0283]: type annotations needed`, and the second names the cause:
+
+```text
+note: multiple `impl`s satisfying `Person: cgp::prelude::HasField<_>` found
+```
+
+Write `PhantomData::<Symbol!("name")>` to name the field.
+
+**A generic marker needs its `PhantomData` field, for a lifetime as much as for a type.** A struct
+that is generic over a `T` without storing a value of it fails with `error[E0392]`, as [the first
+section](#why-a-marker-needs-it) shows. The same rule covers a lifetime parameter:
+`pub struct Borrowing<'a>;` fails with ``error[E0392]: lifetime parameter `'a` is never used``, and
+a `PhantomData<Life<'a>>` field fixes it.
 
 ## Related constructs
 
@@ -201,6 +260,8 @@ The ideas behind it:
   documentation covers the variance, drop-check, and auto-trait effects in full.
 - CGP re-exports it through the prelude, so `use cgp::prelude::*;` brings `PhantomData` into scope
   alongside the rest.
+- The provider struct `new` declares, with its `PhantomData` field:
+  [`empty_struct.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/empty_struct.rs)
 
 ---
 

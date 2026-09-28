@@ -1,6 +1,8 @@
 ---
+title: 'PathCons — a type-level lookup path'
 sidebar_label: 'PathCons'
 sidebar_position: 10
+description: 'The cell of a type-level path, the list of segments that names a route through nested delegation tables so a lookup can reach an entry behind a prefix.'
 ---
 
 # `PathCons`
@@ -11,18 +13,19 @@ lookup can reach an entry several layers deep.
 ## Overview
 
 `PathCons<Head, Tail>` expresses a *route* through nested delegation tables as a single type. A bare
-component name picks one entry out of a context's table. Here the **context** is the type the method
-runs on, and its table records which provider it uses for each component. Sometimes the entry a
-lookup wants sits behind a layer of indirection: inside a namespace, behind a namespace it inherits from,
-or under a prefix. A path names such a route as a list of segments read left to right, and each segment
-narrows the lookup a step further. `PathCons` is the cell of that list, and [`Nil`](nil.md) terminates
-it, so `PathCons<A, PathCons<B, Nil>>` is the path that steps through `A` and then `B`.
+component name picks one entry out of a context's table. Here the **context** is the type the
+implementation runs against, and its table records which provider it uses for each component.
+Sometimes the entry a lookup wants sits behind a layer of indirection: inside a namespace, behind a
+namespace it inherits from, or under a prefix. A path names such a route as a list of segments read
+left to right, and each segment narrows the lookup a step further. `PathCons` is the cell of that
+list, and [`Nil`](nil.md) terminates it, so `PathCons<A, PathCons<B, Nil>>` is the path that steps
+through `A` and then `B`.
 
 A path differs from the [`Cons`](cons.md) product list in its unsized bound, even though both are
-right-nested and end in `Nil`. `PathCons` declares its head and tail `?Sized`, so a segment may be a trait
-object or another unsized type, and code can manipulate the whole path without its parts having a known
-size. A product list keys a struct's fields, and its elements are always sized values. A path keys a
-lookup, and its segments are pure type-level markers that never need to be `Sized`.
+right-nested and end in `Nil`. `PathCons` declares its head and tail `?Sized`, so a segment may be
+an unsized type such as `str`, and code can manipulate the whole path without its parts having a
+known size. A product list keys a struct's fields, and its elements are always sized values. A path
+keys a lookup, and its segments are pure type-level markers that never need to be `Sized`.
 
 The segments are the markers CGP uses elsewhere. A lowercase dotted name becomes a
 [`Symbol`](chars.md) [type-level string](/docs/reference/glossary#type-level-string), and a capitalized name becomes that named type, usually a
@@ -39,10 +42,11 @@ component names, in the form `@a.B.c`, assembled into a `PathCons` chain. You wr
 pub struct PathCons<Head: ?Sized, Tail: ?Sized>(pub PhantomData<Head>, pub PhantomData<Tail>);
 ```
 
-`Head` is the first segment, and `Tail` is the remainder, which is another `PathCons` or [`Nil`](nil.md)
-at the end. Both bounds are `?Sized`, so any type may occupy a segment. The struct holds nothing at run
-time. Like the other type-level building blocks, it exists through [`PhantomData`](phantom_data.md) so
-that trait resolution can name and match a route.
+`Head` is the first segment, and `Tail` is the remainder, which is another `PathCons` or
+[`Nil`](nil.md) at the end. Both bounds are `?Sized`, so any type may occupy a segment. The struct
+holds nothing at run time. Like the other type-level building blocks, it exists through
+[`PhantomData`](phantom_data.md) so that trait resolution can name and match a route. It is in the
+prelude, so `use cgp::prelude::*;` is enough.
 
 ## Behavior
 
@@ -53,21 +57,32 @@ another at the type level. The trait recurses down the list: `PathCons<Head, Tai
 `Other` by becoming `Other`. The result is ordinary list append, computed as an associated-type
 projection.
 
-Beyond concatenation, [`RedirectLookup`](../providers/redirect_lookup.md) consumes a path. That provider
-resolves a delegation by walking a context's table along the path. When a namespace or a prefixed
-component reroutes a lookup, it produces a `RedirectLookup<Components, Path>` whose `Path` is a `PathCons`
-chain, and `RedirectLookup` follows the chain segment by segment until it reaches a concrete provider. The
-path never names a provider itself. It only describes where to look, so the same path can resolve to
-different providers depending on the table `RedirectLookup` walks.
+[`RedirectLookup`](../providers/redirect_lookup.md) consumes a path. When a namespace entry, an
+`open` statement, or a `=>` redirect reroutes a lookup, it produces a
+`RedirectLookup<Components, Path>` whose `Path` is a `PathCons` chain. Its impl, which
+[`#[cgp_component]`](../macros/cgp_component.md) generates for each component, extends the path with
+the component's type parameters through `ConcatPath`, then looks the whole extended path up in
+`Components` as one key, through `DelegateComponent`. The path never names a provider itself. It
+only says which key to look up, so the same path can resolve to different providers in different
+tables, and the entry it reaches may redirect again.
 
 ## Examples
 
-The [`Path!`](../macros/path.md) macro produces paths, and they most often appear inside the wirings that
-[`cgp_namespace!`](../macros/cgp_namespace.md) emits. A namespace entry that redirects one component key
-to a path expands into a `RedirectLookup` over a `PathCons` chain:
+A path is a type, so the checks here are type equalities. The
+[`cgp_namespace!`](../macros/cgp_namespace.md) entry at the top reroutes one component to a path:
 
 ```rust
 use cgp::prelude::*;
+
+#[cgp_component(FooProvider)]
+pub trait CanFoo {
+    fn foo(&self);
+}
+
+#[cgp_component(MyFoo)]
+pub trait CanMyFoo {
+    fn my_foo(&self);
+}
 
 cgp_namespace! {
     new MyNamespace {
@@ -76,23 +91,31 @@ cgp_namespace! {
     }
 }
 
-// the emitted entry, in readable form:
-// impl<__Table__> MyNamespace<__Table__> for FooProviderComponent {
-//     type Delegate = RedirectLookup<__Table__, PathCons<MyFooComponent, Nil>>;
-// }
+pub fn demo() {
+    // A lowercase segment is a `Symbol`, and a capitalized one names its type.
+    let _: PhantomData<PathCons<Symbol!("app"), PathCons<MyFooComponent, Nil>>> =
+        PhantomData::<Path!(@app.MyFooComponent)>;
+
+    // A one-segment path.
+    let _: PhantomData<PathCons<MyFooComponent, Nil>> = PhantomData::<Path!(@MyFooComponent)>;
+
+    // `ConcatPath` appends one path to another.
+    let _: PhantomData<Path!(@a.b.c)> =
+        PhantomData::<<Path!(@a.b) as ConcatPath<Path!(@c)>>::Output>;
+}
 ```
 
-A path can interleave lowercase symbol segments with capitalized component segments. Registering a
-component into a namespace under a prefix produces a path that steps through the prefix and then the
-component:
+The namespace entry expands into a `RedirectLookup` over the one-segment path. `cargo cgp expand`
+prints the path in its `Path!` form:
 
 ```rust
-// @MyBarComponent.BarProviderComponent  expands to
-// PathCons<MyBarComponent, PathCons<BarProviderComponent, Nil>>
+impl<__Table__> MyNamespace<__Table__> for FooProviderComponent {
+    type Delegate = RedirectLookup<__Table__, Path!(@MyFooComponent)>;
+}
 ```
 
-The lookup steps through `MyBarComponent` and then through `BarProviderComponent` before it resolves. A
-single-segment path is `PathCons<Segment, Nil>`, and the empty path is [`Nil`](nil.md) alone.
+which is `RedirectLookup<__Table__, PathCons<MyFooComponent, Nil>>`. A single-segment path is
+`PathCons<Segment, Nil>`, and the empty path is [`Nil`](nil.md) alone.
 
 ## When to use it
 
@@ -109,9 +132,10 @@ single-segment path is `PathCons<Segment, Nil>`, and the empty path is [`Nil`](n
 
 ## Common Mistakes
 
-**A path names a route, not a provider.** A `PathCons` chain describes where to look. The provider it
-resolves to depends on the table that [`RedirectLookup`](../providers/redirect_lookup.md) walks. The same
-path can resolve to different providers in different contexts.
+**A path names a route, not a provider.** A `PathCons` chain describes which key to look up. The
+provider it resolves to depends on the table that
+[`RedirectLookup`](../providers/redirect_lookup.md) looks it up in, so the same path can resolve to
+different providers in different contexts.
 
 **A path list is `?Sized`, unlike the [`Cons`](cons.md) product list.** Its segments are markers rather
 than values, so a segment need not have a known size. Expecting a path to behave like a product list of
@@ -119,6 +143,11 @@ values is the usual source of confusion.
 
 **Both a path and a product end in [`Nil`](nil.md).** A `Nil` at the end of a `PathCons` chain is the
 same terminator doing the same job it does for a record. It does not mean the two lists have been mixed.
+
+**A table's own path keys end in a parameter, not in `Nil`.** A path key written in
+[`delegate_components!`](../macros/delegate_components.md) matches every longer path beneath it, so
+its last `PathCons` holds a generic parameter where a `Path!` holds `Nil`. The expansion of such a
+table shows that parameter rather than `Nil`.
 
 ## Related constructs
 
@@ -128,7 +157,7 @@ same terminator doing the same job it does for a record. It does not mean the tw
 - [`Chars`](chars.md): the [`Symbol`](chars.md) segments a path is built from.
 - [`Path!`](../macros/path.md): the macro that folds `@`-segments onto this list.
 - [`ConcatPath`](../traits/formatting/concat_path.md): appends one path onto another.
-- [`RedirectLookup`](../providers/redirect_lookup.md): walks a path against a table at resolution
+- [`RedirectLookup`](../providers/redirect_lookup.md): looks a path up in a table at resolution
   time.
 - [`cgp_namespace!`](../macros/cgp_namespace.md): emits these paths to reroute and register entries.
 

@@ -1,6 +1,8 @@
 ---
+title: 'Chars — a type-level character list'
 sidebar_label: 'Chars'
 sidebar_position: 9
+description: 'The character list behind Symbol!, which spells a field name out one character at a time so the name can be a type in trait resolution.'
 ---
 
 # `Chars`
@@ -32,61 +34,76 @@ byte-length parameter, and the rest of the wrapper. This page covers the `Chars`
 its tail:
 
 ```rust
+#[derive(Eq, PartialEq, Clone, Copy, Default)]
 pub struct Chars<const CHAR: char, Tail>(pub PhantomData<Tail>);
 ```
 
-`CHAR` is the character at this position, and `Tail` is the rest of the string, which is the next `Chars`
-node or [`Nil`](nil.md) at the end. The character lives in the const parameter, and the tail lives in a
-[`PhantomData<Tail>`](phantom_data.md), so a `Chars` chain does not carry runtime data and compiles to
-a zero-sized value. A `Symbol<const LEN: usize, Chars>` then wraps such a chain together with the string's
-byte length. The wrapper stores the length explicitly because stable Rust cannot compute it inside a
-const-generic context, and the [`Symbol!`](../macros/symbol.md) page explains why.
+`CHAR` is the character at this position, and `Tail` is the rest of the string, which is the next
+`Chars` node or [`Nil`](nil.md) at the end. The character lives in the const parameter, and the tail
+lives in a [`PhantomData<Tail>`](phantom_data.md), so a `Chars` chain does not carry runtime data
+and compiles to a zero-sized value. A `Symbol<const LEN: usize, Chars>` then wraps such a chain
+together with the string's byte length. The wrapper stores the length explicitly because stable Rust
+cannot compute it inside a const-generic context, and the [`Symbol!`](../macros/symbol.md) page
+explains why. Both `Chars` and `Symbol` are in the prelude.
 
 ## Behavior
 
 A `Chars` chain reconstructs its original string on demand through the
-[`StaticFormat`](../traits/formatting/static_format.md) trait, which formats a type-level string into a
-`Formatter` without needing a value. `Chars<CHAR, Tail>` writes `CHAR` and then recurses into the tail,
-and [`Nil`](nil.md) ends the recursion by writing nothing. A `Symbol` forwards to its inner `Chars`, and
-its `Display` impl defers to `StaticFormat`, so `<Symbol!("hello")>::default().to_string()` yields
-`"hello"`.
+[`StaticFormat`](../traits/formatting/static_format.md) trait, which formats a type-level string
+into a `Formatter` without needing a value. `Chars<CHAR, Tail>` writes `CHAR` and then recurses into
+the tail, and [`Nil`](nil.md) ends the recursion by writing nothing. A `Symbol` forwards to its
+inner `Chars`, and the `Display` impls on both defer to `StaticFormat`, so
+`<Symbol!("hello")>::default().to_string()` yields `"hello"`.
 
 The length a `Symbol` records enables [`StaticString`](../traits/formatting/static_string.md), which
-exposes the string as a `const VALUE: &'static str` rather than as a formatting routine. It decodes the
-characters into a byte buffer sized by that length at compile time. Code that needs the string at run
-time uses `Display`, and code that needs it as a const uses `StaticString`.
+exposes the string as a `const VALUE: &'static str` rather than as a formatting routine. It decodes
+the characters into a byte buffer sized by that length at compile time. A bare `Chars` chain lacks
+the length, so `StaticString` is implemented for `Symbol` and for `Nil`, not for `Chars`. Code that
+needs the string at run time uses `Display`, and code that needs it as a const uses `StaticString`.
 
 ## Examples
 
 A type-level string most often appears as the tag in a
-[`HasField`](../traits/field-access/has_field.md) bound, where it names the field a provider reads:
+[`HasField`](../traits/field-access/has_field.md) bound, where it names the field a function or
+provider reads. The same type rebuilds its string through `Display`:
 
 ```rust
 use cgp::prelude::*;
 
-#[cgp_impl(new GreetHello)]
-impl Greeter
+// The tag names the field the function reads.
+pub fn name_of<Context>(context: &Context) -> &str
 where
-    Self: HasField<Symbol!("name"), Value = String>,
+    Context: HasField<Symbol!("name"), Value = String>,
 {
-    fn greet(&self) {
-        println!("Hello, {}!", self.get_field(PhantomData::<Symbol!("name")>));
-    }
+    context.get_field(PhantomData::<Symbol!("name")>)
+}
+
+#[derive(HasField)]
+pub struct Person {
+    pub name: String,
+}
+
+pub fn demo() {
+    let person = Person {
+        name: "Alice".to_owned(),
+    };
+    assert_eq!(name_of(&person), "Alice");
+
+    // `Symbol!` spells the string out as a `Chars` chain, with its byte length in front.
+    let _: PhantomData<Symbol<3, Chars<'a', Chars<'b', Chars<'c', Nil>>>>> =
+        PhantomData::<Symbol!("abc")>;
+    let _: PhantomData<Symbol<6, Chars<'世', Chars<'界', Nil>>>> = PhantomData::<Symbol!("世界")>;
+
+    // `Display` walks the chain to rebuild the text.
+    let symbol = <Symbol!("hello")>::default();
+    assert_eq!(symbol.to_string(), "hello");
+    assert_eq!(core::mem::size_of::<Symbol!("hello")>(), 0);
 }
 ```
 
-You can also build the same type at run time and inspect it through its `Display` impl, which walks the
-`Chars` chain to rebuild the string:
-
-```rust
-use cgp::prelude::*;
-
-let s = <Symbol!("hello")>::default();
-assert_eq!(s.to_string(), "hello");
-```
-
-Because the encoding is a list, an empty string is `Symbol<0, Nil>`: a `Symbol` whose character list is
-just the terminator and whose recorded length is zero.
+The two `PhantomData` annotations are the check on the expansion: `"世界"` records a length of `6`,
+its UTF-8 byte count, over a chain of two `Chars` nodes. Because the encoding is a list, an empty
+string is `Symbol<0, Nil>`: a `Symbol` whose character list is only the terminator.
 
 ## When to use it
 
@@ -94,14 +111,60 @@ just the terminator and whose recorded length is zero.
 chain. You need to know the type so that you can decode a field name in a diagnostic.
 
 - **Decode a `Chars` chain by reading off the characters.** An error that mentions
-  `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` says that the field `width` is missing, and
-  `cargo cgp check` restores the `Symbol!` form in the common cases.
+  `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` says that the field `width` is involved.
 - **Use [`Symbol!`](../macros/symbol.md) for a field-name tag,** and let the ergonomic constructs
   produce it from an argument or a method name where they can.
 - **Use [`Index`](index_type.md) for a tuple-field position,** which encodes a number rather than a
   string.
 
 ## Common Mistakes
+
+**A missing field appears in a raw error as a `Chars` chain.** A provider that reads `width` and
+`height`, wired on a context with only `height`, fails its check:
+
+```rust
+#[cgp_component(AreaCalculator)]
+pub trait CanCalculateArea {
+    fn area(&self) -> f64;
+}
+
+#[cgp_impl(new RectangleArea)]
+impl AreaCalculator {
+    fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+        width * height
+    }
+}
+
+#[derive(HasField)]
+pub struct Rectangle {
+    pub height: f64,
+}
+
+delegate_components! {
+    Rectangle {
+        AreaCalculatorComponent: RectangleArea,
+    }
+}
+
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
+    }
+}
+```
+
+The compiler's help line names the missing tag, and the tag the context does have, character by
+character:
+
+```text
+help: the trait `HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is not implemented for `Rectangle`
+      but trait `HasField<Symbol<6, cgp::prelude::Chars<'h', cgp::prelude::Chars<'e', cgp::prelude::Chars<'i', cgp::prelude::Chars<'g', cgp::prelude::Chars<'h', cgp::prelude::Chars<'t', Nil>>>>>>>>` is implemented for it
+```
+
+[`cargo cgp check`](/docs/cargo-cgp/check) reads the chain back into the name, and reports
+``[CGP-E106] missing field `width` on `Rectangle` `` as the root cause. `cargo cgp check` leads with
+the root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet
+reshape every class.
 
 **The `LEN` in a wrapping `Symbol` is bytes, not characters.** For ASCII the two counts agree, so the
 difference shows only on a non-ASCII field name. There `LEN` does not match the visible character count,

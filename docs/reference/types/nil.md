@@ -1,6 +1,8 @@
 ---
+title: 'Nil — the end of a type-level list'
 sidebar_label: 'Nil'
 sidebar_position: 6
+description: 'The end marker of the product, string, and path lists: an empty, constructible list that is also the shape of a unit struct.'
 ---
 
 # `Nil`
@@ -30,7 +32,8 @@ pub struct Nil;
 
 It holds nothing. Used as a tail it terminates a chain, and used on its own it is the empty list. It
 derives `Eq`, `PartialEq`, `Clone`, `Default`, and `Debug`, so a list ending in `Nil` inherits those
-traits structurally, and `Nil` itself compares equal to `Nil`.
+traits structurally, and `Nil` itself compares equal to `Nil`. It is in the prelude, so
+`use cgp::prelude::*;` is enough.
 
 ## Behavior
 
@@ -40,49 +43,62 @@ recursion stops when it reaches `Nil`. The string and path lists work the same w
 [`Chars`](chars.md) stops at `Nil`, and a walk over [`PathCons`](path_cons.md) stops at `Nil`.
 
 Because `Nil` is a real, constructible value, the empty product `Product![]` is `Nil`, and the empty
-value `product![]` is the `Nil` value. A builder or a conversion returns it when every field of a
-shape has been consumed. This is why an empty record is a value the program can hold. The contrast
-with [`Void`](void.md) is exact. A value with every branch ruled out cannot exist, so a sum ends in
-an uninhabited marker, while a record ends in this inhabited one.
+value `product![]` is the `Nil` value. The empty string `Symbol!("")` is `Symbol<0, Nil>`, and a
+unit struct that derives [`HasFields`](../derives/derive_has_fields.md) has `Nil` as its shape. A
+builder or a conversion returns `Nil` when every field of a shape has been consumed. This is why an
+empty record is a value the program can hold. The contrast with [`Void`](void.md) is exact. A value
+with every branch ruled out cannot exist, so a sum ends in an uninhabited marker, while a record
+ends in this inhabited one.
 
 ## Examples
 
-`Nil` ends every product chain, which the expansion of [`Product!`](../macros/product.md) shows:
+Each list ends in `Nil`, and the empty product, the empty string, and a unit struct's shape are all
+`Nil`:
 
 ```rust
 use cgp::prelude::*;
 
-// Product![u32, bool] expands to:
-type Row = Cons<u32, Cons<bool, Nil>>;
+#[derive(HasFields)]
+pub struct Marker;
 
-// the empty list is Nil alone:
-type Empty = Product![]; // == Nil
+pub fn demo() {
+    // Each list ends in `Nil`; the annotations are the check.
+    let _row: PhantomData<Cons<u32, Cons<bool, Nil>>> = PhantomData::<Product![u32, bool]>;
+    let _name: PhantomData<Symbol<2, Chars<'h', Chars<'i', Nil>>>> =
+        PhantomData::<Symbol!("hi")>;
+    let _path: PhantomData<PathCons<Symbol!("a"), PathCons<Symbol!("b"), Nil>>> =
+        PhantomData::<Path!(@a.b)>;
+
+    // The empty product, the empty string, and a unit struct's shape are all `Nil`.
+    let empty: Product![] = product![];
+    assert_eq!(empty, Nil);
+    let _empty_name: PhantomData<Symbol<0, Nil>> = PhantomData::<Symbol!("")>;
+    let fields: Nil = Marker.to_fields();
+    assert_eq!(fields, Nil);
+}
 ```
 
-It also terminates a [`Symbol!`](../macros/symbol.md) character chain and a
-[`Path!`](../macros/path.md) segment chain:
-
-```rust
-// Symbol!("hi")  ends its Chars chain in Nil
-// Path!(@a.b)    ends its PathCons chain in Nil
-```
+Each `PhantomData` annotation compiles only if the macro on its right expands to the chain on its
+left.
 
 ## When to use it
 
-**You read `Nil` at the end of a chain, and you do not write it.** The macros produce it, and you
-only need to recognize it.
+**You read `Nil` at the end of a chain, and you write it as the base case of a fold.** The macros
+produce it everywhere else.
 
 - **Read `Nil` as "the list ends here."** In an expanded `Cons`, `Chars`, or `PathCons` chain, the `Nil`
   is the terminator and marks the count of cells before it.
+- **Implement a trait for `Nil`** as the base case when you fold over a product, beside the impl for
+  [`Cons<Head, Tail>`](cons.md).
 - **Expect `Nil`, not [`Void`](void.md), at the end of a record, a string, or a path.** A sum ends in
   `Void`, and the other lists end in `Nil`. The wrong terminator in an error usually means the product and
   sum families have been mixed up.
 
 ## Common Mistakes
 
-**`Nil` is inhabited, and [`Void`](void.md) is not.** `Nil` is the real value of the empty product, while
-`Void` is the uninhabited type of an empty choice. They are not interchangeable, and the extractor
-machinery depends on the difference.
+**`Nil` is inhabited, and [`Void`](void.md) is not.** `Nil` is the real value of the empty product,
+while `Void` is the uninhabited type of an empty choice. They are not interchangeable: variant
+extraction relies on `Void` being uninhabited, which `Nil` is not.
 
 **`Nil` terminates the string and path lists as well as the product list.** A `Nil` at the end of a
 [`Chars`](chars.md) chain or a [`PathCons`](path_cons.md) chain is the same marker doing the same job, so

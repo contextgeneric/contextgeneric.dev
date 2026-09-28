@@ -1,6 +1,8 @@
 ---
+title: 'Either — the sum list cell'
 sidebar_label: 'Either'
 sidebar_position: 7
+description: 'The head-or-rest cell of the type-level sum list, which describes an enum one variant at a time so generic code can match any enum''s variants.'
 ---
 
 # `Either`
@@ -38,18 +40,20 @@ pub enum Either<Head, Tail> {
 }
 ```
 
-`Head` is the type of the current branch, and `Tail` is the rest of the chain, which is another `Either`
-or, at the end, [`Void`](void.md). `Left(Head)` carries a value of the head type, and `Right(Tail)`
-carries a value that belongs further down the chain. It derives `Eq`, `PartialEq`, `Debug`, and `Clone`,
-so a sum of values that implement those traits inherits them.
+`Head` is the type of the current branch, and `Tail` is the rest of the chain, which is another
+`Either` or, at the end, [`Void`](void.md). `Left(Head)` carries a value of the head type, and
+`Right(Tail)` carries a value that belongs further down the chain. It derives `Eq`, `PartialEq`,
+`Debug`, and `Clone`, so a sum of values that implement those traits inherits them. It is in the
+prelude, and so is `Void`.
 
 ## Behavior
 
-A sum of any width is an `Either` chain ending in `Void`, nested to the right. The type `Sum![A, B, C]`
-is `Either<A, Either<B, Either<C, Void>>>`, and the empty `Sum![]` is just `Void`. A value selects one
-branch by its nesting depth: `Left(a)` is an `A`, `Right(Left(b))` is a `B`, and `Right(Right(Left(c)))`
-is a `C`. A value at the `Void` position would match none of the listed branches. That is impossible,
-because a value of `Void` cannot exist, so the chain is closed at its end.
+A sum of any width is an `Either` chain ending in `Void`, nested to the right. The type
+`Sum![A, B, C]` is `Either<A, Either<B, Either<C, Void>>>`, and the empty `Sum![]` is `Void` alone.
+A value selects one branch by its nesting depth: `Left(a)` is an `A`, `Right(Left(b))` is a `B`, and
+`Right(Right(Left(c)))` is a `C`. A value at the `Void` position would match none of the listed
+branches. That is impossible, because a value of `Void` cannot exist, so the chain is closed at its
+end.
 
 Generic code consumes the sum by recursing on its cases, in the same way it folds the product list, but it
 branches instead of pairing. The code handles a `Left` directly as the head. A `Right` defers to a trait
@@ -57,11 +61,15 @@ impl on the `Tail`, which recurses until it finds a `Left`. The base case is the
 terminator, and here the difference from the product list matters. A product ends in the constructible
 [`Nil`](nil.md), but a sum ends in the uninhabited `Void`, because an empty choice cannot hold a value.
 
+An enum's shape follows each variant's own form. A variant with one unnamed field has that field's
+type as its payload, a variant with named fields has a product of `Field` entries keyed by name, a
+variant with several unnamed fields has one keyed by [`Index`](index_type.md), and a unit variant
+has [`Nil`](nil.md).
+
 ## Examples
 
-The sum list appears most visibly as the `Fields` of an enum that derives
-[`#[derive(HasFields)]`](../derives/derive_has_fields.md), where the [`Sum!`](../macros/sum.md) macro
-hides the `Either`/`Void` chain:
+An enum's shape is an `Either` chain of `Field` branches, and a `match` on it selects a variant by
+depth, with the `Void` arm closing the match:
 
 ```rust
 use cgp::prelude::*;
@@ -72,31 +80,55 @@ pub enum Shape {
     Rectangle { width: f64, height: f64 },
 }
 
-// generated (schematically):
-// impl HasFields for Shape {
-//     type Fields = Sum![
-//         Field<Symbol!("Circle"), f64>,
-//         Field<Symbol!("Rectangle"), Product![
-//             Field<Symbol!("width"), f64>,
-//             Field<Symbol!("height"), f64>,
-//         ]>,
-//     ];
-//     // i.e. Either<Field<Symbol!("Circle"), f64>,
-//     //          Either<Field<Symbol!("Rectangle"), _>, Void>>
-// }
+pub fn area(shape: Shape) -> f64 {
+    match shape.to_fields() {
+        Either::Left(circle) => core::f64::consts::PI * circle.value * circle.value,
+        Either::Right(Either::Left(rectangle)) => {
+            let Cons(width, Cons(height, Nil)) = rectangle.value;
+            width.value * height.value
+        }
+        Either::Right(Either::Right(void)) => match void {},
+    }
+}
+
+pub type Token = Sum![u32, String, bool];
+
+pub fn demo() {
+    assert_eq!(
+        area(Shape::Rectangle {
+            width: 2.0,
+            height: 3.0
+        }),
+        6.0
+    );
+
+    // The `String` branch sits one `Right` deep.
+    let token: Token = Either::Right(Either::Left("hi".to_owned()));
+    assert_eq!(token, Either::Right(Either::Left("hi".to_owned())));
+
+    // `Sum!` is the right-nested `Either` chain ending in `Void`.
+    let _: PhantomData<Either<u32, Either<String, Either<bool, Void>>>> = PhantomData::<Token>;
+}
 ```
 
-You can also write a standalone sum type through the macro, and a value picks one branch by its nesting
-depth:
+The derive writes `Shape`'s shape with the macros:
 
 ```rust
-use cgp::prelude::*;
-
-type Token = Sum![u32, String, bool];
-// Token == Either<u32, Either<String, Either<bool, Void>>>
-
-let t: Token = Either::Right(Either::Left("hi".to_string())); // the String branch
+impl HasFields for Shape {
+    type Fields = Sum![
+        Field<Symbol!("Circle"), f64>,
+        Field<Symbol!("Rectangle"), Product![
+            Field<Symbol!("width"), f64>,
+            Field<Symbol!("height"), f64>,
+        ]>,
+    ];
+}
 ```
+
+The `Void` arm in `area` states that the chain ends, and `match void {}` is accepted because `Void`
+is uninhabited. Here the arm may also be left out, since `to_fields` returns the shape by value and
+Rust lets a match on a value omit an arm whose payload is uninhabited. Behind a reference the arm is
+required, as the [`Void`](void.md) page shows.
 
 ## When to use it
 
@@ -110,12 +142,16 @@ list. Writing the chain out yourself is longer, harder to change, and identical 
 - **Use [`Cons`](cons.md), not `Either`, when every element is present at once.** A product holds a
   value for every element, and a sum holds a value for exactly one. They are duals, and mixing them
   produces a type error rather than a subtle bug.
+- **Use the [extractor family](../traits/variant/extract_field.md)** to take an enum apart by
+  variant name in generic code. A `match` on the `Either` chain, as above, is positional and belongs
+  where the enum's order is known.
 
 ## Common Mistakes
 
-**A sum holds one branch, not all of them.** `Either<A, Either<B, Void>>` is a value that is *either* an
-`A` or a `B`, not both. This is the opposite of the [product list](cons.md), and confusing the two is the
-usual cause of an "expected `Either`, found `Cons`" error.
+**A sum holds one branch, not all of them.** `Either<A, Either<B, Void>>` is a value that is
+*either* an `A` or a `B`, not both. This is the opposite of the [product list](cons.md), and a type
+written with one where the other is expected fails as a mismatch between an `Either` chain and a
+`Cons` chain.
 
 **The empty sum is the uninhabited [`Void`](void.md), not a value.** `Sum![]` is `Void`, which is
 uninhabited, so code cannot construct an empty choice. It can construct an empty record, because a record
@@ -132,7 +168,8 @@ it sounds, but the types still differ.
 - [`Sum!`](../macros/sum.md): the macro that folds element types onto this list.
 - [`Field`](field.md): what the branches usually are, pairing a variant name with its payload.
 - [`HasFields`](../traits/shape/has_fields.md): exposes an enum's shape as one of these lists.
-- [`ExtractField`](../traits/variant/extract_field.md): the extractor family that walks this list.
+- [`ExtractField`](../traits/variant/extract_field.md): the extractor family that takes an enum
+  apart by variant name.
 
 The ideas behind it:
 

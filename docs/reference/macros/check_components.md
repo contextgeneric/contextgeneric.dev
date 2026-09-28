@@ -399,6 +399,9 @@ context type, which does not say a name is missing. Add `#[check_trait(Name)]`.
 
 **A passing check is not a claim that the implementation is correct**, only that it resolves. It proves
 the provider was found and its dependencies are satisfiable, not that the provider does what you meant.
+One case slips past it: a component used at an unsized type parameter, such as `str`, passes its check
+but fails at every call through the table, as the
+[`delegate_components!`](./delegate_components.md#common-mistakes) page records.
 
 ## Related constructs
 

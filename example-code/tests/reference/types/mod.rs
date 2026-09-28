@@ -2,7 +2,7 @@
 //!
 //! Most of these types are type-level markers a reader recognizes rather than writes, so a page gets a
 //! module only where it shows code a compiler can check: a shape a derive assigns, a value built from a
-//! marker, a call site that passes a tag. The two overview pages, which show no code, get none.
+//! marker, a call site that passes a tag. The overview page, which shows no code, gets none.
 
 pub mod chars;
 pub mod cons;

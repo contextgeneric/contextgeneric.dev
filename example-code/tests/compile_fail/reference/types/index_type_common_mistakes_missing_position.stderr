@@ -1,0 +1,19 @@
+error[E0277]: the trait bound `Point: cgp::prelude::HasField<cgp::prelude::Index<5>>` is not satisfied
+  --> tests/compile_fail/reference/types/index_type_common_mistakes_missing_position.rs:10:12
+   |
+10 |     *point.get_field(PhantomData::<Index<5>>)
+   |            ^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `cgp::prelude::HasField<cgp::prelude::Index<5>>` is not implemented for `Point`
+  --> tests/compile_fail/reference/types/index_type_common_mistakes_missing_position.rs:7:1
+   |
+ 7 | pub struct Point(pub f64, pub f64, pub f64);
+   | ^^^^^^^^^^^^^^^^
+help: `Point` implements trait `cgp::prelude::HasField<Tag>`
+  --> tests/compile_fail/reference/types/index_type_common_mistakes_missing_position.rs:7:18
+   |
+ 7 | pub struct Point(pub f64, pub f64, pub f64);
+   |                  ^^^      ^^^      ^^^ `cgp::prelude::HasField<cgp::prelude::Index<2>>`
+   |                  |        |
+   |                  |        `cgp::prelude::HasField<cgp::prelude::Index<1>>`
+   |                  `cgp::prelude::HasField<cgp::prelude::Index<0>>`

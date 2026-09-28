@@ -1,6 +1,8 @@
 ---
+title: 'Field — a value tagged with its name'
 sidebar_label: 'Field'
 sidebar_position: 2
+description: 'A value paired with its type-level name tag, so a struct''s fields and an enum''s variants can be described one named entry at a time.'
 ---
 
 # `Field`
@@ -40,10 +42,12 @@ pub struct Field<Tag, Value> {
 }
 ```
 
-`Tag` is the type-level name of the field. It appears only inside `PhantomData<Tag>`, never in a stored
-field. It is usually a [type-level string](/docs/reference/glossary#type-level-string) such as `Symbol!("name")` for a named field, or a type-level
-number such as `Index<0>` for a tuple position. `Value` is the field's actual type, and `value` is the
-only data the struct keeps. Apart from the tag, a `Field` is a thin wrapper around its `Value`.
+`Tag` is the type-level name of the field. It appears only inside `PhantomData<Tag>`, never in a
+stored field. It is usually a [type-level string](/docs/reference/glossary#type-level-string) such
+as `Symbol!("name")` for a named field, or a type-level number such as `Index<0>` for a tuple
+position. `Value` is the field's actual type, and `value` is the only data the struct keeps. Apart
+from the tag, a `Field` is a thin wrapper around its `Value`. It is in the prelude, so
+`use cgp::prelude::*;` is enough.
 
 ## Behavior
 
@@ -52,21 +56,28 @@ rather than from you. The `From<Value>` impl fills in `value` and sets `phantom`
 `let f: Field<Symbol!("name"), String> = "Alice".to_string().into();` compiles, and the compiler infers
 the tag from the expected type. This is why generated code builds each entry with a plain `.into()`.
 
-The other trait impls defer to the value and ignore the tag, so a `Field` behaves like its `Value` for
-comparison and printing. `Debug` forwards to the value's `Debug` and does not show the tag.
+The other trait impls defer to the value and ignore the tag, so a `Field` behaves like its `Value`
+for comparison and printing. `Debug` forwards to the value's `Debug` and does not show the tag.
 `PartialEq` and `Eq` compare only `value`, each gated on the matching bound on `Value`. Two `Field`
-values are equal when their values are equal. The tag is a compile-time matter and plays no part at run
-time.
+values are equal when their values are equal. The tag is a compile-time matter and does not take
+part at run time. `Field` implements nothing else: it is not `Clone`, `Copy`, or `Default`, whatever
+its `Value` is.
 
 Because the tag lives only in `PhantomData`, code that needs the name reads it from the `Tag` parameter
 through trait resolution rather than from stored data. For example, it matches a
 `Field<Symbol!("name"), _>` against a [`HasField<Symbol!("name")>`](../traits/field-access/has_field.md)
 bound.
 
+**A tuple struct with exactly one field is the exception to the wrapping.** Its shape is the field's
+type itself, without a `Field` around it or a list, so `struct Meters(u32)` has `Fields = u32`. A
+tuple struct with two or more fields tags each entry by position, as `Field<Index<0>, u32>`. Inside
+an enum, a variant with a single unnamed field has that field's type as its payload in the variant's
+`Field`.
+
 ## Examples
 
-`Field` appears most often inside the shape a derive generates, where each struct field becomes one
-entry tagged by its [`Symbol!`](../macros/symbol.md) name:
+A struct's shape, as [`#[derive(HasFields)]`](../derives/derive_has_fields.md) assigns it, is a list
+of `Field` entries, and [`to_fields`](../traits/shape/to_fields.md) turns a value into that list:
 
 ```rust
 use cgp::prelude::*;
@@ -77,26 +88,50 @@ pub struct Person {
     pub age: u8,
 }
 
-// generated:
-// impl HasFields for Person {
-//     type Fields = Product![
-//         Field<Symbol!("name"), String>,
-//         Field<Symbol!("age"), u8>,
-//     ];
-// }
+#[derive(HasFields)]
+pub struct Point(pub u32, pub u32);
+
+#[derive(HasFields)]
+pub struct Meters(pub u32);
+
+pub fn demo() {
+    // A struct's shape is a list of `Field` entries, each tagged by its name.
+    let fields: Product![Field<Symbol!("name"), String>, Field<Symbol!("age"), u8>] = Person {
+        name: "Alice".to_owned(),
+        age: 30,
+    }
+    .to_fields();
+
+    let Cons(name, Cons(age, Nil)) = fields;
+    assert_eq!(name.value, "Alice");
+    assert_eq!(age.value, 30);
+
+    // A tuple struct's entries are tagged by position.
+    let Cons(x, Cons(y, Nil)): Product![Field<Index<0>, u32>, Field<Index<1>, u32>] =
+        Point(3, 4).to_fields();
+    assert_eq!((x.value, y.value), (3, 4));
+
+    // A one-field tuple struct's shape is the field's type itself.
+    let inner: u32 = Meters(7).to_fields();
+    assert_eq!(inner, 7);
+
+    // One entry, built from its value; the annotation supplies the tag.
+    let entry: Field<Symbol!("name"), String> = "Bob".to_owned().into();
+    assert_eq!(entry.value, "Bob");
+
+    // The tag adds no size, and `Debug` prints the value alone.
+    assert_eq!(
+        core::mem::size_of::<Field<Symbol!("name"), String>>(),
+        core::mem::size_of::<String>()
+    );
+    assert_eq!(format!("{entry:?}"), "\"Bob\"");
+}
 ```
 
-You can also build a single `Field` directly from its value, with the type annotation supplying the tag:
-
-```rust
-use cgp::prelude::*;
-
-let name: Field<Symbol!("name"), String> = "Alice".to_string().into();
-assert_eq!(name.value, "Alice");
-```
-
-For a tuple-struct field the tag is an [`Index`](index_type.md) rather than a `Symbol!`, so the same
-wrapper names a positional field, as `Field<Index<0>, u32>`.
+The annotations on `fields` and on the tuple pattern are the check: each names the list type the
+derive assigned, and the program compiles only if it matches. The derive writes that list as
+`type Fields = Product![Field<Symbol!("name"), String>, Field<Symbol!("age"), u8>];` for `Person`,
+and as `type Fields = u32;` for `Meters`.
 
 ## When to use it
 
@@ -120,6 +155,10 @@ run time. It distinguishes them only in the type.
 
 **A `Field` is the size of its `Value`, not larger.** The tag occupies zero bytes, so wrapping a value in
 a `Field` is free at run time.
+
+**A one-field tuple struct's shape lacks a `Field`.** Code that expects every shape to be a list of
+`Field` entries meets a bare `u32` for `struct Meters(u32)`, since the derive treats such a struct
+as a newtype around its field.
 
 **The tag must match exactly for a lookup to resolve.** `Field<Symbol!("first_name"), _>` and
 `Field<Symbol!("firstName"), _>` carry unrelated tags, so a name mismatch appears as an unsatisfied

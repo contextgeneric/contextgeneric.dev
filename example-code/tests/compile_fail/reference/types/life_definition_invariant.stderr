@@ -1,0 +1,14 @@
+error: lifetime may not live long enough
+ --> tests/compile_fail/reference/types/life_definition_invariant.rs:8:5
+  |
+7 | pub fn shorten<'s, 'l: 's>(marker: Life<'l>) -> Life<'s> {
+  |                --  -- lifetime `'l` defined here
+  |                |
+  |                lifetime `'s` defined here
+8 |     marker
+  |     ^^^^^^ function was supposed to return data with lifetime `'l` but it is returning data with lifetime `'s`
+  |
+  = help: consider adding the following bound: `'s: 'l`
+  = note: requirement occurs because of the type `cgp::prelude::Life<'_>`, which makes the generic argument `'_` invariant
+  = note: the struct `cgp::prelude::Life<'a>` is invariant over the parameter `'a`
+  = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance

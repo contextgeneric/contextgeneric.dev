@@ -13,13 +13,13 @@ whichever it has without forcing every implementor to one or the other.
 ## Overview
 
 `MRef<'a, T>` lets one getter signature serve both the context that already stores a value and the
-context that must produce one. Here a **context** is the type the method runs on. It supplies the
-values the method needs as its own fields. A getter that returns `&'a T` forces every context to keep
-a `T` it can lend. A getter that returns `T` forces every context to give up ownership, and to clone even
-when it could share a reference. `MRef<'a, T>` avoids both constraints by being either case at run time. A
-context with the value in a field returns `MRef::Ref` and lends it. A context that computes or assembles
-the value returns `MRef::Owned` and transfers it. The caller treats both the same, because `MRef` derefs
-to `T`.
+context that must produce one. Here a **context** is the type the method runs on, which supplies the
+values it needs as its fields. A getter that returns `&'a T` forces every context to keep a `T` it
+can lend. A getter that returns `T` forces every context to give up ownership, and to clone even
+when it could share a reference. `MRef<'a, T>` avoids both constraints by being either case at run
+time. A context with the value in a field returns `MRef::Ref` and lends it. A context that computes
+or assembles the value returns `MRef::Owned` and transfers it. The caller treats both the same,
+because `MRef` derefs to `T`.
 
 CGP's getter machinery uses the type directly, because a getter method's return type decides what
 body the macro generates. When a getter returns `MRef<'a, T>` over `&self`, the generated accessor
@@ -28,8 +28,8 @@ nothing extra, and the same interface still lets a provider elsewhere return an 
 getter can therefore leave open whether the context stores the value or makes it, without splitting
 into a separate trait for each case.
 
-Unlike the rest of this section, `MRef` is an ordinary runtime value rather than a type-level marker. It
-belongs here because it is the one type in the group that you write yourself, as the return type of a
+Unlike the rest of this section, `MRef` is an ordinary runtime value rather than a type-level
+marker. It belongs here because it is a type you name in your own code, as the return type of a
 getter.
 
 ## Definition
@@ -44,10 +44,10 @@ pub enum MRef<'a, T> {
 }
 ```
 
-`Ref` borrows a `T` for the lifetime `'a`, and `Owned` carries a `T` by value. The lifetime applies only
-to the borrowed case, so an `MRef` built from an owned value is effectively unbounded in `'a`. The enum is
-an ordinary owned value, with nothing type-level about it, and it is the payload a getter passes back to
-its caller.
+`Ref` borrows a `T` for the lifetime `'a`, and `Owned` carries a `T` by value. The lifetime applies
+only to the borrowed case, so an `MRef` built from an owned value is effectively unbounded in `'a`.
+The enum is an ordinary owned value, with nothing type-level about it, and it is the payload a
+getter passes back to its caller. It is in the prelude, so `use cgp::prelude::*;` is enough.
 
 ## Behavior
 
@@ -56,38 +56,101 @@ implements `Deref<Target = T>` by matching on the variant and returning a `&T` e
 and any auto-deref method call work regardless of which case is inside. It also implements `AsRef<T>` over
 the same logic, giving an explicit `as_ref()` for code that prefers it.
 
-Building an `MRef` takes a single `.into()`, because it implements `From` for both cases. `From<T>` builds
-`Owned`, and `From<&'a T>` builds `Ref`, so a value or a reference converts with `.into()`. When a caller
-needs ownership unconditionally, `get_or_clone` resolves the enum to a plain `T`. It returns the owned
-value as is or clones the borrowed one, and it is available whenever `T: Clone`. These make up the whole
-API: the transparent `Deref` and `AsRef`, the `From` impls, and `get_or_clone`. Code reads a borrowed
-`MRef` cheaply and promotes it to ownership only on request.
+Building an `MRef` takes a single `.into()`, because it implements `From` for both cases. `From<T>`
+builds `Owned`, and `From<&'a T>` builds `Ref`, so a value or a reference converts with `.into()`.
+When a caller needs ownership unconditionally, `get_or_clone` resolves the enum to a plain `T`. It
+returns the owned value as is or clones the borrowed one, and it is available whenever `T: Clone`.
+These make up the whole API: the transparent `Deref` and `AsRef`, the `From` impls, and
+`get_or_clone`. `MRef` does not implement any other trait, so it is neither `Clone` nor `Debug`.
+Code reads a borrowed `MRef` cheaply and promotes it to ownership only on request.
+
+The getter macros recognize `MRef<'_, T>` by its shape: a single-segment path named `MRef` with a
+lifetime and a type argument. The same form works for an [`#[implicit]`](../attributes/implicit.md)
+argument, which then lends the field as `MRef::Ref`. A differently shaped or fully qualified `MRef`,
+such as `cgp::prelude::MRef<'_, T>`, is not recognized. It falls through to the owned form, which
+expects a field of that type, and with `'_` in it the definition does not compile.
 
 ## Examples
 
-`MRef` is the return type of a getter that should work whether the context stores the value or produces
-it. A borrowed field and a freshly built value have the same type, and code reads them the same way:
+A getter returning `MRef` lets one context lend a stored field and another build the value, and
+generic code reads both the same way:
 
 ```rust
 use cgp::prelude::*;
 
-let stored = String::from("hello");
+#[cgp_getter]
+pub trait HasGreeting {
+    fn greeting(&self) -> MRef<'_, String>;
+}
 
-// a context lending a stored value:
-let borrowed: MRef<'_, String> = MRef::from(&stored);
-assert_eq!(&*borrowed, "hello");
+// A provider that builds the value instead of lending a field.
+#[cgp_impl(new BuildGreeting)]
+impl GreetingGetter {
+    fn greeting(&self, #[implicit] name: &str) -> MRef<'_, String> {
+        MRef::Owned(format!("Hello, {name}!"))
+    }
+}
 
-// a provider returning a freshly built value through the same type:
-let made: MRef<'_, String> = MRef::from(String::from("world"));
-assert_eq!(made.as_ref(), "world");
+#[derive(HasField)]
+pub struct Stored {
+    pub greeting: String,
+}
 
-// promote either to an owned value when ownership is required:
-let owned: String = borrowed.get_or_clone();
-assert_eq!(owned, "hello");
+#[derive(HasField)]
+pub struct Computed {
+    pub name: String,
+}
+
+delegate_components! {
+    Stored {
+        GreetingGetterComponent: UseField<Symbol!("greeting")>,
+    }
+}
+
+delegate_components! {
+    Computed {
+        GreetingGetterComponent: BuildGreeting,
+    }
+}
+
+check_components! {
+    Stored {
+        GreetingGetterComponent,
+    }
+}
+
+check_components! {
+    Computed {
+        GreetingGetterComponent,
+    }
+}
+
+// Generic code reads either case through `Deref`.
+pub fn shout<Context: HasGreeting>(context: &Context) -> String {
+    context.greeting().to_uppercase()
+}
+
+pub fn demo() {
+    let stored = Stored {
+        greeting: "Hi there".to_owned(),
+    };
+    let computed = Computed {
+        name: "Alice".to_owned(),
+    };
+
+    assert_eq!(shout(&stored), "HI THERE");
+    assert_eq!(shout(&computed), "HELLO, ALICE!");
+
+    // `UseField` lends the stored field, and `get_or_clone` moves an owned value out.
+    assert!(matches!(stored.greeting(), MRef::Ref(_)));
+    let owned: String = computed.greeting().get_or_clone();
+    assert_eq!(owned, "Hello, Alice!");
+}
 ```
 
-Both `borrowed` and `made` have the same type, and code consumes them the same way. Only the construction
-differs. `get_or_clone` clones the borrowed case and moves the owned one.
+`Stored` and `Computed` are value contexts for a self-targeted getter. `Stored` wires the getter to
+[`UseField`](../providers/use_field.md), whose generated accessor wraps the field as `MRef::Ref`.
+`Computed` wires it to a provider that formats a new `String` and returns it as `MRef::Owned`.
 
 ## When to use it
 
@@ -96,9 +159,10 @@ return type when the value is not always a field the context can lend.
 
 - **Use a plain `&T` return** when every context stores the value and can lend it. `MRef` is useful only
   where some context must produce the value instead.
-- **Use an [`#[implicit]`](../attributes/implicit.md) argument** to read a stored field in a provider,
-  which is the default for field access. An implicit argument can itself have the type `MRef<'_, T>` when
-  the field may be lent or produced.
+- **Use an [`#[implicit]`](../attributes/implicit.md) argument** to read a stored field in a
+  provider, which is the default for field access. An implicit argument declared as `MRef<'_, T>`
+  lends the field as `MRef::Ref`, which suits a body written against a value that may be owned or
+  borrowed.
 - **Use `MRef` with [`#[cgp_getter]`](../macros/cgp_getter.md)** and the
   [`UseField`](../providers/use_field.md) family, where a getter's return type selects the accessor the
   macro generates.
@@ -113,6 +177,11 @@ value, while `Life<'a>` is a zero-sized type-level lift for provider wiring. The
 is free when the getter already owns the value and costs a clone when it borrowed. Use it only when you
 need ownership.
 
+**A qualified path is not recognized.** A getter declared as
+`fn greeting(&self) -> cgp::prelude::MRef<'_, String>;` is treated as returning an owned field of
+that type, so its `'_` lands in a `HasField` bound and the definition fails with
+``error[E0637]: `'_` cannot be used here``. Import `MRef` and write it bare.
+
 **`Deref` makes the variants transparent, so you rarely match on them.** Reading through `&*` or
 `as_ref()` works whichever case is inside, and a manual match on `Ref` versus `Owned` usually means the
 code should have called `get_or_clone` instead.
@@ -120,6 +189,8 @@ code should have called `get_or_clone` instead.
 ## Related constructs
 
 - [`#[cgp_getter]`](../macros/cgp_getter.md): the getter component whose return type may be `MRef`.
+- [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md): the blanket getter, which recognizes the
+  same return type.
 - [`UseField`](../providers/use_field.md) and [`UseFieldRef`](../providers/use_field_ref.md): the
   providers that wire a getter, and the by-reference variant.
 - [`HasField`](../traits/field-access/has_field.md): the field access an `MRef` getter builds on.

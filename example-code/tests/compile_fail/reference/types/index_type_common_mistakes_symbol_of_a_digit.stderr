@@ -1,0 +1,18 @@
+error[E0277]: the trait bound `Pair: cgp::prelude::HasField<cgp::prelude::Symbol<1, cgp::prelude::Chars<'0', Nil>>>` is not satisfied
+  --> tests/compile_fail/reference/types/index_type_common_mistakes_symbol_of_a_digit.rs:10:11
+   |
+10 |     *pair.get_field(PhantomData::<Symbol!("0")>)
+   |           ^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `cgp::prelude::HasField<cgp::prelude::Symbol<1, cgp::prelude::Chars<'0', Nil>>>` is not implemented for `Pair`
+  --> tests/compile_fail/reference/types/index_type_common_mistakes_symbol_of_a_digit.rs:7:1
+   |
+ 7 | pub struct Pair(pub u32, pub String);
+   | ^^^^^^^^^^^^^^^
+help: `Pair` implements trait `cgp::prelude::HasField<Tag>`
+  --> tests/compile_fail/reference/types/index_type_common_mistakes_symbol_of_a_digit.rs:7:17
+   |
+ 7 | pub struct Pair(pub u32, pub String);
+   |                 ^^^      ^^^ `cgp::prelude::HasField<cgp::prelude::Index<1>>`
+   |                 |
+   |                 `cgp::prelude::HasField<cgp::prelude::Index<0>>`
