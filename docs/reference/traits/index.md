@@ -1,4 +1,5 @@
 ---
+description: 'The traits CGP''s macros generate and consume, grouped by job: wiring and checking, field access, extensible data, namespaces, and monads.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---

@@ -1,4 +1,5 @@
 ---
+description: 'The traits that describe a type''s whole shape as one type-level list, and the conversions that move a value into and out of it.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---

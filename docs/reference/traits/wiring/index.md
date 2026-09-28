@@ -1,4 +1,5 @@
 ---
+description: 'The three traits a context''s wiring rests on: the table entry, the marker that names a missing dependency, and the check that combines them.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
@@ -9,9 +10,9 @@ The three traits every context's wiring rests on, and the ones a wiring error na
 
 ## Overview
 
-Wiring a **context**, the type a method runs on, records which provider it uses for each
-component and checks that the provider's own requirements are met. These traits carry that, and you
-read them far more often than you write them, because a
+Wiring a [**context**](/docs/reference/glossary#context), the type the implementation runs against,
+records which provider it uses for each component and checks that the provider's own requirements
+are met. These traits carry that, and you read them far more often than you write them, because a
 [`delegate_components!`](../../macros/delegate_components.md) table generates the first two and a
 [`check_components!`](../../macros/check_components.md) block asserts the third.
 

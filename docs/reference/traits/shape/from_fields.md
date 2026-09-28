@@ -11,11 +11,11 @@ Rebuilding a concrete value from its shape.
 
 ## Overview
 
-[`ToFields`](./to_fields.md) takes a value apart into an anonymous list of named entries. `FromFields` is
-the return journey. It closes the loop for generic code: decompose a value, work on the entries without
-naming the type, and put a concrete value back together at the end. Both directions go through the
-identical `Fields` type, so **the shapes line up by construction rather than by check**: there is
-nothing to validate and nothing that can fail.
+[`ToFields`](./to_fields.md) takes a value apart into an anonymous list of named entries.
+`FromFields` is the return journey. It closes the loop for generic code: decompose a value, work on
+the entries without naming the type, and put a concrete value back together at the end. Both
+directions go through the identical `Fields` type, so **the shapes line up by construction rather
+than by check**: there is nothing to validate and nothing that can fail.
 
 ## Definition
 
@@ -27,23 +27,24 @@ pub trait FromFields: HasFields {
 }
 ```
 
-It [supertraits](/docs/reference/glossary#supertrait) [`HasFields`](./has_fields.md), so `from_fields` takes that trait's `Fields` shape and a
-bound on `FromFields` gives you `Fields` as well. It is an associated function rather than a method,
-because there is no value to call it on, so the call reads `Person::from_fields(fields)`, or
-`T::from_fields(fields)` in generic code.
+It [supertraits](/docs/reference/glossary#supertrait) [`HasFields`](./has_fields.md), so
+`from_fields` takes that trait's `Fields` shape and a bound on `FromFields` gives you `Fields` as
+well. It is an associated function rather than a method, because there is no value to call it on, so
+the call reads `Person::from_fields(fields)`, or `T::from_fields(fields)` in generic code.
 
 ## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough. The impls come from
-[`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all five shape traits together.
+[`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all five shape traits
+together.
 
-The argument must be **exactly** `Self::Fields`: the same entries, the same tags, in the same order. A
-shape that merely has the same field names in a different order is a different type and will not be
-accepted, which makes the conversion total.
+The argument must be **exactly** `Self::Fields`: the same entries, the same tags, in the same order.
+A shape that merely has the same field names in a different order is a different type and will not
+be accepted, which makes the conversion total.
 
 ## Examples
 
-Rebuilding after a round trip:
+A generic round trip through the shape, for a struct and an enum:
 
 ```rust
 use cgp::prelude::*;
@@ -54,72 +55,102 @@ pub struct Config {
     pub port: u16,
 }
 
-let config = Config { host: "localhost".to_owned(), port: 8080 };
+#[derive(Clone, Debug, PartialEq, HasFields)]
+pub enum Shape {
+    Circle(f64),
+    Square(f64),
+}
 
-let fields = config.clone().to_fields();
-let config_again = Config::from_fields(fields);
-
-assert_eq!(config, config_again);
-```
-
-In generic code it is the half that names the destination:
-
-```rust
-fn rebuild<T>(fields: T::Fields) -> T
+pub fn round_trip<T>(value: T) -> T
 where
-    T: FromFields,
+    T: ToFields + FromFields,
 {
-    T::from_fields(fields)
+    T::from_fields(value.to_fields())
+}
+
+pub fn demo() {
+    let config = Config {
+        host: "localhost".to_owned(),
+        port: 8080,
+    };
+    assert_eq!(round_trip(config.clone()), config);
+
+    assert_eq!(round_trip(Shape::Square(2.0)), Shape::Square(2.0));
 }
 ```
 
-An enum rebuilds the same way, from a [`Sum!`](../../macros/sum.md) rather than a product: the arm that is
-present becomes the variant that is constructed.
+An enum rebuilds from a [`Sum!`](../../macros/sum.md) rather than a product: the arm that is present
+becomes the variant that is constructed.
 
 ## When to use it
 
-**Bound on it when generic code produces a concrete value from entries it has assembled or transformed.**
-Pair it with [`ToFields`](./to_fields.md) for a round trip, and require only one of the two when only one
-direction happens.
+**Bound on it when generic code produces a concrete value from entries it has assembled or
+transformed.** Pair it with [`ToFields`](./to_fields.md) for a round trip, and require only one of
+the two when only one direction happens.
 
 - **[`ToFields`](./to_fields.md)** for the decomposition half.
 - **[`HasFields`](./has_fields.md) alone** when the code names the shape and never builds a value.
-- **The [builder family](../builder/has_builder.md)** when the value is assembled *incrementally*, from pieces
-  arriving at different times. `from_fields` needs the whole shape at once, already complete;
-  [`HasBuilder`](../builder/has_builder.md) tracks presence field by field, and the extensible builder
-  pattern uses it.
-- **[`FromVariant`](../variant/from_variant.md)** when an enum is built from *one* named variant rather than from
-  a whole shape. That is the far more common way to construct an enum generically.
-- **A plain constructor** when the type is concrete. Nothing about `from_fields` improves on a struct
-  literal where one can be written.
+- **The [builder family](../builder/has_builder.md)** when the value is assembled *incrementally*,
+  from pieces arriving at different times. `from_fields` needs the whole shape at once, already
+  complete; [`HasBuilder`](../builder/has_builder.md) tracks presence field by field, and the
+  extensible builder pattern uses it.
+- **[`FromVariant`](../variant/from_variant.md)** when an enum is built from *one* named variant
+  rather than from a whole shape. That is the far more common way to construct an enum generically.
+- **A plain constructor** when the type is concrete. Nothing about `from_fields` improves on a
+  struct literal where one can be written.
 
 ## Under the hood
 
-The conversion destructures the `Cons` chain positionally and unwraps each entry's value:
+The conversion destructures the `Cons` chain positionally and unwraps each entry's value.
+`cargo cgp expand` on the example's `Config` shows:
 
 ```rust
-impl FromFields for Person {
-    fn from_fields(Cons(name, Cons(age, Nil)): Self::Fields) -> Self {
-        Self { name: name.value, age: age.value }
+impl FromFields for Config {
+    fn from_fields(Cons(host, Cons(port, Nil)): Self::Fields) -> Self {
+        Self {
+            host: host.value,
+            port: port.value,
+        }
     }
 }
 ```
 
-Note the pattern in the argument position: the shape is matched apart in the signature itself, one node
-per field, terminated by `Nil`. Because the chain is built and matched in declaration order, this is the
-exact inverse of [`to_fields`](./to_fields.md): no lookup by name happens at run time, and the tags
-exist only to make the types distinct.
+The shape is matched apart in the signature itself, one node per field, terminated by `Nil`. Because
+the chain is built and matched in declaration order, this is the exact inverse of
+[`to_fields`](./to_fields.md): nothing is looked up by name at run time, and the tags exist only to
+make the types distinct. An enum's impl is the dual, a `match` down the `Either` chain, and the
+example's `Shape` ends in an empty match on the `Void` terminator:
 
-An enum's impl is the dual: a `match` over the `Either` chain, each arm reconstructing the corresponding
-variant, with the `Void` terminator unreachable by construction.
+```rust
+impl FromFields for Shape {
+    fn from_fields(rest: Self::Fields) -> Self {
+        match rest {
+            Either::Left(field) => {
+                let field = field.value;
+                Self::Circle(field)
+            }
+            Either::Right(rest) => {
+                match rest {
+                    Either::Left(field) => {
+                        let field = field.value;
+                        Self::Square(field)
+                    }
+                    Either::Right(rest) => match rest {}
+                }
+            }
+        }
+    }
+}
+```
 
 ## Common Mistakes
 
-**It is an associated function, not a method.** Write `T::from_fields(fields)`; there is no receiver.
+**It is an associated function, not a method.** Write `T::from_fields(fields)`; there is no
+receiver.
 
-**The shape must match exactly.** Same tags, same value types, same order. Two structs with identical
-field names in different orders have unrelated `Fields` types, and the mismatch is reported against the
-whole chain rather than against the field that moved.
+**The shape must match exactly.** Same tags, same value types, same order. Two structs with
+identical field names in different orders have unrelated `Fields` types, and the mismatch is
+reported against the whole chain rather than against the field that moved.
 
 **A newtype's shape is the inner type**, not a one-element product, so `from_fields` on
 `struct Wrapper(String)` takes a `String`.
@@ -127,23 +158,24 @@ whole chain rather than against the field that moved.
 **It supertraits [`HasFields`](./has_fields.md)**, so naming both in a bound is redundant.
 
 **It cannot build a value incrementally.** The whole shape is required at once. Assembling from
-independent pieces is [`HasBuilder`](../builder/has_builder.md)'s job, and reaching for `from_fields` there means
-constructing the complete product by hand first.
+independent pieces is [`HasBuilder`](../builder/has_builder.md)'s job, and reaching for
+`from_fields` there means constructing the complete product by hand first.
 
-**There is no borrowing counterpart.** [`ToFieldsRef`](./to_fields_ref.md) has no `FromFieldsRef`, because
-a borrowed shape cannot yield an owned value.
+**There is no borrowing counterpart.** [`ToFieldsRef`](./to_fields_ref.md) has no `FromFieldsRef`,
+because a borrowed shape cannot yield an owned value.
 
 ## Related constructs
 
 - [`ToFields`](./to_fields.md): the reverse conversion, and the one usually written first.
 - [`HasFields`](./has_fields.md): the supertrait that names the shape.
-- [`ToFieldsRef`](./to_fields_ref.md) and [`HasFieldsRef`](./has_fields_ref.md): the borrowed half of
-  the family, which has no rebuild.
+- [`ToFieldsRef`](./to_fields_ref.md) and [`HasFieldsRef`](./has_fields_ref.md): the borrowed half
+  of the family, which has no rebuild.
 - [`FromVariant`](../variant/from_variant.md): constructing an enum from one named variant.
-- [`HasBuilder`](../builder/has_builder.md): incremental assembly, as against this wholesale conversion.
+- [`HasBuilder`](../builder/has_builder.md): incremental assembly, as against this wholesale
+  conversion.
 - [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
-- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md): what
-  a shape is made of.
+- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and
+  [`Field`](../../types/field.md): what a shape is made of.
 
 The ideas behind it:
 

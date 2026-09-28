@@ -1,39 +1,34 @@
 ---
+title: 'MapField — read through a field'
+description: 'A blanket helper on every HasField that passes a borrowed field to a closure, so generic code can read a field of a field without a lifetime bound.'
 sidebar_label: 'MapField'
 sidebar_position: 5
 ---
 
 # `MapField`
 
-Reading through a field without forcing its type to be `'static`.
-
-:::info
-
-### Generated machinery
-
-**You will not call `map_field` yourself.** It is a blanket impl that every
-[`HasField`](./has_field.md) already has, and [`ChainGetters`](../../providers/chain_getters.md) is what
-uses it to descend into a nested context. This page explains the lifetime problem it exists to solve,
-which is why reaching a nested field is a provider rather than two chained reads. The one case for calling it directly is writing a getter provider of your own that has to descend.
-
-:::
+Read through a field of a generic context without adding a lifetime bound on its type.
 
 ## Overview
 
-Chaining field reads looks like it should just work: read a field, then read a field of *that*. It does
-not, and the reason is about lifetimes rather than about CGP. Writing
-`context.get_field(..).get_field(..)` makes the intermediate `Value` outlive the borrow it came from,
-which the compiler can only accept by requiring it to be `'static`.
+Reading a field of a field looks like two chained reads, and on a concrete type it is. In generic
+code it is not: when a [**context**](/docs/reference/glossary#context), the type the method runs on,
+which supplies the values it needs as its fields, holds a field of a generic type `Inner`,
+`context.get_field(..).get_field(..)` returns a borrow that the compiler cannot tie to the context's
+borrow without knowing that `Inner` outlives it. A free function can add that bound, but a provider
+trait's method has its lifetimes fixed by the trait, so there the only bound that fits is `'static`.
 
-`MapField` sidesteps that by taking a closure instead of returning the intermediate borrow.
-
-**You will not normally call it.** [`ChainGetters`](../../providers/chain_getters.md) uses
-`map_field`, which is how a getter reaches a field on a nested context.
+`MapField` avoids the problem by taking a closure instead of returning the intermediate borrow.
+`map_field` reads the field and hands it to a closure that returns a borrow derived from it, and the
+closure's higher-ranked bound lets the compiler tie the result to the context's own borrow. Every
+[`HasField`](./has_field.md) has it through a blanket impl, and its provider-side twin
+[`FieldMapper`](./field_mapper.md) is what [`ChainGetters`](../../providers/chain_getters.md) uses
+to descend into a nested value.
 
 ## Definition
 
-`MapField<Tag>` extends [`HasField<Tag>`](./has_field.md) with a `map_field` method that reads the field
-and hands it to a closure:
+`MapField<Tag>` extends [`HasField<Tag>`](./has_field.md) with a `map_field` method that reads the
+field and hands it to a closure:
 
 ```rust
 pub trait MapField<Tag>: HasField<Tag> {
@@ -45,35 +40,47 @@ pub trait MapField<Tag>: HasField<Tag> {
 }
 ```
 
-It is a [supertrait](/docs/reference/glossary#supertrait) extension of [`HasField`](./has_field.md), so `Value` comes from the supertrait.
-`map_field` takes `&self`, the `PhantomData<Tag>` that names the field, and a `mapper` closure, and it
-returns `&T`. The higher-ranked `for<'a>` bound on the closure is the whole trick: the closure must work
-for *any* lifetime, so the compiler ties the returned borrow to the field's own lifetime rather than
-demanding `'static`.
+It is a [supertrait](/docs/reference/glossary#supertrait) extension, so `Value` comes from
+`HasField`. The `for<'a>` bound on `mapper` requires the closure to work for any lifetime of its
+argument, so the `&T` it returns is a borrow of the field, and `map_field` can return it as a borrow
+of `self`.
 
 ## Usage
 
-**It is not in the prelude**, one of only two members of the `HasField` group that are not. Import it
-from `cgp::core::field::traits`:
+It is not in the prelude. Import it from `cgp::core::field::traits`:
 
 ```rust
 use cgp::core::field::traits::MapField;
 ```
 
-It is a supertrait extension of [`HasField`](./has_field.md), so bounding on it gives you the plain read
-as well. The `mapper` argument is an ordinary closure; the `for<'a>` binder makes it unusual, because a
-closure that captures a reference of some *specific* lifetime will not satisfy it.
-
-**Nobody implements it.** It is a blanket impl for every `HasField` whose tag is `'static`, so every
-field access gains `map_field` for free.
+Nothing implements it by hand: a blanket impl gives it to every `HasField` whose tag is `'static`,
+which every [`Symbol!`](../../macros/symbol.md) and [`Index<N>`](../../types/index_type.md) is. So
+bounding a context on `HasField` is enough to call `map_field` on it.
 
 ## Examples
 
-Reaching a field of a field, which is the case the trait exists for:
+A generic function that reads the `name` of a context's `inner` field, and the wiring that performs
+the same descent for a getter:
 
 ```rust
-use cgp::core::field::traits::MapField;
 use cgp::prelude::*;
+use cgp::core::field::impls::ChainGetters;
+use cgp::core::field::traits::MapField;
+
+pub fn inner_name<Context, Inner>(context: &Context) -> &String
+where
+    Context: HasField<Symbol!("inner"), Value = Inner>,
+    Inner: HasField<Symbol!("name"), Value = String>,
+{
+    context.map_field(PhantomData::<Symbol!("inner")>, |inner| {
+        inner.get_field(PhantomData::<Symbol!("name")>)
+    })
+}
+
+#[cgp_getter(NameGetter)]
+pub trait HasName {
+    fn name(&self) -> &String;
+}
 
 #[derive(HasField)]
 pub struct Inner {
@@ -85,99 +92,105 @@ pub struct Outer {
     pub inner: Inner,
 }
 
-let outer = Outer { inner: Inner { name: "Alice".to_owned() } };
-
-let name: &String = outer.map_field(
-    PhantomData::<Symbol!("inner")>,
-    |inner| inner.get_field(PhantomData::<Symbol!("name")>),
-);
-
-assert_eq!(name, "Alice");
-```
-
-The closure receives the borrowed `Inner` and returns a borrow *derived from it*, so no intermediate
-outlives its source and no `'static` bound appears anywhere.
-
-In practice this is what a wiring line expresses instead:
-
-```rust
 delegate_components! {
     Outer {
-        NameGetterComponent: ChainGetters<Symbol!("inner"), UseField<Symbol!("name")>>,
+        NameGetterComponent: WithProvider<
+            ChainGetters<Product![
+                UseField<Symbol!("inner")>,
+                UseField<Symbol!("name")>,
+            ]>,
+        >,
+    }
+}
+
+check_components! {
+    Outer {
+        NameGetterComponent,
+    }
+}
+
+pub fn demo() {
+    let outer = Outer {
+        inner: Inner {
+            name: "Alice".to_owned(),
+        },
+    };
+
+    assert_eq!(inner_name(&outer), "Alice");
+    assert_eq!(outer.name(), "Alice");
+}
+```
+
+The closure receives the borrowed `Inner` and returns a borrow derived from it, so no bound on
+`Inner`'s lifetime appears. The `ChainGetters` entry reaches the same field for the `HasName`
+getter, chosen at the wiring site rather than written at a call site. `Outer` is a
+[value context](/docs/reference/glossary#value-context).
+
+## When to use it
+
+**Reach for [`ChainGetters`](../../providers/chain_getters.md) to give a getter a nested field**,
+and for an [`#[implicit]`](../../attributes/implicit.md) argument or [`HasField`](./has_field.md)
+for a field of the context itself, which is the common case and needs none of this. Call `map_field`
+directly when generic code of your own must read through a field, as `inner_name` does, and use
+[`FieldMapper`](./field_mapper.md) when that code is a provider, where the context is a type
+argument rather than `self`.
+
+## Under the hood
+
+The blanket impl reads the field once and passes the borrow to the mapper:
+
+```rust
+impl<Context, Tag> MapField<Tag> for Context
+where
+    Context: HasField<Tag>,
+    Tag: 'static,
+{
+    fn map_field<T>(
+        &self,
+        tag: PhantomData<Tag>,
+        mapper: impl for<'a> FnOnce(&'a Self::Value) -> &'a T,
+    ) -> &T {
+        mapper(self.get_field(tag))
     }
 }
 ```
 
-which is the same descent, chosen at the wiring site rather than written at the call site.
-
-## When to use it
-
-**Reach for [`ChainGetters`](../../providers/chain_getters.md) rather than this trait.** The provider is the
-construct; `map_field` is the mechanism it is built from, and calling it by hand means writing at a call
-site what the wiring could have decided.
-
-- **Use [`ChainGetters`](../../providers/chain_getters.md)** to reach a field on a nested context.
-- **Use [`HasField`](./has_field.md)** for a field of the context itself, which is the common case and
-  needs none of this.
-- **Use an [`#[implicit]`](../../attributes/implicit.md) argument** before either, since it covers every
-  same-context read.
-- **Reach for [`FieldMapper`](./field_mapper.md)** when the same descent must happen on the provider
-  side, where the context is a type argument rather than `self`.
-
-Call `map_field` directly only when you are writing machinery of the same kind, such as a new getter
-provider, and even then the existing ones usually compose.
-
-## Under the hood
-
-`MapField` is a blanket impl for every [`HasField`](./has_field.md) whose **tag** is `'static`:
-
-```rust
-// for every Context: HasField<Tag>, where Tag: 'static
-```
-
-The bound is on the *tag*, not on the value, and that is the point. A tag is a
-[`Symbol!`](../../macros/symbol.md) or an [`Index<N>`](../../types/index_type.md), both of which are `'static` by
-construction, so the bound costs nothing. The value stays free, which is exactly what the naive chained
-read could not achieve.
-
-Inside, the implementation reads the field once and hands the borrow to the mapper. Because the mapper
-is higher-ranked over `'a`, its return borrow is tied to the field borrow rather than to any fixed
-lifetime, and the result can be returned to the caller.
-
-[`ChainGetters`](../../providers/chain_getters.md) composes descents by nesting these calls, one per
-segment, so an arbitrarily deep path stays lifetime-correct with no `'static` anywhere in the chain.
+The `'static` bound is on the tag, not on the value, and that is the point: the tag is always
+`'static`, while the value, the intermediate whose lifetime the chained read could not express,
+stays free.
 
 ## Common Mistakes
 
-**It is not in the prelude.** Import from `cgp::core::field::traits`.
-[`FieldMapper`](./field_mapper.md) is the other non-prelude member of the group; everything else in it
-is in the prelude.
+**Two chained reads fail in generic code.** Written as
+`context.get_field(PhantomData::<Symbol!("inner")>).get_field(PhantomData::<Symbol!("name")>)`,
+the example's `inner_name` fails:
 
-**The closure must be higher-ranked.** A closure that captures a reference with a particular lifetime
-will not satisfy `for<'a>`, and the error talks about lifetime bounds rather than about the closure's
-body, which is confusing the first time.
+```text
+error[E0311]: the parameter type `Inner` may not live long enough
+```
 
-**The mapper must return a borrow *derived from* its argument.** Returning a reference to something else
-in scope does not satisfy the binder, which is the safety the design buys.
+rustc suggests naming the lifetime and adding `Inner: 'a`, which works in a free function. In a
+provider trait's method, whose signature the trait fixes, that bound cannot be written, so use
+`map_field` or [`FieldMapper`](./field_mapper.md) instead.
 
-**It cannot map to an owned value.** The signature returns `&T`. A getter that must produce a value uses
-[`MRef`](../../types/mref.md) instead.
+**The closure must return a borrow derived from its argument.** Returning a reference to something
+else does not satisfy the `for<'a>` binder, and the error talks about lifetimes rather than about
+the closure's body.
 
-**`MapField` is not [`MapFields`](../type-level/map_fields.md) and not [`MapType`](../type-level/map_type.md).** The names
-are similar: this one is a lifetime helper for reading a nested field, `MapFields` applies a marker across
-a type-level list, and `MapType` names one field's storage on a partial type.
+**It cannot map to an owned value.** The signature returns `&T`; a getter that must produce a value
+returns [`MRef`](../../types/mref.md) instead.
+
+**`MapField` is not [`MapFields`](../type-level/map_fields.md) or
+[`MapType`](../type-level/map_type.md).** This one reads through a field; `MapFields` applies a
+marker across a type-level list, and `MapType` names one field's storage on a partial record.
 
 ## Related constructs
 
-- [`FieldMapper`](./field_mapper.md): the provider-side mirror of this trait.
+- [`FieldMapper`](./field_mapper.md): the provider-side twin.
 - [`HasField`](./has_field.md): the supertrait, and the plain read.
-- [`ChainGetters`](../../providers/chain_getters.md): the provider that uses `map_field` to descend.
-- [`#[implicit]`](../../attributes/implicit.md): the idiomatic way to read a field of the context itself.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags, which are `'static` by
-  construction.
+- [`ChainGetters`](../../providers/chain_getters.md): the provider that descends through nested
+  fields.
 - [`MRef`](../../types/mref.md): the return type for a getter that may produce rather than lend.
-- [`MapFields`](../type-level/map_fields.md) and [`MapType`](../type-level/map_type.md): the two similarly-named traits that do
-  something else.
 
 The ideas behind it:
 
@@ -185,7 +198,7 @@ The ideas behind it:
 
 ## Source
 
-- [`map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs):
+- [`traits/map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs):
   `MapField` and `FieldMapper`
 
 ---

@@ -1,0 +1,41 @@
+error[E0599]: the method `greet` exists for struct `App`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_hand_written_entry.rs:23:17
+   |
+15 | pub struct App;
+   | -------------- method `greet` not found for this struct because it doesn't satisfy `App: CanGreet` or `App: Greeter<App>`
+...
+23 |     let _ = App.greet();
+   |                 ^^^^^ this is an associated function, not a method
+   |
+   = note: found the following associated functions; to be used as methods, functions must have a `self` parameter
+note: the candidate is defined in the trait `Greeter`
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_hand_written_entry.rs:5:5
+   |
+ 5 |     fn greet(&self) -> String;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: trait bound `App: Greeter<App>` was not satisfied
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_hand_written_entry.rs:3:1
+   |
+ 3 | #[cgp_component(Greeter)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 4 | pub trait CanGreet {
+   |           ^^^^^^^^
+note: the trait `Greeter` must be implemented
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_hand_written_entry.rs:4:1
+   |
+ 4 | / pub trait CanGreet {
+ 5 | |     fn greet(&self) -> String;
+ 6 | | }
+   | |_^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `CanGreet` defines an item `greet`, perhaps you need to implement it
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_hand_written_entry.rs:4:1
+   |
+ 4 | pub trait CanGreet {
+   | ^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use associated function syntax instead
+   |
+23 -     let _ = App.greet();
+23 +     let _ = App::greet();
+   |

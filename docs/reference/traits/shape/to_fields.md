@@ -13,17 +13,17 @@ Taking a value apart into its shape.
 
 [`HasFields`](./has_fields.md) *names* a type's shape. `ToFields` produces a value in it.
 
-That lets generic code stop working on a concrete struct and start working on an anonymous list
-of named entries: the form a serializer walks, a converter rewrites, or a merge consumes. The
-concrete type goes in; a [`Product!`](../../macros/product.md) of [`Field`](../../types/field.md) entries comes
-out, or a [`Sum!`](../../macros/sum.md) for an enum.
+That lets generic code stop working on a concrete struct and start working on an anonymous list of
+named entries: the form a serializer walks, a converter rewrites, or a merge consumes. The concrete
+type goes in; a [`Product!`](../../macros/product.md) of [`Field`](../../types/field.md) entries
+comes out, or a [`Sum!`](../../macros/sum.md) for an enum.
 
-**It consumes the value.** That is the difference from [`ToFieldsRef`](./to_fields_ref.md), and it is the
-commonest surprise in the family, because the two read alike at a call site.
+**It consumes the value.** That is the difference from [`ToFieldsRef`](./to_fields_ref.md), and it
+is the commonest surprise in the family, because the two read alike at a call site.
 
-The reverse direction is [`FromFields`](./from_fields.md), and the two round-trip through the identical
-`Fields` type, so generic code can decompose, transform, and rebuild with the shapes lining up by
-construction rather than by check.
+The reverse direction is [`FromFields`](./from_fields.md), and the two round-trip through the
+identical `Fields` type, so generic code can decompose, transform, and rebuild with the shapes
+lining up by construction rather than by check.
 
 ## Definition
 
@@ -35,21 +35,21 @@ pub trait ToFields: HasFields {
 }
 ```
 
-It [supertraits](/docs/reference/glossary#supertrait) [`HasFields`](./has_fields.md), so `to_fields` returns that trait's `Fields` shape and a
-bound on `ToFields` gives you `Fields` as well. The method takes `self` by value, so it consumes the
-value to produce the owned shape.
+It [supertraits](/docs/reference/glossary#supertrait) [`HasFields`](./has_fields.md), so `to_fields`
+returns that trait's `Fields` shape and a bound on `ToFields` gives you `Fields` as well. The method
+takes `self` by value, so it consumes the value to produce the owned shape.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough. Writing `T: HasFields + ToFields` is common
-and harmless, though `T: ToFields` alone already gives you `Fields` through the supertrait.
+**It is in the prelude**, so `use cgp::prelude::*;` is enough. Writing `T: HasFields + ToFields` is
+common and harmless, though `T: ToFields` alone already gives you `Fields` through the supertrait.
 
-The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all five shape
-traits together.
+The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all
+five shape traits together.
 
 ## Examples
 
-A value round-tripping through its shape:
+A value taken apart by a generic function, read from the product, and rebuilt:
 
 ```rust
 use cgp::prelude::*;
@@ -60,27 +60,29 @@ pub struct Config {
     pub port: u16,
 }
 
-let config = Config { host: "localhost".to_owned(), port: 8080 };
-
-let fields = config.clone().to_fields();          // Config -> the product
-let config_again = Config::from_fields(fields);   // the product -> Config
-
-assert_eq!(config, config_again);
-```
-
-The `clone()` is there only because the assertion compares against the original. `to_fields` would
-otherwise have consumed it, which is exactly the point.
-
-In generic code, the bound is the point:
-
-```rust
-fn shape_of<T>(value: T) -> T::Fields
+pub fn shape_of<T>(value: T) -> T::Fields
 where
     T: ToFields,
 {
     value.to_fields()
 }
+
+pub fn demo() {
+    let config = Config {
+        host: "localhost".to_owned(),
+        port: 8080,
+    };
+
+    let fields = shape_of(config.clone());
+    assert_eq!(fields.1 .0.value, 8080);
+
+    assert_eq!(Config::from_fields(fields), config);
+}
 ```
+
+`fields.1.0` is the second entry of the `Cons` chain, the `port` field, and `from_fields` puts the
+value back together. The `clone()` is there only because the assertion compares against the
+original, which `to_fields` consumes.
 
 ## When to use it
 
@@ -91,22 +93,24 @@ borrowing form otherwise.
   borrow would do forces every caller to clone, which is the most common over-requirement in this
   family.
 - **[`FromFields`](./from_fields.md)** for the other direction, and both together for a round trip.
-- **[`HasFields`](./has_fields.md) alone** when the code only *names* the shape and never holds a value
-  in it.
-- **[`HasField`](../field-access/has_field.md)** when one named field is all that is wanted. Decomposing a whole struct
-  to read one entry is the wrong tool.
-- **The [builder family](../builder/has_builder.md)** when a value is assembled incrementally rather than
-  converted wholesale. `to_fields` is a single flat conversion; a builder tracks presence field by field.
+- **[`HasFields`](./has_fields.md) alone** when the code only *names* the shape and never holds a
+  value in it.
+- **[`HasField`](../field-access/has_field.md)** when one named field is all that is wanted.
+  Decomposing a whole struct to read one entry is the wrong tool.
+- **The [builder family](../builder/has_builder.md)** when a value is assembled incrementally rather
+  than converted wholesale. `to_fields` is a single flat conversion; a builder tracks presence field
+  by field.
 
 ## Under the hood
 
-`Product![A, B]` is `Cons<A, Cons<B, Nil>>`, so the conversion builds a `Cons` chain, one node per field,
-wrapping each value into its [`Field`](../../types/field.md) entry:
+`Product![A, B]` is `Cons<A, Cons<B, Nil>>`, so the conversion builds a `Cons` chain, one node per
+field, converting each value into its [`Field`](../../types/field.md) entry with `into`.
+`cargo cgp expand` on the example's `Config` shows:
 
 ```rust
-impl ToFields for Person {
+impl ToFields for Config {
     fn to_fields(self) -> Self::Fields {
-        Cons(self.name.into(), Cons(self.age.into(), Nil))
+        Cons(self.host.into(), Cons(self.port.into(), Nil))
     }
 }
 ```
@@ -114,30 +118,32 @@ impl ToFields for Person {
 An error message prints that chain when structural code fails to resolve, and the
 [type-level lists](../../types/index.md) page covers reading it.
 
-An enum's conversion is the dual: each concrete variant is matched onto its arm of an `Either` chain
-terminated by `Void`, tagged with the variant name.
+An enum's conversion is the dual: each variant is matched onto its arm of the `Either` chain, as
+`Self::Square(field) => Either::Right(Either::Left(field.into()))` for the second variant of an
+enum.
 
 Because the shape is built positionally from declaration order, `to_fields` and
-[`from_fields`](./from_fields.md) are exact inverses by construction: there is no lookup, no matching by
-name at run time, and nothing that can fail.
+[`from_fields`](./from_fields.md) are exact inverses by construction: there is no lookup, no
+matching by name at run time, and nothing that can fail.
 
 ## Common Mistakes
 
-**It consumes the value.** Reach for [`ToFieldsRef`](./to_fields_ref.md) when you need to keep it. This
-is the commonest surprise in the family, because the two read alike.
+**It consumes the value.** Reach for [`ToFieldsRef`](./to_fields_ref.md) when you need to keep it.
+This is the commonest surprise in the family, because the two read alike.
 
-**Field order is declaration order and is part of the type.** Two structs with the same field names in
-different orders produce unrelated `Fields` types, so a chain built from one will not satisfy the other.
+**Field order is declaration order and is part of the type.** Two structs with the same field names
+in different orders produce unrelated `Fields` types, so a chain built from one will not satisfy the
+other.
 
 **A newtype's shape is the inner type**, not a one-element product, so `to_fields` on
-`struct Wrapper(String)` yields a `String`. Generic code written against a `Cons` chain will not match
-it.
+`struct Wrapper(String)` yields a `String`. Generic code written against a `Cons` chain will not
+match it.
 
 **It supertraits [`HasFields`](./has_fields.md)**, so a bound naming both is redundant rather than
 wrong.
 
-**There is no fallible form.** The conversion cannot fail; anything that could is a different operation,
-such as a [cast](../casting/can_downcast.md).
+**There is no fallible form.** The conversion cannot fail; anything that could is a different
+operation, such as a [cast](../casting/can_downcast.md).
 
 ## Related constructs
 
@@ -146,10 +152,11 @@ such as a [cast](../casting/can_downcast.md).
 - [`ToFieldsRef`](./to_fields_ref.md): the borrowing form, which leaves the value intact.
 - [`HasFieldsRef`](./has_fields_ref.md): the shape that form produces.
 - [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
-- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and [`Field`](../../types/field.md): what
-  a shape is made of.
+- [`Product!`](../../macros/product.md), [`Sum!`](../../macros/sum.md), and
+  [`Field`](../../types/field.md): what a shape is made of.
 - [Type-level lists](../../types/index.md): the `Cons` chain the conversion builds.
-- [`HasBuilder`](../builder/has_builder.md): incremental assembly, as against this wholesale conversion.
+- [`HasBuilder`](../builder/has_builder.md): incremental assembly, as against this wholesale
+  conversion.
 
 The ideas behind it:
 

@@ -1,0 +1,20 @@
+error[E0277]: the trait bound `Person: cgp::prelude::HasField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
+  --> tests/compile_fail/reference/traits/has_field_common_mistakes_misspelled_name.rs:21:29
+   |
+21 |     let _ = read_first_name(&person);
+   |                             ^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is not implemented for `Person`
+      but trait `HasField<cgp::prelude::Symbol<9, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'N', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>` is implemented for it
+  --> tests/compile_fail/reference/traits/has_field_common_mistakes_misspelled_name.rs:14:9
+   |
+14 |     pub firstName: String,
+   |         ^^^^^^^^^
+note: required by a bound in `read_first_name`
+  --> tests/compile_fail/reference/traits/has_field_common_mistakes_misspelled_name.rs:5:14
+   |
+ 3 | pub fn read_first_name<Context>(context: &Context) -> &String
+   |        --------------- required by a bound in this function
+ 4 | where
+ 5 |     Context: HasField<Symbol!("first_name"), Value = String>,
+   |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `read_first_name`

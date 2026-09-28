@@ -2,7 +2,7 @@
 title: 'FieldMapper — the provider side of MapField'
 sidebar_label: 'FieldMapper'
 sidebar_position: 6
-description: 'The provider-side mirror of MapField, generated as a blanket implementation over every field getter. You meet it in an expansion rather than call it.'
+description: 'The provider-side mirror of MapField, a blanket impl over every field getter that lets a getter provider read through the field another provider returns.'
 ---
 
 # `FieldMapper`
@@ -13,31 +13,33 @@ The provider-side mirror of `MapField`.
 
 ### Generated machinery
 
-**You will not call `map_field` yourself.** It is a blanket impl over every
-[`FieldGetter`](./field_getter.md), and [`ChainGetters`](../../providers/chain_getters.md) is its only
-caller in practice. This page explains the mechanism a chained getter is built from. The one case for calling it directly is writing a getter provider of your own that has to descend.
+**You are not expected to implement `FieldMapper`.** It is a blanket impl over every
+[`FieldGetter`](./field_getter.md), and [`ChainGetters`](../../providers/chain_getters.md) is the
+provider that calls it to descend into a nested value. The one case for naming it is a getter
+provider of your own that has to read through another provider's field, as the example on this page
+does.
 
 :::
 
 ## Overview
 
-[`MapField`](./map_field.md) reads through a field without forcing its type to be `'static`, by taking a
-higher-ranked closure instead of returning the intermediate borrow. `FieldMapper` is the same operation
-in provider-trait shape, with the context as an explicit type argument rather than as `&self`. The
-group's two-by-two shape holds here too:
+[`MapField`](./map_field.md) reads through a field of a generic
+[**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
+values it needs as its fields, by handing the borrowed field to a closure rather than returning it.
+`FieldMapper` is the same operation in provider shape, with a provider as `Self` and the context as
+an explicit type argument. This is the form a getter provider needs, because a provider trait's
+method has its lifetimes fixed by the trait, so a chained read inside it cannot take the lifetime
+bound a free function could. The group's two-by-two shape holds here too:
 
 | | you bound against | you wire |
 |---|---|---|
 | plain read | [`HasField`](./has_field.md) | [`FieldGetter`](./field_getter.md) |
 | read through | [`MapField`](./map_field.md) | `FieldMapper` |
 
-**This is the one [`ChainGetters`](../../providers/chain_getters.md) actually uses**, because a chained
-getter is a provider composing other providers rather than a method on a concrete type.
-
 ## Definition
 
-`FieldMapper<Context, Tag>` is the provider-trait mirror of [`MapField`](./map_field.md), with the context
-as an explicit type argument instead of `&self`:
+`FieldMapper<Context, Tag>` mirrors [`MapField`](./map_field.md), with the context as an explicit
+type argument:
 
 ```rust
 pub trait FieldMapper<Context, Tag>: FieldGetter<Context, Tag> {
@@ -49,33 +51,45 @@ pub trait FieldMapper<Context, Tag>: FieldGetter<Context, Tag> {
 }
 ```
 
-`Self` is the provider and `Context` is the type being read from. It is a [supertrait](/docs/reference/glossary#supertrait) extension of
-[`FieldGetter`](./field_getter.md), exactly as [`MapField`](./map_field.md) extends
-[`HasField`](./has_field.md), so `Value` comes from the supertrait. `map_field` takes the context by
-shared reference, the `PhantomData<Tag>` that names the field, and a `mapper` closure whose higher-ranked
-`for<'a>` bound ties the returned `&T` to the field's own lifetime.
+`Self` is the provider and `Context` is the type being read from. It is a
+[supertrait](/docs/reference/glossary#supertrait) extension of [`FieldGetter`](./field_getter.md),
+so `Value` comes from there, and the `for<'a>` bound on `mapper` ties the returned `&T` to the
+context's borrow.
 
 ## Usage
 
-**It is not in the prelude.** Import it from `cgp::core::field::traits`:
+It is not in the prelude. Import it from `cgp::core::field::traits`:
 
 ```rust
 use cgp::core::field::traits::FieldMapper;
 ```
 
-**Nobody implements it.** It is a blanket impl for every [`FieldGetter`](./field_getter.md) with the
-getter and the tag `'static`, so every field-getter provider gains `map_field` for free, which makes
-chaining composable without each provider opting in.
-
-The `mapper` argument carries the same `for<'a>` binder as its consumer-side twin, and for the same
-reason: it lets the returned borrow be tied to the field borrow rather than to a fixed lifetime.
+Nothing implements it by hand: a blanket impl gives it to every `FieldGetter` whose provider and tag
+are `'static`, so every field-getter provider can be read through. A provider of your own bounds an
+inner provider on `FieldMapper` and calls `map_field` on it.
 
 ## Examples
 
-You meet it through a wiring line rather than a call. A getter that reaches a field on a nested context:
+A two-step getter provider that reads through the field one provider returns with another, wired for
+a getter, and a direct call through `UseContext`:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::traits::FieldMapper;
+
+pub struct ThenGet<First, Second>(pub PhantomData<(First, Second)>);
+
+impl<Context, Tag, First, Second, Mid, Value> FieldGetter<Context, Tag> for ThenGet<First, Second>
+where
+    First: FieldMapper<Context, Tag, Value = Mid>,
+    Second: FieldGetter<Mid, Tag, Value = Value>,
+{
+    type Value = Value;
+
+    fn get_field(context: &Context, tag: PhantomData<Tag>) -> &Value {
+        First::map_field(context, tag, |mid| Second::get_field(mid, tag))
+    }
+}
 
 #[cgp_getter(NameGetter)]
 pub trait HasName {
@@ -94,98 +108,104 @@ pub struct Outer {
 
 delegate_components! {
     Outer {
-        NameGetterComponent: ChainGetters<Symbol!("inner"), UseField<Symbol!("name")>>,
+        NameGetterComponent:
+            WithProvider<ThenGet<UseField<Symbol!("inner")>, UseField<Symbol!("name")>>>,
+    }
+}
+
+check_components! {
+    Outer {
+        NameGetterComponent,
+    }
+}
+
+pub fn demo() {
+    let outer = Outer {
+        inner: Inner {
+            name: "Alice".to_owned(),
+        },
+    };
+
+    assert_eq!(outer.name(), "Alice");
+
+    let name = <UseContext as FieldMapper<Outer, Symbol!("inner")>>::map_field(
+        &outer,
+        PhantomData,
+        |inner| inner.get_field(PhantomData::<Symbol!("name")>),
+    );
+    assert_eq!(name, "Alice");
+}
+```
+
+`ThenGet` is a two-element [`ChainGetters`](../../providers/chain_getters.md), written out to show
+the mechanism; in real wiring use `ChainGetters` itself. Its `get_field` could not be written as
+`Second::get_field(First::get_field(context, tag), tag)`: that fails with `E0311`, because `Mid` is
+not known to outlive the borrow. `Outer` is a [value
+context](/docs/reference/glossary#value-context).
+
+## When to use it
+
+**Reach for [`ChainGetters`](../../providers/chain_getters.md)** to give a getter a nested field by
+wiring. Name `FieldMapper` only when writing a getter provider of your own that must read through
+another provider's field, and use [`MapField`](./map_field.md) when the descent is on a generic
+context in an ordinary function.
+
+## Under the hood
+
+`FieldMapper` is a blanket impl over every [`FieldGetter`](./field_getter.md):
+
+```rust
+impl<Getter, Context, Tag> FieldMapper<Context, Tag> for Getter
+where
+    Getter: FieldGetter<Context, Tag> + 'static,
+    Tag: 'static,
+{
+    fn map_field<T>(
+        context: &Context,
+        tag: PhantomData<Tag>,
+        mapper: impl for<'a> FnOnce(&'a Self::Value) -> &'a T,
+    ) -> &T {
+        mapper(Getter::get_field(context, tag))
     }
 }
 ```
 
-**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** [`ChainGetters`](../../providers/chain_getters.md) descends into
-`inner` with `FieldMapper::map_field` and then applies the inner provider to what it finds, so
-`outer.name()` resolves to `outer.inner.name` with no lifetime obligations leaking into either type.
-
-Calling it directly is possible and rarely what you want:
-
-```rust
-use cgp::core::field::traits::FieldMapper;
-
-let name = <UseContext as FieldMapper<Outer, Symbol!("inner")>>::map_field(
-    &outer,
-    PhantomData,
-    |inner| inner.get_field(PhantomData::<Symbol!("name")>),
-);
-```
-
-## When to use it
-
-**Reach for [`ChainGetters`](../../providers/chain_getters.md) rather than this trait.** It is the construct;
-`FieldMapper` is the mechanism underneath it.
-
-- **Use [`ChainGetters`](../../providers/chain_getters.md)** to reach a field on a nested context by wiring.
-- **Use [`FieldGetter`](./field_getter.md)** when the wired access is a plain one-level read.
-- **Use [`MapField`](./map_field.md)** when the descent happens on `self` rather than on a wired context:
-  the consumer-side twin.
-- **Use an [`#[implicit]`](../../attributes/implicit.md) argument** before any of them for a field of the
-  implementation's own context.
-
-Name it directly only when writing a getter provider of your own that must descend, and check first
-whether composing the existing ones does the job.
-
-## Under the hood
-
-`FieldMapper` is a blanket impl over every [`FieldGetter`](./field_getter.md), with two `'static` bounds
-that its consumer-side twin needs only one of:
-
-- the **tag** must be `'static`, which is free, since a [`Symbol!`](../../macros/symbol.md) or an
-  [`Index<N>`](../../types/index_type.md) is `'static` by construction;
-- the **getter**, that is, `Self`, the provider, must be `'static`, which is also free, since a
-  provider is a zero-sized marker type with no lifetime parameters in the ordinary case.
-
-The field's *value* stays free of any bound, which is the whole point: it is the intermediate whose
-lifetime the naive chained read could not express.
-
-[`ChainGetters`](../../providers/chain_getters.md) composes descents by nesting `map_field` calls, one per
-path segment, so an arbitrarily deep chain stays lifetime-correct. Because the impl is blanket, adding a
-new getter provider makes it chainable with no extra work.
+Both `'static` bounds are on types that are `'static` in practice, the tag and the provider, a
+zero-sized marker; the field's value stays free. `ChainGetters` nests these calls, one per step, so
+a chain of any length stays free of lifetime bounds.
 
 ## Common Mistakes
 
-**It is not in the prelude.** Import from `cgp::core::field::traits`.
-[`MapField`](./map_field.md) is the other non-prelude member of the group.
+**A chained `get_field` inside a provider fails.** As the example notes, a provider that calls one
+getter's `get_field` on another's result fails with `E0311` on the intermediate type; call
+`map_field` on the first getter instead.
 
-**`Self` is the provider, not the context.** The context is the first type parameter and arrives as
-`&Context` in the method.
+**`Self` is the provider, not the context.** The context is the first type parameter.
 
-**The closure must be higher-ranked.** A closure capturing a reference of a particular lifetime will not
-satisfy `for<'a>`, and the error talks about lifetime bounds rather than about the closure's body.
-
-**A provider with a non-`'static` parameter loses the blanket impl.** The bound on `Self` is free for an
-ordinary zero-sized marker and not for one carrying a lifetime, which is a rare shape and a puzzling
-failure when it happens.
-
-**It cannot map to an owned value.** The signature returns `&T`; a getter that must produce a value uses
-[`MRef`](../../types/mref.md).
+**A provider with a non-`'static` parameter loses the blanket impl.** The bound on `Self` holds for
+an ordinary marker type and not for one carrying a lifetime, a rare shape and a puzzling failure
+when it happens.
 
 ## Related constructs
 
-- [`MapField`](./map_field.md): the consumer-side twin, and where the lifetime problem is explained in
+- [`MapField`](./map_field.md): the consumer-side twin, where the lifetime problem is explained in
   full.
 - [`FieldGetter`](./field_getter.md): the supertrait, and the plain wired read.
-- [`ChainGetters`](../../providers/chain_getters.md): the provider that uses this to descend.
-- [`HasField`](./has_field.md): the consumer side of field access.
-- [`UseField`](../../providers/use_field.md) and [`UseContext`](../../providers/use_context.md): the two
+- [`ChainGetters`](../../providers/chain_getters.md): the provider built on this trait.
+- [`UseField`](../../providers/use_field.md) and [`UseContext`](../../providers/use_context.md): the
   providers a chain is usually built from.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags, `'static` by construction.
-- [`MRef`](../../types/mref.md): the return type for a getter that may produce rather than lend.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the duality this trait is
-  an instance of.
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the split this trait
+  is an instance of.
 
 ## Source
 
-- [`map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs):
+- [`traits/map_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/map_field.rs):
   `FieldMapper` and `MapField`
+- [`impls/chain.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/chain.rs):
+  `ChainGetters`, which calls it
 
 ---
 

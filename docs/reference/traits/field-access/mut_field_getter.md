@@ -1,31 +1,34 @@
 ---
+title: 'MutFieldGetter — wired mutable field access'
+description: 'The provider-side form of HasFieldMut: a getter with a &mut self method takes any MutFieldGetter provider, such as UseField, through WithProvider.'
 sidebar_label: 'MutFieldGetter'
 sidebar_position: 4
 ---
 
 # `MutFieldGetter`
 
-The provider-side mirror of `HasFieldMut`: wired field access that can mutate.
+The provider-side form of `HasFieldMut`: wired field access that can mutate.
 
 :::info
 
 ### Generated machinery
 
-**You are not expected to implement `MutFieldGetter`.**
-[`#[cgp_getter]`](../../macros/cgp_getter.md) generates it alongside its [supertrait](/docs/reference/glossary#supertrait), and
-[`UseField`](../../providers/use_field.md) satisfies both. What you write is the wiring entry; this page
-explains what the mutable half of that entry provides. The one case for implementing it by hand is a provider whose mutable access is not a plain field read.
+**You are not expected to name `MutFieldGetter` in wiring.** A getter component whose method takes
+`&mut self` accepts any provider of it through
+[`WithProvider`](../../providers/with_provider.md), and
+[`UseField`](../../providers/use_field.md) implements it, so the wiring entry is `WithField<Tag>` as
+for a read. The one case for implementing it yourself is a provider whose mutable access no existing
+provider expresses.
 
 :::
 
 ## Overview
 
-[`FieldGetter`](./field_getter.md) is field access in provider-trait shape, so that a context can choose
-by wiring which field answers a getter. `MutFieldGetter` is the same thing with mutation: it hands back a
-`&mut` rather than a `&`.
-
-Completing the square, the traits divide on two axes, consumer versus provider and read versus
-write:
+[`FieldGetter`](./field_getter.md) is field access in provider shape, so that a
+[**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
+values it needs as its fields, can choose by wiring which field answers a getter. `MutFieldGetter`
+is the same with mutation: it hands back a `&mut` rather than a `&`, for a getter whose method takes
+`&mut self`. The four field-access traits divide on two axes:
 
 | | you bound against | you wire |
 |---|---|---|
@@ -34,8 +37,8 @@ write:
 
 ## Definition
 
-`MutFieldGetter<Context, Tag>` extends [`FieldGetter`](./field_getter.md) with one method that returns a
-mutable borrow:
+`MutFieldGetter<Context, Tag>` extends [`FieldGetter`](./field_getter.md) with one method that
+returns a mutable borrow:
 
 ```rust
 pub trait MutFieldGetter<Context, Tag>: FieldGetter<Context, Tag> {
@@ -43,34 +46,39 @@ pub trait MutFieldGetter<Context, Tag>: FieldGetter<Context, Tag> {
 }
 ```
 
-It stands to [`FieldGetter`](./field_getter.md) exactly as [`HasFieldMut`](./has_field_mut.md) stands to
-[`HasField`](./has_field.md): a **supertrait extension** rather than an alternative, with the field's type
-inherited from the supertrait's `Value`. `Self` is the provider and `Context` is the type being mutated;
-`get_field_mut` takes the context by mutable reference and returns `&mut Self::Value`, with the
-`PhantomData<Tag>` argument naming the field.
+It stands to `FieldGetter` as [`HasFieldMut`](./has_field_mut.md) stands to `HasField`: a
+[supertrait](/docs/reference/glossary#supertrait) extension, with the field's type inherited from
+the supertrait's `Value`. `Self` is the provider and `Context` is the type being mutated, passed as
+`&mut Context`.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+It is in the prelude, so `use cgp::prelude::*;` is enough. A getter whose method takes `&mut self`
+and returns `&mut T` is wired the same way as a read, with `WithField<Tag>` from
+`cgp::core::field::impls`:
 
-As with its immutable sibling you rarely name the trait. What you write is a wiring entry naming a
-provider that implements it. [`UseField`](../../providers/use_field.md) does, so a getter component wired
-to `UseField<Symbol!("counter")>` supports both the read and the write.
+```rust
+delegate_components! {
+    App {
+        CounterGetterComponent: WithField<Symbol!("request_count")>,
+    }
+}
+```
 
-Writing an impl by hand is the escape hatch for a provider whose mutable access is not a plain field
-read, and it is an ordinary trait impl on a marker type of your own. Implementing it means implementing
-[`FieldGetter`](./field_getter.md) too, since that is the supertrait.
+A bare `UseField<Tag>` entry works too, through the impl `#[cgp_getter]` emits for `UseField`
+directly. Implementing the trait yourself means implementing `FieldGetter` as well, its supertrait.
 
 ## Examples
 
-A getter component whose mutable access is chosen by wiring:
+A mutable getter named `counter_mut` that reads the `request_count` field:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::impls::WithField;
 
 #[cgp_getter(CounterGetter)]
 pub trait HasCounter {
-    fn counter(&self) -> &u64;
+    fn counter_mut(&mut self) -> &mut u64;
 }
 
 #[derive(HasField)]
@@ -80,76 +88,93 @@ pub struct App {
 
 delegate_components! {
     App {
-        CounterGetterComponent: UseField<Symbol!("request_count")>,
+        CounterGetterComponent: WithField<Symbol!("request_count")>,
+    }
+}
+
+check_components! {
+    App {
+        CounterGetterComponent,
+    }
+}
+
+pub fn demo() {
+    let mut app = App { request_count: 0 };
+    *app.counter_mut() += 1;
+    assert_eq!(app.request_count, 1);
+}
+```
+
+`UseField` implements `MutFieldGetter` for any context whose field has
+[`HasFieldMut`](./has_field_mut.md), which the derive always emits. `App` is an
+[environmental context](/docs/reference/glossary#environmental-context), and the getter is
+[self-targeted](/docs/reference/glossary#self-targeted-component).
+
+## When to use it
+
+**Wire mutable access only when a context must choose which field is mutated**, which is rarer than
+the read case and rarer still than mutation generally.
+
+- **An [`#[implicit]`](../../attributes/implicit.md) argument** reaches a field of the
+  implementation's own context, mutably too, with no provider involved.
+- **[`HasFieldMut`](./has_field_mut.md)** is the bound for an implementation that requires mutable
+  access rather than having it wired.
+- **[`FieldGetter`](./field_getter.md)** is the form for read-only wired access, the common case.
+
+## Under the hood
+
+For a one-method getter whose method takes `&mut self`, `#[cgp_getter]` bounds its `WithProvider`
+impl on `MutFieldGetter` instead of `FieldGetter`. `cargo cgp expand` on the example shows:
+
+```rust
+impl<__Context__, __Provider__> CounterGetter<__Context__> for WithProvider<__Provider__>
+where
+    __Provider__: MutFieldGetter<__Context__, CounterGetterComponent, Value = u64>,
+{
+    fn counter_mut(__context__: &mut __Context__) -> &mut u64 {
+        __Provider__::get_field_mut(
+            __context__,
+            ::core::marker::PhantomData::<CounterGetterComponent>,
+        )
     }
 }
 ```
 
-**[Environmental context](/docs/reference/glossary#environmental-context), [self-targeted](/docs/reference/glossary#self-targeted-component).** The getter reads `request_count` though it is named `counter`,
-and because [`UseField`](../../providers/use_field.md) implements `MutFieldGetter` as well, a provider that
-holds `&mut App` can write through the same wiring.
-
-## When to use it
-
-**Wire it only when the mutable access must be chosen per context**, which is rarer than the read case
-and rarer still than mutation generally.
-
-- **Use an [`#[implicit]`](../../attributes/implicit.md) argument** for a field the implementation reaches
-  on its own context. The access rules on that page cover mutable access, and no provider is involved.
-- **Use [`HasFieldMut`](./has_field_mut.md)** when the implementation should simply *require* mutable
-  access rather than have it wired.
-- **Use [`FieldGetter`](./field_getter.md)** when the wired access is read-only, which is the common case.
-  Requiring mutation narrows what a context can supply for no benefit.
-- **Consider whether the context should be mutated at all.** Much CGP code keeps contexts immutable and
-  threads state through handler outputs instead.
-
-## Under the hood
-
-`MutFieldGetter` adds one method to its supertrait and no new resolution path: a provider that implements
-[`FieldGetter`](./field_getter.md) and can also produce a `&mut` implements this too, and
-[`UseField`](../../providers/use_field.md) does for any context whose field is derived.
-
-The route from a wired getter back to a context's own fields runs through
-[`HasFieldMut`](./has_field_mut.md), whose `DerefMut` forwarding carries the `'static` bound on the
-target that its immutable counterpart does not, so a context behind a smart pointer holding borrowed
-data can satisfy the wired read and not the wired write.
+`UseField<Tag>` implements `MutFieldGetter` for every tag it is asked under, through the context's
+`HasFieldMut<Tag>`, and [`UseFieldRef`](../../providers/use_field_ref.md) implements it through
+`AsMut`. `UseContext` has no `MutFieldGetter` impl, so a mutable getter cannot be wired through
+`WithContext`.
 
 ## Common Mistakes
 
-**`Self` is the provider, not the context.** The context is the first type parameter, and it arrives as
-`&mut Context` in the method rather than as `&mut self`.
+**`Self` is the provider, not the context.** The context is the first type parameter, and arrives as
+`&mut Context` rather than as `&mut self`.
 
-**Implementing it means implementing [`FieldGetter`](./field_getter.md).** It is a supertrait, so the
-read half is not optional.
+**Implementing it means implementing [`FieldGetter`](./field_getter.md).** It is a supertrait, so
+the read half is not optional.
 
-**`Value` lives on the supertrait**, so pin it there rather than redeclaring it.
-
-**The `'static` bound behind `DerefMut` can bite.** A wired read that resolves and a wired write that
-does not usually means the context is behind a smart pointer over borrowed data. See
-[`HasFieldMut`](./has_field_mut.md#common-mistakes).
-
-**Requiring it where a read would do narrows the contexts that fit**, since a provider holding `&Context`
-cannot satisfy it.
+**The `'static` bound behind `DerefMut` can bite.** A context behind a smart pointer to borrowed
+data satisfies the read and not the write; see [`HasFieldMut`](./has_field_mut.md#common-mistakes).
 
 ## Related constructs
 
-- [`FieldGetter`](./field_getter.md): the supertrait, and where the wired form is explained in full.
+- [`FieldGetter`](./field_getter.md): the supertrait, where wired access is explained in full.
 - [`HasFieldMut`](./has_field_mut.md): the consumer side you bound against.
-- [`HasField`](./has_field.md): the read half of the consumer side.
-- [`UseField`](../../providers/use_field.md): the provider that implements both halves.
-- [`#[cgp_getter]`](../../macros/cgp_getter.md): the macro that makes a getter a full component.
-- [`#[implicit]`](../../attributes/implicit.md): the idiomatic way to reach a field.
-- [`Symbol!`](../../macros/symbol.md) and [`Index`](../../types/index_type.md): the tags that key a field.
+- [`UseField`](../../providers/use_field.md) and [`WithField`](../../providers/with_field.md): the
+  provider that implements both halves, and its `WithProvider` alias.
+- [`#[cgp_getter]`](../../macros/cgp_getter.md): the macro whose mutable getters take this trait.
 
 The ideas behind it:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the duality this trait is
-  an instance of.
+- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the split this trait
+  is an instance of.
 
 ## Source
 
-- [`has_field_mut.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field_mut.rs):
+- [`traits/has_field_mut.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_field_mut.rs):
   `MutFieldGetter`, `HasFieldMut`, and the `DerefMut` forwarding
+- [`impls/use_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/impls/use_field.rs):
+  the `UseField` impls
 
 ---
 

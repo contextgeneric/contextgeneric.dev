@@ -1,0 +1,36 @@
+error[E0311]: the parameter type `Inner` may not live long enough
+  --> tests/compile_fail/reference/traits/map_field_common_mistakes_chained_get_field.rs:9:5
+   |
+ 4 |   pub fn inner_name<Context, Inner>(context: &Context) -> &String
+   |                                              -------- the parameter type `Inner` must be valid for the anonymous lifetime defined here...
+...
+ 9 | /     context
+10 | |         .get_field(PhantomData::<Symbol!("inner")>)
+   | |___________________________________________________^ ...so that the type `Inner` will meet its required lifetime bounds
+   |
+help: consider adding an explicit lifetime bound
+   |
+ 4 ~ pub fn inner_name<'a, Context, Inner>(context: &'a Context) -> &'a String
+ 5 | where
+ 6 |     Context: HasField<Symbol!("inner"), Value = Inner>,
+ 7 ~     Inner: HasField<Symbol!("name"), Value = String> + 'a,
+   |
+
+error[E0311]: the parameter type `Inner` may not live long enough
+  --> tests/compile_fail/reference/traits/map_field_common_mistakes_chained_get_field.rs:9:5
+   |
+ 4 |   pub fn inner_name<Context, Inner>(context: &Context) -> &String
+   |                                              -------- the parameter type `Inner` must be valid for the anonymous lifetime defined here...
+...
+ 9 | /     context
+10 | |         .get_field(PhantomData::<Symbol!("inner")>)
+11 | |         .get_field(PhantomData::<Symbol!("name")>)
+   | |__________________________________________________^ ...so that the type `Inner` will meet its required lifetime bounds
+   |
+help: consider adding an explicit lifetime bound
+   |
+ 4 ~ pub fn inner_name<'a, Context, Inner>(context: &'a Context) -> &'a String
+ 5 | where
+ 6 |     Context: HasField<Symbol!("inner"), Value = Inner>,
+ 7 ~     Inner: HasField<Symbol!("name"), Value = String> + 'a,
+   |
