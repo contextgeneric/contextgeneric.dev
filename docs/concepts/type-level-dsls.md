@@ -41,7 +41,8 @@ These describe the fixed program; handlers can still receive runtime values as t
 ## Providers give syntax its behavior
 
 A provider implements one syntax form and asks the context to interpret its subexpressions.
-This addition provider assumes the `Computer` provider trait is imported from `cgp::extra::handler`:
+This addition provider assumes the `CanCompute` consumer trait is imported from
+`cgp::extra::handler`; the `Computer` provider trait comes from the prelude:
 
 ```rust
 #[cgp_impl(new EvalAdd)]

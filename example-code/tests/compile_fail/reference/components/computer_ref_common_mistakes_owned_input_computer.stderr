@@ -1,0 +1,58 @@
+error[E0277]: the trait bound `Double: DelegateComponent<cgp::prelude::ComputerComponent>` is not satisfied
+  --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:25:9
+   |
+25 |         ComputerRefComponent: ((), u64),
+   |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `DelegateComponent<cgp::prelude::ComputerComponent>` is not implemented for `Double`
+  --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:7:54
+   |
+ 7 | impl<Context, Code> Computer<Context, Code, u64> for Double {
+   |                                                      ^^^^^^
+   = help: the following other types implement trait `DelegateComponent<Key>`:
+             BuildAndMergeOutputs<Output, Handlers>
+             MatchWithFieldHandlersRef<Provider>
+             MatchWithValueHandlersMut<Provider>
+             MatchWithValueHandlersRef<Provider>
+             PipeMonadic<M, Providers>
+             PromoteProducer<Provider>
+   = note: required for `Double` to implement `for<'a> cgp::prelude::Computer<App, (), &'a u64>`
+   = note: required for `PromoteRef<Double>` to implement `IsProviderFor<cgp::prelude::ComputerRefComponent, App, ((), u64)>`
+   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerRefComponent, ((), u64)>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:23:1
+   |
+23 | / check_components! {
+24 | |     App {
+25 | |         ComputerRefComponent: ((), u64),
+26 | |     }
+27 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `for<'a> Double: IsProviderFor<cgp::prelude::ComputerComponent, App, ((), &'a u64)>` is not satisfied
+  --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:25:9
+   |
+25 |         ComputerRefComponent: ((), u64),
+   |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), &'a u64)>` is not implemented for `Double`
+      but trait `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), u64)>` is implemented for it
+  --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:7:1
+   |
+ 7 | impl<Context, Code> Computer<Context, Code, u64> for Double {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `u64`, found `&'a u64`
+   = note: required for `Double` to implement `for<'a> cgp::prelude::Computer<App, (), &'a u64>`
+   = note: required for `PromoteRef<Double>` to implement `IsProviderFor<cgp::prelude::ComputerRefComponent, App, ((), u64)>`
+   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerRefComponent, ((), u64)>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:23:1
+   |
+23 | / check_components! {
+24 | |     App {
+25 | |         ComputerRefComponent: ((), u64),
+26 | |     }
+27 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
