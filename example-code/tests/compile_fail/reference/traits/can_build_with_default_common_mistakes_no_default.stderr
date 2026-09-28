@@ -1,0 +1,18 @@
+error[E0277]: the trait bound `Port: Default` is not satisfied
+  --> tests/compile_fail/reference/traits/can_build_with_default_common_mistakes_no_default.rs:19:13
+   |
+19 |     let _ = Server::build_with_default(Host {
+   |             ^^^^^^ the trait `Default` is not implemented for `Port`
+   |
+   = note: required for `TransformMapDefault` to implement `TransformMap<IsNothing, IsPresent, Port>`
+   = note: required for `Cons<cgp::prelude::Field<Symbol<4, cgp::prelude::Chars<'p', cgp::prelude::Chars<'o', cgp::prelude::Chars<'r', cgp::prelude::Chars<'t', Nil>>>>>, Port>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialServer<IsPresent, IsNothing>, TransformMapDefault, IsPresent>`
+   = note: 1 redundant requirement hidden
+   = note: required for `Cons<cgp::prelude::Field<Symbol<4, cgp::prelude::Chars<'h', cgp::prelude::Chars<'o', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, String>, Cons<cgp::prelude::Field<Symbol<4, cgp::prelude::Chars<'p', cgp::prelude::Chars<'o', cgp::prelude::Chars<'r', cgp::prelude::Chars<'t', Nil>>>>>, Port>, Nil>>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialServer<IsPresent, IsNothing>, TransformMapDefault, IsPresent>`
+   = note: required for `__PartialServer<IsPresent, IsNothing>` to implement `TransformMapFields<TransformMapDefault, IsPresent>`
+   = note: required for `__PartialServer<IsPresent, IsNothing>` to implement `CanFinalizeWithDefault`
+   = note: required for `Server` to implement `CanBuildWithDefault<Host>`
+help: consider annotating `Port` with `#[derive(Default)]`
+   |
+ 5 + #[derive(Default)]
+ 6 | pub struct Port(pub u16);
+   |

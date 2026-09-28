@@ -1,0 +1,21 @@
+error[E0277]: the trait bound `__PartialPerson<IsNothing, IsNothing>: UpdateField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>, IsPresent>` is not satisfied
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:11:43
+   |
+11 |     let _ = Person::builder().build_field(PhantomData::<Symbol!("age")>, 42_u8);
+   |                               ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |                               |
+   |                               required by a bound introduced by this call
+   |
+help: the trait `UpdateField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>, IsPresent>` is not implemented for `__PartialPerson<IsNothing, IsNothing>`
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:4:1
+   |
+ 4 | pub struct Person {
+   | ^^^^^^^^^^^^^^^^^
+help: the following other types implement trait `UpdateField<Tag, M>`
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:5:9
+   |
+ 5 |     pub first_name: String,
+   |         ^^^^^^^^^^ `__PartialPerson<__M1__, __F1__>` implements `UpdateField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>, __M2__>`
+ 6 |     pub last_name: String,
+   |         ^^^^^^^^^ `__PartialPerson<__F0__, __M1__>` implements `UpdateField<cgp::prelude::Symbol<9, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>, __M2__>`
+   = note: required for `__PartialPerson<IsNothing, IsNothing>` to implement `cgp::prelude::BuildField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>>`

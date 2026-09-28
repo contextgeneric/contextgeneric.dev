@@ -1,0 +1,13 @@
+error[E0284]: type annotations needed for `((), __PartialPerson<_, IsNothing>)`
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_marker_not_inferred.rs:11:9
+   |
+11 |     let (_old, _partial) =
+   |         ^^^^^^^^^^^^^^^^
+12 |         Person::builder().update_field(PhantomData::<Symbol!("first_name")>, "Alice".to_owned());
+   |                           ------------ type must be known at this point
+   |
+   = note: cannot satisfy `<_ as MapType>::Map<String> == String`
+help: consider giving this pattern a type, where the type for type parameter `M` is specified
+   |
+11 |     let (_old, _partial): (_, __PartialPerson<__M2__, _>) =
+   |                         +++++++++++++++++++++++++++++++++

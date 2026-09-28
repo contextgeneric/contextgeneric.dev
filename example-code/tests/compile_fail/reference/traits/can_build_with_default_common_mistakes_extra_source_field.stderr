@@ -1,0 +1,24 @@
+error[E0277]: the trait bound `__PartialPoint3d<IsPresent, IsPresent, IsNothing>: UpdateField<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>, IsPresent>` is not satisfied
+  --> tests/compile_fail/reference/traits/can_build_with_default_common_mistakes_extra_source_field.rs:20:13
+   |
+20 |     let _ = Point3d::build_with_default(LabeledPoint2d {
+   |             ^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `UpdateField<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>, IsPresent>` is not implemented for `__PartialPoint3d<IsPresent, IsPresent, IsNothing>`
+  --> tests/compile_fail/reference/traits/can_build_with_default_common_mistakes_extra_source_field.rs:13:1
+   |
+13 | pub struct Point3d {
+   | ^^^^^^^^^^^^^^^^^^
+help: the following other types implement trait `UpdateField<Tag, M>`
+  --> tests/compile_fail/reference/traits/can_build_with_default_common_mistakes_extra_source_field.rs:14:9
+   |
+14 |     pub x: u64,
+   |         ^ `__PartialPoint3d<__M1__, __F1__, __F2__>` implements `UpdateField<Symbol<1, cgp::prelude::Chars<'x', Nil>>, __M2__>`
+15 |     pub y: u64,
+   |         ^ `__PartialPoint3d<__F0__, __M1__, __F2__>` implements `UpdateField<Symbol<1, cgp::prelude::Chars<'y', Nil>>, __M2__>`
+16 |     pub z: u64,
+   |         ^ `__PartialPoint3d<__F0__, __F1__, __M1__>` implements `UpdateField<Symbol<1, cgp::prelude::Chars<'z', Nil>>, __M2__>`
+   = note: required for `__PartialPoint3d<IsPresent, IsPresent, IsNothing>` to implement `BuildField<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>>`
+   = note: required for `Cons<cgp::prelude::Field<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>, String>, Nil>` to implement `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder<__PartialLabeledPoint2d<IsNothing, IsNothing, IsPresent>, __PartialPoint3d<IsPresent, IsPresent, IsNothing>>`
+   = note: required for `__PartialPoint3d<IsNothing, IsNothing, IsNothing>` to implement `CanBuildFrom<LabeledPoint2d>`
+   = note: required for `Point3d` to implement `CanBuildWithDefault<LabeledPoint2d>`

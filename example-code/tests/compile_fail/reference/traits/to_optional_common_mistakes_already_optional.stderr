@@ -1,0 +1,24 @@
+error[E0599]: the method `to_optional` exists for struct `__PartialContext<IsOptional, IsOptional>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/traits/to_optional_common_mistakes_already_optional.rs:12:41
+   |
+ 5 | pub struct Context {
+   | ------------------ method `to_optional` not found for this struct because it doesn't satisfy `_: ToOptional` or `_: TransformMapFields<TransformOptional, IsOptional>`
+...
+12 |     let _ = Context::optional_builder().to_optional();
+   |                                         ^^^^^^^^^^^
+   |
+   = note: the following trait bounds were not satisfied:
+           `__PartialContext<IsOptional, IsOptional>: TransformMapFields<TransformOptional, IsOptional>`
+           which is required by `__PartialContext<IsOptional, IsOptional>: cgp::cgp_extra::cgp_field_extra::impls::ToOptional`
+           `&__PartialContext<IsOptional, IsOptional>: TransformMapFields<TransformOptional, IsOptional>`
+           which is required by `&__PartialContext<IsOptional, IsOptional>: cgp::cgp_extra::cgp_field_extra::impls::ToOptional`
+           `&mut __PartialContext<IsOptional, IsOptional>: TransformMapFields<TransformOptional, IsOptional>`
+           which is required by `&mut __PartialContext<IsOptional, IsOptional>: cgp::cgp_extra::cgp_field_extra::impls::ToOptional`
+note: the trait `TransformMapFields` must be implemented
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/transform_map.rs:12:1
+   |
+12 | pub trait TransformMapFields<Transform, TargetMap> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+   = note: the following trait defines an item `to_optional`, perhaps you need to implement it:
+           candidate #1: `cgp::cgp_extra::cgp_field_extra::impls::ToOptional`

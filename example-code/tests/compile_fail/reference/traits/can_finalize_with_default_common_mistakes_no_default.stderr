@@ -1,0 +1,37 @@
+error[E0599]: the method `finalize_with_default` exists for struct `__PartialServer<IsPresent, IsNothing>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/traits/can_finalize_with_default_common_mistakes_no_default.rs:16:10
+   |
+ 8 |   pub struct Server {
+   |   ----------------- method `finalize_with_default` not found for this struct because `__PartialServer<IsPresent, IsNothing>` doesn't implement `PartialData` or `TransformMapFields`
+...
+14 |       let _ = Server::builder()
+   |  _____________-
+15 | |         .build_field(PhantomData::<Symbol!("host")>, "localhost".to_owned())
+16 | |         .finalize_with_default();
+   | |         -^^^^^^^^^^^^^^^^^^^^^ method cannot be called on `__PartialServer<IsPresent, IsNothing>` due to unsatisfied trait bounds
+   | |_________|
+   |
+   |
+   = note: the following trait bounds were not satisfied:
+           `__PartialServer<IsPresent, IsNothing>: TransformMapFields<TransformMapDefault, IsPresent>`
+           which is required by `__PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+           `<&__PartialServer<IsPresent, IsNothing> as PartialData>::Target = _`
+           which is required by `&__PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+           `&__PartialServer<IsPresent, IsNothing>: PartialData`
+           which is required by `&__PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+           `&__PartialServer<IsPresent, IsNothing>: TransformMapFields<TransformMapDefault, IsPresent>`
+           which is required by `&__PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+           `<&mut __PartialServer<IsPresent, IsNothing> as PartialData>::Target = _`
+           which is required by `&mut __PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+           `&mut __PartialServer<IsPresent, IsNothing>: PartialData`
+           which is required by `&mut __PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+           `&mut __PartialServer<IsPresent, IsNothing>: TransformMapFields<TransformMapDefault, IsPresent>`
+           which is required by `&mut __PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
+note: the trait `TransformMapFields` must be implemented
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/transform_map.rs:12:1
+   |
+12 | pub trait TransformMapFields<Transform, TargetMap> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+   = note: the following trait defines an item `finalize_with_default`, perhaps you need to implement it:
+           candidate #1: `CanFinalizeWithDefault`

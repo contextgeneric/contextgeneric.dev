@@ -1,0 +1,21 @@
+error[E0599]: the method `finalize_optional` exists for struct `__PartialContext<IsNothing, IsNothing>`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/traits/finalize_optional_common_mistakes_core_builder.rs:12:32
+   |
+ 5 | pub struct Context {
+   | ------------------ method `finalize_optional` not found for this struct
+...
+12 |     let _ = Context::builder().finalize_optional();
+   |                                ^^^^^^^^^^^^^^^^^
+   |
+   = note: the following trait bounds were not satisfied:
+           `<&__PartialContext<IsNothing, IsNothing> as PartialData>::Target = _`
+           which is required by `&__PartialContext<IsNothing, IsNothing>: cgp::cgp_extra::cgp_field_extra::impls::FinalizeOptional`
+           `&__PartialContext<IsNothing, IsNothing>: PartialData`
+           which is required by `&__PartialContext<IsNothing, IsNothing>: cgp::cgp_extra::cgp_field_extra::impls::FinalizeOptional`
+           `<&mut __PartialContext<IsNothing, IsNothing> as PartialData>::Target = _`
+           which is required by `&mut __PartialContext<IsNothing, IsNothing>: cgp::cgp_extra::cgp_field_extra::impls::FinalizeOptional`
+           `&mut __PartialContext<IsNothing, IsNothing>: PartialData`
+           which is required by `&mut __PartialContext<IsNothing, IsNothing>: cgp::cgp_extra::cgp_field_extra::impls::FinalizeOptional`
+   = help: items from traits can only be used if the trait is implemented and in scope
+   = note: the following trait defines an item `finalize_optional`, perhaps you need to implement it:
+           candidate #1: `cgp::cgp_extra::cgp_field_extra::impls::FinalizeOptional`
