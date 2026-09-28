@@ -36,6 +36,32 @@ pub mod examples {
         Default::default()
     }
 
+    /// The Usage section's `open` table, giving two tags two types.
+    pub struct NameTag;
+
+    pub struct TwoTypes;
+
+    delegate_components! {
+        TwoTypes {
+            open TypeProviderComponent;
+
+            @TypeProviderComponent.ScalarTag: UseType<f64>,
+            @TypeProviderComponent.NameTag: UseType<String>,
+        }
+    }
+
+    check_components! {
+        TwoTypes {
+            TypeProviderComponent: [ScalarTag, NameTag],
+        }
+    }
+
+    #[test]
+    fn open_gives_each_tag_its_own_type() {
+        let _: PhantomData<TypeOf<TwoTypes, NameTag>> = PhantomData::<String>;
+        assert_eq!(zero::<TwoTypes>(), 0.0);
+    }
+
     #[test]
     fn app_resolves_any_tag_to_f64() {
         // `App` wires `TypeProviderComponent` to `UseType<f64>`, so `HasType<ScalarTag>` resolves to

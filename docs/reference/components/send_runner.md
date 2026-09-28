@@ -1,4 +1,6 @@
 ---
+title: 'CanSendRun — a runner with a Send future'
+description: 'The runner component whose future is Send, supplied by a proxy on the concrete context so a spawning provider can hand work to a work-stealing executor.'
 sidebar_label: 'CanSendRun'
 sidebar_position: 9
 ---
@@ -52,7 +54,8 @@ Its attributes:
 
 ## Usage
 
-`CanSendRun` is imported from `cgp::extra::run`. Its method differs from `run` only in the shape of its
+`CanSendRun` is imported from `cgp::extra::run`, with its provider trait `SendRunner` and its key
+`SendRunnerComponent`; none of them is in the prelude. Its method differs from `run` only in the shape of its
 return, an explicit `Send` future rather than a plain `async fn`:
 
 ```rust
@@ -64,6 +67,8 @@ proxy impl on the concrete context that forwards to its own `run`. The proxy dis
 `Send` bound:
 
 ```rust
+use cgp::extra::run::{CanRun, SendRunner, SendRunnerComponent};
+
 #[cgp_provider]
 impl SendRunner<App, ActionA> for App {
     async fn send_run(context: &App, code: PhantomData<ActionA>) -> Result<(), Infallible> {
@@ -74,13 +79,18 @@ impl SendRunner<App, ActionA> for App {
 
 Because this impl names the concrete `App` and `ActionA`, the future produced by `context.run(code)` has
 a fully known type, so the compiler can verify it is `Send` and satisfy the `+ Send` bound on
-`send_run`, which the generic [`CanRun`](./runner.md) definition deliberately does not assert. A spawning
-runner provider can then require `Context: CanSendRun<InCode>`, clone the context into a `Send` future,
-and hand it to a spawner, all without `Send` bounds leaking into the abstract interfaces.
+`send_run`, which the generic [`CanRun`](./runner.md) definition deliberately does not assert. A
+spawning runner provider can then require `Context: CanSendRun<InCode>`, clone the context into a `Send`
+future, and hand it to a spawner, all without `Send` bounds leaking into the abstract interfaces.
+
+`#[cgp_provider]` derives the component key `SendRunnerComponent` from the trait name, so the key must
+be in scope even though the context never wires it.
 
 ## Examples
 
-A spawning provider requires the context to be `CanSendRun` and hands a `Send` future to a spawner:
+A spawning provider requires the context to be `CanSendRun` and hands a `Send` future to a spawner.
+`spawn` stands for any function with the signature of `tokio::spawn`, which requires a
+`Send + 'static` future. The context wires it as [`CanRun`](./runner.md#usage) shows:
 
 ```rust
 #[cgp_impl(new SpawnAndRun<InCode>: RunnerComponent)]

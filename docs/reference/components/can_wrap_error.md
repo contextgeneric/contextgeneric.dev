@@ -1,4 +1,6 @@
 ---
+title: 'CanWrapError — add detail to an error'
+description: 'The component that folds a piece of detail, such as a message or a path, into an error the context already holds, dispatching per detail type.'
 sidebar_label: 'CanWrapError'
 sidebar_position: 3
 ---
@@ -10,12 +12,12 @@ Attach a piece of detail to an error the context already holds, enriching it as 
 ## Overview
 
 `CanWrapError<Detail>` enriches an error as it travels up a call stack. Where
-[`CanRaiseError`](./can_raise_error.md) converts a *foreign* error into the context's abstract error,
-`CanWrapError` takes an error the **context** already holds and folds a piece of `Detail` into it, a
-message, a span, a path, producing an enriched `Self::Error`. The context is the type a method runs
-on, which supplies the values an implementation needs as its own fields, and it decides how detail
-is combined with an existing error. Together the two components cover the common error-handling motions
-in CGP: raise a foreign error in, then wrap context onto it as it bubbles up.
+[`CanRaiseError`](./can_raise_error.md) converts a *foreign* error into the context's abstract
+error, `CanWrapError` takes an error the **context** already holds and folds a piece of `Detail`
+into it, a message, a span, a path, producing an enriched `Self::Error`. The context is the type the
+implementation runs against, and it decides how detail is combined with an existing error. Together
+the two components cover the common error-handling motions in CGP: raise a foreign error in, then
+wrap context onto it as it bubbles up.
 
 Because the trait is parameterized by `Detail`, one context can attach many kinds of detail, each
 through its own provider, all onto the same abstract error. Like its companion, `CanWrapError` builds on
@@ -31,6 +33,7 @@ through its own provider, all onto the same abstract error. Like its companion, 
 #[derive_delegate(UseDelegate<Detail>)]
 #[use_type(HasErrorType.Error)]
 pub trait CanWrapError<Detail> {
+    #[track_caller]
     fn wrap_error(error: Error, detail: Detail) -> Error;
 }
 ```
@@ -38,7 +41,7 @@ pub trait CanWrapError<Detail> {
 Its attributes:
 
 - [`#[cgp_component]`](../macros/cgp_component.md) — turns the trait into a component: its argument names the provider trait `ErrorWrapper` that implementations target and the wiring key `ErrorWrapperComponent`, while `CanWrapError` stays the consumer trait callers use.
-- [`#[prefix]`](../macros/cgp_namespace.md) — registers the generated names into the `@cgp.core.error` path of `DefaultNamespace`, so a context that joins the namespace inherits the wiring by default.
+- [`#[prefix]`](../attributes/prefix.md) — registers the component in `DefaultNamespace` under the path `@cgp.core.error`, so a context that joins that namespace binds its provider at `@cgp.core.error.ErrorWrapperComponent.String` rather than at the bare key.
 - [`#[derive_delegate]`](../attributes/derive_delegate.md) — generates a `UseDelegate` provider that dispatches on the `Detail` type, so a context can route each `Detail` to its own provider; the `open` statement is the modern sugar for the same dispatch.
 - [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a [supertrait](/docs/reference/glossary#supertrait) and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
 
@@ -60,9 +63,21 @@ delegate_components! {
     App {
         open ErrorWrapperComponent;
 
-        @ErrorWrapperComponent.String: DisplayError,
+        @ErrorWrapperComponent.String: AppendDetail,
+        @ErrorWrapperComponent.u64: DisplayError,
     }
 }
+```
+
+`AppendDetail` is a provider of the application's own that folds a `String` detail into the error;
+[Examples](#examples) defines it. [`DisplayError`](../providers/error/display_error.md) formats any
+`Display` detail into a `String` and forwards it to the context's own `CanWrapError<String>`, so here a
+`u64` detail reaches `AppendDetail` too. The forwarding is why `DisplayError` cannot serve the `String`
+entry itself: `@ErrorWrapperComponent.String: DisplayError` sends the lookup back to the same entry, and
+the check overflows:
+
+```text
+error[E0275]: overflow evaluating the requirement `App: IsProviderFor<ErrorWrapperComponent, App, String>`
 ```
 
 The [error providers](../providers/error/index.md) supply the strategies that satisfy it, and the
@@ -71,11 +86,30 @@ common detail types, so an application usually plugs in a backend rather than wr
 Because `wrap_error` is an associated function, generic code calls it on the context type,
 `Context::wrap_error(err, detail)`, without borrowing a context value.
 
+Calling it on a concrete context by its bare name, as `App::wrap_error(…)`, is ambiguous when the
+provider trait `ErrorWrapper` is also in scope, because a context implements the provider trait too.
+The compiler reports ``error[E0034]: multiple applicable items in scope``. Name the consumer trait
+in that case, as `<App as CanWrapError<String>>::wrap_error(…)`, or leave `ErrorWrapper` unimported.
+
+**`wrap_error` carries `#[track_caller]`, and the attribute survives every layer of forwarding.**
+Rust applies `#[track_caller]` on a trait method declaration to every implementation of that method,
+and `#[cgp_component]` keeps it on the provider trait's declaration. It therefore covers the
+consumer and provider blanket implementations, the `UseDelegate`, `RedirectLookup`, and `UseContext`
+implementations, and every provider. An error library that records `Location::caller()`, such as
+`eyre` with its `track-caller` feature, records the line that called `wrap_error`, whether the
+component is wired directly, with `open`, through a namespace path, or through a `UseDelegate`
+table. The location survives only while every call between that line and the library is
+`#[track_caller]`: a generic helper function without the attribute records its own line instead.
+
 ## Examples
 
 A provider wraps a message onto an error as it propagates:
 
 ```rust
+use cgp::core::error::{
+    ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapper, ErrorWrapperComponent,
+};
+use cgp::extra::error::RaiseFrom;
 use cgp::prelude::*;
 
 #[cgp_component(Loader)]
@@ -96,13 +130,42 @@ impl Loader {
         Ok(format!("contents of {path}"))
     }
 }
+
+#[cgp_impl(new AppendDetail)]
+#[use_type(HasErrorType.{Error = String})]
+impl ErrorWrapper<String> {
+    fn wrap_error(error: Error, detail: String) -> Error {
+        format!("{detail}: {error}")
+    }
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ErrorTypeProviderComponent: UseType<String>,
+        ErrorRaiserComponent: RaiseFrom,
+        ErrorWrapperComponent: AppendDetail,
+        LoaderComponent: LoadOrFail,
+    }
+}
+
+check_components! {
+    App {
+        LoaderComponent,
+    }
+}
 ```
+
+`App.load("")` returns `Err("while loading : empty path")`. `AppendDetail` pins the abstract error to
+`String` with the equality form of [`#[use_type]`](../attributes/use_type.md), since it builds a
+`String` directly.
 
 The provider `LoadOrFail` first raises a `String` into the context's abstract error with
 [`CanRaiseError`](./can_raise_error.md), then wraps a further message onto it with `CanWrapError`. Both
 dependencies are declared with [`#[uses]`](../attributes/uses.md), so neither appears on the public
 `CanLoad` signature, and any context that satisfies them makes `load` produce enriched errors in its own
-error type. The context is an **[environmental context](/docs/reference/glossary#environmental-context)**, and the component targets it.
+error type. `App` here satisfies them with `RaiseFrom` and `AppendDetail`. The context is an **[environmental context](/docs/reference/glossary#environmental-context)**, and the component targets it.
 
 ## When to use it
 

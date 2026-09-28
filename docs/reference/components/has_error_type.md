@@ -1,4 +1,6 @@
 ---
+title: 'HasErrorType — a context''s abstract error type'
+description: 'The component that gives a context one shared, abstract Error type, so fallible generic code never names a concrete error and the context chooses it by wiring.'
 sidebar_label: 'HasErrorType'
 sidebar_position: 1
 ---
@@ -9,10 +11,11 @@ Give a context one shared, abstract `Error` type, so fallible generic code never
 
 ## Overview
 
-`HasErrorType` lets generic CGP code fail without committing to a concrete error type. A provider that
-may error has to produce *some* error, but it runs against a **context**, the type that implements the trait that supplies the values an implementation needs, and it cannot know whether that context wants
-`anyhow::Error`, `std::io::Error`, or an enum of its own. `HasErrorType` resolves this by giving the
-context one abstract `Self::Error` type that every fallible operation refers to. Generic code returns
+`HasErrorType` lets generic CGP code fail without committing to a concrete error type. A provider
+that may error has to produce *some* error, but it runs against a **context**, the type that
+implements the trait, and it cannot know whether that context wants `anyhow::Error`,
+`std::io::Error`, or an enum of its own. `HasErrorType` resolves this by giving the context one
+abstract `Self::Error` type that every fallible operation refers to. Generic code returns
 `Result<T, Self::Error>`, and the concrete error is decided once, at wiring time, by whichever error
 backend the context plugs in.
 
@@ -40,7 +43,7 @@ pub type ErrorOf<Context> = <Context as HasErrorType>::Error;
 Its attributes:
 
 - [`#[cgp_type]`](../macros/cgp_type.md) — makes this an abstract-type component rather than a plain trait: it generates the provider trait, the [component marker](/docs/reference/glossary#component-marker), and a [`UseType`](../providers/use_type.md) impl, so a context binds the concrete type by wiring.
-- [`#[prefix]`](../macros/cgp_namespace.md) — registers the generated names into the `@cgp.core.error` path of `DefaultNamespace`, so a context that joins the namespace inherits the wiring by default.
+- [`#[prefix]`](../attributes/prefix.md) — registers the component in `DefaultNamespace` under the path `@cgp.core.error`, so a context that joins that namespace binds its provider at `@cgp.core.error.ErrorTypeProviderComponent` rather than at the bare key.
 
 ## Usage
 
@@ -79,13 +82,15 @@ supply ready-made providers that set `Error` to their respective types.
 
 Generic code names the abstract error with the [`#[use_type]`](../attributes/use_type.md) attribute,
 which imports it as the bare name `Error`, or through the `ErrorOf<Context>` alias, which spells
-`<Context as HasErrorType>::Error`.
+`<Context as HasErrorType>::Error`. `ErrorOf`, the provider trait `ErrorTypeProvider`, and the key
+`ErrorTypeProviderComponent` all come from `cgp::core::error`.
 
 ## Examples
 
 A context declares its abstract error, and generic code returns it without naming a concrete type:
 
 ```rust
+use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::prelude::*;
 
 #[cgp_component(Validator)]
@@ -99,6 +104,12 @@ pub struct App;
 delegate_components! {
     App {
         ErrorTypeProviderComponent: UseType<String>,
+    }
+}
+
+check_components! {
+    App {
+        ErrorTypeProviderComponent,
     }
 }
 ```
@@ -127,8 +138,8 @@ the abstract error to a concrete type, use the equality form
 
 - [`#[cgp_type]`](../macros/cgp_type.md) — the macro `HasErrorType` is defined with, which generates its
   `UseType` provider.
-- [`HasType` / `TypeProvider`](./has_type.md) — the built-in abstract-type substrate `#[cgp_type]`
-  builds this on.
+- [`HasType` / `TypeProvider`](./has_type.md) — the tag-indexed abstract-type component; a
+  `TypeProvider` can back this component through the `WithProvider` impl `#[cgp_type]` generates.
 - [`CanRaiseError`](./can_raise_error.md) — raises a source error into this abstract error.
 - [`CanWrapError`](./can_wrap_error.md) — wraps detail onto this abstract error.
 - [`#[use_type]`](../attributes/use_type.md) — imports the abstract error into a definition as the bare

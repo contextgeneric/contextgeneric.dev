@@ -1,4 +1,6 @@
 ---
+title: 'Component reference'
+description: 'The components CGP ships, grouped by job: the abstract error type and its raising and wrapping, abstract types, the handler family, and runtimes and runners.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
@@ -34,12 +36,12 @@ crate rather than by hand.
 
 ## Let each context choose a type
 
-[`HasType`](./has_type.md) is CGP's single built-in abstract-type component: a tag-indexed trait whose
-associated type a context resolves to a concrete one through wiring. Every named [abstract type](/docs/reference/glossary#abstract-type) a program
-defines with [`#[cgp_type]`](../macros/cgp_type.md), including `HasErrorType` and
-[`HasRuntimeType`](./has_runtime_type.md) below, is built on this substrate, and the same
-[`UseType<T>`](../providers/use_type.md) marker resolves all of them. You reach for `HasType` directly
-only rarely, but recognizing it explains how every other abstract type in a codebase works.
+[`HasType`](./has_type.md) is CGP's tag-indexed [abstract type](/docs/reference/glossary#abstract-type):
+a trait whose associated type a context resolves, one tag at a time, to a concrete type through wiring.
+CGP's other abstract types, such as `HasErrorType` and [`HasRuntimeType`](./has_runtime_type.md) below,
+are named components defined with [`#[cgp_type]`](../macros/cgp_type.md), and the same
+[`UseType<T>`](../providers/use_type.md) marker supplies all of them. You reach for `HasType` directly
+only rarely; a named `#[cgp_type]` component reads better.
 
 ## Compute things
 
@@ -52,8 +54,8 @@ targets because every simpler member promotes up to it. [`Producer`](./handler/p
 input-free case that yields a value from the context alone.
 
 Each of `Computer`, `TryComputer`, and `Handler` also has by-reference and, for the computers, async
-siblings, such as `ComputerRef`, `AsyncComputer`, and `HandlerRef`. These differ from the base member by
-one axis and are documented on the base member's page. Providers for the family are written from plain
+siblings, such as `ComputerRef`, `AsyncComputer`, and `HandlerRef`. Each differs from its base member by
+one axis and has a page of its own in the subsection. Providers for the family are written from plain
 functions with [`#[cgp_computer]`](../macros/cgp_computer.md) and
 [`#[cgp_producer]`](../macros/cgp_producer.md), then composed with the
 [handler combinators](../providers/handler/index.md).

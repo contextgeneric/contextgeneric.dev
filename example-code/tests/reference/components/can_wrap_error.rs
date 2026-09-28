@@ -1,13 +1,18 @@
 //! Code from `docs/reference/components/can_wrap_error.md` — `CanWrapError`.
 //!
-//! Pins the `LoadOrFail` provider from the page's Examples, which raises a `String` into the context's
-//! abstract error and then wraps a further message onto it, declaring both dependencies through
-//! `#[uses]`. The provider is generic over its context, so it compiles on its own; the
-//! `CanRaiseError<String>` and `CanWrapError<String>` dependencies are discharged wherever a concrete
-//! context wires `LoadOrFail`.
+//! The page's Definition carries `#[track_caller]`, which the `cgp` revision this crate pins predates;
+//! the caller-location claims were checked against the local `cgp` checkout instead. The circular
+//! `DisplayError` wiring and the ambiguous concrete-context call are trybuild fixtures.
 
-/// ## Examples
+/// ## Usage and Examples
+///
+/// The `open` table from Usage and the context from Examples, one program: `AppendDetail` folds a
+/// `String` detail into the error, and `DisplayError` forwards a `u64` detail to it.
 pub mod examples {
+    use cgp::core::error::{
+        ErrorRaiserComponent, ErrorTypeProviderComponent, ErrorWrapper, ErrorWrapperComponent,
+    };
+    use cgp::extra::error::{DisplayError, RaiseFrom};
     use cgp::prelude::*;
 
     #[cgp_component(Loader)]
@@ -27,5 +32,58 @@ pub mod examples {
             }
             Ok(format!("contents of {path}"))
         }
+    }
+
+    #[cgp_impl(new AppendDetail)]
+    #[use_type(HasErrorType.{Error = String})]
+    impl ErrorWrapper<String> {
+        fn wrap_error(error: Error, detail: String) -> Error {
+            format!("{detail}: {error}")
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ErrorTypeProviderComponent: UseType<String>,
+            ErrorRaiserComponent: RaiseFrom,
+            ErrorWrapperComponent: AppendDetail,
+            LoaderComponent: LoadOrFail,
+        }
+    }
+
+    check_components! {
+        App {
+            LoaderComponent,
+        }
+    }
+
+    /// The Usage table: `String` goes to `AppendDetail`, and `u64` through `DisplayError` to it.
+    pub struct UsageApp;
+
+    delegate_components! {
+        UsageApp {
+            open ErrorWrapperComponent;
+
+            ErrorTypeProviderComponent: UseType<String>,
+            @ErrorWrapperComponent.String: AppendDetail,
+            @ErrorWrapperComponent.u64: DisplayError,
+        }
+    }
+
+    check_components! {
+        UsageApp {
+            ErrorWrapperComponent: [String, u64],
+        }
+    }
+
+    #[test]
+    fn detail_is_folded_into_the_error() {
+        assert_eq!(App.load(""), Err("while loading : empty path".to_owned()));
+        assert_eq!(
+            <UsageApp as CanWrapError<u64>>::wrap_error("failed".to_owned(), 7),
+            "7: failed"
+        );
     }
 }

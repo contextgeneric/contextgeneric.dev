@@ -1,4 +1,6 @@
 ---
+title: 'CanRun — run a task by type-level code'
+description: 'The async component that runs a task named at the type level to a Result, with each task code dispatched to its own provider through wiring.'
 sidebar_label: 'CanRun'
 sidebar_position: 8
 ---
@@ -9,15 +11,14 @@ Run a task named at the type level to a `Result<(), Error>`, with the behavior c
 
 ## Overview
 
-`CanRun<Code>` gives a context a uniform way to *execute a unit of work* selected at the type level. The
-unit of work is identified by a `Code` type parameter, a phantom tag rather than a value, so a single
-**context**, the type a method runs on that supplies the values an implementation needs as its
-own fields, can host many distinct tasks, one per `Code`, and dispatch each to its own provider. Running
-a task here means invoking the provider wired for that `Code` and awaiting an asynchronous
-`Result<(), Error>`: the task either completes or produces the context's abstract error. The component
-carries no input or output beyond success-or-error, so it models a fire-and-complete action rather than
-a transformation, which separates it from the [handler family](./handler/index.md) that maps an
-`Input` to an `Output`.
+`CanRun<Code>` gives a context a uniform way to *execute a unit of work* selected at the type level.
+The unit of work is identified by a `Code` type parameter, a phantom tag rather than a value, so a
+single **context**, the type the implementation runs against, can host many distinct tasks, one per
+`Code`, and dispatch each to its own provider. Running a task here means invoking the provider wired
+for that `Code` and awaiting an asynchronous `Result<(), Error>`: the task either completes or
+produces the context's abstract error. The component carries no input or output beyond
+success-or-error, so it models a fire-and-complete action rather than a transformation, which
+separates it from the [handler family](./handler/index.md) that maps an `Input` to an `Output`.
 
 `CanRun` is the execution layer that ties a CGP application together: a runner provider typically reaches
 the context's runtime through [`HasRuntime`](./has_runtime.md) to spawn or await work, and dispatches to
@@ -48,7 +49,9 @@ Its attributes:
 
 ## Usage
 
-`CanRun` is imported from `cgp::extra::run`. Its method is `async` and takes only a `Code` tag:
+`CanRun` is imported from `cgp::extra::run`, with its provider trait `Runner` and its key
+`RunnerComponent`; none of them is in the prelude, and the component carries no `#[prefix]`. Its
+method is `async` and takes only a `Code` tag:
 
 ```rust
 async fn run(&self, _code: PhantomData<Code>) -> Result<(), Error>;
@@ -78,8 +81,10 @@ statement supersedes.
 
 ## Examples
 
-A spawning runner provider requires the context to be [`CanSendRun`](./send_runner.md) so it can hand a
-`Send` future to a spawner, and runs an inner task on a background thread:
+A spawning runner provider requires the context to be [`CanSendRun`](./send_runner.md) so it can
+hand a `Send` future to a spawner, and runs an inner task on a background thread. `spawn` stands for
+any function with the signature of `tokio::spawn`, which requires a `Send + 'static` future. The
+wiring is the `open` table from [Usage](#usage):
 
 ```rust
 #[cgp_impl(new SpawnAndRun<InCode>: RunnerComponent)]

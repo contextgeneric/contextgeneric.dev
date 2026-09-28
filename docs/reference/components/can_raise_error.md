@@ -1,4 +1,6 @@
 ---
+title: 'CanRaiseError — raise into the abstract error'
+description: 'The component that converts a concrete source error into the context''s abstract error type, dispatching per source error to the provider the context wires.'
 sidebar_label: 'CanRaiseError'
 sidebar_position: 2
 ---
@@ -10,12 +12,12 @@ Turn a concrete source error into the context's abstract `Self::Error`.
 ## Overview
 
 `CanRaiseError<SourceError>` lets generic CGP code produce its context's abstract error from any
-concrete error it meets. A provider that calls a fallible operation gets back a specific error type, a
-parse error, an I/O error, a string message, but it must return the **context's** abstract `Self::Error`,
-whose concrete identity it does not know. The context here is the type a method runs on, which
-supplies the values an implementation needs as its own fields, and it decides how each source error maps
-into its chosen error type. `CanRaiseError<SourceError>` bridges the gap: generic code writes
-`Context::raise_error(source)` and the context converts the concrete `SourceError` into `Self::Error`.
+concrete error it meets. A provider that calls a fallible operation gets back a specific error type,
+a parse error, an I/O error, a string message, but it must return the **context's** abstract
+`Self::Error`, whose concrete identity it does not know. The context here is the type the
+implementation runs against, and it decides how each source error maps into its chosen error type.
+`CanRaiseError<SourceError>` bridges the gap: generic code writes `Context::raise_error(source)` and
+the context converts the concrete `SourceError` into `Self::Error`.
 
 Because the trait is parameterized by `SourceError`, one context can know how to raise many different
 source errors into its single abstract error. This is the "raise" half of CGP's error handling; the
@@ -32,6 +34,7 @@ Both build on [`HasErrorType`](./has_error_type.md), which supplies the `Self::E
 #[derive_delegate(UseDelegate<SourceError>)]
 #[use_type(HasErrorType.Error)]
 pub trait CanRaiseError<SourceError> {
+    #[track_caller]
     fn raise_error(error: SourceError) -> Error;
 }
 ```
@@ -39,7 +42,7 @@ pub trait CanRaiseError<SourceError> {
 Its attributes:
 
 - [`#[cgp_component]`](../macros/cgp_component.md) — turns the trait into a component: its argument names the provider trait `ErrorRaiser` that implementations target and the wiring key `ErrorRaiserComponent`, while `CanRaiseError` stays the consumer trait callers use.
-- [`#[prefix]`](../macros/cgp_namespace.md) — registers the generated names into the `@cgp.core.error` path of `DefaultNamespace`, so a context that joins the namespace inherits the wiring by default.
+- [`#[prefix]`](../attributes/prefix.md) — registers the component in `DefaultNamespace` under the path `@cgp.core.error`, so a context that joins that namespace binds its provider at `@cgp.core.error.ErrorRaiserComponent.String` rather than at the bare key.
 - [`#[derive_delegate]`](../attributes/derive_delegate.md) — generates a `UseDelegate` provider that dispatches on the `SourceError` type, so a context can route each `SourceError` to its own provider; the `open` statement is the modern sugar for the same dispatch.
 - [`#[use_type]`](../attributes/use_type.md) — adds `HasErrorType` as a [supertrait](/docs/reference/glossary#supertrait) and rewrites the bare `Error` to `<Self as HasErrorType>::Error`.
 
@@ -70,6 +73,9 @@ delegate_components! {
 }
 ```
 
+`ParseError` stands for any source error type the application meets. The key comes from
+`cgp::core::error` and the providers from `cgp::extra::error`.
+
 The interchangeable strategies that satisfy `CanRaiseError` are the
 [error providers](../providers/error/index.md): `RaiseFrom` converts through `From`, `DebugError` and
 `DisplayError` format the source into a string, `ReturnError` returns it unchanged, and so on. The
@@ -79,6 +85,22 @@ common cases, so an application usually wires a backend rather than writing rais
 Because `raise_error` is an associated function, generic code calls it on the context *type*,
 `Context::raise_error(source)` or `Self::raise_error(source)`, without borrowing a context value. This
 matches how errors are constructed deep inside generic code where only the type parameter is in scope.
+
+Calling it on a concrete context by its bare name, as `App::raise_error(…)`, is ambiguous when the
+provider trait `ErrorRaiser` is also in scope, because a context implements the provider trait too.
+The compiler reports ``error[E0034]: multiple applicable items in scope``. Name the consumer trait
+in that case, as `<App as CanRaiseError<String>>::raise_error(…)`, or leave `ErrorRaiser`
+unimported.
+
+**`raise_error` carries `#[track_caller]`, and the attribute survives every layer of forwarding.**
+Rust applies `#[track_caller]` on a trait method declaration to every implementation of that method,
+and `#[cgp_component]` keeps it on the provider trait's declaration. It therefore covers the
+consumer and provider blanket implementations, the `UseDelegate`, `RedirectLookup`, and `UseContext`
+implementations, and every provider. An error library that records `Location::caller()`, such as
+`eyre` with its `track-caller` feature, records the line that called `raise_error`, whether the
+component is wired directly, with `open`, through a namespace path, or through a `UseDelegate`
+table. The location survives only while every call between that line and the library is
+`#[track_caller]`: a generic helper function without the attribute records its own line instead.
 
 ## Examples
 
@@ -109,8 +131,9 @@ impl Loader {
 The provider `LoadOrFail` names neither the context nor its concrete error type. It requires
 `CanRaiseError<String>` through [`#[uses]`](../attributes/uses.md) to turn a `String` message into the
 abstract error, and any wired context that satisfies that bound, typically by plugging in an error
-backend, makes `load` produce errors in that context's chosen type. The context is an **environmental
-context**, and the component targets it rather than a value.
+backend, makes `load` produce errors in that context's chosen type. The context is an
+**[environmental context](/docs/reference/glossary#environmental-context)**, and the component targets
+it rather than a value.
 
 ## When to use it
 

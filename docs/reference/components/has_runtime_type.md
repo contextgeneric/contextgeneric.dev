@@ -1,4 +1,6 @@
 ---
+title: 'HasRuntimeType — the abstract runtime type'
+description: 'The abstract-type component that declares the runtime type a context runs against, chosen per context by wiring, for code that names the type but not a value.'
 sidebar_label: 'HasRuntimeType'
 sidebar_position: 7
 ---
@@ -9,12 +11,11 @@ Declare the abstract runtime *type* a context runs against, chosen per context t
 
 ## Overview
 
-`HasRuntimeType` lets context-generic code name the runtime type a context uses without committing to a
-concrete one. A runtime is whatever object supplies the services an application needs at execution
-time, and different deployments want different runtimes: Tokio in production, a mock in tests, an
-executor in a benchmark. `HasRuntimeType` gives the **context**, the type that implements the trait that
-supplies the values an implementation needs as its own fields, an abstract associated `Runtime` type,
-resolved to a concrete one at wiring time.
+`HasRuntimeType` lets context-generic code name the runtime type a context uses without committing
+to a concrete one. A runtime is whatever object supplies the services an application needs at
+execution time, and different deployments want different runtimes: Tokio in production, a mock in
+tests, an executor in a benchmark. `HasRuntimeType` gives the **context**, the type that implements
+the trait, an abstract associated `Runtime` type, resolved to a concrete one at wiring time.
 
 The runtime abstraction is split into a type component and a getter component because the two questions
 are independent. `HasRuntimeType` answers *what the runtime type is*, while its companion
@@ -42,7 +43,9 @@ Its attributes:
 
 ## Usage
 
-`HasRuntimeType` is imported from `cgp::extra::runtime`. It is an abstract-type component with a single
+`HasRuntimeType` is imported from `cgp::extra::runtime`, with the `RuntimeOf` alias, the provider trait
+`RuntimeTypeProvider`, and the key `RuntimeTypeProviderComponent`. None of them is in the prelude, and
+the component carries no `#[prefix]`. It is an abstract-type component with a single
 associated type, `Runtime`, carrying no bound, so any concrete type may be plugged in. A context supplies
 the type either by implementing `HasRuntimeType` directly or, more commonly, by wiring
 `RuntimeTypeProviderComponent` to [`UseType<R>`](../providers/use_type.md):
@@ -66,7 +69,7 @@ A context fixes its runtime type, and generic code names it without committing t
 
 ```rust
 use cgp::prelude::*;
-use cgp::extra::runtime::{HasRuntimeType, RuntimeOf};
+use cgp::extra::runtime::{HasRuntimeType, RuntimeOf, RuntimeTypeProviderComponent};
 
 pub struct TokioRuntime { /* handle, clock, etc. */ }
 
@@ -75,6 +78,12 @@ pub struct App;
 delegate_components! {
     App {
         RuntimeTypeProviderComponent: UseType<TokioRuntime>,
+    }
+}
+
+check_components! {
+    App {
+        RuntimeTypeProviderComponent,
     }
 }
 
@@ -107,7 +116,8 @@ rather than reusing this one.
 
 - [`HasRuntime`](./has_runtime.md) — the getter companion that borrows a value of this type.
 - [`#[cgp_type]`](../macros/cgp_type.md) — the macro `HasRuntimeType` is defined with.
-- [`HasType` / `TypeProvider`](./has_type.md) — the built-in abstract-type substrate this rests on.
+- [`HasType` / `TypeProvider`](./has_type.md) — the tag-indexed abstract-type component; a
+  `TypeProvider` can back this one through its generated `WithProvider` impl.
 - [`UseType`](../providers/use_type.md) — the provider that fixes the runtime type in wiring.
 - [`CanRun` / `Runner`](./runner.md) — the task runner whose providers reach the runtime.
 

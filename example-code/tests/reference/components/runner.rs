@@ -1,8 +1,9 @@
 //! Code from `docs/reference/components/runner.md` — `CanRun`.
 //!
 //! Pins the `SpawnAndRun` provider from the page's Examples, together with the cast the page names but
-//! does not show in full: a base `RunWithFooBar` runner, a `UseDelegate` table routing two tasks, a
-//! `SendRunner` proxy on the concrete context, and a `dummy_spawn` standing in for `tokio::spawn`. It
+//! does not show in full: a base `RunWithFooBar` runner, the Usage section's `open` table routing two
+//! tasks, a `SendRunner` proxy on the concrete context, and a `dummy_spawn` standing in for
+//! `tokio::spawn`. It
 //! follows the library's own async-and-send spawn test. The elided `RunWithFooBar` body is a trivial
 //! success here.
 
@@ -74,6 +75,12 @@ pub mod examples {
     impl SendRunner<App, ActionA> for App {
         async fn send_run(context: &App, code: PhantomData<ActionA>) -> Result<(), Infallible> {
             context.run(code).await
+        }
+    }
+
+    check_components! {
+        App {
+            RunnerComponent: [ActionA, ActionB],
         }
     }
 

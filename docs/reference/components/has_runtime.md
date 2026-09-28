@@ -1,4 +1,6 @@
 ---
+title: 'HasRuntime — borrow the context''s runtime'
+description: 'The getter component that borrows the runtime value a context stores, so effectful generic code reaches Tokio, a mock, or a test executor without naming it.'
 sidebar_label: 'HasRuntime'
 sidebar_position: 6
 ---
@@ -13,8 +15,8 @@ Hand out a borrow of the context's runtime value, so effectful code reaches it g
 A runtime here is whatever object provides the services an application needs at execution time,
 spawning tasks, sleeping, opening sockets, reading the clock, and different deployments want different
 runtimes: Tokio in production, a mock in tests, a single-threaded executor in a benchmark. Rather than
-thread a concrete runtime type through every signature, the **context**, the type a method runs
-on that supplies the values an implementation needs as its own fields, stores one runtime value,
+thread a concrete runtime type through every signature, the **context**, the type the method runs
+on, which supplies the values it needs as its fields, stores one runtime value,
 and `HasRuntime` is the getter that borrows it.
 
 `HasRuntime` answers *how to obtain the runtime value*; its companion
@@ -44,9 +46,11 @@ Its attributes:
 
 ## Usage
 
-`HasRuntime` is imported from `cgp::extra::runtime`. It is a getter component: its method borrows the
-runtime value out of a borrow of the context, returning `&Runtime`, where `Runtime` is the [abstract type](/docs/reference/glossary#abstract-type)
-supplied by [`HasRuntimeType`](./has_runtime_type.md):
+`HasRuntime` is imported from `cgp::extra::runtime`, with its provider trait `RuntimeGetter` and its
+key `RuntimeGetterComponent`. None of the runtime names is in the prelude. It is a getter component:
+its method borrows the runtime value out of a borrow of the context, returning `&Runtime`, where
+`Runtime` is the [abstract type](/docs/reference/glossary#abstract-type) supplied by
+[`HasRuntimeType`](./has_runtime_type.md):
 
 ```rust
 fn runtime(&self) -> &Runtime;
@@ -68,8 +72,9 @@ delegate_components! {
 ```
 
 One entry fixes the abstract runtime type, and the other says where the value lives. Context-generic
-providers then write `where Self: HasRuntime` and call `self.runtime()` to obtain a `&RuntimeOf<Self>`,
-never naming the concrete runtime.
+providers then depend on `HasRuntime` and call `self.runtime()` to obtain a `&RuntimeOf<Self>`,
+never naming the concrete runtime. Declare that dependency with
+[`#[uses(HasRuntime)]`](../attributes/uses.md) on a provider.
 
 ## Examples
 
@@ -78,7 +83,9 @@ generically:
 
 ```rust
 use cgp::prelude::*;
-use cgp::extra::runtime::{HasRuntime, HasRuntimeType, RuntimeOf};
+use cgp::extra::runtime::{
+    HasRuntime, RuntimeGetterComponent, RuntimeOf, RuntimeTypeProviderComponent,
+};
 
 pub struct TokioRuntime { /* handle, clock, etc. */ }
 
@@ -91,6 +98,13 @@ delegate_components! {
     App {
         RuntimeTypeProviderComponent: UseType<TokioRuntime>,
         RuntimeGetterComponent: UseField<Symbol!("runtime")>,
+    }
+}
+
+check_components! {
+    App {
+        RuntimeTypeProviderComponent,
+        RuntimeGetterComponent,
     }
 }
 
