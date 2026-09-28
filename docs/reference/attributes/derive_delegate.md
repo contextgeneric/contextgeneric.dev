@@ -140,7 +140,18 @@ delegate_components! {
 ```
 
 `MyApp` now implements `CanCalculateArea<Rectangle>` through `RectangleArea` and
-`CanCalculateArea<Circle>` through `CircleArea`.
+`CanCalculateArea<Circle>` through `CircleArea`, which a check confirms for both shapes:
+
+```rust
+check_components! {
+    MyApp {
+        AreaCalculatorComponent: [Rectangle, Circle],
+    }
+}
+```
+
+`MyApp` is an environmental context and the component is parameter-targeted: the shape is the
+parameter, and `MyApp` carries only the wiring.
 
 **Write the same result without the attribute instead.** Drop `#[derive_delegate]` from the component and
 let the context open it:
@@ -201,7 +212,7 @@ where
 ```
 
 Reading it back: `UseDelegate<Components>` is a provider for any `Shape` whose entry in `Components`
-names something that is itself a provider for that `Shape`, and the method simply forwards. The
+names something that is itself a provider for that `Shape`, and the method forwards. The
 `Components` type is the inner table, and [`DelegateComponent`](../traits/wiring/delegate_component.md) is the
 same trait ordinary wiring is made of, which is why you write the table with
 [`delegate_components!`](../macros/delegate_components.md) like any other.
@@ -211,9 +222,15 @@ macro wraps the key list in parentheses**, so a multi-parameter key becomes a tu
 `UseDelegate<(Code, Input)>` declaration produces `DelegateComponent<(Code, Input), …>` with no other
 change. With one parameter, the parentheses in `DelegateComponent<(Shape), …>` are only grouping, and
 Rust reads the key as the bare `Shape`. That is why the table's entries are written as
-`Rectangle: RectangleArea` rather than as one-element tuples. And the generics carry reserved names:
+`Rectangle: RectangleArea` rather than as one-element tuples. A trailing comma is kept, so
+`#[derive_delegate(UseDelegate<(Shape,)>)]` does key on the one-element tuple, and its table entries
+are then written `(Rectangle,): RectangleArea`. And the generics carry reserved names:
 the table is `__Components__` and the looked-up entry `__Delegate__`, alongside the provider trait's own
 `__Context__`.
+
+The dispatcher comes with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl
+under the same `where` clause, like the component's other generated provider impls, so a dependency
+missing inside the looked-up provider is still reported by name.
 
 **A component's [supertraits](/docs/reference/glossary#supertrait) carry into the dispatcher.** The provider trait records each supertrait as a
 `Context:` predicate, and because the dispatcher reuses the provider trait's generics that predicate
@@ -243,8 +260,9 @@ Both parts are required. `Wrapper` is a bare identifier rather than a path, so a
 module path has to be imported first. `KeyParams` are **identifiers**, not types: each must name a generic
 parameter the trait declares, and a type expression such as `Vec<u8>` in that position does not parse. The
 parenthesized form must list at least one parameter (the parser rejects an empty `()` with *expect
-non-empty tuple list of identifiers in use_delegate_spec*), and a single parameter written bare is keyed
-the same way a one-element list would be. The attribute may be repeated, once per dispatcher.
+non-empty tuple list of identifiers in use_delegate_spec*). A single parameter is keyed as the bare type
+whether it is written `Shape` or `(Shape)`, and as a one-element tuple only when written with a trailing
+comma, `(Shape,)`. The attribute may be repeated, once per dispatcher.
 
 ## Common Mistakes
 
@@ -260,7 +278,8 @@ error[E0425]: cannot find type `Shape` in this scope
 ```
 
 The usual cause is putting the attribute on a component that has no type parameter to dispatch on, where
-there is nothing for it to do.
+there is nothing for it to do. The macro does not check the name against the trait's parameters, so a
+name that happens to resolve to a type in scope is accepted and used as a fixed key instead.
 
 **One component gets one dispatch mechanism.** Wiring the same component both with `open` and with a
 `UseDelegate` table is a [coherence](/docs/reference/glossary#coherence) conflict, because each produces its own table entry for that key. A

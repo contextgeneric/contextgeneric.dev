@@ -69,6 +69,16 @@ a local alias:
 #[use_type(HasFooType.{Foo, Bar as Baz})]
 ```
 
+Renaming is also how one associated type is imported from two instantiations of a generic trait, since
+the two imports would otherwise share a name:
+
+```rust
+#[use_type(HasFooType<X>.{Foo as FooX}, HasFooType<Y>.{Foo as FooY})]
+```
+
+An empty group, as in `#[use_type(HasFooType.{})]`, parses too. It imports no name but still adds the
+trait's bound.
+
 Stacking several `#[use_type]` attributes behaves identically, because the macro collects every
 attribute's entries into one list before it resolves any of them. So an alias declared in one is
 available to another regardless of which comes first. Use a second attribute only when there is a
@@ -83,13 +93,22 @@ the error type is `anyhow::Error`":
 #[use_type(HasErrorType.{Error = anyhow::Error})]
 ```
 
-That emits `Self: HasErrorType<Error = anyhow::Error>` in place of the plain bound. The macro substitutes
-the right-hand side too, so it may name another import. One import can therefore tie two abstract types
-together:
+That emits `Self: HasErrorType<Error = anyhow::Error>` in place of the plain bound. On a generic trait the
+binding joins the trait's own arguments, so `#[use_type(HasFooType<u8>.{Foo = u32})]` emits
+`Self: HasFooType<u8, Foo = u32>`. The binding always names the associated type's own name, even when the
+import renames it with `as`.
+
+The macro substitutes the right-hand side too, so it may name another import, alone or inside a larger
+type. One import can therefore tie two abstract types together:
 
 ```rust
 #[use_type(HasPasswordType.Password, HasHashedPasswordType.{HashedPassword = Password})]
 ```
+
+and `#[use_type(HasDbType.Db, HasTransactionType.{Transaction = Tx<Db>})]` emits
+`Self: HasTransactionType<Transaction = Tx<<Self as HasDbType>::Db>>`. The one name the macro leaves
+alone on the right-hand side is the pinned alias itself, so a pin such as `{Foo = Foo}` fails with
+``cannot find type `Foo` in this scope`` rather than becoming a bound that says nothing.
 
 The pin is an implementation-side constraint, so the macro **rejects it on
 [`#[cgp_component]`](../macros/cgp_component.md)** and on the macros built on it, whose trait
@@ -150,7 +169,8 @@ The component gains `HasScalarType` as a [supertrait](/docs/reference/glossary#s
 `Scalar` in both becomes the same qualified projection, so the fields the provider reads and the value it
 returns are guaranteed to agree on whatever scalar the context chose.
 
-A context supplies the concrete type by wiring, and nothing above changes:
+A context supplies the concrete type by wiring, and nothing above changes. `Rectangle` is a value context,
+the shape whose area is being computed:
 
 ```rust
 #[derive(HasField)]
@@ -163,6 +183,12 @@ delegate_components! {
     Rectangle {
         ScalarTypeProviderComponent: UseType<f64>,
         AreaCalculatorComponent: RectangleArea,
+    }
+}
+
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
     }
 }
 ```
@@ -264,11 +290,13 @@ where
 
 An equality pin is the exception: it stays on the implementation, and the macro never adds it to the trait.
 
-**What substitution touches.** The rewrite matches a single-segment type path with no arguments whose
-identifier is an imported name or alias, anywhere it appears: a return type, an argument, a `where`
-predicate, a local binding. It also reaches an alias used to *qualify* a path, so `Transaction::begin()`
-becomes `<<Self as HasTransactionType>::Transaction>::begin()`, because `<Self as Trait>::Assoc::method` is
-not valid syntax.
+**What substitution touches.** The rewrite matches a single-segment type path with no arguments
+whose identifier is an imported name or alias, anywhere it appears: a return type, an argument, a
+`where` predicate, a local binding, and the provider trait's arguments in a `#[cgp_impl]` header, so
+`impl ErrorParser<Error>` under `#[use_type(HasErrorType.Error)]` implements the provider trait for
+the context's error type. It also reaches an alias used to *qualify* a path, so
+`Transaction::begin()` becomes `<<Self as HasTransactionType>::Transaction>::begin()`, because
+`<Self as Trait>::Assoc::method` is not valid syntax.
 
 The rewrite leaves one position alone: a **bare alias in expression position**, which names a value,
 something an abstract type can never be. So an alias sharing its name with a unit struct still constructs
@@ -300,7 +328,7 @@ ContextPath  -> TypePath
 TraitPath    -> TypePath
 
 TypeItems    -> UseTypeIdent
-              | `{` UseTypeIdent ( `,` UseTypeIdent )* `,`? `}`
+              | `{` ( UseTypeIdent ( `,` UseTypeIdent )* `,`? )? `}`
 
 UseTypeIdent -> IDENTIFIER ( `as` IDENTIFIER )? ( `=` Type )?
 ```
@@ -310,7 +338,8 @@ arguments. Their `::` segments belong to the path, while the `.` after the trait
 associated-type list. An omitted `in ContextPath` defaults the target to `Self`. In each `UseTypeIdent`
 the leading `IDENTIFIER` is the associated type's own name, `as` gives it a local alias to write in
 signatures, and `= Type` pins it with an equality bound. The pin is accepted on `#[cgp_fn]` and
-`#[cgp_impl]` and rejected on `#[cgp_component]` and the macros built on it.
+`#[cgp_impl]` and rejected on `#[cgp_component]` and the macros built on it. An empty braced list
+imports no name and adds only the trait's bound.
 
 ## Common Mistakes
 
@@ -360,8 +389,46 @@ Pin the type on the provider with [`#[cgp_impl]`](../macros/cgp_impl.md) instead
 [`#[cgp_fn]`](../macros/cgp_fn.md).
 
 **A construct's own associated type must stay qualified.** Writing a local `type Output` as a bare
-`Output` leaves an identifier that the substitution has no entry for, so the compiler cannot resolve it.
+`Output` leaves an identifier that the substitution has no entry for, so the compiler cannot resolve it:
+
+```rust
+#[cgp_component(Maker)]
+pub trait CanMake {
+    type Output;
+    fn make(&self) -> Output;
+}
+```
+
+```text
+error[E0425]: cannot find type `Output` in this scope
+```
+
 Write `Self::Output`, and do not list it in a `#[use_type]` attribute.
+
+**A misspelled associated type is reported where you wrote it.** The macro keeps your identifier's
+position when it substitutes, so `#[use_type(HasErrorType.Eror)]` fails with
+``error[E0576]: cannot find associated type `Eror` in trait `HasErrorType` `` pointing at each use of
+`Eror` in the signature.
+
+**An alias cannot stand for the trait an import comes from.** The macro grounds an import's `in` clause
+and trait arguments, but not the trait's own name, because that position must name a trait and an alias
+names a type. So `#[use_type(HasFooType.Foo, Foo.Bar)]` fails with
+``error[E0405]: cannot find trait `Foo` in this scope``.
+
+**Two pins that name each other overflow the compiler.** This import grounds without trouble, since it
+asserts only that the two types are equal:
+
+```rust
+#[use_type(HasFooType.{Foo = Bar}, HasBarType.{Bar = Foo})]
+```
+
+The macro therefore emits both bounds, and the trait solver cannot discharge them:
+
+```text
+error[E0275]: overflow evaluating the requirement `<__Context__ as HasFooType>::Foo == _`
+```
+
+Pin one of the two types to a concrete type, or pin only one of them to the other.
 
 ## Related constructs
 

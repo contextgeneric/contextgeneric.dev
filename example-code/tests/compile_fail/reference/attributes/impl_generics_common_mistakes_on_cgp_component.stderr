@@ -1,0 +1,13 @@
+error: cannot find attribute `impl_generics` in this scope
+ --> tests/compile_fail/reference/attributes/impl_generics_common_mistakes_on_cgp_component.rs:9:3
+  |
+9 | #[impl_generics(Name: Display)]
+  |   ^^^^^^^^^^^^^
+
+warning: unused import: `core::fmt::Display`
+ --> tests/compile_fail/reference/attributes/impl_generics_common_mistakes_on_cgp_component.rs:1:5
+  |
+1 | use core::fmt::Display;
+  |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

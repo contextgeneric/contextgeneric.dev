@@ -1,0 +1,19 @@
+error: cannot find attribute `impl_generics` in this scope
+  --> tests/compile_fail/reference/attributes/impl_generics_common_mistakes_on_cgp_impl.rs:13:3
+   |
+13 | #[impl_generics(Name: Display)]
+   |   ^^^^^^^^^^^^^
+
+error[E0425]: cannot find type `Name` in this scope
+  --> tests/compile_fail/reference/attributes/impl_generics_common_mistakes_on_cgp_impl.rs:15:40
+   |
+15 |     fn greet(&self, #[implicit] name: &Name) -> String {
+   |                                        ^^^^ not found in this scope
+
+warning: unused import: `core::fmt::Display`
+ --> tests/compile_fail/reference/attributes/impl_generics_common_mistakes_on_cgp_impl.rs:1:5
+  |
+1 | use core::fmt::Display;
+  |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

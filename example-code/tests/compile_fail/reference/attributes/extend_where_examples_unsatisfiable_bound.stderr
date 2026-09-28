@@ -1,0 +1,37 @@
+error[E0277]: the trait bound `NoClone: Clone` is not satisfied
+  --> tests/compile_fail/reference/attributes/extend_where_examples_unsatisfiable_bound.rs:19:10
+   |
+19 |     Ctx: Scale<NoClone>,
+   |          ^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoClone`
+   |
+note: required by a bound in `Scale`
+  --> tests/compile_fail/reference/attributes/extend_where_examples_unsatisfiable_bound.rs:6:24
+   |
+ 6 | #[extend_where(Scalar: Clone)]
+   |                        ^^^^^ required by this bound in `Scale`
+ 7 | pub fn scale<Scalar>(&self, #[implicit] factor: Scalar) -> Scalar
+   |        ----- required by a bound in this trait
+help: consider annotating `NoClone` with `#[derive(Clone)]`
+   |
+14 + #[derive(Clone)]
+15 | pub struct NoClone;
+   |
+
+error[E0277]: the trait bound `NoClone: Clone` is not satisfied
+  --> tests/compile_fail/reference/attributes/extend_where_examples_unsatisfiable_bound.rs:21:9
+   |
+21 |     ctx.scale()
+   |         ^^^^^ the trait `Clone` is not implemented for `NoClone`
+   |
+note: required by a bound in `Scale::scale`
+  --> tests/compile_fail/reference/attributes/extend_where_examples_unsatisfiable_bound.rs:6:24
+   |
+ 6 | #[extend_where(Scalar: Clone)]
+   |                        ^^^^^ required by this bound in `Scale::scale`
+ 7 | pub fn scale<Scalar>(&self, #[implicit] factor: Scalar) -> Scalar
+   |        ----- required by a bound in this associated function
+help: consider annotating `NoClone` with `#[derive(Clone)]`
+   |
+14 + #[derive(Clone)]
+15 | pub struct NoClone;
+   |

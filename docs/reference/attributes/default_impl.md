@@ -130,6 +130,12 @@ delegate_components! {
         @test.ShowImplComponent.u64: ShowWithDisplay,   // u64 has no registered default
     }
 }
+
+check_components! {
+    App {
+        ShowImplComponent: [String, u64],
+    }
+}
 ```
 
 **[Environmental context](/docs/reference/glossary#environmental-context), [parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: `App` carries the wiring and the shown value is a
@@ -194,17 +200,17 @@ inherits the foreign one.
 The attribute emits a single impl of the named lookup trait, for the key type:
 
 ```rust
-impl<Components> DefaultImpls1<ShowImplComponent, Components> for String {
+impl<__Components__> DefaultImpls1<ShowImplComponent, __Components__> for String {
     type Delegate = ShowString;
 }
 ```
 
-The `Components` parameter is the table the lookup runs against, appended by the macro and left generic
-so one registration serves every context. A path key emits the same impl for the path type, a
+The `__Components__` parameter is the table the lookup runs against, appended by the macro and left
+generic so one registration serves every context. A path key emits the same impl for the path type, a
 [`PathCons`](../types/path_cons.md) list that `cargo cgp expand` prints as `Path!(@app.GreeterComponent)`:
 
 ```rust
-impl<Components> AppNamespace<Components> for Path!(@app.GreeterComponent) {
+impl<__Components__> AppNamespace<__Components__> for Path!(@app.GreeterComponent) {
     type Delegate = GreetHello;
 }
 ```
@@ -260,11 +266,36 @@ exactly one such argument, and the attribute may be repeated.
 and the trait's positions follow. The parameter names on
 [`DefaultImpls1`](../traits/namespace/default_impls1.md) suggest otherwise.
 
-**Do not write the table parameter.** The macro appends it, so supplying it yourself makes the path's
-arity wrong.
+**Do not write the table parameter.** The macro appends it, so supplying it yourself, as in
+`#[default_impl(String in DefaultImpls1<ShowImplComponent, App>)]`, gives the trait one argument too many:
 
-**On a prefixed component it is confined to the namespace's crate**, by the orphan rule. Do not try to
-work around this. Put the wiring in the namespace body instead.
+```text
+error[E0107]: trait takes 2 generic arguments but 3 generic arguments were supplied
+```
+
+**On a prefixed component it is confined to the namespace's crate**, by the orphan rule. A path key into
+a namespace another crate owns, such as `#[default_impl(@app.GreeterComponent in DefaultNamespace)]`
+outside `cgp`, fails because neither the trait nor the `PathCons` key is local:
+
+```text
+error[E0210]: type parameter `__Components__` must be used as an argument to some local type (e.g., `MyStruct<__Components__>`)
+```
+
+Do not try to work around this. Register into a local namespace that inherits the foreign one, or put
+the wiring in a namespace body you own.
+
+**A prefixed component is registered by its path, not its marker.** `#[prefix(@app in DefaultNamespace)]`
+already makes `DefaultNamespace` answer `GreeterComponent` with a redirect, so a
+`#[default_impl(GreeterComponent in DefaultNamespace)]` on its provider emits a second impl for the same
+marker. A namespace that inherits `DefaultNamespace` covers the marker through its inheritance, so
+`#[default_impl(GreeterComponent in AppNamespace)]` collides the same way:
+
+```text
+error[E0119]: conflicting implementations of trait `AppNamespace<_>` for type `GreeterComponent`
+```
+
+Write the path the redirect leads to, `#[default_impl(@app.GreeterComponent in AppNamespace)]`, as in
+[Usage](#usage).
 
 **The lookup trait must be imported.** The emitted impl names it, so
 [`DefaultImpls1`](../traits/namespace/default_impls1.md) and [`DefaultImpls2`](../traits/namespace/default_impls2.md) need
@@ -281,8 +312,11 @@ error[E0207]: the type parameter `T` is not constrained by the impl trait, self 
    |      ^ unconstrained type parameter
 ```
 
-This holds even when the provider struct is not generic. Write per-type defaults for concrete impls,
-and wire a generic provider in a namespace body or directly on the context instead.
+This holds even when the provider struct is not generic. It also rules out the explicit-context form
+of a provider: `impl<Context> ShowImpl<String> for Context` copies `Context` onto the registration and
+fails with the same `E0207` for `Context`, while the concise `impl ShowImpl<String>` registers cleanly.
+Write per-type defaults on concise, concrete impls, and wire a generic provider in a namespace body or
+directly on the context instead.
 
 **Two registrations for one key conflict.** Each emits an impl of the lookup trait for the same key,
 and the compiler rejects the second, with both carets on the keys inside the attributes:
@@ -298,8 +332,8 @@ error[E0119]: conflicting implementations of trait `DefaultImpls1<ShowImplCompon
 ```
 
 **A registered default cannot be overridden from the context.** A direct entry for a type the registry
-already covers overlaps the loop's impl and is rejected with `E0119`; wire directly only the types the
-registry leaves out.
+already covers overlaps the loop's impl and is rejected with `E0119`, naming the path both impls cover.
+Wire directly only the types the registry leaves out.
 
 **On the `#[cgp_impl(Self)]` form the macro emits the registration with `Delegate = Self`.** That form
 does not build a provider, so the macro fills the delegate with `Self`, which inside the registration

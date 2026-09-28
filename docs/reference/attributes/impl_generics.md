@@ -68,7 +68,9 @@ implementation determines one is the field bound an `#[implicit]` argument produ
 not appear in any implicit argument with `E0207`. See [Common Mistakes](#common-mistakes).
 
 The list accepts a lifetime or a const parameter as well as a type parameter, because the macro reads
-ordinary generic parameters. Type parameters are the case the attribute exists for.
+ordinary generic parameters. A const parameter is pinned the same way, by a field type that mentions it:
+`#[impl_generics(const N: usize)]` with `#[implicit] data: &[u8; N]` infers `N` from an array field's
+length. Type parameters are the case the attribute exists for.
 
 **Only [`#[cgp_fn]`](../macros/cgp_fn.md) reads `#[impl_generics]`.** A
 [`#[cgp_impl]`](../macros/cgp_impl.md) block's own generic list is already impl-only, so a provider
@@ -107,7 +109,8 @@ pub fn greet_both(person: &Person, robot: &Robot) {
 
 `Person` and `Robot` both implement `Greet` through the one [blanket implementation](/docs/reference/glossary#blanket-implementation), without any
 wiring. For `Person` the compiler resolves `Name` to `String`, and for `Robot` to `u32`. Neither type
-appears anywhere except in the field.
+appears anywhere except in the field. Both are value contexts: the greeting reads the data each type
+holds.
 
 A trait built on `greet` never learns that `Name` exists:
 
@@ -182,8 +185,11 @@ then the `#[impl_generics]` parameters, so a function `fn scale<Scalar>` with `#
 emits `impl<__Context__, Scalar, Db>`. Rust requires lifetimes to lead a generic list, and the
 emitted list keeps that rule whatever order the parameters were declared in.
 
-The `where` clause is ordered too: the function's own predicates first, then the bounds the
-companion attributes contribute, then the `HasField` bounds from the implicit arguments, always last.
+The `where` clause is ordered too: the function's own predicates first, then the
+[`#[extend]`](./extend.md) and [`#[uses]`](./uses.md) bounds, then the
+[`#[extend_where]`](./extend_where.md) predicates, then the `HasField` bounds from the implicit
+arguments, and last any bounds [`#[use_type]`](./use_type.md) and
+[`#[use_provider]`](./use_provider.md) add.
 The parameter's name is yours. The context, by contrast, is literally `__Context__` in the emitted
 code and appears as `Self` inside the implementation.
 
@@ -288,11 +294,14 @@ impl Greeter {
 
 ```text
 error: cannot find attribute `impl_generics` in this scope
+
+error[E0425]: cannot find type `Name` in this scope
 ```
 
-On a [`#[cgp_component]`](../macros/cgp_component.md) the error repeats once per item the macro
-generates. On a [`#[cgp_impl]`](../macros/cgp_impl.md) block, delete the attribute and declare the
-parameter in the block's own generic list, which is already impl-only.
+The second error follows from the first, because the parameter the attribute would have declared never
+exists. On a [`#[cgp_component]`](../macros/cgp_component.md) the attribute is reported once, the same
+way. On a [`#[cgp_impl]`](../macros/cgp_impl.md) block, delete the attribute and declare the parameter
+in the block's own generic list, which is already impl-only.
 
 ## Related constructs
 
@@ -314,7 +323,6 @@ The ideas behind it:
 
 - Parsing: [`types/attributes/function.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/function.rs)
 - Insertion into the implementation's generic list: [`types/cgp_fn/preprocessed.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_fn/preprocessed.rs)
-- Expansion snapshot: [`generic_components/fn_impl_generics.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/tests/cgp-tests/tests/generic_components/fn_impl_generics.rs)
 
 ---
 

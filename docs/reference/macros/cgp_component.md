@@ -322,7 +322,10 @@ where
 
 The macro adds that predicate to every emitted item that mentions the context. The two blanket impls
 below and the `UseContext` and `RedirectLookup` impls further down each gain their own
-`Context: HasName`, because none of them can apply where the supertrait does not hold.
+`Context: HasName`, because none of them can apply where the supertrait does not hold. A provider you
+write must satisfy the predicate too, since Rust does not let an implementation assume a trait's `where`
+bound, so a `#[cgp_impl]` provider for this component imports it with
+[`#[uses(HasName)]`](../attributes/uses.md) whether or not its body calls `name()`.
 
 **A method may carry a default body, and the body moves to the provider trait.** The
 `Self`-to-`Context` move reaches the body as well, and that move lets a provider inherit a default.

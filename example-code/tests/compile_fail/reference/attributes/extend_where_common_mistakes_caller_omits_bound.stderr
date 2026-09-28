@@ -1,0 +1,35 @@
+error[E0277]: the trait bound `Scalar: Clone` is not satisfied
+  --> tests/compile_fail/reference/attributes/extend_where_common_mistakes_caller_omits_bound.rs:17:10
+   |
+17 |     Ctx: Scale<Scalar>,
+   |          ^^^^^^^^^^^^^ the trait `Clone` is not implemented for `Scalar`
+   |
+note: required by a bound in `Scale`
+  --> tests/compile_fail/reference/attributes/extend_where_common_mistakes_caller_omits_bound.rs:6:24
+   |
+ 6 | #[extend_where(Scalar: Clone)]
+   |                        ^^^^^ required by this bound in `Scale`
+ 7 | pub fn scale<Scalar>(&self, #[implicit] factor: Scalar) -> Scalar
+   |        ----- required by a bound in this trait
+help: consider further restricting type parameter `Scalar` with trait `Clone`
+   |
+17 |     Ctx: Scale<Scalar>, Scalar: std::clone::Clone
+   |                         +++++++++++++++++++++++++
+
+error[E0277]: the trait bound `Scalar: Clone` is not satisfied
+  --> tests/compile_fail/reference/attributes/extend_where_common_mistakes_caller_omits_bound.rs:19:9
+   |
+19 |     ctx.scale()
+   |         ^^^^^ the trait `Clone` is not implemented for `Scalar`
+   |
+note: required by a bound in `Scale::scale`
+  --> tests/compile_fail/reference/attributes/extend_where_common_mistakes_caller_omits_bound.rs:6:24
+   |
+ 6 | #[extend_where(Scalar: Clone)]
+   |                        ^^^^^ required by this bound in `Scale::scale`
+ 7 | pub fn scale<Scalar>(&self, #[implicit] factor: Scalar) -> Scalar
+   |        ----- required by a bound in this associated function
+help: consider further restricting type parameter `Scalar` with trait `Clone`
+   |
+17 |     Ctx: Scale<Scalar>, Scalar: std::clone::Clone
+   |                         +++++++++++++++++++++++++

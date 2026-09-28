@@ -114,8 +114,19 @@ pub trait CanGreet {
 }
 ```
 
-`CanGreet` now means "can greet, and can tell you its name". Every provider may rely on the name being
-available, and so may every caller.
+`CanGreet` now means "can greet, and can tell you its name", and every caller may rely on the name being
+available. A provider of the component must still import `HasName` itself, with `#[uses]`, because the
+provider trait carries the supertrait as a `where` bound that each implementation has to satisfy:
+
+```rust
+#[cgp_impl(new GreetHello)]
+#[uses(HasName)]
+impl Greeter {
+    fn greet(&self) {
+        println!("Hello, {}!", self.name());
+    }
+}
+```
 
 ## When to use it
 
@@ -165,7 +176,9 @@ where
 }
 ```
 
-Callers see the supertrait, and the predicate on the implementation lets the body call the methods.
+Callers see the supertrait, and the predicate on the implementation lets the body call the methods. The
+`#[extend]` entries share that one `Self:` predicate with any [`#[uses]`](uses.md) entries on the same
+function, the `#[extend]` ones first.
 Compare [`#[uses]`](uses.md), which emits only the predicate and leaves the trait declaration bare.
 That single difference is the whole of the distinction.
 
@@ -189,6 +202,22 @@ where
 }
 ```
 
+The provider trait carries the same requirement, but as a `where` bound rather than a supertrait, since its
+context is a type parameter:
+
+```rust
+pub trait Greeter<__Context__>: IsProviderFor<GreeterComponent, __Context__, ()>
+where
+    __Context__: HasName,
+{
+    fn greet(__context__: &__Context__);
+}
+```
+
+Rust does not let an implementation assume a trait's `where` bound, so every provider impl must prove
+`__Context__: HasName` itself. That is why the provider in [Examples](#examples) carries
+`#[uses(HasName)]` even though the component already names the trait.
+
 Here the result is identical to `pub trait CanGreet: HasName`, so on a component `#[extend]` generates
 only what the language can already express. It remains the preferred form because it presents the bound
 as an import rather than as inheritance, and because it keeps the `use`/`pub use` pairing with `#[uses]`
@@ -204,7 +233,9 @@ ExtendArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
 ```
 
 This is the same production [`#[uses]`](uses.md) accepts, the Rust grammar's own bound, so a lifetime, a
-`?Sized`, or an associated-type equality parses as readily as a plain trait name. The list may be empty,
+`?Sized`, or an associated-type equality parses as readily as a plain trait name. Rust still rejects a
+relaxed bound on a trait, so `#[extend(?Sized)]` fails with
+`relaxed bounds are not permitted in supertrait bounds`. The list may be empty,
 and the attribute may be repeated, with every occurrence's entries collected together. The two attributes
 differ in where the bounds land, not in the grammar.
 
@@ -232,6 +263,17 @@ trait's method
 then fail with `E0599`, reporting that the method exists but its trait bounds were not satisfied. Both
 errors have the same cause, and one fix removes both: move the requirement to [`#[uses]`](uses.md), or
 onto the component's trait where supertraits belong.
+
+**A provider of an extended component must import the supertrait again.** Leaving `#[uses(HasName)]` off
+a `GreetHello` provider for the `CanGreet` component above fails at the provider, whether or not its body
+calls `name()`:
+
+```text
+error[E0277]: the trait bound `__Context__: HasName` is not satisfied
+```
+
+The component's `#[extend]` guarantees the trait to callers of `CanGreet`. It does not supply it to the
+implementations that make `CanGreet` true, each of which states its own requirements.
 
 **A supertrait cannot be narrowed later.** Because every implementor and every caller may now rely on it,
 removing an entry from `#[extend]` is a breaking change in a way removing one from `#[uses]` is not. This

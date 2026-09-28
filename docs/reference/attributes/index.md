@@ -10,8 +10,10 @@ description: 'The modifier attributes that refine what a CGP macro generates: de
 An attribute here is a modifier, not a macro of its own. Each one is an option that a host macro reads
 to refine the trait or implementation it generates. The hosts are
 [`#[cgp_impl]`](../macros/cgp_impl.md), [`#[cgp_fn]`](../macros/cgp_fn.md), and
-[`#[cgp_component]`](../macros/cgp_component.md). This page groups every attribute in this section by
-the job it does, in roughly the order most CGP code uses them.
+[`#[cgp_component]`](../macros/cgp_component.md), together with the macros built on
+`#[cgp_component]`. Each attribute works only on the hosts its page names. Anywhere else nothing reads
+it, and the compiler reports it as an attribute it cannot find. This page groups every attribute in
+this section by the job it does, in roughly the order most CGP code uses them.
 
 If you are new to CGP, start with the [reference overview](/docs/reference/) rather than here. This page
 is the fuller guide, for a reader who already knows the essentials.
@@ -19,16 +21,16 @@ is the fuller guide, for a reader who already knows the essentials.
 ## Reading a value from the context
 
 [`#[implicit]`](./implicit.md) marks a function argument that the macro reads from a same-named field
-on the context rather than from the caller. The context is the type the method runs on. A
-provider that needs a value then reads like an ordinary function that takes it. Almost every provider
-uses the attribute, and it is usually the first piece of CGP anyone writes.
+on the context rather than from the caller. The context is the type the method runs on, which supplies
+the values it needs as its fields. A provider that needs a value then reads like an ordinary function
+that takes it. It is the default way to read a context's field, and usually the first piece of CGP
+anyone writes.
 
 ## Importing a dependency
 
 These attributes declare what an implementation depends on, and each reads like an import. Most
 dependencies belong on the implementation, where callers never see them. `#[extend]` and
-`#[extend_where]` put a dependency on the generated trait instead, for the case where every caller must
-rely on it.
+`#[extend_where]` put a requirement on the generated trait instead, where every caller meets it.
 
 [`#[uses]`](./uses.md) imports a consumer trait, or an ordinary Rust trait, that the context must
 satisfy. This is the common case. [`#[use_type]`](./use_type.md) imports an [abstract type](/docs/reference/glossary#abstract-type) that another
@@ -37,8 +39,10 @@ qualified path. [`#[use_provider]`](./use_provider.md) imports a provider trait 
 provider must satisfy, which is the dependency a [higher-order provider](/docs/reference/glossary#higher-order-provider) declares.
 
 [`#[extend]`](./extend.md) and [`#[extend_where]`](./extend_where.md) put the requirement on the generated
-trait rather than on the implementation, so every caller inherits it. `#[extend]` adds a [supertrait](/docs/reference/glossary#supertrait), and
-`#[extend_where]` adds a `where` predicate that a supertrait cannot express.
+trait rather than on the implementation. `#[extend]` adds a [supertrait](/docs/reference/glossary#supertrait),
+which every caller can rely on. `#[extend_where]` adds a `where` predicate that a supertrait cannot
+express, which callers do not inherit: each caller must prove it, and the compiler checks it wherever
+the trait is named.
 
 ## Naming a type the body needs
 
@@ -63,3 +67,9 @@ the default once per-type defaults accumulate.
 generic over a type parameter. The `open` statement of
 [`delegate_components!`](../macros/delegate_components.md) replaced it for new code. The page remains
 because you will meet the form in existing wiring and in CGP's own error and handler components.
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

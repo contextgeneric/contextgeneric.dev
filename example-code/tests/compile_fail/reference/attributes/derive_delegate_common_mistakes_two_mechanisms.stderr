@@ -1,0 +1,17 @@
+error[E0119]: conflicting implementations of trait `IsProviderFor<AreaCalculatorComponent, _, _>` for type `App`
+  --> tests/compile_fail/reference/attributes/derive_delegate_common_mistakes_two_mechanisms.rs:28:9
+   |
+24 |         open AreaCalculatorComponent;
+   |              ----------------------- first implementation here
+...
+28 |         AreaCalculatorComponent:
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `App`
+
+error[E0119]: conflicting implementations of trait `DelegateComponent<AreaCalculatorComponent>` for type `App`
+  --> tests/compile_fail/reference/attributes/derive_delegate_common_mistakes_two_mechanisms.rs:28:9
+   |
+24 |         open AreaCalculatorComponent;
+   |              ----------------------- first implementation here
+...
+28 |         AreaCalculatorComponent:
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `App`

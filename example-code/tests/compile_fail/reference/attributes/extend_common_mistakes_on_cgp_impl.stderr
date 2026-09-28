@@ -1,0 +1,29 @@
+error: cannot find attribute `extend` in this scope
+  --> tests/compile_fail/reference/attributes/extend_common_mistakes_on_cgp_impl.rs:16:3
+   |
+16 | #[extend(HasName)]
+   |   ^^^^^^
+
+error[E0599]: the method `name` exists for reference `&__Context__`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/attributes/extend_common_mistakes_on_cgp_impl.rs:19:37
+   |
+19 |         println!("Hello, {}!", self.name());
+   |                                     ^^^^ method cannot be called on `&__Context__` due to unsatisfied trait bounds
+   |
+note: the following trait bounds were not satisfied:
+      `&__Context__: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+      `<&__Context__ as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `<__Context__ as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `__Context__: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+  --> tests/compile_fail/reference/attributes/extend_common_mistakes_on_cgp_impl.rs:3:1
+   |
+ 3 | #[cgp_auto_getter]
+   | ^^^^^^^^^^^^^^^^^^
+ 4 | pub trait HasName {
+   |           ^^^^^^^
+   = help: items from traits can only be used if the type parameter is bounded by the trait
+   = note: this error originates in the attribute macro `cgp_auto_getter` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: the following trait defines an item `name`, perhaps you need to restrict type parameter `__Context__` with it:
+   |
+15 | #[cgp_impl(new GreetHello)]: HasName
+   |                            +++++++++

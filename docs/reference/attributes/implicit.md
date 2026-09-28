@@ -12,8 +12,8 @@ Source a function argument from a same-named field on the context.
 ## Overview
 
 `#[implicit]` lets a CGP construct read a field value from a generic **context** by naming the field
-like an ordinary function argument. The context is the type the construct runs against, and the macro
-hides the implicit argument from the public signature.
+like an ordinary function argument. The context is the type the method runs on, which supplies the
+values it needs as its fields, and the macro hides the implicit argument from the public signature.
 
 ```rust
 #[cgp_fn]
@@ -50,7 +50,12 @@ fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
 
 `#[implicit]` works only inside the macros that rewrite a function body into an implementation:
 [`#[cgp_fn]`](../macros/cgp_fn.md) and the methods of a [`#[cgp_impl]`](../macros/cgp_impl.md) block. It
-is not a macro of its own, so it does nothing on an ordinary function.
+is not a macro of its own. Anywhere else, on an ordinary function or on a method of a
+[`#[cgp_component]`](../macros/cgp_component.md) trait, nothing removes it, and the compiler reports
+``cannot find attribute `implicit` in this scope``.
+
+The argument's name is also the field's name. A raw identifier is read by its plain name, so
+`#[implicit] r#type: &str` reads the field `type`.
 
 The macro constrains where the attribute may appear. The function must take `self` first, because the
 macro reads the field from `self`. The argument must be a bare identifier, not a destructuring or `mut`
@@ -71,6 +76,7 @@ that type. The table below lists every case:
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
 | `Option<&str>` | `Option<String>` | `.as_deref()` |
 | `&mut T` | `T` | mutably, no conversion |
+| `&mut str` | `String` | `.as_mut_str()` |
 | `&mut [T]` | anything `AsMut<[T]>` | `.as_mut()` |
 | `Option<&mut T>` | `Option<T>` | `.as_mut()` |
 | `Option<&mut str>` | `Option<String>` | `.as_deref_mut()` |
@@ -88,14 +94,17 @@ with one lifetime argument and one type argument. Anything else spelled `MRef` f
 and the macro clones it. This is the one place where a small change to the type changes the read without
 a warning.
 
-The same rules govern the [getter traits](/docs/reference/glossary#getter-trait), so learning them once covers everywhere CGP reads a field.
+The same conversions govern the [getter traits](/docs/reference/glossary#getter-trait), so learning them
+once covers everywhere CGP reads a field. The one difference is where mutability comes from, which the
+next section covers.
 
 ### Mutable arguments
 
-An implicit argument is mutable when its type carries a `&mut`: the outer reference of a `&mut T` or a
-`&mut [T]`, or the inner reference of an `Option<&mut T>` or an `Option<&mut str>`. A mutable argument
-reads through [`HasFieldMut`](../traits/field-access/has_field_mut.md) and `get_field_mut` rather than through
-[`HasField`](../traits/field-access/has_field.md) and `get_field`, so it borrows the field for writing.
+An implicit argument is mutable when its type carries a `&mut`: the outer reference of a `&mut T`, a
+`&mut str`, or a `&mut [T]`, or the inner reference of an `Option<&mut T>` or an `Option<&mut str>`.
+A mutable argument reads through [`HasFieldMut`](../traits/field-access/has_field_mut.md) and
+`get_field_mut` rather than through [`HasField`](../traits/field-access/has_field.md) and
+`get_field`, so it borrows the field for writing.
 
 A mutable argument requires a `&mut self` receiver, because a function cannot borrow a field mutably
 through a shared `&self`. It must also be the only implicit argument on its function, because reading
@@ -104,7 +113,8 @@ one field mutably borrows the whole context exclusively and cannot coexist with 
 Mutability follows the *argument's* type rather than the receiver's. An argument carrying a `&mut` reads
 mutably, and every other argument, an `MRef` included, reads through a shared borrow. A `&mut self`
 function may therefore still take any number of immutable implicit arguments, as long as none of them is
-mutable.
+mutable. A getter trait works the other way, taking its mode from its receiver, so this is the one rule
+that does not carry over from getters.
 
 To get a mutable local from a field the body only reads, take the argument immutably and clone it inside
 the body. `#[implicit]` rejects a `mut` binding on the argument itself, because a mutable argument means
@@ -134,11 +144,23 @@ pub fn print_area(rect: &Rectangle) {
 ```
 
 `Rectangle` derives [`HasField`](../derives/derive_has_field.md), and that derive is all it needs to
-qualify. The program does not wire anything.
+qualify. The program does not wire anything. `Rectangle` is a value context: the data the method
+computes on is the context itself.
+
+A mutable argument modifies a field in place. It is the function's only implicit argument, under a
+`&mut self` receiver:
+
+```rust
+#[cgp_fn]
+pub fn shout(&mut self, #[implicit] name: &mut str) {
+    name.make_ascii_uppercase();
+}
+```
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) provider the attribute behaves the same way and mixes
-with the method's ordinary arguments. The macro removes the implicit arguments from the signature and
-keeps `to` and `body`:
+with the method's ordinary arguments. This fragment assumes an `EmailSender` component whose
+`send_email(&self, to: &str, body: &str)` method is defined elsewhere. The macro removes the implicit
+argument from the signature and keeps `to` and `body`:
 
 ```rust
 #[cgp_impl(new SendViaSmtp)]
@@ -151,7 +173,8 @@ impl EmailSender {
 
 Callers still write `app.send_email(to, body)`. The provider's requirement from its context, an
 `smtp_server` field borrowed here as a `&str` from a `String`, never appears in the trait everyone else
-calls.
+calls. The context here is an environmental one, an `app` that carries the application's settings
+rather than being the data a method acts on.
 
 ## When to use it
 
@@ -234,7 +257,8 @@ Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) block the rewrite is the same, e
 that provider's `where` clause. One addition shows only in a multi-method block: the macro collects the
 bounds across *every* method and de-duplicates them, so two methods each taking `#[implicit] name: &str`
 add one `HasField<Symbol!("name"), Value = String>` bound rather than two. The macro still emits the
-`let` bindings per method, because each body needs its own.
+`let` bindings per method, because each body needs its own. Two reads of one field at *different*
+field types are not merged, and the conflict they create is under [Common Mistakes](#common-mistakes).
 
 ## Common Mistakes
 
@@ -287,6 +311,25 @@ error: &mut self is required for mutable field reference `& mut u64`
 error: a `&mut` implicit argument must be the only implicit argument, since its mutable
        borrow of the context conflicts with reading any other field
 ```
+
+**Two methods of one block cannot read a field at two types.** Each method's argument adds its own
+field bound, so a `u32` read in one method and a `u64` read in another require the same field to be
+both. No context can satisfy that, and the provider fails where it is defined:
+
+```rust
+#[cgp_impl(new ReadCount)]
+impl Counter {
+    fn small(&self, #[implicit] count: u32) -> u32 { count }
+    fn big(&self, #[implicit] count: u64) -> u64 { count }
+}
+```
+
+```text
+error[E0284]: type annotations needed: cannot satisfy `<__Context__ as HasField<Symbol<5, Chars<'c', ...>>>>::Value == u32`
+```
+
+Reads that differ only in how they borrow do not conflict. A `&str` in one method and a `String` in
+another both require a `String` field, so they agree.
 
 ## Related constructs
 

@@ -1,0 +1,5 @@
+error: Multiple abstract types cannot share the same identifier or alias
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_shared_alias.rs:15:39
+   |
+15 | #[use_type(HasFooType.Foo, HasBarType.Bar as Foo)]
+   |                                       ^^^

@@ -1,0 +1,5 @@
+error: cannot ground `#[use_type]` imports: they resolve through one another in a cycle `B` -> `A` -> `B`. An `in Context` clause or a trait argument may name another import's alias only if the resulting chain is acyclic, since a cycle has no valid grounding order.
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_cycle.rs:15:43
+   |
+15 | #[use_type(HasAType.A in B, HasBType.B in A)]
+   |                                           ^

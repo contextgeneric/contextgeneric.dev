@@ -7,7 +7,7 @@ description: 'Add where predicates to a generated trait''s own definition rather
 
 # `#[extend_where]`
 
-Add `where` predicates to a generated trait's own definition, not just to its implementation.
+Add `where` predicates to a generated trait's own definition, not only to its implementation.
 
 ## Overview
 
@@ -52,10 +52,11 @@ these are arbitrary predicates: a bound on any type in scope, including an assoc
 higher-ranked bound, or a lifetime bound. The macro adds each to the generated trait's `where` clause
 verbatim, and keeps it on the implementation as well.
 
-**Only [`#[cgp_fn]`](../macros/cgp_fn.md) supports `#[extend_where]`.** On
-[`#[cgp_impl]`](../macros/cgp_impl.md) or [`#[cgp_component]`](../macros/cgp_component.md) the `where`
-clause you write is already part of the definition, so there is nothing to promote. Write the bound as
-an ordinary `where` clause there.
+**Only [`#[cgp_fn]`](../macros/cgp_fn.md) supports `#[extend_where]`**, because it is the one host that
+keeps your `where` clause off the trait it generates. A `where` clause on a
+[`#[cgp_component]`](../macros/cgp_component.md) trait is already part of the trait, so there is nothing
+to promote, and [`#[cgp_impl]`](../macros/cgp_impl.md) generates no trait at all. Write the bound as an
+ordinary `where` clause there.
 
 ## Examples
 
@@ -161,10 +162,11 @@ The trait carries only the promoted predicate. The function's own bound is absen
 default this attribute overrides.
 
 The implementation carries all of them, and their **order is fixed**: the function's own `where` clause
-first, then whatever the attributes contribute, then the
-[`HasField`](../traits/field-access/has_field.md) bounds from [`#[implicit]`](implicit.md) arguments,
-which are always appended last. That order helps when you read a long `where` clause in an expansion,
-because it tells you where each bound came from.
+first, then one `Self:` predicate for the [`#[extend]`](extend.md) and [`#[uses]`](uses.md) bounds, then
+the `#[extend_where]` predicates, then the [`HasField`](../traits/field-access/has_field.md) bounds from
+[`#[implicit]`](implicit.md) arguments, and last the bounds [`#[use_type]`](use_type.md) and
+[`#[use_provider]`](use_provider.md) add. That order helps when you read a long `where` clause in an
+expansion, because it tells you where each bound came from.
 
 The context parameter is literally `__Context__` in the emitted code and appears as `Self` inside the
 implementation.

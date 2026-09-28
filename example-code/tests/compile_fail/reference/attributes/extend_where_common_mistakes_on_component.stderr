@@ -1,0 +1,5 @@
+error: cannot find attribute `extend_where` in this scope
+ --> tests/compile_fail/reference/attributes/extend_where_common_mistakes_on_component.rs:5:3
+  |
+5 | #[extend_where(Scalar: Clone)]
+  |   ^^^^^^^^^^^^

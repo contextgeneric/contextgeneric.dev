@@ -1,0 +1,5 @@
+error[E0425]: cannot find type `Foo` in this scope
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_self_pin.rs:15:30
+   |
+15 | #[use_type(HasFooType.{Foo = Foo})]
+   |                              ^^^ not found in this scope

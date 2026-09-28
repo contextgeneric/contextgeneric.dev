@@ -1,0 +1,5 @@
+error: &mut self is required for mutable field reference `& mut u64`
+ --> tests/compile_fail/reference/attributes/implicit_common_mistakes_mut_under_shared_self.rs:5:37
+  |
+5 | fn bump(&self, #[implicit] counter: &mut u64) {
+  |                                     ^

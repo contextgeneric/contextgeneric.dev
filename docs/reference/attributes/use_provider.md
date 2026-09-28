@@ -48,7 +48,8 @@ a different choice and usually not what a [higher-order provider](/docs/referenc
 
 `InnerCalculator` is the provider, usually a generic parameter of the implementation, and
 `AreaCalculator` is the provider trait it must satisfy. The trait may carry further arguments of its own,
-and the macro preserves those in order.
+lifetimes included, as in `#[use_provider(Inner: Namer<'a>)]`, and the macro keeps them after the
+context argument it inserts.
 
 The form to use depends on whether one provider must satisfy several traits, or several providers must
 each satisfy one.
@@ -72,7 +73,9 @@ from [`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), where commas are the
 several entries, so remember `#[use_provider]` as the exception.
 
 `#[use_provider]` is accepted on [`#[cgp_impl]`](../macros/cgp_impl.md) and on
-[`#[cgp_fn]`](../macros/cgp_fn.md), and it works the same way on both.
+[`#[cgp_fn]`](../macros/cgp_fn.md), and it works the same way on both. On any other host, such as a
+[`#[cgp_component]`](../macros/cgp_component.md) trait, nothing reads the attribute, and the compiler
+reports ``cannot find attribute `use_provider` in this scope``.
 
 ## Examples
 
@@ -110,7 +113,8 @@ impl<InnerCalculator> AreaCalculator {
 ```
 
 A context then composes the two when it wires the component, and `ScaledArea<RectangleArea>` computes a
-rectangle's area and scales it:
+rectangle's area and scales it. `Rectangle` is a value context, the shape being measured, and it carries
+the fields both layers read:
 
 ```rust
 #[derive(HasField)]
@@ -123,6 +127,12 @@ pub struct Rectangle {
 delegate_components! {
     Rectangle {
         AreaCalculatorComponent: ScaledArea<RectangleArea>,
+    }
+}
+
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
     }
 }
 ```
@@ -211,6 +221,13 @@ The `Self` you wrote in the attribute is the context, so it appears as `__Contex
 name the surrounding macro inserted. Writing `#[use_provider(InnerCalculator: AreaCalculator)]` is
 therefore exactly equivalent to writing `where InnerCalculator: AreaCalculator<Self>` by hand.
 
+The bound also reaches the provider's [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl, and
+because it names the component's own provider trait, that impl gains a matching
+`InnerCalculator: IsProviderFor<AreaCalculatorComponent, __Context__, ()>` bound as well. That is how a
+dependency missing inside the inner provider surfaces through the wrapper when the context is checked.
+A component that carries a lifetime does not get this counterpart, a known defect described under
+[`#[cgp_provider]`](../macros/cgp_provider.md#common-mistakes).
+
 On a [`#[cgp_fn]`](../macros/cgp_fn.md) the same insertion happens. Because that macro's implementation
 is written *for* the context, the bound reads with `Self` directly:
 
@@ -234,20 +251,22 @@ The attribute argument is one provider and the provider traits it must satisfy, 
 [notation](https://doc.rust-lang.org/reference/notation.html):
 
 ```ebnf
-UseProviderArgs -> ProviderType `:` ProviderBound ( `+` ProviderBound )*
+UseProviderArgs -> ProviderType `:` ( ProviderBound ( `+` ProviderBound )* `+`? )?
 
 ProviderType    -> Type
 ProviderBound   -> TypePath GenericArgs?
 ```
 
-Both parts are required. `ProviderType` names the generic parameter the inner provider occupies, and each
-`ProviderBound` is the provider trait to require of it, written *without* its leading context argument,
-which the attribute inserts.
+The provider and the colon are required. `ProviderType` names the generic parameter the inner provider
+occupies, and each `ProviderBound` is the provider trait to require of it, written *without* its leading
+context argument, which the attribute inserts. The bound list may end with a `+`, and it may even be
+empty: `#[use_provider(Inner:)]` parses and adds a `where Inner:` predicate that requires nothing.
 
 Those productions carry the restrictions that account for every parse failure this attribute produces.
 **`ProviderBound` is a path with plain generic arguments**, not a full `TypeParamBound`, so a turbofish
-or an associated-type binding in that position does not parse. A bound of that shape belongs in the
-block's own `where` clause. And **the argument holds exactly one provider**, because the `+`-separated
+or an associated-type binding in that position does not parse: `AreaCalculator<Output = f64>` fails with
+``associated bindings (`Name = ...`) are not allowed in type arguments``. A bound of that shape belongs in
+the block's own `where` clause. And **the argument holds exactly one provider**, because the `+`-separated
 bound list runs to the end of the attribute, so a comma after the first pair lands where a `+` was
 expected. That makes this attribute the one exception to the comma-separated convention its siblings
 follow: bind several inner providers by stacking one attribute each. See

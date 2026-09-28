@@ -1,0 +1,14 @@
+error[E0425]: cannot find type `Output` in this scope
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_own_associated_type.rs:17:23
+   |
+17 |     fn make(&self) -> Output;
+   |                       ^^^^^^
+   |
+help: you might have meant to use the associated type
+   |
+17 |     fn make(&self) -> Self::Output;
+   |                       ++++++
+help: consider importing this struct
+   |
+ 1 + use std::process::Output;
+   |

@@ -1,0 +1,8 @@
+error[E0207]: the type parameter `Context` is not constrained by the impl trait, self type, or predicates
+  --> tests/compile_fail/reference/attributes/default_impl_common_mistakes_explicit_context.rs:13:6
+   |
+11 | #[cgp_impl(new ShowString)]
+   | --------------------------- help: remove the unused type parameter `Context`
+12 | #[default_impl(String in DefaultImpls1<ShowImplComponent>)]
+13 | impl<Context> ShowImpl<String> for Context {
+   |      ^^^^^^^ unconstrained type parameter

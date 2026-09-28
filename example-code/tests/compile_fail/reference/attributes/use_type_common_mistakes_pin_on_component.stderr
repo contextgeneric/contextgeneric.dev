@@ -1,0 +1,5 @@
+error: Type equality constraints cannot be used in component trait definition
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_pin_on_component.rs:15:34
+   |
+15 | #[use_type(HasErrorType.{Error = anyhow::Error})]
+   |                                  ^^^^^^^^^^^^^

@@ -1,0 +1,11 @@
+error[E0107]: trait takes 2 generic arguments but 3 generic arguments were supplied
+  --> tests/compile_fail/reference/attributes/default_impl_common_mistakes_table_parameter.rs:13:26
+   |
+13 | #[default_impl(String in DefaultImpls1<ShowImplComponent, App>)]
+   |                          ^^^^^^^^^^^^^ expected 2 generic arguments
+   |
+note: trait defined here, with 2 generic parameters: `T`, `Components`
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-component/src/namespaces.rs:5:11
+   |
+ 5 | pub trait DefaultImpls1<T, Components> {
+   |           ^^^^^^^^^^^^^ -  ----------

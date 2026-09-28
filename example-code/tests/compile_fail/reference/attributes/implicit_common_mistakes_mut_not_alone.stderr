@@ -1,0 +1,5 @@
+error: a `&mut` implicit argument must be the only implicit argument, since its mutable borrow of the context conflicts with reading any other field
+ --> tests/compile_fail/reference/attributes/implicit_common_mistakes_mut_not_alone.rs:5:9
+  |
+5 | fn bump(&mut self, #[implicit] counter: &mut u64, #[implicit] step: u64) {
+  |         ^^^^^^^^^

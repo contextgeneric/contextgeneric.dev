@@ -1,0 +1,7 @@
+error: this relaxed bound is not permitted here
+ --> tests/compile_fail/reference/attributes/uses_formal_grammar_relaxed_bound.rs:5:8
+  |
+5 | #[uses(?Sized)]
+  |        ^^^^^^
+  |
+  = note: in this context, relaxed bounds are only allowed on type parameters defined on the closest item

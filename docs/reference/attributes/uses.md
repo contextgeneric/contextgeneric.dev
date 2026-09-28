@@ -53,8 +53,10 @@ single list reads as a single set of requirements. You may also split entries ac
 attribute only when there is a reason.
 
 `#[uses(...)]` is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md) and on
-[`#[cgp_impl]`](../macros/cgp_impl.md). In both, it imports into the item being defined, and it does not
-matter how the imported trait was itself produced.
+[`#[cgp_impl]`](../macros/cgp_impl.md), the two hosts that generate an implementation to carry the
+bound. In both, it imports into the item being defined, and it does not matter how the imported trait
+was itself produced. It is not accepted on [`#[cgp_component]`](../macros/cgp_component.md), where a
+trait dependency is a supertrait written with [`#[extend]`](extend.md).
 
 ### Bounds beyond the simple form
 
@@ -111,7 +113,28 @@ impl AreaCalculator {
 ```
 
 This provider is a short adapter: it satisfies the `AreaCalculator` component by calling whatever
-`rectangle_area` computes. Any context with the fields that trait needs can wire it.
+`rectangle_area` computes. Any context with the fields that trait needs can wire it, as a `Rectangle`
+does here. `Rectangle` is a value context, the shape whose area is being computed:
+
+```rust
+#[derive(HasField)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+delegate_components! {
+    Rectangle {
+        AreaCalculatorComponent: RectangleAreaCalculator,
+    }
+}
+
+check_components! {
+    Rectangle {
+        AreaCalculatorComponent,
+    }
+}
+```
 
 ## When to use it
 
@@ -183,12 +206,14 @@ The attribute argument is a comma-separated list of bounds, in the Rust Referenc
 UsesArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
 ```
 
-`TypeParamBound` is the Rust grammar's own bound production, which is wider than the plain `Trait<Args>`
-this attribute is normally written with: a lifetime, a `?Sized`, and an associated-type equality such as
-`HasErrorType<Error = AppError>` all parse. The list may be empty, and the attribute may be repeated,
-with entries from every occurrence collected into one `Self:` predicate. The commas separate *bounds*, so
-`#[uses(A, B)]` and `#[uses(A)] #[uses(B)]` are the same thing, and the single-attribute form is the one
-to write.
+`TypeParamBound` is the Rust grammar's own bound production, which is wider than the plain
+`Trait<Args>` this attribute is normally written with: a lifetime, a `?Sized`, and an
+associated-type equality such as `HasErrorType<Error = AppError>` all parse. Rust still rejects some
+of them as a bound on `Self`, so `#[uses(?Sized)]` fails with
+`this relaxed bound is not permitted here`. The list may be empty, and the attribute may be
+repeated, with entries from every occurrence collected into one `Self:` predicate. The commas
+separate *bounds*, so `#[uses(A, B)]` and `#[uses(A)] #[uses(B)]` are the same thing, and the
+single-attribute form is the one to write.
 
 ## Common Mistakes
 
@@ -217,6 +242,24 @@ The `__Context__` in that note points to the mistake. Depend on the **consumer**
 `#[uses(CanCalculateArea)]`, when you want "whatever this context has wired", which is almost always the
 case. Use [`#[use_provider]`](use_provider.md) when you mean a named implementation, and it will supply
 the missing argument.
+
+**`#[uses]` fails on a component trait.** `#[cgp_component]` does not read the attribute, so it
+stays on the trait and the compiler cannot find it:
+
+```rust
+#[cgp_component(Shouter)]
+#[uses(CanCalculateArea)]
+pub trait CanShout {
+    fn shout(&self) -> String;
+}
+```
+
+```text
+error: cannot find attribute `uses` in this scope
+```
+
+A trait that every implementation of the component needs is a supertrait. Write it with
+[`#[extend(CanCalculateArea)]`](extend.md), or put `#[uses]` on each provider that needs it.
 
 ## Related constructs
 

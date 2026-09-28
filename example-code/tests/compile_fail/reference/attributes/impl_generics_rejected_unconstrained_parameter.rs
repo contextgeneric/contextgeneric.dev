@@ -6,8 +6,8 @@ use cgp::prelude::*;
 //               predicates
 #[cgp_fn]
 #[impl_generics(Name: Display)]
-pub fn greet(&self, #[implicit] label: &str) -> String {
-    format!("Hello, {label}!")
+pub fn greet(&self) -> String {
+    "Hello!".to_owned()
 }
 
 fn main() {}

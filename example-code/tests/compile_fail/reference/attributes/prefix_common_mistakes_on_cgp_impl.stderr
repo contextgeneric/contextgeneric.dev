@@ -1,0 +1,5 @@
+error: cannot find attribute `prefix` in this scope
+  --> tests/compile_fail/reference/attributes/prefix_common_mistakes_on_cgp_impl.rs:10:3
+   |
+10 | #[prefix(@app in DefaultNamespace)]
+   |   ^^^^^^

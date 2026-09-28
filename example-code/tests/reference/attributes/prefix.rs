@@ -291,3 +291,63 @@ pub mod under_the_hood {
         assert_eq!(App.greet(), "Hello!");
     }
 }
+
+/// ## Common Mistakes
+///
+/// Two mistakes that compile: a doubled marker on a component without type parameters, which the
+/// shorter path key still catches, and a prefix on `#[cgp_auto_getter]`, which is dropped.
+pub mod common_mistakes {
+    use cgp::prelude::*;
+
+    #[cgp_component(Greeter)]
+    #[prefix(@app.GreeterComponent in DefaultNamespace)]
+    pub trait CanGreet {
+        fn greet(&self) -> String;
+    }
+
+    #[cgp_impl(new GreetHello)]
+    impl Greeter {
+        fn greet(&self) -> String {
+            "Hello!".to_owned()
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            namespace DefaultNamespace;
+
+            @app.GreeterComponent: GreetHello,
+        }
+    }
+
+    check_components! {
+        App {
+            GreeterComponent,
+        }
+    }
+
+    #[cgp_auto_getter]
+    #[prefix(@app in DefaultNamespace)]
+    pub trait HasName {
+        fn name(&self) -> &str;
+    }
+
+    #[derive(HasField)]
+    pub struct Person {
+        pub name: String,
+    }
+
+    #[test]
+    fn both_compile() {
+        assert_eq!(App.greet(), "Hello!");
+        assert_eq!(
+            Person {
+                name: "Ada".to_owned()
+            }
+            .name(),
+            "Ada"
+        );
+    }
+}

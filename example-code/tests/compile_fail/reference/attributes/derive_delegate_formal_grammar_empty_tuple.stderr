@@ -1,0 +1,5 @@
+error: expect non-empty tuple list of identifiers in use_delegate_spec
+ --> tests/compile_fail/reference/attributes/derive_delegate_formal_grammar_empty_tuple.rs:5:32
+  |
+5 | #[derive_delegate(UseDelegate<()>)]
+  |                                ^

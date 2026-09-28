@@ -1,0 +1,5 @@
+error[E0425]: cannot find type `Shape` in this scope
+ --> tests/compile_fail/reference/attributes/derive_delegate_common_mistakes_missing_parameter.rs:5:31
+  |
+5 | #[derive_delegate(UseDelegate<Shape>)]
+  |                               ^^^^^ not found in this scope

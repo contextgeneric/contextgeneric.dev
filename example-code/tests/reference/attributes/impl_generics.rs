@@ -92,6 +92,29 @@ pub mod usage {
     }
 }
 
+/// ## Usage: a const parameter
+///
+/// A const parameter pinned by an array field's length.
+pub mod const_parameter {
+    use cgp::prelude::*;
+
+    #[cgp_fn]
+    #[impl_generics(const N: usize)]
+    pub fn byte_count(&self, #[implicit] data: &[u8; N]) -> usize {
+        data.len()
+    }
+
+    #[derive(HasField)]
+    pub struct Packet {
+        pub data: [u8; 4],
+    }
+
+    #[test]
+    fn the_length_is_inferred() {
+        assert_eq!(Packet { data: [0; 4] }.byte_count(), 4);
+    }
+}
+
 /// ## Examples
 pub mod examples {
     use core::fmt::Display;

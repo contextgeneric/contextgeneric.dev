@@ -205,7 +205,7 @@ pub mod under_the_hood {
         }
     }
 
-    impl<Components> AppNamespace<Components> for Path!(@app.GreeterComponent) {
+    impl<__Components__> AppNamespace<__Components__> for Path!(@app.GreeterComponent) {
         type Delegate = GreetHello;
     }
 

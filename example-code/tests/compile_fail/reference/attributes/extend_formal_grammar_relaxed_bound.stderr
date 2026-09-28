@@ -1,0 +1,15 @@
+error: relaxed bounds are not permitted in supertrait bounds
+ --> tests/compile_fail/reference/attributes/extend_formal_grammar_relaxed_bound.rs:5:10
+  |
+5 | #[extend(?Sized)]
+  |          ^^^^^^
+  |
+  = note: traits are not implicitly bounded by `Sized`, so there is nothing to relax
+
+error: this relaxed bound is not permitted here
+ --> tests/compile_fail/reference/attributes/extend_formal_grammar_relaxed_bound.rs:5:10
+  |
+5 | #[extend(?Sized)]
+  |          ^^^^^^
+  |
+  = note: in this context, relaxed bounds are only allowed on type parameters defined on the closest item

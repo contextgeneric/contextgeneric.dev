@@ -282,9 +282,13 @@ namespaces.
 ## Common Mistakes
 
 **The macro appends the marker, so do not write it.** `#[prefix(@app.GreeterComponent in Ns)]`
-registers the component at `@app.GreeterComponent.GreeterComponent`. It compiles, and a context that
-binds `@app.GreeterComponent` then finds its entry never consulted, because the route and the binding
-name different paths. Write the prefix alone.
+routes the component to `@app.GreeterComponent.GreeterComponent`. On a component without type
+parameters the mistake stays hidden, because a context's `@app.GreeterComponent` entry also matches
+every longer path beneath it and so catches the doubled route. On a component with type parameters it
+surfaces. With `#[prefix(@app.ShowImplComponent in DefaultNamespace)]` on a `CanShow<T>`, the entry
+`@app.ShowImplComponent.String` does not match the route
+`@app.ShowImplComponent.ShowImplComponent.String`, and the check reports the unbound path described
+next. Write the prefix alone.
 
 **Registering routes a component but does not bind a provider.** A prefixed component compiles even
 when nothing binds its path, and so does a context that joins the namespace. Only a
@@ -341,7 +345,9 @@ pub trait CanGreet {
 error[E0119]: conflicting implementations of trait `AppNamespace<_>` for type `GreeterComponent`
 ```
 
-A component has one route per namespace. To reach it under two paths, define two namespaces.
+Both carets land on the `#[cgp_component]` attribute rather than on the two `#[prefix]` lines, so the
+message does not say which registration is the duplicate. A component has one route per namespace. To
+reach it under two paths, define two namespaces.
 
 **`open` does not reach a prefixed component in a joined namespace.** `open` roots the route at the
 bare marker, while the prefix routes under the path, so the per-type entries `open` expects are never
@@ -408,7 +414,6 @@ The ideas behind it:
 - Collection on the component: [`types/attributes/cgp_component_attributes.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/cgp_component_attributes.rs)
 - Emission, after the standard provider impls: [`types/cgp_component/evaluated/item.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_component/evaluated/item.rs)
 - A library use: [`has_error_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-error/src/traits/has_error_type.rs)
-- Expansion snapshots: [`namespaces/`](https://github.com/contextgeneric/cgp/tree/main/crates/tests/cgp-tests/tests/namespaces/)
 
 ---
 

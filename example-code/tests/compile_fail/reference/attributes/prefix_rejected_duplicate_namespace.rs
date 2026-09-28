@@ -7,7 +7,7 @@ cgp_namespace! {
 // error[E0119]: conflicting implementations of trait `AppNamespace<_>` for type `GreeterComponent`
 #[cgp_component(Greeter)]
 #[prefix(@app in AppNamespace)]
-#[prefix(@other in AppNamespace)]
+#[prefix(@greeting in AppNamespace)]
 pub trait CanGreet {
     fn greet(&self) -> String;
 }
