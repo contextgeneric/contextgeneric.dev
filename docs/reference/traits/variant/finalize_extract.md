@@ -15,9 +15,8 @@ An [extraction chain](./extract_field.md) ends when every variant has been ruled
 remainder's type is **uninhabited** (a value of it cannot exist), and `FinalizeExtract` turns
 that fact into a usable ending.
 
-**It returns *any* type.** That looks unsound and is not, because a value to return it from cannot
-exist: the method can only be called on something that cannot exist, so its body is an empty `match`
-and no execution path reaches it.
+**It returns *any* type.** That looks unsound and is not: the method can only be called on a
+value that cannot exist, so its body is an empty `match` and no execution path reaches it.
 
 That closes a generic match **without a wildcard arm or an `unreachable!()`**. It is the mirror of
 [`FinalizeBuild`](../builder/finalize_build.md), and the two are sound for opposite reasons: a build
@@ -45,7 +44,9 @@ all-ruled-out configuration of each partial enum, owned and borrowed.
 the `Result` a last extraction returns and calls this on the error half. Reaching for `finalize_extract`
 directly means you already hold the remainder rather than a `Result`.
 
-The impls come from [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md).
+The impls on partial enums come from
+[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md); the library supplies the ones
+for `Void` and `Infallible`.
 
 ## Examples
 

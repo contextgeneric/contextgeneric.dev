@@ -104,8 +104,8 @@ field taken out and not replaced cannot be forgotten silently.
 **Reach for it when a complete value must be decomposed**, and remember that the common case,
 merging one record into another, already uses it for you.
 
-- **Use [`CanBuildFrom`](../casting/can_build_from.md)** to move every shared field from one record into another's
-  builder. It is this trait applied in a loop, written once.
+- **Use [`CanBuildFrom`](../casting/can_build_from.md)** to move every field of one record into
+  another's builder. It is this trait applied in a loop, written once.
 - **Use `take_field`** when a *specific* field must be extracted from a partial value, typically after
   [`into_builder`](./into_builder.md).
 - **Use [`BuildField`](./build_field.md)** for the opposite direction.

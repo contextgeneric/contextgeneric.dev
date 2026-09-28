@@ -1,13 +1,13 @@
 ---
 title: 'BuildAndMerge — merge a built sub-record'
-description: 'The builder step that builds a sub-record with a provider and copies every field it shares with the target into the partial record at once.'
+description: 'The builder step that builds a sub-record with a provider and moves every one of its fields into the target''s partial record at once.'
 sidebar_label: 'BuildAndMerge'
 sidebar_position: 9
 ---
 
 # `BuildAndMerge`
 
-Build a sub-record and copy every field it shares with the target into the builder at once.
+Build a sub-record and move every one of its fields into the target's builder at once.
 
 ## Overview
 
@@ -190,8 +190,8 @@ builder has those fields marked present. The `TryComputer` and `Handler` impls r
 - [`BuildAndSetField`](build_and_set_field.md) — the step for one field.
 - [`BuildWithHandlers`](build_with_handlers.md) — runs a list of steps and finalizes.
 - [`BuildAndMergeOutputs`](build_and_merge_outputs.md) — adds this step to each provider in a list.
-- [`CanBuildFrom`](../../traits/casting/can_build_from.md) — the trait that copies the shared
-  fields.
+- [`CanBuildFrom`](../../traits/casting/can_build_from.md) — the trait that moves the sub-record's
+  fields into the builder.
 
 The ideas behind it:
 

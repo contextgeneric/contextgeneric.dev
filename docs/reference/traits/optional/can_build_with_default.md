@@ -2,7 +2,7 @@
 title: 'CanBuildWithDefault — widen a record'
 sidebar_label: 'CanBuildWithDefault'
 sidebar_position: 6
-description: 'Build a wider record from a narrower one in one call, copying the shared fields by name and filling the rest from Default.'
+description: 'Build a wider record from a narrower one in one call, copying the source''s fields by name and filling the rest from Default.'
 ---
 
 # `CanBuildWithDefault`
@@ -11,9 +11,9 @@ Widening one record into another in a single call.
 
 ## Overview
 
-Turning a narrow record into a wider one whose extra fields have sensible defaults is a three-step motion:
-start a builder, copy the shared fields, default the rest. `CanBuildWithDefault` is that motion as one
-call.
+Turning a narrow record into a wider one whose extra fields have sensible defaults is a three-step
+motion: start a builder, copy the source's fields, default the rest. `CanBuildWithDefault` is that
+motion as one call.
 
 `Self` is the target record and `Source` the narrower one. **It is the field-level counterpart of an
 [upcast](../casting/can_upcast.md)**: turning a `Point2d` into a `Point3d` whose extra `z` is `0`,

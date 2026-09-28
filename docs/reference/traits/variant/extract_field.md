@@ -22,7 +22,7 @@ miss.
 
 Keep going and the remainder narrows. Once every variant has been ruled out its type is
 **uninhabited** (a value of it cannot exist), and [`FinalizeExtract`](./finalize_extract.md) closes
-the chain with without a wildcard or a panic path. Add a variant to the enum and the final remainder
+the chain without a wildcard or a panic path. Add a variant to the enum and the final remainder
 becomes inhabited again, so the code stops compiling until it is handled.
 
 The family is the mirror of the [builder](../builder/has_builder.md): a builder tracks which fields are *present*,
@@ -126,8 +126,8 @@ the finalize is accepted without a wildcard arm. The type enforces this: finaliz
 first extraction and the code does not compile. The two functions try the variants in opposite
 orders, which works because each step changes only its own variant's marker.
 
-**In practice you rarely write these chains.** The [dispatch
-combinators](../../providers/dispatch/index.md) build them from a set of per-variant
+**In practice you rarely write these chains.** The
+[dispatch combinators](../../providers/dispatch/index.md) build them from a set of per-variant
 implementations, which is the extensible visitor pattern: a chain like the one above, generated,
 with one implementation per variant chosen by wiring.
 

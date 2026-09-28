@@ -35,11 +35,11 @@ pub trait HasExtractorRef {
 }
 ```
 
-`Self` is the enum. `ExtractorRef<'a>` is a **generic associated type**: the borrowed extractor over the
-same partial companion enum, with every payload held for the lifetime `'a`. The `where Self: 'a` clause
-keeps the borrowed extractor from outliving the value it came from. `extractor_ref` takes a shared borrow
-of the value and returns the extractor at the anonymous lifetime, which is why the call reads with no
-lifetime written.
+`Self` is the enum. `ExtractorRef<'a>` is a **generic associated type**: the borrowed extractor, a
+second companion enum beside the owned one, with every payload held for the lifetime `'a`. The
+`where Self: 'a` clause keeps the borrowed extractor from outliving the value it came from.
+`extractor_ref` takes a shared borrow of the value and returns the extractor at the anonymous
+lifetime, which is why the call reads without a written lifetime.
 
 ## Usage
 

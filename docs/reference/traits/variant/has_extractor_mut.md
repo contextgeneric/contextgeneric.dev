@@ -40,11 +40,11 @@ pub trait HasExtractorMut {
 }
 ```
 
-`Self` is the enum. `ExtractorMut<'a>` is a **generic associated type**: the borrowed extractor over
-the same partial companion enum, with every payload held as a mutable reference for `'a`. The
-`where Self: 'a` clause keeps it from outliving the value. `extractor_mut` takes a mutable borrow
-and returns the extractor at the anonymous lifetime, so the call reads without a written lifetime
-and the borrow ends where the extractor is dropped.
+`Self` is the enum. `ExtractorMut<'a>` is a **generic associated type**: the borrowed extractor, the
+same companion enum [`HasExtractorRef`](./has_extractor_ref.md) uses, with every payload held as a
+mutable reference for `'a`. The `where Self: 'a` clause keeps it from outliving the value.
+`extractor_mut` takes a mutable borrow and returns the extractor at the anonymous lifetime, so the
+call reads without a written lifetime and the borrow ends where the extractor is dropped.
 
 ## Usage
 

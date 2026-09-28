@@ -138,8 +138,9 @@ whole test, and it is narrower than the extractor's, because most code decides w
 build at a site that can name it.
 
 - **Bound on it in a routine parameterized over the variant it produces.** Nothing else can do it.
-- **Derive it to make a smaller enum upcastable into a larger one.** Casting between enums is built on these
-  constructors, so this lets an implementation work in a narrow local enum and widen the result.
+- **Derive it on a wide enum so narrower enums can upcast into it.** An upcast builds each variant
+  into its target through these constructors, and asks nothing else of the target, so this lets an
+  implementation work in a narrow local enum and widen the result.
 - **Do not reach for it for an ordinary constructor call.** `Shape::Circle(circle)` is shorter, clearer, and
   generates nothing. The trait adds a *second* way to do the same thing, for callers that cannot use the first.
 - **Do not derive it alone if you also take the enum apart**, which is the usual case; reach for

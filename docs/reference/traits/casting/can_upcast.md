@@ -15,9 +15,10 @@ Two enums defined independently can share variant names, say a small `FooBar` an
 Converting the narrow one into the wide one is a conversion you could write by hand, and it is
 pure boilerplate: one `match` arm per variant, rewrapping each payload under the same name.
 
-`CanUpcast` derives that conversion from the names instead. Once both enums expose their shape as a
-type-level list, which [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) makes them, widening is a
-matter of routing each source variant to the target's slot of the same name.
+`CanUpcast` derives that conversion from the names instead. Once the source exposes its variants as
+a type-level list and the target can be built one variant at a time, widening is a matter of routing
+each source variant to the target's slot of the same name;
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) on both provides everything.
 
 **It always succeeds.** Every variant of the source has a home in the target, or the conversion does not
 type-check at all, so `upcast` returns the target directly rather than a `Result`. That totality is the
@@ -90,11 +91,8 @@ pub fn demo() {
 ```
 
 Neither enum names the other. They share variant *names*, matched at the type level, and that is the
-whole coupling. The source derives [`HasFields`](../shape/has_fields.md) and
-[`ExtractField`](../../derives/derive_extract_field.md) because the cast walks it and takes it
-apart; the target derives only [`FromVariant`](../../derives/derive_from_variant.md) because the
-cast only builds into it. [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) on both covers
-every case.
+whole coupling. Each derives only its side of the cast, as [Usage](#usage) explains: the source is
+walked and taken apart, and the target is only built into.
 
 ## When to use it
 

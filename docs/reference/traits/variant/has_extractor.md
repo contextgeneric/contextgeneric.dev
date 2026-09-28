@@ -34,11 +34,11 @@ pub trait HasExtractor {
 }
 ```
 
-`Self` is the enum. `Extractor` is the partial companion enum at its all-possible configuration, with
-every variant still available. `to_extractor` **consumes** the value and yields an extractor whose
-payloads are owned, which a chain needs when it will take a payload away. `from_extractor` reverses it,
-rebuilding the enum from an extractor that was not narrowed, which is useful when a routine inspects a
-value and hands it back unchanged.
+`Self` is the enum. `Extractor` is the partial companion enum at its all-possible configuration,
+with every variant still available. `to_extractor` **consumes** the value and yields an extractor
+whose payloads are owned, which a chain needs when it will take a payload away. `from_extractor`
+reverses it, rebuilding the enum from an extractor that was not narrowed, which lets generic code
+that converted a value to its extractor hand the enum back when it does not go on to extract.
 
 ## Usage
 

@@ -111,8 +111,8 @@ the record.**
 
 - **Bound on [`HasBuilder`](./has_builder.md) + `BuildField` + [`FinalizeBuild`](./finalize_build.md)**
   to write a routine that assembles a record it does not name.
-- **Use [`CanBuildFrom`](../casting/can_build_from.md)** to copy every shared field from another record at once,
-  rather than one `build_field` per field.
+- **Use [`CanBuildFrom`](../casting/can_build_from.md)** to copy every field of another record at
+  once, rather than one `build_field` per field.
 - **Use [`SetOptional`](../optional/set_optional.md)** when a field must be settable more than once. `build_field`
   consumes an absent slot exactly once by design; the optional layer relaxes that.
 - **Use [`UpdateField`](./update_field.md)** for a transition this does not cover.

@@ -263,7 +263,8 @@ rather than anything called on a value. Starting from a value is [`IntoBuilder`]
 - [`UpdateField`](./update_field.md): the primitive both are built from.
 - [`PartialData`](./partial_data.md) and [`FinalizeBuild`](./finalize_build.md): naming the destination,
   and reaching it.
-- [`CanBuildFrom`](../casting/can_build_from.md): merging every shared field from another record.
+- [`CanBuildFrom`](../casting/can_build_from.md): merging every field of another record into the
+  builder.
 - [`#[derive(BuildField)]`](../../derives/derive_build_field.md): generates the partial type and every impl
   in the family.
 - [`MapType`](../type-level/map_type.md): the `IsPresent`/`IsNothing` markers presence is encoded in.

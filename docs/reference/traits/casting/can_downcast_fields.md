@@ -36,14 +36,15 @@ pub trait CanDowncastFields<Target> {
 }
 ```
 
-`Target` is the enum being narrowed to. `Self` here is a *remainder* rather than an enum, and the method
-takes it by value, returning `Result<Target, Remainder>` as `downcast` does. The returned
-`Remainder` is narrower again, so each call in a chain has a different, progressively smaller `Self` type.
+`Target` is the enum being narrowed to. `Self` here is an extractor rather than an enum, in practice
+the remainder a prior downcast returned, and the method takes it by value, returning
+`Result<Target, Remainder>` as `downcast` does. The returned `Remainder` is narrower again, so each
+call in a chain has a different, progressively smaller `Self` type.
 
 ## Usage
 
-**It is not in the prelude.** Import it from `cgp::core::field::impls`, alongside `CanDowncast`, which
-you will always be using with it:
+**It is not in the prelude.** Import it from `cgp::core::field::impls`, alongside `CanDowncast`,
+which it nearly always follows:
 
 ```rust
 use cgp::core::field::impls::{CanDowncast, CanDowncastFields};

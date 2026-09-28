@@ -94,8 +94,8 @@ pub fn demo() {
 ```
 
 The code needs neither `.unwrap()`, `expect`, nor a wildcard arm. The call compiles only because
-both variants have been tried, which makes it a proof rather than an assertion; [Common
-Mistakes](#common-mistakes) shows the call one step early.
+both variants have been tried, which makes it a proof rather than an assertion; the
+[Common Mistakes](#common-mistakes) section shows the call one step early.
 
 ## When to use it
 
