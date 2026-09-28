@@ -98,8 +98,8 @@ pub struct Wrapper<T> {
 
 ### What it does not accept
 
-The derive parses its input as a struct, so applying it to an enum or a union fails at parse time. The
-whole-shape view of a struct *or* an enum is a different derive,
+The derive parses its input as a struct, so applying it to an enum or a union fails at parse time with
+``expected `struct` ``. The whole-shape view of a struct *or* an enum is a different derive,
 [`#[derive(HasFields)]`](./derive_has_fields.md) (note the plural), and the two are frequently derived
 together.
 
@@ -140,9 +140,17 @@ delegate_components! {
         GreeterComponent: GreetHello,
     }
 }
+
+check_components! {
+    Person {
+        GreeterComponent,
+    }
+}
 ```
 
 `Person` satisfies the field bound required by `GreetHello`, so `person.greet()` prints its name.
+`Person` is a [value context](/docs/reference/glossary#value-context): the greeting reads data the
+context itself holds.
 Removing the `name` field prevents the call from compiling because the required `HasField`
 implementation is missing.
 
@@ -243,6 +251,8 @@ the same way, and a borrowed field type is kept verbatim as `Value`.
 The library supplies smart-pointer access through blanket implementations of `HasField` and
 `HasFieldMut`. Shared access requires [`Deref`](https://doc.rust-lang.org/std/ops/trait.Deref.html),
 and mutable access requires `DerefMut`, with the target implementing the corresponding field trait.
+The mutable blanket implementation also requires the target to be `'static`, so mutable access through
+a `Box<Borrowed<'a>>` does not resolve, while shared access does.
 The blanket implementations are marked to keep the compiler from recommending them in missing-field
 diagnostics, directing attention to the underlying struct.
 
@@ -266,6 +276,40 @@ types. A spelling mismatch produces an unsatisfied `HasField` bound.
 
 **The mutable accessor is always generated.** The derive does not offer a read-only mode. Limit
 mutation through the access bounds and references supplied to implementations.
+
+**A struct that implements `Deref` cannot derive a field its target also has.** The `Deref` blanket
+implementation already gives the struct every field of its target, so a derived accessor for the same
+name overlaps it:
+
+```rust
+use core::ops::Deref;
+
+#[derive(HasField)]
+pub struct Inner {
+    pub name: String,
+}
+
+#[derive(HasField)]
+pub struct Outer {
+    pub inner: Inner,
+    pub name: String,
+}
+
+impl Deref for Outer {
+    type Target = Inner;
+
+    fn deref(&self) -> &Inner {
+        &self.inner
+    }
+}
+```
+
+```text
+error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` for type `Outer`
+```
+
+Fields whose names the target lacks derive without trouble. Rename the colliding field, drop the
+`Deref` implementation, or write the needed accessors by hand.
 
 **It does not accept an enum.** `#[derive(HasField)]` parses a struct. The plural
 [`#[derive(HasFields)]`](./derive_has_fields.md) is the one that takes both, and the near-identical names

@@ -89,7 +89,8 @@ single-field requirement.
 representation and whole-value conversions are needed. `ExtractField` also accepts a variantless
 enum; its companion enums do not need field-state parameters.
 
-The derive parses an enum, so applying it to a struct fails at parse time. The struct analogue is
+The derive parses an enum, so applying it to a struct fails at parse time with ``expected `enum` ``. The
+struct analogue is
 [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ### What it does *not* generate
@@ -113,7 +114,8 @@ extractor back into the original enum.
 
 ## Examples
 
-`finalize_extract_result` returns the last payload once the chain has ruled out every other variant:
+`finalize_extract_result` returns the last payload once the chain has ruled out every other variant.
+`Circle` and `Rectangle` are payload structs with `radius`, and `width` and `height`, fields:
 
 ```rust
 use cgp::core::field::traits::FinalizeExtractResult;
@@ -307,12 +309,38 @@ rename the conflicting variant. [`HasFields`](./derive_has_fields.md) also reser
 enum does not implement them for the companion. Use `.ok()`, `.is_ok()`, or a `match` to inspect the
 result instead of printing or comparing the whole `Result<Payload, Remainder>`.
 
+**A variant attribute that belongs to another derive breaks the build.** The companion enums copy each
+variant's attributes but none of the enum's derives, so a helper attribute such as `serde`'s lands on an
+enum that does not derive `Serialize`:
+
+```rust
+#[derive(Serialize, ExtractField)]
+pub enum Shape {
+    #[serde(rename = "circle")]
+    Circle(Circle),
+}
+```
+
+```text
+error: cannot find attribute `serde` in this scope
+```
+
+An enum therefore cannot combine `ExtractField`, or [`CgpVariant`](./derive_cgp_variant.md) or
+[`CgpData`](./derive_cgp_data.md), with a derive whose variant helper attributes it uses.
+
 **`FinalizeExtractResult` is not in the prelude.** Import it from `cgp::core::field::traits` to call
 `finalize_extract_result`.
 
 **Finalizing early does not compile, and the error names the companion.** The all-void impl does not apply
-while any marker is still `IsPresent`, so the compiler reports a missing method. Read the companion type in
-the message to see which variants are still possible.
+while any marker is still `IsPresent`, so the method's trait bounds fail. After only the `Circle` attempt
+in the example above:
+
+```text
+error[E0599]: the method `finalize_extract_result` exists for enum `Result<Circle, __PartialShape<IsVoid, IsPresent>>`, but its trait bounds were not satisfied
+```
+
+Read the companion type in the message to see which variants are still possible: here `Rectangle`,
+whose marker is still `IsPresent`.
 
 **Every variant must be ruled out before finalizing the remainder.** Extraction order is unrestricted
 because each step changes only its own variant's marker.

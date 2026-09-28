@@ -16,7 +16,8 @@ derives once you are familiar with the essentials.
 
 ## Reading a value from a context
 
-Use `HasField` to access individual fields and `HasFields` to process a type's whole structure.
+Use `HasField` to access individual fields and `HasFields` to process a type's whole structure. The
+context is the type the method runs on, which supplies the values it needs as its fields.
 
 [`#[derive(HasField)]`](./derive_has_field.md) lets an implementation read a struct field by a
 type-level tag. The implementation declares the field it needs as a trait bound. An
@@ -56,9 +57,21 @@ The individual derives provide these operations:
 `BuildField` accepts structs. `ExtractField` and `FromVariant` accept enums and are commonly derived
 together.
 
-## One restriction to know before you reach for them
+## Restrictions to know before you reach for them
 
 The enum constructor and extractor derives require every variant to carry exactly one unnamed
 payload. This restriction applies to `FromVariant`, `ExtractField`, `CgpData`, and `CgpVariant`;
 individual variants cannot opt out. `HasFields` accepts every variant shape and provides a structural
 representation with whole-value conversions, so it can be used with enums that mix variant shapes.
+
+The builder and extractor derives also generate companion types that copy each field's or variant's
+attributes but not the original type's derives. A helper attribute that belongs to another derive,
+such as `serde`'s `#[serde(rename = "…")]`, therefore fails to compile on a type that also derives
+`BuildField`, `ExtractField`, or one of the umbrella derives. The
+[`BuildField`](./derive_build_field.md#common-mistakes) page shows the error.
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

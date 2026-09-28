@@ -70,8 +70,8 @@ pub enum Shape {
 representation and whole-value conversions are needed. `FromVariant` accepts a variantless enum but
 does not emit any implementations for it.
 
-The derive parses an enum, so applying it to a struct fails at parse time. The struct analogue, setting one
-field of a value being assembled, is [`#[derive(BuildField)]`](./derive_build_field.md).
+The derive parses an enum, so applying it to a struct fails at parse time with ``expected `enum` ``. The
+struct analogue, setting one field of a value being assembled, is [`#[derive(BuildField)]`](./derive_build_field.md).
 
 ### What it does *not* generate
 
@@ -112,8 +112,10 @@ The `FromVariant<Tag>` bound connects each tag to its payload type and construct
 interface, `Shape::Circle` and `Shape::Rectangle` remain separate expressions with different argument
 types.
 
-Upcasting lets an implementation construct a small local enum and convert it into a larger one.
-The implementation only needs to know the variants Each generated implementation selects its constructor through the variant-name tag:
+Upcasting lets an implementation construct a small local enum and convert it into a larger one, so the
+implementation only needs to know the variants it constructs. Here both enums derive
+[`CgpData`](./derive_cgp_data.md), which supplies the constructors and the representation the cast
+reads:
 
 ```rust
 use cgp::core::field::impls::CanUpcast;   // not in the prelude
@@ -189,9 +191,21 @@ underlines that variant rather than the whole `#[derive(FromVariant)]`.
 **Every variant must carry exactly one unnamed payload.** Individual variants cannot opt out.
 [`HasFields`](./derive_has_fields.md) accepts all variant shapes when only a representation is needed.
 
-**Specify the tag when the payload does not determine the variant.** In
-`Shape::from_variant(PhantomData::<Symbol!("Circle")>, value)`, the type argument selects `Circle`.
-The payload type alone cannot distinguish variants that share that type.
+**Specify the tag whenever the enum has more than one variant.** In
+`Shape::from_variant(PhantomData::<Symbol!("Circle")>, value)`, the type argument selects `Circle`. The
+payload type does not select the implementation, even when every variant's payload type is different,
+so an untagged call fails:
+
+```text
+error[E0283]: type annotations needed
+   |
+   |     let _ = Shape::from_variant(PhantomData, Circle { radius: 2.0 });
+   |             -----               ^^^^^^^^^^^ cannot infer type of the type parameter `T` declared on the struct `PhantomData`
+   |             |
+   |             type must be known at this point
+```
+
+Only an enum with a single variant lets the compiler infer the tag.
 
 **Variants sharing a payload type have distinct tags.** A tag that does not match an implemented
 variant produces an unsatisfied `FromVariant` bound.

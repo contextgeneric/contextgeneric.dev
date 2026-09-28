@@ -19,7 +19,8 @@ per-field access, a representation of the whole struct, and a builder that fills
 Generic code can use these operations without naming the concrete struct.
 
 `CgpRecord` accepts only structs. It produces the same output as
-[`CgpData`](./derive_cgp_data.md) on a struct, but rejects an enum at parse time.
+[`CgpData`](./derive_cgp_data.md) on a struct, but rejects an enum at parse time with
+``expected `struct` ``.
 
 ## Usage
 
@@ -35,8 +36,9 @@ pub struct Person {
 }
 ```
 
-Every struct shape is accepted. Named fields use [`Symbol!`](../macros/symbol.md) tags, and tuple
-fields use [`Index<N>`](../types/index_type.md) tags. A fieldless struct produces a companion without
+Every struct shape is accepted. Named fields use [`Symbol!`](../macros/symbol.md) tags, a
+raw-identifier field such as `r#type` is tagged by its plain name `Symbol!("type")`, and tuple fields
+use [`Index<N>`](../types/index_type.md) tags. A fieldless struct produces a companion without
 field-state parameters, so its `builder()` can be finalized immediately.
 
 Generic parameters, lifetimes, and a `where` clause are carried onto everything generated, including
@@ -180,6 +182,11 @@ which this derive inherits.
 
 **A fieldless struct has an immediately finalizable builder.** Its companion does not need field-state
 parameters.
+
+**A field attribute that belongs to another derive breaks the build.** The builder's companion copies
+each field's attributes, so a `serde` helper attribute beside `#[derive(Serialize, CgpRecord)]` lands on a
+struct that does not derive `Serialize` and fails with ``cannot find attribute `serde` in this scope``.
+[`#[derive(BuildField)]`](./derive_build_field.md#common-mistakes) shows the case.
 
 **`CgpRecord` rejects enums.** Use [`CgpVariant`](./derive_cgp_variant.md) or
 [`CgpData`](./derive_cgp_data.md) for an enum.

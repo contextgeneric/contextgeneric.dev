@@ -8,7 +8,7 @@
 /// ## Overview
 ///
 /// The opening claim: `from_variant` with a tag is the same construction as naming the variant.
-pub mod what_its_for {
+pub mod overview {
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]
@@ -39,7 +39,7 @@ pub mod what_its_for {
 /// ## Usage
 ///
 /// The accepted enum, a generic one, and the variantless enum the page says produces no impls.
-pub mod using_it {
+pub mod usage {
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]

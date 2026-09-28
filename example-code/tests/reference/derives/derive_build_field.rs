@@ -7,8 +7,8 @@
 
 /// ## Overview
 ///
-/// The opening builder chain. The page shows it against `Person`, which it declares under *Using it*.
-pub mod what_its_for {
+/// The opening builder chain. The page shows it against `Person`, which it declares under *Usage*.
+pub mod overview {
     use cgp::prelude::*;
 
     #[derive(BuildField, Debug, Eq, PartialEq)]
@@ -61,7 +61,7 @@ pub mod rejected_build_from_without_has_fields {}
 ///
 /// The shapes the page lists: a named-field struct, a tuple struct keyed by position, and the
 /// fieldless struct whose `builder()` is immediately finalizable.
-pub mod using_it {
+pub mod usage {
     use cgp::prelude::*;
 
     #[derive(BuildField, Debug, Eq, PartialEq)]
@@ -198,5 +198,35 @@ pub mod examples {
                 last_name: "Anderson".to_owned(),
             }
         );
+    }
+}
+
+/// ## Common Mistakes
+///
+/// The derives that emit no companion type leave field helper attributes alone, so `serde`'s
+/// `rename` coexists with them. The companion-emitting case is a trybuild fixture.
+pub mod common_mistakes {
+    use cgp::prelude::*;
+    use serde::Serialize;
+
+    #[derive(Serialize, HasField, HasFields)]
+    pub struct Person {
+        #[serde(rename = "name")]
+        pub first_name: String,
+    }
+
+    #[derive(Serialize, FromVariant)]
+    pub enum Shape {
+        #[serde(rename = "circle")]
+        Circle(f64),
+    }
+
+    #[test]
+    fn test_helper_attributes_survive_the_narrow_derives() {
+        let person = Person {
+            first_name: "Ada".to_owned(),
+        };
+        assert_eq!(person.get_field(PhantomData::<Symbol!("first_name")>), "Ada");
+        let _ = Shape::from_variant(PhantomData::<Symbol!("Circle")>, 1.0);
     }
 }

@@ -1,0 +1,9 @@
+error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` for type `Outer`
+  --> tests/compile_fail/reference/derives/derive_has_field_common_mistakes_deref_collision.rs:14:9
+   |
+14 |     pub name: String,
+   |         ^^^^
+   |
+   = note: conflicting implementation in crate `cgp_field`:
+           - impl<Context, Tag, Target, Value> cgp::prelude::HasField<Tag> for Context
+             where <Context as Deref>::Target == Target, <Target as cgp::prelude::HasField<Tag>>::Value == Value, Context: cgp::cgp_core::cgp_field::traits::has_field::DerefMap, Target: cgp::prelude::HasField<Tag>;

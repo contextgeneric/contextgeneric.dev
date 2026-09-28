@@ -1,0 +1,5 @@
+error: expected `enum`
+ --> tests/compile_fail/reference/derives/derive_cgp_variant_common_mistakes_struct.rs:5:5
+  |
+5 | pub struct Circle {
+  |     ^^^^^^

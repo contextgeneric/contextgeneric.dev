@@ -8,7 +8,7 @@
 /// ## Overview
 ///
 /// The opening extraction, and the payload types the page names without declaring.
-pub mod what_its_for {
+pub mod overview {
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]
@@ -51,7 +51,7 @@ pub mod what_its_for {
 ///
 /// The accepted enum, the payload-struct rewrite the page recommends — including for a case that
 /// carries nothing — and the variantless enum the page says degenerates.
-pub mod using_it {
+pub mod usage {
     use cgp::prelude::*;
 
     #[derive(Debug, PartialEq)]
@@ -88,6 +88,17 @@ pub mod using_it {
             .ok();
 
         assert_eq!(extracted, Some(Empty));
+    }
+
+    /// `from_extractor` turns an all-present owned extractor back into the enum.
+    #[test]
+    fn test_an_extractor_converts_back() {
+        let extractor = Shape::Circle(Circle { radius: 1.0 }).to_extractor();
+
+        assert_eq!(
+            Shape::from_extractor(extractor),
+            Shape::Circle(Circle { radius: 1.0 })
+        );
     }
 
     #[test]

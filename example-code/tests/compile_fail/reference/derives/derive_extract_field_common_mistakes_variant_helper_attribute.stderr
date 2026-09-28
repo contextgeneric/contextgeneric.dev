@@ -1,0 +1,12 @@
+error: cannot find attribute `serde` in this scope
+  --> tests/compile_fail/reference/derives/derive_extract_field_common_mistakes_variant_helper_attribute.rs:12:7
+   |
+12 |     #[serde(rename = "circle")]
+   |       ^^^^^
+   |
+   = note: `serde` is in scope, but it is a crate, not an attribute
+help: `serde` is an attribute that can be used by the derive macros `Deserialize` and `Serialize`, you might be missing a `derive` attribute
+   |
+11 + #[derive(Deserialize, Serialize)]
+12 | pub enum Shape {
+   |

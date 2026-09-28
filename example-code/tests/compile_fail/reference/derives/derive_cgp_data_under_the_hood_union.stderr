@@ -1,0 +1,8 @@
+error: expect body to be either a struct or enum
+ --> tests/compile_fail/reference/derives/derive_cgp_data_under_the_hood_union.rs:5:1
+  |
+5 | / pub union Bits {
+6 | |     small: u8,
+7 | |     large: u16,
+8 | | }
+  | |_^

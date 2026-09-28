@@ -20,7 +20,8 @@ individually while tracking which remain possible. Generic code can use these op
 naming the concrete enum.
 
 `CgpVariant` accepts only enums. It produces the same output as
-[`CgpData`](./derive_cgp_data.md) on an enum, but rejects a struct at parse time.
+[`CgpData`](./derive_cgp_data.md) on an enum, but rejects a struct at parse time with
+``expected `enum` ``.
 
 ## Usage
 
@@ -223,6 +224,12 @@ original enum does not implement them for the extraction remainder. Use `.ok()`,
 variant operations have been mixed.
 
 **A variantless enum is accepted.** It produces empty companion enums without field-state parameters.
+
+**A variant attribute that belongs to another derive breaks the build.** The extractor's companion
+enums copy each variant's attributes, so a `serde` helper attribute beside
+`#[derive(Serialize, CgpVariant)]` lands on an enum that does not derive `Serialize` and fails with
+``cannot find attribute `serde` in this scope``.
+[`#[derive(ExtractField)]`](./derive_extract_field.md#common-mistakes) shows the case.
 
 **`CgpVariant` rejects structs.** Use [`CgpRecord`](./derive_cgp_record.md) or
 [`CgpData`](./derive_cgp_data.md) for a struct.

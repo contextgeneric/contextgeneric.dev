@@ -58,7 +58,8 @@ carried onto the companion type and every generated impl.
 A fieldless struct produces a builder that can be finalized immediately. Its companion does not need
 field-state parameters because it has nothing to track.
 
-The derive parses a struct, so applying it to an enum fails at parse time. The enum counterparts are
+The derive parses a struct, so applying it to an enum fails at parse time with ``expected `struct` ``.
+The enum counterparts are
 [`#[derive(ExtractField)]`](./derive_extract_field.md) for taking one apart and
 [`#[derive(FromVariant)]`](./derive_from_variant.md) for constructing one.
 
@@ -288,6 +289,26 @@ missing field.
 **The companion does not inherit `Debug`, `Clone`, or `PartialEq`.** The derive clears the original
 attributes. Read a set field through the companion's `HasField` implementation when inspecting a
 partial value.
+
+**A field attribute that belongs to another derive breaks the build.** The companion copies each
+field's attributes but none of the struct's derives, so a helper attribute such as `serde`'s lands on
+a struct that does not derive `Serialize`:
+
+```rust
+#[derive(Serialize, BuildField)]
+pub struct Person {
+    #[serde(rename = "name")]
+    pub first_name: String,
+}
+```
+
+```text
+error: cannot find attribute `serde` in this scope
+```
+
+A struct therefore cannot combine `BuildField`, or [`CgpRecord`](./derive_cgp_record.md) or
+[`CgpData`](./derive_cgp_data.md), with a derive whose field helper attributes it uses. Plain field
+attributes such as `#[doc]` and `#[allow]` are harmless.
 
 **`build_from` needs `HasFields` on its source in addition to `BuildField`.** Deriving only
 `BuildField` on both structs leaves the source without the field list that the conversion traverses.

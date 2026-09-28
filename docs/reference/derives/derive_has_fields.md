@@ -54,8 +54,8 @@ pub enum Shape {
 
 For a struct the shape is a product; for an enum it is a sum. Naming follows the same rules everywhere: a
 named field or a variant is keyed by [`Symbol!`](../macros/symbol.md), a positional field by
-[`Index<N>`](../types/index_type.md). Applying the derive to anything other than a struct or an enum is a
-compile error.
+[`Index<N>`](../types/index_type.md). Applying the derive to anything other than a struct or an enum, such
+as a union, fails with `expect body to be either a struct or enum`.
 
 ### Struct shapes
 
@@ -296,7 +296,8 @@ code written against a literal `Cons` chain does not.
 
 **Variants named `Fields` or `FieldsRef` make generated paths ambiguous.** The implementations use
 `Self::Fields` and `Self::FieldsRef`, which conflict with variants of those names. The compiler
-reports `ambiguous associated item` at the derive and points to the offending variant in a note.
+reports `ambiguous associated item`, a lint that denies the build by default, at the derive, and points
+to the offending variant in a note.
 Rename that variant. The [extractor](./derive_extract_field.md) and
 [constructor](./derive_from_variant.md) derives reserve additional names, so check their restrictions
 when deriving the full family.

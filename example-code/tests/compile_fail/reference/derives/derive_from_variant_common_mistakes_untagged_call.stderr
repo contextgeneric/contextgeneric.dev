@@ -1,0 +1,19 @@
+error[E0283]: type annotations needed
+  --> tests/compile_fail/reference/derives/derive_from_variant_common_mistakes_untagged_call.rs:22:33
+   |
+22 |     let _ = Shape::from_variant(PhantomData, Circle { radius: 2.0 });
+   |             -----               ^^^^^^^^^^^ cannot infer type of the type parameter `T` declared on the struct `PhantomData`
+   |             |
+   |             type must be known at this point
+   |
+note: multiple `impl`s satisfying `Shape: cgp::prelude::FromVariant<_>` found
+  --> tests/compile_fail/reference/derives/derive_from_variant_common_mistakes_untagged_call.rs:14:5
+   |
+14 |     Circle(Circle),
+   |     ^^^^^^
+15 |     Rectangle(Rectangle),
+   |     ^^^^^^^^^
+help: consider specifying a concrete type for the type parameter `T`
+   |
+22 |     let _ = Shape::from_variant(PhantomData::</* Type */>, Circle { radius: 2.0 });
+   |                                            ++++++++++++++

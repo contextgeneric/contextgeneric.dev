@@ -7,8 +7,8 @@
 /// ## Usage
 ///
 /// The two inputs the page opens on, the shape-specific faces, and the shapes the page says are
-/// accepted. The one it says is rejected is a doctest in the module below this one.
-pub mod using_it {
+/// accepted. The one it says is rejected is a trybuild fixture, named in the module below this one.
+pub mod usage {
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]

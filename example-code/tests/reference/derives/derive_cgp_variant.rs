@@ -5,6 +5,44 @@
 
 /// ## Usage
 ///
+/// The accepted rewrite the page recommends, with a payload struct that derives `CgpRecord`, a
+/// generic enum, and the variantless enum it says is accepted.
+pub mod usage {
+    use cgp::prelude::*;
+
+    #[derive(CgpRecord, Debug, PartialEq)]
+    pub struct Circle {
+        pub radius: f64,
+    }
+
+    #[derive(CgpVariant, Debug, PartialEq)]
+    pub enum Shape {
+        Circle(Circle),
+    }
+
+    #[derive(CgpVariant)]
+    pub enum Generic<T> {
+        Item(T),
+    }
+
+    #[derive(CgpVariant)]
+    pub enum Never {}
+
+    #[test]
+    fn test_the_payload_struct_is_a_record_too() {
+        let circle: Circle = Circle::builder()
+            .build_field(PhantomData::<Symbol!("radius")>, 2.0)
+            .finalize_build();
+        let shape = Shape::from_variant(PhantomData::<Symbol!("Circle")>, circle);
+
+        assert_eq!(shape, Shape::Circle(Circle { radius: 2.0 }));
+        assert!(Generic::Item(1u8)
+            .to_extractor()
+            .extract_field(PhantomData::<Symbol!("Item")>)
+            .is_ok());
+    }
+}
+
 /// The page's rejected snippet: a struct-style variant has no single payload type, so the derive
 /// fails. Every variant must carry exactly one unnamed payload, with no per-variant opt-out.
 ///

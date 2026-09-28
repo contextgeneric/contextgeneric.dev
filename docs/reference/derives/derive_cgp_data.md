@@ -144,7 +144,9 @@ implementations. Derive only the parts you need when the full set of operations 
 [`CgpVariant`](./derive_cgp_variant.md#under-the-hood) call those paths directly, which is why their
 output matches. Their pages show the generated implementations.
 
-All three derives reject unions. The family models structs and enums.
+All three derives reject unions, since the family models structs and enums. `CgpData` reports
+`expect body to be either a struct or enum`, while `CgpRecord` and `CgpVariant` report
+``expected `struct` `` and ``expected `enum` `` for any input of the wrong kind.
 
 ## Common Mistakes
 
@@ -157,6 +159,17 @@ The following restrictions apply when choosing the combined derive.
 **Every enum variant needs exactly one unnamed payload.** Unit, multi-field, and struct-style variants
 are rejected, and individual variants cannot opt out. [`HasFields`](./derive_has_fields.md) accepts
 all of these shapes when only a representation and whole-value conversions are needed.
+
+**Seven variant names are reserved on an enum.** `Fields`, `FieldsRef`, `Value`, `Remainder`,
+`Extractor`, `ExtractorRef`, and `ExtractorMut` make a generated path ambiguous. The
+[variant page](./derive_cgp_variant.md#common-mistakes) explains which collisions name the variant.
+
+**A field attribute that belongs to another derive breaks the build.** The builder's companion copies
+each field's attributes, so a `serde` helper attribute beside `#[derive(Serialize, CgpData)]` lands on a
+struct that does not derive `Serialize` and fails with ``cannot find attribute `serde` in this scope``.
+The extractor's companion enums copy variant attributes the same way, so a `serde` helper on a variant
+fails too. [`#[derive(BuildField)]`](./derive_build_field.md#common-mistakes) and
+[`#[derive(ExtractField)]`](./derive_extract_field.md#common-mistakes) show the two cases.
 
 **Record and variant absence use different markers.** `IsNothing` represents a missing record field;
 `IsVoid` represents a ruled-out variant. An error mentioning the wrong marker usually means record

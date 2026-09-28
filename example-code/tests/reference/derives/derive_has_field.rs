@@ -9,7 +9,7 @@
 ///
 /// The page opens on the bound an implementation writes. The component and the context are shown
 /// further down under *Examples*; they are declared here so the opening bound has something to hold.
-pub mod what_its_for {
+pub mod overview {
     use cgp::prelude::*;
 
     #[derive(HasField)]
@@ -40,7 +40,7 @@ pub mod what_its_for {
 /// The four struct shapes the page lists, in the order it lists them: named fields, a raw-identifier
 /// field, tuple fields, a unit struct, and a generic struct. The unit struct is the one whose whole
 /// point is that it compiles and emits nothing.
-pub mod using_it {
+pub mod usage {
     use cgp::prelude::*;
 
     #[derive(HasField)]
@@ -63,6 +63,21 @@ pub mod using_it {
     #[derive(HasField)]
     pub struct Wrapper<T> {
         pub value: T,
+    }
+
+    /// The *Under the hood* claim that a struct lifetime carries through, with a borrowed field type
+    /// kept verbatim as `Value`.
+    #[derive(HasField)]
+    pub struct Borrowed<'a> {
+        pub name: &'a str,
+    }
+
+    #[test]
+    fn test_a_borrowed_field_keeps_its_type() {
+        let borrowed = Borrowed { name: "Alice" };
+
+        let name: &&str = borrowed.get_field(PhantomData::<Symbol!("name")>);
+        assert_eq!(*name, "Alice");
     }
 
     #[test]

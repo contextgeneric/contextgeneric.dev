@@ -8,7 +8,7 @@
 /// ## Overview
 ///
 /// The `Fields` type the page opens on, checked by naming it explicitly.
-pub mod what_its_for {
+pub mod overview {
     use cgp::prelude::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
@@ -42,7 +42,7 @@ pub mod what_its_for {
 ///
 /// Every struct and enum shape the page lists. The four struct shapes come first, then the four
 /// variant shapes in the single enum the page uses for them.
-pub mod using_it {
+pub mod usage {
     use cgp::prelude::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
@@ -64,6 +64,21 @@ pub mod using_it {
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Generic<T> {
         pub value: T,
+    }
+
+    /// The borrowed view layers its own `'__a` borrow on a borrowed field type.
+    #[derive(HasFields)]
+    pub struct Borrowed<'a, Name> {
+        pub name: &'a Name,
+    }
+
+    pub fn assert_borrowed_fields<'a, 'b, Name>(
+        fields: <Borrowed<'a, Name> as HasFieldsRef>::FieldsRef<'b>,
+    ) -> Product![Field<Symbol!("name"), &'b &'a Name>]
+    where
+        Borrowed<'a, Name>: 'b,
+    {
+        fields
     }
 
     /// The four variant shapes, all accepted by this derive and by no other in the family.
@@ -170,6 +185,18 @@ pub mod examples {
         Rectangle(Rectangle),
     }
 
+    pub fn assert_config_fields(
+        fields: <Config as HasFields>::Fields,
+    ) -> Product![Field<Symbol!("host"), String>, Field<Symbol!("port"), u16>] {
+        fields
+    }
+
+    pub fn assert_shape_fields(
+        fields: <Shape as HasFields>::Fields,
+    ) -> Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Rectangle>] {
+        fields
+    }
+
     /// The page's closing claim: generic code bounds on the shape rather than on the type, so one
     /// function applies to any record that derives it. The page does not show a recursion, so this
     /// stops at naming the shape.
@@ -201,5 +228,60 @@ pub mod examples {
         let shape = Shape::Circle(Circle { radius: 2.0 });
 
         assert_eq!(Shape::from_fields(shape.clone().to_fields()), shape);
+    }
+}
+
+/// ## Under the hood
+///
+/// The listings' inputs, for `cargo cgp expand`, and the variantless enum whose shape is `Void`.
+pub mod under_the_hood {
+    use cgp::prelude::*;
+
+    #[derive(HasFields)]
+    pub struct Person {
+        pub name: String,
+        pub age: u8,
+    }
+
+    #[derive(HasFields)]
+    pub struct Unit;
+
+    #[derive(HasFields)]
+    pub enum Never {}
+
+    pub fn assert_never_fields(fields: <Never as HasFields>::Fields) -> Void {
+        fields
+    }
+}
+
+/// ## Common Mistakes
+///
+/// Field order is part of the type: two structs with the same fields in different orders have
+/// different shapes. The reserved variant name is a trybuild fixture.
+pub mod common_mistakes {
+    use cgp::prelude::*;
+
+    #[derive(HasFields)]
+    pub struct NameFirst {
+        pub name: String,
+        pub age: u8,
+    }
+
+    #[derive(HasFields)]
+    pub struct AgeFirst {
+        pub age: u8,
+        pub name: String,
+    }
+
+    pub fn name_first_shape(
+        fields: <NameFirst as HasFields>::Fields,
+    ) -> Product![Field<Symbol!("name"), String>, Field<Symbol!("age"), u8>] {
+        fields
+    }
+
+    pub fn age_first_shape(
+        fields: <AgeFirst as HasFields>::Fields,
+    ) -> Product![Field<Symbol!("age"), u8>, Field<Symbol!("name"), String>] {
+        fields
     }
 }

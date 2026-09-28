@@ -1,0 +1,8 @@
+error: cannot find attribute `serde` in this scope
+  --> tests/compile_fail/reference/derives/derive_build_field_common_mistakes_field_helper_attribute.rs:10:7
+   |
+10 |     #[serde(rename = "name")]
+   |       ^^^^^
+   |
+   = note: `serde` is an attribute that can be used by the derive macros `Deserialize` and `Serialize`, you might be missing a `derive` attribute
+   = note: `serde` is in scope, but it is a crate, not an attribute
