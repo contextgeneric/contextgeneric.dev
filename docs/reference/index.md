@@ -242,9 +242,14 @@ of the thing it belongs to. If you arrived knowing one of these names, this is w
 | `Symbol` (the type, not the `Symbol!` macro) | [`Chars`](./types/chars.md) |
 | `IdentMonadic`, `OkMonadic`, `ErrMonadic`, `OkMonadicTrans`, `ErrMonadicTrans` | [Monad providers](./providers/monad/index.md) |
 | `UseDelegatedType`, `WithDelegatedType` | [`UseDelegatedType`](./providers/use_delegated_type.md) and [`WithProvider`](./providers/with_provider.md) |
-| `MatchWithHandlersRef`, `MatchFirstWithHandlers`, and the other borrowed and first-argument matcher forms | the matcher page they vary, under [Dispatch combinators](./providers/dispatch/index.md) |
+| `MatchWithHandlersRef`, `MatchWithHandlersMut` | [`MatchWithHandlers`](./providers/dispatch/match_with_handlers.md) |
+| `MatchFirstWithHandlersRef`, `MatchFirstWithHandlersMut`, and the `MatchFirstWithValueHandlers` and `MatchFirstWithFieldHandlers` forms | [`MatchFirstWithHandlers`](./providers/dispatch/match_first_with_handlers.md) |
+| `MatchWithValueHandlersRef`, `MatchWithValueHandlersMut` | [`MatchWithValueHandlers`](./providers/dispatch/match_with_value_handlers.md) |
+| `MatchWithFieldHandlersRef` | [`MatchWithFieldHandlers`](./providers/dispatch/match_with_field_handlers.md) |
 | `ExtractFirstFieldAndHandle`, `HandleFirstFieldValue` | [`ExtractFieldAndHandle`](./providers/dispatch/extract_field_and_handle.md), [`HandleFieldValue`](./providers/dispatch/handle_field_value.md) |
-| `DispatchMatchers`, `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler` | [Dispatch combinators](./providers/dispatch/index.md) |
+| `DispatchMatchers` | [`MatchWithHandlers`](./providers/dispatch/match_with_handlers.md) |
+| `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler`, `MapExtractFieldAndHandle` | [`MatchWithFieldHandlers`](./providers/dispatch/match_with_field_handlers.md) |
+| `ToBuildAndMergeHandler` | [`BuildAndMergeOutputs`](./providers/dispatch/build_and_merge_outputs.md) |
 | `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/type-level/map_type.md) |
 | `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/type-level/map_type_ref.md) |
 | `product!` (the value-level form) | [`Product!`](./macros/product.md) |

@@ -43,7 +43,8 @@ delegate_components! {
 Two borrowed forms take the same list and match without moving the value:
 `MatchWithHandlersRef<Handlers>` over `&Input` and `MatchWithHandlersMut<Handlers>` over
 `&mut Input`. Their adapters extract a borrowed payload, so each payload handler computes over
-`&Circle` or `&mut Circle`, and the check names the borrowed input:
+`&Circle` or `&mut Circle`, and the check names the borrowed input with a [generic parameter
+list](../../macros/check_components.md#components-with-generic-parameters) of its own:
 
 ```rust
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlersRef};
@@ -154,8 +155,8 @@ map to handlers in a way the enum's field list cannot generate. When every paylo
 provider, [`MatchWithValueHandlers`](match_with_value_handlers.md) builds this list from the enum
 and is shorter. When the handlers also take extra arguments, use
 [`MatchFirstWithHandlers`](match_first_with_handlers.md). And when the per-variant handlers return
-`Result`, [`TryPromote`](../handler/try_promote.md) turns the matcher's `Result` output into a
-`TryComputer`.
+`Result` in the context's error type, [`TryPromote`](../handler/try_promote.md) turns the matcher's
+`Result` output into a `TryComputer`.
 
 ## Under the hood
 

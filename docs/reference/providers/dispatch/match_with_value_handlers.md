@@ -14,7 +14,7 @@ as a bare value.
 
 `MatchWithValueHandlers<Provider>` is the matcher for the common case, where every variant's
 payload goes to one provider. Rather than a spelled-out list, it builds one adapter per variant from
-the input enum's own field list, so adding a variant needs no change to the wiring, and it hands
+the input enum's own field list, so adding a variant needs no new arm, and it hands
 each payload to `Provider` as a bare value on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. That
 makes it the form for payload handlers that are ordinary computers over the payload type, such as
@@ -45,9 +45,9 @@ segment matches any code, so the second selects by the input type. A named provi
 per-type entries: `ComputerComponent: MatchWithValueHandlers<ComputeArea>` sends every payload
 straight to `ComputeArea`.
 
-Two borrowed forms match without moving the value, and each answers two components.
-`MatchWithValueHandlersRef<Provider>` serves `ComputerComponent` over `&Input` with a provider over
-borrowed payloads, and `ComputerRefComponent` over `Input` with a
+The borrowed form `MatchWithValueHandlersRef<Provider>` matches without moving the value and answers
+two components. It serves `ComputerComponent` over `&Input` with a provider over borrowed payloads,
+and `ComputerRefComponent` over `Input` with a
 [`ComputerRef`](../../components/handler/computer_ref.md) provider over the payloads:
 
 ```rust

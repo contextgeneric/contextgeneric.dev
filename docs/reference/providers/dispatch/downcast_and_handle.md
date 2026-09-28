@@ -166,9 +166,9 @@ where
 }
 ```
 
-`CanDowncastFields` works on the extractor, not the enum, which is why the arm fits in a matcher's
-loop. The `AsyncComputer` impl matches on the downcast and awaits `Provider::compute_async` on a
-hit.
+`CanDowncastFields` accepts any source that can extract each of `Inner`'s variants, the extractor
+included, which is why the arm fits in a matcher's loop. The `AsyncComputer` impl matches on the
+downcast and awaits `Provider::compute_async` on a hit.
 
 ## Related constructs
 

@@ -137,7 +137,7 @@ the `Rectangle` payload beside its scale factor. `App` is an
 **Reach for `MatchFirstWithHandlers` when every per-variant handler needs the same extra
 arguments.** When the handlers need only the payload, [`MatchWithHandlers`](match_with_handlers.md)
 is simpler. When every payload goes to one provider, the convenience aliases build the list from the
-enum: `MatchFirstWithValueHandlers<ScaledArea>` answers the example above on its own, and
+enum: `MatchFirstWithValueHandlers<ScaledArea>` answers the example above without the list, and
 `MatchFirstWithFieldHandlers` keeps each payload tagged. They come in the same three input modes as
 their plain counterparts, [`MatchWithValueHandlers`](match_with_value_handlers.md) and
 [`MatchWithFieldHandlers`](match_with_field_handlers.md). The value forms are in the prelude; the
