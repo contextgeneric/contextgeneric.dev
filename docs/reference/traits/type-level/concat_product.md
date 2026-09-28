@@ -11,9 +11,9 @@ Splicing one type-level product list onto the end of another.
 
 ## Overview
 
-Merging two records means merging their shapes, and the shapes are type-level lists, a
-[`Product!`](../../macros/product.md) of named fields each. `ConcatProduct<Items>` names the list you get by
-following one product with another.
+Describing the result of combining two records means naming their combined shape, and the shapes are
+type-level lists, a [`Product!`](../../macros/product.md) of named fields each.
+`ConcatProduct<Items>` names the list you get by following one product with another.
 
 It is the general form of [`AppendProduct`](./append_product.md): **append is the single-entry
 special case of concat**, and that is the shortest way to hold both in mind. Like append, CGP itself

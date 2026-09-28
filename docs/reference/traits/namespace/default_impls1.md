@@ -39,9 +39,8 @@ pub trait DefaultImpls1<T, Components> {
 
 `Self` is the key being looked up, the *instance* type, such as `String`. `T` is the further lookup
 type, which the attribute fills with the component name. `Components` is the table the lookup runs
-against, and `Delegate` is the resolved provider. The trait has
-neither a method nor data, so resolving a default
-projects `Delegate` from the matching impl, exactly as with
+against, and `Delegate` is the resolved provider. The trait has neither a method nor data, so
+resolving a default projects `Delegate` from the matching impl, exactly as with
 [`DelegateComponent`](../wiring/delegate_component.md).
 
 Three traits exist rather than one variadic trait because each fixes the key's arity at the type level,

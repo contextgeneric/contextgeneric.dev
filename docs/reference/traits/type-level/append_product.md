@@ -11,10 +11,10 @@ Adding one entry to the end of a type-level product list.
 
 ## Overview
 
-A struct's shape in CGP is a type-level list, a [`Product!`](../../macros/product.md) of named fields.
-Code that processes such a shape generically sometimes needs to describe a *new* shape computed from an
-old one: the shape a builder will have after one more field is set, say, or the shape a routine promises
-to return.
+A struct's shape in CGP is a type-level list, a [`Product!`](../../macros/product.md) of named
+fields. Code that processes such a shape generically sometimes needs to describe a *new* shape
+computed from an old one: the shape a routine promises to return after adding a field, say, or a
+bound relating an input shape to an output one.
 
 `AppendProduct<Item>` is that computation for a single entry. It takes a product and an item and names
 the product with that item added **at the end**.
@@ -87,8 +87,7 @@ pub fn assert_nil_base_case(
 ```
 
 `with_extra_field` is the generic form: its return type names the shape the routine promises,
-computed from its parameters. Appending onto `Nil` yields a one-element list, the recursion's base
-case.
+computed from its parameters.
 
 ## When to use it
 
@@ -145,9 +144,8 @@ unresolved-associated-type error.
 **Order is part of the type.** Appending is not commutative with prepending, and nothing reorders a list
 to make two shapes match.
 
-**A long list means a deep recursion.** This is trait resolution over the list, so a very wide struct
-costs compile time proportional to its width, one of the places CGP's compile-time cost actually comes
-from.
+**A long list means a deep recursion.** This is trait resolution over the list, so a very wide shape
+costs compile time proportional to its width, as every type-level list recursion in CGP does.
 
 ## Related constructs
 

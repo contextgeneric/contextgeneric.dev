@@ -13,12 +13,11 @@ Resolving a namespace's default provider for a component.
 
 ### Generated machinery
 
-**You do not implement `DefaultNamespace`.**
-[`cgp_namespace!`](../../macros/cgp_namespace.md) and its
-[`#[prefix(...)]`](../../attributes/prefix.md) attribute emit the impls. You name the trait in exactly
-one place, a `namespace` header inside
-[`delegate_components!`](../../macros/delegate_components.md), and this page explains what that header
-generates, including why a direct entry can fill a path the namespace leaves open but cannot replace
+**You do not implement `DefaultNamespace`.** The [`#[prefix(...)]`](../../attributes/prefix.md)
+attribute on a component emits its impls. You name the trait in two places, that attribute's
+`in DefaultNamespace` and a `namespace` header inside
+[`delegate_components!`](../../macros/delegate_components.md), and this page explains what they
+generate, including why a direct entry can fill a path the namespace leaves open but cannot replace
 one it binds.
 
 :::
@@ -33,8 +32,9 @@ defaults means asking: *for this component, what does the namespace delegate to?
 [`DefaultImpls1`](./default_impls1.md) adds one further type for a *per-type* default, and
 [`DefaultImpls2`](./default_impls2.md) does the same under a pair.
 
-**You name it in one place**: the `namespace` header of a wiring block. The macros generate the impls and
-the forwarding, so this page is mostly about reading what they generate.
+**You name it in two places**: a component's `#[prefix(@path in DefaultNamespace)]` and the
+`namespace` header of a wiring block. The macros generate the impls and the forwarding, so this page
+is mostly about reading what they generate.
 
 ## Definition
 
@@ -124,8 +124,9 @@ one for `u64`, and the check confirms it resolves.
 
 ## When to use it
 
-**Write [`cgp_namespace!`](../../macros/cgp_namespace.md) and the wiring statements; name this trait only
-where the syntax requires it.** It appears in a `namespace` header and nowhere else in ordinary code.
+**Write [`cgp_namespace!`](../../macros/cgp_namespace.md) and the wiring statements; name this trait
+only where the syntax requires it.** It appears in a `#[prefix]` attribute and a `namespace` header
+and nowhere else in ordinary code.
 
 - **Use `DefaultNamespace`** for a namespace whose defaults are per component, which is the common case
   and what [`#[prefix(...)]`](../../attributes/prefix.md) registers into.

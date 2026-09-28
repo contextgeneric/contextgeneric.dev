@@ -114,7 +114,9 @@ Because all three target `IsPresent`, applying `FillDefaults` through
 [`transform_map_fields`](./transform_map_fields.md) leaves every field present, the configuration
 [`FinalizeBuild`](../builder/finalize_build.md) accepts, so `verbose` comes out as `false`.
 
-**That is not hypothetical: it is how [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) works**, and reading it here is the shortest route to understanding that layer.
+**That is not hypothetical: it is how
+[`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) works**, and reading it here is
+the shortest route to understanding that layer.
 
 ## When to use it
 

@@ -168,10 +168,10 @@ fn transform_map_fields(context_a: ContextA) -> Self::Output {
 }
 ```
 
-The first `update_field` takes the field out, re-marking it `IsNothing` and reporting as `SourceMap`
-the marker it was in; `Transform::transform_mapped` converts the value from `SourceMap`'s storage to
-`TargetMap`'s; the second writes it back under `TargetMap`. So the result type has every field
-re-marked to `TargetMap`, with the values converted accordingly. Three things follow.
+The first `update_field` takes the field out, re-marking it `IsNothing` and reporting through its
+`Mapper` the marker it was in; `Transform::transform_mapped` converts the value from that marker's
+storage to `TargetMap`'s; the second writes it back under `TargetMap`. So the result type has every
+field re-marked to `TargetMap`, with the values converted accordingly. Three things follow.
 
 **The transform must have an impl for every source marker a field might currently be in**, or the
 walk does not resolve, which is why a transform like

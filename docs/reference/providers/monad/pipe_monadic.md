@@ -177,15 +177,16 @@ result is `ComposeHandlers<A, Bind<ComposeHandlers<B, Bind<C>>>>`, where `Bind<P
 the monad produces, such as `BindErr<IdentMonadic, P>` for `ErrMonadic`. A one-element list is its
 only provider, and an empty list builds nothing.
 
-For the fallible components `TryComputerComponent` and `HandlerComponent`, it bridges through the err
-monad. It first maps every provider to [`TryPromote`](../handler/try_promote.md), demoting fallible
-handlers to plain computers whose output is an explicit `Result`; the mapper that rewrites the whole list
-is `TryPromoteProviders`, which implements [`MapType`](../../traits/type-level/map_type.md). It then applies
-`ErrMonadic` as a transformer on top of `M`, composes the demoted list under the transformed monad, and
-wraps the composed provider back in `TryPromote` to restore the fallible interface. A `PipeMonadic` over
-fallible handlers therefore short-circuits on the context's error type in addition to whatever branching
-`M` contributes. The whole fold happens during trait resolution, so the pipeline is not a runtime
-structure.
+For the fallible components `TryComputerComponent` and `HandlerComponent`, it bridges through the
+err monad. It first maps every provider to [`TryPromote`](../handler/try_promote.md), demoting
+fallible handlers to plain computers whose output is an explicit `Result`; the mapper that rewrites
+the whole list is `TryPromoteProviders`, which implements
+[`MapType`](../../traits/type-level/map_type.md). It then applies `M` as a transformer over
+`ErrMonadic`, so the err monad handles the outer `Result` and `M` the layer inside it, composes the
+demoted list under that stack, and wraps the composed provider back in `TryPromote` to restore the
+fallible interface. A `PipeMonadic` over fallible handlers therefore short-circuits on the context's
+error type in addition to whatever branching `M` contributes. The whole fold happens during trait
+resolution, so the pipeline is not a runtime structure.
 
 ## Related constructs
 

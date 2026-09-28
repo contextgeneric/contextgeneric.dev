@@ -52,8 +52,12 @@ storage reads `M: MapType<Map<String> = String>`, and one that leaves it open is
 
 ## Usage
 
-Four markers implement it, and they are the trait's whole public surface. **Three are in the prelude;
-`IsOptional` is not.** Import it from `cgp::core::field::impls`.
+Four state markers implement it, and they are the ones a partial type is parameterized by. **Three
+are in the prelude; `IsOptional` is not.** Import it from `cgp::core::field::impls`. The library
+also implements it for two list mappers that are not field states, `TryPromoteProviders` in
+[`PipeMonadic`](../../providers/monad/pipe_monadic.md) and `ToBuildAndMergeHandler` in
+[`BuildAndMergeOutputs`](../../providers/dispatch/build_and_merge_outputs.md), which
+[`MapFields`](./map_fields.md) uses to wrap every provider in a list.
 
 ```rust
 impl MapType for IsPresent  { type Map<T> = T; }         // the field holds its value

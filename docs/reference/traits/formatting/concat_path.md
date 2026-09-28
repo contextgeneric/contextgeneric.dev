@@ -51,7 +51,7 @@ nothing runs.
 
 **`ConcatPath` is in the prelude**: `use cgp::prelude::*;` names it, which makes it the one member
 of the type-level recovery group that comes with the prelude. Its two neighbours each need a
-different one: [`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
+different import: [`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
 [`StaticFormat`](./static_format.md), defined in the same crate as this trait, from
 `cgp::core::base::traits`.
 
