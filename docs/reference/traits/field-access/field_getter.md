@@ -31,8 +31,9 @@ values it needs as its fields, decides which of its fields answers a getter. Tha
 provider-trait shape: a zero-sized provider as `Self`, and the context as an explicit type argument.
 
 `FieldGetter` is that shape, and it is the ordinary consumer and provider split applied to field
-access: you bound against [`HasField`](./has_field.md), and you wire a `FieldGetter`. Three
+access: you bound against [`HasField`](./has_field.md), and you wire a `FieldGetter`. Four library
 providers implement it. `UseField<Tag>` reads the field `Tag`;
+[`UseFieldRef`](../../providers/use_field_ref.md) reads one through `AsRef`;
 [`UseContext`](../../providers/use_context.md) reads the field named by the tag it is asked under;
 and [`ChainGetters`](../../providers/chain_getters.md) composes others to reach a nested field.
 

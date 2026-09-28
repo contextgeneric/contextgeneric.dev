@@ -93,8 +93,8 @@ The key's type decides what an entry means, and three kinds occur:
 - **Any other type**, such as a shape or a tag. The table is a dispatch map with no provider trait
   attached, as the nested tables inside [`UseDelegate`](../../providers/use_delegate.md) are.
 - **A type-level path**, a [`PathCons`](../../types/path_cons.md) list, which is how the `open`
-  statement and namespaces key their entries. A path entry is written with a generic tail, so it
-  matches every longer path beneath it, and
+  statement and namespaces key their entries. The macro emits a path entry with a generic tail, so
+  it matches every longer path beneath it, and
   [`RedirectLookup`](../../providers/redirect_lookup.md) reads it with one lookup on the whole path.
 
 ### What owns a table
