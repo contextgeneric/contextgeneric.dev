@@ -3,8 +3,8 @@
 //! `Life` is inserted by the macros into the dependency marker of a component with a lifetime, and a
 //! reader names it in one place: the `check_components!` entry for such a component. The Examples
 //! program wires and checks a borrowing getter component and calls it. The generated provider trait,
-//! which records the lifetime as `Life<'a>`, is checked with `cargo cgp expand`. The unsized-target
-//! defect the page records is a trybuild fixture under `tests/compile_fail/reference/types/`.
+//! which records the lifetime as `Life<'a>`, is checked with `cargo cgp expand`. The second
+//! Examples program wires the same component at the unsized target `str` and calls it.
 
 /// ## Examples
 pub mod examples {
@@ -57,6 +57,46 @@ pub mod examples {
     #[test]
     fn test_demo() {
         demo();
+    }
+
+    // The unsized target: the parameter tuple `(Life<'a>, str)` is unsized, and the table's
+    // forwarding impl accepts it.
+    #[cgp_impl(new GetName)]
+    #[uses(HasField<Symbol!("name"), Value = &'a str>)]
+    impl<'a> ReferenceGetter<'a, str> {
+        fn get_reference(&self) -> &'a str {
+            self.get_field(PhantomData::<Symbol!("name")>)
+        }
+    }
+
+    #[derive(HasField)]
+    pub struct Borrowed<'a> {
+        pub name: &'a str,
+    }
+
+    delegate_components! {
+        <'a> Borrowed<'a> {
+            ReferenceGetterComponent: GetName,
+        }
+    }
+
+    check_components! {
+        <'a> Borrowed<'a> {
+            ReferenceGetterComponent: (Life<'a>, str),
+        }
+    }
+
+    pub fn demo_unsized() {
+        let text = String::from("demo");
+        let borrowed = Borrowed { name: &text };
+
+        let name: &str = borrowed.get_reference();
+        assert_eq!(name, "demo");
+    }
+
+    #[test]
+    fn test_demo_unsized() {
+        demo_unsized();
     }
 }
 

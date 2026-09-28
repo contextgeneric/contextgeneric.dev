@@ -243,10 +243,7 @@ it](#when-to-use-it) explains, which is why `delegate_and_check_components!` is 
 a bundle.
 
 **A passing check does not test behavior.** It proves the wiring resolves and every dependency
-exists, not that the provider computes the right thing. The trait asks the delegate's
-`IsProviderFor` impl rather than the context's own, so a component used at an unsized type parameter
-passes it and still fails at the call; see
-[`delegate_components!`](../../macros/delegate_components.md#common-mistakes).
+exists, not that the provider computes the right thing.
 
 ## Related constructs
 

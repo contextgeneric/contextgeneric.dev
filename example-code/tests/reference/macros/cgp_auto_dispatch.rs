@@ -169,3 +169,81 @@ pub mod usage {
         assert_eq!(Token::Word(Word("w".to_owned())).render('#'), "#w");
     }
 }
+
+/// ## Under the hood
+///
+/// The helper's reserved name: a free function called `area` beside the trait does not clash with
+/// the `__compute_area__` helper the macro emits for the `area` method, and a raw method name
+/// yields valid generated names.
+pub mod under_the_hood {
+    use cgp::prelude::*;
+
+    #[derive(CgpData)]
+    pub enum Shape {
+        Circle(Circle),
+        Rectangle(Rectangle),
+    }
+
+    pub struct Circle {
+        pub radius: f64,
+    }
+
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    pub fn area(side: f64) -> f64 {
+        side * side
+    }
+
+    #[cgp_auto_dispatch]
+    pub trait HasArea {
+        fn area(&self) -> f64;
+    }
+
+    impl HasArea for Circle {
+        fn area(&self) -> f64 {
+            core::f64::consts::PI * self.radius * self.radius
+        }
+    }
+
+    impl HasArea for Rectangle {
+        fn area(&self) -> f64 {
+            self.width * self.height
+        }
+    }
+
+    /// The raw-identifier case the page names: `r#type` dispatches through `ComputeType`.
+    #[cgp_auto_dispatch]
+    pub trait HasKind {
+        fn r#type(&self) -> &'static str;
+    }
+
+    impl HasKind for Circle {
+        fn r#type(&self) -> &'static str {
+            "circle"
+        }
+    }
+
+    impl HasKind for Rectangle {
+        fn r#type(&self) -> &'static str {
+            "rectangle"
+        }
+    }
+
+    #[test]
+    fn a_raw_method_name_dispatches() {
+        assert_eq!(Shape::Circle(Circle { radius: 1.0 }).r#type(), "circle");
+    }
+
+    #[test]
+    fn the_free_function_and_the_method_coexist() {
+        let shape = Shape::Rectangle(Rectangle {
+            width: 2.0,
+            height: 3.0,
+        });
+        assert_eq!(shape.area(), 6.0);
+        assert_eq!(area(2.0), 4.0);
+    }
+}

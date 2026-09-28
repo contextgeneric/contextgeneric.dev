@@ -1,5 +1,5 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: a `name:` parameter the trait does
-//! not declare passes the parser and fails in the generated code.
+//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: the macro rejects a `name:`
+//! parameter the trait does not declare.
 
 use cgp::prelude::*;
 

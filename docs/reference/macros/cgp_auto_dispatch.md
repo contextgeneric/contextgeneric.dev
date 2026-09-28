@@ -160,16 +160,20 @@ the operation from scratch and expect contexts to configure it, start with a
 The macro keeps the trait unchanged and appends two kinds of item: one per-method computer, and one blanket
 impl of the trait for a fresh enum parameter.
 
-For each method it emits a free function, named after the method, which
-[`#[cgp_computer]`](./cgp_computer.md) turns into a provider named `Compute` plus the method name in
-PascalCase:
+For each method it emits a private free function under a reserved name, `__compute_` plus the method
+name plus `__`, which [`#[cgp_computer]`](./cgp_computer.md) turns into a provider named `Compute` plus
+the method name in PascalCase:
 
 ```rust
 #[cgp_computer(ComputeArea)]
-fn area<'__a__, __Variants__: HasArea>(__Variants__: &'__a__ __Variants__) -> f64 {
+fn __compute_area__<'__a__, __Variants__: HasArea>(__Variants__: &'__a__ __Variants__) -> f64 {
     __Variants__.area()
 }
 ```
+
+The reserved name does not collide with the module's own items, so a function called `area` beside
+the trait compiles. Both generated names drop a raw-identifier prefix, so a method named `r#type`
+yields `__compute_type__` and `ComputeType`.
 
 The body calls the trait method on the payload, which makes the per-variant handler "invoke
 `HasArea::area` on whatever this variant holds". It is bound by `__Variants__: HasArea` so it applies to every
@@ -265,10 +269,12 @@ named `'a` with the lifetime the macro gives the elided `&str`, reports
 ``error[E0261]: use of undeclared lifetime name `'__a__` ``. Name every reference with the same
 lifetime, or elide them all.
 
-**The helper function takes the method's name.** Each method's per-variant function is a free
-function called, for example, `area`, in the module where the trait is declared, so a module that
-already has an `area` item fails with ``error[E0428]: the name `area` is defined multiple times``.
-Declare the trait in a module of its own when the names clash.
+**Two dispatch traits in one module cannot share a method name.** The macro names the helper and
+the provider after the method alone, so a second trait with an `area` method emits a second
+`__compute_area__` and a second `ComputeArea`, and the module fails with
+``error[E0428]: the name `__compute_area__` is defined multiple times``, the same error for
+`ComputeArea`, and `E0119` conflicts between the two providers' impls, followed by `E0277` errors on
+the second trait's generated code. Declare such traits in separate modules.
 
 **The enum must derive the extensible-data machinery.** Without
 [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or the variant derives, the call fails with

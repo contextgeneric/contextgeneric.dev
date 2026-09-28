@@ -106,6 +106,23 @@ pub mod defining_the_target_at_the_same_time {
         bundle.0
     }
 
+    // The prose's const target: the bare `N` takes its kind from the leading list, so the
+    // declared struct is `ArrayTable<const N: usize>`, and its `PhantomData` field leaves `N` out.
+    delegate_components! {
+        <const N: usize> new ArrayTable<N> {
+            AreaCalculatorComponent: RectangleArea,
+        }
+    }
+
+    pub fn the_const_target_leaves_the_constant_out(table: ArrayTable<3>) -> PhantomData<()> {
+        table.0
+    }
+
+    #[test]
+    fn the_const_target_is_wired() {
+        super::the_key_forms::delegates_to::<ArrayTable<3>, AreaCalculatorComponent, RectangleArea>();
+    }
+
     #[test]
     fn the_bundle_answers_through_the_context() {
         let app = MyApp {
@@ -533,6 +550,23 @@ pub mod the_value_forms {
 
     pub fn the_inner_table_is_generic(table: WidthValue<u8>) -> PhantomData<u8> {
         table.0
+    }
+
+    /// The prose's const inner table: its list declares the struct, so the `const` keeps its kind.
+    pub struct ArrayKey<const N: usize>;
+
+    delegate_components! {
+        new ConstComponents {
+            <const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<const N: usize> {
+                Rectangle: RectangleArea,
+            }>,
+        }
+    }
+
+    #[test]
+    fn the_inner_table_carries_a_const() {
+        super::the_key_forms::delegates_to::<ArrayTable<3>, Rectangle, RectangleArea>();
+        super::the_key_forms::delegates_to::<ConstComponents, ArrayKey<3>, UseDelegate<ArrayTable<3>>>();
     }
 }
 
@@ -1038,31 +1072,26 @@ pub mod under_the_hood {
 
 /// ## Common Mistakes
 ///
-/// The workaround the page gives for a `const`-parameter table: declare the struct by hand and
-/// wire it with its own block. The rejected snippets are the trybuild fixtures.
+/// The fix the page gives for a bare `N` in a nested table's list: write the parameter with its
+/// kind. The rejected snippets are the trybuild fixtures.
 pub mod common_mistakes {
     use cgp::prelude::*;
 
     pub use super::overview::{AreaCalculatorComponent, RectangleArea};
 
     pub struct ArrayKey<const N: usize>;
-    pub struct ArrayTable<const N: usize>;
-
-    delegate_components! {
-        <const N: usize> ArrayTable<N> {
-            AreaCalculatorComponent: RectangleArea,
-        }
-    }
 
     delegate_components! {
         new MyComponents {
-            <const N: usize> ArrayKey<N>: UseDelegate<ArrayTable<N>>,
+            <const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<const N: usize> {
+                u32: RectangleArea,
+            }>,
         }
     }
 
     #[test]
-    fn the_hand_declared_table_is_wired() {
-        super::the_key_forms::delegates_to::<ArrayTable<3>, AreaCalculatorComponent, RectangleArea>();
+    fn the_const_inner_table_is_wired() {
+        super::the_key_forms::delegates_to::<ArrayTable<3>, u32, RectangleArea>();
         super::the_key_forms::delegates_to::<MyComponents, ArrayKey<3>, UseDelegate<ArrayTable<3>>>();
     }
 }

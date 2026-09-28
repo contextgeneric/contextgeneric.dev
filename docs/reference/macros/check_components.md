@@ -138,8 +138,9 @@ check_components! {
 `check_components!` separate from the wiring. A dependency missing only from the outer wrapper fails the
 wrapper's line alone, while one missing from the inner provider fails both. The pattern of failures
 tells you which layer to look at. It must list at least one provider, and may appear at most once per
-table. The listed providers are checked against the table's context type as written, so this form needs a
-concrete context rather than a generic table, as [Common Mistakes](#common-mistakes) explains.
+table. The listed providers are checked against the table's context type, and a generic table checks them
+at every instantiation, so `#[check_providers(RectangleArea)] <T> Gen<T> { AreaCalculatorComponent }`
+asserts that `RectangleArea` is a provider for each `Gen<T>`.
 
 ## Examples
 
@@ -278,19 +279,25 @@ and `where` clause are merged into every impl it produces, so
 `impl<'a, I> __CheckContext<FooComponent, &'a I> for Context where I: Clone {}`.
 
 The `#[check_providers(...)]` form changes both the supertrait and the implementing type. The assertion
-becomes `IsProviderFor` with the context *fixed*, and the impls are written for each provider:
+becomes `IsProviderFor`, the trait gains a `__Context__` parameter that each impl fills with the table's
+context type, and the impls are written for each provider:
 
 ```rust
-trait CheckScaledProviders<__Component__, __Params__: ?Sized>:
-    IsProviderFor<__Component__, ScaledRectangle, __Params__>
+trait CheckScaledProviders<__Component__, __Context__, __Params__: ?Sized>:
+    IsProviderFor<__Component__, __Context__, __Params__>
 {}
 
-impl CheckScaledProviders<AreaCalculatorComponent, ()> for RectangleArea {}
-impl CheckScaledProviders<AreaCalculatorComponent, ()> for ScaledArea<RectangleArea> {}
+impl CheckScaledProviders<AreaCalculatorComponent, ScaledRectangle, ()>
+for RectangleArea {}
+impl CheckScaledProviders<AreaCalculatorComponent, ScaledRectangle, ()>
+for ScaledArea<RectangleArea> {}
 ```
 
 Because each provider is checked on its own line, the failures localize: a dependency the inner provider
-lacks fails both impls, while one only the wrapper needs fails the wrapper's alone.
+lacks fails both impls, while one only the wrapper needs fails the wrapper's alone. Passing the context
+as a parameter keeps a generic table's parameters on the impls that declare them, so the `Gen<T>` table
+above, named with `#[check_trait(CheckGenProviders)]`, emits
+`impl<T> CheckGenProviders<AreaCalculatorComponent, Gen<T>, ()> for RectangleArea {}`.
 
 ## Formal grammar
 
@@ -373,12 +380,6 @@ no-op:
 error: `#[check_providers(...)]` requires at least one provider type.
 ```
 
-**`#[check_providers(...)]` does not work on a generic table.** The generated trait names the context
-type in its supertrait, `IsProviderFor<__Component__, Gen<T>, __Params__>`, but the table's generics
-reach only the impls, so `#[check_providers(RectangleArea)] <T> Gen<T> { … }` fails with `E0425`,
-``cannot find type `T` in this scope``, and an `E0207` beside it. Check a concrete instantiation such
-as `Gen<u32>` instead.
-
 **Listing one check twice conflicts.** The same component and parameters named twice, directly or
 through a bracketed list such as `[AreaCalculatorComponent, AreaCalculatorComponent]`, emit two
 identical impls and fail with `E0119`.
@@ -399,9 +400,7 @@ context type, which does not say a name is missing. Add `#[check_trait(Name)]`.
 
 **A passing check is not a claim that the implementation is correct**, only that it resolves. It
 proves the provider was found and its dependencies are satisfiable, not that the provider does what
-you meant. One case slips past it: a component used at an unsized type parameter, such as `str`,
-passes its check but fails at every call through the table, as the
-[`delegate_components!`](./delegate_components.md#common-mistakes) page records.
+you meant.
 
 ## Related constructs
 

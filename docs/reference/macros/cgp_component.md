@@ -484,15 +484,17 @@ name and the context name take no generics.
 
 The component name's parameters are bare names, such as `name: ShapeComponent<Shape>`, which the
 marker struct then declares. Each must be one of the trait's own parameters, since the macro writes
-the name wherever the component appears. The parser rejects anything more:
+the name wherever the component appears, and the macro rejects one the trait does not declare, as
+[Common Mistakes](#common-mistakes) shows. The parser rejects anything more:
 
 - a bound fails with ``trait bounds (`A: Clone`) are not allowed in type generics``, and a lifetime
   bound with ``lifetime bounds (`'a: 'b`) are not allowed in type generics``;
 - a default fails with ``default type parameters (`A = B`) are not allowed in type generics``;
 - a type that is not a single identifier, such as `Vec<u8>`, fails to parse. A single identifier
   such as `u32` is read as a parameter name rather than as the type;
-- a const parameter parses, per the grammar, but then fails inside the macro, as
-  [Common Mistakes](#common-mistakes) records.
+- a const parameter parses, per the grammar, but is always rejected: a component trait cannot
+  declare one, so the name either carries a parameter the trait lacks or sits on a trait the macro
+  refuses for its const generic parameter.
 
 A provider for such a component names the component explicitly, as in
 `#[cgp_impl(new SquareArea: AreaCalculatorComponent<Square>)]`, because the default
@@ -529,17 +531,18 @@ error: failed to parse internal tokens to type `proc_macro2::Ident`:
 
 Name the parameter instead, as in `_value: u32`, and destructure inside a default method's body.
 
-**A const parameter in the `name:` list fails inside the macro.**
-`#[cgp_component { provider: Buffer, name: BufferComponent<const N: usize> }]` is accepted by the
-parser, but the name is then used in type positions, where the const parameter cannot appear, and
-the macro fails with ``failed to parse internal tokens to type `syn::generics::TypeParamBound` ``.
-Keep the name's parameters to bare type names, as the component's own parameters are.
+**A `name:` parameter must be one of the trait's own.** The marker struct declares the name's
+parameters while the generated impls name it with the trait's, so the macro rejects a parameter the
+trait lacks, with an error pointing at that parameter.
+`#[cgp_component { provider: Shape, name: ShapeComponent<T> }]` on a trait without a `T` fails with:
 
-**A `name:` parameter the trait does not declare fails in the generated code.** In
-`#[cgp_component { provider: Shape, name: ShapeComponent<T> }]` on a trait without a `T`, the parser
-accepts the name, and the compiler then reports ``error[E0425]: cannot find type `T` in this scope``
-at the `T`, followed by a confusing `E0034` about the generated impls. List only the trait's own
-parameters in the name.
+```text
+error: the component name's parameter `T` is not a generic parameter of the trait `CanShape`
+```
+
+A const parameter, as in `name: BufferComponent<const N: usize>`, fails the same way on a trait
+without an `N`, and a trait that declares `const N: usize` is refused for the const generic
+parameter itself. List only the trait's own type and lifetime parameters in the name.
 
 **The attribute must be applied to a trait.** The macro refuses a struct, an enum, or a free function
 at parse time with ``expected `trait` ``, instead of lowering it into code that fails to compile

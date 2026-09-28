@@ -190,8 +190,10 @@ implementation is one of several, is shared between contexts, or composes with a
 impl DelegateComponent<GreeterComponent> for App {
     type Delegate = GreetHello;
 }
-impl<__Context__, __Params__> IsProviderFor<GreeterComponent, __Context__, __Params__>
-for App
+impl<
+    __Context__,
+    __Params__: ?Sized,
+> IsProviderFor<GreeterComponent, __Context__, __Params__> for App
 where
     GreetHello: IsProviderFor<GreeterComponent, __Context__, __Params__>,
 {}

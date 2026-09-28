@@ -18,3 +18,4 @@ trybuild = "1"
 
 [patch.crates-io]
 cgp                 = { git = "https://github.com/contextgeneric/cgp.git" }
+# cgp               = { path = "../../cgp/crates/main/cgp" }

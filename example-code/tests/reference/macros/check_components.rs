@@ -197,7 +197,7 @@ pub mod checking_each_provider_instead_of_the_context {
         }
     }
 
-    /// The generic-table case the page warns about, checked on a concrete instantiation instead.
+    /// The page's generic table: the providers are checked at every instantiation of `Gen<T>`.
     #[derive(HasField)]
     pub struct Gen<T> {
         pub width: f64,
@@ -214,7 +214,7 @@ pub mod checking_each_provider_instead_of_the_context {
     check_components! {
         #[check_trait(CheckGenProviders)]
         #[check_providers(RectangleArea)]
-        Gen<u32> {
+        <T> Gen<T> {
             AreaCalculatorComponent,
         }
     }
@@ -326,5 +326,11 @@ pub mod under_the_hood {
         Context {
             ReferenceGetterComponent: <'a> (Life<'a>, str),
         }
+    }
+
+    #[test]
+    fn the_unsized_component_is_callable() {
+        let reference: Option<&'static str> = Context.get_reference();
+        assert!(reference.is_none());
     }
 }

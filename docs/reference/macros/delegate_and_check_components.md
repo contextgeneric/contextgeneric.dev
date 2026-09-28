@@ -293,8 +293,10 @@ the wiring half is a [`DelegateComponent`](../traits/wiring/delegate_component.m
 impl DelegateComponent<NameTypeProviderComponent> for MyContext {
     type Delegate = UseType<String>;
 }
-impl<__Context__, __Params__>
-    IsProviderFor<NameTypeProviderComponent, __Context__, __Params__> for MyContext
+impl<
+    __Context__,
+    __Params__: ?Sized,
+> IsProviderFor<NameTypeProviderComponent, __Context__, __Params__> for MyContext
 where
     UseType<String>: IsProviderFor<NameTypeProviderComponent, __Context__, __Params__>,
 {}

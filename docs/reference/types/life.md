@@ -140,27 +140,10 @@ Every impl that satisfies this component, whether through `UseContext`, a table'
 or a provider you write yourself, carries the same `(Life<'a>, T)` tuple, so the resolution
 machinery preserves the lifetime end to end.
 
-## When to use it
-
-**You read `Life` in generated code, and you write it only in a check.** The macros insert it
-everywhere else.
-
-- **Read `Life<'a>` in an `IsProviderFor` tuple as the component's lifetime.** A dependency marker such
-  as `IsProviderFor<..., (Life<'a>, T)>` names a lifetime and a type parameter, in that order.
-- **Write `(Life<'a>, T)` in a `check_components!` entry** for a component with a lifetime, and
-  declare `'a` in the table's generic list.
-- **Hold a lifetime as `PhantomData<Life<'a>>`** when you declare a provider struct by hand and want
-  the shape `#[cgp_new_provider]` gives it. A plain [`PhantomData<&'a ()>`](phantom_data.md) also
-  compiles, but it is covariant and keeps the struct `Send`.
-
-## Common Mistakes
-
-**A lifetime cannot appear directly in the `IsProviderFor` tuple.** The tuple holds types, so a bare
-`'a` is invalid there, and the macro lifts it into `Life<'a>`. `Life` in an error means that the component
-carries a lifetime.
-
-**A component whose target is unsized passes its check but fails at the call.** The `?Sized` bound
-on `T` above admits `str`, and wiring such a component at `str` compiles and checks:
+The `?Sized` bound on `T` admits an unsized target such as `str`, which makes the tuple
+`(Life<'a>, str)` unsized too. `IsProviderFor` and the table's forwarding impl both accept an
+unsized parameter tuple, so the same component wired at `str` resolves through the table like any
+other:
 
 ```rust
 #[cgp_impl(new GetName)]
@@ -187,23 +170,34 @@ check_components! {
         ReferenceGetterComponent: (Life<'a>, str),
     }
 }
+
+pub fn demo_unsized() {
+    let text = String::from("demo");
+    let borrowed = Borrowed { name: &text };
+
+    let name: &str = borrowed.get_reference();
+    assert_eq!(name, "demo");
+}
 ```
 
-A call such as `let name: &str = borrowed.get_reference();` then fails with
-``error[E0599]: the method `get_reference` exists for struct `Borrowed<'_>`, but its trait bounds were not satisfied``,
-whose note names the unmet bound:
+## When to use it
 
-```text
-   = note: the following trait bounds were not satisfied:
-           `str: Sized`
-           which is required by `Borrowed<'_>: HasReference<'_, str>`
-```
+**You read `Life` in generated code, and you write it only in a check.** The macros insert it
+everywhere else.
 
-The parameter tuple `(Life<'a>, str)` is unsized, and the forwarding impl that
-[`delegate_components!`](../macros/delegate_components.md) emits for the table requires its
-parameter tuple to be `Sized`, while the check goes to the provider's own impl and passes. This is a
-defect in the library. Until it is fixed, give such a component a sized target, as `Config` is
-above, or implement the consumer trait directly on the context.
+- **Read `Life<'a>` in an `IsProviderFor` tuple as the component's lifetime.** A dependency marker such
+  as `IsProviderFor<..., (Life<'a>, T)>` names a lifetime and a type parameter, in that order.
+- **Write `(Life<'a>, T)` in a `check_components!` entry** for a component with a lifetime, and
+  declare `'a` in the table's generic list.
+- **Hold a lifetime as `PhantomData<Life<'a>>`** when you declare a provider struct by hand and want
+  the shape `#[cgp_new_provider]` gives it. A plain [`PhantomData<&'a ()>`](phantom_data.md) also
+  compiles, but it is covariant and keeps the struct `Send`.
+
+## Common Mistakes
+
+**A lifetime cannot appear directly in the `IsProviderFor` tuple.** The tuple holds types, so a bare
+`'a` is invalid there, and the macro lifts it into `Life<'a>`. `Life` in an error means that the component
+carries a lifetime.
 
 **A [higher-order provider](/docs/reference/glossary#higher-order-provider) with a lifetime loses its dependency propagation.** When the component carries a
 lifetime, the inner-provider bound of such a stack does not get a marker counterpart, because the rewrite

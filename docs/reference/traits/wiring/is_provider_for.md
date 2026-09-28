@@ -229,8 +229,10 @@ inner provider's requirements outward through the stack.
 each entry, an impl on the table that forwards to the chosen provider's marker:
 
 ```rust
-impl<__Context__, __Params__> IsProviderFor<GreeterComponent, __Context__, __Params__>
-for Person
+impl<
+    __Context__,
+    __Params__: ?Sized,
+> IsProviderFor<GreeterComponent, __Context__, __Params__> for Person
 where
     GreetHello: IsProviderFor<GreeterComponent, __Context__, __Params__>,
 {}

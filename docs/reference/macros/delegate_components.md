@@ -66,6 +66,9 @@ delegate_components! {
 
 A leading `new` keyword makes the macro declare the target struct as well. A target with
 parameters, as in `<T> new MyComponents<T> { … }`, is declared with a `PhantomData` field over them.
+The target's parameters take their kinds from the leading generic list, so
+`<const N: usize> new ArrayTable<N> { … }` declares `ArrayTable<const N: usize>`, and the
+`PhantomData` field covers only the lifetime and type parameters.
 
 ```rust
 delegate_components! {
@@ -266,6 +269,9 @@ delegate_components! {
     }
 }
 ```
+
+That list declares the inner struct's parameters, so a `const` parameter is written with its kind,
+as in `<const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<const N: usize> { … }>`.
 
 One prerequisite is not visible in either snippet: **the component must carry
 [`#[derive_delegate(UseDelegate<Shape>)]`](../attributes/derive_delegate.md)**, which generates the
@@ -544,8 +550,10 @@ The hand-written equivalent of one wiring entry is exactly that block.
 The [`IsProviderFor`](../traits/wiring/is_provider_for.md) impl forwards the provider's requirements:
 
 ```rust
-impl<__Context__, __Params__>
-    IsProviderFor<AreaCalculatorComponent, __Context__, __Params__> for Rectangle
+impl<
+    __Context__,
+    __Params__: ?Sized,
+> IsProviderFor<AreaCalculatorComponent, __Context__, __Params__> for Rectangle
 where
     RectangleArea: IsProviderFor<AreaCalculatorComponent, __Context__, __Params__>,
 {}
@@ -554,7 +562,9 @@ where
 This is why missing dependencies stay diagnosable. `RectangleArea`'s own `IsProviderFor` impl carries
 the `where` bounds it needs, so an unsatisfied requirement flows back through this forwarding impl to
 the point of use. Note that these parameters are literally named `__Context__` and `__Params__` in the
-emitted code.
+emitted code. `__Params__` is `?Sized`, as it is on the trait, so a component used at an unsized
+parameter such as `str`, whose parameter tuple `(Life<'a>, str)` is unsized, still resolves through
+the table.
 
 **Every other form on this page lowers to that same pair.** A form changes only how many pairs one
 line produces and what the `Delegate` type is.
@@ -714,12 +724,13 @@ A `ProviderValue`'s nested-table form carries a full `TableBody`, so an inner ta
 form an outer one does. Its wrapper is a bare `IDENTIFIER`, not a path. An `InnerTable` is an
 identifier with an optional generic list rather than a full `TargetType`, because a nested table
 always names a fresh struct the macro declares. Its `BoundFreeGenerics` is a definition-position
-list of lifetimes and type parameters: it allows neither bounds nor defaults, so put a bound on the
-entry's own generics instead. The value parser tries the nested-table form speculatively and falls
-back to reading the whole value as a plain type, so a bound on the inner table, a `const` parameter
-on it, and a qualified wrapper all fail the same misleading way, with ``expected `,` `` at the inner
-table's name. A bare `N` in that list declares a type parameter, so passing a `const` through it
-fails with `E0747`: an inner table cannot carry a `const` parameter at all.
+list of lifetimes, type parameters, and `const` parameters: it allows neither bounds nor defaults,
+so put a bound on the entry's own generics instead. Because the list declares the struct's
+parameters, a `const` is written with its kind, as `ArrayTable<const N: usize>`, and a bare `N`
+declares a type parameter. The value parser tries the nested-table form speculatively and falls back
+to reading the whole value as a plain type, so a bound or a default on the inner table and a
+qualified wrapper all fail the same misleading way, with ``expected `,` `` at the inner table's
+name.
 
 The remaining rules restate points made above. An `OpenStmt` may omit its braces when opening exactly
 one component. A `MultiKey` takes no generic list of its own, only its elements do. Every bracketed
@@ -765,11 +776,13 @@ end.
 is `E0425`, ``cannot find type `SquareArea` in this scope``, which names an unresolved type rather
 than anything about wiring.
 
-**A table struct the macro declares cannot take a `const` parameter.** Both a `new` target such as
-`<const N: usize> new ArrayTable<N>` and a nested inner table read `N` as a type parameter, so
-passing a constant through fails with `E0747`, `constant provided when a type was expected`.
-Declare the struct yourself instead, as `pub struct ArrayTable<const N: usize>;`, wire it with its
-own `delegate_components!` block, and name it as `UseDelegate<ArrayTable<N>>` in the outer entry.
+**A bare `N` in a nested table's generic list declares a type parameter.** That list declares the
+inner struct, so `<const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<N> { … }>` gives
+`ArrayTable` a type parameter `N`, and passing the constant through fails with `E0747`,
+`constant provided when a type was expected`. Write the parameter with its kind, as
+`new ArrayTable<const N: usize> { … }`. A `new` target is different, because its list is the
+target's type arguments: `<const N: usize> new ArrayTable<N>` takes the kind from the leading
+generic list.
 
 **Two entries claiming one key conflict**, and the compiler reports it as a
 [coherence](/docs/reference/glossary#coherence) error, `E0119`, rather than as a wiring one. It
@@ -780,14 +793,6 @@ generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a specific
 `@ComputerComponent.Area` beside `@ComputerComponent.Area.Rectangle` or
 `@ComputerComponent.<Code> Code.Circle`. The same applies to a direct entry for a path a joined
 namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#common-mistakes).
-
-**A component used at an unsized type parameter passes its check and fails at the call.** The
-impl the macro emits for each entry to forward the dependency marker requires the component's
-parameters to be `Sized`, so a component declared over `T: ?Sized` and wired at `str` never works
-through the table, though `check_components!` passes for it. A call reports `E0599` with the note
-`` `str: Sized` which is required by … ``. This is a defect in the library. Until it is fixed, use a
-sized parameter or implement the consumer trait directly on the context. The
-[`Life`](../types/life.md) page shows the full example.
 
 ## Related constructs
 

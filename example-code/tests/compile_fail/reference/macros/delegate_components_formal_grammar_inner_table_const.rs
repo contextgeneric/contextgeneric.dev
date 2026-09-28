@@ -21,7 +21,8 @@ pub struct App;
 
 pub struct ArrayKey<const N: usize>;
 
-// error[E0747]: the bare `N` declares a type parameter, so the const argument does not fit it
+// error[E0747]: the bare `N` declares a type parameter, so the const argument does not fit it;
+// writing `new ArrayTable<const N: usize>` keeps the kind
 delegate_components! {
     new MyComponents {
         <const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<N> {

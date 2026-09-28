@@ -1,14 +1,5 @@
-error: expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+error: the component name's parameter `N` is not a generic parameter of the trait `CanBuffer`
  --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_const_parameter_in_name.rs:6:59
   |
 6 | #[cgp_component { provider: Buffer, name: BufferComponent<const N: usize> }]
-  |                                                           ^^^^^
-
-error: failed to parse internal tokens to type `syn::generics::TypeParamBound`:
-       IsProviderFor < BufferComponent < const N : usize > , __Context__, () >
- --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_const_parameter_in_name.rs:6:1
-  |
-6 | #[cgp_component { provider: Buffer, name: BufferComponent<const N: usize> }]
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+  |                                                           ^^^^^^^^^^^^^^
