@@ -112,9 +112,9 @@ pub fn demo() {
 
 `CheckPort` pins the error to `AppError` with `#[use_type]`'s equality form, so it can construct one
 and raise it. `App` is an [environmental context](/docs/reference/glossary#environmental-context)
-whose table routes each source: the `AppError` through `ReturnError`, a `String` through `RaiseFrom`
-and `AppError`'s `From<String>`, and a `ParseIntError` through [`DebugError`](debug_error.md), which
-formats it and forwards it to the `String` entry.
+whose table routes each source: the `AppError` through `ReturnError`, and a `ParseIntError` through
+[`DebugError`](debug_error.md), which formats it and forwards the resulting `String` to the `String`
+entry, where `RaiseFrom` converts it through `AppError`'s `From<String>`.
 
 ## When to use it
 

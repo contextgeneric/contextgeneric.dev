@@ -32,6 +32,7 @@ because it allocates a `String`. It takes no type parameter and is wired to `Err
 `ErrorWrapperComponent`, or both, usually per source type with the `open` statement:
 
 ```rust
+use core::num::ParseIntError;
 use cgp::core::error::ErrorRaiserComponent;
 use cgp::extra::error::{DisplayError, RaiseFrom};
 

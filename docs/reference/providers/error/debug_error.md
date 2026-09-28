@@ -13,8 +13,8 @@ string handling.
 ## Overview
 
 `DebugError` implements both error components by redirecting through a string. Rather than producing
-the abstract error directly, it formats the source error or the detail with the `Debug` trait and
-`format!("{:?}")` into a `String`, then forwards to the
+the abstract error directly, it formats the source error or the detail with the `Debug` trait, as
+`{:?}` would print it, into a `String`, then forwards to the
 [**context**](/docs/reference/glossary#context)'s own `CanRaiseError<String>` or
 `CanWrapError<String>`, where the context is the type the implementation runs against. It does not
 know the context's error type: it turns a `Debug` value into a `String` and hands it off, leaving
@@ -33,6 +33,7 @@ because it allocates a `String`. It takes no type parameter and is wired to `Err
 `ErrorWrapperComponent`, or both, usually per source type with the `open` statement:
 
 ```rust
+use core::num::ParseIntError;
 use cgp::core::error::ErrorRaiserComponent;
 use cgp::extra::error::{DebugError, RaiseFrom};
 

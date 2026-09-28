@@ -78,19 +78,28 @@ pub mod examples {
 
             // An inner `Ok` stops the pipeline; the last step never runs.
             assert_eq!(
-                PipeMonadic::<OkMonadicTrans<ErrMonadic>, Product![ReturnOkErr, ReturnOkOk, ReturnOkErr]>::compute(&App, code, 1),
+                PipeMonadic::<
+                    OkMonadicTrans<ErrMonadic>,
+                    Product![ReturnOkErr, ReturnOkOk, ReturnOkErr],
+                >::compute(&App, code, 1),
                 Ok(Ok(())),
             );
 
             // An outer `Err` stops it too.
             assert_eq!(
-                PipeMonadic::<OkMonadicTrans<ErrMonadic>, Product![ReturnErr, ReturnOkOk, ReturnOkErr]>::compute(&App, code, 1),
+                PipeMonadic::<
+                    OkMonadicTrans<ErrMonadic>,
+                    Product![ReturnErr, ReturnOkOk, ReturnOkErr],
+                >::compute(&App, code, 1),
                 Err("error"),
             );
 
             // Through the fallible bridge, plain `OkMonadic` behaves the same way.
             assert_eq!(
-                PipeMonadic::<OkMonadic, Product![ReturnOkErr, ReturnOkOk, ReturnOkErr]>::try_compute(&App, code, 1),
+                PipeMonadic::<
+                    OkMonadic,
+                    Product![ReturnOkErr, ReturnOkOk, ReturnOkErr],
+                >::try_compute(&App, code, 1),
                 Ok(Ok(())),
             );
         }
