@@ -169,6 +169,13 @@ pub mod usage {
         7
     }
 
+    /// A pin on a renamed import binds the associated type's own name, `Bar`.
+    #[cgp_fn]
+    #[use_type(HasFooType<X>.{Bar as Flag = bool})]
+    pub fn flag(&self, flag: Flag) -> Flag {
+        flag
+    }
+
     #[cgp_fn]
     #[use_type(HasPasswordType.Password, HasHashedPasswordType.{HashedPassword = Password})]
     pub fn hash(&self, password: Password) -> HashedPassword {
@@ -229,6 +236,7 @@ pub mod usage {
         assert_eq!(App.stacked(1, 2), (1, 2));
         assert_eq!(App.pinned(), "pinned");
         assert_eq!(App.pinned_generic(), 7);
+        assert!(App.flag(true));
         assert_eq!(App.hash("pw".to_owned()), "pw");
         assert_eq!(App.begin(4).0, 4);
         assert_eq!(ScalarOf::<App>::scalar_of(&App, 2.5), 2.5);

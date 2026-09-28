@@ -109,7 +109,7 @@ pub fn greet_both(person: &Person, robot: &Robot) {
 
 `Person` and `Robot` both implement `Greet` through the one [blanket implementation](/docs/reference/glossary#blanket-implementation), without any
 wiring. For `Person` the compiler resolves `Name` to `String`, and for `Robot` to `u32`. Neither type
-appears anywhere except in the field. Both are value contexts: the greeting reads the data each type
+appears anywhere except in the field. Both are [value contexts](/docs/reference/glossary#value-context): the greeting reads the data each type
 holds.
 
 A trait built on `greet` never learns that `Name` exists:

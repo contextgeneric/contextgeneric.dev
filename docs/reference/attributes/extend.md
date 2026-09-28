@@ -176,11 +176,10 @@ where
 }
 ```
 
-Callers see the supertrait, and the predicate on the implementation lets the body call the methods. The
-`#[extend]` entries share that one `Self:` predicate with any [`#[uses]`](uses.md) entries on the same
-function, the `#[extend]` ones first.
+Callers see the supertrait, and the predicate on the implementation lets the body call the methods.
 Compare [`#[uses]`](uses.md), which emits only the predicate and leaves the trait declaration bare.
-That single difference is the whole of the distinction.
+That single difference is the whole of the distinction. When a function carries both attributes,
+their entries share the one `Self:` predicate, the `#[extend]` entries first.
 
 On a `#[cgp_component]` the supertrait goes on the consumer trait, and it also joins the `where` clause of
 the generated consumer blanket implementation, because that implementation can only apply where the
@@ -218,10 +217,10 @@ Rust does not let an implementation assume a trait's `where` bound, so every pro
 `__Context__: HasName` itself. That is why the provider in [Examples](#examples) carries
 `#[uses(HasName)]` even though the component already names the trait.
 
-Here the result is identical to `pub trait CanGreet: HasName`, so on a component `#[extend]` generates
-only what the language can already express. It remains the preferred form because it presents the bound
-as an import rather than as inheritance, and because it keeps the `use`/`pub use` pairing with `#[uses]`
-reading consistently across both macros.
+The consumer trait is identical to `pub trait CanGreet: HasName`, so on a component `#[extend]`
+generates only what the language can already express. It remains the preferred form because it
+presents the bound as an import rather than as inheritance, and because it keeps the `use`/`pub use`
+pairing with `#[uses]` reading consistently across both macros.
 
 ## Formal grammar
 
@@ -232,12 +231,12 @@ The attribute argument is a comma-separated list of bounds, in the Rust Referenc
 ExtendArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
 ```
 
-This is the same production [`#[uses]`](uses.md) accepts, the Rust grammar's own bound, so a lifetime, a
-`?Sized`, or an associated-type equality parses as readily as a plain trait name. Rust still rejects a
-relaxed bound on a trait, so `#[extend(?Sized)]` fails with
-`relaxed bounds are not permitted in supertrait bounds`. The list may be empty,
-and the attribute may be repeated, with every occurrence's entries collected together. The two attributes
-differ in where the bounds land, not in the grammar.
+This is the same production [`#[uses]`](uses.md) accepts, the Rust grammar's own bound, so a
+lifetime, a `?Sized`, or an associated-type equality parses as readily as a plain trait name. Rust
+still rejects a relaxed bound on a trait, so `#[extend(?Sized)]` fails with
+`relaxed bounds are not permitted in supertrait bounds`. The list may be empty, and the attribute
+may be repeated, with every occurrence's entries collected together. The two attributes differ in
+where the bounds land, not in the grammar.
 
 ## Common Mistakes
 

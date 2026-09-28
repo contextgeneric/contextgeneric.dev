@@ -113,7 +113,7 @@ impl<InnerCalculator> AreaCalculator {
 ```
 
 A context then composes the two when it wires the component, and `ScaledArea<RectangleArea>` computes a
-rectangle's area and scales it. `Rectangle` is a value context, the shape being measured, and it carries
+rectangle's area and scales it. `Rectangle` is a [value context](/docs/reference/glossary#value-context), the shape being measured, and it carries
 the fields both layers read:
 
 ```rust

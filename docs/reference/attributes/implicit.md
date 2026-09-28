@@ -144,7 +144,7 @@ pub fn print_area(rect: &Rectangle) {
 ```
 
 `Rectangle` derives [`HasField`](../derives/derive_has_field.md), and that derive is all it needs to
-qualify. The program does not wire anything. `Rectangle` is a value context: the data the method
+qualify. The program does not wire anything. `Rectangle` is a [value context](/docs/reference/glossary#value-context): the data the method
 computes on is the context itself.
 
 A mutable argument modifies a field in place. It is the function's only implicit argument, under a
@@ -172,9 +172,10 @@ impl EmailSender {
 ```
 
 Callers still write `app.send_email(to, body)`. The provider's requirement from its context, an
-`smtp_server` field borrowed here as a `&str` from a `String`, never appears in the trait everyone else
-calls. The context here is an environmental one, an `app` that carries the application's settings
-rather than being the data a method acts on.
+`smtp_server` field borrowed here as a `&str` from a `String`, never appears in the trait everyone
+else calls. The context here is an
+[environmental context](/docs/reference/glossary#environmental-context), an `app` that carries the
+application's settings rather than being the data a method acts on.
 
 ## When to use it
 

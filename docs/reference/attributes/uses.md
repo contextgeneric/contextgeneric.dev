@@ -114,7 +114,7 @@ impl AreaCalculator {
 
 This provider is a short adapter: it satisfies the `AreaCalculator` component by calling whatever
 `rectangle_area` computes. Any context with the fields that trait needs can wire it, as a `Rectangle`
-does here. `Rectangle` is a value context, the shape whose area is being computed:
+does here. `Rectangle` is a [value context](/docs/reference/glossary#value-context), the shape whose area is being computed:
 
 ```rust
 #[derive(HasField)]

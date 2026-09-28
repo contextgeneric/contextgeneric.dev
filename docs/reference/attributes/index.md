@@ -11,8 +11,9 @@ An attribute here is a modifier, not a macro of its own. Each one is an option t
 to refine the trait or implementation it generates. The hosts are
 [`#[cgp_impl]`](../macros/cgp_impl.md), [`#[cgp_fn]`](../macros/cgp_fn.md), and
 [`#[cgp_component]`](../macros/cgp_component.md), together with the macros built on
-`#[cgp_component]`. Each attribute works only on the hosts its page names. Anywhere else nothing reads
-it, and the compiler reports it as an attribute it cannot find. This page groups every attribute in
+`#[cgp_component]`. Each attribute works only on the hosts its page names. Anywhere else the compiler
+usually reports it as an attribute it cannot find, and each page's Common Mistakes names the
+exceptions, such as a `#[prefix]` that `#[cgp_auto_getter]` accepts and drops. This page groups every attribute in
 this section by the job it does, in roughly the order most CGP code uses them.
 
 If you are new to CGP, start with the [reference overview](/docs/reference/) rather than here. This page

@@ -105,7 +105,8 @@ type. One import can therefore tie two abstract types together:
 #[use_type(HasPasswordType.Password, HasHashedPasswordType.{HashedPassword = Password})]
 ```
 
-and `#[use_type(HasDbType.Db, HasTransactionType.{Transaction = Tx<Db>})]` emits
+An alias nested inside the right-hand side is grounded in place, so
+`#[use_type(HasDbType.Db, HasTransactionType.{Transaction = Tx<Db>})]` emits
 `Self: HasTransactionType<Transaction = Tx<<Self as HasDbType>::Db>>`. The one name the macro leaves
 alone on the right-hand side is the pinned alias itself, so a pin such as `{Foo = Foo}` fails with
 ``cannot find type `Foo` in this scope`` rather than becoming a bound that says nothing.
@@ -169,7 +170,7 @@ The component gains `HasScalarType` as a [supertrait](/docs/reference/glossary#s
 `Scalar` in both becomes the same qualified projection, so the fields the provider reads and the value it
 returns are guaranteed to agree on whatever scalar the context chose.
 
-A context supplies the concrete type by wiring, and nothing above changes. `Rectangle` is a value context,
+A context supplies the concrete type by wiring, and nothing above changes. `Rectangle` is a [value context](/docs/reference/glossary#value-context),
 the shape whose area is being computed:
 
 ```rust

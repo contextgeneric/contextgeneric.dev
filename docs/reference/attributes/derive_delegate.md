@@ -150,7 +150,8 @@ check_components! {
 }
 ```
 
-`MyApp` is an environmental context and the component is parameter-targeted: the shape is the
+`MyApp` is an [environmental context](/docs/reference/glossary#environmental-context) and the component is
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component): the shape is the
 parameter, and `MyApp` carries only the wiring.
 
 **Write the same result without the attribute instead.** Drop `#[derive_delegate]` from the component and
