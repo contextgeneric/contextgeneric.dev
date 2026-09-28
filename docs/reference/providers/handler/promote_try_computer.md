@@ -16,7 +16,7 @@ Fill in the handler family from a `Computer` whose output is a `Result`.
 **You are not expected to name `PromoteTryComputer` directly.**
 [`#[cgp_computer]`](../../macros/cgp_computer.md) wires the provider it generates for a function
 returning `Result` to `PromoteTryComputer<Self>`. A context names the bundle only to route its own
-components through such a provider, or through the one entry that serves any base, as
+components through such a provider, or through the entries that serve any base, as
 [Common Mistakes](#common-mistakes) sets out. This page explains what the bundle emits.
 
 :::
@@ -127,10 +127,11 @@ members derive from the computer form.
 
 ## Common Mistakes
 
-**Only the `TryComputerComponent` entry serves a hand-written base.** `TryPromote<P>` needs only a
-`Computer` returning `Result`, but `HandlerComponent` goes through `PromoteComputer<P>` to
-`PromoteAsync<P>`, which looks for a `TryComputer` on the base itself. A hand-written base not wired
-to the bundle fails at the check:
+**The `HandlerComponent` entry does not serve a hand-written base.** `TryComputerComponent` and
+`AsyncComputerComponent` take one step from the base, through `TryPromote<P>` and `PromoteAsync<P>`,
+so they serve any `Computer` returning `Result`; the async entry keeps the `Result` as its output.
+`HandlerComponent` goes through `PromoteComputer<P>` to `PromoteAsync<P>`, which looks for a
+`TryComputer` on the base itself. A hand-written base not wired to the bundle fails at the check:
 
 ```text
 error[E0277]: the trait bound `CheckedDouble: DelegateComponent<TryComputerComponent>` is not satisfied

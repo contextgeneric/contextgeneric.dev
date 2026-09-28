@@ -8,8 +8,7 @@ pub mod examples {
     use core::num::ParseIntError;
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
-    use cgp::extra::error::DebugError;
-    use cgp::extra::error::RaiseFrom;
+    use cgp::extra::error::{DebugError, RaiseFrom};
     use cgp::extra::handler::{CanComputeAsync, CanHandle, PromoteAsync};
     use cgp::prelude::*;
 

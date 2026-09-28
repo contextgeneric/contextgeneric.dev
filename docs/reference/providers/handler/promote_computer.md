@@ -137,17 +137,20 @@ delegate_components! {
 }
 ```
 
-The base `ComputerComponent` is the inner provider itself; the table fills in the other seven. Two
+The base `ComputerComponent` is the inner provider itself; the table fills in the other seven. Four
 of the entries take their step from a sibling rather than from the base: `HandlerComponent` is
-`PromoteAsync<Provider>`, whose `Handler` impl needs `Provider` to be a `TryComputer`, and each
-`…Ref` entry needs `Provider` to answer the owned member over a borrowed input.
+`PromoteAsync<Provider>`, whose `Handler` impl needs `Provider` to be a `TryComputer`, and the
+`TryComputerRef`, `AsyncComputerRef`, and `HandlerRef` entries need `Provider` to answer the
+matching owned member over a borrowed input. `ComputerRefComponent` takes its step from the base,
+which must accept the borrow as its input.
 
 ## Common Mistakes
 
 **Only the one-step entries serve a hand-written `Computer`.** `TryComputerComponent` and
 `AsyncComputerComponent` need only the base, so `PromoteComputer<Double>` answers them for any
-`Computer`. `HandlerComponent` looks for a `TryComputer` on `Double` itself, which a hand-written
-provider not wired to the bundle lacks, so the check fails:
+`Computer`, and `ComputerRefComponent` for any `Computer` whose input is a borrow.
+`HandlerComponent` looks for a `TryComputer` on `Double` itself, which a hand-written provider not
+wired to the bundle lacks, so the check fails:
 
 ```text
 error[E0277]: the trait bound `Double: DelegateComponent<TryComputerComponent>` is not satisfied

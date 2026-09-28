@@ -84,8 +84,9 @@ serves as a `TryComputer`, `AsyncComputer`, or `Handler` wherever both stages su
 
 **Reach for `ComposeHandlers` to sequence exactly two handlers.** For three or more, use
 [`PipeHandlers`](pipe_handlers.md), which reads better as a list and folds to the same nested
-composition. For a step that should short-circuit on a `Result` branch rather than always run the
-next stage, use the [monad providers](../monad/pipe_monadic.md) instead.
+composition. For stages whose output carries the branch to stop on, such as an `Err` value or the
+first success, use [`PipeMonadic`](../monad/pipe_monadic.md), which runs the next stage only on the
+continue branch.
 
 ## Under the hood
 

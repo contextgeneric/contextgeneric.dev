@@ -56,6 +56,43 @@ pub mod examples {
     }
 }
 
+/// ## Under the hood
+///
+/// `ComputerRefComponent` is `PromoteRef<P>`, one step from the base, so a hand-written `Computer`
+/// whose input is a borrow answers it.
+pub mod under_the_hood {
+    use cgp::extra::handler::CanComputeRef;
+    use cgp::prelude::*;
+
+    #[cgp_new_provider]
+    impl<'a, Context, Code> Computer<Context, Code, &'a u64> for DoubleRef {
+        type Output = u64;
+
+        fn compute(_context: &Context, _code: PhantomData<Code>, input: &'a u64) -> u64 {
+            input * 2
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerRefComponent: PromoteComputer<DoubleRef>,
+        }
+    }
+
+    check_components! {
+        App {
+            ComputerRefComponent: ((), u64),
+        }
+    }
+
+    #[test]
+    fn test_compute_ref() {
+        assert_eq!(App.compute_ref(PhantomData::<()>, &21), 42);
+    }
+}
+
 /// ## Common Mistakes
 ///
 /// The one-step entries work for a hand-written base: `TryComputerComponent` goes to `Promote` and

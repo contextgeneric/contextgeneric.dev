@@ -44,8 +44,9 @@ delegate_components! {
 }
 ```
 
-It also answers `AsyncComputerRefComponent` and `HandlerRefComponent`, but those need a base that
-takes its input by reference; a base over an owned `u64` answers only `HandlerComponent`.
+It also answers `AsyncComputerRefComponent`, for a base whose input is a borrow, and
+`HandlerRefComponent`, which needs that base wired to the bundle as `#[cgp_computer]` wires it. A
+base over an owned `u64` answers only `HandlerComponent`.
 
 ## Examples
 

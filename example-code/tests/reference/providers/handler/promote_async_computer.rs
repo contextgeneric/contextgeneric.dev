@@ -42,3 +42,45 @@ pub mod examples {
         futures::executor::block_on(demo());
     }
 }
+
+/// ## Under the hood
+///
+/// `AsyncComputerRefComponent` is `PromoteRef<P>`, one step from the base, so a hand-written
+/// `AsyncComputer` whose input is a borrow answers it.
+pub mod under_the_hood {
+    use cgp::extra::handler::CanComputeAsyncRef;
+    use cgp::prelude::*;
+
+    #[cgp_new_provider]
+    impl<'a, Context, Code> AsyncComputer<Context, Code, &'a u64> for DoubleRefLater {
+        type Output = u64;
+
+        async fn compute_async(
+            _context: &Context,
+            _code: PhantomData<Code>,
+            input: &'a u64,
+        ) -> u64 {
+            input * 2
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            AsyncComputerRefComponent: PromoteAsyncComputer<DoubleRefLater>,
+        }
+    }
+
+    check_components! {
+        App {
+            AsyncComputerRefComponent: ((), u64),
+        }
+    }
+
+    #[test]
+    fn test_compute_async_ref() {
+        let output = futures::executor::block_on(App.compute_async_ref(PhantomData::<()>, &21));
+        assert_eq!(output, 42);
+    }
+}

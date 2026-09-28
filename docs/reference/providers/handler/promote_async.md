@@ -43,8 +43,7 @@ A context serves both async members from hand-written synchronous providers:
 use core::num::ParseIntError;
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
-use cgp::extra::error::DebugError;
-use cgp::extra::error::RaiseFrom;
+use cgp::extra::error::{DebugError, RaiseFrom};
 use cgp::extra::handler::{CanComputeAsync, CanHandle, PromoteAsync};
 
 #[cgp_new_provider]

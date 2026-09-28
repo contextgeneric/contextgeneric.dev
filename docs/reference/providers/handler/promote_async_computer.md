@@ -112,8 +112,10 @@ delegate_components! {
 ```
 
 It routes `HandlerComponent` to [`Promote`](promote.md), which wraps the awaited value in `Ok`, and
-the two by-reference members to [`PromoteRef`](promote_ref.md), which need the base to take the
-borrow as its input.
+the two by-reference members to [`PromoteRef`](promote_ref.md), which passes the borrow to an owned
+member as its input. `AsyncComputerRefComponent` asks that of the base, which must accept the
+borrow. `HandlerRefComponent` asks it of the base's `Handler`, a sibling entry, so it serves only a
+base wired to the bundle.
 
 ## Related constructs
 

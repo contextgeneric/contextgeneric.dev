@@ -109,7 +109,7 @@ The list folds to `ComposeHandlers<Multiply<…>, ComposeHandlers<Add<…>, Mult
 is a [value context](/docs/reference/glossary#value-context): each stage reads one of its fields.
 Stages of mismatched shapes can be reconciled inline, as in
 `PromoteAsync<Promote<Add<Symbol!("bar")>>>`, which lifts a plain `Computer` stage to the async
-`Handler` shape a `Handler` pipeline asks for.
+`Handler` shape a `Handler` pipeline asks for; the context then also needs an error type.
 
 ## When to use it
 
@@ -117,8 +117,9 @@ Stages of mismatched shapes can be reconciled inline, as in
 nesting [`ComposeHandlers`](compose_handlers.md) by hand. For exactly two, `ComposeHandlers` is the
 plainer choice.
 
-For a pipeline where a step should short-circuit on a `Result` branch rather than always feed the
-next stage, use [`PipeMonadic`](../monad/pipe_monadic.md), the monadic generalization;
+For a pipeline whose stages should stop on a branch of their output, such as an `Err` value or the
+first success, rather than feed every output to the next stage, use
+[`PipeMonadic`](../monad/pipe_monadic.md), the monadic generalization;
 `PipeMonadic<IdentMonadic, …>` reduces to `PipeHandlers`.
 
 ## Under the hood

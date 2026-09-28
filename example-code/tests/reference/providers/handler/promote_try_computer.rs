@@ -1,7 +1,7 @@
 //! Code from `docs/reference/providers/handler/promote_try_computer.md` — `PromoteTryComputer`.
 //!
 //! Pins the Examples program, a `#[cgp_computer]` function returning `Result` whose provider answers
-//! the family through the bundle, and the one-step entry a hand-written base can use. The
+//! the family through the bundle, and the one-step entries a hand-written base can use. The
 //! hand-written base behind the `Handler` entry is a trybuild fixture.
 
 /// ## Examples
@@ -46,11 +46,12 @@ pub mod examples {
 
 /// ## Common Mistakes
 ///
-/// The `TryComputerComponent` entry is `TryPromote<P>`, one step from the base, so it serves a
-/// hand-written `Computer` returning `Result`.
+/// The `TryComputerComponent` and `AsyncComputerComponent` entries are `TryPromote<P>` and
+/// `PromoteAsync<P>`, one step from the base, so they serve a hand-written `Computer` returning
+/// `Result`; the async one keeps the `Result` as its output.
 pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
-    use cgp::extra::handler::{PromoteAsync, TryPromote};
+    use cgp::extra::handler::{CanComputeAsync, PromoteAsync, TryPromote};
     use cgp::prelude::*;
 
     #[cgp_new_provider]
@@ -70,7 +71,7 @@ pub mod common_mistakes {
     delegate_components! {
         App {
             ErrorTypeProviderComponent: UseType<String>,
-            TryComputerComponent: PromoteTryComputer<CheckedDouble>,
+            [TryComputerComponent, AsyncComputerComponent]: PromoteTryComputer<CheckedDouble>,
             // The fix the page gives for the handler slot.
             HandlerComponent: PromoteAsync<TryPromote<CheckedDouble>>,
         }
@@ -78,7 +79,18 @@ pub mod common_mistakes {
 
     check_components! {
         App {
-            [TryComputerComponent, HandlerComponent]: ((), u64),
+            [TryComputerComponent, AsyncComputerComponent, HandlerComponent]: ((), u64),
         }
+    }
+
+    pub async fn demo() {
+        let code = PhantomData::<()>;
+
+        assert_eq!(App.compute_async(code, u64::MAX).await, Err("overflow".to_owned()));
+    }
+
+    #[test]
+    fn test_demo() {
+        futures::executor::block_on(demo());
     }
 }
