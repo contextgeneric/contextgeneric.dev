@@ -29,8 +29,8 @@ delegate_components! {
     }
 }
 
-// error[E0599]: the method `greet` exists for struct `Person`, but its trait bounds
-//              were not satisfied
-Person { age: 0 }.greet();
-
-fn main() {}
+fn main() {
+    // error[E0599]: the method `greet` exists for struct `Person`, but its trait bounds
+    //              were not satisfied
+    Person { age: 0 }.greet();
+}

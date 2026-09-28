@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The complete reference for every CGP construct, grouped by the job it does, with the handful a newcomer needs first and a lookup table for names without a page.'
 ---
 
 # Reference
@@ -30,25 +31,26 @@ these.
 | [`#[implicit]`](./attributes/implicit.md) | Reads a value out of the context as if it were a function argument |
 
 The first four are the full component cycle: define, implement, wire, verify. The last two are how
-most code avoids needing that cycle at all — reach for them first, and climb to a full component when
-a trait genuinely needs a second implementation.
+most code avoids needing that cycle at all. Reach for them first, and climb to a full component when
+a trait needs a second implementation.
 
 ## By what you are trying to do
 
-The rest of the reference is grouped by the job a construct does rather than by what kind of thing it
-is. If you know which *file* you want rather than which job, the sidebar groups the same pages by kind
-— macros, attributes, derives, and so on.
+The rest of the reference is grouped by the job a construct does rather than by what kind of thing
+it is. If you know which *file* you want rather than which job, the sidebar groups the same pages by
+kind: macros, attributes, derives, and so on.
 
 ### Define a trait, and implement it
 
-[`#[cgp_component]`](./macros/cgp_component.md) is the foundational macro, turning one trait into the
-consumer trait callers use and the provider trait implementations target. A provider is then written
-with [`#[cgp_impl]`](./macros/cgp_impl.md), which keeps `self` and the consumer method signatures;
-[`#[cgp_provider]`](./macros/cgp_provider.md) is the lower-level form underneath it, which you will
-read in generated code more often than you write. When a trait needs only one implementation and
-no wiring at all, [`#[cgp_fn]`](./macros/cgp_fn.md) builds it straight from a function, and
-[`#[blanket_trait]`](./macros/blanket_trait.md) does the same from a trait with default methods.
-[`#[async_trait]`](./macros/async_trait.md) is how a CGP trait declares an `async fn`.
+[`#[cgp_component]`](./macros/cgp_component.md) is the foundational macro, turning one trait into
+the consumer trait callers use and the provider trait implementations target. A provider is then
+written with [`#[cgp_impl]`](./macros/cgp_impl.md), which keeps `self` and the consumer method
+signatures; [`#[cgp_provider]`](./macros/cgp_provider.md) is the lower-level form underneath it,
+which you will read in generated code more often than you write. When a trait needs only one
+implementation and does not need wiring, [`#[cgp_fn]`](./macros/cgp_fn.md) builds it straight from a
+function, and [`#[blanket_trait]`](./macros/blanket_trait.md) does the same from a trait with
+default methods. [`#[async_trait]`](./macros/async_trait.md) is how a CGP trait declares an
+`async fn`.
 
 ### Wire a type to the implementations it uses
 
@@ -64,16 +66,17 @@ the table is made of.
 
 ### Read values out of the context
 
-An [`#[implicit]`](./attributes/implicit.md) argument is the default way to read a field: it looks like
-an ordinary function parameter and is filled from a same-named field on the context. The field access
-itself comes from [`#[derive(HasField)]`](./derives/derive_has_field.md) and the
+An [`#[implicit]`](./attributes/implicit.md) argument is the default way to read a field: it looks
+like an ordinary function parameter and is filled from a same-named field on the context. The field
+access itself comes from [`#[derive(HasField)]`](./derives/derive_has_field.md) and the
 [`HasField`](./traits/field-access/has_field.md) trait, whose mutable form is
-[`HasFieldMut`](./traits/field-access/has_field_mut.md). Four further traits are the machinery underneath, generated
-rather than written: [`FieldGetter`](./traits/field-access/field_getter.md) and
-[`MutFieldGetter`](./traits/field-access/mut_field_getter.md) are the provider-side mirrors a getter component is
-wired through, and [`MapField`](./traits/field-access/map_field.md) with
-[`FieldMapper`](./traits/field-access/field_mapper.md) are what let a getter reach into a nested value without
-forcing its type to be `'static`.
+[`HasFieldMut`](./traits/field-access/has_field_mut.md). Four further traits sit underneath.
+[`FieldGetter`](./traits/field-access/field_getter.md) and
+[`MutFieldGetter`](./traits/field-access/mut_field_getter.md) are the provider-side forms of field
+access, which a getter component is wired through, and
+[`MapField`](./traits/field-access/map_field.md) with its provider-side mirror
+[`FieldMapper`](./traits/field-access/field_mapper.md) reads through a field of a generic context,
+where a chained `get_field` would need a lifetime bound on the field's type.
 
 Getter traits are the sparing alternative, for the cases an implicit argument cannot reach.
 [`#[cgp_auto_getter]`](./macros/cgp_auto_getter.md) generates one from the method name;
@@ -84,20 +87,20 @@ chosen by wiring, through [`UseField` and its siblings](./providers/use_field.md
 
 ### Declare what an implementation needs
 
-These attributes state what an implementation needs, and they divide by whether the requirement stays
-private to it. [`#[uses]`](./attributes/uses.md) imports the traits the body depends on and
-[`#[use_provider]`](./attributes/use_provider.md) does the same for an inner provider in a higher-order
-provider — both landing on the implementation alone, so a caller never sees them. Where a requirement
-should instead be part of what the trait promises, [`#[extend]`](./attributes/extend.md) adds it as a
-supertrait and [`#[extend_where]`](./attributes/extend_where.md) as a predicate on the generated trait
-itself. When the body needs a type that a field of the context fixes,
-[`#[impl_generics]`](./attributes/impl_generics.md) declares the parameter on the implementation alone,
-so callers never name it.
+These attributes state what an implementation needs, and they divide by whether the requirement
+stays private to it. [`#[uses]`](./attributes/uses.md) imports the traits the body depends on and
+[`#[use_provider]`](./attributes/use_provider.md) does the same for an inner provider in a
+higher-order provider. Both land on the implementation alone, so a caller never sees them. Where a
+requirement should instead be part of what the trait promises, [`#[extend]`](./attributes/extend.md)
+adds it as a supertrait and [`#[extend_where]`](./attributes/extend_where.md) as a predicate on the
+generated trait itself. When the body needs a type that a field of the context fixes,
+[`#[impl_generics]`](./attributes/impl_generics.md) declares the parameter on the implementation
+alone, so callers never name it.
 
 ### Let each context choose a type
 
-[`#[cgp_type]`](./macros/cgp_type.md) defines an abstract-type component — an error type, a runtime,
-a scalar — that each context fills in by wiring the component to
+[`#[cgp_type]`](./macros/cgp_type.md) defines an abstract-type component, such as an error type, a
+runtime, or a scalar, that each context fills in by wiring the component to
 [`UseType<T>`](./providers/use_type.md), or to
 [`UseDelegatedType`](./providers/use_delegated_type.md) to resolve it through a table. Generic code
 names such a type by importing it with [`#[use_type]`](./attributes/use_type.md), which is a
@@ -110,37 +113,37 @@ stand in as a named component's.
 
 [`HasErrorType`](./components/has_error_type.md) gives a context one shared error type,
 [`CanRaiseError`](./components/can_raise_error.md) constructs it from a source error, and
-[`CanWrapError`](./components/can_wrap_error.md) attaches detail to it. The interchangeable strategies
-that satisfy them — `RaiseFrom`, `ReturnError`, `DebugError`, and the rest — are the
-[error providers](./providers/error/index.md).
+[`CanWrapError`](./components/can_wrap_error.md) attaches detail to it. The interchangeable
+strategies that satisfy them, such as `RaiseFrom`, `ReturnError`, and `DebugError`, are the [error
+providers](./providers/error/index.md).
 
 ### Compute things
 
-The [handler family](./components/handler/index.md) models computation along three axes: synchronous or
-async, fallible or not, taking an input or not. [`Computer`](./components/handler/computer.md) is the
-plain synchronous transform, [`TryComputer`](./components/handler/try_computer.md) adds fallibility,
-[`Handler`](./components/handler/handler.md) is the general async and fallible case, and
-[`Producer`](./components/handler/producer.md) is the input-free one.
+The [handler family](./components/handler/index.md) models computation along three axes: synchronous
+or async, fallible or not, taking an input or not. [`Computer`](./components/handler/computer.md) is
+the plain synchronous transform, [`TryComputer`](./components/handler/try_computer.md) adds
+fallibility, [`Handler`](./components/handler/handler.md) is the general async and fallible case,
+and [`Producer`](./components/handler/producer.md) is the input-free one.
 [`CanRun`](./components/runner.md) runs tasks, [`CanSendRun`](./components/send_runner.md) is its
 `Send`-future variant, and [`HasRuntime`](./components/has_runtime.md) with
-[`HasRuntimeType`](./components/has_runtime_type.md) supplies the runtime they run on. Each of the three
-computers and the handler also has by-reference and, where it applies, async siblings —
+[`HasRuntimeType`](./components/has_runtime_type.md) supplies the runtime they run on. `Computer`,
+`TryComputer`, and `Handler` also have by-reference siblings, and `Computer` has async ones:
 [`ComputerRef`](./components/handler/computer_ref.md),
-[`AsyncComputer`](./components/handler/async_computer.md),
-[`AsyncComputerRef`](./components/handler/async_computer_ref.md),
-[`TryComputerRef`](./components/handler/try_computer_ref.md), and
-[`HandlerRef`](./components/handler/handler_ref.md) — each a component with its own page under the
-[handler family](./components/handler/index.md).
+[`TryComputerRef`](./components/handler/try_computer_ref.md),
+[`HandlerRef`](./components/handler/handler_ref.md),
+[`AsyncComputer`](./components/handler/async_computer.md), and
+[`AsyncComputerRef`](./components/handler/async_computer_ref.md). Each is a component with its own
+page under the [handler family](./components/handler/index.md).
 
 Providers in this family are written from plain functions with
 [`#[cgp_computer]`](./macros/cgp_computer.md) and [`#[cgp_producer]`](./macros/cgp_producer.md), and
-composed with the [handler combinators](./providers/handler/index.md), the
-[dispatch combinators](./providers/dispatch/index.md), and the
-[monad providers](./providers/monad/index.md) built on the monad traits —
-[`MonadicBind`](./traits/monad/monadic_bind.md), [`ContainsValue`](./traits/monad/contains_value.md),
-[`LiftValue`](./traits/monad/lift_value.md), and [`MonadicTrans`](./traits/monad/monadic_trans.md).
-[`#[cgp_auto_dispatch]`](./macros/cgp_auto_dispatch.md) generates a dispatching handler from a per-type
-trait.
+composed with the [handler combinators](./providers/handler/index.md), the [dispatch
+combinators](./providers/dispatch/index.md), and the [monad providers](./providers/monad/index.md)
+built on the monad traits: [`MonadicBind`](./traits/monad/monadic_bind.md),
+[`ContainsValue`](./traits/monad/contains_value.md), [`LiftValue`](./traits/monad/lift_value.md),
+and [`MonadicTrans`](./traits/monad/monadic_trans.md).
+[`#[cgp_auto_dispatch]`](./macros/cgp_auto_dispatch.md) generates a dispatching handler from a
+per-type trait.
 
 ### Work with a type's structure
 
@@ -187,36 +190,37 @@ the whole set, so that a name met in an expansion or an error message can be loo
 [`cgp_namespace!`](./macros/cgp_namespace.md) defines a reusable, inheritable wiring table that many
 contexts can join, which is how top-level wiring stays short as component counts grow. It works
 through [`RedirectLookup`](./providers/redirect_lookup.md), which re-routes a lookup along a
-[`Path!`](./macros/path.md), together with the three lookup traits that resolve inherited and per-type
-defaults — [`DefaultNamespace`](./traits/namespace/default_namespace.md) for a key that is a component alone, and
-[`DefaultImpls1`](./traits/namespace/default_impls1.md) and [`DefaultImpls2`](./traits/namespace/default_impls2.md) when the
-key carries one further type or two. A component registers into a namespace under a path prefix with
+[`Path!`](./macros/path.md), together with the three lookup traits that resolve inherited and
+per-type defaults: [`DefaultNamespace`](./traits/namespace/default_namespace.md) for a key that is a
+component alone, and [`DefaultImpls1`](./traits/namespace/default_impls1.md) and
+[`DefaultImpls2`](./traits/namespace/default_impls2.md) when the key carries one further type or
+two. A component registers into a namespace under a path prefix with
 [`#[prefix(...)]`](./attributes/prefix.md), and a provider registers itself as one of those defaults
 with [`#[default_impl(...)]`](./attributes/default_impl.md). The `open` statement of
-[`delegate_components!`](./macros/delegate_components.md) is a
-lightweight special case of the same mechanism, and it supersedes the older
-[`UseDelegate`](./providers/use_delegate.md) tables and the
+[`delegate_components!`](./macros/delegate_components.md) is a lightweight special case of the same
+mechanism, and it supersedes the older [`UseDelegate`](./providers/use_delegate.md) tables and the
 [`#[derive_delegate]`](./attributes/derive_delegate.md) attribute that generates them.
 
 ### Understand a generated type or an error
 
 These are the type-level building blocks the rest of CGP is made of, and the place to look when a
-generated type or an error names one you did not write. [`PhantomData`](./types/phantom_data.md) is the
-one to start with: it is what lets a provider or a tag carry a type it stores no value of, and it
-underlies most of the rest. You write the lists through sugar — [`Symbol!`](./macros/symbol.md) for a
-field name, [`Product!`](./macros/product.md) for a record list, [`Sum!`](./macros/sum.md) for its dual,
-[`Path!`](./macros/path.md) for a route — and only need to recognize the
-[lists](./types/index.md) they expand into, [`Cons`](./types/cons.md) and
-[`Nil`](./types/nil.md), [`Either`](./types/either.md) and
-[`Void`](./types/void.md), [`Chars`](./types/chars.md), and
-[`PathCons`](./types/path_cons.md), when one shows up in an error. Each entry in a record or a
-variant is a [`Field`](./types/field.md), tagged by a [`Symbol!`](./macros/symbol.md) or an
-[`Index`](./types/index_type.md), and [`Life`](./types/life.md) lifts a lifetime into a type where the
-wiring needs one. [`MRef`](./types/mref.md) is the odd one out, a runtime value a getter returns rather
-than a type-level marker. Three traits turn those encodings back into runtime data:
-[`StaticString`](./traits/formatting/static_string.md) decodes a type-level string into a constant,
-[`StaticFormat`](./traits/formatting/static_format.md) writes one into a formatter and is what makes it printable
-at all, and [`ConcatPath`](./traits/formatting/concat_path.md) joins two paths.
+generated type or an error names one you did not write. [`PhantomData`](./types/phantom_data.md) is
+the one to start with: it is what lets a provider or a tag carry a type without storing a value of
+it, and it underlies most of the rest. You write the lists through sugar, with
+[`Symbol!`](./macros/symbol.md) for a field name, [`Product!`](./macros/product.md) for a record
+list, [`Sum!`](./macros/sum.md) for its dual, and [`Path!`](./macros/path.md) for a route. You only
+need to recognize the [lists](./types/index.md) they expand into, [`Cons`](./types/cons.md) and
+[`Nil`](./types/nil.md), [`Either`](./types/either.md) and [`Void`](./types/void.md),
+[`Chars`](./types/chars.md), and [`PathCons`](./types/path_cons.md), when one shows up in an error.
+Each entry in a record or a variant is a [`Field`](./types/field.md), tagged by a
+[`Symbol!`](./macros/symbol.md) or an [`Index`](./types/index_type.md), and
+[`Life`](./types/life.md) lifts a lifetime into a type where the wiring needs one.
+[`MRef`](./types/mref.md) is the odd one out, a runtime value a getter returns rather than a
+type-level marker. Two traits turn a type-level string back into runtime data:
+[`StaticString`](./traits/formatting/static_string.md) decodes it into a constant, and
+[`StaticFormat`](./traits/formatting/static_format.md) writes it into a formatter, which is what
+makes it printable. [`ConcatPath`](./traits/formatting/concat_path.md) joins two paths at the type
+level.
 
 When wiring fails, three traits are what you will see named:
 [`DelegateComponent`](./traits/wiring/delegate_component.md),
@@ -224,35 +228,44 @@ When wiring fails, three traits are what you will see named:
 name, and [`CanUseComponent`](./traits/wiring/can_use_component.md), which is what a check asserts. The
 [compile errors](./errors.md) page covers the recurring failures and how to read them.
 
-If what you are missing is a *word* rather than a construct — environmental context, impl-side
-dependency, type class — the [glossary](./glossary.md) defines the terms this documentation uses and
-links to the page that explains each one.
+If what you are missing is a *word* rather than a construct, such as environmental context,
+impl-side dependency, or type class, the [glossary](./glossary.md) defines the terms this
+documentation uses and links to the page that explains each one.
 
 ## Looking for a name you don't see?
 
 Almost every construct has a page of its own. The exceptions are names that are not separately
 *constructs*: a **marker** is a type implementing a trait, an **alias** is another spelling of a
-construct, and a **variant** differs from a base construct by one axis. Each is documented on the page
-of the thing it belongs to. If you arrived knowing one of these names, this is where it lives.
+construct, and a **variant** differs from a base construct by one axis. A component's **consumer
+trait** shares a page with its provider trait, and the **helper traits and generated types** a
+construct uses are explained on its page. Each is documented on the page of the thing it belongs to.
+If you arrived knowing one of these names, this is where it lives.
 
 | Looking for | It's on |
 |---|---|
 | `#[cgp_new_provider]` | [`#[cgp_provider]`](./macros/cgp_provider.md) |
-| `WithType`, `WithField`, `WithContext` | [`WithProvider`](./providers/with_provider.md) |
-| `Symbol` (the type, not the `Symbol!` macro) | [`Chars`](./types/chars.md) |
+| `Symbol` (the type, not the `Symbol!` macro) | [`Symbol!`](./macros/symbol.md) and [`Chars`](./types/chars.md) |
 | `IdentMonadic`, `OkMonadic`, `ErrMonadic`, `OkMonadicTrans`, `ErrMonadicTrans` | [Monad providers](./providers/monad/index.md) |
-| `UseDelegatedType`, `WithDelegatedType` | [`UseDelegatedType`](./providers/use_delegated_type.md) and [`WithProvider`](./providers/with_provider.md) |
 | `MatchWithHandlersRef`, `MatchWithHandlersMut` | [`MatchWithHandlers`](./providers/dispatch/match_with_handlers.md) |
 | `MatchFirstWithHandlersRef`, `MatchFirstWithHandlersMut`, and the `MatchFirstWithValueHandlers` and `MatchFirstWithFieldHandlers` forms | [`MatchFirstWithHandlers`](./providers/dispatch/match_first_with_handlers.md) |
 | `MatchWithValueHandlersRef`, `MatchWithValueHandlersMut` | [`MatchWithValueHandlers`](./providers/dispatch/match_with_value_handlers.md) |
 | `MatchWithFieldHandlersRef` | [`MatchWithFieldHandlers`](./providers/dispatch/match_with_field_handlers.md) |
 | `ExtractFirstFieldAndHandle`, `HandleFirstFieldValue` | [`ExtractFieldAndHandle`](./providers/dispatch/extract_field_and_handle.md), [`HandleFieldValue`](./providers/dispatch/handle_field_value.md) |
 | `DispatchMatchers` | [`MatchWithHandlers`](./providers/dispatch/match_with_handlers.md) |
-| `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler`, `MapExtractFieldAndHandle` | [`MatchWithFieldHandlers`](./providers/dispatch/match_with_field_handlers.md) |
+| `ToFieldHandlers`, `HasFieldHandlers`, `MapFieldHandler`, `MapExtractFieldAndHandle`, `MapExtractFirstFieldAndHandle` | [`MatchWithFieldHandlers`](./providers/dispatch/match_with_field_handlers.md) |
 | `ToBuildAndMergeHandler` | [`BuildAndMergeOutputs`](./providers/dispatch/build_and_merge_outputs.md) |
 | `IsPresent`, `IsNothing`, `IsVoid`, `IsOptional` | [`MapType`](./traits/type-level/map_type.md) |
 | `IsRef`, `IsMut`, `IsOwned` | [`MapTypeRef`](./traits/type-level/map_type_ref.md) |
 | `product!` (the value-level form) | [`Product!`](./macros/product.md) |
+| `CanCompute`, `CanComputeRef`, `CanComputeAsync`, `CanComputeAsyncRef` | [`Computer`](./components/handler/computer.md), [`ComputerRef`](./components/handler/computer_ref.md), [`AsyncComputer`](./components/handler/async_computer.md), [`AsyncComputerRef`](./components/handler/async_computer_ref.md) |
+| `CanTryCompute`, `CanTryComputeRef`, `CanHandle`, `CanHandleRef`, `CanProduce` | [`TryComputer`](./components/handler/try_computer.md), [`TryComputerRef`](./components/handler/try_computer_ref.md), [`Handler`](./components/handler/handler.md), [`HandlerRef`](./components/handler/handler_ref.md), [`Producer`](./components/handler/producer.md) |
+| `ErrorOf`, `ErrorOnly` | [`HasErrorType`](./components/has_error_type.md) |
+| `TypeOf` | [`HasType`](./components/has_type.md) |
+| `RuntimeOf` | [`HasRuntimeType`](./components/has_runtime_type.md) |
+| `FieldsBuilder`, `FieldsExtractor` | [`CanBuildFrom`](./traits/casting/can_build_from.md), [`CanUpcast`](./traits/casting/can_upcast.md) |
+| `TryPromoteProviders` | [`PipeMonadic`](./providers/monad/pipe_monadic.md) |
+| `__Partial{Name}`, `__PartialRef{Name}` (a derive's companion types) | [`#[derive(BuildField)]`](./derives/derive_build_field.md), [`#[derive(ExtractField)]`](./derives/derive_extract_field.md) |
+| `{Name}Component` (a component's marker) | [`#[cgp_component]`](./macros/cgp_component.md) |
 | `#[check_trait(...)]`, `#[check_providers(...)]` | [`check_components!`](./macros/check_components.md) |
 | `#[check_params(...)]`, `#[skip_check]` | [`delegate_and_check_components!`](./macros/delegate_and_check_components.md) |
 

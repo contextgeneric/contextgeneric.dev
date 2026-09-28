@@ -11,8 +11,8 @@ Short definitions of the words used across this documentation, each pointing at 
 explains the idea properly. It is a place to look a term up, not a place to learn CGP: every entry is
 a sentence or two and a link onward.
 
-If you arrived knowing the name of a *construct* rather than a word — `IsPresent`,
-`#[cgp_new_provider]` — the [reference index](./index.md) is the page that routes those.
+If you arrived knowing the name of a *construct* rather than a word, such as `IsPresent` or
+`#[cgp_new_provider]`, the [reference index](./index.md) is the page that routes those.
 
 ## CGP terms
 
@@ -70,7 +70,7 @@ associated types, and consts, exactly as an ordinary trait may.
 ### component marker
 
 The zero-sized type naming a component in a wiring table, such as `GreeterComponent`. It is the key
-the table looks a provider up by, and it carries no behavior of its own.
+the table looks a provider up by, and it does not carry behavior of its own.
 
 [`#[cgp_component]`](./macros/cgp_component.md) ·
 [`DelegateComponent`](./traits/wiring/delegate_component.md)
@@ -101,8 +101,7 @@ a concrete type, so a context selects among them at compile time.
 ### delegation
 
 An entry in a wiring table, mapping one component to the provider that supplies it. Delegating a
-component does not by itself check that the provider's dependencies hold — that is what a check trait
-is for.
+component does not by itself check that the provider's dependencies hold; a check trait does that.
 
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) ·
 [`DelegateComponent`](./traits/wiring/delegate_component.md)
@@ -126,7 +125,7 @@ way.
 
 ### expansion
 
-The ordinary Rust a CGP macro generates — the traits, impls, and marker types behind a construct,
+The ordinary Rust a CGP macro generates: the traits, impls, and marker types behind a construct,
 also called what a construct desugars to. `cargo cgp expand` prints it with CGP's type-level
 constructs restored to readable macro notation.
 
@@ -152,7 +151,7 @@ or matched variant by variant without naming its concrete type.
 ### getter trait
 
 A trait declaring a named accessor for a value the context holds, used where an implicit argument
-cannot reach — a field on another type, an accessor other code requires by name, or a return type
+cannot reach: a field on another type, an accessor other code requires by name, or a return type
 inferred from the field.
 
 [Implicit arguments](/docs/concepts/implicit-arguments) ·
@@ -191,7 +190,7 @@ on the context. It is the default way to read a context field.
 
 ### marker type
 
-A zero-sized type carrying no data, used as a name the compiler can resolve rather than as a value.
+A zero-sized type without data, used as a name the compiler can resolve rather than as a value.
 Providers and component markers are both marker types, and neither is ever instantiated.
 
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) ·
@@ -246,7 +245,7 @@ In `CanCompute<Code, Input>`, `Code` is the selector and `Input` is the target.
 ### self-targeted component
 
 A component whose operation acts on, or describes, the context itself, as in `CanGreet` or
-`HasErrorType`. Most components are self-targeted.
+`HasErrorType`. Getters are self-targeted too.
 
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
 
@@ -275,7 +274,8 @@ both the target and the context, so it has one implementation of that component 
 ### wiring
 
 The type-level table on a context recording which provider supplies each component. The compiler
-resolves it during type checking, so a wired call compiles to a direct call with no runtime lookup.
+resolves it during type checking, so a wired call compiles to a direct call without a runtime
+lookup.
 
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) ·
 [`delegate_components!`](./macros/delegate_components.md)
@@ -297,7 +297,9 @@ than the caller.
 An implementation written for every type satisfying a set of bounds, such as `impl<T: Display> Foo for T`,
 rather than for one named type. CGP's generated code rests on these.
 
-[Rust Reference: Implementations](https://doc.rust-lang.org/reference/items/implementations.html)
+[Blanket implementations in
+Rust](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) · [Rust Reference:
+Implementations](https://doc.rust-lang.org/reference/items/implementations.html)
 
 ### coherence
 
@@ -357,16 +359,16 @@ and derives are built.
 
 ### static dispatch
 
-Resolving a call at compile time to a direct call to a known function, with no runtime lookup. CGP
+Resolving a call at compile time to a direct call to a known function, without a runtime lookup. CGP
 wiring resolves this way.
 
 [Rust Book: Generic data types](https://doc.rust-lang.org/book/ch10-01-syntax.html)
 
 ### supertrait
 
-A trait required by another trait, so implementing the second means the first is available too. CGP
-adds one with `#[extend]` rather than native `:` syntax, which keeps the generated trait's bounds
-together.
+A trait required by another trait, so implementing the second means the first is available too. In
+CGP, `#[extend]` adds one to a generated trait, and it is the only way to give a `#[cgp_fn]` trait a
+supertrait.
 
 [Rust Reference: Traits](https://doc.rust-lang.org/reference/items/traits.html) ·
 [`#[extend]`](./attributes/extend.md)
@@ -513,7 +515,7 @@ arguments, so behavior is composed at compile time.
 
 ### reflection
 
-Inspecting a type's structure — its fields, variants, and names — from within the program. CGP's
+Inspecting a type's structure (its fields, variants, and names) from within the program. CGP's
 equivalent is encoded in types and resolved at compile time rather than read from runtime metadata.
 
 [Comparison: Reflection](/docs/comparisons/reflection) ·
@@ -537,7 +539,7 @@ apply to records that differ in the fields it does not mention.
 
 ### signature and structure
 
-In ML, a signature is the interface a module satisfies, and a structure is a module satisfying it —
+In ML, a signature is the interface a module satisfies, and a structure is a module satisfying it:
 roughly a type and its implementation, related by ascription rather than by declaration.
 
 [Comparison: ML modules](/docs/comparisons/ml-modules) ·
@@ -567,12 +569,12 @@ An interface a type can be declared to satisfy after the fact, with the compiler
 implementation from the types at a call site.
 
 [Comparison: Type classes](/docs/comparisons/type-classes) ·
-[Type class](https://en.wikipedia.org/wiki/Type_class)
+[How to make ad-hoc polymorphism less ad hoc](https://dl.acm.org/doi/10.1145/75277.75283)
 
 ### vtable
 
-The table of function pointers behind a dynamically dispatched call, consulted at run time to find the
-implementation. CGP wiring has no runtime counterpart to it.
+The table of function pointers behind a dynamically dispatched call, consulted at run time to find
+the implementation. CGP wiring does not use one, because it resolves every call at compile time.
 
 [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch) ·
 [Virtual method table](https://en.wikipedia.org/wiki/Virtual_method_table)

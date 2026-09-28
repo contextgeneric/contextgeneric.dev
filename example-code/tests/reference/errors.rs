@@ -57,9 +57,9 @@ pub mod a_dependency_is_not_met {
 ///
 /// The other half: the same wiring, with the check the page adds to force the failure to the wiring
 /// site. The page quotes the resulting `E0277` — `[CGP-E001]` through the toolchain — so the
-/// snippet is carried as a `compile_fail` doctest.
+/// snippet is a trybuild fixture.
 ///
-/// The program is repeated in full rather than importing the module above, because a doctest is
+/// The program is repeated in full rather than importing the module above, because a fixture is
 /// compiled as its own crate and because the page shows it whole.
 ///
 /// Rejected snippet — trybuild fixture `tests/compile_fail/reference/errors_the_fix_1.rs`.

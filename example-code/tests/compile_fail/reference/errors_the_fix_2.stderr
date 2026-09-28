@@ -1,10 +1,41 @@
-error: missing `struct` for struct definition
-  --> tests/compile_fail/reference/errors_the_fix_2.rs:34:1
+error[E0599]: the method `greet` exists for struct `Person`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/errors_the_fix_2.rs:35:23
    |
-34 | Person { age: 0 }.greet();
-   | ^^^^^^
+22 | pub struct Person {
+   | ----------------- method `greet` not found for this struct because it doesn't satisfy `Person: CanGreet` or `Person: Greeter<Person>`
+...
+35 |     Person { age: 0 }.greet();
+   |                       ^^^^^ this is an associated function, not a method
    |
-help: add `struct` here to parse `Person` as a struct
+   = note: found the following associated functions; to be used as methods, functions must have a `self` parameter
+note: the candidate is defined in the trait `Greeter`
+  --> tests/compile_fail/reference/errors_the_fix_2.rs:5:5
    |
-34 | struct Person { age: 0 }.greet();
-   | ++++++
+ 5 |     fn greet(&self);
+   |     ^^^^^^^^^^^^^^^^
+note: trait bound `Person: Greeter<Person>` was not satisfied
+  --> tests/compile_fail/reference/errors_the_fix_2.rs:3:1
+   |
+ 3 | #[cgp_component(Greeter)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 4 | pub trait CanGreet {
+   |           ^^^^^^^^
+note: the trait `Greeter` must be implemented
+  --> tests/compile_fail/reference/errors_the_fix_2.rs:4:1
+   |
+ 4 | / pub trait CanGreet {
+ 5 | |     fn greet(&self);
+ 6 | | }
+   | |_^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `CanGreet` defines an item `greet`, perhaps you need to implement it
+  --> tests/compile_fail/reference/errors_the_fix_2.rs:4:1
+   |
+ 4 | pub trait CanGreet {
+   | ^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use associated function syntax instead
+   |
+35 -     Person { age: 0 }.greet();
+35 +     Person::greet();
+   |

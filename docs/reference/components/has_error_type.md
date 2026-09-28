@@ -85,6 +85,25 @@ which imports it as the bare name `Error`, or through the `ErrorOf<Context>` ali
 `<Context as HasErrorType>::Error`. `ErrorOf`, the provider trait `ErrorTypeProvider`, and the key
 `ErrorTypeProviderComponent` all come from `cgp::core::error`.
 
+The same module carries `ErrorOnly<E>`, a zero-sized context whose one trait is `HasErrorType`, with
+`Error = E` for any `E: Debug`. It implements `Default`, so `ErrorOnly::<String>::default()` stands
+in wherever code needs a context that has an error type and nothing else, such as a test of a
+fallible function that reads nothing from its context:
+
+```rust
+use cgp::core::error::{ErrorOf, ErrorOnly};
+
+pub fn parse_port<Context: HasErrorType<Error = String>>(
+    _context: &Context,
+    raw: &str,
+) -> Result<u16, ErrorOf<Context>> {
+    raw.parse().map_err(|_| format!("bad port: {raw}"))
+}
+
+let context = ErrorOnly::<String>::default();
+assert_eq!(parse_port(&context, "80"), Ok(80));
+```
+
 ## Examples
 
 A context declares its abstract error, and generic code returns it without naming a concrete type:
@@ -157,6 +176,8 @@ The ideas behind it:
 
 - The trait and the `ErrorOf` alias:
   [`has_error_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-error/src/traits/has_error_type.rs)
+- `ErrorOnly`:
+  [`error_only.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-error/src/contexts/error_only.rs)
 - The `#[cgp_type]` machinery it relies on:
   [`cgp_type/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_type/)
 - The pluggable concrete error backends:

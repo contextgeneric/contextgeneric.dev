@@ -18,6 +18,24 @@ pub mod usage {
     pub fn fail() -> Result<(), <App as HasErrorType>::Error> {
         Err(anyhow::anyhow!("failed"))
     }
+
+    // `ErrorOnly<E>`: a context with an error type and nothing else.
+    use cgp::core::error::{ErrorOf, ErrorOnly};
+
+    pub fn parse_port<Context: HasErrorType<Error = String>>(
+        _context: &Context,
+        raw: &str,
+    ) -> Result<u16, ErrorOf<Context>> {
+        raw.parse().map_err(|_| format!("bad port: {raw}"))
+    }
+
+    #[test]
+    fn test_error_only_supplies_an_error_type() {
+        let context = ErrorOnly::<String>::default();
+        assert_eq!(parse_port(&context, "80"), Ok(80));
+        assert_eq!(parse_port(&context, "x"), Err("bad port: x".to_owned()));
+        assert_eq!(core::mem::size_of::<ErrorOnly<String>>(), 0);
+    }
 }
 
 /// ## Examples
