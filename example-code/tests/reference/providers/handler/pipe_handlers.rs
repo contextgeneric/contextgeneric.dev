@@ -1,14 +1,40 @@
 //! Code from `docs/reference/providers/handler/pipe_handlers.md` — `PipeHandlers`.
+//!
+//! Pins the Examples program: three field-reading computers folded into one pipeline that computes
+//! `((5 * foo) + bar) * baz`.
 
-/// ## Usage and Examples
-///
-/// `PipeHandlers` folds a list of handlers into one pipeline. `Multiply<Field>` and `Add<Field>` each
-/// read a factor or addend from a context field, so the three-stage list computes
-/// `((5 * foo) + bar) * baz`.
-pub mod a_pipeline_of_field_readers {
-    use core::marker::PhantomData;
+/// ## Usage
+pub mod usage {
+    use cgp::extra::handler::{CanCompute, PipeHandlers};
+    use cgp::prelude::*;
 
-    use cgp::extra::handler::{Computer, ComputerComponent, PipeHandlers};
+    #[cgp_computer]
+    pub fn double(value: u64) -> u64 {
+        value * 2
+    }
+
+    #[cgp_computer]
+    pub fn add_one(value: u64) -> u64 {
+        value + 1
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerComponent: PipeHandlers<Product![Double, AddOne, Double]>,
+        }
+    }
+
+    #[test]
+    fn the_list_runs_left_to_right() {
+        assert_eq!(App.compute(PhantomData::<()>, 5), 22); // ((5 * 2) + 1) * 2
+    }
+}
+
+/// ## Examples
+pub mod examples {
+    use cgp::extra::handler::{CanCompute, PipeHandlers};
     use cgp::prelude::*;
 
     #[cgp_new_provider]
@@ -36,43 +62,36 @@ pub mod a_pipeline_of_field_readers {
     }
 
     #[derive(HasField)]
-    pub struct App {
+    pub struct MyContext {
         pub foo: u64,
         pub bar: u64,
         pub baz: u64,
     }
 
     delegate_components! {
-        App {
-            ComputerComponent: PipeHandlers<
-                Product![
+        MyContext {
+            ComputerComponent:
+                PipeHandlers<Product![
                     Multiply<Symbol!("foo")>,
                     Add<Symbol!("bar")>,
                     Multiply<Symbol!("baz")>,
-                ]
-            >,
+                ]>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: ((), u64),
-            }
+    check_components! {
+        MyContext {
+            ComputerComponent: ((), u64),
         }
+    }
+
+    pub fn demo() {
+        let context = MyContext { foo: 2, bar: 3, baz: 4 };
+        assert_eq!(context.compute(PhantomData::<()>, 5), 52); // ((5 * 2) + 3) * 4
     }
 
     #[test]
-    fn the_stages_run_left_to_right() {
-        use cgp::extra::handler::CanCompute;
-
-        let app = App {
-            foo: 2,
-            bar: 3,
-            baz: 4,
-        };
-        // ((5 * 2) + 3) * 4
-        assert_eq!(app.compute(PhantomData::<()>, 5u64), 52);
+    fn test_demo() {
+        demo();
     }
 }

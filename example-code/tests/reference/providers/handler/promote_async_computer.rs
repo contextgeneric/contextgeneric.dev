@@ -1,18 +1,16 @@
 //! Code from `docs/reference/providers/handler/promote_async_computer.md` — `PromoteAsyncComputer`.
+//!
+//! Pins the Examples program: an async `#[cgp_computer]` function is the `AsyncComputer` base, and
+//! the bundle answers `HandlerComponent` from it, one step away, as it would for a hand-written base.
 
-/// ## Usage and Examples
-///
-/// `PromoteAsyncComputer` fills the family from an infallible async base. It answers
-/// `HandlerComponent` (and the async-ref members) but not `AsyncComputerComponent`, so the base is
-/// wired to `AsyncComputerComponent` directly and the bundle fills in the rest.
-pub mod filling_the_family_from_an_async_computer {
-    use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
-    use cgp::extra::error::RaiseFrom;
-    use cgp::extra::handler::{AsyncComputerComponent, HandlerComponent, PromoteAsyncComputer};
+/// ## Examples
+pub mod examples {
+    use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::{CanComputeAsync, CanHandle};
     use cgp::prelude::*;
 
     #[cgp_computer]
-    pub fn double(value: u64) -> u64 {
+    pub async fn double_later(value: u64) -> u64 {
         value * 2
     }
 
@@ -21,32 +19,26 @@ pub mod filling_the_family_from_an_async_computer {
     delegate_components! {
         App {
             ErrorTypeProviderComponent: UseType<String>,
-            ErrorRaiserComponent: RaiseFrom,
-
-            AsyncComputerComponent: Double,
-            HandlerComponent: PromoteAsyncComputer<Double>,
+            AsyncComputerComponent: DoubleLater,
+            HandlerComponent: PromoteAsyncComputer<DoubleLater>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                AsyncComputerComponent: ((), u64),
-                HandlerComponent: ((), u64),
-            }
+    check_components! {
+        App {
+            [AsyncComputerComponent, HandlerComponent]: ((), u64),
         }
+    }
+
+    pub async fn demo() {
+        let code = PhantomData::<()>;
+
+        assert_eq!(App.compute_async(code, 5).await, 10);
+        assert_eq!(App.handle(code, 5).await, Ok(10));
     }
 
     #[test]
-    fn the_async_base_answers_the_family() {
-        use cgp::extra::handler::{CanComputeAsync, CanHandle};
-        use futures::executor::block_on;
-
-        let app = App;
-        let code = PhantomData::<()>;
-
-        assert_eq!(block_on(app.compute_async(code, 5u64)), 10);
-        assert_eq!(block_on(app.handle(code, 5u64)), Ok(10));
+    fn test_demo() {
+        futures::executor::block_on(demo());
     }
 }

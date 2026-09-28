@@ -1,11 +1,30 @@
 //! Code from `docs/reference/providers/handler/return_input.md` — `ReturnInput`.
+//!
+//! Pins the Usage wiring and the Examples program, in which `ReturnInput` is the middle stage of a
+//! pipeline and changes nothing.
 
-/// ## Usage and Examples
-///
-/// `ReturnInput` is the identity handler: it returns its input unchanged. Here it is the middle stage
-/// of a pipeline, so the pipeline behaves as though the stage were not there.
-pub mod the_identity_stage {
-    use cgp::extra::handler::{ComputerComponent, PipeHandlers, ReturnInput};
+/// ## Usage
+pub mod usage {
+    use cgp::extra::handler::{CanCompute, ReturnInput};
+    use cgp::prelude::*;
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerComponent: ReturnInput,
+        }
+    }
+
+    #[test]
+    fn any_input_comes_back() {
+        assert_eq!(App.compute(PhantomData::<()>, "hello"), "hello");
+    }
+}
+
+/// ## Examples
+pub mod examples {
+    use cgp::extra::handler::{CanCompute, PipeHandlers, ReturnInput};
     use cgp::prelude::*;
 
     #[cgp_computer]
@@ -21,20 +40,18 @@ pub mod the_identity_stage {
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: ((), u64),
-            }
+    check_components! {
+        App {
+            ComputerComponent: ((), u64),
         }
     }
 
-    #[test]
-    fn the_input_passes_straight_through() {
-        use cgp::extra::handler::CanCompute;
+    pub fn demo() {
+        assert_eq!(App.compute(PhantomData::<()>, 5), 7); // 5 -> 6 -> 6 -> 7
+    }
 
-        // AddOne, then ReturnInput (a no-op), then AddOne: 5 -> 6 -> 6 -> 7.
-        assert_eq!(App.compute(PhantomData::<()>, 5u64), 7);
+    #[test]
+    fn test_demo() {
+        demo();
     }
 }

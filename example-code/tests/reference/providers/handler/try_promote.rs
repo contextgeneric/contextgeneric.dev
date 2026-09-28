@@ -1,52 +1,77 @@
 //! Code from `docs/reference/providers/handler/try_promote.md` — `TryPromote`.
+//!
+//! Pins both directions the page shows: a `Computer` returning a `Result` serves a `TryComputer` slot,
+//! and a `TryComputer` serves a `Computer` slot whose output is the `Result`.
 
-/// ## Usage and Examples
-///
-/// `TryPromote` turns a `Computer` that *returns* a `Result` into a genuine `TryComputer`, unwrapping
-/// the `Result` into the fallible interface. The context's error type is what the `Result`'s error
-/// arm becomes.
-pub mod unwrapping_a_result_output {
+/// ## Examples
+pub mod examples {
+    use core::num::ParseIntError;
+
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
-    use cgp::extra::error::RaiseFrom;
-    use cgp::extra::handler::{TryComputerComponent, TryPromote};
+    use cgp::extra::error::{DebugError, RaiseFrom};
+    use cgp::extra::handler::{CanCompute, CanTryCompute, TryPromote};
     use cgp::prelude::*;
 
-    /// A computer whose output is itself a `Result`.
-    #[cgp_computer]
-    pub fn checked_add(a: u64, b: u64) -> Result<u64, String> {
-        a.checked_add(b).ok_or_else(|| "overflow".to_owned())
+    /// A computer whose output is a `Result` in the context's error type.
+    #[cgp_new_provider]
+    impl<Context, Code> Computer<Context, Code, u64> for CheckedDouble
+    where
+        Context: HasErrorType<Error = String>,
+    {
+        type Output = Result<u64, String>;
+
+        fn compute(_context: &Context, _code: PhantomData<Code>, input: u64) -> Result<u64, String> {
+            input.checked_mul(2).ok_or_else(|| "overflow".to_owned())
+        }
+    }
+
+    /// A genuinely fallible computer.
+    #[cgp_impl(new ParseU64)]
+    #[uses(CanRaiseError<ParseIntError>)]
+    #[use_type(HasErrorType.Error)]
+    impl<Code> TryComputer<Code, String> {
+        type Output = u64;
+
+        fn try_compute(&self, _code: PhantomData<Code>, input: String) -> Result<u64, Error> {
+            input.parse().map_err(Self::raise_error)
+        }
     }
 
     pub struct App;
 
     delegate_components! {
         App {
+            open ErrorRaiserComponent;
+
             ErrorTypeProviderComponent: UseType<String>,
-            ErrorRaiserComponent: RaiseFrom,
-            TryComputerComponent: TryPromote<CheckedAdd>,
+            @ErrorRaiserComponent.String: RaiseFrom,
+            @ErrorRaiserComponent.ParseIntError: DebugError,
+
+            TryComputerComponent: TryPromote<CheckedDouble>,
+            ComputerComponent: TryPromote<ParseU64>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                TryComputerComponent: ((), (u64, u64)),
-            }
+    check_components! {
+        App {
+            TryComputerComponent: ((), u64),
+            ComputerComponent: ((), String),
         }
+    }
+
+    pub fn demo() {
+        let code = PhantomData::<()>;
+
+        // The `Result` output becomes the fallible interface.
+        assert_eq!(App.try_compute(code, 21), Ok(42));
+        assert_eq!(App.try_compute(code, u64::MAX), Err("overflow".to_owned()));
+
+        // The fallible computer surfaces its `Result` as a plain value.
+        assert_eq!(App.compute(code, "12".to_owned()), Ok(12));
     }
 
     #[test]
-    fn the_result_becomes_the_fallible_interface() {
-        use cgp::extra::handler::CanTryCompute;
-
-        let app = App;
-        let code = PhantomData::<()>;
-
-        assert_eq!(app.try_compute(code, (1u64, 2u64)), Ok(3));
-        assert_eq!(
-            app.try_compute(code, (u64::MAX, 1u64)),
-            Err("overflow".to_owned())
-        );
+    fn test_demo() {
+        demo();
     }
 }

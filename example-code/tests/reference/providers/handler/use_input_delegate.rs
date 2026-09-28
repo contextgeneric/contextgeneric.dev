@@ -1,12 +1,11 @@
 //! Code from `docs/reference/providers/handler/use_input_delegate.md` — `UseInputDelegate`.
+//!
+//! Pins the Usage and Examples programs, the legacy table and its `open` equivalent, and the
+//! component whose generated `UseInputDelegate` impl Under the hood lists, for `cargo cgp expand`.
 
-/// ## Usage and Examples
-///
-/// `UseInputDelegate` chooses the handler by the type of the input. Here a `Circle` input routes to
-/// `CircleArea` and a `Rectangle` input to `RectangleArea`, through one wiring entry keyed on the
-/// input type.
-pub mod dispatching_on_the_input_type {
-    use cgp::extra::handler::{ComputerComponent, UseInputDelegate};
+/// ## Examples
+pub mod examples {
+    use cgp::extra::handler::{CanCompute, UseInputDelegate};
     use cgp::prelude::*;
 
     pub struct Circle {
@@ -39,17 +38,12 @@ pub mod dispatching_on_the_input_type {
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerComponent: [((), Circle), ((), Rectangle)],
-            }
+    check_components! {
+        App {
+            ComputerComponent: [((), Circle), ((), Rectangle)],
         }
     }
 
-    /// The same dispatch in the current form, with `open` keys whose generic first segment matches
-    /// any code. The page names the providers `ComputeCircleArea` and `ComputeRectangleArea`.
     pub struct OpenApp;
 
     delegate_components! {
@@ -61,34 +55,39 @@ pub mod dispatching_on_the_input_type {
         }
     }
 
-    mod check_open_app {
-        use super::*;
-        check_components! {
-            OpenApp {
-                ComputerComponent: [((), Circle), ((), Rectangle)],
-            }
+    check_components! {
+        OpenApp {
+            ComputerComponent: [((), Circle), ((), Rectangle)],
         }
     }
 
-    #[test]
-    fn each_input_reaches_its_own_handler() {
-        use cgp::extra::handler::CanCompute;
-
-        let app = App;
+    pub fn demo() {
         let code = PhantomData::<()>;
 
-        assert_eq!(
-            app.compute(
-                code,
-                Rectangle {
-                    width: 3.0,
-                    height: 4.0
-                }
-            ),
-            12.0,
-        );
+        assert_eq!(App.compute(code, Rectangle { width: 3.0, height: 4.0 }), 12.0);
+        assert_eq!(OpenApp.compute(code, Rectangle { width: 3.0, height: 4.0 }), 12.0);
+        assert!((App.compute(code, Circle { radius: 1.0 }) - core::f64::consts::PI).abs() < 1e-9);
+    }
 
-        let area = app.compute(code, Circle { radius: 1.0 });
-        assert!((area - core::f64::consts::PI).abs() < 1e-9);
+    #[test]
+    fn test_demo() {
+        demo();
+    }
+}
+
+/// ## Under the hood
+///
+/// A component declared with the same `#[derive_delegate(UseInputDelegate<Input>)]` directive as the
+/// handler components, whose generated impl the page lists.
+pub mod under_the_hood {
+    use cgp::extra::handler::UseInputDelegate;
+    use cgp::prelude::*;
+
+    #[cgp_component(Measurer)]
+    #[derive_delegate(UseInputDelegate<Input>)]
+    pub trait CanMeasure<Code, Input> {
+        type Output;
+
+        fn measure(&self, _code: PhantomData<Code>, input: Input) -> Self::Output;
     }
 }

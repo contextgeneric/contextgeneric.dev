@@ -1,19 +1,18 @@
 //! Code from `docs/reference/providers/handler/promote_try_computer.md` — `PromoteTryComputer`.
+//!
+//! Pins the Examples program, a `#[cgp_computer]` function returning `Result` whose provider answers
+//! the family through the bundle, and the one-step entry a hand-written base can use. The
+//! hand-written base behind the `Handler` entry is a trybuild fixture.
 
-/// ## Usage and Examples
-///
-/// `PromoteTryComputer` fills the family from a synchronous fallible base. It answers
-/// `TryComputerComponent` and the async members, so those are routed to it; a base computer returning
-/// a `Result` supplies the fallible behavior.
-pub mod filling_the_family_from_a_try_computer {
-    use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
-    use cgp::extra::error::RaiseFrom;
-    use cgp::extra::handler::{HandlerComponent, PromoteTryComputer, TryComputerComponent};
+/// ## Examples
+pub mod examples {
+    use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::{CanHandle, CanTryCompute};
     use cgp::prelude::*;
 
     #[cgp_computer]
-    pub fn checked_add(a: u64, b: u64) -> Result<u64, String> {
-        a.checked_add(b).ok_or_else(|| "overflow".to_owned())
+    pub fn checked_double(value: u64) -> Result<u64, String> {
+        value.checked_mul(2).ok_or_else(|| "overflow".to_owned())
     }
 
     pub struct App;
@@ -21,35 +20,65 @@ pub mod filling_the_family_from_a_try_computer {
     delegate_components! {
         App {
             ErrorTypeProviderComponent: UseType<String>,
-            ErrorRaiserComponent: RaiseFrom,
-
-            [TryComputerComponent, HandlerComponent]: PromoteTryComputer<CheckedAdd>,
+            [TryComputerComponent, HandlerComponent]: PromoteTryComputer<CheckedDouble>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                TryComputerComponent: ((), (u64, u64)),
-                HandlerComponent: ((), (u64, u64)),
-            }
+    check_components! {
+        App {
+            [TryComputerComponent, HandlerComponent]: ((), u64),
         }
+    }
+
+    pub async fn demo() {
+        let code = PhantomData::<()>;
+
+        assert_eq!(App.try_compute(code, 21), Ok(42));
+        assert_eq!(App.try_compute(code, u64::MAX), Err("overflow".to_owned()));
+        assert_eq!(App.handle(code, 21).await, Ok(42));
     }
 
     #[test]
-    fn the_fallible_base_answers_the_family() {
-        use cgp::extra::handler::{CanHandle, CanTryCompute};
-        use futures::executor::block_on;
+    fn test_demo() {
+        futures::executor::block_on(demo());
+    }
+}
 
-        let app = App;
-        let code = PhantomData::<()>;
+/// ## Common Mistakes
+///
+/// The `TryComputerComponent` entry is `TryPromote<P>`, one step from the base, so it serves a
+/// hand-written `Computer` returning `Result`.
+pub mod common_mistakes {
+    use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::{PromoteAsync, TryPromote};
+    use cgp::prelude::*;
 
-        assert_eq!(app.try_compute(code, (1u64, 2u64)), Ok(3));
-        assert_eq!(
-            app.try_compute(code, (u64::MAX, 1u64)),
-            Err("overflow".to_owned())
-        );
-        assert_eq!(block_on(app.handle(code, (1u64, 2u64))), Ok(3));
+    #[cgp_new_provider]
+    impl<Context, Code> Computer<Context, Code, u64> for CheckedDouble
+    where
+        Context: HasErrorType<Error = String>,
+    {
+        type Output = Result<u64, String>;
+
+        fn compute(_context: &Context, _code: PhantomData<Code>, input: u64) -> Result<u64, String> {
+            input.checked_mul(2).ok_or_else(|| "overflow".to_owned())
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ErrorTypeProviderComponent: UseType<String>,
+            TryComputerComponent: PromoteTryComputer<CheckedDouble>,
+            // The fix the page gives for the handler slot.
+            HandlerComponent: PromoteAsync<TryPromote<CheckedDouble>>,
+        }
+    }
+
+    check_components! {
+        App {
+            [TryComputerComponent, HandlerComponent]: ((), u64),
+        }
     }
 }

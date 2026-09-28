@@ -1,17 +1,14 @@
 //! Code from `docs/reference/providers/handler/promote_ref.md` — `PromoteRef`.
+//!
+//! Pins both directions the page shows: a by-value computer over `&u64` serves `ComputerRefComponent`,
+//! and a `ComputerRef` over `String` serves `ComputerComponent` for a `Box<String>` input.
 
-/// ## Usage and Examples
-///
-/// `PromoteRef` bridges by-value and by-reference handlers. To fill a by-reference slot such as
-/// `ComputerRefComponent`, the inner provider is a by-value provider whose input is a reference; the
-/// bridge calls it on the borrowed input.
-pub mod bridging_value_and_reference {
-    use core::marker::PhantomData;
-
-    use cgp::extra::handler::{Computer, ComputerRefComponent, PromoteRef};
+/// ## Examples
+pub mod examples {
+    use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef, PromoteRef};
     use cgp::prelude::*;
 
-    /// A by-value computer whose input is a reference: doubles the value behind it.
+    /// A by-value computer whose input is a reference.
     #[cgp_new_provider]
     impl<Context, Code> Computer<Context, Code, &u64> for DoubleRef {
         type Output = u64;
@@ -21,28 +18,41 @@ pub mod bridging_value_and_reference {
         }
     }
 
+    /// A by-reference computer over a `String`.
+    #[cgp_new_provider]
+    impl<Context, Code> ComputerRef<Context, Code, String> for StringLength {
+        type Output = usize;
+
+        fn compute_ref(_context: &Context, _code: PhantomData<Code>, input: &String) -> usize {
+            input.len()
+        }
+    }
+
     pub struct App;
 
     delegate_components! {
         App {
             ComputerRefComponent: PromoteRef<DoubleRef>,
+            ComputerComponent: PromoteRef<StringLength>,
         }
     }
 
-    mod check_app {
-        use super::*;
-        check_components! {
-            App {
-                ComputerRefComponent: ((), u64),
-            }
+    check_components! {
+        App {
+            ComputerRefComponent: ((), u64),
+            ComputerComponent: ((), Box<String>),
         }
+    }
+
+    pub fn demo() {
+        let code = PhantomData::<()>;
+
+        assert_eq!(App.compute_ref(code, &21), 42);
+        assert_eq!(App.compute(code, Box::new("hello".to_owned())), 5);
     }
 
     #[test]
-    fn the_by_reference_slot_is_served_from_the_inner_provider() {
-        use cgp::extra::handler::CanComputeRef;
-
-        let app = App;
-        assert_eq!(app.compute_ref(PhantomData::<()>, &5u64), 10);
+    fn test_demo() {
+        demo();
     }
 }

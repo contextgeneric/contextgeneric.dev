@@ -1,4 +1,6 @@
 ---
+title: 'PromoteComputer — the family from a Computer'
+description: 'The promotion bundle that fills in the rest of the handler family from a Computer base; #[cgp_computer] wires its generated provider to it.'
 sidebar_label: 'PromoteComputer'
 sidebar_position: 8
 ---
@@ -12,28 +14,27 @@ Fill in every member of the handler family from a provider that implements `Comp
 ### Generated machinery
 
 **You are not expected to name `PromoteComputer` directly.**
-[`#[cgp_computer]`](../../macros/cgp_computer.md) wires it across the family for the provider it
-generates, so one written `Computer` impl answers the whole handler surface. A bundle
-expects its parameter to be a provider wired to that same bundle, as the macro does with `Self`, because
-some entries reach the base through a sibling: the `Handler` entry is `PromoteAsync<Provider>`, which
-needs `Provider` to be a `TryComputer`. To lift a hand-written `Computer` without wiring it to the
-bundle, chain the one-step adapters, as in `PromoteAsync<Promote<MyComputer>>`. This page explains what
-the bundle emits.
+[`#[cgp_computer]`](../../macros/cgp_computer.md) wires the provider it generates to
+`PromoteComputer<Self>`, so one written function answers the whole handler surface. A context names
+the bundle only to route its own components through such a provider, or through the entries that
+serve any `Computer`, as [Common Mistakes](#common-mistakes) sets out. This page explains what the
+bundle emits.
 
 :::
 
 ## Overview
 
-`PromoteComputer<Provider>` starts from a provider that implements `Computer`, the by-value synchronous
-infallible base, and fills in every other member of the handler family by promotion, on a **context**,
-the type a method runs on. It is a delegation table that routes each remaining handler
-component to the right single-step promotion. Like every CGP provider, it carries no runtime value.
+`PromoteComputer<Provider>` starts from a provider that implements `Computer`, the synchronous,
+infallible, owned-input base, and fills in every other member of the handler family by promotion, on
+a [**context**](/docs/reference/glossary#context), the type the implementation runs against. It is a
+delegation table that routes each remaining handler component to the right single-step promotion.
+Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
 It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-`Computer` provider. `PromoteComputer` answers every family member *except* `ComputerComponent`, so the
-base is wired to `ComputerComponent` directly and the bundle fills in the rest:
+`Computer` provider. `PromoteComputer` answers every family member *except* `ComputerComponent`, so
+the base is wired to `ComputerComponent` directly and the bundle fills in the rest:
 
 ```rust
 delegate_components! {
@@ -48,23 +49,78 @@ delegate_components! {
 }
 ```
 
-Most code gets this wiring from [`#[cgp_computer]`](../../macros/cgp_computer.md) rather than writing it.
+Here `Double` comes from [`#[cgp_computer]`](../../macros/cgp_computer.md), which is what lets the
+`HandlerComponent` entry resolve.
+
+## Examples
+
+One `#[cgp_computer]` function answers four members of the family through the bundle:
+
+```rust
+use cgp::prelude::*;
+use cgp::core::error::ErrorTypeProviderComponent;
+use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute};
+
+#[cgp_computer]
+pub fn double(value: u64) -> u64 {
+    value * 2
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ErrorTypeProviderComponent: UseType<String>,
+        ComputerComponent: Double,
+        [
+            TryComputerComponent,
+            AsyncComputerComponent,
+            HandlerComponent,
+        ]: PromoteComputer<Double>,
+    }
+}
+
+check_components! {
+    App {
+        [
+            ComputerComponent,
+            TryComputerComponent,
+            AsyncComputerComponent,
+            HandlerComponent,
+        ]: ((), u64),
+    }
+}
+
+pub async fn demo() {
+    let code = PhantomData::<()>;
+
+    assert_eq!(App.compute(code, 5), 10);
+    assert_eq!(App.try_compute(code, 5), Ok(10));
+    assert_eq!(App.compute_async(code, 5).await, 10);
+    assert_eq!(App.handle(code, 5).await, Ok(10));
+}
+```
+
+The fallible members wrap `10` in `Ok`, and need the error type `App` wires. `App` is an
+[environmental context](/docs/reference/glossary#environmental-context).
 
 ## When to use it
 
-**Reach for `PromoteComputer` when you wire a hand-written `Computer` provider's family explicitly**
-rather than through [`#[cgp_computer]`](../../macros/cgp_computer.md), which wires it for you. Use a
-different bundle when the base is a different trait: [`PromoteTryComputer`](promote_try_computer.md)
-from a `TryComputer`, [`PromoteProducer`](promote_producer.md) from a `Producer`,
+**Reach for `PromoteComputer` when a context routes its handler components through a `Computer`
+provider generated by [`#[cgp_computer]`](../../macros/cgp_computer.md).** For a hand-written base,
+use the one-step entries the bundle offers, or spell the lift out with the single-step combinators.
+Use a different bundle when the base is a different trait:
+[`PromoteTryComputer`](promote_try_computer.md) from a `Computer` returning `Result`,
+[`PromoteProducer`](promote_producer.md) from a `Producer`,
 [`PromoteAsyncComputer`](promote_async_computer.md) from an `AsyncComputer`, and
-[`PromoteHandler`](promote_handler.md) from a `Handler`.
+[`PromoteHandler`](promote_handler.md) from an `AsyncComputer` returning `Result`.
 
 ## Under the hood
 
-`PromoteComputer` is defined with [`delegate_components!`](../../macros/delegate_components.md) over a
-generic inner `Provider`. It routes the fallible slot to [`Promote`](promote.md) (wrap in `Ok`), the
-async slots to [`PromoteAsync`](promote_async.md) (run synchronously in an async method), and every
-`…Ref` slot to [`PromoteRef`](promote_ref.md) (pass the borrow to the base as its input):
+`PromoteComputer` is defined with [`delegate_components!`](../../macros/delegate_components.md) over
+a generic inner `Provider`. It routes the fallible slot to [`Promote`](promote.md) (wrap in `Ok`),
+the async slots to [`PromoteAsync`](promote_async.md) (run synchronously in an async method), and
+every `…Ref` slot to [`PromoteRef`](promote_ref.md) (pass the borrow to the base as its input):
 
 ```rust
 delegate_components! {
@@ -81,19 +137,39 @@ delegate_components! {
 }
 ```
 
-The base `ComputerComponent` is the inner provider itself; the table fills in the other seven.
+The base `ComputerComponent` is the inner provider itself; the table fills in the other seven. Two
+of the entries take their step from a sibling rather than from the base: `HandlerComponent` is
+`PromoteAsync<Provider>`, whose `Handler` impl needs `Provider` to be a `TryComputer`, and each
+`…Ref` entry needs `Provider` to answer the owned member over a borrowed input.
+
+## Common Mistakes
+
+**Only the one-step entries serve a hand-written `Computer`.** `TryComputerComponent` and
+`AsyncComputerComponent` need only the base, so `PromoteComputer<Double>` answers them for any
+`Computer`. `HandlerComponent` looks for a `TryComputer` on `Double` itself, which a hand-written
+provider not wired to the bundle lacks, so the check fails:
+
+```text
+error[E0277]: the trait bound `Double: DelegateComponent<TryComputerComponent>` is not satisfied
+...
+   = note: required for `Double` to implement `TryComputer<App, (), u64>`
+   = note: required for `PromoteAsync<Double>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), u64)>`
+```
+
+Spell the two steps out as `PromoteAsync<Promote<Double>>`, or write the base with
+[`#[cgp_computer]`](../../macros/cgp_computer.md), which wires it to `PromoteComputer<Self>`.
 
 ## Related constructs
 
-- [`#[cgp_computer]`](../../macros/cgp_computer.md) — generates a `Computer` provider and wires
-  `PromoteComputer` across the family.
+- [`#[cgp_computer]`](../../macros/cgp_computer.md) — generates a `Computer` provider and wires it to
+  `PromoteComputer`.
 - [`PromoteTryComputer`](promote_try_computer.md), [`PromoteProducer`](promote_producer.md),
   [`PromoteAsyncComputer`](promote_async_computer.md), [`PromoteHandler`](promote_handler.md) — the
-  bundles for the other base traits.
+  bundles for the other bases.
 - [`Promote`](promote.md), [`PromoteAsync`](promote_async.md), [`PromoteRef`](promote_ref.md) — the
   single-step lifts this table wires.
-- [`Computer`](../../components/handler/computer.md), [`Handler`](../../components/handler/handler.md) — the family it
-  fills in.
+- [`Computer`](../../components/handler/computer.md),
+  [`Handler`](../../components/handler/handler.md) — the family it fills in.
 
 The ideas behind it:
 
