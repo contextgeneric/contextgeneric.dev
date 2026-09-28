@@ -1,6 +1,8 @@
 ---
+title: 'CanUpcast — widen an enum by variant name'
 sidebar_label: 'CanUpcast'
 sidebar_position: 1
+description: 'Convert a narrow enum into a wider one that has every one of its variants, routing each by name at the type level; the cast cannot fail.'
 ---
 
 # `CanUpcast`
@@ -32,11 +34,10 @@ pub trait CanUpcast<Target> {
 }
 ```
 
-`Self` is the narrow enum and `Target` the wider one. The method takes `self` by value and consumes it,
-returning the `Target` directly rather than a `Result`, because a widening cannot fail. The
-`PhantomData<Target>` argument names the target for inference and carries no data. Both enums must derive
-the extensible-data machinery, and the target's variant set must include every one of the source's,
-matched by name and by payload type.
+`Self` is the narrow enum and `Target` the wider one. The method takes `self` by value and consumes
+it, returning the `Target` directly rather than a `Result`, because a widening cannot fail. The
+`PhantomData<Target>` argument names the target for inference and carries nothing but the type. The
+target's variant set must include every one of the source's, matched by name and by payload type.
 
 ## Usage
 
@@ -49,35 +50,51 @@ use cgp::core::field::impls::CanUpcast;
 use core::marker::PhantomData;
 ```
 
+**Each side derives what its role needs.** The source is walked and taken apart, so it needs
+[`#[derive(HasFields)]`](../../derives/derive_has_fields.md) and
+[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md); the target is only built into,
+so it needs [`#[derive(FromVariant)]`](../../derives/derive_from_variant.md).
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) on both covers every direction at once.
+
+
 ## Examples
 
-Two independently-defined enums that share variant names interconvert with no manual impl:
+A narrow enum widened into a wider one, with each side deriving only what the cast needs:
 
 ```rust
-use cgp::core::field::impls::CanUpcast;
 use cgp::prelude::*;
-use core::marker::PhantomData;
+use cgp::core::field::impls::CanUpcast;
 
-#[derive(Debug, Eq, PartialEq, CgpData)]
+// The source is walked and taken apart, so it needs its shape and its extractor.
+#[derive(Debug, Eq, PartialEq, HasFields, ExtractField)]
 pub enum FooBar {
     Foo(u64),
     Bar(String),
 }
 
-#[derive(Debug, Eq, PartialEq, CgpData)]
+// The target is only built into, one variant at a time.
+#[derive(Debug, Eq, PartialEq, FromVariant)]
 pub enum FooBarBaz {
     Foo(u64),
     Bar(String),
     Baz(bool),
 }
 
-let wide = FooBar::Foo(1).upcast(PhantomData::<FooBarBaz>);
+pub fn demo() {
+    let wide = FooBar::Foo(1).upcast(PhantomData::<FooBarBaz>);
+    assert_eq!(wide, FooBarBaz::Foo(1));
 
-assert_eq!(wide, FooBarBaz::Foo(1));
+    let wide = FooBar::Bar("hi".to_owned()).upcast(PhantomData::<FooBarBaz>);
+    assert_eq!(wide, FooBarBaz::Bar("hi".to_owned()));
+}
 ```
 
 Neither enum names the other. They share variant *names*, matched at the type level, and that is the
-whole coupling.
+whole coupling. The source derives [`HasFields`](../shape/has_fields.md) and
+[`ExtractField`](../../derives/derive_extract_field.md) because the cast walks it and takes it
+apart; the target derives only [`FromVariant`](../../derives/derive_from_variant.md) because the
+cast only builds into it. [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) on both covers
+every case.
 
 ## When to use it
 
@@ -93,24 +110,63 @@ name only the variants you need, and let the widening be checked.
 - **Reach for [`CanBuildFrom`](./can_build_from.md)** for the record analogue: merging a struct's fields
   into another struct's builder.
 
-One boundary worth stating: this is **compile-time, name-driven, and opt-in**. Both enums must derive
-the shape, the names must match exactly, and nothing is inspected at run time. An enum from a crate that
-has not derived the machinery cannot participate at all.
+One boundary worth stating: this is **compile-time, name-driven, and opt-in**. Each enum must derive
+the machinery its side of the cast needs, the names must match exactly, and nothing is inspected at
+run time. An enum from a crate that has not derived the machinery cannot participate at all.
 
 ## Under the hood
 
-`CanUpcast` **recurses over the source's variants**. It converts the source to its extractor with
-[`HasExtractor`](../variant/has_extractor.md), then walks the source's own field list, pulling each variant out
-with [`ExtractField`](../variant/extract_field.md) and rebuilding it into the target with
-[`FromVariant`](../variant/from_variant.md).
+`CanUpcast` **recurses over the source's variants**. Its one impl turns the source into its
+extractor with [`HasExtractor`](../variant/has_extractor.md), walks the source's own
+[`HasFields`](../shape/has_fields.md) list, and discharges what is left:
 
-Because every source variant is guaranteed to exist in a wider target, the walk is total, and the
-extractor left at the end is uninhabited, discharged with [`FinalizeExtract`](../variant/finalize_extract.md).
-That is precisely why `upcast` returns the target directly instead of a `Result`.
+```rust
+impl<Context, Source, Target, Remainder> CanUpcast<Target> for Context
+where
+    Context: HasFields + HasExtractor<Extractor = Source>,
+    Context::Fields: FieldsExtractor<Source, Target, Remainder = Remainder>,
+    Remainder: FinalizeExtract,
+{
+    fn upcast(self, _tag: PhantomData<Target>) -> Target {
+        Context::Fields::extract_from(self.to_extractor()).finalize_extract_result()
+    }
+}
+```
 
-One detail from the source is worth knowing if you read it: the recursion driving this,
-`FieldsExtractor`, is **public**, so it can appear by name in a diagnostic and be named in a bound. Its
-record-side analogue `FieldsBuilder`, behind [`CanBuildFrom`](./can_build_from.md), is private.
+The walk is `FieldsExtractor`, implemented for each cell of the variant list. A cell pulls its
+variant out with [`ExtractField`](../variant/extract_field.md), rebuilds it into the target with
+[`FromVariant`](../variant/from_variant.md), or threads the remainder into the rest of the list:
+
+```rust
+impl<Source, Target, Tag, Value, RestFields, Remainder> FieldsExtractor<Source, Target>
+    for Either<Field<Tag, Value>, RestFields>
+where
+    Source: ExtractField<Tag, Value = Value>,
+    Target: FromVariant<Tag, Value = Value>,
+    RestFields: FieldsExtractor<Source::Remainder, Target, Remainder = Remainder>,
+{
+    type Remainder = Remainder;
+
+    fn extract_from(source: Source) -> Result<Target, Remainder> {
+        match source.extract_field(PhantomData) {
+            Ok(field) => Ok(Target::from_variant(PhantomData, field)),
+            Err(remainder) => RestFields::extract_from(remainder),
+        }
+    }
+}
+```
+
+and the terminal `Void` cell returns whatever remains as `Err`. Because the list walked is the
+source's own, every source variant is tried, so the final remainder is uninhabited and
+`Remainder: FinalizeExtract` holds;
+[`finalize_extract_result`](../variant/finalize_extract_result.md) then discharges it. That is why
+`upcast` returns the target directly instead of a `Result`, and why the bounds put `HasFields` and
+`HasExtractor` on the source and only `FromVariant` on the target.
+
+`FieldsExtractor` is **public**, so it can be named in a bound, and it appears by name in a failed
+cast's notes. Its record-side analogue `FieldsBuilder`, behind
+[`CanBuildFrom`](./can_build_from.md), is private, so it cannot be named in a bound, though it still
+appears in diagnostics.
 
 ## Common Mistakes
 
@@ -118,16 +174,34 @@ record-side analogue `FieldsBuilder`, behind [`CanBuildFrom`](./can_build_from.m
 wrong.
 
 **An upcast is total only if the target really is wider.** If the target lacks one of the source's
-variants there is no impl, and the failure is an unsatisfied bound rather than a runtime error. That is
-the guarantee, but it reads as a puzzling missing-impl message until you check the variant lists.
+variants, the cast fails to compile rather than at run time. With a target
+`FooBaz { Foo(u64), Baz(bool) }` that lacks `FooBar`'s `Bar`:
 
-**Names must match exactly.** Renaming a variant in one enum silently removes it from the overlap, and
-the failure surfaces wherever the cast is written rather than at the rename.
+```rust
+let _ = FooBar::Foo(1).upcast(PhantomData::<FooBaz>);
+```
 
-**The payload types must match too.** A `Foo(u64)` does not upcast into a `Foo(u32)`; the tag and the
-value type are both part of the entry.
+the error names the missing constructor, then the walk that needed it:
 
-**It consumes the source.** There is no borrowing form.
+```text
+error[E0277]: the trait bound `FooBaz: FromVariant<Symbol<3, cgp::prelude::Chars<'B', cgp::prelude::Chars<'a', cgp::prelude::Chars<'r', Nil>>>>>` is not satisfied
+...
+   = note: required for `FooBar` to implement `CanUpcast<FooBaz>`
+```
+
+Read the `Symbol` in the headline to find the variant the target is missing.
+
+**Names must match exactly.** Renaming a variant in one enum removes it from the overlap, and the
+failure surfaces where the cast is written rather than at the rename.
+
+**The payload types must match too.** A `Foo(u64)` does not upcast into a `Foo(u32)`; the tag and
+the value type are both part of the entry, and the mismatch is reported on the target's constructor:
+
+```text
+error[E0271]: type mismatch resolving `<Foo32Bar as FromVariant<Symbol<3, Chars<'F', Chars<'o', Chars<'o', Nil>>>>>>::Value == u64`
+```
+
+**It consumes the source.** The trait lacks a borrowing form.
 
 ## Related constructs
 

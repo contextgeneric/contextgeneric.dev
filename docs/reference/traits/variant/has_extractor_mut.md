@@ -1,6 +1,8 @@
 ---
+title: 'HasExtractorMut — edit a variant in place'
 sidebar_label: 'HasExtractorMut'
 sidebar_position: 4
+description: 'Obtain an extractor that borrows an enum mutably, so a named variant''s payload can be changed in place without consuming or rebuilding the value.'
 ---
 
 # `HasExtractorMut`
@@ -38,11 +40,11 @@ pub trait HasExtractorMut {
 }
 ```
 
-`Self` is the enum. `ExtractorMut<'a>` is a **generic associated type**: the borrowed extractor over the
-same partial companion enum, with every payload held as a mutable reference for `'a`. The `where Self:
-'a` clause keeps it from outliving the value. `extractor_mut` takes a mutable borrow and returns the
-extractor at the anonymous lifetime, so the call reads with no lifetime written and the borrow ends where
-the extractor is dropped.
+`Self` is the enum. `ExtractorMut<'a>` is a **generic associated type**: the borrowed extractor over
+the same partial companion enum, with every payload held as a mutable reference for `'a`. The
+`where Self: 'a` clause keeps it from outliving the value. `extractor_mut` takes a mutable borrow
+and returns the extractor at the anonymous lifetime, so the call reads without a written lifetime
+and the borrow ends where the extractor is dropped.
 
 ## Usage
 
@@ -53,29 +55,54 @@ and shared-borrow accessors.
 
 ## Examples
 
-Changing a payload without rebuilding the enum:
+Changing whichever payload is present, without rebuilding the enum:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::traits::FinalizeExtractResult;
 
-#[derive(ExtractField)]
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(Debug, PartialEq, ExtractField)]
 pub enum Shape {
     Circle(Circle),
     Rectangle(Rectangle),
 }
 
-if let Ok(circle) = shape
-    .extractor_mut()
-    .extract_field(PhantomData::<Symbol!("Circle")>)
-{
-    circle.radius = 5.0;
+pub fn scale(shape: &mut Shape, factor: f64) {
+    match shape.extractor_mut().extract_field(PhantomData::<Symbol!("Circle")>) {
+        Ok(circle) => circle.radius *= factor,
+        Err(remainder) => {
+            let rect = remainder
+                .extract_field(PhantomData::<Symbol!("Rectangle")>)
+                .finalize_extract_result();
+            rect.width *= factor;
+            rect.height *= factor;
+        }
+    }
 }
 
-// `shape` now holds the updated Circle
+pub fn demo() {
+    let mut shape = Shape::Circle(Circle { radius: 1.0 });
+    scale(&mut shape, 5.0);
+
+    // `shape` now holds the updated `Circle`.
+    assert_eq!(shape, Shape::Circle(Circle { radius: 5.0 }));
+}
 ```
 
-The payload arrives as `&mut Circle`, so the write lands in the original value. Written with
-[`HasExtractor`](./has_extractor.md) instead, the same code would consume `shape` and have to rebuild it.
+Each payload arrives as `&mut`, so the writes land in the original value, and the chain still ends
+in a checked `finalize_extract_result`. Written with [`HasExtractor`](./has_extractor.md) instead,
+the same code would consume `shape` and have to rebuild it.
 
 ## When to use it
 
@@ -92,40 +119,54 @@ The payload arrives as `&mut Circle`, so the write lands in the original value. 
 
 ## Under the hood
 
-It uses the **same borrowed companion** as [`HasExtractorRef`](./has_extractor_ref.md#under-the-hood),
-with the outer [`MapTypeRef`](../type-level/map_type_ref.md) marker fixed to `IsMut` rather than `IsRef`:
+It uses the **same borrowed companion** as
+[`HasExtractorRef`](./has_extractor_ref.md#under-the-hood), with the
+[`MapTypeRef`](../type-level/map_type_ref.md) marker fixed to `IsMut` rather than `IsRef`.
+`cargo cgp expand` on the example's `Shape` shows the impl:
 
 ```rust
-// impl HasExtractorMut for Shape {
-//     type ExtractorMut<'a> = __PartialRefShape<'a, IsMut, IsPresent, IsPresent>;
-// }
+impl HasExtractorMut for Shape {
+    type ExtractorMut<'__a__> = __PartialRefShape<'__a__, IsMut, IsPresent, IsPresent>
+    where
+        Self: '__a__;
+    fn extractor_mut<'__a__>(&'__a__ mut self) -> Self::ExtractorMut<'__a__> {
+        match self {
+            Self::Circle(value) => __PartialRefShape::Circle(value),
+            Self::Rectangle(value) => __PartialRefShape::Rectangle(value),
+        }
+    }
+}
 ```
 
 Since `IsMut::Map<'a, T>` is `&'a mut T`, every payload slot becomes a mutable reference while the
-per-variant [`MapType`](../type-level/map_type.md) markers continue to track possibility. That is the whole
-difference between the two borrowing accessors: one marker.
+per-variant [`MapType`](../type-level/map_type.md) markers continue to track possibility. That one
+marker is the whole difference between the two borrowing accessors, and the same
+[`ExtractField`](./extract_field.md) and [`FinalizeExtract`](./finalize_extract.md) impls serve
+both.
 
-There is no rebuild counterpart, and none is needed, because the value was never taken apart, only
+The trait lacks a rebuild counterpart, and needs none, because the value was never taken apart, only
 borrowed.
 
 ## Common Mistakes
 
-**It takes `&mut self`, so nothing else may borrow the value** for as long as the extractor lives. That is
-ordinary borrow checking, but it surfaces as an error about the companion type, which reads as though the
-machinery is at fault.
+**It takes `&mut self`, so nothing else may borrow the value** for as long as the extractor or any
+payload taken from it lives. That is ordinary borrow checking.
 
 **Payloads are `&mut T`, so a chain cannot move one out.** Taking ownership needs
 [`HasExtractor`](./has_extractor.md).
 
-**There is no rebuild.** `from_extractor` belongs to the owning accessor alone.
+**It cannot rebuild the enum.** `from_extractor` belongs to the owning accessor alone.
 
 **The `where Self: 'a` clause propagates**, so a signature holding an `ExtractorMut<'a>` rarely elides
 its lifetime cleanly.
 
-**The three extractors are three different types.** Code generic over "an extractor" must pick one or be
-generic over the [`MapTypeRef`](../type-level/map_type_ref.md) marker too.
+**The owned and borrowed extractors are different enums.** The two borrowing accessors share
+`__PartialRefShape` and differ in its [`MapTypeRef`](../type-level/map_type_ref.md) marker, while
+the owned one is `__PartialShape`, so code generic over "an extractor" is generic over the extractor
+type itself.
 
-**A remainder still carries none of the enum's attributes.**
+**A remainder still carries none of the enum's attributes**, so a `Result` holding one is neither
+`Debug` nor `PartialEq`.
 
 ## Related constructs
 

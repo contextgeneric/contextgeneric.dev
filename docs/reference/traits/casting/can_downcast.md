@@ -1,6 +1,8 @@
 ---
+title: 'CanDowncast — narrow an enum, or get the rest'
 sidebar_label: 'CanDowncast'
 sidebar_position: 2
+description: 'Try to convert a wide enum into a narrower one, getting the narrowed value or a remainder with the attempted variants ruled out for the next attempt.'
 ---
 
 # `CanDowncast`
@@ -49,14 +51,20 @@ use cgp::core::field::impls::CanDowncast;
 use core::marker::PhantomData;
 ```
 
+**The two sides swap roles from an upcast.** The source is only taken apart, so it needs
+[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md); the target's variant list is the
+one walked and each match is rebuilt into it, so it needs
+[`#[derive(HasFields)]`](../../derives/derive_has_fields.md) and
+[`#[derive(FromVariant)]`](../../derives/derive_from_variant.md).
+
+
 ## Examples
 
 A downcast succeeds for a variant the target shares and fails for one it lacks:
 
 ```rust
-use cgp::core::field::impls::CanDowncast;
 use cgp::prelude::*;
-use core::marker::PhantomData;
+use cgp::core::field::impls::CanDowncast;
 
 #[derive(Debug, Eq, PartialEq, CgpData)]
 pub enum FooBar {
@@ -71,16 +79,20 @@ pub enum FooBarBaz {
     Baz(bool),
 }
 
-assert_eq!(
-    FooBarBaz::Bar("hi".to_owned()).downcast(PhantomData::<FooBar>).ok(),
-    Some(FooBar::Bar("hi".to_owned())),
-);
+pub fn demo() {
+    assert_eq!(
+        FooBarBaz::Bar("hi".to_owned())
+            .downcast(PhantomData::<FooBar>)
+            .ok(),
+        Some(FooBar::Bar("hi".to_owned())),
+    );
 
-assert_eq!(FooBarBaz::Baz(true).downcast(PhantomData::<FooBar>).ok(), None);
+    assert_eq!(FooBarBaz::Baz(true).downcast(PhantomData::<FooBar>).ok(), None);
+}
 ```
 
-`.ok()` is right for a single attempt and wrong when another target should be tried, because it throws
-away the remainder that the next attempt needs.
+`.ok()` suits a single attempt and is wrong when another target should be tried, because it throws
+away the remainder the next attempt needs.
 
 ## When to use it
 
@@ -100,30 +112,65 @@ first starts the chain and the second continues it on each remainder.
 ## Under the hood
 
 **The downcasts recurse over the *target's* variants**, which is the mirror image of
-[`CanUpcast`](./can_upcast.md#under-the-hood) walking the source's. For each `Field<Tag, Value>` in
-`Target::Fields`, the implementation tries pulling that variant out of the source extractor: on success
-it rebuilds the target with [`FromVariant`](../variant/from_variant.md) and returns `Ok`; on failure it threads the
-shrunken remainder into the next attempt. If no target variant matches, the terminal `Void` impl returns
-the whole remainder as `Err`.
+[`CanUpcast`](./can_upcast.md#under-the-hood) walking the source's. The impl hands the source's
+extractor to the target's variant list:
 
-`CanDowncast` differs from [`CanDowncastFields`](./can_downcast_fields.md) only in where the walk starts:
-this one calls [`to_extractor`](../variant/has_extractor.md) on the enum first, while that one operates on an
-extractor it is handed. That is the entire reason two traits exist rather than one, and it makes
-chaining possible: the `Remainder` a `downcast` returns is precisely a `downcast_fields` input.
+```rust
+impl<Context, Source, Target, Remainder> CanDowncast<Target> for Context
+where
+    Context: HasExtractor<Extractor = Source>,
+    Target: HasFields,
+    Target::Fields: FieldsExtractor<Source, Target, Remainder = Remainder>,
+{
+    type Remainder = Remainder;
+
+    fn downcast(self, _tag: PhantomData<Target>) -> Result<Target, Self::Remainder> {
+        Target::Fields::extract_from(self.to_extractor())
+    }
+}
+```
+
+`FieldsExtractor` is the same walk the upcast uses: for each `Field<Tag, Value>` in
+`Target::Fields`, it tries pulling that variant out of the source extractor with
+[`ExtractField`](../variant/extract_field.md). On success it rebuilds the target with
+[`FromVariant`](../variant/from_variant.md) and returns `Ok`; on failure it threads the shrunken
+remainder into the next attempt. If no target variant matches, the terminal `Void` impl returns the
+whole remainder as `Err`. The walk needs `ExtractField` for every target variant, so each one must
+exist in the source; the source's other variants are what can reach the `Err`.
+
+`CanDowncast` differs from [`CanDowncastFields`](./can_downcast_fields.md) only in where the walk
+starts: this one calls [`to_extractor`](../variant/has_extractor.md) on the enum first, while that
+one operates on an extractor it is handed. That is the entire reason two traits exist rather than
+one, and it makes chaining possible: the `Remainder` a `downcast` returns is precisely a
+`downcast_fields` input.
 
 ## Common Mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 
-**A downcast returns a remainder, not an `Option`.** `.ok()` discards it, which is fine for a single
-attempt and wrong if you meant to try another target.
+**A downcast returns a remainder, not an `Option`.** `.ok()` discards it, which suits a single
+attempt and is wrong if you meant to try another target.
 
 **A remainder carries none of the enum's attributes**, so a `Result<Target, Remainder>` is neither
-`Debug` nor `PartialEq`, and comparing one whole does not compile. Reach for `.ok()`, `.is_ok()`, or a
-`match`.
+`Debug` nor `PartialEq`, and comparing one whole does not compile, as
+[`ExtractField`](../variant/extract_field.md#common-mistakes) shows. Reach for `.ok()`, `.is_ok()`,
+or a `match`.
 
-**Names and payload types must match exactly**, and a mismatch is a compile error rather than a runtime
-miss: the variant simply drops out of the overlap.
+**Every target variant must exist in the source, by name and payload type.** A source variant the
+target lacks is the runtime `Err` case, but a target variant the source lacks is a compile error.
+With a target `FooQux { Foo(u64), Qux(char) }` and a source `FooBar { Foo(u64), Bar(String) }`:
+
+```rust
+let _ = FooBar::Foo(1).downcast(PhantomData::<FooQux>);
+```
+
+the walk cannot extract `Qux` from what remains of the source:
+
+```text
+error[E0277]: the trait bound `__PartialFooBar<IsVoid, IsPresent>: ExtractField<Symbol<3, cgp::prelude::Chars<'Q', cgp::prelude::Chars<'u', cgp::prelude::Chars<'x', Nil>>>>>` is not satisfied
+...
+   = note: required for `FooBar` to implement `CanDowncast<FooQux>`
+```
 
 **The remainder's type is not the source enum.** It is a partial companion with markers, so it cannot be
 stored where the original was.

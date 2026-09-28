@@ -53,19 +53,30 @@ through [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) and
 
 ## Examples
 
-Starting a chain, which is `to_extractor`'s job:
+Starting a chain, which is `to_extractor`'s job, and a round trip through `from_extractor`:
 
 ```rust
-use cgp::core::field::traits::FinalizeExtractResult;
 use cgp::prelude::*;
+use cgp::core::field::traits::FinalizeExtractResult;
 
-#[derive(ExtractField)]
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(Debug, PartialEq, ExtractField)]
 pub enum Shape {
     Circle(Circle),
     Rectangle(Rectangle),
 }
 
-fn area(shape: Shape) -> f64 {
+pub fn area(shape: Shape) -> f64 {
     match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
         Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
         Err(remainder) => {
@@ -76,18 +87,23 @@ fn area(shape: Shape) -> f64 {
         }
     }
 }
+
+// Any extractable enum survives the round trip unchanged.
+pub fn round_trip<E: HasExtractor>(value: E) -> E {
+    E::from_extractor(value.to_extractor())
+}
+
+pub fn demo() {
+    assert_eq!(area(Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })), 12.0);
+
+    let shape = Shape::Circle(Circle { radius: 2.0 });
+    assert_eq!(round_trip(shape), Shape::Circle(Circle { radius: 2.0 }));
+}
 ```
 
-`from_extractor` is the less common half, and it round-trips an un-narrowed extractor:
-
-```rust
-let extractor = shape.to_extractor();
-// ... inspect without extracting ...
-let shape = Shape::from_extractor(extractor);
-```
-
-Note that this only works on an extractor still at the all-possible configuration. Once a variant has
-been ruled out the type has changed, and there is no way back.
+`round_trip` works for any extractable enum because it never narrows: `from_extractor` accepts only
+the all-possible extractor `to_extractor` returns. Once a variant has been ruled out the type has
+changed, and the rebuild no longer applies.
 
 ## When to use it
 
@@ -105,28 +121,36 @@ accessor otherwise; the weakest that works is the right one.
 
 ## Under the hood
 
-The derive generates a companion enum with one [`MapType`](../type-level/map_type.md) parameter per variant, and this
-trait fixes the starting configuration to all-possible:
+The derive generates a companion enum with one [`MapType`](../type-level/map_type.md) parameter per
+variant, and this trait fixes the starting configuration to all-possible. `cargo cgp expand` on the
+example's `Shape` shows the impl:
 
 ```rust
-pub enum __PartialShape<__F0__: MapType, __F1__: MapType> {
-    Circle(<__F0__ as MapType>::Map<Circle>),
-    Rectangle(<__F1__ as MapType>::Map<Rectangle>),
-}
-
 impl HasExtractor for Shape {
-    type Extractor = __PartialShape<IsPresent, IsPresent>;   // every variant still possible
-    // ...
+    type Extractor = __PartialShape<IsPresent, IsPresent>;
+    fn to_extractor(self) -> Self::Extractor {
+        match self {
+            Self::Circle(value) => __PartialShape::Circle(value),
+            Self::Rectangle(value) => __PartialShape::Rectangle(value),
+        }
+    }
+    fn from_extractor(extractor: Self::Extractor) -> Self {
+        match extractor {
+            __PartialShape::Circle(value) => Self::Circle(value),
+            __PartialShape::Rectangle(value) => Self::Rectangle(value),
+        }
+    }
 }
 ```
 
-Because `IsPresent::Map<T>` is `T`, the all-possible companion holds exactly the enum's own payloads, so
-`to_extractor` is a variant-for-variant move rather than a wrapping, and `from_extractor` is the same
-move back.
+Because `IsPresent::Map<T>` is `T`, the all-possible companion holds exactly the enum's own payloads,
+so `to_extractor` is a variant-for-variant move rather than a wrapping, and `from_extractor` is the
+same move back.
 
-The companion also implements [`PartialData`](../builder/partial_data.md), with `Target` naming the original enum,
-which is how `from_extractor` knows what to rebuild, and the one trait the builder and extractor
-families share directly.
+The companion also implements [`PartialData`](../builder/partial_data.md), with `Target` naming the
+original enum, so generic code holding an extractor can name the enum it came from; that is the one
+trait the builder and extractor families share directly. `from_extractor` does not need it, since
+its own `match` names every variant.
 
 Narrowing from here is [`ExtractField`](./extract_field.md), and the chain ends at
 [`FinalizeExtract`](./finalize_extract.md).
@@ -137,10 +161,12 @@ Narrowing from here is [`ExtractField`](./extract_field.md), and the chain ends 
 survive. This is the commonest over-requirement in the family.
 
 **`from_extractor` only accepts an un-narrowed extractor.** Once a variant is ruled out the type is
-different and there is no rebuild, which is correct, since the value may no longer be representable.
+different and the rebuild no longer applies, which is correct, since the value may no longer be
+representable.
 
-**The extractor carries none of the enum's attributes.** The companion is generated without your derives,
-so it is neither `Debug` nor `PartialEq` however the enum is derived.
+**The extractor carries none of the enum's attributes.** The companion is generated without your
+derives, so it is neither `Debug` nor `PartialEq` however the enum is derived;
+[`ExtractField`](./extract_field.md#common-mistakes) shows the error.
 
 **`Extractor` is not the enum.** A signature that returns `Self::Extractor` is returning a companion
 type, and naming it in a public API exposes a generated name.

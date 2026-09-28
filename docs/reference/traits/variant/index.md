@@ -1,6 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The traits that build an enum from one named variant and take one apart variant by variant, with exhaustiveness proven in the type rather than a wildcard.'
 ---
 
 # Extensible variants

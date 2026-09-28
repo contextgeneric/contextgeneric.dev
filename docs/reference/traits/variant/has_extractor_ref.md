@@ -1,6 +1,8 @@
 ---
+title: 'HasExtractorRef — extract through a borrow'
 sidebar_label: 'HasExtractorRef'
 sidebar_position: 3
+description: 'Obtain an extractor that borrows an enum, so its variants can be matched by name with payloads as shared references and the value left intact.'
 ---
 
 # `HasExtractorRef`
@@ -48,35 +50,69 @@ and mutable accessors.
 
 ## Examples
 
-Reading through a borrow leaves the value intact:
+Reading through a borrow, as a single attempt and as a full chain, leaves the value intact:
 
 ```rust
 use cgp::prelude::*;
+use cgp::core::field::traits::FinalizeExtractResult;
 
-#[derive(ExtractField)]
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(Debug, PartialEq, ExtractField)]
 pub enum Shape {
     Circle(Circle),
     Rectangle(Rectangle),
 }
 
-let radius = shape
-    .extractor_ref()
-    .extract_field(PhantomData::<Symbol!("Circle")>)
-    .map(|circle| circle.radius)
-    .ok();
+pub fn radius(shape: &Shape) -> Option<f64> {
+    shape
+        .extractor_ref()
+        .extract_field(PhantomData::<Symbol!("Circle")>)
+        .map(|circle| circle.radius)
+        .ok()
+}
 
-// `shape` is still usable here
+pub fn area(shape: &Shape) -> f64 {
+    match shape.extractor_ref().extract_field(PhantomData::<Symbol!("Circle")>) {
+        Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
+        Err(remainder) => {
+            let rect = remainder
+                .extract_field(PhantomData::<Symbol!("Rectangle")>)
+                .finalize_extract_result();
+            rect.width * rect.height
+        }
+    }
+}
+
+pub fn demo() {
+    let shape = Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 });
+    assert_eq!(radius(&shape), None);
+    assert_eq!(area(&shape), 12.0);
+
+    // `shape` is still usable here.
+    assert_eq!(shape, Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 }));
+}
 ```
 
-The payload arrives as `&Circle`, so `circle.radius` reads through the borrow and nothing is moved. A
-full chain narrows the same way, with each remainder also borrowing.
+The payloads arrive as `&Circle` and `&Rectangle`, so fields read through the borrow and nothing is
+moved. The full chain narrows and finalizes exactly as an owned one does, with each remainder also
+borrowing.
 
 ## When to use it
 
 **Reach for it whenever the value must survive**, which is most read-only code over an enum.
 
-- **`HasExtractorRef`** for a read-only operation. Prefer it over consuming, since requiring ownership
-  narrows what a caller can pass for no benefit.
+- **`HasExtractorRef`** for a read-only operation. Prefer it over consuming, since requiring
+  ownership narrows what a caller can pass without any benefit.
 - **[`HasExtractorMut`](./has_extractor_mut.md)** to change a payload in place.
 - **[`HasExtractor`](./has_extractor.md)** only when the payload must be moved out.
 - **A `match`** when the enum is concrete. This family is for code that cannot name it.
@@ -85,34 +121,48 @@ full chain narrows the same way, with each remainder also borrowing.
 
 ## Under the hood
 
-The borrowed accessor uses the **same partial enum** as the owning one, with an extra
-[`MapTypeRef`](../type-level/map_type_ref.md) parameter fixed to `IsRef`:
+The borrowing accessors use a **second companion enum**, `__PartialRefShape`, beside the owned
+`__PartialShape`. `cargo cgp expand` on the example's `Shape` shows it:
 
 ```rust
-// conceptually
-//
-// pub enum __PartialRefShape<'a, R: MapTypeRef, F0: MapType, F1: MapType> {
-//     Circle(F0::Map<R::Map<'a, Circle>>),
-//     Rectangle(F1::Map<R::Map<'a, Rectangle>>),
-// }
-//
-// impl HasExtractorRef for Shape {
-//     type ExtractorRef<'a> = __PartialRefShape<'a, IsRef, IsPresent, IsPresent>;
-// }
+pub enum __PartialRefShape<'__a__, __R__: MapTypeRef, __F0__: MapType, __F1__: MapType> {
+    Circle(<__F0__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Circle>>),
+    Rectangle(<__F1__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Rectangle>>),
+}
 ```
 
-Read the nesting outward: the [`MapTypeRef`](../type-level/map_type_ref.md) marker decides *how* a payload is held
-(`IsRef::Map<'a, T>` is `&'a T`), and the per-variant [`MapType`](../type-level/map_type.md) markers decide *whether*
-it is still possible. The two axes are independent, which is precisely why narrowing behaves the same
-through a borrow as through an owned value.
+and this trait's impl, which fixes the [`MapTypeRef`](../type-level/map_type_ref.md) marker to
+`IsRef` and every variant to still possible:
 
-There is no `from_extractor` counterpart here: a borrowed extractor cannot rebuild an owned enum, and the
-original is still there anyway.
+```rust
+impl HasExtractorRef for Shape {
+    type ExtractorRef<'__a__> = __PartialRefShape<'__a__, IsRef, IsPresent, IsPresent>
+    where
+        Self: '__a__;
+    fn extractor_ref<'__a__>(&'__a__ self) -> Self::ExtractorRef<'__a__> {
+        match self {
+            Self::Circle(value) => __PartialRefShape::Circle(value),
+            Self::Rectangle(value) => __PartialRefShape::Rectangle(value),
+        }
+    }
+}
+```
+
+Read the payload type outward: the [`MapTypeRef`](../type-level/map_type_ref.md) marker decides
+*how* a payload is held (`IsRef::Map<'a, T>` is `&'a T`), and the per-variant
+[`MapType`](../type-level/map_type.md) marker decides *whether* it is still possible. The two axes
+are independent, which is why narrowing behaves the same through a borrow as through an owned value.
+The derive emits the per-variant [`ExtractField`](./extract_field.md) impls and the all-`IsVoid`
+[`FinalizeExtract`](./finalize_extract.md) impl on this enum too, generic over the `MapTypeRef`
+marker, so a borrowed chain finalizes exactly as an owned one does.
+
+The trait lacks a `from_extractor` counterpart: a borrowed extractor cannot rebuild an owned enum,
+and the original is still there anyway.
 
 ## Common Mistakes
 
-**There is no rebuild.** [`HasExtractor`](./has_extractor.md)'s `from_extractor` has no borrowing
-equivalent, which is rarely a problem since the value was never consumed.
+**It cannot rebuild the enum.** [`HasExtractor`](./has_extractor.md)'s `from_extractor` lacks a
+borrowing equivalent, which is rarely a problem since the value was never consumed.
 
 **Payloads are `&T`, so a chain cannot move one out.** A routine that must take ownership of a payload
 needs [`HasExtractor`](./has_extractor.md).
@@ -123,8 +173,9 @@ has to spell the lifetime out rather than elide it.
 **A remainder still carries none of the enum's attributes**, so a `Result` holding one is neither `Debug`
 nor `PartialEq`.
 
-**The borrowed and owned extractors are different types.** Code generic over "an extractor" has to pick
-one, or be generic over the [`MapTypeRef`](../type-level/map_type_ref.md) marker as well.
+**The borrowed and owned extractors are different enums**, `__PartialRefShape` and
+`__PartialShape`. Code generic over "an extractor" is generic over the extractor type itself, with
+[`ExtractField`](./extract_field.md) bounds on it, rather than over a marker.
 
 ## Related constructs
 

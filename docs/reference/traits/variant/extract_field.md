@@ -1,6 +1,8 @@
 ---
+title: 'ExtractField — take one variant out'
 sidebar_label: 'ExtractField'
 sidebar_position: 1
+description: 'Try one named variant of an enum''s extractor, getting its payload or a remainder with that variant ruled out, so a chain ends in a proven-exhaustive match.'
 ---
 
 # `ExtractField`
@@ -18,10 +20,10 @@ wanted.
 is still possible**, so attempting the same variant twice is a compile error rather than a guaranteed
 miss.
 
-Keep going and the remainder narrows. Once every variant has been ruled out its type is **uninhabited**
-(a value of it cannot exist), and [`FinalizeExtract`](./finalize_extract.md) closes the chain with
-no wildcard and no panic path. Add a variant to the enum and the final remainder becomes inhabited again,
-so the code stops compiling until it is handled.
+Keep going and the remainder narrows. Once every variant has been ruled out its type is
+**uninhabited** (a value of it cannot exist), and [`FinalizeExtract`](./finalize_extract.md) closes
+the chain with without a wildcard or a panic path. Add a variant to the enum and the final remainder
+becomes inhabited again, so the code stops compiling until it is handled.
 
 The family is the mirror of the [builder](../builder/has_builder.md): a builder tracks which fields are *present*,
 an extractor tracks which variants are still *possible*.
@@ -63,11 +65,22 @@ through [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) and
 ## Examples
 
 The chain reads as a sequence of attempts, each handling one variant, closed by
-[`finalize_extract_result`](./finalize_extract_result.md):
+[`finalize_extract_result`](./finalize_extract_result.md), written here in both orders:
 
 ```rust
-use cgp::core::field::traits::FinalizeExtractResult;
 use cgp::prelude::*;
+use cgp::core::field::traits::FinalizeExtractResult;
+
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
 
 #[derive(ExtractField)]
 pub enum Shape {
@@ -75,27 +88,47 @@ pub enum Shape {
     Rectangle(Rectangle),
 }
 
-fn area(shape: Shape) -> f64 {
+pub fn area(shape: Shape) -> f64 {
     match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
         Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
         Err(remainder) => {
-            // `remainder` now has Circle ruled out
+            // `remainder` can no longer be a `Circle`.
             let rect = remainder
                 .extract_field(PhantomData::<Symbol!("Rectangle")>)
-                .finalize_extract_result();   // uninhabited; cannot fail
+                .finalize_extract_result();
             rect.width * rect.height
         }
     }
 }
+
+// The same chain with the extractions the other way round.
+pub fn perimeter(shape: Shape) -> f64 {
+    match shape.to_extractor().extract_field(PhantomData::<Symbol!("Rectangle")>) {
+        Ok(rect) => 2.0 * (rect.width + rect.height),
+        Err(remainder) => {
+            let circle = remainder
+                .extract_field(PhantomData::<Symbol!("Circle")>)
+                .finalize_extract_result();
+            2.0 * core::f64::consts::PI * circle.radius
+        }
+    }
+}
+
+pub fn demo() {
+    assert_eq!(area(Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })), 12.0);
+    assert_eq!(perimeter(Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })), 14.0);
+    assert!(area(Shape::Circle(Circle { radius: 1.0 })) > 3.14);
+}
 ```
 
-After the second extraction both variants are ruled out, so the remainder's type is uninhabited and the
-finalize is accepted with no wildcard arm. That is not a convention but the type. Try to finalize
-after only the first extraction and it does not compile.
+After the second extraction both variants are ruled out, so the remainder's type is uninhabited and
+the finalize is accepted without a wildcard arm. The type enforces this: finalize after only the
+first extraction and the code does not compile. The two functions try the variants in opposite
+orders, which works because each step changes only its own variant's marker.
 
-**In practice you rarely write these chains.** The
-[dispatch combinators](../../providers/dispatch/index.md) build them from a set of per-variant
-implementations, which is the extensible visitor pattern: a chain exactly like the one above, generated,
+**In practice you rarely write these chains.** The [dispatch
+combinators](../../providers/dispatch/index.md) build them from a set of per-variant
+implementations, which is the extensible visitor pattern: a chain like the one above, generated,
 with one implementation per variant chosen by wiring.
 
 ## When to use it
@@ -123,8 +156,9 @@ the whole family is [`HasBuilder`](../builder/has_builder.md).
 
 ## Under the hood
 
-The derive generates a companion enum with one [`MapType`](../type-level/map_type.md) parameter per variant, each
-payload wrapped in that parameter's projection:
+The derive generates a companion enum with one [`MapType`](../type-level/map_type.md) parameter per
+variant, each payload wrapped in that parameter's projection. `cargo cgp expand` on the example's
+`Shape` shows it:
 
 ```rust
 pub enum __PartialShape<__F0__: MapType, __F1__: MapType> {
@@ -133,36 +167,92 @@ pub enum __PartialShape<__F0__: MapType, __F1__: MapType> {
 }
 ```
 
-[`to_extractor`](./has_extractor.md) starts at the all-`IsPresent` configuration, where every variant is
-still possible. **Each `extract_field` impl is in scope only while its variant's marker is `IsPresent`**;
-on a miss it returns the remainder with that one marker flipped to `IsVoid`, leaving the rest generic,
-which is why extractions may happen in any order.
+[`to_extractor`](./has_extractor.md) starts at the all-`IsPresent` configuration, where every
+variant is still possible. The derive then writes one `ExtractField` impl per variant, and the
+`Circle` one shows the whole mechanism:
 
-That per-variant scoping is the mirror of [`BuildField`](../builder/build_field.md)'s requirement that a field be
-`IsNothing` before it can be set, and it makes a repeated attempt a compile error rather than a
-guaranteed `Err`.
+```rust
+impl<__F1__: MapType> ExtractField<Symbol!("Circle")>
+for __PartialShape<IsPresent, __F1__> {
+    type Value = Circle;
+    type Remainder = __PartialShape<IsVoid, __F1__>;
+    fn extract_field(
+        self,
+        _tag: ::core::marker::PhantomData<Symbol!("Circle")>,
+    ) -> Result<Self::Value, Self::Remainder> {
+        match self {
+            __PartialShape::Circle(value) => Ok(value),
+            __PartialShape::Rectangle(value) => Err(__PartialShape::Rectangle(value)),
+        }
+    }
+}
+```
 
-The exhaustiveness argument itself belongs to [`FinalizeExtract`](./finalize_extract.md), and turns on
-`IsVoid` mapping a payload to the uninhabited `Void`.
+**The impl exists only while `Circle`'s marker is `IsPresent`**, and on a miss it returns the
+remainder with that one marker flipped to `IsVoid` while `__F1__` passes through, which is why
+extractions may happen in any order. That per-variant scoping is the mirror of
+[`BuildField`](../builder/build_field.md)'s requirement that a field be `IsNothing` before it can be
+set, and it makes a repeated attempt a compile error rather than a guaranteed `Err`.
 
-The borrowed accessors use the same partial enum with an extra [`MapTypeRef`](../type-level/map_type_ref.md)
-parameter fixed to `IsRef` or `IsMut`, so a value can be matched without being moved and the narrowing
-works identically.
+The exhaustiveness argument itself belongs to [`FinalizeExtract`](./finalize_extract.md), and turns
+on `IsVoid` mapping a payload to the uninhabited `Void`.
+
+The borrowed accessors use a second companion, `__PartialRefShape`, with a lifetime and an extra
+[`MapTypeRef`](../type-level/map_type_ref.md) parameter that
+[`HasExtractorRef`](./has_extractor_ref.md) fixes to `IsRef` and
+[`HasExtractorMut`](./has_extractor_mut.md) to `IsMut`. The derive emits the same per-variant
+`ExtractField` impls on it, so a value can be matched without being moved and the narrowing works
+identically.
 
 ## Common Mistakes
 
 **`Self` is an extractor, not the enum.** A chain starts with [`to_extractor`](./has_extractor.md) or one
 of its borrowing siblings.
 
-**Attempting the same variant twice does not compile.** The marker is already `IsVoid`, so no impl
-applies, reported as a missing method.
+**Attempting the same variant twice does not compile, and the error is not about the variant.**
+Extracting `Circle` again from the remainder of a failed `Circle` attempt:
+
+```rust
+if let Err(remainder) = shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
+    let _ = remainder.extract_field(PhantomData::<Symbol!("Circle")>);
+}
+```
+
+leaves only the `Rectangle` impl applicable, so rustc settles on it and reports the tag argument as
+the wrong type:
+
+```text
+error[E0308]: mismatched types
+...
+   |                           ------------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `9`, found `6`
+```
+
+The two numbers are the lengths of `Rectangle` and `Circle` in their `Symbol` types, and the `note`
+lines below spell both out.
 
 **Absence is `IsVoid` here and `IsNothing` in a builder, and they are not interchangeable.** An error
 naming the wrong one usually means record and variant machinery have been crossed.
 
 **A remainder carries none of the enum's attributes.** The partial enums are generated without your
-derives, so a `Result<Payload, Remainder>` is neither `Debug` nor `PartialEq` however the enum is derived,
-and `assert_eq!` on the whole result does not compile. Reach for `.ok()`, `.is_ok()`, or a `match`.
+derives, so a `Result<Payload, Remainder>` is neither `Debug` nor `PartialEq` however the enum is
+derived. On a `Shape` deriving both:
+
+```rust
+assert_eq!(
+    shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>),
+    Ok(Circle { radius: 1.0 })
+);
+```
+
+fails with
+
+```text
+error[E0369]: binary operation `==` cannot be applied to type `Result<Circle, __PartialShape<IsVoid, IsPresent>>`
+...
+error[E0277]: `__PartialShape<IsVoid, IsPresent>` doesn't implement `Debug`
+```
+
+Reach for `.ok()`, `.is_ok()`, or a `match`.
 
 **Order is free but the set is not.** Each step changes only its own variant's marker, so extractions may
 be written in any order, but every variant must be tried before the remainder can be finalized.

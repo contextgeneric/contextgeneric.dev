@@ -1,6 +1,8 @@
 ---
+title: 'FinalizeExtract — end an exhausted match'
 sidebar_label: 'FinalizeExtract'
 sidebar_position: 5
+description: 'Discharge an extractor with every variant ruled out: its type is uninhabited, so the method returns any type and closes the match without a wildcard.'
 ---
 
 # `FinalizeExtract`
@@ -13,13 +15,13 @@ An [extraction chain](./extract_field.md) ends when every variant has been ruled
 remainder's type is **uninhabited** (a value of it cannot exist), and `FinalizeExtract` turns
 that fact into a usable ending.
 
-**It returns *any* type.** That looks unsound and is not, because there is no value to return it from:
-the method can only be called on something that cannot exist, so its body is an empty `match` and no
-execution path reaches it.
+**It returns *any* type.** That looks unsound and is not, because a value to return it from cannot
+exist: the method can only be called on something that cannot exist, so its body is an empty `match`
+and no execution path reaches it.
 
-That closes a generic match with **no wildcard arm and no `unreachable!()`**. It is the mirror of
-[`FinalizeBuild`](../builder/finalize_build.md), and the two are sound for opposite reasons: a build finalizes
-because the value is *complete*, an extraction because the value is *impossible*.
+That closes a generic match **without a wildcard arm or an `unreachable!()`**. It is the mirror of
+[`FinalizeBuild`](../builder/finalize_build.md), and the two are sound for opposite reasons: a build
+finalizes because the value is *complete*, an extraction because the value is *impossible*.
 
 ## Definition
 
@@ -29,11 +31,11 @@ pub trait FinalizeExtract {
 }
 ```
 
-`Self` is the exhausted remainder, and `finalize_extract` consumes it to return whatever type `T` the
-surrounding code needs. That return is sound because the receiver is uninhabited: no value of it can
-exist, so no execution path reaches the method. The trait is implemented for the uninhabited
-[`Void`](../../types/void.md), the standard `Infallible`, and the all-ruled-out
-configuration of a partial enum.
+`Self` is the exhausted remainder, and `finalize_extract` consumes it to return whatever type `T`
+the surrounding code needs. That return is sound because the receiver is uninhabited: no value of it
+can exist, so no execution path reaches the method. The library implements the trait for the
+uninhabited [`Void`](../../types/void.md) and the standard `Infallible`, and the derive for the
+all-ruled-out configuration of each partial enum, owned and borrowed.
 
 ## Usage
 
@@ -47,32 +49,52 @@ The impls come from [`#[derive(ExtractField)]`](../../derives/derive_extract_fie
 
 ## Examples
 
-Called directly, on a remainder held in hand:
+Called directly, on a remainder a nested `match` has unwrapped:
 
 ```rust
 use cgp::prelude::*;
 
-match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
-    Ok(circle) => handle_circle(circle),
-    Err(remainder) => match remainder.extract_field(PhantomData::<Symbol!("Rectangle")>) {
-        Ok(rect) => handle_rectangle(rect),
-        Err(remainder) => remainder.finalize_extract(),   // uninhabited: cannot be reached
-    },
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(ExtractField)]
+pub enum Shape {
+    Circle(Circle),
+    Rectangle(Rectangle),
+}
+
+pub fn describe(shape: Shape) -> String {
+    match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
+        Ok(circle) => format!("circle of radius {}", circle.radius),
+        Err(remainder) => match remainder.extract_field(PhantomData::<Symbol!("Rectangle")>) {
+            Ok(rect) => format!("{} by {} rectangle", rect.width, rect.height),
+            // Uninhabited: this arm can never run.
+            Err(remainder) => remainder.finalize_extract(),
+        },
+    }
+}
+
+pub fn demo() {
+    assert_eq!(describe(Shape::Circle(Circle { radius: 2.0 })), "circle of radius 2");
+    assert_eq!(
+        describe(Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })),
+        "3 by 4 rectangle"
+    );
 }
 ```
 
-The last arm returns whatever the surrounding `match` needs, and the compiler accepts it because the
-value being matched cannot exist.
-
-The same chain written with the `Result` helper is shorter and is the form most code uses:
-
-```rust
-use cgp::core::field::traits::FinalizeExtractResult;
-
-let rect = remainder
-    .extract_field(PhantomData::<Symbol!("Rectangle")>)
-    .finalize_extract_result();
-```
+The last arm returns whatever the surrounding `match` needs, here a `String`, and the compiler
+accepts it because the value being matched cannot exist. The same chain written with
+[`finalize_extract_result`](./finalize_extract_result.md) on the last `Result` is shorter, and is
+the form most code uses.
 
 ## When to use it
 
@@ -90,39 +112,65 @@ remainder.** The two do the same job at different points in the chain.
 
 ## Under the hood
 
-**Everything turns on what `IsVoid` maps to.** The [`MapType`](../type-level/map_type.md) marker `IsVoid` maps a
-payload to the uninhabited [`Void`](../../types/void.md), so once every variant's marker is
-`IsVoid`, every arm of the partial enum holds a `Void` and **the whole type is uninhabited**.
+**Everything turns on what `IsVoid` maps to.** The [`MapType`](../type-level/map_type.md) marker
+`IsVoid` maps a payload to the uninhabited [`Void`](../../types/void.md), so once every variant's
+marker is `IsVoid`, every arm of the partial enum holds a `Void` and **the whole type is
+uninhabited**.
 
-The derive supplies an impl on exactly that configuration:
+The derive supplies an impl on exactly that configuration, for the owned companion and, generic over
+the [`MapTypeRef`](../type-level/map_type_ref.md) marker, for the borrowed one. `cargo cgp expand`
+on the example's `Shape` shows both:
 
 ```rust
 impl FinalizeExtract for __PartialShape<IsVoid, IsVoid> {
     fn finalize_extract<__T__>(self) -> __T__ {
-        match self {}       // no arms to write
+        match self {}
+    }
+}
+impl<'__a__, __R__: MapTypeRef> FinalizeExtract
+for __PartialRefShape<'__a__, __R__, IsVoid, IsVoid> {
+    fn finalize_extract<__T__>(self) -> __T__ {
+        match self {}
     }
 }
 ```
 
-An empty `match` is legal precisely because no value of the scrutinee's type can exist, and it satisfies
-any return type for the same reason. So a caller reaches `finalize_extract` only after trying every
-variant, and the compiler accepts the discharge with no fallback.
+The library's own impls for `Void` and `Infallible` have the same one-line body. An empty `match` is
+legal because no value of the scrutinee's type can exist, and it satisfies any return type for the
+same reason. So a caller reaches `finalize_extract` only after trying every variant, and the
+compiler accepts the discharge without a fallback.
 
-**This is where the record and variant families diverge, and the difference decides the whole design.** A record
-uses `IsNothing` for a missing field, which maps to `()` and is *inhabited*: an absent field is a real
-state a value can be in. A variant uses `IsVoid`, which is *uninhabited*: a ruled-out variant is a state
-no value can be in. That is exactly why a builder needs an explicit all-present
-[`FinalizeBuild`](../builder/finalize_build.md) impl while an extractor can discharge its remainder with an empty
-`match`.
+**This is where the record and variant families diverge, and the difference decides the whole
+design.** A record uses `IsNothing` for a missing field, which maps to `()` and is *inhabited*: an
+absent field is a real state a value can be in. A variant uses `IsVoid`, which is *uninhabited*: a
+ruled-out variant is a state no value can be in. That is why a builder needs an explicit all-present
+[`FinalizeBuild`](../builder/finalize_build.md) impl that moves each field into the struct, while an
+extractor discharges its remainder with an empty `match`.
 
 ## Common Mistakes
 
-**Finalizing early does not compile, and the error names the partial enum.** The all-void impl does not
-apply while any marker is still `IsPresent`, so the compiler reports a missing method. Read the type in
-the message to see which variants remain.
+**Finalizing early does not compile, and the error names the partial enum.** The all-void impl does
+not apply while any marker is still `IsPresent`. Trying only `Rectangle` before finalizing:
 
-**It returns any type, which reads as unsound and is not.** The generic return is sound only because the
-receiver is uninhabited; there is no value and no execution.
+```rust
+match shape.to_extractor().extract_field(PhantomData::<Symbol!("Rectangle")>) {
+    Ok(rect) => rect.width,
+    Err(remainder) => remainder.finalize_extract(),
+}
+```
+
+reports a missing method:
+
+```text
+error[E0599]: no method named `finalize_extract` found for enum `__PartialShape<__F0__, __F1__>` in the current scope
+...
+   |                                     ^^^^^^^^^^^^^^^^ method not found in `__PartialShape<IsPresent, IsVoid>`
+```
+
+The marker still `IsPresent` is the variant left to try, here `Circle`.
+
+**It returns any type, which reads as unsound and is not.** The generic return is sound only because
+the receiver is uninhabited; no value exists, so nothing executes.
 
 **Absence is `IsVoid` here and `IsNothing` in a builder.** An error naming the wrong one usually means
 record and variant machinery have been crossed.

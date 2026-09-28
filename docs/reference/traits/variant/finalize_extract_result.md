@@ -1,6 +1,8 @@
 ---
+title: 'FinalizeExtractResult — close a variant chain'
 sidebar_label: 'FinalizeExtractResult'
 sidebar_position: 6
+description: 'Collapse the Result the last step of an extraction chain returns, returning the payload and discharging the uninhabited remainder at the type level.'
 ---
 
 # `FinalizeExtractResult`
@@ -30,17 +32,9 @@ pub trait FinalizeExtractResult {
 ```
 
 `Self` is the `Result` and `Output` is the payload alone. The trait has one blanket impl, for any
-`Result<T, E>` whose error half can be discharged:
+`Result<T, E>` whose error half can be discharged, shown in [Under the hood](#under-the-hood).
 
-```rust
-impl<T, E> FinalizeExtractResult for Result<T, E>
-where
-    E: FinalizeExtract,
-{
-    type Output = T;
-    // Ok(value) => value, Err(remainder) => remainder.finalize_extract()
-}
-```
+
 
 `finalize_extract_result` returns the `Ok` value directly and discharges the `Err` half through
 [`FinalizeExtract`](./finalize_extract.md), which cannot fail once the remainder is uninhabited.
@@ -62,8 +56,19 @@ dischargeable, so it applies the moment a chain has tried every variant.
 Closing a chain, which is the whole use:
 
 ```rust
-use cgp::core::field::traits::FinalizeExtractResult;
 use cgp::prelude::*;
+use cgp::core::field::traits::FinalizeExtractResult;
+
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
 
 #[derive(ExtractField)]
 pub enum Shape {
@@ -71,32 +76,26 @@ pub enum Shape {
     Rectangle(Rectangle),
 }
 
-fn area(shape: Shape) -> f64 {
+pub fn area(shape: Shape) -> f64 {
     match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
         Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
         Err(remainder) => {
             let rect = remainder
                 .extract_field(PhantomData::<Symbol!("Rectangle")>)
-                .finalize_extract_result();   // no variants left, so this cannot fail
+                .finalize_extract_result(); // no variants left, so this cannot fail
             rect.width * rect.height
         }
     }
 }
+
+pub fn demo() {
+    assert_eq!(area(Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })), 12.0);
+}
 ```
 
-No `.unwrap()`, no `expect`, and no wildcard arm. The call compiles only because both variants have been
-tried, which makes it a proof rather than an assertion.
-
-Calling it one step early does not compile:
-
-```rust
-// error: the trait bound is not satisfied: Circle is still possible,
-// so the remainder is inhabited and cannot be discharged
-let rect = shape
-    .to_extractor()
-    .extract_field(PhantomData::<Symbol!("Rectangle")>)
-    .finalize_extract_result();
-```
+The code needs neither `.unwrap()`, `expect`, nor a wildcard arm. The call compiles only because
+both variants have been tried, which makes it a proof rather than an assertion; [Common
+Mistakes](#common-mistakes) shows the call one step early.
 
 ## When to use it
 
@@ -109,34 +108,83 @@ let rect = shape
 - **The [dispatch combinators](../../providers/dispatch/index.md)** rather than a hand-written chain,
   since they generate it from the enum's own variant list, which keeps "add a variant" from
   breaking every call site.
-- **`.ok()` or a `match`** when you are making a single attempt and do not intend to exhaust the enum.
-  Reaching for this trait then simply will not resolve.
+- **`.ok()` or a `match`** when you are making a single attempt and do not intend to exhaust the
+  enum. This trait does not resolve on such a single attempt.
 - **A `match`** when the enum is concrete.
 
 ## Under the hood
 
-The impl delegates to [`FinalizeExtract`](./finalize_extract.md) on the error half, which is where the
-soundness argument lives: the remainder is uninhabited once every variant is `IsVoid`, so the `Err` arm
-is discharged with an empty `match` and no execution path reaches it.
+The trait's one impl delegates to [`FinalizeExtract`](./finalize_extract.md) on the error half:
 
-Because the bound is on `E` rather than on any CGP type in particular, the impl also covers a `Result`
-whose error is `Infallible` or [`Void`](../../types/void.md). That is occasionally useful
-outside the extractor family, for collapsing a `Result` that a signature required but that cannot fail.
+```rust
+impl<T, E> FinalizeExtractResult for Result<T, E>
+where
+    E: FinalizeExtract,
+{
+    type Output = T;
 
-`Output` being an associated type rather than a generic lets the call sit at the end of a method
+    fn finalize_extract_result(self) -> T {
+        match self {
+            Ok(value) => value,
+            Err(remainder) => remainder.finalize_extract(),
+        }
+    }
+}
+```
+
+The soundness argument lives in `FinalizeExtract`: the remainder is uninhabited once every variant
+is `IsVoid`, so the `Err` arm is discharged with an empty `match` and no execution path reaches it.
+
+Because the bound is on `E` rather than on any CGP type in particular, the impl also covers a
+`Result` whose error is `Infallible` or [`Void`](../../types/void.md). That is occasionally useful
+outside the extractor family, for collapsing a `Result` that a signature required but that cannot
+fail.
+
+`Output` is an associated type rather than a generic, so the call can sit at the end of a method
 chain with nothing to annotate.
 
 ## Common Mistakes
 
-**It is not in the prelude.** Import it from `cgp::core::field::traits`. Without it there is no
-`finalize_extract_result` in scope and the chain has no clean ending, and the error is a
-missing-method one, which reads as though the chain is wrong rather than the import missing.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`. Without the import, a
+complete chain on a one-variant enum:
 
-**Calling it early does not compile.** Any variant still possible leaves the remainder inhabited and the
-bound unsatisfied.
+```rust
+let circle = shape
+    .to_extractor()
+    .extract_field(PhantomData::<Symbol!("Circle")>)
+    .finalize_extract_result();
+```
 
-**It discards nothing and cannot panic.** Unlike `.unwrap()`, there is no runtime branch: the `Err` case
-is discharged at the type level.
+fails as a missing method, though rustc does name the fix:
+
+```text
+error[E0599]: no method named `finalize_extract_result` found for enum `Result<T, E>` in the current scope
+...
+help: trait `FinalizeExtractResult` which provides `finalize_extract_result` is implemented but not in scope; perhaps you want to import it
+```
+
+**Calling it early does not compile.** Any variant still possible leaves the remainder inhabited and
+the bound unsatisfied. Trying only `Rectangle`:
+
+```rust
+let rect = shape
+    .to_extractor()
+    .extract_field(PhantomData::<Symbol!("Rectangle")>)
+    .finalize_extract_result();
+```
+
+reports the unsatisfied `FinalizeExtract` bound on the remainder:
+
+```text
+error[E0599]: the method `finalize_extract_result` exists for enum `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>`, but its trait bounds were not satisfied
+...
+   = note: the following trait bounds were not satisfied:
+           `__PartialShape<IsPresent, IsVoid>: FinalizeExtract`
+           which is required by `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>: FinalizeExtractResult`
+```
+
+**It discards nothing and cannot panic.** Unlike `.unwrap()`, it compiles to a single path: the
+`Err` case is discharged at the type level.
 
 **It applies to any `Result` with a dischargeable error**, not only to extraction remainders, which is
 occasionally surprising when it resolves somewhere you did not expect.
