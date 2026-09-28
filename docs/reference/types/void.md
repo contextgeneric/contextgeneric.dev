@@ -14,8 +14,7 @@ complete variant match end without a runtime branch.
 
 `Void` marks the end of a sum. Unlike the [`Nil`](nil.md) that ends the other lists, it is uninhabited: a
 value of `Void` cannot exist. A record, a string, or a path can each be empty and still exist, but an
-empty *choice* cannot. A value that is "none of the branches" cannot exist, so the natural terminator for
-the sum list is a type without values.
+empty *choice* cannot, so the natural terminator for the sum list is a type without values.
 
 The sum list depends on this uninhabitedness. An [`Either`](either.md) chain ends in `Void`, so a
 value that passed every real branch would have type `Void`, and such a value cannot exist. So the
@@ -42,8 +41,8 @@ on one. It is in the prelude, so `use cgp::prelude::*;` is enough.
 `Void` is the base case of a recursion over a sum, and it differs from the product list's base case
 in a way that matters. A walk over an [`Either`](either.md) chain handles each `Left` as a branch
 and defers each `Right` to the tail, until the tail is `Void`. At that point nothing is left to
-handle, so the base-case impl for `Void` either returns without doing anything or discharges a value
-that cannot exist.
+handle, so the base-case impl for `Void` ends the recursion, handing back what it was given or
+discharging a value that cannot exist.
 
 Variant extraction uses the same uninhabitedness in a second place. An extractor from
 [`#[derive(ExtractField)]`](../derives/derive_extract_field.md) is a companion enum with one marker

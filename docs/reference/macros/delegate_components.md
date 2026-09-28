@@ -781,13 +781,13 @@ generic `<Shape> AreaCalculatorComponent<Shape>` entry overlapping a specific
 `@ComputerComponent.<Code> Code.Circle`. The same applies to a direct entry for a path a joined
 namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#common-mistakes).
 
-**A component used at an unsized type parameter passes its check and fails at the call.** The impl the
-macro emits for each entry to forward the dependency marker requires the component's parameters to be
-`Sized`, so a component declared over `T: ?Sized` and wired at `str` never works through the table,
-though `check_components!` passes for it. A call reports `E0599` with the note
+**A component used at an unsized type parameter passes its check and fails at the call.** The
+impl the macro emits for each entry to forward the dependency marker requires the component's
+parameters to be `Sized`, so a component declared over `T: ?Sized` and wired at `str` never works
+through the table, though `check_components!` passes for it. A call reports `E0599` with the note
 `` `str: Sized` which is required by … ``. This is a defect in the library. Until it is fixed, use a
-sized parameter or implement the consumer trait directly on the context. The [`Life`](../types/life.md)
-page shows the full example.
+sized parameter or implement the consumer trait directly on the context. The
+[`Life`](../types/life.md) page shows the full example.
 
 ## Related constructs
 

@@ -121,9 +121,9 @@ pub fn demo() {
 }
 ```
 
-`App` is an environmental context: it holds the borrowed configuration a provider reads, and the
-component is parameter-targeted, returning a borrow of `T` for the lifetime `'a`. The generated
-provider trait records the lifetime in its dependency marker as the type `Life<'a>`, as
+`App` is an environmental context: it holds the borrowed configuration a provider reads. The
+component is a self-targeted getter, and its `T` names the type it lends for the lifetime `'a`. The
+generated provider trait records the lifetime in its dependency marker as the type `Life<'a>`, as
 `cargo cgp expand` shows:
 
 ```rust

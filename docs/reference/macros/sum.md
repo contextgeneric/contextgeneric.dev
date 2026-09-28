@@ -140,10 +140,11 @@ record is a perfectly good value; a sum terminates in `Void` because an empty ch
 being nothing to pick. `Void` functions as the never type, used here to close a sum off.
 
 **Why it matters beyond tidiness**: this gives generic variant handling compile-time exhaustiveness
-without a wildcard arm. As each variant is ruled out, the remaining type shrinks toward `Void`, and code that
-has handled every variant is left holding a value that cannot exist. The compiler accepts discharging it
-with no fallback case. Add a variant to the enum without handling it, and the remainder becomes inhabited
-again, so the code stops compiling. The same guarantee a concrete `match` gives, recovered for generic code.
+without a wildcard arm. As an extractor rules each variant out, it marks that variant's payload as
+`Void`, so code that has handled every variant is left holding a value that cannot exist. The
+compiler accepts discharging it without a fallback case. Add a variant to the enum without handling
+it, and the remainder becomes inhabited again, so the code stops compiling. Generic code gets the
+guarantee a concrete `match` gives.
 
 The macro builds the chain by folding the element types right to left onto `Void`.
 
