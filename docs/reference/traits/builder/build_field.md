@@ -36,22 +36,24 @@ pub trait BuildField<Tag> {
 }
 ```
 
-`Tag` names the field. `Value` is the field's declared type, so `build_field` takes an ordinary value with
-no marker wrapper. `Output` is the partial record with that one field's marker flipped from `IsNothing` to
-`IsPresent`, a different type from `Self`. The blanket impl over [`UpdateField`](./update_field.md) that
-supplies all of this is shown in [Under the hood](#under-the-hood).
+`Tag` names the field. `Value` is the field's declared type, so `build_field` takes an ordinary
+value without a marker wrapper. `Output` is the partial record with that one field's marker flipped
+from `IsNothing` to `IsPresent`, a different type from `Self`. The blanket impl over
+[`UpdateField`](./update_field.md) that supplies all of this is shown in [Under the
+hood](#under-the-hood).
 
 ## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-The `PhantomData<Tag>` argument names the field, the same way a [`HasField`](../field-access/has_field.md) read does:
-`PhantomData::<Symbol!("first_name")>` for a named field, `PhantomData::<Index<0>>` for a tuple-struct
-position. `Value` is the field's declared type, so what you pass is an ordinary value with no wrapper.
+The `PhantomData<Tag>` argument names the field, the same way a
+[`HasField`](../field-access/has_field.md) read does: `PhantomData::<Symbol!("first_name")>` for a
+named field, `PhantomData::<Index<0>>` for a tuple-struct position. `Value` is the field's declared
+type, so what you pass is an ordinary value without a wrapper.
 
 **Nothing implements it directly.** It is a library blanket impl over
-[`UpdateField`](./update_field.md), so every field the derive generates an `UpdateField` impl for gains
-`build_field` for free.
+[`UpdateField`](./update_field.md), so every field the derive generates an `UpdateField` impl for
+gains `build_field` without an impl of its own.
 
 ## Examples
 

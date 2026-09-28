@@ -1,5 +1,5 @@
 ---
-title: 'CanFinalizeWithDefault — fill gaps, then build'
+title: 'CanFinalizeWithDefault — finish with defaults'
 sidebar_label: 'CanFinalizeWithDefault'
 sidebar_position: 5
 description: 'End a build by filling every unset field from Default, for an optional builder or a core one, then finalizing through the strict impl.'
@@ -40,13 +40,14 @@ pub trait CanFinalizeWithDefault {
 }
 ```
 
-`Self` is any partial builder whose fields can be re-marked to all-present, which covers a core builder
-from [`builder()`](../builder/has_builder.md) as well as an optional one from
+`Self` is any partial builder whose fields can be re-marked to all-present, which covers a core
+builder from [`builder()`](../builder/has_builder.md) as well as an optional one from
 [`optional_builder()`](./has_optional_builder.md). `Output` is the concrete struct being built.
-`finalize_with_default` takes `self`, consuming the builder, and returns that struct with every unset
-field filled from `Default`. The trait has no [supertrait](/docs/reference/glossary#supertrait); it is a blanket impl over the
-transform-then-finalize shown in [*Under the hood*](#under-the-hood). It is not in the prelude; import it
-from `cgp-field-extra`.
+`finalize_with_default` takes `self`, consuming the builder, and returns that struct with every
+unset field filled from `Default`. The trait does not declare a
+[supertrait](/docs/reference/glossary#supertrait); it is a blanket impl over the
+transform-then-finalize shown in [*Under the hood*](#under-the-hood). It is not in the prelude;
+import it from `cgp-field-extra`.
 
 ## Usage
 
@@ -144,8 +145,8 @@ configuration its single impl requires, so the strict check runs, and cannot fai
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 
-**A field whose type has no `Default` is reported without being named.** On a core builder with
-`port` left unset, where `Port` has no `Default`:
+**A field whose type lacks `Default` is reported without being named.** On a core builder with
+`port` left unset, where `Port` lacks `Default`:
 
 ```rust
 pub struct Port(pub u16);
@@ -187,7 +188,8 @@ let _ = Server::optional_builder()
 
 fails the same way, on `__PartialServer<IsOptional, IsOptional>`, because a set field is still
 `IsOptional` and its conversion requires `Default`. A core builder with both fields set finalizes
-this way regardless, and [`finalize_optional`](./finalize_optional.md) needs no `Default` at all.
+this way regardless, and [`finalize_optional`](./finalize_optional.md) does not need `Default` at
+all.
 
 **A defaulted field is silent.** Nothing distinguishes "set to zero" from "left unset" in the result, which
 is the trade against [`FinalizeOptional`](./finalize_optional.md).

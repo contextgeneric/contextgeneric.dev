@@ -13,10 +13,10 @@ The primitive that moves one field of a [partial record](/docs/reference/glossar
 
 ### Generated machinery
 
-**You are not expected to call `update_field` directly.** It is the per-field
-primitive [`#[derive(BuildField)]`](../../derives/derive_build_field.md) emits, and
-[`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are the two directions you actually
-call. This page explains the primitive, because it is what makes build order free and what the
+**You are not expected to call `update_field` directly.** It is the per-field primitive
+[`#[derive(BuildField)]`](../../derives/derive_build_field.md) emits, and
+[`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are the two directions you
+actually call. This page explains the primitive, because it makes build order free and is what the
 optional-field layer reaches for when neither direction fits.
 
 :::
@@ -64,10 +64,10 @@ directions.
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-The `M` parameter is the target marker, and **it is not inferred from the value you pass**: a
-`String` could be the storage of `IsPresent` or of any other marker that maps to it, so a direct
-call names the trait with the marker, as
-`UpdateField::<Symbol!("first_name"), IsPresent>::update_field(builder, PhantomData, value)`.
+The `M` parameter is the target marker, and **it is not inferred from the value you pass**. The
+argument's type is the projection `M::Map<Self::Value>`, and rustc does not solve a projection
+backwards, so a `String` argument leaves `M` unknown. A direct call names the trait with the marker,
+as `UpdateField::<Symbol!("first_name"), IsPresent>::update_field(builder, PhantomData, value)`.
 [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) pin the marker for you, which is
 one reason to call them instead.
 
@@ -197,7 +197,8 @@ error[E0284]: type annotations needed for `((), __PartialPerson<_, IsNothing>)`
    = note: cannot satisfy `<_ as MapType>::Map<String> == String`
 ```
 
-**A field not declared on the record has no impl.** Setting an `age` that `Person` does not declare:
+**A field not declared on the record lacks an impl.** Setting an `age` that `Person` does not
+declare:
 
 ```rust
 let _ = Person::builder().build_field(PhantomData::<Symbol!("age")>, 42_u8);

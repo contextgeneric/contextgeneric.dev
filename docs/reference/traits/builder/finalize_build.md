@@ -40,19 +40,19 @@ pub trait FinalizeBuild: PartialData {
 }
 ```
 
-`finalize_build` takes `self` by value, so it consumes the partial record, and returns `Self::Target`, the
-concrete struct being built. `Target` is not declared here: it comes from the supertrait
-[`PartialData`](./partial_data.md), which every configuration of a partial record implements, so the
-destination is nameable at any point in a build. What `FinalizeBuild` adds is the method, and its impl
-exists for only one configuration (every field `IsPresent`), which is the safety argument the rest of
-this page works out.
+`finalize_build` takes `self` by value, so it consumes the partial record, and returns
+`Self::Target`, the concrete struct being built. `Target` is not declared here: it comes from the
+supertrait [`PartialData`](./partial_data.md), which every configuration of a partial record
+implements, so the destination is nameable at any point in a build. `FinalizeBuild` adds the method,
+and its impl exists for only one configuration (every field `IsPresent`), which is the safety
+argument the rest of this page works out.
 
 ## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-`finalize_build` consumes the partial value and returns `Self::Target`. It takes no arguments. There is
-nothing left to decide by the time it applies.
+`finalize_build` consumes the partial value and returns `Self::Target`. It takes only `self`:
+nothing is left to decide by the time it applies.
 
 Bounding on it is how generic builder code says it will produce a finished value, as the
 `assemble` function in the [example](#examples) does with `FinalizeBuild<Target = Target>`.
@@ -98,7 +98,7 @@ pub fn demo() {
 ```
 
 `assemble` names only `FinalizeBuild`, yet it can bind `Target`, because the projection comes from
-the supertrait [`PartialData`](./partial_data.md). `Empty` has no markers to fill, so its builder is
+the supertrait [`PartialData`](./partial_data.md). `Empty` lacks markers to fill, so its builder is
 already at the one configuration the impl covers.
 
 ## When to use it
@@ -137,8 +137,8 @@ impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
 So a partial value always knows its destination and only sometimes has a way to reach it. Because
 `IsPresent::Map<T>` is `T`, the body is a field-by-field move with nothing to unwrap. **This is why
 the error for an incomplete build is a missing method rather than a missing field**: method
-resolution looks for `finalize_build` on `__PartialPerson<IsPresent, IsNothing>`, finds no impl, and
-reports that, so the marker list in the type is the diagnostic.
+resolution looks for `finalize_build` on `__PartialPerson<IsPresent, IsNothing>`, does not find an
+impl, and reports that, so the marker list in the type is the diagnostic.
 
 The optional layer reaches this same impl rather than replacing it:
 [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) runs a
@@ -171,11 +171,11 @@ The field whose marker is still `IsNothing` is the one missing.
 **It supertraits [`PartialData`](./partial_data.md)**, so naming both in a bound is redundant, and
 `Target` is projected from the supertrait.
 
-**There is no fallible variant here.** Reporting absence at run time is
+**It lacks a fallible variant.** Reporting absence at run time is
 [`FinalizeOptional`](../optional/finalize_optional.md), a different trait in a different crate.
 
-**A fieldless struct finalizes immediately.** Its companion has no markers, so `builder().finalize_build()`
-compiles, which is legal and useless.
+**A fieldless struct finalizes immediately.** Its companion lacks markers, so
+`builder().finalize_build()` compiles, which is legal and useless.
 
 **The enum side has its own ending.** [`FinalizeExtract`](../variant/finalize_extract.md) discharges an exhausted
 extractor, and it is sound for the opposite reason: the value cannot exist, rather than being complete.

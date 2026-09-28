@@ -56,8 +56,8 @@ The `PhantomData<Tag>` argument names the field, and the method returns a tuple:
 remainder second.**
 
 **Nothing implements it directly.** It is a library blanket impl over
-[`UpdateField`](./update_field.md), so every field the derive generates an `UpdateField` impl for gains
-`take_field` for free.
+[`UpdateField`](./update_field.md), so every field the derive generates an `UpdateField` impl for
+gains `take_field` without an impl of its own.
 
 ## Examples
 
@@ -111,8 +111,8 @@ merging one record into another, already uses it for you.
 - **Use [`BuildField`](./build_field.md)** for the opposite direction.
 - **Use [`ToFields`](../shape/to_fields.md)** when the whole value should become a flat shape rather than a
   partial record with one field missing.
-- **Prefer ordinary destructuring** in concrete code. `let Person { first_name, .. } = person;` needs no
-  machinery, and this family is for code that cannot name the type.
+- **Prefer ordinary destructuring** in concrete code. `let Person { first_name, .. } = person;`
+  needs none of this machinery, and this family is for code that cannot name the type.
 
 ## Under the hood
 

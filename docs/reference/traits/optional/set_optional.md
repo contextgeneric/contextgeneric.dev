@@ -1,5 +1,5 @@
 ---
-title: 'SetOptional — set a field of an optional builder'
+title: 'SetOptional — set an optional builder field'
 sidebar_label: 'SetOptional'
 sidebar_position: 3
 description: 'Set one field of an all-optional builder, as many times as you like, optionally getting back the value it replaced.'
@@ -35,13 +35,14 @@ pub trait SetOptional<Tag> {
 ```
 
 `Tag` is the field's type-level name, a [`Symbol!`](../../macros/symbol.md) for a named field or an
-[`Index<N>`](../../types/index_type.md) for a tuple field, passed at the call site as a `PhantomData<Tag>`
-argument. `Value` is the field's declared type, so a caller passes an ordinary value rather than an
-`Option`. Both methods take `self` and return `Self`: the field's marker stays `IsOptional` before and
-after, so the builder's type does not change and an optional field can be set repeatedly. The two
-methods differ only in what they do with whatever was already there. `set` discards it; `set_optional`
-returns it as an `Option<Self::Value>` alongside the rebuilt builder. The trait has no [supertrait](/docs/reference/glossary#supertrait). It is
-not in the prelude; import it from `cgp-field-extra`.
+[`Index<N>`](../../types/index_type.md) for a tuple field, passed at the call site as a
+`PhantomData<Tag>` argument. `Value` is the field's declared type, so a caller passes an ordinary
+value rather than an `Option`. Both methods take `self` and return `Self`: the field's marker stays
+`IsOptional` before and after, so the builder's type does not change and an optional field can be
+set repeatedly. The two methods differ only in what they do with whatever was already there. `set`
+discards it; `set_optional` returns it as an `Option<Self::Value>` alongside the rebuilt builder.
+The trait does not declare a [supertrait](/docs/reference/glossary#supertrait). It is not in the
+prelude; import it from `cgp-field-extra`.
 
 ## Usage
 
@@ -51,10 +52,10 @@ not in the prelude; import it from `cgp-field-extra`.
 use cgp::extra::field::impls::SetOptional;
 ```
 
-`Self` must be an optional builder, one from
-[`optional_builder()`](./has_optional_builder.md) or [`to_optional()`](./to_optional.md). Calling it on a
-core builder does not resolve, because the field's marker is `IsNothing` rather than `IsOptional`. There
-is no "unset" operation: a field starts absent and stays so unless it is set.
+`Self` must be an optional builder, one from [`optional_builder()`](./has_optional_builder.md) or
+[`to_optional()`](./to_optional.md). Calling it on a core builder does not resolve, because the
+field's marker is `IsNothing` rather than `IsOptional`. The trait lacks an "unset" operation: a
+field starts absent and stays so unless it is set.
 
 ## Examples
 
@@ -129,7 +130,7 @@ where
 
 `Mapper = IsOptional` requires the field to already be in the optional state, and `Output = Context`
 pins the result to the same type on both sides. **That pinning allows repeated sets:**
-there is no marker to consume, so no impl becomes unavailable after the first call.
+the call does not consume a marker, so every impl that applied before it still applies after it.
 
 Contrast [`BuildField`](../builder/build_field.md#under-the-hood), which pins `Mapper = IsNothing` and a target of
 `IsPresent`: its `Output` is a *different* type, which makes a second call fail to resolve.
@@ -161,14 +162,14 @@ The field must already be `IsOptional`, so start with
 [`optional_builder()`](./has_optional_builder.md) or convert with
 [`to_optional()`](./to_optional.md).
 
-**The builder's type never changes, so it carries no record of what you have set.** That is deliberate:
+**The builder's type never changes, so it does not record what you have set.** That is deliberate:
 it allows re-setting, and it is why finalizing has to check at run time.
 
 **`set_optional` returns `(previous, builder)`, in that order.** Reversing the binding is a type error,
 and a confusing one in generic code.
 
-**The argument is a `Value`, not an `Option<Value>`.** There is no "unset" operation; a field left alone
-stays absent.
+**The argument is a `Value`, not an `Option<Value>`.** The trait lacks an "unset" operation; a field
+left alone stays absent.
 
 **A field whose type is already `Option<T>` takes an `Option<T>` here and is stored as
 `Option<Option<T>>`.** The outer layer is the builder's presence tracking, and the two are easy to

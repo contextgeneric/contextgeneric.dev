@@ -15,9 +15,10 @@ Naming the concrete type a partial value is on its way to becoming.
 
 **You are not expected to implement `PartialData`.**
 [`#[derive(BuildField)]`](../../derives/derive_build_field.md) and
-[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) emit it for every companion type they
-generate. What you meet is the projection `Self::Target` in another trait's signature; this page explains
-where that projection comes from. The one case for bounding on it is generic code that needs the destination type before the value is complete.
+[`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) emit it for every companion type
+they generate. You meet the projection `Self::Target` in another trait's signature; this page
+explains where that projection comes from. The one case for bounding on it is generic code that
+needs the destination type before the value is complete.
 
 :::
 
@@ -43,11 +44,12 @@ pub trait PartialData {
 }
 ```
 
-`Self` is a partial companion type, a record builder or an extraction remainder. `Target` is the concrete
-struct or enum it belongs to. There is no method, because naming a type is not an operation; the trait
-exists so that generic code can project `Self::Target` while holding a value of unknown completeness.
-[`FinalizeBuild`](./finalize_build.md) and [`FinalizeOptional`](../optional/finalize_optional.md) both
-read the destination through this projection rather than declaring one of their own.
+`Self` is a partial companion type, a record builder or an extraction remainder. `Target` is the
+concrete struct or enum it belongs to. It lacks a method, because naming a type is not an operation;
+the trait exists so that generic code can project `Self::Target` while holding a value of unknown
+completeness. [`FinalizeBuild`](./finalize_build.md) and
+[`FinalizeOptional`](../optional/finalize_optional.md) both read the destination through this
+projection rather than declaring one of their own.
 
 ## Usage
 
@@ -137,7 +139,7 @@ builder, which is occasionally what you want and occasionally too permissive.
 **`Target` is the original type, not the partial one.** Reading the projection the other way round is the
 usual confusion when meeting it in an error.
 
-**It has no method.** Getting a value of `Target` is a finalize; this only names the type.
+**It lacks a method.** Getting a value of `Target` is a finalize; this only names the type.
 
 ## Related constructs
 

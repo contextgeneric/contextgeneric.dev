@@ -16,12 +16,12 @@ start a builder, copy the shared fields, default the rest. `CanBuildWithDefault`
 call.
 
 `Self` is the target record and `Source` the narrower one. **It is the field-level counterpart of an
-[upcast](../casting/can_upcast.md)**: turning a `Point2d` into a `Point3d` whose extra `z` is `0`, naming no field
-explicitly.
+[upcast](../casting/can_upcast.md)**: turning a `Point2d` into a `Point3d` whose extra `z` is `0`,
+without naming a field explicitly.
 
-It chains [`builder()`](../builder/has_builder.md), [`build_from`](../casting/can_build_from.md), and
-[`finalize_with_default`](./can_finalize_with_default.md), and it is worth reaching for precisely because
-those three lines together read as plumbing.
+It chains [`builder()`](../builder/has_builder.md), [`build_from`](../casting/can_build_from.md),
+and [`finalize_with_default`](./can_finalize_with_default.md), and it is worth reaching for because
+those three lines, written out, say only that one record is widened into another.
 
 ## Definition
 
@@ -33,13 +33,13 @@ pub trait CanBuildWithDefault<Source> {
 }
 ```
 
-`Source` is the narrower record and `Self` is the target. `build_with_default` is an associated function
-with no receiver, and it returns a fully built `Self`. The trait declares no associated type and no
-[supertrait](/docs/reference/glossary#supertrait); it is a blanket impl chaining a builder, a merge, and a defaulted finalize, shown in
-[*Under the hood*](#under-the-hood). Two requirements follow from that chain: the source needs
-[`HasFields`](../shape/has_fields.md), because the merge walks its field list, and every field the source
-does not supply needs `Default`, because the finalize fills it. It is not in the prelude; import it from
-`cgp-field-extra`.
+`Source` is the narrower record and `Self` is the target. `build_with_default` is an associated
+function without a receiver, and it returns a fully built `Self`. The trait declares neither an
+associated type nor a [supertrait](/docs/reference/glossary#supertrait); it is a blanket impl
+chaining a builder, a merge, and a defaulted finalize, shown in [*Under the hood*](#under-the-hood).
+Two requirements follow from that chain: the source needs [`HasFields`](../shape/has_fields.md),
+because the merge walks its field list, and every field the source does not supply needs `Default`,
+because the finalize fills it. It is not in the prelude; import it from `cgp-field-extra`.
 
 ## Usage
 
@@ -53,7 +53,7 @@ It is an **associated function**, called on the target: `Point3d::build_with_def
 
 ## Examples
 
-Widening a record with no field named anywhere, in one call and as the three calls it stands for:
+Widening a record without naming a field, in one call and as the three calls it stands for:
 
 ```rust
 use cgp::prelude::*;
@@ -92,9 +92,10 @@ filled because `u64: Default`.
 **Reach for it for a one-call widening from a narrower record**, and reach for the pieces when anything
 in between needs to happen.
 
-- **[`CanBuildFrom`](../casting/can_build_from.md) plus an explicit finalize** when some fields must be set by
-  hand as well as copied. This trait offers no place to insert a `build_field`.
-- **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** when there is no source to merge from.
+- **[`CanBuildFrom`](../casting/can_build_from.md) plus an explicit finalize** when some fields must
+  be set by hand as well as copied. This trait cannot insert a `build_field` between its steps.
+- **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** when the fields do not come from a
+  source record.
 - **[`CanUpcast`](../casting/can_upcast.md)** for the enum analogue: widening a variant set rather than a field
   set.
 - **A plain `From` impl** when both types are yours and the conversion is one you would write once. A
@@ -134,11 +135,11 @@ receiver, rustc follows the chain to the root cause and prints each layer as a `
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 
 **The source needs [`HasFields`](../shape/has_fields.md), not only a builder.** Deriving only
-[`BuildField`](../../derives/derive_build_field.md) on both looks symmetric and fails, the same trap
-[`CanBuildFrom`](../casting/can_build_from.md) carries.
+[`BuildField`](../../derives/derive_build_field.md) on both looks symmetric and fails, the same
+mistake [`CanBuildFrom`](../casting/can_build_from.md) carries.
 
 **Every field the source does not supply needs `Default`.** Building a `Server` from a `Host` that
-lacks its `port`, where `Port` has no `Default`:
+lacks its `port`, where `Port` lacks `Default`:
 
 ```rust
 pub struct Port(pub u16);
@@ -173,7 +174,7 @@ The later notes climb the chain from there, through `TransformMapFields` and
 **It is an associated function on the target.** `Point3d::build_with_default(source)`, not a method on
 the source.
 
-**There is no place to set a field explicitly.** If one field needs a real value, use the three-call form.
+**It cannot set a field explicitly.** If one field needs a real value, use the three-call form.
 
 **A source field the target lacks is an error, not dropped.** The merge walks the *source's* fields
 and builds each into the target, so a `label` that `Point3d` does not declare:
@@ -193,7 +194,7 @@ let _ = Point3d::build_with_default(LabeledPoint2d {
 });
 ```
 
-has no slot to go into:
+lacks a slot to go into:
 
 ```text
 error[E0277]: the trait bound `__PartialPoint3d<IsPresent, IsPresent, IsNothing>: UpdateField<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>, IsPresent>` is not satisfied

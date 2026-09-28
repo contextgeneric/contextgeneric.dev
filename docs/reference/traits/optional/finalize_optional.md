@@ -35,12 +35,12 @@ pub trait FinalizeOptional: PartialData {
 }
 ```
 
-The `PartialData` [supertrait](/docs/reference/glossary#supertrait) supplies `Target`, the concrete struct being built, so the method projects
-its return type through it and declares no associated type of its own. `finalize_optional` takes `self`,
-consuming the builder, and returns `Result<Self::Target, &'static str>`: the built struct on success,
-or, on failure, a missing field's own name, recovered from its type-level tag as a
-`&'static str` with no allocation. The trait carries no other parameter. It is not in the prelude; import it from
-`cgp-field-extra`.
+The `PartialData` [supertrait](/docs/reference/glossary#supertrait) supplies `Target`, the concrete
+struct being built, so the method projects its return type through it and does not declare an
+associated type of its own. `finalize_optional` takes `self`, consuming the builder, and returns
+`Result<Self::Target, &'static str>`: the built struct on success, or, on failure, a missing field's
+own name, recovered from its type-level tag as a `&'static str` without allocating. The trait is not
+generic. It is not in the prelude; import it from `cgp-field-extra`.
 
 ## Usage
 
@@ -97,7 +97,7 @@ stops at the first `None` it meets.
 
 ## When to use it
 
-**Reach for it when absence is an error you want to *report* rather than paper over.**
+**Reach for it when absence is an error you want to *report* rather than hide.**
 
 - **[`CanFinalizeWithDefault`](./can_finalize_with_default.md)** when unset fields have meaningful
   defaults and silence is the right outcome. The two are the same builder finalized differently, so the

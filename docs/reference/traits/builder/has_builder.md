@@ -42,17 +42,17 @@ pub trait HasBuilder {
 }
 ```
 
-`Self` is the concrete record being built. `Builder` is the *partial companion type* the derive generates
-for it, the record carrying one [`MapType`](../type-level/map_type.md) presence marker per field.
-`builder()` is an associated function, so it takes no receiver, and it returns that companion at its
-all-absent configuration, ready to fill.
+`Self` is the concrete record being built. `Builder` is the *partial companion type* the derive
+generates for it, the record carrying one [`MapType`](../type-level/map_type.md) presence marker per
+field. `builder()` is an associated function, so it does not take a receiver, and it returns that
+companion at its all-absent configuration, ready to fill.
 
 ## Usage
 
 **It is in the prelude**, so `use cgp::prelude::*;` is enough.
 
-`builder()` is called with no receiver, as `Person::builder()` or `T::builder()` in generic code. You
-rarely name the `Builder` type yourself, but it appears in an error when a build is incomplete.
+`builder()` is called without a receiver, as `Person::builder()` or `T::builder()` in generic code.
+You rarely name the `Builder` type yourself, but it appears in an error when a build is incomplete.
 
 The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.md), also available through
 [`#[derive(CgpRecord)]`](../../derives/derive_cgp_record.md) and
@@ -112,7 +112,7 @@ pub fn demo() {
 ```
 
 Every step changes the partial *type*, and `finalize_build` type-checks only because every marker
-has reached present; moving it before the `baz` step is a compile error. A set field can be read
+has reached `IsPresent`; moving it before the `baz` step is a compile error. A set field can be read
 back mid-build because the derive emits a [`HasField`](../field-access/has_field.md) impl on the
 partial type for each field once it is present.
 
@@ -130,11 +130,12 @@ record being built, which is the extensible builder pattern, and the reason the 
   completeness, reads better, and generates nothing. This family buys *decoupling*, and with nothing to
   decouple it is pure cost.
 
-Two boundaries are worth stating plainly. This is **not a conventional builder**: it tracks presence and
-nothing else, with no defaults, no validation at finalize, and no optional field unless the field's own
-type is optional. The [optional-field extensions](../optional/has_optional_builder.md) cover the defaulted and optional
-cases, and a hand-written builder remains better when the *logic* is the point. And the enum counterparts
-are a different family: [`ExtractField`](../variant/extract_field.md) for taking a value apart and
+Two boundaries are worth stating plainly. This is **not a conventional builder**: it tracks presence
+and nothing else, without defaults, validation at finalize, or optional fields unless the field's
+own type is optional. The [optional-field extensions](../optional/has_optional_builder.md) cover the
+defaulted and optional cases, and a hand-written builder remains better when the *logic* is the
+point. And the enum counterparts are a different family:
+[`ExtractField`](../variant/extract_field.md) for taking a value apart and
 [`FromVariant`](../variant/from_variant.md) for constructing one.
 
 ## Under the hood
@@ -178,7 +179,7 @@ impl FinalizeBuild for __PartialPerson<IsPresent, IsPresent> {
 ```
 
 That pair is the whole safety argument. `builder()` starts at all-absent, each
-[`build_field`](./build_field.md) flips one marker, and there is no check to run at the end: the
+[`build_field`](./build_field.md) flips one marker, and nothing is checked at the end: the
 impl is absent for an incomplete value. Everything between the two ends reduces to one primitive,
 [`UpdateField`](./update_field.md), which is what the derive writes per field;
 [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are library blanket impls over
@@ -238,18 +239,18 @@ error[E0277]: the trait bound `FooBar: HasFields` is not satisfied
 The [example](#examples) derives both on its `FooBar`.
 
 **The partial type cannot be printed or cloned.** The derive drops the original's struct-level
-attributes, so no `Debug`, no `Clone`, whatever the record derives. Read a set field through the
-partial type's [`HasField`](../field-access/has_field.md) impl instead. Field-level attributes, by
-contrast, are copied onto the partial type, so a field helper attribute such as
-`#[serde(rename = "...")]` breaks the build; see
+attributes, so it lacks `Debug`, `Clone`, and every other derive the record carries. Read a set
+field through the partial type's [`HasField`](../field-access/has_field.md) impl instead.
+Field-level attributes, by contrast, are copied onto the partial type, so a field helper attribute
+such as `#[serde(rename = "...")]` breaks the build; see
 [`#[derive(BuildField)]`](../../derives/derive_build_field.md#common-mistakes).
 
-**There are no defaults and no validation.** Presence is all that is tracked. A field with a sensible
+**It neither defaults nor validates.** Presence is all that is tracked. A field with a sensible
 default still has to be set, unless you reach for the
 [optional-field extensions](../optional/can_finalize_with_default.md).
 
-**`builder()` is an associated function.** There is no receiver, so it is `Person::builder()` rather than
-anything called on a value. Starting from a value is [`IntoBuilder`](./into_builder.md).
+**`builder()` is an associated function.** It does not take a receiver, so it is `Person::builder()`
+rather than anything called on a value. Starting from a value is [`IntoBuilder`](./into_builder.md).
 
 **A fieldless struct's builder is immediately finalizable**, since there is nothing to track.
 `Empty::builder().finalize_build()` compiles for a `struct Empty {}`, which is legal and useless.

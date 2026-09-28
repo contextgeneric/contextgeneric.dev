@@ -13,10 +13,11 @@ The transform marker that makes every field optional.
 
 ### Generated machinery
 
-**You are not expected to name `TransformOptional` directly.** It is the
-marker [`ToOptional`](./to_optional.md) and [`HasOptionalBuilder`](./has_optional_builder.md) drive, and
-calling one of those is what you write. This page explains the conversion behind them, and why it needs
-less of a field's type than its defaulting counterpart does. The one case for naming it is writing an operation of your own that drives the optional conversion.
+**You are not expected to name `TransformOptional` directly.** It is the marker
+[`ToOptional`](./to_optional.md) and [`HasOptionalBuilder`](./has_optional_builder.md) drive, and
+you write a call to one of those. This page explains the conversion behind them, and why it needs
+less of a field's type than its defaulting counterpart does. The one case for naming it is writing
+an operation of your own that drives the optional conversion.
 
 :::
 
@@ -31,8 +32,8 @@ conversions that make that possible.
 workflows behave so alike.
 
 **You name it only when extending the layer.** Using the optional workflow means calling
-[`optional_builder()`](./has_optional_builder.md) or [`to_optional()`](./to_optional.md), with no marker
-in sight.
+[`optional_builder()`](./has_optional_builder.md) or [`to_optional()`](./to_optional.md), without
+naming the marker.
 
 ## Definition
 
@@ -42,7 +43,7 @@ in sight.
 pub struct TransformOptional;
 ```
 
-It carries no data. It becomes a transform by implementing
+It stores nothing. It becomes a transform by implementing
 [`TransformMap`](../type-level/transform_map.md) once for each state a core builder's field can be
 in, both impls targeting `IsOptional`:
 
@@ -51,11 +52,11 @@ in, both impls targeting `IsOptional`:
 | `IsPresent` | `Some(value)` |
 | `IsNothing` | `None` |
 
-Because both impls target `IsOptional`, applying the marker across a record leaves every field optional,
-the configuration [`SetOptional`](./set_optional.md) requires. Unlike its defaulting counterpart it needs
-nothing of the field types, since wrapping a value in `Some` and producing `None` require no `Default`.
-The impl bodies are in [*Under the hood*](#under-the-hood). The marker is not in the prelude; import it
-from `cgp-field-extra`.
+Because both impls target `IsOptional`, applying the marker across a record leaves every field
+optional, the configuration [`SetOptional`](./set_optional.md) requires. Unlike its defaulting
+counterpart it needs nothing of the field types, since wrapping a value in `Some` and producing
+`None` do not require `Default`. The impl bodies are in [*Under the hood*](#under-the-hood). The
+marker is not in the prelude; import it from `cgp-field-extra`.
 
 ## Usage
 
@@ -74,8 +75,8 @@ Builder: TransformMapFields<TransformOptional, IsOptional>
 ```
 
 Unlike its defaulting counterpart, **it requires nothing of the field types**: wrapping a value in
-`Some` and producing `None` need no `Default` and no other bound, which is why the optional path applies
-to records the defaulting path does not.
+`Some` and producing `None` need neither `Default` nor any other bound, which is why the optional
+path applies to records the defaulting path does not.
 
 ## Examples
 
@@ -147,7 +148,7 @@ impl<T> TransformMap<IsNothing, IsOptional, T> for TransformOptional {
 }
 ```
 
-Note what is absent: **no `Default` bound anywhere.** Its counterpart
+Note what is absent: **a `Default` bound.** Its counterpart
 [`TransformMapDefault`](./transform_map_default.md) needs one on two of its three impls, because
 filling an absent field means producing a value from nothing. Producing `None` does not, so this
 conversion applies to every field type. Also absent is an impl from `IsOptional`, which
@@ -170,10 +171,11 @@ makes [`SetOptional`](./set_optional.md) resolve and the strict
 **It always targets `IsOptional`.** Reaching `IsPresent` is
 [`TransformMapDefault`](./transform_map_default.md)'s job.
 
-**It has no conversion from `IsOptional`**, so a builder that is already optional cannot be relaxed
+**It lacks a conversion from `IsOptional`**, so a builder that is already optional cannot be relaxed
 again; [`ToOptional`](./to_optional.md#common-mistakes) shows the error.
 
-**It is a marker, not an operation.** There is no method and nothing to wire. It is named in a bound.
+**It is a marker, not an operation.** It lacks a method and needs nothing wired. It is named in a
+bound.
 
 **It requires nothing of the field types**, which is the one place the two markers genuinely differ in
 what they can be applied to.

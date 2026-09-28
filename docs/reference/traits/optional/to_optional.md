@@ -35,12 +35,12 @@ pub trait ToOptional {
 }
 ```
 
-`Self` is any partial builder, and `Output` is the same partial companion type with every marker set to
-`IsOptional`. `to_optional` takes `self`, consuming the builder and returning the re-marked one. The
-trait has no [supertrait](/docs/reference/glossary#supertrait); it is a blanket impl over
-[`TransformMapFields`](../type-level/transform_map_fields.md), so any partial value whose fields can be
-re-marked gains it, with nothing to implement by hand. It is not in the prelude; the optional-field
-layer lives in `cgp-field-extra`.
+`Self` is any partial builder, and `Output` is the same partial companion type with every marker set
+to `IsOptional`. `to_optional` takes `self`, consuming the builder and returning the re-marked one.
+The trait does not declare a [supertrait](/docs/reference/glossary#supertrait); it is a blanket impl
+over [`TransformMapFields`](../type-level/transform_map_fields.md), so any partial value whose
+fields can be re-marked gains it, with nothing to implement by hand. It is not in the prelude; the
+optional-field layer lives in `cgp-field-extra`.
 
 ## Usage
 
@@ -126,9 +126,9 @@ where
 That walk visits each field of the target's [`HasFields`](../shape/has_fields.md) shape, uses
 [`UpdateField`](../builder/update_field.md) to take the field out and learn its current marker,
 applies the transform, and writes it back under `IsOptional`. The transform's impls decide the
-value: `IsPresent` becomes `Some(value)` and `IsNothing` becomes `None`. **There is no impl from
-`IsOptional`**, so a builder that is already optional cannot be converted again, as [Common
-Mistakes](#common-mistakes) shows.
+value: `IsPresent` becomes `Some(value)` and `IsNothing` becomes `None`. **`TransformOptional` lacks
+an impl from `IsOptional`**, so a builder that is already optional cannot be converted again, as
+[Common Mistakes](#common-mistakes) shows.
 
 Its mirror image is [`CanFinalizeWithDefault`](./can_finalize_with_default.md), which runs the same walk
 with [`TransformMapDefault`](./transform_map_default.md) toward `IsPresent`. **Both operations are the
@@ -154,8 +154,8 @@ here a missing field is an `Err` or a default rather than a compile error.
 let _ = Context::optional_builder().to_optional();
 ```
 
-finds no [`TransformOptional`](./transform_optional.md) conversion from `IsOptional`, and fails
-with:
+does not find a [`TransformOptional`](./transform_optional.md) conversion from `IsOptional`, and
+fails with:
 
 ```text
 error[E0599]: the method `to_optional` exists for struct `__PartialContext<IsOptional, IsOptional>`, but its trait bounds were not satisfied
@@ -164,8 +164,8 @@ error[E0599]: the method `to_optional` exists for struct `__PartialContext<IsOpt
            `__PartialContext<IsOptional, IsOptional>: TransformMapFields<TransformOptional, IsOptional>`
 ```
 
-**It is not reversible.** There is no `from_optional`; getting back to a strict configuration means
-finalizing, through [`FinalizeOptional`](./finalize_optional.md) or
+**It is not reversible.** `from_optional` does not exist; getting back to a strict configuration
+means finalizing, through [`FinalizeOptional`](./finalize_optional.md) or
 [`CanFinalizeWithDefault`](./can_finalize_with_default.md).
 
 **A field whose type is already `Option<T>` becomes `Option<Option<T>>`** in the slot. That is correct

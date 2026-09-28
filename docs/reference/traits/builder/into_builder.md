@@ -52,7 +52,7 @@ The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.m
 
 ## Examples
 
-Swapping one field of a complete record, the shape redistributing code has:
+Swapping one field of a complete record, the usual form of a redistribution:
 
 ```rust
 use cgp::prelude::*;
@@ -92,8 +92,7 @@ pub fn demo() {
 
 `into_builder` starts with every field present, [`take_field`](./take_field.md) removes `last_name`,
 and [`build_field`](./build_field.md) puts a new one in its place. A value straight out of
-`into_builder` is already finalizable, so the round trip earns its keep only from what happens in
-between.
+`into_builder` is already finalizable, so the round trip is useful only for what happens in between.
 
 ## When to use it
 
@@ -104,10 +103,11 @@ entry points and the one that shows up in generic code more than in application 
   common case and the one the extensible builder pattern is about.
 - **Use `IntoBuilder`** when a complete value must be decomposed: to swap one field, or to hand its
   fields to several destinations, including the builder of a different record.
-- **Use [`ToFields`](../shape/to_fields.md)** instead when what you want is the value's *shape* as a flat list
-  rather than a partial type you can fill. A partial value tracks presence; a `Fields` product does not.
+- **Use [`ToFields`](../shape/to_fields.md)** instead when you want the value's *shape* as a flat
+  list rather than a partial type you can fill. A partial value tracks presence; a `Fields` product
+  does not.
 - **Prefer a struct update expression** in concrete code. `Person { first_name, ..person }` does the
-  common case with no machinery, and this family is for code that cannot name the type.
+  common case without this machinery, and this family is for code that cannot name the type.
 
 ## Under the hood
 
@@ -142,11 +142,11 @@ so it satisfies [`FinalizeBuild`](./finalize_build.md) immediately and
 
 ## Common Mistakes
 
-**It consumes the value.** There is no borrowing form; use [`ToFieldsRef`](../shape/to_fields_ref.md) if the
-original must survive, bearing in mind that gives you a shape rather than a builder.
+**It consumes the value.** It lacks a borrowing form; use [`ToFieldsRef`](../shape/to_fields_ref.md)
+if the original must survive, bearing in mind that gives you a shape rather than a builder.
 
-**The result is already finalizable.** Calling `into_builder().finalize_build()` is the identity, which
-is legal and pointless. The trait earns its keep only if something happens in between.
+**The result is already finalizable.** Calling `into_builder().finalize_build()` is the identity,
+which is legal and pointless. The trait is useful only when something happens in between.
 
 **The partial type cannot be printed or cloned.** The derive drops the original's struct-level
 attributes, so a value mid-redistribution has none of the record's own derives.

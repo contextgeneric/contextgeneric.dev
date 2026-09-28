@@ -38,12 +38,13 @@ pub trait HasOptionalBuilder {
 }
 ```
 
-`Builder` names the partial companion type the derive generated, with every field marked `IsOptional`.
-It is the same companion the core builder produces, at a configuration the core builder never starts
-from. `optional_builder` is an associated function with no receiver, so a caller writes
-`Context::optional_builder()`. The trait carries no [supertrait](/docs/reference/glossary#supertrait), and it is implemented as a blanket impl
-over the core builder machinery, so any record that derives the builder gains it. It is not in the
-prelude; the whole optional-field layer lives in `cgp-field-extra`.
+`Builder` names the partial companion type the derive generated, with every field marked
+`IsOptional`. It is the same companion the core builder produces, at a configuration the core
+builder never starts from. `optional_builder` is an associated function without a receiver, so a
+caller writes `Context::optional_builder()`. The trait does not declare a
+[supertrait](/docs/reference/glossary#supertrait), and it is implemented as a blanket impl over the
+core builder machinery, so any record that derives the builder gains it. It is not in the prelude;
+the whole optional-field layer lives in `cgp-field-extra`.
 
 ## Usage
 
@@ -56,7 +57,7 @@ use cgp::extra::field::impls::HasOptionalBuilder;
 
 The impls are blanket ones over the core builder machinery, so any record deriving
 [`#[derive(BuildField)]`](../../derives/derive_build_field.md) (or
-[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md)) gets this for free. There is no separate derive.
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md)) gets this with nothing more to derive.
 
 **Two endings are available**, and picking between them at the call site is the layer's real payoff:
 [`FinalizeOptional`](./finalize_optional.md) requires every field and reports a missing one, while
@@ -104,9 +105,9 @@ pub fn demo() {
 }
 ```
 
-The fields are set in reverse declaration order, which the core builder also allows; what it does
-not allow is ending an incomplete build any way but a compile error. Here the same unfinished
-builder either fills `bar` with `0` or reports it by name, chosen at the finalize call.
+The fields are set in reverse declaration order, which the core builder also allows. The core
+builder rejects an incomplete build at compile time, while here the same unfinished builder either
+fills `bar` with `0` or reports it by name, as the finalize call chooses.
 
 ## When to use it
 
@@ -148,11 +149,11 @@ So `optional_builder()` starts at the all-`IsNothing` configuration and re-marks
 `__PartialContext<IsOptional, IsOptional>`, the same partial companion the core builder uses, at a
 configuration the core builder never reaches on its own.
 
-Nothing about the companion type is special to this layer. What changes is the marker, and with it which
+Nothing about the companion type is special to this layer. The marker changes, and with it which
 operations apply: [`SetOptional`](./set_optional.md) resolves where
 [`BuildField`](../builder/build_field.md) does not, and the strict
-[`FinalizeBuild`](../builder/finalize_build.md) does not resolve at all until a finalize has re-marked the fields
-back to `IsPresent`.
+[`FinalizeBuild`](../builder/finalize_build.md) does not resolve at all until a finalize has
+re-marked the fields back to `IsPresent`.
 
 ## Common Mistakes
 

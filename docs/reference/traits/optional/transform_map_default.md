@@ -1,5 +1,5 @@
 ---
-title: 'TransformMapDefault — make every field present'
+title: 'TransformMapDefault — fill the unset fields'
 sidebar_label: 'TransformMapDefault'
 sidebar_position: 7
 description: 'The transform marker behind the defaulting finalize: three per-field conversions that leave every field present, filling gaps from Default.'
@@ -15,7 +15,7 @@ The transform marker that makes every field present, defaulting whatever is not.
 
 **You are not expected to name `TransformMapDefault` directly.** It is the
 marker [`CanFinalizeWithDefault`](./can_finalize_with_default.md) and
-[`CanBuildWithDefault`](./can_build_with_default.md) drive, and calling one of those is what you write.
+[`CanBuildWithDefault`](./can_build_with_default.md) drive, and you write a call to one of those.
 This page explains the three conversions behind them, which is also the model to copy if you write a
 transform of your own.
 
@@ -29,7 +29,7 @@ record to `IsPresent` and then calling the ordinary [`finalize_build`](../builde
 
 **You name it only when extending the layer.** Using the defaulting workflow means calling
 [`finalize_with_default`](./can_finalize_with_default.md) or
-[`build_with_default`](./can_build_with_default.md), with no marker in sight.
+[`build_with_default`](./can_build_with_default.md), without naming the marker.
 
 ## Definition
 
@@ -39,9 +39,9 @@ record to `IsPresent` and then calling the ordinary [`finalize_build`](../builde
 pub struct TransformMapDefault;
 ```
 
-It carries no data. It becomes a transform by implementing
-[`TransformMap`](../type-level/transform_map.md) once for each state a field might currently be in, every
-impl targeting `IsPresent`:
+It stores nothing. It becomes a transform by implementing
+[`TransformMap`](../type-level/transform_map.md) once for each state a field might currently be in,
+every impl targeting `IsPresent`:
 
 | a field currently | becomes |
 |---|---|
@@ -127,7 +127,7 @@ served by the two operations already built on it.
 
 ## Under the hood
 
-The marker is zero-sized and carries no data. What it carries is three
+The marker is zero-sized, so it stores nothing. What it carries is three
 [`TransformMap`](../type-level/transform_map.md) impls, distinguished by their source marker:
 
 ```rust
@@ -152,9 +152,9 @@ impl<T: Default> TransformMap<IsOptional, IsPresent, T> for TransformMapDefault 
 
 Note that each argument type is the *source* marker's projection (`T`, then `()`, then `Option<T>`),
 which keeps the three from overlapping. And note that only two carry the `T: Default` bound: a field
-already present needs no default, which is why a fully-set *core* builder can be finalized this way
-regardless of its field types. An optional builder cannot: its set fields are still `IsOptional`, so
-the third impl, and its bound, applies to every field.
+already present does not need a default, which is why a fully-set *core* builder can be finalized
+this way regardless of its field types. An optional builder cannot: its set fields are still
+`IsOptional`, so the third impl, and its bound, applies to every field.
 
 Three impls are needed rather than one because
 [`TransformMapFields`](../type-level/transform_map_fields.md#under-the-hood) resolves a conversion per field from
@@ -173,8 +173,8 @@ optional one. Through a method call such as `finalize_with_default`, the error n
 **It always targets `IsPresent`.** It cannot be used to reach any other configuration; that is
 [`TransformOptional`](./transform_optional.md)'s job.
 
-**It is a marker, not an operation.** There is no method to call and nothing to wire. It is named in a
-bound.
+**It is a marker, not an operation.** It lacks a method to call and needs nothing wired. It is named
+in a bound.
 
 **A defaulted field is indistinguishable from one set to the default value** in the result, which is the
 trade against [`FinalizeOptional`](./finalize_optional.md).
