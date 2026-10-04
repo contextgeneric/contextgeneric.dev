@@ -5,7 +5,7 @@
 /// ## Usage
 ///
 /// The default and explicit provider names, each in its own module since both define
-/// `magic_number`.
+/// `magic_number`, and the default for a raw function name.
 pub mod usage {
     pub mod default_name {
         use core::marker::PhantomData;
@@ -54,6 +54,24 @@ pub mod usage {
         #[test]
         fn the_argument_names_the_provider() {
             assert_eq!(TheAnswer::produce(&(), PhantomData::<()>), 42);
+        }
+    }
+
+    /// A raw function name, which the page says loses its `r#`: `r#loop` names `Loop`.
+    pub mod raw_name {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::Producer;
+        use cgp::prelude::*;
+
+        #[cgp_producer]
+        fn r#loop() -> u64 {
+            42
+        }
+
+        #[test]
+        fn the_raw_prefix_is_dropped() {
+            assert_eq!(Loop::produce(&(), PhantomData::<()>), 42);
         }
     }
 }

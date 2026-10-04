@@ -94,8 +94,9 @@ pub mod examples {
 
 /// ## Usage
 ///
-/// The shapes the page lists in prose: a by-value `self`, an `async` method, and a trait generic
-/// parameter, each dispatched over one enum.
+/// The shapes the page lists in prose: a by-value `self`, an `async` method, a trait generic
+/// parameter, a supertrait, named and elided lifetimes, and a default body, each dispatched over one
+/// enum.
 pub mod usage {
     use cgp::prelude::*;
 
@@ -159,6 +160,63 @@ pub mod usage {
         }
     }
 
+    /// A supertrait, which the enum provides by dispatching it too.
+    #[cgp_auto_dispatch]
+    pub trait HasName {
+        fn name(&self) -> String;
+    }
+
+    #[cgp_auto_dispatch]
+    pub trait CanGreet: HasName {
+        fn greet(&self) -> String;
+    }
+
+    impl HasName for Word {
+        fn name(&self) -> String {
+            self.0.clone()
+        }
+    }
+
+    impl HasName for Number {
+        fn name(&self) -> String {
+            self.0.to_string()
+        }
+    }
+
+    impl CanGreet for Word {
+        fn greet(&self) -> String {
+            format!("hello, {}", self.name())
+        }
+    }
+
+    impl CanGreet for Number {
+        fn greet(&self) -> String {
+            format!("number {}", self.name())
+        }
+    }
+
+    /// Named and elided lifetimes, and a default body.
+    #[cgp_auto_dispatch]
+    pub trait CanPick {
+        fn pick<'a>(&'a self, fallback: &'a str) -> &'a str;
+
+        fn first_char(&self, text: Option<&str>) -> Option<char> {
+            text.and_then(|text| text.chars().next())
+        }
+    }
+
+    impl CanPick for Word {
+        fn pick<'a>(&'a self, _fallback: &'a str) -> &'a str {
+            &self.0
+        }
+    }
+
+    impl CanPick for Number {
+        fn pick<'a>(&'a self, fallback: &'a str) -> &'a str {
+            fallback
+        }
+    }
+
     #[test]
     fn every_listed_shape_dispatches() {
         assert_eq!(Token::Number(Number(12)).into_text(), "12");
@@ -167,14 +225,17 @@ pub mod usage {
             3
         );
         assert_eq!(Token::Word(Word("w".to_owned())).render('#'), "#w");
+        assert_eq!(Token::Number(Number(7)).greet(), "number 7");
+        assert_eq!(Token::Number(Number(7)).pick("none"), "none");
+        assert_eq!(Token::Number(Number(7)).first_char(Some("xy")), Some('x'));
     }
 }
 
 /// ## Under the hood
 ///
 /// The helper's reserved name: a free function called `area` beside the trait does not clash with
-/// the `__compute_area__` helper the macro emits for the `area` method, and a raw method name
-/// yields valid generated names.
+/// the `__compute_area__` helper the macro emits for the `area` method, a raw method name yields
+/// valid generated names, and the `label` example's elided lifetimes keep their meaning.
 pub mod under_the_hood {
     use cgp::prelude::*;
 
@@ -230,6 +291,35 @@ pub mod under_the_hood {
         fn r#type(&self) -> &'static str {
             "rectangle"
         }
+    }
+
+    /// The elided-lifetime example: the returned borrow takes the receiver's lifetime, so it
+    /// outlives a shorter-lived `suffix`.
+    #[cgp_auto_dispatch]
+    pub trait CanLabel {
+        fn label(&self, suffix: &str) -> &str;
+    }
+
+    impl CanLabel for Circle {
+        fn label(&self, _suffix: &str) -> &str {
+            "circle"
+        }
+    }
+
+    impl CanLabel for Rectangle {
+        fn label(&self, _suffix: &str) -> &str {
+            "rectangle"
+        }
+    }
+
+    #[test]
+    fn the_returned_borrow_outlives_the_argument() {
+        let shape = Shape::Circle(Circle { radius: 1.0 });
+        let label = {
+            let suffix = String::from("!");
+            shape.label(&suffix)
+        };
+        assert_eq!(label, "circle");
     }
 
     #[test]

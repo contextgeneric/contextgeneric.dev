@@ -4,7 +4,8 @@
 
 /// ## Usage
 ///
-/// The default and the explicit provider name, in separate modules since both define `add`.
+/// The default and the explicit provider name, in separate modules since both define `add`, and the
+/// default for a raw function name.
 pub mod usage {
     pub mod default_name {
         use core::marker::PhantomData;
@@ -59,6 +60,24 @@ pub mod usage {
         #[test]
         fn the_argument_names_the_provider() {
             assert_eq!(MyAdder::compute(&(), PhantomData::<()>, (1, 2)), 3);
+        }
+    }
+
+    /// A raw function name, which the page says loses its `r#`: `r#type` names `Type`.
+    pub mod raw_name {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::Computer;
+        use cgp::prelude::*;
+
+        #[cgp_computer]
+        fn r#type(value: u64) -> u64 {
+            value + 1
+        }
+
+        #[test]
+        fn the_raw_prefix_is_dropped() {
+            assert_eq!(Type::compute(&(), PhantomData::<()>, 1), 2);
         }
     }
 }
