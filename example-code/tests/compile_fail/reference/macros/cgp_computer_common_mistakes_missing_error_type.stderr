@@ -51,7 +51,7 @@ error[E0277]: the trait bound `Promote<Add>: TryComputer<App, (), (u64, u64)>` i
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `TryComputer<App, (), (u64, u64)>` is not implemented for `Promote<Add>`
    |
 help: the trait `TryComputer<Context, Code, Input>` is conditionally implemented for `Promote<Provider>`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/providers/promote.rs:23:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-handler/src/providers/promote.rs:23:1
    |
 23 | / impl<Context, Code, Input, Output, Provider> TryComputer<Context, Code, Input> for Promote<Provider>
 24 | | where

@@ -263,7 +263,7 @@ error[E0277]: the trait bound `for<'__a__> MatchWithHandlersRef<_>: Computer<(),
    |        ---- required by a bound introduced by this call
    |
 help: the trait `Computer<Context, Code, &Input>` is conditionally implemented for `MatchWithHandlersRef<Handlers>`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:12:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:12:1
    |
 12 | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, &'a Input>
 13 | |     for MatchWithHandlersRef<Handlers>

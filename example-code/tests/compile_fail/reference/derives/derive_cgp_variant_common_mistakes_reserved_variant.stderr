@@ -10,7 +10,7 @@ note: `Remainder` could refer to the variant defined here
  7 | #[derive(CgpVariant)]
    |          ^^^^^^^^^^
 note: `Remainder` could also refer to the associated type defined here
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:33:5
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/traits/extract_field.rs:33:5
    |
 33 |     type Remainder;
    |     ^^^^^^^^^^^^^^

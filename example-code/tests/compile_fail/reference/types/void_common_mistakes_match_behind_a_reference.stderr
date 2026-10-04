@@ -5,7 +5,7 @@ error[E0004]: non-exhaustive patterns: `&cgp::prelude::Either::Right(cgp::prelud
    |           ^^^^^ pattern `&cgp::prelude::Either::Right(cgp::prelude::Either::Right(_))` not covered
    |
 note: `cgp::prelude::Either<u32, cgp::prelude::Either<bool, Void>>` defined here
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/types/sum.rs:27:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/types/sum.rs:27:1
    |
 27 | pub enum Either<Head, Tail> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^

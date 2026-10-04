@@ -6,7 +6,7 @@ error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<S
    |
    = help: the trait `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>` is not implemented for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::prelude::Chars<'C', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::prelude::Chars<'R', cgp::prelude::Chars<'e', cgp::prelude::Chars<'c', cgp::prelude::Chars<'t', cgp::prelude::Chars<'a', cgp::prelude::Chars<'n', cgp::prelude::Chars<'g', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>`
 help: `MatchWithHandlersRef<Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:12:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:12:1
    |
 12 | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, &'a Input>
 13 | |     for MatchWithHandlersRef<Handlers>

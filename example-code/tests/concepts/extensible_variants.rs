@@ -47,7 +47,7 @@ pub mod one_handler_per_variant {
 
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::dispatch::MatchWithFieldHandlers;
-    use cgp::extra::handler::{Computer, ComputerComponent};
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq, CgpData)]

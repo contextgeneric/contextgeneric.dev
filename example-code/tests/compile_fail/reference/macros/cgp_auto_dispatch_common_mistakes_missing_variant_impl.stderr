@@ -7,7 +7,7 @@ error[E0599]: the method `area` exists for reference `&Shape`, but its trait bou
 32 |     shape.area()
    |           ^^^^ method cannot be called on `&Shape` due to unsatisfied trait bounds
    |
-  ::: /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
    |
 19 | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
    | ----------------------------------------------------------- doesn't satisfy `<_ as Computer<(), (), &&Shape>>::Output = f64`, `<_ as Computer<(), (), &Shape>>::Output = f64`, `_: Computer<(), (), &&Shape>` or `_: Computer<(), (), &Shape>`

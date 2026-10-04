@@ -10,7 +10,7 @@ error[E0599]: no method named `finalize_extract_result` found for enum `Result<T
    | |_________|
    |
    |
-  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:57:8
+  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/traits/extract_field.rs:57:8
    |
 57 |       fn finalize_extract_result(self) -> Self::Output;
    |          ----------------------- the method is available for `Result<Circle, __PartialShape<IsVoid>>` here

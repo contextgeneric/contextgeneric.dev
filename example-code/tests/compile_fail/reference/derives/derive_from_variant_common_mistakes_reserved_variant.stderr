@@ -10,7 +10,7 @@ note: `Value` could refer to the variant defined here
 8 |     Value(Payload),
   |     ^^^^^
 note: `Value` could also refer to the associated type defined here
- --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/from_variant.rs:4:5
+ --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/traits/from_variant.rs:4:5
   |
 4 |     type Value;
   |     ^^^^^^^^^^

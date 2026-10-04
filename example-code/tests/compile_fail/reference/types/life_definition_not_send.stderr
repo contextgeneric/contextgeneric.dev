@@ -11,7 +11,7 @@ note: required because it appears within the type `PhantomData<*mut &'static ()>
    | pub struct PhantomData<T: PointeeSized>;
    |            ^^^^^^^^^^^
 note: required because it appears within the type `cgp::prelude::Life<'static>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/types/life.rs:3:12
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/types/life.rs:3:12
    |
  3 | pub struct Life<'a>(pub PhantomData<*mut &'a ()>);
    |            ^^^^
@@ -34,7 +34,7 @@ note: required because it appears within the type `PhantomData<*mut &'static ()>
    | pub struct PhantomData<T: PointeeSized>;
    |            ^^^^^^^^^^^
 note: required because it appears within the type `cgp::prelude::Life<'static>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/types/life.rs:3:12
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/types/life.rs:3:12
    |
  3 | pub struct Life<'a>(pub PhantomData<*mut &'a ()>);
    |            ^^^^

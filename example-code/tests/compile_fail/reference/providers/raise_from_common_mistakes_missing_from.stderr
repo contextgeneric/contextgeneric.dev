@@ -5,7 +5,7 @@ error[E0277]: the trait bound `RaiseFrom: ErrorRaiser<App, ParseIntError>` is no
    |         ^^^^^^^^^^^^^^^^^^^ the trait `ErrorRaiser<App, ParseIntError>` is not implemented for `RaiseFrom`
    |
 help: the trait `ErrorRaiser<Context, E>` is conditionally implemented for `RaiseFrom`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-error-extra/src/impls/raise_from.rs:5:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-error-extra/src/impls/raise_from.rs:5:1
    |
  5 | / impl<Context, E> ErrorRaiser<Context, E> for RaiseFrom
  6 | | where

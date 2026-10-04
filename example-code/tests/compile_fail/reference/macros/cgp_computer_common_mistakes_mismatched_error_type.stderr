@@ -8,7 +8,7 @@ error[E0271]: type mismatch resolving `<App as HasErrorType>::Error == String`
    = note: 1 redundant requirement hidden
    = note: required for `CheckedAdd` to implement `IsProviderFor<TryComputerComponent, App, (_, (u64, u64))>`
 note: required by a bound in `cgp::prelude::TryComputer::try_compute`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/components/try_compute.rs:8:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-handler/src/components/try_compute.rs:8:1
    |
  8 | #[cgp_component(TryComputer)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `TryComputer::try_compute`
@@ -24,7 +24,7 @@ error[E0277]: the trait bound `TryPromote<CheckedAdd>: TryComputer<App, (), (u64
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `TryComputer<App, (), (u64, u64)>` is not implemented for `TryPromote<CheckedAdd>`
    |
 help: the trait `TryComputer<Context, Code, Input>` is conditionally implemented for `TryPromote<Provider>`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/providers/try_promote.rs:11:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-handler/src/providers/try_promote.rs:11:1
    |
 11 | / impl<Context, Code, Input, Output, Provider> TryComputer<Context, Code, Input>
 12 | |     for TryPromote<Provider>

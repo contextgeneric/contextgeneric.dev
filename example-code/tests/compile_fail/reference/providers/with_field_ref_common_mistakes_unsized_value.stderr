@@ -10,7 +10,7 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
    |
    = help: the trait `Sized` is not implemented for `str`
 note: required by an implicit `Sized` bound in `UseFieldRef`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/impls/use_ref.rs:7:29
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/impls/use_ref.rs:7:29
    |
  7 | pub struct UseFieldRef<Tag, Value>(pub PhantomData<(Tag, Value)>);
    |                             ^^^^^ required by the implicit `Sized` requirement on this type parameter in `UseFieldRef`
@@ -77,7 +77,7 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
    |
    = help: the trait `Sized` is not implemented for `str`
 note: required by an implicit `Sized` bound in `UseFieldRef`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/impls/use_ref.rs:7:29
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/impls/use_ref.rs:7:29
    |
  7 | pub struct UseFieldRef<Tag, Value>(pub PhantomData<(Tag, Value)>);
    |                             ^^^^^ required by the implicit `Sized` requirement on this type parameter in `UseFieldRef`

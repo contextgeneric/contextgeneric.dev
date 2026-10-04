@@ -19,7 +19,7 @@ note: the following trait bounds were not satisfied:
  6 | pub trait HasName {
    |           ^^^^^^^
 note: the trait `cgp::prelude::HasField` must be implemented
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/has_field.rs:46:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/traits/has_field.rs:46:1
    |
 46 | pub trait HasField<Tag> {
    | ^^^^^^^^^^^^^^^^^^^^^^^

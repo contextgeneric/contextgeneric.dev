@@ -5,7 +5,7 @@ error[E0277]: the trait bound `MatchWithHandlers<_>: cgp::prelude::Computer<App,
    |         ^^^^^^^^^^^^^^^^^ the trait `cgp::prelude::Computer<App, (), Scene>` is not implemented for `MatchWithHandlers<_>`
    |
 help: the trait `cgp::prelude::Computer<Context, Code, Input>` is conditionally implemented for `MatchWithHandlers<Handlers>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers.rs:12:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers.rs:12:1
    |
 12 | / impl<Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, Input>
 13 | |     for MatchWithHandlers<Handlers>
@@ -37,7 +37,7 @@ error[E0277]: the trait bound `Cons<cgp::prelude::Field<Symbol<6, cgp::prelude::
    |
    = help: the trait `dispatch::providers::matchers::to_field_handlers::ToFieldHandlers<dispatch::providers::matchers::to_field_handlers::MapExtractFieldAndHandle<HandleFieldValue<ComputeArea>>>` is not implemented for `Cons<cgp::prelude::Field<Symbol<6, cgp::prelude::Chars<'c', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>, Circle>, Cons<cgp::prelude::Field<Symbol<9, cgp::prelude::Chars<'r', cgp::prelude::Chars<'e', cgp::prelude::Chars<'c', cgp::prelude::Chars<'t', cgp::prelude::Chars<'a', cgp::prelude::Chars<'n', cgp::prelude::Chars<'g', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>>>, Rectangle>, Nil>>`
 help: the following other types implement trait `dispatch::providers::matchers::to_field_handlers::ToFieldHandlers<M>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/matchers/to_field_handlers.rs:25:1
+  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-dispatch/src/providers/matchers/to_field_handlers.rs:25:1
    |
 25 | / impl<Tag, Value, RestFields, M> ToFieldHandlers<M> for Either<Field<Tag, Value>, RestFields>
 26 | | where
