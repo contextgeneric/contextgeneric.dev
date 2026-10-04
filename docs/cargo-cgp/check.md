@@ -44,17 +44,12 @@ impl AreaCalculator {
 #[derive(HasField)]
 pub struct Rectangle {
     pub width: f64,
+    // missing `height` field
 }
 
-delegate_components! {
+delegate_and_check_components! {
     Rectangle {
         AreaCalculatorComponent: RectangleArea,
-    }
-}
-
-check_components! {
-    Rectangle {
-        AreaCalculatorComponent,
     }
 }
 ```

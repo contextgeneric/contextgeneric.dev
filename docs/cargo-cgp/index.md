@@ -29,6 +29,7 @@ impl AreaCalculator {
 #[derive(HasField)]
 pub struct Rectangle {
     pub width: f64,
+    // missing `height` field
 }
 ```
 
