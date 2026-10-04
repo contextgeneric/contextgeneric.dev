@@ -49,8 +49,8 @@ fn magic_number() -> u64 {
 }
 ```
 
-Omitted, the provider struct takes the function name in PascalCase: `magic_number` becomes `MagicNumber`.
-Given, the argument is used verbatim. The function's return type becomes the producer's output, and
+Omitted, the provider struct takes the function name in PascalCase: `magic_number` becomes `MagicNumber`,
+and a raw identifier loses its `r#`, so `r#loop` becomes `Loop`. Given, the argument is used verbatim. The function's return type becomes the producer's output, and
 an omitted return type is `()`.
 
 **The function is constrained tightly, to exactly what a producer can be.** Each restriction is
@@ -61,6 +61,7 @@ enforced at expansion time with its own message:
 | No parameters, and no `self` | A producer takes no input and has no receiver. |
 | Not `async` | The producer trait is synchronous. |
 | No generic parameters | There is nothing to infer them from. |
+| No `impl Trait` return type | The generated impl's output type has to be nameable. |
 
 That last restriction is the one most likely to cause trouble, and it is the biggest difference from
 [`#[cgp_computer]`](./cgp_computer.md), which carries generics through fine. A producer has no input, so a
@@ -142,8 +143,12 @@ within it there is nothing simpler.
 
 ## Under the hood
 
-The macro emits the function unchanged, a provider impl of [`Producer`](../components/handler/producer.md), and a
-[`delegate_components!`](./delegate_components.md) block wiring the whole family. From this input:
+The macro's expansion is the function unchanged, a provider impl of
+[`Producer`](../components/handler/producer.md), and a
+[`delegate_components!`](./delegate_components.md) block wiring the whole family. It builds the input
+for [`#[cgp_new_provider]`](./cgp_provider.md) and `delegate_components!` itself and runs their code
+in place, so what it emits is already their expansion, with every name written as a full path. The
+blocks below show that input, which is the readable form. From this function:
 
 ```rust
 #[cgp_producer]
@@ -213,7 +218,7 @@ ProviderName    -> IDENTIFIER
 
 Omitted, the provider struct takes the function name converted to PascalCase; a given `IDENTIFIER` is used
 verbatim. The annotated function is plain Rust, constrained to a producer's shape (no parameters, no
-`async`, no generics), as described in [Usage](#usage).
+`async`, no generics, and no `impl Trait` return type), as described in [Usage](#usage).
 
 ## Common Mistakes
 
@@ -223,10 +228,11 @@ verbatim. The annotated function is plain Rust, constrained to a producer's shap
 error: Producer functions cannot have parameters
 error: Producer functions cannot be async
 error: Producer functions must have empty generic parameters
+error: Producer functions cannot return `impl Trait`
 ```
 
 For the first two, [`#[cgp_computer]`](./cgp_computer.md) is the macro that accepts them. For the third there
-is no macro alternative: write the provider by hand.
+is no macro alternative: write the provider by hand. For the fourth, name the returned type.
 
 **The function cannot reach the context**, so a producer that needs a field or an abstract type is not
 expressible this way at all. That rules out most real producers, which is worth knowing before reaching for
@@ -272,7 +278,8 @@ The ideas behind it:
 
 ## Source
 
-- Entry point: [`entrypoints/cgp_producer.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-extra-macro-lib/src/entrypoints/cgp_producer.rs)
+- Entry point: [`cgp-macro-extra-lib/src/cgp_producer.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-extra-lib/src/cgp_producer.rs)
+- The parsing and code generation: [`cgp-macro-extra-core/src/types/cgp_producer/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-extra-core/src/types/cgp_producer/)
 - The `Producer` trait: [`components/produce.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-handler/src/components/produce.rs)
 - The `PromoteProducer` bundle: [`providers/promote_all.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-handler/src/providers/promote_all.rs)
 

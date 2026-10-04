@@ -21,29 +21,25 @@ error[E0428]: the name `ComputeArea` is defined multiple times
    |
    = note: `ComputeArea` must be defined only once in the type namespace of this module
 
-error[E0119]: conflicting implementations of trait `cgp::prelude::Computer<_, _, &_>` for type `ComputeArea`
-  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
+error[E0119]: conflicting implementations of trait `Computer<_, _, &_>` for type `ComputeArea`
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:13:8
    |
- 6 | #[cgp_auto_dispatch]
-   | -------------------- first implementation here
+ 8 |     fn area(&self) -> f64;
+   |        ---- first implementation here
 ...
-11 | #[cgp_auto_dispatch]
-   | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
-   |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+13 |     fn area(&self) -> f64;
+   |        ^^^^ conflicting implementation for `ComputeArea`
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::ComputerComponent, _, (_, &_)>` for type `ComputeArea`
-  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
+error[E0119]: conflicting implementations of trait `IsProviderFor<ComputerComponent, _, (_, &_)>` for type `ComputeArea`
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:13:8
    |
- 6 | #[cgp_auto_dispatch]
-   | -------------------- first implementation here
+ 8 |     fn area(&self) -> f64;
+   |        ---- first implementation here
 ...
-11 | #[cgp_auto_dispatch]
-   | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
-   |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+13 |     fn area(&self) -> f64;
+   |        ^^^^ conflicting implementation for `ComputeArea`
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::ComputerRefComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<ComputerRefComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -52,9 +48,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::TryComputerComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<TryComputerComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -63,9 +59,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::TryComputerRefComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<TryComputerRefComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -74,9 +70,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::AsyncComputerComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<AsyncComputerComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -85,9 +81,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::AsyncComputerRefComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<AsyncComputerRefComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -96,9 +92,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::HandlerComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<HandlerComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -107,9 +103,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::HandlerRefComponent, _, _>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `IsProviderFor<HandlerRefComponent, _, _>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -118,9 +114,9 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<cgp::prelude::
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::ComputerRefComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<ComputerRefComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -129,9 +125,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::TryComputerComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<TryComputerComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -140,9 +136,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::TryComputerRefComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<TryComputerRefComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -151,9 +147,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::AsyncComputerComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<AsyncComputerComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -162,9 +158,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::AsyncComputerRefComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<AsyncComputerRefComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -173,9 +169,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::HandlerComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<HandlerComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -184,9 +180,9 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelude::HandlerRefComponent>` for type `ComputeArea`
+error[E0119]: conflicting implementations of trait `DelegateComponent<HandlerRefComponent>` for type `ComputeArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
  6 | #[cgp_auto_dispatch]
@@ -195,13 +191,13 @@ error[E0119]: conflicting implementations of trait `DelegateComponent<cgp::prelu
 11 | #[cgp_auto_dispatch]
    | ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ComputeArea`
    |
-   = note: this error originates in the attribute macro `cgp_computer` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `__Variants__: HasArea` is not satisfied
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
 11 | #[cgp_auto_dispatch]
-   | ^^^^^^^^^^^^^^^^^^^^ the trait `cgp::prelude::HasExtractor` is not implemented for `__Variants__`
+   | ^^^^^^^^^^^^^^^^^^^^ the trait `HasExtractor` is not implemented for `__Variants__`
 12 | pub trait HasSurface {
 13 |     fn area(&self) -> f64;
    |        ---- required by a bound introduced by this call
@@ -226,7 +222,7 @@ help: consider further restricting type parameter `__Variants__` with trait `Has
 12 | pub trait HasSurface + cgp::prelude::HasExtractor {
    |                      ++++++++++++++++++++++++++++
 
-error[E0277]: the trait bound `for<'__a__> UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>: cgp::prelude::Computer<(), (), &'__a__ __Variants__>` is not satisfied
+error[E0277]: the trait bound `for<'__a__> UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>: Computer<(), (), &'__a__ __Variants__>` is not satisfied
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
 11 | #[cgp_auto_dispatch]
@@ -235,8 +231,8 @@ error[E0277]: the trait bound `for<'__a__> UseInputDelegate<MatchWithFieldHandle
 13 |     fn area(&self) -> f64;
    |        ---- required by a bound introduced by this call
    |
-   = help: the trait `for<'__a__> cgp::prelude::Computer<(), (), &'__a__ __Variants__>` is not implemented for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>`
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> cgp::prelude::Computer<(), (), &'__a__ __Variants__>`
+   = help: the trait `for<'__a__> Computer<(), (), &'__a__ __Variants__>` is not implemented for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> Computer<(), (), &'__a__ __Variants__>`
 note: required for `__Variants__` to implement `HasArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:6:1
    |
@@ -254,19 +250,19 @@ note: required by a bound in `__compute_area__`
    = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider introducing a `where` clause, but there might be an alternative better way to express this requirement
    |
-13 |     fn area where for<'__a__> UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>: cgp::prelude::Computer<(), (), &'__a__ __Variants__>(&self) -> f64;
-   |             ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+13 |     fn area where for<'__a__> UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>: Computer<(), (), &'__a__ __Variants__>(&self) -> f64;
+   |             ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-error[E0277]: the trait bound `for<'__a__> MatchWithHandlersRef<_>: cgp::prelude::Computer<(), (), &'__a__ __Variants__>` is not satisfied
+error[E0277]: the trait bound `for<'__a__> MatchWithHandlersRef<_>: Computer<(), (), &'__a__ __Variants__>` is not satisfied
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
    |
 11 | #[cgp_auto_dispatch]
-   | ^^^^^^^^^^^^^^^^^^^^ the trait `for<'__a__> cgp::prelude::Computer<(), (), &'__a__ __Variants__>` is not implemented for `MatchWithHandlersRef<_>`
+   | ^^^^^^^^^^^^^^^^^^^^ the trait `for<'__a__> Computer<(), (), &'__a__ __Variants__>` is not implemented for `MatchWithHandlersRef<_>`
 12 | pub trait HasSurface {
 13 |     fn area(&self) -> f64;
    |        ---- required by a bound introduced by this call
    |
-help: the trait `cgp::prelude::Computer<Context, Code, &Input>` is conditionally implemented for `MatchWithHandlersRef<Handlers>`
+help: the trait `Computer<Context, Code, &Input>` is conditionally implemented for `MatchWithHandlersRef<Handlers>`
   --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:12:1
    |
 12 | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, &'a Input>
@@ -278,10 +274,10 @@ help: the trait `cgp::prelude::Computer<Context, Code, &Input>` is conditionally
 17 | |         Computer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
 18 | |     Remainder: FinalizeExtract,
    | |_______________________________^
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>` to implement `for<'__a__> IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ __Variants__)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>` to implement `for<'__a__> IsProviderFor<ComputerComponent, (), ((), &'__a__ __Variants__)>`
    = note: 1 redundant requirement hidden
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ __Variants__)>`
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> cgp::prelude::Computer<(), (), &'__a__ __Variants__>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> IsProviderFor<ComputerComponent, (), ((), &'__a__ __Variants__)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> Computer<(), (), &'__a__ __Variants__>`
 note: required for `__Variants__` to implement `HasArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:6:1
    |
@@ -308,10 +304,10 @@ error[E0277]: the trait bound `__Variants__: HasArea` is not satisfied
    |        ---- required by a bound introduced by this call
    |
    = note: required for `__Variants__` to implement `dispatch::providers::matchers::to_field_handlers::HasFieldHandlers<dispatch::providers::matchers::to_field_handlers::MapExtractFieldAndHandle<HandleFieldValue<ComputeArea>>>`
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>` to implement `for<'__a__> IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ __Variants__)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>` to implement `for<'__a__> IsProviderFor<ComputerComponent, (), ((), &'__a__ __Variants__)>`
    = note: 1 redundant requirement hidden
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ __Variants__)>`
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> cgp::prelude::Computer<(), (), &'__a__ __Variants__>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> IsProviderFor<ComputerComponent, (), ((), &'__a__ __Variants__)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> Computer<(), (), &'__a__ __Variants__>`
 note: required for `__Variants__` to implement `HasArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:6:1
    |
@@ -341,10 +337,10 @@ error[E0277]: the trait bound `__Variants__: HasArea` is not satisfied
 13 |     fn area(&self) -> f64;
    |        ---- required by a bound introduced by this call
    |
-   = note: required for `MatchWithHandlersRef<_>` to implement `for<'__a__> IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ __Variants__)>`
+   = note: required for `MatchWithHandlersRef<_>` to implement `for<'__a__> IsProviderFor<ComputerComponent, (), ((), &'__a__ __Variants__)>`
    = note: 2 redundant requirements hidden
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ __Variants__)>`
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> cgp::prelude::Computer<(), (), &'__a__ __Variants__>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> IsProviderFor<ComputerComponent, (), ((), &'__a__ __Variants__)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeArea>` to implement `for<'__a__> Computer<(), (), &'__a__ __Variants__>`
 note: required for `__Variants__` to implement `HasArea`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:6:1
    |

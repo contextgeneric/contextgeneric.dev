@@ -2,31 +2,31 @@ error[E0599]: the method `area` exists for reference `&Plain`, but its trait bou
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:36:11
    |
 20 | pub enum Plain {
-   | -------------- doesn't satisfy `Plain: HasArea` or `Plain: cgp::prelude::HasExtractor`
+   | -------------- doesn't satisfy `Plain: HasArea` or `Plain: HasExtractor`
 ...
 36 |     shape.area()
    |           ^^^^ method cannot be called on `&Plain` due to unsatisfied trait bounds
    |
-  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
+  ::: /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
    |
 19 | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
    | ----------------------------------------------------------- doesn't satisfy `<_ as Computer<(), (), &&Plain>>::Output = f64`, `<_ as Computer<(), (), &Plain>>::Output = f64`, `_: Computer<(), (), &&Plain>` or `_: Computer<(), (), &Plain>`
    |
 note: the following trait bounds were not satisfied:
-      `&Plain: cgp::prelude::HasExtractor`
-      `<cgp::prelude::MatchWithValueHandlersRef<ComputeArea> as cgp::prelude::Computer<(), (), &'__a__ &Plain>>::Output = f64`
-      `<cgp::prelude::MatchWithValueHandlersRef<ComputeArea> as cgp::prelude::Computer<(), (), &'__a__ Plain>>::Output = f64`
-      `Plain: cgp::prelude::HasExtractor`
-      `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>: cgp::prelude::Computer<(), (), &'__a__ &Plain>`
-      `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>: cgp::prelude::Computer<(), (), &'__a__ Plain>`
+      `&Plain: HasExtractor`
+      `<MatchWithValueHandlersRef<ComputeArea> as Computer<(), (), &'__a__ &Plain>>::Output = f64`
+      `<MatchWithValueHandlersRef<ComputeArea> as Computer<(), (), &'__a__ Plain>>::Output = f64`
+      `MatchWithValueHandlersRef<ComputeArea>: Computer<(), (), &'__a__ &Plain>`
+      `MatchWithValueHandlersRef<ComputeArea>: Computer<(), (), &'__a__ Plain>`
+      `Plain: HasExtractor`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:24:1
    |
 24 | #[cgp_auto_dispatch]
-   | ^^^^^^^^^^^^^^^^^^^^
+   | ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound introduced here
 25 | pub trait HasArea {
-   |           ^^^^^^^
-note: the trait `cgp::prelude::HasExtractor` must be implemented
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/core/cgp-field/src/traits/extract_field.rs:6:1
+   |           -------
+note: the trait `HasExtractor` must be implemented
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:6:1
    |
  6 | pub trait HasExtractor {
    | ^^^^^^^^^^^^^^^^^^^^^^

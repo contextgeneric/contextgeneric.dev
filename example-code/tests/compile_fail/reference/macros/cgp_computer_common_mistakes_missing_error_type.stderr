@@ -10,14 +10,14 @@ help: the trait `DelegateComponent<ErrorTypeProviderComponent>` is not implement
 14 | pub struct App;
    | ^^^^^^^^^^^^^^
    = help: the following other types implement trait `DelegateComponent<Key>`:
-             `Add` implements `DelegateComponent<cgp::prelude::AsyncComputerComponent>`
-             `Add` implements `DelegateComponent<cgp::prelude::AsyncComputerRefComponent>`
-             `Add` implements `DelegateComponent<cgp::prelude::ComputerRefComponent>`
-             `Add` implements `DelegateComponent<cgp::prelude::HandlerComponent>`
-             `Add` implements `DelegateComponent<cgp::prelude::HandlerRefComponent>`
-             `Add` implements `DelegateComponent<cgp::prelude::TryComputerComponent>`
-             `Add` implements `DelegateComponent<cgp::prelude::TryComputerRefComponent>`
-             `BuildAndMergeOutputs<Output, Handlers>` implements `DelegateComponent<cgp::prelude::ComputerComponent>`
+             `Add` implements `DelegateComponent<AsyncComputerComponent>`
+             `Add` implements `DelegateComponent<AsyncComputerRefComponent>`
+             `Add` implements `DelegateComponent<ComputerRefComponent>`
+             `Add` implements `DelegateComponent<HandlerComponent>`
+             `Add` implements `DelegateComponent<HandlerRefComponent>`
+             `Add` implements `DelegateComponent<TryComputerComponent>`
+             `Add` implements `DelegateComponent<TryComputerRefComponent>`
+             `BuildAndMergeOutputs<Output, Handlers>` implements `DelegateComponent<ComputerComponent>`
            and $N others
    = note: required for `App` to implement `ErrorTypeProvider<App>`
 
@@ -33,14 +33,14 @@ help: the trait `IsProviderFor<ErrorTypeProviderComponent, App>` is not implemen
 14 | pub struct App;
    | ^^^^^^^^^^^^^^
    = help: the following other types implement trait `IsProviderFor<Component, Context, Params>`:
-             `Add` implements `IsProviderFor<cgp::prelude::AsyncComputerComponent, __Context__, __Params__>`
-             `Add` implements `IsProviderFor<cgp::prelude::AsyncComputerRefComponent, __Context__, __Params__>`
-             `Add` implements `IsProviderFor<cgp::prelude::ComputerComponent, __Context__, (__Code__, (u64, u64))>`
-             `Add` implements `IsProviderFor<cgp::prelude::ComputerRefComponent, __Context__, __Params__>`
-             `Add` implements `IsProviderFor<cgp::prelude::HandlerComponent, __Context__, __Params__>`
-             `Add` implements `IsProviderFor<cgp::prelude::HandlerRefComponent, __Context__, __Params__>`
-             `Add` implements `IsProviderFor<cgp::prelude::TryComputerComponent, __Context__, __Params__>`
-             `Add` implements `IsProviderFor<cgp::prelude::TryComputerRefComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<AsyncComputerComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<AsyncComputerRefComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<ComputerComponent, __Context__, (__Code__, (u64, u64))>`
+             `Add` implements `IsProviderFor<ComputerRefComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<HandlerComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<HandlerRefComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<TryComputerComponent, __Context__, __Params__>`
+             `Add` implements `IsProviderFor<TryComputerRefComponent, __Context__, __Params__>`
            and $N others
    = note: required for `App` to implement `ErrorTypeProvider<App>`
 
@@ -51,7 +51,7 @@ error[E0277]: the trait bound `Promote<Add>: TryComputer<App, (), (u64, u64)>` i
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `TryComputer<App, (), (u64, u64)>` is not implemented for `Promote<Add>`
    |
 help: the trait `TryComputer<Context, Code, Input>` is conditionally implemented for `Promote<Provider>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-handler/src/providers/promote.rs:23:1
+  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/providers/promote.rs:23:1
    |
 23 | / impl<Context, Code, Input, Output, Provider> TryComputer<Context, Code, Input> for Promote<Provider>
 24 | | where

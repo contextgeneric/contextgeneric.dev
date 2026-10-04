@@ -1,0 +1,5 @@
+error: Computer function parameters cannot use `impl Trait`; declare a generic parameter instead
+ --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_impl_trait_parameter.rs:7:20
+  |
+7 | fn describe(value: impl core::fmt::Display) -> String {
+  |                    ^^^^^^^^^^^^^^^^^^^^^^^

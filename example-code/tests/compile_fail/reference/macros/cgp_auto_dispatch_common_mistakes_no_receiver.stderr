@@ -2,4 +2,4 @@ error: Dispatcher method must have a self argument
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_no_receiver.rs:22:5
    |
 22 |     fn origin() -> (f64, f64);
-   |     ^^
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^

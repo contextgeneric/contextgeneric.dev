@@ -2,4 +2,4 @@ error: Dispatch trait methods cannot contain non-lifetime generic parameters due
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_generic_method.rs:22:17
    |
 22 |     fn describe<T: Default>(&self) -> T;
-   |                 ^
+   |                 ^^^^^^^^^^

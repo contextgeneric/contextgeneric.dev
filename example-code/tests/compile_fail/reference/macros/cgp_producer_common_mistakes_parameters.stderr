@@ -2,4 +2,4 @@ error: Producer functions cannot have parameters
  --> tests/compile_fail/reference/macros/cgp_producer_common_mistakes_parameters.rs:6:17
   |
 6 | fn magic_number(seed: u64) -> u64 {
-  |                 ^^^^
+  |                 ^^^^^^^^^

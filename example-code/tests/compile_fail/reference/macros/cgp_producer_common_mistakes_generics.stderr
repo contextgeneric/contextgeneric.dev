@@ -2,4 +2,4 @@ error: Producer functions must have empty generic parameters
  --> tests/compile_fail/reference/macros/cgp_producer_common_mistakes_generics.rs:6:18
   |
 6 | fn default_value<T: Default>() -> T {
-  |                  ^
+  |                  ^^^^^^^^^^

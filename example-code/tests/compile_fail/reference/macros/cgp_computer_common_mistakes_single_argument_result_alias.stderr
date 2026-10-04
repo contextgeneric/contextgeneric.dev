@@ -1,5 +1,5 @@
-error: expected `,`
- --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_single_argument_result_alias.rs:9:35
+error: A `Result` return type must be written as `Result<T, E>`, naming its error type
+ --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_single_argument_result_alias.rs:9:25
   |
 9 | fn halve(value: u64) -> Result<u64> {
-  |                                   ^
+  |                         ^^^^^^

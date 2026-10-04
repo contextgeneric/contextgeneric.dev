@@ -7,23 +7,23 @@ error[E0599]: the method `area` exists for reference `&Shape`, but its trait bou
 32 |     shape.area()
    |           ^^^^ method cannot be called on `&Shape` due to unsatisfied trait bounds
    |
-  ::: /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/0bf713d/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
+  ::: /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
    |
 19 | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
    | ----------------------------------------------------------- doesn't satisfy `<_ as Computer<(), (), &&Shape>>::Output = f64`, `<_ as Computer<(), (), &Shape>>::Output = f64`, `_: Computer<(), (), &&Shape>` or `_: Computer<(), (), &Shape>`
    |
 note: the following trait bounds were not satisfied:
-      `&Shape: cgp::prelude::HasExtractor`
-      `<cgp::prelude::MatchWithValueHandlersRef<ComputeArea> as cgp::prelude::Computer<(), (), &'__a__ &Shape>>::Output = f64`
-      `<cgp::prelude::MatchWithValueHandlersRef<ComputeArea> as cgp::prelude::Computer<(), (), &'__a__ Shape>>::Output = f64`
-      `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>: cgp::prelude::Computer<(), (), &'__a__ &Shape>`
-      `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>: cgp::prelude::Computer<(), (), &'__a__ Shape>`
+      `&Shape: HasExtractor`
+      `<MatchWithValueHandlersRef<ComputeArea> as Computer<(), (), &'__a__ &Shape>>::Output = f64`
+      `<MatchWithValueHandlersRef<ComputeArea> as Computer<(), (), &'__a__ Shape>>::Output = f64`
+      `MatchWithValueHandlersRef<ComputeArea>: Computer<(), (), &'__a__ &Shape>`
+      `MatchWithValueHandlersRef<ComputeArea>: Computer<(), (), &'__a__ Shape>`
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_variant_impl.rs:20:1
    |
 20 | #[cgp_auto_dispatch]
-   | ^^^^^^^^^^^^^^^^^^^^
+   | ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound introduced here
 21 | pub trait HasArea {
-   |           ^^^^^^^
+   |           -------
    = help: items from traits can only be used if the trait is implemented and in scope
 note: `HasArea` defines an item `area`, perhaps you need to implement it
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_variant_impl.rs:21:1
