@@ -304,7 +304,7 @@ These pages explain the static mechanisms and related comparisons:
 
 ## Sources
 
-The CGP snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!` assertion per
+The CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!` assertion per
 wired context. This page contains only Rust snippets.
 
 - [The Rust Reference, *Trait object types*](https://doc.rust-lang.org/reference/types/trait-object.html): trait-object pointers and dynamic dispatch.

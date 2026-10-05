@@ -379,7 +379,7 @@ These pages develop the constructs and the neighbouring comparisons:
 
 The Rust snippets from the proposals are quoted from their authors' posts and the Cairo book. The
 specialization snippet was compiled against a stable toolchain to confirm it is rejected with
-`E0658` ; the CGP snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!`
+`E0658` ; the CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!`
 assertion per wired context.
 
 - [Rust Reference, *Implementations*](https://doc.rust-lang.org/reference/items/implementations.html) and [RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html): the orphan and overlap rules.

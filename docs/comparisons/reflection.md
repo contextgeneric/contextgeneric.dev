@@ -341,7 +341,7 @@ These pages develop the constructs and the neighbouring comparisons:
 ## Sources
 
 The Zig snippet was compiled with Zig 0.16; the Rust snippet is the nightly source's own doc test
-and is unstable. The CGP snippets were compiled against `cgp` `0.8.0-alpha` with a
+and is unstable. The CGP snippets were compiled against `cgp` `0.8.0` with a
 `check_components!` assertion on the wired context.
 
 - [`bevy_reflect` documentation](https://docs.rs/bevy_reflect/latest/bevy_reflect/), [`TypeInfo`](https://docs.rs/bevy/latest/bevy/reflect/enum.TypeInfo.html), and [`TypeRegistry`](https://docs.rs/bevy/latest/bevy/reflect/struct.TypeRegistry.html): the `Reflect` trait, the shape descriptor, and the runtime registry.

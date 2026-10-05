@@ -75,6 +75,17 @@ which exists partly to be quoted. When a page quotes a project built with CGP, s
 [`projects/`](https://github.com/contextgeneric/cgp-knowledge-base/tree/main/projects), which records
 the project's current code and whether it uses current idioms.
 
+## Name official versions only
+
+Every page names official release versions, `cgp` 0.8.0 and `cargo-cgp` 0.1.0, as though they had
+already shipped, and never a pre-release such as `0.8.0-alpha` or `0.1.0-alpha`. Pre-releases are
+test runs of the crates and the cargo integration before an official release, not versions a reader
+is expected to have, so no page names one, explains how one differs, or tells a reader how to move
+off one. Command output that names a pre-release version is quoted with the official version. The
+rule is the knowledge base's
+[rule on versions](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md#document-official-versions-never-pre-releases),
+and it yields only to an explicit instruction from the user.
+
 ## Consult the communication strategy before writing public prose
 
 Everything published here is public writing about CGP, and how CGP is presented is a settled matter

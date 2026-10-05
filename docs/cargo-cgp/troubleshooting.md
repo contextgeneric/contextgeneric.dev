@@ -35,7 +35,6 @@ Find the distinctive part of your error in the left column, then read the sectio
 | `could not find Cargo.toml` | run outside a cargo package | [The command itself fails](#the-command-itself-fails) |
 | `unexpected argument` | a flag `cargo check` does not know | [The command itself fails](#the-command-itself-fails) |
 | `rustup was not found on PATH` | `setup` needs rustup | [Setup fails](#setup-fails) |
-| `--print sysroot` failed with `exit status: 127` | a pre-release Nix install | [A Nix pre-release install fails its sysroot probe](#a-nix-pre-release-install-fails-its-sysroot-probe) |
 
 Some problems print no error at all: a check that disagrees with `cargo check`, a slow first check,
 and a compiler wrapper of your own that stopped running. Each has a section near the end of the page.
@@ -219,21 +218,6 @@ Install through the [Nix flake](./installation.md#with-nix) instead, which needs
 rustup first. `setup` also downloads the toolchain and the driver's source, so it needs a network
 connection; a failure during either step comes from rustup or cargo, and their message says what went
 wrong.
-
-## A Nix pre-release install fails its sysroot probe
-
-A Nix install of the `v0.1.0-alpha` pre-release can fail in some projects before compiling anything:
-
-```text
-cargo-cgp: `/nix/store/…-rust-minimal-…/bin/rustc --print sysroot` failed with status exit status: 127:
-
-rustc: error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory
-```
-
-It happens in projects whose own rustup toolchain has the same Rust version as the tool's nightly:
-rustup puts that toolchain's libraries ahead of the Nix ones, and they do not load in the Nix
-environment. Version 0.1.0 fixes it, so upgrade the install to the `v0.1.0` reference, as described on
-the [installation page](./installation.md#with-nix).
 
 ## The check disagrees with `cargo check`
 

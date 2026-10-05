@@ -322,7 +322,7 @@ These pages develop the patterns and the neighbouring comparisons:
 ## Sources
 
 The PureScript snippet was compiled with PureScript 0.15.15 against the prelude and the OCaml
-snippet with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0-alpha` .
+snippet with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0` .
 
 - [Wikipedia, *Structural type system*](https://en.wikipedia.org/wiki/Structural_type_system), [*Nominal type system*](https://en.wikipedia.org/wiki/Nominal_type_system), and [*Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism): the definitions and their contrast.
 - [PureScript language reference, *Types*](https://github.com/purescript/documentation/blob/master/language/Types.md), [Pursuit, *Prim*](https://pursuit.purescript.org/builtins/docs/Prim), and [*Prim.Row*](https://pursuit.purescript.org/builtins/docs/Prim.Row): rows, records, open-row syntax, and the row type classes.

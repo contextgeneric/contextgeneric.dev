@@ -70,7 +70,7 @@ work is extensive and repetitive, so assistance makes coverage practical beyond 
 could maintain alone. Passing tests provide evidence for the cases they cover; an incorrect
 expectation or a missing case can still leave a bug undetected.
 
-`cargo-cgp` is an early pre-release and can contain bugs. It rewrites the error classes it recognizes
+`cargo-cgp` is an early release and can contain bugs. It rewrites the error classes it recognizes
 and passes other diagnostics through in the compiler's wording.
 
 ## The CGP library

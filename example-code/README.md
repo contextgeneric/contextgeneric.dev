@@ -118,5 +118,6 @@ rejected snippet means writing a fixture under `tests/compile_fail/`, blessing i
 
 ## The `cgp` version
 
-The crate pins `cgp = "0.8.0-alpha"`, which is what resolves from crates.io today. Re-pin it to
-`"0.8.0"` when that release ships, alongside the version pins in the tutorials.
+The crate takes `cgp` from the `cgp` repository's `main`, which is the 0.8.0 release the site
+documents, so it checks the pages against that release before it is on crates.io. Once 0.8.0 is
+published, pin `cgp = "0.8.0"` from crates.io instead, alongside the version pins in the tutorials.

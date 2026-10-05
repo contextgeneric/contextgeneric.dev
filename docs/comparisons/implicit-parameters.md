@@ -308,7 +308,7 @@ These pages develop the mechanisms and related comparisons:
 ## Sources
 
 The Haskell snippets were compiled with GHC 9.10 and the Scala snippets with Scala 3.8.4. The CGP
-snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!` assertion per wired
+snippets were compiled against `cgp` `0.8.0` with a `check_components!` assertion per wired
 context.
 
 - [Scala 3 Book, *Context Parameters*](https://docs.scala-lang.org/scala3/book/ca-context-parameters.html) and [Scala 3 Reference, *Given Instances*](https://docs.scala-lang.org/scala3/reference/contextual/givens.html): `using` clauses, `given` instances, and the 3.6 syntax change.

@@ -379,7 +379,7 @@ These pages expand the CGP mechanisms and nearby comparisons:
 
 The Koka `ask` snippet was compiled with Koka 3.2.3, and the `choice` handler follows the Koka book's
 own example; the OCaml snippet was compiled with OCaml 5.5.0 and the Flix snippet run with Flix
-0.76.0. The CGP snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!`
+0.76.0. The CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!`
 assertion per wired context.
 
 - [Plotkin & Pretnar, *Handling Algebraic Effects* (LMCS 2013)](https://homepages.inf.ed.ac.uk/gdp/publications/handling-algebraic-effects.pdf) and [*Handlers of Algebraic Effects* (ESOP 2009)](https://homepages.inf.ed.ac.uk/gdp/publications/Effect_Handlers.pdf): effects as operations with an equational theory and handlers interpreting them through the continuation.

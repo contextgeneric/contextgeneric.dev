@@ -6,7 +6,8 @@ publish = false
 description = "Compiled counterparts of the code shown on contextgeneric.dev. Not part of the site."
 
 [dependencies]
-cgp = "0.8.0-alpha"
+# The `cgp` release the site documents, taken from the repository until it is on crates.io.
+cgp = { git = "https://github.com/contextgeneric/cgp.git" }
 
 [dev-dependencies]
 anyhow = "1"
@@ -14,8 +15,3 @@ cap-std = "3"
 futures = "0.3"
 serde = { version = "1", features = ["derive"] }
 trybuild = "1"
-
-
-[patch.crates-io]
-cgp                 = { git = "https://github.com/contextgeneric/cgp.git" }
-# cgp               = { path = "../../cgp/crates/main/cgp" }

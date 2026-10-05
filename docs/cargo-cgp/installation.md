@@ -150,23 +150,10 @@ cargo cgp update
 
 It looks up the published versions on crates.io and does nothing if you already have the newest. When
 there is a newer one, it reinstalls the front end and runs the new version's `setup`, so the driver and
-the pinned nightly move with it. It stays within your release channel: a stable install moves only to
-stable releases, and a pre-release install to newer pre-releases or a stable release.
+the pinned nightly move with it.
 
 On the Nix path there is no `cargo cgp update`. Change the version in the flake reference and reinstall
 the profile, or run `nix flake update cargo-cgp` in a flake that pins the tool as an input.
-
-### Upgrading from the v0.1.0-alpha pre-release
-
-**An install of the `v0.1.0-alpha` pre-release cannot update itself to 0.1.0.** `update` runs the code
-of the version you have, and the pre-release only ever looks for newer pre-releases. Reinstall instead:
-
-```sh
-cargo install cargo-cgp
-cargo cgp setup
-```
-
-On the Nix path, install the `v0.1.0` reference as above.
 
 ## Using it in CI
 

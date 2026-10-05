@@ -357,7 +357,7 @@ These pages explain the dependencies and related language proposals:
 
 ## Sources
 
-The `cap-std` snippets were compiled with `cap-std` 3 and the CGP snippet against `cgp` `0.8.0-alpha`
+The `cap-std` snippets were compiled with `cap-std` 3 and the CGP snippet against `cgp` `0.8.0`
 with a `check_components!` assertion per wired context; the Scala snippet was compiled with Scala
 3.8.4. The Pony snippet was checked against the standard library's documented signatures for
 `FileAuth`, `FilePath`, and `OpenFile` rather than compiled.

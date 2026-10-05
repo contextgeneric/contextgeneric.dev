@@ -354,7 +354,7 @@ These pages develop the constructs and the neighbouring comparisons:
 
 The Haskell snippets were compiled with GHC 9.10, the Agda snippet type-checked with Agda 2.8.0, and
 the Lean snippet evaluated with Lean 4.34.0. The CGP snippets were compiled against `cgp`
-`0.8.0-alpha` with a `check_components!` assertion per wired context.
+`0.8.0` with a `check_components!` assertion per wired context.
 
 - [Wadler & Blott, *How to make ad-hoc polymorphism less ad hoc* (POPL 1989)](https://dl.acm.org/doi/10.1145/75277.75283): the origin of type classes and the dictionary-passing translation.
 - [GHC User's Guide, *Instance declarations and resolution*](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html): the one-instance rule, the orphan-instance rule, the overlap pragmas, and GHC's own warnings about incoherence.

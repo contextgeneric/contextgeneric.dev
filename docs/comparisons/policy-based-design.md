@@ -410,7 +410,7 @@ These pages expand the mechanisms used in the examples:
 The C++ snippets are adapted from the reference examples from Wikipedia and cppreference. They were
 compiled and run with GCC 15.2.0 in C++23 mode, with standard-library headers and small drivers added
 where omitted. The greeting qualifies inherited member calls with `this->` for dependent-base lookup.
-The CGP snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!` assertion per
+The CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!` assertion per
 wired context.
 
 These references support the C++ mechanisms and example origins:

@@ -274,7 +274,7 @@ These pages explain the mechanisms behind the comparison:
 
 ## Sources
 
-The CGP snippets were compiled against `cgp` `0.8.0-alpha` with a `check_components!` assertion per
+The CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!` assertion per
 wired context. The Java snippets follow the framework documentation cited below.
 
 - [Dagger developer guide](https://dagger.dev/dev-guide/): generated wiring, component graphs, and compile-time validation.

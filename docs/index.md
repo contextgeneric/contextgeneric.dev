@@ -33,7 +33,7 @@ mission-critical project, expect to investigate problems yourself when the avail
 and support do not cover your case.
 
 [cargo-cgp](/docs/cargo-cgp) helps diagnose wiring errors by naming their root cause and showing the
-dependency chain. The tool is an early pre-release and rewrites the error classes it recognizes;
+dependency chain. The tool is an early release and rewrites the error classes it recognizes;
 other diagnostics retain the compiler's wording. CGP also publishes an
 [agent skill](/docs/ai/skills) to help coding assistants read, write, and debug CGP code. You still
 need to review the code an assistant produces.
