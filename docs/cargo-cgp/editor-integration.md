@@ -43,8 +43,8 @@ Each part of the command has a job:
 
 **The command goes in `check.overrideCommand`, not `check.command`.** The
 [`check.command`](https://rust-analyzer.github.io/book/configuration.html#check.command) setting takes
-a single cargo subcommand, such as `clippy`, and rust-analyzer adds its own arguments after it, which
-cannot spell `cgp check`.
+a single cargo subcommand, such as `clippy`, and rust-analyzer puts its own flags straight after it,
+so `cgp` would be followed by `--workspace` rather than by `check`.
 [`check.overrideCommand`](https://rust-analyzer.github.io/book/configuration.html#check.overrideCommand)
 takes the whole command line and runs it as written.
 
@@ -53,12 +53,12 @@ takes the whole command line and runs it as written.
 **Prefer the workspace settings, so the tool runs only on projects that use CGP.**
 [User settings](https://code.visualstudio.com/docs/configure/settings) apply to every project you open.
 The tool checks a project without CGP correctly, but it still builds that project a second time under
-its pinned nightly, which costs time and disk for errors it has nothing to add to. Workspace settings
+its pinned nightly, which costs time and disk on a project that has no CGP errors to rewrite. Workspace settings
 override user settings, so a project can also turn the check on or off for itself.
 
 **Commit `.vscode/settings.json` only if everyone who opens the project has the tool.** On a machine
-without `cargo-cgp`, rust-analyzer runs a command that does not exist there, and that person sees no
-check errors in their editor at all until they remove the setting or install the tool.
+without `cargo-cgp`, the check fails on every save, so that person gets a warning from rust-analyzer
+instead of their check errors until they install the tool or remove the setting.
 
 ## What the editor shows
 
@@ -82,17 +82,16 @@ The compiler's own code, `E0599` here, stays attached to the error, as it does i
 
 ## What changes when the editor runs the tool
 
-Switching the check changes a few things about how rust-analyzer behaves, and each is worth knowing
-before you wonder about it:
+Running the tool in place of `cargo check` changes four things about how rust-analyzer behaves:
 
 - **The first save is slow.** The check builds into its own `target/cgp` directory under the tool's
   pinned nightly, so the first one compiles every dependency again. Later saves reuse that build, and
   because it is separate from `target`, your terminal builds and the editor's checks do not undo each
   other's work.
-- **rust-analyzer's own check options stop applying.** With an override in place, rust-analyzer runs
+- **rust-analyzer's own check options are ignored.** With an override in place, rust-analyzer runs
   the command exactly as written, so settings such as
   [`check.features`](https://rust-analyzer.github.io/book/configuration.html#check.features),
-  `check.allTargets`, and `check.extraArgs` no longer reach the check. Put the flags you need in the
+  `check.allTargets`, and `check.extraArgs` do not reach the check. Put the flags you need in the
   command itself, for example `"--all-features"` or `"--features", "my-feature"` after
   `"--all-targets"`.
 - **Two kinds of error appear, and only one is rewritten.** rust-analyzer also analyzes your code as
@@ -111,21 +110,37 @@ rust-analyzer goes back to running `cargo check` on save.
 
 ## When it does not work
 
-**Run the same command in a terminal first**, from the root of the project you opened in VS Code:
+**When the command fails, rust-analyzer says so in a warning.** The warning begins
+`cargo check failed to start`, whatever the command is, and ends with what the command printed. A
+missing setup, for example, arrives as the tool's own message:
+
+```text
+cargo check failed to start: Cargo watcher failed, the command produced no valid metadata (exit code: ExitStatus(unix_wait_status(256))):
+cargo-cgp: toolchain `nightly-2026-09-14` is not available (exit status: 1)
+
+The pinned toolchain is not installed. Run `cargo cgp setup`.
+```
+
+Your message names the nightly your build is pinned to. Look the message up on
+[Troubleshooting](./troubleshooting.md), which lists each one with its fix. To tell whether the problem
+is the tool or the editor, run the same command in a terminal from the root of the project you opened
+in VS Code:
 
 ```sh
 cargo cgp check --workspace --all-targets
 ```
 
-The editor runs exactly this, so an error it prints here is the reason the editor shows nothing.
-Messages from the tool itself, such as one telling you to run `cargo cgp setup`, are listed with
-their fixes on [Troubleshooting](./troubleshooting.md).
+**If the warning ends with cargo's `no such command` error, the editor cannot find the tool:**
 
-**If the terminal check works but the editor shows no errors from it**, VS Code may be running with a
-different `PATH` from your terminal, so the `cargo` it starts cannot find the tool. This happens most
-often when VS Code is started from a desktop launcher rather than from a shell, and when the tool is
-installed somewhere only your shell's start-up files add to `PATH`, as with a Nix profile. Start VS Code
-from a terminal in which `cargo cgp --version` works, and check again.
+```text
+error: no such command: `cgp`
+```
+
+When the terminal command works, VS Code is running with a different `PATH` from your terminal, so the
+`cargo` it starts does not see the tool. This happens most often when VS Code is started from a desktop
+launcher rather than from a shell, and the tool is installed somewhere only your shell's start-up files
+add to `PATH`, as with a Nix profile. Start VS Code from a terminal in which `cargo cgp --version`
+works, and save again.
 
 **If only some errors are rewritten**, that is the tool's limit rather than the editor's.
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
@@ -139,9 +154,11 @@ go-to-definition, and rust-analyzer's own as-you-type errors are unaffected, bec
 the check.
 
 **It has been tested on Linux, with the rust-analyzer language server.** The setting was verified by
-running the server the way VS Code runs it and reading the errors it reported for the program above.
-Other editors that use rust-analyzer accept the same setting, `check.overrideCommand`, in their own
-configuration format, but none of them, and neither macOS nor Windows, has been tried.
+running the server the way VS Code runs it, saving the program above, and reading what the server
+reported: the rewritten error, the warnings quoted above, and the check options it leaves out
+under the override. The VS Code window itself was not part of that test. Other editors that use rust-analyzer accept the
+same setting, `check.overrideCommand`, in their own configuration format, but none of them has been
+tried, and neither have macOS and Windows.
 
 ---
 
