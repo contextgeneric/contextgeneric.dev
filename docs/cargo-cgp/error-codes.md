@@ -190,18 +190,16 @@ define a namespace of your own that inherits the foreign one. Explained in
 
 ### CGP-E012
 
-**A `#[cgp_fn]` body calls a CGP trait's method on `self` without declaring the trait as a
-dependency.** The macro turns the body into a blanket implementation over a generated context type, so
-a trait the body uses has to be declared for that type to have it.
+**A `#[cgp_fn]` or `#[cgp_impl]` body calls a CGP trait's method on `self` without declaring the trait
+as a dependency.** The macro turns the body into an implementation over a generated context type, so a
+trait the body uses has to be declared for that type to have it.
 
 ```text
 [CGP-E012] the trait `<Trait>` is used but not declared as a dependency
 ```
 
 The compiler's code is `E0599`. **Fix:** add the trait to `#[uses(...)]`, as the `help` line says.
-The same mistake inside a [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider body is not
-recognized yet and arrives as the compiler wrote it, as
-[Reading the output](./reading-output.md#errors-that-pass-through-unchanged) describes. Explained in
+Explained in
 [Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare).
 
 ### CGP-E013

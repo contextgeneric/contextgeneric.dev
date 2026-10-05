@@ -285,8 +285,9 @@ error[E0599]: [CGP-E012] the trait `PersonName` is used but not declared as a de
 For more information about this error, try `rustc --explain E0599`.
 ```
 
-Adding `#[uses(PersonName)]` under `#[cgp_fn]` on `greeting` fixes it. The compiler's own message for
-this mistake talks about a method that exists for `&__Context__`, a type parameter the macro
+Adding `#[uses(PersonName)]` under `#[cgp_fn]` on `greeting` fixes it, and the same error and fix
+apply to a [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider body. The compiler's own message
+for this mistake talks about a method that exists for `&__Context__`, a type parameter the macro
 generated, and never names the missing attribute. The codes from `[CGP-E012]` to `[CGP-E016]` all work
 this way, each for a different attribute or trait mistake.
 
@@ -307,10 +308,10 @@ These are the ones you are most likely to meet:
   dispatch over enum variants. Their errors name generated helper types rather than the variant or
   field at fault. [Extensible variants](/docs/concepts/extensible-variants) and
   [extensible records](/docs/concepts/extensible-records) explain what those operations require.
-- **An undeclared trait called inside a [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider's
-  body.** The same mistake in a `#[cgp_fn]` body is reshaped, as shown above; inside a provider it
-  arrives as the compiler's `E0599` about `&__Context__`. The fix is the same `#[uses(...)]`
-  attribute.
+- **An undeclared trait called on a generic parameter other than the context**, such as
+  `value.describe()` on a `value: &Value` argument. The fix is a bound on `Value` rather than an
+  `#[uses(...)]` attribute, which only bounds the context, so the tool leaves the compiler's message,
+  which names `Value`, as it is.
 
 Errors in crates outside your workspace also pass through, because the tool reshapes only your
 workspace's own crates. For any error that arrives raw, the

@@ -37,9 +37,8 @@ Find the distinctive part of your error in the left column, then read the sectio
 | `rustup was not found on PATH` | `setup` needs rustup | [Setup fails](#setup-fails) |
 | `--print sysroot` failed with `exit status: 127` | a pre-release Nix install | [A Nix pre-release install fails its sysroot probe](#a-nix-pre-release-install-fails-its-sysroot-probe) |
 
-Some problems print no error at all: a check that disagrees with `cargo check`, a check that is slow
-or builds a second `target/cgp`, and a compiler wrapper of your own that stopped running. Each has a
-section near the end of the page.
+Some problems print no error at all: a check that disagrees with `cargo check`, a slow first check,
+and a compiler wrapper of your own that stopped running. Each has a section near the end of the page.
 
 ## Narrowing it down
 
@@ -243,16 +242,11 @@ compiler, a pinned nightly, with Rust's next-generation trait solver turned on, 
 on nightly-only or solver-specific behavior the two can disagree. When they do, trust `cargo check`,
 and use the tool for what it is for: reading the CGP errors both of them report.
 
-## The check is slow, or a second `target/cgp` appears
+## The first check is slow
 
-**The first check in a project builds every dependency once more**, into `target/cgp`, because the
-check uses its own toolchain and keeps its artifacts apart from your normal build. Later checks reuse
-them.
-
-**The directory is relative to where you run the command.** Run from a subdirectory of your project,
-the check creates `target/cgp` inside that subdirectory and builds everything there again. Run it from
-the package or workspace root, or pass `--target-dir` to fix the location. Delete a stray directory as
-you would any build output.
+**The first check in a project builds every dependency once more**, into `target/cgp` inside your
+project's target directory, because the check uses its own toolchain and keeps its artifacts apart
+from your normal build. Later checks reuse them, from wherever in the project you run them.
 
 ## Your own compiler wrapper stopped running
 

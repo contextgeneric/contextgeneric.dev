@@ -25,7 +25,7 @@ Two options stand in for a command:
 | Option | Effect |
 |---|---|
 | `-h`, `--help` | Prints the version, the list of commands, and a line on each. Running `cargo cgp` with no command does the same. |
-| `--version` | Prints the version of the tool. |
+| `-V`, `--version` | Prints the version of the tool, as `cargo-cgp 0.1.0`. |
 
 ## Commands
 
@@ -49,7 +49,8 @@ cargo cgp check [CARGO CHECK ARGS]...
 does not run a check. Two flags matter more than the rest:
 
 - **`--target-dir <DIR>`** sets where the build goes. Without it, and without `CARGO_TARGET_DIR`, the
-  tool adds `--target-dir target/cgp`, relative to the directory you run it from.
+  tool builds into the `cgp` subdirectory of your project's own target directory, which it reads from
+  `cargo metadata`, so the location is the same wherever in the project you run it.
 - **`--message-format=json`** prints the errors as JSON, rewritten the same way as the text output. An
   editor needs this form; see [Check](./check.md#in-your-editor).
 
@@ -89,8 +90,8 @@ cargo cgp update
 Looks up the published versions on crates.io and, if there is a newer one in your release channel,
 reinstalls the front end and runs the new version's `setup`. It needs a network connection.
 
-**`setup` and `update` take no options, and they ignore any arguments.** `cargo cgp setup --help`
-therefore runs setup; use `cargo cgp --help` for help.
+**`setup` and `update` take no options.** Each answers `-h` or `--help` with a description of what it
+does instead of running, and refuses any other argument with an error naming it.
 
 ## Environment variables
 
@@ -102,7 +103,7 @@ install, such as one from a source checkout:
 | `CARGO_CGP_NO_MANAGE` | When set, skips the preflight test of the toolchain and driver, and does not switch to the pinned nightly. The check then runs under whatever toolchain is active, which must be the driver's nightly. |
 | `CARGO_CGP_DRIVER` | The path of the driver to run, instead of looking beside the front end. |
 | `CARGO_CGP_TOOLCHAIN` | A nightly to use in place of the pinned one, for `setup`, `check`, and `expand`. The driver must be built against it. |
-| `CARGO_TARGET_DIR` | cargo's own variable. When set, the tool does not add `--target-dir target/cgp`. |
+| `CARGO_TARGET_DIR` | cargo's own variable. When set, the tool does not add its `target/cgp` directory. |
 
 For the length of a `check` or `expand`, the tool also sets variables for cargo:
 
@@ -122,7 +123,7 @@ the toolchain and the build directories; see [Uninstalling](./installation.md#un
 | `~/.cargo/bin/cargo-cgp` | The front end, on the cargo path. |
 | `~/.cargo/bin/cargo-cgp-driver` | The driver, which `setup` installs beside the front end. |
 | `~/.rustup/toolchains/nightly-…` | The pinned nightly, which `setup` installs through rustup. The driver's `--version` names it. |
-| `target/cgp` | The check's build artifacts, relative to the directory the command ran in. |
+| `target/cgp` | The check's build artifacts, inside the project's target directory. |
 
 ## Exit status
 

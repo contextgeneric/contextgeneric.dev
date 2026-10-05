@@ -49,8 +49,8 @@ do not match, it stops with a message naming `cargo cgp setup` as the fix, rathe
 anything on its own. [Troubleshooting](./troubleshooting.md#the-preflight-rejects-the-setup) lists those
 messages.
 
-`setup` and `update` take no options, and they ignore anything you pass after them. In particular,
-`cargo cgp setup --help` runs setup rather than printing help; run `cargo cgp --help` instead.
+`setup` and `update` take no options. Each answers `--help` with what it does instead of running, and
+refuses any other argument rather than starting an install you did not ask for.
 
 ## With Nix
 
@@ -98,8 +98,11 @@ Ask the front end for its version:
 cargo cgp --version
 ```
 
-It prints the version of the tool you are running. `cargo cgp --help` prints the same version on its
-first line, followed by the list of commands.
+```text
+cargo-cgp 0.1.0
+```
+
+`cargo cgp --help` prints the same line first, followed by the list of commands.
 
 The driver has its own version query, and it doubles as a test that the driver can run at all, because
 the driver loads the compiler's libraries before printing anything:

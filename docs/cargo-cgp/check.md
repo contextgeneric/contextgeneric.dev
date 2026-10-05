@@ -15,7 +15,7 @@ each one leads with its root cause. It is part of [`cargo-cgp`](./index.md), the
 cargo cgp check
 ```
 
-**Run it from your package's or workspace's root directory.** Everything after `check` is passed to
+Run it anywhere inside your package or workspace. Everything after `check` is passed to
 `cargo check`, so the flags you already use work unchanged:
 
 ```sh
@@ -163,9 +163,9 @@ Because the tool picks these settings, a check is a diagnostic pass rather than 
 own build, the way Clippy runs under settings of its own. Your toolchain's `cargo check` remains the
 authority on whether the code compiles.
 
-**`target/cgp` is relative to the directory you run the command from.** Run from a subdirectory, the
-check creates a new `target/cgp` inside that subdirectory and builds every dependency again there. Pass
-`--target-dir`, or set `CARGO_TARGET_DIR`, to put the artifacts somewhere else.
+**`target/cgp` sits inside your project's own target directory**, wherever in the project you run the
+command, and follows a `build.target-dir` you have configured. Pass `--target-dir`, or set
+`CARGO_TARGET_DIR`, to put the artifacts somewhere else.
 
 ## Flags are cargo's, not the tool's
 
@@ -178,8 +178,8 @@ consequences:
 - **`cargo cgp check --help` prints cargo's help** for `cargo check` and exits without running a check.
   For the tool's own commands, run `cargo cgp --help`.
 
-The one flag the tool reads itself is `--target-dir`, and only to decide whether to supply
-`target/cgp`.
+The tool reads two of the flags itself, `--target-dir` and `--manifest-path`, and only to decide where
+`target/cgp` goes.
 
 ## In your editor
 
