@@ -199,7 +199,10 @@ a trait the body uses has to be declared for that type to have it.
 ```
 
 The compiler's code is `E0599`. **Fix:** add the trait to `#[uses(...)]`, as the `help` line says.
-Explained in [Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare).
+The same mistake inside a [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider body is not
+recognized yet and arrives as the compiler wrote it, as
+[Reading the output](./reading-output.md#errors-that-pass-through-unchanged) describes. Explained in
+[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare).
 
 ### CGP-E013
 
@@ -390,7 +393,9 @@ the case where that last line has no code.
 
 **The chain ends at an ordinary Rust trait bound that does not hold**, such as `f64: Eq`. The last line
 of the tree repeats the compiler's own wording without a code, and the `root cause:` line carries this
-one.
+one. The line appears when the error has a CGP headline, as at a method call; at a
+`check_components!` entry the tool keeps the compiler's own headline, which already names the bound,
+and adds the chain without a `root cause:` line.
 
 ```text
 root cause: [CGP-E201] the trait bound `<Type: Trait>` is not satisfied

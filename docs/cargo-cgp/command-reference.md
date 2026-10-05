@@ -101,7 +101,7 @@ install, such as one from a source checkout:
 |---|---|
 | `CARGO_CGP_NO_MANAGE` | When set, skips the preflight test of the toolchain and driver, and does not switch to the pinned nightly. The check then runs under whatever toolchain is active, which must be the driver's nightly. |
 | `CARGO_CGP_DRIVER` | The path of the driver to run, instead of looking beside the front end. |
-| `CARGO_CGP_TOOLCHAIN` | A nightly to use in place of the pinned one, for `setup` and for the checks. The driver must be built against it. |
+| `CARGO_CGP_TOOLCHAIN` | A nightly to use in place of the pinned one, for `setup`, `check`, and `expand`. The driver must be built against it. |
 | `CARGO_TARGET_DIR` | cargo's own variable. When set, the tool does not add `--target-dir target/cgp`. |
 
 For the length of a `check` or `expand`, the tool also sets variables for cargo:
@@ -114,8 +114,8 @@ For the length of a `check` or `expand`, the tool also sets variables for cargo:
 
 ## Files and directories
 
-The tool creates these, and removing it does not remove them; see
-[Uninstalling](./installation.md#uninstalling):
+The tool puts its files in these places. Uninstalling with cargo removes the two binaries but leaves
+the toolchain and the build directories; see [Uninstalling](./installation.md#uninstalling):
 
 | Path | What it holds |
 |---|---|

@@ -10,7 +10,8 @@ description: 'How to read the errors cargo cgp check prints: the headline and it
 `cargo cgp check`, part of the [`cargo-cgp`](./index.md) toolchain for
 [Context-Generic Programming (CGP)](/docs/), prints ordinary compiler diagnostics, with the CGP errors
 it recognizes rewritten into a few fixed shapes. This page takes each shape apart. Every example comes
-from running the tool on the program shown beside it, and every `[CGP-Exxx]` code is listed on
+from running the tool on a complete program; the snippets show the part of it that matters, and the
+line numbers in the output refer to the whole file. Every `[CGP-Exxx]` code is listed on
 [Error codes](./error-codes.md).
 
 ## The parts of a rewritten error
@@ -95,6 +96,49 @@ The same merging works in the other direction. When several components fail beca
 mistake, such as a single missing field that three providers read, the tool reports one error whose
 headline names all three consumer traits, rather than three errors with the same cause.
 
+## A component nothing is wired for
+
+When the context has no wiring entry for a component at all, the chain is short, and its last line
+names the entry that is missing. The examples from here on use `App`, a type that stands for an
+application and carries its wiring, where the examples above used `Rectangle`, the shape being
+measured. The error shapes are the same for both. Here `App` is checked for `FarewellComponent` but
+wires only the greeter:
+
+```rust
+delegate_components! {
+    App {
+        GreeterComponent: GreetHello,
+    }
+}
+
+check_components! {
+    App {
+        GreeterComponent,
+        FarewellComponent,
+    }
+}
+```
+
+```text
+error[E0277]: [CGP-E001] the consumer trait `CanSayGoodbye` is not implemented for context `App`
+  --> src/lib.rs:31:9
+   |
+31 |         FarewellComponent,
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = note: root cause: [CGP-E107] context `App` does not contain any delegate entry for `FarewellComponent`
+           this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanSayGoodbye` for context `App`
+             └─ [CGP-E107] context `App` does not contain any delegate entry for `FarewellComponent`
+
+For more information about this error, try `rustc --explain E0277`.
+```
+
+There is no `[CGP-E102]` line, because no provider was selected for the chain to pass through. Add the
+entry, or remove the component from the check if the context is not meant to have it. When the
+component is routed through a namespace or an `open` statement, the chain gains a `[CGP-E104]` line
+naming the path the lookup followed, and the last line names that path rather than the component.
+
 ## A field with the wrong type
 
 When the field exists but has the wrong type, the headline states the whole cause, so the error has
@@ -126,6 +170,60 @@ For more information about this error, try `rustc --explain E0271`.
 The chain still shows which provider needs the type, which tells you whether to change the field or
 the provider. An [abstract type](/docs/concepts/abstract-types) wired one way and required another
 produces the same shape with `[CGP-E017]`.
+
+## An ordinary Rust trait that does not hold
+
+Not every requirement is a CGP one. When a provider needs an ordinary trait that the wired type does
+not implement, the compiler's own headline already states the cause, so the tool keeps it and adds
+only the chain. Here `CompareScalars` requires `Scalar: Eq`, and `App` wires the scalar type to
+`f64`, which is not `Eq`:
+
+```rust
+#[cgp_impl(new CompareScalars)]
+#[use_type(HasScalarType.Scalar)]
+impl ScalarEquality
+where
+    Scalar: Eq,
+{
+    fn same(&self, a: &Scalar, b: &Scalar) -> bool {
+        a == b
+    }
+}
+
+delegate_components! {
+    App {
+        ScalarTypeProviderComponent: UseType<f64>,
+        ScalarEqualityComponent: CompareScalars,
+    }
+}
+```
+
+```text
+error[E0277]: the trait bound `f64: Eq` is not satisfied
+  --> src/lib.rs:36:9
+   |
+36 |         ScalarEqualityComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ the trait `Eq` is not implemented for `f64`
+   |
+   = note: this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanCompareScalars` for context `App`
+             └─ [CGP-E102] provider trait impl `ScalarEquality` with context `App` for provider `CompareScalars`
+               └─ the trait bound `f64: Eq` is not satisfied
+
+For more information about this error, try `rustc --explain E0277`.
+```
+
+The last line of the chain repeats the compiler's words without a code, since it is not a CGP
+requirement. Reached through a method call rather than a check, the same mistake gets a CGP headline
+instead, and then the cause line carries `[CGP-E201]`, the code for an ordinary bound:
+
+```text
+   = note: root cause: [CGP-E201] the trait bound `f64: Eq` is not satisfied
+```
+
+The fix is in the types rather than the wiring: wire the scalar type to one that implements the trait,
+or relax the provider's bound if it asks for more than it needs. The message names `f64` but not the
+`UseType<f64>` entry that chose it, so that last step is yours.
 
 ## Two entries that claim one key
 
@@ -195,8 +293,9 @@ this way, each for a different attribute or trait mistake.
 ## Errors that pass through unchanged
 
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
-reshape every class. An error with no `[CGP-Exxx]` code in its headline is one it passed through, so
-read it as the compiler wrote it. These are the ones you are most likely to meet:
+reshape every class. An error with no `[CGP-Exxx]` code anywhere in it, in the headline or in a
+dependency chain beneath it, is one the tool passed through, so read it as the compiler wrote it.
+These are the ones you are most likely to meet:
 
 - **A per-entry generic that never reaches the key**, which the compiler reports as `E0207` twice, with
   two suggested fixes of which only the second matches the mistake. See

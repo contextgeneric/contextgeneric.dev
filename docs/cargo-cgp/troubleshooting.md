@@ -100,8 +100,8 @@ cargo-cgp: the installed cargo-cgp-driver is version 0.0.9, but this cargo-cgp i
 Run `cargo cgp setup`.
 ```
 
-**The driver was built by a different compiler than the pinned nightly now provides**, which happens
-when that nightly has been reinstalled:
+**The driver was built by a different compiler than the pinned nightly now provides.** The driver and
+the toolchain the front end expects no longer belong together, even though their versions match:
 
 ```text
 cargo-cgp: the cargo-cgp-driver was built against `rustc 1.99.0-nightly (0123abcde 2026-08-01)`, but the pinned toolchain `nightly-2026-09-14` now provides `rustc 1.100.0-nightly (4b6d04e70 2026-09-13)`
@@ -160,7 +160,7 @@ active toolchain, for example with `RUSTUP_TOOLCHAIN`. Running through the Nix f
 ## The driver cannot be found
 
 **The front end looks for the driver in its own directory**, unless `CARGO_CGP_DRIVER` names another
-path, and only then on your `PATH`. When the driver is missing, the preflight reports it:
+path, and looks on your `PATH` only when the driver is not there. When the driver is missing, the preflight reports it:
 
 ```text
 cargo-cgp: failed to run the cargo-cgp-driver at /path/to/cargo-cgp-driver: No such file or directory (os error 2)

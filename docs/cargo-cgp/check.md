@@ -75,7 +75,7 @@ pub fn print_area(rectangle: &Rectangle) {
 }
 ```
 
-Running the check prints this, followed by cargo's own one-line summary:
+After cargo's progress lines, the check prints this, followed by cargo's one-line summary:
 
 ```text
 $ cargo cgp check
@@ -135,8 +135,10 @@ error[E0277]: [CGP-E001] the consumer trait `CanCalculateArea` is not implemente
 For more information about this error, try `rustc --explain E0277`.
 ```
 
-A check also changes what plain `cargo check` can tell you. On this version the compiler names the
-missing requirement, but spells the field name one character at a time, as a type-level string:
+A check also changes what plain `cargo check` can tell you. With the check in place, stable Rust names
+the missing requirement, but spells the field name one character at a time, as a type-level string.
+Because it compares that name with the `width` field the struct does have, it also prints the letter
+the two share in that position as `_`:
 
 ```text
 help: the trait `HasField<Symbol<6, cgp::prelude::Chars<'h', cgp::prelude::Chars<'e', cgp::prelude::Chars<'i', cgp::prelude::Chars<'g', cgp::prelude::Chars<_, cgp::prelude::Chars<'t', Nil>>>>>>>>` is not implemented for `Rectangle`
