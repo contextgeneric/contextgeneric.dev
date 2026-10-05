@@ -1,11 +1,18 @@
 //! Code from the pages under `docs/cargo-cgp/`.
 //!
-//! Two of the five pages show Rust. `installation.md` and `troubleshooting.md` are shell commands and
-//! quoted diagnostics, so they have no file here.
+//! Four of the eight pages show Rust: `index.md`, `check.md`, `reading-output.md`, and `expand.md`.
+//! The rest are shell commands, quoted messages, and tables, so they have no file here.
 //!
-//! Both pages that do show Rust show the *same* program, once broken and once fixed, because that is
-//! the point being made: `check.md` runs the tool on the broken one, and `expand.md` expands the fixed
-//! one. The broken version cannot be a module, so it is a `compile_fail` doctest.
+//! Almost every program those pages show is broken on purpose, because the point of each is the error
+//! `cargo cgp check` prints for it. Those programs are `trybuild` fixtures under
+//! `tests/compile_fail/cargo_cgp/`, one per heading, named `<page>_<heading>.rs`. The modules here hold
+//! the programs the pages say compile: the repaired `Rectangle` that `expand.md` expands, and the
+//! repaired `greeting` that `reading-output.md` gives as the fix for `[CGP-E012]`.
+//!
+//! Neither the fixtures nor these modules check the `cargo cgp check` or `cargo cgp expand` output the
+//! pages quote. That output was produced by running the tool on exactly these programs, and re-running
+//! it is the only way to re-verify it.
 
 pub mod check;
 pub mod expand;
+pub mod reading_output;

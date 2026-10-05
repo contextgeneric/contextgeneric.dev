@@ -1,12 +1,12 @@
-//! Code from `docs/cargo-cgp/check.md` — *Check*, and the excerpt of it on the section index.
+//! Code from `docs/cargo-cgp/check.md` — *Check*.
 //!
-//! The page's whole program is the mistake: `RectangleArea` reads a `height` field through an
-//! `#[implicit]` argument and `Rectangle` does not have one. It therefore cannot be a module, and is
-//! carried as a `compile_fail` doctest.
+//! Both programs on the page are broken on purpose, so both are `trybuild` fixtures:
 //!
-//! What the doctest guards is narrow but real: that the snippet the page calls broken is still broken.
-//! It does **not** verify which diagnostic comes out — rustdoc does not enforce that — and it says
-//! nothing at all about the `cargo cgp check` output the page quotes beside it. That output was
-//! produced by running the tool, and re-running it is the only way to re-verify it.
+//! - *Try it on a deliberate mistake* — `tests/compile_fail/cargo_cgp/check_try_it_on_a_deliberate_mistake.rs`,
+//!   the unchecked call to `area` on a `Rectangle` without its `height` field. The same program is
+//!   `index_the_problem_it_solves.rs`, for the section index.
+//! - *Check the wiring where you write it* —
+//!   `tests/compile_fail/cargo_cgp/check_check_the_wiring_where_you_write_it.rs`, the same mistake with
+//!   `print_area` replaced by a `check_components!` block.
 //!
-//! Rejected snippet — trybuild fixture `tests/compile_fail/cargo_cgp/check_check.rs`.
+//! The page's repaired program, with `height` restored, is the one [`super::expand`] carries.

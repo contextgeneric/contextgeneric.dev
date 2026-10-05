@@ -37,7 +37,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 |---|---|
 | `docs/concepts/` | complete — one file under `tests/concepts/` per page that shows code |
 | `docs/reference/` | partial — `errors.md`, every `macros/` page and every `attributes/` page that shows code, all of `derives/`, every `traits/` construct page, all of `providers/` that shows code (the singletons, and all of `error/`, `handler/`, `monad/`, and `dispatch/`; `use_field_ref` shows its example on its alias page), all of `components/` (each component page that shows code, including the `handler/` subsection), and all of `types/` (each type page that shows code, the `spines/` subsection included); the section is filled in lazily |
-| `docs/cargo-cgp/` | complete — the two pages that show Rust, under `tests/cargo_cgp/` |
+| `docs/cargo-cgp/` | complete — the four pages that show Rust: the programs they say compile under `tests/cargo_cgp/`, and the deliberate mistakes under `tests/compile_fail/cargo_cgp/` |
 | `docs/comparisons/` | complete — one file per page under `tests/comparisons/`; only the CGP side of each page is checked here, since the other language's snippets are compiled against the toolchain the page names |
 | `docs/tutorials/` | partial — `area-calculation/checking.md`, whose three quoted diagnostics are the reason it is mirrored; the rest is filled in lazily |
 | `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |

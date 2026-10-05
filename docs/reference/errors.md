@@ -22,8 +22,8 @@ It is meant to be looked up rather than read through. If you have an error in fr
 `cargo check`.** For the worst class it recovers a cause that plain `cargo check` discards entirely,
 and every "what you see" example below is its real output.
 
-`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a
-v0.1.0-alpha that does not yet reshape every class. Where a class passes through as the compiler
+`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
+reshape every class. Where a class passes through as the compiler
 wrote it, this page says so and shows the raw form instead. The raw forms quoted here are what
 stable `rustc` prints.
 
@@ -637,53 +637,13 @@ plain `impl`.
 
 ## The `[CGP-Exxx]` codes
 
-A code tags one class of CGP mistake. The compiler's own code is always kept beside it, so
-`rustc --explain` still works and nothing is reclassified away from rustc.
+A code tags one class of CGP mistake in the output of `cargo cgp check`. The compiler's own code is
+always kept beside it, so `rustc --explain` still works and nothing is reclassified away from rustc. A
+code in the **headline** classifies the error; a code in the **root-cause tree** labels one link in
+the chain.
 
-Codes appear in two places and mean different things. A code in the **headline** classifies the error; a
-code in the **root-cause tree** labels one link in the chain.
-
-### Headline codes
-
-| Code | Means |
-|---|---|
-| `CGP-E001` | A context does not implement a consumer trait |
-| `CGP-E002` | A provider does not implement its provider trait for the context |
-| `CGP-E003` | A field is present but has the wrong type |
-| `CGP-E004` | The same key wired twice, or a generic table overlapping a specific one |
-| `CGP-E005` | Wiring a key that a shorter path key or a namespace entry already covers |
-| `CGP-E006` | More than one namespace joined on one context |
-| `CGP-E007` | A direct entry colliding with a redirect of the same key, such as an `open` header |
-| `CGP-E008` | The same key redirected twice |
-| `CGP-E009` | A non-component trait (a wrapper, or a `#[cgp_fn]` blanket trait) blocked by a CGP dependency |
-| `CGP-E010` | The wiring recurses without terminating |
-| `CGP-E011` | An orphan-rule namespace registration |
-| `CGP-E012` | A trait used but not declared with `#[uses]` |
-| `CGP-E013` | A consumer trait named in a provider impl header |
-| `CGP-E014` | `#[cgp_impl]` applied to a trait that is not a component |
-| `CGP-E015` | A consumer trait named in an inner-provider bound |
-| `CGP-E016` | An inner provider used but not imported |
-| `CGP-E017` | An abstract type wired differently from what a provider pinned |
-
-### Dependency-tree codes
-
-| Code | Means |
-|---|---|
-| `CGP-E101` | A hop through a context's consumer-trait impl |
-| `CGP-E102` | A hop through a provider's provider-trait impl |
-| `CGP-E104` | A hop through a namespace or `open` redirect |
-| `CGP-E105` | A hop through any other trait |
-| `CGP-E106` | **Leaf:** a field is absent |
-| `CGP-E107` | **Leaf:** the context wires nothing for a component or path |
-| `CGP-E108` | **Leaf:** the field exists but `#[derive(HasField)]` is missing |
-| `CGP-E109` | **Leaf:** the field has the wrong type |
-| `CGP-E110` | **Leaf:** a provider's own dispatch table is missing an entry |
-| `CGP-E111` | **Leaf:** something wired where a provider belongs is not a provider |
-| `CGP-E112` | **Leaf:** an associated type differs from what was required |
-| `CGP-E201` | The root-cause lead for an ordinary Rust trait bound |
-
-A tree entry that merely passes a non-CGP message through in rustc's own words is left uncoded.
-`CGP-E103` is unassigned, so the numbering has a gap there.
+[Error codes](/docs/cargo-cgp/error-codes) lists every code with its message, its meaning, its fix,
+and the section of this page that explains its class.
 
 ## Related constructs
 

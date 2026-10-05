@@ -1,3 +1,5 @@
+// From docs/cargo-cgp/index.md, The problem it solves: the unchecked call hides the missing field.
+
 use cgp::prelude::*;
 
 #[cgp_component(AreaCalculator)]
@@ -12,10 +14,10 @@ impl AreaCalculator {
     }
 }
 
-// The mistake: no `height` field, though the provider reads one.
 #[derive(HasField)]
 pub struct Rectangle {
     pub width: f64,
+    // missing `height` field
 }
 
 delegate_components! {
@@ -24,10 +26,8 @@ delegate_components! {
     }
 }
 
-check_components! {
-    Rectangle {
-        AreaCalculatorComponent,
-    }
+pub fn print_area(rectangle: &Rectangle) {
+    println!("{}", rectangle.area());
 }
 
 fn main() {}

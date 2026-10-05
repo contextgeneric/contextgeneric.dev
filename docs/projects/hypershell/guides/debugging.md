@@ -12,8 +12,8 @@ failed. [Hypershell](../index.md) is a shell-scripting language whose programs a
 with [CGP](/docs/). This guide shows the common mistakes, each with the code that triggers it, the
 root cause [`cargo cgp check`](/docs/cargo-cgp/check) reports, and the fix. Each output below was
 produced by running the check and is trimmed to its headline and root cause, with long types
-abridged. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is
-a v0.1.0-alpha that does not yet reshape every class.
+abridged. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool
+does not yet reshape every class.
 
 ## Check first, then read the root cause
 
@@ -39,7 +39,7 @@ step, which follows the walk on the
 [assembly](../architecture/assembly.md#following-one-piece-of-syntax) page. Read it from the bottom:
 the last line is the part that failed. Each step names the table it looked in, so the chain shows
 whether the failure is in the context, in a bundle, or in an input dispatcher. The codes in brackets
-are listed in the [compile errors](/docs/reference/errors#the-cgp-exxx-codes) page.
+are listed on the [error codes](/docs/cargo-cgp/error-codes) page.
 
 ## A context lacks a field
 
