@@ -1,7 +1,7 @@
 ---
 title: 'Troubleshooting cargo-cgp'
 sidebar_label: 'Troubleshooting'
-sidebar_position: 6
+sidebar_position: 7
 description: 'Match an error from cargo-cgp itself to its cause and fix: the setup check, a driver that will not load or cannot be found, wrong invocations, and slow checks.'
 ---
 

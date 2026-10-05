@@ -196,6 +196,7 @@ Start with installation, then the page for what you want to do:
 - [Check](./check.md): running a check, and trying it on a deliberate mistake.
 - [Reading the output](./reading-output.md): every shape of error the tool produces, part by part.
 - [Expand](./expand.md): reading what your CGP macros generated.
+- [Editor integration](./editor-integration.md): rewritten errors in VS Code, every time you save.
 - [Troubleshooting](./troubleshooting.md): when the tool itself will not run.
 - [Error codes](./error-codes.md) and [Command reference](./command-reference.md): to look something
   up.

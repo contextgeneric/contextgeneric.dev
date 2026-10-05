@@ -183,22 +183,9 @@ The tool reads two of the flags itself, `--target-dir` and `--manifest-path`, an
 
 ## In your editor
 
-rust-analyzer can run the check every time you save. In VS Code, add this to your `settings.json`:
-
-```json
-{
-  "rust-analyzer.check.overrideCommand": [
-    "cargo", "cgp", "check", "--workspace", "--all-targets", "--message-format=json"
-  ]
-}
-```
-
-The command must go in `check.overrideCommand` rather than `check.command`, because it is more than one
-word and must print JSON for the editor to read. The tool renders its rewritten errors in the same
-JSON format as the compiler, so they appear inline like any other diagnostic, and the separate
-`target/cgp` directory keeps the editor's checks from contending with your builds. Other editors that
-use rust-analyzer take the same setting in their own configuration format. This setup has not yet been
-tried in an editor as part of writing this page.
+rust-analyzer can run `cargo cgp check` every time you save, so the errors your editor underlines lead
+with their root cause too. It takes one setting, which
+[Editor integration](./editor-integration.md) gives for VS Code, along with what the switch changes.
 
 ## When it will not help
 

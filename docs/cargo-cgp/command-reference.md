@@ -1,7 +1,7 @@
 ---
 title: 'cargo-cgp command reference: commands, options, variables'
 sidebar_label: 'Command reference'
-sidebar_position: 8
+sidebar_position: 9
 description: 'Every cargo-cgp command and option, the environment variables it reads and sets, the files it creates, and its exit status, in one place.'
 ---
 
@@ -52,7 +52,7 @@ does not run a check. Two flags matter more than the rest:
   tool builds into the `cgp` subdirectory of your project's own target directory, which it reads from
   `cargo metadata`, so the location is the same wherever in the project you run it.
 - **`--message-format=json`** prints the errors as JSON, rewritten the same way as the text output. An
-  editor needs this form; see [Check](./check.md#in-your-editor).
+  editor needs this form; see [Editor integration](./editor-integration.md).
 
 ### `expand`
 

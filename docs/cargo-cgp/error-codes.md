@@ -1,7 +1,7 @@
 ---
 title: 'cargo-cgp error codes: every CGP-E code explained'
 sidebar_label: 'Error codes'
-sidebar_position: 7
+sidebar_position: 8
 description: 'Look up any [CGP-Exxx] code cargo cgp check prints: what the message says, what mistake it means, how to fix it, and where the class is explained.'
 ---
 
