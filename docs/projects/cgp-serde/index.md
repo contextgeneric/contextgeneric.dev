@@ -107,7 +107,7 @@ know first:
   compile, and the compiler's raw message lists every step it took to find it. Checking the context
   with `check_components!` and reading the error with [`cargo cgp check`](/docs/cargo-cgp/check)
   names the missing entry: `cargo cgp check` leads with the root cause for the classes it
-  recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The [debugging
+  recognizes, and the tool does not yet reshape every class. The [debugging
   guide](./guides/debugging-wiring.md) shows the common mistakes.
 - **Its output suits self-describing formats.** JSON and RON work with it as they are.
   Length-prefixed binary formats, such as postcard, do not accept the maps and sequences its generic

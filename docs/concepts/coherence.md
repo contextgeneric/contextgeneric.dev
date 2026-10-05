@@ -192,8 +192,8 @@ further places to inspect when tracing a choice.
 Wiring checks are deferred until the trait is checked or used. A table can name a provider
 whose requirements the context does not satisfy, and a later call can produce a verbose error.
 [`check_components!`](/docs/reference/macros/check_components) verifies requirements beside the
-wiring. [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) makes recognized causes
-easier to read; its `v0.1.0-alpha` release covers core wiring errors rather than every class.
+wiring. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
+recognizes, and the tool does not yet reshape every class.
 [Checking your wiring](./check-traits.md) shows the diagnostics and their limits.
 
 ## Where to go next

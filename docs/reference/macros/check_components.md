@@ -187,8 +187,8 @@ the cause: `Person` does not implement `HasField` for the `name` tag, which rust
 `Symbol<4, Chars<'n', …>>` type. The mismatch is reported at the wiring rather than at some later
 `person.greet()` in another file. [`cargo cgp check`](/docs/cargo-cgp/check) reports the same failure
 with the root cause first, as ``[CGP-E106] missing field `name` on `Person` ``. `cargo cgp check`
-leads with the root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not
-yet reshape every class.
+leads with the root cause for the classes it recognizes, and the tool does not yet reshape every
+class.
 
 A generic component supplies its parameters, and the bracketed form checks several at once:
 

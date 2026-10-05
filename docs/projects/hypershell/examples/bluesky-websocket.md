@@ -154,8 +154,8 @@ error[E0277]: [CGP-E002] the provider trait `Handler<Pipe<…>, TokioAsyncReadSt
 The path's last segment is the error type the provider raises, written by its own name. That type is
 `tungstenite::Error`, which the program imports as `TungsteniteError`, so the `Error` in the message
 is `tungstenite`'s error rather than the context's own. Adding the route back fixes it.
-`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a
-v0.1.0-alpha that does not yet reshape every class.
+`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
+reshape every class.
 
 ## The pattern
 

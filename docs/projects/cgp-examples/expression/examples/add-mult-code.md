@@ -163,8 +163,7 @@ error[E0277]: [CGP-E001] the consumer trait `CanComputeRef<ToLisp, Plus<MathExpr
 
 Evaluating a `Plus` still has its entry, so only conversion is broken. Two more errors point at the
 `ToLisp` wrapper's call to the dispatcher, for the same reason. `cargo cgp check` leads with the
-root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape
-every class.
+root cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 ## The pattern
 

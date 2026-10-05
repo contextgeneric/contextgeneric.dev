@@ -263,7 +263,7 @@ CGP requires component declarations and provider selection through wiring or dec
 This adds code to maintain and trait-resolution work during compilation. Tracing a selection can
 also require following delegation through several tables. Raw diagnostics expose generated traits
 and types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
-recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+recognizes, and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) weighs these costs against simpler forms.
 
 ## Where implicit resolution is the better choice

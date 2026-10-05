@@ -247,8 +247,8 @@ Wiring does not immediately verify the selected provider's requirements. A missi
 unsatisfied dependency can remain undetected until a caller needs the trait.
 [`check_components!`](/docs/reference/macros/check_components) verifies the requirements where you
 place the check, usually beside the table.
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reports recognized failures with
-readable causes; its `v0.1.0-alpha` release covers core wiring errors rather than every class.
+[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+and the tool does not yet reshape every class.
 [Checking your wiring](./check-traits.md) shows what to expect with and without those tools.
 
 Tracing a method call requires following the wiring to its provider. Static dispatch avoids runtime

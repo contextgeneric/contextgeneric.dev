@@ -107,8 +107,8 @@ Hypershell is a demonstration, and these are the costs a reader evaluating it sh
 - **Error messages are long.** A mistake in a program is a compile error, and the compiler's raw
   message lists every step it took before it failed. Checking the program with `check_components!`
   and reading the error with [`cargo cgp check`](/docs/cargo-cgp/check) helps: `cargo cgp check`
-  leads with the root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does
-  not yet reshape every class. The [debugging guide](./guides/debugging.md) shows the common
+  leads with the root cause for the classes it recognizes, and the tool does not yet reshape every
+  class. The [debugging guide](./guides/debugging.md) shows the common
   failures.
 - **It is a demonstration.** Hypershell is lightly tested and not meant for production use; its
   value is as a worked example. The [limitations page](./limitations.md) describes the limits of its

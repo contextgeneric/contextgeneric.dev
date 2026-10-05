@@ -166,7 +166,7 @@ fields `width` and `height`. The tree beneath shows how the requirement arrived 
 `RectangleAreaCalculator`, which is the provider we wired by mistake.
 
 One thing to keep in mind as you use it: `cargo cgp check` leads with the root cause for the classes
-it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. When you meet an
+it recognizes, and the tool does not yet reshape every class. When you meet an
 error it has not rewritten, you will be reading the raw compiler output, which is why the previous
 section is worth understanding rather than skipping.
 

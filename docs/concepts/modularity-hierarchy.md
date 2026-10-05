@@ -345,7 +345,7 @@ runs. Wrappers and namespaces can add further steps to that trace even though se
 Wiring failures can produce verbose diagnostics involving generated types and transitive bounds.
 [`check_components!`](/docs/reference/macros/check_components) forces selected requirements to be
 checked near the wiring. `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+and the tool does not yet reshape every class. The
 [cargo-cgp documentation](/docs/cargo-cgp/) explains the checking workflow.
 
 Macros, trait resolution, and [monomorphization](/docs/reference/glossary#monomorphization) add compile-time work. The effect depends on the

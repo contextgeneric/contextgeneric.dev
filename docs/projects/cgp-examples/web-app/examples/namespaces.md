@@ -154,7 +154,7 @@ error[E0277]: [CGP-E001] the consumer traits `CanCreatePost` and `CanDetectSpamM
 Each root cause names the full path the namespace routed the lookup to, which says where the entry
 belongs. The other five components still check, since the getters, updaters, and deleter need
 nothing from the extras. `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class.
+and the tool does not yet reshape every class.
 
 ## The pattern
 

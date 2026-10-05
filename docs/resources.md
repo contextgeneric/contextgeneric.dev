@@ -20,7 +20,7 @@ This page lists some resources related to CGP. More resources will be added as t
 
 Install it with `cargo install cargo-cgp`, then run `cargo cgp setup` to provision the pinned nightly its driver needs. CGP itself compiles on stable Rust without it; the tool is optional.
 
-`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class. The [`cargo-cgp` section](/docs/cargo-cgp/) covers installation, both commands, and troubleshooting.
+`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet reshape every class. The [`cargo-cgp` section](/docs/cargo-cgp/) covers installation, both commands, reading the output, the error codes, and troubleshooting.
 
 ## Tutorials
 

@@ -745,8 +745,7 @@ unmet, still compiles. The failure appears later, at the place where code uses t
 long error naming types you did not write. The answer is to check the table (see
 [`check_components!`](./check_components.md)) and to read failures through
 [`cargo cgp check`](/docs/cargo-cgp/check) in place of `cargo check`. `cargo cgp check` leads with the
-root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape
-every class.
+root cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 **Statements must lead the block**, and getting it wrong produces a misleading message. Once the parser
 has consumed the statements it expects only mappings, so it reads the `open` keyword as a *key* and

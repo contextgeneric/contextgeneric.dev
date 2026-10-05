@@ -169,7 +169,7 @@ The digest is a `GenericArray<u8, …>`, and `StreamToStdout`'s input dispatcher
 type. The path in the message is the syntax followed by the input type, which is exactly the key the
 dispatcher failed to match. The fix is to convert the value into a type the dispatcher lists, which
 is what `BytesToHex` does. `cargo cgp check` leads with the root cause for the classes it
-recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class.
+recognizes, and the tool does not yet reshape every class.
 
 ## The pattern
 

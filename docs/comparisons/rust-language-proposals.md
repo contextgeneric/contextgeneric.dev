@@ -332,8 +332,8 @@ CGP requires a component definition and explicit wiring. A provider trait create
 [`#[cgp_component]`](/docs/reference/macros/cgp_component) cannot retrofit a foreign trait such as
 `serde::Serialize` without a parallel component. Wiring adds compile-time work and can produce long
 trait errors over generated types. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root
-cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every
-class. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs
+cause for the classes it recognizes, and the tool does not yet reshape every class. The
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs
 against simpler approaches.
 
 ## Where a proposal, or a smaller tool, is the better choice

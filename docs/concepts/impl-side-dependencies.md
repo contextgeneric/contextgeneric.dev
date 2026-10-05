@@ -243,9 +243,8 @@ Errors may refer to generated bounds rather than the requirement as written in t
 A missing implicit field, for example, can appear as an unsatisfied `HasField` bound with a
 nested type-level field name. [`check_components!`](/docs/reference/macros/check_components)
 checks selected components where you place it, usually beside the wiring, and helps expose the
-missing dependency. [`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) reports readable
-causes for recognized cases; its `v0.1.0-alpha` release covers core wiring errors rather than every
-class. [Checking your wiring](./check-traits.md) shows the diagnostics and their limits.
+missing dependency. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the
+classes it recognizes, and the tool does not yet reshape every class. [Checking your wiring](./check-traits.md) shows the diagnostics and their limits.
 
 A component and wiring are unnecessary when one blanket implementation provides all the reuse you
 need. Write that implementation in ordinary Rust, or use

@@ -297,8 +297,8 @@ error[E0277]: [CGP-E001] the consumer trait `CanCompute<Eval, Times<MathExpr>>` 
 
 A second, longer error points at the wrapper's call to `MatchWithValueHandlers`, because the
 dispatcher cannot find a provider for the `Times` variant either. The first error is the one to
-read. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a
-v0.1.0-alpha that does not yet reshape every class. Put the line back, and the check passes.
+read. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does
+not yet reshape every class. Put the line back, and the check passes.
 
 ## The pattern
 

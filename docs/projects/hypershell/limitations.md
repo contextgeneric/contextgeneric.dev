@@ -57,8 +57,8 @@ program.
 A mistake in a program or its wiring is a compile error, and the compiler's raw message lists every
 step it took through the wiring before it failed. Checking a program with `check_components!` and
 reading the error with [`cargo cgp check`](/docs/cargo-cgp/check) gets to the cause faster:
-`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a
-v0.1.0-alpha that does not yet reshape every class. The [debugging guide](./guides/debugging.md)
+`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
+reshape every class. The [debugging guide](./guides/debugging.md)
 shows the common mistakes.
 
 ## When another tool is the better choice

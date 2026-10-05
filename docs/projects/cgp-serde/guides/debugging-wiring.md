@@ -13,7 +13,7 @@ recognize once seen. cgp-serde rebuilds Serde's `Serialize` and `Deserialize` as
 
 The errors below come from [`cargo cgp check`](/docs/cargo-cgp/check), CGP's error tool, run in
 place of `cargo check`. `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class. Each mistake is caught by a
+and the tool does not yet reshape every class. Each mistake is caught by a
 [`check_components!`](/docs/reference/macros/check_components) table listing the context's types,
 as [wiring a context](./wiring-a-context.md#5-check-every-value-type) recommends, and the errors are
 shorter and clearer there than at the first call.

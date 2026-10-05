@@ -150,8 +150,8 @@ error[E0277]: [CGP-E002] the provider trait `Handler<Pipe<…>, Vec<u8>>` with c
 The full output continues with the dependency chain that leads there, from the pipeline through
 `SimpleExec`, the command's argument list, and the `FieldArg` that asked for the field. The fix is
 the one `MyApp` already applies: run the program on a context that derives `HasField` and has the
-field. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a
-v0.1.0-alpha that does not yet reshape every class.
+field. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does
+not yet reshape every class.
 
 ## The pattern
 

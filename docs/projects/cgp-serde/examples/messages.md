@@ -270,8 +270,7 @@ Every checked type that contains a date fails, and all for one reason. Below the
 tool prints the chain that leads to it: from `MessagesArchive` through `SerializeFields`, the
 vectors, the references, and `EncryptedMessage`, down to `SerializeTimestamp`, which asks `AppB` for
 an `i64` it has no entry for. The fix is to put `i64` back. `cargo cgp check` leads with the root
-cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every
-class.
+cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 ## The pattern
 

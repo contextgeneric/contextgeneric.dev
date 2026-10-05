@@ -194,7 +194,7 @@ against the expanded tag, so an error mentioning
 `HasField<Symbol<5, Chars<'w', Chars<'i', ...>>>>` is telling you the field `width` is missing. Reading
 the characters in order is enough to decode it, and [`cargo cgp check`](/docs/cargo-cgp/check) names
 the field directly, as ``missing field `width` ``. `cargo cgp check` leads with the root cause for the
-classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class.
+classes it recognizes, and the tool does not yet reshape every class.
 
 ## Formal grammar
 

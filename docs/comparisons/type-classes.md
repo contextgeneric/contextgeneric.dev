@@ -307,7 +307,7 @@ CGP requires explicit wiring to choose providers. Providers also need a componen
 [`#[cgp_component]`](/docs/reference/macros/cgp_component), adding code beyond a plain trait. Trait
 resolution adds compile-time work and can produce long errors over generated types.
 [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page compares these costs with simpler
 approaches.
 

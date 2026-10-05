@@ -139,8 +139,9 @@ The dependency chain connects that missing field to the `CanSendEmail` trait the
 
 The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
 next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.
-Its `v0.1.0-alpha` release covers core wiring errors, but some classes, including orphan-rule
-failures, still pass through unchanged. Output details depend on the compiler and tool version.
+`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
+reshape every class; [Reading the output](/docs/cargo-cgp/reading-output#errors-that-pass-through-unchanged)
+lists the ones that pass through unchanged. Output details depend on the compiler and tool version.
 
 ## Checking a stack one layer at a time
 

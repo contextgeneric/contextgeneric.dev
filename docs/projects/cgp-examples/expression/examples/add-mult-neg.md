@@ -163,7 +163,7 @@ error[E0277]: [CGP-E001] the consumer trait `CanComputeRef<ToLisp, MathPlusExpr>
 Supporting it would be a second group of `ToLisp` entries beside the `Eval` ones, with a provider
 for each new operator, an entry binding the context's Lisp type, and a `DispatchToLisp` wrapper, as
 [`add_mult`](./add-mult.md) has. `cargo cgp check` leads with the root cause
-for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class.
+for the classes it recognizes, and the tool does not yet reshape every class.
 
 ## The pattern
 

@@ -164,7 +164,7 @@ A default a namespace binds is final. The context's entry would be a second answ
 lookup, and Rust rejects the two as conflicting implementations, which is `E0119` underneath the
 tool's message. A context that needs a different getter joins a different namespace, one that does
 not bind the getter. `cargo cgp check` leads with the root cause for the classes it recognizes, and
-the tool is a v0.1.0-alpha that does not yet reshape every class.
+the tool does not yet reshape every class.
 
 ## The pattern
 

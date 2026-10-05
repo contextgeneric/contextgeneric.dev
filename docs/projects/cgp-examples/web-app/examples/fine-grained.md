@@ -171,8 +171,8 @@ error[E0277]: [CGP-E001] the consumer traits `CanCreateUser` and `CanCensorUsern
 
 Getting and updating users still check, because their providers need only the database. In the
 [coarse stage](./coarse-grained.md#try-a-change) the same change took the whole user manager with
-it. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool is a
-v0.1.0-alpha that does not yet reshape every class.
+it. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not
+yet reshape every class.
 
 ## The pattern
 

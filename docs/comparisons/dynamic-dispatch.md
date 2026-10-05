@@ -258,7 +258,7 @@ runtime mechanisms, which CGP code can use alongside its wiring.
 
 CGP's raw diagnostics expose generated traits and types.
 [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
-and the tool is a v0.1.0-alpha that does not yet reshape every class. The
+and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) compares these costs with ordinary
 traits, generics, and trait objects.
 

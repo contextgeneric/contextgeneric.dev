@@ -160,8 +160,7 @@ error[E0277]: [CGP-E001] the consumer trait `CanManageUser` is not implemented f
 The context has lost `get_user` and `update_user_data` as well as `create_user`, though neither
 calls the censor, because the three methods share one provider and one set of requirements. Compare
 the same change in the [next stage](./fine-grained.md#try-a-change). `cargo cgp check` leads with
-the root cause for the classes it recognizes, and the tool is a v0.1.0-alpha that does not yet
-reshape every class.
+the root cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 ## The pattern
 

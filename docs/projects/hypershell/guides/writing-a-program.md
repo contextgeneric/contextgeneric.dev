@@ -140,7 +140,7 @@ One check can list several programs, or several inputs, as an array:
 [`cargo cgp check`](/docs/cargo-cgp/check); the [debugging guide](./debugging.md) shows the common
 ones. A failure reported at the `handle` call itself often carries no root cause, which is the
 practical reason to check. `cargo cgp check` leads with the root cause for the classes it
-recognizes, and the tool is a v0.1.0-alpha that does not yet reshape every class.
+recognizes, and the tool does not yet reshape every class.
 
 ## Build with nightly and the new trait solver
 
