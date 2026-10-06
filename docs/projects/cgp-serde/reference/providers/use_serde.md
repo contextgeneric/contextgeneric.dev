@@ -74,7 +74,7 @@ The same provider reads what it writes.
 most scalar types, and for any type cgp-serde's generic providers do not cover, such as an enum
 with a derived Serde impl.
 
-Reach for [`SerializeFields`](./serialize_fields.md) and
+Reach for [`SerializeRecordFields`](./serialize_record_fields.md) and
 [`DeserializeRecordFields`](./deserialize_record_fields.md) instead when a struct's fields should
 follow the context's choices, since `UseSerde` hands the whole struct to its own impl.
 

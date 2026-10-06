@@ -21,7 +21,7 @@ shorter and clearer there than at the first call.
 ## A type the traversal reaches has no entry
 
 **The most common mistake is a missing entry for a nested type.** Here `Payload` is wired to
-[`SerializeFields`](../reference/providers/serialize_fields.md), but the type of its `data` field
+[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md), but the type of its `data` field
 has no entry:
 
 ```rust
@@ -37,7 +37,7 @@ delegate_components! {
     App {
         open ValueSerializerComponent;
         @ValueSerializerComponent.u64: UseSerde,
-        @ValueSerializerComponent.Payload: SerializeFields,
+        @ValueSerializerComponent.Payload: SerializeRecordFields,
     }
 }
 
@@ -56,7 +56,7 @@ error[E0277]: [CGP-E001] the consumer trait `CanSerializeValue<Payload>` is not 
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanSerializeValue<Payload>` for context `App`
              └─ [CGP-E104] redirect lookup to `@ValueSerializerComponent` in `App`
-               └─ [CGP-E102] provider trait impl `ValueSerializer<Payload>` with context `App` for provider `SerializeFields`
+               └─ [CGP-E102] provider trait impl `ValueSerializer<Payload>` with context `App` for provider `SerializeRecordFields`
                  └─ [CGP-E105] trait impl `FieldsSerializer` for `Struct! { quantity: u64, data: Vec<u8> }`
                    └─ [CGP-E105] trait impl `FieldsSerializer` for `Struct! { data: Vec<u8> }`
                      └─ [CGP-E101] consumer trait impl `CanSerializeValue<Vec<u8>>` for context `App`
@@ -64,7 +64,7 @@ error[E0277]: [CGP-E001] the consumer trait `CanSerializeValue<Payload>` is not 
                          └─ [CGP-E107] context `App` does not contain any delegate entry for `@ValueSerializerComponent.Vec<u8>`
 ```
 
-The chain reads from the top down: serializing `Payload` goes to `SerializeFields`, which walks the
+The chain reads from the top down: serializing `Payload` goes to `SerializeRecordFields`, which walks the
 fields to `data`, which asks the context for a `Vec<u8>`, which the table does not have. However
 deep the missing type sits, the root cause names it. The fix is an entry for `Vec<u8>`, such as
 `@ValueSerializerComponent.Vec<u8>: SerializeHex`.
@@ -225,7 +225,7 @@ delegate_components! {
         @ValueSerializerComponent.<'a, T> &'a T: SerializeDeref,
         @ValueSerializerComponent.u64: UseSerde,
         @ValueSerializerComponent.Vec<Node>: SerializeIterator,
-        @ValueSerializerComponent.Node: SerializeFields,
+        @ValueSerializerComponent.Node: SerializeRecordFields,
     }
 }
 ```

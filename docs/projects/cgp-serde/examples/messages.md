@@ -43,17 +43,17 @@ application its own choices.
 ## Run it
 
 From the root of the [cgp-serde repository](https://github.com/contextgeneric/cgp-serde), run the
-test and show what it prints:
+test:
 
 ```sh
-cargo test -p cgp-serde-tests messages -- --nocapture
+cargo test -p cgp-serde-tests messages
 ```
 
-It prints the same archive twice. From the first application, `AppA`, bytes are hex and dates are
-RFC 3339 strings:
+It serializes the same archive twice and checks each document against the exact JSON below. From
+the first application, `AppA`, bytes are hex and dates are RFC 3339 strings:
 
-```text
-serialized with A: {
+```json
+{
   "decryption_key": "746f702d736563726574",
   "messages_by_topics": [
     {
@@ -79,8 +79,8 @@ serialized with A: {
 
 From the second, `AppB`, bytes are base64 and dates are Unix timestamps:
 
-```text
-serialized with B: {
+```json
+{
   "decryption_key": "dG9wLXNlY3JldA==",
   "messages_by_topics": [
     {
@@ -103,8 +103,6 @@ serialized with B: {
   ]
 }
 ```
-
-The test prints the documents rather than asserting them, and passes when both serialize.
 
 ## The data names no encoding
 
@@ -176,7 +174,7 @@ delegate_components! {
             MessagesByTopic,
             EncryptedMessage,
         ]:
-            SerializeFields,
+            SerializeRecordFields,
     }
 }
 ```
@@ -213,7 +211,7 @@ they do not, because each choice holds only within the context that makes it.
 
 Neither table says anything about where a `Vec<u8>` appears, and yet every byte field in the
 archive, at all three levels, follows its context's choice. That is because no provider encodes the
-values inside the one it is given. [`SerializeFields`](../reference/providers/serialize_fields.md)
+values inside the one it is given. [`SerializeRecordFields`](../reference/providers/serialize_record_fields.md)
 walks a struct and asks the context to serialize each field, and
 [`SerializeIterator`](../reference/providers/serialize_iterator.md) walks a collection and asks the
 context to serialize each item. Each of those requests goes back through the same table, so the
@@ -246,9 +244,8 @@ Each context's wiring is asserted by a
 serializes. Then the test hands each context and the archive to `serde_json`:
 
 ```rust
-let serialized =
+let serialized_a =
     serde_json::to_string_pretty(&SerializeWithContext::new(&AppA, &archive)).unwrap();
-println!("serialized with A: {serialized}");
 ```
 
 [`SerializeWithContext`](../reference/types/serialize_with_context.md) pairs a context with a value
@@ -267,7 +264,7 @@ error[E0277]: [CGP-E001] the consumer traits `CanSerializeValue<DateTime<Utc>>`,
 ```
 
 Every checked type that contains a date fails, and all for one reason. Below the root cause, the
-tool prints the chain that leads to it: from `MessagesArchive` through `SerializeFields`, the
+tool prints the chain that leads to it: from `MessagesArchive` through `SerializeRecordFields`, the
 vectors, the references, and `EncryptedMessage`, down to `SerializeTimestamp`, which asks `AppB` for
 an `i64` it has no entry for. The fix is to put `i64` back. `cargo cgp check` leads with the root
 cause for the classes it recognizes, and the tool does not yet reshape every class.

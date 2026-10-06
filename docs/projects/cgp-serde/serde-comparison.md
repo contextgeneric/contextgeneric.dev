@@ -55,7 +55,7 @@ field while a cgp-serde context chooses per type:
 | `serialize_with` and `deserialize_with` | write a provider, and wire the type to it |
 | a newtype to change a type's encoding | wire a different provider in a different context |
 | `#[serde(remote = "…")]` for a type from another crate | wire the type to a provider directly |
-| `#[derive(Serialize, Deserialize)]` on a struct | derive `CgpData`, and wire the struct to `SerializeFields` and `DeserializeRecordFields` |
+| `#[derive(Serialize, Deserialize)]` on a struct | derive `CgpData`, and wire the struct to `SerializeRecordFields` and `DeserializeRecordFields` |
 | a hand-written `DeserializeSeed` for state | a provider that takes the state from the context |
 | a borrowed `&'de str` field | wire `&'a str` to `UseSerde`, and read from input that can lend it |
 

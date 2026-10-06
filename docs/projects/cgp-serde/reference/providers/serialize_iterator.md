@@ -76,7 +76,7 @@ choices.** For a collection of types the application does not customize, such as
 
 ## Related constructs
 
-- [`SerializeFields`](./serialize_fields.md) is the matching provider for a struct.
+- [`SerializeRecordFields`](./serialize_record_fields.md) is the matching provider for a struct.
 
 ## The ideas behind it
 

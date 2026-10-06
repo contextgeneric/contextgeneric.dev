@@ -12,7 +12,7 @@ field.
 
 ## Overview
 
-`DeserializeRecordFields` is the reading half of [`SerializeFields`](./serialize_fields.md). It
+`DeserializeRecordFields` is the reading half of [`SerializeRecordFields`](./serialize_record_fields.md). It
 reads a map, asks the **context**, the type whose wiring holds the application's choices, to read
 each field's value, and collects the values in CGP's builder for the struct until every field is
 present. The struct derives only CGP's field traits, through
@@ -86,7 +86,7 @@ through [`DeserializeExtend`](./deserialize_extend.md).
 
 ## Pairing
 
-[`SerializeFields`](./serialize_fields.md) writes the map it reads.
+[`SerializeRecordFields`](./serialize_record_fields.md) writes the map it reads.
 
 ## When to use it
 

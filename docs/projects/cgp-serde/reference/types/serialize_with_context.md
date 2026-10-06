@@ -73,7 +73,7 @@ type, [`SerializeToJsonString`](../providers/serialize_to_json_string.md) wraps 
 ## Related constructs
 
 - [`SerializeIterator`](../providers/serialize_iterator.md) and
-  [`SerializeFields`](../providers/serialize_fields.md) use it for each item and field.
+  [`SerializeRecordFields`](../providers/serialize_record_fields.md) use it for each item and field.
 
 ## The ideas behind it
 

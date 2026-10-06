@@ -27,7 +27,7 @@ to.
 ## Serialization providers
 
 Every provider below implements the serializing component, the deserializing one, or both, and is
-imported from its crate's `providers` module, such as `cgp_serde::providers::SerializeFields`. The
+imported from its crate's `providers` module, such as `cgp_serde::providers::SerializeRecordFields`. The
 last column is what the provider asks the context to encode in turn; see [re-entrant
 providers](../architecture/reentrant-providers.md).
 
@@ -44,7 +44,7 @@ providers](../architecture/reentrant-providers.md).
 | [`SerializeDeref`](./providers/serialize_deref.md) | `cgp-serde` | writes | a reference or smart pointer | the value it points to |
 | [`SerializeIterator`](./providers/serialize_iterator.md) | `cgp-serde` | writes | a collection iterable by reference | each item it yields |
 | [`DeserializeExtend`](./providers/deserialize_extend.md) | `cgp-serde` | reads | a collection that can be extended | each item |
-| [`SerializeFields`](./providers/serialize_fields.md) | `cgp-serde` | writes | a struct with named fields | each field's type |
+| [`SerializeRecordFields`](./providers/serialize_record_fields.md) | `cgp-serde` | writes | a struct with named fields | each field's type |
 | [`DeserializeRecordFields`](./providers/deserialize_record_fields.md) | `cgp-serde` | reads | a struct with named fields | each field's type |
 | [`DeserializeDefault`](./providers/deserialize_default.md) | `cgp-serde` | reads | a `Default` type that may be null | nothing; wraps another provider |
 | [`SerializeHex`](./providers/serialize_hex.md) | `cgp-serde-extra` | both | bytes, as hex | `String` |

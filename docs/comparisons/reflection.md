@@ -115,7 +115,7 @@ Zig-style `comptime` outside its immediate scope. The feature remains experiment
 
 CGP encodes a type's structure as types and processes it with trait resolution. The example
 fragments form a field writer modeled on [`cgp-serde`](https://github.com/contextgeneric/cgp-serde)
-'s `SerializeFields` provider, which does the same over serde's `Serializer` . Its context is an
+'s `SerializeRecordFields` provider, which does the same over serde's `Serializer` . Its context is an
 [environmental context](/docs/reference/glossary#environmental-context) : `App` stands for an
 application and chooses how each field type is written. The written `Value` is a type parameter, so
 the component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component) .
@@ -228,7 +228,7 @@ App.write_value(&config);   // {"host": "localhost", "port": 8080}
 To complete these fragments, `Config` also needs `#[derive(HasField)]` , `App` needs a declaration,
 and `config` needs a value. The `WriteWithDebug` provider formats a value with `Debug` ; this
 illustrates traversal and dispatch rather than a complete JSON serializer. `cgp-serde` 's
-[`SerializeFields`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde/src/providers/fields.rs)
+[`SerializeRecordFields`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde/src/providers/fields.rs)
 performs the same recursion over a `serde::Serializer` . Its deserialization counterpart reads a
 field name as a runtime string and compares it with each field's compile-time `Tag::VALUE` .
 
@@ -348,7 +348,7 @@ and is unstable. The CGP snippets were compiled against `cgp` `0.8.0` with a
 - [Zig language reference](https://ziglang.org/documentation/master/), [Comptime (zig.guide)](https://zig.guide/language-basics/comptime/), and [*Compile-Time Reflection with @typeInfo*](https://hive.blog/hive-196387/@scipio/learn-zig-series-32-compile-time-reflection-with-typeinfo): `comptime`, `@typeInfo`, `@Type`, `inline for`, and `@field`.
 - [Rust tracking issue #146922](https://github.com/rust-lang/rust/issues/146922), the source at [`library/core/src/mem/type_info.rs`](https://github.com/rust-lang/rust/blob/master/library/core/src/mem/type_info.rs), and the [*Reflection and comptime* project goal](https://rust-lang.github.io/rust-project-goals/2026/reflection-and-comptime.html): the `type_info` API, the compile-time-only restriction, and the stabilization plan.
 - [fasterthanli.me, *Introducing facet*](https://fasterthanli.me/articles/introducing-facet-reflection-for-rust): the derive-generates-data approach and its motivation.
-- [`cgp-serde`, `SerializeFields`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde/src/providers/fields.rs): the production version of this page's field recursion, over serde.
+- [`cgp-serde`, `SerializeRecordFields`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde/src/providers/fields.rs): the production version of this page's field recursion, over serde.
 - [P2996R13, *Reflection for C++26*](https://isocpp.org/files/papers/P2996R13.html): C++'s static reflection with `std::meta::info` and splicers.
 - [*The Hidden Cost of Reflection in Go*](https://dev.to/devflex-pro/the-hidden-cost-of-reflection-in-go-why-your-code-is-slower-than-you-think-41ee) and [*Golang Reflection guide*](https://medium.com/@mojimich2015/golang-reflection-the-guide-to-runtime-type-inspection-manipulation-and-best-practices-303087684576): the runtime performance and type-safety costs of reflection.
 

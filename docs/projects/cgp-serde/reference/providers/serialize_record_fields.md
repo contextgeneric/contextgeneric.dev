@@ -1,17 +1,17 @@
 ---
-title: 'SerializeFields — write a struct with no serialization derive in cgp-serde'
-sidebar_label: 'SerializeFields'
+title: 'SerializeRecordFields — write a struct with no serialization derive in cgp-serde'
+sidebar_label: 'SerializeRecordFields'
 sidebar_position: 12
 description: 'The cgp-serde provider that writes any struct deriving CGP''s field traits as a map from field names to values, asking the context to write each field.'
 ---
 
-# `SerializeFields`
+# `SerializeRecordFields`
 
 Write a struct as a map from each field's name to its value, asking the context to write each value.
 
 ## Overview
 
-`SerializeFields` serializes a struct that derives nothing from Serde. It reads the struct's field
+`SerializeRecordFields` serializes a struct that derives nothing from Serde. It reads the struct's field
 list through CGP's field traits, which
 [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) provides, and asks the **context**,
 the type whose wiring holds the application's choices, to write each field's value. So one generic
@@ -20,7 +20,9 @@ provider serves every struct, and each field is encoded however the context enco
 ## Definition
 
 ```rust
-#[cgp_impl(new SerializeFields)]
+pub struct SerializeRecordFields;
+
+#[cgp_impl(SerializeRecordFields)]
 impl<Value> ValueSerializer<Value>
 where
     Value: HasFields,
@@ -50,7 +52,7 @@ pub struct Payload {
 @ValueSerializerComponent.u64: UseSerde,
 @ValueSerializerComponent.String: SerializeString,
 @ValueSerializerComponent.Vec<u8>: SerializeHex,
-@ValueSerializerComponent.Payload: SerializeFields,
+@ValueSerializerComponent.Payload: SerializeRecordFields,
 ```
 
 That context writes a `Payload` as `{"quantity":42,"message":"hello","data":"010203"}`.
@@ -78,7 +80,7 @@ shape: a map keyed by Rust field names.
 
 ## When to use it
 
-**Reach for `SerializeFields` for a struct whose fields should follow the context's choices**, and
+**Reach for `SerializeRecordFields` for a struct whose fields should follow the context's choices**, and
 for any struct whose crate should not depend on `serde`. For a struct that already derives Serde's
 `Serialize` and needs no per-application choice, [`UseSerde`](./use_serde.md) uses that derive.
 

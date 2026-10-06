@@ -1,7 +1,7 @@
 //! Code from `docs/comparisons/reflection.md` — *Reflection and compile-time introspection*.
 //!
 //! The page's worked example is a self-contained field writer modeled on `cgp-serde`'s
-//! `SerializeFields` provider, so it can be compiled here without a `serde` dependency.
+//! `SerializeRecordFields` provider, so it can be compiled here without a `serde` dependency.
 
 /// ## A type's shape becomes a type, not a descriptor
 pub mod a_types_shape_becomes_a_type {
