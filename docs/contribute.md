@@ -24,6 +24,19 @@ When that happens, it would become possible for CGP to be used by anyone, withou
 
 If you _care_ about modularity and would like to contribute, the best way is to start publishing context-generic components, and help build up an ecosystem that benefits the rest of developers.
 
+## Contribute Code or Documentation
+
+To change CGP itself, with or without a coding agent, start from
+[Contributing to CGP with an Agent](/docs/ai/knowledge-base/contributing-with-an-agent). It explains
+how the repositories are set up, the rules each one follows, and the policy for AI-assisted
+contributions.
+
+Reporting problems is also a contribution. The CGP knowledge base, which the documentation is
+written from, is in an early phase, and an error or inconsistency you find in it is worth filing as
+an issue; [Report problems in the knowledge
+base](/docs/ai/knowledge-base/contributing-with-an-agent#report-problems-in-the-knowledge-base)
+explains how.
+
 ## Spread on Social Media
 
 Help raise awareness of CGP by sharing it on social media. Follow our official BlueSky account [@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) to stay updated on CGP’s development and latest news.

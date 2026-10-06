@@ -1,8 +1,8 @@
 {
-  "label": "AI Assisted Development",
+  "label": "AI-Assisted Development",
   "position": 12,
   "link": {
-    "type": "generated-index",
-    "description": "CGP's published agent skill, for handing to a coding assistant, and how the project discloses its own use of AI."
+    "type": "doc",
+    "id": "ai/index"
   }
 }

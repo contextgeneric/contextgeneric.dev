@@ -1,0 +1,8 @@
+{
+  "label": "Knowledge Base",
+  "position": 2,
+  "link": {
+    "type": "doc",
+    "id": "ai/knowledge-base/index"
+  }
+}

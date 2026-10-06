@@ -44,6 +44,10 @@ for learning CGP. The skill is written for an assistant that needs dense rules a
 for a specific task. Read it when you want that detail or want to see the instructions your
 assistant receives.
 
+When a question needs more than the skill carries, such as a macro's corner cases or how it is
+implemented, point your assistant at the knowledge base the skill is written from. [Using the
+Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent) shows how.
+
 ## What is published here
 
 The skill pages on this site are pinned to a particular repository revision. The repository may
