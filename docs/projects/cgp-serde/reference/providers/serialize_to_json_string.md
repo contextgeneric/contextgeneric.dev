@@ -1,7 +1,7 @@
 ---
 title: 'SerializeToJsonString — write JSON as an operation on the context in cgp-serde'
 sidebar_label: 'SerializeToJsonString'
-sidebar_position: 19
+sidebar_position: 21
 description: 'The cgp-serde provider that writes a value as a compact JSON string through the context''s wiring, turning serde_json errors into the context''s error type.'
 ---
 

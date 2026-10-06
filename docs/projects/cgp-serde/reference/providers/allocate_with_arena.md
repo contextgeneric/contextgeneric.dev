@@ -1,7 +1,7 @@
 ---
 title: 'AllocateWithArena — allocate into an arena held by the context in cgp-serde'
 sidebar_label: 'AllocateWithArena'
-sidebar_position: 23
+sidebar_position: 25
 description: 'The cgp-serde provider that implements the allocation component by moving values into a typed_arena::Arena the context supplies through an arena getter.'
 ---
 

@@ -14,8 +14,9 @@ applications can write the same value differently, and neither needs to own the 
 
 cgp-serde is a proof of concept. It replaces Serde's per-type implementations and keeps everything
 else: Serde's data model, its formats such as `serde_json`, and any `Serialize` impl a type already
-has. Its generic providers cover structs with named fields and the standard collections, and
-scalars, enums, and every other type are encoded through their own Serde impls. These pages show
+has. Its generic providers cover structs with named fields, enums whose variants each hold one
+value, and the standard collections, and scalars and every other type are encoded through their
+own Serde impls. These pages show
 what the design makes possible and where it stops.
 
 ## One value, two encodings

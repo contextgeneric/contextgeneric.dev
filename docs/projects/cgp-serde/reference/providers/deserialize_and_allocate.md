@@ -1,7 +1,7 @@
 ---
 title: 'DeserializeAndAllocate — read a reference into an allocator in cgp-serde'
 sidebar_label: 'DeserializeAndAllocate'
-sidebar_position: 22
+sidebar_position: 24
 description: 'The cgp-serde provider that reads a borrowed &T by reading an owned T through the context and allocating it through the context''s allocation component.'
 ---
 

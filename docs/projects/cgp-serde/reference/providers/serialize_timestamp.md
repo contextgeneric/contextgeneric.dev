@@ -1,7 +1,7 @@
 ---
 title: 'SerializeTimestamp — encode a date as a Unix timestamp in cgp-serde'
 sidebar_label: 'SerializeTimestamp'
-sidebar_position: 18
+sidebar_position: 20
 description: 'The cgp-serde provider that writes a DateTime<Utc> as whole seconds since the Unix epoch and reads one back, asking the context to write and read the i64.'
 ---
 

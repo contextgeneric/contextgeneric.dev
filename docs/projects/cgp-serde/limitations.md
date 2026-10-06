@@ -25,11 +25,13 @@ everything else. Its output is whatever Serde's data model can express, written 
 format. It cannot make a format do something the format does not do, and a program still depends on
 `serde` and on the format crates it uses. See [the bridge to Serde](./architecture/serde-bridge.md).
 
-## The generic providers cover structs with named fields
+## The generic providers cover structs and simple enums
 
-The providers that walk a type generically handle structs with named fields, the standard
-collections, references, and types that convert to or from another type. They do not handle enums,
-tuple structs, or tuples. Those types, and any other type that already implements Serde's traits,
+The providers that walk a type generically handle structs with named fields, enums whose variants
+each hold exactly one value, the standard collections, references, and types that convert to or
+from another type. Enums are written only in Serde's default form, `{"Variant": value}`, and only
+an enum without a lifetime can be written. The providers do not handle other enums, tuple structs,
+or tuples. Those types, and any other type that already implements Serde's traits,
 are encoded through their own Serde impl, with `UseSerde`, and the choices of the **context**, the
 type whose wiring holds an application's choices, do not reach inside them.
 

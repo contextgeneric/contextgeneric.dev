@@ -77,10 +77,13 @@ written under its Rust name, and a field cannot be renamed, skipped, flattened, 
 when it is missing. Choices are made per type instead, through the context: a `Vec<u8>` field is
 encoded however the context encodes `Vec<u8>`.
 
-The providers also cover one shape of type: structs with named fields. Tuple structs and enums are
-not handled by them, and an enum is encoded through its own Serde impl, with `UseSerde`. The
+The struct providers cover structs with named fields, and tuple structs are not handled by them.
+Enums get the same treatment from
+[`SerializeVariantFields`](../reference/providers/serialize_variant_fields.md) and
+[`DeserializeVariantFields`](../reference/providers/deserialize_variant_fields.md), which read an
+enum's variants through CGP's traits and handle variants that each hold one value. The
 [comparison with Serde](../serde-comparison.md) lists what Serde's derive does that cgp-serde's
-struct providers do not.
+providers do not.
 
 ## What it costs
 

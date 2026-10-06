@@ -1,7 +1,7 @@
 ---
 title: 'SerializeHex — encode bytes as hex in cgp-serde'
 sidebar_label: 'SerializeHex'
-sidebar_position: 15
+sidebar_position: 17
 description: 'The cgp-serde provider that writes bytes as a lowercase hex string and reads a hex string back, asking the context to write and read the String.'
 ---
 

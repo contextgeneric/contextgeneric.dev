@@ -1,7 +1,7 @@
 ---
 title: 'SerializeBase64 — encode bytes as base64 in cgp-serde'
 sidebar_label: 'SerializeBase64'
-sidebar_position: 16
+sidebar_position: 18
 description: 'The cgp-serde provider that writes bytes as a standard padded base64 string and reads one back into a Vec<u8>.'
 ---
 

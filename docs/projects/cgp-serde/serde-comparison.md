@@ -56,6 +56,7 @@ field while a cgp-serde context chooses per type:
 | a newtype to change a type's encoding | wire a different provider in a different context |
 | `#[serde(remote = "…")]` for a type from another crate | wire the type to a provider directly |
 | `#[derive(Serialize, Deserialize)]` on a struct | derive `CgpData`, and wire the struct to `SerializeRecordFields` and `DeserializeRecordFields` |
+| `#[derive(Serialize, Deserialize)]` on an enum of one-value variants | derive `CgpVariant`, and wire the enum to `SerializeVariantFields` and `DeserializeVariantFields` |
 | a hand-written `DeserializeSeed` for state | a provider that takes the state from the context |
 | a borrowed `&'de str` field | wire `&'a str` to `UseSerde`, and read from input that can lend it |
 
@@ -67,8 +68,9 @@ providers leave to it:
 - **Field and container attributes**, such as `rename`, `skip`, `flatten`, `default`, and
   `deny_unknown_fields`. cgp-serde's struct providers write every field under its Rust name and
   expect every field to be present.
-- **Enums, tuple structs, and tuples.** Serde derives all of them, in several representations for
-  enums. cgp-serde's struct providers handle structs with named fields.
+- **Enum representations, tuple structs, and tuples.** Serde derives all of them, in several
+  representations for enums. cgp-serde's providers handle structs with named fields, and enums
+  whose variants each hold one value, in Serde's default externally tagged form.
 - **Recursive types**, such as a tree whose nodes contain nodes. Serde derives them without
   difficulty; cgp-serde's generic providers cannot express the recursion, and such a type needs a
   provider written for it.
