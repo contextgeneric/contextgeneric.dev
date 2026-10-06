@@ -171,6 +171,8 @@ as a newtype around its field.
 - [`PhantomData`](phantom_data.md): where the tag is stored, at zero size.
 - [`Product!`](../macros/product.md) and [`Sum!`](../macros/sum.md): the lists of `Field` entries that
   describe a record and a variant.
+- [`Struct!`](../macros/struct.md) and [`Enum!`](../macros/enum.md): write a list of `Field` entries as
+  the body of a struct or enum declaration, each tag taken from a field or variant name.
 - [`Cons`](cons.md) and [`Either`](either.md): the product and sum lists those entries are built into.
 - [`HasFields`](../traits/shape/has_fields.md): exposes a type's whole list of `Field` entries.
 - [`HasField`](../traits/field-access/has_field.md): single-field access against a matching tag.

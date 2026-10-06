@@ -152,6 +152,8 @@ with
 - [`Field`](field.md): carries an `Index` tag beside a positional value.
 - [`PhantomData`](phantom_data.md): how an `Index` tag is passed to `get_field`.
 - [`HasFields`](../traits/shape/has_fields.md): the tuple struct's shape whose entries this tag names.
+- [`Struct!`](../macros/struct.md): writes that shape as a tuple struct body, so `Struct!(u64, String)`
+  keys its entries `Index<0>` and `Index<1>`.
 
 The ideas behind it:
 
