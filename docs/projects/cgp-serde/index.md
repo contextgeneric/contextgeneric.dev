@@ -124,6 +124,8 @@ they teach:
   and its errors in the context's error type.
 - [`messages`](./examples/messages.md) — one nested archive encoded two ways by two contexts that
   differ in three wiring lines.
+- [`events`](./examples/events.md) — an enum of chat events, each holding a struct, written and read
+  back by two applications with different encodings.
 
 Two more examples deserialize borrowed values into an arena that the context supplies. Their pages
 are still being written, and [context services](./architecture/context-services.md) explains the

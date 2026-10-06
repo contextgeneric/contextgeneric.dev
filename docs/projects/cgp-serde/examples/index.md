@@ -41,9 +41,11 @@ file selects the Rust version, and no example needs a network or any program out
 - [`messages`](./messages.md) — one nested archive encoded by two contexts that differ in three
   wiring lines, with hex bytes and RFC 3339 dates from one and base64 bytes and Unix timestamps from
   the other.
+- [`events`](./events.md) — a batch of chat events, an enum whose variants hold structs, written and
+  read back by two applications with different encodings, and misread by each with the other's.
 
-Two more tests, `arena_simplified` and `arena`, deserialize borrowed values into an arena that the
-context supplies. Their pages are still being written; [context
+Two more examples, `arena_simplified` and `arena`, deserialize borrowed values into an arena that
+the context supplies. Their pages are still being written; [context
 services](../architecture/context-services.md) explains the design they show.
 
 ## Where to go next
