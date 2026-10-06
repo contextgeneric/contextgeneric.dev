@@ -220,6 +220,8 @@ lists it with the other reserved names.
 - [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md): bundles this with the builder and extractor.
 - [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md): the list types a shape is
   built from.
+- [`Struct!`](../../macros/struct.md) and [`Enum!`](../../macros/enum.md): name a shape as the body of a
+  struct or enum declaration, as in `HasFields<Fields = Struct! { name: String }>`.
 - [`Field`](../../types/field.md): one entry: a value paired with its type-level name.
 - [Type-level lists](../../types/index.md): the `Cons`/`Nil` and `Either`/`Void` chains
   underneath.

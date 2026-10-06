@@ -225,7 +225,9 @@ impl ::cgp::macro_prelude::HasField<::cgp::macro_prelude::Symbol<6,
 
 `cargo cgp expand` writes it back as `Symbol!("height")`, which is what you wrote. It does the same for
 the rest of CGP's type-level vocabulary: a list of handlers reads `Product![StepOne, StepTwo]` rather
-than a chain of `Cons` cells, and a namespace key reads `Path!(@app.GreeterComponent)`.
+than a chain of `Cons` cells, a derived field list reads
+[`Struct! { width: f64, height: f64 }`](/docs/reference/macros/struct), and a namespace key reads
+`Path!(@app.GreeterComponent)`.
 
 `--item` is the other difference. It selects Rust items rather than filtering text: asking for a trait
 gives every impl of that trait, wherever it sits in the crate, which is the shape a question about CGP

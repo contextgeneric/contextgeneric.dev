@@ -1,7 +1,7 @@
 ---
 title: 'Path! — type-level paths'
 sidebar_label: 'Path!'
-sidebar_position: 19
+sidebar_position: 21
 description: 'A type-level path, used by CGP namespaces and by component lookups that are redirected along one.'
 ---
 

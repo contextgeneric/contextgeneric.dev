@@ -114,6 +114,9 @@ a provider list. Everywhere else it is generated for you.
   [`Sum!`](./sum.md)'s list.
 - **Use [`#[derive(HasFields)]`](../derives/derive_has_fields.md) for a struct's shape** rather than declaring
   the list yourself. Writing it by hand means restating the struct, and the two will disagree eventually.
+- **Use [`Struct!`](./struct.md) where code has to name a list of named fields**, in a bound or an impl:
+  `Struct! { name: String, age: u8 }` is this same `Product!` of `Field` entries, written as a struct
+  body.
 - **Use a tuple when nothing generic consumes it.** A `Product!` is worth using only where code recurses over
   the list; for a fixed group of values passed between known functions, a tuple or a struct is clearer and
   needs no machinery.
@@ -204,6 +207,7 @@ the order *is* the execution order.
 ## Related constructs
 
 - [`Sum!`](./sum.md) — the dual, for a choice among types rather than a collection of them.
+- [`Struct!`](./struct.md) — writes a `Product!` of named or positional `Field` entries as a struct body.
 - [Type-level lists](../types/index.md) — the `Cons`/`Nil` types the expansion builds.
 - [`Field`](../types/field.md) — what the entries usually are, pairing a name with a type.
 - [`Symbol!`](./symbol.md) — the name half of a `Field` entry.

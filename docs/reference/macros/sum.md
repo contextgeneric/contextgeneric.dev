@@ -105,6 +105,9 @@ use.
 - **Use [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or
   [`#[derive(HasFields)]`](../derives/derive_has_fields.md) on the enum**, which generates the list from the
   variants you already declared. Writing it out means restating the enum, and the two will drift.
+- **Use [`Enum!`](./enum.md) where code has to name a variant list**, in a bound or an impl:
+  `Enum! { Circle(f64), Rectangle { width: f64, height: f64 } }` is the list above, written as an enum
+  body.
 - **Never hand-write the list.** `Sum!` expands to `Either<A, Either<B, Void>>`, and writing it out is
   longer and identical in meaning.
 - **Use [`Product!`](./product.md) for a collection rather than a choice.** They are duals: every element
@@ -189,6 +192,7 @@ over its payload as one value, so the payload has to be a single type.
 ## Related constructs
 
 - [`Product!`](./product.md) — the dual, for a collection rather than a choice.
+- [`Enum!`](./enum.md) — writes a `Sum!` of named variants as an enum body.
 - [Type-level lists](../types/index.md) — the `Either`/`Void` types the expansion builds.
 - [`Field`](../types/field.md) — what the branches usually are, pairing a variant name with its payload.
 - [`Symbol!`](./symbol.md) — the name half of a branch.

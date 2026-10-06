@@ -213,7 +213,9 @@ generated type or an error names one you did not write. [`PhantomData`](./types/
 the one to start with: it is what lets a provider or a tag carry a type without storing a value of
 it, and it underlies most of the rest. You write the lists through sugar, with
 [`Symbol!`](./macros/symbol.md) for a field name, [`Product!`](./macros/product.md) for a record
-list, [`Sum!`](./macros/sum.md) for its dual, and [`Path!`](./macros/path.md) for a route. You only
+list, [`Sum!`](./macros/sum.md) for its dual, and [`Path!`](./macros/path.md) for a route, and you
+name a whole struct or enum shape with [`Struct!`](./macros/struct.md) or
+[`Enum!`](./macros/enum.md), written as the body of its declaration. You only
 need to recognize the [lists](./types/index.md) they expand into, [`Cons`](./types/cons.md) and
 [`Nil`](./types/nil.md), [`Either`](./types/either.md) and [`Void`](./types/void.md),
 [`Chars`](./types/chars.md), and [`PathCons`](./types/path_cons.md), when one shows up in an error.

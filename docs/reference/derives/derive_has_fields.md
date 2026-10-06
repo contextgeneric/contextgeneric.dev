@@ -317,6 +317,8 @@ These references cover the related derives, generated traits, and supporting typ
   incremental machinery.
 - [`Product!`](../macros/product.md) and [`Sum!`](../macros/sum.md) — the list types a struct and an enum
   shape are built from.
+- [`Struct!`](../macros/struct.md) and [`Enum!`](../macros/enum.md) — write the shape this derive
+  generates as the body of a struct or enum declaration, for code that names it.
 - [`Field`](../types/field.md) — one entry: a value paired with its type-level name.
 - [`Symbol!`](../macros/symbol.md) and [`Index`](../types/index_type.md) — the tags that name an entry.
 - [Type-level lists](../types/index.md) — the `Cons`/`Nil` and `Either`/`Void` chains the
