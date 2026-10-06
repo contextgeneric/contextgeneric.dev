@@ -11,8 +11,8 @@ Write a struct as a map from each field's name to its value, asking the context 
 
 ## Overview
 
-`SerializeRecordFields` serializes a struct that derives nothing from Serde. It reads the struct's field
-list through CGP's field traits, which
+`SerializeRecordFields` serializes a struct that derives nothing from Serde. It reads the struct's
+field list through CGP's field traits, which
 [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) provides, and asks the **context**,
 the type whose wiring holds the application's choices, to write each field's value. So one generic
 provider serves every struct, and each field is encoded however the context encodes its type.
@@ -80,9 +80,10 @@ shape: a map keyed by Rust field names.
 
 ## When to use it
 
-**Reach for `SerializeRecordFields` for a struct whose fields should follow the context's choices**, and
-for any struct whose crate should not depend on `serde`. For a struct that already derives Serde's
-`Serialize` and needs no per-application choice, [`UseSerde`](./use_serde.md) uses that derive.
+**Reach for `SerializeRecordFields` for a struct whose fields should follow the context's choices**,
+and for any struct whose crate should not depend on `serde`. For a struct that already derives
+Serde's `Serialize` and needs no per-application choice, [`UseSerde`](./use_serde.md) uses that
+derive.
 
 ## Related constructs
 

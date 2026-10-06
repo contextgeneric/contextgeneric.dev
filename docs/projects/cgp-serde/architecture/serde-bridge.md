@@ -49,7 +49,8 @@ where
 `SerdeSerialize` is Serde's `Serialize`, imported under another name. Every `Serialize` impl, in the
 standard library or in any crate, is therefore available to a context without a cgp-serde provider
 being written for it; the context wires the type to `UseSerde`. This is also how a context handles a
-type that cgp-serde's generic providers do not cover, such as an enum in an internally tagged form, with a derived impl.
+type that cgp-serde's generic providers do not cover, such as an enum in an internally tagged form,
+with a derived impl.
 
 The trade is that the context's choices stop at that value. The type's own impl serializes its
 contents, so a `Vec<u8>` inside it is written the way that impl writes it, whatever the context

@@ -12,12 +12,12 @@ field.
 
 ## Overview
 
-`DeserializeRecordFields` is the reading half of [`SerializeRecordFields`](./serialize_record_fields.md). It
-reads a map, asks the **context**, the type whose wiring holds the application's choices, to read
-each field's value, and collects the values in CGP's builder for the struct until every field is
-present. The struct derives only CGP's field traits, through
-[`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) or the narrower
-[`HasFields`](/docs/reference/traits/shape/has_fields) and
+`DeserializeRecordFields` is the reading half of
+[`SerializeRecordFields`](./serialize_record_fields.md). It reads a map, asks the **context**, the
+type whose wiring holds the application's choices, to read each field's value, and collects the
+values in CGP's builder for the struct until every field is present. The struct derives only CGP's
+field traits, through [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) or the
+narrower [`HasFields`](/docs/reference/traits/shape/has_fields) and
 [`BuildField`](/docs/reference/traits/builder/build_field) derives.
 
 ## Definition

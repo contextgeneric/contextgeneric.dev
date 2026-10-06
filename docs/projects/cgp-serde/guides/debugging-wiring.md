@@ -21,8 +21,8 @@ shorter and clearer there than at the first call.
 ## A type the traversal reaches has no entry
 
 **The most common mistake is a missing entry for a nested type.** Here `Payload` is wired to
-[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md), but the type of its `data` field
-has no entry:
+[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md), but the type of its
+`data` field has no entry:
 
 ```rust
 #[derive(CgpData)]
@@ -64,10 +64,10 @@ error[E0277]: [CGP-E001] the consumer trait `CanSerializeValue<Payload>` is not 
                          └─ [CGP-E107] context `App` does not contain any delegate entry for `@ValueSerializerComponent.Vec<u8>`
 ```
 
-The chain reads from the top down: serializing `Payload` goes to `SerializeRecordFields`, which walks the
-fields to `data`, which asks the context for a `Vec<u8>`, which the table does not have. However
-deep the missing type sits, the root cause names it. The fix is an entry for `Vec<u8>`, such as
-`@ValueSerializerComponent.Vec<u8>: SerializeHex`.
+The chain reads from the top down: serializing `Payload` goes to `SerializeRecordFields`, which
+walks the fields to `data`, which asks the context for a `Vec<u8>`, which the table does not have.
+However deep the missing type sits, the root cause names it. The fix is an entry for `Vec<u8>`, such
+as `@ValueSerializerComponent.Vec<u8>: SerializeHex`.
 
 ## An entry for a type no field has
 

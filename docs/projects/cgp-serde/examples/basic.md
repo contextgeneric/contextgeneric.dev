@@ -155,8 +155,8 @@ The providers each do one job:
   string.
 - [`SerializeHex`](../reference/providers/serialize_hex.md) writes bytes as a hex string, and reads
   them back.
-- [`SerializeRecordFields`](../reference/providers/serialize_record_fields.md) writes a struct as a map from
-  field names to values, and
+- [`SerializeRecordFields`](../reference/providers/serialize_record_fields.md) writes a struct as a
+  map from field names to values, and
   [`DeserializeRecordFields`](../reference/providers/deserialize_record_fields.md) reads one back.
 
 The two directions are wired separately, so they can name different providers. `String` is written
@@ -165,10 +165,10 @@ in both directions, because one struct implements both halves of the hex encodin
 
 ## The struct's provider asks the context for its fields
 
-`SerializeRecordFields` knows how to walk a struct, but not how to encode any field. For each field, it
-asks the context to serialize the field's type, and the context's wiring answers. That is why `App`
-has entries for `u64`, `String`, and `Vec<u8>` as well as for `Payload`: they are the types the
-struct's provider hands back.
+`SerializeRecordFields` knows how to walk a struct, but not how to encode any field. For each field,
+it asks the context to serialize the field's type, and the context's wiring answers. That is why
+`App` has entries for `u64`, `String`, and `Vec<u8>` as well as for `Payload`: they are the types
+the struct's provider hands back.
 
 The same handing back is what lets a choice reach every level of a nested value. Wire `Vec<u8>` to
 `SerializeHex`, and every `Vec<u8>` the context serializes is hex, wherever it sits.

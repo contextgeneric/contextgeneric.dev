@@ -20,16 +20,16 @@ is written however Serde's impl for `Vec<u8>` writes it. The choice is fixed whe
 written.
 
 A cgp-serde provider makes the same call on the context instead. The struct provider,
-[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md), serializes each field by asking the
-context to serialize the field's type. The collection provider,
+[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md), serializes each field
+by asking the context to serialize the field's type. The collection provider,
 [`SerializeIterator`](../reference/providers/serialize_iterator.md), does the same for each item.
 The context answers each request from its wiring table, so a context that wires `Vec<u8>` to hex
 gets hex for every `Vec<u8>` it serializes: a top-level value, a field, or an item in a list inside
 a field.
 
-This also keeps each provider small. `SerializeRecordFields` knows how to walk a struct and nothing about
-the fields' types, and `SerializeIterator` knows how to walk a collection and nothing about the
-items. Each is written once, generically, and the context composes them.
+This also keeps each provider small. `SerializeRecordFields` knows how to walk a struct and nothing
+about the fields' types, and `SerializeIterator` knows how to walk a collection and nothing about
+the items. Each is written once, generically, and the context composes them.
 
 ## Re-entering directly
 

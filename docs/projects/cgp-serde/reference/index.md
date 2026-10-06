@@ -27,8 +27,8 @@ to.
 ## Serialization providers
 
 Every provider below implements the serializing component, the deserializing one, or both, and is
-imported from its crate's `providers` module, such as `cgp_serde::providers::SerializeRecordFields`. The
-last column is what the provider asks the context to encode in turn; see [re-entrant
+imported from its crate's `providers` module, such as `cgp_serde::providers::SerializeRecordFields`.
+The last column is what the provider asks the context to encode in turn; see [re-entrant
 providers](../architecture/reentrant-providers.md).
 
 | Provider | Crate | Direction | Handles | Asks the context for |

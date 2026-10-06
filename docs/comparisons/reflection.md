@@ -115,8 +115,8 @@ Zig-style `comptime` outside its immediate scope. The feature remains experiment
 
 CGP encodes a type's structure as types and processes it with trait resolution. The example
 fragments form a field writer modeled on [`cgp-serde`](https://github.com/contextgeneric/cgp-serde)
-'s `SerializeRecordFields` provider, which does the same over serde's `Serializer` . Its context is an
-[environmental context](/docs/reference/glossary#environmental-context) : `App` stands for an
+'s `SerializeRecordFields` provider, which does the same over serde's `Serializer` . Its context is
+an [environmental context](/docs/reference/glossary#environmental-context) : `App` stands for an
 application and chooses how each field type is written. The written `Value` is a type parameter, so
 the component is [parameter-targeted](/docs/reference/glossary#parameter-targeted-component) .
 

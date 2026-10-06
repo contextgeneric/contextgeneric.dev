@@ -54,8 +54,8 @@ services](./context-services.md).
 Every crate sorts its items into modules by kind, so an item's kind says where to import it from:
 
 - **`components`** — the serialization components, in `cgp-serde`.
-- **`providers`** — the providers, in every crate, as in `cgp_serde::providers::SerializeRecordFields` or
-  `cgp_serde_extra::providers::SerializeHex`.
+- **`providers`** — the providers, in every crate, as in
+  `cgp_serde::providers::SerializeRecordFields` or `cgp_serde_extra::providers::SerializeHex`.
 - **`types`** — the adapter types, in `cgp-serde`.
 - **`traits`** — components that support a provider, such as the allocation component in
   `cgp-serde-alloc` and the arena getter in `cgp-serde-typed-arena`.

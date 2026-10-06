@@ -35,9 +35,9 @@ pub struct Payload {
 ```
 
 Two generic providers are written once against what `CgpData` exposes.
-[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md) walks the field list and writes the
-struct as a map from each field's name to its value, asking the **context**, the type whose wiring
-holds an application's choices, to serialize each value.
+[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md) walks the field list
+and writes the struct as a map from each field's name to its value, asking the **context**, the type
+whose wiring holds an application's choices, to serialize each value.
 [`DeserializeRecordFields`](../reference/providers/deserialize_record_fields.md) reads the map back,
 asking the context to deserialize each value, and fills the struct in field by field, reporting any
 field the input left out. A context wires the struct to them like any other type:

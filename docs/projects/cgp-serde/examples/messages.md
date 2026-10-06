@@ -211,8 +211,9 @@ they do not, because each choice holds only within the context that makes it.
 
 Neither table says anything about where a `Vec<u8>` appears, and yet every byte field in the
 archive, at all three levels, follows its context's choice. That is because no provider encodes the
-values inside the one it is given. [`SerializeRecordFields`](../reference/providers/serialize_record_fields.md)
-walks a struct and asks the context to serialize each field, and
+values inside the one it is given.
+[`SerializeRecordFields`](../reference/providers/serialize_record_fields.md) walks a struct and asks
+the context to serialize each field, and
 [`SerializeIterator`](../reference/providers/serialize_iterator.md) walks a collection and asks the
 context to serialize each item. Each of those requests goes back through the same table, so the
 context's choice for a type applies wherever the type turns up. [Re-entrant
