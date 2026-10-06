@@ -52,11 +52,14 @@ Each variant's name becomes a [`Symbol!`](../macros/symbol.md) tag and its paylo
 that tag yields. Generic parameters, lifetimes, and a `where` clause are carried onto both companion types and
 every generated impl.
 
-### Every variant needs exactly one unnamed payload
+### Every variant needs one unnamed payload or none
 
-Every variant must contain exactly one unnamed field. The extractor uses that field's type as its
-payload type. Unit, multi-field, and struct-style variants fail with
-`Expected variant to contain exactly one unnamed field`. Individual variants cannot opt out.
+Every variant must contain exactly one unnamed field or no fields at all. The extractor uses the
+field's type as its payload type. A variant with no fields, written `Closed`, `Closed()`, or
+`Closed {}`, has the payload `Nil`, extracted as `Nil`, `&Nil`, or `&mut Nil` depending on the
+extractor. Multi-field and struct-style variants with fields fail with
+`Expected variant to contain exactly one unnamed field, or no fields`. Individual variants cannot
+opt out.
 
 Wrap the payload in a dedicated struct to give each variant a single payload type:
 
@@ -189,8 +192,8 @@ Choose the derive according to the operations the enum needs:
 - **[`FromVariant`](./derive_from_variant.md)**: provide generic construction, often needed alongside
   extraction.
 
-The single-payload requirement can require changes at every construction site. An enum with unit,
-multi-field, or struct-style variants must be restructured before it can derive the extractor.
+The payload requirement can require changes at every construction site. An enum with multi-field or
+struct-style variants must be restructured before it can derive the extractor.
 Consider that cost when deciding whether independent variant handling is needed.
 
 ## Under the hood
@@ -287,8 +290,13 @@ at the enum name. The companion enums are cloned from yours, so their tokens alr
 
 ## Common Mistakes
 
-**Every variant must carry exactly one unnamed payload.** Individual variants cannot opt out. Wrap
-richer payloads in structs, and give a fieldless case a payload type too.
+**Every variant must carry one unnamed payload or none.** Individual variants cannot opt out. Wrap
+richer payloads in structs.
+
+**A `no_std` crate needs `Box` in scope for a variant with no fields.** The mutable extractor makes
+that variant's `&mut Nil` with `Box::leak(Box::new(Nil))`, which never allocates, and finds `Box` in
+your crate. Without it, the build fails with ``cannot find type `Box` in this scope`` on the variant;
+add `extern crate alloc; use alloc::boxed::Box;`.
 [`HasFields`](./derive_has_fields.md) accepts all variant shapes if only a representation is needed.
 
 **A ruled-out variant uses `IsVoid`.** It maps the payload to uninhabited `Void`, allowing a fully

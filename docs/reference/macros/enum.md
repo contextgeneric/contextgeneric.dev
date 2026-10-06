@@ -151,10 +151,11 @@ Variant   -> IDENTIFIER ( `(` TupleFields `)` | `{` NamedFields `}` )?
 
 ## Common Mistakes
 
-**The variant derives need each variant to hold exactly one positional field.** `Enum!` describes any
-variant, as `#[derive(HasFields)]` does, but [`#[derive(CgpData)]`](../derives/derive_cgp_data.md),
-`CgpVariant`, `ExtractField`, and `FromVariant` reject a unit, multi-field, or named-field variant. A
-shape with such variants therefore has no generic constructor or extractor.
+**The variant derives need each variant to hold one positional field or none.** `Enum!` describes
+any variant, as `#[derive(HasFields)]` does, and
+[`#[derive(CgpData)]`](../derives/derive_cgp_data.md), `CgpVariant`, `ExtractField`, and
+`FromVariant` accept a unit variant with the same `Nil` payload, but reject a multi-field or
+named-field variant. A shape with such variants therefore has no generic constructor or extractor.
 
 **An enum body's other parts are rejected.** An attribute on a variant (such as `#[default]` or a doc
 comment), `pub` on a variant, a discriminant such as `= 1`, and a variant name given twice each fail

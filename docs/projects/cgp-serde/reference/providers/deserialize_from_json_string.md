@@ -1,7 +1,7 @@
 ---
 title: 'DeserializeFromJsonString — read JSON from a string in cgp-serde'
 sidebar_label: 'DeserializeFromJsonString'
-sidebar_position: 23
+sidebar_position: 24
 description: 'The cgp-serde provider that reads a value from any string-like input by wrapping it in a serde_json reader and handing it to an inner provider.'
 ---
 

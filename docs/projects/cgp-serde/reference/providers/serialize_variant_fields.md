@@ -18,8 +18,9 @@ variants through CGP's field traits, which
 payload. So one generic provider serves every such enum, and each payload is encoded however the
 context encodes its type.
 
-Every variant must hold exactly one unnamed payload, as `Circle(Circle)` does, which is also what
-`CgpVariant` requires. A variant with no data is written with a `()` payload, as `Empty(())`.
+Every variant must hold one unnamed payload, as `Circle(Circle)` does, or no fields, as `Empty`
+does, which is also what `CgpVariant` requires. A variant with no fields has the payload `Nil`, so
+the context decides how it is written through its entry for `Nil`.
 
 ## Definition
 
@@ -37,7 +38,7 @@ where
 [`ToFieldsRef`](/docs/reference/traits/shape/to_fields_ref) borrows the enum as a list of its
 variants, each paired with its name. `VariantsSerializer` is a private trait that finds the active
 variant in that list, and it requires, for each variant, that the context can write the payload's
-type.
+type, `Nil` for a variant with no fields.
 
 ## Usage
 
@@ -48,29 +49,41 @@ Import it from `cgp_serde::providers`, and wire it beside an entry for each vari
 pub enum Shape {
     Circle(Circle),
     Label(String),
-    Empty(()),
+    Empty,
 }
 
 delegate_components! {
     App {
         open ValueSerializerComponent;
 
-        @ValueSerializerComponent.[u64, String, ()]: UseSerde,
+        @ValueSerializerComponent.[u64, String]: UseSerde,
+        @ValueSerializerComponent.Nil: SerializeUnit,
         @ValueSerializerComponent.Circle: SerializeRecordFields,
         @ValueSerializerComponent.Shape: SerializeVariantFields,
     }
 }
 ```
 
-Here `Circle` is a struct with one `radius: u64` field, so its own entry needs `u64`.
+Here `Circle` is a struct with one `radius: u64` field, so its own entry needs `u64`, and
+[`SerializeUnit`](./serialize_unit.md) writes the `Nil` of `Empty`.
 
 ## Behavior
 
 The provider writes the active variant as a Serde newtype variant, with the variant's name and its
 position in the declaration. With JSON, `Shape::Circle(Circle { radius: 3 })` is written as
-`{"Circle":{"radius":3}}`, `Shape::Label("hi".into())` as `{"Label":"hi"}`, and
-`Shape::Empty(())` as `{"Empty":null}`, because `()` is wired to `UseSerde`. This is exactly what
-Serde's derive writes for the same enum.
+`{"Circle":{"radius":3}}` and `Shape::Label("hi".into())` as `{"Label":"hi"}`, exactly what
+Serde's derive writes for those variants. `Shape::Empty` is written as `{"Empty":null}`, because
+`Nil` is wired to `SerializeUnit`. Every empty form is written that way, while Serde's derive
+writes each form its own way:
+
+| Variant | This provider | Serde's derive |
+|---|---|---|
+| `Empty` | `{"Empty":null}` | `"Empty"` |
+| `Empty()` | `{"Empty":null}` | `{"Empty":[]}` |
+| `Empty {}` | `{"Empty":null}` | `{"Empty":{}}` |
+
+Serde's derive reads `{"Empty":null}` back only for the first form. In postcard the two agree,
+since every form is written as the variant's position alone.
 
 Other formats see the same Serde calls. RON writes `Label("x")`, and postcard writes the variant's
 position followed by its payload. Both match Serde's derive, except where the payload is a struct:
@@ -79,7 +92,8 @@ rejects.
 
 ## Context dependencies
 
-`CanSerializeValue<P>` for the payload type `P` of every variant.
+`CanSerializeValue<P>` for the payload type `P` of every variant, which is `Nil` for a variant with
+no fields.
 
 ## Pairing
 
@@ -95,7 +109,8 @@ choices.** Its limits are worth knowing first:
   current limitation in how Rust proves lifetime bounds. `Token<'static>` works, and reading a
   borrowing enum with [`DeserializeVariantFields`](./deserialize_variant_fields.md) works too.
 - **Only Serde's default enum form is written.** There is no internally tagged, adjacently tagged,
-  or untagged form, and a variant with no data is `Empty(())` rather than a bare `"Empty"`.
+  or untagged form, and a variant with no fields is written as `{"Empty":null}`, which does not
+  match Serde's derive in JSON or RON.
 - **An enum that contains itself**, such as an expression tree, fails to compile, as a struct that
   contains itself does.
 
@@ -106,6 +121,7 @@ An enum outside these limits keeps its own Serde impl and is wired to
 
 - [`SerializeRecordFields`](./serialize_record_fields.md) is the matching provider for a struct, and
   usually writes a variant's payload.
+- [`SerializeUnit`](./serialize_unit.md) writes the `Nil` payload of a variant with no fields.
 
 ## The ideas behind it
 

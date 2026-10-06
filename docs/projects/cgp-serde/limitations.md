@@ -28,12 +28,14 @@ format. It cannot make a format do something the format does not do, and a progr
 ## The generic providers cover structs and simple enums
 
 The providers that walk a type generically handle structs with named fields, enums whose variants
-each hold exactly one value, the standard collections, references, and types that convert to or
-from another type. Enums are written only in Serde's default form, `{"Variant": value}`, and only
-an enum without a lifetime can be written. The providers do not handle other enums, tuple structs,
-or tuples. Those types, and any other type that already implements Serde's traits,
-are encoded through their own Serde impl, with `UseSerde`, and the choices of the **context**, the
-type whose wiring holds an application's choices, do not reach inside them.
+each hold one value or none, the standard collections, references, and types that convert to or
+from another type. Enums are written only in Serde's default form, `{"Variant": value}`, a variant
+with no fields included, so it becomes `{"Variant":null}` where Serde writes a bare `"Variant"`, an
+empty sequence, or an empty map. Only an enum without a lifetime can be written. The providers do
+not handle other enums, tuple structs, or tuples. Those types, and any other type that already
+implements Serde's traits, are encoded through their own Serde impl, with `UseSerde`, and the
+choices of the **context**, the type whose wiring holds an application's choices, do not reach
+inside them.
 
 A recursive type, such as a tree whose nodes contain nodes, cannot be encoded by the generic
 providers at all, because the compiler cannot resolve the cycle in the wiring. It needs a provider

@@ -46,8 +46,9 @@ providers](../architecture/reentrant-providers.md).
 | [`DeserializeExtend`](./providers/deserialize_extend.md) | `cgp-serde` | reads | a collection that can be extended | each item |
 | [`SerializeRecordFields`](./providers/serialize_record_fields.md) | `cgp-serde` | writes | a struct with named fields | each field's type |
 | [`DeserializeRecordFields`](./providers/deserialize_record_fields.md) | `cgp-serde` | reads | a struct with named fields | each field's type |
-| [`SerializeVariantFields`](./providers/serialize_variant_fields.md) | `cgp-serde` | writes | an enum of one-value variants, without a lifetime | each variant's value type |
-| [`DeserializeVariantFields`](./providers/deserialize_variant_fields.md) | `cgp-serde` | reads | an enum of one-value variants | each variant's value type |
+| [`SerializeVariantFields`](./providers/serialize_variant_fields.md) | `cgp-serde` | writes | an enum whose variants hold one value or none, without a lifetime | each variant's value type, `Nil` for a variant with no fields |
+| [`DeserializeVariantFields`](./providers/deserialize_variant_fields.md) | `cgp-serde` | reads | an enum whose variants hold one value or none | each variant's value type, `Nil` for a variant with no fields |
+| [`SerializeUnit`](./providers/serialize_unit.md) | `cgp-serde` | both | writes any type as a unit; reads any `Default` type from one | nothing |
 | [`DeserializeDefault`](./providers/deserialize_default.md) | `cgp-serde` | reads | a `Default` type that may be null | nothing; wraps another provider |
 | [`SerializeHex`](./providers/serialize_hex.md) | `cgp-serde-extra` | both | bytes, as hex | `String` |
 | [`SerializeBase64`](./providers/serialize_base64.md) | `cgp-serde-extra` | both | bytes, as base64 | `String` |

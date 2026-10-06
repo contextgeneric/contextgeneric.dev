@@ -80,7 +80,7 @@ pub enum ChatEvent {
     Posted(Posted),
     Edited(Edited),
     Reacted(Reacted),
-    HistoryCleared(()),
+    HistoryCleared,
 }
 
 #[derive(Debug, PartialEq, CgpData)]
@@ -91,9 +91,9 @@ pub struct SyncBatch {
 ```
 
 `Edited` holds a message id, a date, and new encrypted data, and `Reacted` holds a message id, an
-author id, and an emoji as a `String`, since many emoji, such as 👍🏽, are more than one `char`. Every
-variant holds exactly one value, which `CgpVariant` requires, so `HistoryCleared`, which carries no
-data, holds `()`. The batch is a struct holding a `Vec` of events, so structs sit inside the enum
+author id, and an emoji as a `String`, since many emoji, such as 👍🏽, are more than one `char`.
+`HistoryCleared` carries no data, so it has no fields, and `CgpVariant` gives it the payload `Nil`,
+CGP's empty value. The batch is a struct holding a `Vec` of events, so structs sit inside the enum
 and the enum sits inside a struct.
 
 ## Each application wires both directions
@@ -110,14 +110,16 @@ delegate_components! {
         };
 
         @ValueSerializerComponent.<'a, T> &'a T: SerializeDeref,
-        @ValueSerializerComponent.[i64, u64, String, ()]: UseSerde,
+        @ValueSerializerComponent.[i64, u64, String]: UseSerde,
+        @ValueSerializerComponent.Nil: SerializeUnit,
         @ValueSerializerComponent.Vec<u8>: SerializeBase64,
         @ValueSerializerComponent.DateTime<Utc>: SerializeTimestamp,
         @ValueSerializerComponent.[Posted, Edited, Reacted, SyncBatch]: SerializeRecordFields,
         @ValueSerializerComponent.ChatEvent: SerializeVariantFields,
         @ValueSerializerComponent.Vec<ChatEvent>: SerializeIterator,
 
-        @ValueDeserializerComponent.[i64, u64, String, ()]: UseSerde,
+        @ValueDeserializerComponent.[i64, u64, String]: UseSerde,
+        @ValueDeserializerComponent.Nil: SerializeUnit,
         @ValueDeserializerComponent.Vec<u8>: SerializeBase64,
         @ValueDeserializerComponent.DateTime<Utc>: SerializeTimestamp,
         @ValueDeserializerComponent.[Posted, Edited, Reacted, SyncBatch]: DeserializeRecordFields,
@@ -134,7 +136,9 @@ The source spreads each entry over two lines. The structs go to
 [`DeserializeVariantFields`](../reference/providers/deserialize_variant_fields.md), which write
 each event as `{"Variant": value}` and read it back. Each of them asks the context for the types
 inside, so the encodings of `Vec<u8>` and `DateTime<Utc>` reach through the enum into every struct.
-The `()` entry serves `HistoryCleared`, written as `{"HistoryCleared": null}`.
+The `Nil` entry serves `HistoryCleared`:
+[`SerializeUnit`](../reference/providers/serialize_unit.md) writes it as
+`{"HistoryCleared": null}`, where Serde's derive would write the bare name `"HistoryCleared"`.
 
 The inspector's table is the same except for three entries:
 [`SerializeHex`](../reference/providers/serialize_hex.md) for `Vec<u8>`,
@@ -168,18 +172,18 @@ any error.
 
 ## Try a change
 
-Remove `()` from the server's `UseSerde` entry for reading, leaving `[i64, u64, String]`, remove
-`(Life<'de>, ())` from its check, and run [`cargo cgp check`](/docs/cargo-cgp/check). The check
+Remove the server's `@ValueDeserializerComponent.Nil: SerializeUnit` entry, remove
+`(Life<'de>, Nil)` from its check, and run [`cargo cgp check`](/docs/cargo-cgp/check). The check
 fails on the three types that contain an event, and the tool names the missing entry as the root
 cause:
 
 ```text
 error[E0277]: [CGP-E001] the consumer traits `CanDeserializeValue<ChatEvent>`, `CanDeserializeValue<Vec<ChatEvent>>`, and `CanDeserializeValue<SyncBatch>` are not implemented for context `ServerApp`
-    = note: root cause: [CGP-E107] context `ServerApp` does not contain any delegate entry for `@ValueDeserializerComponent.()`
+    = note: root cause: [CGP-E107] context `ServerApp` does not contain any delegate entry for `@ValueDeserializerComponent.Nil`
 ```
 
-`HistoryCleared` holds `()`, so reading an event asks the context to read `()`, even though no
-struct has a `()` field. Put the entry back to fix it.
+`HistoryCleared` carries `Nil`, so reading an event asks the context to read `Nil`, even though no
+struct has a `Nil` field. Put the entry back to fix it.
 
 ## The pattern
 

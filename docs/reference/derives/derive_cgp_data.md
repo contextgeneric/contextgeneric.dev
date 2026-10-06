@@ -59,7 +59,8 @@ output in detail:
 | a struct | per-field access, the representation, and the builder | [`#[derive(CgpRecord)]`](./derive_cgp_record.md) |
 | an enum | the representation, the constructors, and the extractor | [`#[derive(CgpVariant)]`](./derive_cgp_variant.md) |
 
-Every enum variant must carry exactly one unnamed payload, and individual variants cannot opt out.
+Every enum variant must carry one unnamed payload or no fields, and individual variants cannot opt
+out.
 The matching page covers the accepted shapes, generated code, and corner cases.
 
 ### Choosing among the three
@@ -156,8 +157,9 @@ tuple builders, and the newtype representation. The
 [variant page](./derive_cgp_variant.md#common-mistakes) covers payload shapes and reserved names.
 The following restrictions apply when choosing the combined derive.
 
-**Every enum variant needs exactly one unnamed payload.** Unit, multi-field, and struct-style variants
-are rejected, and individual variants cannot opt out. [`HasFields`](./derive_has_fields.md) accepts
+**Every enum variant needs one unnamed payload or none.** A variant with no fields has the payload
+`Nil`. Multi-field and struct-style variants with fields are rejected, and individual variants
+cannot opt out. [`HasFields`](./derive_has_fields.md) accepts
 all of these shapes when only a representation and whole-value conversions are needed.
 
 **Seven variant names are reserved on an enum.** `Fields`, `FieldsRef`, `Value`, `Remainder`,

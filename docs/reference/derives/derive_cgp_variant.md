@@ -40,11 +40,14 @@ pub enum Shape {
 Each variant is keyed by [`Symbol!`](../macros/symbol.md) of its name. Generic parameters, lifetimes,
 and a `where` clause are carried onto everything generated, including the companion enums.
 
-### Every variant needs exactly one unnamed payload
+### Every variant needs one unnamed payload or none
 
-Every variant must contain exactly one unnamed field. The constructor and extractor implementations
-use that field's type as the payload type. Unit, multi-field, and struct-style variants fail with
-`Expected variant to contain exactly one unnamed field`. Individual variants cannot opt out.
+Every variant must contain exactly one unnamed field or no fields at all. The constructor and
+extractor implementations use the field's type as the payload type. A variant with no fields,
+written `Closed`, `Closed()`, or `Closed {}`, has the payload `Nil`, so it is built from `Nil` and
+extracted as `Nil`. Multi-field and struct-style variants with fields fail with
+`Expected variant to contain exactly one unnamed field, or no fields`. Individual variants cannot
+opt out.
 
 Wrap a richer payload in its own struct so the variant contains a single payload type:
 
@@ -202,9 +205,19 @@ hand-written impl underlines that variant rather than the whole derive.
 
 ## Common Mistakes
 
-**Every variant needs exactly one unnamed payload.** Individual variants cannot opt out.
+**Every variant needs one unnamed payload or none.** Individual variants cannot opt out.
 [`HasFields`](./derive_has_fields.md) accepts all variant shapes when only the representation and
 whole-value conversions are needed.
+
+**A `no_std` crate needs `Box` in scope for a variant with no fields.** The mutable extractor builds
+that variant's `&mut Nil` with `Box::leak(Box::new(Nil))`, which never allocates, and finds `Box`
+in your crate. Without it, the build fails with ``cannot find type `Box` in this scope`` on the
+variant; add `extern crate alloc; use alloc::boxed::Box;`.
+
+**`#[cgp_auto_dispatch]` cannot serve an enum with a variant that has no fields.** The variant's
+payload is `Nil`, and an impl of your trait for `Nil` conflicts with the macro's blanket impl.
+Dispatch such an enum with the [dispatch combinators](/docs/reference/providers/dispatch) and a
+provider instead.
 
 **Seven variant names are reserved.** Because the generated impls name their associated types through
 `Self::…`, a variant called `Fields`, `FieldsRef`, `Value`, `Remainder`, `Extractor`, `ExtractorRef`, or

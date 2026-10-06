@@ -232,9 +232,9 @@ error[E0119]: conflicting implementations of trait `cgp::prelude::FromVariant<cg
 `Self::Value`. The [derive's page](../../derives/derive_from_variant.md) covers this with the family's other
 reserved names.
 
-**Every variant needs exactly one unnamed payload**, which is the derive's requirement rather than the trait's:
-a unit, multi-field, or struct-style variant cannot be given a single `Value`. Wrap the payload in its own
-struct.
+**Every variant needs one unnamed payload or none**, which is the derive's requirement rather than
+the trait's: a multi-field or struct-style variant with fields cannot be given a single `Value`,
+while a variant with no fields has the `Value` `Nil`. Wrap a richer payload in its own struct.
 
 ## Related constructs
 

@@ -102,6 +102,8 @@ same encoding:
 | [`SerializeDeref`](../reference/providers/serialize_deref.md) | [`DeserializeAndAllocate`](../reference/providers/deserialize_and_allocate.md), for a reference |
 | [`SerializeIterator`](../reference/providers/serialize_iterator.md) | [`DeserializeExtend`](../reference/providers/deserialize_extend.md) |
 | [`SerializeRecordFields`](../reference/providers/serialize_record_fields.md) | [`DeserializeRecordFields`](../reference/providers/deserialize_record_fields.md) |
+| [`SerializeVariantFields`](../reference/providers/serialize_variant_fields.md) | [`DeserializeVariantFields`](../reference/providers/deserialize_variant_fields.md) |
+| [`SerializeUnit`](../reference/providers/serialize_unit.md) | the same provider, for a `Default` type |
 | none | [`DeserializeDefault`](../reference/providers/deserialize_default.md), which wraps another reader |
 | [`SerializeHex`](../reference/providers/serialize_hex.md), [`SerializeBase64`](../reference/providers/serialize_base64.md), [`SerializeRfc3339Date`](../reference/providers/serialize_rfc3339_date.md), [`SerializeTimestamp`](../reference/providers/serialize_timestamp.md) | the same providers |
 

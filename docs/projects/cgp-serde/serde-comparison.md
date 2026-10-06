@@ -56,7 +56,7 @@ field while a cgp-serde context chooses per type:
 | a newtype to change a type's encoding | wire a different provider in a different context |
 | `#[serde(remote = "…")]` for a type from another crate | wire the type to a provider directly |
 | `#[derive(Serialize, Deserialize)]` on a struct | derive `CgpData`, and wire the struct to `SerializeRecordFields` and `DeserializeRecordFields` |
-| `#[derive(Serialize, Deserialize)]` on an enum of one-value variants | derive `CgpVariant`, and wire the enum to `SerializeVariantFields` and `DeserializeVariantFields` |
+| `#[derive(Serialize, Deserialize)]` on an enum whose variants hold one value or none | derive `CgpVariant`, wire the enum to `SerializeVariantFields` and `DeserializeVariantFields`, and wire `Nil` to `SerializeUnit` for the variants with no fields |
 | a hand-written `DeserializeSeed` for state | a provider that takes the state from the context |
 | a borrowed `&'de str` field | wire `&'a str` to `UseSerde`, and read from input that can lend it |
 
@@ -70,7 +70,9 @@ providers leave to it:
   expect every field to be present.
 - **Enum representations, tuple structs, and tuples.** Serde derives all of them, in several
   representations for enums. cgp-serde's providers handle structs with named fields, and enums
-  whose variants each hold one value, in Serde's default externally tagged form.
+  whose variants each hold one value or none, in Serde's default externally tagged form. A variant
+  with no fields is written as `{"Variant":null}`, where Serde writes a bare `"Variant"`, an empty
+  sequence, or an empty map, depending on how the variant is declared.
 - **Recursive types**, such as a tree whose nodes contain nodes. Serde derives them without
   difficulty; cgp-serde's generic providers cannot express the recursion, and such a type needs a
   provider written for it.

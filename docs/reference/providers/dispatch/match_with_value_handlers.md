@@ -236,6 +236,14 @@ The owned `MatchWithValueHandlers` has the same limit. Wire the matcher to `Comp
 `AsyncComputerComponent`, and lift it with a promotion as
 [`MatchWithHandlers`](match_with_handlers.md#common-mistakes) shows.
 
+**Variants with no fields all reach the same handler.** The
+[variant derives](../../derives/derive_cgp_variant.md) give each such variant, such as `Closed` or
+`Paused()`, the payload `Nil`. The provider receives only the payload, so its `Nil` impl serves
+every one of them and cannot tell which variant it got. Use
+[`MatchWithFieldHandlers`](match_with_field_handlers.md) when they need different handling: its
+provider receives `Field<Symbol!("Closed"), Nil>` and can read the variant name from the tag. The
+borrowed forms handle these variants too, with a `&Nil` or `&mut Nil` payload.
+
 ## Related constructs
 
 - [`MatchWithFieldHandlers`](match_with_field_handlers.md) — the sibling that keeps the variant tag

@@ -84,8 +84,9 @@ have to move through it.
 
 **`HasFields` accepts every enum variant shape**: unit, tuple, multi-field, and struct-style. A
 variant with one unnamed field carries its payload directly, a unit variant carries `Nil`, and any
-other variant carries its fields as a nested product. The derives that take an enum apart need
-exactly one unnamed payload per variant; this one only describes the variant, so it does not.
+other variant carries its fields as a nested product. The derives that take an enum apart need one
+unnamed payload or no fields per variant, and give a variant with no fields the same `Nil`; this one
+only describes the variant, so it accepts every shape.
 
 ## Examples
 

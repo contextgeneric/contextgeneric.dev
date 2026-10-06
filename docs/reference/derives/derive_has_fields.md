@@ -76,7 +76,8 @@ that depends on the original representation must account for that change.
 applies the struct field rules within each variant. In contrast, the per-variant constructor and
 extractor derives ([`FromVariant`](./derive_from_variant.md) and
 [`ExtractField`](./derive_extract_field.md), also included by [`CgpData`](./derive_cgp_data.md))
-require exactly one unnamed payload per variant.
+require one unnamed payload or no fields per variant, and give a variant with no fields the same
+`Nil` payload this derive does.
 
 ```rust
 #[derive(HasFields)]

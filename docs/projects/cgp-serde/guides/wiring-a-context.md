@@ -73,6 +73,11 @@ type, and follow what each provider asks the context for, which each provider's
 - **A struct** wired to [`SerializeRecordFields`](../reference/providers/serialize_record_fields.md)
   or [`DeserializeRecordFields`](../reference/providers/deserialize_record_fields.md) needs an entry
   for each field's type.
+- **An enum** wired to
+  [`SerializeVariantFields`](../reference/providers/serialize_variant_fields.md) or
+  [`DeserializeVariantFields`](../reference/providers/deserialize_variant_fields.md) needs an entry
+  for each variant's payload type. A variant with no fields, such as `Empty`, carries `Nil`, which
+  [`SerializeUnit`](../reference/providers/serialize_unit.md) writes as `{"Empty":null}`.
 - **A collection** needs an entry of its own, besides its item type's. Writing one with
   [`SerializeIterator`](../reference/providers/serialize_iterator.md) also asks for the item as a
   reference, which one generic entry covers:

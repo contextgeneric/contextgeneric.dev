@@ -59,10 +59,11 @@ together.
 
 ## Restrictions to know before you reach for them
 
-The enum constructor and extractor derives require every variant to carry exactly one unnamed
-payload. This restriction applies to `FromVariant`, `ExtractField`, `CgpData`, and `CgpVariant`;
-individual variants cannot opt out. `HasFields` accepts every variant shape and provides a structural
-representation with whole-value conversions, so it can be used with enums that mix variant shapes.
+The enum constructor and extractor derives require every variant to carry one unnamed payload or no
+fields, the latter with the payload `Nil`. This restriction applies to `FromVariant`,
+`ExtractField`, `CgpData`, and `CgpVariant`; individual variants cannot opt out. `HasFields` accepts
+every variant shape and provides a structural representation with whole-value conversions, so it can
+be used with enums whose variants have several or named fields.
 
 The builder and extractor derives also generate companion types that copy each field's or variant's
 attributes but not the original type's derives. A helper attribute that belongs to another derive,

@@ -1,7 +1,7 @@
 ---
 title: 'DeserializeDefault — read a null value as the default in cgp-serde'
 sidebar_label: 'DeserializeDefault'
-sidebar_position: 16
+sidebar_position: 17
 description: 'The cgp-serde higher-order provider that reads a null input as the type''s Default and passes any other input to an inner provider named in the wiring.'
 ---
 

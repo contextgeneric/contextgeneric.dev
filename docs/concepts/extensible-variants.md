@@ -136,9 +136,11 @@ complete result type.
 
 ## What it costs
 
-The full construction and extraction derives require exactly one unnamed payload per variant.
+The full construction and extraction derives require one unnamed payload or no fields per variant.
 A richer case must wrap its fields in a payload type, such as `Circle(Circle)` instead of
-`Circle { radius: u64 }`. Unit variants also need a payload if they are to use these derives.
+`Circle { radius: u64 }`. A variant with no fields carries the payload `Nil`, which has a cost of
+its own: a handler that sees only payloads sees every such variant as the same `Nil`, so telling
+them apart needs a handler that also receives the variant's name.
 [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) can describe all variant shapes,
 but that structural description alone does not supply generic constructors or extractors.
 

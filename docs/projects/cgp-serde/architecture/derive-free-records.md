@@ -81,7 +81,7 @@ The struct providers cover structs with named fields, and tuple structs are not 
 Enums get the same treatment from
 [`SerializeVariantFields`](../reference/providers/serialize_variant_fields.md) and
 [`DeserializeVariantFields`](../reference/providers/deserialize_variant_fields.md), which read an
-enum's variants through CGP's traits and handle variants that each hold one value. The
+enum's variants through CGP's traits and handle variants that each hold one value or none. The
 [comparison with Serde](../serde-comparison.md) lists what Serde's derive does that cgp-serde's
 providers do not.
 

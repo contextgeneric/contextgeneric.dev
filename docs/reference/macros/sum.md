@@ -177,12 +177,13 @@ name-tagged [`Field`](../types/field.md)s and the operations match on names, so 
 But the *types* are still different, and a cast between two enums works through the name matching rather than
 by position.
 
-**The variant derives need each variant to hold exactly one unnamed field.**
+**The variant derives need each variant to hold one unnamed field or none.**
 [`#[derive(CgpData)]`](../derives/derive_cgp_data.md), `CgpVariant`, `ExtractField`, and `FromVariant`
-reject a struct-like, multi-field, or unit variant, while `#[derive(HasFields)]` accepts all of them:
+accept a unit variant with the payload `Nil`, but reject a multi-field or struct-like variant with
+fields, while `#[derive(HasFields)]` accepts all of them:
 
 ```text
-error: Expected variant to contain exactly one unnamed field
+error: Expected variant to contain exactly one unnamed field, or no fields
 ```
 
 That is a restriction of those derives rather than of `Sum!` itself, and it is why richer payloads are

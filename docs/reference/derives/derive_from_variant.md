@@ -47,11 +47,14 @@ Each variant's name becomes a [`Symbol!`](../macros/symbol.md) tag and its paylo
 constructor's value type. Generic parameters, lifetimes, and a `where` clause are carried onto every generated
 impl.
 
-### Every variant needs exactly one unnamed payload
+### Every variant needs one unnamed payload or none
 
 Every variant must contain exactly one unnamed field, whose type becomes the constructor's payload
-type. Unit, multi-field, and struct-style variants fail with
-`Expected variant to contain exactly one unnamed field`. Individual variants cannot opt out.
+type, or no fields at all. A variant with no fields, written `Closed`, `Closed()`, or `Closed {}`,
+takes the payload `Nil`: `Status::from_variant(PhantomData::<Symbol!("Closed")>, Nil)` builds
+`Status::Closed`. Multi-field and struct-style variants with fields fail with
+`Expected variant to contain exactly one unnamed field, or no fields`. Individual variants cannot
+opt out.
 
 Wrap a richer payload in a dedicated struct so the variant contains a single payload type:
 
@@ -190,7 +193,7 @@ underlines that variant rather than the whole `#[derive(FromVariant)]`.
 
 ## Common Mistakes
 
-**Every variant must carry exactly one unnamed payload.** Individual variants cannot opt out.
+**Every variant must carry one unnamed payload or none.** Individual variants cannot opt out.
 [`HasFields`](./derive_has_fields.md) accepts all variant shapes when only a representation is needed.
 
 **Specify the tag whenever the enum has more than one variant.** In

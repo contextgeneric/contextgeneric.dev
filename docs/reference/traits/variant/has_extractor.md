@@ -171,9 +171,10 @@ derives, so it is neither `Debug` nor `PartialEq` however the enum is derived;
 **`Extractor` is not the enum.** A signature that returns `Self::Extractor` is returning a companion
 type, and naming it in a public API exposes a generated name.
 
-**Every variant must carry exactly one unnamed payload** for the derive to apply at all, the family's
+**Every variant must carry one unnamed payload or none** for the derive to apply at all, the family's
 one real restriction, covered on the
-[derive's page](../../derives/derive_extract_field.md).
+[derive's page](../../derives/derive_extract_field.md). A variant with no fields is extracted as
+`Nil`, or as `&Nil` and `&mut Nil` through the borrowed extractors.
 
 ## Related constructs
 

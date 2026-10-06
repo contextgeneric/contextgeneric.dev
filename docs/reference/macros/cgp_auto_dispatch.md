@@ -327,6 +327,20 @@ extensible enum collides, including the enum the trait was written for:
 error[E0119]: conflicting implementations of trait `HasArea` for type `Shape`
 ```
 
+**Every payload type must belong to the crate that implements the trait.** An impl for a foreign
+payload type, such as `u64`, collides with the same blanket impl, because Rust assumes the foreign
+type's crate may implement `HasExtractor` in a later version:
+
+```text
+error[E0119]: conflicting implementations of trait `HasArea` for type `u64`
+```
+
+This rules out an enum with a variant that has no fields, such as `Empty` in
+`enum Shape { Circle(Circle), Empty }`, because the derive gives that variant the payload `Nil`,
+which comes from CGP. Dispatch such an enum with
+[`MatchWithValueHandlers`](../providers/dispatch/match_with_value_handlers.md) and a provider
+instead. A crate can implement its own provider for `Nil`.
+
 ## Related constructs
 
 - [Dispatch combinators](../providers/dispatch/index.md) — the matchers this wires, and what to use
