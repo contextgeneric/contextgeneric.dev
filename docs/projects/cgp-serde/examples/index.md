@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'The cgp-serde examples as short tutorials: a JSON round trip with no serialization derive, and one value encoded two ways by two applications.'
+description: 'The cgp-serde examples as short tutorials: a JSON round trip with no serialization derive, one value encoded two ways by two applications, and an enum of records written and read back.'
 ---
 
 # cgp-serde examples
