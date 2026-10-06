@@ -127,8 +127,10 @@ pub struct Config {
 }
 ```
 
-`Config::Fields` is now `Product![Field<Symbol!("host"), String>, Field<Symbol!("port"), u16>]`, and a
-value round-trips through it:
+`Config::Fields` is now `Product![Field<Symbol!("host"), String>, Field<Symbol!("port"), u16>]`.
+Code that needs to name that type can write it as the struct body instead, with
+[`Struct!`](../macros/struct.md): `Struct! { host: String, port: u16 }` is the same type. A value
+round-trips through it:
 
 ```rust
 let config = Config { host: "localhost".to_owned(), port: 8080 };
@@ -155,7 +157,8 @@ pub enum Shape {
 }
 ```
 
-`Shape::Fields` is `Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Rectangle>]`.
+`Shape::Fields` is `Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Rectangle>]`,
+which [`Enum!`](../macros/enum.md) writes as `Enum! { Circle(Circle), Rectangle(Rectangle) }`.
 
 Generic code can operate on `Self::Fields` under a `Self: HasFields` bound. An implementation that
 supports the resulting representation can work with `Config`, `Person`, or a struct in another crate

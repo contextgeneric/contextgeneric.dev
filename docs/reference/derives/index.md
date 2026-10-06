@@ -24,7 +24,7 @@ type-level tag. The implementation declares the field it needs as a trait bound.
 [`#[implicit]`](../attributes/implicit.md) argument and a
 [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) method generate that bound from the field name.
 
-[`#[derive(HasFields)]`](./derive_has_fields.md) gives the whole shape instead of one field: the struct
+[`#[derive(HasFields)]`](./derive_has_fields.md) gives the whole [shape](/docs/reference/glossary#shape) instead of one field: the struct
 or enum described as a single type-level list, plus the conversions that move values in and out of it.
 Reach for it when code must process every field at once, such as a serializer or a builder that merges
 two records. It is often derived alongside `HasField`.

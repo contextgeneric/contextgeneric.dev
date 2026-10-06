@@ -11,7 +11,7 @@ Splicing one type-level product list onto the end of another.
 
 ## Overview
 
-Describing the result of combining two records means naming their combined shape, and the shapes are
+Describing the result of combining two records means naming their combined [shape](/docs/reference/glossary#shape), and the shapes are
 type-level lists, a [`Product!`](../../macros/product.md) of named fields each.
 `ConcatProduct<Items>` names the list you get by following one product with another.
 

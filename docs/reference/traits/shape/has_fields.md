@@ -137,8 +137,14 @@ pub fn demo() {
 ```
 
 `assert_shape` compiles only if the type's `Fields` is exactly the second parameter, so each call is
-a compile-time check of one shape. `Config` also derives [`HasField`](../field-access/has_field.md),
-the common pairing that gives one struct both indexed and whole-shape access. A variant with one
+a compile-time check of one shape. The listing spells the shapes out to show their encoding. Code
+that only needs to name a shape writes it as a declaration body with
+[`Struct!`](../../macros/struct.md) or [`Enum!`](../../macros/enum.md), so the first two checks
+could pass `Struct! { host: String, port: u16 }` and
+`Enum! { Circle(Circle), Rectangle(Rectangle) }`, which are the same types.
+
+`Config` also derives [`HasField`](../field-access/has_field.md), the common pairing that gives one
+struct both indexed and whole-shape access. A variant with one
 unnamed field carries its payload directly, so `Shape`'s entries hold `Circle` and `Rectangle`, and
 the one-field `UserId` has the bare `u64` as its shape rather than a one-element product.
 

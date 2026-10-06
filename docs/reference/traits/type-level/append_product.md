@@ -11,7 +11,7 @@ Adding one entry to the end of a type-level product list.
 
 ## Overview
 
-A struct's shape in CGP is a type-level list, a [`Product!`](../../macros/product.md) of named
+A struct's [shape](/docs/reference/glossary#shape) in CGP is a type-level list, a [`Product!`](../../macros/product.md) of named
 fields. Code that processes such a shape generically sometimes needs to describe a *new* shape
 computed from an old one: the shape a routine promises to return after adding a field, say, or a
 bound relating an input shape to an output one.

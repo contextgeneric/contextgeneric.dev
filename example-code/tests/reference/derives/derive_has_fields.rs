@@ -197,6 +197,19 @@ pub mod examples {
         fields
     }
 
+    /// The same two shapes, written with the shape macros the page names.
+    pub fn assert_config_struct(
+        fields: <Config as HasFields>::Fields,
+    ) -> Struct! { host: String, port: u16 } {
+        fields
+    }
+
+    pub fn assert_shape_enum(
+        fields: <Shape as HasFields>::Fields,
+    ) -> Enum! { Circle(Circle), Rectangle(Rectangle) } {
+        fields
+    }
+
     /// The page's closing claim: generic code bounds on the shape rather than on the type, so one
     /// function applies to any record that derives it. The page does not show a recursion, so this
     /// stops at naming the shape.

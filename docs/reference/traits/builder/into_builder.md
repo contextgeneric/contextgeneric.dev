@@ -103,7 +103,7 @@ entry points and the one that shows up in generic code more than in application 
   common case and the one the extensible builder pattern is about.
 - **Use `IntoBuilder`** when a complete value must be decomposed: to swap one field, or to hand its
   fields to several destinations, including the builder of a different record.
-- **Use [`ToFields`](../shape/to_fields.md)** instead when you want the value's *shape* as a flat
+- **Use [`ToFields`](../shape/to_fields.md)** instead when you want the value's [*shape*](/docs/reference/glossary#shape) as a flat
   list rather than a partial type you can fill. A partial value tracks presence; a `Fields` product
   does not.
 - **Prefer a struct update expression** in concrete code. `Person { first_name, ..person }` does the

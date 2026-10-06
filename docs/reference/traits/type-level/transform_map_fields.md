@@ -129,7 +129,7 @@ layer requires exactly that.
   cover.
 - **Use [`UpdateField`](../builder/update_field.md)** when a *single* field changes state. This trait is the
   whole-record form, and reaching for it to change one field walks every other field for nothing.
-- **Use [`MapFields`](./map_fields.md)** when you only need to *name* the re-marked shape as a type.
+- **Use [`MapFields`](./map_fields.md)** when you only need to *name* the re-marked [shape](/docs/reference/glossary#shape) as a type.
   That trait computes the type; this one converts the values.
 
 ## Under the hood

@@ -26,7 +26,7 @@ nested branches rather than by a `match` written against a fixed enum.
 
 You write this list through the [`Sum!`](../macros/sum.md) macro. `Sum![A, B, C]` is the right-nested
 `Either` chain terminated by `Void`. The branches are most often [`Field`](field.md) entries that pair a
-variant name with its payload, so an enum's shape becomes a `Sum!` of `Field` branches over this list.
+variant name with its payload, so an enum's [shape](/docs/reference/glossary#shape) becomes a `Sum!` of `Field` branches over this list.
 
 ## Definition
 

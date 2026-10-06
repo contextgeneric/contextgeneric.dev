@@ -62,7 +62,7 @@ presets without a separate construct for them.
 [`Product!`](./product.md) and its value-level twin `product!` build a type-level list for a struct's
 fields or a handler pipeline's steps, [`Sum!`](./sum.md) builds the dual list for an enum's variants,
 and [`Path!`](./path.md) builds the routing list that namespaces and redirected lookups resolve
-against. [`Struct!`](./struct.md) and [`Enum!`](./enum.md) write a whole struct or enum shape as the
+against. [`Struct!`](./struct.md) and [`Enum!`](./enum.md) write a whole struct or enum [shape](/docs/reference/glossary#shape) as the
 body of its declaration, expanding to the same `Product!` or `Sum!` of named fields that
 `#[derive(HasFields)]` generates. You write two of them by hand in ordinary code, `Symbol!` in a `UseField` wiring entry and
 `Product!` in a handler pipeline, and the derives, the ergonomic macros above, and the `open`

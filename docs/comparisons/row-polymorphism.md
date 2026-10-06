@@ -121,7 +121,7 @@ effect sets, as in [Koka](https://arxiv.org/pdf/1406.2061) ; the
 
 ## How CGP expresses it
 
-CGP derives type-level shapes for Rust's nominal structs and enums. Trait bounds then express the
+CGP derives type-level [shapes](/docs/reference/glossary#shape) for Rust's nominal structs and enums. Trait bounds then express the
 field and variant requirements that row predicates express in a row system.
 
 ### Field lists and field requirements {#a-struct-is-a-closed-row-hasfield-is-row-containment}

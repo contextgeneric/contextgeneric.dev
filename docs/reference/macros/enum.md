@@ -30,8 +30,8 @@ Enum! { Circle(f64), Square(f64) }
 The two are the identical type, and it is exactly the `Fields` the derive gives an enum with that
 body. Reach for `Enum!` wherever code *names* a variant set's shape rather than deriving it, such as
 a [trait bound](https://doc.rust-lang.org/book/ch10-02-traits.html) on `FromFields`. It is also the
-form [`cargo cgp`](/docs/cargo-cgp) prints a variant list in, so a list read in the tool's output can
-be copied back into code.
+form [`cargo cgp check`](/docs/cargo-cgp/check) and [`cargo cgp expand`](/docs/cargo-cgp/expand)
+print a variant list in, so a list read in the tool's output can be copied back into code.
 
 ## Usage
 
@@ -50,6 +50,12 @@ Inside the body, a variant's brackets keep their Rust meaning: parentheses hold 
 and braces hold named fields. The brackets around the whole `Enum!` invocation do not matter. A
 variant name may be a raw identifier, tagged without the `r#`, and the list accepts a trailing comma.
 An empty body, `Enum! {}`, is allowed.
+
+Each variant carries its fields as one payload, and two cases matter when you build a value. A
+variant with **exactly one positional field** carries that field's type directly, so `Circle(f64)`
+carries an `f64`, and a **unit variant** carries `Nil`, the empty list. Every other variant,
+including one with a single named field, carries a list, as a [`Struct!`](./struct.md) body
+would. [Under the hood](#under-the-hood) lists every case.
 
 `Enum!` builds a type, never a value. A value of the shape selects its variant with `Either::Left`
 and `Either::Right`, wrapping the payload with `Field::from`, or comes from an existing enum through
@@ -151,11 +157,19 @@ variant, as `#[derive(HasFields)]` does, but [`#[derive(CgpData)]`](../derives/d
 shape with such variants therefore has no generic constructor or extractor.
 
 **An enum body's other parts are rejected.** An attribute on a variant (such as `#[default]` or a doc
-comment), `pub` on a variant, a discriminant such as `= 1`, a variant name given twice, and any field
-`Struct!` would reject each fail with their own error.
+comment), `pub` on a variant, a discriminant such as `= 1`, and a variant name given twice each fail
+with their own error. A variant's fields are checked as a `Struct!` body's are, with the same
+messages, so an attribute, visibility, a field named `_`, a field name given twice, a keyword field
+name without its `r#`, and a value where a type belongs are each rejected inside a variant too.
 
-**A variant list tagged by position has no `Enum!` spelling.** A variant needs a name, so a sum whose
-entries are keyed by `Index<N>` is written with `Sum!`.
+**A variant's brackets decide its form, and a field that contradicts them is rejected.** A bare
+type inside braces, as in `V { u8 }`, and a `name: Type` entry inside parentheses, as in
+`V(a: u8)`, each fail with a message saying which form the brackets require. This differs from the
+brackets around the whole `Enum!` invocation, which do not matter.
+
+**A list whose tags are not identifiers has no `Enum!` spelling.** A variant needs a name that is a
+Rust identifier, so a sum whose entries are keyed by `Index<N>`, or by a type-level string that is
+not an identifier, is written with `Sum!`.
 
 **Clippy's `type_complexity` lint, and an imported abstract type inside the body,** behave as they do
 for [`Struct!`](./struct.md#common-mistakes).

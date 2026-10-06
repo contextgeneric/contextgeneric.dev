@@ -31,7 +31,7 @@ Reading a value out of a context is the next most common need.
 Most of the remaining traits build and read structs and enums generically, by their fields and
 variants. They divide into families that mirror the extensible-data derives:
 
-- [Field structure](shape/index.md) exposes a type's whole shape as a single type, and moves a value
+- [Field structure](shape/index.md) exposes a type's whole [shape](/docs/reference/glossary#shape) as a single type, and moves a value
   through it in both directions.
 - [Record builders](builder/index.md) assemble a struct one field at a time, with field presence
   tracked at compile time so an incomplete record cannot be finalized.

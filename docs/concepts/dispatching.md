@@ -126,7 +126,7 @@ An incomplete builder similarly reports bounds involving its partial-record stat
 can be longer and less direct than an ordinary non-exhaustive `match` or missing struct field.
 
 Dispatching adds type-level work for each field or variant. The compiler resolves the handler chain
-and checks its changing types; wide shapes and many instantiations can increase that work. Runtime
+and checks its changing types; wide [shapes](/docs/reference/glossary#shape) and many instantiations can increase that work. Runtime
 variant tests and handler calls still occur, and their optimization depends on the generated code
 and compiler. Static wiring alone does not guarantee that dispatch has zero runtime cost.
 

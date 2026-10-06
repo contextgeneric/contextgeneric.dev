@@ -50,6 +50,11 @@ Each `Field` pairs a variant-name tag with its payload type. A sum holds one of 
 where a record's product holds all its fields. Generic code can require an operation on the
 `Circle` variant without naming `Shape` itself.
 
+That sum is the enum's **shape**. Code that names a shape itself, in a bound or an impl, can write
+it as the enum body it describes:
+[`Enum! { Circle(Circle), Rectangle(Rectangle) }`](/docs/reference/macros/enum) is exactly the type
+above, because the macro runs the derive's own encoding.
+
 Construction uses the same tags. A `FromVariant` bound lets generic code supply a payload for a
 named variant, while the implementing enum determines how to construct the value. Extraction
 provides the corresponding operation for taking a payload out.

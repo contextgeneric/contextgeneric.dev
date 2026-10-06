@@ -15,7 +15,7 @@ described one entry at a time without naming the concrete type.
 `Field<Tag, Value>` carries a field's *name* and its *value* together in one type. A bare
 [`Product!`](../macros/product.md) list such as `Product![String, u8]` records the value types and their
 order, but it cannot tell `name: String` from any other `String`. Wrapping each element in a `Field`,
-as `Field<Symbol!("name"), String>`, attaches the name as a type, so a struct's shape describes itself.
+as `Field<Symbol!("name"), String>`, attaches the name as a type, so a struct's [shape](/docs/reference/glossary#shape) describes itself.
 Code that walks the list matches on the tag to find the field it wants.
 
 The name is a type because the program needs it only at compile time, for trait resolution and

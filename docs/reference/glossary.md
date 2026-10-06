@@ -249,6 +249,15 @@ A component whose operation acts on, or describes, the context itself, as in `Ca
 
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
 
+### shape
+
+The type-level list of a struct's fields or an enum's variants, which `#[derive(HasFields)]` gives a
+type as its `Fields`. Code that names a shape can write it as the declaration body, with `Struct!`
+or `Enum!`.
+
+[Extensible records](/docs/concepts/extensible-records) · [`Struct!`](./macros/struct.md) ·
+[`Enum!`](./macros/enum.md)
+
 ### target
 
 The thing a component's operation acts on: the context itself for a self-targeted component, or a type

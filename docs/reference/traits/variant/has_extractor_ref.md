@@ -116,7 +116,7 @@ borrowing.
 - **[`HasExtractorMut`](./has_extractor_mut.md)** to change a payload in place.
 - **[`HasExtractor`](./has_extractor.md)** only when the payload must be moved out.
 - **A `match`** when the enum is concrete. This family is for code that cannot name it.
-- **[`ToFieldsRef`](../shape/to_fields_ref.md)** when what you want is the value's borrowed *shape* rather than
+- **[`ToFieldsRef`](../shape/to_fields_ref.md)** when what you want is the value's borrowed [*shape*](/docs/reference/glossary#shape) rather than
   a narrowing chain: the same borrow-rather-than-consume idea, applied to the whole-shape view.
 
 ## Under the hood

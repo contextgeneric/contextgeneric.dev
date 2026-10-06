@@ -45,6 +45,10 @@ pub mod examples {
             Sum![Field<Symbol!("Circle"), Circle>, Field<Symbol!("Rectangle"), Rectangle>],
         >();
         assert_shape::<UserId, u64>();
+
+        // The prose's shape-macro spellings of the first two checks.
+        assert_shape::<Config, Struct! { host: String, port: u16 }>();
+        assert_shape::<Shape, Enum! { Circle(Circle), Rectangle(Rectangle) }>();
     }
 
     #[test]

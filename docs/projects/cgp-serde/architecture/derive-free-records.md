@@ -64,7 +64,7 @@ derives all three. A struct that derives only the narrower ones, as the arena te
 `HasFields` and `BuildField` for reading, works in the directions they cover.
 
 The same derive serves every other generic CGP code that works over fields, such as builders and
-conversions between struct shapes, so one opt-in covers more than serialization. A type whose owner
+conversions between struct [shapes](/docs/reference/glossary#shape), so one opt-in covers more than serialization. A type whose owner
 has not derived the field traits, including any type from a crate that does not use CGP, cannot use
 the struct providers; it is encoded through its own Serde impl with
 [`UseSerde`](../reference/providers/use_serde.md) instead.

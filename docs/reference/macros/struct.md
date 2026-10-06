@@ -31,8 +31,8 @@ The two are the identical type, and it is exactly the `Fields` the derive gives 
 body. Reach for `Struct!` wherever code *names* a shape rather than deriving it: a
 [trait bound](https://doc.rust-lang.org/book/ch10-02-traits.html) on `HasFields`, a trait
 implemented for a shape, or a wiring entry. It is also the form
-[`cargo cgp expand`](/docs/cargo-cgp) and `cargo cgp check` print a shape in, so a shape read in
-the tool's output can be copied back into code.
+[`cargo cgp check`](/docs/cargo-cgp/check) and [`cargo cgp expand`](/docs/cargo-cgp/expand) print
+a shape in, so a shape read in the tool's output can be copied back into code.
 
 ## Usage
 
@@ -50,11 +50,17 @@ the tuple form. Write braces for named fields and parentheses for a tuple body, 
 entry is a named field when it starts with a name followed by a single `:`, so a path type such as
 `core::marker::PhantomData<u8>` is a positional field.
 
-Both forms accept a trailing comma. A field name may be a raw identifier, and its tag is the name
-without the `r#`: `Struct! { r#type: u8 }` tags its field `"type"`, as the derive does. A field
-type is any Rust type, including generic parameters, references with
+Both forms accept a trailing comma. A field name may be a raw identifier, and a name that is a
+keyword such as `type` must be written as one. Its tag is the name without the `r#`:
+`Struct! { r#type: u8 }` tags its field `"type"`, as the derive does. A field type is any Rust
+type, including generic parameters, references with
 [lifetimes](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html), and
 [associated-type](https://doc.rust-lang.org/reference/items/associated-items.html) projections.
+
+Two bodies give a type you might not expect, because `Struct!` follows the derive. A body with
+**exactly one positional field** is that field's type itself, so `Struct!(u64)` is plain `u64`
+rather than a list with one entry, and an **empty body** is `Nil`, the empty list. A single named
+field still makes a list. [Under the hood](#under-the-hood) shows both expansions.
 
 `Struct!` builds a type, never a value. A value of the shape comes from an existing struct through
 `to_fields()`, or is built with [`product!`](./product.md), wrapping each field value with `.into()`.
@@ -108,7 +114,8 @@ impl Describe for Struct!(u8, u16) {
 ```
 
 A shape can also key an `open` dispatch entry in [`delegate_components!`](./delegate_components.md),
-choosing a provider by the structure of a record:
+so `App` chooses a provider by the structure of a record. This fragment assumes a component
+`CanDescribeShape<Shape>` and its providers `DescribePoint` and `DescribePair`, defined elsewhere:
 
 ```rust
 delegate_components! {
@@ -206,6 +213,16 @@ Build a value with `product!` and `.into()`, or with `to_fields()`.
 **A struct body's other parts are rejected.** Attributes (doc comments included), visibility such as
 `pub`, a field named `_`, a field name given twice, and a body that mixes named and positional entries
 each fail with their own error, since a shape has no use for them.
+
+**A keyword field name needs its `r#`.** A keyword is not an identifier, so `Struct! { type: u8 }`
+is rejected:
+
+```text
+error: `type` is a keyword: write the field name as `r#type`
+```
+
+Write `Struct! { r#type: u8 }`, which tags the field `"type"`. The four keywords that have no raw
+form, `self`, `Self`, `super`, and `crate`, cannot name a field at all.
 
 **Clippy's `type_complexity` lint can fire on an ordinary shape.** Clippy measures the expanded type,
 in which every field name is a nested type-level string, so a shape nested in a larger type in a

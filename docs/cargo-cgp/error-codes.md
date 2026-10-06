@@ -408,8 +408,11 @@ Some changes make an error easier to read without classifying it, so they carry 
 them in an error whose headline the tool left as the compiler wrote it:
 
 - **Type-level names written back as you wrote them**: a field name as `Symbol!("name")`, a list as
-  `Product![A, B]` or `Sum![A, B]`, and a path as `Path!(@app.Component)`. A path that ends in an
-  unknown part gets a trailing `.*`, which is not real `Path!` syntax.
+  `Product![A, B]` or `Sum![A, B]`, and a path as `Path!(@app.Component)`. A list of named or
+  numbered fields reads as the struct or enum body it describes, such as
+  [`Struct! { name: String }`](/docs/reference/macros/struct) or
+  [`Enum! { Circle(f64) }`](/docs/reference/macros/enum), when it has such a spelling. A path that
+  ends in an unknown part gets a trailing `.*`, which is not real `Path!` syntax.
 - **Shorter type names**, with the CGP module paths the compiler prints in front of them removed.
 - **A missing-field sentence** in place of an unmet `HasField` requirement inside a note.
 - **Consumer and provider trait names** in the compiler's "required for … to implement …" notes, in

@@ -18,7 +18,7 @@ Rewriting every entry of a type-level list through one marker.
 marker, and the record builder's `BuildAndMergeOutputs` maps its handler list the same way. You will
 most likely meet it in an error message from one of those; this page explains what it produces, and
 how it differs from the two similarly-named traits beside it. The one case for naming it is generic
-code that must describe a uniformly re-wrapped shape.
+code that must describe a uniformly re-wrapped [shape](/docs/reference/glossary#shape).
 
 :::
 

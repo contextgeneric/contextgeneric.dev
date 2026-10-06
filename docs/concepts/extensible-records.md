@@ -56,6 +56,11 @@ Each `Field` pairs a name tag with a value type. `Symbol!("url")` encodes the na
 trait bounds to identify the field during compilation. A product contains every listed field;
 this differs from an enum's sum, which contains one variant at a time.
 
+That list is the struct's **shape**. Code that names a shape itself, in a bound or an impl, can
+write it as the struct body it describes:
+[`Struct! { url: String, pool_size: u32 }`](/docs/reference/macros/struct) is exactly the type
+above, because the macro runs the derive's own encoding.
+
 Generic code can use either the complete field representation or a single-field bound. `HasFields`
 describes the whole structure, while `HasField<Tag>` provides access to one field. The latter is
 also the mechanism used by [implicit arguments](./implicit-arguments.md). These operations use

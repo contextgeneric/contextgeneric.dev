@@ -36,6 +36,13 @@ pub mod usage {
         let _: PhantomData<Enum! {}> = PhantomData::<Void>;
         let _: PhantomData<Enum! { r#match(u8) }> = PhantomData::<Sum![Field<Symbol!("match"), u8>]>;
     }
+
+    #[test]
+    fn the_payloads_that_matter_when_building_a_value() {
+        let circle: Enum! { Circle(f64), Empty } = Either::Left(Field::from(2.0));
+        let empty: Enum! { Circle(f64), Empty } = Either::Right(Either::Left(Field::from(Nil)));
+        let _ = (circle, empty);
+    }
 }
 
 /// ## Examples

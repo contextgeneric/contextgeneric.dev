@@ -156,7 +156,7 @@ conversion applies to every field type. Also absent is an impl from `IsOptional`
 conversion here, so the marker cannot be applied to an optional builder.
 
 [`TransformMapFields`](../type-level/transform_map_fields.md#under-the-hood) applies it, visiting each field
-of the target's [`HasFields`](../shape/has_fields.md) shape and using
+of the target's [`HasFields`](../shape/has_fields.md) [shape](/docs/reference/glossary#shape) and using
 [`UpdateField`](../builder/update_field.md) twice per field: once to take the value out and learn its marker,
 once to write it back under `IsOptional`.
 

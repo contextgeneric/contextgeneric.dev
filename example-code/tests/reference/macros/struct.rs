@@ -1,6 +1,6 @@
 //! Code from `docs/reference/macros/struct.md` — *`Struct!`*.
 //!
-//! The snippet the page rejects lives under `tests/compile_fail/reference/macros/`. Type
+//! The snippets the page rejects live under `tests/compile_fail/reference/macros/`. Type
 //! equalities are checked by assigning one `PhantomData` to a binding typed with the other.
 
 /// ## Overview
@@ -32,6 +32,14 @@ pub mod usage {
         let _: PhantomData<Struct! { r#type: u8 }> =
             PhantomData::<Product![Field<Symbol!("type"), u8>]>;
         let _: PhantomData<Struct! {}> = PhantomData::<Nil>;
+    }
+
+    #[test]
+    fn the_bodies_that_follow_the_derive() {
+        let _: PhantomData<Struct!(u64)> = PhantomData::<u64>;
+        let _: PhantomData<Struct!()> = PhantomData::<Nil>;
+        let _: PhantomData<Struct! { value: u64 }> =
+            PhantomData::<Product![Field<Symbol!("value"), u64>]>;
     }
 
     #[derive(Debug, PartialEq, HasFields)]

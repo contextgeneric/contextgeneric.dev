@@ -24,6 +24,18 @@ pub mod a_struct_as_a_list_of_named_fields {
 
         assert_shape::<DatabaseClient>();
     }
+
+    /// The page's `Struct!` spelling of the same shape.
+    #[test]
+    fn struct_writes_the_same_shape() {
+        fn assert_shape<T>()
+        where
+            T: HasFields<Fields = Struct! { url: String, pool_size: u32 }>,
+        {
+        }
+
+        assert_shape::<DatabaseClient>();
+    }
 }
 
 /// ## Building one field at a time

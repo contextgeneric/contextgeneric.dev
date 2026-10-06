@@ -30,7 +30,7 @@ position.
 
 `Index` is a zero-sized marker without runtime data. Its only job is to make a number available at the
 type level. So it can serve as a [`HasField`](../traits/field-access/has_field.md) tag, as the tag of
-a [`Field`](field.md) entry inside a tuple struct's shape, and as the type inside a
+a [`Field`](field.md) entry inside a tuple struct's [shape](/docs/reference/glossary#shape), and as the type inside a
 [`PhantomData`](phantom_data.md) wherever compile-time code needs a positional name.
 
 ## Definition

@@ -142,7 +142,7 @@ argument type of `<IsNothing as MapType>::Map<T>`, which normalizes to `()`, and
 That lets three impls for one marker coexist without overlapping: they differ in `M1`.
 
 [`TransformMapFields`](./transform_map_fields.md) calls this. For each field of the target's
-[`HasFields`](../shape/has_fields.md) shape, it uses [`UpdateField`](../builder/update_field.md) to take the field out
+[`HasFields`](../shape/has_fields.md) [shape](/docs/reference/glossary#shape), it uses [`UpdateField`](../builder/update_field.md) to take the field out
 (learning the marker it was in), applies `Transform::transform_mapped`, and writes the result back under
 the target marker.
 

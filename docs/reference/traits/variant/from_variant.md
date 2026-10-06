@@ -145,7 +145,7 @@ build at a site that can name it.
   generates nothing. The trait adds a *second* way to do the same thing, for callers that cannot use the first.
 - **Do not derive it alone if you also take the enum apart**, which is the usual case; reach for
   [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md), which bundles construction, deconstruction, and the
-  shape.
+  [shape](/docs/reference/glossary#shape).
 
 The names capture the split exactly: this trait puts a value *into* an enum,
 [`ExtractField`](./extract_field.md) gets one *out*. For structs, the analogous field-setting primitive is

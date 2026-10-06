@@ -44,7 +44,7 @@ recursion stops when it reaches `Nil`. The string and path lists work the same w
 
 Because `Nil` is a real, constructible value, the empty product `Product![]` is `Nil`, and the empty
 value `product![]` is the `Nil` value. The empty string `Symbol!("")` is `Symbol<0, Nil>`, and a
-unit struct that derives [`HasFields`](../derives/derive_has_fields.md) has `Nil` as its shape. A
+unit struct that derives [`HasFields`](../derives/derive_has_fields.md) has `Nil` as its [shape](/docs/reference/glossary#shape). A
 builder or a conversion returns `Nil` when every field of a shape has been consumed. This is why an
 empty record is a value the program can hold. The contrast with [`Void`](void.md) is exact. A value
 with every branch ruled out cannot exist, so a sum ends in an uninhabited marker, while a record

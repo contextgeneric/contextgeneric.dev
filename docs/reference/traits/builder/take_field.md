@@ -109,7 +109,7 @@ merging one record into another, already uses it for you.
 - **Use `take_field`** when a *specific* field must be extracted from a partial value, typically after
   [`into_builder`](./into_builder.md).
 - **Use [`BuildField`](./build_field.md)** for the opposite direction.
-- **Use [`ToFields`](../shape/to_fields.md)** when the whole value should become a flat shape rather than a
+- **Use [`ToFields`](../shape/to_fields.md)** when the whole value should become a flat [shape](/docs/reference/glossary#shape) rather than a
   partial record with one field missing.
 - **Prefer ordinary destructuring** in concrete code. `let Person { first_name, .. } = person;`
   needs none of this machinery, and this family is for code that cannot name the type.

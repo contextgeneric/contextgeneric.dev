@@ -38,6 +38,18 @@ pub mod an_enum_as_a_list_of_named_variants {
 
         assert_shape::<Shape>();
     }
+
+    /// The page's `Enum!` spelling of the same shape.
+    #[test]
+    fn enum_writes_the_same_shape() {
+        fn assert_shape<T>()
+        where
+            T: HasFields<Fields = Enum! { Circle(Circle), Rectangle(Rectangle) }>,
+        {
+        }
+
+        assert_shape::<Shape>();
+    }
 }
 
 /// ## One handler per variant, dispatched by name

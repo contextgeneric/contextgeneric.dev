@@ -13,7 +13,7 @@ the one ordinary runtime type you return from a getter.
 
 Most types on these pages are **type-level building blocks**, and you read them far more often than you
 write them. Much of CGP's machinery runs at the type level, where a field name, a variant, a position, or
-a whole record shape is a *type* rather than a value. These building blocks carry that information. A
+a whole record [shape](/docs/reference/glossary#shape) is a *type* rather than a value. These building blocks carry that information. A
 macro writes almost all of them for you, so you meet them when you read generated code or when a wiring
 mistake reports a deeply nested type. This section exists to make such a type readable.
 
