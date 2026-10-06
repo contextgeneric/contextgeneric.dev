@@ -28,7 +28,7 @@ impl<'de, 'a, Value> ValueDeserializer<'de, &'a Value> { ... }
 ## Usage
 
 Import it from `cgp_serde_alloc::providers`, and wire it for the reference type, beside an entry for
-the owned type and an allocator. From the repository's arena test:
+the owned type and an allocator. From the repository's arena example:
 
 ```rust
 AllocatorComponent:

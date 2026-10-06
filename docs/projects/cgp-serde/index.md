@@ -117,16 +117,17 @@ know first:
 
 ## The examples
 
-The examples are the repository's tests, walked through as short tutorials in the order they teach:
+The examples are the repository's runnable programs, walked through as short tutorials in the order
+they teach:
 
 - [`basic`](./examples/basic.md) — one struct written to JSON and read back, with its bytes as hex
   and its errors in the context's error type.
 - [`messages`](./examples/messages.md) — one nested archive encoded two ways by two contexts that
   differ in three wiring lines.
 
-Two more tests deserialize borrowed values into an arena that the context supplies. Their pages are
-still being written, and [context services](./architecture/context-services.md) explains the design
-they show.
+Two more examples deserialize borrowed values into an arena that the context supplies. Their pages
+are still being written, and [context services](./architecture/context-services.md) explains the
+design they show.
 
 ## The rest of the section
 
@@ -140,9 +141,9 @@ describes where the design stops.
 
 ## Running it
 
-Clone the [repository](https://github.com/contextgeneric/cgp-serde) and run the examples from its
-root with `cargo test -p cgp-serde-tests`. The repository's toolchain file selects the Rust version,
-and no example needs a network or any program outside the build.
+Clone the [repository](https://github.com/contextgeneric/cgp-serde) and run an example from its root
+with `cargo run -p cgp-serde-examples --example <name>`. The repository's toolchain file selects the
+Rust version, and no example needs a network or any program outside the build.
 
 To use cgp-serde from your own crate, depend on its crates from the repository by git: `cgp-serde`
 for the components and core providers, and `cgp-serde-extra`, `cgp-serde-json`, `cgp-serde-alloc`,

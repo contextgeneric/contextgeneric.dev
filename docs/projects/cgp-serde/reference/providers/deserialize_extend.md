@@ -34,7 +34,7 @@ The `IntoIterator` bound only names the collection's item type; the provider nev
 ## Usage
 
 Import it from `cgp_serde::providers`, and wire each collection type the context reads, beside its
-item type. The repository's arena test reads a vector of references into an arena:
+item type. The repository's arena example reads a vector of references into an arena:
 
 ```rust
 @ValueDeserializerComponent.<'b> Vec<&'b Coord>:

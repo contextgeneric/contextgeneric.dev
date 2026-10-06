@@ -1,17 +1,17 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'The cgp-serde tests as short tutorials: a JSON round trip with no serialization derive, and one value encoded two ways by two applications.'
+description: 'The cgp-serde examples as short tutorials: a JSON round trip with no serialization derive, and one value encoded two ways by two applications.'
 ---
 
 # cgp-serde examples
 
-These pages walk through the tests in the [cgp-serde
-repository](https://github.com/contextgeneric/cgp-serde), one test per page. The tests are the
-repository's runnable examples. [cgp-serde](../index.md) rebuilds Serde's `Serialize` and
-`Deserialize` traits as components of [CGP](/docs/), so that each application chooses how a type is
-encoded. Each page runs a test, explains how its wiring produces what it prints, and names the CGP
-pattern it shows, so the pages work as short tutorials on those patterns.
+These pages walk through the examples in the [cgp-serde
+repository](https://github.com/contextgeneric/cgp-serde), one example per page.
+[cgp-serde](../index.md) rebuilds Serde's `Serialize` and `Deserialize` traits as components of
+[CGP](/docs/), so that each application chooses how a type is encoded. Each page runs an example,
+explains how its wiring produces what it prints, and names the CGP pattern it shows, so the pages
+work as short tutorials on those patterns.
 
 The pages are in the order they teach. Each stands alone, but a reader new to cgp-serde should start
 with [`basic`](./basic.md), since the later pages build on the wiring it introduces.
@@ -29,9 +29,10 @@ smaller encoding example. Neither is required reading; each page links what it r
 
 ## Running an example
 
-Clone the repository and run an example from its root with `cargo test -p cgp-serde-tests <name>`.
-Add `-- --nocapture` to see what a test prints. The repository's toolchain file selects the Rust
-version, and no example needs a network or any program outside the build.
+Clone the repository and run an example from its root with
+`cargo run -p cgp-serde-examples --example <name>`. Each example also checks what it prints in a
+test, which `cargo test -p cgp-serde-examples --example <name>` runs. The repository's toolchain
+file selects the Rust version, and no example needs a network or any program outside the build.
 
 ## The examples
 

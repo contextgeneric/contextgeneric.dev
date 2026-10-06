@@ -1,17 +1,16 @@
 ---
 sidebar_label: 'basic'
 sidebar_position: 1
-description: 'A cgp-serde test that writes a struct to JSON and reads it back, with no serialization derive and each field type''s encoding chosen by the context.'
+description: 'A cgp-serde example that writes a struct to JSON and reads it back, with no serialization derive and each field type''s encoding chosen by the context.'
 ---
 
 # Write a struct to JSON and read it back
 
-This test writes a struct to a JSON string and reads it back, through a **context**, the type whose
-wiring holds the application's choices, which decides how each of the struct's field types is
-encoded. It is an example from
-[cgp-serde](../index.md), which rebuilds Serde's `Serialize` and `Deserialize` traits as components
-of [CGP](/docs/). The struct derives nothing from Serde, and its bytes come out as hex because one
-wiring line says so.
+This example writes a struct to a JSON string and reads it back, through a **context**, the type
+whose wiring holds the application's choices, which decides how each of the struct's field types is
+encoded. It is an example from [cgp-serde](../index.md), which rebuilds Serde's `Serialize` and
+`Deserialize` traits as components of [CGP](/docs/). The struct derives nothing from Serde, and its
+bytes come out as hex because one wiring line says so.
 
 :::tip
 
@@ -45,26 +44,23 @@ moves both decisions out of the struct and into the application's wiring.
 From the root of the [cgp-serde repository](https://github.com/contextgeneric/cgp-serde):
 
 ```sh
-cargo test -p cgp-serde-tests basic
+cargo run -p cgp-serde-examples --example basic
 ```
 
-The test passes:
+It prints the JSON the struct serializes to, and the value read back from it:
 
 ```text
-test tests::basic::test_basic_serialization ... ok
+serialized: {"quantity":42,"message":"hello","data":"010203"}
+deserialized: Payload { quantity: 42, message: "hello", data: [1, 2, 3] }
 ```
 
-It asserts that the struct serializes to exactly this JSON, and that reading the JSON back gives the
-original value:
-
-```json
-{"quantity":42,"message":"hello","data":"010203"}
-```
+`cargo test -p cgp-serde-examples --example basic` checks both: the exact JSON, and that reading it
+back gives the original value.
 
 ## The struct derives nothing from Serde
 
 The data type is an ordinary struct, from
-[`basic.rs`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/basic.rs):
+[`basic.rs`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-examples/examples/basic.rs):
 
 ```rust
 #[derive(Debug, Eq, PartialEq, CgpData)]
@@ -75,17 +71,17 @@ pub struct Payload {
 }
 ```
 
-`Debug`, `Eq`, and `PartialEq` are there for the test's assertions. The only other derive is CGP's
-[`CgpData`](/docs/reference/derives/derive_cgp_data), which exposes the struct's field names and
-types to generic code and lets generic code build the struct one field at a time. It is not specific
-to serialization, and nothing in the struct says how any field is encoded. cgp-serde's record
-providers read what `CgpData` exposes, as [derive-free
+`Debug`, `Eq`, and `PartialEq` are there to print the value and for the example's test. The only
+other derive is CGP's [`CgpData`](/docs/reference/derives/derive_cgp_data), which exposes the
+struct's field names and types to generic code and lets generic code build the struct one field at a
+time. It is not specific to serialization, and nothing in the struct says how any field is encoded.
+cgp-serde's record providers read what `CgpData` exposes, as [derive-free
 records](../architecture/derive-free-records.md) explains.
 
 ## One context holds every choice
 
-The test runs on `App`, a type that stands for this application, which is where its choices live. It
-has no fields, because every choice it makes is in its wiring:
+The example runs on `App`, a type that stands for this application, which is where its choices live.
+It has no fields, because every choice it makes is in its wiring:
 
 ```rust
 pub struct App;
@@ -180,11 +176,11 @@ The same handing back is what lets a choice reach every level of a nested value.
 The last two entries make JSON encoding something `App` can do. They are keyed on CGP's
 [`TryComputer`](/docs/reference/components/handler/try_computer), an interface for a fallible
 computation chosen by a marker type, and the markers `SerializeJson` and `DeserializeJson<T>` pick
-the JSON providers. The test calls both through `try_compute`:
+the JSON providers. The example calls both through `try_compute`:
 
 ```rust
 let serialized = context
-    .try_compute(PhantomData::<SerializeJson>, &value)
+    .try_compute(PhantomData::<SerializeJson>, &payload())
     .unwrap();
 
 let deserialized: Payload = context
@@ -209,7 +205,7 @@ handling](/docs/concepts/modular-error-handling) explains how.
 
 ## Checking both directions
 
-Wiring is checked when it is used, so the test asserts that every entry resolves with
+Wiring is checked when it is used, so the example asserts that every entry resolves with
 [`check_components!`](/docs/reference/macros/check_components), once per direction:
 
 ```rust
@@ -247,7 +243,8 @@ the same name.
 
 Change the encoding of the bytes from hex to base64 by replacing `SerializeHex` with
 `SerializeBase64` in both `Vec<u8>` entries, and importing it from `cgp_serde_extra::providers`.
-Nothing else changes. Run the test again, and its first assertion fails, printing the new JSON:
+Nothing else changes. Run the example's test again, and its first assertion fails, printing the new
+JSON:
 
 ```text
 assertion `left == right` failed
@@ -261,7 +258,7 @@ the encoding lived only in the wiring.
 
 ## The pattern
 
-This test shows **serialization as a choice made by the context, one type at a time**. The
+This example shows **serialization as a choice made by the context, one type at a time**. The
 component takes the encoded value as a parameter, so the context, not the data type, chooses the
 provider for each value type, and a provider for a struct asks the context about the struct's
 fields. The same move makes the error type the context's choice too. [Modularity

@@ -60,8 +60,8 @@ field traits: writing needs the field list, from
 [`HasFields`](/docs/reference/traits/shape/has_fields), and access to each field, from
 [`HasField`](/docs/reference/traits/field-access/has_field); reading needs the field list and the
 field-by-field builder, from [`BuildField`](/docs/reference/traits/builder/build_field). `CgpData`
-derives all three. A struct that derives only the narrower ones, as the arena tests' structs derive
-`HasFields` and `BuildField` for reading, works in the directions they cover.
+derives all three. A struct that derives only the narrower ones, as the arena examples' structs
+derive `HasFields` and `BuildField` for reading, works in the directions they cover.
 
 The same derive serves every other generic CGP code that works over fields, such as builders and
 conversions between struct [shapes](/docs/reference/glossary#shape), so one opt-in covers more than serialization. A type whose owner

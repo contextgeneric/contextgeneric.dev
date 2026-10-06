@@ -1,12 +1,12 @@
 ---
 sidebar_label: 'messages'
 sidebar_position: 2
-description: 'A cgp-serde test in which two application contexts encode one nested value differently, hex and RFC 3339 against base64 and Unix time.'
+description: 'A cgp-serde example in which two application contexts encode one nested value differently, hex and RFC 3339 against base64 and Unix time.'
 ---
 
 # Encode one value two ways in two applications
 
-This test serializes one nested archive of messages twice, under two applications that disagree
+This example serializes one nested archive of messages twice, under two applications that disagree
 about how bytes and dates should look. It is an example from [cgp-serde](../index.md), which
 rebuilds Serde's `Serialize` and `Deserialize` traits as components of [CGP](/docs/). The data types
 name no encoding, and the two applications differ in three wiring lines, which is the whole
@@ -43,13 +43,14 @@ application its own choices.
 ## Run it
 
 From the root of the [cgp-serde repository](https://github.com/contextgeneric/cgp-serde), run the
-test:
+example:
 
 ```sh
-cargo test -p cgp-serde-tests messages
+cargo run -p cgp-serde-examples --example messages
 ```
 
-It serializes the same archive twice and checks each document against the exact JSON below. From
+It serializes the same archive twice and prints each document, shown below.
+`cargo test -p cgp-serde-examples --example messages` checks both against this exact JSON. From
 the first application, `AppA`, bytes are hex and dates are RFC 3339 strings:
 
 ```json
@@ -107,7 +108,7 @@ From the second, `AppB`, bytes are base64 and dates are Unix timestamps:
 ## The data names no encoding
 
 The archive is three nested structs, from
-[`messages.rs`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/messages.rs):
+[`messages.rs`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-examples/examples/messages.rs):
 
 ```rust
 #[derive(CgpData)]
@@ -242,11 +243,16 @@ without it.
 
 Each context's wiring is asserted by a
 [`check_components!`](/docs/reference/macros/check_components) table listing the seven types it
-serializes. Then the test hands each context and the archive to `serde_json`:
+serializes. Then the example hands each context and the archive to `serde_json`, through a helper
+that accepts any context able to serialize the archive:
 
 ```rust
-let serialized_a =
-    serde_json::to_string_pretty(&SerializeWithContext::new(&AppA, &archive)).unwrap();
+fn to_pretty_json<Context>(context: &Context, archive: &MessagesArchive) -> String
+where
+    Context: CanSerializeValue<MessagesArchive>,
+{
+    serde_json::to_string_pretty(&SerializeWithContext::new(context, archive)).unwrap()
+}
 ```
 
 [`SerializeWithContext`](../reference/types/serialize_with_context.md) pairs a context with a value
@@ -272,7 +278,7 @@ cause for the classes it recognizes, and the tool does not yet reshape every cla
 
 ## The pattern
 
-This test shows **two applications choosing different implementations for the same types, without
+This example shows **two applications choosing different implementations for the same types, without
 a conflict**. Each application is a context, the serialized value is a parameter of the component,
 and a context's table decides the provider for each value type, including types from other crates.
 Because every provider hands nested values back to the context, one entry decides a type's encoding

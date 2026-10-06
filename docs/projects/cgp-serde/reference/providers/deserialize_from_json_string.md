@@ -62,7 +62,7 @@ let deserialized: Payload = context
 The provider wraps the string in a `StrRead` and calls the inner provider with it, which reads the
 value and checks for trailing input. Because it must work for a reader of any lifetime, the value it
 produces cannot borrow from the input string. A value that borrows from elsewhere is unaffected: the
-repository's arena test reads a `Payload<'a>` that borrows from the context's arena through this
+repository's arena example reads a `Payload<'a>` that borrows from the context's arena through this
 provider.
 
 ## Context dependencies

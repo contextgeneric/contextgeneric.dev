@@ -95,7 +95,7 @@ context. Hex, base64, and RFC 3339 dates need `String` the same way. The
 **A service a provider takes from the context.** Wiring `&'b Coord` to
 [`DeserializeAndAllocate`](../reference/providers/deserialize_and_allocate.md) without an entry for
 `AllocatorComponent` fails, because the provider allocates through the context. In the repository's
-arena test, with the allocator entry removed, the check on the borrowed types reports:
+arena example, with the allocator entry removed, the check on the borrowed types reports:
 
 ```text
 error[E0277]: [CGP-E001] the consumer traits `CanDeserializeValue<&Coord>` and `CanDeserializeValue<Payload<'_>>` are not implemented for context `App<'_>`

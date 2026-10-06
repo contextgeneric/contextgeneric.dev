@@ -81,7 +81,7 @@ impl<'a, Value: 'a> Allocator<'a, Value> {
 }
 ```
 
-A context wires all three. These are the relevant entries from the repository's arena test, where
+A context wires all three. These are the relevant entries from the repository's arena example, where
 the context holds the arena in a field named `arena`:
 
 ```rust

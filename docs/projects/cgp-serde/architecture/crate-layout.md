@@ -31,8 +31,8 @@ base64 compiles `hex` and not `base64`. None of the library crates names an erro
 JSON providers raise their errors into whatever error type the context wires, so the application
 chooses it, as the [`basic`](../examples/basic.md) example does with `anyhow`.
 
-The repository's sixth crate, `cgp-serde-tests`, holds the tests the
-[examples](../examples/index.md) walk through.
+Two more crates are not published. `cgp-serde-examples` holds the programs the
+[examples](../examples/index.md) walk through, and `cgp-serde-tests` holds the library's tests.
 
 ## A data crate needs none of them
 

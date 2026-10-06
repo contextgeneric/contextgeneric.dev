@@ -33,7 +33,7 @@ impl<'a, Value: 'a> Allocator<'a, Value> { ... }
 
 Import it from `cgp_serde_typed_arena::providers`. Wire it as the context's allocator, and point the
 arena getter at the field that holds the arena with
-[`UseField`](/docs/reference/providers/use_field). From the repository's arena test:
+[`UseField`](/docs/reference/providers/use_field). From the repository's arena example:
 
 ```rust
 #[derive(HasField)]

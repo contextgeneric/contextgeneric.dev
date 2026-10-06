@@ -77,8 +77,8 @@ position to the message:
   `invalid type: sequence, expected map`.
 
 Only structs with named fields work, since a field's name is its key. A struct with a lifetime works
-the same way: the arena test's `Payload<'a>` is read with this provider, its `Vec<&'a Coord>` field
-through [`DeserializeExtend`](./deserialize_extend.md).
+the same way: the arena example's `Payload<'a>` is read with this provider, its `Vec<&'a Coord>`
+field through [`DeserializeExtend`](./deserialize_extend.md).
 
 ## Context dependencies
 
