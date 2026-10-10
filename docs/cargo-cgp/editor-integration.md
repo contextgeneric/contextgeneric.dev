@@ -116,7 +116,7 @@ missing setup, for example, arrives as the tool's own message:
 
 ```text
 cargo check failed to start: Cargo watcher failed, the command produced no valid metadata (exit code: ExitStatus(unix_wait_status(256))):
-cargo-cgp: toolchain `nightly-2026-09-14` is not available (exit status: 1)
+cargo-cgp: toolchain `nightly-2026-10-10` is not available (exit status: 1)
 
 The pinned toolchain is not installed. Run `cargo cgp setup`.
 ```

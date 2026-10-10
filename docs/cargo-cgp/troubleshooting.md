@@ -60,12 +60,12 @@ driver or compiler problem.
 
 Almost every message in this section is resolved by running `cargo cgp setup`, which installs the pinned
 nightly and rebuilds the driver against it at the front end's version. The messages tell you which part
-was wrong. The examples show `nightly-2026-09-14`; yours names the nightly your build is pinned to.
+was wrong. The examples show `nightly-2026-10-10`; yours names the nightly your build is pinned to.
 
 **The pinned nightly is not installed:**
 
 ```text
-cargo-cgp: toolchain `nightly-2026-09-14` is not available (exit status: 1)
+cargo-cgp: toolchain `nightly-2026-10-10` is not available (exit status: 1)
 
 The pinned toolchain is not installed. Run `cargo cgp setup`.
 ```
@@ -86,7 +86,7 @@ Here `setup` cannot help, since it needs rustup too; install rustup, or use the
 was built against a different nightly:
 
 ```text
-cargo-cgp: the cargo-cgp-driver could not run under toolchain `nightly-2026-09-14` (it was likely built against a different nightly). Run `cargo cgp setup`.
+cargo-cgp: the cargo-cgp-driver could not run under toolchain `nightly-2026-10-10` (it was likely built against a different nightly). Run `cargo cgp setup`.
 ```
 
 **The driver runs, but its version differs from the front end's.** This follows a partial upgrade, or
@@ -102,7 +102,7 @@ Run `cargo cgp setup`.
 the toolchain the front end expects no longer belong together, even though their versions match:
 
 ```text
-cargo-cgp: the cargo-cgp-driver was built against `rustc 1.99.0-nightly (0123abcde 2026-08-01)`, but the pinned toolchain `nightly-2026-09-14` now provides `rustc 1.100.0-nightly (4b6d04e70 2026-09-13)`
+cargo-cgp: the cargo-cgp-driver was built against `rustc 1.99.0-nightly (0123abcde 2026-08-01)`, but the pinned toolchain `nightly-2026-10-10` now provides `rustc 1.101.0-nightly (32dba69d6 2026-10-09)`
 
 Run `cargo cgp setup`.
 ```
@@ -210,7 +210,7 @@ error: unexpected argument '--nope' found
 `cargo cgp setup` installs the toolchain through rustup, so without rustup it stops at once:
 
 ```text
-cargo-cgp: installing toolchain `nightly-2026-09-14` (with rustc-dev, llvm-tools)…
+cargo-cgp: installing toolchain `nightly-2026-10-10` (with rustc-dev, llvm-tools)…
 cargo-cgp: rustup was not found on PATH; cargo-cgp requires rustup to manage toolchains
 ```
 
