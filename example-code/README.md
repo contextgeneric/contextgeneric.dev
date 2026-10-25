@@ -26,6 +26,7 @@ pulls in a module tree that mirrors that section's pages:
 - `tests/comparisons_tests.rs` → `tests/comparisons/`, mirroring `docs/comparisons/`
 - `tests/tutorials_tests.rs` → `tests/tutorials/`, mirroring `docs/tutorials/`
 - `tests/compile_fail_tests.rs` → `tests/compile_fail/`, the snippets the pages **reject** (see below)
+- `tests/blog_tests.rs` → `tests/blog/`, the current release draft's worked examples
 
 **A standalone page gets a test binary of its own instead**, since there is no section tree for it to
 sit in: `tests/quickstart.rs` answers `docs/quickstart.md`. Use this form only for a page that has no
@@ -41,6 +42,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 | `docs/comparisons/` | complete — one file per page under `tests/comparisons/`; only the CGP side of each page is checked here, since the other language's snippets are compiled against the toolchain the page names |
 | `docs/tutorials/` | partial — `area-calculation/checking.md`, whose three quoted diagnostics are the reason it is mirrored; the rest is filled in lazily |
 | `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |
+| `blog/2026-05-10-v0.8.0-release.md` | complete — `tests/blog/v0_8_0_release.rs` checks each wiring stage, the default-binding alternatives, and the migrated configuration; the deliberate missing-field error is a compile-fail fixture |
 | front page, remaining orientation pages | none yet |
 
 Within a covered section the mapping is mechanical: `docs/concepts/coherence.md` is answered by
