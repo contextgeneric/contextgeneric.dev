@@ -24,13 +24,13 @@ written for agents, and to follow the `AGENTS.md` file of each repository it tou
 contribution then carries the documentation and skill updates the change requires, and it uses the
 vocabulary and the current syntax the knowledge base records.
 
-The policy exists because an agent working from its training alone writes outdated CGP. It
-reproduces syntax that earlier releases accepted and the current one does not, and it guesses at
-semantics the knowledge base already states. [How CGP's Documentation Is
-Written](how-cgp-is-documented.md) explains the problem and the process that answers it.
+The policy exists because CGP lacks presence in today's LLM training data. As a result, agents either
+hallucinate with significant misunderstanding about CGP, or use outdated information about CGP.
+[How CGP's Documentation Is Written](how-cgp-is-documented.md) explains the problem and the process
+that answers it.
 
-**An AI-assisted pull request or issue must include the prompts used to produce it**: the prompt
-that verified the issue, or the prompt that applied the fix. The CGP maintainers may run similar
+**An AI-assisted pull request or issue must include the prompts that can be used to reproduce similar patch**:
+the prompt that verified the issue, or the prompt that applied the fix. The CGP maintainers may run similar
 prompts themselves rather than merge a pull request directly, so the prompt can be as useful to them
 as the change.
 

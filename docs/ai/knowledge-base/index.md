@@ -18,10 +18,10 @@ reference pages on this site, most of its other documentation, and the
 ## What it is for
 
 The knowledge base gives an agent a written record of CGP to read, so the agent does not have to
-reconstruct CGP from the macro source or recall it from training. It records the semantics of each
-construct, including the syntax forms it accepts and the code each macro expands to. It also holds
-the internals of the macros and of [cargo-cgp](/docs/cargo-cgp), the classes of compile error CGP
-produces, worked examples, and comparisons with related ideas from other languages.
+reconstruct CGP from the macro source or hallucinate on what a given syntax really means. It records
+the semantics of each construct, including the syntax forms it accepts and the code each macro
+expands to. It also holds the internals of the macros and of [cargo-cgp](/docs/cargo-cgp), the classes
+of compile error CGP produces, worked examples, and comparisons with related ideas from other languages.
 
 The [agent skill](/docs/ai/skills) is the part of this record sized for everyday work: it fits in an
 assistant's context and teaches it to read and write CGP code. The knowledge base is the exhaustive

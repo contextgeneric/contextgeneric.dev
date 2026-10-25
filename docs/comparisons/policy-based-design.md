@@ -1,6 +1,6 @@
 ---
 sidebar_label: 'Policy-based design'
-sidebar_position: 2
+sidebar_position: 5
 description: 'CGP read against C++ policy classes, host templates, CRTP, and concepts, for a reader who composes behavior with templates.'
 ---
 

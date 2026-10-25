@@ -37,18 +37,6 @@ Install it with `cargo install cargo-cgp`, then run `cargo cgp setup` to provisi
 
 [Read the full transcript here](/blog/rustlab-2025-coherence)
 
-## Books
-
-- [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/) - Builds CGP's constructs from first principles, for readers who want to understand what happens behind the macros. Its early chapters explain the ideas in ordinary Rust and remain accurate; its later chapters were written against an earlier release and show syntax that has since changed.
-
-## CGP in production
-
-[Hermes SDK](https://github.com/informalsystems/hermes-sdk/) is the system CGP was built for and the
-largest real-world use of it. It is an inter-blockchain relayer developed at
-[Informal Systems](https://informal.systems/), and its need to support many chains and configurations
-from one codebase is the problem the paradigm grew out of. If you are evaluating whether CGP holds up
-beyond small examples, this is the codebase to read.
-
 ## Projects
 
 - [CGP Examples](https://github.com/contextgeneric/cgp-examples) - A repository hosting various examples of using CGP. Documented on this site in the [Projects](/docs/projects/cgp-examples/) section, with its examples walked through as short tutorials.
