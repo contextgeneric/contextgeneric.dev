@@ -5,79 +5,93 @@ sidebar_position: 10
 
 # Modular error handling
 
-CGP lets reusable fallible code use an error type chosen by its context. The context selects the
-error type, how source errors become that type, and how additional detail is attached. This page
-follows a port parser through those choices, then applies the pattern to application-specific errors
-and explains its costs.
+A port parser may serve several applications, each with its own way of reporting errors. One may
+need a message to log, while another needs an enum its callers can match on. With CGP, the parser
+can leave that choice to its context and use the same parsing logic in both applications.
+
+This page follows that parser from detecting a failure to constructing an error, then shows how
+other code can attach detail as the error propagates. It also explains how applications can define
+their own error-raising operations and where the extra abstraction is useful.
 
 ## Separating failure from error representation {#why-the-error-type-is-the-hard-one}
 
-A reusable parser can detect a failure without deciding how every application should represent it.
-One application may want a string, another a domain enum, and another an error-library type. Fixing
-that choice inside the parser limits where the same implementation can be reused.
+Ordinary Rust already offers ways to share parsing logic across applications. A parser can return
+a concrete error for callers to convert, take a generic error parameter, or use an associated error
+type. In each case, the application can choose how to represent a failure.
 
-Ordinary Rust offers several ways to expose the choice. A function can return a concrete error for
-callers to convert, take a generic error parameter, or use an associated error type. CGP combines a
-shared associated type with interchangeable providers for constructing and enriching errors.
+CGP builds on the associated-type approach by giving a context one shared error type. Operations
+that use this type can propagate each other's errors directly. To produce an error in the first
+place, reusable code asks the context to convert a source error into the shared type. Other code
+can then ask it to attach detail, such as the path of a configuration file.
 
-The built-in components separate these responsibilities:
+These choices belong to separate built-in components:
 
 - **`HasErrorType`:** Names the context's shared `Error` type, which must implement `Debug`.
 - **`CanRaiseError<SourceError>`:** Converts a source error into that shared type.
 - **`CanWrapError<Detail>`:** Attaches detail to an existing error.
 
-A provider declares the raising and wrapping operations it needs. The context then selects
-compatible implementations, so these choices can vary without changing the provider's source.
+The context selects providers for these components through wiring. That lets it choose both the
+error type and how to construct or enrich it. Reusable code only declares which raising and
+wrapping operations it needs.
 
 ## A parser with an abstract error type
 
-The parser names its return error abstractly and raises the concrete failures it encounters.
-This fragment assumes `cgp::prelude::*` and `core::num::ParseIntError` are imported:
+Consider a parser that reads an integer and checks whether it fits in a port number. Either step
+can fail, so the parser needs to raise both an integer parse error and a message about an
+out-of-range value:
 
 ```rust
-#[cgp_component(PortParser)]
-#[use_type(HasErrorType.Error)]
-pub trait CanParsePort {
-    fn parse_port(&self, raw: &str) -> Result<u16, Error>;
-}
+use cgp::prelude::*;
+use core::num::ParseIntError;
 
-#[cgp_impl(new ParsePortFromStr)]
+#[cgp_fn(CanParsePort)]
 #[uses(CanRaiseError<ParseIntError>, CanRaiseError<String>)]
 #[use_type(HasErrorType.Error)]
-impl PortParser {
-    fn parse_port(&self, raw: &str) -> Result<u16, Error> {
-        let parsed: u32 = raw.parse().map_err(Self::raise_error)?;
+pub fn parse_port(&self, raw: &str) -> Result<u16, Error> {
+    let parsed: u32 = raw.parse().map_err(Self::raise_error)?;
 
-        if parsed > u16::MAX as u32 {
-            return Err(Self::raise_error(format!("port {parsed} out of range")));
-        }
-
-        Ok(parsed as u16)
+    if parsed > u16::MAX as u32 {
+        return Err(Self::raise_error(format!("port {parsed} out of range")));
     }
+
+    Ok(parsed as u16)
 }
 ```
 
-`Error` is the context's [abstract type](./abstract-types.md), imported by `#[use_type]`.
-`Self::raise_error` converts either a `ParseIntError` or a `String` into it. The `#[uses]` line
-requires those conversions on the implementation; a caller bounded by `CanParsePort` needs only
-the parser interface and its shared error type.
+The parser names its return error as `Error`, the context's [abstract type](./abstract-types.md)
+imported by `#[use_type]`. When a step fails, `Self::raise_error` converts the source into that type,
+and ordinary Rust `Result` and `?` handle propagation. The raising method is an associated
+function on the context type, so constructing an error does not require a context value.
 
-`raise_error` is an associated function called on the context type. Error construction therefore
-uses the context's selected implementation without requiring a context value.
+The parser still decides which failures to report. For example, `"abc"` produces a `ParseIntError`,
+while `"65536"` parses as `u32` but exceeds `u16::MAX` and produces a string message. A number too
+large for `u32` fails during parsing instead. Only the conversion of those failures into `Error`
+is left to the context.
+
+To make this implementation available, [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) generates a
+`CanParsePort` trait and a blanket implementation for contexts that satisfy the dependencies in
+`#[uses]`. Those raising requirements stay on the implementation. A generic caller can therefore
+require `CanParsePort` and use its shared error type without repeating the conversion requirements.
+There is only one parsing implementation here; a full component would also let contexts choose
+among parsing providers.
 
 ## Selecting a strategy for each source
 
-The context can route different source errors through different providers. This table assumes an
-`App` context, the error component keys imported from `cgp::core::error`, and `RaiseFrom` and
-`DebugError` imported from `cgp::extra::error`:
+For an application that reports errors as strings, the context can select `String` and provide the
+two conversions the parser needs. Here, `App` stands for the application and carries its
+error-handling choices. The port text is passed to the method as an argument:
 
 ```rust
+use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
+use cgp::extra::error::{DebugError, RaiseFrom};
+
+pub struct App;
+
 delegate_components! {
     App {
         open ErrorRaiserComponent;
 
         ErrorTypeProviderComponent: UseType<String>,
-        PortParserComponent: ParsePortFromStr,
 
         @ErrorRaiserComponent.String: RaiseFrom,
         @ErrorRaiserComponent.ParseIntError: DebugError,
@@ -85,59 +99,98 @@ delegate_components! {
 }
 ```
 
-`App` uses `String` as its error type. `RaiseFrom` converts a raised `String` through `From`, which
-returns the same string here. `DebugError` formats a `ParseIntError` into a string, then calls the
-context's `String` raiser. The formatting provider thus relies on the conversion selected by the
-context instead of naming the final error type itself.
+The `open ErrorRaiserComponent;` statement lets the table choose a provider for each source type.
+A raised `String` goes to `RaiseFrom`, which uses `From` and returns the string unchanged. A
+`ParseIntError` goes to `DebugError`, which formats it into a string and passes that string to the
+same `RaiseFrom` provider. Both paths end in `String`, so `App` can use the parser.
 
-Other providers express different policies. `DisplayError` uses `Display` formatting,
-`ReturnError` accepts a source that already has the context's error type, and `RaiseInfallible`
-handles `Infallible`. Per-source dispatch lets a context combine these strategies where needed.
+This formatting step keeps the parse error's debug output but loses its structure. Callers receive
+a message they can log, though they can no longer match on the original `ParseIntError`. If an
+application needs that structure, its context can choose a conversion that preserves it.
 
 ## Changing the error type
 
-The same parser can return a domain error when another context supplies compatible conversions.
-In this fragment, `AppError` must implement `Debug` and `From<String>`:
+For example, another application may need to distinguish a parsing failure from a value that
+passed parsing but exceeded `u16::MAX`. An error enum can keep the original parse error in one
+variant and the range message in another:
 
 ```rust
+#[derive(Debug)]
+pub enum AppError {
+    InvalidNumber(ParseIntError),
+    InvalidPort(String),
+}
+
+impl From<ParseIntError> for AppError {
+    fn from(error: ParseIntError) -> Self {
+        Self::InvalidNumber(error)
+    }
+}
+
+impl From<String> for AppError {
+    fn from(message: String) -> Self {
+        Self::InvalidPort(message)
+    }
+}
+
+pub struct StrictApp;
+
 delegate_components! {
     StrictApp {
-        open ErrorRaiserComponent;
-
         ErrorTypeProviderComponent: UseType<AppError>,
-        PortParserComponent: ParsePortFromStr,
-
-        @ErrorRaiserComponent.String: RaiseFrom,
-        @ErrorRaiserComponent.ParseIntError: DebugError,
+        ErrorRaiserComponent: RaiseFrom,
     }
 }
 ```
 
-`ParsePortFromStr` can be reused unchanged because it never fixed its return error to `String`.
-It still raises a `String` for an out-of-range port, and `RaiseFrom` now converts that message into
-`AppError`. Rust checks and monomorphizes the provider for the new context as usual.
+Because `AppError` implements `From` for both source types, `StrictApp` can send both to
+`RaiseFrom` with a single wiring entry. Parsing `"abc"` now returns an `Err` containing
+`AppError::InvalidNumber`, while parsing `"65536"` returns one containing `AppError::InvalidPort`.
+A caller that knows this context can match on either variant.
 
-Error-library backends package compatible type providers, raisers, and wrappers. For example,
-`cgp-error-anyhow` supplies providers for `anyhow::Error`, while `cgp-error-eyre` supplies the
-corresponding `eyre` integration. Choosing a backend keeps those concrete dependencies in the
-application's wiring rather than in reusable providers.
+The parser itself has not changed. It raises the same source values through the same operations,
+but the context preserves them in a different return type. An application can also choose an
+error-library backend, such as `cgp-error-anyhow` for `anyhow::Error` or `cgp-error-eyre` for `eyre`.
+These optional crates package compatible type providers, raisers, and wrappers. The application
+selects them in its wiring, while reusable code continues to use the shared error traits.
 
 ## Attaching detail as an error propagates
 
-`CanWrapError<Detail>` lets a provider enrich an error it did not construct. A caller might attach
-the configuration path after a port parser fails. The provider declares the wrapping requirement
-and calls `Self::wrap_error(error, detail)`; the context chooses how the detail is stored or formatted.
+The parser knows which input failed, but a configuration loader may also know which file it came
+from. When the parser returns an error, the loader can use `CanWrapError<Detail>` to attach the
+file path before passing the error to its caller:
 
-Wrapping is separate from raising because a source error and propagation detail serve different
-purposes. A source explains what failed, while detail can identify which request or resource was
-involved. `DiscardDetail` can deliberately ignore that detail, and a backend wrapper can preserve it.
-The parser above only raises errors, so its context does not need a wrapper until another provider
-requires one.
+```rust
+#[cgp_fn(CanParseConfigPort)]
+#[uses(CanParsePort, CanWrapError<String>)]
+#[use_type(HasErrorType.Error)]
+pub fn parse_config_port(&self, raw: &str, path: &str) -> Result<u16, Error> {
+    self.parse_port(raw).map_err(|error| {
+        Self::wrap_error(error, format!("invalid port in {path}"))
+    })
+}
+```
+
+Here, the parser's error already has the type the wrapper expects, because both operations use the
+context's shared `Error`. The loader only needs to require `CanParsePort` and a wrapper for strings.
+It does not repeat the parser's raising requirements, just as its own caller can require
+`CanParseConfigPort` without repeating the loader's dependencies.
+
+Wrapping adds information to an error that has already been raised. How much of that information
+survives depends on the selected provider: a backend wrapper can retain both the error and the file
+path, while `DiscardDetail` returns the error unchanged. Neither `App` nor `StrictApp` selects a
+wrapper yet. Each would need a compatible `ErrorWrapperComponent` entry to use this loader, even
+though both already support the parser.
 
 ## An application's own error vocabulary
 
-Application-specific components can express failures that need more structure than a message.
-A service can define a raising operation that takes a status marker and detail:
+Choosing behavior by source type works well when the type identifies the failure. In `StrictApp`,
+for example, every raised `String` becomes `AppError::InvalidPort`. That suits a context where
+strings only report port failures, but a web service may use strings to describe many unrelated
+problems. It needs more information to choose the right error.
+
+An application-specific component can supply that information explicitly. For HTTP errors, it can
+accept a status marker alongside the detail:
 
 ```rust
 #[cgp_component(HttpErrorRaiser)]
@@ -147,43 +200,54 @@ pub trait CanRaiseHttpError<Code, Detail> {
 }
 ```
 
-Markers such as `ErrUnauthorized` and `ErrNotFound` identify domain failures. Providers map them to
-status codes and construct the context's error. A handler requiring the appropriate
-`CanRaiseHttpError` implementation can then call:
+The status markers can be empty structs such as `ErrUnauthorized` and `ErrNotFound`. A provider
+maps them to HTTP status codes and constructs the context's error, so a handler with the
+corresponding `CanRaiseHttpError` dependency can write:
 
 ```rust
-Self::raise_http_error(ErrUnauthorized, "you must first login")
+Self::raise_http_error(ErrUnauthorized, "you must log in first")
 ```
 
-The handler names the failure and its detail. Its selected provider determines the numeric status
-and concrete error representation, just as the built-in raiser determines how a parse error is stored.
+The marker identifies the failure even though the detail is a string. As with the port parser,
+the handler leaves the concrete error representation to its context; here, the selected provider
+also determines the numeric HTTP status.
 
 ## What it costs
 
-The selected error type must satisfy every chosen provider's requirements. A formatting route can
-lose the original error's structure, and a `From` route requires a suitable conversion. Changing
-the type may therefore require changing strategies as well as the type-setting entry.
+Leaving error representation to the context moves the conversion choices into wiring. Those
+choices still have to agree: the string context needs a provider that can format `ParseIntError`,
+while the enum context needs `From` implementations for both sources. Changing the error type may
+therefore mean changing the raising providers too. An enum cannot recover the original error if
+a formatting provider has already reduced it to text.
 
-Missing raisers and wrappers can remain undetected until the relevant operation is checked or used.
-Use [`check_components!`](/docs/reference/macros/check_components) to verify the parser and other
-application components against their contexts. Naming an error type alone does not establish that
-all required conversions exist.
+Rust verifies these requirements when they are needed. Calling `App.parse_port(...)` or asserting
+`App: CanParsePort` checks the raising dependencies, while checking `CanParseConfigPort` also
+checks the wrapper. For components,
+[`check_components!`](/docs/reference/macros/check_components) verifies the selected providers
+against their contexts. Until then, a context can name an error type while still lacking a
+conversion it needs.
 
-`HasErrorType` selects one shared error type per context. That makes component errors compose, but
-an application needing independent error types must model them with separate type components or
-contexts. CGP also leaves error design to the application: useful messages, preserved causes, and
-matchable variants depend on the chosen representations and providers.
+Sharing the error type through `HasErrorType` lets operations compose, but it also gives each
+context a single choice. An application that needs independent error types must use separate type
+components or contexts. In either case, useful messages, preserved causes, and matchable variants
+still depend on the application's error design.
+
+For a parser that only needs one fixed error type, a concrete `Result` and ordinary conversions
+may be enough. The additional traits and wiring are useful when the same parsing logic needs to
+work with different error policies, as it does for `App` and `StrictApp`.
 
 ## Where to go next
 
-These pages explain the supporting mechanisms and available strategies:
+To use the same parser with your own error policy, start with the shared type and the conversions
+it needs. These pages explain the supporting mechanisms and available providers:
 
 - [Abstract types](./abstract-types.md): How the context selects a shared type.
 - [Impl-side dependencies](./impl-side-dependencies.md): Why conversion requirements stay on the
   provider.
 - [Dispatching](./dispatching.md): Selecting providers by type.
 - [`HasErrorType`](/docs/reference/components/has_error_type) and
-  [`CanRaiseError` / `CanWrapError`](/docs/reference/components/can_raise_error): The error interfaces.
+  [`CanRaiseError`](/docs/reference/components/can_raise_error) /
+  [`CanWrapError`](/docs/reference/components/can_wrap_error): The error interfaces.
 - [Error providers](/docs/reference/providers/error): Strategies and their requirements.
 - [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): Why raising selects an
   interpretation while ordinary Rust control flow still propagates the error.
