@@ -8,22 +8,23 @@ description: 'cargo-cgp runs in place of cargo check and reports a CGP compile e
 # cargo-cgp
 
 [Context-Generic Programming (CGP)](/docs/) is a language extension for Rust, with pluggable trait
-implementations at compile-time. `cargo-cgp` is its error toolchain: a cargo subcommand you run in
-place of `cargo check` to read a CGP compile error with its root cause first, and to see the ordinary
-Rust your CGP macros generate.
+implementations at compile-time. Because its macros expand to ordinary Rust, a mistake in CGP code is
+often reported in terms of generated traits you never wrote. `cargo-cgp` is the error toolchain that
+helps you read those reports: a cargo subcommand you run in place of `cargo check` to see a CGP compile
+error with its root cause first, and to see the ordinary Rust your CGP macros generate.
 
-The tool is optional. CGP is a library on stable Rust, and `cargo check`, `cargo build`, and
-`cargo test` work on a CGP project without it. Reach for `cargo-cgp` when an error is hard to read.
+The tool is optional. CGP is a library on stable Rust, so `cargo check`, `cargo build`, and `cargo test`
+all work on a CGP project without it, and you only need `cargo-cgp` when an error is hard to read.
 
 ## The problem it solves
 
-**Some CGP mistakes produce a compiler error that does not contain its cause.** CGP's wiring is lazy: a
+Some CGP mistakes produce a compiler error that does not contain its cause. CGP's wiring is lazy: a
 [`delegate_components!`](/docs/reference/macros/delegate_components) entry selects a provider without
 checking that the context can give the provider what it needs. That check happens later, where the
 trait is first used, and from there the compiler often cannot say what went wrong.
 
-In this program, `RectangleArea` reads a `width` and a `height` field through
-[`#[implicit]`](/docs/reference/attributes/implicit) arguments, and `Rectangle` has no `height`:
+The following program shows the problem. `RectangleArea` reads a `width` and a `height` field through
+[`#[implicit]`](/docs/reference/attributes/implicit) arguments, but `Rectangle` has no `height`:
 
 ```rust
 use cgp::prelude::*;
@@ -107,94 +108,99 @@ help: use associated function syntax instead
 For more information about this error, try `rustc --explain E0599`.
 ```
 
-The message never mentions `height`. It describes the trait machinery CGP generated, and its closing
-suggestion, calling `Rectangle::area()`, fixes a different problem. The cause is not buried in the
-output: it is absent, because the compiler set the candidate implementation aside before working out
-why it did not apply.
+This message never mentions `height`. It describes the trait machinery CGP generated, and its closing
+suggestion, calling `Rectangle::area()`, would fix a different problem. So the cause is not buried in
+the output. It is absent, because the compiler set the candidate implementation aside before working
+out why it did not apply.
 
 `cargo cgp check` reports the same mistake like this:
 
 ```text
-error[E0599]: [CGP-E001] the consumer trait `CanCalculateArea` is not implemented for context `Rectangle`
+error[E0599]: [CGP-E001] missing field `height` on `Rectangle`
   --> src/lib.rs:28:30
    |
 28 |     println!("{}", rectangle.area());
    |                              ^^^^
    |
-   = note: root cause: [CGP-E106] missing field `height` on `Rectangle`
+   = note: root cause: [CGP-E110] missing field `height` on `Rectangle`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanCalculateArea` for context `Rectangle`
              └─ [CGP-E102] provider trait impl `AreaCalculator` with context `Rectangle` for provider `RectangleArea`
-               └─ [CGP-E106] missing field `height` on `Rectangle`
+               └─ [CGP-E110] missing field `height` on `Rectangle`
+   = help: add the field `height: f64` to `Rectangle`
 
 For more information about this error, try `rustc --explain E0599`.
 ```
 
-The error code and the position are unchanged. The headline says which trait `Rectangle` fails to
-implement, the `root cause:` line names the missing field, and the tree beneath it shows the chain of
-requirements that led there. [Reading the output](./reading-output.md) explains each part.
+The compiler's error code and the position stay the same, but the headline now states the cause. Below
+it, the tree shows the chain of requirements that led from the call to the missing field, and the `help`
+line gives the fix. [Reading the output](./reading-output.md) explains each part.
 
 ## How it works
 
-**It compiles your code under Rust's next-generation trait solver, which computes the cause the
-default solver leaves out.** The default solver stops at "the trait bounds were not satisfied" in the
-case above; the next-generation solver works the failed requirement down to the missing
-`HasField` bound. That is what gives the tool a root cause to print at all.
+Two changes produce that message. The first is that the tool compiles your code under Rust's
+next-generation trait solver, which computes the cause the default solver leaves out. In the case above,
+the default solver stops at "the trait bounds were not satisfied", while the next-generation solver
+works the failed requirement down to the missing `HasField` bound. Without that step, the tool would
+have no root cause to print.
 
-**It rewrites the errors it recognizes.** Where the tool knows the shape of a CGP failure, it leads with
-the cause, draws the chain of requirements as a tree, and tags the message with a `[CGP-Exxx]` code
-naming the class of mistake. The compiler's own code stays in the header, so `rustc --explain` still
-works. Errors it does not recognize pass through as the compiler wrote them.
+The second change is that the tool rewrites the errors it recognizes. Where it knows the shape of a CGP
+failure, it leads with the cause, draws the chain of requirements as a tree, and tags the message with a
+`[CGP-Exxx]` code naming the class of mistake. The compiler's own code stays in the header, so
+`rustc --explain` still works, and an error the tool does not recognize passes through as the compiler
+wrote it.
 
 ## The two commands
 
-[**`cargo cgp check`**](./check.md) stands in for `cargo check` when you hit or expect a wiring error.
-Everything after `check` is passed to `cargo check`, so the flags you already use work unchanged.
+Most of the time you will use [`cargo cgp check`](./check.md), which stands in for `cargo check` when you
+hit or expect a wiring error. Everything after `check` is passed to `cargo check`, so the flags you
+already use work unchanged.
 
-[**`cargo cgp expand`**](./expand.md) prints the Rust your CGP macros generated, with CGP's type-level
-constructs written the way you wrote them: a field name reads `Symbol!("height")` rather than a list of
-characters. Use it when you want to know what a macro produced rather than guess.
+When you want to know what a macro produced rather than guess, use
+[`cargo cgp expand`](./expand.md). It prints the Rust your CGP macros generated, with CGP's type-level
+constructs written the way you wrote them, so a field name reads `Symbol!("height")` rather than a list
+of characters.
 
 ## What it costs
 
-**Installing it takes a nightly toolchain.** The tool embeds the Rust compiler, so it needs one exact
-nightly with the compiler's development libraries, which is more than a gigabyte of disk. Setup
-downloads that toolchain and builds a driver binary against it. Your project does not switch
-toolchains: the nightly is used only for the tool's own check.
+Installing the tool takes a nightly toolchain. Because the tool embeds the Rust compiler, it needs one
+exact nightly with the compiler's development libraries, which is more than a gigabyte of disk. Setup
+downloads that toolchain and builds a driver binary against it. Your project does not switch toolchains,
+though, since the tool uses the nightly only for its own check.
 
-**The first check rebuilds your dependencies.** A check builds into its own `target/cgp` directory
-under that nightly, so the first run compiles every dependency once more and keeps a second set of
-build artifacts beside your normal ones. Later checks reuse them.
+The first check also rebuilds your dependencies. A check builds into its own `target/cgp` directory under
+that nightly, so the first run compiles every dependency once more and keeps a second set of build
+artifacts beside your normal ones. Later checks reuse them.
 
 If you work with a coding assistant, [CGP's agent skill](/docs/ai/skills) teaches it to run
-`cargo cgp check` and read what comes back. That makes the error output cheaper to work through; it
+`cargo cgp check` and read what comes back. That makes the error output cheaper to work through, but it
 does not replace reading the conclusion yourself.
 
 ## What it does not do
 
-**It is not a build tool.** There is no `cargo cgp build`, `run`, or `test`. CGP compiles on stable Rust
-1.89 or newer, so build, run, and test with ordinary cargo.
+The tool is not a build tool: there is no `cargo cgp build`, `run`, or `test`. CGP compiles on stable Rust
+1.89 or newer, so you build, run, and test with ordinary cargo.
 
-**It does not decide whether your code compiles.** A check runs a different compiler and trait solver
-from your project's, so treat it as a diagnostic pass, the way Clippy runs under its own settings.
-Your own toolchain's `cargo check` is the authority on whether the code builds.
+It also does not decide whether your code compiles. A check runs a different compiler and trait solver
+from your project's, so treat it as a diagnostic pass, the way Clippy runs under its own settings. Your
+own toolchain's `cargo check` is the authority on whether the code builds.
 
-**It does not reshape every error.** `cargo cgp check` leads with the root cause for the classes it
+Nor does it improve every error. `cargo cgp check` leads with the root cause for the classes it
 recognizes, and the tool does not yet reshape every class.
-[Reading the output](./reading-output.md#errors-that-pass-through-unchanged) lists the ones that pass
-through, and where to read about them instead. It also reshapes errors only in your workspace's own
-crates.
+[Reading the output](./reading-output.md#errors-that-pass-through-unchanged) lists the ones you are most
+likely to meet and where to read about them instead. The tool also reshapes errors only in your
+workspace's own crates.
 
-**It is tested on Linux.** macOS and Windows have not been tested yet.
+Finally, the tool is tested on Linux. macOS and Windows have not been tested yet.
 
 ## Where to go next
 
-Start with installation, then the page for what you want to do:
+Start with installation, then go to the page for what you want to do:
 
 - [Installation](./installation.md): installing with cargo or Nix, checking the install, updating,
   and uninstalling.
 - [Check](./check.md): running a check, and trying it on a deliberate mistake.
-- [Reading the output](./reading-output.md): every shape of error the tool produces, part by part.
+- [Reading the output](./reading-output.md): the shapes of error the tool produces, part by part.
 - [Expand](./expand.md): reading what your CGP macros generated.
 - [Editor integration](./editor-integration.md): rewritten errors in VS Code, every time you save.
 - [Troubleshooting](./troubleshooting.md): when the tool itself will not run.

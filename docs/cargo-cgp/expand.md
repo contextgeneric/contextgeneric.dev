@@ -7,10 +7,10 @@ description: 'Print the Rust your CGP macros generate, narrowed to one module, t
 
 # Expand
 
-`cargo cgp expand` prints your crate as the compiler sees it after macro expansion, so you can read what
-a [CGP](/docs/) macro actually generated instead of reasoning about what it probably generated. It is
-part of [`cargo-cgp`](./index.md), and it writes CGP's type-level constructs back in the form you wrote
-them.
+A [CGP](/docs/) macro generates code you never see, and sometimes the answer to a question is in that
+code. `cargo cgp expand`, part of [`cargo-cgp`](./index.md), prints your crate as the compiler sees it
+after macro expansion, so you can read what a macro actually generated instead of reasoning about what it
+probably generated. It also writes CGP's type-level constructs back in the form you wrote them.
 
 ```sh
 cargo cgp expand --lib
@@ -18,22 +18,24 @@ cargo cgp expand --lib
 
 ## When to use it
 
-Reach for `expand` when the answer is in the generated code rather than in an error message:
+Use `expand` when an error message does not answer your question and the generated code might. These
+situations come up most often:
 
-- **A diagnostic names a type you did not write**, such as
-  [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), a `PathCons` key, or a
-  `__Context__` parameter, and you want to see the impl it came from.
-- **A wiring table does not resolve**, and you want its actual
-  [`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) keys and providers rather
-  than inferring them from the table's syntax.
-- **You are unsure what a construct emits**, such as the exact `where` clauses of a provider, or which
-  field a getter reads.
-- **Two forms differ and only one compiles.** Expand both and compare the output.
+- **A diagnostic names a type you did not write:** the message mentions
+  [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), a `PathCons` key, or a `__Context__`
+  parameter, and you want to see the impl it came from.
+- **A wiring table does not resolve:** you want its actual
+  [`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) keys and providers rather than
+  inferring them from the table's syntax.
+- **You are unsure what a construct emits:** you want the exact `where` clauses of a provider, or to see
+  which field a getter reads.
+- **Two forms differ and only one compiles:** you can expand both and compare the output.
 
 ## What it looks like
 
-This is the `Rectangle` program from the [Check page](./check.md#check-the-wiring-where-you-write-it)
-with its `height` field restored, so the program compiles:
+To see what the output looks like, take the `Rectangle` program from the
+[Check page](./check.md#check-the-wiring-where-you-write-it) with its `height` field restored, so the
+program compiles:
 
 ```rust
 use cgp::prelude::*;
@@ -127,21 +129,19 @@ where
 impl __CheckRectangle<AreaCalculatorComponent, ()> for Rectangle {}
 ```
 
-Each part of the program is visible in the listing:
-
-- [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) produced a pair of field accessors
-  for each field, keyed by the field's name.
-- [`delegate_components!`](/docs/reference/macros/delegate_components) produced the one-line table
-  entry that selects `RectangleArea`, and an impl that passes the provider's requirements through to
-  `Rectangle`.
-- [`check_components!`](/docs/reference/macros/check_components) produced the last line, the
-  assertion that `Rectangle` can use the component.
+You can find each part of the program in this listing.
+[`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) produced a pair of field accessors for
+each field, keyed by the field's name.
+[`delegate_components!`](/docs/reference/macros/delegate_components) produced the one-line table entry
+that selects `RectangleArea`, and an impl that passes the provider's requirements through to `Rectangle`.
+Finally, [`check_components!`](/docs/reference/macros/check_components) produced the last line, the
+assertion that `Rectangle` can use the component.
 
 ## Narrowing with `--item`
 
-**`--item` narrows the output to one module or item.** A whole crate's expansion is long: for this
-small program it is 148 lines, against 49 for `Rectangle` alone. The option takes a `::`-separated
-path naming something inside the crate, and what you get depends on what it names:
+A whole crate's expansion is long: for this small program it is 148 lines, against 49 for `Rectangle`
+alone. So `--item` narrows the output to one module or item. The option takes a `::`-separated path naming
+something inside the crate, and what you get depends on what it names:
 
 ```sh
 cargo cgp expand --lib --item shapes             # a module: its contents
@@ -151,8 +151,8 @@ cargo cgp expand --lib --item AreaCalculator     # a trait: its definition and e
 
 A leading `crate::` is accepted, so `--item crate::shapes` and `--item shapes` are the same request.
 
-**Naming a component's provider trait is usually the most useful form**, because most of a
-component's generated items are impls of it. For this program, `--item AreaCalculator` gives the
+Naming a component's provider trait is usually the most useful form, because most of a component's
+generated items are impls of it. For this program, `--item AreaCalculator` gives the
 provider trait itself, the blanket impl that lets a context's wiring pick the provider, the impls for
 the `UseContext` and `RedirectLookup` providers CGP generates for every component, and
 `RectangleArea`'s own impl, with the `where` clause that requires the two fields. Naming the consumer
@@ -175,8 +175,8 @@ error: no expansion was produced; see the errors above
 
 ## Choosing a target
 
-`expand` expands exactly one target, and its other arguments are passed to `cargo rustc`, so choosing
-the target is cargo's job. A package with both a library and a binary needs to be told which one:
+Because `expand` expands exactly one target and passes its other arguments to `cargo rustc`, choosing the
+target is cargo's job. A package with both a library and a binary needs to be told which one:
 
 ```sh
 cargo cgp expand --lib
@@ -184,7 +184,7 @@ cargo cgp expand --bin my-app
 cargo cgp expand -p my-crate --lib
 ```
 
-Without one, cargo declines, in a message that does not mention `expand`:
+Without a choice, cargo declines, in a message that does not mention `expand`:
 
 ```text
 error: extra arguments to `rustc` can only be passed to one target, consider filtering
@@ -199,16 +199,16 @@ cargo cgp expand --lib > expanded.rs
 cargo cgp expand --lib | grep 'Symbol!'
 ```
 
-`cargo cgp expand --help` prints the tool's own help for `expand`, which documents `--item`. That is
-the one argument `expand` reads itself; for cargo's target-selection options, run `cargo rustc --help`.
+`cargo cgp expand --help` prints the tool's own help for `expand`, which documents `--item`. That is the
+one argument `expand` reads itself, so for cargo's target-selection options, run `cargo rustc --help`.
 
 ## Why not `cargo-expand`
 
 [`cargo-expand`](https://github.com/dtolnay/cargo-expand) is the general tool, and it works on CGP code.
-The reason to use this one is that CGP's generated code is full of type-level constructs, which a
-general expander prints the way the compiler stores them.
+The reason to use this one is that CGP's generated code is full of type-level constructs, which a general
+expander prints the way the compiler stores them.
 
-**A field name is the clearest case.** CGP encodes it as a
+A field name is the clearest case. CGP encodes it as a
 [type-level string](/docs/reference/glossary#type-level-string), with one type per character. In the
 compiler's own expansion, which is what a general expander formats, the `height` accessor above begins:
 
@@ -229,25 +229,30 @@ than a chain of `Cons` cells, a derived field list reads
 [`Struct! { width: f64, height: f64 }`](/docs/reference/macros/struct), and a namespace key reads
 `Path!(@app.GreeterComponent)`.
 
-`--item` is the other difference. It selects Rust items rather than filtering text: asking for a trait
-gives every impl of that trait, wherever it sits in the crate, which is the shape a question about CGP
-wiring usually takes.
+`--item` is the other difference. It selects Rust items rather than filtering text, so asking for a trait
+gives every impl of that trait, wherever it sits in the crate. A question about CGP wiring usually takes
+that shape.
 
 ## What to expect from the output
 
-**Every macro is expanded, not only CGP's.** `#[derive(Debug)]` and `println!` appear in their generated
-form too. What is specific to CGP is how the type-level constructs are written.
+Every macro is expanded, not only CGP's, so `#[derive(Debug)]` and `println!` appear in their generated
+form too. Only the way the type-level constructs are written is specific to CGP.
 
-**The output is for reading, not compiling.** The tool removes the `cgp::macro_prelude::` prefix the
-macros put in front of every CGP name, which makes the listing readable and means it does not compile
-if you paste it back into your crate.
+The output is for reading rather than compiling. The tool removes the `cgp::macro_prelude::` prefix the
+macros put in front of every CGP name, which makes the listing readable but means it does not compile if
+you paste it back into your crate.
 
-**`expand` is not a check.** Compilation stops once the macros are expanded, so no type checking runs
-and no wiring error is reported. A malformed macro invocation still fails, because that happens during
-expansion. This is what makes `expand` useful in the middle of debugging: it works on a crate that does
-not type-check. For the wiring mistake itself, use [`cargo cgp check`](./check.md).
+`expand` is also not a check. Compilation stops once the macros are expanded, so no type checking runs, a
+wiring mistake goes unreported, and the command exits with `0` on a crate that does not type-check. That
+makes `expand` useful in the middle of debugging, but for the wiring mistake itself you need
+[`cargo cgp check`](./check.md).
 
-**It builds the way a check does.** `expand` uses the same pinned nightly and the same `target/cgp`
+An error reported before that point does fail the command, with cargo's exit status. Most such errors, such
+as a CGP macro rejecting its input, still print what expanded. A type defined twice, a `macro_rules!` call
+that matches no rule, or an unclosed delimiter prints nothing. A closed pipe is not a failure, so
+`cargo cgp expand --lib | head` exits as it normally would.
+
+Finally, `expand` builds the way a check does. It uses the same pinned nightly and the same `target/cgp`
 directory as `cargo cgp check`, so the notes on the [Check page](./check.md#what-a-check-does-differently)
 apply to it too.
 
