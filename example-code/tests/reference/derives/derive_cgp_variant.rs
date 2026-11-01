@@ -103,3 +103,29 @@ pub mod examples {
         );
     }
 }
+
+/// No variant name is reserved: the generated impls name their associated types through qualified
+/// projections, so a variant may share a name with one of them. Helper attributes of another derive
+/// stay on the enum.
+pub mod no_reserved_names {
+    use cgp::prelude::*;
+    use serde::Serialize;
+
+    #[derive(CgpData, Serialize)]
+    pub enum Shape {
+        #[serde(rename = "value")]
+        Value(u32),
+        Fields(u32),
+        FieldsRef(u32),
+        Remainder(u32),
+        Extractor(u32),
+        ExtractorRef(u32),
+        ExtractorMut(u32),
+    }
+
+    #[test]
+    fn a_variant_named_value_is_constructed() {
+        let shape = Shape::from_variant(PhantomData::<Symbol!("Value")>, 1);
+        assert!(matches!(shape, Shape::Value(1)));
+    }
+}

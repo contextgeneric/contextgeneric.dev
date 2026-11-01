@@ -1,7 +1,7 @@
 error[E0277]: the trait bound `Person: CanUseComponent<GreeterComponent>` is not satisfied
-  --> tests/compile_fail/reference/errors_the_fix_1.rs:37:9
+  --> tests/compile_fail/reference/errors_the_fix_1.rs:36:9
    |
-37 |         GreeterComponent,
+36 |         GreeterComponent,
    |         ^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `HasField<Symbol<4, Chars<'n', Chars<'a', Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` is not implemented for `Person`
@@ -26,12 +26,12 @@ note: required for `GreetHello` to implement `IsProviderFor<GreeterComponent, Pe
    |        ------- unsatisfied trait bound introduced here
    = note: required for `Person` to implement `CanUseComponent<GreeterComponent>`
 note: required by a bound in `__CheckPerson`
-  --> tests/compile_fail/reference/errors_the_fix_1.rs:35:1
+  --> tests/compile_fail/reference/errors_the_fix_1.rs:34:1
    |
-35 | / check_components! {
-36 | |     Person {
-37 | |         GreeterComponent,
-38 | |     }
-39 | | }
+34 | / check_components! {
+35 | |     Person {
+36 | |         GreeterComponent,
+37 | |     }
+38 | | }
    | |_^ required by this bound in `__CheckPerson`
    = note: this error originates in the attribute macro `cgp_auto_getter` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

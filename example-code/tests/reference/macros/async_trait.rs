@@ -169,3 +169,28 @@ pub mod under_the_hood {
         fn sync_method(&self) -> u8;
     }
 }
+
+/// ## Under the hood: a default body
+///
+/// A default body is wrapped in `async move`, so it is the future the method returns. The bound
+/// `mut` parameter is rebound inside the block.
+pub mod default_body {
+    use cgp::prelude::*;
+
+    #[async_trait]
+    pub trait CanAdd {
+        async fn add(&self, mut value: u32, extra: u32) -> u32 {
+            value += extra;
+            value
+        }
+    }
+
+    pub struct App;
+
+    impl CanAdd for App {}
+
+    #[test]
+    fn the_default_body_is_awaited() {
+        assert_eq!(futures::executor::block_on(App.add(1, 2)), 3);
+    }
+}

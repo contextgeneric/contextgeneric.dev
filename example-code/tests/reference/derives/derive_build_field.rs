@@ -230,3 +230,16 @@ pub mod common_mistakes {
         let _ = Shape::from_variant(PhantomData::<Symbol!("Circle")>, 1.0);
     }
 }
+
+/// A field keeps only its documentation on the companion, so another derive's helper attribute does
+/// not reach it.
+pub mod helper_attribute_on_a_field {
+    use cgp::prelude::*;
+    use serde::Serialize;
+
+    #[derive(Serialize, BuildField)]
+    pub struct Person {
+        #[serde(rename = "name")]
+        pub first_name: String,
+    }
+}

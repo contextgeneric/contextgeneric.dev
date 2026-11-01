@@ -7,7 +7,7 @@
 //! `cargo cgp check` prints for it. Those programs are `trybuild` fixtures under
 //! `tests/compile_fail/cargo_cgp/`, one per heading, named `<page>_<heading>.rs`. The modules here hold
 //! the programs the pages say compile: the repaired `Rectangle` that `expand.md` expands, and the
-//! repaired `greeting` that `reading-output.md` gives as the fix for `[CGP-E012]`.
+//! repaired `greeting` that `reading-output.md` gives as the fix for `[CGP-E030]`.
 //!
 //! Neither the fixtures nor these modules check the `cargo cgp check` or `cargo cgp expand` output the
 //! pages quote. That output was produced by running the tool on exactly these programs, and re-running

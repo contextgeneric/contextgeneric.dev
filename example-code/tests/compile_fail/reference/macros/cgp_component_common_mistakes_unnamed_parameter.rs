@@ -1,5 +1,5 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: a `_` method parameter fails inside
-//! the macro, because the generated impls forward each argument by name.
+//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: the macro rejects a `_` method
+//! parameter, because the generated impls forward each argument by name.
 
 use cgp::prelude::*;
 

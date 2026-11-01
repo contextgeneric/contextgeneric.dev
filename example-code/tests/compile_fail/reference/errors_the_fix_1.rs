@@ -29,9 +29,8 @@ delegate_components! {
     }
 }
 
-// error[E0277]: [CGP-E001] the consumer trait `CanGreet` is not implemented for
-//              context `Person`
-//   root cause: [CGP-E106] missing field `name` on `Person`
+// error[E0277]: [CGP-E001] missing field `name` on `Person`
+//   root cause: [CGP-E110] missing field `name` on `Person`
 check_components! {
     Person {
         GreeterComponent,

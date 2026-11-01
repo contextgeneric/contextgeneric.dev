@@ -638,7 +638,7 @@ pub mod common_mistakes {
             const LIMIT: u64 = 100;
 
             fn allows(&self, count: u64) -> bool {
-                count < <AllowUnderLimit as RateLimiter<Self>>::LIMIT
+                count < Self::LIMIT
             }
         }
 
@@ -657,7 +657,7 @@ pub mod common_mistakes {
         }
 
         #[test]
-        fn the_qualified_const_resolves() {
+        fn the_blocks_own_const_resolves() {
             assert!(App.allows(99));
             assert!(!App.allows(100));
             assert_eq!(<App as CanRateLimit>::LIMIT, 100);

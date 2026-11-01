@@ -1,5 +1,5 @@
 //! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: `#[uses]` above a component trait
-//! is carried onto the generated items and reported once as an unresolved attribute.
+//! is rejected by name.
 
 use cgp::prelude::*;
 

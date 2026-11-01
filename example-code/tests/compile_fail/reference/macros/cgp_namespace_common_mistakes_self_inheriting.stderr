@@ -1,5 +1,5 @@
 error: the namespace `A` cannot inherit from itself; name another namespace as its parent, or omit the parent
- --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_self_inheriting.rs:5:25
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_self_inheriting.rs:4:25
   |
-5 | cgp_namespace! { new A: A {} }
+4 | cgp_namespace! { new A: A {} }
   |                         ^

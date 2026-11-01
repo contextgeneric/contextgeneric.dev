@@ -144,3 +144,16 @@ pub mod under_the_hood {
         >;
     }
 }
+
+/// A segment that only looks like a primitive's name is a symbol.
+pub mod primitive_like_names {
+    use core::marker::PhantomData;
+
+    use cgp::prelude::*;
+
+    #[test]
+    fn f_is_a_symbol() {
+        let _: PhantomData<Path!(@app.f)> =
+            PhantomData::<PathCons<Symbol!("app"), PathCons<Symbol!("f"), Nil>>>;
+    }
+}
