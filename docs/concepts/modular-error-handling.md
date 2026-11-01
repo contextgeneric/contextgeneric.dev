@@ -5,19 +5,21 @@ sidebar_position: 10
 
 # Modular error handling
 
-A port parser may serve several applications, each with its own way of reporting errors. One may
-need a message to log, while another needs an enum its callers can match on. With CGP, the parser
-can leave that choice to its context and use the same parsing logic in both applications.
+Modular error handling lets reusable code report failures while each application chooses how to
+represent them. In CGP, the context selects a shared error type and providers for converting
+source errors into it and attaching detail. Reusable code declares which of those operations it
+needs, allowing the same implementation to work with different error policies.
 
-This page follows that parser from detecting a failure to constructing an error, then shows how
-other code can attach detail as the error propagates. It also explains how applications can define
-their own error-raising operations and where the extra abstraction is useful.
+Errors built this way still propagate through ordinary Rust `Result` values and the `?` operator.
+This page explains how these choices fit together, how to preserve structured failures, and when
+application-specific error operations are useful. It also considers the requirements and costs
+of leaving error representation to the context.
 
 ## Separating failure from error representation {#why-the-error-type-is-the-hard-one}
 
-Ordinary Rust already offers ways to share parsing logic across applications. A parser can return
-a concrete error for callers to convert, take a generic error parameter, or use an associated error
-type. In each case, the application can choose how to represent a failure.
+Ordinary Rust offers several ways for reusable code to leave error representation to an
+application. A parser, for example, can return a concrete source error for callers to convert,
+take a generic error parameter, or use an associated error type.
 
 CGP builds on the associated-type approach by giving a context one shared error type. Operations
 that use this type can propagate each other's errors directly. To produce an error in the first

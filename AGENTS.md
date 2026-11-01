@@ -111,6 +111,16 @@ better; naming where a simpler tool is the right choice is an asset, not a conce
 genuine costs — the learning curve, the verbose diagnostics, the young ecosystem — wherever a reader
 would look for them, because this audience is unusually good at detecting what is being left out.
 
+## Use natural-writing for concept pages
+
+When adding or revising a page under `docs/concepts/`, use the natural-writing style of the
+`point-first-writing` skill throughout the page. Let sentences build on one another, connect
+paragraphs so the reasoning is easy to follow, and vary sentence length. Keep the concept and its
+purpose as the subject of the opening, with examples serving as illustrations.
+
+The knowledge base's [explanation-page writing guide](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/explanation.md#writing-style)
+sets the full style and structure requirements for these pages.
+
 ## Do not rewrite published blog posts
 
 A blog post is dated. A release announcement records what a release did at the time, and editing its
