@@ -41,7 +41,7 @@ pub mod moving_the_requirement {
         }
     }
 
-    // `HasName` is nowhere in this signature, and nothing above it will mention one either.
+    // Generic callers can require `CanGreet` without repeating `HasName`.
     pub fn greet_twice<Context>(context: &Context) -> String
     where
         Context: CanGreet,
@@ -135,7 +135,7 @@ pub mod two_providers_two_requirements {
     }
 }
 
-/// ## The three things an implementation can ask for
+/// ## Traits, values, and types
 ///
 /// The value leg. The field requirement is generated from the argument name and lands on the impl.
 pub mod the_value_leg {
@@ -166,10 +166,9 @@ pub mod the_value_leg {
     }
 }
 
-/// ## Type dependencies, and why they need no parameter
+/// ## Keeping type choices on the context
 ///
-/// The shape a type dependency takes when it is a parameter: an input the caller supplies, so every
-/// intermediate signature carries it whether or not it touches one.
+/// Generic forwarding functions can carry type parameters and bounds needed by the job runner.
 pub mod the_type_leg_as_a_parameter {
     pub trait Store {
         type Error;
@@ -185,11 +184,11 @@ pub mod the_type_leg_as_a_parameter {
         R: Runtime,
         S: Store,
     {
-        // This layer touches none of the three.
+        // The page omits the job execution body.
         Ok(())
     }
 
-    // And the layer above declares them again, for the same reason: it touches none of them either.
+    // This generic forwarding layer repeats the job runner's parameters and bounds.
     pub fn run_jobs<E, R, S>(store: &S, runtime: &R) -> Result<(), E>
     where
         E: From<S::Error> + From<R::Error>,
@@ -200,10 +199,9 @@ pub mod the_type_leg_as_a_parameter {
     }
 }
 
-/// ## Type dependencies, and why they need no parameter
+/// ## Keeping type choices on the context
 ///
-/// The same dependency as an abstract type: an output the context determines, so it is named where
-/// it is used and nowhere else.
+/// The context selects the associated error type, which remains part of the public interface.
 pub mod the_type_leg_as_an_abstract_type {
     // The error component's wiring key is deliberately not in the prelude.
     use cgp::core::error::ErrorTypeProviderComponent;
@@ -223,13 +221,20 @@ pub mod the_type_leg_as_an_abstract_type {
         }
     }
 
-    // The intermediate layer names no error type, no runtime, and no store.
+    // The forwarding operation shares the context's error and requires `CanRunJob` on its impl.
     #[cgp_fn]
     #[uses(CanRunJob)]
     #[use_type(HasErrorType.Error)]
     pub fn run_jobs(&self) -> Result<(), Error> {
         self.run_job()?;
         self.run_job()
+    }
+
+    pub fn run_batch<Context>(context: &Context) -> Result<(), Context::Error>
+    where
+        Context: RunJobs,
+    {
+        context.run_jobs()
     }
 
     pub struct App;
@@ -247,7 +252,8 @@ pub mod the_type_leg_as_an_abstract_type {
     }
 
     #[test]
-    fn the_context_decides_the_error_type_and_no_layer_names_it() {
-        assert!(App.run_jobs().is_ok());
+    fn the_forwarder_uses_the_contexts_shared_error_type() {
+        let result: Result<(), String> = run_batch(&App);
+        assert!(result.is_ok());
     }
 }
