@@ -219,15 +219,6 @@ payload is `Nil`, and an impl of your trait for `Nil` conflicts with the macro's
 Dispatch such an enum with the [dispatch combinators](/docs/reference/providers/dispatch) and a
 provider instead.
 
-**Seven variant names are reserved.** Because the generated impls name their associated types through
-`Self::…`, a variant called `Fields`, `FieldsRef`, `Value`, `Remainder`, `Extractor`, `ExtractorRef`, or
-`ExtractorMut` makes that path ambiguous and the derive fails with `ambiguous associated item`, headlined
-at the derive. Whether the message also names the variant depends on which part collided: the
-representation and constructor impls are generated for your enum and point a note at the real variant,
-while the extractor's are generated for the companion enums and point back at the derive. Renaming the
-variant is the fix. Record field names are unaffected, since a field is not in the same namespace as an
-associated type.
-
 **The companion enums do not inherit your attributes.** Deriving `Debug` or `PartialEq` on the
 original enum does not implement them for the extraction remainder. Use `.ok()`, `.is_ok()`, or a
 `match` to inspect an extraction result instead of comparing the whole result with `assert_eq!`.
@@ -237,12 +228,6 @@ original enum does not implement them for the extraction remainder. Use `.ok()`,
 variant operations have been mixed.
 
 **A variantless enum is accepted.** It produces empty companion enums without field-state parameters.
-
-**A variant attribute that belongs to another derive breaks the build.** The extractor's companion
-enums copy each variant's attributes, so a `serde` helper attribute beside
-`#[derive(Serialize, CgpVariant)]` lands on an enum that does not derive `Serialize` and fails with
-``cannot find attribute `serde` in this scope``.
-[`#[derive(ExtractField)]`](./derive_extract_field.md#common-mistakes) shows the case.
 
 **`CgpVariant` rejects structs.** Use [`CgpRecord`](./derive_cgp_record.md) or
 [`CgpData`](./derive_cgp_data.md) for a struct.

@@ -123,15 +123,14 @@ with readable field names and dependency chains. For this missing-field case, it
 identifies both the unavailable trait and its cause:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanSendEmail` is not implemented
-              for context `BrokenApp`
+error[E0277]: [CGP-E001] missing field `sent_emails` on `BrokenApp`
    |
-   = note: root cause: [CGP-E106] missing field `sent_emails` on `BrokenApp`
+   = note: root cause: [CGP-E110] missing field `sent_emails` on `BrokenApp`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanSendEmail` for context `BrokenApp`
              └─ [CGP-E102] provider trait impl `EmailSender` with context `BrokenApp`
                            for provider `RecordEmails`
-               └─ [CGP-E106] missing field `sent_emails` on `BrokenApp`
+               └─ [CGP-E110] missing field `sent_emails` on `BrokenApp`
 ```
 
 The root cause is now explicit: `BrokenApp` lacks `sent_emails`, which `RecordEmails` requires.

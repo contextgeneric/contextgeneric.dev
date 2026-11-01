@@ -166,7 +166,7 @@ it produces:
 impl FromVariant<Symbol!("Circle")> for Shape {
     type Value = Circle;
 
-    fn from_variant(_tag: PhantomData<Symbol!("Circle")>, value: Self::Value) -> Self {
+    fn from_variant(_tag: PhantomData<Symbol!("Circle")>, value: <Self as FromVariant<Symbol!("Circle")>>::Value) -> Self {
         Self::Circle(value)
     }
 }
@@ -174,7 +174,7 @@ impl FromVariant<Symbol!("Circle")> for Shape {
 impl FromVariant<Symbol!("Rectangle")> for Shape {
     type Value = Rectangle;
 
-    fn from_variant(_tag: PhantomData<Symbol!("Rectangle")>, value: Self::Value) -> Self {
+    fn from_variant(_tag: PhantomData<Symbol!("Rectangle")>, value: <Self as FromVariant<Symbol!("Rectangle")>>::Value) -> Self {
         Self::Rectangle(value)
     }
 }
@@ -217,12 +217,6 @@ variant produces an unsatisfied `FromVariant` bound.
 
 **A variant name is a `Symbol!` of its identifier, matched exactly.** `Symbol!("Circle")` and
 `Symbol!("circle")` are unrelated types, so a case slip reports as an unsatisfied `FromVariant` bound.
-
-**A variant named `Value` does not compile.** The generated body writes `Self::Value` to name the payload
-type, and a variant of that name makes the path ambiguous. The compiler reports
-`ambiguous associated item` with its headline on the derive and a note pointing at the offending variant.
-`Value` is the only name this derive reserves; the [extractor](./derive_extract_field.md) reserves several
-more, so an enum taking both should avoid all of them. Renaming the variant is the fix.
 
 **A variantless enum is accepted without generating implementations.** It has nothing to construct;
 code requiring a `FromVariant` implementation will fail at that use site.

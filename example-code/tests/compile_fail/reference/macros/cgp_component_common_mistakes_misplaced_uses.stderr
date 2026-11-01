@@ -1,11 +1,5 @@
-error: cannot find attribute `uses` in this scope
-  --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_misplaced_uses.rs:12:3
+error: `#[uses]` declares the dependencies of a provider, not of a trait; write `#[extend(HasName)]` to make it a supertrait
+  --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_misplaced_uses.rs:12:1
    |
 12 | #[uses(HasName)]
-   |   ^^^^
-   |
-help: a built-in attribute with a similar name exists
-   |
-12 - #[uses(HasName)]
-12 + #[used(HasName)]
-   |
+   | ^^^^^^^^^^^^^^^^

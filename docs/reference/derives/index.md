@@ -65,11 +65,9 @@ fields, the latter with the payload `Nil`. This restriction applies to `FromVari
 every variant shape and provides a structural representation with whole-value conversions, so it can
 be used with enums whose variants have several or named fields.
 
-The builder and extractor derives also generate companion types that copy each field's or variant's
-attributes but not the original type's derives. A helper attribute that belongs to another derive,
-such as `serde`'s `#[serde(rename = "…")]`, therefore fails to compile on a type that also derives
-`BuildField`, `ExtractField`, or one of the umbrella derives. The
-[`BuildField`](./derive_build_field.md#common-mistakes) page shows the error.
+The builder and extractor derives also generate companion types. Each field or variant of a companion
+keeps only its documentation, so a helper attribute that belongs to another derive, such as `serde`'s
+`#[serde(rename = "…")]`, stays on your type and does not reach the companion.
 
 ---
 

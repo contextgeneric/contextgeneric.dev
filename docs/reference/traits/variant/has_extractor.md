@@ -128,13 +128,13 @@ example's `Shape` shows the impl:
 ```rust
 impl HasExtractor for Shape {
     type Extractor = __PartialShape<IsPresent, IsPresent>;
-    fn to_extractor(self) -> Self::Extractor {
+    fn to_extractor(self) -> <Self as HasExtractor>::Extractor {
         match self {
             Self::Circle(value) => __PartialShape::Circle(value),
             Self::Rectangle(value) => __PartialShape::Rectangle(value),
         }
     }
-    fn from_extractor(extractor: Self::Extractor) -> Self {
+    fn from_extractor(extractor: <Self as HasExtractor>::Extractor) -> Self {
         match extractor {
             __PartialShape::Circle(value) => Self::Circle(value),
             __PartialShape::Rectangle(value) => Self::Rectangle(value),

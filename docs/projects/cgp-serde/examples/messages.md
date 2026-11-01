@@ -266,8 +266,8 @@ Remove `i64` from `AppB`'s `UseSerde` entry, leaving `[u64, String]`, and run
 missing entry as the root cause:
 
 ```text
-error[E0277]: [CGP-E001] the consumer traits `CanSerializeValue<DateTime<Utc>>`, `CanSerializeValue<EncryptedMessage>`, `CanSerializeValue<MessagesByTopic>`, and `CanSerializeValue<MessagesArchive>` are not implemented for context `AppB`
-    = note: root cause: [CGP-E107] context `AppB` does not contain any delegate entry for `@ValueSerializerComponent.i64`
+error[E0277]: [CGP-E001] missing wiring for `@ValueSerializerComponent.i64` on `AppB`
+    = note: root cause: [CGP-E113] missing wiring for `@ValueSerializerComponent.i64` on `AppB`
 ```
 
 Every checked type that contains a date fails, and all for one reason. Below the root cause, the

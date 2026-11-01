@@ -183,11 +183,6 @@ which this derive inherits.
 **A fieldless struct has an immediately finalizable builder.** Its companion does not need field-state
 parameters.
 
-**A field attribute that belongs to another derive breaks the build.** The builder's companion copies
-each field's attributes, so a `serde` helper attribute beside `#[derive(Serialize, CgpRecord)]` lands on a
-struct that does not derive `Serialize` and fails with ``cannot find attribute `serde` in this scope``.
-[`#[derive(BuildField)]`](./derive_build_field.md#common-mistakes) shows the case.
-
 **`CgpRecord` rejects enums.** Use [`CgpVariant`](./derive_cgp_variant.md) or
 [`CgpData`](./derive_cgp_data.md) for an enum.
 

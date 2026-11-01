@@ -51,17 +51,17 @@ check_components! {
 The check fails on `Payload`, and the tool names the missing entry, then the path that leads to it:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanSerializeValue<Payload>` is not implemented for context `App`
-   = note: root cause: [CGP-E107] context `App` does not contain any delegate entry for `@ValueSerializerComponent.Vec<u8>`
+error[E0277]: [CGP-E001] missing wiring for `@ValueSerializerComponent.Vec<u8>` on `App`
+   = note: root cause: [CGP-E113] missing wiring for `@ValueSerializerComponent.Vec<u8>` on `App`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanSerializeValue<Payload>` for context `App`
-             └─ [CGP-E104] redirect lookup to `@ValueSerializerComponent` in `App`
+             └─ [CGP-E103] redirect lookup to `@ValueSerializerComponent` in `App`
                └─ [CGP-E102] provider trait impl `ValueSerializer<Payload>` with context `App` for provider `SerializeRecordFields`
-                 └─ [CGP-E105] trait impl `FieldsSerializer` for `Struct! { quantity: u64, data: Vec<u8> }`
-                   └─ [CGP-E105] trait impl `FieldsSerializer` for `Struct! { data: Vec<u8> }`
+                 └─ [CGP-E104] trait impl `FieldsSerializer` for `Struct! { quantity: u64, data: Vec<u8> }`
+                   └─ [CGP-E104] trait impl `FieldsSerializer` for `Struct! { data: Vec<u8> }`
                      └─ [CGP-E101] consumer trait impl `CanSerializeValue<Vec<u8>>` for context `App`
-                       └─ [CGP-E104] redirect lookup to `@ValueSerializerComponent` in `App`
-                         └─ [CGP-E107] context `App` does not contain any delegate entry for `@ValueSerializerComponent.Vec<u8>`
+                       └─ [CGP-E103] redirect lookup to `@ValueSerializerComponent` in `App`
+                         └─ [CGP-E113] missing wiring for `@ValueSerializerComponent.Vec<u8>` on `App`
 ```
 
 The chain reads from the top down: serializing `Payload` goes to `SerializeRecordFields`, which
@@ -79,8 +79,8 @@ in the data has the type.
 because walking the vector by reference yields `&u64`:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanSerializeValue<Vec<u64>>` is not implemented for context `Ctx`
-   = note: root cause: [CGP-E107] context `Ctx` does not contain any delegate entry for `@ValueSerializerComponent.&u64`
+error[E0277]: [CGP-E001] missing wiring for `@ValueSerializerComponent.&u64` on `Ctx`
+   = note: root cause: [CGP-E113] missing wiring for `@ValueSerializerComponent.&u64` on `Ctx`
 ```
 
 The fix is the generic reference entry, `@ValueSerializerComponent.<'a, T> &'a T: SerializeDeref`,
@@ -98,8 +98,8 @@ context. Hex, base64, and RFC 3339 dates need `String` the same way. The
 arena example, with the allocator entry removed, the check on the borrowed types reports:
 
 ```text
-error[E0277]: [CGP-E001] the consumer traits `CanDeserializeValue<&Coord>` and `CanDeserializeValue<Payload<'_>>` are not implemented for context `App<'_>`
-   = note: root cause: [CGP-E107] context `App<'_>` does not contain any delegate entry for `AllocatorComponent`
+error[E0277]: [CGP-E001] missing wiring for `AllocatorComponent` on `App<'_>`
+   = note: root cause: [CGP-E113] missing wiring for `AllocatorComponent` on `App<'_>`
 ```
 
 The fix is the entry `AllocatorComponent: AllocateWithArena`, or another allocation provider; see
@@ -158,11 +158,11 @@ Plain `cargo check` reports only that the method exists for `Ctx` but its trait 
 satisfied. `cargo cgp check` names what is missing:
 
 ```text
-error[E0599]: [CGP-E009] the trait `CanDeserializeJsonString<_>` is not implemented for context `Ctx`
+error[E0599]: [CGP-E003] the trait `CanDeserializeJsonString<_>` is not implemented for context `Ctx`
    = note: root causes:
-             - [CGP-E107] context `Ctx` does not contain any delegate entry for `@ValueDeserializerComponent`
-             - [CGP-E107] context `Ctx` does not contain any delegate entry for `ErrorTypeProviderComponent`
-             - [CGP-E107] context `Ctx` does not contain any delegate entry for `ErrorRaiserComponent`
+             - [CGP-E113] missing wiring for `@ValueDeserializerComponent` on `Ctx`
+             - [CGP-E113] missing wiring for `ErrorTypeProviderComponent` on `Ctx`
+             - [CGP-E113] missing wiring for `ErrorRaiserComponent` on `Ctx`
 ```
 
 The two error entries are the real causes. The first cause appears because the call failed before
@@ -195,12 +195,11 @@ check_components! {
 The check reports that the wiring never resolves:
 
 ```text
-error[E0275]: [CGP-E010] the wiring for the consumer trait `CanSerializeValue<String>` on context `Ctx` never resolves — the lookup recurses without terminating
+error[E0275]: [CGP-E020] the wiring for the consumer trait `CanSerializeValue<String>` on context `Ctx` never resolves, because the lookup leads back to itself
 ```
 
-The help line printed below it suggests a component delegated back to the context itself, as with
-`UseContext`, which is the usual cause of this class; here the cycle runs through the provider
-instead, and the headline's consumer trait names the type to look at. Without the check, the first
+Its help line names the provider to replace, the one that requires the same consumer trait on the same
+context again, and the headline's consumer trait names the type to look at. Without the check, the first
 call reports the compiler's raw overflow error instead, `E0275`,
 "overflow evaluating the requirement", naming the adapter that was passed to `serde_json`. The fix
 is a provider for the in-between type that asks for nothing, such as
@@ -231,7 +230,7 @@ delegate_components! {
 ```
 
 ```text
-error[E0275]: [CGP-E010] the wiring for the consumer trait `CanSerializeValue<Node>` on context `Ctx` never resolves — the lookup recurses without terminating
+error[E0275]: [CGP-E020] the wiring for the consumer trait `CanSerializeValue<Node>` on context `Ctx` never resolves, because the lookup leads back to itself
 ```
 
 Serializing a `Node` requires serializing its `Vec<Node>`, which requires `&Node`, which requires

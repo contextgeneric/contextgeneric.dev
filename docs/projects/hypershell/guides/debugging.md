@@ -54,8 +54,8 @@ pub type Program = hypershell! {
 ```
 
 ```text
-error[E0277]: [CGP-E002] the provider trait `Handler<Pipe<…>, Vec<u8>>` with context `HypershellCli` is not implemented for provider `ComposeHandlers<…>`
-   = note: root cause: [CGP-E106] missing field `name` on `HypershellCli`
+error[E0277]: [CGP-E001] missing field `name` on `HypershellCli`
+   = note: root cause: [CGP-E110] missing field `name` on `HypershellCli`
 ```
 
 The chain runs through the pipeline, `SimpleExec`, the command's argument list, and the extractor
@@ -80,7 +80,7 @@ pub type Program = hypershell! {
 ```
 
 ```text
-   = note: root cause: [CGP-E201] the trait bound `TokioAsyncReadStream<ChildOutputStream>: AsRef<[u8]>` is not satisfied
+   = note: root cause: [CGP-E117] the trait bound `TokioAsyncReadStream<ChildOutputStream>: AsRef<[u8]>` is not satisfied
 ```
 
 **Fix:** insert `StreamToBytes` between the two stages. With it, the program compiles and prints
@@ -99,7 +99,7 @@ pub type Program = hypershell! {
 ```
 
 ```text
-   = note: root cause: [CGP-E110] provider `HandleToTokioAsyncRead` does not contain any delegate entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>`
+   = note: root cause: [CGP-E114] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `HandleToTokioAsyncRead`
 ```
 
 The path names the syntax and then the input type, which is exactly what the dispatcher could not
@@ -124,8 +124,8 @@ pub type Program = hypershell! {
 ```
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanHandle<Pipe<…>, Vec<u8>>` is not implemented for context `HypershellCli`
-  = note: root cause: [CGP-E107] context `HypershellCli` does not contain any delegate entry for `@cgp.extra.handler.HandlerComponent.Checksum<…>`
+error[E0277]: [CGP-E001] missing wiring for `@cgp.extra.handler.HandlerComponent.Checksum<…>` on `HypershellCli`
+  = note: root cause: [CGP-E113] missing wiring for `@cgp.extra.handler.HandlerComponent.Checksum<…>` on `HypershellCli`
 ```
 
 `WebSocket` fails the same way on such a context. **Fix:** add the route, either on a namespace that
@@ -176,8 +176,8 @@ delegate_components! {
 ```
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanHandle<CheckLength, Vec<u8>>` is not implemented for context `App`
-   = note: root cause: [CGP-E107] context `App` does not contain any delegate entry for `@cgp.core.error.ErrorRaiserComponent.TooLong`
+error[E0277]: [CGP-E001] missing wiring for `@cgp.core.error.ErrorRaiserComponent.TooLong` on `App`
+   = note: root cause: [CGP-E113] missing wiring for `@cgp.core.error.ErrorRaiserComponent.TooLong` on `App`
 ```
 
 The provider requires the context to raise `TooLong` into its error type, and `HypershellNamespace`
@@ -222,8 +222,8 @@ delegate_components! {
 ```
 
 ```text
-error[E0277]: [CGP-E002] the provider trait `Handler<Shout, String>` with context `App` is not implemented for provider `ShoutText`
-   = note: root cause: [CGP-E111] the provider trait `Handler` is not implemented for `ShoutText`
+error[E0277]: [CGP-E001] `ShoutText` is not a provider of `Handler`
+   = note: root cause: [CGP-E115] `ShoutText` is not a provider of `Handler`
 ```
 
 **Fix:** lift the provider into a handler, as `Promote<PromoteAsync<ShoutText>>`, with both imported
@@ -246,7 +246,7 @@ delegate_components! {
 ```
 
 ```text
-error[E0119]: [CGP-E005] `App` cannot wire `@cgp.extra.handler.HandlerComponent.SimpleExec.*` that is already set through `HypershellNamespace`
+error[E0119]: [CGP-E011] conflicting wiring: `App` wires `@cgp.extra.handler.HandlerComponent.SimpleExec<Path, Args>`, which `HypershellNamespace` already covers
 ```
 
 A namespace that inherits `HypershellNamespace` and binds the same path fails in the same way.

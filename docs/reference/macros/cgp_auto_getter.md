@@ -85,8 +85,8 @@ mirror: `&mut T`, `&mut str` from a `String` via `.as_mut_str()`, `&mut [T]` thr
 in the return type needs that receiver, and under `&self` the macro rejects it with
 *&mut self is required for mutable field reference*.
 
-Two combinations fall outside the table. `Option<&[T]>` has no rule of its own, so the `Option<&T>`
-rule applies and asks for an unsized `Option<[T]>` field, which the compiler rejects. And a shared
+Two combinations fall outside the table. `Option<&[T]>` and `Option<&dyn Trait>` have no rule of their
+own, and the macro rejects them, since an `Option<[T]>` field cannot exist. And a shared
 `Option` return under `&mut self` does not compile, as [Common Mistakes](#common-mistakes) records.
 
 The `&str` row is the one most often wanted and least obvious: the context stores a `String` and the
@@ -382,12 +382,15 @@ error[E0308]: mismatched types
 The plain reference, `&str`, slice, and `MRef` forms are unaffected, because a `&mut` result
 coerces to the shared one. Return `Option<&mut T>` from a `&mut self` getter, or take `&self`.
 
-**`Option<&[T]>` is not a supported return type.** It falls through to the `Option<&T>` rule, which
-bounds the field as `Option<[u8]>`:
+**`Option<&[T]>` is not a supported return type**, and neither is `Option<&dyn Trait>`. The macro rejects
+them, since the field they would read cannot exist:
 
 ```text
-error[E0277]: the size for values of type `[u8]` cannot be known at compilation time
+error: `Option<&[T]>` would read an `Option<[T]>` field, which cannot exist because a slice is unsized; read an `Option<Vec<T>>` field as `Option<&Vec<T>>` instead
 ```
+
+A type named by a path, such as `Option<&Path>`, has a size only the compiler knows, so it still reaches
+the compiler, as an `E0277` on the attribute naming `[u8]`.
 
 From an `Option<Vec<T>>` field, return `Option<&Vec<T>>`, or return `&Option<Vec<T>>` and convert
 at the call site.

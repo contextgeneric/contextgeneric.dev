@@ -321,12 +321,12 @@ through the context.
 the return type with *Computer functions cannot return `impl Trait`*. A parameter's `impl Trait` is
 shorthand for a generic parameter, so the fix is to write that parameter out.
 
-**A type parameter used only in the return type fails to compile.** The function's generics move
-onto the generated impl, which names only the input type, so in
-`fn parse<T: FromStr>(value: String) -> Option<T>` nothing fixes `T` and the compiler rejects it:
+**A type parameter used only in the return type is rejected.** The function's generics move onto the
+generated impl, which names only the input type, so in
+`fn parse<T: FromStr>(value: String) -> Option<T>` nothing fixes `T`, and the macro says so:
 
 ```text
-error[E0207]: the type parameter `T` is not constrained by the impl trait, self type, or predicates
+error: the parameter `T` appears in no argument type, so the generated `Computer` impl cannot determine it; take an argument whose type names `T`, or write the provider by hand as a `Computer` impl on a provider generic over `T`
 ```
 
 Such a computation needs a `Computer` provider written by hand, whose struct can carry `T`.

@@ -1,10 +1,8 @@
 error[E0277]: the trait bound `__PartialPerson<IsNothing, IsNothing>: UpdateField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>, IsPresent>` is not satisfied
-  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:11:43
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:11:31
    |
 11 |     let _ = Person::builder().build_field(PhantomData::<Symbol!("age")>, 42_u8);
-   |                               ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
-   |                               |
-   |                               required by a bound introduced by this call
+   |                               ^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `UpdateField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>, IsPresent>` is not implemented for `__PartialPerson<IsNothing, IsNothing>`
   --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:4:1

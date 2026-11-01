@@ -143,8 +143,8 @@ check_components! {
 the long types abridged:
 
 ```text
-error[E0277]: [CGP-E002] the provider trait `Handler<Pipe<…>, Vec<u8>>` with context `HypershellCli` is not implemented for provider `ComposeHandlers<…>`
-   = note: root cause: [CGP-E106] missing field `name` on `HypershellCli`
+error[E0277]: [CGP-E001] missing field `name` on `HypershellCli`
+   = note: root cause: [CGP-E110] missing field `name` on `HypershellCli`
 ```
 
 The full output continues with the dependency chain that leads there, from the pipeline through

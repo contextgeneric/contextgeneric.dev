@@ -106,7 +106,7 @@ The conversion destructures the `Cons` chain positionally and unwraps each entry
 
 ```rust
 impl FromFields for Config {
-    fn from_fields(Cons(host, Cons(port, Nil)): Self::Fields) -> Self {
+    fn from_fields(Cons(host, Cons(port, Nil)): <Self as HasFields>::Fields) -> Self {
         Self {
             host: host.value,
             port: port.value,
@@ -123,7 +123,7 @@ example's `Shape` ends in an empty match on the `Void` terminator:
 
 ```rust
 impl FromFields for Shape {
-    fn from_fields(rest: Self::Fields) -> Self {
+    fn from_fields(rest: <Self as HasFields>::Fields) -> Self {
         match rest {
             Either::Left(field) => {
                 let field = field.value;

@@ -1,7 +1,5 @@
-error[E0207]: the type parameter `__Value__` is not constrained by the impl trait, self type, or predicates
- --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_self_inheriting.rs:5:1
+error: the namespace `A` cannot inherit from itself; name another namespace as its parent, or omit the parent
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_self_inheriting.rs:5:25
   |
 5 | cgp_namespace! { new A: A {} }
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unconstrained type parameter
-  |
-  = note: this error originates in the macro `cgp_namespace` (in Nightly builds, run with -Z macro-backtrace for more info)
+  |                         ^

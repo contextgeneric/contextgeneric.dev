@@ -161,7 +161,7 @@ impl FromVariant<Symbol!("Circle")> for Shape {
     type Value = Circle;
     fn from_variant(
         _tag: ::core::marker::PhantomData<Symbol!("Circle")>,
-        value: Self::Value,
+        value: <Self as FromVariant<Symbol!("Circle")>>::Value,
     ) -> Self {
         Self::Circle(value)
     }
@@ -170,7 +170,7 @@ impl FromVariant<Symbol!("Rectangle")> for Shape {
     type Value = Rectangle;
     fn from_variant(
         _tag: ::core::marker::PhantomData<Symbol!("Rectangle")>,
-        value: Self::Value,
+        value: <Self as FromVariant<Symbol!("Rectangle")>>::Value,
     ) -> Self {
         Self::Rectangle(value)
     }
@@ -227,10 +227,6 @@ error[E0119]: conflicting implementations of trait `cgp::prelude::FromVariant<cg
 14 |     Circle(Circle),
    |     ^^^^^^ conflicting implementation for `Shape`
 ```
-
-**A variant named `Value` does not compile**, because the generated signature names the payload as
-`Self::Value`. The [derive's page](../../derives/derive_from_variant.md) covers this with the family's other
-reserved names.
 
 **Every variant needs one unnamed payload or none**, which is the derive's requirement rather than
 the trait's: a multi-field or struct-style variant with fields cannot be given a single `Value`,

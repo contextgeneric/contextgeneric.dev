@@ -135,7 +135,7 @@ brackets, and the compiler abbreviates the display differently depending on how 
 Decoding type-level strings by hand is exactly the job a tool should do, and CGP ships one:
 
 ```bash
-cargo install cargo-cgp
+cargo install --locked cargo-cgp
 cargo cgp setup
 ```
 
@@ -144,21 +144,22 @@ Nix flake, and explains why `setup` is a separate step. `cargo cgp check` then r
 `cargo check` and rewrites the errors it recognizes. On the same broken program:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanCalculateArea` is not implemented for context `PlainCircle`
+error[E0277]: [CGP-E001] missing fields `width` and `height` on `PlainCircle`
   --> src/main.rs:61:9
    |
 61 |         AreaCalculatorComponent,
    |         ^^^^^^^^^^^^^^^^^^^^^^^
    |
    = note: root causes:
-             - [CGP-E106] missing field `height` on `PlainCircle`
-             - [CGP-E106] missing field `width` on `PlainCircle`
+             - [CGP-E110] missing field `width` on `PlainCircle`
+             - [CGP-E110] missing field `height` on `PlainCircle`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanCalculateArea` for context `PlainCircle`
              └─ [CGP-E102] provider trait impl `AreaCalculator` with context `PlainCircle` for provider `RectangleAreaCalculator`
-               └─ [CGP-E105] trait impl `RectangleArea` for `PlainCircle`
-                 ├─ [CGP-E106] missing field `height` on `PlainCircle`
-                 └─ [CGP-E106] missing field `width` on `PlainCircle`
+               └─ [CGP-E104] trait impl `RectangleArea` for `PlainCircle`
+                 ├─ [CGP-E110] missing field `width` on `PlainCircle`
+                 └─ [CGP-E110] missing field `height` on `PlainCircle`
+   = help: add the fields `width: f64` and `height: f64` to `PlainCircle`
 ```
 
 This is the same failure a third time, and now it leads with the answer: `PlainCircle` is missing the

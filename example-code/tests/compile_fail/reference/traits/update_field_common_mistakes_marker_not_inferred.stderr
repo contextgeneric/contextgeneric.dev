@@ -7,7 +7,16 @@ error[E0284]: type annotations needed for `((), __PartialPerson<_, IsNothing>)`
    |                           ------------ type must be known at this point
    |
    = note: cannot satisfy `<_ as MapType>::Map<String> == String`
+   = note: the type must also implement `MapType`
+note: required by a bound in `update_field`
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/update_field.rs:5:31
+   |
+ 5 | pub trait UpdateField<Tag, M: MapType> {
+   |                               ^^^^^^^ required by this bound in `UpdateField::update_field`
+...
+12 |     fn update_field(
+   |        ------------ required by a bound in this associated function
 help: consider giving this pattern a type, where the type for type parameter `M` is specified
    |
-11 |     let (_old, _partial): (_, __PartialPerson<__M2__, _>) =
-   |                         +++++++++++++++++++++++++++++++++
+11 |     let (_old, _partial): (_, __PartialPerson<M, _>) =
+   |                         ++++++++++++++++++++++++++++

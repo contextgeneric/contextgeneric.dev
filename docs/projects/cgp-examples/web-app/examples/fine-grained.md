@@ -165,8 +165,8 @@ Remove `UsernameCensorComponent` from the last list, so the censor has no entry,
 [`cargo cgp check`](/docs/cargo-cgp/check). This time only the operation that uses the censor fails:
 
 ```text
-error[E0277]: [CGP-E001] the consumer traits `CanCreateUser` and `CanCensorUsername` are not implemented for context `ProductionApp`
-    = note: root cause: [CGP-E107] context `ProductionApp` does not contain any delegate entry for `UsernameCensorComponent`
+error[E0277]: [CGP-E001] missing wiring for `UsernameCensorComponent` on `ProductionApp`
+    = note: root cause: [CGP-E113] missing wiring for `UsernameCensorComponent` on `ProductionApp`
 ```
 
 Getting and updating users still check, because their providers need only the database. In the

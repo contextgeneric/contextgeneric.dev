@@ -21,8 +21,8 @@ error[E0277]: the trait bound `OnlyAbsent: TransformMap<cgp::prelude::IsPresent,
 21 |     let _ = TransformMapFields::<OnlyAbsent, IsPresent>::transform_map_fields(partial);
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-help: the trait `TransformMap<cgp::prelude::IsPresent, cgp::prelude::IsPresent, u16>` is not implemented for `OnlyAbsent`
-      but trait `TransformMap<cgp::prelude::IsNothing, cgp::prelude::IsPresent, u16>` is implemented for it
+help: the trait `TransformMap<cgp::prelude::IsPresent, IsPresent, u16>` is not implemented for `OnlyAbsent`
+      but trait `TransformMap<cgp::prelude::IsNothing, IsPresent, u16>` is implemented for it
   --> tests/compile_fail/reference/traits/transform_map_common_mistakes_missing_source_state.rs:7:1
    |
  7 | impl<T: Default> TransformMap<IsNothing, IsPresent, T> for OnlyAbsent {

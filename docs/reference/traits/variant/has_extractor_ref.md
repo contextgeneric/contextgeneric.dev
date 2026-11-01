@@ -139,7 +139,7 @@ impl HasExtractorRef for Shape {
     type ExtractorRef<'__a__> = __PartialRefShape<'__a__, IsRef, IsPresent, IsPresent>
     where
         Self: '__a__;
-    fn extractor_ref<'__a__>(&'__a__ self) -> Self::ExtractorRef<'__a__> {
+    fn extractor_ref<'__a__>(&'__a__ self) -> <Self as HasExtractorRef>::ExtractorRef<'__a__> {
         match self {
             Self::Circle(value) => __PartialRefShape::Circle(value),
             Self::Rectangle(value) => __PartialRefShape::Rectangle(value),

@@ -241,9 +241,8 @@ The [example](#examples) derives both on its `FooBar`.
 **The partial type cannot be printed or cloned.** The derive drops the original's struct-level
 attributes, so it lacks `Debug`, `Clone`, and every other derive the record carries. Read a set
 field through the partial type's [`HasField`](../field-access/has_field.md) impl instead.
-Field-level attributes, by contrast, are copied onto the partial type, so a field helper attribute
-such as `#[serde(rename = "...")]` breaks the build; see
-[`#[derive(BuildField)]`](../../derives/derive_build_field.md#common-mistakes).
+Each field keeps only its documentation, so a field helper attribute such as
+`#[serde(rename = "...")]` does not reach the partial type.
 
 **It neither defaults nor validates.** Presence is all that is tracked. A field with a sensible
 default still has to be set, unless you reach for the

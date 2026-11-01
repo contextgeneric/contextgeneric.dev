@@ -8,4 +8,3 @@ error[E0119]: conflicting implementations of trait `HasArea` for type `Shape`
    | ---------------------- first implementation here
    |
    = note: upstream crates may add a new impl of trait `cgp::prelude::IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ Shape)>` for type `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` in future versions
-   = note: upstream crates may add a new impl of trait `cgp::prelude::IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ Shape)>` for type `cgp::prelude::MatchWithValueHandlersRef<ComputeArea>` in future versions

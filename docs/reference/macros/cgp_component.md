@@ -146,8 +146,8 @@ The `open` statement of [`delegate_components!`](./delegate_components.md) super
 
 `#[uses(...)]`, `#[extend_where(...)]`, and `#[use_provider(...)]` look like they belong here, but
 only [`#[cgp_impl]`](./cgp_impl.md) and [`#[cgp_fn]`](./cgp_fn.md) read them. None of them is an
-attribute in its own right, so writing one above a component leaves a name nothing can resolve, and
-the error is confusing; see [Common Mistakes](#common-mistakes). The equivalent of `#[uses]` on a
+attribute in its own right, so the macro rejects one written above a component and names `#[extend]`
+instead; see [Common Mistakes](#common-mistakes). The equivalent of `#[uses]` on a
 component is a supertrait, written with `#[extend]`.
 
 ## Examples
@@ -515,18 +515,16 @@ CGP's wiring dispatches on types rather than values, so that machinery cannot ho
 
 The rule does not affect an associated `const` *item*. `const LIMIT: u64;` as a trait member is an
 [associated const](https://doc.rust-lang.org/reference/items/associated-items.html), not a generic
-parameter, and a provider supplies it in the ordinary way. Naming your own associated const from
-*inside* a [`#[cgp_impl]`](./cgp_impl.md) body has one complication of its own, covered in that page's
-[Common Mistakes](./cgp_impl.md#common-mistakes).
+parameter, and a provider supplies it in the ordinary way. A default method body reading `Self::LIMIT`
+reads the provider's own `LIMIT` in the provider trait.
 
 **Every method parameter needs a plain name.** The impls the macro generates forward each argument to
-the provider by name, so a `_` parameter, which Rust allows in a trait method without a body, or a
-destructuring pattern such as `(a, b): (u32, u32)` in a default method fails inside the macro:
+the provider by name, so a `_` parameter, which Rust allows in a trait method without a body, or a `ref`
+binding, a binding with a subpattern, or a destructuring pattern such as `(a, b): (u32, u32)` in a default
+method is rejected. A `mut value` parameter of a default method is accepted and forwarded by its name:
 
 ```text
-error: expected identifier, found keyword `_`
-error: failed to parse internal tokens to type `proc_macro2::Ident`:
-       _
+error: a component method parameter needs a plain name, since the generated impls forward each argument by name; write a name such as `_value`, and destructure inside a default body
 ```
 
 Name the parameter instead, as in `_value: u32`, and destructure inside a default method's body.
@@ -559,11 +557,13 @@ The [`#[use_type]`](../attributes/use_type.md) page covers both.
 generates from the trait: the consumer trait, the provider trait, the two blanket impls, and the
 `UseContext`, `RedirectLookup`, and `UseDelegate` impls. For `#[allow(...)]` or a doc comment, that
 is what you want.
-For `#[uses(HasName)]` written above a component trait, it means a *cannot find attribute `uses` in
-this scope* error on the attribute's line, which the compiler reports once because every copy shares
-the attribute's span. The compiler may even suggest a built-in attribute with a similar name, such as
-`#[used]`. It is the same error a typo in an attribute name gives, so the fix is to move the
-attribute rather than to add an import.
+A typo in an attribute's name therefore gives a *cannot find attribute* error on the attribute's line,
+which the compiler reports once because every copy shares the attribute's span. `#[uses]` is the
+exception, because the macro rejects it by name:
+
+```text
+error: `#[uses]` declares the dependencies of a provider, not of a trait; write `#[extend(HasName)]` to make it a supertrait
+```
 
 ## Related constructs
 

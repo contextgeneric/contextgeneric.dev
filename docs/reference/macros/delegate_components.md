@@ -773,7 +773,10 @@ end.
 **Naming a provider struct that does not exist** is easy to do when you wrote a provider with
 [`#[cgp_impl]`](./cgp_impl.md) *without* the `new` keyword and never declared it separately. The error
 is `E0425`, ``cannot find type `SquareArea` in this scope``, which names an unresolved type rather
-than anything about wiring.
+than anything about wiring. When no type of that name exists anywhere, [`cargo cgp
+check`](/docs/cargo-cgp/error-codes#cgp-e043) reports it as an undeclared provider, `[CGP-E043]`, and a
+key that does not resolve as one of `[CGP-E040]` to `[CGP-E042]` or `[CGP-E044]`. A name declared elsewhere
+but not imported keeps the compiler's message and its import suggestion.
 
 **A bare `N` in a nested table's generic list declares a type parameter.** That list declares the
 inner struct, so `<const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<N> { … }>` gives

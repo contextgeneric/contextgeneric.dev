@@ -243,8 +243,8 @@ The `__Context__` in that note points to the mistake. Depend on the **consumer**
 case. Use [`#[use_provider]`](use_provider.md) when you mean a named implementation, and it will supply
 the missing argument.
 
-**`#[uses]` fails on a component trait.** `#[cgp_component]` does not read the attribute, so it
-stays on the trait and the compiler cannot find it:
+**`#[uses]` is rejected on a component trait.** It declares the dependencies of a provider, and the macro
+says so:
 
 ```rust
 #[cgp_component(Shouter)]
@@ -255,7 +255,7 @@ pub trait CanShout {
 ```
 
 ```text
-error: cannot find attribute `uses` in this scope
+error: `#[uses]` declares the dependencies of a provider, not of a trait; write `#[extend(CanCalculateArea)]` to make it a supertrait
 ```
 
 A trait that every implementation of the component needs is a supertrait. Write it with

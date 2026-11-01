@@ -398,12 +398,14 @@ component name, the context, and a tuple of any remaining provider-trait paramet
 so a provider for `ComputerRef<Context, Code, Input>` gets
 `IsProviderFor<ComputerRefComponent, Context, (Code, Input)>`.
 
-**An associated type the block declares is exempt.** The macro leaves `Self::Output` alone in a
-provider that supplies `type Output`, because it gathers the block's own associated-type names first
-and skips any `Self::` path starting with one. In the emitted impl, `Self` is the provider struct,
-which is the type that declares `Output`, so the path still resolves. The macro still rewrites every
-other `Self` in the block, including one naming an [abstract type](/docs/reference/glossary#abstract-type) the *context* supplies. The exemption
-does not cover associated consts; see [Common Mistakes](#common-mistakes).
+**An associated type or const the block declares is the provider's own.** The macro leaves
+`Self::Output` alone in a provider that supplies `type Output`, because it gathers the block's own
+associated-item names first and skips any `Self::` path starting with one. In the emitted impl, `Self` is
+the provider struct, which is the type that declares `Output`, so the path still resolves. A
+`Self::LIMIT` naming a const the block declares reads that const through its qualified provider path,
+even when a [`#[uses]`](../attributes/uses.md) trait declares a const of the same name, and
+`<Self as HasLimit>::LIMIT` reads the context's. The macro still rewrites every other `Self` in the block,
+including one naming an [abstract type](/docs/reference/glossary#abstract-type) the *context* supplies.
 
 **The rewrite is scoped to the block's own method bodies.** An item nested *inside* a body, such as a
 local `struct` with its own impl, a helper `fn`, or an inline `trait`, introduces a fresh `self`/`Self`
@@ -429,23 +431,6 @@ passthrough form. `ComponentType` overrides the component in the generated `IsPr
 defaulting to the provider trait's name plus `Component`. Both are Rust `Type` productions.
 
 ## Common Mistakes
-
-**A provider's own associated const needs a qualified path inside its body**, and this follows
-directly from the rewrite. The exemption described above covers associated *types* only. So a provider
-that declares `const LIMIT: u64 = 100;` cannot then write `Self::LIMIT` in a method body, because the
-macro rewrites that `Self` to the context, which lacks the const. The error reads:
-
-```text
-error[E0599]: no associated function or constant named `LIMIT` found for type parameter `__Context__` in the current scope
-```
-
-Name it through the provider trait instead, which the rewrite turns into the correct qualified path:
-
-```rust
-<AllowUnderLimit as RateLimiter<Self>>::LIMIT
-```
-
-The consumer side is unaffected: a wired context reads the same const as `<App as CanRateLimit>::LIMIT`.
 
 **One nesting case escapes the scoping rule.** An item written inside a `macro!( … )` invocation has
 its `self`/`Self` rewritten too, because a token-level rewrite cannot see the scope the macro will

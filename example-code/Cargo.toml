@@ -15,3 +15,8 @@ cap-std = "3"
 futures = "0.3"
 serde = { version = "1", features = ["derive"] }
 trybuild = "1"
+
+# The site documents the `cgp` release its sibling checkout prepares, which the repository's `main` does
+# not hold yet. Remove this once that release is on `main`.
+[patch."https://github.com/contextgeneric/cgp.git"]
+cgp = { path = "../../cgp/crates/main/cgp" }

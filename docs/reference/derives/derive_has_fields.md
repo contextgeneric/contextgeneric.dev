@@ -222,19 +222,19 @@ The conversion implementations move or borrow values between `Person` and that p
 
 ```rust
 impl ToFields for Person {
-    fn to_fields(self) -> Self::Fields {
+    fn to_fields(self) -> <Self as HasFields>::Fields {
         Cons(self.name.into(), Cons(self.age.into(), Nil))
     }
 }
 
 impl FromFields for Person {
-    fn from_fields(Cons(name, Cons(age, Nil)): Self::Fields) -> Self {
+    fn from_fields(Cons(name, Cons(age, Nil)): <Self as HasFields>::Fields) -> Self {
         Self { name: name.value, age: age.value }
     }
 }
 
 impl ToFieldsRef for Person {
-    fn to_fields_ref<'__a>(&'__a self) -> Self::FieldsRef<'__a>
+    fn to_fields_ref<'__a>(&'__a self) -> <Self as HasFieldsRef>::FieldsRef<'__a>
     where
         Self: '__a,
     {
@@ -297,14 +297,6 @@ for that additional borrow.
 **Field order is declaration order, and it is part of the type.** Two structs with the same field names in
 different orders have different `Fields` types. Structural conversions that match on names cope with that;
 code written against a literal `Cons` chain does not.
-
-**Variants named `Fields` or `FieldsRef` make generated paths ambiguous.** The implementations use
-`Self::Fields` and `Self::FieldsRef`, which conflict with variants of those names. The compiler reports
-`ambiguous associated item` at the derive and points to the offending variant in a note. The error
-comes from a lint that denies the build by default.
-Rename that variant. The [extractor](./derive_extract_field.md) and
-[constructor](./derive_from_variant.md) derives reserve additional names, so check their restrictions
-when deriving the full family.
 
 **`HasField` and `HasFields` generate different interfaces.** The singular derive provides per-field
 access for structs. The plural derive provides a whole-type representation for structs and enums.

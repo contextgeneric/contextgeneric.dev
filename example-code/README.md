@@ -120,6 +120,8 @@ rejected snippet means writing a fixture under `tests/compile_fail/`, blessing i
 
 ## The `cgp` version
 
-The crate takes `cgp` from the `cgp` repository's `main`, which is the 0.8.0 release the site
-documents, so it checks the pages against that release before it is on crates.io. Once 0.8.0 is
-published, pin `cgp = "0.8.0"` from crates.io instead, alongside the version pins in the tutorials.
+The crate checks the pages against the 0.8.0 release before it is on crates.io. Its manifest names the
+`cgp` repository and patches it to a sibling checkout at `../../cgp`, which holds that release, so `cargo
+test` needs that checkout on the release's branch. Once the release is on the repository's `main`, remove
+the patch, and once 0.8.0 is published, pin `cgp = "0.8.0"` from crates.io instead, alongside the version
+pins in the tutorials. Each step changes the paths in the `.stderr` files, so re-bless them.

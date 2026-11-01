@@ -6,7 +6,7 @@ error[E0277]: the trait bound `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDa
    |
    = help: the trait `IsProviderFor<cgp::prelude::ComputerRefComponent, AppBuilder, ((), ())>` is not implemented for `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDatabaseConfig>, Cons<BuildAndMerge<BuildHttpConfig>, Nil>>>`
 help: `BuildWithHandlers<Output, Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/extra/cgp-dispatch/src/providers/with_handlers/build_with_handlers.rs:10:1
+  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/build_with_handlers.rs:10:1
    |
 10 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Computer<Context, Code, Input>
 11 | |     for BuildWithHandlers<Output, Handlers>

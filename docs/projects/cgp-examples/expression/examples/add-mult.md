@@ -291,8 +291,8 @@ Remove the evaluation entry for `Times`, the line
 [`cargo cgp check`](/docs/cargo-cgp/check). The check names the missing entry:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanCompute<Eval, Times<MathExpr>>` is not implemented for context `Interpreter`
-   = note: root cause: [CGP-E107] context `Interpreter` does not contain any delegate entry for `@ComputerComponent.Eval.Times<MathExpr>`
+error[E0277]: [CGP-E001] missing wiring for `@ComputerComponent.Eval.Times<MathExpr>` on `Interpreter`
+   = note: root cause: [CGP-E113] missing wiring for `@ComputerComponent.Eval.Times<MathExpr>` on `Interpreter`
 ```
 
 A second, longer error points at the wrapper's call to `MatchWithValueHandlers`, because the

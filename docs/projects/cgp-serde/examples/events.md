@@ -178,8 +178,8 @@ fails on the three types that contain an event, and the tool names the missing e
 cause:
 
 ```text
-error[E0277]: [CGP-E001] the consumer traits `CanDeserializeValue<ChatEvent>`, `CanDeserializeValue<Vec<ChatEvent>>`, and `CanDeserializeValue<SyncBatch>` are not implemented for context `ServerApp`
-    = note: root cause: [CGP-E107] context `ServerApp` does not contain any delegate entry for `@ValueDeserializerComponent.Nil`
+error[E0277]: [CGP-E001] missing wiring for `@ValueDeserializerComponent.Nil` on `ServerApp`
+    = note: root cause: [CGP-E113] missing wiring for `@ValueDeserializerComponent.Nil` on `ServerApp`
 ```
 
 `HistoryCleared` carries `Nil`, so reading an event asks the context to read `Nil`, even though no

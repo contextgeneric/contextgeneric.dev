@@ -75,7 +75,7 @@ it for each operand, which is the same question, and it never finishes. With the
 the wiring never resolves:
 
 ```text
-error[E0275]: [CGP-E010] the wiring for the consumer trait `CanCompute<Eval, MathExpr>` on context `Interpreter` never resolves — the lookup recurses without terminating
+error[E0275]: [CGP-E020] the wiring for the consumer trait `CanCompute<Eval, MathExpr>` on context `Interpreter` never resolves, because the lookup leads back to itself
 ```
 
 The same error follows for `Plus` and `Times`, and two raw overflow errors for the dispatcher

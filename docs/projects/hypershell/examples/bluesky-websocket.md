@@ -147,8 +147,8 @@ Remove the error route, keeping the `WebSocket` entry. Checked with `check_compo
 abridged:
 
 ```text
-error[E0277]: [CGP-E002] the provider trait `Handler<Pipe<…>, TokioAsyncReadStream<ReadHalf<SimplexStream>>>` with context `MyApp` is not implemented for provider `ComposeHandlers<…>`
-   = note: root cause: [CGP-E107] context `MyApp` does not contain any delegate entry for `@cgp.core.error.ErrorRaiserComponent.Error`
+error[E0277]: [CGP-E001] missing wiring for `@cgp.core.error.ErrorRaiserComponent.Error` on `MyApp`
+   = note: root cause: [CGP-E113] missing wiring for `@cgp.core.error.ErrorRaiserComponent.Error` on `MyApp`
 ```
 
 The path's last segment is the error type the provider raises, written by its own name. That type is

@@ -290,28 +290,6 @@ missing field.
 attributes. Read a set field through the companion's `HasField` implementation when inspecting a
 partial value.
 
-**A field attribute that belongs to another derive breaks the build.** The companion copies each
-field's attributes but none of the struct's derives, so a helper attribute such as `serde`'s lands on
-a struct that does not derive `Serialize`:
-
-```rust
-use serde::Serialize;
-
-#[derive(Serialize, BuildField)]
-pub struct Person {
-    #[serde(rename = "name")]
-    pub first_name: String,
-}
-```
-
-```text
-error: cannot find attribute `serde` in this scope
-```
-
-A struct therefore cannot combine `BuildField`, or [`CgpRecord`](./derive_cgp_record.md) or
-[`CgpData`](./derive_cgp_data.md), with a derive whose field helper attributes it uses. Plain field
-attributes such as `#[doc]` and `#[allow]` are harmless.
-
 **`build_from` needs `HasFields` on its source in addition to `BuildField`.** Deriving only
 `BuildField` on both structs leaves the source without the field list that the conversion traverses.
 The error reports an unsatisfied [`HasFields`](./derive_has_fields.md) bound on the source.

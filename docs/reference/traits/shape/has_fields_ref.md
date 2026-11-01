@@ -155,10 +155,6 @@ its own.** There is no `#[derive(HasFieldsRef)]`.
 **Naming the shape is not obtaining it.** [`ToFieldsRef`](./to_fields_ref.md) is the method half;
 this trait has none.
 
-**Two enum variant names are reserved**, `Fields` and `FieldsRef`, because these associated types
-are named through `Self::…` in the generated impls. The [derive's
-page](../../derives/derive_has_fields.md) lists them with the others.
-
 ## Related constructs
 
 - [`HasFields`](./has_fields.md): the owned shape, and where the family is explained in full.

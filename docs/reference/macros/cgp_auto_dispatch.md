@@ -303,7 +303,8 @@ the provider after the method alone, so a second trait with an `area` method emi
 `__compute_area__` and a second `ComputeArea`, and the module fails with
 ``error[E0428]: the name `__compute_area__` is defined multiple times``, the same error for
 `ComputeArea`, and `E0119` conflicts between the two providers' impls, followed by `E0277` errors on
-the second trait's generated code. Declare such traits in separate modules.
+the second trait's generated code. [`cargo cgp check`](/docs/cargo-cgp/error-codes#cgp-e061) reports the pair
+as one error on the two method names. Declare such traits in separate modules.
 
 **The enum must derive the extensible-data machinery.** Without
 [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or the variant derives, the call fails with
@@ -317,6 +318,8 @@ error[E0599]: the method `area` exists for reference `&Plain`, but its trait bou
 `HasArea for Rectangle` does not fail where the impl should have been. It fails where
 `shape.area()` is called, with the same `E0599` headline, and the notes list unsatisfied bounds on
 `MatchWithValueHandlersRef<ComputeArea>` without naming the variant that lacks an impl.
+[`cargo cgp check`](/docs/cargo-cgp/check) names the payload instead:
+``[CGP-E003] the trait bound `Rectangle: HasArea` is not satisfied``.
 
 **The generated impl is a blanket impl over every type that implements `HasExtractor`.** This lets
 it cover any extensible enum whose payloads implement the trait. A hand-written impl for a type

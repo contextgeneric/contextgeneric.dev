@@ -145,10 +145,10 @@ Remove `TestApp`'s `@app.extra` line, and run [`cargo cgp check`](/docs/cargo-cg
 creators fail, each with the filter its wrapper uses:
 
 ```text
-error[E0277]: [CGP-E001] the consumer traits `CanCreateUser` and `CanCensorUsername` are not implemented for context `TestApp`
-    = note: root cause: [CGP-E107] context `TestApp` does not contain any delegate entry for `@app.extra.content_filter.UsernameCensorComponent`
-error[E0277]: [CGP-E001] the consumer traits `CanCreatePost` and `CanDetectSpamMessage` are not implemented for context `TestApp`
-    = note: root cause: [CGP-E107] context `TestApp` does not contain any delegate entry for `@app.extra.content_filter.SpamMessageDetectorComponent`
+error[E0277]: [CGP-E001] missing wiring for `@app.extra.content_filter.UsernameCensorComponent` on `TestApp`
+    = note: root cause: [CGP-E113] missing wiring for `@app.extra.content_filter.UsernameCensorComponent` on `TestApp`
+error[E0277]: [CGP-E001] missing wiring for `@app.extra.content_filter.SpamMessageDetectorComponent` on `TestApp`
+    = note: root cause: [CGP-E113] missing wiring for `@app.extra.content_filter.SpamMessageDetectorComponent` on `TestApp`
 ```
 
 Each root cause names the full path the namespace routed the lookup to, which says where the entry

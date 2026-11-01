@@ -162,7 +162,7 @@ help: the trait `HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars
 ```
 
 [`cargo cgp check`](/docs/cargo-cgp/check) reads the chain back into the name, and reports
-``[CGP-E106] missing field `width` on `Rectangle` `` as the root cause. `cargo cgp check` leads with
+``[CGP-E110] missing field `width` on `Rectangle` `` as the root cause. `cargo cgp check` leads with
 the root cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 **The `LEN` in a wrapping `Symbol` is bytes, not characters.** For ASCII the two counts agree, so the

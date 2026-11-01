@@ -157,8 +157,8 @@ Remove the conversion entry for `Plus`, the line
 its key:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanComputeRef<ToLisp, Plus<MathExpr>>` is not implemented for context `Interpreter`
-   = note: root cause: [CGP-E107] context `Interpreter` does not contain any delegate entry for `@ComputerRefComponent.ToLisp.Plus<MathExpr>`
+error[E0277]: [CGP-E001] missing wiring for `@ComputerRefComponent.ToLisp.Plus<MathExpr>` on `Interpreter`
+   = note: root cause: [CGP-E113] missing wiring for `@ComputerRefComponent.ToLisp.Plus<MathExpr>` on `Interpreter`
 ```
 
 Evaluating a `Plus` still has its entry, so only conversion is broken. Two more errors point at the

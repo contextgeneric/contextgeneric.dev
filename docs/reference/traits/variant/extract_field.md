@@ -260,9 +260,6 @@ be written in any order, but every variant must be tried before the remainder ca
 **Adding a variant breaks every hand-written chain, by design.** That is the guarantee, and it is the
 reason to prefer the [dispatch combinators](../../providers/dispatch/index.md).
 
-**Five enum variant names are reserved**, because the generated impls name their associated types through
-`Self::…`. The [derive's page](../../derives/derive_extract_field.md) lists them.
-
 ## Related constructs
 
 - [`HasExtractor`](./has_extractor.md), [`HasExtractorRef`](./has_extractor_ref.md), and

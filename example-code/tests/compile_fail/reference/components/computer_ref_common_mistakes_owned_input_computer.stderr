@@ -36,8 +36,8 @@ error[E0277]: the trait bound `for<'a> Double: IsProviderFor<cgp::prelude::Compu
 25 |         ComputerRefComponent: ((), u64),
    |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-help: the trait `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), &'a u64)>` is not implemented for `Double`
-      but trait `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), u64)>` is implemented for it
+help: the trait `IsProviderFor<ComputerComponent, App, ((), &'a u64)>` is not implemented for `Double`
+      but trait `IsProviderFor<ComputerComponent, App, ((), u64)>` is implemented for it
   --> tests/compile_fail/reference/components/computer_ref_common_mistakes_owned_input_computer.rs:7:1
    |
  7 | impl<Context, Code> Computer<Context, Code, u64> for Double {

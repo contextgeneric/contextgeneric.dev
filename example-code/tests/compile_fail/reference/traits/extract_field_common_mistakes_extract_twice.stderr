@@ -6,10 +6,10 @@ error[E0308]: mismatched types
    |                           |
    |                           arguments to this method are incorrect
    |
-   = note: expected struct `std::marker::PhantomData<cgp::prelude::Symbol<9, cgp::prelude::Chars<'R', cgp::prelude::Chars<'e', cgp::prelude::Chars<'c', cgp::prelude::Chars<'t', cgp::prelude::Chars<'a', cgp::prelude::Chars<'n', cgp::prelude::Chars<'g', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>`
-              found struct `std::marker::PhantomData<cgp::prelude::Symbol<6, cgp::prelude::Chars<'C', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>`
+   = note: expected struct `PhantomData<Symbol<9, Chars<'R', Chars<'e', Chars<'c', Chars<'t', Chars<'a', Chars<'n', cgp::prelude::Chars<'g', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>`
+              found struct `PhantomData<Symbol<6, Chars<'C', Chars<'i', Chars<'r', Chars<'c', Chars<'l', Chars<'e', Nil>>>>>>>>`
 note: method defined here
-  --> /home/soares/.cargo/git/checkouts/cgp-9f04a98e35a2c3c7/52bcaf7/crates/core/cgp-field/src/traits/extract_field.rs:35:8
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:35:8
    |
 35 |     fn extract_field(self, _tag: PhantomData<Tag>) -> Result<Self::Value, Self::Remainder>;
    |        ^^^^^^^^^^^^^

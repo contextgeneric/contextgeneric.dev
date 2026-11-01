@@ -153,8 +153,8 @@ Remove the censor's entry, the line `UsernameCensorComponent: DummyUserCensor,`,
 [`cargo cgp check`](/docs/cargo-cgp/check). The whole user manager fails:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanManageUser` is not implemented for context `ProductionApp`
-    = note: root cause: [CGP-E107] context `ProductionApp` does not contain any delegate entry for `UsernameCensorComponent`
+error[E0277]: [CGP-E001] missing wiring for `UsernameCensorComponent` on `ProductionApp`
+    = note: root cause: [CGP-E113] missing wiring for `UsernameCensorComponent` on `ProductionApp`
 ```
 
 The context has lost `get_user` and `update_user_data` as well as `create_user`, though neither

@@ -18,7 +18,7 @@ This page lists some resources related to CGP. More resources will be added as t
 
 - [`cargo-cgp`](https://crates.io/crates/cargo-cgp) - CGP's error toolchain. Its `check` command replaces `cargo check` when you are diagnosing a wiring failure, and its `expand` command shows the ordinary Rust that CGP's macros generate.
 
-Install it with `cargo install cargo-cgp`, then run `cargo cgp setup` to provision the pinned nightly its driver needs. CGP itself compiles on stable Rust without it; the tool is optional.
+Install it with `cargo install --locked cargo-cgp`, then run `cargo cgp setup` to provision the pinned nightly its driver needs. CGP itself compiles on stable Rust without it; the tool is optional.
 
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet reshape every class. The [`cargo-cgp` section](/docs/cargo-cgp/) covers installation, both commands, reading the output, the error codes, and troubleshooting.
 

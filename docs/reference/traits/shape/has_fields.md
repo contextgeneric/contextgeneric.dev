@@ -209,10 +209,6 @@ access and takes only structs. Their derives are likewise distinct.
 different orders have different `Fields` types. Name-driven conversions cope; code written against a
 literal `Cons` chain does not.
 
-**Two enum variant names are reserved.** A variant called `Fields` or `FieldsRef` collides with
-these associated types and the derive fails; the [derive's page](../../derives/derive_has_fields.md)
-lists it with the other reserved names.
-
 **There is no method.** `Fields` is a type. Getting a *value* in that shape is
 [`ToFields`](./to_fields.md).
 

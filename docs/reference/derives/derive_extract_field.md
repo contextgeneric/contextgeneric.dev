@@ -304,10 +304,6 @@ narrowed remainder to be finalized. The record marker `IsNothing` maps to inhabi
 serve that purpose. An error naming `IsNothing` usually means record and variant operations have
 been mixed.
 
-**Reserved variant names make generated associated-type paths ambiguous.** Avoid `Value`, `Remainder`,
-`Extractor`, `ExtractorRef`, and `ExtractorMut`. The generated implementations use those names through
-`Self::…`, which conflicts with identically named variants and produces `ambiguous associated item`.
-
 Extractor diagnostics may leave the offending variant unnamed. The implementations target generated
 companion enums, so both the headline and the note can point to the derive. Check the names above and
 rename the conflicting variant. [`HasFields`](./derive_has_fields.md) also reserves `Fields` and
@@ -316,27 +312,6 @@ rename the conflicting variant. [`HasFields`](./derive_has_fields.md) also reser
 **The remainder does not inherit the enum's attributes.** Deriving `Debug` or `PartialEq` on the
 enum does not implement them for the companion. Use `.ok()`, `.is_ok()`, or a `match` to inspect the
 result instead of printing or comparing the whole `Result<Payload, Remainder>`.
-
-**A variant attribute that belongs to another derive breaks the build.** The companion enums copy each
-variant's attributes but none of the enum's derives, so a helper attribute such as `serde`'s lands on an
-enum that does not derive `Serialize`:
-
-```rust
-use serde::Serialize;
-
-#[derive(Serialize, ExtractField)]
-pub enum Shape {
-    #[serde(rename = "circle")]
-    Circle(Circle),
-}
-```
-
-```text
-error: cannot find attribute `serde` in this scope
-```
-
-An enum therefore cannot combine `ExtractField`, or [`CgpVariant`](./derive_cgp_variant.md) or
-[`CgpData`](./derive_cgp_data.md), with a derive whose variant helper attributes it uses.
 
 **`FinalizeExtractResult` is not in the prelude.** Import it from `cgp::core::field::traits` to call
 `finalize_extract_result`.

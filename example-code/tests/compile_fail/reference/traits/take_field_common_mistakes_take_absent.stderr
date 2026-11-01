@@ -1,10 +1,8 @@
 error[E0271]: type mismatch resolving `<__PartialPerson<IsNothing, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsNothing>>::Mapper == IsPresent`
-  --> tests/compile_fail/reference/traits/take_field_common_mistakes_take_absent.rs:12:42
+  --> tests/compile_fail/reference/traits/take_field_common_mistakes_take_absent.rs:12:31
    |
 12 |     let _ = Person::builder().take_field(PhantomData::<Symbol!("first_name")>);
-   |                               ---------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<__PartialPerson<IsNothing, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsNothing>>::Mapper == IsPresent`
-   |                               |
-   |                               required by a bound introduced by this call
+   |                               ^^^^^^^^^^ type mismatch resolving `<__PartialPerson<IsNothing, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsNothing>>::Mapper == IsPresent`
    |
 note: expected this to be `IsPresent`
   --> tests/compile_fail/reference/traits/take_field_common_mistakes_take_absent.rs:4:10

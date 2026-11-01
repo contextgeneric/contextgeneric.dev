@@ -405,7 +405,7 @@ a path.
 routed under a prefix, `open`, which roots the route at the bare component name, no longer reaches those
 entries. Write the per-value entries with the full prefixed path instead.
 
-**A cyclic parent chain and a self-inheriting namespace fail differently.** Two namespaces inheriting each
+**A cyclic parent chain fails at both definitions, and a self-inheriting namespace at the macro.** Two namespaces inheriting each
 other make the forwarding impl's `where` clause loop, and the compiler rejects it eagerly at both
 definitions:
 
@@ -414,14 +414,12 @@ error[E0275]: overflow evaluating the requirement `__Key__: A<__BComponents>`
 note: required for `__Key__` to implement `B<__AComponents>`
 ```
 
-A namespace inheriting *itself*, as in `new A: A {}`, does not overflow. It produces a forwarding impl whose
-value parameter nothing can determine:
+A namespace inheriting *itself*, as in `new A: A {}`, or another instance of itself, as in
+`<T> new A<T>: A<u32> {}`, is rejected by the macro, with the caret on the parent's name:
 
 ```text
-error[E0207]: the type parameter `__Value__` is not constrained by the impl trait, self type, or predicates
+error: the namespace `A` cannot inherit from itself; name another namespace as its parent, or omit the parent
 ```
-
-Both mean the inheritance chain is not acyclic, but only the first says so recognizably.
 
 **A registered component with no provider bound anywhere still compiles.** If a `#[prefix]` routes a component
 into a namespace and nothing ever binds a provider at its path, the redirect lands on an empty slot and the

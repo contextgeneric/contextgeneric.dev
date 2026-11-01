@@ -156,8 +156,8 @@ Run [`cargo cgp check`](/docs/cargo-cgp/check), and the check reports that conve
 wired:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanComputeRef<ToLisp, MathPlusExpr>` is not implemented for context `InterpreterPlus`
-   = note: root cause: [CGP-E107] context `InterpreterPlus` does not contain any delegate entry for `@ComputerRefComponent.ToLisp.MathPlusExpr`
+error[E0277]: [CGP-E001] missing wiring for `@ComputerRefComponent.ToLisp.MathPlusExpr` on `InterpreterPlus`
+   = note: root cause: [CGP-E113] missing wiring for `@ComputerRefComponent.ToLisp.MathPlusExpr` on `InterpreterPlus`
 ```
 
 Supporting it would be a second group of `ToLisp` entries beside the `Eval` ones, with a provider

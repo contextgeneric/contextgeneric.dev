@@ -214,17 +214,6 @@ that resolves to nothing, with no hint that the cause was a capital letter.
 **A lowercase primitive is the type, not a string.** `@u32`, `@bool`, and `@str` name those types. That is
 almost always what you want, and it means a path segment cannot be the *string* `"u32"` through this syntax.
 
-**The primitive check also catches names that are not primitives.** It treats `char`, `bool`,
-`usize`, `isize`, `str`, and any `i`, `u`, or `f` followed only by digits as a primitive, which
-includes the bare `i`, `u`, and `f` and names such as `u2`. So `@app.f` keeps `f` as a type instead
-of the string `"f"`, and fails unless a type `f` is in scope:
-
-```text
-error[E0425]: cannot find type `f` in this scope
-```
-
-Avoid one-letter and letter-digit segments of that shape in a path.
-
 **A path needs a segment after the `@` and after every dot.** `@` alone, or a trailing dot as in
 `@app.`, fails while parsing the missing segment as a type, with a message that lists type tokens:
 

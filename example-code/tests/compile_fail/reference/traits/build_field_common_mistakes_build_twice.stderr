@@ -1,10 +1,8 @@
 error[E0271]: type mismatch resolving `<__PartialPerson<IsPresent, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsPresent>>::Mapper == IsNothing`
-  --> tests/compile_fail/reference/traits/build_field_common_mistakes_build_twice.rs:13:22
+  --> tests/compile_fail/reference/traits/build_field_common_mistakes_build_twice.rs:13:10
    |
 13 |         .build_field(PhantomData::<Symbol!("first_name")>, "Bob".to_owned());
-   |          ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<__PartialPerson<IsPresent, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsPresent>>::Mapper == IsNothing`
-   |          |
-   |          required by a bound introduced by this call
+   |          ^^^^^^^^^^^ type mismatch resolving `<__PartialPerson<IsPresent, IsNothing> as UpdateField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>, IsPresent>>::Mapper == IsNothing`
    |
 note: expected this to be `IsNothing`
   --> tests/compile_fail/reference/traits/build_field_common_mistakes_build_twice.rs:3:10

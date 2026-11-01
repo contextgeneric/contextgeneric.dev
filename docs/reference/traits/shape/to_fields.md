@@ -109,7 +109,7 @@ field, converting each value into its [`Field`](../../types/field.md) entry with
 
 ```rust
 impl ToFields for Config {
-    fn to_fields(self) -> Self::Fields {
+    fn to_fields(self) -> <Self as HasFields>::Fields {
         Cons(self.host.into(), Cons(self.port.into(), Nil))
     }
 }

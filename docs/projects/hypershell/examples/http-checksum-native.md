@@ -161,8 +161,8 @@ Checked with `check_components!`, as on the [`hello_name`](./hello-name.md#try-a
 abridged:
 
 ```text
-error[E0277]: [CGP-E002] the provider trait `Handler<Pipe<…>, GenericArray<u8, …>>` with context `MyApp` is not implemented for provider `Call<StreamToStdout>`
-   = note: root cause: [CGP-E110] provider `HandleToTokioAsyncRead` does not contain any delegate entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>`
+error[E0277]: [CGP-E001] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `HandleToTokioAsyncRead`
+   = note: root cause: [CGP-E114] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `HandleToTokioAsyncRead`
 ```
 
 The digest is a `GenericArray<u8, …>`, and `StreamToStdout`'s input dispatcher has no entry for that

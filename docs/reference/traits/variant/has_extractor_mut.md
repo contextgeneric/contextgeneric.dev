@@ -129,7 +129,7 @@ impl HasExtractorMut for Shape {
     type ExtractorMut<'__a__> = __PartialRefShape<'__a__, IsMut, IsPresent, IsPresent>
     where
         Self: '__a__;
-    fn extractor_mut<'__a__>(&'__a__ mut self) -> Self::ExtractorMut<'__a__> {
+    fn extractor_mut<'__a__>(&'__a__ mut self) -> <Self as HasExtractorMut>::ExtractorMut<'__a__> {
         match self {
             Self::Circle(value) => __PartialRefShape::Circle(value),
             Self::Rectangle(value) => __PartialRefShape::Rectangle(value),

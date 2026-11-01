@@ -1,10 +1,8 @@
 error[E0271]: type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Mapper == IsOptional`
-  --> tests/compile_fail/reference/traits/set_optional_common_mistakes_core_builder.rs:12:36
+  --> tests/compile_fail/reference/traits/set_optional_common_mistakes_core_builder.rs:12:32
    |
 12 |     let _ = Context::builder().set(PhantomData::<Symbol!("foo")>, "foo".to_owned());
-   |                                --- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Mapper == IsOptional`
-   |                                |
-   |                                required by a bound introduced by this call
+   |                                ^^^ type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Mapper == IsOptional`
    |
 note: expected this to be `IsOptional`
   --> tests/compile_fail/reference/traits/set_optional_common_mistakes_core_builder.rs:4:10
@@ -15,12 +13,10 @@ note: expected this to be `IsOptional`
    = note: this error originates in the derive macro `CgpData` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Output == __PartialContext<IsNothing, IsNothing>`
-  --> tests/compile_fail/reference/traits/set_optional_common_mistakes_core_builder.rs:12:36
+  --> tests/compile_fail/reference/traits/set_optional_common_mistakes_core_builder.rs:12:32
    |
 12 |     let _ = Context::builder().set(PhantomData::<Symbol!("foo")>, "foo".to_owned());
-   |                                --- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Output == __PartialContext<IsNothing, IsNothing>`
-   |                                |
-   |                                required by a bound introduced by this call
+   |                                ^^^ type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Output == __PartialContext<IsNothing, IsNothing>`
    |
 note: expected this to be `__PartialContext<IsNothing, IsNothing>`
   --> tests/compile_fail/reference/traits/set_optional_common_mistakes_core_builder.rs:4:10

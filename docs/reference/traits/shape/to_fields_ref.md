@@ -101,7 +101,7 @@ declares. `cargo cgp expand` on the example's `Config` shows:
 
 ```rust
 impl ToFieldsRef for Config {
-    fn to_fields_ref<'__a>(&'__a self) -> Self::FieldsRef<'__a>
+    fn to_fields_ref<'__a>(&'__a self) -> <Self as HasFieldsRef>::FieldsRef<'__a>
     where
         Self: '__a,
     {

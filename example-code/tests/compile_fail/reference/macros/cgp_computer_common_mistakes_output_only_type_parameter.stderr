@@ -1,18 +1,5 @@
-error[E0207]: the type parameter `T` is not constrained by the impl trait, self type, or predicates
+error: the parameter `T` appears in no argument type, so the generated `Computer` impl cannot determine it; take an argument whose type names `T`, or write the provider by hand as a `Computer` impl on a provider generic over `T`
  --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_output_only_type_parameter.rs:7:10
   |
 7 | fn parse<T: core::str::FromStr>(value: String) -> Option<T> {
-  |          ^ unconstrained type parameter
-  |
-help: use the type parameter `T` in the `Parse` type and use it in the type definition
-  |
-7 | fn parse<T><T: core::str::FromStr>(value: String) -> Option<T> {
-  |         +++
-
-error[E0207]: the type parameter `T` is not constrained by the impl trait, self type, or predicates
- --> tests/compile_fail/reference/macros/cgp_computer_common_mistakes_output_only_type_parameter.rs:7:10
-  |
-6 | #[cgp_computer]
-  | --------------- help: remove the unused type parameter `T`
-7 | fn parse<T: core::str::FromStr>(value: String) -> Option<T> {
-  |          ^ unconstrained type parameter
+  |          ^

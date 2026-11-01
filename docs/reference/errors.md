@@ -65,12 +65,11 @@ Match the compiler's code and the shape of the message.
 | `E0428` the name … is defined multiple times | A generated name declared twice | [Two entries claim one key](#two-entries-claim-one-key) |
 | `E0275` overflow evaluating the requirement | A wiring or inheritance cycle | [A lookup that never terminates](#a-lookup-that-never-terminates) |
 | `E0210` / `E0117` [orphan rule](/docs/reference/glossary#orphan-rule) | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
-| `E0207` type parameter is not constrained | A per-entry generic that never reaches the key | [A generic that reaches nothing](#a-generic-that-reaches-nothing) |
+| `E0207` type parameter is not constrained, or `[CGP-E019]` | A per-entry generic that never reaches the key | [A generic that reaches nothing](#a-generic-that-reaches-nothing) |
 | `E0107` trait takes N generic arguments but N+1 supplied | A consumer trait written where a provider trait belongs | [Naming the wrong half of a component](#naming-the-wrong-half-of-a-component) |
 | `E0433` / `E0425` cannot find type | A name the generated code cannot see | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 | `E0576` cannot find associated type … in trait | A `#[use_type]` import with a wrong name | [An imported type that does not exist](#an-imported-type-that-does-not-exist) |
 | `E0404` expected trait, found type parameter | An [abstract type](/docs/reference/glossary#abstract-type) named after its own bound | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
-| `error: ambiguous associated item` (without a code) | An enum variant named like a derive's associated type | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 
 ## A dependency is not met
 
@@ -117,25 +116,26 @@ That block **compiles**. Nothing has asked yet whether `GreetHello` can do its j
 Through the tool, both routes to the failure give the same answer. Checking it:
 
 ```text
-error[E0277]: [CGP-E001] the consumer trait `CanGreet` is not implemented for context `Person`
-  --> src/main.rs:56:9
+error[E0277]: [CGP-E001] missing field `name` on `Person`
+  --> src/main.rs:34:9
    |
-56 |         GreeterComponent,
+34 |         GreeterComponent,
    |         ^^^^^^^^^^^^^^^^
    |
-   = note: root cause: [CGP-E106] missing field `name` on `Person`
+   = note: root cause: [CGP-E110] missing field `name` on `Person`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanGreet` for context `Person`
              └─ [CGP-E102] provider trait impl `Greeter` with context `Person` for provider `GreetHello`
-               └─ [CGP-E105] trait impl `HasName` for `Person`
-                 └─ [CGP-E106] missing field `name` on `Person`
+               └─ [CGP-E104] trait impl `HasName` for `Person`
+                 └─ [CGP-E110] missing field `name` on `Person`
+   = help: add the field `name: String` to `Person`
 ```
 
-**Read the `root cause:` line and stop.** It names the fix. The tree beneath it is the chain of
+**Read the headline and stop.** It names the cause, and the `help` line a fix. The tree beneath it is the chain of
 obligations that demanded it, read top to bottom: the context must implement the consumer trait, so its
 wired provider must be a provider for that context, so the context must have the field.
 
-Calling `person.greet()` instead of checking produces the identical note under an `E0599`. That recovery
+Calling `person.greet()` instead of checking produces the same headline and note under an `E0599`. That recovery
 is the single largest thing the tool does.
 
 ### What the raw compiler says
@@ -188,8 +188,19 @@ A variant worth knowing, because the fix differs and the usual landmark disappea
 accessor for nothing at all, and the tool reports that as one cause rather than one per field:
 
 ```text
-   = help: make sure that `#[derive(HasField)]` is used for `Person`
-   = note: root cause: [CGP-E108] accessor trait `HasField` with field `name` is not implemented for `Person`
+error[E0277]: [CGP-E001] `HasField` not derived for field `name` of `Person`
+  --> src/main.rs:34:9
+   |
+34 |         GreeterComponent,
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: root cause: [CGP-E111] `HasField` not derived for field `name` of `Person`
+           this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanGreet` for context `Person`
+             └─ [CGP-E102] provider trait impl `Greeter` with context `Person` for provider `GreetHello`
+               └─ [CGP-E104] trait impl `HasName` for `Person`
+                 └─ [CGP-E111] `HasField` not derived for field `name` of `Person`
+   = help: add `#[derive(HasField)]` to `Person`
 ```
 
 In the raw output the tell is an absence. A missing field draws a "but trait
@@ -212,10 +223,12 @@ error[E0277]: the trait bound `f64: Eq` is not satisfied
    = note: this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanCompareScalars` for context `App`
              └─ [CGP-E102] provider trait impl `ScalarEquality` with context `App` for provider `CompareScalars`
-               └─ the trait bound `f64: Eq` is not satisfied
+               └─ [CGP-E117] the trait bound `f64: Eq` is not satisfied
 ```
 
-This is the one class here without a `[CGP-Exxx]` headline, and the absence is deliberate.
+This is the one class here without a `[CGP-Exxx]` headline at a check, and the absence is deliberate.
+Reached through a method call, where the compiler's headline talks about the method, the same mistake
+reads `[CGP-E001] the trait bound `+"`f64: Eq`"+` is not satisfied`.
 
 The fix is not to wire a component or add a field but to satisfy the trait: wire the abstract type
 to something that implements it, implement it for a type you own, or relax the provider's bound if
@@ -229,8 +242,16 @@ that same abstract type to something else. The trait half of the bound still hol
 reports a projection mismatch rather than a missing impl:
 
 ```text
-error[E0271]: [CGP-E017] expected the abstract type `Scalar` of `HasScalarType` on `Rectangle` to be `f64`, but found `u32`
+error[E0271]: [CGP-E005] abstract type `Scalar` of `HasScalarType` on `Rectangle` is `u32`, but `f64` is required
+  --> src/main.rs:32:9
    |
+32 |         AreaCalculatorComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanCalculateArea` for context `Rectangle`
+             └─ [CGP-E102] provider trait impl `AreaCalculator` with context `Rectangle` for provider `FixedArea`
+               └─ [CGP-E116] abstract type `Scalar` of `HasScalarType` on `Rectangle` is `u32`, but `f64` is required
    = help: wire `ScalarTypeProviderComponent` to `UseType<f64>` in the wiring for `Rectangle`, or change the provider to work with `u32`
 ```
 
@@ -249,13 +270,14 @@ With a [higher-order provider](./attributes/use_provider.md) the question is whi
 tool answers it in the shape of the tree. An inner-layer failure shows **two** provider hops:
 
 ```text
-   = note: root cause: [CGP-E106] missing field `base_area` on `Rectangle`
+   = note: root cause: [CGP-E110] missing field `base_area` on `Rectangle`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanCalculateArea` for context `Rectangle`
              └─ [CGP-E102] provider trait impl `AreaCalculator` with context `Rectangle` for provider `ScaledArea<BaseArea>`
                └─ [CGP-E102] provider trait impl `AreaCalculator` with context `Rectangle` for provider `BaseArea`
-                 └─ [CGP-E105] trait impl `HasBaseArea` for `Rectangle`
-                   └─ [CGP-E106] missing field `base_area` on `Rectangle`
+                 └─ [CGP-E104] trait impl `HasBaseArea` for `Rectangle`
+                   └─ [CGP-E110] missing field `base_area` on `Rectangle`
+   = help: add the field `base_area: f64` to `Rectangle`
 ```
 
 An outer-layer failure shows **one**, with the inner provider never named. Either way the wiring is
@@ -268,22 +290,21 @@ missing only from the wrapper fails on its line alone.
 ### When one mistake prints many errors
 
 A dependency several components share, left unmet, fails at every one of them. Raw `cargo check`
-prints one block per affected provider (three chained components over one missing field produce
-**six**), and only some of them reach the cause.
+prints one block per affected provider, and only some of them reach the cause.
 
-The tool collapses the whole cascade into one block naming every affected consumer over a single tree:
+The tool collapses the whole cascade into one block over a single cause, marking each affected check entry:
 
 ```text
-error[E0277]: [CGP-E001] the consumer traits `CanBaz`, `CanBar`, and `CanFoo` are not implemented for context `App`
+error[E0277]: [CGP-E001] missing field `name` on `App`
    |
-85 |         BazComponent,
-   |         ^^^^^^^^^^^^
-86 |         BarComponent,
-   |         ^^^^^^^^^^^^
-87 |         FooComponent,
-   |         ^^^^^^^^^^^^
+56 |         BazProviderComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^
+57 |         BarProviderComponent,
+   |         -------------------- also required here
+58 |         FooProviderComponent,
+   |         -------------------- also required here
    |
-   = note: root cause: [CGP-E106] missing field `name` on `App`
+   = note: root cause: [CGP-E110] missing field `name` on `App`
 ```
 
 Fix the one cause and all of it disappears together.
@@ -304,14 +325,15 @@ nothing ever binds: a [`#[prefix]`](./attributes/prefix.md) routes the lookup so
 `#[default_impl]`, namespace entry, or direct wiring puts a provider there:
 
 ```text
-   = note: root cause: [CGP-E107] context `App` does not contain any delegate entry for `@app.GreeterComponent`
+   = note: root cause: [CGP-E113] missing wiring for `@app.GreeterComponent` on `App`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanGreet` for context `App`
-             └─ [CGP-E104] redirect lookup to `@app.GreeterComponent` in `App`
-               └─ [CGP-E107] context `App` does not contain any delegate entry for `@app.GreeterComponent`
+             └─ [CGP-E103] redirect lookup to `@app.GreeterComponent` in `App`
+               └─ [CGP-E113] missing wiring for `@app.GreeterComponent` on `App`
+   = help: wire `@app.GreeterComponent` to a provider in the wiring of `App`
 ```
 
-The same `[CGP-E107]` leaf covers a component the context never wired. The path is resugared to its
+The same `[CGP-E113]` leaf covers a component the context never wired. The path is resugared to its
 `@app.GreeterComponent` form, which is the largest readability win here. Raw `rustc` prints it as a
 `PathCons<Symbol<3, Chars<..>>, _>` list.
 
@@ -342,18 +364,18 @@ with an explicit mapping, or a provider name declared twice. CGP lowers each blo
 cannot see the collision, so the compiler catches it:
 
 ```text
-error[E0119]: [CGP-E004] duplicate wiring for component `GreeterComponent` on `Person`
+error[E0119]: [CGP-E010] conflicting wiring: `Person` wires component `GreeterComponent` twice
    |
-31 |         GreeterComponent: GreetHello,
+22 |         GreeterComponent: GreetHello,
    |         ---------------- first implementation here
-...
-38 |         GreeterComponent: GreetGoodbye,
+23 |         GreeterComponent: GreetGoodbye,
    |         ^^^^^^^^^^^^^^^^ conflicting implementation for `Person`
 ```
 
-Two carets, two lines to reconcile. Related codes cover the neighbouring shapes: `[CGP-E005]` for a
-path key that covers a longer one, `[CGP-E007]` for an `open` header colliding with an explicit
-entry, and `[CGP-E008]` for the same key redirected twice.
+Two carets, two lines to reconcile. Related codes cover the neighbouring shapes: `[CGP-E011]` for a
+path key that covers a longer one, `[CGP-E013]` for an `open` header colliding with an explicit
+entry, and `[CGP-E014]` for the same key redirected twice. A `check_components!` table listing an entry
+twice is `[CGP-E015]`, and two tables in one module sharing a check-trait name are `[CGP-E016]`.
 
 Two things are worth knowing when reading the raw form. A context-wiring entry generates *two*
 impls, so one duplicate prints a **pair** of `E0119`s, which is one conflict, not two. And a
@@ -361,8 +383,8 @@ blanket-versus-specific collision often carries a "downstream crates may impleme
 the compiler explaining that [coherence](/docs/reference/glossary#coherence) must allow for impls a
 future crate could add, not a second problem.
 
-A duplicate **name** rather than a duplicate key is an `E0428` instead, and passes through uncoded,
-because it already points precisely at both definitions.
+A duplicate **name** of your own, rather than a duplicate key, is an `E0428` instead, and passes through
+uncoded, because it already points precisely at both definitions.
 
 ### Joining more than one namespace
 
@@ -371,11 +393,11 @@ A context can forward through exactly one namespace. Two `namespace` headers (or
 every key, and the two overlap:
 
 ```text
-error[E0119]: [CGP-E006] only one namespace can be used for each target type in `delegate_components!`, but `App` uses both `NamespaceA` and `NamespaceB`
+error[E0119]: [CGP-E012] conflicting wiring: `App` joins both `NamespaceA` and `NamespaceB`, but a target type in `delegate_components!` can join only one namespace
    |
-52 |         namespace NamespaceA;
+15 |         namespace NamespaceA;
    |                   ---------- first implementation here
-53 |         namespace NamespaceB;
+16 |         namespace NamespaceB;
    |                   ^^^^^^^^^^ conflicting implementation for `App`
 ```
 
@@ -389,11 +411,12 @@ A namespace's entries are defaults, but only a path it *routes to* without *term
 overridden. A path the namespace itself binds is already covered by its blanket impl:
 
 ```text
-error[E0119]: [CGP-E005] `App` cannot wire `@app.GreeterComponent.*` that is already set through `AppNamespace`
+error[E0119]: [CGP-E011] conflicting wiring: `App` wires `@app.GreeterComponent`, which `AppNamespace` already covers
    |
-55 |         namespace AppNamespace;
+29 |         namespace AppNamespace;
    |                   ------------ first implementation here
-57 |         @app.GreeterComponent: GreetBye,
+30 |
+31 |         @app.GreeterComponent: GreetGoodbye,
    |          ^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `App`
 ```
 
@@ -404,7 +427,7 @@ The same mistake one level up, a child namespace redefining a key it inherits, i
 way:
 
 ```text
-error[E0119]: [CGP-E005] `ChildNs` cannot wire component `GreeterComponent` that is already set through `BaseNs`
+error[E0119]: [CGP-E011] conflicting wiring: `ChildNs` wires component `GreeterComponent`, which `BaseNs` already covers
 ```
 
 In the raw form, ``conflicting implementations of trait `ChildNs<_>` for type `GreeterComponent` ``,
@@ -415,7 +438,7 @@ than binding it, as it does for a component carrying [`#[prefix]`](./attributes/
 was written in the wrong form rather than overridden, and the tool says so with a different code:
 
 ```text
-error[E0119]: [CGP-E007] component `GreeterComponent` on `AppNamespace` is redirected to `@app.GreeterComponent`
+error[E0119]: [CGP-E013] conflicting wiring: `AppNamespace` wires component `GreeterComponent` directly, but it is redirected to `@app.GreeterComponent`
    = help: wire the provider `GreetHello` with the key `@app.GreeterComponent`
 ```
 
@@ -425,7 +448,7 @@ Rust's orphan rule forbids implementing a foreign trait for a foreign type, and 
 is exactly such an impl when both the namespace and the key belong to other crates:
 
 ```text
-error[E0210]: [CGP-E011] cannot register the foreign path `@app.AnnouncerComponent` into the foreign namespace `AppNamespace`
+error[E0210]: [CGP-E022] cannot register the foreign path `@app.AnnouncerComponent` into the foreign namespace `AppNamespace`
    |
 26 | #[cgp_impl(new AnnounceQuietly)]
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -444,23 +467,28 @@ Wiring a component to [`UseContext`](./providers/use_context.md) when the contex
 component *is* that wiring makes the lookup chase its own tail:
 
 ```text
-error[E0275]: [CGP-E010] the wiring for the consumer trait `CanGreet` on context `Person` never resolves — the lookup recurses without terminating
+error[E0275]: [CGP-E020] the wiring for the consumer trait `CanGreet` on context `Person` never resolves, because the lookup leads back to itself
    |
-   = help: a lookup that recurses usually means the component is delegated back to the context itself — e.g. wired to `UseContext` with no direct implementation of the consumer trait — so wire a real provider, or implement the consumer trait directly on the context
+18 |         GreeterComponent,
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = help: wire a provider in place of `UseContext`, which provides `Greeter` for `Person` by requiring `CanGreet` on `Person` again
 ```
 
 Raw `rustc` gives an `E0275` overflow with a note chain you can read the loop out of, plus a stock
 "consider increasing the recursion limit" suggestion. **Ignore that suggestion**: a true cycle does
 not terminate at any depth, so raising the limit cannot help.
 
-Reached by a method call rather than a check, a cycle does not overflow at all. It hides as the
-ordinary `E0599`, and nothing in it says a cycle was the reason.
+Reached by a method call rather than a check, the same lookup gets the same `[CGP-E020]` from the tool. In
+raw output a cycle reached that way can hide as the ordinary `E0599`, where nothing says a cycle was the
+reason. A lookup that requires the consumer trait again for a larger type each time never repeats, so the
+tool reports it as `[CGP-E021]`.
 
 **A related cycle sits at namespace definitions rather than at a use site.** Namespaces whose parent
 chain loops (`A: B` with `B: A`) fail *eagerly*, with an `E0275` on each `cgp_namespace!` block,
 because the cycle lives in the `where` clause of a generated impl the compiler checks on sight. A
-namespace that inherits itself (`A: A`) fails differently, with an `E0207` saying the impl's value
-parameter is not constrained. Two things are unusual about the mutual cycle. Under
+namespace that inherits itself (`A: A`) never reaches the compiler, because `cgp_namespace!` rejects it
+with ``the namespace `A` cannot inherit from itself``. Two things are unusual about the mutual cycle. Under
 `cargo cgp check`'s next-generation solver the code **compiles clean** and nothing is reported, the
 one class where the tool shows you *less* than plain `cargo check`. And the wiring is wrong
 regardless: break the loop so the parent chain forms a tree, factoring shared entries into a third
@@ -472,16 +500,20 @@ A per-entry generic must reach the *key*, where `DelegateComponent<Key<…>>` bi
 only in the provider value binds nothing:
 
 ```text
-error[E0207]: the type parameter `T` is not constrained by the impl trait, self type, or predicates
+error[E0207]: [CGP-E019] the entry for `GreeterComponent` in the wiring of `App` binds `T`, but its key does not use it
    |
-39 |         <T> GreeterComponent: GreetWith<T>,
-   |          ^ unconstrained type parameter
+21 |         <T> GreeterComponent: GreetWith<T>,
+   |          ^
+   |
+   = help: write a concrete type in place of `T` in `GreetWith<T>`, and remove `T` from the entry's generic parameters
 ```
 
-This passes through unrewritten, and it does not need much: the caret is on the parameter. The
-message speaks in impl terms, though, where the actionable reading is a wiring one: **the generic
-has to appear in the key** (`<T> SomeKey<T>: …`), not only in the value. Expect the same error
-twice, once per generated position; both name the same `<T>`.
+The message speaks in wiring terms: **the generic has to appear in the key** (`<T> SomeKey<T>: …`), not
+only in the value. The compiler's own `E0207` speaks in impl terms and repeats once per generated
+position, and the tool reports the mistake once. A `for` loop whose key skips its variable is
+`[CGP-E017]`, and a `#[default_impl]` on a provider impl generic over a parameter is `[CGP-E018]`. A
+per-entry lifetime the provider uses and a blanket entry keyed by its own parameter still keep the
+compiler's `E0207`, whose suggestions do not compile.
 
 ## A macro lowered something the compiler rejects
 
@@ -497,15 +529,23 @@ trait declares, so a wrong name is lowered faithfully and caught by name resolut
 ```text
 error[E0576]: cannot find associated type `Scalr` in trait `HasScalarType`
    |
-21 |     type Scalar;
-   |     ------------ similarly named associated type `Scalar` defined here
-...
-26 | pub fn get_scalar(&self) -> Scalr {
-   |                             ^^^^^
+10 | pub fn get_scalar(&self) -> Scalr {
+   |                             ^^^^^ not found in `HasScalarType`
+   |
+note: similarly named associated type `Scalar` defined here
+   |
+ 5 |     type Scalar;
+   |     ^^^^^^^^^^^^
+note: associated type `Scalar` defined here
+   |
+ 5 |     type Scalar;
+   |     ^^^^^^^^^^^^
+   = help: rename `Scalr` to `Scalar` in the `#[use_type]` import from `HasScalarType` and in each use of `Scalr`
 ```
 
 The caret lands on the name *you* wrote, because the macro copies the identifier's span onto the
-rewritten path, and the `help:` usually supplies the spelling. Nothing needs decoding.
+rewritten path. The `help` names the edit that compiles: rename it in the import and in each use. The
+compiler's own suggestion respells only the signature, which does not compile.
 
 ### A name the generated code cannot see
 
@@ -542,45 +582,31 @@ error[E0404]: expected trait, found type parameter `Database`
 Both halves are named, so the message explains itself once read. Name them apart: `Db` reads better
 for an abstract database type anyway.
 
-A third sibling is a defect in the library rather than a mistake of yours. The extensible-data
-derives name their own associated types as `Self::Value`, `Self::Remainder`, `Self::Fields`, and so
-on, so an enum with a variant of one of those names makes the path ambiguous. The error does not
-carry a code:
-
-```text
-error: ambiguous associated item
-```
-
-and its notes say the name "could refer to the variant defined here" or "could also refer to the
-associated type defined here". Under [`#[derive(ExtractField)]`](./derives/derive_extract_field.md)
-both notes point at the derive attribute, so nothing names the variant to rename. The seven reserved
-names are listed on [`#[derive(CgpVariant)]`](./derives/derive_cgp_variant.md#common-mistakes), and
-each derive's own page names the ones it reserves. Rename the variant.
-
 ### A field-type shorthand without a rule
 
 The getter and implicit-argument macros recognize a small set of field-type shorthands:
-`Option<&T>`, `&[T]`, and `&str`. A *combination* they lack a rule for is lowered by whichever rule
-matches first, and the result can be a type that is not well-formed. `Option<&[u8]>` lowers to a
-bound naming the unsized `Option<[u8]>`:
+`Option<&T>`, `&[T]`, and `&str`. A *combination* they lack a rule for can lower to a type that is not
+well-formed. The macros reject an optional reference to a slice or a trait object at expansion, since its
+shape shows the referent is unsized. A type named by a path, such as `Option<&Path>`, has a size only the
+compiler knows, so it lowers to a bound naming the unsized `Option<Path>`:
 
 ```text
 error[E0277]: the size for values of type `[u8]` cannot be known at compilation time
-   |
-18 | #[cgp_auto_getter]
-   | ^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
-   |
-   = help: the trait `Sized` is not implemented for `[u8]`
+  |
+5 | #[cgp_auto_getter]
+  | ^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+  |
+  = help: within `Path`, the trait `Sized` is not implemented for `[u8]`
+note: required because it appears within the type `Path`
 note: required by an implicit `Sized` bound in `Option`
 ```
 
 Two things make this harder to read than it looks. The caret is on the macro attribute rather than
 on any type you wrote, because the offending type is synthesized. And a second `E0599` on `as_ref`
-usually follows, which is derived noise from the same unsized type and points at nothing new.
+follows, which is derived noise from the same unsized type and points at nothing new.
 
-**The fix** is a shape a single shorthand supports: `Option<Vec<u8>>`, or `Option<&'static [u8]>`, or a
-hand-written getter naming whatever type the field actually has. The shorthands compose only where the
-result is `Sized`.
+**The fix** is a shape a single shorthand supports: `Option<PathBuf>`, read as `Option<&PathBuf>`, or a
+hand-written getter naming whatever type the field actually has.
 
 ## Using something you did not declare
 
@@ -592,9 +618,9 @@ they talk about that generated parameter; the tool names the missing declaration
 **A trait used without `#[uses]`:**
 
 ```text
-error[E0599]: [CGP-E012] the trait `GetCount` is used but not declared as a dependency
+error[E0599]: [CGP-E030] the trait `GetCount` is used but not declared as a dependency
    |
-44 |     format!("{} ({})", self.get_name(), self.get_count())
+16 |     format!("{} ({})", self.get_name(), self.get_count())
    |                                              ^^^^^^^^^
    |
    = help: declare it as a dependency with `#[uses(GetCount)]`
@@ -603,9 +629,9 @@ error[E0599]: [CGP-E012] the trait `GetCount` is used but not declared as a depe
 **An inner provider used without `#[use_provider]`:**
 
 ```text
-error[E0599]: [CGP-E016] the inner provider `InnerCalculator` is used but not imported
+error[E0599]: [CGP-E031] the inner provider `InnerCalculator` is used but not imported
    |
-22 |         InnerCalculator::area(self) * scale_factor * scale_factor
+11 |         InnerCalculator::area(self) * scale_factor * scale_factor
    |                          ^^^^
    |
    = help: import it with `#[use_provider(InnerCalculator: AreaCalculator)]`
@@ -621,7 +647,7 @@ where the provider trait belongs gives it one generic argument too many, because
 context:
 
 ```text
-error[E0107]: [CGP-E013] `CanCalculateArea` is a consumer trait, but a `#[cgp_impl]` provider must implement its provider trait `AreaCalculator`
+error[E0107]: [CGP-E032] `CanCalculateArea` is a consumer trait, but a `#[cgp_impl]` provider must implement its provider trait `AreaCalculator`
   |
 9 | impl CanCalculateArea {
   |      ^^^^^^^^^^^^^^^^
@@ -631,7 +657,8 @@ error[E0107]: [CGP-E013] `CanCalculateArea` is a consumer trait, but a `#[cgp_im
 
 Untranslated, this one mistake produces a burst of `E0425`/`E0107`/`E0186`/`E0207` errors plus a
 downstream check failure, none of which names the cause. Two neighbours share the shape:
-`[CGP-E015]` is the same confusion in a `#[use_provider]` bound, and `[CGP-E014]` is `#[cgp_impl]`
+`[CGP-E034]` is the same confusion in a `#[use_provider]` bound, `[CGP-E037]` is its mirror in `#[uses]`,
+and `[CGP-E033]` is `#[cgp_impl]`
 applied to a trait that is not a component at all, where the fix is to make it one, or to write a
 plain `impl`.
 

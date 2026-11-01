@@ -157,7 +157,7 @@ and wire it in `ProductionApp`, beside the namespace line:
 Run [`cargo cgp check`](/docs/cargo-cgp/check), and the entry is rejected:
 
 ```text
-error[E0119]: [CGP-E005] `ProductionApp` cannot wire `@app.core.user.UserGetterComponent.*` that is already set through `DefaultAppComponents`
+error[E0119]: [CGP-E011] conflicting wiring: `ProductionApp` wires `@app.core.user.UserGetterComponent`, which `DefaultAppComponents` already covers
 ```
 
 A default a namespace binds is final. The context's entry would be a second answer to the same

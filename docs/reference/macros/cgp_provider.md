@@ -382,8 +382,8 @@ error[E0277]: the trait bound `UnitArea: IsProviderFor<AreaCalculatorComponent, 
 
 Omit the argument unless the component's marker departs from the `{Trait}Component` convention.
 
-**A provider's own associated const or type still needs qualifying**, though for a different reason than
-in [`#[cgp_impl]`](./cgp_impl.md#common-mistakes). Here `Self` really is the provider, and nothing rewrites it.
+**A provider's own associated const or type still needs qualifying**, unlike in
+[`#[cgp_impl]`](./cgp_impl.md), where the macro qualifies it. Here `Self` really is the provider, and nothing rewrites it.
 But the provider struct is also a perfectly good context, so the consumer blanket impl gives it the
 *consumer* trait as well, and both traits declare the item. `Self::LIMIT` is therefore ambiguous rather
 than missing:

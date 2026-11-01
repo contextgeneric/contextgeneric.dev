@@ -199,6 +199,22 @@ A few things to read off it. The `Output` is the original return type verbatim. 
 `Output = ()`. And `sync_method` was left completely alone, which lets a trait mix async and
 synchronous methods.
 
+**A method with a default body keeps it, wrapped in `async move { … }`,** so the body is the future the method
+returns, as the body of an `async fn` is. Each by-value parameter bound to a plain name is rebound inside the
+block, so the future owns it, and a `mut` on the parameter moves to the rebinding:
+
+```rust
+// async fn add(&self, mut value: u32, extra: u32) -> u32 { value += extra; value }
+fn add(&self, value: u32, extra: u32) -> impl ::core::future::Future<Output = u32> {
+    async move {
+        let mut value = value;
+        let extra = extra;
+        value += extra;
+        value
+    }
+}
+```
+
 **The macro rewrites only trait definitions.** Applied to anything else, most importantly an `impl` block,
 it returns the tokens unchanged. This passthrough makes the composition work: an `async fn` is legal in
 an impl already, so the provider's body stays as written while the trait's declaration carries the future
@@ -242,19 +258,6 @@ The workaround is to declare a second, ordinary trait whose method spells `+ Sen
 type directly, and to implement it for each concrete context. That pattern is mechanical but
 unavoidable; the opacity that makes the rewrite zero-cost is the same opacity that hides the
 auto-traits.
-
-**A default-bodied async method is mishandled.** The macro rewrites the *signature* and never the body, so a
-method with a default gets its `async` stripped and its return type changed while the body stays a plain
-expression:
-
-```text
-error[E0277]: `{integer}` is not a future
-```
-
-That error names the body's type rather than the rewrite that caused it. In practice this is rarely hit,
-because async trait methods are almost always declarations with the behaviour supplied by a provider. But a
-default-bodied `async fn` inside an `#[async_trait]` trait is not supported. Wrap the body in an
-`async { … }` block by hand, or move it to a provider.
 
 **Attribute arguments are silently ignored.** `#[async_trait(anything)]` is accepted and discarded rather than
 rejected, so a typo'd option gives no feedback. Always write it bare.

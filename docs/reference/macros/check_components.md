@@ -186,7 +186,7 @@ does not. It fails *here*, with `E0277` at the `GreeterComponent` entry, and the
 the cause: `Person` does not implement `HasField` for the `name` tag, which rustc prints as the nested
 `Symbol<4, Chars<'n', …>>` type. The mismatch is reported at the wiring rather than at some later
 `person.greet()` in another file. [`cargo cgp check`](/docs/cargo-cgp/check) reports the same failure
-with the root cause first, as ``[CGP-E106] missing field `name` on `Person` ``. `cargo cgp check`
+with the root cause first, as ``[CGP-E110] missing field `name` on `Person` ``. `cargo cgp check`
 leads with the root cause for the classes it recognizes, and the tool does not yet reshape every
 class.
 
@@ -370,7 +370,8 @@ error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorCompon
 ```
 
 Only a help line hints at the cause, noting that the provider implements the marker for `Rectangle`
-but not for `()`. If a check on a generic component fails or passes too easily, the missing value is
+but not for `()`. [`cargo cgp check`](/docs/cargo-cgp/error-codes#cgp-e060) rewords this as `[CGP-E060]`
+and names the parameters to check at, when the context passes the check at any. If a check on a generic component fails or passes too easily, the missing value is
 the first thing to suspect.
 
 **`#[check_providers(...)]` must list at least one provider**, and is rejected rather than treated as a

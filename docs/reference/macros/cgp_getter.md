@@ -325,7 +325,7 @@ since the tag tells you which field the mismatch is about.
 **A `&mut self` getter cannot return a shared `Option`, and `Option<&[T]>` is unsupported.** Both
 come from the method parsing this macro shares with `#[cgp_auto_getter]`, which documents them under
 [Common Mistakes](./cgp_auto_getter.md#common-mistakes): the first fails with `E0308` in every
-generated provider, and the second reaches the compiler as an unsized bound.
+generated provider, and the macro rejects the second.
 
 ## Related constructs
 
