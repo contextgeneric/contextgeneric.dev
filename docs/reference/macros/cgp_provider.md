@@ -220,8 +220,8 @@ A couple of cases call for writing the raw form yourself:
 - **You need the inside-out provider-trait shape itself**, not merely a separately-declared struct: a
   bound `#[cgp_impl]`'s sugar cannot express, or a rare construct its rewrite does not support, whether
   from a limitation or a bug. This is uncommon. Most bounds that look like they need the raw form are
-  expressible in `#[cgp_impl]`'s explicit-context form instead (`impl<Context> AreaCalculator for
-  Context`), which reaches a higher-ranked bound such as `for<'a> &'a Context: IntoIterator` and pins
+  expressible in `#[cgp_impl]`'s explicit-context form instead 
+  (`impl<Context> AreaCalculator for Context`), which reaches a higher-ranked bound such as `for<'a> &'a Context: IntoIterator` and pins
   the provider to a single concrete context with `impl AreaCalculator for Rectangle` alike. A struct
   that `new` cannot declare, such as one carrying a default generic parameter
   (`pub struct IterSum<Inner = UseContext>(PhantomData<Inner>);`) or one shared by several impls, is

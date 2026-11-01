@@ -263,7 +263,7 @@ impl<__F1__: MapType> ExtractField<Symbol!("Circle")> for __PartialShape<IsPrese
     type Value = Circle;
     type Remainder = __PartialShape<IsVoid, __F1__>;   // Circle ruled out; __F1__ untouched
 
-    fn extract_field(self, _: PhantomData<Symbol!("Circle")>) -> Result<Circle, Self::Remainder> {
+    fn extract_field(self, _: PhantomData<Symbol!("Circle")>) -> Result<Circle, <Self as ExtractField<Symbol!("Circle")>>::Remainder> {
         match self {
             __PartialShape::Circle(value) => Ok(value),
             __PartialShape::Rectangle(value) => Err(__PartialShape::Rectangle(value)),

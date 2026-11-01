@@ -179,7 +179,10 @@ for __PartialShape<IsPresent, __F1__> {
     fn extract_field(
         self,
         _tag: ::core::marker::PhantomData<Symbol!("Circle")>,
-    ) -> Result<Self::Value, Self::Remainder> {
+    ) -> Result<
+        <Self as ExtractField<Symbol!("Circle")>>::Value,
+        <Self as ExtractField<Symbol!("Circle")>>::Remainder,
+    > {
         match self {
             __PartialShape::Circle(value) => Ok(value),
             __PartialShape::Rectangle(value) => Err(__PartialShape::Rectangle(value)),

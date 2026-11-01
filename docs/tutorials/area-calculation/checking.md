@@ -124,8 +124,8 @@ The error now points at **our line**, the one we should be looking at, and the n
 name the chain: `PlainCircle` was required to implement `RectangleArea`, which was required for
 `RectangleAreaCalculator` to serve this context. That is the actual story of the mistake.
 
-The cause is in there too, and this is the part that did not improve. That `Symbol<5, Chars<'w',
-Chars<'i', ...>>>` is how CGP writes the field name `width` as a type, so that the compiler can
+The cause is in there too, and this is the part that did not improve. That
+`Symbol<5, Chars<'w', Chars<'i', ...>>>` is how CGP writes the field name `width` as a type, so that the compiler can
 reason about field names at all. Read character by character it says `width`, and the second one says
 `radius` — but you have to read it character by character, in the middle of a paragraph of angle
 brackets, and the compiler abbreviates the display differently depending on how it is invoked.
