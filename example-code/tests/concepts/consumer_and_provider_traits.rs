@@ -1,9 +1,8 @@
 //! Code from `docs/concepts/consumer-and-provider-traits.md` — *Consumer and provider traits*.
 //!
-//! Module names follow the page's headings. Code the page **rejects** is carried as a
-//! `compile_fail` doctest, and the two listings the page presents as *generated* code are rebuilt by
-//! hand in [`how_a_call_finds_its_provider`], which is a weaker check than it looks — see the note
-//! there.
+//! Module names follow the page's headings. Rejected code lives in trybuild fixtures. The two
+//! generated-code listings are assembled by hand in [`how_a_call_finds_its_provider`]; that checks
+//! their structure, while macro expansion establishes what the library generates.
 
 /// ## What an ordinary Rust trait does, and where it stops
 ///
@@ -59,15 +58,17 @@ pub mod splitting_one_trait_in_two {
         fn send_email(context: &Context, to: &str, body: &str);
     }
 
-    // The page names these two providers without declaring them.
+    pub trait HasSmtpConfig {}
+    pub trait HasRecordedEmails {}
+
     pub struct SendViaSmtp;
     pub struct RecordEmails;
 
-    impl<Context> EmailSender<Context> for SendViaSmtp {
+    impl<Context: HasSmtpConfig> EmailSender<Context> for SendViaSmtp {
         fn send_email(context: &Context, to: &str, body: &str) {}
     }
 
-    impl<Context> EmailSender<Context> for RecordEmails {
+    impl<Context: HasRecordedEmails> EmailSender<Context> for RecordEmails {
         fn send_email(context: &Context, to: &str, body: &str) {}
     }
 }
@@ -91,7 +92,7 @@ pub mod how_a_call_finds_its_provider {
         fn send_email(&self, to: &str, body: &str);
     }
 
-    pub trait EmailSender<Context> {
+    pub trait EmailSender<Context>: IsProviderFor<EmailSenderComponent, Context, ()> {
         fn send_email(context: &Context, to: &str, body: &str);
     }
 
@@ -109,9 +110,7 @@ pub mod how_a_call_finds_its_provider {
         fn send_email(context: &Context, to: &str, body: &str) {}
     }
 
-    // Generated for every provider, and not shown on the page, which says only that it is
-    // "generated, never written by hand". Without it the provider blanket impl below has an
-    // unsatisfiable bound.
+    // Provider macros generate these checking implementations with the provider's bounds.
     impl<Context> IsProviderFor<EmailSenderComponent, Context, ()> for SendViaSmtp {}
     impl<Context> IsProviderFor<EmailSenderComponent, Context, ()> for RecordEmails {}
 
@@ -208,15 +207,18 @@ pub mod writing_it {
         check_components! { TestApp { EmailSenderComponent } }
     }
 
-    /// The page's claim that the implicit arguments leave the public signature alone, so
-    /// `app.send_email(to, body)` still takes two arguments.
+    pub fn send_welcome(app: &impl CanSendEmail, to: &str) {
+        app.send_email(to, "Welcome!");
+    }
+
+    /// A generic caller needs only the consumer trait, while the selected provider reads its field.
     #[test]
-    fn each_provider_reads_a_different_field_and_neither_reaches_the_signature() {
+    fn generic_caller_uses_the_selected_recording_provider() {
         let test_app = TestApp {
             sent_emails: RefCell::new(Vec::new()),
         };
-        test_app.send_email("a@b.c", "hi");
+        send_welcome(&test_app, "a@b.c");
 
-        assert_eq!(test_app.sent_emails.borrow().as_slice(), ["a@b.c: hi"]);
+        assert_eq!(test_app.sent_emails.borrow().as_slice(), ["a@b.c: Welcome!"]);
     }
 }
