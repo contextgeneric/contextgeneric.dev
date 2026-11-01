@@ -194,6 +194,9 @@ would be implemented by delegating to `UseContext`, whose `Encoder<u32>` impl in
 error[E0275]: overflow evaluating the requirement `App: IsProviderFor<EncoderComponent, App, u32>`
 ```
 
+[`cargo cgp check`](/docs/cargo-cgp/error-codes#cgp-e020) reports the same mistake as `[CGP-E020]`, at a check
+or at a method call, and names the provider that closes the loop.
+
 `UseContext` belongs where the provider trait resolves to a *different* implementation, such as a
 wrapper over another trait or a per-type dispatch entry for a different type. The `EncodeVec`
 example above is safe for exactly that reason: it is wired for `Vec<u32>`, but its inner

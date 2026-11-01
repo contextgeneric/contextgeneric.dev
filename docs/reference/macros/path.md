@@ -56,7 +56,7 @@ because it lets a path mix names and types without any extra syntax:
 |---|---|
 | A single identifier starting with a lowercase ASCII letter (`app`, `my_app`) | a [`Symbol`](./symbol.md) type-level string |
 | A capitalized name (`ErrorRaiserComponent`) | that named type |
-| A primitive type name (`u32`, `bool`, `str`) | that type, *not* a symbol |
+| A primitive type name (`u32`, `bool`, `str`) | that type, *not* a symbol. A name that only looks like one, such as `f` or `u2`, is a symbol |
 | Any other type (`Vec<u8>`, `some_mod::Marker`, `&'static str`) | that type |
 
 So lowercase segments read as namespace and prefix names, capitalized ones as component keys or marker types,
@@ -193,7 +193,7 @@ PathSegment -> Type
 
 The leading `` `@` `` is required and at least one segment must follow. Each `PathSegment` is parsed
 as a Rust `Type`, but its encoding is decided semantically: a single identifier starting with a
-lowercase ASCII letter that is not primitive-shaped becomes a `Symbol` type-level string, while
+lowercase ASCII letter that is not a primitive's name becomes a `Symbol` type-level string, while
 every other segment (a capitalized name, a primitive, or any type with a path, generic arguments, or
 other structure) is kept as the type. [`cgp_namespace!`](./cgp_namespace.md) entries and
 `#[prefix(...)]` attributes embed this same grammar, where it appears as the `Path` production.

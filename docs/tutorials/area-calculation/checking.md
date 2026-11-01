@@ -164,7 +164,8 @@ error[E0277]: [CGP-E001] missing fields `width` and `height` on `PlainCircle`
 
 This is the same failure a third time, and now it leads with the answer: `PlainCircle` is missing the
 fields `width` and `height`. The tree beneath shows how the requirement arrived — through
-`RectangleAreaCalculator`, which is the provider we wired by mistake.
+`RectangleAreaCalculator`, which is the provider we wired by mistake. The `help` line offers to add the
+fields, which would compile, but a circle has no width or height, so here the tree points at the better fix.
 
 One thing to keep in mind as you use it: `cargo cgp check` leads with the root cause for the classes
 it recognizes, and the tool does not yet reshape every class. When you meet an
@@ -173,7 +174,7 @@ section is worth understanding rather than skipping.
 
 ## Fixing it
 
-The error named the provider, so the fix is the line the error pointed at:
+The tree named the provider, so the fix is the line the error pointed at:
 
 ```rust
 delegate_components! {

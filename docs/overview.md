@@ -44,7 +44,8 @@ does not force that verification, so use
 
 These checks establish that components fit together; they do not prove application logic correct.
 [cargo-cgp](/docs/cargo-cgp) helps explain wiring failures by showing the root cause and dependency
-chain. It is an early release and does not rewrite every kind of compiler error.
+chain. It is an early release: `cargo cgp check` leads with the root cause for the classes it
+recognizes, and the tool does not yet reshape every class.
 
 ### Abstract Over Every Dependency
 

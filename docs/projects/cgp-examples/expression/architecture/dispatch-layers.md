@@ -75,12 +75,13 @@ it for each operand, which is the same question, and it never finishes. With the
 the wiring never resolves:
 
 ```text
-error[E0275]: [CGP-E020] the wiring for the consumer trait `CanCompute<Eval, MathExpr>` on context `Interpreter` never resolves, because the lookup leads back to itself
+error[E0275]: [CGP-E020] the wiring for the consumer trait `CanCompute<Eval, contexts::add_mult::MathExpr>` on context `contexts::add_mult::Interpreter` never resolves, because the lookup leads back to itself
 ```
 
 The same error follows for `Plus` and `Times`, and two raw overflow errors for the dispatcher
-itself. Its help line suggests a component wired back to the context itself, the usual cause of the
-class; here the loop runs through the operands instead.
+itself. The project names a `MathExpr` and an `Interpreter` in several modules, so the output keeps their
+module paths. The help lines name `EvalAdd`, whose requirement closes the loop where the tool's walk met it,
+rather than the `MathExpr` entry that needs the wrapper.
 
 The wrapper breaks the loop, and the likeliest reason is the shape of its impl: it is written for
 one concrete context, with a concrete output type and no conditions. The compiler can then accept

@@ -129,24 +129,26 @@ collide. A `<key>` is worded as what it is, such as `` component `<Marker>` ``, 
 
 ### CGP-E010
 
-The same key is wired twice, because a wiring table or a namespace maps one component or path to two providers. To
-fix it, remove one of the entries.
+The same key is wired twice, because a wiring table or a namespace maps one component or path to two providers.
 
 ```text
 [CGP-E010] conflicting wiring: `<Context>` wires <key> twice
 ```
 
+To fix it, remove one of the entries.
+
 ### CGP-E011
 
 Two different keys overlap, so an entry is wired that another already covers. It may be a generic entry over a
-specific one, a path that covers a longer path, or an entry for a key the context's namespace already binds. To fix
-it, remove or narrow the overlapping entry.
-[Overriding something a namespace already binds](/docs/reference/errors#overriding-something-a-namespace-already-binds)
-covers the namespace case.
+specific one, a path that covers a longer path, or an entry for a key the context's namespace already binds.
 
 ```text
 [CGP-E011] conflicting wiring: `<Context>` wires <key>, which <source> already covers
 ```
+
+To fix it, remove or narrow the overlapping entry.
+[Overriding something a namespace already binds](/docs/reference/errors#overriding-something-a-namespace-already-binds)
+covers the namespace case.
 
 The source is the key that covers the other, whichever comes first. When neither covers the other, the key is the
 one they share.
@@ -154,33 +156,39 @@ one they share.
 ### CGP-E012
 
 A context joins more than one namespace. Each namespace covers every key, so two of them, or a namespace and a loop
-over bare keys, conflict. To fix it, join one namespace and make it inherit the others.
-[Joining more than one namespace](/docs/reference/errors#joining-more-than-one-namespace) explains the class.
+over bare keys, conflict.
 
 ```text
 [CGP-E012] conflicting wiring: `<Context>` joins both `<A>` and `<B>`, but a target type in `delegate_components!` can join only one namespace
 ```
 
+To fix it, join one namespace and make it inherit the others.
+[Joining more than one namespace](/docs/reference/errors#joining-more-than-one-namespace) explains the class.
+
 ### CGP-E013
 
 A direct entry collides with a redirect of the same key, such as a component wired by name while an `open`
-statement, a `=>` redirect, or a namespace sends it along a path. To fix it, wire the provider under the redirected
-path rather than the component name, as the `help` line says.
-[Overriding something a namespace already binds](/docs/reference/errors#overriding-something-a-namespace-already-binds)
-explains the class.
+statement, a `=>` redirect, or a namespace sends it along a path.
 
 ```text
 [CGP-E013] conflicting wiring: `<Context>` wires <component> directly, but it is redirected to `<path>`
 ```
 
+To fix it, wire the provider under the redirected
+path rather than the component name, as the `help` line says.
+[Overriding something a namespace already binds](/docs/reference/errors#overriding-something-a-namespace-already-binds)
+explains the class.
+
 ### CGP-E014
 
 The same key is redirected twice, by two `open` statements or `=>` mappings on one context, or by one path registered
-twice in a namespace. To fix it, keep one redirect.
+twice in a namespace.
 
 ```text
 [CGP-E014] conflicting wiring: `<Context>` redirects <component> twice, to `<path>` and to `<path>`
 ```
+
+To fix it, keep one redirect.
 
 ## Structural mistakes
 
@@ -190,74 +198,88 @@ line.
 
 ### CGP-E015
 
-A `check_components!` table lists one entry twice. To fix it, remove one of the two.
-[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
+A `check_components!` table lists one entry twice.
 
 ```text
 [CGP-E015] `check_components!` checks `<entry>` twice for `<Context>`
 ```
 
+To fix it, remove one of the two.
+[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
+
 ### CGP-E016
 
-Two `check_components!` tables in one module check the same context, so they share a check-trait name. To fix it, merge
-the tables, or name one table's check trait with `#[check_trait(...)]`. When two attributes give one name, the message
-says so instead.
-[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
+Two `check_components!` tables in one module check the same context, so they share a check-trait name.
 
 ```text
 [CGP-E016] two `check_components!` tables in one module check `<Context>`
 ```
 
+To fix it, merge
+the tables, or name one table's check trait with `#[check_trait(...)]`. When two attributes give one name, the message
+says so instead.
+[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
+
 ### CGP-E017
 
-A `for` loop in the wiring binds a variable its key does not use. To fix it, write the variable in the key where the
-type the loop covers goes.
-[A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing) explains the class.
+A `for` loop in the wiring binds a variable its key does not use.
 
 ```text
 [CGP-E017] the `for` loop in the wiring of `<Context>` binds `<T>`, but its key `<key>` does not use it
 ```
 
+To fix it, write the variable in the key where the
+type the loop covers goes.
+[A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing) explains the class.
+
 ### CGP-E018
 
-A `#[default_impl]` registers a provider whose impl is generic over a parameter the key does not fix. To fix it, write
-the impl for that key alone, as the `help` line says.
-[A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing) explains the class.
+A `#[default_impl]` registers a provider whose impl is generic over a parameter the key does not fix.
 
 ```text
 [CGP-E018] `#[default_impl]` cannot register `<Provider>` for `<key>`, because the provider's impl is generic over `<T>`
 ```
 
+To fix it, write
+the impl for that key alone, as the `help` line says.
+[A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing) explains the class.
+
 ### CGP-E019
 
-A wiring or namespace entry binds a generic parameter its key does not use. To fix it, write a concrete type in place of
-the parameter and remove it from the entry's generic parameters, as the `help` line says.
-[A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing) explains the class.
+A wiring or namespace entry binds a generic parameter its key does not use.
 
 ```text
 [CGP-E019] the entry for `<key>` in the wiring of `<Context>` binds `<T>`, but its key does not use it
 ```
 
+To fix it, write a concrete type in place of
+the parameter and remove it from the entry's generic parameters, as the `help` line says.
+[A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing) explains the class.
+
 ### CGP-E060
 
 A check entry names no parameters for a component that takes some, so it checks the component at the unit parameters
-`()`, which the provider does not implement. To fix it, check it at the parameters the `help` line offers, with
-`#[check_params(...)]` in `delegate_and_check_components!` or `<entry>: <P>` in `check_components!`.
-[`check_components!`](/docs/reference/macros/check_components) describes the syntax.
+`()`, which the provider does not implement.
 
 ```text
 [CGP-E060] the check of `<entry>` on `<Context>` names no parameters, so it checks the component at the unit parameters `()`
 ```
 
+To fix it, check it at the parameters the `help` line offers, with
+`#[check_params(...)]` in `delegate_and_check_components!` or `<entry>: <P>` in `check_components!`.
+[`check_components!`](/docs/reference/macros/check_components) describes the syntax.
+
 ### CGP-E061
 
 Two [`#[cgp_auto_dispatch]`](/docs/reference/macros/cgp_auto_dispatch) traits in one module declare a method of the same
-name, and the macro names its generated items after the method alone. To fix it, rename the method in one trait, or
-declare the traits in different modules.
+name, and the macro names its generated items after the method alone.
 
 ```text
 [CGP-E061] two `#[cgp_auto_dispatch]` traits in one module declare the method `<method>`
 ```
+
+To fix it, rename the method in one trait, or
+declare the traits in different modules.
 
 ## Wiring that never resolves, and the orphan rule
 
@@ -267,13 +289,15 @@ Rust's coherence rules forbid it.
 ### CGP-E020
 
 Looking up the wiring for a component leads back to itself. The plain case is a component wired to `UseContext` on a
-context with no other implementation of it. The compiler's code is `E0275`. To fix it, wire a real provider, or implement
-the consumer trait directly on the context. The `help` line names the provider that closes the loop.
-[A lookup that never terminates](/docs/reference/errors#a-lookup-that-never-terminates) explains the class.
+context with no other implementation of it. The compiler's code is `E0275`.
 
 ```text
 [CGP-E020] the wiring for the consumer trait `<Consumer>` on context `<Context>` never resolves, because the lookup leads back to itself
 ```
+
+To fix it, wire a real provider, or implement
+the consumer trait directly on the context. The `help` line names the provider that closes the loop.
+[A lookup that never terminates](/docs/reference/errors#a-lookup-that-never-terminates) explains the class.
 
 ### CGP-E021
 
@@ -288,15 +312,17 @@ at its recursion limit. No limit ends a lookup that grows, so to fix it, wire a 
 ### CGP-E022
 
 A crate registers wiring into a namespace it does not own, under a key it does not own either, which Rust's orphan rule
-forbids. The compiler's code is `E0210` or `E0117`. To fix it, own one end, as the `help` line says: key the registration
-on a component your crate defines, register it from the crate that owns the namespace, or define a namespace of your own
-that inherits the foreign one.
-[Registering into a namespace you do not own](/docs/reference/errors#registering-into-a-namespace-you-do-not-own)
-explains the class.
+forbids. The compiler's code is `E0210` or `E0117`.
 
 ```text
 [CGP-E022] cannot register the foreign <key> into the foreign namespace `<Namespace>`
 ```
+
+To fix it, own one end, as the `help` line says: key the registration
+on a component your crate defines, register it from the crate that owns the namespace, or define a namespace of your own
+that inherits the foreign one.
+[Registering into a namespace you do not own](/docs/reference/errors#registering-into-a-namespace-you-do-not-own)
+explains the class.
 
 ## Mistakes in what a macro was given
 
@@ -307,108 +333,128 @@ These codes name a CGP attribute or macro used in a way the generated code canno
 
 A `#[cgp_fn]` or `#[cgp_impl]` body calls a CGP trait's method on `self` or `Self` without declaring the trait as a
 dependency. The macro turns the body into an implementation over a generated context type, so a trait the body uses has to
-be declared for that type to have it. The compiler's code is `E0599`. To fix it, add the trait to `#[uses(...)]`, as the
-`help` line says.
-[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+be declared for that type to have it. The compiler's code is `E0599`.
 
 ```text
 [CGP-E030] the trait `<Trait>` is used but not declared as a dependency
 ```
 
+To fix it, add the trait to `#[uses(...)]`, as the
+`help` line says.
+[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+
 ### CGP-E031
 
 A higher-order provider calls an inner provider it never imported, so the inner provider has no provider-trait bound and
-the call cannot resolve. To fix it, import it with `#[use_provider(<Inner>: <ProviderTrait>)]`, as the `help` line says.
-[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+the call cannot resolve.
 
 ```text
 [CGP-E031] the inner provider `<Inner>` is used but not imported
 ```
 
+To fix it, import it with `#[use_provider(<Inner>: <ProviderTrait>)]`, as the `help` line says.
+[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+
 ### CGP-E032
 
 A `#[cgp_impl]` header names the component's consumer trait where its provider trait belongs. Without the rewrite, this one
-mistake produces a burst of unrelated-looking errors. To fix it, name the provider trait in the header, as the `help` line
-says. [Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the
-class.
+mistake produces a burst of unrelated-looking errors.
 
 ```text
 [CGP-E032] `<Consumer>` is a consumer trait, but a `#[cgp_impl]` provider must implement its provider trait `<ProviderTrait>`
 ```
 
+To fix it, name the provider trait in the header, as the `help` line
+says. [Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the
+class.
+
 ### CGP-E033
 
-`#[cgp_impl]` is applied to a trait that is not a CGP component at all, so there is no provider trait to implement. To fix
-it, make the trait a component with [`#[cgp_component]`](/docs/reference/macros/cgp_component) and implement its provider
-trait, or drop `#[cgp_impl]` and write an ordinary `impl`.
-[Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the class.
+`#[cgp_impl]` is applied to a trait that is not a CGP component at all, so there is no provider trait to implement.
 
 ```text
 [CGP-E033] `#[cgp_impl]` can only implement a CGP component's provider trait, but `<Trait>` is not a CGP component
 ```
 
+To fix it, make the trait a component with [`#[cgp_component]`](/docs/reference/macros/cgp_component) and
+implement its provider trait, or drop `#[cgp_impl]` and write an ordinary `impl`.
+[Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains
+the class.
+
 ### CGP-E034
 
 An inner-provider bound names a consumer trait where the provider trait belongs, most often in
-[`#[use_provider]`](/docs/reference/attributes/use_provider). To fix it, name the provider trait, as the `help` line says.
-[Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the class.
+[`#[use_provider]`](/docs/reference/attributes/use_provider).
 
 ```text
 [CGP-E034] `<Consumer>` is a consumer trait and cannot bound an inner provider; a higher-order provider imports its provider trait `<ProviderTrait>`
 ```
 
+To fix it, name the provider trait, as the `help` line says.
+[Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the class.
+
 ### CGP-E035
 
 A `#[cgp_fn]`, `#[cgp_impl]`, or `#[cgp_component]` definition names an abstract type of the context, as `Self::Error` or a
-bare `Error`, without [`#[use_type]`](/docs/reference/attributes/use_type). To fix it, import the type with
-`#[use_type(<Trait>.<Type>)]`, as the `help` line says, and write it bare.
-[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+bare `Error`, without [`#[use_type]`](/docs/reference/attributes/use_type).
 
 ```text
 [CGP-E035] the abstract type `<Type>` is used but not imported
 ```
 
+To fix it, import the type with
+`#[use_type(<Trait>.<Type>)]`, as the `help` line says, and write it bare.
+[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+
 ### CGP-E036
 
 A component requires a trait of every context, through [`#[extend(...)]`](/docs/reference/attributes/extend) or
-`#[use_type(...)]`, and a `#[cgp_impl]` provider does not declare it, even if its body never uses the trait. To fix it, add
-the `#[uses(...)]` or `#[use_type(...)]` the `help` line names.
-[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+`#[use_type(...)]`, and a `#[cgp_impl]` provider does not declare it, even if its body never uses the trait.
 
 ```text
 [CGP-E036] the provider trait `<ProviderTrait>` requires `<Trait>` of the context, but the provider `<Provider>` does not declare it
 ```
 
+To fix it, add
+the `#[uses(...)]` or `#[use_type(...)]` the `help` line names.
+[Using something you did not declare](/docs/reference/errors#using-something-you-did-not-declare) explains the class.
+
 ### CGP-E037
 
-[`#[uses]`](/docs/reference/attributes/uses) names a provider trait, but a dependency names its consumer trait. To fix it,
-name the consumer trait, as the `help` line says.
-[Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the class.
+[`#[uses]`](/docs/reference/attributes/uses) names a provider trait, but a dependency names its consumer trait.
 
 ```text
 [CGP-E037] `<ProviderTrait>` is a provider trait and cannot be a `#[uses]` dependency; a dependency names its consumer trait `<Consumer>`
 ```
 
+To fix it,
+name the consumer trait, as the `help` line says.
+[Naming the wrong half of a component](/docs/reference/errors#naming-the-wrong-half-of-a-component) explains the class.
+
 ### CGP-E038
 
-`#[cgp_impl(GreetHello)]` without `new` implements the provider trait for a struct nothing declares. To fix it, write
-`#[cgp_impl(new GreetHello)]` so the macro declares it, or declare the struct yourself. A provider declared elsewhere but not
-imported keeps the compiler's `E0425` and its import suggestion instead.
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) describes the syntax.
+`#[cgp_impl(GreetHello)]` without `new` implements the provider trait for a struct nothing declares.
 
 ```text
 [CGP-E038] the provider `<Provider>` is not declared
 ```
 
+To fix it, write
+`#[cgp_impl(new GreetHello)]` so the macro declares it, or declare the struct yourself. A provider declared elsewhere but not
+imported keeps the compiler's `E0425` and its import suggestion instead.
+[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) describes the syntax.
+
 ### CGP-E039
 
 A plain `impl` implements a provider trait. The trait has `IsProviderFor` as a supertrait, and only `#[cgp_provider]` or
-`#[cgp_impl]` writes the provider's impl of it. To fix it, add one of those macros, as the `help` line says.
-[`#[cgp_provider]`](/docs/reference/macros/cgp_provider) describes the macro.
+`#[cgp_impl]` writes the provider's impl of it.
 
 ```text
 [CGP-E039] the impl of `<Trait>` for `<Provider>` is written without `#[cgp_provider]`
 ```
+
+To fix it, add one of those macros, as the `help` line says.
+[`#[cgp_provider]`](/docs/reference/macros/cgp_provider) describes the macro.
 
 ## Wiring keys and values that do not resolve
 
@@ -418,40 +464,48 @@ type of that name exists in your crate or its dependencies, or when the tool can
 
 ### CGP-E040
 
-A wiring key names a consumer trait such as `CanGreet`, where its component marker `GreeterComponent` belongs. To fix it, name
-the component, as the `help` line says.
+A wiring key names a consumer trait such as `CanGreet`, where its component marker `GreeterComponent` belongs.
 
 ```text
 [CGP-E040] the wiring key `<Consumer>` is a consumer trait, but a key names a component
 ```
 
+To fix it, name
+the component, as the `help` line says.
+
 ### CGP-E041
 
 A key names a component that exists but is not imported where the table is written, such as `ErrorTypeProviderComponent`,
-which the prelude does not export. To fix it, add the `use` line the `help` line gives.
+which the prelude does not export.
 
 ```text
 [CGP-E041] the component `<Component>` is not in scope
 ```
 
+To fix it, add the `use` line the `help` line gives.
+
 ### CGP-E042
 
 A key was guessed from a consumer trait's name with `Component` appended, such as `HasScalarTypeComponent`, while the marker
-follows the provider trait, as in `ScalarTypeProviderComponent`. To fix it, name the component the `help` line gives.
+follows the provider trait, as in `ScalarTypeProviderComponent`.
 
 ```text
 [CGP-E042] the wiring key `<Key>` names no component
 ```
 
+To fix it, name the component the `help` line gives.
+
 ### CGP-E043
 
-A wiring value names a provider struct nothing declares, often a misspelling. To fix it, declare the provider or name one that
-exists. A `help` line appears when the component has a provider with a similar name. A provider declared elsewhere but not
-imported keeps the compiler's `E0425` and its import suggestion instead.
+A wiring value names a provider struct nothing declares, often a misspelling.
 
 ```text
 [CGP-E043] the provider `<Provider>` wired for `<Key>` is not declared
 ```
+
+To fix it, declare the provider or name one that
+exists. A `help` line appears when the component has a provider with a similar name. A provider declared elsewhere but not
+imported keeps the compiler's `E0425` and its import suggestion instead.
 
 ### CGP-E044
 
@@ -524,26 +578,33 @@ This line is a step through any other trait, such as a getter or a blanket trait
 ## Where the chain ends
 
 These codes end the chain, and the cause they state is the one to fix. The `root cause:` line repeats the same code.
+The codes from `[CGP-E118]` to `[CGP-E126]` belong to extensible data, which
+[extensible records](/docs/concepts/extensible-records) and [extensible variants](/docs/concepts/extensible-variants)
+explain.
 
 ### CGP-E110
 
-The chain ends at a field the context does not have. To fix it, add the field, or wire a provider that does not read it. A `help`
-line names a similar field when there is one, and otherwise the field to add.
-[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains the class.
+The chain ends at a field the context does not have.
 
 ```text
 [CGP-E110] missing field `<field>` on `<Type>`
 ```
 
+To fix it, add the field, or wire a provider that does not read it. A `help`
+line names a similar field when there is one, and otherwise the field to add.
+[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains the class.
+
 ### CGP-E111
 
-The chain ends at a field that exists but has no `HasField` impl, because the struct does not derive it. To fix it, add
-`#[derive(HasField)]` to the struct, as the `help` line says.
-[When the derive is missing entirely](/docs/reference/errors#when-the-derive-is-missing-entirely) explains the class.
+The chain ends at a field that exists but has no `HasField` impl, because the struct does not derive it.
 
 ```text
 [CGP-E111] `HasField` not derived for field `<field>` of `<Type>`
 ```
+
+To fix it, add
+`#[derive(HasField)]` to the struct, as the `help` line says.
+[When the derive is missing entirely](/docs/reference/errors#when-the-derive-is-missing-entirely) explains the class.
 
 ### CGP-E112
 
@@ -555,33 +616,38 @@ The chain ends at a field with the wrong type. This is the last line of a `[CGP-
 
 ### CGP-E113
 
-The chain ends at a component or path the context wires nothing for. To fix it, add the wiring entry the `help` line names.
-[Nothing is wired there](/docs/reference/errors#nothing-is-wired-there) explains the class.
+The chain ends at a component or path the context wires nothing for.
 
 ```text
 [CGP-E113] missing wiring for `<key>` on `<Context>`
 ```
 
+To fix it, add the wiring entry the `help` line names.
+[Nothing is wired there](/docs/reference/errors#nothing-is-wired-there) explains the class.
+
 ### CGP-E114
 
 The chain ends at a provider's own table that has no entry for a key: a bundle of wiring missing a component, or a provider that
-dispatches per type missing the type it was given. To fix it, add the entry to that provider's table, or pass it a type the table
-covers.
+dispatches per type missing the type it was given.
 
 ```text
 [CGP-E114] missing entry for `<key>` in provider `<Provider>`
 ```
 
+To fix it, add the entry to that provider's table, or pass it a type the table
+covers.
+
 ### CGP-E115
 
-The chain ends at a type wired where a provider belongs that is not a provider, such as a value type put in a provider's place. To
-fix it, wire an actual provider in that position. A `help` line suggests one when the program supports it: an adapter such as
-`WithProvider`, `UseFields` in place of `UseField` on a multi-method getter, an `open` statement in place of `UseDelegate`, or the
-right component for a provider of another one.
+The chain ends at a type wired where a provider belongs that is not a provider, such as a value type put in a provider's place.
 
 ```text
 [CGP-E115] `<Type>` is not a provider of `<ProviderTrait>`
 ```
+
+To fix it, wire an actual provider in that position. A `help` line suggests one when the program supports it:
+an adapter such as `WithProvider`, `UseFields` in place of `UseField` on a multi-method getter, an `open`
+statement in place of `UseDelegate`, or the right component for a provider of another one.
 
 ### CGP-E116
 
@@ -595,117 +661,142 @@ same wording.
 ### CGP-E117
 
 The chain ends at an ordinary Rust trait bound that does not hold, such as `f64: Eq`, in the compiler's own wording. At a
-`check_components!` entry the tool keeps the compiler's headline, which already names the bound. To fix it, use a type that implements
-the trait, or a provider that does not require it.
-[When the missing bound is an ordinary Rust trait](/docs/reference/errors#when-the-missing-bound-is-an-ordinary-rust-trait) explains the
-class.
+`check_components!` entry the tool keeps the compiler's headline, which already names the bound.
 
 ```text
 [CGP-E117] the trait bound `<Type: Trait>` is not satisfied
 ```
 
+To fix it, use a type that implements
+the trait, or a provider that does not require it.
+[When the missing bound is an ordinary Rust trait](/docs/reference/errors#when-the-missing-bound-is-an-ordinary-rust-trait) explains the
+class.
+
 ### CGP-E118
 
-A builder operation needs a field unset, as a second `build_field` or a second merge source does, and the field is already set. To fix
-it, drop the second setting.
+A builder operation needs a field unset, as a second `build_field` or a second merge source does, and the field is already set.
 
 ```text
 [CGP-E118] field `<field>` of `<Type>` is already set
 ```
 
+To fix it, drop the second setting.
+
 ### CGP-E119
 
-An operation such as a finalize or `take_field` needs one or more fields set, and they are not. To fix it, set them first.
+An operation such as a finalize or `take_field` needs one or more fields set, and they are not.
 
 ```text
 [CGP-E119] field `<field>` of `<Type>` is not set
 ```
 
+To fix it, set them first.
+
 ### CGP-E120
 
-A cast between enums has variants that do not match, or a construction uses a tag the enum lacks. To fix it, add the variant or correct
-the name. A `help` line names a similar variant when there is one.
+A cast between enums has variants that do not match, or a construction uses a tag the enum lacks.
 
 ```text
 [CGP-E120] missing variant `<Variant>` on `<Type>`
 ```
 
+To fix it, add the variant or correct
+the name. A `help` line names a similar variant when there is one.
+
 ### CGP-E121
 
-An extractor is finalized while it may still yield a variant, as a matcher that leaves one out does. To fix it, handle the variant.
+An extractor is finalized while it may still yield a variant, as a matcher that leaves one out does.
 
 ```text
 [CGP-E121] variant `<Variant>` of `<Type>` is not extracted
 ```
 
+To fix it, handle the variant.
+
 ### CGP-E122
 
-A cast between enums has same-named variants that carry different payloads. To fix it, align the payload types.
+A cast between enums has same-named variants that carry different payloads.
 
 ```text
 [CGP-E122] variant `<Variant>` on `<Type>` has type `<actual>`, but `<expected>` is required
 ```
 
+To fix it, align the payload types.
+
 ### CGP-E123
 
-A trait only a data derive implements is required of a type that does not have it. To fix it, add the derive the `help` line names.
+A trait only a data derive implements is required of a type that does not have it.
 
 ```text
 [CGP-E123] `<Type>` does not implement `<Trait>`
 ```
 
+To fix it, add the derive the `help` line names.
+
 ### CGP-E124
 
 A variant is extracted a second time from an extractor that no longer holds it. The compiler reports this as an `E0308` on the tag
-argument. To fix it, drop the second extraction.
+argument.
 
 ```text
 [CGP-E124] variant `<Variant>` of `<Type>` is already extracted
 ```
 
+To fix it, drop the second extraction.
+
 ### CGP-E125
 
-An optional builder's operation is called on a field a core builder holds set or unset. To fix it, call `to_optional` on the builder
-first, as the `help` line says.
+An optional builder's operation is called on a field a core builder holds set or unset.
 
 ```text
 [CGP-E125] field `<field>` of `<Type>` is not optional
 ```
 
+To fix it, call `to_optional` on the builder
+first, as the `help` line says.
+
 ### CGP-E126
 
 A builder or extractor is given to an operation that needs a trait only its struct or enum implements, as `downcast` on the remainder
-of a downcast is. To fix it, call the method the `help` line names, such as `downcast_fields`.
+of a downcast is.
 
 ```text
 [CGP-E126] an extractor of `<Type>` does not implement `<Trait>`
 ```
 
+To fix it, call the method the `help` line names, such as `downcast_fields`.
+
 ### CGP-E127
 
 A provider's impls differ from the wiring in exactly one argument: the context, or a component parameter, as for a pipeline stage that
-takes `u64` after one that returns `String`. To fix it, wire a provider for those arguments, or change the type that disagrees.
+takes `u64` after one that returns `String`.
 
 ```text
 [CGP-E127] `<Provider>` implements `<ProviderTrait>` only for `<A>`, not `<B>`
 ```
 
+To fix it, wire a provider for those arguments, or change the type that disagrees.
+
 ### CGP-E128
 
 A hand-written `DelegateComponent` impl lacks the `IsProviderFor` impl `delegate_components!` writes beside each entry, so a check passes
-but every consumer call fails. To fix it, replace the impl with `delegate_components!`, as the `help` line says.
+but every consumer call fails.
 
 ```text
 [CGP-E128] the wiring of `<Component>` on `<Context>` has no `IsProviderFor` impl
 ```
 
+To fix it, replace the impl with `delegate_components!`, as the `help` line says.
+
 ### CGP-E129
 
-A consumer method is called on a value of a type parameter without the bound. To fix it, add the bound the `help` line names.
+A consumer method is called on a value of a type parameter without the bound.
 
 ```text
 [CGP-E129] the type parameter `<T>` of `<function>` is not bounded by `<Trait>`
 ```
+
+To fix it, add the bound the `help` line names.
 
 ## Rewrites without a code
 

@@ -640,6 +640,10 @@ error[E0599]: [CGP-E031] the inner provider `InnerCalculator` is used but not im
 In both cases rustc's own suggestion is worse than useless: it leaks the generated `__Context__`
 parameter, and for the second it proposes the *consumer* trait, which is the wrong fix.
 
+Two neighbours share the cause. `[CGP-E035]` is an abstract type of the context named without
+[`#[use_type]`](./attributes/use_type.md), and `[CGP-E036]` is a requirement of the component, added through
+`#[extend]` or `#[use_type]`, that a provider does not declare. Each `help` names the attribute to add.
+
 ### Naming the wrong half of a component
 
 A component has two traits, and a provider implements the *provider* one. Writing the consumer trait

@@ -402,7 +402,8 @@ error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorCompon
 ```
 
 Only a help line hints at the cause, noting that the provider implements the marker for `Rectangle` but
-not for `()`. Add `#[check_params(...)]`, or move the entry to a standalone
+not for `()`. [`cargo cgp check`](/docs/cargo-cgp/error-codes#cgp-e060) rewords this as `[CGP-E060]` and names
+the parameters to check at, when the context passes the check at any. Add `#[check_params(...)]`, or move the entry to a standalone
 [`check_components!`](./check_components.md).
 
 **An attribute on a key inside a nested table is silently dropped.** In

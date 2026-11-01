@@ -399,8 +399,7 @@ note: candidate #2 is defined in an impl of the trait `CanRateLimit` for the typ
 ```
 
 Name the provider trait to disambiguate: `<Self as RateLimiter<Context>>::LIMIT` works here
-because `Self` is the provider. The `#[cgp_impl]` form needs
-`<AllowUnderLimit as RateLimiter<Self>>::LIMIT` instead, since there `Self` is the context. Either way
+because `Self` is the provider. Either way
 the consumer side is unaffected: a wired context reads `<App as CanRateLimit>::LIMIT`.
 
 ## Related constructs

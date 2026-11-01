@@ -286,8 +286,8 @@ adding a second field changes the shape rather than lengthening it.
 **Named-field and newtype variants have different representations.** `Circle { radius: f64 }` uses a
 one-entry product, while `Circle(Circle)` uses its payload type directly.
 
-**Only `HasFields` accepts every variant shape in this family.** Unit, multi-field, and struct-style
-variants are rejected by `CgpData`, `CgpVariant`, `ExtractField`, and `FromVariant`. Wrap richer
+**Only `HasFields` accepts every variant shape in this family.** Multi-field and struct-style variants
+with fields are rejected by `CgpData`, `CgpVariant`, `ExtractField`, and `FromVariant`. Wrap richer
 payloads in dedicated structs to use those derives.
 
 **The borrowed shape adds a reference to each field's declared type.** A field of type `&'a Name`
