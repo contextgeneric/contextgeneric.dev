@@ -5,19 +5,19 @@ sidebar_position: 3
 
 # Impl-side dependencies
 
-Building a greeting from a name requires access to that name. A caller that only wants the
-resulting greeting, however, may have no reason to retrieve the name itself. Keeping that
-requirement on the implementation lets the caller depend on the greeting operation alone.
-Such a requirement, present on an implementation but absent from its trait interface, is an
-**impl-side dependency**.
+A trait exposes operations that callers can use, while an implementation may need additional
+traits, values, or types to carry them out. A requirement kept on the implementation without
+appearing in the trait's interface is an **impl-side dependency**. Callers can then depend on the
+trait alone, and the compiler checks the implementation's requirements when resolving that trait
+for a context.
 
-This page develops that separation with ordinary Rust functions and blanket implementations,
-then applies it to CGP providers. The examples move from trait requirements to field values and
-type choices, including the types that must remain visible in the public interface.
+This page develops that separation in ordinary Rust blanket implementations, then applies it to
+CGP providers. It covers dependencies on traits, field values, and context-selected types,
+including why types used in public signatures must remain available through the interface.
 
 ## What a `where` clause costs the callers above it
 
-A generic greeting function can obtain a name through a `HasName` bound on the context:
+For example, a generic greeting function can obtain a name through a `HasName` bound on the context:
 
 ```rust
 pub trait HasName {

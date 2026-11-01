@@ -5,14 +5,15 @@ sidebar_position: 1
 
 # Bypassing coherence
 
-A trait bound lets generic code request an implementation without asking its caller to pass one.
-Rust's coherence rules make that possible by keeping the choice consistent across the program.
-That consistency also limits which implementations can coexist: if several could apply to the
-same type, Rust rejects them even when an application knows which behavior it wants.
+Rust's coherence rules keep trait lookup consistent across a program. For a given trait, its
+type arguments, and an implementing type, at most one implementation applies. Generic code can
+therefore rely on trait bounds without asking callers to choose an implementation. The same
+guarantee rules out overlapping implementations, even when each would be useful on its own.
 
-This page follows that trade-off from ordinary trait lookup to an encoding example with competing
-implementations. It then shows how CGP gives those implementations separate provider types and
-connects each value type to its chosen provider, before considering the costs of that arrangement.
+CGP lets alternatives coexist by giving each implementation a separate provider type. A context
+then selects its provider through wiring, and the generated code continues to obey Rust's
+coherence rules. This page explains why that guarantee matters, how the provider split works
+within it, and where ownership and wiring limit the available choices.
 
 ## The trait system is already a dependency-injection mechanism
 

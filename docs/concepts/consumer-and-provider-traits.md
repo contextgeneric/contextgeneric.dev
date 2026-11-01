@@ -5,21 +5,21 @@ sidebar_position: 2
 
 # Consumer and provider traits
 
-A production application may send email through SMTP, while a test application records messages
-for inspection. Both can expose the same `send_email` method through an ordinary Rust trait.
-As more application types need those behaviors, it becomes useful to share each implementation
-while letting each application choose which one to use.
+A CGP component connects callers to implementations through two related traits. Callers use the
+**consumer trait** to invoke methods on a context, the type receiving the call. Implementers use
+the **provider trait** to supply those methods through separate provider types. The context chooses
+a provider through wiring, so implementations can vary while callers keep the same interface.
 
-CGP supports that choice by separating the interface callers use from the interface reusable
-implementations target. This page follows the email example through that split, traces a call
-through the generated Rust, and shows how the macros connect the pieces. It closes with the
-costs and limits of the arrangement.
+This page follows the connection between the two traits, from a method call through the generated
+forwarding implementations to the chosen provider. It then shows how the macros produce those
+connections, where application state lives, and what the separation costs.
 
 ## What an ordinary Rust trait does, and where it stops
 
-An ordinary Rust trait already lets the two applications expose the same method with different
-behavior. Each application type provides its own implementation of `CanSendEmail`, and callers
-use the shared interface:
+An ordinary Rust trait lets different types expose the same method with different behavior.
+For example, a production application may send email through SMTP, while a test application
+records messages for inspection. Each type can implement `CanSendEmail`, giving callers a
+shared interface:
 
 ```rust
 use core::cell::RefCell;
@@ -71,8 +71,8 @@ implementations and a wiring table that selects one.
 
 ## Splitting one trait in two
 
-The **consumer trait** keeps the caller's interface, including the original methods and receiver.
-The **provider trait** moves the consumer's `Self` into a `Context` parameter. Its methods receive
+The consumer trait keeps the caller's interface, including the original methods and receiver.
+The provider trait moves the consumer's `Self` into a `Context` parameter. Its methods receive
 the context as an explicit argument, leaving the implementing type free to name the behavior.
 
 The signatures below show the split. They omit a generated checking bound on the provider trait,
