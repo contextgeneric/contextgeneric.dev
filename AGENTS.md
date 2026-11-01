@@ -121,6 +121,16 @@ purpose as the subject of the opening, with examples serving as illustrations.
 The knowledge base's [explanation-page writing guide](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/explanation.md#writing-style)
 sets the full style and structure requirements for these pages.
 
+## Use natural-writing for cargo-cgp pages
+
+When adding or revising a page under `docs/cargo-cgp/`, use the same natural-writing style
+throughout the page, the lookup pages included. Keep tables, lists, and code blocks where the content
+is a set of items or text a reader copies, and let the prose around them follow from one sentence to
+the next.
+
+The knowledge base's [tooling-page writing guide](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/tooling.md#writing-style)
+sets the full style requirements for these pages.
+
 ## Do not rewrite published blog posts
 
 A blog post is dated. A release announcement records what a release did at the time, and editing its
