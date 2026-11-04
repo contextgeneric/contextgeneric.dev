@@ -14,7 +14,7 @@ Join the conversation on platforms like [**Discord**](https://discord.gg/Hgk3rCw
 
 ## Read The Documentation
 
-We encourage you to explore the documentation available on this website, including the [CGP Patterns](https://patterns.contextgeneric.dev) book. Your feedback is invaluable to us—if you encounter anything confusing or unclear, please let us know so we can improve the content and make it more accessible to everyone.
+We encourage you to explore the documentation available on this website. Your feedback is invaluable to us—if you encounter anything confusing or unclear, please let us know so we can improve the content and make it more accessible to everyone.
 
 ## Publish Your own CGP Components
 

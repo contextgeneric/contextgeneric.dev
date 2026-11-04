@@ -57,11 +57,8 @@ Use the documentation according to the question you need to answer:
 - [Glossary](/docs/reference/glossary): short definitions of the terms used across this documentation.
 - [Resources](/docs/resources): libraries, projects, talks, and further reading.
 
-The [Context-Generic Programming Patterns book](https://patterns.contextgeneric.dev/) develops CGP
-from first principles. It is useful for understanding the underlying patterns, but its examples do
-not consistently match the current library. Use the maintained tutorials and reference when writing
-new code. The [blog](/blog) records releases, design discussions, and talks; older posts describe
-the library as it was when they were published.
+The [blog](/blog) records releases, design discussions, and talks; older posts describe the library
+as it was when they were published.
 
 ---
 
