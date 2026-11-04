@@ -29,7 +29,7 @@ hallucinate with significant misunderstanding about CGP, or use outdated informa
 [How CGP's Documentation Is Written](how-cgp-is-documented.md) explains the problem and the process
 that answers it.
 
-**An AI-assisted pull request or issue must include the prompts that can be used to reproduce similar patch**:
+**An AI-assisted pull request or issue must include the prompts that can be used to reproduce a similar patch**:
 the prompt that verified the issue, or the prompt that applied the fix. The CGP maintainers may run similar
 prompts themselves rather than merge a pull request directly, so the prompt can be as useful to them
 as the change.

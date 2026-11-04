@@ -73,8 +73,8 @@ When the macro's output changes, the snapshot changes with it, and the reference
 implementation document, and the skill are updated in the same change. When the views disagree, the
 source decides which one is wrong.
 
-The repeating explanation from different views keeps agents from drifting away from the correct
-understand of a given CGP construct. Doing so would require the agent to maintain the same
+Repeating the explanation in different views keeps agents from drifting away from the correct
+understanding of a given CGP construct. Doing so would require the agent to maintain the same
 misunderstanding across all views, which is relatively unlikely.
 
 ## Written rules
