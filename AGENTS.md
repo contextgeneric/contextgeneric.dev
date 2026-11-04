@@ -37,8 +37,15 @@ useless to any reader who does not have that repository.
 
 A published page may link only to public resources: other pages on this site, the
 [`cgp` repository](https://github.com/contextgeneric/cgp) and its siblings,
-[docs.rs](https://docs.rs/cgp), [crates.io](https://crates.io/crates/cgp), the
-[CGP Patterns book](https://patterns.contextgeneric.dev/), and ordinary external sources.
+[docs.rs](https://docs.rs/cgp), [crates.io](https://crates.io/crates/cgp), and ordinary external
+sources.
+
+**The CGP Patterns book and the Hermes SDK are legacy resources: no page links, lists, or recommends
+either.** Point a reader who wants a first-principles explanation or a real system built with CGP at
+this site's Concepts and Projects pages instead. A page that already mentions one is for the author to
+change, since an acknowledgement of where CGP came from is the author's to keep or drop. The knowledge
+base's [website rules](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/AGENTS.md#leave-legacy-resources-off-public-pages)
+state the rule in full.
 
 **Two hand-written surfaces are sanctioned exceptions, and only two.** `docs/ai/disclaimer.md` links
 to the knowledge base repository, because the base is the subject it discloses: the page's argument
