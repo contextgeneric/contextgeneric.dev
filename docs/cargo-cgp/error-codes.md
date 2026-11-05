@@ -204,7 +204,8 @@ A `check_components!` table lists one entry twice.
 [CGP-E015] `check_components!` checks `<entry>` twice for `<Context>`
 ```
 
-To fix it, remove one of the two.
+To fix it, remove one of the two. A `delegate_and_check_components!` table that lists an entry twice also wires it twice,
+so you see that as [CGP-E010](#cgp-e010) alone.
 [The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
 
 ### CGP-E016
