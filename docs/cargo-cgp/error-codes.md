@@ -209,7 +209,8 @@ To fix it, remove one of the two.
 
 ### CGP-E016
 
-Two `check_components!` tables in one module check the same context, so they share a check-trait name.
+Two `check_components!` tables, or two `delegate_and_check_components!` tables, in one module check the same context,
+so they share a check-trait name. The message names the macro the tables were written with.
 
 ```text
 [CGP-E016] two `check_components!` tables in one module check `<Context>`
@@ -217,7 +218,7 @@ Two `check_components!` tables in one module check the same context, so they sha
 
 To fix it, merge
 the tables, or name one table's check trait with `#[check_trait(...)]`. When two attributes give one name, the message
-says so instead.
+says so instead, and for tables of different macros it names each macro and asks you to rename one check trait.
 [The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
 
 ### CGP-E017
