@@ -228,7 +228,7 @@ error[E0277]: the trait bound `f64: Eq` is not satisfied
 
 This is the one class here without a `[CGP-Exxx]` headline at a check, and the absence is deliberate.
 Reached through a method call, where the compiler's headline talks about the method, the same mistake
-reads `[CGP-E001] the trait bound `+"`f64: Eq`"+` is not satisfied`.
+reads `` [CGP-E001] the trait bound `f64: Eq` is not satisfied ``.
 
 The fix is not to wire a component or add a field but to satisfy the trait: wire the abstract type
 to something that implements it, implement it for a type you own, or relax the provider's bound if

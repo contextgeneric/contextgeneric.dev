@@ -305,9 +305,7 @@ serve that purpose. An error naming `IsNothing` usually means record and variant
 been mixed.
 
 Extractor diagnostics may leave the offending variant unnamed. The implementations target generated
-companion enums, so both the headline and the note can point to the derive. Check the names above and
-rename the conflicting variant. [`HasFields`](./derive_has_fields.md) also reserves `Fields` and
-`FieldsRef`, so an enum deriving the full family must avoid those too.
+companion enums, so both the headline and the note can point to the derive.
 
 **The remainder does not inherit the enum's attributes.** Deriving `Debug` or `PartialEq` on the
 enum does not implement them for the companion. Use `.ok()`, `.is_ok()`, or a `match` to inspect the
