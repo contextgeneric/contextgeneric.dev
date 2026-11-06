@@ -7,24 +7,22 @@ description: 'Look up any [CGP-Exxx] code cargo cgp check prints: what the messa
 
 # Error codes
 
-When `cargo cgp check` rewrites a CGP error, it tags the message with a code in square brackets, such as
-`[CGP-E001]`, so you can look up what the message means. The command is part of the
-[`cargo-cgp`](./index.md) toolchain for [Context-Generic Programming (CGP)](/docs/). This page lists every
-code with the message it heads, the mistake it means, the fix, and the section that explains the class of
-mistake in full, usually in the [compile-errors reference](/docs/reference/errors).
-[Reading the output](./reading-output.md) shows how the codes sit inside a complete error.
+A code such as `[CGP-E001]` identifies the kind of failure `cargo cgp check` recognized. This page
+lists those codes with their message forms, causes, and remedies. The command belongs to the
+[`cargo-cgp`](./index.md) toolchain for [Context-Generic Programming (CGP)](/docs/).
+[Reading the output](./reading-output.md) places the codes in complete diagnostics, while the
+[compile-errors reference](/docs/reference/errors) explains the underlying mistake classes.
 
 ## How the codes work
 
-A CGP code sits beside the compiler's own code rather than in place of it. In
-`error[E0277]: [CGP-E001] …`, `E0277` is the compiler's code, which `rustc --explain` describes, and
-`[CGP-E001]` is the CGP class the tool recognized. Because a rewritten error restates the compiler's error
-and keeps its code, searching your output for a CGP code finds every error of that class.
+The CGP code supplements the compiler's own code. In `error[E0277]: [CGP-E001] …`, `E0277` still
+refers to the explanation available through `rustc --explain`, while `[CGP-E001]` identifies the
+CGP failure. Searching for a CGP code therefore collects the rewritten errors of that class.
 
-The hundreds digit says where in the error a code appears. `CGP-E0xx` codes head the error and classify it
-as a whole. `CGP-E1xx` codes label the dependency chain, one per line of the tree beneath a `root cause:`
-note. From `CGP-E101` to `CGP-E104` they mark steps along the way, and from `CGP-E110` onward they mark the
-cause the chain ends at.
+The hundreds digit distinguishes whole-error codes from dependency steps. A `CGP-E0xx` code
+heads the diagnostic, while a `CGP-E1xx` code labels a line of its dependency tree. Codes
+`CGP-E101` through `CGP-E104` describe the path through requirements; codes from `CGP-E110` onward
+identify the cause at the end.
 
 In the messages below, a word in angle brackets, such as `<Context>`, stands for the name the tool fills in
 from your code.
@@ -36,9 +34,9 @@ causes, so the error usually carries a `root cause:` note and a dependency chain
 
 ### CGP-E001
 
-A context cannot use a component it is expected to use. Either the component is not wired, or something the
-wired provider needs is missing, so the context never gets the consumer trait. The headline states the cause
-in the words of its chain line:
+The context cannot obtain the consumer trait, either because the component has no wiring entry
+or because the chosen provider lacks a dependency. The headline names the cause using the same
+wording as the corresponding dependency-chain line:
 
 ```text
 [CGP-E001] missing field `height` on `Rectangle`
@@ -58,10 +56,11 @@ fix it, follow the `root cause:` note, which names the missing field, derive, wi
 
 ### CGP-E002
 
-A provider does not implement its provider trait for the context, because something the provider requires
-does not hold. This is the provider-side version of `[CGP-E001]`, and a failing `#[check_providers(...)]`
-assertion in [`check_components!`](/docs/reference/macros/check_components) or a call through the provider's
-own path reports it. It also states the cause in its headline, with this class sentence for mixed causes:
+The selected provider cannot implement its provider trait for this context because one of its
+requirements fails. This is the provider-side form of `[CGP-E001]`, reported by a failing
+`#[check_providers(...)]` assertion in [`check_components!`](/docs/reference/macros/check_components)
+or a call through the provider's own path. Its headline names the cause, using this class sentence
+when causes differ:
 
 ```text
 [CGP-E002] the provider trait `<ProviderTrait>` with context `<Context>` is not implemented for provider `<Provider>`
@@ -210,17 +209,19 @@ so you see that as [CGP-E010](#cgp-e010) alone.
 
 ### CGP-E016
 
-Two `check_components!` tables, or two `delegate_and_check_components!` tables, in one module check the same context,
-so they share a check-trait name. The message names the macro the tables were written with.
+Checking the same context in two `check_components!` tables, or two
+`delegate_and_check_components!` tables, in one module gives both checks the same generated
+trait name. The message identifies the macro used:
 
 ```text
 [CGP-E016] two `check_components!` tables in one module check `<Context>`
 ```
 
-To fix it, merge
-the tables, or name one table's check trait with `#[check_trait(...)]`. When two attributes give one name, the message
-says so instead, and for tables of different macros it names each macro and asks you to rename one check trait.
-[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
+Merge the tables or give one check a distinct name with `#[check_trait(...)]`. If two attributes
+explicitly choose the same name, the message identifies that conflict instead. For tables from
+different macros, it names both and asks you to rename one check trait.
+[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile)
+covers these cases.
 
 ### CGP-E017
 
@@ -260,8 +261,9 @@ the parameter and remove it from the entry's generic parameters, as the `help` l
 
 ### CGP-E060
 
-A check entry names no parameters for a component that takes some, so it checks the component at the unit parameters
-`()`, which the provider does not implement.
+Omitting parameters from a check makes it request the component at unit parameters `()`.
+If the provider supports a different parameter set, that check cannot establish the intended
+implementation:
 
 ```text
 [CGP-E060] the check of `<entry>` on `<Context>` names no parameters, so it checks the component at the unit parameters `()`
@@ -273,8 +275,9 @@ To fix it, check it at the parameters the `help` line offers, with
 
 ### CGP-E061
 
-Two [`#[cgp_auto_dispatch]`](/docs/reference/macros/cgp_auto_dispatch) traits in one module declare a method of the same
-name, and the macro names its generated items after the method alone.
+The generated names for [`#[cgp_auto_dispatch]`](/docs/reference/macros/cgp_auto_dispatch) depend
+on the method name. Two traits declaring the same method in one module therefore produce
+colliding generated items:
 
 ```text
 [CGP-E061] two `#[cgp_auto_dispatch]` traits in one module declare the method `<method>`
@@ -303,9 +306,11 @@ the consumer trait directly on the context. The `help` line names the provider t
 
 ### CGP-E021
 
-Each step of the lookup requires the consumer trait again for a larger type, so nothing repeats, and the compiler stops
-at its recursion limit. No limit ends a lookup that grows, so to fix it, wire a provider whose requirements do not grow.
-[A lookup that never terminates](/docs/reference/errors#a-lookup-that-never-terminates) explains the class.
+The lookup keeps requesting the consumer trait for a larger type. Because each request differs,
+Rust eventually reaches its recursion limit without finding an implementation. Raising that
+limit cannot terminate an ever-growing lookup; select a provider whose requirements stop growing.
+[A lookup that never terminates](/docs/reference/errors#a-lookup-that-never-terminates)
+explains this failure.
 
 ```text
 [CGP-E021] the wiring for the consumer trait `<Consumer>` on context `<Context>` never resolves, because each step requires it for a larger type (`<Larger>`, …)
@@ -313,18 +318,18 @@ at its recursion limit. No limit ends a lookup that grows, so to fix it, wire a 
 
 ### CGP-E022
 
-A crate registers wiring into a namespace it does not own, under a key it does not own either, which Rust's orphan rule
-forbids. The compiler's code is `E0210` or `E0117`.
+The registration belongs to neither end of the lookup: both its namespace and its key come from
+other crates. Rust's orphan rule rejects this with `E0210` or `E0117`:
 
 ```text
 [CGP-E022] cannot register the foreign <key> into the foreign namespace `<Namespace>`
 ```
 
-To fix it, own one end, as the `help` line says: key the registration
-on a component your crate defines, register it from the crate that owns the namespace, or define a namespace of your own
-that inherits the foreign one.
+Make one end local, as the `help` line suggests. You can use a component defined in your crate,
+move the registration into the namespace's crate, or define a local namespace inheriting the
+foreign one.
 [Registering into a namespace you do not own](/docs/reference/errors#registering-into-a-namespace-you-do-not-own)
-explains the class.
+explains the ownership requirement.
 
 ## Mistakes in what a macro was given
 
@@ -333,9 +338,9 @@ These codes name a CGP attribute or macro used in a way the generated code canno
 
 ### CGP-E030
 
-A `#[cgp_fn]` or `#[cgp_impl]` body calls a CGP trait's method on `self` or `Self` without declaring the trait as a
-dependency. The macro turns the body into an implementation over a generated context type, so a trait the body uses has to
-be declared for that type to have it. The compiler's code is `E0599`.
+A `#[cgp_fn]` or `#[cgp_impl]` body can call a CGP method on `self` or `Self` only when its context
+bounds include the trait. The macro generates a generic context, so bringing the trait into scope
+alone does not establish that requirement. Omitting the dependency produces `E0599`:
 
 ```text
 [CGP-E030] the trait `<Trait>` is used but not declared as a dependency
@@ -347,8 +352,8 @@ To fix it, add the trait to `#[uses(...)]`, as the
 
 ### CGP-E031
 
-A higher-order provider calls an inner provider it never imported, so the inner provider has no provider-trait bound and
-the call cannot resolve.
+The higher-order provider calls an inner provider without importing its provider-trait bound.
+Without that requirement, Rust cannot resolve the inner call:
 
 ```text
 [CGP-E031] the inner provider `<Inner>` is used but not imported
@@ -372,7 +377,8 @@ class.
 
 ### CGP-E033
 
-`#[cgp_impl]` is applied to a trait that is not a CGP component at all, so there is no provider trait to implement.
+The trait named by `#[cgp_impl]` is not a CGP component, so it has no provider trait for the macro
+to implement:
 
 ```text
 [CGP-E033] `#[cgp_impl]` can only implement a CGP component's provider trait, but `<Trait>` is not a CGP component
@@ -410,8 +416,9 @@ To fix it, import the type with
 
 ### CGP-E036
 
-A component requires a trait of every context, through [`#[extend(...)]`](/docs/reference/attributes/extend) or
-`#[use_type(...)]`, and a `#[cgp_impl]` provider does not declare it, even if its body never uses the trait.
+A component can require a trait of every context through
+[`#[extend(...)]`](/docs/reference/attributes/extend) or `#[use_type(...)]`. Its provider must
+declare that requirement too, even if the provider's method bodies never use it:
 
 ```text
 [CGP-E036] the provider trait `<ProviderTrait>` requires `<Trait>` of the context, but the provider `<Provider>` does not declare it
@@ -435,21 +442,22 @@ name the consumer trait, as the `help` line says.
 
 ### CGP-E038
 
-`#[cgp_impl(GreetHello)]` without `new` implements the provider trait for a struct nothing declares.
+The form `#[cgp_impl(GreetHello)]` implements an existing provider struct. If nothing declares
+`GreetHello`, that implementation has no type to target:
 
 ```text
 [CGP-E038] the provider `<Provider>` is not declared
 ```
 
-To fix it, write
-`#[cgp_impl(new GreetHello)]` so the macro declares it, or declare the struct yourself. A provider declared elsewhere but not
-imported keeps the compiler's `E0425` and its import suggestion instead.
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) describes the syntax.
+Use `#[cgp_impl(new GreetHello)]` to declare the struct with the implementation, or declare it
+separately. If a provider is declared elsewhere but not imported, the tool instead keeps the
+compiler's `E0425` and import suggestion.
+[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) describes both declaration forms.
 
 ### CGP-E039
 
-A plain `impl` implements a provider trait. The trait has `IsProviderFor` as a supertrait, and only `#[cgp_provider]` or
-`#[cgp_impl]` writes the provider's impl of it.
+The provider trait requires `IsProviderFor` as a supertrait, but a plain `impl` does not supply
+that implementation. `#[cgp_provider]` and `#[cgp_impl]` generate it alongside the provider impl:
 
 ```text
 [CGP-E039] the impl of `<Trait>` for `<Provider>` is written without `#[cgp_provider]`
@@ -460,25 +468,27 @@ To fix it, add one of those macros, as the `help` line says.
 
 ## Wiring keys and values that do not resolve
 
-These codes replace a name-resolution error on a wiring entry, for a name the tool can settle. Each applies only when no
-type of that name exists in your crate or its dependencies, or when the tool can say which name you meant.
-[`delegate_components!`](/docs/reference/macros/delegate_components) describes what a key and a value may be.
+A wiring name may fail to resolve because it is missing, not imported, or the wrong kind of
+item. These codes replace the compiler's message only when the tool can establish that no such
+type exists in the crate or its dependencies, or can identify the intended name.
+[`delegate_components!`](/docs/reference/macros/delegate_components) explains the permitted keys
+and values.
 
 ### CGP-E040
 
-A wiring key names a consumer trait such as `CanGreet`, where its component marker `GreeterComponent` belongs.
+The table uses a consumer trait such as `CanGreet` as its key. Wiring needs the corresponding
+component marker, such as `GreeterComponent`, to select a provider:
 
 ```text
 [CGP-E040] the wiring key `<Consumer>` is a consumer trait, but a key names a component
 ```
 
-To fix it, name
-the component, as the `help` line says.
+Replace the trait with the component marker named by the `help` line.
 
 ### CGP-E041
 
-A key names a component that exists but is not imported where the table is written, such as `ErrorTypeProviderComponent`,
-which the prelude does not export.
+The component exists, but the table cannot see it. For example, `ErrorTypeProviderComponent`
+needs an explicit import because it is not exported by the prelude:
 
 ```text
 [CGP-E041] the component `<Component>` is not in scope
@@ -488,8 +498,8 @@ To fix it, add the `use` line the `help` line gives.
 
 ### CGP-E042
 
-A key was guessed from a consumer trait's name with `Component` appended, such as `HasScalarTypeComponent`, while the marker
-follows the provider trait, as in `ScalarTypeProviderComponent`.
+The key uses a consumer trait's name with `Component` appended, such as `HasScalarTypeComponent`.
+The actual marker follows the provider trait's name instead, as in `ScalarTypeProviderComponent`:
 
 ```text
 [CGP-E042] the wiring key `<Key>` names no component
@@ -499,22 +509,23 @@ To fix it, name the component the `help` line gives.
 
 ### CGP-E043
 
-A wiring value names a provider struct nothing declares, often a misspelling.
+The table selects a provider struct that has not been declared, often because its name is
+misspelled:
 
 ```text
 [CGP-E043] the provider `<Provider>` wired for `<Key>` is not declared
 ```
 
-To fix it, declare the provider or name one that
-exists. A `help` line appears when the component has a provider with a similar name. A provider declared elsewhere but not
-imported keeps the compiler's `E0425` and its import suggestion instead.
+Declare the intended provider or select an existing one. When the component has a provider with
+a similar name, a `help` line suggests it. A provider that exists elsewhere but is not imported
+keeps the compiler's `E0425` and import suggestion instead.
 
 ### CGP-E044
 
-An `@`-path in a key, or in the value of a `=>` redirect, names a type nothing declares. A path segment that is not a lowercase
-identifier stays the type it spells, and only a lowercase one becomes a symbol. So to fix it, declare or import the type, or
-write the segment in lowercase. A type declared elsewhere but not imported keeps the compiler's `E0425` and its import
-suggestion instead.
+A segment in an `@` key or `=>` destination names an undeclared type. Lowercase identifiers
+become symbols, while other segments retain their spelling as types, so capitalization can
+change the lookup's meaning. Declare or import the intended type, or use lowercase for a symbol.
+An existing type that is merely unimported keeps the compiler's `E0425` and import suggestion.
 
 ```text
 [CGP-E044] the type `<Name>` in a wiring path is not declared
@@ -524,18 +535,20 @@ suggestion instead.
 
 ### CGP-E050
 
-A cast, builder, or extractor operation is called on a value whose field or variant is not in the state the operation needs, or
-on a type without the data derive it needs. The headline states the cause, and the chain ends at one of the codes from
-`[CGP-E118]` to `[CGP-E126]`, at `[CGP-E110]` for a missing field, or at `[CGP-E117]` for an ordinary bound. For example:
+The requested cast, build, or extraction cannot operate on the value in its current state, or
+the type lacks the needed data derive. The headline identifies that cause. The chain ends at
+`[CGP-E118]` through `[CGP-E126]` for data-state failures, `[CGP-E110]` for a missing field, or
+`[CGP-E117]` for an ordinary bound. For example:
 
 ```text
 [CGP-E050] missing variant `Bar` on `Big`
 ```
 
-Its class sentence is `` the trait `<Trait>` is not implemented for `<Type>` ``. To fix it, follow the cause: drop a second
-setting or extraction, set an unset field, add a missing variant or align a payload type, or add the derive or call the method a
-`help` line names. [Extensible variants](/docs/concepts/extensible-variants) and
-[extensible records](/docs/concepts/extensible-records) explain what those operations require.
+The general class sentence is `` the trait `<Trait>` is not implemented for `<Type>` ``.
+Follow the reported cause to choose the correction: remove a duplicate setting or extraction,
+set a missing field, supply a compatible variant or payload, or use the derive or method named
+in `help`. [Extensible variants](/docs/concepts/extensible-variants) and
+[extensible records](/docs/concepts/extensible-records) explain the state each operation requires.
 
 ## Steps of the dependency chain
 
@@ -544,8 +557,8 @@ no fix of their own.
 
 ### CGP-E101
 
-This line is a step through a context's consumer trait, and it is usually the first line of the chain. A type without wiring of
-its own is named plainly, without the word "context".
+The chain usually begins with the consumer trait required of the context. If the type has no
+wiring of its own, the message names it without the word “context”.
 
 ```text
 [CGP-E101] consumer trait impl `<Consumer>` for context `<Context>`
@@ -553,9 +566,9 @@ its own is named plainly, without the word "context".
 
 ### CGP-E102
 
-This line is a step through a provider's provider trait: the context's wiring selected this provider, and the chain continues with
-what the provider needs. Directly above a `[CGP-E115]` line for the same provider, which has no such impl, it reads
-`` provider trait `<ProviderTrait>` required of provider `<Provider>` with context `<Context>` ``.
+The wiring selected this provider, so the chain proceeds through its provider-trait requirements.
+If the provider lacks the implementation entirely, a `[CGP-E115]` line follows and this step
+instead reads `` provider trait `<ProviderTrait>` required of provider `<Provider>` with context `<Context>` ``.
 
 ```text
 [CGP-E102] provider trait impl `<ProviderTrait>` with context `<Context>` for provider `<Provider>`
@@ -592,21 +605,22 @@ The chain ends at a field the context does not have.
 [CGP-E110] missing field `<field>` on `<Type>`
 ```
 
-To fix it, add the field, or wire a provider that does not read it. A `help`
-line names a similar field when there is one, and otherwise the field to add.
-[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains the class.
+Add the required field or select a provider that does not read it. The `help` line points to a
+similar existing field when possible; otherwise, it names the field to add.
+[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains this failure.
 
 ### CGP-E111
 
-The chain ends at a field that exists but has no `HasField` impl, because the struct does not derive it.
+The field is present, but generic field access is unavailable because the struct has not derived
+`HasField`:
 
 ```text
 [CGP-E111] `HasField` not derived for field `<field>` of `<Type>`
 ```
 
-To fix it, add
-`#[derive(HasField)]` to the struct, as the `help` line says.
-[When the derive is missing entirely](/docs/reference/errors#when-the-derive-is-missing-entirely) explains the class.
+Add `#[derive(HasField)]` to expose the struct's fields, as the `help` line suggests.
+[When the derive is missing entirely](/docs/reference/errors#when-the-derive-is-missing-entirely)
+explains the missing access implementation.
 
 ### CGP-E112
 
@@ -629,8 +643,8 @@ To fix it, add the wiring entry the `help` line names.
 
 ### CGP-E114
 
-The chain ends at a provider's own table that has no entry for a key: a bundle of wiring missing a component, or a provider that
-dispatches per type missing the type it was given.
+The context selected a provider, but that provider's table lacks the requested key. For a bundle,
+this can mean a missing component; for per-type dispatch, a missing entry for the supplied type:
 
 ```text
 [CGP-E114] missing entry for `<key>` in provider `<Provider>`
@@ -641,15 +655,17 @@ covers.
 
 ### CGP-E115
 
-The chain ends at a type wired where a provider belongs that is not a provider, such as a value type put in a provider's place.
+The selected type cannot supply the required provider trait. A common cause is putting a value
+type in the table where a provider belongs:
 
 ```text
 [CGP-E115] `<Type>` is not a provider of `<ProviderTrait>`
 ```
 
-To fix it, wire an actual provider in that position. A `help` line suggests one when the program supports it:
-an adapter such as `WithProvider`, `UseFields` in place of `UseField` on a multi-method getter, an `open`
-statement in place of `UseDelegate`, or the right component for a provider of another one.
+Select a provider for that component. When the program supports a specific correction, `help`
+may suggest an adapter such as `WithProvider`, `UseFields` for a multi-method getter instead
+of `UseField`, an `open` statement instead of `UseDelegate`, or the component that matches
+the provider you selected.
 
 ### CGP-E116
 
@@ -662,8 +678,9 @@ same wording.
 
 ### CGP-E117
 
-The chain ends at an ordinary Rust trait bound that does not hold, such as `f64: Eq`, in the compiler's own wording. At a
-`check_components!` entry the tool keeps the compiler's headline, which already names the bound.
+An ordinary Rust bound, such as `f64: Eq`, failed at the end of the dependency chain. The line
+keeps the compiler's wording. At a `check_components!` entry, the original headline already
+identifies this bound, so the tool keeps it too.
 
 ```text
 [CGP-E117] the trait bound `<Type: Trait>` is not satisfied
@@ -676,7 +693,8 @@ class.
 
 ### CGP-E118
 
-A builder operation needs a field unset, as a second `build_field` or a second merge source does, and the field is already set.
+A field can be supplied only while it is unset. A second `build_field` call or a merge source
+supplying the same field therefore fails once the builder already contains its value:
 
 ```text
 [CGP-E118] field `<field>` of `<Type>` is already set
@@ -686,7 +704,8 @@ To fix it, drop the second setting.
 
 ### CGP-E119
 
-An operation such as a finalize or `take_field` needs one or more fields set, and they are not.
+Finalization and operations such as `take_field` require the relevant fields to be present.
+One or more are still unset in this builder:
 
 ```text
 [CGP-E119] field `<field>` of `<Type>` is not set
@@ -696,7 +715,8 @@ To fix it, set them first.
 
 ### CGP-E120
 
-A cast between enums has variants that do not match, or a construction uses a tag the enum lacks.
+An enum conversion cannot find a compatible variant, or construction uses a tag absent from
+the target enum:
 
 ```text
 [CGP-E120] missing variant `<Variant>` on `<Type>`
@@ -707,7 +727,8 @@ the name. A `help` line names a similar variant when there is one.
 
 ### CGP-E121
 
-An extractor is finalized while it may still yield a variant, as a matcher that leaves one out does.
+Finalization requires an extractor with no possible variants remaining. An unhandled case,
+such as a missing matcher branch, leaves this variant available:
 
 ```text
 [CGP-E121] variant `<Variant>` of `<Type>` is not extracted
@@ -717,7 +738,8 @@ To fix it, handle the variant.
 
 ### CGP-E122
 
-A cast between enums has same-named variants that carry different payloads.
+The enums share this variant's name, but disagree on its payload type. That prevents the cast
+from transferring the payload:
 
 ```text
 [CGP-E122] variant `<Variant>` on `<Type>` has type `<actual>`, but `<expected>` is required
@@ -737,8 +759,8 @@ To fix it, add the derive the `help` line names.
 
 ### CGP-E124
 
-A variant is extracted a second time from an extractor that no longer holds it. The compiler reports this as an `E0308` on the tag
-argument.
+The extractor has already excluded this variant, so extracting it again is invalid. Rust reports
+the mismatch as `E0308` on the tag argument:
 
 ```text
 [CGP-E124] variant `<Variant>` of `<Type>` is already extracted
@@ -759,8 +781,8 @@ first, as the `help` line says.
 
 ### CGP-E126
 
-A builder or extractor is given to an operation that needs a trait only its struct or enum implements, as `downcast` on the remainder
-of a downcast is.
+The method requires a trait implemented by the original struct or enum, but receives a builder
+or extractor instead. Calling `downcast` on a previous downcast's remainder is one example:
 
 ```text
 [CGP-E126] an extractor of `<Type>` does not implement `<Trait>`
@@ -770,8 +792,9 @@ To fix it, call the method the `help` line names, such as `downcast_fields`.
 
 ### CGP-E127
 
-A provider's impls differ from the wiring in exactly one argument: the context, or a component parameter, as for a pipeline stage that
-takes `u64` after one that returns `String`.
+The wiring requests arguments that differ from the provider's implementations in exactly one
+position: either the context or a component parameter. For example, a pipeline stage may accept
+`u64` while the previous stage returns `String`:
 
 ```text
 [CGP-E127] `<Provider>` implements `<ProviderTrait>` only for `<A>`, not `<B>`
@@ -781,8 +804,9 @@ To fix it, wire a provider for those arguments, or change the type that disagree
 
 ### CGP-E128
 
-A hand-written `DelegateComponent` impl lacks the `IsProviderFor` impl `delegate_components!` writes beside each entry, so a check passes
-but every consumer call fails.
+Writing `DelegateComponent` by hand can leave out the accompanying `IsProviderFor` implementation
+that `delegate_components!` generates. In that case, a component check can pass while every
+consumer call fails:
 
 ```text
 [CGP-E128] the wiring of `<Component>` on `<Context>` has no `IsProviderFor` impl

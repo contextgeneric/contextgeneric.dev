@@ -7,13 +7,14 @@ description: 'How to read the errors cargo cgp check prints: the headline and it
 
 # Reading the output
 
-When you hold an error from `cargo cgp check`, you want to know what failed, why, and what to change. The
-command, part of the [`cargo-cgp`](./index.md) toolchain for
-[Context-Generic Programming (CGP)](/docs/), prints ordinary compiler diagnostics, with the CGP errors it
-recognizes rewritten into a few fixed shapes that answer those questions. This page takes each shape
-apart. Every example comes from running the tool on a complete program. The snippets show the part of the
-program that matters, so the line numbers in the output refer to the whole file. For a single code, see
-[Error codes](./error-codes.md).
+An error from `cargo cgp check` should tell you what failed, why it failed, and what to change.
+The command is part of the [`cargo-cgp`](./index.md) toolchain for
+[Context-Generic Programming (CGP)](/docs/), and keeps ordinary compiler diagnostics while
+rewriting recognized CGP failures into a few recurring forms.
+
+Each example below was captured from a complete program. The snippets beside it show only the
+relevant code, so output line numbers refer to the full file. Read through the examples to learn
+the diagnostic forms, or use [Error codes](./error-codes.md) to look up a particular code.
 
 ## The parts of a rewritten error
 
@@ -38,7 +39,7 @@ error[E0277]: [CGP-E001] missing field `height` on `Rectangle`
 For more information about this error, try `rustc --explain E0277`.
 ```
 
-The error has five parts, and you can read them in the order they appear:
+Read the diagnostic from its headline through the notes and suggested fix:
 
 - **The compiler's code:** `error[E0277]` is the code the compiler assigned, and the tool always keeps it.
   A rewritten error restates the compiler's error rather than replacing it, so `rustc --explain E0277`
@@ -52,20 +53,21 @@ The error has five parts, and you can read them in the order they appear:
   line repeats the root cause where the chain ends.
 - **The `help` line:** it names a fix, when the tool can confirm one.
 
-The chain matters when the fix is not where the caret points. If the provider in the `[CGP-E102]` line is
-not the one you meant to wire, the mistake is in the wiring rather than in the struct, and adding the field
-would hide it.
+When the caret is far from the cause, follow the chain before applying the suggested fix.
+For example, the provider named on the `[CGP-E102]` line may be different from the one you meant
+to select. Adding a field would satisfy that provider, but correcting the wiring may be what the
+program needs.
 
-The caret stays where the compiler put it: on the `check_components!` entry that asserted the requirement,
-or on the call that used the trait when nothing checked it first. The
-[Check page](./check.md#try-it-on-a-deliberate-mistake) shows the second case, where the compiler's own
-message leaves the cause out entirely.
+The caret identifies where Rust was asked to establish the requirement. With `check_components!`,
+that is the check entry; otherwise, it may be the first method call that needs the trait.
+The [Check page](./check.md#try-it-on-a-deliberate-mistake) shows the call-site failure whose raw
+compiler message leaves out the cause.
 
 ## Several causes in one error
 
-One requirement can fail for more than one reason, and in that case the tool lists every cause under
-`root causes:` and branches the chain to show each one. Here `Rectangle` has a `length` field and neither of
-the two the provider reads:
+A provider may lack several dependencies at once. In that case, the tool lists them under
+`root causes:` and branches the tree to show how each is required. Here the struct supplies
+`length`, while its provider reads `width` and `height`:
 
 ```rust
 #[derive(HasField)]
@@ -94,20 +96,20 @@ error[E0277]: [CGP-E001] missing fields `width` and `height` on `Rectangle`
 For more information about this error, try `rustc --explain E0277`.
 ```
 
-Fix every listed cause before checking again. Plain `cargo check` reports only the `width` field for this
-program, so fixing what it names would surface `height` on the next run.
+Both missing fields are visible here, so you can address them together before checking again.
+Plain `cargo check` reports only `width` for this program; fixing that alone would expose
+`height` on a later run.
 
-The same merging works in the other direction. When several components fail because of one shared mistake,
-such as a single missing field that three providers read, the tool reports one error rather than three. Its
-caret marks the first check entry, the other entries are labelled "also required here", and the chain
-repeats once for each component.
+Several components can also fail because of one shared dependency. If three providers read the
+same missing field, the tool reports the mistake once. It marks the first check entry with the
+caret, labels the others “also required here”, and includes a chain for each component.
 
 ## A component nothing is wired for
 
-Sometimes the context has no wiring entry for a component at all. The chain is then short, and its last line
-names the entry that is missing. The examples from here on use `App`, a type that stands for an application
-and carries its wiring, where the examples above used `Rectangle`, the shape being measured. The error
-shapes are the same for both. Here `App` is checked for `FarewellComponent` but wires only the greeter:
+When no provider is selected, the dependency chain ends before reaching a provider implementation.
+To illustrate this, the next examples switch from the shape context `Rectangle` to `App`, a type
+representing an application and its wiring. Both use the same diagnostic forms. Here `App` is
+checked for `FarewellComponent`, but selects only a greeter:
 
 ```rust
 delegate_components! {
@@ -140,15 +142,16 @@ error[E0277]: [CGP-E001] missing wiring for `FarewellComponent` on `App`
 For more information about this error, try `rustc --explain E0277`.
 ```
 
-There is no `[CGP-E102]` line, because no provider was selected for the chain to pass through. To fix it, add
-the entry, or remove the component from the check if the context is not meant to have it. When the component
-is routed through a namespace or an `open` statement, the chain gains a `[CGP-E103]` line naming the path the
-lookup followed, and the last line names that path rather than the component.
+Because no provider was selected, this chain has no `[CGP-E102]` step. Add the missing wiring
+entry, or remove the check if the context should not supply this component. If a namespace or
+`open` statement routes the lookup, a `[CGP-E103]` step shows that path and the chain ends at the
+missing path entry instead.
 
 ## A field with the wrong type
 
-A field can also exist but have the wrong type. The headline then states the whole cause, so the error has no
-separate `root cause:` line. Here `height` is a `u32` where the provider reads an `f64`:
+If the field exists but its type disagrees with the provider, the headline can state that mismatch
+directly and needs no separate `root cause:` note. This `height` is a `u32`, while the area
+provider expects `f64`:
 
 ```rust
 #[derive(HasField)]
@@ -173,15 +176,17 @@ error[E0271]: [CGP-E004] field `height` on `Rectangle` has type `u32`, but `f64`
 For more information about this error, try `rustc --explain E0271`.
 ```
 
-The chain still shows which provider needs the type, which tells you whether to change the field or the
-provider. An [abstract type](/docs/concepts/abstract-types) wired one way and required another produces the
-same shape with `[CGP-E005]`.
+The provider named in the chain tells you where the `f64` requirement came from. Use that to
+decide whether the field should change or a different provider should be selected. An
+[abstract type](/docs/concepts/abstract-types) that disagrees with a provider's requirement produces
+the same form under `[CGP-E005]`.
 
 ## An ordinary Rust trait that does not hold
 
-Not every requirement is a CGP one. When a provider needs an ordinary trait that the wired type does not
-implement, the compiler's own headline already states the cause, so the tool keeps it and adds only the chain.
-Here `CompareScalars` requires `Scalar: Eq`, and `App` wires the scalar type to `f64`, which is not `Eq`:
+A provider can also depend on ordinary Rust traits. At a check entry, the compiler already names
+a missing ordinary bound in its headline, so the tool keeps that wording and adds a dependency
+chain. In this example, `CompareScalars` needs `Scalar: Eq`, while `App` selects `f64`, which
+lacks that implementation:
 
 ```rust
 #[cgp_impl(new CompareScalars)]
@@ -218,22 +223,23 @@ error[E0277]: the trait bound `f64: Eq` is not satisfied
 For more information about this error, try `rustc --explain E0277`.
 ```
 
-The last line of the chain repeats the compiler's words under `[CGP-E117]`, the code for an ordinary bound.
-Reached through a method call rather than a check, the same mistake gets a CGP headline instead, because the
-compiler's own headline there talks about the method:
+The `[CGP-E117]` line identifies the ordinary bound at the end of the chain, using the compiler's
+wording. If the same failure is reached through a method call, the original headline describes
+the method instead, so the tool replaces it with a CGP headline:
 
 ```text
 error[E0599]: [CGP-E001] the trait bound `f64: Eq` is not satisfied
 ```
 
-The fix is in the types rather than the wiring: wire the scalar type to one that implements the trait, or
-relax the provider's bound if it asks for more than it needs. The message names `f64` but not the
-`UseType<f64>` entry that chose it, so that last step is yours.
+To satisfy this requirement, select a scalar type that implements `Eq`, or relax the provider's
+bound if its work does not need equality. The message identifies `f64`, but leaves you to trace
+that choice back to the `UseType<f64>` wiring entry.
 
 ## Two entries that claim one key
 
-A wiring conflict looks different from the errors above, because it is reported where it happens, with two
-carets and no chain. Here one context wires the same component twice:
+When two wiring entries conflict, the error can point directly to them. There is no dependency
+chain to follow: the two carets show the competing implementations. For example, this context
+selects two providers for the same component:
 
 ```rust
 delegate_components! {
@@ -256,15 +262,15 @@ error[E0119]: [CGP-E010] conflicting wiring: `App` wires component `GreeterCompo
 For more information about this error, try `rustc --explain E0119`.
 ```
 
-The two carets point at the two entries, so you only need to remove the one you did not mean. The neighbouring
-codes `[CGP-E011]` to `[CGP-E014]` cover the other ways two entries can claim one key, such as a path key that
-covers a longer one, or an entry that collides with an `open` statement.
+Remove the unintended entry to give this key a single provider. Codes `[CGP-E011]` through
+`[CGP-E014]` cover related overlaps, including a path covering a longer path and a direct entry
+colliding with an `open` statement.
 
 ## A fix in a `help` line
 
-Some mistakes have one right fix, and for those the `help` line matters more than anything else in the error.
-Here a [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) function calls another CGP function on `self` without
-declaring it as a dependency:
+For some failures, the tool can name the missing declaration directly in a `help` line.
+This [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) body calls another CGP function on `self`
+without declaring the trait it needs:
 
 ```rust
 #[cgp_fn]
@@ -290,11 +296,11 @@ error[E0599]: [CGP-E030] the trait `PersonName` is used but not declared as a de
 For more information about this error, try `rustc --explain E0599`.
 ```
 
-Adding `#[uses(PersonName)]` under `#[cgp_fn]` on `greeting` fixes it, and the same error and fix apply to a
-[`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider body. The compiler's own message for this mistake
-talks about a method that exists for `&__Context__`, a type parameter the macro generated, and never names the
-missing attribute. Most of the codes from `[CGP-E030]` to `[CGP-E044]` work this way, each for a different
-mistake in what a macro was given.
+Here adding `#[uses(PersonName)]` beneath `#[cgp_fn]` on `greeting` supplies the missing requirement.
+The same remedy applies inside a [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider body.
+Without the rewrite, the compiler refers to a method on the generated `&__Context__` parameter
+and never names the attribute. Many codes from `[CGP-E030]` through `[CGP-E044]` similarly
+identify a mistake in a macro's input and offer a specific correction.
 
 ## Errors that pass through unchanged
 

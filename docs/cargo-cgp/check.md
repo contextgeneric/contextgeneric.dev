@@ -7,10 +7,10 @@ description: 'Run cargo cgp check in place of cargo check to get CGP compile err
 
 # Check
 
-When a CGP error is hard to read, the first thing to try is `cargo cgp check`. It runs `cargo check` on
-your project and rewrites the CGP errors it recognizes so that each one leads with its root cause. The
-command is part of [`cargo-cgp`](./index.md), the error toolchain for
-[Context-Generic Programming (CGP)](/docs/), and you use it wherever you would use `cargo check`:
+When a CGP error is hard to read, run `cargo cgp check` where you would normally run `cargo check`.
+It checks your project and rewrites recognized CGP errors to lead with their root causes.
+The command belongs to [`cargo-cgp`](./index.md), the error toolchain for
+[Context-Generic Programming (CGP)](/docs/):
 
 ```sh
 cargo cgp check
@@ -27,7 +27,7 @@ cargo cgp check --all-targets
 
 ## Try it on a deliberate mistake
 
-A small library with one mistake shows what the tool does. Start by creating a package:
+A missing context field provides a small example you can try. Create a library package to hold it:
 
 ```sh
 cargo new --lib area-demo
@@ -97,19 +97,22 @@ error[E0599]: [CGP-E001] missing field `height` on `Rectangle`
 For more information about this error, try `rustc --explain E0599`.
 ```
 
-The headline already names the problem, and the `help` line offers one fix: add a `height: f64` field to
-`Rectangle`. Another fix is to wire a provider that does not read a height, and the tree shows why that
-would work too. Read from the top, it says that `Rectangle` must implement `CanCalculateArea`, so its
-provider `RectangleArea` must work for `Rectangle`, so `Rectangle` must have the field. Replace the
-comment with `pub height: f64,` and the check passes. By contrast, plain `cargo check` reports this same
-mistake without ever mentioning `height`, as the [overview](./index.md#the-problem-it-solves) shows.
+Read the tree to connect the suggested fix to the failing call. `CanCalculateArea` is required,
+so the chosen `RectangleArea` provider must work for `Rectangle`, which in turn needs `height`.
+Adding the `f64` field satisfies that requirement. If the table selected the wrong provider,
+however, correcting the wiring may be the intended change.
+
+In this program, replace the comment with `pub height: f64,` and check again; it passes.
+For comparison, the [overview](./index.md#the-problem-it-solves) shows the original `cargo check`
+error, which never names the missing field.
 
 ## Check the wiring where you write it
 
-So far the error has appeared at the call to `area`, because wiring is lazy: without a check, the error
-appears wherever the trait is first used. In a larger program, that place can be far from the line you
-need to change. A [`check_components!`](/docs/reference/macros/check_components) block moves the error to
-the wiring. Replace `print_area` in the program above with:
+The error points to `area` because the call is the first place this program requires the trait.
+A wiring entry alone does not verify its provider's dependencies, so in a larger program the first
+failure might occur far from that entry. Adding a
+[`check_components!`](/docs/reference/macros/check_components) block beside the wiring asks for
+the proof there. Replace `print_area` above with:
 
 ```rust
 check_components! {
@@ -138,22 +141,23 @@ error[E0277]: [CGP-E001] missing field `height` on `Rectangle`
 For more information about this error, try `rustc --explain E0277`.
 ```
 
-The `check_components!` block also changes what plain `cargo check` can tell you. With the block in place,
-stable Rust names the missing requirement, but it spells the field name one character at a time, as a
-type-level string. Because it compares that name with the `width` field the struct does have, it also
-prints the letter the two share in that position as `_`:
+That explicit check helps ordinary `cargo check` expose the missing requirement too. Its field
+tag still appears as a type-level string, however, with one type per character. When comparing
+`height` with the existing `width` field, Rust also replaces a shared character at the same position
+with `_`:
 
 ```text
 help: the trait `HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<_, cgp::prelude::Chars<'t', Nil>>>>>>>>` is not implemented for `Rectangle`
 ```
 
-That line is an excerpt from an error of about thirty lines whose headline names
-`CanUseComponent<AreaCalculatorComponent>`, a trait the macros generated. The tool turns all of it into
-the message above.
+Even with the cause exposed, the raw diagnostic runs to about thirty lines and leads with the
+generated `CanUseComponent<AreaCalculatorComponent>` bound. The tool rewrites that report into
+the field error and dependency chain shown above.
 
 ## What a check does differently
 
-The rewriting is possible because a check is `cargo check` with three settings the tool chooses for you:
+To recover and present these causes, the tool runs `cargo check` with its own compiler settings
+and build location. The changes work together:
 
 - **The pinned nightly:** a check compiles under the tool's own nightly, so the compiler inside the driver
   matches the one that builds your code. Your project's toolchain is untouched.
@@ -163,46 +167,45 @@ The rewriting is possible because a check is `cargo check` with three settings t
   directory while it builds there, so a shared one would make each check wait for your other cargo runs
   and your editor's, and the reverse.
 
-Because the tool picks these settings, a check is a diagnostic pass rather than a reproduction of your own
-build, the way Clippy runs under settings of its own. A passing check therefore does not promise a passing
-`cargo check`. For example, two namespaces that inherit from each other are rejected by stable Rust but
-compile under the tool. Your toolchain's `cargo check` remains the authority on whether the code compiles.
+Using a separate compiler and solver makes this a diagnostic pass rather than a reproduction
+of your project's check. Like Clippy under its own settings, it can give a different result.
+Mutually inheriting namespaces, for example, pass this check but are rejected by stable Rust.
+Use your own toolchain's `cargo check` to decide whether the code compiles.
 
-The `target/cgp` directory sits inside your project's own target directory, wherever in the project you
-run the command, so it follows a configured `build.target-dir` or a set `CARGO_TARGET_DIR`. With
-`CARGO_TARGET_DIR=/build`, for example, the check builds in `/build/cgp`. To choose the check's directory
-exactly, pass `--target-dir`.
+The build location follows the project's target directory rather than the directory you invoke
+the command from. A configured `build.target-dir` or `CARGO_TARGET_DIR` therefore moves the tool's
+artifacts too: with `CARGO_TARGET_DIR=/build`, they go in `/build/cgp`. Pass `--target-dir` if you
+want to choose the check's directory exactly.
 
 ## Flags are cargo's, not the tool's
 
-The tool appends your arguments to `cargo check` and lets cargo handle them, so every `cargo check` flag
-behaves as it normally does. Cargo also validates them, which means an unknown flag produces cargo's
-error, `error: unexpected argument '--nope' found`, rather than a message from the tool. In the same way,
-`cargo cgp check --help` prints cargo's help for `cargo check` and exits without running a check. For the
-tool's own commands, run `cargo cgp --help`.
+Since cargo receives and validates the forwarded flags, an unknown flag produces cargo's own
+`error: unexpected argument '--nope' found`. Help follows the same division: `cargo cgp check --help`
+displays cargo's help without running a check, while `cargo cgp --help` describes the tool's commands.
 
-The tool reads three of the flags itself, `--target-dir`, `--manifest-path`, and `--config`, and only to
-decide where `target/cgp` goes. It still passes all three on to cargo.
+Before forwarding the arguments, the tool reads `--target-dir`, `--manifest-path`, and `--config`
+to determine the build directory. Cargo still receives all three and handles their usual behavior.
 
 ## In your editor
 
-The same check can run in your editor, so the errors you see there lead with their root cause too.
-rust-analyzer can run `cargo cgp check` every time you save, and it takes one setting, which
-[Editor integration](./editor-integration.md) gives for VS Code, along with what the switch changes.
+You can also make rust-analyzer run this command whenever you save. The
+[Editor integration](./editor-integration.md) page gives the VS Code setting and explains how the
+override affects the editor's checks.
 
 ## When it will not help
 
-A check reports only what your code asks the compiler to prove. Wiring that nothing uses and nothing
-checks produces no error, from this tool or any other, which is why
-[`check_components!`](/docs/reference/macros/check_components) is worth adding for every context you wire.
+Neither this tool nor ordinary `cargo check` reports a requirement that the program never asks
+to prove. Unused, unchecked wiring can therefore remain invalid without an error. Adding
+[`check_components!`](/docs/reference/macros/check_components) for each context makes those
+requirements explicit.
 
 Some errors also pass through as the compiler wrote them. `cargo cgp check` leads with the root cause for
 the classes it recognizes, and the tool does not yet reshape every class.
 [Reading the output](./reading-output.md#errors-that-pass-through-unchanged) lists the ones you are most
 likely to meet.
 
-Finally, the tool reshapes errors in your workspace's own crates only. A dependency outside the workspace
-is compiled normally, so an error inside it arrives as the compiler wrote it.
+Errors outside your workspace are another boundary. Dependencies compile normally, so their
+errors arrive without the tool's rewrites.
 
 If the command itself will not run, see [Troubleshooting](./troubleshooting.md).
 

@@ -7,9 +7,9 @@ description: 'Every cargo-cgp command and option, the environment variables it r
 
 # Command reference
 
-When you need to look up a flag or a variable, this page lists everything [`cargo-cgp`](./index.md) version
-0.1.0 accepts and changes: its commands, their options, the environment variables it reads and sets, the
-files it creates, and its exit status. The other pages in this section explain how to use them.
+This page collects the commands, options, environment variables, files, and exit statuses of
+[`cargo-cgp`](./index.md) version 0.1.0. Use it to look up an exact flag or setting; the other
+pages in this section develop working examples.
 
 ## Running it
 
@@ -29,7 +29,8 @@ Two options stand in for a command:
 
 ## Commands
 
-The tool has four commands. Two read your code, and two install and update the tool itself:
+Use `check` and `expand` to inspect a project. The other commands, `setup` and `update`, prepare
+and maintain the tool's own installation:
 
 | Command | Does | Details |
 |---|---|---|
@@ -44,9 +45,9 @@ The tool has four commands. Two read your code, and two install and update the t
 cargo cgp check [CARGO CHECK ARGS]...
 ```
 
-Every argument is passed to `cargo check`, which also validates them, so the command takes every
-`cargo check` flag and no flags of its own. `cargo cgp check --help` prints `cargo check`'s help and does not
-run a check. Two flags matter more than the rest:
+`check` forwards its arguments to `cargo check`, which validates them. It therefore accepts
+cargo's check flags without adding flags of its own, and `cargo cgp check --help` displays cargo's
+help instead of checking a project. Two options are especially useful when configuring a check:
 
 - **`--target-dir <DIR>`:** sets exactly where the build goes. Without it, the tool builds into the `cgp`
   subdirectory of your project's own target directory, which it reads from `cargo metadata`, so the location
@@ -65,10 +66,11 @@ cargo cgp expand [--item <PATH>] [CARGO RUSTC ARGS]...
 | `--item <PATH>` | Prints only one module or item instead of the whole target. The path is `::`-separated, names something inside the crate, and may start with `crate::`. A module gives its contents, a type its declaration and every impl written for it, and a trait its definition and every impl of it. |
 | `-h`, `--help` | Prints the help for `expand`, including `--item`. |
 
-Every other argument is passed to `cargo rustc`, so choosing the target, with `--lib`, `--bin`,
-`-p`, or `--features`, is cargo's job. A package with more than one target needs `--lib` or
-`--bin <NAME>`. Unless you pass `--profile` or `--release`, the tool builds under cargo's `check`
-profile. The expansion goes to standard output, and everything else goes to standard error.
+After handling `--item`, `expand` passes the remaining arguments to `cargo rustc`. Select the
+package, target, and features through cargo's options such as `-p`, `--lib`, `--bin`, and
+`--features`; a package with multiple targets needs `--lib` or `--bin <NAME>`. The build uses
+cargo's `check` profile unless you request `--profile` or `--release`. The expansion is written
+to standard output, leaving other messages on standard error.
 
 ### `setup`
 
@@ -76,9 +78,9 @@ profile. The expansion goes to standard output, and everything else goes to stan
 cargo cgp setup
 ```
 
-This command installs the pinned nightly through rustup, with the `rustc-dev` and `llvm-tools` components,
-then builds `cargo-cgp-driver` at the front end's version under that nightly and installs it beside the front
-end. Running it again when both are present does no harm. It needs rustup and a network connection.
+Setup uses rustup to install the pinned nightly with `rustc-dev` and `llvm-tools`, then builds
+the matching `cargo-cgp-driver` and installs it beside the front end. It needs a network connection
+and can be run again when the binaries and toolchain are already present.
 
 ### `update`
 
@@ -86,16 +88,18 @@ end. Running it again when both are present does no harm. It needs rustup and a 
 cargo cgp update
 ```
 
-This command looks up the published versions on crates.io and, if there is a newer one in your release
-channel, reinstalls the front end and runs the new version's `setup`. It needs a network connection.
+Update checks crates.io for a newer version in your release channel. If one is available, it
+reinstalls the front end and invokes that version's `setup`, keeping the driver in agreement.
+The command needs a network connection.
 
 `setup` and `update` take no options. Each answers `-h` or `--help` with a description of what it does instead
 of running, and refuses any other argument with an error naming it.
 
 ## Environment variables
 
-The tool reads these variables, which are meant for running a build of the tool that `setup` did not
-install, such as one from a source checkout:
+When running a build outside the setup-managed installation, such as a source checkout, these
+variables select the driver and toolchain environment. `CARGO_TARGET_DIR` also controls where
+ordinary project artifacts go:
 
 | Variable | Effect |
 |---|---|
@@ -104,7 +108,8 @@ install, such as one from a source checkout:
 | `CARGO_CGP_TOOLCHAIN` | A nightly to use in place of the pinned one, for `setup`, `check`, and `expand`. The driver must be built against it. It has no effect when `CARGO_CGP_NO_MANAGE` is set. |
 | `CARGO_TARGET_DIR` | cargo's own variable. It moves the project's target directory, and the tool builds in that directory's `cgp` subdirectory. |
 
-For the length of a `check` or `expand`, the tool also sets variables for cargo:
+During `check` and `expand`, the tool passes the following environment to cargo so it uses the
+driver and matching compiler libraries:
 
 | Variable | Set to |
 |---|---|
@@ -114,8 +119,9 @@ For the length of a `check` or `expand`, the tool also sets variables for cargo:
 
 ## Files and directories
 
-The tool puts its files in these places. Uninstalling with cargo removes the two binaries but leaves the
-toolchain and the build directories, as [Uninstalling](./installation.md#uninstalling) explains:
+Installation and checks create the files listed below. Uninstalling through cargo removes the
+two binaries, while the toolchain and build directories remain; [Uninstalling](./installation.md#uninstalling)
+explains how to remove those separately.
 
 | Path | What it holds |
 |---|---|
@@ -126,24 +132,27 @@ toolchain and the build directories, as [Uninstalling](./installation.md#uninsta
 
 ## Exit status
 
-`check` exits with `cargo check`'s status, so `0` means no errors. `expand` exits with `0` when the compilation
-reached the end of macro expansion without an error, which includes a crate that would fail type checking. An
-error before that point exits with cargo's status, even when part of an expansion was printed, and a path given to
-`--item` that matches nothing exits with `1`. A failure in the tool itself, such as a preflight message or an
-unknown command, also exits with `1`.
+`check` returns the exit status of `cargo check`, with `0` indicating no errors. For `expand`,
+success means reaching the end of macro expansion without an error; type checking has not run,
+so that result can include a crate that would fail it.
+
+If an error occurs before expansion completes, the command returns cargo's status even when a
+partial listing was printed. The tool returns `1` for an unmatched `--item` path or one of its
+own failures, including an unsuccessful preflight or an unknown command.
 
 ## The driver
 
-You do not normally run `cargo-cgp-driver` yourself, since the front end runs it in place of the compiler. It
-does answer two queries of its own:
+The front end normally invokes `cargo-cgp-driver` for you in place of the compiler. When checking
+an installation, you can query the driver directly with these options:
 
 | Option | Effect |
 |---|---|
 | `--version`, `-V` | Prints three lines: its version, the `pinned-toolchain:` it needs, and the `built-against-rustc:` compiler it was built with. |
 | `--help`, `-h` | Prints a short description of the driver. Running it with no arguments does the same. |
 
-Run directly on the cargo path, it needs the pinned nightly's `lib` directory on `LD_LIBRARY_PATH`, and
-[Troubleshooting](./troubleshooting.md#the-driver-cannot-load-the-compiler) shows the command.
+With a cargo installation, a direct driver invocation needs the pinned nightly's `lib` directory
+on `LD_LIBRARY_PATH`. [Troubleshooting](./troubleshooting.md#the-driver-cannot-load-the-compiler)
+shows how to supply it.
 
 ---
 

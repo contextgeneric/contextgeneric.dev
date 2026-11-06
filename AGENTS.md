@@ -131,9 +131,11 @@ sets the full style and structure requirements for these pages.
 ## Use natural-writing for cargo-cgp pages
 
 When adding or revising a page under `docs/cargo-cgp/`, use the same natural-writing style
-throughout the page, the lookup pages included. Keep tables, lists, and code blocks where the content
-is a set of items or text a reader copies, and let the prose around them follow from one sentence to
-the next.
+throughout the page, the lookup pages included. Develop explanations in connected paragraphs;
+a lookup page does not require point-first paragraphs or sentence fragments. Short error-code entries
+may connect the cause, consequence, and remedy in prose. Keep tables and lists for options and other
+sets, and code blocks for commands and quoted output. Preserve code headings and anchors so readers
+can still look up an individual diagnostic.
 
 The knowledge base's [tooling-page writing guide](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/tooling.md#writing-style)
 sets the full style requirements for these pages.

@@ -7,15 +7,13 @@ description: 'Install cargo-cgp v0.1.0 with cargo and rustup or with Nix, check 
 
 # Installation
 
-How you install [`cargo-cgp`](./index.md) depends on what your machine already uses: install it with
-cargo if your Rust comes from rustup, or with Nix if you use Nix. This page covers version 0.1.0 of the
-tool, which is built for CGP v0.8.
+To install [`cargo-cgp`](./index.md), choose the path that fits your existing Rust environment:
+cargo with rustup, or the Nix flake. This page covers version 0.1.0, built for CGP v0.8.
 
-The cargo path takes two commands because the tool comes in two parts. `cargo-cgp` is the cargo
-subcommand you type, and `cargo-cgp-driver` is the program it runs in place of the compiler. The driver
-embeds the compiler itself, so it has to be built against one exact nightly toolchain. You never type
-that nightly's date, and your project does not switch to it, because the tool uses the nightly for its
-own check only.
+The cargo path installs the command first, then prepares the compiler it needs. `cargo-cgp` runs
+a separate `cargo-cgp-driver`, which embeds the Rust compiler and must match one exact nightly.
+Setup chooses that nightly for you. It is used for the tool's checks without changing your
+project's toolchain.
 
 ## Which path to use
 
@@ -30,43 +28,42 @@ Match what your machine already has to the path for it:
 
 ## With cargo
 
-The first command installs the front end, and the second provisions everything else:
+Install the front end, then let it prepare the matching driver and nightly:
 
 ```sh
 cargo install --locked cargo-cgp
 cargo cgp setup
 ```
 
-The front end is an ordinary binary with no compiler inside, so `cargo install` builds it with the
-toolchain you already have, which must be Rust 1.96 or newer. The `--locked` flag keeps the dependency
-versions the release was tested with.
+The first command builds an ordinary binary using your existing toolchain, which must be
+Rust 1.96 or newer. Its `--locked` flag keeps the dependency versions tested with the release.
+The compiler-linked driver is built separately in the setup step.
 
-`cargo cgp setup` then asks rustup to install the pinned nightly with the `rustc-dev` and `llvm-tools`
-components. After that, it builds `cargo-cgp-driver` at the same version as the front end under that
-nightly and places it beside the front end in `~/.cargo/bin`. This step needs rustup and a network
-connection, and it takes a while, since the toolchain is more than a gigabyte and the driver is compiled
-on your machine.
+During setup, rustup installs the pinned nightly with `rustc-dev` and `llvm-tools`. The tool then
+builds the matching version of `cargo-cgp-driver` under that nightly and puts it beside the front
+end in `~/.cargo/bin`. Allow time for both the toolchain download, which is more than a gigabyte,
+and local driver compilation. This step needs rustup and a network connection.
 
-You run `setup` once after installing, and again only when the tool tells you to. Before every check the
-front end runs a quick, read-only test of the toolchain and the driver. If either is missing or the two
-do not match, it stops with a message naming `cargo cgp setup` as the fix, rather than downloading
-anything on its own. [Troubleshooting](./troubleshooting.md#the-preflight-rejects-the-setup) lists those
-messages.
+Once setup finishes, ordinary checks only test that the toolchain and driver are present and
+match. They do not download or install anything. If that read-only test fails, the message tells
+you to run `cargo cgp setup` again; [Troubleshooting](./troubleshooting.md#the-preflight-rejects-the-setup)
+explains the possible failures.
 
-`setup` and `update` take no options. Each answers `--help` with what it does instead of running, and
-refuses any other argument, so a mistyped flag cannot start an install you did not ask for.
+To read what `setup` or `update` will do, pass `--help`. Neither command accepts other options:
+an unrecognized argument produces an error before installation begins.
 
 ## With Nix
 
-The flake builds both binaries against the pinned nightly and wraps them so they find its libraries
-without rustup, which means a machine with only Nix can run the tool:
+With Nix, the flake builds both binaries against the pinned nightly and wraps them with the
+library paths they need. This supplies the complete setup without rustup:
 
 ```sh
 nix profile install github:contextgeneric/cargo-cgp/v0.1.0
 ```
 
-The `/v0.1.0` suffix pins the install to that release. Without it, the flake tracks the repository's
-default branch, which is what you want only if you are following the tool's development.
+Including `/v0.1.0` keeps this installation on the documented release. Omitting it selects the
+repository's default branch instead, which is appropriate when following development rather
+than a release.
 
 To pin the tool inside another project's flake, add it as an input and take its default package:
 
@@ -88,10 +85,10 @@ nix run github:contextgeneric/cargo-cgp/v0.1.0 -- check
 
 ## Neither rustup nor Nix
 
-If your Rust comes from somewhere else, such as an operating system package, neither path works as it
-stands. The driver has to be built against one exact nightly with the compiler's development libraries,
-and only rustup or the Nix flake provides that. The usual way forward is to install rustup alongside your
-packaged Rust. CGP itself needs neither, since it compiles on any stable Rust 1.89 or newer.
+An operating-system Rust package alone does not supply the matching nightly and compiler
+libraries the driver needs. The installation paths here obtain those through rustup or the Nix
+flake. If you use neither, the usual next step is installing rustup alongside your packaged Rust.
+CGP itself still works without either installer on stable Rust 1.89 or newer.
 
 ## Checking your install
 
@@ -107,16 +104,16 @@ cargo-cgp 0.1.0
 
 `cargo cgp --help` prints the same line first, followed by the list of commands.
 
-The driver has its own version query, which doubles as a test that the driver can run at all, because the
-driver loads the compiler's libraries before printing anything:
+To test whether the driver itself can start, ask for its version too. It must load the compiler's
+libraries before answering, so this query also tests library loading:
 
 ```sh
 cargo-cgp-driver --version
 ```
 
-On the cargo path, that command runs under your default toolchain rather than the pinned nightly, so it
-can fail with a library-loading error even when the install is fine. The front end sets up the library
-path for the driver every time it runs it, so to probe the driver yourself you need to do the same:
+With a cargo installation, running the driver directly uses your default toolchain's environment.
+It can therefore fail to load a library even when checks work: the front end normally supplies the
+pinned nightly's library path. To supply that path yourself, run:
 
 ```sh
 LD_LIBRARY_PATH="$(rustc +nightly-YYYY-MM-DD --print sysroot)/lib" cargo-cgp-driver --version
@@ -132,16 +129,16 @@ pinned-toolchain: nightly-2026-10-10
 built-against-rustc: rustc 1.101.0-nightly (32dba69d6 2026-10-09)
 ```
 
-The second line names the nightly the driver needs, and the third the compiler it was built with. Your
-dates may differ from these, so read them from your own output.
+Read the nightly from `pinned-toolchain:` and the compiler identity from `built-against-rustc:`
+in your own output. The dates in this example may differ from those in your installation.
 
 ## Supported platforms and CGP versions
 
 The tool is tested on Linux, and it has not yet been tested on macOS or Windows.
 
-It is built for CGP v0.8. The tool recognizes CGP's errors by the names of the traits and crates CGP
-defines, so a project on an older CGP version compiles under it as it would under `cargo check`, but
-whether its errors are reshaped has not been tested.
+The supported CGP target is v0.8. Recognition depends on CGP's trait and crate names, so older
+CGP code is still compiled as it would be under `cargo check`, but rewriting its errors has
+not been tested.
 
 ## Updating
 
@@ -151,24 +148,23 @@ On the cargo path, one command updates the tool:
 cargo cgp update
 ```
 
-It looks up the published versions on crates.io and does nothing if you already have the newest. When
-there is a newer one, it reinstalls the front end and runs the new version's `setup`, so the driver and
-the pinned nightly move with it.
+The update command checks the published versions on crates.io and leaves an up-to-date install
+alone. If it finds a newer version, it reinstalls the front end and runs that version's `setup`,
+bringing the driver and pinned nightly into agreement with it.
 
 The Nix path has no `cargo cgp update`. Instead, change the version in the flake reference and reinstall
 the profile, or run `nix flake update cargo-cgp` in a flake that pins the tool as an input.
 
 ## Using it in CI
 
-Keep your own toolchain's `cargo check` as the gate in CI, and add the tool for readable failures. The
-commands are the same as on your machine, but pin them so a build does not change under you, either with
-`cargo install cargo-cgp --version 0.1.0 --locked` followed by `cargo cgp setup`, or with the tagged
+In CI, keep your own toolchain's `cargo check` as the build gate and add the tool for readable
+diagnostics. Pin its installation so later runs use the same version: either
+`cargo install cargo-cgp --version 0.1.0 --locked` followed by `cargo cgp setup`, or the tagged
 Nix reference.
 
-On the cargo path, every fresh machine downloads the pinned nightly and compiles the driver, which is the
-slowest part of the install. If your CI service can cache directories between runs, caching
-`~/.cargo/bin` and the pinned nightly under `~/.rustup/toolchains/` avoids repeating that. This page does
-not cover any particular CI service, and these setups have not been run there.
+A fresh CI machine repeats the nightly download and driver compilation. If the service supports
+caching, retaining `~/.cargo/bin` and the pinned nightly in `~/.rustup/toolchains/` avoids that
+part of setup on later runs. These instructions have not been tested with a particular CI service.
 
 ## Uninstalling
 
@@ -179,17 +175,17 @@ cargo uninstall cargo-cgp cargo-cgp-driver    # cargo path: both, since setup in
 nix profile remove cargo-cgp                  # Nix path
 ```
 
-Neither command removes the pinned nightly, since another tool may use the same toolchain. Remove it
-yourself when nothing else needs it. Its name is the `pinned-toolchain:` line of
-`cargo-cgp-driver --version`:
+Removing the binaries leaves the nightly installed, since other tools may use it. If nothing
+else needs it, take the name from the `pinned-toolchain:` line of `cargo-cgp-driver --version`
+and remove it with rustup:
 
 ```sh
 rustup toolchain uninstall nightly-YYYY-MM-DD
 ```
 
-The `target/cgp` directories the tool built in your projects also stay behind. Because each one sits
-inside its project's target directory, `cargo clean` removes it along with your normal build output. To
-remove only the tool's artifacts, run `cargo clean --target-dir target/cgp` from the project's root.
+Project build artifacts also remain after uninstalling the binaries. A normal `cargo clean`
+removes them along with the rest of the project's target directory. To keep the normal build and
+remove only the tool's artifacts, run `cargo clean --target-dir target/cgp` from the project root.
 
 ## From source
 
@@ -202,9 +198,9 @@ cd cargo-cgp
 cargo build
 ```
 
-Then run the built front end in another project, pointing it at the built driver and turning off the
-read-only test, which expects an installed setup. With the test turned off, the tool does not switch to
-the pinned nightly for you either, so select it yourself, or the driver will fail to load:
+To use that build in another project, point the front end at the built driver and disable the
+preflight that expects an installed setup. Disabling management also stops the automatic toolchain
+switch, so select the pinned nightly yourself to let the driver load its libraries:
 
 ```sh
 RUSTUP_TOOLCHAIN=nightly-YYYY-MM-DD CARGO_CGP_NO_MANAGE=1 \
