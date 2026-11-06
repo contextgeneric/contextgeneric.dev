@@ -314,7 +314,7 @@ mod start_with_a_manager_and_add_dependencies {
         pub database: PostgresDb,
     }
 
-    delegate_components! {
+    delegate_and_check_components! {
         ProductionApp {
             UserManagerComponent: PostgresUserManager,
             PostManagerComponent: PostgresPostManager,
@@ -328,7 +328,7 @@ mod start_with_a_manager_and_add_dependencies {
         pub database: PostgresDb,
     }
 
-    delegate_components! {
+    delegate_and_check_components! {
         TestApp {
             UserManagerComponent: PostgresUserManager,
             PostManagerComponent: PostgresPostManager,
@@ -336,8 +336,6 @@ mod start_with_a_manager_and_add_dependencies {
             SpamMessageDetectorComponent: DummySpamMessageDetector,
         }
     }
-    check_components! { ProductionApp { UserManagerComponent, PostManagerComponent, UsernameCensorComponent, SpamMessageDetectorComponent, } }
-    check_components! { TestApp { UserManagerComponent, PostManagerComponent, UsernameCensorComponent, SpamMessageDetectorComponent, } }
 }
 
 mod separate_filtering_from_database_access {
@@ -1154,8 +1152,6 @@ mod sharing_default_implementations {
             @app.core.post.PostDeleterComponent: DeletePostWithPostgres,
         }
     }
-    type ContentFilterComponents = AiContentFilterComponents;
-
     #[derive(HasField)]
     pub struct ProductionApp {
         pub database: PostgresDb,
@@ -1164,7 +1160,7 @@ mod sharing_default_implementations {
         ProductionApp {
             namespace DefaultAppComponents;
 
-            @app.extra.content_filter: ContentFilterComponents,
+            @app.extra.content_filter: AiContentFilterComponents,
         }
     }
     check_components! {
