@@ -98,6 +98,11 @@ them after a bump rather than editing them by hand:
 TRYBUILD=overwrite cargo test --test compile_fail_tests
 ```
 
+A snapshot that quotes a line from the `cgp` checkout carries that checkout's absolute path, since the
+manifest depends on `cgp` by path. The crate's own files and the standard library are written as
+`tests/…` and `$RUST/…`, so a checkout elsewhere fails only the snapshots naming `cgp`, and re-blessing
+writes the new path in.
+
 ## Generated code
 
 Two of these pages show what a macro *generates*, in simplified form. A hand-rolled rendering of such
