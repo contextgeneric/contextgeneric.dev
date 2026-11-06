@@ -383,10 +383,11 @@ The plain reference, `&str`, slice, and `MRef` forms are unaffected, because a `
 coerces to the shared one. Return `Option<&mut T>` from a `&mut self` getter, or take `&self`.
 
 **`Option<&[T]>` is not a supported return type**, and neither is `Option<&dyn Trait>`. The macro rejects
-them, since the field they would read cannot exist:
+them, since the field they would read cannot exist, and names the container to read with the type you
+wrote, here for `Option<&[u8]>`:
 
 ```text
-error: `Option<&[T]>` would read an `Option<[T]>` field, which cannot exist because a slice is unsized; read an `Option<Vec<T>>` field as `Option<&Vec<T>>` instead
+error: `Option<&[u8]>` would read an `Option<[u8]>` field, which cannot exist because a slice is unsized; read an `Option<Vec<u8>>` field as `Option<&Vec<u8>>` instead
 ```
 
 A type named by a path, such as `Option<&Path>`, has a size only the compiler knows, so it still reaches

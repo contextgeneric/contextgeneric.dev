@@ -1,4 +1,4 @@
-error: `Option<&[T]>` would read an `Option<[T]>` field, which cannot exist because a slice is unsized; read an `Option<Vec<T>>` field as `Option<&Vec<T>>` instead
+error: `Option<&[u8]>` would read an `Option<[u8]>` field, which cannot exist because a slice is unsized; read an `Option<Vec<u8>>` field as `Option<&Vec<u8>>` instead
  --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_option_slice.rs:7:24
   |
 7 |     fn bytes(&self) -> Option<&[u8]>;
