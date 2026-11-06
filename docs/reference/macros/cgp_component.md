@@ -521,13 +521,15 @@ reads the provider's own `LIMIT` in the provider trait.
 **Every method parameter needs a plain name.** The impls the macro generates forward each argument to
 the provider by name, so a `_` parameter, which Rust allows in a trait method without a body, or a `ref`
 binding, a binding with a subpattern, or a destructuring pattern such as `(a, b): (u32, u32)` in a default
-method is rejected. A `mut value` parameter of a default method is accepted and forwarded by its name:
+method is rejected:
 
 ```text
 error: a component method parameter needs a plain name, since the generated impls forward each argument by name; write a name such as `_value`, and destructure inside a default body
 ```
 
-Name the parameter instead, as in `_value: u32`, and destructure inside a default method's body.
+Name the parameter instead, as in `_value: u32`, and destructure inside a default method's body. A
+`mut value` parameter or a `mut self` receiver of a default method is accepted and forwarded by its
+name.
 
 **A `name:` parameter must be one of the trait's own.** The marker struct declares the name's
 parameters while the generated impls name it with the trait's, so the macro rejects a parameter the
