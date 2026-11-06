@@ -120,10 +120,10 @@ the command's output. For a missing setup, that includes the tool's own diagnost
 
 ```text
 cargo check failed to start: Cargo watcher failed, the command produced no valid metadata (exit code: ExitStatus(unix_wait_status(256))):
-error: toolchain `nightly-2026-10-10` is not available:
+error: toolchain `nightly-2026-11-05` is not available:
 
-  error: toolchain 'nightly-2026-10-10-x86_64-unknown-linux-gnu' is not installed
-  help: run `rustup toolchain install nightly-2026-10-10-x86_64-unknown-linux-gnu` to install it
+  error: toolchain 'nightly-2026-11-05-x86_64-unknown-linux-gnu' is not installed
+  help: run `rustup toolchain install nightly-2026-11-05-x86_64-unknown-linux-gnu` to install it
 
 help: run `cargo cgp setup`
 ```
