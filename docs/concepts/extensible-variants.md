@@ -6,26 +6,28 @@ sidebar_position: 14
 # Extensible variants
 
 Extensible variants let generic code construct and handle enums through variant names and payload
-types. Handlers can be reused across compatible enums, while the compiler still checks that every
-variant is covered. This page explains the structural representation, exhaustiveness, and conversions
-between enums that share variants. [Extensible records](./extensible-records.md) introduces the
-related field representation.
+types. By describing the cases it needs through traits, a handler can work across compatible enums
+without depending on any one enum definition. The compiler still checks that every variant is
+covered, even when independently written handlers supply the cases.
+
+This uses the same field representation as [extensible records](./extensible-records.md), but an
+enum contains one alternative at a time. That difference changes how generic code takes a value
+apart and proves that it has handled every possibility.
 
 ## The problem a `match` builds in
 
-An exhaustive `match` makes an operation's cases explicit. Adding a variant to an enum makes existing
-matches fail to compile unless they already have a pattern that covers it. This is useful when each
-operation should be reviewed as the enum changes.
+With an exhaustive `match`, an operation lists the enum cases it handles. If a new variant has no
+covering pattern, Rust rejects the match, prompting the operation's author to review the new case.
+That is useful when the enum and its operations should evolve together.
 
-Reusable per-variant logic does not always need to change with the enum. A circle-area calculation,
-for example, can serve several shape enums, including one extended with triangles. Ordinary helper
-functions can share that calculation, but each concrete `match` still has to connect its enum's
-variants to the helpers.
+Some of the work inside those cases may already be reusable. A circle-area calculation can serve
+several shape enums, including a larger one that adds triangles. Ordinary helper functions share
+that calculation, but each match must still connect its particular enum variants to those helpers.
 
-CGP separates the payload handlers from the generic dispatcher that selects them. An operation can
-then support another enum by supplying handlers for its additional payloads, leaving existing
-handlers unchanged. The enum definitions remain ordinary closed Rust enums: a downstream crate
-extends the design by defining another enum, not by adding variants to an upstream definition.
+Separating those helpers from the enum-specific connection is the purpose of CGP's generic
+dispatcher. Existing payload handlers can keep working when another enum introduces additional
+cases, provided those cases have handlers too. The enums remain ordinary closed Rust types:
+a downstream crate defines a new enum rather than adding variants to an upstream definition.
 
 ## An enum as a list of named variants
 
@@ -50,30 +52,32 @@ Each `Field` pairs a variant-name tag with its payload type. A sum holds one of 
 where a record's product holds all its fields. Generic code can require an operation on the
 `Circle` variant without naming `Shape` itself.
 
-That sum is the enum's **shape**. Code that names a shape itself, in a bound or an impl, can write
-it as the enum body it describes:
-[`Enum! { Circle(Circle), Rectangle(Rectangle) }`](/docs/reference/macros/enum) is exactly the type
-above, because the macro runs the derive's own encoding.
+This sum is the enum's **shape**. A bound or implementation can name it with
+[`Enum! { Circle(Circle), Rectangle(Rectangle) }`](/docs/reference/macros/enum), using the same
+syntax as the enum body. Because the macro uses the derive's encoding, that form produces exactly
+the sum shown above.
 
-Construction uses the same tags. A `FromVariant` bound lets generic code supply a payload for a
-named variant, while the implementing enum determines how to construct the value. Extraction
-provides the corresponding operation for taking a payload out.
+These name tags also let generic code construct a value. With a `FromVariant` bound, it can supply
+a payload for a named variant while leaving the enum's implementation to assemble the value.
+Extraction uses the same representation in the other direction, taking a payload back out.
 
 ## Exhaustiveness without a wildcard
 
-A **partial variant** tracks which alternatives remain possible during extraction. Converting an
-enum value to its extractor starts with every variant possible. Each extraction attempt either
-returns the requested payload or returns a remainder whose type excludes that variant.
+Extracting one payload leaves a question: what cases are still possible if the extraction misses?
+A **partial variant** records that answer in its type. An enum's extractor begins with every case
+possible, and each attempt either returns the requested payload or a remainder that excludes
+that variant.
 
-An unsuccessful attempt narrows the remainder type without losing the value. For `Shape`, failing
-to extract `Circle` leaves only `Rectangle` possible. If every variant has been excluded, the
-remainder is uninhabited: its type cannot contain a value.
+For `Shape`, an attempt to extract `Circle` either returns its payload or leaves a remainder in
+which only `Rectangle` is possible. The value survives a failed attempt, but its type now records
+that it cannot be a circle. Continuing this process until every variant has been excluded leaves
+an uninhabited remainder: a type that cannot contain a value.
 
-Finalization requires an uninhabited remainder, so the compiler verifies that extraction covers
-every variant. The final operation eliminates that impossible remainder without a wildcard arm or
-`unreachable!()`. Adding an unhandled variant leaves a possible case and prevents finalization from
-compiling. Borrowed and mutable extractor forms preserve the same tracking without consuming the
-original enum.
+To finish extraction, the remainder must be uninhabited. This requirement is how the compiler
+checks coverage: an unhandled variant would leave a possible value and prevent finalization from
+compiling. Once coverage is complete, the final operation can eliminate the impossible remainder
+without a wildcard arm or `unreachable!()`. Borrowed and mutable extractors track the same cases
+while keeping the original enum in place.
 
 ## One handler, many enums
 
@@ -97,10 +101,10 @@ delegate_components! {
 }
 ```
 
-Suppose `Reading` contains `Temperature(u64)` and `Label(String)`, while `ExtendedReading` also
-contains `Flag(bool)`. The same wiring handles both enums because every payload implements `Display`.
-The handler ignores the variant tag and formats its value. An added payload without `Display` would
-make this wiring fail to satisfy the enum's computation.
+For example, `Reading` might contain `Temperature(u64)` and `Label(String)`, while
+`ExtendedReading` adds `Flag(bool)`. Because all those payloads implement `Display`, both enums
+can use this wiring. `FieldToString` ignores the variant tag and formats whichever value it
+receives. A new payload without `Display` would instead leave the enum's computation unsatisfied.
 
 Separate providers can supply different behavior for different payloads. In the **extensible
 visitor pattern**, those providers remain independent of the full enum, and a dispatcher routes the
@@ -108,9 +112,10 @@ current variant to its handler. [Dispatching](./dispatching.md) explains how the
 
 ## Converting enums that share variants {#enums-that-share-variants-convert-for-free}
 
-Structural casts convert compatible enums without a handwritten conversion implementation. They
-match variant names and payload types; sharing names alone is insufficient. The generated code
-selects the current variant and reconstructs it in the target enum at runtime.
+The same structural representation supports conversions between compatible enums. A cast matches
+both the variant name and its payload type, so sharing a name alone is insufficient. At runtime,
+the generated code identifies the current variant and reconstructs it in the target enum, without
+a handwritten conversion implementation.
 
 Widening always succeeds when the target supports every source variant with the same payload type.
 For the `Reading` and `ExtendedReading` types above:
@@ -126,9 +131,10 @@ target value on success or an extraction remainder on failure:
 let narrow: Result<Reading, _> = wide.downcast(PhantomData::<Reading>);
 ```
 
-`ExtendedReading::Label` can become `Reading::Label`, but `ExtendedReading::Flag` cannot become a
-`Reading`. The remainder preserves the unmatched value, and `CanDowncastFields` can try it against
-another target. Import the cast traits from `cgp::core::field::impls` when using these methods.
+A `Label` value can pass from `ExtendedReading` to `Reading`, because both contain that case.
+A `Flag` cannot, so narrowing returns its value in the extraction remainder instead. The remainder
+can then be tried against another target with `CanDowncastFields`. These cast methods require
+imports from `cgp::core::field::impls`.
 
 A provider can also construct a small local enum and widen it into a compatible application enum.
 The provider then needs to know only the variants it produces, while the application chooses the
@@ -136,18 +142,18 @@ complete result type.
 
 ## What it costs
 
-The full construction and extraction derives require one unnamed payload or no fields per variant.
-A richer case must wrap its fields in a payload type, such as `Circle(Circle)` instead of
-`Circle { radius: u64 }`. A variant with no fields carries the payload `Nil`, which has a cost of
-its own: a handler that sees only payloads sees every such variant as the same `Nil`, so telling
-them apart needs a handler that also receives the variant's name.
+Generic construction and extraction also constrain how variants are declared: the full derives
+accept one unnamed payload or no fields. A richer case must collect its fields in a payload type,
+as in `Circle(Circle)` rather than `Circle { radius: u64 }`. A fieldless variant uses `Nil` as its
+payload. Because every fieldless variant has that same payload type, a handler needs the variant's
+name as well as its payload to distinguish them.
 [`#[derive(HasFields)]`](/docs/reference/derives/derive_has_fields) can describe all variant shapes,
 but that structural description alone does not supply generic constructors or extractors.
 
-An enum must implement the traits used by the generic operation. A foreign enum without them is
-not automatically available to the dispatcher, and CGP does not permit adding variants to it.
-A local enum with the required support can provide the extensible boundary and convert to other
-representations where necessary.
+These generic operations are available only where the enum implements the required traits.
+A foreign enum without them cannot be dispatched automatically, nor can CGP add variants to its
+definition. Where that boundary matters, a supported local enum can provide the extensible
+representation and convert to other forms as needed.
 
 Unhandled variants can produce long trait errors. The diagnostic may name a missing payload-handler
 bound or a partial-variant type whose markers describe the remaining cases. This is less direct to

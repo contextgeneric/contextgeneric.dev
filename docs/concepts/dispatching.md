@@ -6,29 +6,29 @@ sidebar_position: 15
 # Dispatching
 
 Dispatching connects a record's fields or an enum's variants to the providers that process them.
-A generic dispatcher can build several record types or handle several enum types while each provider
-implements one part of the work. This page explains matching, building, and their compile-time
-guarantees, then shows how to derive dispatch from an ordinary trait.
+By separating that connection from the individual computations, a generic dispatcher can build
+several record types or handle several enum types while each provider implements one part of the
+work. The compiler checks that the pieces fit together and cover the required fields or variants.
 
-The examples build on [extensible records](./extensible-records.md) and
-[extensible variants](./extensible-variants.md). Those pages explain how CGP exposes fields and
-variants to generic code; dispatching chooses and runs the computations that use them.
+[Extensible records](./extensible-records.md) and [extensible variants](./extensible-variants.md)
+expose data to generic code through field and variant traits. Dispatchers use those traits to run
+the computations that build a record or handle the current variant.
 
 ## Two directions, one idea
 
-Dispatchers combine generic data operations with a list of handlers. The data traits describe how
-to extract a variant or set a field. A handler supplies the computation to perform on the extracted
-payload or to produce the field's value.
+The data traits used by a dispatcher describe how to extract a variant or set a field. To do
+useful work with those operations, the dispatcher also needs handlers: one can process an extracted
+payload, while another can produce a value for a field.
 
-Matching and building use these pieces differently:
+These operations lead to two forms of dispatch. A matcher tries variants until it finds the
+current payload, then runs the corresponding handler. A builder instead runs its handlers in
+sequence, adding their results to a [partial record](/docs/reference/glossary#partial-record)
+until the record can be finalized.
 
-- **Matching:** Try variants until the current one is found, then run its handler.
-- **Building:** Run handlers in sequence, adding their outputs to a [partial record](/docs/reference/glossary#partial-record) until it can be finalized.
-
-Dispatchers implement the same computation interfaces as other
-[handler providers](./handlers.md). They can be selected through context wiring, composed with other
-computations, or nested to delegate a group of variants to another matcher. The available interfaces
-depend on the dispatcher and the providers it contains.
+Because dispatchers implement the same interfaces as other [handler providers](./handlers.md),
+they can participate in ordinary context wiring and computation pipelines. A matcher can even
+delegate a group of variants to another matcher. The interfaces available to the resulting
+composition depend on both the dispatcher and the providers it contains.
 
 ## Matching, and why it is exhaustive
 
@@ -56,37 +56,37 @@ extracts the current variant's payload and delegates it through the same context
 `CircleArea`, and a `Rectangle` reaches `RectangleArea`. The application does not write a `match`
 over `Shape`.
 
-The matcher tracks unhandled variants through the extractor's remainder type. Each extraction
-attempt returns either a payload to handle or a remainder that excludes that variant. The next
-attempt receives the narrowed remainder. After every variant has been covered, the remainder is
-uninhabited, so finalization can eliminate it without a wildcard or a runtime panic.
+To check coverage, the matcher tracks unhandled variants through the extractor's remainder type.
+An extraction attempt either finds a payload to handle or passes on a remainder that excludes that
+variant. Each miss therefore leaves fewer possibilities for the next attempt. Once every variant
+has been covered, the remainder is uninhabited, so finalization can eliminate it without a wildcard
+or a runtime panic.
 
-A missing handler prevents the matcher from compiling for that enum. An automatically generated
-handler list requires a suitable provider for every payload; an explicit list must leave an
-uninhabited remainder. Adding a variant therefore requires either an existing generic handler that
-covers it or an additional handler.
+If a variant remains uncovered, the matcher cannot compile for that enum. With an automatically
+generated handler list, every payload must have a suitable provider; with an explicit list, the
+extraction steps must leave an uninhabited remainder. Adding a variant therefore needs either a
+new handler or an existing generic handler that already covers it.
 
-The attempts are sequenced by the `OkMonadic` pipeline described in
-[monadic handlers](./monadic-handlers.md). A successful extraction stops the search; a miss passes
-the remainder onward. Here the `Err` branch means “try another variant,” rather than an application
-error. Provider selection and exhaustiveness are checked at compile time, while testing the actual
-variant and running its handler happen at runtime.
+This sequence of attempts uses the `OkMonadic` pipeline from
+[monadic handlers](./monadic-handlers.md). A successful extraction ends the search, while a miss
+passes its remainder to the next attempt. In this use of `Result`, `Err` means “try another variant”
+rather than an application failure. The compiler checks provider selection and exhaustiveness;
+the actual variant tests and handler calls happen when the program runs.
 
 ## Building, and why it is complete
 
-A builder dispatcher runs handlers over a partial record and finalizes the result. The partial
-record's type tracks which fields are present after each step. `BuildWithHandlers` starts the
-builder, passes it through the handler list, and calls `finalize_build` at the end.
+Building follows the other direction: handlers supply values until a partial record is complete.
+`BuildWithHandlers` starts the builder, passes it through the handler list, and calls `finalize_build`.
+After each step, the partial record's type describes the fields supplied so far.
 
-Field adapters let a handler produce either one field or a group of fields. `BuildAndSetField`
-computes and sets a named field; `BuildAndMerge` computes a source record and merges its fields.
-Both pass the current builder by reference to the inner provider, so a later provider can read
-fields an earlier step supplied.
+Each step can contribute one field or several. `BuildAndSetField` runs an inner provider and sets
+a named field from its output, while `BuildAndMerge` merges the fields of a returned record. Both
+lend the current builder to that provider, allowing it to read fields supplied by earlier steps.
 
-Finalization requires every field in the strict builder to be present. Omitting a required field
-prevents the pipeline from compiling. Fallible handlers can still return runtime errors while
-computing values; completeness guarantees that a successful build supplies every field, not that
-construction cannot fail.
+As each handler adds fields, the partial record's type records their presence. Finalization
+requires every field in the strict builder to be present, so omitting a required field prevents the
+pipeline from compiling. Computing those values can still fail at runtime if the handlers are
+fallible; the guarantee is that a successful build supplies every field.
 
 This supports the [extensible builder pattern](./extensible-records.md): independent providers
 produce parts of a result, and a dispatcher assembles them into a target record. The handler order
@@ -104,10 +104,11 @@ pub trait CanDescribe {
 }
 ```
 
-If `Circle` and `Rectangle` implement `CanDescribe`, a `Shape` enum with the required extensible-data
-support gains the trait through a generated [blanket implementation](/docs/reference/glossary#blanket-implementation). A call to `shape.describe()`
-forwards to the current payload's implementation without application wiring or a handwritten `match`.
-Deriving `CgpData` on `Shape` supplies that data support.
+Once `Circle` and `Rectangle` implement `CanDescribe`, the generated
+[blanket implementation](/docs/reference/glossary#blanket-implementation) can forward the same
+operation from `Shape`. Deriving `CgpData` supplies the enum support it needs, so
+`shape.describe()` reaches the current payload's implementation without a handwritten `match` or
+application wiring.
 
 Explicit dispatch combinators provide more control when the context must choose different handlers
 or when several variants should be handled as a group. The automatic trait form is a simpler entry
@@ -121,14 +122,16 @@ handler. A context-specific wrapper provider can break that cycle by declaring t
 implementation and calling the matcher inside its method body. Non-recursive `Shape` wiring does
 not need that extra provider.
 
-Missing handlers can produce errors involving partial-variant types or unsatisfied provider bounds.
-An incomplete builder similarly reports bounds involving its partial-record state. These diagnostics
-can be longer and less direct than an ordinary non-exhaustive `match` or missing struct field.
+When these type-level guarantees fail, the errors can be less direct than an ordinary missing
+struct field or non-exhaustive `match`. A missing handler may appear as an unsatisfied provider
+bound or a partial-variant type. An incomplete build can similarly report the bounds on its
+partial-record state.
 
-Dispatching adds type-level work for each field or variant. The compiler resolves the handler chain
-and checks its changing types; wide [shapes](/docs/reference/glossary#shape) and many instantiations can increase that work. Runtime
-variant tests and handler calls still occur, and their optimization depends on the generated code
-and compiler. Static wiring alone does not guarantee that dispatch has zero runtime cost.
+The compiler also has to resolve the handler chain and its changing types for each field or
+variant. Wide [shapes](/docs/reference/glossary#shape) and many instantiations can increase that work.
+At runtime, variant tests and handler calls still execute, with optimization depending on the
+code generated and the compiler. Static wiring removes provider lookup, without promising that
+the dispatch operation itself is free.
 
 An ordinary `match` or struct literal is usually clearer when one place owns the whole operation.
 Dispatching becomes useful when generic code must work over different shapes or when independently

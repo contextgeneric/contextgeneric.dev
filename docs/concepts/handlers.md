@@ -5,28 +5,30 @@ sidebar_position: 11
 
 # Handlers
 
-CGP's handler components let a context select and compose computations through wiring. Separate
-interfaces describe whether a computation is synchronous or async, returns a fallible result, and
-consumes or borrows its input. This page explains those choices, the adapters between them, and how
-providers form a pipeline.
+CGP's handler components represent computations through a common input-and-output interface.
+Because providers share that interface, a context can select individual computations or compose
+them into a pipeline through wiring. The family has separate forms for synchronous and async work,
+fallible results, and owned or borrowed inputs, so a simple computation needs only the requirements
+its work calls for.
 
 ## Computation as something a context decides
 
-Handler components provide a common interface for computations that a context can choose.
-An application-specific component might expose `send_email` or `load_file`; handlers expose a
-uniform input-and-output interface that generic combinators can connect.
+An application-specific component gives a name to an operation, such as `send_email` or `load_file`.
+A handler gives it a uniform computation interface instead, allowing generic combinators to
+connect it to other computations.
 
-An input-taking handler receives a context, a `Code` tag, and an `Input`, then produces an `Output`.
-The context supplies dependencies and wiring. The tag identifies the computation, and the input
-contains the value being processed. The provider selects `Output` through an associated type.
+In that interface, an input-taking handler receives a context, a `Code` tag, and an `Input`.
+The context supplies its dependencies and wiring, while the input carries the value being processed.
+The provider chooses the resulting `Output` through an associated type.
 
-The `Code` tag lets one context select several computations for the same input type. It is passed
-as `PhantomData<Code>`, which carries type information without storing a `Code` value. A program
-with only one computation can use `()` as its tag.
+The tag matters when several computations accept the same input type: `Code` distinguishes them
+so the context can select a provider for each. Passing it as `PhantomData<Code>` carries that type
+information without storing a `Code` value. If there is only one computation, `()` can serve as the
+tag.
 
-Different interfaces keep unnecessary requirements out of simple computations. An addition provider
-can return its output synchronously without requiring an error type or returning a future. Adapters
-can expose that provider through a more general interface when composition requires it.
+Not every computation needs the same execution or error behavior. Addition, for example, can
+return synchronously without an error type or a future. When it needs to join a more general
+pipeline, adapters can expose it through the interface that pipeline uses.
 
 ## Three axes, and the names that encode them
 
@@ -40,10 +42,10 @@ callers the corresponding methods:
 | [`TryComputer`](/docs/reference/components/handler/try_computer) | `try_compute` | Synchronous | `Result<Output, Error>` |
 | [`Handler`](/docs/reference/components/handler/handler) | `handle` | Async | `Result<Output, Error>` |
 
-Synchronous methods finish their work before returning; async methods return futures that perform
-work when polled. Fallible interfaces use the context's
-[abstract error type](./modular-error-handling.md). “Infallible” describes the interface's lack of an
-error channel; it does not guarantee that the implementation cannot panic or perform side effects.
+A synchronous method completes its work before it returns, while an async method returns a
+future that does the work when polled. The fallible forms add an error channel using the context's
+[abstract error type](./modular-error-handling.md). An infallible interface simply lacks that
+channel; its implementation may still have side effects or panic.
 
 Input ownership supplies the other distinction. The base components take `Input` by value, while
 siblings such as `ComputerRef` and `HandlerRef` take `&Input`. This lets the interface express
@@ -55,10 +57,10 @@ Producer adapters can expose that behavior through input-taking interfaces by ig
 
 ## Write the simplest suitable provider {#write-the-weakest-one-the-rest-come-free}
 
-Promotion adapters let a provider support another computation interface without duplicating its
-body. An infallible result can be wrapped in `Ok`, and synchronous work can be performed inside an
-async method. These adaptations preserve the computation; wrapping blocking work in a future does
-not make the work nonblocking.
+The separate interfaces need not force a provider to repeat its body. Promotion adapters can
+wrap an infallible output in `Ok`, or run synchronous work inside an async method. The computation
+keeps its original behavior through those adaptations: in particular, putting blocking work in
+a future does not make it nonblocking.
 
 `#[cgp_computer]` generates a provider and its promotion wiring from a function:
 
@@ -88,9 +90,10 @@ fn checked_add(a: u64, b: u64) -> Result<u64, String> {
 error type matches `String`. Promotion does not automatically convert an arbitrary source error into
 another error type.
 
-Borrowed interfaces require a compatible borrowed-input implementation. Promotion does not let a
-provider consume an arbitrary value through a shared reference. Likewise, an async provider does
-not gain a synchronous implementation merely by being placed in a promotion table.
+These adaptations must respect ownership as well. A provider that consumes an arbitrary input
+cannot run on a shared reference to it, so the borrowed interfaces need a compatible implementation.
+The direction of execution also matters: placing an async provider in a promotion table cannot
+give it a synchronous implementation.
 
 Choose the simplest interface that expresses the computation, then use the adapters supported by
 its signature. The function macros generate suitable promotion wiring; a manually implemented
@@ -120,14 +123,15 @@ identified by `Tag` and combines it with the input. This `Add<Tag>` is separate 
 function-generated `Add` in the previous example. The pipeline computes `((5 * foo) + bar) * baz`
 when given input `5`.
 
-`PipeHandlers` runs the listed providers from left to right. Each stage's output type must satisfy
-the next stage's input requirements, and the final stage determines the pipeline's output. The
-fallible forms stop on the first error; async forms await each stage in sequence.
+To perform that calculation, `PipeHandlers` runs the listed providers from left to right, passing
+each output to the next stage. Those types must fit the next stage's input requirements, and the
+last stage supplies the pipeline's output. In fallible forms, an error ends the pipeline before
+later stages run; in async forms, each stage is awaited before the next begins.
 
-`ComposeHandlers<A, B>` is the two-stage form: run `A`, then pass its result to `B`. `PipeHandlers`
-constructs nested compositions from its provider list. `ReturnInput` passes its input through
-unchanged, and the `Promote*` adapters connect compatible interfaces. The
-[handler combinator reference](/docs/reference/providers/handler) describes their bounds.
+For just two stages, `ComposeHandlers<A, B>` runs `A` and gives its result to `B`. `PipeHandlers`
+builds nested uses of that composition from its list. `ReturnInput` provides a stage that leaves
+the value unchanged, while the `Promote*` adapters connect compatible computation interfaces.
+Their requirements are described in the [handler combinator reference](/docs/reference/providers/handler).
 
 ## Many computations on one context
 
@@ -148,28 +152,27 @@ delegate_components! {
 `ComputeNegated`. This table names a code tag followed by the input type for each entry, so the
 compiler can resolve the requested pair.
 
-Dispatch on the input alone uses a generic first segment: `@ComputerComponent.<Code> Code.i64`
-matches every code and selects by the input type. [Dispatching](./dispatching.md) uses that form to
-route an enum and its payloads to different providers. A shorter or generic key covers every key it
-matches, so that entry could not share a table with the two above, since it also covers
-`@ComputerComponent.Doubled.i64`. The tag can also describe a larger program, as in
-[type-level DSLs](./type-level-dsls.md).
+If only the input should determine the computation, a generic first segment can match every code:
+`@ComputerComponent.<Code> Code.i64`. [Dispatching](./dispatching.md) uses this form for an enum
+and its payloads. Because that key also covers `@ComputerComponent.Doubled.i64`, it would overlap
+the entries above and cannot appear beside them in the same table. Code tags can also carry more
+structure, as the programs in [type-level DSLs](./type-level-dsls.md) show.
 
 ## What it costs
 
-A handler call needs a type tag even when the application has only one computation.
-`PhantomData::<()>` supplies it, but adds syntax compared with an ordinary function call.
+Compared with an ordinary function call, even the smallest handler call needs a type tag.
+`PhantomData::<()>` fills that role when there is only one computation, but the extra syntax remains.
 
-The family introduces several component and adapter names. The execution, error, and ownership
-choices explain their relationships, but reading a pipeline still requires knowing which
-interfaces each stage supports. Start with the form the computation needs and consult the adapter
-bounds when connecting it to another form.
+Larger compositions also require familiarity with the component and adapter family. Execution,
+error handling, and ownership explain the names, but a reader must still know which interface each
+stage supports. Choosing the simplest form for each computation helps keep those requirements
+visible when adapters connect the stages.
 
-Type-level composition makes some failures harder to locate. A mismatched stage can produce a trait
-error involving an associated `Output` type rather than a line in a function body.
-[Provider checks](./check-traits.md) help isolate the incompatible stage. Runtime debugging remains
-possible inside each provider's method body, although the wiring table itself is not executable
-code where a breakpoint or log statement can be placed.
+Connecting stages through types moves some errors away from the function body. A mismatch can
+appear as a trait error involving an associated `Output`, so
+[provider checks](./check-traits.md) help isolate the stage whose types do not fit. Once the program
+runs, each provider's method body remains available for debugging. The wiring table only selects
+those methods, however, so it supplies no executable location for a breakpoint or log statement.
 
 Async handler interfaces do not promise that their returned futures are `Send`. Spawning a task on
 an executor that requires `Send` needs an additional guarantee, described in

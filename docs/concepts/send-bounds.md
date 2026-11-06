@@ -5,10 +5,11 @@ sidebar_position: 17
 
 # Recovering `Send` bounds
 
-A generic caller needs an explicit guarantee that an async method returns a `Send` future before
-it can move that future between threads. CGP's `#[async_trait]` does not add that guarantee.
-This page explains the trait-bound gap and a companion-trait workaround, including why it requires
-forwarding implementations for concrete context and API pairs.
+Recovering a `Send` bound lets generic code require a sendable future from an async interface that
+leaves that guarantee open. CGP's `#[async_trait]` returns an unboxed future without promising
+`Send`, so a caller cannot infer sendability from the consumer trait alone. A companion trait can
+expose the stronger guarantee, with forwarding implementations that verify it for concrete context
+and API pairs.
 
 ## What the async trait promises
 
@@ -25,24 +26,25 @@ pub trait CanHandleApi<Api> {
 }
 ```
 
-The generated return type is `impl Future<Output = Self::Response>`. The rewrite adds neither
-boxing nor allocation, and it does not promise that the future implements `Send`. A concrete
-implementation may return a `Send` future, but the generic bound `App: CanHandleApi<Api>` alone
-does not establish that fact.
+After expansion, `handle_api` returns `impl Future<Output = Self::Response>`. The rewrite needs
+neither boxing nor allocation, but its signature gives callers no `Send` guarantee. Even if a
+particular implementation returns a sendable future, generic code with only
+`App: CanHandleApi<Api>` cannot rely on that property.
 
-The missing guarantee comes from the trait signature. Opaque return types can explicitly carry
-`+ Send`; this particular signature leaves that requirement open so implementations can also use
-futures that are not sendable.
+Leaving `Send` out of the signature permits implementations whose futures cannot move between
+threads. Others may return sendable futures, but generic callers have to support either case.
+An explicit `+ Send` in the opaque return type would make the stronger promise available to them.
 
 ## Why spawning needs a stronger bound
 
-Spawning APIs may require both the future and its output to be sendable. For example,
-[`tokio::spawn`](https://docs.rs/tokio/latest/tokio/task/fn.spawn.html) requires both to be
-`Send + 'static`. An async task that awaits `handle_api` needs to satisfy those bounds as a whole.
+The distinction becomes relevant when a task must move between threads. For example,
+[`tokio::spawn`](https://docs.rs/tokio/latest/tokio/task/fn.spawn.html) requires both the spawned
+future and its output to be `Send + 'static`. If that task awaits `handle_api`, the awaited future
+must allow the surrounding task to satisfy those requirements.
 
-A generic caller cannot infer the awaited future's `Send` implementation from
-`App: CanHandleApi<Api>`. Giving `App` itself a `Send` bound does not constrain every future its
-methods return.
+Adding `App: Send` does not close this gap. That bound allows the application value to move between
+threads, but says nothing about the futures its methods return. The caller needs a requirement on
+`handle_api`'s return type itself.
 
 Return Type Notation would let a caller state the missing requirement directly:
 
@@ -75,9 +77,9 @@ where
 }
 ```
 
-`CanHandleApiSend` is an ordinary trait that adds a stronger method signature. It inherits the
-original response type and needs neither a component key nor provider wiring. A generic caller can
-require it with these bounds:
+The resulting `CanHandleApiSend` is an ordinary trait, so it needs no component key or provider
+wiring. By extending the original trait, it reuses its response type while adding a method whose
+return type explicitly promises `Send`. Generic callers can request this stronger interface:
 
 ```rust
 where
@@ -85,19 +87,22 @@ where
     App::Response: Send,
 ```
 
-The caller must use `handle_api_send` to obtain the advertised future. The companion trait does not
-change the signature of `handle_api`. Its response bound is repeated here because a bound on an
-associated type in a trait's `where` clause must also be established at the generic use site.
+With these bounds, the caller can obtain a future known to be `Send` by calling `handle_api_send`.
+Calling the original `handle_api` still gives only the original guarantee. The response bound also
+appears at this use site because Rust requires the caller to establish the associated-type bound
+from the companion trait's `where` clause.
 
-This trait addresses the future's sendability, not every condition for spawning. The surrounding
-task must still satisfy the executor's lifetime and output requirements. A future borrowing a local
-`app` is not automatically `'static` merely because it implements `Send`.
+The companion method supplies the missing sendability promise, but the task still needs to meet
+the executor's other requirements. For example, a future borrowing a local `app` can be `Send`
+without being `'static`. The surrounding task's lifetime and output therefore need attention
+independently of this bound.
 
 ## Why forwarding implementations need concrete types
 
-A blanket forwarding implementation cannot prove `Send` from the original trait bound alone.
-Its body would await `self.handle_api(api)`, whose future the original signature does not guarantee
-to be sendable. Wrapping that call in another async block preserves the same missing requirement.
+It might seem possible to implement this companion trait for every `App: CanHandleApi<Api>` by
+awaiting `self.handle_api(api)`. But that implementation would still have to prove that the awaited
+future is `Send`, and the generic bound supplies no such guarantee. Wrapping the call in another
+async block carries the same uncertainty into the wrapper.
 
 A concrete context and API let Rust check the actual selected implementation. In this fragment,
 `MockApp` is wired to a `QueryBalance` provider whose response is `u64` and whose future is sendable:
@@ -110,20 +115,20 @@ impl CanHandleApiSend<QueryBalance> for MockApp {
 }
 ```
 
-The compiler resolves this call through the concrete wiring and checks that the returned future
-satisfies the companion trait's `Send` promise. A provider that holds a non-sendable value across
-an await can still make this implementation fail. The forwarding method verifies the property;
-it does not make an otherwise non-sendable future safe to transfer.
+Rust can now follow the concrete wiring and verify the selected provider's future against the
+companion method's promise. If the provider holds a non-sendable value across an await, this
+implementation can still fail. The forwarding body exposes a verified `Send` property rather than
+changing the future's ability to move between threads.
 
 ## What it costs
 
-This forwarding pattern needs an implementation for each context and API pair that exposes the
-stronger interface. A macro can generate the repetitive bodies, but each generated implementation
-still needs to satisfy the bound independently.
+Each context and API pair that exposes the stronger interface needs a forwarding implementation.
+A macro can generate those repetitive bodies, but Rust must still verify the `Send` requirement
+for each pair.
 
-The companion trait adds an interface to maintain. Methods that need the stronger guarantee need
-corresponding signatures and forwarding bodies. Other methods can remain available through the
-original [supertrait](/docs/reference/glossary#supertrait) without being duplicated.
+That also leaves another interface to maintain. Each method needing the stronger guarantee needs
+its own signature and forwarding body. Methods without that requirement can remain on the original
+[supertrait](/docs/reference/glossary#supertrait), where callers can still use them.
 
 A companion trait is useful when the base interface must support both sendable and non-sendable
 futures. If every implementation must return a `Send` future, an explicit `impl Future + Send`

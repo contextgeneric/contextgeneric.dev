@@ -5,16 +5,16 @@ sidebar_position: 6
 
 # Checking your wiring
 
-CGP wiring records provider choices without checking their requirements immediately. A compile-time
-check verifies those requirements at a location you choose and helps expose missing dependencies.
-This page follows one broken context from a method-call error through an explicit check and
-`cargo cgp check`, then explains what each can and cannot verify.
+Check traits let you verify a context's wiring at a location you choose. Wiring itself records
+provider choices without immediately checking whether the context meets their requirements, so a
+missing dependency can remain unnoticed until a later method call. An explicit check brings that
+failure back beside the wiring, where the context and its selected providers are easier to inspect.
 
 ## A context can be wrong and still compile
 
-A wiring table can name a provider even when the context lacks a field that provider needs.
-In this example, `RecordEmails` implements the `EmailSender` component by recording messages in
-`sent_emails`, but `BrokenApp` supplies only `smtp_server`:
+Consider a provider that records outgoing email in a `sent_emails` field. Its wiring can still
+name a context with only an `smtp_server` field, as this example shows. The fragment imports
+CGP's prelude and defines both the `EmailSender` component and the recording provider:
 
 ```rust
 use cgp::prelude::*;
@@ -40,14 +40,14 @@ pub struct BrokenApp {
 delegate_components! { BrokenApp { EmailSenderComponent: RecordEmails } }
 ```
 
-The table compiles because it records only the mapping from `EmailSenderComponent` to `RecordEmails`.
-The compiler has not yet been asked to prove that `RecordEmails` can send email for `BrokenApp`.
-That proof will fail: the `#[implicit]` argument requires a `sent_emails` field.
+This table establishes which provider `BrokenApp` selects without proving that it can use that
+provider. The missing proof would require the `sent_emails` field read by `RecordEmails`' implicit
+argument. Because this fragment never asks for `CanSendEmail` on `BrokenApp`, the missing field has
+not yet caused a compilation failure.
 
-This deferred checking lets reusable wiring exist before its final context is known.
-An [aggregate provider](./aggregate-providers.md), for example, can group provider choices for
-contexts defined elsewhere. Each context must satisfy the providers' requirements when it uses
-them, but the bundle does not need to supply those dependencies itself.
+Deferring that proof is useful for reusable wiring. An [aggregate provider](./aggregate-providers.md)
+can collect choices before the contexts that use it are even defined. Those contexts must eventually
+meet the providers' requirements, but the bundle itself needs only to record the choices.
 
 ## Where the failure surfaces instead
 
@@ -66,9 +66,10 @@ note: the following trait bounds were not satisfied:
       `BrokenApp: EmailSender<BrokenApp>`
 ```
 
-The diagnostic reports that `BrokenApp` lacks `CanSendEmail` and `EmailSender<BrokenApp>`, but does
-not identify the missing `sent_emails` field. The failed requirement is hidden behind the generated
-trait implementations. The error location may also be far from the wiring, in another module or crate.
+The diagnostic stops at the unsatisfied trait implementations: `BrokenApp` lacks `CanSendEmail`
+and `EmailSender<BrokenApp>`. It leaves the missing `sent_emails` field hidden behind the generated
+implementations. If the first call occurs in another module or crate, the error can also appear a
+long way from the table that selected the provider.
 
 ## Asking the question at a line you chose
 
@@ -80,12 +81,12 @@ trait CanUseApp: CanSendEmail {}
 impl CanUseApp for App {}
 ```
 
-The empty implementation compiles only if `App: CanSendEmail` holds. Placing it beside the wiring
-catches the failure there, although checking the consumer trait alone can still produce the vague
-error shown above.
+For Rust to accept the empty implementation, it must establish `App: CanSendEmail` at that line.
+Putting it beside the wiring moves a failure there. But the requirement still goes through the
+consumer trait, so its diagnostic can remain as vague as the method-call error.
 
-[`check_components!`](/docs/reference/macros/check_components) generates a check that exposes the
-selected provider's requirements more directly:
+To expose the provider's requirements, the check needs a path through more than the consumer
+trait. [`check_components!`](/docs/reference/macros/check_components) generates that check:
 
 ```rust
 check_components! {
@@ -95,8 +96,9 @@ check_components! {
 }
 ```
 
-The macro checks `CanUseComponent`, which requires a wiring entry and the selected provider's
-dependency bounds for this context. That path makes the missing field visible in the diagnostic:
+The generated assertion asks for `CanUseComponent`. Satisfying this bound requires both a wiring
+entry and the chosen provider's dependencies for the context being checked. The missing field
+therefore appears in the diagnostic:
 
 ```text
 error[E0277]: the trait bound `BrokenApp: CanUseComponent<EmailSenderComponent>`
@@ -111,10 +113,10 @@ note: required for `RecordEmails` to implement
       `IsProviderFor<EmailSenderComponent, BrokenApp>`
 ```
 
-The error now identifies a missing `HasField` implementation and names `RecordEmails` as the
-provider requiring it. The expanded field names remain hard to read: `sent_emails` and `smtp_server`
-appear as nested character types. The headline also names the generated `CanUseComponent` bound
-rather than the public trait.
+Following this checking path exposes `RecordEmails`' requirement for a `HasField` implementation.
+The cause is closer to the surface, but the field tags still appear as nested character types,
+leaving `sent_emails` and `smtp_server` difficult to recognize. The headline also refers to the
+generated `CanUseComponent` bound rather than the public trait.
 
 ## Reading it through the toolchain
 
@@ -133,8 +135,9 @@ error[E0277]: [CGP-E001] missing field `sent_emails` on `BrokenApp`
                └─ [CGP-E110] missing field `sent_emails` on `BrokenApp`
 ```
 
-The root cause is now explicit: `BrokenApp` lacks `sent_emails`, which `RecordEmails` requires.
-The dependency chain connects that missing field to the `CanSendEmail` trait the application needs.
+Here the dependency chain connects the application's need for `CanSendEmail` to the provider it
+selected and then to the missing `sent_emails` field. This gives the reader both the cause and the
+reason that field is required.
 
 The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
 next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.
@@ -160,15 +163,16 @@ check_components! {
 }
 ```
 
-A missing `width` requirement fails both assertions because the wrapper also needs its inner
-provider to work. A missing scale factor fails only the wrapper's assertion. Separate diagnostic
-locations make that difference easier to see when debugging a
-[higher-order provider](./higher-order-providers.md).
+If `App` lacks `width`, both assertions fail because the wrapper needs its inner provider to
+work. If it lacks only the scale factor, the rectangle assertion passes and the wrapper assertion
+fails. Giving each layer its own diagnostic location makes this distinction easier to see when
+debugging a [higher-order provider](./higher-order-providers.md).
 
 ## What to check, and when to fuse it
 
-Check each context's required components when you define its wiring. This catches missing entries
-and unsatisfied dependencies before a later caller happens to exercise them.
+Placing checks beside each context's wiring catches missing entries and dependencies before a
+caller happens to need them. For basic `Component: Provider` entries, the checks can be part of the
+same declaration.
 
 [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) combines
 wiring and checking for basic `Component: Provider` entries. For generic components, its
@@ -187,18 +191,21 @@ context supplies. Neither result verifies the intended application.
 
 ## What it costs
 
-Explicit checks cover only the components and parameter sets you list. Add them as you add wiring;
-otherwise an omitted component can still fail only when a caller uses it. Generic wiring may need
-several checks to cover the concrete uses an application depends on.
+An explicit check proves only the components and parameter sets it names. As wiring grows, the
+checks need to grow with it, or an omitted component can still fail at a later call site. For a
+generic component, this may mean checking several concrete parameter sets that the application
+relies on.
 
-A check can expose a cause without making the diagnostic short. Several invalid entries can produce
-several errors, and one shared missing dependency can appear in multiple provider failures.
-`cargo cgp check` makes recognized cases easier to read, but raw compiler diagnostics remain verbose.
+Moving the check does not necessarily shorten its diagnostic. Several broken entries can produce
+several errors, and a shared missing dependency may appear once for every provider that needs it.
+`cargo cgp check` makes the cases it recognizes easier to follow, while raw compiler output can
+remain verbose.
 
-Checks verify trait requirements rather than runtime behavior. Ordinary bounds such as `Value: Display`
-can still fail as dependencies of a provider, and those traits need ordinary Rust implementations.
-They cannot be listed as components in a wiring check unless they have the corresponding CGP component
-machinery. Tests remain necessary for behavior such as whether an email was recorded correctly.
+Even a successful check establishes only the trait requirements. A provider may depend on an
+ordinary bound such as `Value: Display`, which still needs an ordinary Rust implementation. Without
+the corresponding CGP machinery, that trait cannot itself be listed as a component to check.
+And satisfying these bounds says nothing about whether the email body was recorded correctly;
+that behavior still needs tests.
 
 ## Where to go next
 

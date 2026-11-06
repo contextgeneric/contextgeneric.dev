@@ -5,14 +5,14 @@ sidebar_position: 18
 
 # Modularity Hierarchy
 
-Choose the least complex implementation model that supports the choices your program needs.
-Rust traits and CGP components offer a progression from one shared implementation to providers
-selected independently by context, target type, and enclosing provider. Each additional choice
-requires more structure.
+The modularity hierarchy describes how implementation choices grow from a single shared body to
+providers selected independently by context, target type, and enclosing provider. Each tier adds a
+place where a program can make a choice, along with the structure needed to express it. The useful
+tier is the least complex one that supports the variation your program actually needs.
 
-This page follows encoding through the tiers, then gives a decision guide for choosing among them
-and ordinary Rust alternatives. The examples are fragments: imports from `cgp::prelude::*`, context
-structs, and some provider bodies are omitted to keep the implementation choices visible.
+Encoding illustrates how those choices differ. The examples below omit imports from
+`cgp::prelude::*`, context structs, and some provider bodies so the implementation choices remain
+visible. The decision guide that follows compares those choices with ordinary Rust alternatives.
 
 ## The tiers at a glance
 
@@ -26,9 +26,10 @@ The tiers differ in where a program can select an implementation:
 | **4** | One provider per target type in each context | A parameter-targeted component and `open` | The interface must separate context from target |
 | **5** | An inner provider chosen by an enclosing provider | A [higher-order provider](/docs/reference/glossary#higher-order-provider) | The enclosing provider depends on the inner provider interface |
 
-All tiers obey Rust's [coherence](/docs/reference/glossary#coherence) rules. CGP permits reusable alternatives by placing their
-implementations on distinct provider types, then using wiring to select one unambiguously.
-Tier 5 adds a local composition choice rather than relaxing another coherence rule.
+These choices all work within Rust's [coherence](/docs/reference/glossary#coherence) rules.
+CGP places alternative implementations on distinct provider types, allowing wiring to select one
+unambiguously. The final tier extends that selection into a provider composition, where a wrapper
+can choose an inner provider independently of the context's general choice.
 
 ## Tier 1: one implementation for matching types
 
@@ -47,13 +48,13 @@ impl<Value: AsRef<[u8]>> CanEncode for Value {
 }
 ```
 
-Every matching type receives this implementation. A second implementation for a type covered by
-that blanket would overlap it and be rejected. [`#[cgp_fn]`](/docs/reference/macros/cgp_fn)
-expresses the same arrangement from a function and keeps the implementation's bounds off the
-consumer interface.
+Every type satisfying the bound receives this body, so another implementation for a covered type
+would overlap it and be rejected. That is the constraint of this tier: matching types share the
+logic. [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) can generate this arrangement from a function,
+keeping its implementation bounds off the consumer interface.
 
-Use this tier when matching types should share one implementation. It requires neither named
-providers nor wiring.
+When that shared body is the desired behavior, this tier needs nothing more. Provider names and
+wiring become useful only when the program needs a further choice.
 
 ## Tier 2: one implementation per type
 
@@ -78,9 +79,9 @@ impl CanEncode for Vec<u8> {
 }
 ```
 
-`u32` encodes as decimal text, while `Vec<u8>` copies its bytes. The choice is shared wherever
-that trait is used for that type. Blanket implementations remain possible where they do not
-overlap other impls; coherence prevents ambiguous combinations.
+Now `u32` uses decimal text and `Vec<u8>` copies its bytes. Each choice follows its type wherever
+this trait is used. A blanket implementation could still cover other types, provided it does not
+overlap these implementations or any others.
 
 This tier fits behavior that varies by type but does not need an independent choice per application.
 Rust's [orphan rules](/docs/reference/glossary#orphan-rule) also determine which crate may supply an implementation.
@@ -106,9 +107,10 @@ impl SelfEncoder {
 }
 ```
 
-`EncodeSelfAsText` requires the context to implement `Display`. A separate `EncodeSelfAsBytes`
-provider can require `AsRef<[u8]>`, even if some types satisfy both bounds. Wiring selects the
-provider for a concrete type:
+The `EncodeSelfAsText` provider can serve any context implementing `Display`. A separate
+`EncodeSelfAsBytes` can support `AsRef<[u8]>` contexts, even when some contexts satisfy both bounds,
+because the two implementations belong to distinct provider types. Wiring then chooses which one
+a concrete type will use:
 
 ```rust
 delegate_components! {
@@ -127,9 +129,9 @@ A table entry alone does not force Rust to verify all of the selected provider's
 
 ### Value contexts and application contexts
 
-The wired type can represent either the value being operated on or an application environment.
-That distinction changes what “one choice per type” means without necessarily changing the method
-signature.
+In this example the wired type is the value being encoded. But a type can also represent an
+application environment, carrying dependencies and implementation choices for its operations.
+Both arrangements fit tier 3, even though “one choice per type” serves a different purpose in each.
 
 In the **value-context** arrangement, `Self` is the data, as `u32` is in the encoding example.
 The provider operates on that value, and wiring selects one provider for it. This arrangement suits
@@ -154,13 +156,13 @@ delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
 delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
 ```
 
-The provider bodies are elided here. An SMTP provider would require connection settings or a client;
-a recording provider would require storage for captured messages. `App` and `TestApp` supply those
-dependencies and select different providers for the same consumer trait.
+The omitted SMTP body would need connection settings or a client, while the recording body would
+need storage for captured messages. `App` and `TestApp` supply the appropriate dependencies. Their
+separate wiring lets callers use the same consumer trait in either environment.
 
-Application contexts make independent choices possible without parameterizing the trait over a
-target value. Both contexts belong to the application, so it can define and wire them separately.
-This is a common CGP arrangement for services, test environments, and application operations.
+The application owns both context types, so it can wire them independently even though the
+consumer trait has no target parameter. This makes tier 3 sufficient for many service operations
+and test environments: the selected behavior belongs to the application context itself.
 
 Components may group methods, associated types, and consts, just as ordinary traits do. The examples
 use one method to isolate provider selection; the appropriate grouping depends on which items a
@@ -201,10 +203,10 @@ delegate_components! {
 owning either context can supply that wiring even when it owns neither the component nor `String`.
 Ownership of the context satisfies Rust's rules for the wiring implementation.
 
-The extra choice requires a compatible interface. An existing self-targeted trait cannot acquire
-this context-and-target separation merely by changing wiring. The context must also supply entries
-covering the target types it uses, although generic entries can cover families of types.
-Use this tier when target behavior must vary independently between contexts.
+Making the value a parameter is what enables these independent application choices. A self-targeted
+trait cannot gain that separation through wiring alone, because its interface still treats the
+context as the value. With the parameter-targeted interface, each context must cover the target
+types it uses, although generic entries can supply providers for whole families of targets.
 
 ## Tier 5: an inner provider chosen locally
 
@@ -241,9 +243,9 @@ delegate_components! {
 `EncodeAsText`. `Vec<Vec<u8>>` explicitly selects `EncodeAsHex` for each inner byte vector,
 regardless of how the context encodes `Vec<u8>` elsewhere.
 
-The local override lets a collection or wrapper impose a specific inner interpretation while
-other operations retain the context's general choice. It also adds another provider parameter and
-interface dependency. Use it when that local choice is part of the operation's design.
+Here the collection specifies how its elements should be interpreted while other operations keep
+the context's general choice. Expressing that local decision requires another provider parameter
+and an interface dependency, so it earns its place when the wrapper needs that independent choice.
 
 ## Choosing a tier
 
@@ -261,14 +263,15 @@ another type. These arrangements answer different needs:
 | Behavior for a target type that differs by application | Environmental context, parameter-targeted component (tier 4) | One choice per context and target type |
 | A wrapper needs a particular inner implementation | Higher-order provider (tier 5) | A choice within that provider composition |
 
-An application-level operation does not need a target parameter merely to support testing.
-Separate `App` and `TestApp` contexts can select different email providers at tier 3. A target
-parameter becomes useful when the operation acts on types whose treatment must vary independently
-of those types' own trait implementations.
+Testing alone does not require moving to tier 4. At tier 3, `App` and `TestApp` can already select
+different providers for an operation such as sending email. A target parameter earns its place
+when the operation acts on a separate value whose treatment must vary between applications,
+independently of that value's own trait implementations.
 
-Shared wiring is a separate concern from the tier. [Aggregate providers](./aggregate-providers.md)
-and [namespaces](./namespaces.md) group repeated selections; they become useful when the shared
-table is worth maintaining as a unit.
+Whichever tier supplies the needed choices, several contexts may repeat part of their wiring.
+[Aggregate providers](./aggregate-providers.md) and [namespaces](./namespaces.md) can collect those
+selections once the shared table is useful to maintain as a unit. Sharing a table does not itself
+require moving to another tier.
 
 ## Comparing ordinary alternatives
 
@@ -299,10 +302,10 @@ An operation with one suitable implementation does not need provider selection.
 A plain impl, blanket impl, or [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) can express it directly.
 Likewise, a small closed enum usually needs only a `match` rather than generic variant dispatch.
 
-Some APIs depend on one consistent interpretation of a value. Ordering within a map, for example,
-must remain consistent across its operations. Independent provider choices are useful only when
-the surrounding design preserves such invariants; they are not a reason to replace a coherent
-trait that already expresses the required contract.
+For some APIs, variation would weaken a contract the program relies on. A map, for example,
+needs a consistent ordering across its operations. Independent provider choices help only when
+the surrounding design preserves that invariant, so a coherent trait that already expresses it
+may remain the better fit.
 
 ## Evaluating a single-context application
 
@@ -322,14 +325,14 @@ If these needs are absent, use a simpler implementation form.
 
 ## Representing configuration choices
 
-A separate handwritten context is not required for every combination of settings.
-A generic context definition can share structure across backend types, though each concrete
-instantiation remains a distinct Rust type. Enums and trait objects can represent choices made
-from runtime configuration.
+Configuration does not require a handwritten context for every combination of settings.
+A generic context can share its structure across backend types, although each concrete instantiation
+is still a distinct Rust type. If a choice comes from runtime configuration instead, an enum or
+trait object can represent it inside the context.
 
-Use distinct context types where the distinction should be checked statically. For example,
-separating a test client from a production client can prevent accidental substitution. Keep other
-choices as fields or generic parameters when that gives the program the flexibility it needs.
+A distinct context type is useful when Rust should enforce the distinction, such as preventing
+a test client from being substituted for a production client. Other settings can stay in fields
+or generic parameters, according to how the application needs to choose and share them.
 
 Context-generic libraries can also leave backend representation to downstream applications.
 When providers depend on context traits rather than a fixed backend enum, a downstream crate can
@@ -338,9 +341,10 @@ that context satisfies without changing the upstream enum.
 
 ## What it costs
 
-Provider selection adds declarations and another step when reading a call. A component generates
-consumer and provider traits plus a wiring key; the context's table identifies the provider that
-runs. Wrappers and namespaces can add further steps to that trace even though selection is static.
+Reading a wired method call requires finding the provider in the context's table as well as the
+consumer trait. The component generates that trait, its provider counterpart, and a wiring key;
+wrappers and namespaces can add more tables or types to follow. Those steps disappear from runtime
+selection, but remain part of understanding the code.
 
 Wiring failures can produce verbose diagnostics involving generated types and transitive bounds.
 [`check_components!`](/docs/reference/macros/check_components) forces selected requirements to be
@@ -348,9 +352,10 @@ checked near the wiring. `cargo cgp check` leads with the root cause for the cla
 and the tool does not yet reshape every class. The
 [cargo-cgp documentation](/docs/cargo-cgp/) explains the checking workflow.
 
-Macros, trait resolution, and [monomorphization](/docs/reference/glossary#monomorphization) add compile-time work. The effect depends on the
-program and should be measured for the codebase being evaluated. Static dispatch removes runtime
-provider lookup, but that does not mean every added compilation cost replaces a runtime cost.
+The compiler does additional work through macros, trait resolution, and
+[monomorphization](/docs/reference/glossary#monomorphization). Its effect needs measuring in the
+program being evaluated. Although static dispatch removes runtime provider lookup, compilation
+costs do not necessarily correspond to runtime work that the program would otherwise have done.
 
 The vocabulary and generated code take time to learn. CGP's
 [agent skill](https://github.com/contextgeneric/cgp-skills) can help a coding assistant explain

@@ -5,16 +5,20 @@ sidebar_position: 12
 
 # Monadic handlers
 
-Monadic handlers let a pipeline choose whether to continue based on each step's result. A pipeline
-can stop at the first error, stop at the first success, or pass every output onward. This page
-builds on [handlers](./handlers.md) to explain those choices, how CGP composes them, and when an
-ordinary function is simpler.
+Monadic handlers separate a pipeline's computations from the rule that decides whether another
+step should run. The same composition machinery can stop at the first error, stop at the first
+success, or pass every output onward. A monad supplies that continuation rule, while the providers
+supply the work performed at each step.
+
+Ordinary [handler composition](./handlers.md) already connects outputs to inputs. Monadic
+composition extends that connection to cases where the next step needs a value inside a result,
+or where one branch should end the pipeline.
 
 ## When direct composition does not fit
 
-Direct composition through `Computer` passes each step's entire output to the next step.
-That does not fit a chain whose steps return `Result<T, E>` but accept only `T`. Consider this
-computer, defined with imports from `cgp::prelude::*`:
+When computers compose directly, one step passes its whole output to the next. That works only if
+the next computer accepts that type. A fallible increment makes the difficulty visible; this
+fragment assumes imports from `cgp::prelude::*`:
 
 ```rust
 #[cgp_computer]
@@ -23,21 +27,21 @@ pub fn increment(value: u8) -> Result<u8, &'static str> {
 }
 ```
 
-`Increment` accepts a `u8` and produces a `Result<u8, &'static str>`. Directly composing two copies
-through `Computer` fails because the second expects a `u8`, not the complete `Result`. The chain
-needs a rule that passes the value inside `Ok` onward and returns an `Err` immediately.
+The generated `Increment` computer takes a `u8` but returns `Result<u8, &'static str>`. If a second
+copy receives that whole result, its input type does not fit. To connect the two, the pipeline needs
+to unpack an `Ok` and continue with its `u8`, or return an `Err` before running the next increment.
 
-The handler interface matters here. Ordinary composition through `TryComputer` or `Handler`
-already propagates its outer error with `?`. Monadic composition makes the continuation rule a
-separate choice, including when `Result` is the output of a `Computer` or when success should end
-the chain.
+Composition through `TryComputer` or `Handler` already propagates the interface's outer error with
+`?`, so this mismatch is specific to treating the result as a `Computer`'s output value. Monadic
+composition lets the pipeline choose that continuation behavior separately. It can reproduce error
+propagation here or choose a different rule, such as stopping when an attempt succeeds.
 
 ## Choosing the continuation rule
 
-A **monad** describes how to compose computations through a surrounding type. In CGP's result-based
-monads, it determines which branch supplies the next input, which branch ends the pipeline, and how
-a value is placed into the result type. The identity monad supplies ordinary composition without a
-result wrapper.
+The continuation rule belongs to a **monad**, which describes how computations compose through a
+surrounding type. For CGP's result-based monads, this includes which branch supplies the next input,
+which branch stops the pipeline, and how a plain value enters the result type. The identity monad
+uses the same idea for ordinary composition, with no result wrapper.
 
 `PipeMonadic` combines that choice with a type-level list of providers. This type fragment uses
 `PipeMonadic` from `cgp::extra::monad::providers` and `ErrMonadic` from
@@ -47,10 +51,10 @@ result wrapper.
 PipeMonadic<ErrMonadic, Product![Increment, Increment, Increment]>
 ```
 
-`ErrMonadic` passes each `Ok` value to the next `Increment` and stops on `Err`. Starting from `1`
-produces `Ok(4)`. Starting from `253` reaches `254`, then `255`, then returns `Err("overflow")`.
-Starting from `255` fails in the first step and skips the other two. This is the control flow of
-successive `?` expressions, assembled from provider types.
+With `ErrMonadic`, each `Ok` supplies the next `Increment` with its contained value, so starting
+from `1` produces `Ok(4)`. Starting from `253` reaches `254`, then `255`, before the last increment
+returns `Err("overflow")`. An input of `255` fails immediately and skips the remaining steps.
+The provider types therefore assemble the same control flow as successive `?` expressions.
 
 ## The built-in monads
 
@@ -62,18 +66,18 @@ Choose the marker according to which result should end the pipeline:
 | `OkMonadic` | The value inside `Err` | `Ok` |
 | `IdentMonadic` | The complete output | Every step continues |
 
-`OkMonadic` supports a sequence of attempts where the first success wins. Each failed attempt must
-return, in `Err`, the input the next attempt needs. For example, variant dispatch can pass the
-unmatched remainder onward until one handler accepts it.
+For a sequence of attempts, `OkMonadic` reverses the stopping rule: the first success ends the
+search. A failed attempt returns the next step's input inside `Err`. Variant dispatch uses this to
+pass an unmatched remainder from one attempt to another until a handler accepts it.
 
-`IdentMonadic` lets a pipeline use the same composition interface without short-circuiting.
-It forwards the whole output, so the next provider must accept that exact type. Using it with
-`Increment` does not resolve the `Result`-versus-`u8` mismatch.
+If every step should continue, `IdentMonadic` forwards the complete output without unpacking it.
+This keeps the same composition machinery, but requires the next provider to accept that exact
+output type. It therefore leaves the `Increment` input mismatch unresolved.
 
-Monad transformers combine continuation rules for nested results. For
-`Result<Result<T, E>, F>`, `OkMonadicTrans<ErrMonadic>` stops on an outer `Err(F)` or an inner
-`Ok(T)` and continues with the `E` inside `Ok(Err(E))`. Both result layers affect whether another
-step runs; their nesting order determines how the output is interpreted.
+When a computation has nested results, monad transformers let both layers participate in the
+continuation decision. For `Result<Result<T, E>, F>`, `OkMonadicTrans<ErrMonadic>` stops on an outer
+`Err(F)` or an inner `Ok(T)`. Only `Ok(Err(E))` continues, supplying `E` to the next step. The order
+of the nested rules matters because it determines how each result layer is interpreted.
 
 ## A pipeline is an ordinary provider
 
@@ -88,14 +92,14 @@ delegate_components! {
 }
 ```
 
-Callers use the ordinary `CanCompute` interface. For this example, the code tag is `()` and the
-input is `u8`; the output is `Result<u8, &'static str>`. The context's wiring selects the pipeline,
-and its callers do not need a separate monadic interface.
+Once wired, the pipeline is available through the ordinary `CanCompute` interface. A caller
+supplies the `()` code tag and a `u8`, then receives `Result<u8, &'static str>` without needing to
+name a monad. The context's table determines how those increments are composed.
 
-Provider selection happens at compile time, while the increments and result branches execute when
-the pipeline runs. The marker and provider list require neither runtime instances nor a runtime
-lookup table. `PipeMonadic` also supports the async and fallible handler forms; those forms retain
-their own execution and error behavior.
+Rust selects the providers from their types at compile time, so the marker and list need no
+runtime instances or lookup table. The increments and branches still execute when the pipeline
+runs. The same `PipeMonadic` machinery supports async and fallible handler forms, retaining their
+execution and error behavior.
 
 ## What it costs
 
@@ -103,13 +107,15 @@ A fixed sequence of fallible operations is usually clearer as a function using `
 composition is useful when contexts select different sequences or when reusable steps need a
 continuation rule such as stopping at the first success.
 
-Pipeline errors can be difficult to locate. An incompatible stage can produce a trait-resolution
-error involving associated output types and monad traits rather than identifying the stage directly.
-Checking a short pipeline before adding more stages narrows the source of a mismatch.
+Moving the continuation rule into types can make an incompatible stage harder to identify.
+The error may involve associated outputs and monad traits without pointing directly to the stage
+that does not fit. Checking a short pipeline before extending it narrows the possible source of a
+mismatch.
 
-Nested monads require readers to track each result layer separately. Use a transformer when those
-layers express distinct decisions, and document which cases continue. The provider type alone may
-not make that behavior obvious to a reader unfamiliar with the chosen transformer.
+With nested monads, understanding a call also means following the decision at each result layer.
+A transformer is useful when those layers represent distinct choices, but its provider type may
+not explain them to a reader. Documenting exactly which cases continue makes that control flow
+easier to follow.
 
 ## Where to go next
 

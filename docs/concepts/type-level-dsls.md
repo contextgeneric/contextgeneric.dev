@@ -5,17 +5,20 @@ sidebar_position: 16
 
 # Type-level DSLs
 
-A type-level domain-specific language represents a program as Rust types and uses CGP wiring to
-select implementations for its operations. The compiler checks and resolves the program's structure;
-the selected operations run when called. This page develops a small arithmetic language, explains
-how its syntax and interpretation can vary independently, and identifies the limits of the approach.
-It assumes familiarity with [handlers](./handlers.md).
+A type-level domain-specific language represents a program as Rust types and gives its operations
+meaning through CGP providers. The program's structure can stay the same while different contexts
+select different interpretations, and new syntax forms can bring their own providers. Rust checks
+and resolves those choices at compile time; the selected operations execute when called.
+
+The [handler](./handlers.md) family's `Code` parameter gives the program type a place in a
+computation's interface. An interpreter can use the structure of that type to choose and combine
+providers for the program's parts.
 
 ## A program represented as a type
 
-The handler family's `Code` parameter can describe a whole program. Each syntax form becomes a
-marker type, and its parameters describe the program's structure. These fragments assume
-`PhantomData` and CGP's prelude are imported:
+To describe a language this way, give each syntax form a marker type. Its parameters can then
+refer to other forms, allowing expressions to nest. These fragments assume `PhantomData` and CGP's
+prelude are imported:
 
 ```rust
 pub struct Literal<const N: u64>;
@@ -29,14 +32,14 @@ Nesting the markers represents a compound expression:
 type Program = Multiply<Add<Literal<2>, Literal<3>>, Literal<4>>;
 ```
 
-`Program` represents `(2 + 3) * 4`. The marker types form the language's **abstract syntax**:
-they describe the expression without implementing its evaluation. An evaluator can compute its
-value, while a different interpreter could format the same expression as text.
+The nesting describes `(2 + 3) * 4`, but the markers themselves do not evaluate it. They form the
+language's **abstract syntax**, leaving providers to decide what the expression means. One
+interpreter can calculate its value while another formats the same expression as text.
 
-Larger languages can use type-level collections and strings within their syntax.
-[`Product!`](/docs/reference/macros/product) can hold a pipeline's stages, and
-[`Symbol!`](/docs/reference/macros/symbol) can represent a string in a type position.
-These describe the fixed program; handlers can still receive runtime values as their inputs.
+As the language grows, its syntax can include type-level collections and strings too.
+[`Product!`](/docs/reference/macros/product) can describe a sequence of pipeline stages, while
+[`Symbol!`](/docs/reference/macros/symbol) places a string in a type position. These types fix the
+program's structure without preventing its handlers from receiving runtime input values.
 
 ## Providers give syntax its behavior
 
@@ -56,10 +59,10 @@ impl<Left, Right> Computer<Add<Left, Right>, ()> {
 }
 ```
 
-`EvalAdd` handles any `Add<Left, Right>` whose operands the context can compute as `u64`.
-Its requirements describe those computations without naming the providers that perform them.
-Calling the context for each operand lets the addition provider work with syntax introduced by
-other crates.
+The bounds let `EvalAdd` handle any `Add<Left, Right>` whose operands the context can compute as
+`u64`. The addition provider asks the context for those results rather than selecting their
+providers itself. This leaves each operand free to use syntax introduced elsewhere, including by
+another crate.
 
 The context assembles an interpreter by selecting a provider for each syntax form. This fragment
 assumes an `Interpreter` context, matching `EvalLiteral` and `EvalMultiply` providers, and an import
@@ -77,9 +80,9 @@ delegate_components! {
 }
 ```
 
-Each generic entry covers a family of expressions. The addition entry applies to every
-`Add<Left, Right>` with unit input, subject to the selected provider's requirements. Running the
-program then uses the ordinary consumer method:
+The generic entries let this small table cover nested expressions. In particular, the addition
+entry applies to any `Add<Left, Right>` with unit input once its provider requirements hold.
+The complete `Program` can then run through the same consumer method used for other computations:
 
 ```rust
 Interpreter.compute(PhantomData::<Program>, ())   // 20
@@ -92,27 +95,27 @@ that multiplication can compute its operands, that addition can compute its oper
 each literal has an implementation. The resulting calls use static dispatch without a runtime
 syntax-tree lookup or interpreter dispatch loop.
 
-The computation itself remains ordinary Rust execution. `compute` is not a `const fn`; type
-checking does not evaluate its arithmetic. An optimizer may fold this constant example, but the
-DSL does not guarantee that. A provider performing I/O or processing runtime input does that work
-when the program runs.
+Resolving those calls does not execute their bodies. `compute` is an ordinary function rather than
+a `const fn`, so type checking does not evaluate its arithmetic. The optimizer may fold this
+constant example, but the DSL makes no such guarantee. If a provider performs I/O or processes a
+runtime input, that work happens when the program runs.
 
 ## Syntax and interpretation can vary independently
 
-Different contexts can assign different meanings to the same program type. One context may
-evaluate arithmetic while another pretty-prints it or estimates its cost. Each interpretation
-needs providers with mutually compatible input and output types; the syntax stays unchanged.
+With the syntax represented independently, another context can interpret the same program by
+pretty-printing it or estimating its cost instead of evaluating it. Each interpretation needs
+providers whose input and output types fit together, but it can leave the program type unchanged.
 
-An independent crate can extend the syntax by defining another marker and its provider.
-A context includes that form by adding wiring, without editing the base language's source.
-Existing providers such as `EvalAdd` can accept the new form as an operand when it satisfies their
-computation requirements. This addresses the syntax-extension side of the
-[expression problem](./extensible-variants.md).
+The same separation lets an independent crate introduce another marker and a provider for it.
+A context then includes the new syntax through wiring, without changing the base language's source.
+Because `EvalAdd` asks only for computations with compatible outputs, the new form can become one
+of its operands as soon as it meets those requirements. This is how the design addresses the
+syntax-extension side of the [expression problem](./extensible-variants.md).
 
-Namespaces package a language's shared wiring for reuse. A child namespace can add entries for
-new forms while inheriting the base language. Alternative interpretations must still respect the
-[namespace rule](./namespaces.md#a-bound-entry-cannot-be-overridden): an inherited bound entry
-cannot be replaced, so paths that need different providers must remain open in the shared base.
+To reuse the interpreter's wiring, a namespace can package its shared entries and a child can
+add entries for new forms. Replacing an interpretation requires more planning: under the
+[namespace rule](./namespaces.md#a-bound-entry-cannot-be-overridden), a child cannot replace an
+inherited binding. Any path whose provider should vary must remain open in the shared base.
 
 ## An optional surface syntax
 
@@ -121,10 +124,10 @@ types. For example, it might turn a pipeline expression into nested types or a s
 `Symbol!`. Interpretation remains in the providers, so handwritten types and macro-generated types
 use the same implementations.
 
-Separating syntax translation from execution keeps provider changes independent of the macro.
-A generic surface syntax may also accept new fragments without a macro change. New grammatical
-forms can still require changes to the parser or macro; type-level representation alone does not
-make every syntax extension automatic.
+Because the macro only translates syntax, changing a provider's behavior need not change the
+macro. A sufficiently generic surface syntax may also accept new fragments as they are introduced.
+New grammatical forms can still require parser or macro changes, however; representing the program
+as types does not by itself make every syntax extension automatic.
 
 ## What it costs
 
@@ -132,15 +135,14 @@ The program's type structure must be known at compile time. Runtime inputs and b
 providers are possible, but an arbitrary script loaded from a file cannot become a new Rust type
 inside the running binary. Such a script needs a runtime interpreter or a separate compilation step.
 
-Nested program types can produce long trait-resolution errors. Missing wiring or incompatible
-operand outputs may appear through several layers of provider bounds. Checking smaller expressions
-before combining them helps locate the mismatch.
+Nesting those types also nests the requirements Rust must resolve. A missing wiring entry or an
+incompatible operand output can therefore produce a long error through several provider layers.
+Checking smaller expressions before combining them helps narrow down which requirement failed.
 
-Compilation must resolve the bounds and generate code for the concrete programs used. Large
-programs and multiple interpretations can increase compile time and generated code size. The
-tradeoff is most useful when reusable, extensible program descriptions justify those costs, such
-as fixed build pipelines or protocol descriptions. Direct Rust functions are simpler for a small
-set of fixed computations that does not need a language of its own.
+Each concrete program and interpretation also gives the compiler bounds to resolve and code to
+generate. Larger programs or more interpretations can increase compilation time and code size.
+Fixed build pipelines and protocol descriptions may justify that cost through reuse and extensibility.
+For a few fixed computations without that need, direct Rust functions are easier to maintain.
 
 ## Where to go next
 

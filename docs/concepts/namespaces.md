@@ -5,15 +5,16 @@ sidebar_position: 9
 
 # Namespaces
 
-Namespaces share wiring across contexts while leaving selected provider choices to each context.
-They are useful when related contexts repeat large parts of the same table. This page explains
-path-based routing, inherited bindings, and the rule that determines what can vary: a context can
-fill an unbound path, but it cannot replace an inherited binding.
+Namespaces give shared wiring a name that contexts can inherit. They organize component lookups
+under paths, allowing a shared table to bind the choices its contexts have in common and leave other
+destinations for each context to fill. The distinction matters: a context can fill an unbound path,
+but it cannot replace an inherited binding.
 
 ## Repeated wiring obscures the differences
 
-Separate wiring tables can repeat choices that are intended to stay together. These fragments
-assume the named components, providers, and context types are defined, with CGP's prelude imported:
+When production and test contexts differ in only a few choices, writing their tables separately
+repeats the choices they share. These fragments assume the named components, providers, and
+contexts are defined, with CGP's prelude imported:
 
 ```rust
 delegate_components! {
@@ -33,14 +34,15 @@ delegate_components! {
 }
 ```
 
-Only the greeter differs, but each table repeats the shared farewell and announcer choices.
-As the shared portion grows, maintaining the tables requires checking that those entries still
-agree. A namespace gives the shared wiring a name that contexts can inherit.
+Here the greeter changes, while the farewell and announcer entries must stay in agreement.
+A larger shared table would leave more entries to keep synchronized. Giving those entries a
+namespace lets both contexts inherit the common choices and state their differences separately.
 
 ## Lookups follow a path
 
-A namespace can register a route for a component while leaving the provider at its destination
-unspecified. This example registers the greeter under an application path:
+For a context to make its own choice, the namespace needs to route a component lookup without
+binding its final provider. Registering the greeter under an application path makes that distinction
+visible:
 
 ```rust
 cgp_namespace! { new AppNamespace {} }
@@ -65,13 +67,15 @@ delegate_components! {
 }
 ```
 
-The namespace supplies the route, and `App` supplies its destination binding. Rust resolves both
-at compile time. The context's entry must not overlap an entry the namespace already binds;
-joining a namespace does not give local entries priority over inherited ones.
+The context entry completes the route declared by `AppNamespace`, and Rust resolves both parts
+at compile time. This works because the destination was left unbound. Had the namespace already
+bound it, adding a local entry would create an overlap; joining a namespace gives local entries
+no priority over inherited ones.
 
-Paths also let wiring redirect a group of related lookups. A shared prefix can route a subsystem
-to another prefix, with the remaining path identifying its component and parameters. The
-[`cgp_namespace!` reference](/docs/reference/macros/cgp_namespace) specifies that redirection syntax.
+The route can also cover a group of components. Redirecting a shared prefix sends the subsystem's
+lookups to another prefix, while the rest of each path still identifies the component and its
+parameters. The [`cgp_namespace!` reference](/docs/reference/macros/cgp_namespace) gives the syntax
+for these grouped redirections.
 
 ## Bind shared choices and leave varying paths open
 
@@ -94,8 +98,9 @@ delegate_components! { App     { namespace AppDefaults; @app.GreeterComponent: G
 delegate_components! { TestApp { namespace AppDefaults; @app.GreeterComponent: GreetQuietly } }
 ```
 
-Both contexts inherit `SayGoodbye`, and each states its own greeting choice. A library can publish
-this shared configuration for applications to use without knowing those applications' context types.
+The farewell choice now comes from `AppDefaults`, and only the greeter differs in the two context
+tables. Because the shared configuration refers to components rather than particular application
+types, a library can publish it for contexts that downstream applications define later.
 
 ## A bound entry cannot be overridden
 
@@ -120,9 +125,9 @@ delegate_components! {
 }
 ```
 
-Rust rejects the overlapping implementations. Joining the namespace generates a forwarding
-implementation for its keys, and the direct `GreeterComponent` entry would implement the same
-lookup again. A child namespace redefining an inherited key has the same problem.
+Joining this namespace already generates a forwarding implementation for `GreeterComponent`.
+The local entry tries to implement the same lookup again, so Rust rejects the overlap. A child
+namespace that redefines an inherited key runs into the same conflict.
 
 Keep configurable paths unbound in the shared base. Returning to the path-based example, each
 configuration can bind the open greeter path in its own child namespace:
@@ -132,14 +137,16 @@ cgp_namespace! { new ProductionDefaults: AppDefaults { @app.GreeterComponent: Gr
 cgp_namespace! { new TestDefaults:       AppDefaults { @app.GreeterComponent: GreetQuietly } }
 ```
 
-`ProductionDefaults` and `TestDefaults` both inherit the shared farewell choice and supply different
-greeters. A context then joins the configuration it needs. Neither child replaces a parent binding.
+Both children inherit the farewell choice, while each fills the greeter path that `AppDefaults`
+left open. A context can then join the production or test configuration as appropriate. The shared
+base remains consistent because each child adds a binding where the parent supplied only a route.
 
 ## Presets and per-type dispatch
 
-A namespace can serve as a preset by grouping shared choices and exposing unbound paths for
-configuration. Inheritance adds the remaining choices. The distinction between a fixed binding
-and an open path determines which parts an application can customize.
+This inherit-and-complete arrangement also gives namespaces their role as presets. A library can
+bind a shared configuration while leaving paths open for the choices applications make. Child
+namespaces fill those paths to produce more specific configurations, subject to the same rule
+about inherited bindings.
 
 The `open` statement uses related path routing for a smaller task: selecting a provider for each
 type parameter of one component. This standalone fragment assumes an encoder component without a
@@ -155,10 +162,10 @@ delegate_components! {
 }
 ```
 
-`open` roots the route at `EncoderComponent`, and the context supplies entries beneath that root.
-It does not require a shared namespace. Once a component is registered through a namespace prefix,
-its entries must use that full prefixed route instead; opening the same component at its bare name
-does not reach them.
+Here `open` starts the lookup path at `EncoderComponent`, and the following entry chooses the
+provider for `String`. This uses path routing without requiring a shared namespace. If the
+component has a namespace prefix, however, its lookups already follow that prefixed route. Entries
+must use the full path, because opening its bare name does not reach them.
 
 ## What it costs
 
@@ -166,14 +173,15 @@ Binding a shared key commits every joining context to that choice. If a later co
 different provider, the namespace design must expose an unbound destination for it. Changing that
 design can affect existing contexts, so decide which choices vary before publishing the shared table.
 
-Inherited wiring takes more work to trace. An [aggregate provider](./aggregate-providers.md)
-lets the context list which components it delegates to a bundle. A namespace can supply those
-routes through its registration and parent chain, so finding the selected provider may require
-reading several tables.
+Inheritance also spreads the explanation of a lookup across tables. With an
+[aggregate provider](./aggregate-providers.md), the context lists the components it delegates to the
+bundle. With a namespace, registration and the parent chain can supply those routes, so a reader
+may need to follow several tables to find the selected provider.
 
-Path types can make diagnostics longer, and joining a namespace does not verify every inherited
-component's dependencies. Use separate [`check_components!`](/docs/reference/macros/check_components)
-assertions for the components a concrete context needs.
+Tracing a failure can involve those paths too, making diagnostics longer. Joining the namespace
+also leaves inherited dependencies unchecked until they are required. Separate
+[`check_components!`](/docs/reference/macros/check_components) assertions bring the components a
+concrete context needs into an explicit check.
 
 Small tables often remain clearer when written directly. Namespaces become useful when sharing a
 configuration or grouping routes reduces enough repetition to justify the inheritance and path

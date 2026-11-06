@@ -5,13 +5,15 @@ sidebar_position: 0
 
 # Concepts
 
-CGP lets a type choose reusable trait implementations through compile-time wiring. These pages
-explain why that design works, what you can build with it, and when its costs outweigh the benefits.
-They assume familiarity with Rust traits and generic bounds; you can read them without running code.
+CGP connects reusable trait implementations to the types that use them through compile-time wiring.
+Understanding that connection explains how providers obtain dependencies, how contexts choose shared
+types and values, and how implementations compose into larger operations. These pages develop those
+ideas alongside their costs. You can read them without running code, with familiarity with Rust
+traits and generic bounds as a starting point.
 
-The [tutorials](/docs/tutorials/hello) introduce CGP by building working programs. The
-[reference](/docs/reference/) specifies individual constructs and their syntax. Concepts connects
-those constructs to the problems they solve, with examples, tradeoffs, and links to both.
+If you want to learn by building a program, the [tutorials](/docs/tutorials/hello) introduce the
+same ideas through working code. Once you need the syntax or precise behavior of a construct, the
+[reference](/docs/reference/) supplies that detail.
 
 ## Where to start
 
@@ -24,16 +26,18 @@ Choose an entry point for the question you want answered:
 - **Should I use CGP?** [Modularity Hierarchy](./modularity-hierarchy.md) compares ordinary traits,
   blanket implementations, and wired components so you can choose what your problem requires.
 
-If traits and generic bounds are unfamiliar, start with the [tutorials](/docs/tutorials/hello).
-They introduce the ideas through working code and provide the background these explanations assume.
+If you need more background on traits or generic bounds, the [tutorials](/docs/tutorials/hello)
+introduce them in working programs before returning to these explanations.
 
 ## The ideas, grouped
 
-The sidebar follows a suggested reading order. The groups below let you find related ideas directly.
+The sidebar offers a reading order from the trait model to its applications. The groups below
+bring related pages together, so you can also follow a particular question across the section.
 
 ### Traits and implementation choices
 
-These pages explain the problem CGP addresses and the mechanism it uses:
+The trait pages begin with Rust's rules for choosing implementations, then explain how CGP builds
+on them and where that additional structure is useful:
 
 - [Bypassing coherence](./coherence.md): Why Rust restricts overlapping implementations and how
   separate provider types let alternative implementations coexist.
@@ -43,18 +47,19 @@ These pages explain the problem CGP addresses and the mechanism it uses:
 
 ### Dependencies
 
-A provider can state requirements that its callers do not need to carry. These pages explain the
-forms those requirements take:
+Once a caller depends on a consumer trait, the chosen provider can have further requirements of
+its own. The dependency pages explain how those requirements reach the context as traits, values,
+and types:
 
 - [Impl-side dependencies](./impl-side-dependencies.md): Traits, values, and types required by an
-  implementation
-  without appearing in its public interface.
+  implementation without appearing in its public interface.
 - [Implicit arguments](./implicit-arguments.md): Values read from context fields.
 - [Abstract types](./abstract-types.md): Types selected by a context and shared by generic code.
 
 ### Composition and wiring
 
-These pages explain how to combine implementations, share wiring, and verify the result:
+As implementations grow, wiring needs to express their relationships and remain practical to
+maintain. These pages explain composition, shared tables, and checks on the resulting choices:
 
 - [Checking your wiring](./check-traits.md): Why wiring errors can remain undetected until use, and
   how compile-time checks report missing requirements near the wiring.
@@ -64,7 +69,8 @@ These pages explain how to combine implementations, share wiring, and verify the
 
 ### Applications of the design
 
-These pages apply the same component model to errors, computations, and data:
+The same separation between interfaces, providers, and wiring supports more specialized designs.
+These pages follow it into errors, computations, and generic operations on data:
 
 - [Modular error handling](./modular-error-handling.md): Choosing an error type and the providers
   that construct errors and attach detail.
