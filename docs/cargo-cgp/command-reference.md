@@ -36,7 +36,7 @@ The tool has four commands. Two read your code, and two install and update the t
 | `check` | Runs `cargo check` and rewrites the CGP errors it recognizes | [Check](./check.md) |
 | `expand` | Prints the Rust one target's macros generate | [Expand](./expand.md) |
 | `setup` | Installs the pinned nightly and builds the driver | [Installation](./installation.md#with-cargo) |
-| `update` | Upgrades the tool to the newest published version | [Installation](./installation.md#updating) |
+| `update` | Upgrades the tool to the newest version its release channel allows | [Installation](./installation.md#updating) |
 
 ### `check`
 
@@ -65,10 +65,10 @@ cargo cgp expand [--item <PATH>] [CARGO RUSTC ARGS]...
 | `--item <PATH>` | Prints only one module or item instead of the whole target. The path is `::`-separated, names something inside the crate, and may start with `crate::`. A module gives its contents, a type its declaration and every impl written for it, and a trait its definition and every impl of it. |
 | `-h`, `--help` | Prints the help for `expand`, including `--item`. |
 
-Every other argument is passed to `cargo rustc`, so choosing the target, with `--lib`, `--bin`, `-p`, or
-`--features`, is cargo's job. A package with more than one target needs `--lib` or
-`--bin <NAME>`. Unless you pass `--profile`, the tool builds under cargo's `check` profile. The
-expansion goes to standard output, and everything else goes to standard error.
+Every other argument is passed to `cargo rustc`, so choosing the target, with `--lib`, `--bin`,
+`-p`, or `--features`, is cargo's job. A package with more than one target needs `--lib` or
+`--bin <NAME>`. Unless you pass `--profile` or `--release`, the tool builds under cargo's `check`
+profile. The expansion goes to standard output, and everything else goes to standard error.
 
 ### `setup`
 
