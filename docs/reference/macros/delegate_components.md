@@ -779,8 +779,8 @@ rather than anything about wiring. When no type of that name exists anywhere,
 component guessed from a consumer trait's name, or a type in an `@`-path nothing declares gets one
 of the [wiring-name codes](/docs/cargo-cgp/error-codes#wiring-keys-and-values-that-do-not-resolve),
 `[CGP-E040]` to `[CGP-E042]` or `[CGP-E044]`; a key the tool cannot settle, such as a misspelled
-component name, keeps the compiler's `E0425`. A value declared elsewhere but not imported keeps the
-compiler's message and its import suggestion.
+component name, keeps the compiler's `E0425`. A provider or a type declared elsewhere but not
+imported keeps the compiler's message and its import suggestion.
 
 **A bare `N` in a nested table's generic list declares a type parameter.** That list declares the
 inner struct, so `<const N: usize> ArrayKey<N>: UseDelegate<new ArrayTable<N> { … }>` gives
