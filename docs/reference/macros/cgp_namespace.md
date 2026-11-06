@@ -422,7 +422,7 @@ name:
 error: the namespace `A` cannot inherit from itself; name another namespace as its parent, or omit the parent
 ```
 
-A parent written through a longer path, such as `crate::A`, is not checked, since the macro cannot
+A parent written through any other path, such as `crate::A`, is not checked, since the macro cannot
 tell which item the path names, so that cycle reaches the compiler as an unconstrained-parameter
 error instead.
 
