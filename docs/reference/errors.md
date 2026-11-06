@@ -487,8 +487,8 @@ tool reports it as `[CGP-E021]`.
 **A related cycle sits at namespace definitions rather than at a use site.** Namespaces whose parent
 chain loops (`A: B` with `B: A`) fail *eagerly*, with an `E0275` on each `cgp_namespace!` block,
 because the cycle lives in the `where` clause of a generated impl the compiler checks on sight. A
-namespace that inherits itself (`A: A`) never reaches the compiler, because `cgp_namespace!` rejects it
-with ``the namespace `A` cannot inherit from itself``. Two things are unusual about the mutual cycle. Under
+namespace that inherits itself (`A: A`, or `A: self::A`) never reaches the compiler, because
+`cgp_namespace!` rejects it with ``the namespace `A` cannot inherit from itself``. Two things are unusual about the mutual cycle. Under
 `cargo cgp check`'s next-generation solver the code **compiles clean** and nothing is reported, the
 one class where the tool shows you *less* than plain `cargo check`. And the wiring is wrong
 regardless: break the loop so the parent chain forms a tree, factoring shared entries into a third

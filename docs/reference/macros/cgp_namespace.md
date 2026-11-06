@@ -414,12 +414,17 @@ error[E0275]: overflow evaluating the requirement `__Key__: A<__BComponents>`
 note: required for `__Key__` to implement `B<__AComponents>`
 ```
 
-A namespace inheriting *itself*, as in `new A: A {}`, or another instance of itself, as in
-`<T> new A<T>: A<u32> {}`, is rejected by the macro, with the caret on the parent's name:
+A namespace inheriting *itself*, as in `new A: A {}` or `new A: self::A {}`, or another instance of
+itself, as in `<T> new A<T>: A<u32> {}`, is rejected by the macro, with the caret on the parent's
+name:
 
 ```text
 error: the namespace `A` cannot inherit from itself; name another namespace as its parent, or omit the parent
 ```
+
+A parent written through a longer path, such as `crate::A`, is not checked, since the macro cannot
+tell which item the path names, so that cycle reaches the compiler as an unconstrained-parameter
+error instead.
 
 **A registered component with no provider bound anywhere still compiles.** If a `#[prefix]` routes a component
 into a namespace and nothing ever binds a provider at its path, the redirect lands on an empty slot and the
