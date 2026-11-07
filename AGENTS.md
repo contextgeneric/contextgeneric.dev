@@ -75,8 +75,8 @@ block to match. These are the actionable rules here:
 
 ## Build
 
-- Run `yarn start` for the dev server and `yarn build` for the static output, or the `node_modules`
-  binaries of the same names.
+- Install with `npm ci`, and run `npm start` for the dev server and `npm run build` for the static
+  output, or the `node_modules` binaries of the same names.
 - Check the build's exit status rather than its output.
 - Keep `onBrokenLinks` set to `throw`; fix every reference when a page moves.
 - Take a page's position from `sidebar_position` and its directory's `_category_.json`.
