@@ -69,9 +69,8 @@ git clone https://github.com/contextgeneric/contextgeneric.dev.git
 
 The layout matters in these places:
 
-- **The skills inside `cgp`.** The `cgp` repository includes two skills under `.claude/skills/` as
-  links to sibling checkouts: the CGP skill from `cgp-skills`, and the `point-first-writing` skill
-  from the knowledge base. Each link resolves only when its repository is cloned next to `cgp`.
+- **The skills your agent loads.** The CGP skill lives in `cgp-skills`. The `point-first-writing`
+  skill is managed locally with your agent's skills, not in the knowledge base.
 - **The `cargo-cgp` tests.** Its UI test suite compiles fixtures against a `cgp` checkout at
   `../cgp`. Work on its compiler driver may also consult the Rust compiler's source, which its
   `AGENTS.md` expects at `../external/rust`.
@@ -108,8 +107,8 @@ they can be reviewed together.
 
 The rules also ask your agent to load two skills before it works. The CGP skill lives in
 [`cgp-skills`](https://github.com/contextgeneric/cgp-skills), and the `point-first-writing` skill,
-which the rules name for any prose the agent writes, lives in the knowledge base's `skills/`
-directory. Make both available to your agent in the way it loads skills.
+which the rules name for any prose the agent writes, is managed locally with your agent's skills.
+Make both available to your agent in the way it loads skills.
 
 The rules also shape how the agent works with you. It stops and asks you when a choice has more than
 one defensible answer, such as an unclear intended behavior, rather than guessing. And it creates
