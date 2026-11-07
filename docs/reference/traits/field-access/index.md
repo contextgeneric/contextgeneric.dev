@@ -28,6 +28,10 @@ The **provider-side mirrors** are what a getter component is wired through, by w
 answers a getter. [`FieldGetter`](field_getter.md) is the read side and
 [`MutFieldGetter`](mut_field_getter.md) the write side.
 
+[`OptionAsRef`](option_as_ref.md) borrows the value inside an `Option` as a `&T`, which is the bound
+an `Option<&str>` implicit argument generates so the field may be a `String`, a `Cow<str>`, or a
+`Box<str>`.
+
 The **read-through forms** let generic code and getter providers read a field of a field without a
 lifetime bound on the intermediate type. [`MapField`](map_field.md) is the consumer side and
 [`FieldMapper`](field_mapper.md) the provider side, and
