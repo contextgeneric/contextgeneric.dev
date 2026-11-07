@@ -1,9 +1,10 @@
-# Website example code
+# Website example code: compiled counterparts of the site's snippets
 
 This crate holds compiled counterparts of the code shown on <https://contextgeneric.dev>. **It is not
 part of the website.** Nothing here is rendered, linked, or served, no page refers to it, and readers
 are not meant to find it. It exists for the agent revising a documentation page, so that the code on
-that page can be checked against something the compiler has agreed to rather than read and hoped for.
+that page can be checked against something the compiler has agreed to rather than read and assumed
+correct.
 
 Run it from this directory:
 
@@ -30,7 +31,7 @@ pulls in a module tree that mirrors that section's pages:
 
 **A standalone page gets a test binary of its own instead**, since there is no section tree for it to
 sit in: `tests/quickstart.rs` answers `docs/quickstart.md`. Use this form only for a page that has no
-section — a page inside one belongs in that section's module tree.
+section; a page inside one belongs in that section's module tree.
 
 One file per page, at the matching path with the file name in `snake_case`:
 
@@ -49,7 +50,7 @@ Within a covered section the mapping is mechanical: `docs/concepts/coherence.md`
 `tests/concepts/coherence.rs`, and `docs/concepts/consumer-and-provider-traits.md` by
 `tests/concepts/consumer_and_provider_traits.rs`.
 
-A page that shows no code gets no file — `docs/concepts/modularity-hierarchy.md` is prose and tables,
+A page that shows no code gets no file: `docs/concepts/modularity-hierarchy.md` is prose and tables,
 so it has no module here, and neither does a section index.
 
 Inside a file, **one module per heading of the page**, named after that heading and in the page's
@@ -68,14 +69,14 @@ correct, and confusing an expected difference for a defect wastes more time than
 
 **Expected, and not a defect.** A body the page elides as `/* ... */` is filled in here, and every
 such fill-in carries a comment saying the page elided it. Imports the page omits are present.
-Types the page names without declaring — a provider it has not introduced yet, a context it
-introduces two sections later — are declared. `check_components!` assertions are added for every
+Types the page names without declaring, such as a provider it has not introduced yet or a context it
+introduces two sections later, are declared. `check_components!` assertions are added for every
 wired context, since that is what proves the wiring resolves rather than merely parses, and pages do
 not show them. Tests are added where a page quotes an output or makes a claim worth pinning.
 
 **A defect, in one or the other.** Anything else: a signature, a trait bound, an attribute, a derive,
 a wiring line, a provider name, an item that exists on one side and not the other. When they
-disagree, find out which is wrong rather than assuming — the crate is checked by the compiler and the
+disagree, find out which is wrong rather than assuming: the crate is checked by the compiler and the
 page is not, so the page is the likelier culprit, but a stale file here is worse than no file.
 
 ## Code a page deliberately rejects
@@ -87,7 +88,7 @@ that it fails. The harness is `tests/compile_fail_tests.rs`.
 
 Each fixture is a **complete program** whose only fault is the intended one: the elided bodies are
 filled in, an item-only snippet carries a trailing `fn main() {}`, and a snippet with statements is
-wrapped in `fn main() { ... }` — the way rustdoc wraps the doctest these were carried as before.
+wrapped in `fn main() { ... }`, the way rustdoc wraps the doctest these were carried as before.
 
 trybuild compares each fixture's output against a sibling `.stderr` file. **What that genuinely guards
 is the regression that matters: a snippet the page calls rejected that the compiler has started
@@ -106,7 +107,7 @@ writes the new path in.
 ## Generated code
 
 Two of these pages show what a macro *generates*, in simplified form. A hand-rolled rendering of such
-a listing — as `concepts::consumer_and_provider_traits::how_a_call_finds_its_provider` carries — is a
+a listing, as `concepts::consumer_and_provider_traits::how_a_call_finds_its_provider` carries, is a
 weaker check than the rest of this crate: it shows the listing is structurally sound, not that its
 text is current. **The authority on what a macro emits is `cargo cgp expand`**, run against the test
 target the example lives in (for example `cargo cgp expand --test concepts_tests --item …`). Check the
