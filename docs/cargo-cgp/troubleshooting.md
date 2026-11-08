@@ -7,9 +7,9 @@ description: 'Match an error from cargo-cgp itself to its cause and fix: the set
 
 # Troubleshooting
 
-If [`cargo-cgp`](./index.md) will not start or behaves unexpectedly, begin with the symptom index
-below. For a tool that runs but reports an unfamiliar CGP error, [Reading the output](./reading-output.md)
-explains the diagnostic instead.
+If [`cargo-cgp`](./index.md), the check command for Context-Generic Programming projects, will not
+start or behaves unexpectedly, begin with the symptom index below. For a tool that runs but reports
+an unfamiliar CGP error, [Reading the output](./reading-output.md) explains the diagnostic instead.
 
 Many startup failures involve a mismatch between the front end, `cargo-cgp-driver`, and the pinned
 nightly. The front end normally finds the driver beside itself, and the driver loads that nightly's
@@ -98,7 +98,7 @@ loader's message so you can see which library could not be loaded:
 ```text
 error: the cargo-cgp-driver at /home/you/.cargo/bin/cargo-cgp-driver (beside cargo-cgp) could not run under toolchain `nightly-2026-11-05` (it was likely built against a different nightly):
 
-  /home/you/.cargo/bin/cargo-cgp-driver: error while loading shared libraries: librustc_driver-1a6e695c833ebcd1.so: cannot open shared object file: No such file or directory
+  /home/you/.cargo/bin/cargo-cgp-driver: error while loading shared libraries: librustc_driver-a1ed262f84b24882.so: cannot open shared object file: No such file or directory
 
 help: run `cargo cgp setup`
 ```
@@ -141,7 +141,7 @@ This failure comes from the operating system's loader, before the driver's own c
 unlike any other message from the tool:
 
 ```text
-cargo-cgp-driver: error while loading shared libraries: librustc_driver-1a6e695c833ebcd1.so: cannot open shared object file: No such file or directory
+cargo-cgp-driver: error while loading shared libraries: librustc_driver-a1ed262f84b24882.so: cannot open shared object file: No such file or directory
 ```
 
 The driver needs the exact `librustc_driver-<hash>.so` it linked against when built. Your hash may
@@ -166,7 +166,7 @@ may try to start the driver under another toolchain:
 ```text
 error: process didn't exit successfully: `…/cargo-cgp-driver …/stable-…/bin/rustc -vV` (exit status: 127)
 --- stderr
-…/cargo-cgp-driver: error while loading shared libraries: librustc_driver-1a6e695c833ebcd1.so: cannot open shared object file: No such file or directory
+…/cargo-cgp-driver: error while loading shared libraries: librustc_driver-a1ed262f84b24882.so: cannot open shared object file: No such file or directory
 ```
 
 In that case, unset `CARGO_CGP_NO_MANAGE` so the tool switches to the pinned nightly itself, or make that nightly
