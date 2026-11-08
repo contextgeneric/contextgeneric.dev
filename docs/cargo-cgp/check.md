@@ -95,6 +95,7 @@ error[E0599]: [CGP-E001] missing field `height` on `Rectangle`
    = help: add the field `height: f64` to `Rectangle`
 
 For more information about this error, try `rustc --explain E0599`.
+error: could not compile `area-demo` (lib) due to 1 previous error
 ```
 
 Read the tree to connect the suggested fix to the failing call. `CanCalculateArea` is required,
@@ -139,6 +140,7 @@ error[E0277]: [CGP-E001] missing field `height` on `Rectangle`
    = help: add the field `height: f64` to `Rectangle`
 
 For more information about this error, try `rustc --explain E0277`.
+error: could not compile `area-demo` (lib) due to 1 previous error
 ```
 
 That explicit check helps ordinary `cargo check` expose the missing requirement too. Its field
