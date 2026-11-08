@@ -12,8 +12,8 @@ whichever it has without forcing every implementor to one or the other.
 
 ## Overview
 
-`MRef<'a, T>` lets one getter signature serve both the context that already stores a value and the
-context that must produce one. Here a **context** is the type the method runs on, which supplies the
+In [Context-Generic Programming (CGP)](/docs/), `MRef<'a, T>` lets one getter signature serve both
+the context that already stores a value and the context that must produce one. Here a **context** is the type the method runs on, which supplies the
 values it needs as its fields. A getter that returns `&'a T` forces every context to keep a `T` it
 can lend. A getter that returns `T` forces every context to give up ownership, and to clone even
 when it could share a reference. `MRef<'a, T>` avoids both constraints by being either case at run

@@ -12,7 +12,8 @@ A number lifted into a type, so a tuple-struct field can be named by its positio
 
 ## Overview
 
-`Index<const I: usize>` encodes a `usize` at the type level. CGP's getter mechanism keys every field by a
+In [Context-Generic Programming (CGP)](/docs/), `Index<const I: usize>` encodes a `usize` at the
+type level. CGP's getter mechanism keys every field by a
 *type* tag, but a tuple-struct field has only a position and lacks a string name to turn into a
 [`Symbol!`](../macros/symbol.md). So the position itself becomes a type, and positional fields can use the
 same trait-resolution machinery as named fields. `Index<I>` is that type. It carries a `usize` as a const

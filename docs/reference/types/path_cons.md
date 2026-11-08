@@ -12,7 +12,8 @@ lookup can reach an entry several layers deep.
 
 ## Overview
 
-`PathCons<Head, Tail>` expresses a *route* through nested delegation tables as a single type. A bare
+In [Context-Generic Programming (CGP)](/docs/), `PathCons<Head, Tail>` expresses a *route* through
+nested delegation tables as a single type. A bare
 component name picks one entry out of a context's table. Here the **context** is the type the
 implementation runs against, and its table records which provider it uses for each component.
 Sometimes the entry a lookup wants sits behind a layer of indirection: inside a namespace, behind a

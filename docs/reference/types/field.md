@@ -12,7 +12,8 @@ described one entry at a time without naming the concrete type.
 
 ## Overview
 
-`Field<Tag, Value>` carries a field's *name* and its *value* together in one type. A bare
+In [Context-Generic Programming (CGP)](/docs/), `Field<Tag, Value>` carries a field's *name* and its
+*value* together in one type. A bare
 [`Product!`](../macros/product.md) list such as `Product![String, u8]` records the value types and their
 order, but it cannot tell `name: String` from any other `String`. Wrapping each element in a `Field`,
 as `Field<Symbol!("name"), String>`, attaches the name as a type, so a struct's [shape](/docs/reference/glossary#shape) describes itself.

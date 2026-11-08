@@ -12,8 +12,8 @@ time.
 
 ## Overview
 
-`Cons<Head, Tail>` represents an ordered sequence of types as a single type, so that generic code can
-reason about a collection of fields. A Rust tuple holds several things at once, but generic code cannot
+In [Context-Generic Programming (CGP)](/docs/), `Cons<Head, Tail>` represents an ordered sequence of
+types as a single type, so that generic code can reason about a collection of fields. A Rust tuple holds several things at once, but generic code cannot
 take it apart element by element. A recursive list allows that. `Cons` pairs the
 first element with the rest of the list, and [`Nil`](nil.md) marks the end. Together they form an
 *anonymous product type*: a record-shaped value that code can walk without knowing the concrete struct it

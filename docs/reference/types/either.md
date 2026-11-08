@@ -12,8 +12,8 @@ time.
 
 ## Overview
 
-`Either<Head, Tail>` represents a choice among several types as a single type, so that generic code can
-reason about an enum's variants. The [product list](cons.md) holds a value for *every* element at once.
+In [Context-Generic Programming (CGP)](/docs/), `Either<Head, Tail>` represents a choice among
+several types as a single type, so that generic code can reason about an enum's variants. The [product list](cons.md) holds a value for *every* element at once.
 The sum list holds a value for exactly *one* of its branches, which makes it a tagged union, or
 *anonymous sum type*. `Either` branches at each step, and [`Void`](void.md) marks the end. Together they
 form a coproduct that code can walk without knowing the concrete enum it came from.

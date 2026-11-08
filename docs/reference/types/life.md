@@ -12,8 +12,8 @@ types.
 
 ## Overview
 
-`Life<'a>` turns the lifetime `'a` into a type, because CGP's wiring is parameterized by *types* and a CGP
-trait may carry a lifetime of its own. The marker that records a provider's dependencies,
+In [Context-Generic Programming (CGP)](/docs/), `Life<'a>` turns the lifetime `'a` into a type,
+because CGP's wiring is parameterized by *types* and a CGP trait may carry a lifetime of its own. The marker that records a provider's dependencies,
 [`IsProviderFor`](../traits/wiring/is_provider_for.md), takes a tuple of the trait's generic parameters as
 one type argument, so that the compiler can match a provider against the exact instantiation asked for. A
 lifetime cannot sit in that tuple, because a tuple is a type and its members must be types. So a lifetime

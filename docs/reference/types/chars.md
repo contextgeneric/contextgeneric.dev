@@ -12,8 +12,8 @@ the name can be a type.
 
 ## Overview
 
-`Chars<const CHAR: char, Tail>` encodes a string as a type, so that a field name can take part in trait
-resolution. CGP keys field access by a tag type. To read a field called `name`, something must stand for
+In [Context-Generic Programming (CGP)](/docs/), `Chars<const CHAR: char, Tail>` encodes a string as
+a type, so that a field name can take part in trait resolution. CGP keys field access by a tag type. To read a field called `name`, something must stand for
 the string `"name"` at the type level, so that the compiler can tell one
 [`HasField`](../traits/field-access/has_field.md) impl from another by the tag alone. A `Chars` chain
 turns the string into a type, and a `Symbol` that wraps the chain is the tag itself.

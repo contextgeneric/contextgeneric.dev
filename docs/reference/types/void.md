@@ -12,7 +12,7 @@ complete variant match end without a runtime branch.
 
 ## Overview
 
-`Void` marks the end of a sum. Unlike the [`Nil`](nil.md) that ends the other lists, it is uninhabited: a
+In [Context-Generic Programming (CGP)](/docs/), `Void` marks the end of a sum. Unlike the [`Nil`](nil.md) that ends the other lists, it is uninhabited: a
 value of `Void` cannot exist. A record, a string, or a path can each be empty and still exist, but an
 empty *choice* cannot, so the natural terminator for the sum list is a type without values.
 

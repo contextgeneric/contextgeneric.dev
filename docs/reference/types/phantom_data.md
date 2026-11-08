@@ -13,7 +13,8 @@ give a function a type instead of data.
 
 ## Overview
 
-`PhantomData` is a standard-library type, not a CGP type. It comes from
+In [Context-Generic Programming (CGP)](/docs/), `PhantomData` is a standard-library type, not a CGP
+type. It comes from
 [`core::marker`](https://doc.rust-lang.org/std/marker/struct.PhantomData.html). It has a page here because
 it appears throughout CGP code and does one specific job. A reader who has only seen it as noise in a
 struct definition will misread much of what CGP generates.

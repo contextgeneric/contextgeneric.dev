@@ -11,7 +11,8 @@ The end marker of the product, string, and path lists: an empty, constructible l
 
 ## Overview
 
-`Nil` marks the end of a right-nested type-level list. Where a [`Cons`](cons.md) cell pairs a head with
+In [Context-Generic Programming (CGP)](/docs/), `Nil` marks the end of a right-nested type-level
+list. Where a [`Cons`](cons.md) cell pairs a head with
 the rest of the list, `Nil` is the rest when nothing is left, so a list of any length is a `Cons` chain
 that finishes in `Nil`. On its own, `Nil` is the empty list.
 
