@@ -1,4 +1,5 @@
 ---
+title: 'Connect a method call to the provider it selects'
 sidebar_label: 'Consumer and provider traits'
 sidebar_position: 2
 description: 'How CGP splits one trait into a consumer trait for callers and a provider trait for implementations, and how wiring connects a call to its provider.'

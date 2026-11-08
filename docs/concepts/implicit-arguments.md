@@ -1,4 +1,5 @@
 ---
+title: 'Read context values without extra parameters'
 sidebar_label: 'Implicit arguments'
 sidebar_position: 4
 description: 'How implicit arguments read context fields through function parameters, how the declared type controls borrowing and cloning, and when a getter trait is the better fit.'

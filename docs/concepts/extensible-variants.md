@@ -1,4 +1,5 @@
 ---
+title: 'Handle every enum variant without a wildcard'
 sidebar_label: 'Extensible variants'
 sidebar_position: 14
 description: 'How an enum variant list becomes a sum type, how extraction proves every variant is handled without a wildcard, and how one handler serves several enums.'

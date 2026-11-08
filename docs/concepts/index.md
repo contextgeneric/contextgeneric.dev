@@ -1,4 +1,5 @@
 ---
+title: 'CGP concepts, explained with their costs'
 sidebar_label: 'Overview'
 sidebar_position: 0
 description: 'The concept pages of Context-Generic Programming: coherence, the consumer and provider split, dependencies, composition, and the applied designs, each with its cost.'

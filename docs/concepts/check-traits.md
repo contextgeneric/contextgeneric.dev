@@ -1,4 +1,5 @@
 ---
+title: 'Check wiring where the choice is written'
 sidebar_label: 'Checking your wiring'
 sidebar_position: 6
 description: 'How check traits and check_components! verify a context wiring beside the table, what the raw and rewritten diagnostics show, and what a check does not prove.'

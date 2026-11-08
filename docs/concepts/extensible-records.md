@@ -1,4 +1,5 @@
 ---
+title: 'Build a struct field by field, checked at compile time'
 sidebar_label: 'Extensible records'
 sidebar_position: 13
 description: 'How a struct field list becomes a type, how a builder records which fields are present, and how independent providers assemble a record the compiler checks.'

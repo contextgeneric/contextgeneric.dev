@@ -1,4 +1,5 @@
 ---
+title: 'Choose one error type for the whole context'
 sidebar_label: 'Modular error handling'
 sidebar_position: 10
 description: 'How a context chooses one error type and the providers that raise and wrap it, so reusable code reports failures without fixing their representation.'

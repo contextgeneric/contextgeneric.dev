@@ -1,4 +1,5 @@
 ---
+title: 'Choose how a pipeline continues on a result'
 sidebar_label: 'Monadic handlers'
 sidebar_position: 12
 description: 'How monadic handlers put a pipeline continuation rule in a type, the err, ok, and identity monads, and how a monad transformer stacks two result layers.'

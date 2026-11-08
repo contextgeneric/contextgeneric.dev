@@ -1,4 +1,5 @@
 ---
+title: 'Keep provider dependencies out of the caller interface'
 sidebar_label: 'Impl-side dependencies'
 sidebar_position: 3
 description: 'How a provider keeps its trait, value, and type requirements out of the caller interface, and how CGP checks them when a context selects the provider.'

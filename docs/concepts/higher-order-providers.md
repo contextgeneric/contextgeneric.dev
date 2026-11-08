@@ -1,4 +1,5 @@
 ---
+title: 'Compose providers that take other providers'
 sidebar_label: 'Higher-order providers'
 sidebar_position: 7
 description: 'How a provider takes another provider as a parameter, so a wrapper such as scaling reuses one body with different inner calculations.'
