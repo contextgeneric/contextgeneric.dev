@@ -54,11 +54,17 @@ block to match. These are the actionable rules here:
   stale parts first.
 - Put a page's code in the website repository's `example-code/` crate, except a Projects page, whose
   code is checked against the project's repository.
+- Run the `example-code` tests after changing a page's code, as
+  [example-code/README.md](example-code/README.md) describes.
 - Use the knowledge base's `releases/` directory to date an unfamiliar construct.
 
 ## Public prose
 
 - Read the communication strategy before outlining or drafting a page.
+- Name Context-Generic Programming in each page's prose and relate a short form of the tag line to its
+  content, following the knowledge base's
+  [naming rule](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/identity.md#the-name-and-the-tag-line-on-every-page);
+  the skill pages and the published blog posts are exempt.
 - Never publish an invented benchmark, adoption figure, or quotation.
 - Never disparage another crate, language, or community; say where a simpler tool is the better choice.
 - Concede the learning curve, the verbose diagnostics, and the young ecosystem where a reader looks for
