@@ -7,14 +7,14 @@ description: "How CGP expresses field access, record building, and variant opera
 # Row polymorphism, structural typing, and extensible data types
 
 CGP gives Rust structs and enums selected forms of structural reuse through derived field lists and
-trait bounds. It is a language extension built as a [stable Rust library](/docs/) , with pluggable
+trait bounds. It is a language extension built as a [stable Rust library](/docs/), with pluggable
 implementations behind ordinary Rust traits. This page compares its field access, builders, and
 variant operations with PureScript rows and OCaml polymorphic variants.
 
 ## In your terms
 
 A **context** is the type a CGP method runs on. The examples here operate directly on records and
-enums, so their contexts are [value contexts](/docs/reference/glossary#value-context) . Field access
+enums, so their contexts are [value contexts](/docs/reference/glossary#value-context). Field access
 uses derived traits; component-based operations can also use wiring to select providers.
 
 The row operations map onto CGP constructs as follows:
@@ -48,7 +48,7 @@ nominal identities even when their fields match; CGP adds structural operations 
 Row polymorphism uses a *row variable* to describe the fields a function does not name. The function
 accepts any record with its required fields, while the variable carries the remaining fields
 ([Wikipedia, *Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism)). In PureScript a
-*row* is "an unordered collection of named types", of kind `Row k` , and a record is a row wrapped
+*row* is "an unordered collection of named types", of kind `Row k`, and a record is a row wrapped
 by `Record` ([PureScript language
 reference](https://github.com/purescript/documentation/blob/master/language/Types.md)). An open row
 adds a tail variable after a pipe:
@@ -63,7 +63,7 @@ fullName { firstName: "Ada", lastName: "Lovelace" }              -- ok
 fullName { firstName: "Ada", lastName: "Lovelace", age: 36 }     -- also ok; age flows through `r`
 ```
 
-PureScript checks row operations through the `Prim.Row` classes `Cons` , `Union` , `Nub` , and
+PureScript checks row operations through the `Prim.Row` classes `Cons`, `Union`, `Nub`, and
 `Lacks` ([Pursuit, *Prim.Row*](https://pursuit.purescript.org/builtins/docs/Prim.Row)). PureScript's
 design descends from Wand's row variables (1987), Rémy's principal types for rows (1989), and
 Leijen's scoped labels (2005), which PureScript adopts directly ([Leijen, *Extensible records with
@@ -116,7 +116,7 @@ build values and containment to read them; variants reverse those roles ([Morris
 The evidence for these relationships can also implement the operation. Evidence that a record
 contains a field supplies the code that reads it. This connection matters for CGP because its trait
 implementations both satisfy constraints and perform field access or conversion. Rows also describe
-effect sets, as in [Koka](https://arxiv.org/pdf/1406.2061) ; the
+effect sets, as in [Koka](https://arxiv.org/pdf/1406.2061); the
 [algebraic effects](./algebraic-effects.md) page covers that use.
 
 ## How CGP expresses it
@@ -128,7 +128,7 @@ field and variant requirements that row predicates express in a row system.
 
 `#[derive(HasFields)]` gives a struct the type-level equivalent of a closed row, with one
 `Field<Tag, Value>` entry per field, each tagged by a
-[type-level string](/docs/reference/glossary#type-level-string) :
+[type-level string](/docs/reference/glossary#type-level-string):
 
 ```rust
 #[derive(HasField, HasFields)]
@@ -145,7 +145,7 @@ pub struct Person {
 ```
 
 PureScript's `fullName` names its required fields with an open row. A CGP function names them as
-[implicit arguments](/docs/concepts/implicit-arguments) , and any context with those fields
+[implicit arguments](/docs/concepts/implicit-arguments), and any context with those fields
 satisfies it:
 
 ```rust
@@ -195,9 +195,9 @@ row. The [Extensible records](/docs/concepts/extensible-records) page develops t
 CGP tracks field presence with a flag per field, as Rémy's presence polymorphism does. The flags are
 [`MapType`](/docs/reference/traits/type-level/map_type) markers on a partial record: `IsPresent`
 stores the value, `IsNothing` stores nothing, and the
-[optional-field extensions](/docs/reference/traits/optional/) add `IsOptional` . A builder starts
-with every field marked `IsNothing` , and each step changes one marker. `FinalizeBuild` is
-implemented only when every marker is `IsPresent` . On the variant side, `IsVoid` marks a case that
+[optional-field extensions](/docs/reference/traits/optional/) add `IsOptional`. A builder starts
+with every field marked `IsNothing`, and each step changes one marker. `FinalizeBuild` is
+implemented only when every marker is `IsPresent`. On the variant side, `IsVoid` marks a case that
 extraction has ruled out.
 
 ### Widening, narrowing, and handling variants {#an-enum-is-a-row-typed-sum-upcast-and-downcast-are-injection-and-branching}
@@ -322,7 +322,7 @@ These pages develop the patterns and the neighbouring comparisons:
 ## Sources
 
 The PureScript snippet was compiled with PureScript 0.15.15 against the prelude and the OCaml
-snippet with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0` .
+snippet with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0`.
 
 - [Wikipedia, *Structural type system*](https://en.wikipedia.org/wiki/Structural_type_system), [*Nominal type system*](https://en.wikipedia.org/wiki/Nominal_type_system), and [*Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism): the definitions and their contrast.
 - [PureScript language reference, *Types*](https://github.com/purescript/documentation/blob/master/language/Types.md), [Pursuit, *Prim*](https://pursuit.purescript.org/builtins/docs/Prim), and [*Prim.Row*](https://pursuit.purescript.org/builtins/docs/Prim.Row): rows, records, open-row syntax, and the row type classes.

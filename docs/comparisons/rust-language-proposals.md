@@ -7,7 +7,7 @@ description: 'How CGP compares with Rust proposals for specialization, named imp
 # Rust's own proposals
 
 CGP offers explicit implementation selection and access to context values through a
-[stable Rust library](/docs/) . It is a language extension with pluggable implementations behind
+[stable Rust library](/docs/). It is a language extension with pluggable implementations behind
 ordinary Rust traits. This page compares those choices with specialization, named impls, dictionary
 passing, and contexts and capabilities, including what each language proposal can express beyond
 CGP.
@@ -40,13 +40,13 @@ Reference](https://doc.rust-lang.org/reference/items/implementations.html);
 [RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html) ).
 
 These rules keep trait selection consistent across a program. For example, operations on a
-`HashMap<K, V>` must agree on the hashing and equality implementations for `K` . The
+`HashMap<K, V>` must agree on the hashing and equality implementations for `K`. The
 [type classes](./type-classes.md) page explains the broader reasons for coherence.
 
 ### Specialization
 
 RFC 1210 proposes letting two impls overlap when one is *strictly more specific*, with the compiler
-choosing the more specific one. Its own example refines a blanket `AddAssign` :
+choosing the more specific one. Its own example refines a blanket `AddAssign`:
 
 ```rust
 impl<R, T: Add<R> + Clone> AddAssign<R> for T {
@@ -62,7 +62,7 @@ The `default` keyword marks an item that a more specific impl may override ([RFC
 unstable, with soundness problems involving lifetime information that is erased before code
 generation. The standard library uses the more restricted `min_specialization` feature internally
 ([tracking issue #31844](https://github.com/rust-lang/rust/issues/31844)). On a stable toolchain the
-snippet above fails with `E0658` .
+snippet above fails with `E0658`.
 
 Specialization cannot choose between overlapping impls when neither is more specific. For example,
 `T: Display` and `T: AsRef<[u8]>` describe intersecting sets of types, but neither set contains the
@@ -172,7 +172,7 @@ A CGP provider corresponds to an impl named with `impl Name<T> = Trait<T> for T`
 Each implementation has its own zero-sized type. Overlapping implementations of one trait can
 therefore coexist, because each implements the provider trait for its own type. The encoder pair
 from the [Introduction](/docs/) shows this. Rust rejects two blanket impls of one trait for
-`T: Display` and `T: AsRef<[u8]>` , since `String` satisfies both. Written as providers, both
+`T: Display` and `T: AsRef<[u8]>`, since `String` satisfies both. Written as providers, both
 compile:
 
 ```rust
@@ -196,15 +196,15 @@ impl<Value: AsRef<[u8]>> Encoder<Value> {
 }
 ```
 
-`EncodeWithDisplay` and `EncodeBytes` play the role of named impls. Both accept `String` , and a
+`EncodeWithDisplay` and `EncodeBytes` play the role of named impls. Both accept `String`, and a
 context selects one. A downstream crate can define another provider even if it owns neither the
 component nor the value type, because it implements the provider trait for its own marker type.
 Rust's coherence rules still apply to those generated impls.
 
-The encoded value is the `Value` parameter rather than `Self` , so `Self` can stand for an
+The encoded value is the `Value` parameter rather than `Self`, so `Self` can stand for an
 application. The contexts below are **[environmental
 contexts](/docs/reference/glossary#environmental-context)**, and the component is
-[parameter-targeted](/docs/reference/glossary#parameter-targeted-component) .
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
 
 ### Selecting implementations on a context {#an-incoherent-bound-resolves-through-the-context-not-at-each-call-site}
 
@@ -231,7 +231,7 @@ delegate_components! {
 }
 ```
 
-Every call through `ApiServer` uses its selected provider for `String` ; `Firmware` has its own
+Every call through `ApiServer` uses its selected provider for `String`; `Firmware` has its own
 choice. This gives consistency per context, component, and dispatch key. Boxy's sketch permits
 explicit choices at calls, while Cairo can infer them from scope. The
 [type classes](./type-classes.md) page compares these choices with Haskell's instance resolution.
@@ -239,8 +239,8 @@ explicit choices at calls, while Cairo can infer them from scope. The
 ### Passing providers as type parameters {#passing-an-impl-explicitly-is-a-higher-order-provider}
 
 Where the proposals and Cairo let a caller pass an impl as a parameter, CGP uses
-[higher-order providers](/docs/concepts/higher-order-providers) . A provider takes another provider
-as a type parameter and binds it with `#[use_provider]` , which corresponds to Cairo's
+[higher-order providers](/docs/concepts/higher-order-providers). A provider takes another provider
+as a type parameter and binds it with `#[use_provider]`, which corresponds to Cairo's
 `impl TDrop: Drop<T>` written as a Rust generic:
 
 ```rust
@@ -255,11 +255,11 @@ impl<InnerCalculator> AreaCalculator {
 
 Wiring `AreaCalculatorComponent: ScaledArea<RectangleArea>` selects both the wrapper and its inner
 implementation. The example assumes an `AreaCalculator` component and a `RectangleArea` provider
-that reads `width` and `height` . A `ScaledRectangle` context would supply those fields plus
-`scale_factor` . It is a **value context** because the measured value carries the wiring.
+that reads `width` and `height`. A `ScaledRectangle` context would supply those fields plus
+`scale_factor`. It is a **value context** because the measured value carries the wiring.
 
 Higher-order providers let a wrapper fix or parameterize its inner choice. An inner parameter can
-also default to [`UseContext`](/docs/reference/providers/use_context) , which delegates that step
+also default to [`UseContext`](/docs/reference/providers/use_context), which delegates that step
 back to the context's selected implementation.
 
 ### A `with` clause becomes a context field
@@ -267,7 +267,7 @@ back to the context's selected implementation.
 Mandry's `with arena: &BasicArena` clause declares a value the function needs from its environment.
 CGP expresses an environmental dependency as an
 [implicit argument](/docs/concepts/implicit-arguments) read from the context. This fragment assumes
-a `Greeter` component whose method returns a `String` :
+a `Greeter` component whose method returns a `String`:
 
 ```rust
 #[cgp_impl(new GreetHello)]
@@ -379,7 +379,7 @@ These pages develop the constructs and the neighbouring comparisons:
 
 The Rust snippets from the proposals are quoted from their authors' posts and the Cairo book. The
 specialization snippet was compiled against a stable toolchain to confirm it is rejected with
-`E0658` ; the CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!`
+`E0658`; the CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!`
 assertion per wired context.
 
 - [Rust Reference, *Implementations*](https://doc.rust-lang.org/reference/items/implementations.html) and [RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html): the orphan and overlap rules.

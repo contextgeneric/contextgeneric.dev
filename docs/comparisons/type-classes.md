@@ -7,7 +7,7 @@ description: 'How CGP provider selection compares with type classes, coherence, 
 # Type classes
 
 CGP lets each context select named implementations at compile time. It is a language extension built
-as a [stable Rust library](/docs/) , with ordinary Rust traits as its caller interfaces. This page
+as a [stable Rust library](/docs/), with ordinary Rust traits as its caller interfaces. This page
 compares explicit wiring with type-class resolution in Haskell, Agda, and Lean, and explains when a
 single canonical implementation is the simpler choice.
 
@@ -62,7 +62,7 @@ from enforcing uniqueness across every separately compiled part of a program ([Y
 confluence, coherence and global
 uniqueness*](https://blog.ezyang.com/2014/07/type-classes-confluence-coherence-global-uniqueness/)).
 
-Rust enforces coherence through overlap and [orphan rules](/docs/reference/glossary#orphan-rule) .
+Rust enforces coherence through overlap and [orphan rules](/docs/reference/glossary#orphan-rule).
 An impl needs a local trait or a qualifying local type, subject to restrictions on uncovered type
 parameters ([RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)). GHC
 permits orphan instances and can warn about them. CGP works within Rust's rules; the
@@ -194,12 +194,12 @@ delegate_components! { Rectangle { AreaCalculatorComponent: RectangleArea } }
 ```
 
 Separate provider types let alternative implementations coexist under Rust's coherence rules. The
-wiring selects `RectangleArea` for `Rectangle` ; another provider could implement the same provider
+wiring selects `RectangleArea` for `Rectangle`; another provider could implement the same provider
 trait on its own marker type.
 
-This example still makes one choice for `Rectangle` . It is a
-[value context](/docs/reference/glossary#value-context) : the measured type also carries the wiring,
-and the component is [self-targeted](/docs/reference/glossary#self-targeted-component) . Independent
+This example still makes one choice for `Rectangle`. It is a
+[value context](/docs/reference/glossary#value-context): the measured type also carries the wiring,
+and the component is [self-targeted](/docs/reference/glossary#self-targeted-component). Independent
 choices for the same value type require moving selection to separate contexts, as the next example
 does.
 
@@ -241,10 +241,10 @@ These providers accept overlapping inputs: `String` supports display and byte ac
 distinguish those choices; constraints alone do not make one instance more specific. CGP keeps the
 choices separate through provider types and records the selection in wiring.
 
-The encoded value is the `Value` parameter rather than `Self` , so the contexts that wire these
+The encoded value is the `Value` parameter rather than `Self`, so the contexts that wire these
 providers are **[environmental contexts](/docs/reference/glossary#environmental-context)**, types
 that stand for an application. The component is
-[parameter-targeted](/docs/reference/glossary#parameter-targeted-component) .
+[parameter-targeted](/docs/reference/glossary#parameter-targeted-component).
 
 ### Selecting a provider per context and value type {#incoherent-choices-made-explicit-and-local}
 
@@ -274,14 +274,14 @@ delegate_components! {
 `AppA` encodes `Vec<u8>` as hexadecimal, while `AppB` returns its bytes directly. Each choice is
 fixed for the context, component, and value type. This makes the difference explicit without
 relaxing Rust's coherence rules. The `open` statement and `@` paths are explained in
-[`delegate_components!`](/docs/reference/macros/delegate_components) .
+[`delegate_components!`](/docs/reference/macros/delegate_components).
 
 ### Providers avoid orphan conflicts and newtypes
 
 A downstream crate can define a provider for a foreign component and value type by owning the
 provider's marker type. This satisfies the orphan rule without wrapping the value in a newtype.
 Alternative behaviors get their own provider types, rather than wrappers such as Haskell's `Sum` and
-`Product` . The [Bypassing coherence](/docs/concepts/coherence) page develops this pattern.
+`Product`. The [Bypassing coherence](/docs/concepts/coherence) page develops this pattern.
 
 ## What each approach costs
 
@@ -314,7 +314,7 @@ approaches.
 ## Where coherent type classes are the better choice
 
 Coherent type classes fit programs that need one canonical instance per type, such as the `Ord` used
-by a `Set` . The compiler keeps generic code consistent without wiring. In Rust, an ordinary trait
+by a `Set`. The compiler keeps generic code consistent without wiring. In Rust, an ordinary trait
 already provides that guarantee. The [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
 page starts from this simpler case.
 
