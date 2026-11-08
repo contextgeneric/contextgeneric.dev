@@ -28,9 +28,10 @@ provider, often [`RaiseFrom`](raise_from.md), for that key.
 ## Usage
 
 Import the provider from `cgp::extra::error` and the wiring keys from `cgp::core::error`; none of them
-is in the prelude. `DebugError` lives behind the crate's `alloc` feature, which is on by default,
-because it allocates a `String`. It takes no type parameter and is wired to `ErrorRaiserComponent`,
-`ErrorWrapperComponent`, or both, usually per source type with the `open` statement:
+is in the prelude. `DebugError` allocates a `String`, so it lives behind an `alloc` feature that is
+off by default: enable `features = ["alloc"]` on the `cgp` dependency. It takes no type parameter
+and is wired to `ErrorRaiserComponent`, `ErrorWrapperComponent`, or both, usually per source type
+with the `open` statement:
 
 ```rust
 use core::num::ParseIntError;
