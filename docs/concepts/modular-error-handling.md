@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Modular error handling'
 sidebar_position: 10
+description: 'How a context chooses one error type and the providers that raise and wrap it, so reusable code reports failures without fixing their representation.'
 ---
 
 # Modular error handling
 
-Modular error handling lets reusable code report failures while each application chooses how to
-represent them. In CGP, the context selects a shared error type and providers for converting
-source errors into it and attaching detail. Reusable code declares which of those operations it
-needs, allowing the same implementation to work with different error policies.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations,
+including the implementations that build errors. Modular error handling lets reusable code report
+failures while each application chooses how to represent them. The context selects a shared error
+type and providers for converting source errors into it and attaching detail. Reusable code declares
+which of those operations it needs, allowing the same implementation to work with different error
+policies.
 
 Errors built this way still propagate through ordinary Rust `Result` values and the `?` operator.
 This page explains how these choices fit together, how to preserve structured failures, and when
