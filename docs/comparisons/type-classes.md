@@ -1,13 +1,14 @@
 ---
 sidebar_label: 'Type classes'
 sidebar_position: 3
-description: 'How CGP provider selection compares with type classes, coherence, and overlapping instances in Haskell, Agda, and Lean.'
+description: 'Compare Context-Generic Programming provider selection with type classes, coherence, and overlapping instances in Haskell, Agda, and Lean.'
 ---
 
 # Type classes
 
-CGP lets each context select named implementations at compile time. It is a language extension built
-as a [stable Rust library](/docs/), with ordinary Rust traits as its caller interfaces. This page
+[Context-Generic Programming](/docs/) lets each context select named implementations at compile
+time. CGP extends Rust with pluggable trait implementations, chosen per context and resolved at
+compile time, as a library on stable Rust whose consumer traits are ordinary Rust traits. This page
 compares explicit wiring with type-class resolution in Haskell, Agda, and Lean, and explains when a
 single canonical implementation is the simpler choice.
 
@@ -36,6 +37,8 @@ Wadler and Blott introduced them to "make ad-hoc polymorphism less ad hoc" ([Wad
 1989](https://dl.acm.org/doi/10.1145/75277.75283)):
 
 ```haskell
+import Prelude hiding (Show, show)
+
 class Show a where
   show :: a -> String
 
@@ -55,8 +58,8 @@ compare other forms of passed evidence.
 
 ### Coherence and canonical instances
 
-Coherence keeps implementation choices consistent as generic code is compiled and composed. A `Set`
-, for example, relies on insertion and lookup agreeing on its element ordering. Global uniqueness of
+Coherence keeps implementation choices consistent as generic code is compiled and composed. A `Set`,
+for example, relies on insertion and lookup agreeing on its element ordering. Global uniqueness of
 instances is one way to support that agreement. GHC's guarantees within a compilation are distinct
 from enforcing uniqueness across every separately compiled part of a program ([Yang, *Type classes:
 confluence, coherence and global
@@ -74,6 +77,13 @@ GHC permits some overlapping instances when one is more specific than another. P
 control which overlaps are allowed:
 
 ```haskell
+{-# LANGUAGE FlexibleInstances #-}
+import Prelude hiding (Show, show)
+import Data.List (intercalate)
+
+class Show a where
+  show :: a -> String
+
 instance {-# OVERLAPPABLE #-} Show a => Show [a] where   -- lists in general
   show xs = "[" ++ intercalate "," (map show xs) ++ "]"
 
