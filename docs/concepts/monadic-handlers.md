@@ -1,14 +1,16 @@
 ---
 sidebar_label: 'Monadic handlers'
 sidebar_position: 12
+description: 'How monadic handlers put a pipeline continuation rule in a type, the err, ok, and identity monads, and how a monad transformer stacks two result layers.'
 ---
 
 # Monadic handlers
 
-Monadic handlers separate a pipeline's computations from the rule that decides whether another
-step should run. The same composition machinery can stop at the first error, stop at the first
-success, or pass every output onward. A monad supplies that continuation rule, while the providers
-supply the work performed at each step.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
+monadic handlers make the rule that joins them a choice too. Monadic handlers separate a pipeline's
+computations from the rule that decides whether another step should run. The same composition
+machinery can stop at the first error, stop at the first success, or pass every output onward. A
+monad supplies that continuation rule, while the providers supply the work performed at each step.
 
 Ordinary [handler composition](./handlers.md) already connects outputs to inputs. Monadic
 composition extends that connection to cases where the next step needs a value inside a result,
