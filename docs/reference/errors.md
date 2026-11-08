@@ -67,7 +67,7 @@ Match the compiler's code and the shape of the message.
 | `E0210` / `E0117` [orphan rule](/docs/reference/glossary#orphan-rule) | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
 | `E0207` type parameter is not constrained, or `[CGP-E019]` | A per-entry generic that never reaches the key | [A generic that reaches nothing](#a-generic-that-reaches-nothing) |
 | `E0107` trait takes N generic arguments but N+1 supplied | A consumer trait written where a provider trait belongs | [Naming the wrong half of a component](#naming-the-wrong-half-of-a-component) |
-| `E0433` / `E0425` cannot find type | A name the generated code cannot see | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
+| `E0433` cannot find type | A name the generated code cannot see | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 | `E0576` cannot find associated type … in trait | A `#[use_type]` import with a wrong name | [An imported type that does not exist](#an-imported-type-that-does-not-exist) |
 | `E0404` expected trait, found type parameter | An [abstract type](/docs/reference/glossary#abstract-type) named after its own bound | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 
