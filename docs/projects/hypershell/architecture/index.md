@@ -8,10 +8,10 @@ description: 'How Hypershell works, in outline: a program written as a Rust type
 
 A Hypershell program looks like a shell pipeline, but it is a Rust type, and the compiler turns it
 into ordinary function calls. [Hypershell](../index.md) is a small shell-scripting language built
-with [CGP](/docs/), a language extension for Rust with pluggable trait implementations at
-compile-time. This page explains, in outline, how a type can be a program, what decides what that
-program does, and how the language is put together. Each idea has a page of its own with the
-details.
+with [Context-Generic Programming](/docs/) (CGP), a Rust library whose wiring decides which
+implementation a program runs. This page explains, in outline, how a type can be a program, what
+decides what that program does, and how the language is put together. Each idea has a page of its
+own with the details.
 
 ## The program only says what to do
 

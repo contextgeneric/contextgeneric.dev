@@ -6,10 +6,12 @@ description: 'A Hypershell program that reads a runtime value from a field of it
 
 # Read a runtime value from the context
 
-This program runs `echo` with a greeting whose name comes from a field of the context, the type the
-program runs on, at run time. It is an example from [Hypershell](../index.md), a shell-scripting
-language whose programs are Rust types, built with [CGP](/docs/). This page shows where such runtime
-values live, and what the compiler reports when one is missing.
+This program runs `echo` with a greeting whose name comes from a field of the context, the type
+the program runs on, at run time. It is an example from [Hypershell](../index.md), a
+shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library whose wiring supplies the values a
+program's parts need. This page shows where such runtime values live, and what the compiler
+reports when one is missing.
 
 :::tip
 

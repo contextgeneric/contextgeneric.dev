@@ -6,14 +6,17 @@ description: 'The common mistakes in a Hypershell program or its wiring, each wi
 
 # Debugging a program
 
-A mistake in a Hypershell program or its wiring is a compile error, and the raw compiler output for
-one spans every layer of wiring between the context, the type the program runs on, and the part that
-failed. [Hypershell](../index.md) is a shell-scripting language whose programs are Rust types, built
-with [CGP](/docs/). This guide shows the common mistakes, each with the code that triggers it, the
-root cause [`cargo cgp check`](/docs/cargo-cgp/check) reports, and the fix. Each output below was
-produced by running the check and is trimmed to its headline and root cause, with long types
-abridged. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool
-does not yet reshape every class.
+A mistake in a Hypershell program or its wiring is a compile error, and the raw compiler output
+for one spans every layer of wiring between the context, the type the program runs on, and the
+part that failed. [Hypershell](../index.md) is a shell-scripting language whose programs are Rust
+types, built with [Context-Generic Programming](/docs/) (CGP), a Rust library whose wiring selects
+the implementation behind each trait. This guide shows the common mistakes, each with the code
+that triggers it, the root cause [`cargo cgp check`](/docs/cargo-cgp/check) reports, and the fix.
+Each output below comes from compiling the program against `cargo-cgp` built from its current
+source, sometimes through a `check_components!` and sometimes at the `handle` call, and is trimmed
+to its headline and root cause. Long type paths are abridged with an ellipsis, and the dependency
+chain the tool prints below the root cause is left out. `cargo cgp check` leads with the root cause
+for the classes it recognizes, and the tool does not yet reshape every class.
 
 ## Check first, then read the root cause
 
@@ -80,7 +83,8 @@ pub type Program = hypershell! {
 ```
 
 ```text
-   = note: root cause: [CGP-E117] the trait bound `TokioAsyncReadStream<ChildOutputStream>: AsRef<[u8]>` is not satisfied
+error[E0277]: [CGP-E001] the trait bound `…::TokioAsyncReadStream<…::ChildOutputStream>: AsRef<[u8]>` is not satisfied
+   = note: root cause: [CGP-E117] the trait bound `…::TokioAsyncReadStream<…::ChildOutputStream>: AsRef<[u8]>` is not satisfied
 ```
 
 **Fix:** insert `StreamToBytes` between the two stages. With it, the program compiles and prints
@@ -99,7 +103,8 @@ pub type Program = hypershell! {
 ```
 
 ```text
-   = note: root cause: [CGP-E114] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `HandleToTokioAsyncRead`
+error[E0277]: [CGP-E001] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `hypershell_tokio_components::providers::async_read::HandleToTokioAsyncRead`
+   = note: root cause: [CGP-E114] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `hypershell_tokio_components::providers::async_read::HandleToTokioAsyncRead`
 ```
 
 The path names the syntax and then the input type, which is exactly what the dispatcher could not
@@ -124,14 +129,15 @@ pub type Program = hypershell! {
 ```
 
 ```text
-error[E0277]: [CGP-E001] missing wiring for `@cgp.extra.handler.HandlerComponent.Checksum<…>` on `HypershellCli`
-  = note: root cause: [CGP-E113] missing wiring for `@cgp.extra.handler.HandlerComponent.Checksum<…>` on `HypershellCli`
+error[E0277]: [CGP-E001] missing wiring for `PathCons<…>` on `HypershellCli`
+  = note: root cause: [CGP-E113] missing wiring for `PathCons<…>` on `HypershellCli`
 ```
 
-`WebSocket` fails the same way on such a context. **Fix:** add the route, either on a namespace that
-inherits `HypershellNamespace`, as [`http_checksum_native`](../examples/http-checksum-native.md)
-joins, or as an entry beside the context's `namespace` statement, as
-[`bluesky_websocket`](../examples/bluesky-websocket.md) adds.
+The message names the route as the type-level path the lookup follows, `PathCons<…>`, with the
+`Checksum` segment inside it. `WebSocket` fails the same way on such a context. **Fix:** add the
+route, either on a namespace that inherits `HypershellNamespace`, as
+[`http_checksum_native`](../examples/http-checksum-native.md) joins, or as an entry beside the
+context's `namespace` statement, as [`bluesky_websocket`](../examples/bluesky-websocket.md) adds.
 
 ## A raised error type has no route
 
@@ -238,7 +244,7 @@ An entry for a syntax the namespace already routes conflicts with the namespace:
 
 ```rust
 delegate_components! {
-    App {
+    MyApp {
         namespace HypershellNamespace;
         @cgp.extra.handler.HandlerComponent.<Path, Args> SimpleExec<Path, Args>: FakeSimpleExec,
     }
@@ -246,7 +252,7 @@ delegate_components! {
 ```
 
 ```text
-error[E0119]: [CGP-E011] conflicting wiring: `App` wires `@cgp.extra.handler.HandlerComponent.SimpleExec<Path, Args>`, which `HypershellNamespace` already covers
+error[E0119]: [CGP-E011] conflicting wiring: `MyApp` wires `@cgp.extra.handler.HandlerComponent.SimpleExec<Path, Args>`, which `HypershellNamespace` already covers
 ```
 
 A namespace that inherits `HypershellNamespace` and binds the same path fails in the same way.

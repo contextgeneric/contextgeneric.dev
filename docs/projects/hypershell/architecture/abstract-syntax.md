@@ -8,9 +8,10 @@ description: 'What a Hypershell program is made of: empty Rust structs that name
 
 Why would anyone write a program as a Rust type made of empty structs? Because a program that
 contains no code can be given its meaning by something else, and changed without being edited.
-[Hypershell](../index.md) is a small shell-scripting language built with [CGP](/docs/). This page
-shows what a Hypershell program is made of, the kinds of pieces it can contain, and the macro that
-lets it be written like a shell pipeline.
+[Hypershell](../index.md) is a small shell-scripting language built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that lets a program's parts take their
+meaning from elsewhere. This page shows what a Hypershell program is made of, the kinds of pieces
+it can contain, and the macro that lets it be written like a shell pipeline.
 
 ## A piece of syntax is an empty struct
 

@@ -8,8 +8,10 @@ description: 'The shell pipeline curl | sha256sum | cut written as three streami
 
 This program is the shell pipeline `curl $url | sha256sum | cut -d ' ' -f 1`: it downloads a web
 page and prints its SHA-256 digest. It is an example from [Hypershell](../index.md), a
-shell-scripting language whose programs are Rust types, built with [CGP](/docs/). The page shows how
-streaming stages run concurrently, and why each stage's input type decides what may come before it.
+shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that resolves each stage's
+implementation when the program compiles. The page shows how streaming stages run concurrently,
+and why each stage's input type decides what may come before it.
 
 :::tip
 

@@ -6,11 +6,12 @@ description: 'A Hypershell program that adds a WebSocket stage and its error typ
 
 # Add a WebSocket stage to one context
 
-This program reads the same Bluesky firehose as [`bluesky`](./bluesky.md), with `websocat` replaced
-by a native WebSocket stage. It is an example from [Hypershell](../index.md), a shell-scripting
-language whose programs are Rust types, built with [CGP](/docs/). The WebSocket stage is an
-extension that the base language does not include, and this page shows how one context, the type a
-program runs on, adds it with two wiring entries, where
+This program reads the same Bluesky firehose as [`bluesky`](./bluesky.md), with `websocat`
+replaced by a native WebSocket stage. It is an example from [Hypershell](../index.md), a
+shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that keeps a context's choices in its
+own wiring. The WebSocket stage is an extension that the base language does not include, and this
+page shows how one context, the type a program runs on, adds it with two wiring entries, where
 [`http_checksum_native`](./http-checksum-native.md) joined an extended namespace.
 
 :::tip
@@ -141,19 +142,19 @@ stays open.
 
 ## Try a change
 
-Remove the error route, keeping the `WebSocket` entry. Checked with `check_components!` as on the
-[`hello_name`](./hello-name.md#try-a-change) page, keyed on the program and the pipe's reader type,
-[`cargo cgp check`](/docs/cargo-cgp/check) reports the missing route, shown here with the long types
-abridged:
+Remove the error route, keeping the `WebSocket` entry. The program then fails at its `handle` call,
+and [`cargo cgp check`](/docs/cargo-cgp/check) reports the missing route, shown here with the long
+type abridged:
 
 ```text
-error[E0277]: [CGP-E001] missing wiring for `@cgp.core.error.ErrorRaiserComponent.Error` on `MyApp`
-   = note: root cause: [CGP-E113] missing wiring for `@cgp.core.error.ErrorRaiserComponent.Error` on `MyApp`
+error[E0277]: [CGP-E001] missing wiring for `@cgp.core.error.ErrorRaiserComponent.tokio_tungstenite::tungstenite::Error` on `MyApp`
+   = note: root cause: [CGP-E113] missing wiring for `@cgp.core.error.ErrorRaiserComponent.tokio_tungstenite::tungstenite::Error` on `MyApp`
 ```
 
-The path's last segment is the error type the provider raises, written by its own name. That type is
-`tungstenite::Error`, which the program imports as `TungsteniteError`, so the `Error` in the message
-is `tungstenite`'s error rather than the context's own. Adding the route back fixes it.
+The path's last segment is the error type the provider raises, written by its full path:
+`tokio_tungstenite::tungstenite::Error`, the type the program imports as `TungsteniteError`. So the
+message names `tungstenite`'s error rather than the context's own, and adding the route back fixes
+it.
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
 reshape every class.
 

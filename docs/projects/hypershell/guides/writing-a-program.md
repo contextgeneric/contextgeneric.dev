@@ -6,11 +6,12 @@ description: 'How to write a Hypershell program: the prelude and a context, valu
 
 # Writing a program
 
-This guide is for writing Hypershell programs rather than extending the language: how to choose the
-context, which is the type a program runs on, and then how to feed the program its values, make its
-stages agree, and check it before running it. [Hypershell](../index.md) is a shell-scripting
-language whose programs are Rust types, built with [CGP](/docs/). The
-[examples](../examples/index.md) show each step in a running program.
+This guide is for writing Hypershell programs rather than extending the language: how to choose
+the context, which is the type a program runs on, and then how to feed the program its values,
+make its stages agree, and check it before running it. [Hypershell](../index.md) is a
+shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that lets an application choose an
+implementation. The [examples](../examples/index.md) show each step in a running program.
 
 ## Start from the prelude and a context
 

@@ -6,10 +6,11 @@ description: 'Why Hypershell is split into a crate per backend, what each crate 
 
 # Crate layout
 
-Why is a small language split into nine crates? So that each backend library lives in a crate of its
-own, and a program compiles only the backends it uses. [Hypershell](../index.md) is a small
-shell-scripting language built with [CGP](/docs/). This page lists the crates and what each adds,
-what a program file imports, and what the workspace needs to build.
+Why is a small language split into nine crates? So that each backend library lives in a crate of
+its own, and a program compiles only the backends it uses. [Hypershell](../index.md) is a small
+shell-scripting language built with [Context-Generic Programming](/docs/) (CGP), a Rust library
+that separates implementations from the code that chooses them. This page lists the crates and
+what each adds, what a program file imports, and what the workspace needs to build.
 
 ## One crate per backend
 

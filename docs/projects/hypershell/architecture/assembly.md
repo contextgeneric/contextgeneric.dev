@@ -6,11 +6,12 @@ description: 'How one line of wiring gives a Hypershell context the whole langua
 
 # Assembly
 
-How does one line of wiring give a context the whole Hypershell language? The language has dozens of
-pieces of syntax, and each needs a provider, so something must gather them.
-[Hypershell](../index.md) is a small shell-scripting language built with [CGP](/docs/). This page
-explains the three layers that do the gathering, how a context can add to them, and how one piece of
-syntax is traced through all three to its provider.
+How does one line of wiring give a context the whole Hypershell language? The language has dozens
+of pieces of syntax, and each needs a provider, so something must gather them.
+[Hypershell](../index.md) is a small shell-scripting language built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library whose implementations are selected by
+a context's wiring. This page explains the three layers that do the gathering, how a context can
+add to them, and how one piece of syntax is traced through all three to its provider.
 
 ## Three layers, from providers to a context
 

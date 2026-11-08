@@ -6,11 +6,12 @@ description: 'Runnable Hypershell programs, each walked through as a short tutor
 
 # Hypershell examples
 
-These pages walk through the runnable programs in the [Hypershell
-repository](https://github.com/contextgeneric/hypershell), one program per page.
+These pages walk through the runnable programs in the
+[Hypershell repository](https://github.com/contextgeneric/hypershell), one program per page.
 [Hypershell](../index.md) is a shell-scripting language whose programs are Rust types, built with
-[CGP](/docs/). Each page runs a program, explains how its wiring produces what it prints, and names
-the CGP pattern it shows, so the pages work as short tutorials on those patterns.
+[Context-Generic Programming](/docs/) (CGP), a Rust library that lets each application choose an
+implementation. Each page runs a program, explains how its wiring produces what it prints, and
+names the CGP pattern it shows, so the pages work as short tutorials on those patterns.
 
 The pages are in the order they teach. Each stands alone, but a reader new to Hypershell should
 start with [`hello`](./hello.md), since the later pages build on the ideas it introduces.

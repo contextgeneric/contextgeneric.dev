@@ -6,10 +6,11 @@ description: 'The limits of Hypershell: a proof of concept, programs fixed at co
 
 # Limitations
 
-Hypershell is a proof of concept built to show what CGP makes possible, and its design has limits
-that are worth knowing before reading further. [Hypershell](./index.md) is a small shell-scripting
-language built with [CGP](/docs/). This page describes those limits, and the cases where another
-tool is the better choice.
+Hypershell is a proof of concept, and its design has limits that are worth knowing before reading
+further. [Hypershell](./index.md) is a small shell-scripting language built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that selects an implementation through
+a context's wiring. This page describes those limits, and the cases where another tool is the
+better choice.
 
 ## It is a demonstration, not a tool to depend on
 
@@ -58,8 +59,7 @@ A mistake in a program or its wiring is a compile error, and the compiler's raw 
 step it took through the wiring before it failed. Checking a program with `check_components!` and
 reading the error with [`cargo cgp check`](/docs/cargo-cgp/check) gets to the cause faster:
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
-reshape every class. The [debugging guide](./guides/debugging.md)
-shows the common mistakes.
+reshape every class. The [debugging guide](./guides/debugging.md) shows the common mistakes.
 
 ## When another tool is the better choice
 

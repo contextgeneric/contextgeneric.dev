@@ -8,9 +8,10 @@ description: 'A Hypershell program whose input and output are Rust values: a str
 
 This program takes a Rust struct holding some code, posts it as JSON to the Rust Playground's gist
 API, and decodes the reply into another struct. It is an example from [Hypershell](../index.md), a
-shell-scripting language whose programs are Rust types, built with [CGP](/docs/). The page shows a
-program whose input and output are both Rust values rather than bytes, run on a context, the type a
-program runs on, that the library provides.
+shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that fixes a program's interface
+through its wiring. The page shows a program whose input and output are both Rust values rather
+than bytes, run on a context, the type a program runs on, that the library provides.
 
 :::tip
 

@@ -6,11 +6,12 @@ description: 'A Hypershell program that filters a web page through tr and grep, 
 
 # Filter a web page through two commands
 
-This program downloads the Nixpkgs manual, converts it to upper case with `tr`, and prints the lines
-that mention a keyword, found with `grep`. It is an example from [Hypershell](../index.md), a
-shell-scripting language whose programs are Rust types, built with [CGP](/docs/). The page looks at
-Hypershell's argument syntax: a URL written as a literal, and an argument list that mixes a literal
-with a field.
+This program downloads the Nixpkgs manual, converts it to upper case with `tr`, and prints the
+lines that mention a keyword, found with `grep`. It is an example from [Hypershell](../index.md),
+a shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library whose wiring decides what each piece
+of a program means. The page looks at Hypershell's argument syntax: a URL written as a literal,
+and an argument list that mixes a literal with a field.
 
 :::tip
 

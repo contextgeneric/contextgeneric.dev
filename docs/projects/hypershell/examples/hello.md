@@ -8,9 +8,10 @@ description: 'The smallest Hypershell program: echo hello world! written as a Ru
 
 This program runs `echo hello world!` and prints the result. It is the smallest program in
 [Hypershell](../index.md), a shell-scripting language whose programs are Rust types, built with
-[CGP](/docs/), a language extension for Rust with pluggable trait implementations at compile-time.
-The page shows the two ideas every other Hypershell example builds on: a program is a type, and the
-context it runs on, itself a type, gets the whole language from one line of wiring.
+[Context-Generic Programming](/docs/) (CGP), a Rust library that gives a program's parts their
+meaning at compile time. The page shows the two ideas every other Hypershell example builds on: a
+program is a type, and the context it runs on, itself a type, gets the whole language from one
+line of wiring.
 
 :::tip
 

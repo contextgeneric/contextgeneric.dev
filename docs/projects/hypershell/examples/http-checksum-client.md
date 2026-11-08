@@ -7,10 +7,11 @@ description: 'A native Hypershell HTTP request feeding external commands, with i
 # Replace a command with a native HTTP request
 
 This program computes the same digest as [`http_checksum_cli`](./http-checksum-cli.md), with the
-`curl` command replaced by a native HTTP request. It is an example from [Hypershell](../index.md), a
-shell-scripting language whose programs are Rust types, built with [CGP](/docs/). The page shows how
-a native stage and an external command share one stream, even though they produce different kinds of
-stream, and where the HTTP client comes from.
+`curl` command replaced by a native HTTP request. It is an example from [Hypershell](../index.md),
+a shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that picks an implementation by the
+types a stage receives. The page shows how a native stage and an external command share one
+stream, even though they produce different kinds of stream, and where the HTTP client comes from.
 
 :::tip
 

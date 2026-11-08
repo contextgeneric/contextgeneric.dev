@@ -7,10 +7,10 @@ description: 'Hypershell is a Rust DSL for shell-script-like programs, where a p
 # Hypershell
 
 Hypershell is a small language for writing shell-script-like programs in Rust, built with
-[CGP](/docs/), a language extension for Rust with pluggable trait implementations at compile-time. A
-Hypershell program is a Rust *type*, and the context that runs it, a type whose wiring chooses how
-each piece behaves, is its interpreter. So both the language's syntax and its meaning can be
-extended without editing the crates that define it.
+[Context-Generic Programming](/docs/) (CGP), a language extension for Rust with pluggable trait
+implementations at compile time. A Hypershell program is a Rust *type*, and the context that runs
+it, a type whose wiring chooses how each piece behaves, is its interpreter. So both the language's
+syntax and its meaning can be extended without editing the crates that define it.
 
 Hypershell is an experimental proof of concept. It is not a replacement for a shell, and it builds
 only on nightly Rust. It is also the most complete example of a type-level language built with CGP,

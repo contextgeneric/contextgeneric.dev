@@ -6,10 +6,12 @@ description: 'A Hypershell program that calls the GitHub API with a URL built fr
 
 # Call a JSON API and decode the response
 
-This program asks the GitHub API for the open issues of a repository and decodes the JSON reply into
-Rust values. It is an example from [Hypershell](../index.md), a shell-scripting language whose
-programs are Rust types, built with [CGP](/docs/). The page shows a URL assembled from several
-arguments, a request header, and a program whose output is a Rust type it names itself.
+This program asks the GitHub API for the open issues of a repository and decodes the JSON reply
+into Rust values. It is an example from [Hypershell](../index.md), a shell-scripting language
+whose programs are Rust types, built with [Context-Generic Programming](/docs/) (CGP), a Rust
+library that resolves a program's nested parts through its context. The page shows a URL assembled
+from several arguments, a request header, and a program whose output is a Rust type it names
+itself.
 
 :::tip
 

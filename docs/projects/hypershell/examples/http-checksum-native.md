@@ -6,11 +6,12 @@ description: 'A fully native Hypershell checksum pipeline, run on a context that
 
 # Extend the language with native checksums
 
-This program computes the same digest as the two before it with every stage native: an HTTP request,
-a SHA-256 checksum, and hexadecimal encoding. It is an example from [Hypershell](../index.md), a
-shell-scripting language whose programs are Rust types, built with [CGP](/docs/). The checksum
-stages are not part of the base language. The page shows how a language extension defined in other
-crates is joined by changing one namespace name.
+This program computes the same digest as the two before it with every stage native: an HTTP
+request, a SHA-256 checksum, and hexadecimal encoding. It is an example from
+[Hypershell](../index.md), a shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that lets a language be extended
+without editing its crates. The checksum stages are not part of the base language. The page shows
+how a language extension defined in other crates is joined by changing one namespace name.
 
 :::tip
 
@@ -156,13 +157,12 @@ pub type Program = hypershell! {
 };
 ```
 
-Checked with `check_components!`, as on the [`hello_name`](./hello-name.md#try-a-change) page,
-[`cargo cgp check`](/docs/cargo-cgp/check) names the missing entry, shown here with the long types
-abridged:
+The program then fails at its `handle` call, and [`cargo cgp check`](/docs/cargo-cgp/check) names
+the missing entry, shown here with the long types abridged:
 
 ```text
-error[E0277]: [CGP-E001] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `HandleToTokioAsyncRead`
-   = note: root cause: [CGP-E114] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `HandleToTokioAsyncRead`
+error[E0277]: [CGP-E001] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `hypershell_tokio_components::providers::async_read::HandleToTokioAsyncRead`
+   = note: root cause: [CGP-E114] missing entry for `@HandlerComponent.StreamToStdout.GenericArray<u8, …>` in provider `hypershell_tokio_components::providers::async_read::HandleToTokioAsyncRead`
 ```
 
 The digest is a `GenericArray<u8, …>`, and `StreamToStdout`'s input dispatcher has no entry for that

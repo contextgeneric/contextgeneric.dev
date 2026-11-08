@@ -8,9 +8,10 @@ description: 'How Hypershell stages of different kinds fit together: bytes and t
 
 In a shell, every program in a pipeline reads bytes and writes bytes, so any two can be connected.
 In Hypershell, stages pass typed Rust values, so how do stages of different kinds fit together?
-[Hypershell](../index.md) is a small shell-scripting language built with [CGP](/docs/). This page
-explains what stages pass to each other, how a stage adapts to the kind of input it receives, and
-which stages accept which inputs.
+[Hypershell](../index.md) is a small shell-scripting language built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that chooses an implementation from
+the types involved. This page explains what stages pass to each other, how a stage adapts to the
+kind of input it receives, and which stages accept which inputs.
 
 ## What stages pass to each other
 

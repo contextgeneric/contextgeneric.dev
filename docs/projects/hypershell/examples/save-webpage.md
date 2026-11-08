@@ -6,10 +6,11 @@ description: 'A Hypershell program that streams an HTTP download straight into a
 
 # Download a web page to a file
 
-This program downloads the Nixpkgs manual and writes it to a file as it arrives, without holding the
-whole page in memory. It is an example from [Hypershell](../index.md), a shell-scripting language
-whose programs are Rust types, built with [CGP](/docs/). The page shows a pipeline whose last stage
-produces nothing, and a file path read from the context, the type the program runs on.
+This program downloads the Nixpkgs manual and writes it to a file as it arrives, without holding
+the whole page in memory. It is an example from [Hypershell](../index.md), a shell-scripting
+language whose programs are Rust types, built with [Context-Generic Programming](/docs/) (CGP), a
+Rust library that derives a program's behavior from its wiring. The page shows a pipeline whose
+last stage produces nothing, and a file path read from the context, the type the program runs on.
 
 :::tip
 

@@ -8,9 +8,10 @@ description: 'A Hypershell pipeline that streams the Bluesky firehose through gr
 
 This program reads the Bluesky firehose, a live stream of every public post, and prints the events
 that mention a keyword, until it is stopped. It is an example from [Hypershell](../index.md), a
-shell-scripting language whose programs are Rust types, built with [CGP](/docs/). The page shows a
-pipeline that never ends on its own, and a stage that passes a whole shell command line to another
-program.
+shell-scripting language whose programs are Rust types, built with
+[Context-Generic Programming](/docs/) (CGP), a Rust library that resolves every stage's
+implementation at compile time. The page shows a pipeline that never ends on its own, and a stage
+that passes a whole shell command line to another program.
 
 :::tip
 
