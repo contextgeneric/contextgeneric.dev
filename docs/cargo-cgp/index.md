@@ -8,10 +8,10 @@ description: 'cargo-cgp runs in place of cargo check and reports a CGP compile e
 # cargo-cgp
 
 `cargo-cgp` helps you understand compile errors and macro expansions in
-[Context-Generic Programming (CGP)](/docs/) code. CGP's macros generate ordinary Rust traits and
-implementations, so a compiler error may name that generated machinery while leaving the failed
-requirement unclear. Running `cargo cgp check` brings the root cause forward for failures the
-tool recognizes.
+[Context-Generic Programming (CGP)](/docs/) code. CGP extends Rust with pluggable trait
+implementations through macros that generate ordinary Rust traits, so a compiler error may name
+that generated machinery while leaving the failed requirement unclear. Running `cargo cgp check`
+brings the root cause forward for failures the tool recognizes.
 
 You can keep using ordinary cargo commands alongside it. CGP is a library on stable Rust, so
 `cargo check`, `cargo build`, and `cargo test` work without the tool. Reach for `cargo-cgp` when
