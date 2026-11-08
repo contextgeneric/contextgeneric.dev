@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Implicit arguments'
 sidebar_position: 4
+description: 'How implicit arguments read context fields through function parameters, how the declared type controls borrowing and cloning, and when a getter trait is the better fit.'
 ---
 
 # Implicit arguments
 
-Implicit arguments let a provider declare the context values it needs as function parameters.
-CGP reads those values from the context, so callers pass only the method's explicit arguments.
-This page explains the field access behind that shorthand, how argument types control borrowing
-and cloning, and when a [getter trait](/docs/reference/glossary#getter-trait) is a better fit.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations whose
+providers read context values as if they were parameters. Implicit arguments name the context value
+a method needs, and CGP reads it from the context, so callers pass only the method's explicit
+arguments. This page explains the field access behind that shorthand, how argument types control
+borrowing and cloning, and when a [getter trait](/docs/reference/glossary#getter-trait) is a better
+fit.
 
 ## Reading a field explicitly
 
@@ -53,7 +56,7 @@ impl Greeter {
 
 `#[implicit]` removes `name` from the method's public signature and generates the field bound and
 read. The body receives a local `name`, while a caller still writes `app.greet()`. Here, `&str`
-borrows the contents of a `String` field.
+borrows the contents of any field that implements `AsRef<str>`, such as a `String` field.
 
 Implicit arguments are the usual choice for reading fields from a provider's own context. They
 keep each value's name and type beside the method that uses it, while the macro supplies the
@@ -90,7 +93,7 @@ pub fn describe(
     &self,
     // Cloned from the context's String field.
     #[implicit] name: String,
-    // Borrows the contents of the context's String field.
+    // Borrows any field implementing `AsRef<str>`, such as a String field.
     #[implicit] title: &str,
     // Borrows the Vec field directly.
     #[implicit] tags: &Vec<String>,
@@ -100,9 +103,9 @@ pub fn describe(
 ```
 
 An owned argument calls `.clone()` on the field, leaving the stored value in the context. A `&str`
-argument reads a `String` field with `.as_str()`, and `&Vec<String>` borrows the vector directly.
-Prefer a borrow when the body only needs to read the value, especially when cloning would allocate
-or copy substantial data.
+argument reads any field implementing `AsRef<str>` with `.as_ref()`, and `&Vec<String>` borrows the
+vector directly. Prefer a borrow when the body only needs to read the value, especially when cloning
+would allocate or copy substantial data.
 
 The macro supports specific access forms rather than arbitrary conversions between types. The
 [`#[implicit]` reference](/docs/reference/attributes/implicit) covers options, slices, mutable

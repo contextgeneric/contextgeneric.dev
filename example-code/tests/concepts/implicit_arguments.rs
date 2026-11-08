@@ -111,7 +111,7 @@ pub mod the_declared_type_decides_the_read {
         &self,
         // Owned: read by reference and cloned, so the context keeps its field.
         #[implicit] name: String,
-        // `&str`: backed by a `String` field, borrowed rather than cloned.
+        // `&str`: any field implementing `AsRef<str>`, borrowed rather than cloned.
         #[implicit] title: &str,
         // Any other borrow: taken as it stands.
         #[implicit] tags: &Vec<String>,
