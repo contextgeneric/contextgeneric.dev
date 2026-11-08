@@ -11,8 +11,9 @@ Add `where` predicates to a generated trait's own definition, not only to its im
 
 ## Overview
 
-`#[extend_where]` moves a `where` predicate onto the trait that a [`#[cgp_fn]`](../macros/cgp_fn.md)
-generates, so the predicate becomes a condition of naming the trait at all. By default, `#[cgp_fn]`
+In [Context-Generic Programming (CGP)](/docs/), `#[extend_where]` moves a `where` predicate onto
+the trait that a [`#[cgp_fn]`](../macros/cgp_fn.md) generates, so the predicate becomes a condition of
+naming the trait at all. By default, `#[cgp_fn]`
 treats the `where` clause you write on the function as an implementation detail: the bounds land on the
 generated implementation and never appear on the generated trait. That default keeps a trait's
 requirements private to its implementation, and it is almost always right.

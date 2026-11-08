@@ -7,7 +7,8 @@ description: 'The modifier attributes that refine what a CGP macro generates: de
 
 # Attributes
 
-An attribute here is a modifier, not a macro of its own. Each one is an option that a host macro reads
+In [Context-Generic Programming (CGP)](/docs/), an attribute here is a modifier, not a macro of its
+own. Each one is an option that a host macro reads
 to refine the trait or implementation it generates. The hosts are
 [`#[cgp_impl]`](../macros/cgp_impl.md), [`#[cgp_fn]`](../macros/cgp_fn.md), and
 [`#[cgp_component]`](../macros/cgp_component.md), together with the macros built on

@@ -28,7 +28,9 @@ attribute once `open` is shown to cover every dispatch case.
 
 ## Overview
 
-`#[derive_delegate]` generates the dispatcher for a component that is generic over a type parameter.
+In [Context-Generic Programming (CGP)](/docs/), `#[derive_delegate]` generates the dispatcher for a
+component that is generic over a type parameter. CGP enables pluggable trait implementations in Rust,
+and this attribute is the older way to choose one per type.
 Such a component usually wants a different implementation per value of the parameter: `Rectangle`
 handled one way, `Circle` another. Something has to look at the type and pick. Written by hand, that
 dispatcher is an implementation of the provider trait that reads a lookup table, finds the entry for the

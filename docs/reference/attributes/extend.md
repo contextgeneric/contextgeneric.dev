@@ -11,9 +11,8 @@ Add a trait as a [supertrait](/docs/reference/glossary#supertrait) of a generate
 
 ## Overview
 
-`#[extend]` declares that a trait is part of what a generated trait *guarantees*, rather than
-something its
-implementation happens to need. Where [`#[uses]`](uses.md) adds a private requirement, `#[extend]` adds a
+In [Context-Generic Programming (CGP)](/docs/), `#[extend]` declares that a trait is part of what a
+generated trait *guarantees*, rather than something its implementation happens to need. Where [`#[uses]`](uses.md) adds a private requirement, `#[extend]` adds a
 supertrait. Every **context** implementing the trait, meaning every type the method runs on,
 must also satisfy it, and every caller may rely on it.
 

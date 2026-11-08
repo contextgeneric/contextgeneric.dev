@@ -11,8 +11,8 @@ Source a function argument from a same-named field on the context.
 
 ## Overview
 
-`#[implicit]` lets a CGP construct read a field value from a generic **context** by naming the field
-like an ordinary function argument. The context is the type the method runs on, which supplies the
+In [Context-Generic Programming (CGP)](/docs/), `#[implicit]` lets a construct read a field value
+from a generic **context** by naming the field like an ordinary function argument. The context is the type the method runs on, which supplies the
 values it needs as its fields, and the macro hides the implicit argument from the public signature.
 
 ```rust
@@ -71,20 +71,20 @@ that type. The table below lists every case:
 |---|---|---|
 | An owned type (`f64`, `String`, a tuple, an array) | the same type | by reference, then `.clone()` |
 | `&T` | `T` | by reference, no conversion |
-| `&str` | `String` | `.as_str()` |
+| `&str` | any `'static` value implementing `AsRef<str>` | `.as_ref()` |
 | `&[T]` | anything `AsRef<[T]>` | `.as_ref()` |
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
-| `Option<&str>` | `Option<String>` | `.as_deref()` |
+| `Option<&str>` | any `'static` `Option<U>` whose `U` implements `AsRef<str>` | `.option_as_ref()` |
 | `&mut T` | `T` | mutably, no conversion |
-| `&mut str` | `String` | `.as_mut_str()` |
+| `&mut str` | a field implementing `AsMut<str>` | `.as_mut()` |
 | `&mut [T]` | anything `AsMut<[T]>` | `.as_mut()` |
 | `Option<&mut T>` | `Option<T>` | `.as_mut()` |
-| `Option<&mut str>` | `Option<String>` | `.as_deref_mut()` |
+| `Option<&mut str>` | an `Option<U>` whose `U` derefs mutably to `str` | `.as_deref_mut()` |
 | [`MRef<'a, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
 
 The rows for `&str`, for an owned type, and for `MRef` are the ones most often misread. `&str` is the
-case most often wanted and least obvious: the field is a `String`, and the argument borrows from it, so
-a context never has to store a `&str`. An owned argument *clones* the value. That is cheap for an
+case most often wanted and least obvious: the field can be a `String`, a `Cow<str>`, or a `Box<str>`,
+and the argument borrows from it, so a context never has to store a `&str`. An owned argument *clones* the value. That is cheap for an
 `f64` and costly for a large `String`, so take `&str` or `&T` wherever the body only needs to read. And
 `MRef` is the owned-or-borrowed form. It reads a plain `T` field, gives the body a value that may be
 either, and is the one reference-shaped row without a mutable counterpart.
@@ -247,9 +247,10 @@ field name. The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form i
 `cargo cgp expand` resugars it back. The context parameter is literally `__Context__`, a reserved name
 chosen so it cannot collide with one of yours.
 
-The slice rows and the mutable rows generate a different bound from the `Value = T` equality, and it
-reads oddly at first. A slice argument bounds the *associated type* instead, so `&[u8]` emits
-`HasField<Symbol!("slice"), Value: AsRef<[u8]> + 'static>`. Any field whose value can be viewed as a
+The `&str`, slice, and mutable rows generate a different bound from the `Value = T` equality, and it
+reads oddly at first. A `&str` argument bounds the *associated type* instead, so it emits
+`HasField<Symbol!("name"), Value: AsRef<str> + 'static>`, and a slice argument does the same, so
+`&[u8]` emits `HasField<Symbol!("slice"), Value: AsRef<[u8]> + 'static>`. Any field whose value can be viewed as a
 `[u8]` then qualifies, rather than one exact type. And every mutable form swaps the trait as well as the
 accessor: `&mut u64` emits `HasFieldMut<Symbol!("counter"), Value = u64>` and reads through
 `get_field_mut`.

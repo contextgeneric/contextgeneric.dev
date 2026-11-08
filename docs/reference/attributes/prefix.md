@@ -12,8 +12,10 @@ namespace addresses the component by that path.
 
 ## Overview
 
-`#[prefix(...)]` registers a component into a [namespace](/docs/concepts/namespaces) under a path
-prefix. Written on the component's trait beside [`#[cgp_component]`](../macros/cgp_component.md), it
+In [Context-Generic Programming (CGP)](/docs/), `#[prefix(...)]` registers a component into a
+[namespace](/docs/concepts/namespaces) under a path prefix. CGP enables pluggable trait
+implementations in Rust, and a prefix is where a component's route into a shared wiring table is
+named. Written on the component's trait beside [`#[cgp_component]`](../macros/cgp_component.md), it
 adds the component's own route to the namespace. A namespace is a reusable wiring table that a
 **context** joins with one line and then overrides where it needs to. (The context is the type the
 method runs on.) A namespace answers a lookup by *routing* it: asked for a component, it says

@@ -11,8 +11,11 @@ Depend on another provider by name, importing the provider trait it must satisfy
 
 ## Overview
 
-`#[use_provider]` declares that an implementation depends on *another* implementation, by importing the
-[provider trait](../macros/cgp_component.md) the inner provider must satisfy. An implementation with such
+In [Context-Generic Programming (CGP)](/docs/), `#[use_provider]` declares that an implementation
+depends on *another* implementation, by importing the
+[provider trait](../macros/cgp_component.md) the inner provider must satisfy. CGP enables pluggable
+trait implementations in Rust, and `#[use_provider]` is how one implementation names another it
+builds on. An implementation with such
 a dependency is a [higher-order provider](/docs/concepts/higher-order-providers): a wrapper that scales
 whatever an inner calculator produces, or a retry layer over whatever performs a request.
 

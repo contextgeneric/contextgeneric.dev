@@ -11,8 +11,10 @@ Register a provider as a namespace's default for a key.
 
 ## Overview
 
-`#[default_impl(...)]` lets a *provider* register itself as a [namespace](/docs/concepts/namespaces)'s
-default for a key, at the point where the provider is defined. A namespace is a reusable table of default
+In [Context-Generic Programming (CGP)](/docs/), `#[default_impl(...)]` lets a *provider* register
+itself as a [namespace](/docs/concepts/namespaces)'s default for a key, at the point where the
+provider is defined. CGP enables pluggable trait implementations in Rust, and this attribute is where
+a provider declares itself the default choice for a key. A namespace is a reusable table of default
 wirings that a **context** can opt into and then complete with the entries it leaves open. (The context
 is the type the method runs on.) Ordinarily you write a namespace's entries in its own body. This
 attribute moves one entry onto the provider:

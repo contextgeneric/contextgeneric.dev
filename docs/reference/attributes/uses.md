@@ -11,8 +11,9 @@ Import the traits an implementation depends on, reading like a `use` statement.
 
 ## Overview
 
-`#[uses]` names a [consumer trait](../macros/cgp_component.md), or an ordinary Rust trait, that `Self`
-must satisfy, so the body can call it. `Self` here is the **context**, the type the implementation runs
+In [Context-Generic Programming (CGP)](/docs/), `#[uses]` names a
+[consumer trait](../macros/cgp_component.md), or an ordinary Rust trait, that `Self` must satisfy, so
+the body can call it. `Self` here is the **context**, the type the implementation runs
 against:
 
 ```rust

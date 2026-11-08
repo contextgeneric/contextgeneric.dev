@@ -12,8 +12,9 @@ through a field and callers never name it.
 
 ## Overview
 
-`#[impl_generics(...)]` declares a generic parameter on the implementation that a
-[`#[cgp_fn]`](../macros/cgp_fn.md) generates, and keeps it off the generated trait. By default,
+In [Context-Generic Programming (CGP)](/docs/), `#[impl_generics(...)]` declares a generic parameter
+on the implementation that a [`#[cgp_fn]`](../macros/cgp_fn.md) generates, and keeps it off the
+generated trait. By default,
 `#[cgp_fn]` puts every generic parameter you write on the function onto both the trait and its
 implementation. That is right for a type the caller chooses. But a body often needs a type that nobody
 chooses: a database handle, a name that only has to be printable, a scalar read from a field. The

@@ -11,7 +11,8 @@ Import an abstract associated type and write it as a bare name.
 
 ## Overview
 
-`#[use_type]` imports a type from the **context**, the type the code runs against. In CGP a type
+In [Context-Generic Programming (CGP)](/docs/), `#[use_type]` imports a type from the **context**,
+the type the code runs against. In CGP a type
 supplied this way is called an [*abstract type*](/docs/concepts/abstract-types): the code names it,
 and the context chooses what it actually is, at compile time, through its
 [`delegate_components!`](../macros/delegate_components.md) wiring.
