@@ -11,6 +11,7 @@ Satisfy a provider trait by routing back through the context's own consumer-trai
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `UseContext` turns a context's existing consumer-trait implementation into a provider that other
 providers can call. The [**context**](/docs/reference/glossary#context) is the type the
 implementation runs against, and it normally *uses* a provider through its consumer trait. Sometimes

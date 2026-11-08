@@ -11,12 +11,13 @@ Select a component's implementation from the consumer trait's own default method
 
 ## Overview
 
-`UseDefault` names the "use the trait's own defaults" choice in wiring. A consumer trait may define
-default bodies for its methods, the same way any Rust trait can. When every method of a component has a
-usable default, no behavior is left for a provider to supply, and the provider only needs to exist so
-the component can be wired. `UseDefault` is that empty provider: wiring a component to `UseDefault`
-selects an implementation whose method bodies come from the trait's defaults rather than from a
-dedicated provider.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
+call, and `UseDefault` names the "use the trait's own defaults" choice in wiring. A consumer trait
+may define default bodies for its methods, the same way any Rust trait can. When every method of a
+component has a usable default, no behavior is left for a provider to supply, and the provider only
+needs to exist so the component can be wired. `UseDefault` is that empty provider: wiring a
+component to `UseDefault` selects an implementation whose method bodies come from the trait's
+defaults rather than from a dedicated provider.
 
 This keeps a default-only component consistent with the rest of wiring. Without it, a component
 whose methods are all defaulted would still need some provider type and some

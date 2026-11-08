@@ -12,6 +12,7 @@ method.
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `UseFields` is the provider form of the convention "the method `name` reads the field `name`." A
 getter component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes one or more
 values the **context** can supply, and the most common arrangement is that each value lives in a

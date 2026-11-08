@@ -11,6 +11,7 @@ Wire a getter component to a field borrowed through `AsRef`, through the `WithPr
 
 ## Overview
 
+Under [Context-Generic Programming (CGP)](/docs/), a getter can borrow a field as another type, and
 `WithFieldRef<Tag, Value>` is the alias `WithProvider<UseFieldRef<Tag, Value>>`. It implements a
 getter component by reading the field named by `Tag` from the
 [**context**](/docs/reference/glossary#context), the type the method runs on, and borrowing it
@@ -38,8 +39,8 @@ delegate_components! {
 ```
 
 `Tag` names the field, as in [`UseField`](use_field.md), and `Value` is the type the getter exposes. The
-stored field type must implement `AsRef<Value>` (and, for the mutable getter, `AsMut<Value>`), and the
-getter's return type must be `&Value`.
+stored field type must implement `AsRef<Value>` and be `'static` (and, for the mutable getter, also
+`AsMut<Value>`), and the getter's return type must be `&Value`.
 
 ## Examples
 

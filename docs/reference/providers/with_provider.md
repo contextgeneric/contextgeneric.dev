@@ -12,8 +12,9 @@ specific named component.
 
 ## Overview
 
-`WithProvider<Provider>` bridges CGP's two layers of provider trait. Foundational traits like
-[`TypeProvider`](../components/has_type.md) and
+[Context-Generic Programming (CGP)](/docs/) separates foundational providers from named components
+through two layers of provider trait, and `WithProvider<Provider>` bridges them. Foundational traits
+like [`TypeProvider`](../components/has_type.md) and
 [`FieldGetter`](../traits/field-access/field_getter.md) are generic, component-agnostic mechanisms:
 a `TypeProvider` supplies *some* [abstract type](/docs/reference/glossary#abstract-type) for *some*
 tag, and a `FieldGetter` reads *some* field for *some* output tag, without either knowing which

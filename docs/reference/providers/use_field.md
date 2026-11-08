@@ -12,12 +12,13 @@ decision rather than the method name.
 
 ## Overview
 
-`UseField<Tag>` decouples a getter's method name from the field it reads. A getter component defined
-with [`#[cgp_getter]`](../macros/cgp_getter.md) describes a value the context can supply, such as
-`fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the type the method
-runs on, which supplies the values it needs as its fields. But the context may store the value under
-a different field name, say `first_name`, and different contexts may store it under different names.
-`UseField<Tag>` carries the field name as its type parameter, so wiring a getter to
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
+call, and `UseField<Tag>` decouples a getter's method name from the field it reads. A getter
+component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes a value the context can
+supply, such as `fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the
+type the method runs on, which supplies the values it needs as its fields. But the context may store
+the value under a different field name, say `first_name`, and different contexts may store it under
+different names. `UseField<Tag>` carries the field name as its type parameter, so wiring a getter to
 `UseField<Symbol!("first_name")>` makes it read `first_name` even though the method is `name`. The
 field name lives in the wiring, not in the trait.
 

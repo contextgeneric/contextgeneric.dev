@@ -21,13 +21,15 @@ statement of [`delegate_components!`](../macros/delegate_components.md) does the
 already has, with no separate table type and no wrapper.
 
 **Prefer `open` for anything new.** This page is here because you will meet `UseDelegate` in existing
-code and in CGP's own error and handler components, which are still defined with `#[derive_delegate]`.
+code and in the library's own error and handler components, which are still defined with
+`#[derive_delegate]`.
 It is expected to be deprecated once `open` is shown to cover every dispatch case.
 
 :::
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `UseDelegate` chooses a provider based on a type argument rather than on the component alone. An
 ordinary component picks its provider by looking the component name up in the
 [**context**](/docs/reference/glossary#context)'s delegation table, where the context is the type

@@ -11,6 +11,7 @@ Wire a getter component to a named context field, through the `WithProvider` ada
 
 ## Overview
 
+Under [Context-Generic Programming (CGP)](/docs/), a getter can read a field chosen in wiring, and
 `WithField<Tag>` is the alias `WithProvider<UseField<Tag>>`. It implements a getter component by
 reading the context field named by `Tag`, on a [**context**](/docs/reference/glossary#context), the
 type the method runs on, by adapting the foundational [`UseField<Tag>`](use_field.md) getter through

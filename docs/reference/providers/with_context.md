@@ -12,14 +12,16 @@ context's own generic `HasType` or `HasField` entry.
 
 ## Overview
 
-`WithContext` is the alias `WithProvider<UseContext>`. It pairs the [`WithProvider`](with_provider.md)
-adapter with [`UseContext`](use_context.md), which implements the two foundational traits by asking
-the [**context**](/docs/reference/glossary#context), the type the implementation runs against:
+Under [Context-Generic Programming (CGP)](/docs/), a named component can take its answer from the
+context's own foundational entry, and `WithContext` is the alias `WithProvider<UseContext>`. It
+pairs the [`WithProvider`](with_provider.md) adapter with [`UseContext`](use_context.md), which
+implements the two foundational traits by asking the
+[**context**](/docs/reference/glossary#context), the type the implementation runs against:
 [`TypeProvider`](../components/has_type.md) through the context's own `HasType<Tag>`, and
 [`FieldGetter`](../traits/field-access/field_getter.md) through its own `HasField<Tag>`.
 `WithProvider` passes the component's marker as that tag, so wiring a component to `WithContext`
-answers it from the context's `HasType` or `HasField` entry keyed by the component itself. Like every
-CGP provider, it carries no runtime value.
+answers it from the context's `HasType` or `HasField` entry keyed by the component itself. Like
+every CGP provider, it carries no runtime value.
 
 `WithContext` is distinct from the bare [`UseContext`](use_context.md), and the two are not
 interchangeable. `UseContext` implements a component's provider trait *directly*, by calling the

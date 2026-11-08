@@ -11,12 +11,13 @@ Bind an abstract-type component to a concrete type, through the `WithProvider` a
 
 ## Overview
 
-`WithType<Type>` is the alias `WithProvider<UseType<Type>>`. It binds an abstract-type component to the
-concrete `Type` on a [**context**](/docs/reference/glossary#context), the type that implements the
-trait, by adapting the foundational
-[`UseType<Type>`](use_type.md) provider through the [`WithProvider`](with_provider.md) layer. It sets
-the same [abstract type](/docs/reference/glossary#abstract-type) the plain [`UseType`](use_type.md) provider does, and both are interchangeable in
-wiring. Like every CGP provider, it carries no runtime value.
+Under [Context-Generic Programming (CGP)](/docs/), an abstract type is chosen through wiring, and
+`WithType<Type>` is the alias `WithProvider<UseType<Type>>`. It binds an abstract-type component to
+the concrete `Type` on a [**context**](/docs/reference/glossary#context), the type that implements
+the trait, by adapting the foundational [`UseType<Type>`](use_type.md) provider through the
+[`WithProvider`](with_provider.md) layer. It sets the same
+[abstract type](/docs/reference/glossary#abstract-type) the plain [`UseType`](use_type.md) provider
+does, and both are interchangeable in wiring. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 

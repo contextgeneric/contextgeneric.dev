@@ -1,14 +1,15 @@
 ---
-description: 'The providers CGP ships, grouped by job: context, type, and getter providers, the With… adapters, per-type dispatch, and the handler combinators.'
+description: 'The providers the library ships, grouped by job: context, type, and getter providers, the With… adapters, per-type dispatch, and the handler combinators.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
 
 # Providers
 
-A provider is a zero-sized type wired to a component to say how that component is implemented for a
-[context](/docs/reference/glossary#context), the type the implementation runs against. Providers
-carry no runtime value; they are type-level markers named in a
+[Context-Generic Programming (CGP)](/docs/) lets a context choose the provider behind each trait
+call, and a provider is a zero-sized type wired to a component to say how that component is
+implemented for a [context](/docs/reference/glossary#context), the type the implementation runs
+against. Providers carry no runtime value; they are type-level markers named in a
 [`delegate_components!`](../macros/delegate_components.md) table and resolved at compile time. This
 page groups the providers CGP ships by the job they do, in roughly the order most CGP code reaches
 for them.

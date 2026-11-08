@@ -11,15 +11,16 @@ Compose a list of field getters into one, reaching a field several hops inside a
 
 ## Overview
 
-`ChainGetters<Getters>` reaches a field that does not live directly on the context but several
-levels inside it. The [**context**](/docs/reference/glossary#context) is the type the method runs
-on, which supplies the values it needs as its fields, and a single [`UseField`](use_field.md) reads
-one field of one context. But CGP contexts often nest: a context holds a config, the config holds a
-connection, the connection holds a timeout, and a getter may need the innermost value. Writing one
-provider that walks the whole path by hand is tedious and couples the getter to the nesting.
-`ChainGetters<Getters>` takes a list of getters, applies them in order, and threads the reference
-from each step into the next, so the chain reads like the path it traverses: outer getter, then the
-next, ending at the target field.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each getter
+call, and `ChainGetters<Getters>` reaches a field that does not live directly on the context but
+several levels inside it. The [**context**](/docs/reference/glossary#context) is the type the method
+runs on, which supplies the values it needs as its fields, and a single [`UseField`](use_field.md)
+reads one field of one context. But CGP contexts often nest: a context holds a config, the config
+holds a connection, the connection holds a timeout, and a getter may need the innermost value.
+Writing one provider that walks the whole path by hand is tedious and couples the getter to the
+nesting. `ChainGetters<Getters>` takes a list of getters, applies them in order, and threads the
+reference from each step into the next, so the chain reads like the path it traverses: outer getter,
+then the next, ending at the target field.
 
 `ChainGetters` is a foundational [`FieldGetter`](../traits/field-access/field_getter.md), so it is wired to a getter
 component through the [`WithProvider`](with_provider.md) adapter rather than named on its own. The list

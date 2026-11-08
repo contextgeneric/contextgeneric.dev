@@ -11,8 +11,9 @@ Resolve an [abstract type](/docs/reference/glossary#abstract-type) by looking it
 
 ## Overview
 
-`UseDelegatedType<Components>` is for the case where the concrete type an abstract type resolves to
-should itself be decided by a table. The plain [`UseType<T>`](use_type.md) provider binds an
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the types behind its traits,
+and `UseDelegatedType<Components>` is for the case where the concrete type an abstract type resolves
+to should itself be decided by a table. The plain [`UseType<T>`](use_type.md) provider binds an
 abstract type to one fixed `T`. But sometimes a single provider must answer several abstract-type
 components at once, or route each type tag to a different concrete type chosen elsewhere, such as
 when a namespace or a [higher-order provider](/docs/reference/glossary#higher-order-provider)

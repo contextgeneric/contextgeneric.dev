@@ -25,14 +25,15 @@ this provider is legible.
 
 ## Overview
 
-`RedirectLookup<Components, Path>` separates *which key* a component is looked up under from *which
-table* answers it. The ordinary provider blanket impl looks a component up in the
-[**context**](/docs/reference/glossary#context)'s own delegation table, keyed by the [component
-marker](/docs/reference/glossary#component-marker), where the context is the type the implementation
-runs against. `RedirectLookup` does the lookup differently: it consults the table `Components` keyed
-by a type-level `Path`, then delegates to whatever provider that entry holds. This indirection lets
-one component's resolution be redirected to a different key in a different table, which is the basis
-for organizing wiring into namespaces.
+Under [Context-Generic Programming (CGP)](/docs/), wiring can be organized by paths and namespaces,
+and `RedirectLookup<Components, Path>` separates *which key* a component is looked up under from
+*which table* answers it. The ordinary provider blanket impl looks a component up in the
+[**context**](/docs/reference/glossary#context)'s own delegation table, keyed by the
+[component marker](/docs/reference/glossary#component-marker), where the context is the type the
+implementation runs against. `RedirectLookup` does the lookup differently: it consults the table
+`Components` keyed by a type-level `Path`, then delegates to whatever provider that entry holds.
+This indirection lets one component's resolution be redirected to a different key in a different
+table, which is the basis for organizing wiring into namespaces.
 
 The redirection makes namespaces work. A namespace groups a context's components under a path
 prefix so several related components can be wired in one place and addressed by a shared path.

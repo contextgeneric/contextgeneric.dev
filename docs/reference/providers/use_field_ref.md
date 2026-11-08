@@ -12,7 +12,8 @@ stored type differs from the getter's return type.
 
 ## Overview
 
-`UseFieldRef<Tag, Value>` reads the field named by `Tag` from the
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each getter
+call, and `UseFieldRef<Tag, Value>` reads the field named by `Tag` from the
 [**context**](/docs/reference/glossary#context) (the type the method runs on, which supplies the
 values it needs as its fields) and borrows it through `AsRef` to produce a `&Value`, where the
 stored field type implements `AsRef<Value>`. It exists for a getter whose return type is reached
@@ -74,8 +75,8 @@ field is read at `Tag`. The body reads the field and calls `as_ref()`. The store
 also be `'static`, so a field holding a borrowed reference cannot be read this way.
 
 `UseFieldRef` also implements the mutable getter [`MutFieldGetter`](../traits/field-access/mut_field_getter.md),
-requiring the field type to implement both `AsRef<Value>` and `AsMut<Value>` and returning `&mut Value`
-through `as_mut()`. Because these are `FieldGetter` implementations rather than a getter component's own
+requiring the field type to implement both `AsRef<Value>` and `AsMut<Value>` and to be `'static`,
+and returning `&mut Value` through `as_mut()`. Because these are `FieldGetter` implementations rather than a getter component's own
 provider trait, the [`WithProvider`](with_provider.md) adapter behind `WithFieldRef` turns
 `UseFieldRef` into a provider a getter component can be wired to. Unlike [`UseField`](use_field.md), it
 does not implement [`TypeProvider`](../components/has_type.md), because its purpose is borrowed field
