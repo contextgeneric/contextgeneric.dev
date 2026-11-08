@@ -109,6 +109,17 @@ manifest depends on `cgp` by path. The crate's own files and the standard librar
 writes the new path in. A snapshot also quotes rustc's own wording, so
 [`rust-toolchain.toml`](rust-toolchain.toml) pins the compiler and a bump re-blesses the suite.
 
+## Diagnostic capture programs
+
+`diagnostics/cgp_serde/` holds complete programs for the cgp-serde debugging guide's missing
+`Vec<u8>` entry, missing iterator-reference entry, and absent JSON error wiring. Each program is
+intended to fail. The diagnostic capture harness compiles each file as a library with the sibling
+`cgp` and `cgp-serde` checkouts, using cargo-cgp's pinned nightly and local driver.
+
+These files are separate from the integration-test suite because they need the project's own
+dependencies. `cargo test` and CI do not compile them; fresh diagnostic captures check their
+failures. The remaining Projects examples are checked in their project checkouts.
+
 ## Generated code
 
 Two of these pages show what a macro *generates*, in simplified form. A hand-rolled rendering of such
