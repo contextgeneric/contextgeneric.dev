@@ -11,8 +11,9 @@ Wrap an error by throwing the detail away and returning the error unchanged.
 
 ## Overview
 
-`DiscardDetail` is the `ErrorWrapper` provider that ignores whatever detail is attached and returns the
-error as it was. It satisfies the `CanWrapError` trait of a
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the wrapper behind each trait
+call, and `DiscardDetail` is the `ErrorWrapper` provider that ignores whatever detail is attached
+and returns the error as it was. It satisfies the `CanWrapError` trait of a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against, without
 enriching the error. This is useful when a context's error type cannot carry extra context, or when
 the wrapping detail is deliberately not kept. It is the wrapping counterpart of a no-op: the error

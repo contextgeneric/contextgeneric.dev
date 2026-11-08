@@ -11,11 +11,12 @@ Raise a source error by converting it into the context's error type through the 
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `RaiseFrom` is the `ErrorRaiser` provider for the common case: the abstract error of the
 [**context**](/docs/reference/glossary#context), the type the implementation runs against, already
-knows how to build itself from the source error through `From`. Wiring it means "convert every source
-error the abstract error has a `From` impl for". It is the default choice whenever that `From` impl
-exists, which covers most error raising in practice.
+knows how to build itself from the source error through `From`. Wiring it means "convert every
+source error the abstract error has a `From` impl for". It is the default choice whenever that
+`From` impl exists, which covers most error raising in practice.
 
 Because the bound is on the abstract error rather than on one source type, a single wiring of
 `RaiseFrom` covers every source error the context's error can absorb. Like every CGP provider,

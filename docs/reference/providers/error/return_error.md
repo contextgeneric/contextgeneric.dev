@@ -11,11 +11,12 @@ Raise a source error that already is the context's abstract error, so raising is
 
 ## Overview
 
-`ReturnError` is the `ErrorRaiser` provider for the case where the source error is exactly the
-abstract error the [**context**](/docs/reference/glossary#context) chose, where the context is the
-type the implementation runs against. Raising then has nothing to convert: it returns its argument
-untouched. A context uses it when generic code raises a value that is already of the context's own
-error type. Like every CGP provider, `ReturnError` carries no runtime value.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the raiser behind each trait
+call, and `ReturnError` is the `ErrorRaiser` provider for the case where the source error is exactly
+the abstract error the [**context**](/docs/reference/glossary#context) chose, where the context is
+the type the implementation runs against. Raising then has nothing to convert: it returns its
+argument untouched. A context uses it when generic code raises a value that is already of the
+context's own error type. Like every CGP provider, `ReturnError` carries no runtime value.
 
 ## Usage
 

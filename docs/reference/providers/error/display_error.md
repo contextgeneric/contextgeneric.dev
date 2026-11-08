@@ -12,6 +12,7 @@ string handling.
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `DisplayError` implements both error components by redirecting through a string. Rather than
 producing the abstract error directly, it formats the source error or the detail with the `Display`
 trait through `to_string()` into a `String`, then forwards to the

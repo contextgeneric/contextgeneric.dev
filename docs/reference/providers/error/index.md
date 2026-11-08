@@ -1,5 +1,5 @@
 ---
-description: 'The seven error providers CGP ships, from RaiseFrom to DisplayError: raising and wrapping strategies generic over the context''s error type.'
+description: 'The seven error providers the library ships, from RaiseFrom to DisplayError: raising and wrapping strategies generic over the context''s error type.'
 sidebar_label: 'Overview'
 sidebar_position: 0
 ---
@@ -11,7 +11,8 @@ concrete error type the context chose.
 
 ## Overview
 
-The error providers supply common error-handling strategies to any
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and the
+error providers supply common error-handling strategies to any
 [**context**](/docs/reference/glossary#context), the type the implementation runs against.
 [`CanRaiseError`](../../components/can_raise_error.md) and
 [`CanWrapError`](../../components/can_wrap_error.md) define *what* a context can do with an error:

@@ -11,12 +11,13 @@ Abort with the source error's debug output instead of producing an abstract erro
 
 ## Overview
 
-`PanicOnError` is the `ErrorRaiser` provider that panics rather than returning an error. When a
-[**context**](/docs/reference/glossary#context), the type the implementation runs against, treats an
-error as a programming fault that should stop the program, `PanicOnError` raises by calling `panic!`
-with the source error's debug representation. Its signature promises to return the abstract error,
-but the body never does, because `panic!` diverges. This suits tests and fail-fast tooling. Like every
-CGP provider, `PanicOnError` carries no runtime value.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the raiser behind each trait
+call, and `PanicOnError` is the `ErrorRaiser` provider that panics rather than returning an error.
+When a [**context**](/docs/reference/glossary#context), the type the implementation runs against,
+treats an error as a programming fault that should stop the program, `PanicOnError` raises by
+calling `panic!` with the source error's debug representation. Its signature promises to return the
+abstract error, but the body never does, because `panic!` diverges. This suits tests and fail-fast
+tooling. Like every CGP provider, `PanicOnError` carries no runtime value.
 
 ## Usage
 
