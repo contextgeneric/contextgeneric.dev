@@ -1,20 +1,18 @@
 ---
 sidebar_label: 'Policy-based design'
 sidebar_position: 2
-description: 'CGP read against C++ policy classes, host templates, CRTP, and concepts, for a reader who composes behavior with templates.'
+description: 'Compare Context-Generic Programming providers and wiring with C++ policy classes, host templates, CRTP, and concepts.'
 ---
 
 # C++ policy-based design
 
-CGP and C++ policy-based design compose behavior from implementations chosen at compile time. A CGP
-provider plays a policy's role, and a context supplies the host's data and implementation choices.
-The main differences are how interfaces are declared, how generic bodies are checked, and where
-an application records its choices.
-
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time. It is
-implemented as a library on stable Rust, and its consumer traits are ordinary Rust traits. The
-[Introduction](/docs/) covers the basics. This page assumes familiarity with policy classes, the
-curiously recurring template pattern (CRTP), and C++20 concepts.
+[Context-Generic Programming](/docs/) and C++ policy-based design compose behavior from
+implementations chosen at compile time. A CGP provider plays a policy's role, and a context supplies
+the host's data and implementation choices. CGP extends Rust with pluggable trait implementations,
+chosen per context and resolved at compile time, as a library on stable Rust whose consumer traits
+are ordinary Rust traits. The main differences are how interfaces are declared, how generic bodies
+are checked, and where an application records its choices. This page assumes familiarity with policy
+classes, the curiously recurring template pattern (CRTP), and C++20 concepts.
 
 ## In your terms
 
