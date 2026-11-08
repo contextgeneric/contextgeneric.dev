@@ -1,11 +1,13 @@
 ---
 sidebar_label: 'Handlers'
 sidebar_position: 11
+description: 'How CGP represents computations as components, the synchronous, async, fallible, and borrowed forms, and how a wiring entry composes them into a pipeline.'
 ---
 
 # Handlers
 
-CGP's handler components represent computations through a common input-and-output interface.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
+its **handler** components represent computations through a common input-and-output interface.
 Because providers share that interface, a context can select individual computations or compose
 them into a pipeline through wiring. The family has separate forms for synchronous and async work,
 fallible results, and owned or borrowed inputs, so a simple computation needs only the requirements
