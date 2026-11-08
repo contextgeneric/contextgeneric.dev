@@ -6,10 +6,12 @@ sidebar_position: 0
 
 # Traits
 
-The traits on these pages are the machinery CGP's macros generate and consume. A component definition,
-a wiring table, a derive, or a field read all expand into impls of these traits, so you meet the names
-here in an expansion or a compiler error far more often than you write them. This section groups the
-traits by the job they do, so that a name from a diagnostic has a page to land on.
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, chosen
+at compile time, and the traits on these pages are the machinery its macros generate and consume. A
+component definition, a wiring table, a derive, or a field read all expand into impls of these
+traits, so you meet the names here in an expansion or a compiler error far more often than you write
+them. This section groups the traits by the job they do, so that a name from a diagnostic has a page
+to land on.
 
 If you are new to CGP, start with the [reference overview](/docs/reference/) rather than here. This page
 is the fuller map for once the essentials are familiar.

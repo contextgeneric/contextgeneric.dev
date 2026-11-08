@@ -23,10 +23,11 @@ one.
 
 ## Overview
 
-A bind step in a [monadic pipeline](/docs/concepts/monadic-handlers) unwraps a value, runs a
+In [Context-Generic Programming (CGP)](/docs/), which composes handlers into pipelines at compile
+time, a bind step in a [monadic pipeline](/docs/concepts/monadic-handlers) unwraps a value, runs a
 continuation or short-circuits, and then has to produce the step's own output. Producing it means
-wrapping something back up, and there are **two** things that might need wrapping, so this trait has two
-methods rather than one.
+wrapping something back up, and there are **two** things that might need wrapping, so this trait has
+two methods rather than one.
 
 It is the counterpart of [`ContainsValue`](./contains_value.md): that one says how to get *out* of an
 output type, this one how to get back *in*. Together they run one step; the other two monad traits,

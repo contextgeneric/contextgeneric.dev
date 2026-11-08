@@ -22,9 +22,10 @@ page is here to explain how a step unwraps its input.
 
 ## Overview
 
-A step in a [monadic pipeline](/docs/concepts/monadic-handlers) produces a wrapped output, a `Result`,
-say, and the next step needs the value *inside* the wrapper for the branch that continues. Which half of
-the wrapper that is depends on the monad, so it cannot be hard-coded.
+When [Context-Generic Programming (CGP)](/docs/) composes handlers into a
+[monadic pipeline](/docs/concepts/monadic-handlers), each step produces a wrapped output, a
+`Result`, say, and the next step needs the value *inside* the wrapper for the branch that continues.
+Which half of the wrapper that is depends on the monad, so it cannot be hard-coded.
 
 `ContainsValue` is where each monad answers it.
 

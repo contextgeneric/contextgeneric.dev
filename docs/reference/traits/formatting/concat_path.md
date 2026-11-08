@@ -25,11 +25,11 @@ writing one out.
 
 ## Overview
 
-A [`Path!`](../../macros/path.md) is a type-level list of segments: the route a namespaced or
-`open`-dispatched component lookup is redirected along. Composing two such routes means splicing one
-list onto the end of another, and `ConcatPath` is that operation. It is the path-level analogue of
-[`ConcatProduct`](../type-level/concat_product.md), with the same two-impl recursion over a
-different list.
+In [Context-Generic Programming (CGP)](/docs/), a [`Path!`](../../macros/path.md) is a type-level
+list of segments: the route a namespaced or `open`-dispatched component lookup is redirected along.
+Composing two such routes means splicing one list onto the end of another, and `ConcatPath` is that
+operation. It is the path-level analogue of [`ConcatProduct`](../type-level/concat_product.md), with
+the same two-impl recursion over a different list.
 
 ## Definition
 
@@ -50,8 +50,8 @@ nothing runs.
 ## Usage
 
 **`ConcatPath` is in the prelude**: `use cgp::prelude::*;` names it, which makes it the one member
-of the type-level recovery group that comes with the prelude. Its two neighbours each need a
-different import: [`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
+of this group that comes with the prelude. Its two neighbours each need a different import:
+[`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
 [`StaticFormat`](./static_format.md), defined in the same crate as this trait, from
 `cgp::core::base::traits`.
 

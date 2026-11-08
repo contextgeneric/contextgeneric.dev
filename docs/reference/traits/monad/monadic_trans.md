@@ -22,7 +22,8 @@ a monad of your own a transformer form; otherwise this page is here to explain h
 
 ## Overview
 
-A [monadic pipeline](/docs/concepts/monadic-handlers) over a nested output, a `Result` inside a
+[Context-Generic Programming (CGP)](/docs/) composes handlers into pipelines at compile time. A
+[monadic pipeline](/docs/concepts/monadic-handlers) over a nested output, a `Result` inside a
 `Result`, needs to peel more than one layer, and hard-coding a depth would give up the composability
 the design exists for. `MonadicTrans` is how a monad is expressed as a *transformer* over another.
 

@@ -22,9 +22,10 @@ and the narrow case where bounding on it is the answer.
 
 ## Overview
 
-CGP encodes field and variant names as *types*, so a name can drive trait resolution. Printing one means
-turning that type back into characters, and `StaticFormat` is the trait that does it **lazily**, by
-writing into a formatter rather than producing a value.
+[Context-Generic Programming (CGP)](/docs/) encodes field and variant names as *types*, so a name
+can drive trait resolution. Printing one means turning that type back into characters, and
+`StaticFormat` is the trait that does it **lazily**, by writing into a formatter rather than
+producing a value.
 
 **It backs the `Display` impls on `Symbol` and `Chars`**, which is how you usually meet it: a
 type-level string can be printed with `{}` or `to_string()` because of this trait.

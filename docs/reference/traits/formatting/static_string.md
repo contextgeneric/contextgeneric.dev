@@ -1,5 +1,5 @@
 ---
-title: 'StaticString — a symbol as a &static str'
+title: 'StaticString — a symbol as a &''static str'
 sidebar_label: 'StaticString'
 sidebar_position: 1
 description: 'Decode a Symbol into a compile-time &''static str constant, the eager way to recover a field or variant name as data.'
@@ -11,14 +11,14 @@ Recovering a [type-level string](/docs/reference/glossary#type-level-string) as 
 
 ## Overview
 
-CGP encodes field and variant names as *types* (a [`Symbol!`](../../macros/symbol.md) is a length plus a
-character list, one node per character) so that names can drive trait resolution. But a program
-eventually needs those names as ordinary strings: to report a missing field, to build a key, to compare
-against input.
+[Context-Generic Programming (CGP)](/docs/) encodes field and variant names as *types* (a
+[`Symbol!`](../../macros/symbol.md) is a length plus a character list, one node per character) so
+that names can drive trait resolution. But a program eventually needs those names as ordinary
+strings: to report a missing field, to build a key, to compare against input.
 
 `StaticString` is how a name comes back out, and it does it **eagerly**.
 
-**This is the one of the three recovery traits to reach for.** Its sibling
+**This is the recovery trait to reach for.** Its sibling
 [`StaticFormat`](./static_format.md) recovers a name lazily by writing into a formatter, which backs
 `Display`; reach for it only where a value to format is missing and a constant will not do.
 

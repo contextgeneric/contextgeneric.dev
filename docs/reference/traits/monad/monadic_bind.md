@@ -22,10 +22,11 @@ otherwise this page is here to explain how a pipeline is assembled.
 
 ## Overview
 
-A [monadic pipeline](/docs/concepts/monadic-handlers) chains steps where each may either continue or
+[Context-Generic Programming (CGP)](/docs/) composes handlers into pipelines at compile time, and a
+[monadic pipeline](/docs/concepts/monadic-handlers) chains steps where each may either continue or
 short-circuit, the familiar `?`-style behaviour, expressed as composable providers rather than as
-syntax. Folding such a pipeline means asking the monad, once per step: *given everything built so far,
-what provider runs one bind?*
+syntax. Folding such a pipeline means asking the monad, once per step: *given everything built so
+far, what provider runs one bind?*
 
 `MonadicBind` is that question.
 
