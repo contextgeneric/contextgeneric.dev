@@ -12,7 +12,9 @@ already know.
 
 ## Overview
 
-A [provider trait](./cgp_component.md) has a different shape from the trait it came from. The
+In [Context-Generic Programming (CGP)](/docs/), a [provider trait](./cgp_component.md) has a
+different shape from the trait it came from. CGP enables pluggable trait implementations in Rust, and
+`#[cgp_impl]` is how you write one in the shape you already know. The
 original `Self` has moved into an explicit leading type parameter, the implementation targets a small
 marker type rather than the type the operation acts on, and the method receiver is a plain parameter.
 Written by hand, with `HasDimensions` standing for a trait that supplies `width()` and `height()`, it

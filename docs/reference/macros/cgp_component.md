@@ -12,8 +12,10 @@ target, and the key that wires them together.
 
 ## Overview
 
-`#[cgp_component]` turns an ordinary Rust trait into a component, so that each type using the trait
-chooses which implementation it gets. Applying it takes nothing away. The trait you wrote keeps
+`#[cgp_component]` turns an ordinary Rust trait into a component in
+[Context-Generic Programming (CGP)](/docs/), so that each type using the trait chooses which
+implementation it gets. CGP enables pluggable trait implementations in Rust, and this macro is where
+a trait becomes one. Applying it takes nothing away. The trait you wrote keeps
 working exactly as it did, now under the name CGP calls the **consumer trait**, and every call site
 that already uses it keeps compiling unchanged. The macro adds a matching **provider trait** for
 implementations to target, a small marker type called the **component** that names the trait for

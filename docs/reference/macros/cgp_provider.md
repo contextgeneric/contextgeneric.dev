@@ -12,7 +12,9 @@ declaring the provider struct.
 
 ## Overview
 
-A provider trait is not shaped like the trait it came from. [`#[cgp_component]`](./cgp_component.md)
+In [Context-Generic Programming (CGP)](/docs/), a provider trait is not shaped like the trait it
+came from. CGP enables pluggable trait implementations in Rust, and this macro writes one in the
+shape the sugar desugars to. [`#[cgp_component]`](./cgp_component.md)
 moves the original `Self` into an explicit leading type parameter for the **context**. The context is
 the type the method runs on, and it supplies the values it needs as its own fields. An
 implementation targets a small named struct instead. Written out, a provider looks like this:
