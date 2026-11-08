@@ -1,14 +1,18 @@
 ---
+title: 'When to use CGP, and when a plain trait is enough'
 sidebar_label: 'Modularity Hierarchy'
 sidebar_position: 18
+description: 'How implementation choice grows from a shared blanket impl to providers selected per context and target, and how to pick the least complex tier your program needs.'
 ---
 
 # Modularity Hierarchy
 
-The modularity hierarchy describes how implementation choices grow from a single shared body to
-providers selected independently by context, target type, and enclosing provider. Each tier adds a
-place where a program can make a choice, along with the structure needed to express it. The useful
-tier is the least complex one that supports the variation your program actually needs.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
+the modularity hierarchy says how far that choice should go. The hierarchy describes how
+implementation choices grow from a single shared body to providers selected independently by
+context, target type, and enclosing provider. Each tier adds a place where a program can make a
+choice, along with the structure needed to express it. The useful tier is the least complex one
+that supports the variation your program actually needs.
 
 Encoding illustrates how those choices differ. The examples below omit imports from
 `cgp::prelude::*`, context structs, and some provider bodies so the implementation choices remain
