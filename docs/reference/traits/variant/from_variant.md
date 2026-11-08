@@ -13,9 +13,7 @@ Generic construction of an enum from a named variant.
 
 In [Context-Generic Programming (CGP)](/docs/), `Shape::Circle(circle)` names two things: the enum
 and the variant. That is fine where both are known and useless to code that knows neither: a routine
-handed a payload and told which variant to wrap it in cannot write that expression. CGP enables
-pluggable trait implementations in Rust, and `FromVariant` is the operation that constructs a variant
-by name.
+handed a payload and told which variant to wrap it in cannot write that expression.
 
 `FromVariant<Tag>` gives it a way to. The variant is selected by its *name as a type*, so the choice becomes a
 parameter rather than syntax:

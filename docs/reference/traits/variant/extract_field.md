@@ -13,9 +13,7 @@ Pulling one variant out of an extractor, or narrowing what remains.
 
 In [Context-Generic Programming (CGP)](/docs/), a `match` on a concrete enum is checked for
 exhaustiveness. Code that is generic over the enum cannot write one, so it falls back on a wildcard
-arm and an `unreachable!()`, losing exactly the guarantee you wanted. CGP enables pluggable trait
-implementations in Rust, and `ExtractField` is the operation that takes one variant out of an
-extractor.
+arm and an `unreachable!()`, losing exactly the guarantee you wanted.
 
 `ExtractField` is the operation that recovers it. Each attempt either yields the payload or hands back a
 *remainder* whose type has that variant ruled out, and **the impl exists only while the requested variant
