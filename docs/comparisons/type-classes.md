@@ -50,7 +50,8 @@ describe :: Show a => a -> String
 describe x = "value: " ++ show x
 ```
 
-Dictionary passing explains how a class constraint supplies behavior. The class becomes a record of
+The import hides the Prelude's `Show` so the snippet can define its own class. Dictionary passing
+explains how a class constraint supplies behavior. The class becomes a record of
 methods, an instance supplies that record, and `describe` receives it as a hidden argument. CGP
 organizes choices through a context and resolves calls statically, without runtime dictionaries. The
 [algebraic effects](./algebraic-effects.md) and [row polymorphism](./row-polymorphism.md) pages
@@ -91,7 +92,8 @@ instance {-# OVERLAPPING #-} Show [Char] where           -- but strings speciall
   show s = s
 ```
 
-GHC normally requires a single most-specific candidate and may defer resolution if a type variable
+The snippet declares a local `Show` class so its instances do not collide with the Prelude's. GHC
+normally requires a single most-specific candidate and may defer resolution if a type variable
 could allow a competing match. Its manual warns that overlapping instances can still produce
 inconsistent choices across a program ([GHC User's
 Guide](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html)).

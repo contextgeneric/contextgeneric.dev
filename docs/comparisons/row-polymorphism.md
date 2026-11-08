@@ -49,8 +49,8 @@ nominal identities even when their fields match; CGP adds structural operations 
 Row polymorphism uses a *row variable* to describe the fields a function does not name. The function
 accepts any record with its required fields, while the variable carries the remaining fields
 ([Wikipedia, *Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism)). In PureScript a
-*row* is "an unordered collection of named types, with duplicates", of kind `Row k`, and a record is a row wrapped
-by `Record` ([PureScript language
+*row* is "an unordered collection of named types, with duplicates", of kind `Row k`, and a record
+is a row wrapped by `Record` ([PureScript language
 reference](https://github.com/purescript/documentation/blob/master/language/Types.md)). An open row
 adds a tail variable after a pipe:
 
