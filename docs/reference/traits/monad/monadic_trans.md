@@ -33,8 +33,8 @@ It is one of four traits that give a monad marker its meaning, and it belongs wi
 composed [provider](/docs/reference/glossary#provider), while [`ContainsValue`](./contains_value.md)
 and [`LiftValue`](./lift_value.md) run each step.
 
-**This is a plain trait, not a CGP component.** It lacks a generated
-[provider trait](/docs/reference/glossary#provider-trait) and is never wired.
+**This is a plain trait, not a [CGP component](/docs/reference/glossary#component).** It lacks a
+generated [provider trait](/docs/reference/glossary#provider-trait) and is never wired.
 
 ## Definition
 

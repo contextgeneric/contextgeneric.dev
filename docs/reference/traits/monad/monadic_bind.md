@@ -34,9 +34,9 @@ It is one of four traits that give a monad marker its meaning, alongside
 [`ContainsValue`](./contains_value.md), [`LiftValue`](./lift_value.md), and
 [`MonadicTrans`](./monadic_trans.md). Keeping them apart lets one marker serve all four roles.
 
-**This is a plain trait, not a CGP component.** It lacks a generated
-[provider trait](/docs/reference/glossary#provider-trait) and a `…Component` marker, and is never
-wired through [`delegate_components!`](../../macros/delegate_components.md): the
+**This is a plain trait, not a [CGP component](/docs/reference/glossary#component).** It lacks a
+generated [provider trait](/docs/reference/glossary#provider-trait) and a `…Component` marker, and
+is never wired through [`delegate_components!`](../../macros/delegate_components.md): the
 [monad providers](../../providers/monad/index.md) consume it as an ordinary trait bound while
 folding a pipeline at compile time.
 

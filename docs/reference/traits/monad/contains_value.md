@@ -34,8 +34,8 @@ It is one of four traits that give a monad marker its meaning, and it pairs with
 back *in*. The other two, [`MonadicBind`](./monadic_bind.md) and
 [`MonadicTrans`](./monadic_trans.md), fold the pipeline rather than run a step of it.
 
-**This is a plain trait, not a CGP component.** It lacks a generated
-[provider trait](/docs/reference/glossary#provider-trait) and is never wired.
+**This is a plain trait, not a [CGP component](/docs/reference/glossary#component).** It lacks a
+generated [provider trait](/docs/reference/glossary#provider-trait) and is never wired.
 
 ## Definition
 
