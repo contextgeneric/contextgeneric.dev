@@ -1,20 +1,19 @@
 ---
 sidebar_label: 'ML modules'
 sidebar_position: 4
-description: 'CGP read against OCaml and Standard ML signatures, structures, functors, and modular implicits.'
+description: 'Compare Context-Generic Programming components, providers, and higher-order providers with OCaml and Standard ML signatures, structures, functors, and modular implicits.'
 ---
 
 # ML modules and modular implicits
 
-CGP lets Rust programs assemble named implementations through a context's wiring table. For an
-ML programmer, its components, providers, and [higher-order providers](/docs/reference/glossary#higher-order-provider) play roles similar to
+[Context-Generic Programming](/docs/) lets Rust programs assemble named implementations through a
+context's wiring table. CGP extends Rust with pluggable trait implementations, chosen per context
+and resolved at compile time, as a library on stable Rust whose consumer traits are ordinary Rust
+traits. For an ML programmer, its components, providers, and
+[higher-order providers](/docs/reference/glossary#higher-order-provider) play roles similar to
 signatures, structures, and functors. The correspondence explains how to compose implementations;
-ML's sealing and module type identities need a separate account.
-
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time. It is
-implemented as a library on stable Rust, and its consumer traits are ordinary Rust traits. The
-[Introduction](/docs/) covers the basics. This page assumes familiarity with OCaml or Standard ML
-modules and also compares the proposed OCaml modular-implicits extension.
+ML's sealing and module type identities need a separate account. This page assumes familiarity with
+OCaml or Standard ML modules and also compares the proposed OCaml modular-implicits extension.
 
 ## In your terms
 
