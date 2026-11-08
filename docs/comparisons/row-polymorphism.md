@@ -1,15 +1,16 @@
 ---
 sidebar_label: 'Row polymorphism'
 sidebar_position: 7
-description: "How CGP expresses field access, record building, and variant operations compared with row polymorphism."
+description: "Compare Context-Generic Programming field access, record building, and variant operations with PureScript rows and OCaml polymorphic variants."
 ---
 
 # Row polymorphism, structural typing, and extensible data types
 
-CGP gives Rust structs and enums selected forms of structural reuse through derived field lists and
-trait bounds. It is a language extension built as a [stable Rust library](/docs/), with pluggable
-implementations behind ordinary Rust traits. This page compares its field access, builders, and
-variant operations with PureScript rows and OCaml polymorphic variants.
+[Context-Generic Programming](/docs/) gives Rust structs and enums selected forms of structural reuse
+through derived field lists and trait bounds. CGP extends Rust with pluggable trait implementations,
+chosen per context and resolved at compile time, as a library on stable Rust whose consumer traits
+are ordinary Rust traits. This page compares its field access, builders, and variant operations with
+PureScript rows and OCaml polymorphic variants.
 
 ## In your terms
 
@@ -48,7 +49,7 @@ nominal identities even when their fields match; CGP adds structural operations 
 Row polymorphism uses a *row variable* to describe the fields a function does not name. The function
 accepts any record with its required fields, while the variable carries the remaining fields
 ([Wikipedia, *Row polymorphism*](https://en.wikipedia.org/wiki/Row_polymorphism)). In PureScript a
-*row* is "an unordered collection of named types", of kind `Row k`, and a record is a row wrapped
+*row* is "an unordered collection of named types, with duplicates", of kind `Row k`, and a record is a row wrapped
 by `Record` ([PureScript language
 reference](https://github.com/purescript/documentation/blob/master/language/Types.md)). An open row
 adds a tail variable after a pipe:
@@ -264,7 +265,7 @@ manual](https://ocaml.org/manual/5.5/polyvariant.html)).
 
 Some languages have narrowed their use of rows. PureScript replaced its row-typed effect monad
 because "getting the effect rows to line up was sometimes quite tricky"
-([PureScript-Resources](https://purescript-resources.readthedocs.io/en/latest/eff-to-effect.html)),
+([the `purescript-eff` README](https://github.com/purescript-deprecated/purescript-eff#readme)),
 and Gleam removed row-typed records to become "less structural and more nominal in style" ([Gleam
 v0.4](https://gleam.run/news/gleam-v0.4-released/)).
 
@@ -333,7 +334,7 @@ snippet with OCaml 5.5.0. The CGP snippets were compiled against `cgp` `0.8.0`.
 - [Leijen, *Koka: Programming with Row-Polymorphic Effect Types* (2014)](https://arxiv.org/pdf/1406.2061): rows applied to effects.
 - [OCaml manual, *Polymorphic variants* (5.5)](https://ocaml.org/manual/5.5/polyvariant.html): open and closed variant bounds and the documented weaker discipline.
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes-oop.html), [Bornea](https://medium.com/@gabriel-bornea/approximating-row-type-polymorphism-in-typescript-495ebd5a623d), and [Andreas, *Structural vs Nominal Typing in Rust*](https://felixandreas.me/blog/nominal-vs-structural-types/): the wider structural landscape and Rust's nominal baseline.
-- [PureScript-Resources, *Eff to Effect*](https://purescript-resources.readthedocs.io/en/latest/eff-to-effect.html) and [Gleam v0.4 release notes](https://gleam.run/news/gleam-v0.4-released/): two retreats from rows and their reasons.
+- [PureScript-Resources, *Eff to Effect*](https://purescript-resources.readthedocs.io/en/latest/eff-to-effect.html), [the `purescript-eff` README](https://github.com/purescript-deprecated/purescript-eff#readme), and [Gleam v0.4 release notes](https://gleam.run/news/gleam-v0.4-released/): two retreats from rows and their reasons.
 - [Fowler, *Row Polymorphism without the Jargon*](https://jadon.io/blog/row-polymorphism/), [Nguyen, *Record Row Type and Row Polymorphism*](https://hgiasac.github.io/posts/2018-11-18-Record-Row-Type-and-Row-Polymorphism.html), and PureScript Discourse threads on [error messages](https://discourse.purescript.org/t/upcoming-changes-to-error-messages-for-large-records-rows/3696) and [when to use extensible types](https://discourse.purescript.org/t/when-to-use-extensible-types-when-modeling-a-domain/217): community sentiment.
 
 ---
