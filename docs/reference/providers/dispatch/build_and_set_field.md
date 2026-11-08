@@ -12,9 +12,11 @@ Compute one field's value and set it on a
 
 ## Overview
 
-`BuildAndSetField<Tag, Provider>` is the builder step for a single field. It takes the builder, a
-partial record with some fields set, runs `Provider` over a reference to it to compute the value of
-the field named `Tag`, and returns the builder with that field set, on a
+`BuildAndSetField<Tag, Provider>` is the builder step for a single field.
+[Context-Generic Programming (CGP)](/docs/) lets a context choose the provider that computes each
+field's value, and this step applies one of those choices: it takes the builder, a partial record
+with some fields set, runs `Provider` over a reference to it to compute the value of the field
+named `Tag`, and returns the builder with that field set, on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. Because
 `Provider` receives the builder, it can read the fields earlier steps have set as well as anything
 on the context. `Provider` defaults to [`UseContext`](../use_context.md). Like every CGP provider,

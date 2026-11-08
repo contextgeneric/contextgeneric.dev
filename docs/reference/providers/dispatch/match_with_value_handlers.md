@@ -13,9 +13,11 @@ as a bare value.
 ## Overview
 
 `MatchWithValueHandlers<Provider>` is the matcher for the common case, where every variant's
-payload goes to one provider. Rather than a spelled-out list, it builds one adapter per variant from
-the input enum's own field list, so adding a variant needs no new arm, and it hands
-each payload to `Provider` as a bare value on a
+payload goes to one provider. [Context-Generic Programming (CGP)](/docs/) enables pluggable trait
+implementations in Rust, and `MatchWithValueHandlers` is that pluggability at its plainest:
+whichever provider the context wired serves every payload. Rather than a spelled-out list, it
+builds one adapter per variant from the input enum's own field list, so adding a variant needs no
+new arm. It hands each payload to `Provider` as a bare value on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. That
 makes it the form for payload handlers that are ordinary computers over the payload type, such as
 ones from [`#[cgp_computer]`](../../macros/cgp_computer.md). `Provider` defaults to

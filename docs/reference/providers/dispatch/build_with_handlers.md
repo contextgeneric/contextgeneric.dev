@@ -13,7 +13,10 @@ is set.
 ## Overview
 
 `BuildWithHandlers<Output, Handlers>` assembles a record whose fields come from separate providers.
-It starts from the empty [partial record](/docs/reference/glossary#partial-record) of `Output`,
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
+this builder gives a record that shape: the context chooses the provider that fills each field. The
+builder starts from the empty [partial record](/docs/reference/glossary#partial-record) of
+`Output`,
 passes it through a list of builder steps that each set one field or a group of fields, and turns
 the finished builder into the concrete `Output`, on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. Each

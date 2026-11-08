@@ -12,8 +12,10 @@ on to the next arm otherwise.
 
 ## Overview
 
-`ExtractFieldAndHandle<Tag, Provider>` is one arm of a matcher's list. It takes an extractor, a view
-of an enum that can rule variants out one at a time, and tries to extract the variant named `Tag`.
+`ExtractFieldAndHandle<Tag, Provider>` is one arm of a matcher's list. [Context-Generic Programming
+(CGP)](/docs/) lets a context choose the handler behind each trait call, and
+`ExtractFieldAndHandle` is where one such choice meets one variant. It takes an extractor, a view of
+an enum that can rule variants out one at a time, and tries to extract the variant named `Tag`.
 On a match it wraps the payload in a [`Field<Tag, Value>`](../../types/field.md) and returns `Ok` of
 what `Provider` computes from it; on a miss it returns `Err` of the remainder, the extractor with
 that variant ruled out, which the next arm takes as its input. It runs on a

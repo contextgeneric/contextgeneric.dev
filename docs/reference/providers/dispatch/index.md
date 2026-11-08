@@ -12,11 +12,14 @@ handlers: the matchers take an enum apart, and the builders assemble a record.
 ## Overview
 
 The dispatch combinators handle an enum or a record generically, where the logic for each variant
-or field lives in its own provider. A hand-written `match` names every variant in one place. These
-combinators drive the extractor and builder traits instead, trying one variant or filling one field
-at a time on a [**context**](/docs/reference/glossary#context), the type the implementation runs
-against, and they prove at compile time that every variant is matched or every field is set. Like
-every CGP provider, each is zero-sized: its type parameters ride in `PhantomData`.
+or field lives in its own provider. [Context-Generic Programming (CGP)](/docs/) enables pluggable
+trait implementations in Rust, and these combinators extend that to extensible data: the handler
+for each variant or field is a provider the context chooses. A hand-written `match` names every
+variant in one place. These combinators drive the extractor and builder traits instead, trying one
+variant or filling one field at a time on a [**context**](/docs/reference/glossary#context), the
+type the implementation runs against. They prove at compile time that every variant is matched or
+every field is set. Like every CGP provider, each is zero-sized: its type parameters ride in
+`PhantomData`.
 
 The two halves implement different members of the handler family. The matchers and their adapters
 implement [`Computer`](../../components/handler/computer.md) and

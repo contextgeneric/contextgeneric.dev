@@ -12,7 +12,9 @@ Match an enum against a spelled-out list of per-variant handlers, with no wildca
 ## Overview
 
 `MatchWithHandlers<Handlers>` is the matcher for an enum whose variants each have their own handler.
-It turns the input into its extractor, a view of the enum that can rule variants out one at a time,
+[Context-Generic Programming (CGP)](/docs/) lets a context choose the handler behind each trait
+call, and `MatchWithHandlers` runs the list of those choices, one per variant. It turns the input
+into its extractor, a view of the enum that can rule variants out one at a time,
 and runs a list of handlers over it on a [**context**](/docs/reference/glossary#context), the type
 the implementation runs against. The first handler whose variant matches produces the output. When
 the list has a handler for every variant, the last miss leaves nothing to match, so the matcher

@@ -13,7 +13,9 @@ Match an enum that arrives together with extra arguments, passing the arguments 
 
 `MatchFirstWithHandlers<Handlers>` is the matcher for an input of the form `(Input, Args)`: the enum
 being matched, first, and extra arguments that every per-variant handler needs, such as a scale
-factor or a target buffer. It works like [`MatchWithHandlers`](match_with_handlers.md) on a
+factor or a target buffer. [Context-Generic Programming (CGP)](/docs/) lets a context choose the
+handler for each variant, and `MatchFirstWithHandlers` keeps those per-variant choices while the
+arguments ride along. It works like [`MatchWithHandlers`](match_with_handlers.md) on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against, except
 that `Args` travels with the extractor through the loop, so on a miss the next handler still
 receives the arguments. Like every CGP provider, it carries no runtime value; the handler list rides

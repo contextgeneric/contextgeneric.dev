@@ -11,8 +11,10 @@ Strip the variant tag from a matched payload and pass the bare value to an inner
 
 ## Overview
 
-`HandleFieldValue<Provider>` sits between a matcher arm and the provider that does the work. An arm
-such as [`ExtractFieldAndHandle`](extract_field_and_handle.md) delivers its payload as a
+`HandleFieldValue<Provider>` sits between a matcher arm and the provider that does the work.
+[Context-Generic Programming (CGP)](/docs/) keeps the handler behind a trait call pluggable, and
+`HandleFieldValue` keeps the payload's handler ordinary: free of the variant tag the arm attaches.
+An arm such as [`ExtractFieldAndHandle`](extract_field_and_handle.md) delivers its payload as a
 [`Field<Tag, Value>`](../../types/field.md), with the variant name attached as a type. Most payload
 handlers are ordinary computers over the payload type and know nothing of that tag, so
 `HandleFieldValue` unwraps the `Field` and passes the bare `Value` to `Provider`, on a

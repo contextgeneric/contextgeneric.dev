@@ -12,7 +12,9 @@ Match a group of variants in one arm, by narrowing the input to a smaller enum.
 ## Overview
 
 `DowncastAndHandle<Inner, Provider>` is the matcher arm for several variants that one provider
-handles together. Instead of extracting one variant, it tries to narrow the input to `Inner`, a
+handles together. [Context-Generic Programming (CGP)](/docs/) keeps the handler behind a trait call
+pluggable, and this arm extends one pluggable choice from a single variant to a group of them.
+Instead of extracting one variant, it tries to narrow the input to `Inner`, a
 smaller enum whose variants are a subset of the input's. When the value is one of those variants,
 it hands the whole `Inner` value to `Provider` and returns `Ok`; otherwise it returns `Err` of the
 remainder, with every variant of `Inner` ruled out, on a

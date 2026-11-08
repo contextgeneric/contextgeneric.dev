@@ -12,9 +12,11 @@ Build a sub-record and move every one of its fields into the target's builder at
 ## Overview
 
 `BuildAndMerge<Provider>` is the builder step for a group of fields that one provider produces
-together. It runs `Provider` over a reference to the builder to build another record, then copies
-each of that record's fields into the builder by name, on a
-[**context**](/docs/reference/glossary#context), the type the implementation runs against. A
+together. [Context-Generic Programming (CGP)](/docs/) lets a context choose the provider behind
+each trait call, and `BuildAndMerge` carries that choice into record assembly: it runs `Provider`
+over a reference to the builder to build another record, then copies each of that record's fields
+into the builder by name, on a [**context**](/docs/reference/glossary#context), the type the
+implementation runs against. A
 subsystem can therefore contribute its part of a larger record as a struct of its own, with no
 knowledge of the record it ends up in. `Provider` defaults to [`UseContext`](../use_context.md).
 Like every CGP provider, it carries no runtime value.

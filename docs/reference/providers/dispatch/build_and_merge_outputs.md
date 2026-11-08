@@ -13,8 +13,10 @@ name.
 ## Overview
 
 `BuildAndMergeOutputs<Output, Handlers>` assembles a record from providers that each build a
-sub-record: a database configuration, an HTTP configuration, a logger. It wraps each provider in the
-[`BuildAndMerge`](build_and_merge.md) step and runs the list through
+sub-record: a database configuration, an HTTP configuration, a logger. [Context-Generic Programming
+(CGP)](/docs/) enables pluggable trait implementations in Rust, and this builder applies that at
+the subsystem level: the context chooses the provider behind each part. It wraps each provider in
+the [`BuildAndMerge`](build_and_merge.md) step and runs the list through
 [`BuildWithHandlers`](build_with_handlers.md), on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. The
 providers know nothing of the target record or of each other; the merge matches their fields to the
@@ -189,9 +191,9 @@ the list, so `Product![BuildDatabaseConfig, BuildHttpConfig]` becomes
 and rustc lists the three impls it has:
 
 ```text
-   | |________________________________________^ `IsProviderFor<cgp::prelude::ComputerComponent, Context, (Code, Input)>`
-   | |________________________________________^ `IsProviderFor<cgp::prelude::TryComputerComponent, Context, (Code, Input)>`
-   | |________________________________________^ `IsProviderFor<cgp::prelude::HandlerComponent, Context, (Code, Input)>`
+   | |________________________________________^ `IsProviderFor<ComputerComponent, Context, (Code, Input)>`
+   | |________________________________________^ `IsProviderFor<TryComputerComponent, Context, (Code, Input)>`
+   | |________________________________________^ `IsProviderFor<HandlerComponent, Context, (Code, Input)>`
 ```
 
 Wire it to the owned-input components only. The builder ignores its input, so a borrowed form would

@@ -15,7 +15,9 @@ with its variant name attached.
 `MatchWithFieldHandlers<Provider>` builds the per-variant list from the input enum's field list,
 like [`MatchWithValueHandlers`](match_with_value_handlers.md), but hands each payload to `Provider`
 as a [`Field<Tag, Value>`](../../types/field.md), where `Tag` is the variant's name as a type-level
-string. A provider over `Field<Tag, Value>` can read that name, so one provider can report or route
+string. [Context-Generic Programming (CGP)](/docs/) lets a context choose the handler for each
+variant, and this matcher builds that choice into the wiring while keeping the variant's name
+attached. A provider over `Field<Tag, Value>` can read that name, so one provider can report or route
 on which variant it received, on a [**context**](/docs/reference/glossary#context), the type the
 implementation runs against. `Provider` defaults to [`UseContext`](../use_context.md). Like every
 CGP provider, it carries no runtime value.
