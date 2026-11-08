@@ -49,7 +49,8 @@ use cgp::core::field::traits::TransformMap;
 ```
 
 The trait is implemented on a **transform marker**, a zero-sized type you declare. It stores nothing
-and exists only to name the set of conversions, exactly as a provider does elsewhere in CGP.
+and exists only to name the set of conversions, exactly as a
+[provider](/docs/reference/glossary#provider) does elsewhere in CGP.
 
 **A transform needs an impl for every source marker a field might currently be in.** That rule
 decides how many impls you write, and getting it wrong is the usual failure, shown in

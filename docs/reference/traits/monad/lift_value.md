@@ -32,8 +32,8 @@ It is the counterpart of [`ContainsValue`](./contains_value.md): that one says h
 output type, this one how to get back *in*. Together they run one step; the other two monad traits,
 [`MonadicBind`](./monadic_bind.md) and [`MonadicTrans`](./monadic_trans.md), fold the pipeline instead.
 
-**This is a plain trait, not a CGP component.** It lacks a generated provider trait and is
-never wired.
+**This is a plain trait, not a CGP component.** It lacks a generated
+[provider trait](/docs/reference/glossary#provider-trait) and is never wired.
 
 ## Definition
 

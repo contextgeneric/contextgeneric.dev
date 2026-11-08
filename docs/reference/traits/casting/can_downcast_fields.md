@@ -2,7 +2,7 @@
 title: 'CanDowncastFields — continue a narrowing'
 sidebar_label: 'CanDowncastFields'
 sidebar_position: 3
-description: 'Continue narrowing on the remainder a failed downcast hands back, so a value can be tried against a second target and a third. Never used on its own.'
+description: 'Narrow an extractor into a target enum, most often the remainder a failed downcast hands back, so a value can be tried against a second target and a third.'
 ---
 
 # `CanDowncastFields`

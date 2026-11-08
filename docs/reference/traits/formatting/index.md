@@ -1,20 +1,21 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'The traits that recover type-level names and paths as runtime data: a symbol as a constant string, a symbol written into a formatter, and joined paths.'
+description: 'The traits that recover a type-level name as runtime data, as a constant string or written into a formatter, and the one that joins two type-level paths.'
 ---
 
 # Type-level strings and paths
 
-Recovering a field name or a routing path as runtime data.
+Recovering a field name as runtime data, and joining the paths a lookup follows.
 
 ## Overview
 
 [Context-Generic Programming (CGP)](/docs/) encodes field and variant names as *types*, so that a
 name can drive trait resolution. A program eventually needs those names as ordinary strings, to
-report a missing field, to build a key, or to render a path, and these traits are how a name comes
-back out. They sit in three different homes, which is the group's sharpest edge: one is in the
-prelude and the other two each need a different import.
+report a missing field or to build a key, and two of these traits are how a name comes back out,
+while the third joins the type-level paths a redirected lookup follows. They sit in three different
+homes, which is the group's sharpest edge: one is in the prelude and the other two each need a
+different import.
 
 - [`StaticString`](static_string.md) decodes a [`Symbol!`](../../macros/symbol.md) into a compile-time
   `&'static str` constant. This is the one to reach for when you need a name as data. Import it from

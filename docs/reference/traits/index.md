@@ -52,7 +52,7 @@ Three smaller groups each serve one area:
 
 - [Namespaces and defaults](namespace/index.md) are the lookup traits behind a namespace and a per-type
   default.
-- [Type-level strings and paths](formatting/index.md) recover a field name or a path as runtime data.
+- [Type-level strings and paths](formatting/index.md) recover a field name as runtime data and join type-level paths.
 - [Monad interface](monad/index.md) holds the four traits that give a monad marker its meaning for
   monadic handler composition.
 

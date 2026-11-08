@@ -30,11 +30,11 @@ the design exists for. `MonadicTrans` is how a monad is expressed as a *transfor
 
 It is one of four traits that give a monad marker its meaning, and it belongs with
 [`MonadicBind`](./monadic_bind.md) as the pipeline-folding half: those two decide the *shape* of the
-composed provider, while [`ContainsValue`](./contains_value.md) and [`LiftValue`](./lift_value.md) run
-each step.
+composed [provider](/docs/reference/glossary#provider), while [`ContainsValue`](./contains_value.md)
+and [`LiftValue`](./lift_value.md) run each step.
 
-**This is a plain trait, not a CGP component.** It lacks a generated provider trait and is
-never wired.
+**This is a plain trait, not a CGP component.** It lacks a generated
+[provider trait](/docs/reference/glossary#provider-trait) and is never wired.
 
 ## Definition
 

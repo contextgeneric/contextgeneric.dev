@@ -24,9 +24,9 @@ monad of your own; otherwise this page is here to explain how a pipeline is asse
 
 [Context-Generic Programming (CGP)](/docs/) composes handlers into pipelines at compile time, and a
 [monadic pipeline](/docs/concepts/monadic-handlers) chains steps where each may either continue or
-short-circuit, the familiar `?`-style behaviour, expressed as composable providers rather than as
-syntax. Folding such a pipeline means asking the monad, once per step: *given everything built so
-far, what provider runs one bind?*
+short-circuit, the familiar `?`-style behaviour, expressed as composable
+[providers](/docs/reference/glossary#provider) rather than as syntax. Folding such a pipeline means
+asking the monad, once per step: *given everything built so far, what provider runs one bind?*
 
 `MonadicBind` is that question.
 
@@ -34,11 +34,11 @@ It is one of four traits that give a monad marker its meaning, alongside
 [`ContainsValue`](./contains_value.md), [`LiftValue`](./lift_value.md), and
 [`MonadicTrans`](./monadic_trans.md). Keeping them apart lets one marker serve all four roles.
 
-**This is a plain trait, not a CGP component.** It lacks a generated provider trait and a
-`…Component` marker, and is never wired through
-[`delegate_components!`](../../macros/delegate_components.md): the [monad
-providers](../../providers/monad/index.md) consume it as an ordinary trait bound while folding a
-pipeline at compile time.
+**This is a plain trait, not a CGP component.** It lacks a generated
+[provider trait](/docs/reference/glossary#provider-trait) and a `…Component` marker, and is never
+wired through [`delegate_components!`](../../macros/delegate_components.md): the
+[monad providers](../../providers/monad/index.md) consume it as an ordinary trait bound while
+folding a pipeline at compile time.
 
 ## Definition
 
