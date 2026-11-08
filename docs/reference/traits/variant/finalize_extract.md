@@ -11,7 +11,8 @@ Discharging an extractor that has nothing left in it.
 
 ## Overview
 
-An [extraction chain](./extract_field.md) ends when every variant has been ruled out. At that point the
+In [Context-Generic Programming (CGP)](/docs/), an [extraction chain](./extract_field.md) ends when
+every variant has been ruled out. At that point the
 remainder's type is **uninhabited** (a value of it cannot exist), and `FinalizeExtract` turns
 that fact into a usable ending.
 

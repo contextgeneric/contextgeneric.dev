@@ -23,8 +23,9 @@ backwards.
 
 ## Overview
 
-[`DefaultNamespace`](./default_namespace.md) keys a default on the component alone: one component, one
-default provider. `DefaultImpls1` adds a second type to the key, which a **per-type default**
+In [Context-Generic Programming (CGP)](/docs/), [`DefaultNamespace`](./default_namespace.md) keys a
+default on the component alone: one component, one default provider. CGP enables pluggable trait
+implementations in Rust, and `DefaultImpls1` is where a per-type default is registered. `DefaultImpls1` adds a second type to the key, which a **per-type default**
 needs: the same component resolving differently for `String` than for `u64`.
 
 ## Definition

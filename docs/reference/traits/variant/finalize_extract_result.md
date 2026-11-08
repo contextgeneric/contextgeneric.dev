@@ -11,8 +11,9 @@ Collapsing the `Result` at the end of an extraction chain.
 
 ## Overview
 
-Every step of an [extraction chain](./extract_field.md) returns a `Result`: the payload on the left, the
-narrowed remainder on the right. At the last step the remainder is uninhabited, so the `Err` case cannot
+In [Context-Generic Programming (CGP)](/docs/), every step of an
+[extraction chain](./extract_field.md) returns a `Result`: the payload on the left, the narrowed
+remainder on the right. At the last step the remainder is uninhabited, so the `Err` case cannot
 happen, and `FinalizeExtractResult` says so.
 
 **This is the one you actually call.** [`FinalizeExtract`](./finalize_extract.md) is the underlying

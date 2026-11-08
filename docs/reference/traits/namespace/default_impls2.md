@@ -22,8 +22,10 @@ page explains what they emit.
 
 ## Overview
 
-[`DefaultImpls1`](./default_impls1.md) keys a namespace default on a component plus one type, which a
-per-type default needs. `DefaultImpls2` is the same idea under a **pair** of types.
+In [Context-Generic Programming (CGP)](/docs/), [`DefaultImpls1`](./default_impls1.md) keys a
+namespace default on a component plus one type, which a per-type default needs. CGP enables
+pluggable trait implementations in Rust, and `DefaultImpls2` is where a default keyed on a pair of
+types is registered. `DefaultImpls2` is the same idea under a **pair** of types.
 
 ## Definition
 

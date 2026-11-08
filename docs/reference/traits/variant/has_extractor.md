@@ -11,8 +11,8 @@ Turning an enum into an extractor, and back.
 
 ## Overview
 
-[`ExtractField`](./extract_field.md) narrows an *extractor*, not an enum. `HasExtractor` is where one
-comes from. It is the owning member of a group of three, and choosing between them is most of using the
+In [Context-Generic Programming (CGP)](/docs/), [`ExtractField`](./extract_field.md) narrows an
+*extractor*, not an enum. `HasExtractor` is where one comes from. It is the owning member of a group of three, and choosing between them is most of using the
 extractor family:
 
 | | payloads come out as | the original |

@@ -24,8 +24,10 @@ one it binds.
 
 ## Overview
 
-A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a **context** (the
-type the method runs on) can opt into and then complete. Resolving one of those
+In [Context-Generic Programming (CGP)](/docs/), a [namespace](/docs/concepts/namespaces) is a
+reusable table of default wirings that a **context** (the type the method runs on) can opt into and
+then complete. CGP enables pluggable trait implementations in Rust, and a namespace is where a group
+of those choices gets a name. Resolving one of those
 defaults means asking: *for this component, what does the namespace delegate to?*
 
 `DefaultNamespace` answers that. It is the simplest of three lookup traits, keyed on the component alone.

@@ -11,8 +11,9 @@ Obtaining an extractor that can change a payload in place.
 
 ## Overview
 
-[`HasExtractorRef`](./has_extractor_ref.md) borrows an enum so its variants can be read without consuming
-it. `HasExtractorMut` borrows it mutably, so a payload can be **changed in place**.
+In [Context-Generic Programming (CGP)](/docs/), [`HasExtractorRef`](./has_extractor_ref.md) borrows
+an enum so its variants can be read without consuming it. `HasExtractorMut` borrows it mutably, so a
+payload can be **changed in place**.
 
 Payloads come out as `&mut T`. The original survives, mutably borrowed for the duration, and the
 narrowing works exactly as it does for the other two accessors: [`ExtractField`](./extract_field.md)

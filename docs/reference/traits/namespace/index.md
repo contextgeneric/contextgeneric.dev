@@ -10,8 +10,10 @@ The lookup traits behind a namespace and a per-type default.
 
 ## Overview
 
-A [namespace](/docs/concepts/namespaces) is a reusable table of default wirings that a context opts into
-and then completes with the entries the namespace leaves open. Resolving one of those defaults means
+In [Context-Generic Programming (CGP)](/docs/), a [namespace](/docs/concepts/namespaces) is a
+reusable table of default wirings that a context opts into and then completes with the entries the
+namespace leaves open. CGP enables pluggable trait implementations in Rust, and a namespace is where
+a group of those choices gets a name. Resolving one of those defaults means
 asking, for a given key, what the namespace delegates to, and these three traits answer it, differing
 only in how many types take part in the key. You name them where the syntax requires it: a `namespace`
 header or a `for … in` loop inside [`delegate_components!`](../../macros/delegate_components.md), and the

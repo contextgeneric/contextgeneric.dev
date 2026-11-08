@@ -10,8 +10,9 @@ Constructing an enum from one named variant, and taking one apart variant by var
 
 ## Overview
 
-These traits are the enum counterpart of the [record builder](../builder/index.md): where a record is
-a product of named fields, an enum is a sum of named variants, and the same name-driven, decoupled
+In [Context-Generic Programming (CGP)](/docs/), these traits are the enum counterpart of the [record
+builder](../builder/index.md): where a record is a product of named fields, an enum is a sum of named
+variants, and the same name-driven, decoupled
 treatment applies. They let generic code build and match an enum it cannot name, with exhaustiveness
 proven in the type rather than by a wildcard arm. The impls come from
 [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md) and
