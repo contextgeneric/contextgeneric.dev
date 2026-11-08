@@ -1,15 +1,17 @@
 ---
 sidebar_label: 'Impl-side dependencies'
 sidebar_position: 3
+description: 'How a provider keeps its trait, value, and type requirements out of the caller interface, and how CGP checks them when a context selects the provider.'
 ---
 
 # Impl-side dependencies
 
-A trait exposes operations that callers can use, while an implementation may need additional
-traits, values, or types to carry them out. A requirement kept on the implementation without
-appearing in the trait's interface is an **impl-side dependency**. Callers can then depend on the
-trait alone, and the compiler checks the implementation's requirements when resolving that trait
-for a context.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations whose
+own requirements stay with the implementation. A trait exposes operations that callers can use,
+while an implementation may need additional traits, values, or types to carry them out. A
+requirement kept on the implementation without appearing in the trait's interface is an
+**impl-side dependency**. Callers can then depend on the trait alone, and the compiler checks the
+implementation's requirements when resolving that trait for a context.
 
 This page develops that separation in ordinary Rust blanket implementations, then applies it to
 CGP providers. It covers dependencies on traits, field values, and context-selected types,
