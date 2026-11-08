@@ -60,7 +60,10 @@ block to match. These are the actionable rules here:
 
 ## Public prose
 
-- Read the communication strategy before outlining or drafting a page.
+- Read the shared set and the page kind's row of the knowledge base's
+  [reading map](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/README.md#the-reading-map)
+  before outlining or drafting a page, and a strategy document whole when the page makes a claim
+  its row does not cover.
 - Name Context-Generic Programming in each page's prose and relate a short form of the tag line to its
   content, following the knowledge base's
   [naming rule](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/identity.md#the-name-and-the-tag-line-on-every-page);
