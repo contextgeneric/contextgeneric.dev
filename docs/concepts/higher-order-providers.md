@@ -1,14 +1,16 @@
 ---
 sidebar_label: 'Higher-order providers'
 sidebar_position: 7
+description: 'How a provider takes another provider as a parameter, so a wrapper such as scaling reuses one body with different inner calculations.'
 ---
 
 # Higher-order providers
 
-A **higher-order provider** takes another provider as a type parameter and uses it to perform part
-of its work. This separates a reusable transformation, such as scaling a result, from the inner
-implementation that produces the result. Wiring can then combine the same wrapper with different
-inner providers, while both operate on the same context.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations that
+compose. A **higher-order provider** takes another provider as a type parameter and uses it to
+perform part of its work. This separates a reusable transformation, such as scaling a result, from
+the inner implementation that produces the result. Wiring can then combine the same wrapper with
+different inner providers, while both operate on the same context.
 
 ## Choosing is not the only thing you can do with a provider
 
