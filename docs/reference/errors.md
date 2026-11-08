@@ -113,7 +113,8 @@ That block **compiles**. Nothing has asked yet whether `GreetHello` can do its j
 
 ### What you see
 
-Through the tool, both routes to the failure give the same answer. Checking it:
+Through the tool, both routes to the failure give the same answer. Adding a check at the wiring site
+and checking it:
 
 ```text
 error[E0277]: [CGP-E001] missing field `name` on `Person`
@@ -256,8 +257,8 @@ error[E0271]: [CGP-E005] abstract type `Scalar` of `HasScalarType` on `Rectangle
 ```
 
 Both halves of the disagreement are named, and the `help:` names the wiring line to change. The raw
-`E0271` is much worse: it states only what was *required*, never what the context supplied, and puts
-its caret on the `#[cgp_type]` attribute that declared the type, nowhere near either decision.
+`E0271` is much worse: it states only what was *required*, never what the context supplied, and points
+a note at the `#[cgp_type]` attribute that declared the type, nowhere near either decision.
 
 The same shape appears one level down, when a *field's* type is expressed through an abstract type
 (`#[implicit] database: &Pool<Db>`). The tool then gives the requirement in both forms,
