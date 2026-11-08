@@ -1,17 +1,17 @@
 ---
 sidebar_label: 'Algebraic effects'
 sidebar_position: 6
-description: 'Compare CGP providers with algebraic effect handlers: shared operation interfaces, static selection, and the continuation boundary.'
+description: 'Compare Context-Generic Programming providers with algebraic effect handlers: shared operation interfaces, static selection, and the continuation boundary.'
 ---
 
 # Algebraic effects and handlers
 
-CGP separates operations from their implementations, much as algebraic effects separate operations
-from handlers, but CGP does not capture continuations. It is a language extension for Rust, with
-pluggable trait implementations at compile-time, implemented as a library on stable Rust whose
-consumer traits are ordinary Rust traits; the [Introduction](/docs/) covers the basics. For readers
-familiar with Koka, OCaml 5, Flix, or Eff, this page develops the correspondence with handlers that
-resume in place, its limits, and the costs of each approach.
+[Context-Generic Programming](/docs/) separates operations from their implementations, much as
+algebraic effects separate operations from handlers, but CGP does not capture continuations. CGP
+extends Rust with pluggable trait implementations, chosen per context and resolved at compile time,
+as a library on stable Rust whose consumer traits are ordinary Rust traits. For readers familiar
+with Koka, OCaml 5, Flix, or Eff, this page develops the correspondence with handlers that resume in
+place, its limits, and the costs of each approach.
 
 ## In your terms
 
