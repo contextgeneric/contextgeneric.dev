@@ -24,8 +24,10 @@ an entry, as the [Usage](#usage) section shows.
 
 ## Overview
 
-Wiring a [**context**](/docs/reference/glossary#context), the type the implementation runs against,
-means recording which provider it uses for each component. `DelegateComponent` is the trait that
+In [Context-Generic Programming (CGP)](/docs/), wiring a
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, means
+recording which provider it uses for each component. CGP enables pluggable trait implementations in
+Rust, and `DelegateComponent` is the table that records each choice. `DelegateComponent` is the trait that
 record is made of, and one impl is one entry:
 
 ```rust

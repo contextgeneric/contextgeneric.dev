@@ -26,9 +26,11 @@ because this trait is what a missing-dependency error names.
 
 ## Overview
 
-A provider states what it needs from its [**context**](/docs/reference/glossary#context), the type
-the implementation runs against, in its own `where` clause: a field, an
-[abstract type](/docs/reference/glossary#abstract-type), another trait. When one of those
+In [Context-Generic Programming (CGP)](/docs/), a provider states what it needs from its
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, in its
+own `where` clause: a field, an [abstract type](/docs/reference/glossary#abstract-type), another
+trait. CGP enables pluggable trait implementations in Rust, and `IsProviderFor` is the marker that
+makes a provider's missing dependency show up by name. When one of those
 requirements is not met, you want the compiler to say which, and left to itself it will not. Asking
 whether a provider implements its provider trait has two candidate impls in scope, the blanket impl
 that routes through the wiring table and the one you wrote, and when more than one impl could apply,

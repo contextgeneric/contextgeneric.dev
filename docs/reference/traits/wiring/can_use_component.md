@@ -24,8 +24,9 @@ probing one case.
 
 ## Overview
 
-CGP's wiring is lazy: writing a wiring line does not check that the chosen provider's own
-requirements are met. That check happens where the trait is first used, usually far from the wiring,
+In [Context-Generic Programming (CGP)](/docs/), wiring is lazy: writing a wiring line does not check
+that the chosen provider's own requirements are met. CGP enables pluggable trait implementations in
+Rust, and `CanUseComponent` is the check that a context's choice is complete. That check happens where the trait is first used, usually far from the wiring,
 and the error there is poor, because asking whether a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against,
 implements the consumer trait makes the compiler report only the outermost unmet bound. The root

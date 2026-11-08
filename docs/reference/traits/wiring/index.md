@@ -10,9 +10,9 @@ The three traits every context's wiring rests on, and the ones a wiring error na
 
 ## Overview
 
-Wiring a [**context**](/docs/reference/glossary#context), the type the implementation runs against,
-records which provider it uses for each component and checks that the provider's own requirements
-are met. These traits carry that, and you read them far more often than you write them, because a
+In [Context-Generic Programming (CGP)](/docs/), wiring a
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, records
+which provider it uses for each component and checks that the provider's own requirements are met. These traits carry that, and you read them far more often than you write them, because a
 [`delegate_components!`](../../macros/delegate_components.md) table generates the first two and a
 [`check_components!`](../../macros/check_components.md) block asserts the third.
 
