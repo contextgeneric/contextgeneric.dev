@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Extensible records'
 sidebar_position: 13
+description: 'How a struct field list becomes a type, how a builder records which fields are present, and how independent providers assemble a record the compiler checks.'
 ---
 
 # Extensible records
 
-Extensible records let generic code read and assemble structs through their field names and types.
-A provider can contribute fields without knowing the final struct, so several independent providers
-can supply parts of a larger value. As those parts are assembled, the builder's type tracks which
-fields are present, letting the compiler check that construction is complete.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations whose
+providers can contribute fields. Extensible records let generic code read and assemble structs
+through their field names and types. A provider can contribute fields without knowing the final
+struct, so several independent providers can supply parts of a larger value. As those parts are
+assembled, the builder's type tracks which fields are present, letting the compiler check that
+construction is complete.
 
 ## What a closed struct cannot do
 
