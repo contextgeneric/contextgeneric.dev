@@ -11,6 +11,7 @@ Bridge in both directions between a `Result`-valued output and a fallible handle
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `TryPromote<Provider>` unifies the two ways of expressing fallibility: a handler that *returns* a
 `Result`, and a genuinely fallible handler trait. It converts between them in both directions on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against, and every

@@ -12,6 +12,7 @@ branch.
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `PipeMonadic<M, Providers>` composes a handler list `Providers` under a monad `M` into one
 short-circuiting handler, on a [**context**](/docs/reference/glossary#context), the type the
 implementation runs against. Each step runs only on the previous step's continue branch, and the

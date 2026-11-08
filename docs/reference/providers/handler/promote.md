@@ -12,6 +12,7 @@ without adding behavior of its own.
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `Promote<Provider>` re-exposes one inner provider under a more capable member of the handler family.
 It treats a less capable provider as a more capable one without introducing error or async behavior
 itself, so the [**context**](/docs/reference/glossary#context), the type the implementation runs

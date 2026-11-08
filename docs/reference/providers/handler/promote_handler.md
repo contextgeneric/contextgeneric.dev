@@ -24,12 +24,13 @@ returning `Result`. This page explains what the bundle emits.
 
 ## Overview
 
-`PromoteHandler<Provider>` starts from an `AsyncComputer` whose output is a `Result` over the
-context's error type, the base `#[cgp_computer]` builds for an `async fn` returning `Result`, and
-fills in the fallible async members on a [**context**](/docs/reference/glossary#context), the type
-the implementation runs against. Despite its name, its base is not a `Handler`: it produces the
-`Handler` by reading the base's `Result` as the failure path. Like every CGP provider, it carries no
-runtime value.
+[Context-Generic Programming (CGP)](/docs/) lets one provider answer several related trait calls
+through wiring, and `PromoteHandler<Provider>` starts from an `AsyncComputer` whose output is a
+`Result` over the context's error type, the base `#[cgp_computer]` builds for an `async fn`
+returning `Result`. It fills in the fallible async members on a
+[**context**](/docs/reference/glossary#context), the type the implementation runs against. Despite
+its name, its base is not a `Handler`: it produces the `Handler` by reading the base's `Result` as
+the failure path. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 

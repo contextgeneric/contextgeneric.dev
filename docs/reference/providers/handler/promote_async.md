@@ -11,10 +11,12 @@ Lift a synchronous handler into an asynchronous one.
 
 ## Overview
 
-`PromoteAsync<Provider>` runs a synchronous inner provider inside an async method, so a synchronous
-handler serves an asynchronous slot on a [**context**](/docs/reference/glossary#context), the type
-the implementation runs against. The returned future does all its work when first polled and awaits
-nothing, so no actual asynchrony is added. It is usually reached through a promotion bundle such as
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
+call, and `PromoteAsync<Provider>` runs a synchronous inner provider inside an async method, so a
+synchronous handler serves an asynchronous slot on a
+[**context**](/docs/reference/glossary#context), the type the implementation runs against. The
+returned future does all its work when first polled and awaits nothing, so no actual asynchrony is
+added. It is usually reached through a promotion bundle such as
 [`PromoteComputer`](promote_computer.md), and it is written by hand when a context wires one slot at
 a time. Like every CGP provider, it carries no runtime value; the inner provider rides in
 `PhantomData`.

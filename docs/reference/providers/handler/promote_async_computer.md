@@ -23,12 +23,13 @@ components through such a provider, or through its `HandlerComponent` entry, whi
 
 ## Overview
 
-`PromoteAsyncComputer<Provider>` starts from a provider that implements `AsyncComputer`, the
-asynchronous infallible base, and fills in the other async members of the handler family on a
-[**context**](/docs/reference/glossary#context), the type the implementation runs against. It is the
-async-base counterpart of [`PromoteComputer`](promote_computer.md), and it fills in only async
-members, because the synchronous ones cannot be derived from an async base. Like every CGP provider,
-it carries no runtime value.
+[Context-Generic Programming (CGP)](/docs/) lets one provider answer several related trait calls
+through wiring, and `PromoteAsyncComputer<Provider>` starts from a provider that implements
+`AsyncComputer`, the asynchronous infallible base. It fills in the other async members of the
+handler family on a [**context**](/docs/reference/glossary#context), the type the implementation
+runs against. It is the async-base counterpart of [`PromoteComputer`](promote_computer.md), and it
+fills in only async members, because the synchronous ones cannot be derived from an async base. Like
+every CGP provider, it carries no runtime value.
 
 ## Usage
 

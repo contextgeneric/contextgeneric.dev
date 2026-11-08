@@ -12,6 +12,7 @@ next.
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 `PipeHandlers<Providers>` generalizes [`ComposeHandlers`](compose_handlers.md) from two handlers to
 a list of them. It takes a [`Product!`](../../macros/product.md) list of providers and folds the
 whole pipeline into one nested `ComposeHandlers`, so the input flows through each stage in turn, on

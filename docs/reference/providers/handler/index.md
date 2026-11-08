@@ -11,15 +11,16 @@ through a pipeline, returning the input unchanged, and lifting one handler shape
 
 ## Overview
 
-The handler combinators exist because the handler family is not one trait but several related ones,
-and code is rarely written against all of them at once. A provider author writes a plain synchronous
-[`Computer`](../../components/handler/computer.md), a fallible
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and the
+handler combinators work across the family of traits that model computation. That family is not one
+trait but several related ones, and code is rarely written against all of them at once. A provider
+author writes a plain synchronous [`Computer`](../../components/handler/computer.md), a fallible
 [`TryComputer`](../../components/handler/try_computer.md), or an async
 [`Handler`](../../components/handler/handler.md), depending on the computation. The combinators let
 those single-shape providers be wired where a different shape is expected, and let several providers
 be glued into a larger one, on a [**context**](/docs/reference/glossary#context), the type the
 implementation runs against. Like every CGP provider, each combinator is zero-sized: its type
-parameters are inner providers carried in `PhantomData`.
+parameters ride in `PhantomData`.
 
 The promotion bundles are in the prelude. Every other combinator here, from `ComposeHandlers` to
 `UseInputDelegate`, is imported from `cgp::extra::handler`, as are the consumer traits such as

@@ -11,7 +11,8 @@ Run two handlers back to back, feeding the output of the first as the input of t
 
 ## Overview
 
-`ComposeHandlers<ProviderA, ProviderB>` is the fundamental sequencing combinator. It runs
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
+`ComposeHandlers<ProviderA, ProviderB>` is the fundamental sequencing combinator for them. It runs
 `ProviderA`, then runs `ProviderB` on `ProviderA`'s output, under one
 [**context**](/docs/reference/glossary#context), the type the implementation runs against, and one
 `Code` tag. It implements the four owned-input members of the handler family, `Computer`,

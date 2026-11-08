@@ -24,11 +24,12 @@ bundle emits.
 
 ## Overview
 
-`PromoteComputer<Provider>` starts from a provider that implements `Computer`, the synchronous,
-infallible, owned-input base, and fills in every other member of the handler family by promotion, on
-a [**context**](/docs/reference/glossary#context), the type the implementation runs against. It is a
-delegation table that routes each remaining handler component to the right single-step promotion.
-Like every CGP provider, it carries no runtime value.
+[Context-Generic Programming (CGP)](/docs/) lets one provider answer several related trait calls
+through wiring, and `PromoteComputer<Provider>` starts from a provider that implements `Computer`,
+the synchronous, infallible, owned-input base, and fills in every other member of the handler family
+by promotion, on a [**context**](/docs/reference/glossary#context), the type the implementation runs
+against. It is a delegation table that routes each remaining handler component to the right
+single-step promotion. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 

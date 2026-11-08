@@ -12,6 +12,7 @@ short-circuit on `Ok`.
 
 ## Overview
 
+Under [Context-Generic Programming (CGP)](/docs/), a pipeline is a sequence of chosen providers, and
 `BindOk<M, Cont>` implements a single bind step of the ok monad. [`PipeMonadic`](pipe_monadic.md)
 composes it for you when it folds a pipeline under [`OkMonadic`](index.md#the-monad-markers), so
 most code never names it. It is usable directly as a handler provider on a

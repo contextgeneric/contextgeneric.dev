@@ -11,12 +11,13 @@ Dispatch a handler to a different inner provider per input type, through a looku
 
 ## Overview
 
-`UseInputDelegate<Components>` chooses a handler provider by the type of the value being handled. An
-ordinary handler component is answered by one provider. `UseInputDelegate` performs a second lookup:
-it treats the handler's `Input` type as a key and reads the matching inner provider out of a table,
-so a single wiring entry on a [**context**](/docs/reference/glossary#context), the type the
-implementation runs against, fans out to many input-specific providers. Like every CGP provider, it
-holds no runtime value; the table rides in `PhantomData`.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
+call, and `UseInputDelegate<Components>` chooses a handler provider by the type of the value being
+handled. An ordinary handler component is answered by one provider. `UseInputDelegate` performs a
+second lookup: it treats the handler's `Input` type as a key and reads the matching inner provider
+out of a table, so a single wiring entry on a [**context**](/docs/reference/glossary#context), the
+type the implementation runs against, fans out to many input-specific providers. Like every CGP
+provider, it holds no runtime value; the table rides in `PhantomData`.
 
 It is the sibling of [`UseDelegate`](../use_delegate.md). Where `UseDelegate` keys on the `Code`
 parameter of a handler, `UseInputDelegate` keys on the `Input` parameter, so the provider that

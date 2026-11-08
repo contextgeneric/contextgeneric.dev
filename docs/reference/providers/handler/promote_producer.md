@@ -23,8 +23,10 @@ sets out. This page explains what the bundle emits.
 
 ## Overview
 
-`PromoteProducer<Provider>` starts from a [`Producer`](../../components/handler/producer.md), a
-provider that takes no input, and fills in every input-taking member of the handler family on a
+[Context-Generic Programming (CGP)](/docs/) lets one provider answer several related trait calls
+through wiring, and `PromoteProducer<Provider>` starts from a
+[`Producer`](../../components/handler/producer.md), a provider that takes no input. It fills in
+every input-taking member of the handler family on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. The
 single produced value flows out of every handler shape regardless of the input, which the promotion
 discards. Like every CGP provider, it carries no runtime value.

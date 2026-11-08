@@ -11,12 +11,13 @@ The identity handler: return the input unchanged as the output.
 
 ## Overview
 
-`ReturnInput` ignores the [**context**](/docs/reference/glossary#context), the type the
-implementation runs against, and the `Code` tag, and returns its input as its output. It is the
-neutral element of handler composition: putting it before or after any other handler leaves that
-handler's behavior unchanged. It fills a handler slot where no transformation is wanted and stands
-in as a placeholder stage. Like every CGP provider, it carries no runtime value; it is a plain unit
-struct.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
+call, and `ReturnInput` is the provider that ignores the
+[**context**](/docs/reference/glossary#context), the type the implementation runs against, and the
+`Code` tag, and returns its input as its output. It is the neutral element of handler composition:
+putting it before or after any other handler leaves that handler's behavior unchanged. It fills a
+handler slot where no transformation is wanted and stands in as a placeholder stage. Like every CGP
+provider, it carries no runtime value; it is a plain unit struct.
 
 ## Usage
 

@@ -23,9 +23,10 @@ components through such a provider, or through the entries that serve any base, 
 
 ## Overview
 
-`PromoteTryComputer<Provider>` starts from a `Computer` whose output is a `Result` over the
-context's error type, the base [`#[cgp_computer]`](../../macros/cgp_computer.md) generates for a
-function returning `Result`, and fills in the rest of the handler family on a
+[Context-Generic Programming (CGP)](/docs/) lets one provider answer several related trait calls
+through wiring, and `PromoteTryComputer<Provider>` starts from a `Computer` whose output is a
+`Result` over the context's error type, the base [`#[cgp_computer]`](../../macros/cgp_computer.md)
+generates for a function returning `Result`, and fills in the rest of the handler family on a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. It reads
 that `Result` as the failure path for the fallible slot through [`TryPromote`](try_promote.md), and
 derives the other members from the computer form through [`PromoteComputer`](promote_computer.md).

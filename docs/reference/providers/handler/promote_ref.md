@@ -11,14 +11,15 @@ Bridge between by-value handlers and by-reference handlers, in both directions.
 
 ## Overview
 
-`PromoteRef<Provider>` lets a provider written for one input mode serve a slot that uses the other,
-without manual dereference code, on a [**context**](/docs/reference/glossary#context), the type the
-implementation runs against. It is the most thoroughly implemented promotion: it covers all four
-input-taking members of the family, `Computer`, `TryComputer`, `AsyncComputer`, and `Handler`, in
-both directions, and the two directions ask different things of the inner provider. Every promotion
-bundle routes its `…Ref` slots through it, and it is written by hand when a context wires one slot
-at a time. Like every CGP provider, it carries no runtime value; the inner provider rides in
-`PhantomData`.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider for each trait
+call, and `PromoteRef<Provider>` lets a provider written for one input mode serve a slot that uses
+the other, without manual dereference code, on a [**context**](/docs/reference/glossary#context),
+the type the implementation runs against. It is the most thoroughly implemented promotion: it covers
+all four input-taking members of the family, `Computer`, `TryComputer`, `AsyncComputer`, and
+`Handler`, in both directions, and the two directions ask different things of the inner provider.
+Every promotion bundle routes its `…Ref` slots through it, and it is written by hand when a context
+wires one slot at a time. Like every CGP provider, it carries no runtime value; the inner provider
+rides in `PhantomData`.
 
 ## Usage
 

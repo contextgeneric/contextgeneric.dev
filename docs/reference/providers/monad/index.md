@@ -11,8 +11,9 @@ appropriate branch.
 
 ## Overview
 
-The monad providers build [monadic handler composition](/docs/concepts/monadic-handlers) on top of
-the [`Computer`](../../components/handler/computer.md) family. They let a sequence of handlers whose
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and the
+monad providers build [monadic handler composition](/docs/concepts/monadic-handlers) on top of the
+[`Computer`](../../components/handler/computer.md) family. They let a sequence of handlers whose
 outputs carry a "continue" case and a "stop" case be chained without pattern-matching each step by
 hand: the monad decides which case threads forward and which short-circuits. A built pipeline is
 itself a provider for `Computer`, `AsyncComputer`, `TryComputer`, and `Handler`, so it wires into a
