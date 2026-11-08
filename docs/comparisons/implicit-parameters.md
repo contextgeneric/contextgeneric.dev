@@ -1,17 +1,17 @@
 ---
 sidebar_label: 'Implicit parameters'
 sidebar_position: 5
-description: 'Compare CGP context fields and wiring with Scala contextual parameters, Haskell implicit parameters, and type-class selection.'
+description: 'Compare Context-Generic Programming context fields and wiring with Scala contextual parameters, Haskell implicit parameters, and type-class selection.'
 ---
 
 # Implicit parameters
 
-CGP supplies implicit arguments from a context's fields and selects implementations through wiring.
-It is a language extension for Rust, with pluggable trait implementations at compile-time,
-implemented as a library on stable Rust whose consumer traits are ordinary Rust traits; the
-[Introduction](/docs/) explains the basics. For readers familiar with Scala's `given` and `using`,
-Haskell's `ImplicitParams`, or `Reader`, this page compares how dependencies travel through a
-program, how implementations are selected, and what each approach costs.
+[Context-Generic Programming](/docs/) supplies implicit arguments from a context's fields and
+selects implementations through wiring. CGP extends Rust with pluggable trait implementations,
+chosen per context and resolved at compile time, as a library on stable Rust whose consumer traits
+are ordinary Rust traits. For readers familiar with Scala's `given` and `using`, Haskell's
+`ImplicitParams`, or `Reader`, this page compares how dependencies travel through a program, how
+implementations are selected, and what each approach costs.
 
 ## In your terms
 
@@ -56,9 +56,9 @@ renderWebsite("/home")     // the given Config is supplied automatically
 
 Scala uses contextual parameters for type classes as well as configuration values. A
 `given Comparator[Int]` supplies the implementation required by a `using Comparator[A]` parameter.
-Scala 3.6 introduced the colon form for a given with a body; the older
-`given Comparator[Int] with` form is also accepted. See the
-[Scala reference](https://docs.scala-lang.org/scala3/reference/contextual/givens.html).
+Parts of the given syntax changed in Scala 3.6, including the colon form for a given with a body.
+The original `given Comparator[Int] with` form remains accepted for now and will be phased out. See
+the [Scala reference](https://docs.scala-lang.org/scala3/reference/contextual/givens.html).
 
 ```scala
 trait Comparator[A]:
