@@ -299,7 +299,7 @@ For more information about this error, try `rustc --explain E0599`.
 Here adding `#[uses(PersonName)]` beneath `#[cgp_fn]` on `greeting` supplies the missing requirement.
 The same remedy applies inside a [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) provider body.
 Without the rewrite, the compiler refers to a method on the generated `&__Context__` parameter
-and never names the attribute. Many codes from `[CGP-E030]` through `[CGP-E044]` similarly
+and never names the attribute. Many codes from `[CGP-E030]` through `[CGP-E039]` similarly
 identify a mistake in a macro's input and offer a specific correction.
 
 ## Errors that pass through unchanged
@@ -309,9 +309,6 @@ every class. An error with no `[CGP-Exxx]` code anywhere in it, in the headline 
 it, is one the tool passed through, so read it as the compiler wrote it. These are the ones you are most likely
 to meet:
 
-- **A check on a generic context:** `check_components! { <T> App<T> { … } }` keeps the compiler's headline, though
-  its notes name the consumer and provider traits. Checking one concrete instance, such as `App<u32>`, gets the
-  usual error.
 - **An unconstrained lifetime or blanket key:** a per-entry lifetime the provider uses, or a blanket entry keyed
   by its own parameter, keeps the compiler's `E0207`, whose suggested fixes do not compile. See
   [A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing).
