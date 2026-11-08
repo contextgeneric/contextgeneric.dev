@@ -1,16 +1,16 @@
 ---
 sidebar_label: "Rust's own proposals"
 sidebar_position: 1
-description: 'How CGP compares with Rust proposals for specialization, named implementations, dictionary passing, and contexts and capabilities.'
+description: 'Compare Context-Generic Programming with Rust proposals for specialization, named implementations, dictionary passing, and contexts and capabilities.'
 ---
 
 # Rust's own proposals
 
-CGP offers explicit implementation selection and access to context values through a
-[stable Rust library](/docs/). It is a language extension with pluggable implementations behind
-ordinary Rust traits. This page compares those choices with specialization, named impls, dictionary
-passing, and contexts and capabilities, including what each language proposal can express beyond
-CGP.
+[Context-Generic Programming](/docs/) offers explicit implementation selection and access to
+context values. CGP extends Rust with pluggable trait implementations, chosen per context and
+resolved at compile time, as a library on stable Rust whose consumer traits are ordinary Rust
+traits. This page compares those choices with specialization, named impls, dictionary passing, and
+contexts and capabilities, including what each language proposal can express beyond CGP.
 
 ## In your terms
 
@@ -37,7 +37,7 @@ only if `Trait` is a local trait, or at least one of the types `T0..=Tn` is a lo
 uncovered type parameter appears before it. The *overlap rule* rejects two implementations that "can
 be instantiated with the same type" ([Rust
 Reference](https://doc.rust-lang.org/reference/items/implementations.html);
-[RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html) ).
+[RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html)).
 
 These rules keep trait selection consistent across a program. For example, operations on a
 `HashMap<K, V>` must agree on the hashing and equality implementations for `K`. The
@@ -156,7 +156,7 @@ fn smallest_element<T, +PartialOrd<T>, +Copy<T>, +Drop<T>>(list: @Array<T>) -> T
 
 A caller can let the compiler infer the impl from those visible at the call site ([Cairo Book,
 *Traits*](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html);
-[*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html) ). This
+[*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html)). This
 inference matters for the comparison: because resolution uses what is in scope, a call site's
 imports decide which implementation it uses.
 
@@ -301,8 +301,8 @@ Constructing `App` supplies the value that `GreetHello` reads. The access resolv
 field read, and a missing field causes a compile error when the component is checked or used.
 [`check_components!`](/docs/reference/macros/check_components) lets you request that check beside
 the wiring. `App` is an environmental context; the greeter is
-[self-targeted](/docs/reference/glossary#self-targeted-component) because its method acts on `self`
-.
+[self-targeted](/docs/reference/glossary#self-targeted-component) because its method acts on
+`self`.
 
 ### The context is the dictionary
 
@@ -322,7 +322,7 @@ an accepted RFC but remains unstable because of a soundness problem ([tracking i
 #31844](https://github.com/rust-lang/rust/issues/31844)). Named impls and dictionary passing remain
 design sketches whose authors discuss syntax, ergonomics, migration, and coherence
 ([Boxy](https://www.boxyuwu.blog/posts/an-incoherent-rust/);
-[Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html) ). Contexts
+[Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)). Contexts
 and capabilities has open questions about thread boundaries and scope
 ([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)). Cairo's
 scope-based resolution requires the caller to import the needed impls; two call sites can then
@@ -355,9 +355,9 @@ CGP's explicit context introduces limits that the proposals address differently:
   trait bounds, but CGP does not choose a provider by searching the impls imported at each call.
 - **Bindings belong to types.** A lexical block does not shadow a context's wiring. A different
   selection requires another context type or a context adapter.
-- **Implicit arguments borrow the context.** A method can take `&self` or `&mut self`, but implicit
-  a mutable implicit argument must be the only implicit argument in that method. Independent ownership or mutation
-  may need a different data layout, interior mutability, or cloning.
+- **Implicit arguments borrow the context.** A method can take `&self` or `&mut self`, but a
+  mutable implicit argument must be the only implicit argument in that method. Independent
+  ownership or mutation may need a different data layout, interior mutability, or cloning.
 - **Existing traits retain their rules.** CGP introduces provider traits and wiring; it does not
   enable specialization or additional impls of an arbitrary foreign trait.
 
