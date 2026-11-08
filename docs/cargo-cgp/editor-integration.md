@@ -14,7 +14,8 @@ lead with the same root causes as they do in a terminal.
 This page covers VS Code with the
 [rust-analyzer extension](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
 Before configuring it, [install](./installation.md) the [`cargo-cgp`](./index.md) toolchain for
-[CGP](/docs/) and confirm that `cargo cgp check` works in a terminal inside your project.
+[Context-Generic Programming (CGP)](/docs/) and confirm that `cargo cgp check` works in a terminal
+inside your project.
 
 ## Set it up
 

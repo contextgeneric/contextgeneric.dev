@@ -8,7 +8,8 @@ description: 'Every cargo-cgp command and option, the environment variables it r
 # Command reference
 
 This page collects the commands, options, environment variables, files, and exit statuses of
-[`cargo-cgp`](./index.md) version 0.1.0. Use it to look up an exact flag or setting; the other
+[`cargo-cgp`](./index.md) version 0.1.0, the error toolchain for
+[Context-Generic Programming (CGP)](/docs/). Use it to look up an exact flag or setting; the other
 pages in this section develop working examples.
 
 ## Running it
@@ -115,7 +116,7 @@ driver and matching compiler libraries:
 |---|---|
 | `RUSTC_WORKSPACE_WRAPPER` | The driver. This replaces any value you set, so a wrapper of your own given through this variable does not run under the tool, which prints a warning saying so. |
 | `RUSTUP_TOOLCHAIN` | The pinned nightly, unless `CARGO_CGP_NO_MANAGE` is set. |
-| `LD_LIBRARY_PATH` | The `lib` directory of the toolchain the check runs under, added in front of any existing value, so the driver can load the compiler. |
+| `LD_LIBRARY_PATH` | The `lib` directory of the toolchain the check runs under, added in front of any existing value, so the driver can load the compiler. On macOS the tool sets `DYLD_FALLBACK_LIBRARY_PATH` instead, and on Windows it prepends to `PATH`. |
 
 ## Files and directories
 
