@@ -112,13 +112,19 @@ writes the new path in. A snapshot also quotes rustc's own wording, so
 ## Diagnostic capture programs
 
 `diagnostics/cgp_serde/` holds complete programs for the cgp-serde debugging guide's missing
-`Vec<u8>` entry, missing iterator-reference entry, and absent JSON error wiring. Each program is
-intended to fail. The diagnostic capture harness compiles each file as a library with the sibling
-`cgp` and `cgp-serde` checkouts, using cargo-cgp's pinned nightly and local driver.
+`Vec<u8>` entry, missing iterator-reference entry, absent JSON error wiring, and fixed-size array
+key rejected by the macro parser. Each program is intended to fail. The diagnostic capture harness
+compiles each file as a library with the sibling `cgp` and `cgp-serde` checkouts, using cargo-cgp's
+pinned nightly and local driver.
 
-These files are separate from the integration-test suite because they need the project's own
-dependencies. `cargo test` and CI do not compile them; fresh diagnostic captures check their
-failures. The remaining Projects examples are checked in their project checkouts.
+`diagnostics/reference/shared_missing_name.rs` reproduces the compile-errors page's merged
+diagnostic: three checked components need the same absent field. The capture must show all three
+check entries and both secondary labels, so a single call failure cannot substitute for it.
+
+These programs are checked by the diagnostic capture harness. The cgp-serde cases need the project's
+own dependencies, and the reference case checks cargo-cgp's diagnostic merging. `cargo test` and CI
+do not compile these files; fresh diagnostic captures check their failures. The remaining Projects
+examples are checked in their project checkouts.
 
 ## Generated code
 
