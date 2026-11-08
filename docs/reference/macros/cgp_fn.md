@@ -11,8 +11,8 @@ Define a trait with a single [blanket implementation](/docs/reference/glossary#b
 
 ## Overview
 
-`#[cgp_fn]` is the simplest CGP construct that does anything useful. You write a plain function and
-mark the values it needs from the **context**. The context is the type the method runs on,
+`#[cgp_fn]` is the simplest construct in [Context-Generic Programming (CGP)](/docs/) that does
+anything useful. You write a plain function and mark the values it needs from the **context**. The context is the type the method runs on,
 and it supplies those values as its own fields. The macro turns the function into a trait that
 every type with those fields gets automatically:
 

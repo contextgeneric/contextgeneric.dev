@@ -11,8 +11,8 @@ Rewrite a trait's `async fn` declarations into the lint-clean `-> impl Future` f
 
 ## Overview
 
-Writing a bare `async fn` inside a public trait compiles on stable Rust, and the compiler warns
-about it. The `async_fn_in_trait` lint fires because the future such a method returns is *opaque*: a
+In [Context-Generic Programming (CGP)](/docs/), writing a bare `async fn` inside a public trait
+compiles on stable Rust, and the compiler warns about it. The `async_fn_in_trait` lint fires because the future such a method returns is *opaque*: a
 caller working through the trait cannot name it, so they cannot require anything of it, most
 importantly that it is `Send`. The hand-written way to silence the lint is to declare the method as
 a future-returning function instead, which is correct and obscures the intent:

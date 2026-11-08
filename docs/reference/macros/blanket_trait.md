@@ -11,7 +11,8 @@ Generate a blanket impl from a trait with default methods and [supertrait](/docs
 
 ## Overview
 
-The pattern CGP is built on is an **extension trait**: a trait with a clean interface whose
+The pattern [Context-Generic Programming (CGP)](/docs/) is built on is an **extension trait**: a
+trait with a clean interface whose
 [blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) carries the
 real requirements in its `where` clause. A trait declared `FooBar: Foo + Bar` with a default `foo_bar` method
 exposes only `foo_bar` to callers, while the `Foo + Bar` requirements live on the impl. So any type
