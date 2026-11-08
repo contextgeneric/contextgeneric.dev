@@ -368,7 +368,7 @@ Which macro you invoke decides whether the struct is declared, so use `#[cgp_new
 rewrite above finds the context by reading the inner bound's first argument. On a component with a
 lifetime, that argument is the lifetime, so the macro builds no counterpart and copies the bound as-is.
 The stack compiles and runs correctly, but it loses the propagation: a dependency unmet inside the
-inner provider no longer surfaces at the outer one, and `#[check_providers(...)]` cannot say which
+inner provider does not surface at the outer one, and `#[check_providers(...)]` cannot say which
 layer of such a stack is at fault. Components without lifetime parameters are unaffected.
 
 **The macro does not check the component argument against the trait.** Passing a component that does

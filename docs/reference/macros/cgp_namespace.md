@@ -402,7 +402,7 @@ namespace first and join it by its name. The inheritance header and a `for` loop
 a path.
 
 **`open` does not combine with a prefixed component in a joined namespace.** Once a component's lookups are
-routed under a prefix, `open`, which roots the route at the bare component name, no longer reaches those
+routed under a prefix, `open`, which roots the route at the bare component name, does not reach those
 entries. Write the per-value entries with the full prefixed path instead.
 
 **A cyclic parent chain fails at both definitions, and a self-inheriting namespace at the macro.** Two namespaces inheriting each

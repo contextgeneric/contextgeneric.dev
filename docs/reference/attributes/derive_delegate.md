@@ -14,7 +14,7 @@ Generate the `UseDelegate` dispatcher impl for a component. Superseded by the `o
 ### Legacy: read, don't write
 
 `#[derive_delegate]` and the [`UseDelegate`](../providers/use_delegate.md) provider it generates are the
-older way to choose an implementation per type. A component no longer needs this attribute to be
+older way to choose an implementation per type. A component does not need this attribute to be
 dispatched on a type parameter: the `open` statement of
 [`delegate_components!`](../macros/delegate_components.md) does the same job through machinery every
 component already has, without a separate table or a wrapper.
