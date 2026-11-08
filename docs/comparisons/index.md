@@ -1,20 +1,20 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'Compare CGP with familiar programming models through vocabulary, examples, trade-offs, and limits.'
+description: 'Compare Context-Generic Programming with familiar programming models through vocabulary, examples, trade-offs, and limits.'
 ---
 
 # Comparisons
 
-These pages explain CGP through related ideas you may already know: dependency injection,
-type classes, effect handlers, dynamic dispatch, and other approaches to reusable implementations.
-Each comparison maps the vocabulary, illustrates the mechanisms, and explains the costs and cases
-where the other approach fits better.
+These pages place [Context-Generic Programming](/docs/) beside the ideas you may already know:
+dependency injection, type classes, effect handlers, dynamic dispatch, and other approaches to
+reusable implementations. CGP extends Rust with pluggable trait implementations, chosen per context
+and resolved at compile time, and each comparison maps one familiar model onto that machinery, then
+marks where the correspondence stops.
 
-CGP is a language extension for Rust, with pluggable trait implementations at compile-time.
-It is a library on stable Rust, and its consumer traits are ordinary Rust traits. The
-[Introduction](/docs/) explains those foundations; the comparisons focus on how they relate to
-other programming models.
+CGP is a library on stable Rust, and a consumer trait is an ordinary Rust trait. Every page states
+that frame, because the comparison is about where the ideas meet rather than about abandoning the
+other tool.
 
 ## Which page to read
 
