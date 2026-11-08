@@ -23,9 +23,10 @@ does.
 
 ## Overview
 
-[`MapField`](./map_field.md) reads through a field of a generic
-[**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
-values it needs as its fields, by handing the borrowed field to a closure rather than returning it.
+In [Context-Generic Programming (CGP)](/docs/), [`MapField`](./map_field.md) reads through a field
+of a generic [**context**](/docs/reference/glossary#context), the type the method runs on, which
+supplies the values it needs as its fields, by handing the borrowed field to a closure rather than
+returning it.
 `FieldMapper` is the same operation in provider shape, with a provider as `Self` and the context as
 an explicit type argument. This is the form a getter provider needs, because a provider trait's
 method has its lifetimes fixed by the trait, so a chained read inside it cannot take the lifetime

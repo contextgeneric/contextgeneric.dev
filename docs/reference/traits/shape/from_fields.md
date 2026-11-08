@@ -11,8 +11,8 @@ Rebuilding a concrete value from its shape.
 
 ## Overview
 
-[`ToFields`](./to_fields.md) takes a value apart into an anonymous list of named entries.
-`FromFields` is the return journey. It closes the loop for generic code: decompose a value, work on
+In [Context-Generic Programming (CGP)](/docs/), [`ToFields`](./to_fields.md) takes a value apart
+into an anonymous list of named entries. `FromFields` is the return journey. It closes the loop for generic code: decompose a value, work on
 the entries without naming the type, and put a concrete value back together at the end. Both
 directions go through the identical `Fields` type, so **the shapes line up by construction rather
 than by check**: there is nothing to validate and nothing that can fail.

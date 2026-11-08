@@ -10,8 +10,9 @@ A type's whole shape as a single type, and the conversions that move a value thr
 
 ## Overview
 
-Where [field access](../field-access/index.md) reads one named field, these traits describe a type's
-*whole shape* at once, every field, its name, and its type, as a single associated type. That is what
+In [Context-Generic Programming (CGP)](/docs/), where [field access](../field-access/index.md) reads
+one named field, these traits describe a type's *whole shape* at once, every field, its name, and
+its type, as a single associated type. That is what
 lets generic code walk a struct or an enum it cannot name: a serializer, a validator, a merge, a
 dispatcher. The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md).
 

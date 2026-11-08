@@ -24,9 +24,10 @@ provider expresses.
 
 ## Overview
 
-[`FieldGetter`](./field_getter.md) is field access in provider shape, so that a
-[**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
-values it needs as its fields, can choose by wiring which field answers a getter. `MutFieldGetter`
+In [Context-Generic Programming (CGP)](/docs/), [`FieldGetter`](./field_getter.md) is field access
+in provider shape, so that a [**context**](/docs/reference/glossary#context), the type the method
+runs on, which supplies the values it needs as its fields, can choose by wiring which field answers
+a getter. `MutFieldGetter`
 is the same with mutation: it hands back a `&mut` rather than a `&`, for a getter whose method takes
 `&mut self`. The four field-access traits divide on two axes:
 

@@ -11,9 +11,9 @@ Mutable tag-keyed field access.
 
 ## Overview
 
-[`HasField`](./has_field.md) lets an implementation read a field of a
-[**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
-values it needs as its fields, by keying on the field's name as a type. `HasFieldMut` is the same
+In [Context-Generic Programming (CGP)](/docs/), [`HasField`](./has_field.md) lets an implementation
+read a field of a [**context**](/docs/reference/glossary#context), the type the method runs on,
+which supplies the values it needs as its fields, by keying on the field's name as a type. `HasFieldMut` is the same
 access with mutation: it hands back a `&mut` rather than a `&`, so an implementation can change a
 value in place.
 

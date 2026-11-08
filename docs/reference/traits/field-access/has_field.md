@@ -11,9 +11,11 @@ Reading a field by a type-level name, from a context you cannot name.
 
 ## Overview
 
-An implementation written against a [**context**](/docs/reference/glossary#context), the type the
-method runs on, which supplies the values it needs as its fields, is generic over that context and
-cannot name its concrete type, so it cannot write `self.name`. `HasField<Tag>` closes the gap: the
+In [Context-Generic Programming (CGP)](/docs/), an implementation written against a
+[**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
+values it needs as its fields, is generic over that context and cannot name its concrete type, so it
+cannot write `self.name`. CGP enables pluggable trait implementations in Rust, and `HasField` is the
+trait that lets a provider ask for a field by name. `HasField<Tag>` closes the gap: the
 field's name becomes a type, and the implementation asks for the field as a trait bound:
 
 ```rust

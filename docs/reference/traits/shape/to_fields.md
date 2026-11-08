@@ -11,7 +11,8 @@ Taking a value apart into its shape.
 
 ## Overview
 
-[`HasFields`](./has_fields.md) *names* a type's shape. `ToFields` produces a value in it.
+In [Context-Generic Programming (CGP)](/docs/), [`HasFields`](./has_fields.md) *names* a type's
+shape. `ToFields` produces a value in it.
 
 That lets generic code stop working on a concrete struct and start working on an anonymous list of
 named entries: the form a serializer walks, a converter rewrites, or a merge consumes. The concrete

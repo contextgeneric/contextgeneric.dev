@@ -11,8 +11,8 @@ A type's whole shape, as a single type.
 
 ## Overview
 
-Some code needs one field of a type. Other code needs the *shape*, every field, its name, and its
-type, so it can walk them: a serializer, a validator, a builder that merges two structs, a
+In [Context-Generic Programming (CGP)](/docs/), some code needs one field of a type. Other code
+needs the *shape*, every field, its name, and its type, so it can walk them: a serializer, a validator, a builder that merges two structs, a
 dispatcher that routes an enum to a handler per variant. None of those can be written one field at a
 time, and none can name the concrete type either.
 

@@ -11,7 +11,8 @@ Read through a field of a generic context without adding a lifetime bound on its
 
 ## Overview
 
-Reading a field of a field looks like two chained reads, and on a concrete type it is. In generic
+In [Context-Generic Programming (CGP)](/docs/), reading a field of a field looks like two chained
+reads, and on a concrete type it is. In generic
 code it is not: when a [**context**](/docs/reference/glossary#context), the type the method runs on,
 which supplies the values it needs as its fields, holds a field of a generic type `Inner`,
 `context.get_field(..).get_field(..)` returns a borrow that the compiler cannot tie to the context's

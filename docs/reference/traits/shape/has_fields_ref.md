@@ -22,7 +22,8 @@ reserved lifetime name that shows up in an error message.
 
 ## Overview
 
-[`HasFields`](./has_fields.md) describes a type as a list of named entries holding owned values.
+In [Context-Generic Programming (CGP)](/docs/), [`HasFields`](./has_fields.md) describes a type as
+a list of named entries holding owned values.
 Code that only *reads* a value should not have to consume it to walk its shape (a validator, a
 serializer, a routine that inspects a struct and hands it back), so there is a second description in
 which every entry holds a borrow instead.

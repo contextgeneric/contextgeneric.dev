@@ -13,8 +13,9 @@ whose `U` implements `AsRef<T>`.
 
 ## Overview
 
-The trait lets an [`#[implicit]`](../../attributes/implicit.md) argument of type `Option<&str>` read
-any `Option<U>` whose `U` converts to `&str`. The two obvious bounds do not work: requiring the field
+In [Context-Generic Programming (CGP)](/docs/), the trait lets an
+[`#[implicit]`](../../attributes/implicit.md) argument of type `Option<&str>` read any `Option<U>`
+whose `U` converts to `&str`. The two obvious bounds do not work: requiring the field
 to be an `Option<String>` ties it to one type and pulls in `alloc`, and requiring `Value: AsRef<str>`
 fails because `Option<String>` does not implement `AsRef<str>`. `OptionAsRef<T>` names the conversion
 instead of the field's concrete type.

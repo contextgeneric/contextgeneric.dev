@@ -24,7 +24,8 @@ yourself is a getter provider whose read no existing provider expresses.
 
 ## Overview
 
-[`HasField`](./has_field.md) is a bound an implementation states about its own context. Sometimes
+In [Context-Generic Programming (CGP)](/docs/), [`HasField`](./has_field.md) is a bound an
+implementation states about its own context. Sometimes
 the field should instead be **chosen by wiring**, so that each
 [**context**](/docs/reference/glossary#context), the type the method runs on, which supplies the
 values it needs as its fields, decides which of its fields answers a getter. That needs the

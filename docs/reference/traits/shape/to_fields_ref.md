@@ -11,7 +11,8 @@ Walking a value's shape without consuming it.
 
 ## Overview
 
-[`ToFields`](./to_fields.md) takes a value apart into its shape and consumes it in the process. Code
+In [Context-Generic Programming (CGP)](/docs/), [`ToFields`](./to_fields.md) takes a value apart
+into its shape and consumes it in the process. Code
 that only reads (a validator, a serializer, a routine that inspects a struct and hands it back)
 should not have to. `ToFieldsRef` produces the **borrowed** shape instead. The original survives,
 and every entry in the result holds a reference rather than a value.
