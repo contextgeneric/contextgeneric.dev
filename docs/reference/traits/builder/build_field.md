@@ -11,8 +11,10 @@ Setting one currently-absent field of a builder.
 
 ## Overview
 
-`BuildField` is the direction of the [builder family](./has_builder.md) you write most: take a partial
-record with a field absent, supply the value, and get back a [partial record](/docs/reference/glossary#partial-record) with that field present.
+When [Context-Generic Programming (CGP)](/docs/) builds a struct one named field at a time,
+`BuildField` is the direction of its [builder family](./has_builder.md) you write most: take a
+partial record with a field absent, supply the value, and get back a
+[partial record](/docs/reference/glossary#partial-record) with that field present.
 
 `Output` is a **different type** from `Self` (the same partial record with one marker flipped), which is
 what makes the compiler track completeness. A chain of `build_field` calls walks through as many distinct

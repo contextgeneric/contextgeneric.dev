@@ -11,10 +11,11 @@ Finalizing an optional builder, reporting a missing field.
 
 ## Overview
 
-An [optional builder](./has_optional_builder.md) has given up the compile-time completeness check: every
-field is `IsOptional`, so the type no longer records what has been set. Something has to check at run
-time instead, and `FinalizeOptional` is the strict way to do it: it succeeds only if every field holds a
-value, and otherwise reports a missing field by name.
+An [optional builder](./has_optional_builder.md) in [Context-Generic Programming (CGP)](/docs/),
+which assembles a struct generically by its field names, has given up the compile-time completeness
+check: every field is `IsOptional`, so the type no longer records what has been set. Something has
+to check at run time instead, and `FinalizeOptional` is the strict way to do it: it succeeds only if
+every field holds a value, and otherwise reports a missing field by name.
 
 It is one of two endings for an optional builder, and the choice between them is made at the call site
 rather than when the builder is created:

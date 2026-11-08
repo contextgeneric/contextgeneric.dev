@@ -11,10 +11,11 @@ Finalizing a [partial record](/docs/reference/glossary#partial-record), filling 
 
 ## Overview
 
-The core [builder family](../builder/has_builder.md) refuses to finalize an incomplete record, which is what
-catches a missing field at compile time. For a record where some fields have sensible defaults, that
-strictness is the wrong shape. `CanFinalizeWithDefault` relaxes it: every field that is not set becomes
-`Default::default()`, and the result is the concrete struct.
+The core [builder family](../builder/has_builder.md) of [Context-Generic Programming (CGP)](/docs/),
+which assembles a struct generically by its field names, refuses to finalize an incomplete record,
+which is what catches a missing field at compile time. For a record where some fields have sensible
+defaults, that strictness is the wrong shape. `CanFinalizeWithDefault` relaxes it: every field that
+is not set becomes `Default::default()`, and the result is the concrete struct.
 
 **The strict presence check still runs, and it always passes**, because the fields are re-marked to
 `IsPresent` first. That is the layer's whole design in one sentence, and it is why the core

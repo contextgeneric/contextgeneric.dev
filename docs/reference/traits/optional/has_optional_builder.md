@@ -11,10 +11,12 @@ Starting a builder in which every field is already optional.
 
 ## Overview
 
-The core [builder family](../builder/has_builder.md) is deliberately strict: a field is set exactly once, and a
-[partial record](/docs/reference/glossary#partial-record) becomes its concrete struct only when **every** field is present. That strictness is what
-catches a missing field at compile time, and it is too rigid for a record whose fields arrive in an
-unpredictable order, or more than once.
+[Context-Generic Programming (CGP)](/docs/) assembles a struct generically through a
+[builder family](../builder/has_builder.md) that is deliberately strict: a field is set exactly
+once, and a [partial record](/docs/reference/glossary#partial-record) becomes its concrete struct
+only when **every** field is present. That strictness is what catches a missing field at compile
+time, and it is too rigid for a record whose fields arrive in an unpredictable order, or more than
+once.
 
 `HasOptionalBuilder` is the entry point that relaxes it. It hands back a partial value with every field
 marked `IsOptional` rather than `IsNothing`, so each slot holds an `Option` and **absence becomes a
@@ -179,7 +181,7 @@ Conflating them produces an `Option<Option<T>>`.
 ## Related constructs
 
 - [`SetOptional`](./set_optional.md): setting a field on the builder this produces.
-- [`FinalizeOptional`](./finalize_optional.md): the strict ending, reporting the first missing field.
+- [`FinalizeOptional`](./finalize_optional.md): the strict ending, naming a missing field.
 - [`CanFinalizeWithDefault`](./can_finalize_with_default.md): the defaulting ending.
 - [`ToOptional`](./to_optional.md): converting an existing core builder instead of starting fresh.
 - [`HasBuilder`](../builder/has_builder.md): the core entry point this relaxes.

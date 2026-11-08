@@ -23,11 +23,12 @@ optional-field layer reaches for when neither direction fits.
 
 ## Overview
 
-Everything in the [builder family](./has_builder.md) reduces to one operation: change one field's storage
-from one [`MapType`](../type-level/map_type.md) marker to another, and hand back what was there before.
-`UpdateField` is that operation. [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are
-library blanket impls over it, each pinning one transition, which is why the derive writes this general
-form once per field.
+[Context-Generic Programming (CGP)](/docs/) builds a struct generically, one named field at a time,
+and everything in its [builder family](./has_builder.md) reduces to one operation: change one
+field's storage from one [`MapType`](../type-level/map_type.md) marker to another, and hand back
+what was there before. `UpdateField` is that operation. [`BuildField`](./build_field.md) and
+[`TakeField`](./take_field.md) are library blanket impls over it, each pinning one transition, which
+is why the derive writes this general form once per field.
 
 ## Definition
 

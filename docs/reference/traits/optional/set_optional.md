@@ -11,10 +11,11 @@ Setting one field of an optional builder, as many times as you like.
 
 ## Overview
 
-[`BuildField`](../builder/build_field.md) sets an absent field and consumes the slot: the builder's type changes,
-and setting the same field twice is a compile error. `SetOptional` is the optional layer's answer, and its
-defining property is the opposite: an optional field is settable in any order and as many times as you
-like.
+When [Context-Generic Programming (CGP)](/docs/) assembles a struct generically,
+[`BuildField`](../builder/build_field.md) sets an absent field and consumes the slot: the builder's
+type changes, and setting the same field twice is a compile error. `SetOptional` is the optional
+layer's answer, and its defining property is the opposite: an optional field is settable in any
+order and as many times as you like.
 
 ## Definition
 

@@ -24,12 +24,14 @@ needs the destination type before the value is complete.
 
 ## Overview
 
-A [partial record](/docs/reference/glossary#partial-record) is a companion type (`__PartialPerson<IsNothing, IsPresent>`), and generic code holding
+[Context-Generic Programming (CGP)](/docs/) builds a struct generically through a
+[partial record](/docs/reference/glossary#partial-record), a companion type
+(`__PartialPerson<IsNothing, IsPresent>`) that tracks which fields are set, and generic code holding
 one often needs to know what it will *become* before it is complete: to name the return type of a
-routine, to state a bound, to decide what to do next. `PartialData` answers that: its single `Target`
-associated type is the concrete struct or enum the partial value corresponds to. **It is implemented for
-every configuration**, complete or not, and that coverage is the point: the destination is knowable from
-the first `builder()` call, long before any field is set.
+routine, to state a bound, to decide what to do next. `PartialData` answers that: its single
+`Target` associated type is the concrete struct or enum the partial value corresponds to. **It is
+implemented for every configuration**, complete or not, and that coverage is the point: the
+destination is knowable from the first `builder()` call, long before any field is set.
 
 That is the division of labour with [`FinalizeBuild`](./finalize_build.md), which is implemented **only**
 at the all-present configuration. One says where you are going; the other says you have arrived.

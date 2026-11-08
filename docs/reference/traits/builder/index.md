@@ -10,12 +10,13 @@ Assembling a struct one field at a time, with field presence tracked in the type
 
 ## Overview
 
-These traits build a record incrementally, where the fields come from several independent places and
-the result must still be checked at compile time. The build starts from an empty *partial* value and
-adds fields one by one, and each field's presence lives in the type, so finalizing an incomplete
-record is a missing impl rather than a runtime panic. The impls come from
-[`#[derive(BuildField)]`](../../derives/derive_build_field.md), which also generates the partial
-companion type.
+[Context-Generic Programming (CGP)](/docs/) builds and reads Rust structs generically, by their
+named fields, and these traits are its record builder. They build a record incrementally, where the
+fields come from several independent places and the result must still be checked at compile time.
+The build starts from an empty *partial* value and adds fields one by one, and each field's presence
+lives in the type, so finalizing an incomplete record is a missing impl rather than a runtime panic.
+The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.md), which also
+generates the partial companion type.
 
 The family divides into entry points, the update primitive and its two directions, and the finalize
 step.

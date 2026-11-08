@@ -11,6 +11,7 @@ Widening one record into another in a single call.
 
 ## Overview
 
+[Context-Generic Programming (CGP)](/docs/) can convert between structs that share field names.
 Turning a narrow record into a wider one whose extra fields have sensible defaults is a three-step
 motion: start a builder, copy the source's fields, default the rest. `CanBuildWithDefault` is that
 motion as one call.

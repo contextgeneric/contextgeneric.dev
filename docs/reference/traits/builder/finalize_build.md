@@ -11,10 +11,11 @@ Turning a fully-built [partial record](/docs/reference/glossary#partial-record) 
 
 ## Overview
 
-`FinalizeBuild` is where a build ends. What makes it the family's safety argument is not the method but
-**where the impl exists**. It is
-implemented for exactly one configuration of a partial record, the one in which every field is
-`IsPresent`, so calling it on an incomplete value is a *missing impl*, not a runtime check that fails:
+`FinalizeBuild` is where a build ends when [Context-Generic Programming (CGP)](/docs/) assembles a
+struct generically, one named field at a time. What makes it the family's safety argument is not the
+method but **where the impl exists**. It is implemented for exactly one configuration of a partial
+record, the one in which every field is `IsPresent`, so calling it on an incomplete value is a
+*missing impl*, not a runtime check that fails:
 
 ```rust
 let person = Person::builder()
@@ -110,8 +111,8 @@ already at the one configuration the impl covers.
 - **Use [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md)** when unset fields should be filled
   from `Default` rather than rejected. It re-marks every field to `IsPresent` and then calls this, so the
   strict check still runs and always passes.
-- **Use [`FinalizeOptional`](../optional/finalize_optional.md)** when absence should be *reported* at run time
-  rather than caught at compile time. It returns a `Result` naming a missing field.
+- **Use [`FinalizeOptional`](../optional/finalize_optional.md)** when absence should be *reported*
+  at run time rather than caught at compile time. It returns a `Result` naming a missing field.
 - **Stay with `FinalizeBuild`** when every field is genuinely required. Moving to either of the other two
   gives up the compile-time completeness check, which is the reason the family exists.
 

@@ -23,8 +23,9 @@ transform of your own.
 
 ## Overview
 
-[`CanFinalizeWithDefault`](./can_finalize_with_default.md) works by re-marking every field of a partial
-record to `IsPresent` and then calling the ordinary [`finalize_build`](../builder/finalize_build.md).
+[Context-Generic Programming (CGP)](/docs/) tracks each field of a partial record with a type-level
+marker, and [`CanFinalizeWithDefault`](./can_finalize_with_default.md) works by re-marking every
+field to `IsPresent` and then calling the ordinary [`finalize_build`](../builder/finalize_build.md).
 `TransformMapDefault` is the marker that carries the per-field conversions making that possible.
 
 **You name it only when extending the layer.** Using the defaulting workflow means calling

@@ -11,10 +11,12 @@ Turning a complete record into a partial one, with every field present.
 
 ## Overview
 
-[`HasBuilder`](./has_builder.md) starts from nothing: a partial value with every field absent, to be
-filled. `IntoBuilder` starts from the other end: `into_builder(self)` consumes an existing value and
-hands back a partial one with **every field present**. You reach for it when *redistributing* a struct's
-fields rather than assembling one: taking a value apart, moving some fields elsewhere, and rebuilding.
+[Context-Generic Programming (CGP)](/docs/) assembles a struct generically through a builder that
+tracks each field's presence in its type. [`HasBuilder`](./has_builder.md) starts from nothing: a
+partial value with every field absent, to be filled. `IntoBuilder` starts from the other end:
+`into_builder(self)` consumes an existing value and hands back a partial one with **every field
+present**. You reach for it when *redistributing* a struct's fields rather than assembling one:
+taking a value apart, moving some fields elsewhere, and rebuilding.
 
 The two entry points differ only in where they begin, and they produce the same kind of value:
 

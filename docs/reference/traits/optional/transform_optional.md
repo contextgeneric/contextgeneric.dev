@@ -23,9 +23,11 @@ an operation of your own that drives the optional conversion.
 
 ## Overview
 
-[`ToOptional`](./to_optional.md) re-marks every field of a [partial record](/docs/reference/glossary#partial-record) to `IsOptional`, so it can then
-be set freely and finalized either way. `TransformOptional` is the marker carrying the per-field
-conversions that make that possible.
+[Context-Generic Programming (CGP)](/docs/) tracks each field of a
+[partial record](/docs/reference/glossary#partial-record) with a type-level marker, and
+[`ToOptional`](./to_optional.md) re-marks every field to `IsOptional`, so it can then be set freely
+and finalized either way. `TransformOptional` is the marker carrying the per-field conversions that
+make that possible.
 
 **It is the exact mirror of [`TransformMapDefault`](./transform_map_default.md)**, which targets
 `IsPresent` instead: same walk, different destination. That symmetry is why the defaulted and optional
@@ -177,8 +179,9 @@ again; [`ToOptional`](./to_optional.md#common-mistakes) shows the error.
 **It is a marker, not an operation.** It lacks a method and needs nothing wired. It is named in a
 bound.
 
-**It requires nothing of the field types**, which is the one place the two markers genuinely differ in
-what they can be applied to.
+**It requires nothing of the field types**, so it applies to a field type without `Default`, which
+[`TransformMapDefault`](./transform_map_default.md) does not. The missing `IsOptional` impl is the
+other difference, in the opposite direction.
 
 **Converting gives up the compile-time completeness check**, since every field becomes optional whether
 it was set or not.

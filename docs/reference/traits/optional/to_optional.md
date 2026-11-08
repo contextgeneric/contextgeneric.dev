@@ -11,13 +11,14 @@ Re-marking every field of an existing builder as optional.
 
 ## Overview
 
-[`HasOptionalBuilder`](./has_optional_builder.md) starts an all-optional builder from nothing.
-`ToOptional` is the conversion for the case where you already hold a partial value and want to relax it.
-Every field is re-marked to `IsOptional`, whatever state it was in (a set field becomes `Some(value)`,
-an absent one becomes `None`), and from there the value behaves like any other optional builder:
-[`SetOptional`](./set_optional.md) applies, and either
-[`FinalizeOptional`](./finalize_optional.md) or [`CanFinalizeWithDefault`](./can_finalize_with_default.md)
-ends it.
+[Context-Generic Programming (CGP)](/docs/) builds a struct generically, and its optional builder
+lets the fields arrive in any order. [`HasOptionalBuilder`](./has_optional_builder.md) starts one
+from nothing. `ToOptional` is the conversion for the case where you already hold a partial value and
+want to relax it. Every field is re-marked to `IsOptional`, whatever state it was in (a set field
+becomes `Some(value)`, an absent one becomes `None`), and from there the value behaves like any
+other optional builder: [`SetOptional`](./set_optional.md) applies, and either
+[`FinalizeOptional`](./finalize_optional.md) or
+[`CanFinalizeWithDefault`](./can_finalize_with_default.md) ends it.
 
 **It is the conversion `optional_builder()` is built from**, which is the shortest way to describe both:
 one starts fresh and converts, the other converts something you already have.

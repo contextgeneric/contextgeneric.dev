@@ -11,10 +11,12 @@ Removing one currently-present field from a builder.
 
 ## Overview
 
-`TakeField` is the reverse of [`BuildField`](./build_field.md): it removes a field that is currently set,
-handing back the value and the [partial record](/docs/reference/glossary#partial-record) without it. The value comes out owned, and the remainder is
-the partial record with that one field flipped back to absent, so it can no longer be finalized until the
-field is put back.
+[Context-Generic Programming (CGP)](/docs/) assembles and takes apart structs generically, by their
+field names. `TakeField` is the reverse of [`BuildField`](./build_field.md): it removes a field that
+is currently set, handing back the value and the
+[partial record](/docs/reference/glossary#partial-record) without it. The value comes out owned, and
+the remainder is the partial record with that one field flipped back to absent, so it can no longer
+be finalized until the field is put back.
 
 It pins the `IsPresent → IsNothing` transition of the [`UpdateField`](./update_field.md) primitive, and
 because it *requires* the starting marker to be `IsPresent`, **taking a field that is absent is a compile

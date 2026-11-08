@@ -11,9 +11,11 @@ Starting an empty builder for a record.
 
 ## Overview
 
-A struct literal supplies every field at once, in one place that names the type. `HasBuilder` is the
-entry point for the case where that is impossible: the fields come from several independent places, none
-of which should know the whole struct, and the result must still be checked at compile time.
+A struct literal supplies every field at once, in one place that names the type.
+[Context-Generic Programming (CGP)](/docs/) builds structs generically, by their field names, and
+`HasBuilder` is its entry point for the case where a literal is impossible: the fields come from
+several independent places, none of which should know the whole struct, and the result must still be
+checked at compile time.
 
 `builder()` hands back a partial value with **every field absent**. Filling it is
 [`BuildField`](./build_field.md), and turning it back into the concrete struct is
@@ -145,6 +147,7 @@ point. And the enum counterparts are a different family:
 parameter's projection. `cargo cgp expand` on a two-field `Person` shows it:
 
 ```rust
+///The partial builder for [`Person`].
 pub struct __PartialPerson<__F0__: MapType, __F1__: MapType> {
     pub first_name: <__F0__ as MapType>::Map<String>,
     pub last_name: <__F1__ as MapType>::Map<String>,
