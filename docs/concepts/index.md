@@ -1,11 +1,13 @@
 ---
 sidebar_label: 'Overview'
 sidebar_position: 0
+description: 'The concept pages of Context-Generic Programming: coherence, the consumer and provider split, dependencies, composition, and the applied designs, each with its cost.'
 ---
 
 # Concepts
 
-CGP connects reusable trait implementations to the types that use them through compile-time wiring.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations,
+connecting reusable implementations to the types that use them through compile-time wiring.
 Understanding that connection explains how providers obtain dependencies, how contexts choose shared
 types and values, and how implementations compose into larger operations. These pages develop those
 ideas alongside their costs. You can read them without running code, with familiarity with Rust
