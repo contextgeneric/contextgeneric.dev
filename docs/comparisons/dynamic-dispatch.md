@@ -1,17 +1,17 @@
 ---
 sidebar_label: 'Dynamic dispatch'
 sidebar_position: 9
-description: 'Compare CGP static wiring with dynamic dispatch, duck typing, and prototype delegation, including how trait objects can coexist with CGP.'
+description: 'Compare Context-Generic Programming static wiring with dynamic dispatch, duck typing, and prototype delegation, including how trait objects can coexist with CGP.'
 ---
 
 # Dynamic dispatch, dynamic typing, and prototypal inheritance
 
-CGP supports interchangeable implementations and delegation while resolving provider selection at
-compile time. It is a language extension for Rust, with pluggable trait implementations at
-compile-time, implemented as a library on stable Rust whose consumer traits are ordinary Rust
-traits; the [Introduction](/docs/) covers the basics. For readers familiar with objects, messages,
-vtables, or prototypes, this page explains the shared structure, the limits of static selection,
-and where runtime dispatch remains useful.
+[Context-Generic Programming](/docs/) supports interchangeable implementations and delegation while
+resolving provider selection at compile time. CGP extends Rust with pluggable trait implementations,
+chosen per context and resolved at compile time, as a library on stable Rust whose consumer traits
+are ordinary Rust traits. For readers familiar with objects, messages, vtables, or prototypes, this
+page explains the shared structure, the limits of static selection, and where runtime dispatch
+remains useful.
 
 ## In your terms
 
@@ -312,7 +312,7 @@ wired context. This page contains only Rust snippets.
 - [Wikipedia, *Dynamic dispatch*](https://en.wikipedia.org/wiki/Dynamic_dispatch), [*Virtual method table*](https://en.wikipedia.org/wiki/Virtual_method_table), and [*Duck typing*](https://en.wikipedia.org/wiki/Duck_typing): late binding, the vtable, and usability decided by the methods an object has.
 - [The Rust Programming Language, *Trait objects*](https://doc.rust-lang.org/book/ch18-02-trait-objects.html) and [geo-ant, *Rust Dyn Trait Objects and Fat Pointers*](https://geo-ant.github.io/blog/2023/rust-dyn-trait-objects-fat-pointers/): Rust's own dynamic dispatch as a fat pointer and a vtable.
 - [Lieberman, *Using Prototypical Objects to Implement Shared Behavior in Object-Oriented Systems* (OOPSLA 1986)](https://web.media.mit.edu/~lieber/Lieberary/OOP/Delegation/Delegation.html): delegation, and the rule that `self` stays bound to the original receiver.
-- [MDN, *Inheritance and the prototype chain*](https://developer.mozilla.org/en-US/docs/JavaScript/Guide/Inheritance_and_the_prototype_chain): JavaScript's prototype chain and own-property shadowing.
+- [MDN, *Inheritance and the prototype chain*](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Inheritance_and_the_prototype_chain): JavaScript's prototype chain and own-property shadowing.
 - [V8, *Maps (Hidden Classes)*](https://v8.dev/docs/hidden-classes): the engineering that dynamic dispatch's runtime cost demands.
 - [SitePoint, *Making Ruby Quack*](https://www.sitepoint.com/making-ruby-quack-why-we-love-duck-typing/), [GeeksforGeeks, *Type Systems*](https://www.geeksforgeeks.org/python/type-systemsdynamic-typing-static-typing-duck-typing/), and [DevGex, *Duck Typing*](https://devgex.com/en/article/00035033): community sentiment on what duck typing buys and costs.
 
