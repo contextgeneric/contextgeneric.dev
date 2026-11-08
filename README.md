@@ -2,7 +2,7 @@
 [![Test deployment](https://github.com/contextgeneric/contextgeneric.dev/actions/workflows/test-deploy.yaml/badge.svg)](https://github.com/contextgeneric/contextgeneric.dev/actions/workflows/test-deploy.yaml)
 ![License: Apache-2.0 for code](https://img.shields.io/badge/license-Apache_2.0-blue.svg)
 ![Content: CC BY-SA 4.0](https://img.shields.io/badge/content-CC_BY--SA_4.0-lightgrey.svg)
-![Node 20+](https://img.shields.io/badge/node-20+-green.svg)
+![Node 24+](https://img.shields.io/badge/node-24+-green.svg)
 
 # The CGP website: contextgeneric.dev
 
@@ -21,7 +21,7 @@ npm ci
 ```
 
 The repository carries `package-lock.json`, and CI installs with `npm ci`, so use `npm` rather than
-another package manager. Node 20 or newer is required. CI runs the version `.nvmrc` pins, and
+another package manager. Node 24 or newer is required. CI runs the version `.nvmrc` pins, and
 `nvm use` selects the same one locally.
 
 ## Local development
