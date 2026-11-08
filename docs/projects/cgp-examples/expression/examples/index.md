@@ -7,10 +7,11 @@ description: 'The four expression contexts as short tutorials on the extensible 
 # expression examples
 
 These pages walk through the four **contexts**, the types that each stand for one interpreter and
-hold its choices, in the `expression` crate of the [cgp-examples
-repository](https://github.com/contextgeneric/cgp-examples), one context per page.
-[`expression`](../index.md) is an arithmetic interpreter built with [CGP](/docs/), in which each
-operator is its own type and each operation is one provider per operator. Each page runs its
+hold its choices, in the `expression` crate of the
+[cgp-examples repository](https://github.com/contextgeneric/cgp-examples), one context per page.
+[`expression`](../index.md) is an arithmetic interpreter built with
+[Context-Generic Programming](/docs/) (CGP), which enables pluggable trait implementations: each
+operator is its own type, and each operation is one provider per operator. Each page runs its
 context, explains how the wiring produces what it computes, and names the CGP pattern it shows.
 
 The pages are in the order they teach, and each later page changes one thing about the one before.

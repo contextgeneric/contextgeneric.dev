@@ -6,14 +6,15 @@ description: 'Five small demonstration crates built with CGP: an extensible inte
 
 # cgp-examples
 
-`cgp-examples` is a repository of five small programs built with [CGP](/docs/), a language extension
-for Rust with pluggable trait implementations at compile-time. Each crate shows one area of CGP
-working in code, and between them they cover a wide range of CGP's design patterns. They share a
-workspace and nothing else, so each has a section of its own.
+`cgp-examples` is a repository of five small programs built with
+[Context-Generic Programming](/docs/) (CGP), a language extension for Rust with pluggable trait
+implementations at compile-time. Each crate shows one area of CGP working in code, and between them
+they cover a wide range of CGP's design patterns. They share a workspace and nothing else, so each
+has a section of its own.
 
 The crates are demonstrations, not libraries. None is published, and nobody adds them as a
-dependency: the way to use one is to clone the repository and run it, or read it. Their code uses
-current CGP idioms throughout, so it is safe to copy for the patterns it shows.
+dependency: the way to use one is to clone the repository and run it, or read it. The code these pages
+show uses current CGP idioms throughout, so it is safe to copy for the patterns it shows.
 
 ## The crates
 

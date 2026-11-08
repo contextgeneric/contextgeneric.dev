@@ -9,8 +9,9 @@ description: 'An arithmetic interpreter that evaluates and converts expressions 
 This context evaluates arithmetic expressions such as `2 * (3 + 4)` and converts them to Lisp, with
 one provider per operator and no hand-written `match` over the language. It is the first example in
 [`expression`](../index.md), an interpreter from the [cgp-examples](../../index.md) repository,
-built with [CGP](/docs/). Each later example changes one thing about this one, so every piece it
-introduces comes back.
+built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable trait
+implementations, one per operator, resolved at compile time. Each later example changes one thing
+about this one, so every piece it introduces comes back.
 
 :::tip
 
@@ -79,7 +80,8 @@ the same three expressions to Lisp, so `2 * (3 + 4)` becomes the tree for `(* 2 
 
 ## The language is an enum of operator structs
 
-The context's module, [`add_mult.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult.rs),
+The context's module,
+[`add_mult.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult.rs),
 defines the language and the Lisp output as two enums:
 
 ```rust
@@ -291,14 +293,20 @@ Remove the evaluation entry for `Times`, the line
 [`cargo cgp check`](/docs/cargo-cgp/check). The check names the missing entry:
 
 ```text
-error[E0277]: [CGP-E001] missing wiring for `@ComputerComponent.Eval.Times<MathExpr>` on `Interpreter`
-   = note: root cause: [CGP-E113] missing wiring for `@ComputerComponent.Eval.Times<MathExpr>` on `Interpreter`
+error[E0277]: [CGP-E001] missing wiring for `@ComputerComponent.Eval.Times<…>` on `…`
+   = note: root cause: [CGP-E113] missing wiring for `@ComputerComponent.Eval.Times<…>` on `…`
+           this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanCompute<Eval, Times<…>>` for context `…`
+             └─ [CGP-E103] redirect lookup to `@ComputerComponent` in `…`
+   = help: wire `@ComputerComponent.Eval.Times<…>` to a provider in the wiring of `…`
 ```
 
-A second, longer error points at the wrapper's call to `MatchWithValueHandlers`, because the
-dispatcher cannot find a provider for the `Times` variant either. The first error is the one to
-read. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does
-not yet reshape every class. Put the line back, and the check passes.
+A second, longer error, `[CGP-E002]`, points at the wrapper's call to `MatchWithValueHandlers`,
+because the dispatcher's chain cannot provide a `Times` operand either. The first error is the one
+to read, and the block elides the module paths, which name the context's module. Removing the entry
+leaves `EvalMultiply` unused, so the output carries a warning about that import. `cargo cgp check`
+leads with the root cause for the classes it recognizes, and the tool does not yet reshape every
+class. Put the line back, and the check passes.
 
 ## The pattern
 

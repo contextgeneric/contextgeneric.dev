@@ -9,8 +9,9 @@ description: 'A CGP namespace that supplies seven of an application''s nine prov
 This stage moves seven of the backend's nine providers into a namespace as defaults, so the
 application's context joins the namespace and wires only what varies: its content filters. It is the
 last stage of [`web-app`](../index.md), a wiring study from the [cgp-examples](../../index.md)
-repository, built with [CGP](/docs/). Nothing in the crate runs; every provider body is `todo!()`,
-and the compiler's check of the wiring is what this page runs.
+repository, built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable trait
+implementations that a namespace can supply as defaults at compile time. Nothing in the crate runs;
+every provider body is `todo!()`, and the compiler's check of the wiring is what this page runs.
 
 :::tip
 
@@ -53,7 +54,7 @@ satisfies all nine components.
 ## A namespace of defaults
 
 The module,
-[`default_impls.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/default_impls.rs),
+[`default_impls.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/default_impls.rs),
 keeps the previous stage's components and paths, and declares a namespace of its own that inherits
 `DefaultNamespace`:
 
@@ -157,14 +158,15 @@ and wire it in `ProductionApp`, beside the namespace line:
 Run [`cargo cgp check`](/docs/cargo-cgp/check), and the entry is rejected:
 
 ```text
-error[E0119]: [CGP-E011] conflicting wiring: `ProductionApp` wires `@app.core.user.UserGetterComponent`, which `DefaultAppComponents` already covers
+error[E0119]: [CGP-E011] conflicting wiring: `…ProductionApp` wires `@app.core.user.…UserGetterComponent`, which `DefaultAppComponents` already covers
 ```
 
 A default a namespace binds is final. The context's entry would be a second answer to the same
 lookup, and Rust rejects the two as conflicting implementations, which is `E0119` underneath the
-tool's message. A context that needs a different getter joins a different namespace, one that does
-not bind the getter. `cargo cgp check` leads with the root cause for the classes it recognizes, and
-the tool does not yet reshape every class.
+tool's message. The block elides the module names the tool qualifies the context and the component
+with. A context that needs a different getter joins a different namespace, one that does not bind
+the getter. `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool
+does not yet reshape every class.
 
 ## The pattern
 

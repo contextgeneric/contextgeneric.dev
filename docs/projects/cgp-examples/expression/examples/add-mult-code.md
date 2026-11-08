@@ -9,7 +9,8 @@ description: 'Both interpreter operations served by one CGP component, each wiri
 This **context**, the type that stands for one interpreter and holds its choices, serves both
 evaluation and conversion to Lisp through one component, and chooses between them by a marker type
 passed with the input. It is an example from [`expression`](../index.md), an interpreter from the
-[cgp-examples](../../index.md) repository, built with [CGP](/docs/). Where
+[cgp-examples](../../index.md) repository, built with [Context-Generic Programming](/docs/) (CGP),
+which enables pluggable trait implementations, chosen per operation and input at compile time. Where
 [`add_mult`](./add-mult.md) chose the operation by which method was called, this context chooses it
 in its wiring, by keying each entry on two things at once.
 
@@ -86,7 +87,7 @@ List(List([Ident(Ident("*")), Literal(Literal(2)), List(List([Ident(Ident("+")),
 ## The marker is part of the key
 
 The context's module,
-[`add_mult_code.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_code.rs),
+[`add_mult_code.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult_code.rs),
 opens one component, and every entry names both the operation and the input:
 
 ```rust
@@ -157,13 +158,19 @@ Remove the conversion entry for `Plus`, the line
 its key:
 
 ```text
-error[E0277]: [CGP-E001] missing wiring for `@ComputerRefComponent.ToLisp.Plus<MathExpr>` on `Interpreter`
-   = note: root cause: [CGP-E113] missing wiring for `@ComputerRefComponent.ToLisp.Plus<MathExpr>` on `Interpreter`
+error[E0277]: [CGP-E001] missing wiring for `@ComputerRefComponent.ToLisp.Plus<…>` on `…`
+   = note: root cause: [CGP-E113] missing wiring for `@ComputerRefComponent.ToLisp.Plus<…>` on `…`
+           this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanComputeRef<ToLisp, Plus<…>>` for context `…`
+             └─ [CGP-E103] redirect lookup to `@ComputerRefComponent` in `…`
+   = help: wire `@ComputerRefComponent.ToLisp.Plus<…>` to a provider in the wiring of `…`
 ```
 
-Evaluating a `Plus` still has its entry, so only conversion is broken. Two more errors point at the
-`ToLisp` wrapper's call to the dispatcher, for the same reason. `cargo cgp check` leads with the
-root cause for the classes it recognizes, and the tool does not yet reshape every class.
+Evaluating a `Plus` still has its entry, so only conversion is broken. A second error, `E0271`,
+points at the `ToLisp` wrapper's call to the dispatcher, where the missing entry leaves the output
+types unresolved. The block elides the module paths and the last hop of the chain, which ends at the
+same missing entry. `cargo cgp check` leads with the root cause for the classes it recognizes, and
+the tool does not yet reshape every class.
 
 ## The pattern
 

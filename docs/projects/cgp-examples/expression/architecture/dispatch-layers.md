@@ -9,8 +9,9 @@ description: 'The two ways the expression contexts key their dispatch, by input 
 Every context in [`expression`](../index.md) chooses a provider by the type of the expression it is
 given, and some also choose by the operation. Why do they write their tables two different ways, and
 why does each one write a small wrapper for its enum? `expression` is an arithmetic interpreter
-built with [CGP](/docs/), and a **context** in it is a type that stands for one interpreter and
-holds its choices. This page explains both arrangements, and the wrapper that every context needs.
+built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable trait implementations
+chosen at compile time, and a **context** in it is a type that stands for one interpreter and holds
+its choices. This page explains both arrangements, and the wrapper that every context needs.
 
 ## Two ways to pick the operation
 
@@ -76,12 +77,14 @@ the wiring never resolves:
 
 ```text
 error[E0275]: [CGP-E020] the wiring for the consumer trait `CanCompute<Eval, contexts::add_mult::MathExpr>` on context `contexts::add_mult::Interpreter` never resolves, because the lookup leads back to itself
+   = help: wire a provider in place of `EvalAdd`, which provides `Computer<_, Plus<…>>` for `…` by requiring `CanCompute<_, …>` on `…` again
 ```
 
 The same error follows for `Plus` and `Times`, and two raw overflow errors for the dispatcher
-itself. The project names a `MathExpr` and an `Interpreter` in several modules, so the output keeps their
-module paths. The help lines name `EvalAdd`, whose requirement closes the loop where the tool's walk met it,
-rather than the `MathExpr` entry that needs the wrapper.
+itself. The project names a `MathExpr` and an `Interpreter` in several modules, so the output keeps
+their module paths. The help lines name `EvalAdd`, whose requirement closes the loop where the
+tool's walk met it, rather than the `MathExpr` entry that needs the wrapper; the block elides the
+paths in that help line.
 
 The wrapper breaks the loop, and the likeliest reason is the shape of its impl: it is written for
 one concrete context, with a concrete output type and no conditions. The compiler can then accept

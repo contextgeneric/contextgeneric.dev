@@ -8,8 +8,9 @@ description: 'A modular arithmetic interpreter built with CGP: each operator is 
 
 `expression` is a small arithmetic interpreter in which each operator is its own type, and each
 operation over the language is a set of providers, one per operator. It is one of the demonstration
-crates in [cgp-examples](../index.md), built with [CGP](/docs/), a language extension for Rust with
-pluggable trait implementations at compile-time. The crate shows the **extensible visitor pattern**:
+crates in [cgp-examples](../index.md), built with [Context-Generic Programming](/docs/) (CGP), a
+language extension for Rust with pluggable trait implementations at compile-time. The crate shows
+the **extensible visitor pattern**:
 new operators and new operations can be added without editing the code that handles the old ones.
 
 ## The starting point: an enum and a `match`

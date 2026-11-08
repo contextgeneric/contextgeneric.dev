@@ -9,8 +9,10 @@ description: 'A CGP application whose components sit under paths in a namespace,
 This stage places the backend's nine components under paths, so that a context wires the whole
 application in two lines, and a test context differs from production in one. It is the third stage
 of [`web-app`](../index.md), a wiring study from the [cgp-examples](../../index.md) repository,
-built with [CGP](/docs/). Nothing in the crate runs; every provider body is `todo!()`, and the
-compiler's check of the wiring is what this page runs.
+built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable trait
+implementations, with the choices grouped under paths and resolved at compile time. Nothing in the
+crate runs; every provider body is `todo!()`, and the compiler's check of the wiring is what this
+page runs.
 
 :::tip
 
@@ -53,7 +55,7 @@ components.
 ## Each component gets a path
 
 The module,
-[`namespace.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/namespace.rs),
+[`namespace.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/namespace.rs),
 declares the same nine components as the previous stage, each with a
 [`#[prefix]`](/docs/reference/attributes/prefix) that registers it under a path:
 
@@ -145,16 +147,26 @@ Remove `TestApp`'s `@app.extra` line, and run [`cargo cgp check`](/docs/cargo-cg
 creators fail, each with the filter its wrapper uses:
 
 ```text
-error[E0277]: [CGP-E001] missing wiring for `@app.extra.content_filter.UsernameCensorComponent` on `TestApp`
-    = note: root cause: [CGP-E113] missing wiring for `@app.extra.content_filter.UsernameCensorComponent` on `TestApp`
-error[E0277]: [CGP-E001] missing wiring for `@app.extra.content_filter.SpamMessageDetectorComponent` on `TestApp`
-    = note: root cause: [CGP-E113] missing wiring for `@app.extra.content_filter.SpamMessageDetectorComponent` on `TestApp`
+error[E0277]: [CGP-E001] missing wiring for `@app.extra.content_filter.…UsernameCensorComponent` on `TestApp`
+    = note: root cause: [CGP-E113] missing wiring for `@app.extra.content_filter.…UsernameCensorComponent` on `TestApp`
+            this is required through the dependency chain:
+              [CGP-E101] consumer trait impl `CanCreateUser` for context `TestApp`
+              …
+    = help: wire `@app.extra.content_filter.…UsernameCensorComponent` to a provider in the wiring of `TestApp`
+error[E0277]: [CGP-E001] missing wiring for `@app.extra.content_filter.…SpamMessageDetectorComponent` on `TestApp`
+    = note: root cause: [CGP-E113] missing wiring for `@app.extra.content_filter.…SpamMessageDetectorComponent` on `TestApp`
+            this is required through the dependency chain:
+              [CGP-E101] consumer trait impl `CanCreatePost` for context `TestApp`
+              …
+    = help: wire `@app.extra.content_filter.…SpamMessageDetectorComponent` to a provider in the wiring of `TestApp`
 ```
 
 Each root cause names the full path the namespace routed the lookup to, which says where the entry
-belongs. The other five components still check, since the getters, updaters, and deleter need
-nothing from the extras. `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool does not yet reshape every class.
+belongs, and each chain lists every lookup on the way there: from the creator, through the redirect
+to `@app.core`, `PostgresCoreComponents`, and the bundle behind it. The block elides those hops and
+the module names the tool adds to each path. The other five components still check, since the
+getters, updaters, and deleter need nothing from the extras. `cargo cgp check` leads with the root
+cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 ## The pattern
 

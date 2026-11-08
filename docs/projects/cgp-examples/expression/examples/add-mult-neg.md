@@ -9,9 +9,10 @@ description: 'The interpreter''s language extended with subtraction and negation
 This **context**, the type that stands for one interpreter and holds its choices, evaluates a larger
 language, with subtraction and negation added to addition and multiplication, and no existing
 provider is edited to do it. It is the last example in [`expression`](../index.md), an interpreter
-from the [cgp-examples](../../index.md) repository, built with [CGP](/docs/). It is the pay-off of
-the design the earlier examples set up: the language grows by adding types and providers next to the
-old ones.
+from the [cgp-examples](../../index.md) repository, built with [Context-Generic Programming](/docs/)
+(CGP), which enables pluggable trait implementations that a new language reuses at compile time. It
+is the pay-off of the design the earlier examples set up: the language grows by adding types and
+providers next to the old ones.
 
 :::tip
 
@@ -59,7 +60,7 @@ It evaluates `2 + 3` to `5`, `2 * 3` to `6`, `2 - 3` to `-1`, and `-2 * (3 + 4)`
 ## A new enum, from old parts and new ones
 
 The context's module,
-[`add_mult_neg.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_neg.rs),
+[`add_mult_neg.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult_neg.rs),
 defines the larger language as a new enum:
 
 ```rust

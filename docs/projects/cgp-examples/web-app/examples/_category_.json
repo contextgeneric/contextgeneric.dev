@@ -1,5 +1,6 @@
 {
   "label": "Stages",
   "position": 1,
-  "collapsed": false
+  "collapsed": false,
+  "description": "One social-media backend wired four ways with Context-Generic Programming, from one trait per domain to namespace defaults."
 }

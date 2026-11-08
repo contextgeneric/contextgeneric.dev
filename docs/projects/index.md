@@ -6,11 +6,11 @@ description: 'Projects built with CGP, with their runnable examples written as s
 
 # Projects
 
-These pages document projects built with [CGP](/docs/), a language extension for Rust with pluggable
-trait implementations at compile-time. Where the [Concepts](/docs/concepts/) pages explain each CGP
-idea with the smallest code that shows it, these pages show the ideas working together in programs
-that do something real, and each project's examples are written as short tutorials on the patterns
-they use.
+These pages document projects built with [Context-Generic Programming](/docs/) (CGP), a language
+extension for Rust with pluggable trait implementations at compile-time. Where the
+[Concepts](/docs/concepts/) pages explain each CGP idea with the smallest code that shows it, these
+pages show the ideas working together in programs that do something real, and each project's
+examples are written as short tutorials on the patterns they use.
 
 The projects are experiments rather than products. Each section says on its first page what state
 its project is in, what it needs to build, and where its design stops, so that a reader weighing CGP

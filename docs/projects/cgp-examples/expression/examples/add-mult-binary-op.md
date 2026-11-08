@@ -10,8 +10,9 @@ This **context**, the type that stands for one interpreter and holds its choices
 arithmetic expressions to Lisp with one provider for both `+` and `*`, where
 [`add_mult`](./add-mult.md) had a provider for each. It is an example from
 [`expression`](../index.md), an interpreter from the [cgp-examples](../../index.md) repository,
-built with [CGP](/docs/). The change is small, and it shows how a provider can be generic over the
-operator it handles.
+built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable trait
+implementations, with one provider wired for both binary operators at compile time. The change is
+small, and it shows how a provider can be generic over the operator it handles.
 
 :::tip
 
@@ -86,7 +87,7 @@ List(List([Ident(Ident("*")), Literal(Literal(2)), List(List([Ident(Ident("+")),
 ## Two entries, one provider
 
 The context's module,
-[`add_mult_binary_op.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_binary_op.rs),
+[`add_mult_binary_op.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult_binary_op.rs),
 has its own copy of `add_mult`'s enums, its context `Interpreter`, and its wrappers. Its wiring
 differs in two lines, the conversion entries for the binary operators:
 

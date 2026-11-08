@@ -7,10 +7,11 @@ description: 'How the expression interpreter works: operators as generic structs
 # How expression works
 
 How can an interpreter gain a new operator without anyone editing the code that handles the old
-ones? [`expression`](../index.md) is an arithmetic interpreter built with [CGP](/docs/), a language
-extension for Rust with pluggable trait implementations at compile-time, and its answer is to split
-the usual enum and `match` into parts that can each be reused. This page explains the design in
-outline: what an operator is, what an operation is, and what puts them together.
+ones? [`expression`](../index.md) is an arithmetic interpreter built with
+[Context-Generic Programming](/docs/) (CGP), a language extension for Rust with pluggable trait
+implementations at compile-time, and its answer is to split the usual enum and `match` into parts
+that can each be reused. This page explains the design in outline: what an operator is, what an
+operation is, and what puts them together.
 
 ## Each operator is its own type
 

@@ -9,8 +9,9 @@ description: 'A CGP application wired with one manager trait per domain, and the
 This stage wires a small social-media backend with one trait per domain, a user manager and a post
 manager, and shows what that costs as soon as one method needs something the others do not. It is
 the first stage of [`web-app`](../index.md), a wiring study from the [cgp-examples](../../index.md)
-repository, built with [CGP](/docs/). Nothing in the crate runs; every provider body is `todo!()`,
-and the compiler's check of the wiring is what this page runs.
+repository, built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable trait
+implementations, one per domain, chosen at compile time. Nothing in the crate runs; every provider
+body is `todo!()`, and the compiler's check of the wiring is what this page runs.
 
 :::tip
 
@@ -52,7 +53,7 @@ four components, including everything those providers need.
 ## One component per domain
 
 The module,
-[`coarse_grained.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/coarse_grained.rs),
+[`coarse_grained.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/coarse_grained.rs),
 defines a manager trait for each domain, and a small trait for each content filter:
 
 ```rust
@@ -153,12 +154,19 @@ Remove the censor's entry, the line `UsernameCensorComponent: DummyUserCensor,`,
 [`cargo cgp check`](/docs/cargo-cgp/check). The whole user manager fails:
 
 ```text
-error[E0277]: [CGP-E001] missing wiring for `UsernameCensorComponent` on `ProductionApp`
-    = note: root cause: [CGP-E113] missing wiring for `UsernameCensorComponent` on `ProductionApp`
+error[E0277]: [CGP-E001] missing wiring for `UsernameCensorComponent` on `…ProductionApp`
+    = note: root cause: [CGP-E113] missing wiring for `UsernameCensorComponent` on `…ProductionApp`
+            this is required through the dependency chain:
+              [CGP-E101] consumer trait impl `CanManageUser` for context `…ProductionApp`
+              └─ [CGP-E102] provider trait impl `UserManager` with context `…` for provider `PostgresUserManager`
+                └─ [CGP-E101] consumer trait impl `CanCensorUsername` for context `…ProductionApp`
+    = help: wire `UsernameCensorComponent` to a provider in the wiring of `…ProductionApp`
 ```
 
-The context has lost `get_user` and `update_user_data` as well as `create_user`, though neither
-calls the censor, because the three methods share one provider and one set of requirements. Compare
+The chain names the manager, the provider behind it, and the censor that provider's `create_user`
+needs, so the whole manager goes with the censor. The context has lost `get_user` and
+`update_user_data` as well as `create_user`, though neither calls the censor, because the three
+methods share one provider and one set of requirements. The block elides the module paths. Compare
 the same change in the [next stage](./fine-grained.md#try-a-change). `cargo cgp check` leads with
 the root cause for the classes it recognizes, and the tool does not yet reshape every class.
 

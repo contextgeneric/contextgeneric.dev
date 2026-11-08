@@ -7,10 +7,11 @@ description: 'One social-media backend wired four ways with CGP, from one trait 
 # web-app
 
 `web-app` wires one small social-media backend four times, each time a step further, to show how
-the wiring of a CGP application changes as it grows: from one trait per domain, to one trait per
-operation grouped into bundles, to wiring grouped under paths, to defaults a namespace supplies. It
-is one of the demonstration crates in [cgp-examples](../index.md), built with [CGP](/docs/), a
-language extension for Rust with pluggable trait implementations at compile-time.
+the wiring of an application built with [Context-Generic Programming](/docs/) (CGP) changes as it
+grows: from one trait per domain, to one trait per operation grouped into bundles, to wiring
+grouped under paths, to defaults a namespace supplies. It is one of the demonstration crates in
+[cgp-examples](../index.md); CGP is a language extension for Rust with pluggable trait
+implementations at compile-time.
 
 **Nothing in the crate runs.** Every provider body is `todo!()`, and there is no binary or test. The
 crate is a study of wiring, and the compiler is what checks it, so each page's "run it" step is a
