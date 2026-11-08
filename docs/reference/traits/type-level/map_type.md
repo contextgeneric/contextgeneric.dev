@@ -23,10 +23,11 @@ what each one means. The one case for bounding on the trait is generic code of y
 
 ## Overview
 
-CGP represents a half-built struct or a partly-extracted enum as a single type whose every field is
-independently wrapped: a field that is set carries its value, a field that is not carries nothing, a
-variant that has been ruled out carries an uninhabited type. Rather than hard-code those shapes, each
-field is parameterized by a **marker**, and the field's actual storage type is read out of the marker.
+[Context-Generic Programming (CGP)](/docs/) represents a half-built struct or a partly-extracted
+enum as a single type whose every field is independently wrapped: a field that is set carries its
+value, a field that is not carries nothing, a variant that has been ruled out carries an uninhabited
+type. Rather than hard-code those shapes, each field is parameterized by a **marker**, and the
+field's actual storage type is read out of the marker.
 
 `MapType` is that marker's trait. It lets the [builder](../builder/has_builder.md) and
 [extractor](../variant/extract_field.md) families move a value through intermediate states without

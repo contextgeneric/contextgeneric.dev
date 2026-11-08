@@ -24,9 +24,10 @@ or writing an operation that re-marks a whole record.
 
 ## Overview
 
-[`TransformMap`](./transform_map.md) converts *one* field from one marker's storage to another's.
-`TransformMapFields` lifts that conversion across an entire partial record, so every field is re-marked
-in one call.
+In [Context-Generic Programming (CGP)](/docs/), where each field of a partial record carries a
+type-level marker, [`TransformMap`](./transform_map.md) converts *one* field from one marker's
+storage to another's. `TransformMapFields` lifts that conversion across an entire partial record, so
+every field is re-marked in one call.
 
 **This is the motion the optional-field layer is made of.**
 [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) re-marks every field to

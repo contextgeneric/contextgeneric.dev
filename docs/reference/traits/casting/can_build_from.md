@@ -11,9 +11,9 @@ Moving every field of one record into another record's builder.
 
 ## Overview
 
-Assembling one struct out of several smaller ones means copying each field across by hand: a
-line per field, repeated for every pair of types. `CanBuildFrom` derives that copying from the field
-names instead.
+Assembling one struct out of several smaller ones means copying each field across by hand: a line
+per field, repeated for every pair of types. `CanBuildFrom`, one of the structural conversions of
+[Context-Generic Programming (CGP)](/docs/), derives that copying from the field names instead.
 
 It is the record counterpart of the [variant casts](./can_upcast.md), and it differs from them in
 one way that shapes how it is written: **it is implemented for a builder rather than for the target

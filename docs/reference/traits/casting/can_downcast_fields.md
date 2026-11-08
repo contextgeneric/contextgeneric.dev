@@ -11,7 +11,8 @@ Continuing a narrowing chain on a remainder.
 
 ## Overview
 
-[`CanDowncast`](./can_downcast.md) narrows an enum and, when it fails, hands back a *remainder*: the
+[Context-Generic Programming (CGP)](/docs/) can narrow a Rust enum into a smaller one by its variant
+names. [`CanDowncast`](./can_downcast.md) does so and, when it fails, hands back a *remainder*: the
 same value with the attempted variants ruled out in its type. You then pass that remainder to
 `CanDowncastFields`, so a value can be tried against a second target, a third, and so on.
 

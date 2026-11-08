@@ -22,10 +22,11 @@ explains what each one means and how it composes with the per-field markers. The
 
 ## Overview
 
-[`MapType`](./map_type.md) decides whether a field of a partial type holds its value, nothing, or an
-uninhabited type. A **borrowed** partial type needs a second decision on top: whether each payload is
-held by shared reference, by mutable reference, or by value. That decision brings a lifetime with it,
-which is why it needs its own trait.
+In [Context-Generic Programming (CGP)](/docs/), a partial struct or enum tracks each field's state
+in its type, and [`MapType`](./map_type.md) decides whether a field holds its value, nothing, or an
+uninhabited type. A **borrowed** partial type needs a second decision on top: whether each payload
+is held by shared reference, by mutable reference, or by value. That decision brings a lifetime with
+it, which is why it needs its own trait.
 
 **The two families compose rather than compete.** A borrowed extractor carries one outer `MapTypeRef`
 marker shared across all fields and one [`MapType`](./map_type.md) marker per field, so a field's storage
@@ -44,9 +45,10 @@ pub trait MapTypeRef {
 ```
 
 `Map<'a, T>` is a **generic associated type** over both a lifetime and a type. The `T: 'a` bound
-requires the payload to outlive the borrow, and the `: 'a` bound on the result keeps the storage type
-from outliving it either. That is more machinery than [`MapType`](./map_type.md)'s single-parameter
-`Map<T>`, and it makes the borrowed shape expressible at whatever lifetime a caller has.
+requires the payload to outlive the borrow, and the `: 'a` bound on the result requires the storage
+type to live at least as long as the borrow too. That is more machinery than
+[`MapType`](./map_type.md)'s single-parameter `Map<T>`, and it makes the borrowed shape expressible
+at whatever lifetime a caller has.
 
 ## Usage
 
@@ -155,6 +157,7 @@ ones, and each payload slot projects through both. `cargo cgp expand` on a
 `Shape { Circle(Circle), Rectangle(Rectangle) }` deriving `ExtractField` shows it:
 
 ```rust
+///The borrowed partial extractor for [`Shape`].
 pub enum __PartialRefShape<'__a__, __R__: MapTypeRef, __F0__: MapType, __F1__: MapType> {
     Circle(<__F0__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Circle>>),
     Rectangle(<__F1__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Rectangle>>),
@@ -169,7 +172,7 @@ through an owned value.
 
 The `T: 'a` bound and the `: 'a` bound on the associated type are what keep the projection
 well-formed: a payload cannot be borrowed for longer than it lives, and the resulting storage type
-cannot outlive the borrow either.
+stays valid for the whole of the borrow.
 
 ## Common Mistakes
 

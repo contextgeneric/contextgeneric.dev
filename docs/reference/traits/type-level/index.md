@@ -10,12 +10,14 @@ The per-field state markers and list operations the extensible-data families are
 
 ## Overview
 
-These are the least user-facing traits in the reference. They are the type-level layer beneath the
+These are the least user-facing traits in the reference of
+[Context-Generic Programming (CGP)](/docs/), which builds and reads Rust structs and enums
+generically by their field and variant names. They are the type-level layer beneath the
 [builders](../builder/index.md), [extractors](../variant/index.md), and
 [casts](../casting/index.md): the markers that record what state one field is in, and the operations
 that grow and reshape a type's field list. You meet them in an error message from code that walks a
-[shape](/docs/reference/glossary#shape) far more often than in code you wrote, and this group exists so that such a message is
-legible. Most are not in the prelude.
+[shape](/docs/reference/glossary#shape) far more often than in code you wrote, and this group exists
+so that such a message is legible. Most are not in the prelude.
 
 The group divides into the state markers and the list operations.
 

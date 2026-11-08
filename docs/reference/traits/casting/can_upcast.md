@@ -11,9 +11,11 @@ Widening a narrow enum into a wider one that shares its variants.
 
 ## Overview
 
-Two enums defined independently can share variant names, say a small `FooBar` and a larger `FooBarBaz`.
-Converting the narrow one into the wide one is a conversion you could write by hand, and it is
-pure boilerplate: one `match` arm per variant, rewrapping each payload under the same name.
+[Context-Generic Programming (CGP)](/docs/) can convert between Rust enums by their variant names.
+Two enums defined independently can share variant names, say a small `FooBar` and a larger
+`FooBarBaz`. Converting the narrow one into the wide one is a conversion you could write by hand,
+and it is pure boilerplate: one `match` arm per variant, rewrapping each payload under the same
+name.
 
 `CanUpcast` derives that conversion from the names instead. Once the source exposes its variants as
 a type-level list and the target can be built one variant at a time, widening is a matter of routing

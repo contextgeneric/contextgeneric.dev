@@ -11,9 +11,10 @@ Narrowing a wide enum into a smaller one, or handing back what is left.
 
 ## Overview
 
-Converting a wide enum into a narrower one is the direction that can fail: the value's current variant
-may be one the target does not have. `CanDowncast` attempts that conversion, and it does more than
-a fallible `From` because of what it returns on failure.
+[Context-Generic Programming (CGP)](/docs/) converts between Rust enums by their variant names, and
+converting a wide enum into a narrower one is the direction that can fail: the value's current
+variant may be one the target does not have. `CanDowncast` attempts that conversion, and it does
+more than a fallible `From` because of what it returns on failure.
 
 **A failed downcast hands back a *remainder* rather than an error.** The remainder is the same value with
 the attempted variants ruled out *in its type*, so it can be tried against another target, and each

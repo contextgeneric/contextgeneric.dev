@@ -1,5 +1,5 @@
 ---
-title: 'TransformMap — convert a fields storage'
+title: 'TransformMap — convert a field''s storage'
 sidebar_label: 'TransformMap'
 sidebar_position: 3
 description: 'The per-field function converting a value from one marker''s storage to another''s, and the extension point for a new way to re-mark a record.'
@@ -11,9 +11,11 @@ The per-field function that converts a value from one marker's storage to anothe
 
 ## Overview
 
-[`MapType`](./map_type.md) only names storage *types*: it says that an `IsNothing` field holds `()` and
-an `IsPresent` field holds its value, and nothing about how you get from one to the other.
-`TransformMap` carries that missing half: the function that performs the conversion.
+[Context-Generic Programming (CGP)](/docs/) tracks each field of a partial record with a type-level
+marker, and [`MapType`](./map_type.md) only names each marker's storage *type*: it says that an
+`IsNothing` field holds `()` and an `IsPresent` field holds its value, and nothing about how you get
+from one to the other. `TransformMap` carries that missing half: the function that performs the
+conversion.
 
 **This is the extension point of the whole partial-type scheme**, and it is genuinely usable. Defining a
 new way to re-mark a record means writing one impl per source state and then applying it with

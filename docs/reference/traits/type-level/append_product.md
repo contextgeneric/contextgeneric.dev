@@ -11,10 +11,11 @@ Adding one entry to the end of a type-level product list.
 
 ## Overview
 
-A struct's [shape](/docs/reference/glossary#shape) in CGP is a type-level list, a [`Product!`](../../macros/product.md) of named
-fields. Code that processes such a shape generically sometimes needs to describe a *new* shape
-computed from an old one: the shape a routine promises to return after adding a field, say, or a
-bound relating an input shape to an output one.
+A struct's [shape](/docs/reference/glossary#shape) in [Context-Generic Programming (CGP)](/docs/) is
+a type-level list, a [`Product!`](../../macros/product.md) of named fields. Code that processes such
+a shape generically sometimes needs to describe a *new* shape computed from an old one: the shape a
+routine promises to return after adding a field, say, or a bound relating an input shape to an
+output one.
 
 `AppendProduct<Item>` is that computation for a single entry. It takes a product and an item and names
 the product with that item added **at the end**.
@@ -128,7 +129,7 @@ Because the recursion only ever rebuilds the list, order is structurally preserv
 appending yields a *different* type from prepending, and why two products with the same entries in
 different orders are unrelated types.
 
-All of this is resolved during type checking. Nothing on this page is a `fn`.
+All of this is resolved during type checking. Neither impl contains a `fn`.
 
 ## Common Mistakes
 

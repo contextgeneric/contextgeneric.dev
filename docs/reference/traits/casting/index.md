@@ -11,12 +11,13 @@ conversion.
 
 ## Overview
 
-Two types that share a subset of named fields or variants can convert into one another generically,
-without a hand-written `From` or `TryFrom`. Because CGP represents each record as a product of named
-fields and each enum as a sum of named variants, a conversion becomes a matter of routing each named
-entry to the target's slot of the same name. Each side derives the part of the extensible-data
-machinery its role needs, and the names are matched at the type level. None of these traits is in
-the prelude. Import each from `cgp::core::field::impls`.
+In [Context-Generic Programming (CGP)](/docs/), two types that share a subset of named fields or
+variants can convert into one another generically, without a hand-written `From` or `TryFrom`.
+Because CGP represents each record as a product of named fields and each enum as a sum of named
+variants, a conversion becomes a matter of routing each named entry to the target's slot of the same
+name. Each side derives the part of the extensible-data machinery its role needs, and the names are
+matched at the type level. None of these traits is in the prelude. Import each from
+`cgp::core::field::impls`.
 
 These traits cover the directions that routing can take.
 

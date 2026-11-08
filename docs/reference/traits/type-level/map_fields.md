@@ -15,20 +15,23 @@ Rewriting every entry of a type-level list through one marker.
 
 **You are not expected to use `MapFields` directly.** CGP uses it to rewrite lists of providers:
 [`PipeMonadic`](../../providers/monad/pipe_monadic.md) maps its handler list through a promotion
-marker, and the record builder's `BuildAndMergeOutputs` maps its handler list the same way. You will
-most likely meet it in an error message from one of those; this page explains what it produces, and
-how it differs from the two similarly-named traits beside it. The one case for naming it is generic
-code that must describe a uniformly re-wrapped [shape](/docs/reference/glossary#shape).
+marker, and the record-building provider
+[`BuildAndMergeOutputs`](../../providers/dispatch/build_and_merge_outputs.md) maps its handler list
+the same way. You will most likely meet it in an error message from one of those; this page explains
+what it produces, and how it differs from the two similarly-named traits beside it. The one case for
+naming it is generic code that must describe a uniformly re-wrapped
+[shape](/docs/reference/glossary#shape).
 
 :::
 
 ## Overview
 
-Some type-level lists need every entry changed the same way: each value wrapped in an `Option`, or
-replaced by `()`, or each provider wrapped in an adapter. Describing that as a type means rewriting
-every entry of the list uniformly, and `MapFields<Mapper>` is that operation. The partial records and
-enums of the extensible-data derives are not computed with it; [`#[derive(CgpData)]`](../../derives/derive_cgp_data.md)
-generates those types directly.
+[Context-Generic Programming (CGP)](/docs/) describes a type's fields, and a pipeline's providers,
+as type-level lists, and some of those lists need every entry changed the same way: each value
+wrapped in an `Option`, or replaced by `()`, or each provider wrapped in an adapter. Describing that
+as a type means rewriting every entry of the list uniformly, and `MapFields<Mapper>` is that
+operation. The partial records and enums of the extensible-data derives are not computed with it;
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md) generates those types directly.
 
 The list's length and order never change. Each entry type `T` becomes `Mapper::Map<T>`, where the mapper
 is a [`MapType`](./map_type.md) marker, so **the marker decides the whole effect**. With `IsPresent` it
