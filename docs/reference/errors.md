@@ -735,8 +735,8 @@ The headline names the field and its state, and the chain names the operation th
 state. **The fix** depends on the operation: set each field once, finalize only once every field is
 set, rule out a variant once, or add the derive the type lacks. The same family includes a field the
 struct does not declare, a variant extracted twice, an incomplete match, and a cast between shapes
-whose variants do not agree. The tool words the operation under `[CGP-E050]` through `[CGP-E059]`,
-and the leaf names the state, such as `[CGP-E118]` for a field already set.
+whose variants do not agree. The tool words the operation as `[CGP-E050]`, and the leaf names the
+state, such as `[CGP-E118]` for a field already set.
 
 ## The `[CGP-Exxx]` codes
 
