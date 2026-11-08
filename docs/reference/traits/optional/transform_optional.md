@@ -179,9 +179,9 @@ again; [`ToOptional`](./to_optional.md#common-mistakes) shows the error.
 **It is a marker, not an operation.** It lacks a method and needs nothing wired. It is named in a
 bound.
 
-**It requires nothing of the field types**, so it applies to a field type without `Default`, which
-[`TransformMapDefault`](./transform_map_default.md) does not. The missing `IsOptional` impl is the
-other difference, in the opposite direction.
+**It requires nothing of the field types**, where
+[`TransformMapDefault`](./transform_map_default.md) needs `Default` for every field not already
+`IsPresent`. The missing `IsOptional` impl is the other difference, in the opposite direction.
 
 **Converting gives up the compile-time completeness check**, since every field becomes optional whether
 it was set or not.

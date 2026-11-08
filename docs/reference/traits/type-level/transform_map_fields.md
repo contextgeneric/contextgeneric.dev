@@ -13,7 +13,7 @@ Applying one per-field transform across a whole [partial record](/docs/reference
 
 ### Generated machinery
 
-**You are not expected to call `transform_map_fields` for CGP's own conversions.** It is the
+**You are not expected to call `transform_map_fields` for the library's own conversions.** It is the
 recursion the optional-field layer is built from, and
 [`CanFinalizeWithDefault`](../optional/can_finalize_with_default.md) and
 [`ToOptional`](../optional/to_optional.md) are what you call. This page explains the walk, which

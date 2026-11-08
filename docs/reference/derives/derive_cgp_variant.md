@@ -181,6 +181,7 @@ extraction, as documented for [`#[derive(ExtractField)]`](./derive_extract_field
 and `IsVoid` maps it to the uninhabited `Void`:
 
 ```rust
+///The partial extractor for [`Shape`].
 pub enum __PartialShape<__F0__: MapType, __F1__: MapType> {
     Circle(<__F0__ as MapType>::Map<Circle>),
     Rectangle(<__F1__ as MapType>::Map<Rectangle>),

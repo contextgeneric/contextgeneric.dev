@@ -13,11 +13,10 @@ Putting a value back into a monad's output type, on either branch.
 
 ### Generated machinery
 
-**You are not expected to name `LiftValue`.** The
-[bind providers](../../providers/monad/index.md) use it while running a step, and the monad markers CGP
-ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
-page is here to explain how a step produces its output, and why that takes two methods rather than
-one.
+**You are not expected to name `LiftValue`.** The [bind providers](../../providers/monad/index.md)
+use it while running a step, and the monad markers the library ships already implement it. The one
+case for naming it is defining a monad of your own; otherwise this page is here to explain how a
+step produces its output, and why that takes two methods rather than one.
 
 :::
 

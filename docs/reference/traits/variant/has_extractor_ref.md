@@ -126,6 +126,7 @@ The borrowing accessors use a **second companion enum**, `__PartialRefShape`, be
 `__PartialShape`. `cargo cgp expand` on the example's `Shape` shows it:
 
 ```rust
+///The borrowed partial extractor for [`Shape`].
 pub enum __PartialRefShape<'__a__, __R__: MapTypeRef, __F0__: MapType, __F1__: MapType> {
     Circle(<__F0__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Circle>>),
     Rectangle(<__F1__ as MapType>::Map<<__R__ as MapTypeRef>::Map<'__a__, Rectangle>>),

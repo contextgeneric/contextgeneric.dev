@@ -161,6 +161,7 @@ variant, each payload wrapped in that parameter's projection. `cargo cgp expand`
 `Shape` shows it:
 
 ```rust
+///The partial extractor for [`Shape`].
 pub enum __PartialShape<__F0__: MapType, __F1__: MapType> {
     Circle(<__F0__ as MapType>::Map<Circle>),
     Rectangle(<__F1__ as MapType>::Map<Rectangle>),

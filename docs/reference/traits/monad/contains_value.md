@@ -14,9 +14,9 @@ Naming the value a monad threads forward out of a step's output.
 ### Generated machinery
 
 **You are not expected to name `ContainsValue`.** The
-[bind providers](../../providers/monad/index.md) use it while running a step, and the monad markers CGP
-ships already implement it. The one case for naming it is defining a monad of your own; otherwise this
-page is here to explain how a step unwraps its input.
+[bind providers](../../providers/monad/index.md) use it while running a step, and the monad markers
+the library ships already implement it. The one case for naming it is defining a monad of your own;
+otherwise this page is here to explain how a step unwraps its input.
 
 :::
 

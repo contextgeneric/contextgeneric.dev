@@ -13,7 +13,7 @@ Rewriting every entry of a type-level list through one marker.
 
 ### Generated machinery
 
-**You are not expected to use `MapFields` directly.** CGP uses it to rewrite lists of providers:
+**You are not expected to use `MapFields` directly.** The library uses it to rewrite lists of providers:
 [`PipeMonadic`](../../providers/monad/pipe_monadic.md) maps its handler list through a promotion
 marker, and the record-building provider
 [`BuildAndMergeOutputs`](../../providers/dispatch/build_and_merge_outputs.md) maps its handler list
