@@ -11,7 +11,8 @@ A type-level list and its value-level counterpart.
 
 ## Overview
 
-`Product![A, B, C]` represents an ordered sequence of types as a single type. CGP uses it to describe the
+In [Context-Generic Programming (CGP)](/docs/), `Product![A, B, C]` represents an ordered sequence of
+types as a single type. CGP uses it to describe the
 [*shape*](/docs/reference/glossary#shape) of a struct: the list of its fields, in order, as one type that generic code can reason about.
 
 It is sometimes called an anonymous product type, because like a tuple it holds several things at once. The

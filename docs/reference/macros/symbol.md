@@ -11,7 +11,7 @@ A [type-level string](/docs/reference/glossary#type-level-string), used as a fie
 
 ## Overview
 
-CGP needs field *names* to be types. Reading a field goes through
+In [Context-Generic Programming (CGP)](/docs/), field *names* need to be types. Reading a field goes through
 [`HasField<Tag>`](../traits/field-access/has_field.md), where `Tag` identifies which field is meant. So to look up a field
 called `name`, something has to stand in for the string `"name"` at the type level.
 
