@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Dispatching'
 sidebar_position: 15
+description: 'How a dispatcher routes record fields and enum variants to the providers that process them, and how the compiler checks coverage and completeness.'
 ---
 
 # Dispatching
 
-Dispatching connects a record's fields or an enum's variants to the providers that process them.
-By separating that connection from the individual computations, a generic dispatcher can build
-several record types or handle several enum types while each provider implements one part of the
-work. The compiler checks that the pieces fit together and cover the required fields or variants.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations that
+a dispatcher can route data to. Dispatching connects a record's fields or an enum's variants to the
+providers that process them. By separating that connection from the individual computations, a
+generic dispatcher can build several record types or handle several enum types while each provider
+implements one part of the work. The compiler checks that the pieces fit together and cover the
+required fields or variants.
 
 [Extensible records](./extensible-records.md) and [extensible variants](./extensible-variants.md)
 expose data to generic code through field and variant traits. Dispatchers use those traits to run
