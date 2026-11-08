@@ -11,7 +11,8 @@ The type-level shape of an enum, written as the body of an enum declaration.
 
 ## Overview
 
-Generic code over enums works on an enum's **shape**: one type that lists every variant by name,
+In [Context-Generic Programming (CGP)](/docs/), generic code over enums works on an enum's
+**shape**: one type that lists every variant by name,
 which [`#[derive(HasFields)]`](../derives/derive_has_fields.md) generates for an enum as its `Fields`
 type. Written out by hand, that shape is a [`Sum!`](./sum.md) of [`Field`](../types/field.md)
 entries that repeats each variant name as a

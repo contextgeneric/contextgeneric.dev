@@ -11,7 +11,8 @@ The type-level shape of a struct, written as the body of a struct declaration.
 
 ## Overview
 
-Generic code over records works on a struct's **shape**: one type that lists every field by name,
+In [Context-Generic Programming (CGP)](/docs/), generic code over records works on a struct's
+**shape**: one type that lists every field by name,
 which [`#[derive(HasFields)]`](../derives/derive_has_fields.md) generates for a struct as its
 `Fields` type. Written out by hand, that shape is a [`Product!`](./product.md) of
 [`Field`](../types/field.md) entries that repeats each field name as a
