@@ -11,12 +11,15 @@ Define a reusable, inheritable wiring table that many contexts can join.
 
 ## Overview
 
-With [`delegate_components!`](./delegate_components.md) alone, every **context** (the type the method
-runs on, which supplies the values it needs as its fields) spells out its own wiring entry by entry.
+In [Context-Generic Programming (CGP)](/docs/), every **context** (the type the method runs on,
+which supplies the values it needs as its fields) spells out its own wiring entry by entry with
+[`delegate_components!`](./delegate_components.md) alone.
 Two contexts that should share the same providers repeat the same lines, and a table grows with the number
 of components until the wiring is the largest thing in the file.
 
-`cgp_namespace!` lifts a table out of any one context and gives it a name, so other contexts can adopt it:
+CGP enables pluggable trait implementations in Rust, and a namespace is where a group of those
+choices gets a name other contexts can adopt. `cgp_namespace!` lifts a table out of any one context
+and gives it that name:
 
 ```rust
 cgp_namespace! {
@@ -296,7 +299,7 @@ Each `=>` entry becomes an impl of that trait **for the key**, whose `Delegate` 
 
 ```rust
 impl<__Table__> MyNamespace<__Table__> for FooProviderComponent {
-    type Delegate = RedirectLookup<__Table__, Path!(@MyFooComponent)>;
+    type Delegate = RedirectLookup<__Table__, PathCons<MyFooComponent, Nil>>;
 }
 ```
 

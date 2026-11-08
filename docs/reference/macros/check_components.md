@@ -11,7 +11,7 @@ Assert at compile time that a context can actually use each component it wires.
 
 ## Overview
 
-**CGP's wiring is lazy, and this macro is the answer to that.** The **context** is the type the
+**In [Context-Generic Programming (CGP)](/docs/), wiring is lazy, and this macro is the answer to that.** The **context** is the type the
 method runs on, and it supplies the values it needs as its own fields. When
 [`delegate_components!`](./delegate_components.md) records that a context delegates a component to some
 provider, nothing checks that the provider can do the job. The entry is stored as a type-level fact and

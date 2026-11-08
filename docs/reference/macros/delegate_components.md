@@ -11,11 +11,12 @@ Build a context's wiring table, naming the provider that implements each of its 
 
 ## Overview
 
-[`#[cgp_component]`](./cgp_component.md) separates the trait callers use from the trait
-implementations target, which leaves one question open: for a given type, *which* implementation
-supplies the behavior? `delegate_components!` answers it. You give it a type and a list of entries,
+In [Context-Generic Programming (CGP)](/docs/), [`#[cgp_component]`](./cgp_component.md) separates
+the trait callers use from the trait implementations target, which leaves one question open: for a
+given type, *which* implementation supplies the behavior? `delegate_components!` answers it. You give it a type and a list of entries,
 the component name as the key and the chosen provider as the value, and it records that choice on the
-type.
+type. CGP enables pluggable trait implementations in Rust, and `delegate_components!` is where a
+context picks them.
 
 ```rust
 delegate_components! {

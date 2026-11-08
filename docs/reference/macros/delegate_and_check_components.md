@@ -11,14 +11,17 @@ Wire a context and check that wiring in one macro.
 
 ## Overview
 
-CGP's wiring is [lazy](./delegate_components.md#common-mistakes): a
+In [Context-Generic Programming (CGP)](/docs/), wiring is
+[lazy](./delegate_components.md#common-mistakes): a
 [`delegate_components!`](./delegate_components.md) entry is accepted without verifying that the provider it
 names can actually satisfy the component, so a **context** (the type the method runs on, which
 supplies the values it needs as its own fields) can compile while being broken. The fix is a
 [`check_components!`](./check_components.md) block, and the problem with the fix is that keeping it in step
 with the wiring is manual. Add a delegation, remember to add its check.
 
-`delegate_and_check_components!` removes that bookkeeping by deriving the checks from the delegations:
+CGP enables pluggable trait implementations in Rust, and this macro is where a context picks them
+and proves the choice in one step. It removes the bookkeeping by deriving the checks from the
+delegations:
 
 ```rust
 delegate_and_check_components! {
