@@ -1,11 +1,13 @@
 ---
 sidebar_label: 'Consumer and provider traits'
 sidebar_position: 2
+description: 'How CGP splits one trait into a consumer trait for callers and a provider trait for implementations, and how wiring connects a call to its provider.'
 ---
 
 # Consumer and provider traits
 
-A CGP component connects callers to implementations through two related traits. Callers use the
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations: a
+component connects callers to implementations through two related traits. Callers use the
 **consumer trait** to invoke methods on a context, the type receiving the call. Implementers use
 the **provider trait** to supply those methods through separate provider types. The context chooses
 a provider through wiring, so implementations can vary while callers keep the same interface.
@@ -90,6 +92,10 @@ pub trait EmailSender<Context> {
 }
 ```
 
+The diagram shows the two roles and the provider structs that implement the second one.
+
+![Diagram: one trait splits into a consumer trait that callers use and a provider trait that implementations target. Two provider structs implement the provider trait, and the context's wiring selects one of them.](/img/consumer-provider-split.svg)
+
 The implementations can now keep their original context bounds while using separate marker
 structs as `Self`. With the method bodies omitted, their declarations look like this:
 
@@ -132,6 +138,10 @@ With the behaviors defined, each application needs to choose which provider supp
 delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
 delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
 ```
+
+The table maps the same component key to a different provider for each context.
+
+![Diagram: the wiring table has three columns, context, component key, and provider. App maps EmailSenderComponent to SendViaSmtp, and TestApp maps it to RecordEmails. A call resolves through the table at compile time to a direct call on the selected provider.](/img/wiring-table.svg)
 
 The key in both tables is `EmailSenderComponent`, a marker generated alongside the two traits.
 Those traits, the marker, and the forwarding implementations form the **component**. The entry

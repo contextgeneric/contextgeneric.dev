@@ -1,19 +1,21 @@
 ---
+title: 'Blanket implementations: why Rust rejects overlapping ones'
 sidebar_label: 'Bypassing coherence'
 sidebar_position: 1
+description: 'Why Rust rejects overlapping blanket implementations, and how CGP lets each context record one provider choice without repealing coherence.'
 ---
 
 # Bypassing coherence
 
 Rust's coherence rules keep trait lookup consistent across a program. For a given trait, its
 type arguments, and an implementing type, at most one implementation applies. Generic code can
-therefore rely on trait bounds without asking callers to choose an implementation. The same
-guarantee rules out overlapping implementations, even when each would be useful on its own.
+therefore rely on trait bounds without asking callers to choose an implementation, but the same
+guarantee rules out overlapping implementations even when each would be useful on its own.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations by
+giving each implementation a separate provider type, and a context selects one through wiring.
 
-CGP lets alternatives coexist by giving each implementation a separate provider type. A context
-then selects its provider through wiring, and the generated code continues to obey Rust's
-coherence rules. This page explains why that guarantee matters, how the provider split works
-within it, and where ownership and wiring limit the available choices.
+This page explains why that guarantee matters, how the provider split works within it, and where
+ownership and wiring limit the available choices.
 
 ## The trait system is already a dependency-injection mechanism
 
@@ -195,6 +197,11 @@ still need a single implementation. A wiring table records that choice for each 
 delegate_components! { String  { EncoderComponent: EncodeAsText } }
 delegate_components! { Vec<u8> { EncoderComponent: EncodeAsHex  } }
 ```
+
+Rust's rule still holds. What changes is where the choice is recorded: coherence is scoped to each
+context's provider, so the two applications can encode the same `String` differently.
+
+![Diagram: Rust checks coherence once against each provider implementation, and CGP scopes the recorded choice to each context. The String value encodes as text in one application and as hexadecimal in another.](/img/coherence-scoped.svg)
 
 With these entries, `value.encode()` uses `EncodeAsText` for a `String` and `EncodeAsHex` for a
 `Vec<u8>`. The string `"hi"` therefore encodes as `b"hi"`, while the byte vector `b"hi".to_vec()`
