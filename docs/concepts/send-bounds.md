@@ -1,10 +1,12 @@
 ---
 sidebar_label: 'Recovering Send bounds'
 sidebar_position: 17
+description: 'How a companion trait exposes a sendable future when an async CGP method leaves Send open, and why the forwarding implementation needs a concrete context.'
 ---
 
 # Recovering `Send` bounds
 
+[Context-Generic Programming](/docs/) (CGP) leaves `Send` out of its async trait methods.
 Recovering a `Send` bound lets generic code require a sendable future from an async interface that
 leaves that guarantee open. CGP's `#[async_trait]` returns an unboxed future without promising
 `Send`, so a caller cannot infer sendability from the consumer trait alone. A companion trait can
