@@ -11,8 +11,9 @@ Define a `Producer` provider from an input-free function.
 
 ## Overview
 
-`#[cgp_producer]` is for the degenerate member of the handler family: a computation that takes no input and
-yields a value from nothing. A constant, a default, a seed for a pipeline. It is the input-free sibling of
+In [Context-Generic Programming (CGP)](/docs/), `#[cgp_producer]` is for the degenerate member of the
+handler family: a computation that takes no input and yields a value from nothing. CGP enables
+pluggable trait implementations in Rust, and this macro builds one from an input-free function. A constant, a default, a seed for a pipeline. It is the input-free sibling of
 [`#[cgp_computer]`](./cgp_computer.md), and like that macro it lets you write a plain function and have the
 provider synthesized for you:
 

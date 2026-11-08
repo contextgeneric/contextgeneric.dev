@@ -11,8 +11,9 @@ Define a `Computer` provider from a plain function.
 
 ## Overview
 
-CGP models computation as a family of components varying along three axes: synchronous or async, fallible
-or not, taking an input or not. A provider in that family is a struct with one or more impls threading a
+In [Context-Generic Programming (CGP)](/docs/), computation is modeled as a family of components
+varying along three axes: synchronous or async, fallible or not, taking an input or not. CGP enables
+pluggable trait implementations in Rust, and this macro builds one from a plain function. A provider in that family is a struct with one or more impls threading a
 **context** (the type the method runs on, which supplies the values it needs as its fields), a
 phantom `Code` tag, and an `Input`. Written by hand for a computation as small as "add two numbers", that is
 far more code than the task needs.

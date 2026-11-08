@@ -11,8 +11,9 @@ Generate a handler that dispatches over an extensible-data input from a per-type
 
 ## Overview
 
-`#[cgp_auto_dispatch]` answers a common shape: **you have a trait with one implementation per type, and you
-want it to work on an enum of those types too.**
+In [Context-Generic Programming (CGP)](/docs/), `#[cgp_auto_dispatch]` answers a common shape: **you
+have a trait with one implementation per type, and you want it to work on an enum of those types
+too.**
 
 ```rust
 #[cgp_auto_dispatch]
