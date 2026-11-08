@@ -1,14 +1,16 @@
 ---
 sidebar_label: 'Extensible variants'
 sidebar_position: 14
+description: 'How an enum variant list becomes a sum type, how extraction proves every variant is handled without a wildcard, and how one handler serves several enums.'
 ---
 
 # Extensible variants
 
-Extensible variants let generic code construct and handle enums through variant names and payload
-types. By describing the cases it needs through traits, a handler can work across compatible enums
-without depending on any one enum definition. The compiler still checks that every variant is
-covered, even when independently written handlers supply the cases.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations whose
+handlers can cover enum variants. Extensible variants let generic code construct and handle enums
+through variant names and payload types. By describing the cases it needs through traits, a handler
+can work across compatible enums without depending on any one enum definition. The compiler still
+checks that every variant is covered, even when independently written handlers supply the cases.
 
 This uses the same field representation as [extensible records](./extensible-records.md), but an
 enum contains one alternative at a time. That difference changes how generic code takes a value
