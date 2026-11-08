@@ -84,7 +84,8 @@ block to match. These are the actionable rules here:
 - Install with `npm ci`, and run `npm start` for the dev server and `npm run build` for the static
   output, or the `node_modules` binaries of the same names.
 - Check the build's exit status rather than its output.
-- Keep `onBrokenLinks` set to `throw`; fix every reference when a page moves.
+- Keep `onBrokenLinks` and `onBrokenAnchors` set to `throw`; fix every reference when a page or heading
+  moves.
 - Take a page's position from `sidebar_position` and its directory's `_category_.json`.
 - Update the announcement bar in `docusaurus.config.ts` by hand with every release announcement.
 - Keep the site stock: do not add plugins, and do not add React beyond the landing page.

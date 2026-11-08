@@ -26,6 +26,7 @@ const config: Config = {
   projectName: 'contextgeneric.dev', // Usually your repo name.
 
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
 
   // Parse `.md` as CommonMark and `.mdx` as MDX, rather than treating every file
   // as MDX. The skill pages under `docs/ai/skills/` are symlinks into the
