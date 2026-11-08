@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 340" role="img" aria-labelledby="title desc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 360" role="img" aria-labelledby="title desc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif">
   <title id="title">Coherence scoped to each provider choice</title>
-  <desc id="desc">Rust keeps one implementation of a trait for a type by rejecting overlapping impls. CGP keeps that rule but scopes the choice to the provider type: the String value is encoded as text in one context and as hexadecimal in another.</desc>
+  <desc id="desc">Rust keeps one implementation of a trait for a type by rejecting overlapping impls. CGP keeps that rule but scopes the choice to the provider type: the String value type is wired to EncodeAsText and the Vec of bytes to EncodeAsHex, so both impls coexist while each value type names one provider.</desc>
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -9,7 +9,7 @@
   </defs>
 
   <!-- Rust rule -->
-  <rect x="10" y="10" width="400" height="320" rx="10" fill="#f7f4f2" stroke="#8a8378" stroke-width="1.5"/>
+  <rect x="10" y="10" width="400" height="340" rx="10" fill="#f7f4f2" stroke="#8a8378" stroke-width="1.5"/>
   <text x="30" y="42" font-size="18" font-weight="700" fill="#24201c">Rust coherence</text>
   <text x="30" y="70" font-size="14" fill="#4a443c">One implementation per trait and type,</text>
   <text x="30" y="90" font-size="14" fill="#4a443c">checked for the whole program.</text>
@@ -28,28 +28,24 @@
   <text x="40" y="300" font-size="13" fill="#4a443c">every lookup for <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">String</tspan> agrees.</text>
 
   <!-- CGP move -->
-  <rect x="470" y="10" width="400" height="320" rx="10" fill="#fbf7f6" stroke="#5D0705" stroke-width="1.5"/>
-  <text x="490" y="42" font-size="18" font-weight="700" fill="#5D0705">CGP: same rule, scoped per provider</text>
+  <rect x="470" y="10" width="400" height="340" rx="10" fill="#fbf7f6" stroke="#5D0705" stroke-width="1.5"/>
+  <text x="490" y="42" font-size="18" font-weight="700" fill="#5D0705">CGP: the same rule, per provider</text>
   <text x="490" y="70" font-size="14" fill="#4a443c">Each provider type gets its own impl, so</text>
-  <text x="490" y="90" font-size="14" fill="#4a443c">each context records one choice.</text>
+  <text x="490" y="90" font-size="14" fill="#4a443c">each value type names one provider.</text>
 
-  <rect x="490" y="112" width="120" height="40" rx="8" fill="#ffffff" stroke="#8a8378"/>
-  <text x="550" y="137" text-anchor="middle" font-size="14" fill="#24201c">String</text>
+  <rect x="490" y="120" width="120" height="44" rx="8" fill="#ffffff" stroke="#8a8378"/>
+  <text x="550" y="147" text-anchor="middle" font-size="15" fill="#24201c">String</text>
+  <path d="M 610 142 L 650 142" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="655" y="120" width="190" height="44" rx="8" fill="#ffffff" stroke="#5D0705"/>
+  <text x="750" y="147" text-anchor="middle" font-size="14" fill="#5D0705">EncodeAsText</text>
+  <text x="655" y="188" font-size="13" fill="#4a443c">encode → b"hi"</text>
 
-  <path d="M 550 152 L 550 176" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 550 176 L 660 176" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 550 176 L 440 176" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 660 176 L 660 200" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <path d="M 440 176 L 440 200" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="490" y="210" width="120" height="44" rx="8" fill="#ffffff" stroke="#8a8378"/>
+  <text x="550" y="237" text-anchor="middle" font-size="15" fill="#24201c">Vec&lt;u8&gt;</text>
+  <path d="M 610 232 L 650 232" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="655" y="210" width="190" height="44" rx="8" fill="#ffffff" stroke="#5D0705"/>
+  <text x="750" y="237" text-anchor="middle" font-size="14" fill="#5D0705">EncodeAsHex</text>
+  <text x="655" y="278" font-size="13" fill="#4a443c">encode → b"6869"</text>
 
-  <rect x="350" y="205" width="180" height="96" rx="8" fill="#ffffff" stroke="#8a8378"/>
-  <text x="440" y="228" text-anchor="middle" font-size="14" font-weight="600" fill="#24201c">context App</text>
-  <text x="440" y="252" text-anchor="middle" font-size="13" fill="#4a443c">selects EncodeAsText</text>
-  <text x="440" y="276" text-anchor="middle" font-size="13" fill="#4a443c">encode → b"hi"</text>
-
-  <rect x="570" y="205" width="180" height="96" rx="8" fill="#ffffff" stroke="#8a8378"/>
-  <text x="660" y="228" text-anchor="middle" font-size="14" font-weight="600" fill="#24201c">context Firmware</text>
-  <text x="660" y="252" text-anchor="middle" font-size="13" fill="#4a443c">selects EncodeAsHex</text>
-  <text x="660" y="276" text-anchor="middle" font-size="13" fill="#4a443c">encode → b"6869"</text>
-
+  <text x="490" y="322" font-size="13" fill="#4a443c">Both impls coexist because their provider types differ.</text>
 </svg>
