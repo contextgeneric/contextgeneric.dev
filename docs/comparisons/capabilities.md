@@ -1,17 +1,16 @@
 ---
 sidebar_label: 'Capabilities'
 sidebar_position: 11
-description: 'Distinguish capability models and compare their guarantees with CGP dependency checks and context fields.'
+description: 'Distinguish capability models and compare their guarantees with Context-Generic Programming dependency checks and context fields.'
 ---
 
 # Capabilities
 
-CGP can declare dependencies and carry capability values, but it does not enforce a security
-boundary. It is a language extension for Rust, with pluggable trait implementations at
-compile-time, implemented as a library on stable Rust whose consumer traits are ordinary Rust
-traits; the [Introduction](/docs/) covers the basics. This page separates object capabilities,
-effects as capabilities, and other uses of the term, then explains which properties CGP shares
-and which must come from another system.
+[Context-Generic Programming](/docs/) can declare dependencies and carry capability values, but it
+does not enforce a security boundary. CGP extends Rust with pluggable trait implementations, chosen
+per context and resolved at compile time, as a library on stable Rust whose consumer traits are
+ordinary Rust traits. This page separates object capabilities, effects as capabilities, and other
+uses of the term, then explains which properties CGP shares and which must come from another system.
 
 ## In your terms
 
