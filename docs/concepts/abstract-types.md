@@ -1,14 +1,16 @@
 ---
 sidebar_label: 'Abstract types'
 sidebar_position: 5
+description: 'How a context chooses an associated type through wiring, so providers share one scalar, error type, or runtime without adding a parameter at every call.'
 ---
 
 # Abstract types
 
-An **abstract type** gives providers a shared name for a type their context chooses. For example,
-providers can return the same error type without deciding whether it is a string or a domain enum,
-or carry out calculations using the scalar type their application selects. Rust's associated types
-express that relationship, and CGP lets each context make the choice through wiring.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
+an **abstract type** lets the same wiring choose the types those implementations share. Providers
+can return the same error type without deciding whether it is a string or a domain enum, or carry
+out calculations using the scalar type their application selects. Rust's associated types express
+that relationship, and CGP lets each context make the choice through wiring.
 
 ## Rust already has this
 
