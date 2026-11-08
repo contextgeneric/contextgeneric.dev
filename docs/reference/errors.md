@@ -58,10 +58,12 @@ Match the compiler's code and the shape of the message.
 | `E0599` no associated function found for type parameter | An inner provider called but never imported | [Using something you did not declare](#using-something-you-did-not-declare) |
 | `E0277` … `CanUseComponent` is not satisfied | A checked component's provider is missing something | [A dependency is not met](#a-dependency-is-not-met) |
 | `E0277` the trait bound `f64: Eq` is not satisfied | An ordinary Rust bound on a wired type | [When the missing bound is an ordinary Rust trait](#when-the-missing-bound-is-an-ordinary-rust-trait) |
+| `E0277` … `IsProviderFor` is not satisfied | A provider impl written without its macro | [A provider impl written without its macro](#a-provider-impl-written-without-its-macro) |
 | `E0277` … `PathCons<…>: SomeNamespace<…>` is not satisfied | A namespace path nothing binds | [Nothing is wired there](#nothing-is-wired-there) |
 | `E0277` the size for values of type `[u8]` cannot be known | A field-type shorthand lowered to an unsized type | [A field-type shorthand without a rule](#a-field-type-shorthand-without-a-rule) |
 | `E0271` type mismatch resolving `<… as …>::Assoc == …` | A type pinned one way and wired another | [When two decisions disagree about a type](#when-two-decisions-disagree-about-a-type) |
 | `E0119` conflicting implementations | Two wiring entries claim one key | [The wiring itself does not compile](#the-wiring-itself-does-not-compile) |
+| `E0425` / `E0782` a wiring name resolves to nothing | A component or provider named wrongly in a table | [A wiring name that resolves to nothing](#a-wiring-name-that-resolves-to-nothing) |
 | `E0428` the name … is defined multiple times | A generated name declared twice | [Two entries claim one key](#two-entries-claim-one-key) |
 | `E0275` overflow evaluating the requirement | A wiring or inheritance cycle | [A lookup that never terminates](#a-lookup-that-never-terminates) |
 | `E0210` / `E0117` [orphan rule](/docs/reference/glossary#orphan-rule) | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
@@ -387,6 +389,30 @@ future crate could add, not a second problem.
 A duplicate **name** of your own, rather than a duplicate key, is an `E0428` instead, and passes through
 uncoded, because it already points precisely at both definitions.
 
+### A wiring name that resolves to nothing
+
+A table entry names a component marker and a provider type, and both must exist where the table is
+written. A consumer trait in the key, a component that is not imported, a key guessed from a trait's
+name, a provider never declared, or a type in an `@`-path that does not exist all fail the same way:
+the compiler reports the name itself, with suggestions that do not fit wiring.
+
+```text
+error[E0782]: [CGP-E040] the wiring key `CanGreet` is a consumer trait, but a key names a component
+  --> src/main.rs:41:9
+   |
+41 |         CanGreet: GreetHello,
+   |         ^^^^^^^^
+   |
+   = help: name its component instead: `GreeterComponent`
+```
+
+The fix is to name the item the table needs: the component marker (`GreeterComponent`), the import
+for a component from another module, the provider struct declared with `new`, or the type in the
+path. The tool words each shape with its own code: `[CGP-E040]` for a consumer trait as a key,
+`[CGP-E041]` for a component not in scope, `[CGP-E042]` for a key guessed from a trait's name,
+`[CGP-E043]` for an undeclared provider, and `[CGP-E044]` for an undeclared type in a path. A
+`#[cgp_impl]` provider never declared is `[CGP-E038]`.
+
 ### Joining more than one namespace
 
 A context can forward through exactly one namespace. Two `namespace` headers (or one header plus a
@@ -666,6 +692,24 @@ downstream check failure, none of which names the cause. Two neighbours share th
 and `[CGP-E033]` is `#[cgp_impl]`
 applied to a trait that is not a component at all, where the fix is to make it one, or to write a
 plain `impl`.
+
+### A provider impl written without its macro
+
+A provider trait's `IsProviderFor` supertrait is written by `#[cgp_provider]` or `#[cgp_impl]`. A
+plain `impl` of the provider trait has no marker impl, so the compiler rejects it on the supertrait:
+
+```text
+error[E0277]: [CGP-E039] the impl of `Greeter` for `GreetHello` is written without `#[cgp_provider]`
+  --> src/main.rs:24:36
+   |
+24 | impl<Context> Greeter<Context> for GreetHello {
+   |                                    ^^^^^^^^^^
+   |
+   = help: add `#[cgp_provider]` to the impl of `Greeter`, or write the provider with `#[cgp_impl]`
+```
+
+Add the attribute, or write the provider with `#[cgp_impl]`, which lowers to it. The raw error lists
+the types that do implement `IsProviderFor`, none of which is the fix.
 
 ## The `[CGP-Exxx]` codes
 
