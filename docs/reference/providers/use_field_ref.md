@@ -28,8 +28,8 @@ component's own provider, so it is wired through its [`WithFieldRef`](with_field
 Most borrowed-view getters do not need `UseFieldRef` at all, and this is the key thing to know
 before reaching for it. When a getter's return type is one of the shorthands the getter macros
 recognize, the generated [`UseField`](use_field.md) implementation already borrows for you: a `&str`
-getter reads a `String` field through `.as_str()`, a `&[T]` getter reads any `'static` field
-implementing `AsRef<[T]>`, such as a `Vec<u8>`, through `.as_ref()`, and an `Option<&T>` or
+getter reads a `String` field through `AsRef::as_ref`, a `&[T]` getter reads any `'static` field
+implementing `AsRef<[T]>`, such as a `Vec<u8>`, through `AsRef::as_ref`, and an `Option<&T>` or
 `Option<&str>` getter reads an `Option<T>` or `Option<String>` field. Each is wired with a plain
 `UseField`. `UseFieldRef` is for the remaining case, a getter that returns `&T` for some type `T`
 the field is not stored as but can be borrowed as. Like every CGP provider, it carries no runtime

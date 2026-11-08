@@ -11,8 +11,8 @@ Abort with the source error's debug output instead of producing an abstract erro
 
 ## Overview
 
-Under [Context-Generic Programming (CGP)](/docs/), a context chooses the raiser behind each trait
-call, and `PanicOnError` is the `ErrorRaiser` provider that panics rather than returning an error.
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the raiser for each source
+error, and `PanicOnError` is the `ErrorRaiser` provider that panics rather than returning an error.
 When a [**context**](/docs/reference/glossary#context), the type the implementation runs against,
 treats an error as a programming fault that should stop the program, `PanicOnError` raises by
 calling `panic!` with the source error's debug representation. Its signature promises to return the

@@ -51,10 +51,11 @@ delegate_components! {
 }
 ```
 
-Every method of the getter reads the context field whose name equals the method name. The context must
-have a `HasField` implementation for each of those names, which
-[`#[derive(HasField)]`](../derives/derive_has_field.md) supplies. The return-type shorthands the getter
-macros support apply here too, so a `&str` return reads a `String` field and appends `.as_str()`.
+Every method of the getter reads the context field whose name equals the method name. The context
+must have a `HasField` implementation for each of those names, which
+[`#[derive(HasField)]`](../derives/derive_has_field.md) supplies. The return-type shorthands the
+getter macros support apply here too, so a `&str` return reads a `String` field and wraps the read
+in `AsRef::as_ref`.
 
 ## Examples
 
@@ -128,21 +129,26 @@ where
     __Context__: HasField<Symbol!("bar"), Value = u8>,
 {
     fn foo(__context__: &__Context__) -> &str {
-        __context__.get_field(::core::marker::PhantomData::<Symbol!("foo")>).as_str()
+        ::core::convert::AsRef::as_ref(
+            HasField::get_field(
+                __context__,
+                ::core::marker::PhantomData::<Symbol!("foo")>,
+            ),
+        )
     }
 
     fn bar(__context__: &__Context__) -> &u8 {
-        __context__.get_field(::core::marker::PhantomData::<Symbol!("bar")>)
+        HasField::get_field(__context__, ::core::marker::PhantomData::<Symbol!("bar")>)
     }
 }
 ```
 
 Each method becomes a `HasField` bound keyed on the method name as a `Symbol!`, and the body reads
-that field. The `&str` return makes the field `Value` a `String` and appends `.as_str()`, the same
-shorthand [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) uses. The implementation carries one
-`HasField` bound and one body per method, each keyed by its own name. The implementation is paired
-with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md), so a check reports a missing
-field precisely.
+that field. The `&str` return makes the field `Value` a `String` and wraps the read in
+`AsRef::as_ref`, the same shorthand [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) uses. The
+implementation carries one `HasField` bound and one body per method, each keyed by its own name. The
+implementation is paired with a matching [`IsProviderFor`](../traits/wiring/is_provider_for.md), so
+a check reports a missing field precisely.
 
 This is one of three provider implementations `#[cgp_getter]` generates for a getter component, and
 the only one a getter with several methods gets. The other two, [`UseField`](use_field.md) for a

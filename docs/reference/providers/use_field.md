@@ -12,13 +12,13 @@ decision rather than the method name.
 
 ## Overview
 
-Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
-call, and `UseField<Tag>` decouples a getter's method name from the field it reads. A getter
-component defined with [`#[cgp_getter]`](../macros/cgp_getter.md) describes a value the context can
-supply, such as `fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the
-type the method runs on, which supplies the values it needs as its fields. But the context may store
-the value under a different field name, say `first_name`, and different contexts may store it under
-different names. `UseField<Tag>` carries the field name as its type parameter, so wiring a getter to
+Under [Context-Generic Programming (CGP)](/docs/), a getter's field is a wiring choice, and
+`UseField<Tag>` decouples the method name from the field it reads. A getter component defined with
+[`#[cgp_getter]`](../macros/cgp_getter.md) describes a value the context can supply, such as
+`fn name(&self) -> &str`. The [**context**](/docs/reference/glossary#context) is the type the method
+runs on, which supplies the values it needs as its fields. But the context may store the value under
+a different field name, say `first_name`, and different contexts may store it under different names.
+`UseField<Tag>` carries the field name as its type parameter, so wiring a getter to
 `UseField<Symbol!("first_name")>` makes it read `first_name` even though the method is `name`. The
 field name lives in the wiring, not in the trait.
 
@@ -113,12 +113,12 @@ trait at all. Where a [getter trait](/docs/reference/glossary#getter-trait) is g
 each method on its own name. The [`#[cgp_getter]`](../macros/cgp_getter.md) page works the choice
 through in full.
 
-`UseField` already handles the common borrowed-view getters: a `-> &str` getter over a `String` field
-and a `-> &[u8]` getter over a `Vec<u8>` field work through `UseField`, because the generated
-implementation borrows through `as_str()` or `as_ref()` based on the return type. Two neighbours cover
-the cases it does not. When a getter returns `&T` and the field is stored as a different type that
-borrows to `T` through `AsRef`, use [`UseFieldRef`](use_field_ref.md). When the field lives several hops
-inside a nested context, use [`ChainGetters`](chain_getters.md).
+`UseField` already handles the common borrowed-view getters: a `-> &str` getter over a `String`
+field and a `-> &[u8]` getter over a `Vec<u8>` field work through `UseField`, because the generated
+implementation borrows the field through `AsRef::as_ref` to match the return type. Two neighbours
+cover the cases it does not. When a getter returns `&T` and the field is stored as a different type
+that borrows to `T` through `AsRef`, use [`UseFieldRef`](use_field_ref.md). When the field lives
+several hops inside a nested context, use [`ChainGetters`](chain_getters.md).
 
 ## Under the hood
 
@@ -136,7 +136,9 @@ where
     __Context__: HasField<__Tag__, Value = String>,
 {
     fn name(__context__: &__Context__) -> &str {
-        __context__.get_field(::core::marker::PhantomData::<__Tag__>).as_str()
+        ::core::convert::AsRef::as_ref(
+            HasField::get_field(__context__, ::core::marker::PhantomData::<__Tag__>),
+        )
     }
 }
 
@@ -147,11 +149,11 @@ where
 {}
 ```
 
-The `&str` return reads a `String` field and appends `.as_str()`, the getter macros' return-type
-shorthand. The paired [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation carries
-the same `HasField` bound, so a check names a missing field precisely. A getter with more than one
-method gets no `UseField` implementation, since one tag cannot name several fields;
-[Common Mistakes](#common-mistakes) shows the error.
+The `&str` return reads a `String` field and wraps the read in `AsRef::as_ref`, the getter macros'
+return-type shorthand. The paired [`IsProviderFor`](../traits/wiring/is_provider_for.md)
+implementation carries the same `HasField` bound, so a check names a missing field precisely. A
+getter with more than one method gets no `UseField` implementation, since one tag cannot name
+several fields; [Common Mistakes](#common-mistakes) shows the error.
 
 **The foundational field getters.** `UseField<Tag>` implements
 [`FieldGetter`](../traits/field-access/field_getter.md), which reads the field by reference:

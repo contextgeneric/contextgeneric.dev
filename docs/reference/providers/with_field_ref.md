@@ -135,7 +135,7 @@ error[E0271]: type mismatch resolving `<UseFieldRef<Symbol<4, Chars<'n', Chars<'
 ```
 
 Wire a `&str` getter over a `String` field to the plain [`UseField`](use_field.md), which borrows
-through `.as_str()`.
+through `AsRef::as_ref`.
 
 ## Related constructs
 

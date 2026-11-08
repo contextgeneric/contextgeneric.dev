@@ -26,7 +26,7 @@ different jobs.
 
 Under [Context-Generic Programming (CGP)](/docs/), a context chooses the concrete type behind each
 abstract type through wiring, and `UseType<Type>` removes the need to hand-write a provider every
-time it wants to fix one. The context is the
+time the context wants to fix one. The context is the
 [type that implements the trait](/docs/reference/glossary#context), and it decides what each
 abstract type resolves to. An abstract type in CGP is a trait with a single associated type, defined
 with [`#[cgp_type]`](../macros/cgp_type.md), such as `trait HasScalarType { type Scalar; }`. Generic

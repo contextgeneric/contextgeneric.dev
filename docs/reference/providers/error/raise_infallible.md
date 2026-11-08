@@ -11,8 +11,8 @@ Absorb `core::convert::Infallible`, the error type that can never be constructed
 
 ## Overview
 
-Under [Context-Generic Programming (CGP)](/docs/), a context chooses the raiser behind each trait
-call, and `RaiseInfallible` is the `ErrorRaiser` provider for `core::convert::Infallible`, an error
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the raiser for each source
+error, and `RaiseInfallible` is the `ErrorRaiser` provider for `core::convert::Infallible`, an error
 type with no values. It lets generic code that raises the error of a fallible operation be wired
 uniformly on a [**context**](/docs/reference/glossary#context), the type the implementation runs
 against, even when the operation chosen for that context cannot fail. Because an `Infallible` value

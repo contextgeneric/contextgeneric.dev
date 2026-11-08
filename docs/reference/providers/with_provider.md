@@ -12,9 +12,9 @@ specific named component.
 
 ## Overview
 
-[Context-Generic Programming (CGP)](/docs/) separates foundational providers from named components
-through two layers of provider trait, and `WithProvider<Provider>` bridges them. Foundational traits
-like [`TypeProvider`](../components/has_type.md) and
+[Context-Generic Programming (CGP)](/docs/) has two layers of provider trait, one foundational and
+one per named component, and `WithProvider<Provider>` bridges them. Foundational traits like
+[`TypeProvider`](../components/has_type.md) and
 [`FieldGetter`](../traits/field-access/field_getter.md) are generic, component-agnostic mechanisms:
 a `TypeProvider` supplies *some* [abstract type](/docs/reference/glossary#abstract-type) for *some*
 tag, and a `FieldGetter` reads *some* field for *some* output tag, without either knowing which
@@ -151,8 +151,12 @@ where
     __Provider__: FieldGetter<__Context__, NameGetterComponent, Value = String>,
 {
     fn name(__context__: &__Context__) -> &str {
-        __Provider__::get_field(__context__, ::core::marker::PhantomData::<NameGetterComponent>)
-            .as_str()
+        ::core::convert::AsRef::as_ref(
+            __Provider__::get_field(
+                __context__,
+                ::core::marker::PhantomData::<NameGetterComponent>,
+            ),
+        )
     }
 }
 ```

@@ -6,8 +6,8 @@ sidebar_position: 0
 
 # Handler combinators
 
-The providers that build, sequence, and adapt handlers: composing them end to end, threading a list
-through a pipeline, returning the input unchanged, and lifting one handler shape into another.
+The providers that build, sequence, and adapt handlers: composing them end to end, running a list in
+sequence, returning the input unchanged, and lifting one handler shape into another.
 
 ## Overview
 
