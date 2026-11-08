@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Type-level DSLs'
 sidebar_position: 16
+description: 'How Rust types can represent a program, how providers give each syntax form meaning, and how the compiler resolves a whole expression through wiring.'
 ---
 
 # Type-level DSLs
 
-A type-level domain-specific language represents a program as Rust types and gives its operations
-meaning through CGP providers. The program's structure can stay the same while different contexts
-select different interpretations, and new syntax forms can bring their own providers. Rust checks
-and resolves those choices at compile time; the selected operations execute when called.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations that
+can interpret a type as a program. A type-level domain-specific language represents a program as
+Rust types and gives its operations meaning through CGP providers. The program's structure can stay
+the same while different contexts select different interpretations, and new syntax forms can bring
+their own providers. Rust checks and resolves those choices at compile time; the selected operations
+execute when called.
 
 The [handler](./handlers.md) family's `Code` parameter gives the program type a place in a
 computation's interface. An interpreter can use the structure of that type to choose and combine
