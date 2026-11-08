@@ -1,14 +1,17 @@
 ---
 sidebar_label: 'Checking your wiring'
 sidebar_position: 6
+description: 'How check traits and check_components! verify a context wiring beside the table, what the raw and rewritten diagnostics show, and what a check does not prove.'
 ---
 
 # Checking your wiring
 
-Check traits let you verify a context's wiring at a location you choose. Wiring itself records
-provider choices without immediately checking whether the context meets their requirements, so a
-missing dependency can remain unnoticed until a later method call. An explicit check brings that
-failure back beside the wiring, where the context and its selected providers are easier to inspect.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
+a **check trait** verifies that a context can use the providers its wiring selects. Wiring itself
+records provider choices without immediately checking whether the context meets their requirements,
+so a missing dependency can remain unnoticed until a later method call. An explicit check brings
+that failure back beside the wiring, where the context and its selected providers are easier to
+inspect.
 
 ## A context can be wrong and still compile
 
