@@ -11,7 +11,8 @@ Define a getter as a blanket impl over `HasField`, keyed by the method name.
 
 ## Overview
 
-`#[cgp_auto_getter]` publishes a context field as a named, reusable accessor. You write a trait of getter
+In [Context-Generic Programming (CGP)](/docs/), `#[cgp_auto_getter]` publishes a context field as a
+named, reusable accessor. You write a trait of getter
 methods, and the macro implements it for every **context** that happens to carry fields of the matching
 names. The context is the type the method runs on, and it supplies the values it needs as its
 own fields. For example:
@@ -72,7 +73,7 @@ natural. The field's type is inferred from what you return:
 | The method returns | The field's type | How it is read |
 |---|---|---|
 | `&T` | `T` | by reference, no conversion |
-| `&str` | `String` | `.as_str()` |
+| `&str` | `String` | `.as_ref()` |
 | `&[T]` | any `'static` type implementing `AsRef<[T]>` | `.as_ref()` |
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
 | `Option<&str>` | `Option<String>` | `.as_deref()` |
@@ -80,7 +81,7 @@ natural. The field's type is inferred from what you return:
 | An owned type (`f64`, `String`, a tuple, an array) | the same type | by reference, then `.clone()` |
 
 A `&mut self` receiver reads mutably, through `HasFieldMut`, and each reference form has a mutable
-mirror: `&mut T`, `&mut str` from a `String` via `.as_mut_str()`, `&mut [T]` through `AsMut<[T]>`,
+mirror: `&mut T`, `&mut str` from a `String` via `.as_mut()`, `&mut [T]` through `AsMut<[T]>`,
 `Option<&mut T>` via `.as_mut()`, and `Option<&mut str>` via `.as_deref_mut()`. A `&mut` anywhere
 in the return type needs that receiver, and under `&self` the macro rejects it with
 *&mut self is required for mutable field reference*.
@@ -290,7 +291,7 @@ where
     __Context__: HasField<Symbol!("name"), Value = String>,
 {
     fn name(&self) -> &str {
-        self.get_field(PhantomData::<Symbol!("name")>).as_str()
+        self.get_field(PhantomData::<Symbol!("name")>).as_ref()
     }
 }
 ```
@@ -299,7 +300,7 @@ A few things to recognize. The context parameter is literally `__Context__`, a r
 cannot collide with one of yours. [`Symbol!("name")`](./symbol.md) is a [type-level string](/docs/reference/glossary#type-level-string) standing for the
 field name. The compiler prints its expanded `Symbol<4, Chars<'n', …>>` form in errors, and
 `cargo cgp expand` resugars it back to this. And because the return type is `&str`, the bound asks for a
-`String` field and the body appends `.as_str()`, which is the conversion table in action.
+`String` field and the body appends `.as_ref()`, which is the conversion table in action.
 
 A trait with several methods produces one predicate and one body per field, all in the same impl:
 

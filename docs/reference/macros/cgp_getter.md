@@ -11,7 +11,8 @@ Define a getter as a full component, so the field it reads is chosen by wiring r
 
 ## Overview
 
-[`#[cgp_auto_getter]`](./cgp_auto_getter.md) ties a getter to a field of the same name: declare
+In [Context-Generic Programming (CGP)](/docs/), [`#[cgp_auto_getter]`](./cgp_auto_getter.md) ties a
+getter to a field of the same name: declare
 `fn name(&self) -> &str` and every context with a `name` field satisfies it. That is the right tradeoff almost
 always, and it has one hard limitation: a context that stores the value under a different name cannot use the
 getter at all.
@@ -222,7 +223,7 @@ where
     __Context__: HasField<__Tag__, Value = String>,
 {
     fn name(__context__: &__Context__) -> &str {
-        __context__.get_field(PhantomData::<__Tag__>).as_str()
+        __context__.get_field(PhantomData::<__Tag__>).as_ref()
     }
 }
 ```
@@ -231,7 +232,7 @@ where
 [`#[cgp_auto_getter]`](./cgp_auto_getter.md), whose blanket impl hard-codes the tag to
 `Symbol!("name")`. Here the tag is whatever the wiring supplies, so `UseField<Symbol!("first_name")>`
 reads `first_name`. The `&str` shorthand behaves identically in both: the bound asks for a `String` and the
-body appends `.as_str()`.
+body appends `.as_ref()`.
 
 Next is the `UseFields` impl, which is the auto-getter's behaviour expressed as a provider, with the
 tag fixed to each method's own name:
@@ -242,7 +243,7 @@ where
     __Context__: HasField<Symbol!("name"), Value = String>,
 {
     fn name(__context__: &__Context__) -> &str {
-        __context__.get_field(PhantomData::<Symbol!("name")>).as_str()
+        __context__.get_field(PhantomData::<Symbol!("name")>).as_ref()
     }
 }
 ```
@@ -256,7 +257,7 @@ where
     __Provider__: FieldGetter<__Context__, NameGetterComponent, Value = String>,
 {
     fn name(__context__: &__Context__) -> &str {
-        __Provider__::get_field(__context__, PhantomData::<NameGetterComponent>).as_str()
+        __Provider__::get_field(__context__, PhantomData::<NameGetterComponent>).as_ref()
     }
 }
 ```
