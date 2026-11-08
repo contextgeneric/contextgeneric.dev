@@ -1,14 +1,16 @@
 ---
 sidebar_label: 'Aggregate providers'
 sidebar_position: 8
+description: 'How a provider bundle records a group of wiring choices once, why a context delegates to it, and why a bundle must be checked through a real context.'
 ---
 
 # Aggregate providers
 
-An **aggregate provider** collects provider choices into a wiring table that several contexts can
-reuse. Each context delegates a group of components to that table, so changing the shared choices
-can update them together. The chosen providers still receive the original context and use its data;
-the bundle only connects them.
+[Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations whose
+choices can be bundled. An **aggregate provider** collects provider choices into a wiring table that
+several contexts can reuse. Each context delegates a group of components to that table, so changing
+the shared choices can update them together. The chosen providers still receive the original context
+and use its data; the bundle only connects them.
 
 ## A table whose target is not a context
 
