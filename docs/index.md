@@ -25,24 +25,6 @@ implementations or want to reuse an implementation across contexts. The
 [Overview](/docs/overview) covers those features, along with abstract types, extensible data, and
 composable handlers.
 
-## Current Status
-
-CGP is in active development, with a young ecosystem and limited community support. Learning its
-patterns takes time, and compiler errors can be difficult to interpret. If you adopt it for a
-mission-critical project, expect to investigate problems yourself when the available documentation
-and support do not cover your case.
-
-[cargo-cgp](/docs/cargo-cgp) helps diagnose wiring errors by naming their root cause and showing the
-dependency chain. The tool is an early release: `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool does not yet reshape every class. CGP also publishes an
-[agent skill](/docs/ai/skills) to help coding assistants read, write, and debug CGP code. You still
-need to review the code an assistant produces.
-
-Start with a small part of your project whose implementation choices already vary. For a trait
-with one implementation, a plain trait may be enough. CGP particularly welcomes
-[early adopters and contributors](/docs/contribute) who want to experiment and help improve the
-library, tools, and documentation.
-
 ## Getting Started
 
 Start with the [Hello World tutorial](/docs/tutorials/hello) for a short working example. Continue
