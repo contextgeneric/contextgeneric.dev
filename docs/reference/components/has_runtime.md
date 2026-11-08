@@ -11,7 +11,9 @@ Hand out a borrow of the context's runtime value, so effectful code reaches it g
 
 ## Overview
 
-`HasRuntime` lets context-generic code obtain the runtime it runs against without naming a concrete one.
+In [Context-Generic Programming (CGP)](/docs/), `HasRuntime` lets context-generic code obtain the
+runtime it runs against without naming a concrete one. CGP enables pluggable trait implementations
+in Rust, and `HasRuntime` is the getter that lets a context plug in its runtime value.
 A runtime here is whatever object provides the services an application needs at execution time,
 spawning tasks, sleeping, opening sockets, reading the clock, and different deployments want different
 runtimes: Tokio in production, a mock in tests, a single-threaded executor in a benchmark. Rather than

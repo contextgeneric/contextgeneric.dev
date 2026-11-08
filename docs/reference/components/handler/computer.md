@@ -11,7 +11,9 @@ The synchronous, infallible member of the handler family, and the simplest provi
 
 ## Overview
 
-`Computer` is for computations that always succeed. Adding two numbers, formatting a value, or
+In [Context-Generic Programming (CGP)](/docs/), `Computer` is for computations that always succeed.
+CGP enables pluggable trait implementations in Rust, and `Computer` is the component that lets a
+context plug in an infallible computation. Adding two numbers, formatting a value, or
 projecting a field never fails, so returning a `Result` and requiring an error type would be noise.
 A `Computer` provider names an `Output` type and produces it from the
 [**context**](/docs/reference/glossary#context) (the type the implementation runs against), a

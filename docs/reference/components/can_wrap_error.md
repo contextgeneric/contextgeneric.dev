@@ -11,7 +11,9 @@ Attach a piece of detail to an error the context already holds, enriching it as 
 
 ## Overview
 
-`CanWrapError<Detail>` enriches an error as it travels up a call stack. Where
+In [Context-Generic Programming (CGP)](/docs/), `CanWrapError<Detail>` enriches an error as it
+travels up a call stack. CGP enables pluggable trait implementations in Rust, and `CanWrapError` is
+the component that lets a context plug in how detail is folded into its error. Where
 [`CanRaiseError`](./can_raise_error.md) converts a *foreign* error into the context's abstract
 error, `CanWrapError` takes an error the **context** already holds and folds a piece of `Detail`
 into it, a message, a span, a path, producing an enriched `Self::Error`. The context is the type the

@@ -11,8 +11,10 @@ Turn a concrete source error into the context's abstract `Self::Error`.
 
 ## Overview
 
-`CanRaiseError<SourceError>` lets generic CGP code produce its context's abstract error from any
-concrete error it meets. A provider that calls a fallible operation gets back a specific error type,
+In [Context-Generic Programming (CGP)](/docs/), `CanRaiseError<SourceError>` lets generic code
+produce its context's abstract error from any concrete error it meets. CGP enables pluggable trait
+implementations in Rust, and `CanRaiseError` is the component that lets a context plug in how each
+source error becomes its own. A provider that calls a fallible operation gets back a specific error type,
 a parse error, an I/O error, a string message, but it must return the **context's** abstract
 `Self::Error`, whose concrete identity it does not know. The context here is the type the
 implementation runs against, and it decides how each source error maps into its chosen error type.

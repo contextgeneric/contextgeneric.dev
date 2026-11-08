@@ -11,7 +11,9 @@ Run a task named at the type level to a `Result<(), Error>`, with the behavior c
 
 ## Overview
 
-`CanRun<Code>` gives a context a uniform way to *execute a unit of work* selected at the type level.
+In [Context-Generic Programming (CGP)](/docs/), `CanRun<Code>` gives a context a uniform way to
+*execute a unit of work* selected at the type level. CGP enables pluggable trait implementations in
+Rust, and `CanRun` is the component that lets a context plug in a task runner per code.
 The unit of work is identified by a `Code` type parameter, a phantom tag rather than a value, so a
 single **context**, the type the implementation runs against, can host many distinct tasks, one per
 `Code`, and dispatch each to its own provider. Running a task here means invoking the provider wired

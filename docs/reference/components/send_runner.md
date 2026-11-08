@@ -11,9 +11,11 @@ The runner variant whose returned future is `Send`, for work that must cross a t
 
 ## Overview
 
-`CanSendRun<Code>` is [`CanRun`](./runner.md) with one added guarantee: the future its method returns is
-[`Send`](https://doc.rust-lang.org/std/marker/trait.Send.html), so it can be handed to a spawner such as
-`tokio::spawn`. It exists to solve a specific Rust limitation. A generic `async fn` over abstract
+In [Context-Generic Programming (CGP)](/docs/), `CanSendRun<Code>` is [`CanRun`](./runner.md) with
+one added guarantee: the future its method returns is
+[`Send`](https://doc.rust-lang.org/std/marker/trait.Send.html), so it can be handed to a spawner
+such as `tokio::spawn`. CGP enables pluggable trait implementations in Rust, and `CanSendRun` is the
+component that lets a context plug in a `Send`-future runner. It exists to solve a specific Rust limitation. A generic `async fn` over abstract
 **context** types (the context being the type a method runs on that supplies the values an
 implementation needs as its own fields) cannot promise its future is `Send` without annotating `Send`
 bounds on every [abstract type](/docs/reference/glossary#abstract-type) in scope, and those bounds pollute every interface.

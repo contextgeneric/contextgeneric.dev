@@ -12,9 +12,11 @@ borrows its input.
 
 ## Overview
 
-`AsyncComputerRef` combines two of the family's axes: it is asynchronous like
-[`AsyncComputer`](./async_computer.md) and takes its input by reference like
-[`ComputerRef`](./computer_ref.md). A computation that must await and only *reads* its argument,
+In [Context-Generic Programming (CGP)](/docs/), `AsyncComputerRef` combines two of the family's
+axes: it is asynchronous like [`AsyncComputer`](./async_computer.md) and takes its input by
+reference like [`ComputerRef`](./computer_ref.md). CGP enables pluggable trait implementations in
+Rust, and `AsyncComputerRef` is the component that lets a context plug in an async computation that
+reads its input. A computation that must await and only *reads* its argument,
 while still never failing, fits it: its method is `async`, receives `&Input`, and returns the
 `Output` directly with no failure path. It runs against a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against.

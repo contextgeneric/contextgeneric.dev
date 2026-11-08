@@ -11,8 +11,10 @@ Declare the abstract runtime *type* a context runs against, chosen per context t
 
 ## Overview
 
-`HasRuntimeType` lets context-generic code name the runtime type a context uses without committing
-to a concrete one. A runtime is whatever object supplies the services an application needs at
+In [Context-Generic Programming (CGP)](/docs/), `HasRuntimeType` lets context-generic code name the
+runtime type a context uses without committing to a concrete one. CGP enables pluggable trait
+implementations in Rust, and `HasRuntimeType` is the component that lets a context plug in its
+runtime type. A runtime is whatever object supplies the services an application needs at
 execution time, and different deployments want different runtimes: Tokio in production, a mock in
 tests, an executor in a benchmark. `HasRuntimeType` gives the **context**, the type that implements
 the trait, an abstract associated `Runtime` type, resolved to a concrete one at wiring time.

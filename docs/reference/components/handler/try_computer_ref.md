@@ -12,7 +12,10 @@ The by-reference member of the handler family's fallible corner: a
 
 ## Overview
 
-`TryComputerRef` is a [`TryComputer`](./try_computer.md) that takes its input by reference. A
+In [Context-Generic Programming (CGP)](/docs/), `TryComputerRef` is a
+[`TryComputer`](./try_computer.md) that takes its input by reference. CGP enables pluggable trait
+implementations in Rust, and `TryComputerRef` is the component that lets a context plug in a
+fallible computation that reads its input. A
 synchronous computation that can fail and only *reads* its argument fits it: its method receives
 `&Input` and returns `Result<Output, Error>`, where `Error` is the abstract error type of the
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. It

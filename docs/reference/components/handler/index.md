@@ -6,8 +6,9 @@ sidebar_position: 0
 
 # The handler family
 
-The handler family models a computation as a swappable component, so a pipeline step, an I/O call,
-or a type-level interpreter is wired and composed the same way as any other component. Every member
+In [Context-Generic Programming (CGP)](/docs/), the handler family models a computation as a
+swappable component, so a pipeline step, an I/O call, or a type-level interpreter is wired and
+composed the same way as any other component. Every member
 turns an `Input` into an `Output` under a phantom `Code` tag, against a
 [**context**](/docs/reference/glossary#context), the type the implementation runs against. The
 members differ along three axes: synchronous or async, infallible or fallible, and taking the input

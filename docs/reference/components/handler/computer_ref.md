@@ -11,8 +11,10 @@ The by-reference member of the handler family: a [`Computer`](./computer.md) tha
 
 ## Overview
 
-`ComputerRef` is a [`Computer`](./computer.md) that takes its input by reference instead of by
-value. A synchronous, infallible computation that only *reads* its argument fits `ComputerRef`,
+In [Context-Generic Programming (CGP)](/docs/), `ComputerRef` is a [`Computer`](./computer.md) that
+takes its input by reference instead of by value. CGP enables pluggable trait implementations in
+Rust, and `ComputerRef` is the component that lets a context plug in a computation that reads its
+input. A synchronous, infallible computation that only *reads* its argument fits `ComputerRef`,
 whose method receives `&Input` where `CanCompute` receives `Input`, so the caller keeps ownership.
 Everything else is the same: it turns the input into an `Output` under a phantom `Code` tag, against
 a [**context**](/docs/reference/glossary#context) (the type the implementation runs against), and

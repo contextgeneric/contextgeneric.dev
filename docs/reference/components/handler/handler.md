@@ -12,8 +12,10 @@ The general computation component: asynchronous and fallible.
 
 ## Overview
 
-`Handler` is for computations that must both await and fail, such as a call to a remote service,
-which awaits the response and must report a failure. It is the corner of the [handler
+In [Context-Generic Programming (CGP)](/docs/), `Handler` is for computations that must both await
+and fail, such as a call to a remote service, which awaits the response and must report a failure.
+CGP enables pluggable trait implementations in Rust, and `Handler` is the component that lets a
+context plug in an async, fallible computation. It is the corner of the [handler
 family](/docs/concepts/handlers) that has both properties: it turns an `Input` into an `Output`
 under a phantom `Code` tag and returns a `Result` in the abstract error type of the
 [**context**](/docs/reference/glossary#context), the type the implementation runs against.

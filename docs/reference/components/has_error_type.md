@@ -11,7 +11,9 @@ Give a context one shared, abstract `Error` type, so fallible generic code never
 
 ## Overview
 
-`HasErrorType` lets generic CGP code fail without committing to a concrete error type. A provider
+In [Context-Generic Programming (CGP)](/docs/), `HasErrorType` lets generic code fail without
+committing to a concrete error type. CGP enables pluggable trait implementations in Rust, and
+`HasErrorType` is the component that lets a context plug in its error type. A provider
 that may error has to produce *some* error, but it runs against a **context**, the type that
 implements the trait, and it cannot know whether that context wants `anyhow::Error`,
 `std::io::Error`, or an enum of its own. `HasErrorType` resolves this by giving the context one

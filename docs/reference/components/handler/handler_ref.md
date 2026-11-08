@@ -12,7 +12,9 @@ borrows its input.
 
 ## Overview
 
-`HandlerRef` is a [`Handler`](./handler.md) that takes its input by reference. It is asynchronous
+In [Context-Generic Programming (CGP)](/docs/), `HandlerRef` is a [`Handler`](./handler.md) that
+takes its input by reference. CGP enables pluggable trait implementations in Rust, and `HandlerRef`
+is the component that lets a context plug in an async, fallible computation that reads its input. It is asynchronous
 and fallible like the general handler, so it awaits and may return the abstract error of the
 [**context**](/docs/reference/glossary#context), the type the implementation runs against, but its
 method receives `&Input` where `CanHandle` receives `Input`. It suits an async, fallible computation

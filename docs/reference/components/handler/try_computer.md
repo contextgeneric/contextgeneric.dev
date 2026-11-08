@@ -11,7 +11,9 @@ The fallible synchronous member of the handler family: a computer that can retur
 
 ## Overview
 
-`TryComputer` is for synchronous computations that can fail. A computation that parses a string,
+In [Context-Generic Programming (CGP)](/docs/), `TryComputer` is for synchronous computations that
+can fail. CGP enables pluggable trait implementations in Rust, and `TryComputer` is the component
+that lets a context plug in a fallible computation. A computation that parses a string,
 looks up a key, or checks an invariant may not be able to produce its output, and it needs a way to
 report the failure. Where [`Computer`](./computer.md) returns its `Output` directly, `TryComputer`
 returns `Result<Output, Error>`, where `Error` is the abstract error type of the

@@ -11,7 +11,9 @@ The input-free member of the handler family: a synchronous, infallible source of
 
 ## Overview
 
-`Producer` is for computations that take no input and yield a value. A default configuration, a
+In [Context-Generic Programming (CGP)](/docs/), `Producer` is for computations that take no input
+and yield a value. CGP enables pluggable trait implementations in Rust, and `Producer` is the
+component that lets a context plug in an input-free computation. A default configuration, a
 constant, or a value read entirely from the [**context**](/docs/reference/glossary#context) (the
 type the implementation runs against) has no `Input` to transform: it needs only the context and a
 phantom `Code` tag naming which value to produce. The rest of the [handler

@@ -7,8 +7,8 @@ sidebar_position: 0
 
 # Components
 
-A component is one trait, defined once, that a context can wire to any of several
-implementations. The constructs on the other pages of this reference are the tools you use to *build*
+In [Context-Generic Programming (CGP)](/docs/), a component is one trait, defined once, that a
+context can wire to any of several implementations. The constructs on the other pages of this reference are the tools you use to *build*
 your own components; the pages in this section document the components CGP already ships. Each is a
 consumer trait you call, a provider trait an implementation targets, and a wiring key a context
 delegates, exactly like a component you define yourself, so you wire a built-in error type or runtime

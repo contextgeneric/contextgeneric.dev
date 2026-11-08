@@ -12,7 +12,9 @@ awaits.
 
 ## Overview
 
-`AsyncComputer` is for computations that must await but still cannot fail. Reading a value that is
+In [Context-Generic Programming (CGP)](/docs/), `AsyncComputer` is for computations that must await
+but still cannot fail. CGP enables pluggable trait implementations in Rust, and `AsyncComputer` is
+the component that lets a context plug in an async computation. Reading a value that is
 already in memory is a [`Computer`](./computer.md); awaiting a timer, or a channel that always
 yields a value, is an `AsyncComputer`. It turns an `Input` into an `Output` under a phantom `Code`
 tag, against a [**context**](/docs/reference/glossary#context) (the type the implementation runs
