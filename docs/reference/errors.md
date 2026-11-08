@@ -72,6 +72,7 @@ Match the compiler's code and the shape of the message.
 | `E0433` cannot find type | A name the generated code cannot see | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 | `E0576` cannot find associated type … in trait | A `#[use_type]` import with a wrong name | [An imported type that does not exist](#an-imported-type-that-does-not-exist) |
 | `E0404` expected trait, found type parameter | An [abstract type](/docs/reference/glossary#abstract-type) named after its own bound | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
+| `E0277` / `E0271` a bound on a generated partial type | A builder, extractor, or cast in a state its value does not allow | [Extensible data](#extensible-data) |
 
 ## A dependency is not met
 
@@ -710,6 +711,32 @@ error[E0277]: [CGP-E039] the impl of `Greeter` for `GreetHello` is written witho
 
 Add the attribute, or write the provider with `#[cgp_impl]`, which lowers to it. The raw error lists
 the types that do implement `IsProviderFor`, none of which is the fix.
+
+## Extensible data
+
+A builder, extractor, or cast tracks each field's or variant's state in a type, so the compiler
+rejects an operation applied to a value whose state does not allow it, or to a type without the
+data derive. A builder field set twice is the clearest case:
+
+```text
+error[E0271]: [CGP-E050] field `first_name` of `Person` is already set
+  --> src/main.rs:24:22
+   |
+24 |         .build_field(PhantomData::<Symbol!("first_name")>, "Bob".to_owned());
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: root cause: [CGP-E118] field `first_name` of `Person` is already set
+           this is required through the dependency chain:
+             [CGP-E104] trait impl `BuildField<Symbol!("first_name")>` for the builder of `Person` with `first_name` set
+             └─ [CGP-E118] field `first_name` of `Person` is already set
+```
+
+The headline names the field and its state, and the chain names the operation that needed the other
+state. **The fix** depends on the operation: set each field once, finalize only once every field is
+set, rule out a variant once, or add the derive the type lacks. The same family includes a field the
+struct does not declare, a variant extracted twice, an incomplete match, and a cast between shapes
+whose variants do not agree. The tool words the operation under `[CGP-E050]` through `[CGP-E059]`,
+and the leaf names the state, such as `[CGP-E118]` for a field already set.
 
 ## The `[CGP-Exxx]` codes
 
