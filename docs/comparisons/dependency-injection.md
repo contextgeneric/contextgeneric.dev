@@ -1,16 +1,16 @@
 ---
 sidebar_label: 'Dependency injection'
 sidebar_position: 8
-description: 'Compare CGP with Spring, Guice, Dagger, and plain Rust injection: dependency declarations, wiring, validation, and runtime values.'
+description: 'Compare Context-Generic Programming with Spring, Guice, Dagger, and plain Rust injection: dependency declarations, wiring, validation, and runtime values.'
 ---
 
 # Dependency injection
 
-CGP supports dependency injection through reusable providers selected by each application. It is a language extension for Rust, with pluggable trait implementations at
-compile-time, implemented as a library on stable Rust whose consumer traits are ordinary Rust
-traits; the [Introduction](/docs/) explains the basics. For readers familiar with Spring, Guice,
-Dagger, or constructor injection, this page compares dependency declarations, wiring, validation,
-and the cases that still call for a container.
+[Context-Generic Programming](/docs/) supports dependency injection through reusable providers
+selected by each application: CGP extends Rust with pluggable trait implementations, chosen per
+context and resolved at compile time, as a library on stable Rust whose consumer traits are ordinary
+Rust traits. For readers familiar with Spring, Guice, Dagger, or constructor injection, this page
+compares dependency declarations, wiring, validation, and the cases that still call for a container.
 
 ## In your terms
 
