@@ -20,7 +20,8 @@ npm ci
 ```
 
 The repository carries `package-lock.json`, and CI installs with `npm ci`, so use `npm` rather than
-another package manager. Node 20 or newer is required.
+another package manager. Node 20 or newer is required. CI runs the version `.nvmrc` pins, and
+`nvm use` selects the same one locally.
 
 ## Local development
 
@@ -45,8 +46,9 @@ fixed in the same change.
 
 The site deploys from `main` through GitHub Pages, using the workflow in
 [`.github/workflows/deploy.yaml`](.github/workflows/deploy.yaml): a push to `main` builds the site and
-publishes it. A pull request runs the same build through
-[`.github/workflows/test-deploy.yaml`](.github/workflows/test-deploy.yaml) without deploying.
+publishes it. Every other branch and every pull request runs the same build through
+[`.github/workflows/test-deploy.yaml`](.github/workflows/test-deploy.yaml) without deploying, and that
+workflow also runs the `example-code` snippet tests.
 
 ## Writing a page
 

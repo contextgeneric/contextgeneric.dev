@@ -1,0 +1,6 @@
+# The compiler the snippet checks and their `.stderr` snapshots are blessed with.
+# A snapshot quotes rustc's exact wording, so an unpinned channel would turn a
+# toolchain update into a red build. Bump this file and re-bless in one change.
+[toolchain]
+channel = "1.99.0"
+profile = "minimal"

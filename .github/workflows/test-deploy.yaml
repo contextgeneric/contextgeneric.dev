@@ -1,16 +1,34 @@
 name: Test deployment
 
-on:
-  pull_request:
-    branches:
-      - main
-    # Review gh actions docs if you want to further define triggers, paths, etc
-    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+# `main` is built by `deploy.yaml`, which also publishes it, so this workflow
+# builds every other branch and every pull request instead of duplicating that
+# build.
 
+# Review gh actions docs if you want to further define triggers, paths, etc
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request: {}
+
+# Cancel in-progress runs when a new commit is pushed to the same PR, branch, or tag.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# To minimize supply-chain exposure this workflow uses only GitHub's own
+# first-party actions. Each job runs a check the repository's documentation
+# lists: the site build from README.md, and the snippet tests from
+# example-code/README.md.
 jobs:
-  test-deploy:
-    name: Test deployment
+  build:
+    name: Build the site
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,10 +38,43 @@ jobs:
           submodules: recursive
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # `.nvmrc` pins the runtime so a Node release cannot change the build
+          # without a commit.
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
         run: npm ci
       - name: Test build website
         run: npm run build
+
+  example-code:
+    name: Snippet tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      # `example-code` patches `cgp` to a sibling checkout at `../../cgp`, so the
+      # two repositories are checked out side by side.
+      - name: Check out the website
+        uses: actions/checkout@v4
+        with:
+          path: contextgeneric.dev
+      - name: Check out cgp beside it
+        uses: actions/checkout@v4
+        with:
+          repository: contextgeneric/cgp
+          path: cgp
+      # `example-code/rust-toolchain.toml` pins the compiler the snapshots are
+      # blessed with; rustup installs that channel from this directory.
+      - name: Install the pinned Rust toolchain
+        working-directory: contextgeneric.dev/example-code
+        run: rustup toolchain install
+      # The pages' snippets are compiled here, so a page cannot drift from the
+      # library without a red build. The compile-fail snapshots are skipped
+      # because each quotes the absolute path of the `cgp` checkout, which only
+      # matches where it was blessed; run them locally with `cargo test`.
+      - name: Run the snippet tests
+        working-directory: contextgeneric.dev/example-code
+        run: cargo test -- --skip rejected_snippets_do_not_compile

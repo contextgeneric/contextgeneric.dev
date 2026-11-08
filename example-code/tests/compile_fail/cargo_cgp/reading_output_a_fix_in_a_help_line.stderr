@@ -5,16 +5,19 @@ error[E0599]: the method `person_name` exists for reference `&__Context__`, but 
    |                                ^^^^^^^^^^^ method cannot be called on `&__Context__` due to unsatisfied trait bounds
    |
 note: the following trait bounds were not satisfied:
-      `&__Context__: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
-      `<&__Context__ as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
-      `<__Context__ as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
-      `__Context__: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+      `&__Context__: HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+      `__Context__: HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
   --> tests/compile_fail/cargo_cgp/reading_output_a_fix_in_a_help_line.rs:5:1
    |
  5 | #[cgp_fn]
    | ^^^^^^^^^
  6 | fn person_name(&self, #[implicit] name: &str) -> String {
    |    ^^^^^^^^^^^
+   = note: the following trait bounds were not satisfied:
+           `<__Context__ as Deref>::Target = _`
+           which is required by `__Context__: PersonName`
+           `__Context__: cgp::cgp_core::cgp_field::traits::has_field::DerefMap`
+           which is required by `__Context__: PersonName`
    = help: items from traits can only be used if the type parameter is bounded by the trait
    = note: this error originates in the attribute macro `cgp_fn` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: the following trait defines an item `person_name`, perhaps you need to restrict type parameter `__Context__` with it:

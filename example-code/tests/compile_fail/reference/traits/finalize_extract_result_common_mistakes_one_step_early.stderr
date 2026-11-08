@@ -13,16 +13,11 @@ error[E0599]: the method `finalize_extract_result` exists for enum `Result<Recta
    | |_________|
    |
    |
-  ::: $RUST/core/src/result.rs
-   |
-   |   pub enum Result<T, E> {
-   |   --------------------- doesn't satisfy `_: FinalizeExtractResult`
-   |
    = note: the following trait bounds were not satisfied:
            `__PartialShape<IsPresent, IsVoid>: FinalizeExtract`
            which is required by `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>: FinalizeExtractResult`
 note: the trait `FinalizeExtract` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:38:1
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:73:1
    |
-38 | pub trait FinalizeExtract {
+73 | pub trait FinalizeExtract {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^

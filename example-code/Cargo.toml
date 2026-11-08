@@ -7,7 +7,7 @@ description = "Compiled counterparts of the code shown on contextgeneric.dev. No
 
 [dependencies]
 # The `cgp` release the site documents, taken from the repository until it is on crates.io.
-cgp = { git = "https://github.com/contextgeneric/cgp.git" }
+cgp = { git = "https://github.com/contextgeneric/cgp.git", features = ["alloc"] }
 
 [dev-dependencies]
 anyhow = "1"

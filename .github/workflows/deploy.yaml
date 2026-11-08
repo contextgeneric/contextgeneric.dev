@@ -7,10 +7,23 @@ on:
     # Review gh actions docs if you want to further define triggers, paths, etc
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
 
+# Serialize deployments instead of cancelling them: a cancelled deploy can leave
+# the Pages environment half-updated, so a newer run waits for the current one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+# To minimize supply-chain exposure this workflow uses only GitHub's own
+# first-party actions. The site is built here and published from `main`; every
+# other branch and every pull request is built by `test-deploy.yaml`.
 jobs:
   build:
     name: Build Docusaurus
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,7 +33,9 @@ jobs:
           submodules: recursive
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # `.nvmrc` pins the runtime so a Node release cannot change the build
+          # without a commit.
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
@@ -48,6 +63,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

@@ -5,7 +5,7 @@ error[E0107]: trait takes 2 generic arguments but 3 generic arguments were suppl
    |                          ^^^^^^^^^^^^^ expected 2 generic arguments
    |
 note: trait defined here, with 2 generic parameters: `T`, `Components`
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-component/src/namespaces.rs:5:11
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-component/src/namespaces.rs:17:11
    |
- 5 | pub trait DefaultImpls1<T, Components> {
+17 | pub trait DefaultImpls1<T, Components> {
    |           ^^^^^^^^^^^^^ -  ----------

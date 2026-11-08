@@ -28,9 +28,9 @@ error[E0599]: the method `finalize_with_default` exists for struct `__PartialSer
            `&mut __PartialServer<IsPresent, IsNothing>: TransformMapFields<TransformMapDefault, IsPresent>`
            which is required by `&mut __PartialServer<IsPresent, IsNothing>: CanFinalizeWithDefault`
 note: the trait `TransformMapFields` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/transform_map.rs:12:1
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/transform_map.rs:22:1
    |
-12 | pub trait TransformMapFields<Transform, TargetMap> {
+22 | pub trait TransformMapFields<Transform, TargetMap> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    = help: items from traits can only be used if the trait is implemented and in scope
    = note: the following trait defines an item `finalize_with_default`, perhaps you need to implement it:

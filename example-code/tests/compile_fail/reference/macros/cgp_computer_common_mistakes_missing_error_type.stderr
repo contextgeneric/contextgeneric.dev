@@ -51,15 +51,15 @@ error[E0277]: the trait bound `Promote<Add>: TryComputer<App, (), (u64, u64)>` i
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `TryComputer<App, (), (u64, u64)>` is not implemented for `Promote<Add>`
    |
 help: the trait `TryComputer<Context, Code, Input>` is conditionally implemented for `Promote<Provider>`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/providers/promote.rs:23:1
+  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/providers/promote.rs:27:1
    |
-23 | / impl<Context, Code, Input, Output, Provider> TryComputer<Context, Code, Input> for Promote<Provider>
-24 | | where
-25 | |     Context: HasErrorType,
+27 | / impl<Context, Code, Input, Output, Provider> TryComputer<Context, Code, Input> for Promote<Provider>
+28 | | where
+29 | |     Context: HasErrorType,
    | |              ------------
    | |              |
    | |              unsatisfied requirement introduced here: `App: HasErrorType`
    | |              unsatisfied requirement introduced here: `App: HasErrorType`
-26 | |     Provider: Computer<Context, Code, Input, Output = Output>,
+30 | |     Provider: Computer<Context, Code, Input, Output = Output>,
    | |______________________________________________________________^
    = note: required for `Add` to implement `TryComputer<App, (), (u64, u64)>`

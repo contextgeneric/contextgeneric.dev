@@ -9,7 +9,7 @@ error[E0308]: mismatched types
    = note: expected struct `PhantomData<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>`
               found struct `PhantomData<Symbol<9, Chars<'l', Chars<'a', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>`
 note: method defined here
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/has_field.rs:49:8
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/has_field.rs:15:8
    |
-49 |     fn get_field(&self, _tag: PhantomData<Tag>) -> &Self::Value;
+15 |     fn get_field(&self, _tag: PhantomData<Tag>) -> &Self::Value;
    |        ^^^^^^^^^

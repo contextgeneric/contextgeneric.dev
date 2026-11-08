@@ -6,13 +6,13 @@ error[E0277]: the trait bound `cgp::prelude::Chars<'a', cgp::prelude::Nil>: Stat
    |
    = help: the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::prelude::Chars<'a', cgp::prelude::Nil>`
 help: the following other types implement trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes`
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/static_string.rs:29:1
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/static_string.rs:34:1
    |
-29 | / impl<const LEN: usize, Chars> StaticBytes for Symbol<LEN, Chars>
-30 | | where
-31 | |     Chars: MaybeChars,
+34 | / impl<const LEN: usize, Chars> StaticBytes for Symbol<LEN, Chars>
+35 | | where
+36 | |     Chars: MaybeChars,
    | |______________________^ `Symbol<LEN, Chars>`
 ...
-36 |   impl StaticBytes for Nil {
+41 |   impl StaticBytes for Nil {
    |   ^^^^^^^^^^^^^^^^^^^^^^^^ `cgp::prelude::Nil`
    = note: required for `cgp::prelude::Chars<'a', cgp::prelude::Nil>` to implement `StaticString`

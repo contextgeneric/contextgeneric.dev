@@ -32,12 +32,9 @@ error[E0277]: `__PartialShape<IsVoid, IsPresent>` doesn't implement `Debug`
    |
 help: the trait `Debug` is conditionally implemented for `Result<T, E>`
   --> $RUST/core/src/result.rs
+  ::: $RUST/core/src/result.rs
    |
-   | #[derive(Copy, Debug, Hash)]
-   |                ^^^^^
-...
-   | pub enum Result<T, E> {
-   |                    - unsatisfied requirement introduced here: `__PartialShape<IsVoid, IsPresent>: Debug`
+   = note: unsatisfied requirement introduced here: `__PartialShape<IsVoid, IsPresent>: Debug`
 help: consider annotating `__PartialShape<IsVoid, IsPresent>` with `#[derive(Debug)]`
    |
 15 + #[derive(Debug)]
@@ -55,12 +52,9 @@ error[E0277]: `__PartialShape<IsVoid, IsPresent>` doesn't implement `Debug`
    |
 help: the trait `Debug` is conditionally implemented for `Result<T, E>`
   --> $RUST/core/src/result.rs
+  ::: $RUST/core/src/result.rs
    |
-   | #[derive(Copy, Debug, Hash)]
-   |                ^^^^^
-...
-   | pub enum Result<T, E> {
-   |                    - unsatisfied requirement introduced here: `__PartialShape<IsVoid, IsPresent>: Debug`
+   = note: unsatisfied requirement introduced here: `__PartialShape<IsVoid, IsPresent>: Debug`
 help: consider annotating `__PartialShape<IsVoid, IsPresent>` with `#[derive(Debug)]`
    |
 15 + #[derive(Debug)]

@@ -16,6 +16,10 @@ cargo test --no-run     # the fast check: everything compiles, nothing runs
 The code lives in **integration tests**, which a plain `cargo check` skips; use `cargo test --no-run`
 (or `cargo check --tests`) for a compile-only pass. The crate has no library or binary target.
 
+CI runs the same suite with the compile-fail snapshots skipped
+(`cargo test -- --skip rejected_snippets_do_not_compile`), because each snapshot quotes the absolute
+path of the `cgp` checkout and only matches where it was blessed. Run the full command locally.
+
 ## The layout mirrors `docs/`
 
 The code lives under `tests/`, as one integration-test binary per `docs/` section. Each entrypoint
@@ -102,7 +106,8 @@ TRYBUILD=overwrite cargo test --test compile_fail_tests
 A snapshot that quotes a line from the `cgp` checkout carries that checkout's absolute path, since the
 manifest depends on `cgp` by path. The crate's own files and the standard library are written as
 `tests/…` and `$RUST/…`, so a checkout elsewhere fails only the snapshots naming `cgp`, and re-blessing
-writes the new path in.
+writes the new path in. A snapshot also quotes rustc's own wording, so
+[`rust-toolchain.toml`](rust-toolchain.toml) pins the compiler and a bump re-blesses the suite.
 
 ## Generated code
 

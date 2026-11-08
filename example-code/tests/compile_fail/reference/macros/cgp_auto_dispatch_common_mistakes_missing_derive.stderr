@@ -7,9 +7,9 @@ error[E0599]: the method `area` exists for reference `&Plain`, but its trait bou
 36 |     shape.area()
    |           ^^^^ method cannot be called on `&Plain` due to unsatisfied trait bounds
    |
-  ::: /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:19:1
+  ::: /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/matchers/match_with_field_handlers.rs:33:1
    |
-19 | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
+33 | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
    | ----------------------------------------------------------- doesn't satisfy `<_ as Computer<(), (), &&Plain>>::Output = f64`, `<_ as Computer<(), (), &Plain>>::Output = f64`, `_: Computer<(), (), &&Plain>` or `_: Computer<(), (), &Plain>`
    |
 note: the following trait bounds were not satisfied:
@@ -26,9 +26,9 @@ note: the following trait bounds were not satisfied:
 25 | pub trait HasArea {
    |           -------
 note: the trait `HasExtractor` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:6:1
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:10:1
    |
- 6 | pub trait HasExtractor {
+10 | pub trait HasExtractor {
    | ^^^^^^^^^^^^^^^^^^^^^^
    = help: items from traits can only be used if the trait is implemented and in scope
 note: `HasArea` defines an item `area`, perhaps you need to implement it

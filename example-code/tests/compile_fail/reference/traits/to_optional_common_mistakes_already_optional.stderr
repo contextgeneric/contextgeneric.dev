@@ -15,9 +15,9 @@ error[E0599]: the method `to_optional` exists for struct `__PartialContext<IsOpt
            `&mut __PartialContext<IsOptional, IsOptional>: TransformMapFields<TransformOptional, IsOptional>`
            which is required by `&mut __PartialContext<IsOptional, IsOptional>: cgp::cgp_extra::cgp_field_extra::impls::ToOptional`
 note: the trait `TransformMapFields` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/transform_map.rs:12:1
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/transform_map.rs:22:1
    |
-12 | pub trait TransformMapFields<Transform, TargetMap> {
+22 | pub trait TransformMapFields<Transform, TargetMap> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    = help: items from traits can only be used if the trait is implemented and in scope
    = note: the following trait defines an item `to_optional`, perhaps you need to implement it:
