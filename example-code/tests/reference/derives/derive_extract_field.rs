@@ -49,8 +49,8 @@ pub mod overview {
 
 /// ## Usage
 ///
-/// The accepted enum, the payload-struct rewrite the page recommends — including for a case that
-/// carries nothing — and the variantless enum the page says degenerates.
+/// The accepted enum, the payload-struct rewrite the page recommends, and the variantless enum the
+/// page says degenerates.
 pub mod usage {
     use cgp::prelude::*;
 
@@ -59,15 +59,11 @@ pub mod usage {
         pub radius: f64,
     }
 
-    /// The page's point that even a fieldless case needs a payload struct, since a bare `Empty` is a
-    /// unit variant and would be refused.
-    #[derive(Debug, PartialEq)]
-    pub struct Empty;
-
+    /// A unit variant is accepted as it stands: its payload is `Nil`.
     #[derive(ExtractField, Debug, PartialEq)]
     pub enum Shape {
         Circle(Circle),
-        Empty(Empty),
+        Empty,
     }
 
     #[derive(ExtractField)]
@@ -79,15 +75,15 @@ pub mod usage {
     }
 
     #[test]
-    fn test_a_payload_struct_stands_in_for_a_unit_variant() {
+    fn test_a_unit_variant_carries_nil() {
         // A remainder carries none of the enum's attributes, so it is neither `Debug` nor
         // `PartialEq` — the result is unwrapped rather than compared whole.
-        let extracted = Shape::Empty(Empty)
+        let extracted = Shape::Empty
             .to_extractor()
             .extract_field(PhantomData::<Symbol!("Empty")>)
             .ok();
 
-        assert_eq!(extracted, Some(Empty));
+        assert_eq!(extracted, Some(Nil));
     }
 
     /// `from_extractor` turns an all-present owned extractor back into the enum.

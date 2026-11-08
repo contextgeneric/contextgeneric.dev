@@ -11,7 +11,8 @@ description: 'Generate structural access and the incremental building and extrac
 
 ## Overview
 
-Generic code needs traits to access a struct's fields or an enum's variants. A type parameter alone
+In [Context-Generic Programming (CGP)](/docs/), generic code needs traits to access a struct's fields
+or an enum's variants. A type parameter alone
 does not let it name a `first_name` field or a `Circle` variant.
 
 `#[derive(CgpData)]` supplies those traits by turning the type into **extensible data**. On a struct,

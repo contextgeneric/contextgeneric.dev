@@ -11,7 +11,8 @@ description: 'Generate an extractor that tracks in its own type which variants o
 
 ## Overview
 
-Generic code cannot match directly on an enum whose concrete type it does not know. It needs a trait
+In [Context-Generic Programming (CGP)](/docs/), generic code cannot match directly on an enum whose
+concrete type it does not know. It needs a trait
 interface that preserves Rust's exhaustiveness checking while handling variants individually.
 
 `#[derive(ExtractField)]` provides that interface by tracking the remaining variants in the
@@ -64,29 +65,26 @@ opt out.
 Wrap the payload in a dedicated struct to give each variant a single payload type:
 
 ```rust
-// rejected: no single payload type
+// rejected: `Circle` has named fields, so it has no single payload type
 pub enum Shape {
     Circle { radius: f64 },
     Empty,
 }
 
-// accepted
+// accepted: `Circle` carries one payload type, and `Empty` carries `Nil`
 pub struct Circle {
     pub radius: f64,
 }
 
-pub struct Empty;
-
 #[derive(ExtractField)]
 pub enum Shape {
     Circle(Circle),
-    Empty(Empty),
+    Empty,
 }
 ```
 
-Payload structs can derive extensible-data operations themselves. A fieldless case also needs a
-payload type, such as the unit struct `Empty` above; a bare `Empty` variant does not meet the
-single-field requirement.
+Payload structs can derive extensible-data operations themselves. A variant with no fields needs no
+payload struct: `Empty` carries `Nil`, and the extractor matches it with braces.
 
 [`HasFields`](./derive_has_fields.md) accepts every variant shape when only a structural
 representation and whole-value conversions are needed. `ExtractField` also accepts a variantless

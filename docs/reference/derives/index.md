@@ -7,8 +7,8 @@ description: 'The derives that let generic code access, describe, build and deco
 
 # Derives
 
-CGP derives let generic code access, describe, build, and deconstruct structs and enums without naming
-their concrete types. Each derive adds trait implementations alongside the original type. Choose one
+In [Context-Generic Programming (CGP)](/docs/), derives let generic code access, describe, build, and
+deconstruct structs and enums without naming their concrete types. Each derive adds trait implementations alongside the original type. Choose one
 according to the operations your generic code needs.
 
 Start with the [reference overview](/docs/reference/) if you are new to CGP. This page compares the

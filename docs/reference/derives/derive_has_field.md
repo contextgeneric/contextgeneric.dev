@@ -11,7 +11,8 @@ description: 'Generate shared and mutable accessors for every field of a struct,
 
 ## Overview
 
-A generic implementation cannot access fields with expressions such as `self.name`. It runs against
+In [Context-Generic Programming (CGP)](/docs/), a generic implementation cannot access fields with
+expressions such as `self.name`. It runs against
 a **context**, the type that supplies the values it needs as fields, but does not know that context's
 concrete type.
 

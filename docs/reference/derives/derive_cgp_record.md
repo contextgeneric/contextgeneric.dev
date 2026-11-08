@@ -11,7 +11,8 @@ description: 'Generate field access, a structural representation, and a builder 
 
 ## Overview
 
-Generic code needs traits to read and assemble fields across different structs. A type parameter alone
+In [Context-Generic Programming (CGP)](/docs/), generic code needs traits to read and assemble fields
+across different structs. A type parameter alone
 does not let it refer to a field such as `first_name`.
 
 `#[derive(CgpRecord)]` supplies those traits, making the struct an **[extensible record](/docs/reference/glossary#extensible-record)**. It generates

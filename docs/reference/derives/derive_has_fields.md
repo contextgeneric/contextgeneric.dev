@@ -11,8 +11,8 @@ description: 'Generate a structural representation of a struct or enum and the c
 
 ## Overview
 
-Generic serializers, validators, record conversions, and enum dispatchers need a description of the
-whole type. Individual field access does not tell them which fields or variants exist or how to
+In [Context-Generic Programming (CGP)](/docs/), generic serializers, validators, record conversions,
+and enum dispatchers need a description of the whole type. Individual field access does not tell them which fields or variants exist or how to
 traverse them.
 
 `#[derive(HasFields)]` describes that structure through a single associated type, `Fields`.

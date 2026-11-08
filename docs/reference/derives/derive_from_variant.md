@@ -11,7 +11,8 @@ description: 'Let generic code construct an enum variant selected by a type-leve
 
 ## Overview
 
-Generic code needs a trait interface to construct a variant selected by a type parameter.
+In [Context-Generic Programming (CGP)](/docs/), generic code needs a trait interface to construct a
+variant selected by a type parameter.
 `Shape::Circle(circle)` fixes both the enum and variant at the call site.
 
 `#[derive(FromVariant)]` generates a constructor for each variant, keyed by its name as a type-level

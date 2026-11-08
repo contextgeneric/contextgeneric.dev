@@ -11,7 +11,8 @@ description: 'Generate a structural representation, constructors, and an extract
 
 ## Overview
 
-Generic code needs traits to construct and handle variants across different enums. A type parameter
+In [Context-Generic Programming (CGP)](/docs/), generic code needs traits to construct and handle
+variants across different enums. A type parameter
 alone does not let it name a `Circle` variant or match exhaustively on the concrete enum.
 
 `#[derive(CgpVariant)]` supplies those traits, making the enum **extensible data**. It generates a

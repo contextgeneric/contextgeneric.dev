@@ -11,7 +11,8 @@ description: 'Generate a builder that tracks in its own type which fields of a s
 
 ## Overview
 
-A struct literal requires one place to name the concrete type and supply every field. When independent
+In [Context-Generic Programming (CGP)](/docs/), a struct literal requires one place to name the
+concrete type and supply every field. When independent
 parts of a program contribute fields, a shared constructor can force each contribution to depend on
 the whole struct.
 
