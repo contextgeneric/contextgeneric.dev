@@ -7,8 +7,10 @@ description: 'Install cargo-cgp v0.1.0 with cargo and rustup or with Nix, check 
 
 # Installation
 
-To install [`cargo-cgp`](./index.md), choose the path that fits your existing Rust environment:
-cargo with rustup, or the Nix flake. This page covers version 0.1.0, built for CGP v0.8.
+To install [`cargo-cgp`](./index.md), the error toolchain for
+[Context-Generic Programming (CGP)](/docs/) code, choose the path that fits your existing Rust
+environment: cargo with rustup, or the Nix flake. This page covers version 0.1.0, built for
+CGP v0.8.
 
 The cargo path installs the command first, then prepares the compiler it needs. `cargo-cgp` runs
 a separate `cargo-cgp-driver`, which embeds the Rust compiler and must match one exact nightly.
