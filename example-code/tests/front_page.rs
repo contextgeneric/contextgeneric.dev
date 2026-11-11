@@ -112,3 +112,68 @@ mod name_each_implementation {
         app.send_email("ada@example.com", "hello");
     }
 }
+
+// Property: the text the page shows between each pair of `front-page:` markers equals the text this
+// crate compiles between the same markers. The page keeps its blocks as template literals in
+// `src/pages/index.tsx`, which no compiler reads, so without this check the page could drift from
+// the code that proves it.
+mod page_text {
+    use std::fs;
+    use std::path::Path;
+
+    /// The lines strictly between `// front-page:<name>:begin` and `// front-page:<name>:end`.
+    fn region<'a>(source: &'a str, name: &str) -> Vec<&'a str> {
+        let begin = format!("// front-page:{name}:begin");
+        let end = format!("// front-page:{name}:end");
+        let lines: Vec<&str> = source.lines().collect();
+        let start = lines.iter().position(|l| l.trim() == begin).expect("begin marker") + 1;
+        let stop = lines.iter().position(|l| l.trim() == end).expect("end marker");
+        lines[start..stop].to_vec()
+    }
+
+    /// A Rust region, with the indentation of the module it sits in removed.
+    fn rust_text(lines: &[&str]) -> String {
+        let indent = lines
+            .iter()
+            .filter(|l| !l.trim().is_empty())
+            .map(|l| l.len() - l.trim_start().len())
+            .min()
+            .unwrap_or(0);
+        lines
+            .iter()
+            .map(|l| if l.trim().is_empty() { "" } else { &l[indent..] })
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    /// The template literal a TSX region declares, with its escapes undone.
+    fn tsx_text(lines: &[&str]) -> String {
+        let joined = lines.join("\n");
+        let open = joined.find('`').expect("opening backtick") + 1;
+        let close = joined.rfind('`').expect("closing backtick");
+        joined[open..close].replace("\\`", "`").replace("\\$", "$").replace("\\\\", "\\")
+    }
+
+    fn read(relative: &str) -> String {
+        let path = Path::new(env!("CARGO_MANIFEST_DIR")).join(relative);
+        fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()))
+    }
+
+    #[test]
+    fn the_page_shows_the_code_this_crate_compiles() {
+        let page = read("../src/pages/index.tsx");
+        let compiled = read("tests/front_page.rs");
+        let rejected = read("tests/compile_fail/front_page/rust_accepts_only_one.rs");
+        for (name, source) in [
+            ("rejected-block", &rejected),
+            ("cgp-block", &compiled),
+            ("email-wiring", &compiled),
+        ] {
+            assert_eq!(
+                tsx_text(&region(&page, name)),
+                rust_text(&region(source, name)),
+                "the page's `{name}` differs from the compiled code"
+            );
+        }
+    }
+}
