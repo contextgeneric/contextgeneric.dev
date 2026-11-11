@@ -7,7 +7,16 @@
 
 .page {
   --page-gutter: 1.5rem;
-  --page-width: 1200px;
+  /* Wide enough that the numbered rejected block, whose longest line is 70 characters, fits its
+     window at 1440 px without scrolling. */
+  --page-width: 1280px;
+  /* The strength of a changed line's tint. The light theme's is lower, so a comment on a tinted line
+     keeps 4.5:1. */
+  --diff-tint: 9%;
+}
+
+html[data-theme='dark'] .page {
+  --diff-tint: 14%;
 }
 
 /* One container for every band, so the title, the code, and the essay share a left edge. */
@@ -246,7 +255,7 @@ html[data-theme='dark'] .heroArt {
 .windowCode {
   flex: 1;
   /* A wider gutter leaves room for the glyph that marks a changed line. */
-  --ifm-pre-padding: 1.4rem;
+  --ifm-pre-padding: 1.3rem;
 }
 
 .windowCode :global(.theme-code-block) {
@@ -256,25 +265,29 @@ html[data-theme='dark'] .heroArt {
 }
 
 .windowCode pre {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   line-height: 1.5;
 }
+
+/* Decorative glyphs below give an empty alternative text after a plain fallback, so a screen reader
+   skips them and an older browser still draws them. */
 
 /* The changed lines read like a diff: a tint and a gutter mark in each window's own colour, a cross
    on the line Rust rejects and a plus on the lines CGP adds. The rejected block shows line numbers,
    which Docusaurus lays out as table rows, so its mark sits in the line-number cell; a pseudo-element
    on the row itself would become a cell of its own. */
 .rejected :global(.theme-code-block-highlighted-line) {
-  background: color-mix(in srgb, var(--ifm-color-danger) 14%, transparent);
+  background: color-mix(in srgb, var(--ifm-color-danger) var(--diff-tint), transparent);
 }
 
 .rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber'] {
-  background: color-mix(in srgb, var(--ifm-color-danger) 14%, var(--cgp-code-bg));
+  background: color-mix(in srgb, var(--ifm-color-danger) var(--diff-tint), var(--cgp-code-bg));
   box-shadow: inset 3px 0 0 var(--ifm-color-danger);
 }
 
 .rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber']::after {
   content: '✗';
+  content: '✗' / '';
   position: absolute;
   left: 0.45rem;
   font-weight: 700;
@@ -283,12 +296,13 @@ html[data-theme='dark'] .heroArt {
 
 .accepted :global(.theme-code-block-highlighted-line) {
   position: relative;
-  background: color-mix(in srgb, var(--ifm-color-success) 14%, transparent);
+  background: color-mix(in srgb, var(--ifm-color-success) var(--diff-tint), transparent);
   box-shadow: inset 3px 0 0 var(--ifm-color-success);
 }
 
 .accepted :global(.theme-code-block-highlighted-line)::before {
   content: '+';
+  content: '+' / '';
   position: absolute;
   left: 0.45rem;
   font-weight: 700;
@@ -486,6 +500,7 @@ html[data-theme='dark'] .heroArt {
 
 .tileTitle::after {
   content: ' →';
+  content: ' →' / '';
 }
 
 .tileBody {

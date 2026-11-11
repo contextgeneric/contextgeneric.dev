@@ -77,14 +77,19 @@ delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }`;
 
 const INSTALL_COMMAND = 'cargo add cgp';
 
-// The install line copies its command, so a reader can paste it without selecting the text.
+// The install line copies its command, so a reader can paste it without selecting the text. A
+// browser without the clipboard API, or one that refuses it, leaves the button unchanged, and the
+// command stays selectable by hand.
 function InstallLine(): ReactNode {
   const [copied, setCopied] = useState(false);
   const copy = () => {
-    navigator.clipboard?.writeText(INSTALL_COMMAND).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
+    navigator.clipboard
+      ?.writeText(INSTALL_COMMAND)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
   };
   return (
     <div className={styles.install}>
@@ -94,7 +99,7 @@ function InstallLine(): ReactNode {
         </span>{' '}
         {INSTALL_COMMAND}
       </code>
-      <button type="button" className={styles.copy} onClick={copy}>
+      <button type="button" className={styles.copy} onClick={copy} aria-live="polite">
         {copied ? 'Copied' : 'Copy'}
       </button>
     </div>
@@ -105,7 +110,7 @@ function Hero(): ReactNode {
   return (
     <header className={styles.hero}>
       <div className={clsx(styles.container, styles.heroGrid)}>
-        <div className={styles.heroCopy}>
+        <div>
           <Heading as="h1" className={styles.heroTitle}>
             Context-Generic Programming
           </Heading>
@@ -173,9 +178,7 @@ function CodeWindow({label, verdict, metastring, code, diagnostic}: CodeWindowPr
         </CodeBlock>
       </div>
       {diagnostic && (
-        <pre className={styles.diagnostic} aria-label="The compiler's error for this block">
-          {diagnostic}
-        </pre>
+        <pre className={styles.diagnostic}>{diagnostic}</pre>
       )}
     </figure>
   );
