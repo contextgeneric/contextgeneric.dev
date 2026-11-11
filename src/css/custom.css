@@ -79,12 +79,12 @@ html[data-theme='light'] {
   --cgp-highlight-line: rgba(214, 150, 40, 0.18);
   --cgp-selection: rgba(178, 58, 51, 0.18);
   --cgp-image-frame: #ffffff;
-  --cgp-announce-bg: var(--cgp-red-100);
-  --cgp-announce-text: var(--cgp-red-800);
+  --cgp-announce-bg: #fbf1ed;
+  --cgp-announce-text: #4a2f2b;
   --cgp-footer-bg: #4a1110;
-  --cgp-footer-text: #f3e2df;
+  --cgp-footer-text: #f7efec;
   --cgp-footer-title: #ffffff;
-  --cgp-footer-link: #f9cfc9;
+  --cgp-footer-link: #fdf4f1;
   --cgp-on-red: #ffffff;
 
   /* Infima: the primary scale. */
@@ -192,12 +192,12 @@ html[data-theme='dark'] {
   --cgp-highlight-line: rgba(230, 170, 60, 0.14);
   --cgp-selection: rgba(239, 143, 134, 0.28);
   --cgp-image-frame: #fdfaf7;
-  --cgp-announce-bg: #3d0d0c;
-  --cgp-announce-text: #f8e1dd;
+  --cgp-announce-bg: #261c1b;
+  --cgp-announce-text: #f1e7e4;
   --cgp-footer-bg: #2b0c0b;
-  --cgp-footer-text: #e9d6d2;
+  --cgp-footer-text: #eee4e1;
   --cgp-footer-title: #ffffff;
-  --cgp-footer-link: #f4b3ab;
+  --cgp-footer-link: #f8efec;
 
   --ifm-color-primary: #ef8f86;
   --ifm-color-primary-dark: #ec7d72;
@@ -348,4 +348,10 @@ html[data-theme='dark'] .markdown img {
   background-color: var(--cgp-image-frame);
   border-radius: 12px;
   padding: 0.5rem;
+}
+
+/* The footer's links share its text colour, so the links inside the licence line are underlined. */
+.footer__copyright a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
