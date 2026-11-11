@@ -260,36 +260,59 @@ html[data-theme='dark'] .heroArt {
   line-height: 1.5;
 }
 
-/* The changed lines read like a diff: a tint and a gutter glyph in each window's own colour, a cross
-   on the line Rust rejects and a plus on the lines CGP adds. */
-.window :global(.theme-code-block-highlighted-line) {
-  position: relative;
-}
-
-.window :global(.theme-code-block-highlighted-line)::before {
-  position: absolute;
-  left: 0.45rem;
-  font-weight: 700;
-}
-
+/* The changed lines read like a diff: a tint and a gutter mark in each window's own colour, a cross
+   on the line Rust rejects and a plus on the lines CGP adds. The rejected block shows line numbers,
+   which Docusaurus lays out as table rows, so its mark sits in the line-number cell; a pseudo-element
+   on the row itself would become a cell of its own. */
 .rejected :global(.theme-code-block-highlighted-line) {
   background: color-mix(in srgb, var(--ifm-color-danger) 14%, transparent);
+}
+
+.rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber'] {
+  background: color-mix(in srgb, var(--ifm-color-danger) 14%, var(--cgp-code-bg));
   box-shadow: inset 3px 0 0 var(--ifm-color-danger);
 }
 
-.rejected :global(.theme-code-block-highlighted-line)::before {
+.rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber']::after {
   content: '✗';
+  position: absolute;
+  left: 0.45rem;
+  font-weight: 700;
   color: var(--ifm-color-danger);
 }
 
 .accepted :global(.theme-code-block-highlighted-line) {
+  position: relative;
   background: color-mix(in srgb, var(--ifm-color-success) 14%, transparent);
   box-shadow: inset 3px 0 0 var(--ifm-color-success);
 }
 
 .accepted :global(.theme-code-block-highlighted-line)::before {
   content: '+';
+  position: absolute;
+  left: 0.45rem;
+  font-weight: 700;
   color: var(--ifm-color-success);
+}
+
+/* The compiler's error, quoted under the rejected block, reads as terminal output with its first
+   line in the rejection's colour. */
+.diagnostic {
+  margin: 0;
+  padding: 0.9rem 1.4rem 1rem;
+  border-top: 1px dashed var(--cgp-border);
+  border-radius: 0;
+  background: var(--cgp-surface);
+  color: var(--cgp-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.diagnostic::first-line {
+  color: var(--ifm-color-danger);
+  font-weight: 700;
 }
 
 /* The caption: its reason at body size, then its conclusion set large. */

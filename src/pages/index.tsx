@@ -33,6 +33,19 @@ impl<T: AsRef<[u8]>> CanEncode for T {          // error[E0119]
 }`;
 // front-page:rejected-block:end
 
+// The compiler's error for the rejected block, from its compile-fail snapshot, without the location
+// line, which names the fixture's path. The block starts at the fixture's first line, so the line
+// numbers here are the ones the page shows beside the block.
+// front-page:rejected-diagnostic:begin
+const REJECTED_DIAGNOSTIC = `error[E0119]: conflicting implementations of trait \`CanEncode\`
+   |
+ 7 | impl<T: Display> CanEncode for T {
+   | -------------------------------- first implementation here
+...
+11 | impl<T: AsRef<[u8]>> CanEncode for T {          // error[E0119]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation`;
+// front-page:rejected-diagnostic:end
+
 // front-page:cgp-block:begin
 const CGP_BLOCK = `#[cgp_component(Encoder)]
 pub trait CanEncode {
@@ -139,12 +152,13 @@ type CodeWindowProps = {
   verdict: 'rejected' | 'accepted';
   metastring: string;
   code: string;
+  diagnostic?: string;
 };
 
 // A code block framed as an editor window. The title bar states the verdict with a mark as well as
 // a colour, and the highlighted lines carry a gutter glyph, so the two blocks differ for a reader who
 // cannot tell red from green.
-function CodeWindow({label, verdict, metastring, code}: CodeWindowProps): ReactNode {
+function CodeWindow({label, verdict, metastring, code, diagnostic}: CodeWindowProps): ReactNode {
   return (
     <figure className={clsx(styles.window, styles[verdict])}>
       <figcaption className={styles.windowBar}>
@@ -158,6 +172,11 @@ function CodeWindow({label, verdict, metastring, code}: CodeWindowProps): ReactN
           {code}
         </CodeBlock>
       </div>
+      {diagnostic && (
+        <pre className={styles.diagnostic} aria-label="The compiler's error for this block">
+          {diagnostic}
+        </pre>
+      )}
     </figure>
   );
 }
@@ -169,8 +188,9 @@ function CodeBand(): ReactNode {
         <CodeWindow
           label="Rust accepts only one of these"
           verdict="rejected"
-          metastring="{11}"
+          metastring="showLineNumbers {11}"
           code={REJECTED_BLOCK}
+          diagnostic={REJECTED_DIAGNOSTIC}
         />
         <CodeWindow
           label="With CGP, both compile"

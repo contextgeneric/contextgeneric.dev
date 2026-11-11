@@ -7,7 +7,9 @@
 //!
 //! The text between each pair of `front-page:` marker comments is exactly what the page shows, so a
 //! test can compare it with `index.tsx`. Everything outside the markers is what the page omits: the
-//! imports, the email swap's consumer trait, providers, and contexts, and the checks.
+//! imports, the email swap's consumer trait, providers, and contexts, and the checks. The rejected
+//! block starts at its fixture's first line, so the page's quoted `E0119` names the lines the page
+//! numbers; that fixture carries only the end marker.
 
 // The hero's CGP block. The page omits these two imports.
 mod first_screen {
@@ -131,6 +133,14 @@ mod page_text {
         lines[start..stop].to_vec()
     }
 
+    /// The lines from the start of a file up to `// front-page:<name>:end`.
+    fn leading_region<'a>(source: &'a str, name: &str) -> Vec<&'a str> {
+        let end = format!("// front-page:{name}:end");
+        let lines: Vec<&str> = source.lines().collect();
+        let stop = lines.iter().position(|l| l.trim() == end).expect("end marker");
+        lines[..stop].to_vec()
+    }
+
     /// A Rust region, with the indentation of the module it sits in removed.
     fn rust_text(lines: &[&str]) -> String {
         let indent = lines
@@ -164,16 +174,36 @@ mod page_text {
         let page = read("../src/pages/index.tsx");
         let compiled = read("tests/front_page.rs");
         let rejected = read("tests/compile_fail/front_page/rust_accepts_only_one.rs");
-        for (name, source) in [
-            ("rejected-block", &rejected),
-            ("cgp-block", &compiled),
-            ("email-wiring", &compiled),
-        ] {
+        assert_eq!(
+            tsx_text(&region(&page, "rejected-block")),
+            rust_text(&leading_region(&rejected, "rejected-block")),
+            "the page's `rejected-block` differs from the compiled code"
+        );
+        for name in ["cgp-block", "email-wiring"] {
             assert_eq!(
                 tsx_text(&region(&page, name)),
-                rust_text(&region(source, name)),
+                rust_text(&region(&compiled, name)),
                 "the page's `{name}` differs from the compiled code"
             );
         }
+    }
+
+    // Property: the diagnostic the page quotes under the rejected block equals the compiler's output
+    // for that block, as the compile-fail snapshot records it, without the location line, which names
+    // the fixture's path rather than anything on the page.
+    #[test]
+    fn the_page_quotes_the_compiler_error() {
+        let page = read("../src/pages/index.tsx");
+        let snapshot = read("tests/compile_fail/front_page/rust_accepts_only_one.stderr");
+        let expected = snapshot
+            .lines()
+            .filter(|l| !l.trim_start().starts_with("--> "))
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert_eq!(
+            tsx_text(&region(&page, "rejected-diagnostic")),
+            expected.trim_end(),
+            "the page's quoted diagnostic differs from the compile-fail snapshot"
+        );
     }
 }
