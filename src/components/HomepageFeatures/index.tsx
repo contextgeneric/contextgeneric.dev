@@ -47,14 +47,17 @@ const FEATURES: Feature[] = [
   },
 ];
 
+// Each card is one link, so the whole card is the target; its title stays a heading inside it.
 function FeatureCard({title, line, to, image}: Feature): ReactNode {
   return (
-    <li className={styles.card}>
-      <img className={styles.image} src={useBaseUrl(image)} alt="" width={180} height={180} />
-      <Heading as="h3" className={styles.title}>
-        <Link to={to}>{title}</Link>
-      </Heading>
-      <p className={styles.line}>{line}</p>
+    <li>
+      <Link className={styles.card} to={to}>
+        <img className={styles.image} src={useBaseUrl(image)} alt="" width={180} height={180} />
+        <Heading as="h3" className={styles.title}>
+          {title}
+        </Heading>
+        <p className={styles.line}>{line}</p>
+      </Link>
     </li>
   );
 }

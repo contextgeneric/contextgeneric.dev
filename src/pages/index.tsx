@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import {useState, type ReactNode} from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
 import Head from '@docusaurus/Head';
@@ -9,6 +9,9 @@ import CodeBlock from '@theme/CodeBlock';
 import FeatureCards from '@site/src/components/HomepageFeatures';
 
 import styles from './index.module.css';
+
+// The front page is written as its own markup and stylesheet on the site theme's tokens, inside the
+// Docusaurus layout. Its copy, code, and art follow the knowledge base's homepage guide.
 
 // The page's code. `example-code/tests/front_page.rs` compiles each block and compares the text
 // between each pair of `front-page:` markers with the same markers in its own sources, so a change
@@ -59,10 +62,36 @@ const EMAIL_WIRING = `delegate_components! { App     { EmailSenderComponent: Sen
 delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }`;
 // front-page:email-wiring:end
 
+const INSTALL_COMMAND = 'cargo add cgp';
+
+// The install line copies its command, so a reader can paste it without selecting the text.
+function InstallLine(): ReactNode {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard?.writeText(INSTALL_COMMAND).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+  return (
+    <div className={styles.install}>
+      <code>
+        <span className={styles.prompt} aria-hidden="true">
+          $
+        </span>{' '}
+        {INSTALL_COMMAND}
+      </code>
+      <button type="button" className={styles.copy} onClick={copy}>
+        {copied ? 'Copied' : 'Copy'}
+      </button>
+    </div>
+  );
+}
+
 function Hero(): ReactNode {
   return (
-    <header className={styles.hero} data-theme="light">
-      <div className={styles.heroInner}>
+    <header className={styles.hero}>
+      <div className={clsx(styles.container, styles.heroGrid)}>
         <div className={styles.heroCopy}>
           <Heading as="h1" className={styles.heroTitle}>
             Context-Generic Programming
@@ -74,69 +103,101 @@ function Hero(): ReactNode {
             Still ordinary Rust: a library on the stable toolchain, with provider selection resolved
             at compile time, adopted one trait at a time.
           </p>
-          <pre className={styles.install}>
-            <code>cargo add cgp</code>
-          </pre>
+          <InstallLine />
           <div className={styles.heroLinks}>
-            <Link className={clsx("button button--lg", styles.primaryLink)} to="/docs/quickstart">
+            <Link className={styles.primaryButton} to="/docs/quickstart">
               Quickstart
             </Link>
-            <Link className={clsx("button button--lg", styles.secondaryLink)} to="#costs">
+            <Link className={styles.secondaryButton} to="#costs">
               Costs and maturity
             </Link>
             <iframe
               className={styles.starButton}
-              src="https://ghbtns.com/github-btn.html?user=contextgeneric&amp;repo=cgp&amp;type=star&amp;count=true&amp;size=large"
-              width={160}
-              height={30}
+              src="https://ghbtns.com/github-btn.html?user=contextgeneric&amp;repo=cgp&amp;type=star&amp;count=true"
+              width={110}
+              height={20}
               title="Star CGP on GitHub"
             />
           </div>
         </div>
-        <img
-          className={styles.heroArt}
-          src={useBaseUrl('/img/cgp-hero.webp')}
-          alt="The Context-Generic Programming logo"
-          width={280}
-          height={202}
-        />
+        <div className={styles.heroArtFrame}>
+          <img
+            className={styles.heroArt}
+            src={useBaseUrl('/img/cgp-hero.webp')}
+            alt="The Context-Generic Programming logo"
+            width={280}
+            height={202}
+          />
+        </div>
       </div>
     </header>
+  );
+}
+
+type CodeWindowProps = {
+  label: string;
+  verdict: 'rejected' | 'accepted';
+  metastring: string;
+  code: string;
+};
+
+// A code block framed as an editor window. The title bar states the verdict with a mark as well as
+// a colour, and the highlighted lines carry a gutter glyph, so the two blocks differ for a reader who
+// cannot tell red from green.
+function CodeWindow({label, verdict, metastring, code}: CodeWindowProps): ReactNode {
+  return (
+    <figure className={clsx(styles.window, styles[verdict])}>
+      <figcaption className={styles.windowBar}>
+        <span className={styles.verdictMark} aria-hidden="true">
+          {verdict === 'rejected' ? '✗' : '✓'}
+        </span>
+        {label}
+      </figcaption>
+      <div className={styles.windowCode}>
+        <CodeBlock language="rust" metastring={metastring}>
+          {code}
+        </CodeBlock>
+      </div>
+    </figure>
   );
 }
 
 function CodeBand(): ReactNode {
   return (
     <section className={styles.codeBand} aria-label="The same two implementations, without and with CGP">
-      <div className={styles.codeColumns}>
-        <div className={styles.codeColumn}>
-          <p className={styles.codeLabel}>Rust accepts only one of these</p>
-          <CodeBlock language="rust" metastring="{11}">
-            {REJECTED_BLOCK}
-          </CodeBlock>
-        </div>
-        <div className={styles.codeColumn}>
-          <p className={styles.codeLabel}>With CGP, both compile</p>
-          <CodeBlock language="rust" metastring="{1,6-7,12-13,18-21}">
-            {CGP_BLOCK}
-          </CodeBlock>
-        </div>
+      <div className={clsx(styles.container, styles.codeColumns)}>
+        <CodeWindow
+          label="Rust accepts only one of these"
+          verdict="rejected"
+          metastring="{11}"
+          code={REJECTED_BLOCK}
+        />
+        <CodeWindow
+          label="With CGP, both compile"
+          verdict="accepted"
+          metastring="{1,6-7,12-13,18-21}"
+          code={CGP_BLOCK}
+        />
       </div>
-      <p className={styles.caption}>
-        Both implementations compile, because each one now has a name, and each type names the one it
-        uses, so a call to <code>encode()</code> is as unambiguous as it ever was. Coherence is not
-        repealed; it is scoped.
-      </p>
+      <div className={clsx(styles.container, styles.caption)}>
+        <p className={styles.captionReason}>
+          Both implementations compile, because each one now has a name, and each type names the one
+          it uses, so a call to <code>encode()</code> is as unambiguous as it ever was.
+        </p>
+        <p className={styles.captionQuote}>Coherence is not repealed; it is scoped.</p>
+      </div>
     </section>
   );
 }
 
-function Essay(): ReactNode {
+function WhyOnce(): ReactNode {
   return (
-    <>
-      <section className={styles.section}>
+    <section className={styles.section}>
+      <div className={clsx(styles.container, styles.split)}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          Why Rust allows this only once
+        </Heading>
         <div className={styles.prose}>
-          <Heading as="h2">Why Rust allows this only once</Heading>
           <p>
             Rust rejects the second implementation to keep every trait lookup consistent. The trait
             system finds implementations for you: when a generic implementation requires{' '}
@@ -153,11 +214,19 @@ function Essay(): ReactNode {
             what they cost in practice.
           </p>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className={clsx(styles.section, styles.sectionAlt)}>
+function NameEach(): ReactNode {
+  return (
+    <section className={clsx(styles.section, styles.sectionTinted)}>
+      <div className={clsx(styles.container, styles.sideBySide)}>
         <div className={styles.prose}>
-          <Heading as="h2">Name each implementation, and let the application choose</Heading>
+          <Heading as="h2" className={styles.sectionTitle}>
+            Name each implementation, and let the application choose
+          </Heading>
           <p>
             CGP gives each implementation its own provider type, owned by the crate that writes it,
             so neither the overlap rule nor the orphan rule rejects it. Each wired type then names
@@ -172,6 +241,12 @@ function Essay(): ReactNode {
             message for a test, while the code that calls <code>send_email</code> is the same in
             both:
           </p>
+          <p>
+            <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
+            shows the traits behind these lines and the plain Rust they expand to.
+          </p>
+        </div>
+        <div className={styles.example}>
           <CodeBlock language="rust">{EMAIL_WIRING}</CodeBlock>
           <div className={styles.diagramFrame}>
             <img
@@ -180,118 +255,225 @@ function Essay(): ReactNode {
               alt="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
             />
           </div>
-          <p>
-            <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
-            shows the traits behind these lines and the plain Rust they expand to.
-          </p>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className={styles.section}>
-        <div className={styles.prose}>
-          <Heading as="h2">What that gives you</Heading>
-          <p>
-            <strong>Many implementations, chosen per application.</strong> A production application
-            and its test application, or two deployments, choose different providers for the same
-            interface, without <code>dyn</code> or a framework.
-          </p>
-          <p>
-            <strong>Direct calls.</strong> Provider selection happens at compile time, so a wired call
-            compiles to a direct call, without a container or a vtable lookup.
-          </p>
-          <p>
-            <strong>Checked dependencies.</strong> Once the wiring is checked, the build fails when a
-            context lacks what a provider needs. A provider states its requirements, as{' '}
-            <code>#[uses(Display)]</code> does above, and a <code>check_components!</code> assertion
-            or a use of the component checks them. A wiring entry alone does not check them, so the
-            check is code you write.
-          </p>
-          <p>
-            <strong>Still ordinary Rust.</strong> You can adopt CGP one trait at a time, because a
-            consumer trait stays an ordinary trait that you can implement directly. The{' '}
-            <Link to="/docs/overview">Overview</Link> describes every feature in detail.
-          </p>
-        </div>
-      </section>
+type Benefit = {title: string; body: ReactNode};
 
-      <FeatureCards />
+const BENEFITS: Benefit[] = [
+  {
+    title: 'Many implementations, chosen per application',
+    body: (
+      <>
+        A production application and its test application, or two deployments, choose different
+        providers for the same interface, without <code>dyn</code> or a framework.
+      </>
+    ),
+  },
+  {
+    title: 'Direct calls',
+    body: (
+      <>
+        Provider selection happens at compile time, so a wired call compiles to a direct call,
+        without a container or a vtable lookup.
+      </>
+    ),
+  },
+  {
+    title: 'Checked dependencies',
+    body: (
+      <>
+        Once the wiring is checked, the build fails when a context lacks what a provider needs. A
+        provider states its requirements, as <code>#[uses(Display)]</code> does above, and a{' '}
+        <code>check_components!</code> assertion or a use of the component checks them. A wiring entry
+        alone does not check them, so the check is code you write.
+      </>
+    ),
+  },
+  {
+    title: 'Still ordinary Rust',
+    body: (
+      <>
+        You can adopt CGP one trait at a time, because a consumer trait stays an ordinary trait that
+        you can implement directly. The <Link to="/docs/overview">Overview</Link> describes every
+        feature in detail.
+      </>
+    ),
+  },
+];
 
-      <section className={styles.section}>
-        <div className={styles.prose}>
-          <Heading as="h2">More than trait implementations</Heading>
-          <p>
-            CGP applies the same mechanism to types, data, and computation.{' '}
-            <Link to="/docs/concepts/abstract-types">Abstract types</Link> let a context choose its
-            own types, so an error type or a runtime no longer has to be a type parameter that every
-            layer declares. <Link to="/docs/concepts/extensible-records">Extensible records</Link> and{' '}
-            <Link to="/docs/concepts/extensible-variants">variants</Link> let generic code work over
-            a type's fields and variants. <Link to="/docs/concepts/handlers">Handlers</Link> compose
-            small steps into a computation.
-          </p>
-        </div>
-      </section>
+function Benefits(): ReactNode {
+  return (
+    <section className={styles.section}>
+      <div className={styles.container}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          What that gives you
+        </Heading>
+        <ul className={styles.benefitGrid}>
+          {BENEFITS.map(({title, body}) => (
+            <li key={title} className={styles.benefit}>
+              <h3 className={styles.benefitTitle}>{title}</h3>
+              <p>{body}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
 
-      <section className={clsx(styles.section, styles.sectionAlt)}>
-        <div className={styles.prose}>
-          <Heading as="h2" id="costs">
+type Breadth = {title: string; to: string; body: ReactNode};
+
+const BREADTH: Breadth[] = [
+  {
+    title: 'Abstract types',
+    to: '/docs/concepts/abstract-types',
+    body: (
+      <>
+        A context chooses its own types, so an error type or a runtime no longer has to be a type
+        parameter that every layer declares.
+      </>
+    ),
+  },
+  {
+    title: 'Extensible records and variants',
+    to: '/docs/concepts/extensible-records',
+    body: <>Generic code works over a type's fields and variants.</>,
+  },
+  {
+    title: 'Handlers',
+    to: '/docs/concepts/handlers',
+    body: <>Small steps compose into a computation.</>,
+  },
+];
+
+function MoreThanTraits(): ReactNode {
+  return (
+    <section className={styles.section}>
+      <div className={styles.container}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          More than trait implementations
+        </Heading>
+        <p className={styles.lead}>CGP applies the same mechanism to types, data, and computation.</p>
+        <ul className={styles.tileGrid}>
+          {BREADTH.map(({title, to, body}) => (
+            <li key={title}>
+              <Link className={styles.tile} to={to}>
+                <span className={styles.tileTitle}>{title}</span>
+                <span className={styles.tileBody}>{body}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function Costs(): ReactNode {
+  return (
+    <section className={styles.section}>
+      <div className={styles.container}>
+        <div className={styles.costPanel}>
+          <Heading as="h2" id="costs" className={styles.sectionTitle}>
             What it costs
           </Heading>
-          <p>
-            CGP adds declarations and wiring that a plain trait does not need, so for a trait with one
-            implementation, a plain trait is the right tool. The macros and the type checking add
-            compile-time work.
-            Raw compiler errors from wiring are verbose.{' '}
-            <Link to="/docs/cargo-cgp">
-              <code>cargo cgp check</code>
-            </Link>{' '}
-            leads with the root cause for the classes it recognizes, and the tool does not yet reshape
-            every class.
-          </p>
-          <p>
-            CGP is also young. Its ecosystem is small and community support is limited, so if you
-            adopt it for a mission-critical project, expect to investigate some problems on your own.
-            Learning its patterns takes time, and <code>cargo-cgp</code> is itself an early release.
-            CGP publishes an <Link to="/docs/ai/skills">agent skill</Link> that helps an assistant
-            with the vocabulary, the diagnostics, and the wiring. It makes those costs smaller but
-            does not remove them, and code an assistant writes still needs your review.
-          </p>
-          <p>
-            Try CGP first on a small part of a project whose implementation choices already vary.{' '}
-            <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows
-            when a plain trait is enough.
-          </p>
+          <div className={styles.prose}>
+            <p>
+              CGP adds declarations and wiring that a plain trait does not need, so for a trait with
+              one implementation, a plain trait is the right tool. The macros and the type checking add
+              compile-time work. Raw compiler errors from wiring are verbose.{' '}
+              <Link to="/docs/cargo-cgp">
+                <code>cargo cgp check</code>
+              </Link>{' '}
+              leads with the root cause for the classes it recognizes, and the tool does not yet
+              reshape every class.
+            </p>
+            <p>
+              CGP is also young. Its ecosystem is small and community support is limited, so if you
+              adopt it for a mission-critical project, expect to investigate some problems on your
+              own. Learning its patterns takes time, and <code>cargo-cgp</code> is itself an early
+              release. CGP publishes an <Link to="/docs/ai/skills">agent skill</Link> that helps an
+              assistant with the vocabulary, the diagnostics, and the wiring. It makes those costs
+              smaller but does not remove them, and code an assistant writes still needs your review.
+            </p>
+            <p className={styles.costAdvice}>
+              Try CGP first on a small part of a project whose implementation choices already vary.{' '}
+              <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows when a
+              plain trait is enough.
+            </p>
+          </div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+}
 
-      <section className={styles.section}>
-        <div className={styles.prose}>
-          <Heading as="h2">Where to go next</Heading>
-          <ul className={styles.routes}>
-            <li>
-              <strong>Try it:</strong> the <Link to="/docs/quickstart">Quickstart</Link>, then the{' '}
-              <Link to="/docs/tutorials/hello">Hello World tutorial</Link>.
+type Route = {reader: string; links: ReactNode};
+
+const ROUTES: Route[] = [
+  {
+    reader: 'Try it',
+    links: (
+      <>
+        The <Link to="/docs/quickstart">Quickstart</Link>, then the{' '}
+        <Link to="/docs/tutorials/hello">Hello World tutorial</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Understand the idea',
+    links: (
+      <>
+        <Link to="/docs/concepts/coherence">Bypassing coherence</Link> and{' '}
+        <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Decide whether it fits',
+    links: (
+      <>
+        <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> and the{' '}
+        <Link to="/docs/projects">projects built with CGP</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Go deeper',
+    links: (
+      <>
+        The <Link to="/docs/overview">Overview</Link>, the{' '}
+        <Link to="/docs/comparisons">comparisons</Link>, and the <Link to="/blog">blog</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Help build it',
+    links: <Link to="/docs/contribute">Contribute</Link>,
+  },
+];
+
+function WhereNext(): ReactNode {
+  return (
+    <section className={clsx(styles.section, styles.sectionTinted)}>
+      <div className={styles.container}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          Where to go next
+        </Heading>
+        <ul className={styles.routeGrid}>
+          {ROUTES.map(({reader, links}) => (
+            <li key={reader} className={styles.route}>
+              <span className={styles.routeReader}>{reader}</span>
+              <span className={styles.routeLinks}>{links}</span>
             </li>
-            <li>
-              <strong>Understand the idea:</strong>{' '}
-              <Link to="/docs/concepts/coherence">Bypassing coherence</Link> and{' '}
-              <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>.
-            </li>
-            <li>
-              <strong>Decide whether it fits:</strong>{' '}
-              <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> and the{' '}
-              <Link to="/docs/projects">projects built with CGP</Link>.
-            </li>
-            <li>
-              <strong>Go deeper:</strong> the <Link to="/docs/overview">Overview</Link>, the{' '}
-              <Link to="/docs/comparisons">comparisons</Link>, and the <Link to="/blog">blog</Link>.
-            </li>
-            <li>
-              <strong>Help build it:</strong> <Link to="/docs/contribute">Contribute</Link>.
-            </li>
-          </ul>
-        </div>
-      </section>
-    </>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
@@ -314,10 +496,16 @@ export default function Home(): ReactNode {
           content="Context-Generic Programming (CGP) - Pluggable trait implementations for Rust"
         />
       </Head>
-      <main>
+      <main className={styles.page}>
         <Hero />
         <CodeBand />
-        <Essay />
+        <WhyOnce />
+        <NameEach />
+        <Benefits />
+        <FeatureCards />
+        <MoreThanTraits />
+        <Costs />
+        <WhereNext />
       </main>
     </Layout>
   );

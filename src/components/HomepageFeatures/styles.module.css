@@ -1,11 +1,16 @@
+/* The five headline features as a band of linked cards between the argument and the breadth. Colours
+   come from the site theme's tokens in src/css/custom.css. */
 .features {
-  padding: 3rem 1rem;
+  padding: 3.5rem 1.5rem;
+  background: var(--cgp-surface);
+  border-top: 1px solid var(--cgp-border);
+  border-bottom: 1px solid var(--cgp-border);
 }
 
 .cards {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0;
@@ -13,37 +18,73 @@
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  padding: 1.25rem 1rem 1.4rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 16px;
+  background: var(--cgp-surface-raised);
+  color: var(--cgp-text);
   text-align: center;
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
 }
 
-/* The illustrations have white backgrounds, so a rounded frame makes each one a tile in both themes. */
+.card:hover {
+  color: var(--cgp-text);
+  text-decoration: none;
+  border-color: var(--cgp-link);
+  transform: translateY(-2px);
+}
+
+/* The illustrations have white backgrounds, so each sits in a rounded frame that reads as a tile in
+   both themes. */
 .image {
   display: block;
-  width: 180px;
+  width: 150px;
   max-width: 100%;
   height: auto;
   margin: 0 auto 1rem;
-  border-radius: 20px;
+  border-radius: 18px;
   background: var(--cgp-image-frame);
   box-shadow: 0 0 0 1px var(--ifm-color-emphasis-200);
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  line-height: 1.3;
   margin-bottom: 0.5rem;
+  color: var(--cgp-link);
 }
 
 .line {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  color: var(--cgp-text-muted);
   margin: 0;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
+
 @media screen and (max-width: 996px) {
+  .features {
+    padding: 2.5rem 1rem;
+  }
+
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .image {
-    width: 140px;
+    width: 120px;
   }
 }

@@ -1,199 +1,608 @@
 /**
- * The front page's layout. The knowledge base's homepage guide sets the targets: the hero copy beside
- * the hero illustration, then both code blocks side by side, so the whole first screen fits at
- * 1920x1080 and the tops of both blocks show at 1440x900.
+ * The front page's layout, on the site theme's tokens from src/css/custom.css; no colour here is a
+ * literal. The knowledge base's homepage guide sets the targets: the hero copy beside the hero art,
+ * then both code blocks side by side, so the whole first screen fits at 1920x1080 and the tops of both
+ * blocks show at 1440x900.
  */
 
-/* The hero keeps its light colours in both themes, so every colour in it is set here rather than
-   taken from the theme. The background matches the hero illustration's own, so the art has no seam. */
-.hero {
-  background-color: #fdf2e3;
-  color: #1c1e21;
+.page {
+  --page-gutter: 1.5rem;
+  --page-width: 1200px;
 }
 
-.heroInner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2rem;
-  max-width: 1200px;
+/* One container for every band, so the title, the code, and the essay share a left edge. */
+.container {
+  max-width: calc(var(--page-width) + 2 * var(--page-gutter));
   margin: 0 auto;
-  padding: 1.25rem 1.5rem 1rem;
+  padding: 0 var(--page-gutter);
 }
 
-.heroCopy {
-  max-width: 720px;
+/* The hero. A soft glow in the brand's tints sits behind the art, and a faint dot grid across the
+   band, both drawn in CSS. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--cgp-surface);
+  background-image:
+    radial-gradient(circle at 82% 45%, color-mix(in srgb, var(--cgp-red-200) 45%, transparent) 0, transparent 34%),
+    radial-gradient(color-mix(in srgb, var(--cgp-text) 9%, transparent) 1px, transparent 1px);
+  background-size: auto, 22px 22px;
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+html[data-theme='dark'] .hero {
+  background-image:
+    radial-gradient(circle at 82% 45%, color-mix(in srgb, var(--cgp-red-300) 22%, transparent) 0, transparent 34%),
+    radial-gradient(color-mix(in srgb, var(--cgp-text) 8%, transparent) 1px, transparent 1px);
+}
+
+.heroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2.5rem;
+  padding-top: 1.75rem;
+  padding-bottom: 1.5rem;
 }
 
 .heroTitle {
-  color: #5d0705;
-  font-size: 2.5rem;
-  line-height: 1.15;
-  margin: 0 0 0.5rem;
+  font-size: 3rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.6rem;
 }
 
 .heroTagline {
-  font-size: 1.25rem;
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.4rem;
   font-weight: 600;
-  color: #5d0705;
-  margin: 0 0 0.4rem;
+  line-height: 1.3;
+  color: var(--cgp-link);
+  margin: 0 0 0.5rem;
+  max-width: 34em;
 }
 
 .heroReassurance {
   font-size: 1.05rem;
-  margin: 0 0 0.75rem;
+  color: var(--cgp-text-muted);
+  margin: 0 0 1rem;
+  max-width: 40em;
 }
 
+/* The install line looks like a terminal prompt, with a button that copies the command. */
 .install {
-  display: inline-block;
-  margin: 0 0 0.9rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #1c1e21;
-  border: 1px solid #ead7c8;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  padding: 0.35rem 0.4rem 0.35rem 0.9rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 10px;
+  background: var(--cgp-code-bg);
 }
 
 .install code {
   background: none;
   border: 0;
   padding: 0;
-  color: inherit;
+  font-size: 0.95rem;
+  color: var(--cgp-text);
 }
 
-.primaryLink,
-.primaryLink:hover {
-  background-color: #7a1614;
-  border-color: #7a1614;
-  color: #ffffff;
+.prompt {
+  color: var(--cgp-text-muted);
+  user-select: none;
 }
 
-.secondaryLink,
-.secondaryLink:hover {
-  background-color: #f2ddd0;
-  border-color: #f2ddd0;
-  color: #5d0705;
+.copy {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 7px;
+  background: var(--cgp-surface-raised);
+  color: var(--cgp-text-muted);
+  cursor: pointer;
+}
+
+.copy:hover {
+  color: var(--cgp-link);
+  border-color: var(--cgp-link);
 }
 
 .heroLinks {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1.4rem;
+  border-radius: 10px;
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primaryButton,
+.primaryButton:hover {
+  background: var(--cgp-red);
+  color: var(--cgp-on-red);
+  text-decoration: none;
+}
+
+.primaryButton:hover {
+  background: var(--cgp-red-700);
+}
+
+.secondaryButton,
+.secondaryButton:hover {
+  border: 1px solid var(--ifm-color-emphasis-400);
+  color: var(--ifm-heading-color);
+  text-decoration: none;
+}
+
+.secondaryButton:hover {
+  background: var(--cgp-surface-raised);
+  border-color: var(--cgp-link);
 }
 
 .starButton {
   border: 0;
   overflow: hidden;
+  margin-left: 0.25rem;
+}
+
+/* The hero art has an opaque background of its own. Its edges fade out, so it never shows a
+   rectangle against the band; in the dark theme it sits on a circle of its own background colour. */
+.heroArtFrame {
+  display: grid;
+  place-items: center;
 }
 
 .heroArt {
-  flex-shrink: 0;
+  display: block;
   width: 280px;
   height: auto;
+  /* A mask reads only alpha, so its colour stands for "opaque", not for a colour on the page. */
+  mask-image: radial-gradient(closest-side, black 72%, transparent 100%);
 }
 
+html[data-theme='dark'] .heroArtFrame {
+  width: 270px;
+  height: 270px;
+  border-radius: 50%;
+  background: var(--cgp-hero-art-bg);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--cgp-red-300) 25%, transparent);
+}
+
+html[data-theme='dark'] .heroArt {
+  width: 236px;
+}
+
+/* The code band: two editor windows side by side. */
 .codeBand {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0.75rem 1.5rem 2rem;
+  padding: 1.25rem 0 3rem;
 }
 
 .codeColumns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
+  align-items: stretch;
 }
 
-.codeColumn {
+.window {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
   min-width: 0;
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--cgp-code-bg);
 }
 
-.codeColumn pre {
-  font-size: 0.82rem;
-  line-height: 1.45;
-}
-
-.codeLabel {
+.windowBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--cgp-border);
+  background: var(--cgp-surface-raised);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 0.98rem;
   font-weight: 700;
-  margin-bottom: 0.35rem;
+  color: var(--ifm-heading-color);
 }
 
+.verdictMark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cgp-surface-raised);
+}
+
+.rejected .verdictMark {
+  background: var(--ifm-color-danger);
+}
+
+.accepted .verdictMark {
+  background: var(--ifm-color-success);
+}
+
+.windowCode {
+  flex: 1;
+  /* A wider gutter leaves room for the glyph that marks a changed line. */
+  --ifm-pre-padding: 1.4rem;
+}
+
+.windowCode :global(.theme-code-block) {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.windowCode pre {
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+/* The changed lines read like a diff: a tint and a gutter glyph in each window's own colour, a cross
+   on the line Rust rejects and a plus on the lines CGP adds. */
+.window :global(.theme-code-block-highlighted-line) {
+  position: relative;
+}
+
+.window :global(.theme-code-block-highlighted-line)::before {
+  position: absolute;
+  left: 0.45rem;
+  font-weight: 700;
+}
+
+.rejected :global(.theme-code-block-highlighted-line) {
+  background: color-mix(in srgb, var(--ifm-color-danger) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--ifm-color-danger);
+}
+
+.rejected :global(.theme-code-block-highlighted-line)::before {
+  content: '✗';
+  color: var(--ifm-color-danger);
+}
+
+.accepted :global(.theme-code-block-highlighted-line) {
+  background: color-mix(in srgb, var(--ifm-color-success) 14%, transparent);
+  box-shadow: inset 3px 0 0 var(--ifm-color-success);
+}
+
+.accepted :global(.theme-code-block-highlighted-line)::before {
+  content: '+';
+  color: var(--ifm-color-success);
+}
+
+/* The caption: its reason at body size, then its conclusion set large. */
 .caption {
-  max-width: 900px;
-  margin: 0.5rem auto 0;
+  max-width: calc(860px + 2 * var(--page-gutter));
+  margin-top: 1.75rem;
   text-align: center;
+}
+
+.captionReason {
   font-size: 1.05rem;
+  color: var(--cgp-text-muted);
+  margin: 0 0 0.4rem;
 }
 
+.captionQuote {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--cgp-link);
+  margin: 0;
+}
+
+/* The essay. Each section takes the layout that fits its content. */
 .section {
-  padding: 3rem 1.5rem;
+  padding: 4rem 0;
 }
 
-.sectionAlt {
-  background-color: var(--ifm-color-emphasis-100);
+.sectionTinted {
+  background: var(--cgp-surface);
+  border-top: 1px solid var(--cgp-border);
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
 }
 
 .prose {
-  max-width: 760px;
-  margin: 0 auto;
+  font-size: 1.05rem;
+  max-width: 44em;
 }
 
-.prose h2 {
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--cgp-text-muted);
+  margin: -0.5rem 0 1.5rem;
+}
+
+/* Prose links on the page are underlined, as in Markdown content. */
+.prose a,
+.lead a,
+.benefit a,
+.routeLinks a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+/* Section 1: the title in its own column beside the prose. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+/* Section 2: the prose beside the wiring and its diagram. */
+.sideBySide {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.example :global(.theme-code-block) {
   margin-bottom: 1rem;
 }
 
-/* The diagram has a white background, so a rounded frame keeps it a tile in the dark theme. Below its
-   readable width it scrolls sideways, as the code blocks do, rather than shrinking its labels. */
+.example pre {
+  font-size: 0.8rem;
+}
+
 .diagramFrame {
-  margin: 1rem 0;
   overflow-x: auto;
-  border-radius: 16px;
-  background: #ffffff;
-  box-shadow: 0 0 0 1px var(--ifm-color-emphasis-200);
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  background: var(--cgp-image-frame);
 }
 
 .diagram {
   display: block;
   width: 100%;
-  min-width: 620px;
+  min-width: 520px;
   padding: 0.75rem;
 }
 
-.routes {
-  padding-left: 1.25rem;
+/* Section 3: the four benefits as a grid of cards. */
+.benefitGrid,
+.tileGrid,
+.routeGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
 }
 
-.routes li {
-  margin-bottom: 0.4rem;
+.benefitGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.benefit {
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--cgp-border);
+  border-top: 3px solid var(--cgp-link);
+  border-radius: 14px;
+  background: var(--cgp-surface-raised);
+}
+
+.benefitTitle {
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+}
+
+.benefit p {
+  margin: 0;
+}
+
+/* Section 4: three link tiles. */
+.tileGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  height: 100%;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  background: var(--cgp-surface-raised);
+  color: var(--cgp-text);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.tile:hover {
+  color: var(--cgp-text);
+  text-decoration: none;
+  border-color: var(--cgp-link);
+  transform: translateY(-2px);
+}
+
+.tileTitle {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--cgp-link);
+}
+
+.tileTitle::after {
+  content: ' →';
+}
+
+.tileBody {
+  color: var(--cgp-text-muted);
+}
+
+/* Section 5: the costs in a framed panel, ending on the advice. */
+.costPanel {
+  padding: 2rem 2.25rem;
+  border: 1px solid var(--cgp-border);
+  border-left: 4px solid var(--ifm-color-warning);
+  border-radius: 14px;
+  background: var(--cgp-surface);
+}
+
+.costPanel .prose {
+  max-width: 52em;
+}
+
+.costAdvice {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--cgp-border);
+  font-weight: 600;
+}
+
+/* Section 6: one card per reader, ending the page on a choice. */
+.routeGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.route {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.2rem 1.25rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  background: var(--cgp-surface-raised);
+}
+
+.routeReader {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+}
+
+.routeLinks {
+  font-size: 0.95rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none;
+  }
+
+  .tile:hover {
+    transform: none;
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .routeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media screen and (max-width: 996px) {
-  .heroInner {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1.5rem 1rem;
+  .page {
+    --page-gutter: 1rem;
+  }
+
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  .heroArtFrame {
+    order: -1;
+    justify-self: center;
   }
 
   .heroArt {
+    width: 150px;
+  }
+
+  html[data-theme='dark'] .heroArtFrame {
     width: 160px;
-    align-self: center;
+    height: 160px;
+  }
+
+  html[data-theme='dark'] .heroArt {
+    width: 134px;
   }
 
   .heroTitle {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
 
-  .codeColumns {
+  .heroTagline {
+    font-size: 1.2rem;
+  }
+
+  .codeColumns,
+  .split,
+  .sideBySide,
+  .benefitGrid,
+  .tileGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .codeBand {
-    padding: 1rem;
+  .split {
+    gap: 0;
+  }
+
+  .captionQuote {
+    font-size: 1.5rem;
   }
 
   .section {
-    padding: 2rem 1rem;
+    padding: 2.75rem 0;
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .costPanel {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .routeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .routeGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

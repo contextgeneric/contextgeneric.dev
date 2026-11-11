@@ -93,6 +93,7 @@ html[data-theme='light'] {
   --cgp-highlight-line: rgba(214, 150, 40, 0.18);
   --cgp-selection: rgba(178, 58, 51, 0.18);
   --cgp-image-frame: #ffffff;
+  --cgp-hero-art-bg: #fdefe1;
   --cgp-announce-bg: #fbf1ed;
   --cgp-announce-text: #4a2f2b;
   --cgp-footer-bg: #4a1110;
