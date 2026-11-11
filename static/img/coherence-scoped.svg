@@ -4,48 +4,48 @@
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5D0705"/>
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f1f1d"/>
     </marker>
   </defs>
 
   <!-- Rust rule -->
-  <rect x="10" y="10" width="400" height="340" rx="10" fill="#f7f4f2" stroke="#8a8378" stroke-width="1.5"/>
-  <text x="30" y="42" font-size="18" font-weight="700" fill="#24201c">Rust coherence</text>
-  <text x="30" y="70" font-size="14" fill="#4a443c">One implementation per trait and type,</text>
-  <text x="30" y="90" font-size="14" fill="#4a443c">checked for the whole program.</text>
+  <rect x="10" y="10" width="400" height="340" rx="10" fill="#f7f0ea" stroke="#7d6b64" stroke-width="1.5"/>
+  <text x="30" y="42" font-size="18" font-weight="700" fill="#261d1b">Rust coherence</text>
+  <text x="30" y="70" font-size="14" fill="#5e504c">One implementation per trait and type,</text>
+  <text x="30" y="90" font-size="14" fill="#5e504c">checked for the whole program.</text>
 
-  <rect x="40" y="120" width="200" height="46" rx="8" fill="#ffffff" stroke="#8a8378"/>
-  <text x="140" y="149" text-anchor="middle" font-size="15" fill="#24201c">impl CanEncode for String</text>
+  <rect x="40" y="120" width="200" height="46" rx="8" fill="#ffffff" stroke="#7d6b64"/>
+  <text x="140" y="149" text-anchor="middle" font-size="15" fill="#261d1b">impl CanEncode for String</text>
 
-  <path d="M 250 143 L 300 143" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="310" y="120" width="70" height="46" rx="8" fill="#f5e9e6" stroke="#5D0705"/>
-  <text x="345" y="148" text-anchor="middle" font-size="14" fill="#5D0705">E0119</text>
+  <path d="M 250 143 L 300 143" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="310" y="120" width="70" height="46" rx="8" fill="#fcf1ef" stroke="#8f1f1d"/>
+  <text x="345" y="148" text-anchor="middle" font-size="14" fill="#8f1f1d">E0119</text>
 
-  <text x="40" y="204" font-size="13" fill="#4a443c">A second overlapping blanket impl is</text>
-  <text x="40" y="222" font-size="13" fill="#4a443c">ambiguous at the call site, so Rust</text>
-  <text x="40" y="240" font-size="13" fill="#4a443c">rejects it.</text>
-  <text x="40" y="282" font-size="13" fill="#4a443c">The answer stays single-valued:</text>
-  <text x="40" y="300" font-size="13" fill="#4a443c">every lookup for <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">String</tspan> agrees.</text>
+  <text x="40" y="204" font-size="13" fill="#5e504c">A second overlapping blanket impl is</text>
+  <text x="40" y="222" font-size="13" fill="#5e504c">ambiguous at the call site, so Rust</text>
+  <text x="40" y="240" font-size="13" fill="#5e504c">rejects it.</text>
+  <text x="40" y="282" font-size="13" fill="#5e504c">The answer stays single-valued:</text>
+  <text x="40" y="300" font-size="13" fill="#5e504c">every lookup for <tspan font-family="ui-monospace, SFMono-Regular, Menlo, monospace">String</tspan> agrees.</text>
 
   <!-- CGP move -->
-  <rect x="470" y="10" width="400" height="340" rx="10" fill="#fbf7f6" stroke="#5D0705" stroke-width="1.5"/>
-  <text x="490" y="42" font-size="18" font-weight="700" fill="#5D0705">CGP: the same rule, per provider</text>
-  <text x="490" y="70" font-size="14" fill="#4a443c">Each provider type gets its own impl, so</text>
-  <text x="490" y="90" font-size="14" fill="#4a443c">each value type names one provider.</text>
+  <rect x="470" y="10" width="400" height="340" rx="10" fill="#fdfaf7" stroke="#8f1f1d" stroke-width="1.5"/>
+  <text x="490" y="42" font-size="18" font-weight="700" fill="#8f1f1d">CGP: the same rule, per provider</text>
+  <text x="490" y="70" font-size="14" fill="#5e504c">Each provider type gets its own impl, so</text>
+  <text x="490" y="90" font-size="14" fill="#5e504c">each value type names one provider.</text>
 
-  <rect x="490" y="120" width="120" height="44" rx="8" fill="#ffffff" stroke="#8a8378"/>
-  <text x="550" y="147" text-anchor="middle" font-size="15" fill="#24201c">String</text>
-  <path d="M 610 142 L 650 142" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="655" y="120" width="190" height="44" rx="8" fill="#ffffff" stroke="#5D0705"/>
-  <text x="750" y="147" text-anchor="middle" font-size="14" fill="#5D0705">EncodeAsText</text>
-  <text x="655" y="188" font-size="13" fill="#4a443c">encode → b"hi"</text>
+  <rect x="490" y="120" width="120" height="44" rx="8" fill="#ffffff" stroke="#7d6b64"/>
+  <text x="550" y="147" text-anchor="middle" font-size="15" fill="#261d1b">String</text>
+  <path d="M 610 142 L 650 142" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="655" y="120" width="190" height="44" rx="8" fill="#ffffff" stroke="#8f1f1d"/>
+  <text x="750" y="147" text-anchor="middle" font-size="14" fill="#8f1f1d">EncodeAsText</text>
+  <text x="655" y="188" font-size="13" fill="#5e504c">encode → b"hi"</text>
 
-  <rect x="490" y="210" width="120" height="44" rx="8" fill="#ffffff" stroke="#8a8378"/>
-  <text x="550" y="237" text-anchor="middle" font-size="15" fill="#24201c">Vec&lt;u8&gt;</text>
-  <path d="M 610 232 L 650 232" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <rect x="655" y="210" width="190" height="44" rx="8" fill="#ffffff" stroke="#5D0705"/>
-  <text x="750" y="237" text-anchor="middle" font-size="14" fill="#5D0705">EncodeAsHex</text>
-  <text x="655" y="278" font-size="13" fill="#4a443c">encode → b"6869"</text>
+  <rect x="490" y="210" width="120" height="44" rx="8" fill="#ffffff" stroke="#7d6b64"/>
+  <text x="550" y="237" text-anchor="middle" font-size="15" fill="#261d1b">Vec&lt;u8&gt;</text>
+  <path d="M 610 232 L 650 232" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="655" y="210" width="190" height="44" rx="8" fill="#ffffff" stroke="#8f1f1d"/>
+  <text x="750" y="237" text-anchor="middle" font-size="14" fill="#8f1f1d">EncodeAsHex</text>
+  <text x="655" y="278" font-size="13" fill="#5e504c">encode → b"6869"</text>
 
-  <text x="490" y="322" font-size="13" fill="#4a443c">Both impls coexist because their provider types differ.</text>
+  <text x="490" y="322" font-size="13" fill="#5e504c">Both impls coexist because their provider types differ.</text>
 </svg>

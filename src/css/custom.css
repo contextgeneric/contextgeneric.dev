@@ -327,3 +327,12 @@ kbd {
 .footer--dark a {
   color: var(--cgp-footer-link);
 }
+
+/* Content images keep their light backgrounds, because an image loaded by <img> follows the operating
+   system's colour scheme rather than the site's switch. In the dark theme each one sits in a
+   paper-coloured frame, so it reads as a tile rather than a bright hole in the page. */
+html[data-theme='dark'] .markdown img {
+  background-color: var(--cgp-image-frame);
+  border-radius: 12px;
+  padding: 0.5rem;
+}

@@ -4,46 +4,46 @@
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5D0705"/>
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f1f1d"/>
     </marker>
   </defs>
 
-  <rect x="300" y="10" width="280" height="52" rx="10" fill="#f7f4f2" stroke="#8a8378" stroke-width="1.5"/>
-  <text x="440" y="42" text-anchor="middle" font-size="16" font-weight="600" fill="#24201c">one trait: CanSendEmail</text>
+  <rect x="300" y="10" width="280" height="52" rx="10" fill="#f7f0ea" stroke="#7d6b64" stroke-width="1.5"/>
+  <text x="440" y="42" text-anchor="middle" font-size="16" font-weight="600" fill="#261d1b">one trait: CanSendEmail</text>
 
-  <path d="M 440 62 L 440 84" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 200 84 L 680 84" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 200 84 L 200 116" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <path d="M 680 84 L 680 116" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 440 62 L 440 84" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 200 84 L 680 84" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 200 84 L 200 116" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 680 84 L 680 116" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
 
   <!-- consumer side -->
-  <rect x="60" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#5D0705" stroke-width="1.5"/>
-  <text x="200" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#5D0705">consumer trait</text>
-  <text x="200" y="170" text-anchor="middle" font-size="13" fill="#24201c">what callers use</text>
-  <text x="200" y="194" text-anchor="middle" font-size="13" fill="#4a443c">app.send_email(to, body)</text>
+  <rect x="60" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
+  <text x="200" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#8f1f1d">consumer trait</text>
+  <text x="200" y="170" text-anchor="middle" font-size="13" fill="#261d1b">what callers use</text>
+  <text x="200" y="194" text-anchor="middle" font-size="13" fill="#5e504c">app.send_email(to, body)</text>
 
   <!-- provider side -->
-  <rect x="540" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#5D0705" stroke-width="1.5"/>
-  <text x="680" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#5D0705">provider trait</text>
-  <text x="680" y="170" text-anchor="middle" font-size="13" fill="#24201c">what implementations target</text>
-  <text x="680" y="194" text-anchor="middle" font-size="13" fill="#4a443c">EmailSender&lt;Context&gt;</text>
+  <rect x="540" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
+  <text x="680" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#8f1f1d">provider trait</text>
+  <text x="680" y="170" text-anchor="middle" font-size="13" fill="#261d1b">what implementations target</text>
+  <text x="680" y="194" text-anchor="middle" font-size="13" fill="#5e504c">EmailSender&lt;Context&gt;</text>
 
-  <rect x="500" y="256" width="160" height="80" rx="10" fill="#fbf7f6" stroke="#8a8378"/>
-  <text x="580" y="282" text-anchor="middle" font-size="14" font-weight="600" fill="#24201c">SendViaSmtp</text>
-  <text x="580" y="306" text-anchor="middle" font-size="13" fill="#4a443c">impl EmailSender</text>
-  <text x="580" y="324" text-anchor="middle" font-size="13" fill="#4a443c">for SendViaSmtp</text>
+  <rect x="500" y="256" width="160" height="80" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
+  <text x="580" y="282" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">SendViaSmtp</text>
+  <text x="580" y="306" text-anchor="middle" font-size="13" fill="#5e504c">impl EmailSender</text>
+  <text x="580" y="324" text-anchor="middle" font-size="13" fill="#5e504c">for SendViaSmtp</text>
 
-  <rect x="700" y="256" width="160" height="80" rx="10" fill="#fbf7f6" stroke="#8a8378"/>
-  <text x="780" y="282" text-anchor="middle" font-size="14" font-weight="600" fill="#24201c">RecordEmails</text>
-  <text x="780" y="306" text-anchor="middle" font-size="13" fill="#4a443c">impl EmailSender</text>
-  <text x="780" y="324" text-anchor="middle" font-size="13" fill="#4a443c">for RecordEmails</text>
+  <rect x="700" y="256" width="160" height="80" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
+  <text x="780" y="282" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">RecordEmails</text>
+  <text x="780" y="306" text-anchor="middle" font-size="13" fill="#5e504c">impl EmailSender</text>
+  <text x="780" y="324" text-anchor="middle" font-size="13" fill="#5e504c">for RecordEmails</text>
 
-  <path d="M 680 216 L 680 240" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 580 240 L 780 240" stroke="#5D0705" stroke-width="2"/>
-  <path d="M 580 240 L 580 254" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <path d="M 780 240 L 780 254" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 680 216 L 680 240" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 580 240 L 780 240" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 580 240 L 580 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 780 240 L 780 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
 
-  <text x="200" y="282" text-anchor="middle" font-size="13" fill="#4a443c">the context's wiring</text>
-  <text x="200" y="302" text-anchor="middle" font-size="13" fill="#4a443c">selects one provider</text>
-  <path d="M 330 296 L 480 296" stroke="#5D0705" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+  <text x="200" y="282" text-anchor="middle" font-size="13" fill="#5e504c">the context's wiring</text>
+  <text x="200" y="302" text-anchor="middle" font-size="13" fill="#5e504c">selects one provider</text>
+  <path d="M 330 296 L 480 296" stroke="#8f1f1d" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
 </svg>

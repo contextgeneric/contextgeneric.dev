@@ -4,39 +4,39 @@
 
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5D0705"/>
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f1f1d"/>
     </marker>
   </defs>
 
-  <text x="10" y="26" font-size="16" font-weight="700" fill="#24201c">the wiring table</text>
+  <text x="10" y="26" font-size="16" font-weight="700" fill="#261d1b">the wiring table</text>
 
-  <rect x="10" y="40" width="560" height="210" rx="10" fill="#f7f4f2" stroke="#8a8378" stroke-width="1.5"/>
-  <text x="34" y="70" font-size="13" font-weight="600" fill="#4a443c">context</text>
-  <text x="214" y="70" font-size="13" font-weight="600" fill="#4a443c">component key</text>
-  <text x="434" y="70" font-size="13" font-weight="600" fill="#4a443c">provider</text>
-  <path d="M 24 82 L 556 82" stroke="#c9c2ba" stroke-width="1"/>
+  <rect x="10" y="40" width="560" height="210" rx="10" fill="#f7f0ea" stroke="#7d6b64" stroke-width="1.5"/>
+  <text x="34" y="70" font-size="13" font-weight="600" fill="#5e504c">context</text>
+  <text x="214" y="70" font-size="13" font-weight="600" fill="#5e504c">component key</text>
+  <text x="434" y="70" font-size="13" font-weight="600" fill="#5e504c">provider</text>
+  <path d="M 24 82 L 556 82" stroke="#c9b9b0" stroke-width="1"/>
 
-  <text x="34" y="118" font-size="14" fill="#24201c">App</text>
-  <text x="214" y="118" font-size="13" fill="#4a443c">EmailSenderComponent</text>
-  <text x="434" y="118" font-size="14" fill="#5D0705">SendViaSmtp</text>
+  <text x="34" y="118" font-size="14" fill="#261d1b">App</text>
+  <text x="214" y="118" font-size="13" fill="#5e504c">EmailSenderComponent</text>
+  <text x="434" y="118" font-size="14" fill="#8f1f1d">SendViaSmtp</text>
 
-  <path d="M 24 138 L 556 138" stroke="#e2ddd8" stroke-width="1"/>
+  <path d="M 24 138 L 556 138" stroke="#e3d5cb" stroke-width="1"/>
 
-  <text x="34" y="174" font-size="14" fill="#24201c">TestApp</text>
-  <text x="214" y="174" font-size="13" fill="#4a443c">EmailSenderComponent</text>
-  <text x="434" y="174" font-size="14" fill="#5D0705">RecordEmails</text>
+  <text x="34" y="174" font-size="14" fill="#261d1b">TestApp</text>
+  <text x="214" y="174" font-size="13" fill="#5e504c">EmailSenderComponent</text>
+  <text x="434" y="174" font-size="14" fill="#8f1f1d">RecordEmails</text>
 
-  <text x="34" y="220" font-size="13" fill="#4a443c">The same key, a different choice for each context.</text>
+  <text x="34" y="220" font-size="13" fill="#5e504c">The same key, a different choice for each context.</text>
 
-  <path d="M 570 178 L 640 178" stroke="#5D0705" stroke-width="2" marker-end="url(#arrow)"/>
-  <text x="605" y="132" text-anchor="middle" font-size="12" fill="#5D0705">resolved at</text>
-  <text x="605" y="150" text-anchor="middle" font-size="12" fill="#5D0705">compile time</text>
+  <path d="M 570 178 L 640 178" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="605" y="132" text-anchor="middle" font-size="12" fill="#8f1f1d">resolved at</text>
+  <text x="605" y="150" text-anchor="middle" font-size="12" fill="#8f1f1d">compile time</text>
 
-  <rect x="650" y="60" width="220" height="170" rx="10" fill="#ffffff" stroke="#5D0705" stroke-width="1.5"/>
-  <text x="760" y="90" text-anchor="middle" font-size="14" font-weight="600" fill="#5D0705">call site</text>
-  <text x="760" y="120" text-anchor="middle" font-size="13" fill="#24201c">app.send_email(to, body)</text>
-  <path d="M 690 140 L 830 140" stroke="#e2ddd8" stroke-width="1"/>
-  <text x="760" y="166" text-anchor="middle" font-size="13" fill="#4a443c">direct call to</text>
-  <text x="760" y="188" text-anchor="middle" font-size="13" fill="#4a443c">the selected provider</text>
-  <text x="760" y="212" text-anchor="middle" font-size="13" fill="#4a443c">no runtime lookup</text>
+  <rect x="650" y="60" width="220" height="170" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
+  <text x="760" y="90" text-anchor="middle" font-size="14" font-weight="600" fill="#8f1f1d">call site</text>
+  <text x="760" y="120" text-anchor="middle" font-size="13" fill="#261d1b">app.send_email(to, body)</text>
+  <path d="M 690 140 L 830 140" stroke="#e3d5cb" stroke-width="1"/>
+  <text x="760" y="166" text-anchor="middle" font-size="13" fill="#5e504c">direct call to</text>
+  <text x="760" y="188" text-anchor="middle" font-size="13" fill="#5e504c">the selected provider</text>
+  <text x="760" y="212" text-anchor="middle" font-size="13" fill="#5e504c">no runtime lookup</text>
 </svg>
