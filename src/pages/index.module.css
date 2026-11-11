@@ -144,15 +144,21 @@
   margin-bottom: 1rem;
 }
 
-/* The diagram has a white background, so a rounded frame keeps it a tile in the dark theme. */
-.diagram {
-  display: block;
-  width: 100%;
+/* The diagram has a white background, so a rounded frame keeps it a tile in the dark theme. Below its
+   readable width it scrolls sideways, as the code blocks do, rather than shrinking its labels. */
+.diagramFrame {
   margin: 1rem 0;
-  padding: 0.75rem;
+  overflow-x: auto;
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 0 0 1px var(--ifm-color-emphasis-200);
+}
+
+.diagram {
+  display: block;
+  width: 100%;
+  min-width: 620px;
+  padding: 0.75rem;
 }
 
 .routes {

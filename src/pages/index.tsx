@@ -172,11 +172,13 @@ function Essay(): ReactNode {
             <code>send_email</code> is the same in both:
           </p>
           <CodeBlock language="rust">{EMAIL_WIRING}</CodeBlock>
-          <img
-            className={styles.diagram}
-            src={useBaseUrl('/img/wiring-table.svg')}
-            alt="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
-          />
+          <div className={styles.diagramFrame}>
+            <img
+              className={styles.diagram}
+              src={useBaseUrl('/img/wiring-table.svg')}
+              alt="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
+            />
+          </div>
           <p>
             <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
             shows the traits behind these lines and the plain Rust they expand to.
@@ -287,8 +289,8 @@ function Essay(): ReactNode {
           <p className={styles.provenance}>
             An AI agent wrote this page using the{' '}
             <Link to="https://github.com/contextgeneric/cgp-knowledge-base">CGP knowledge base</Link>,
-            and its code was verified by compiling it. Its illustrations were made with image models.
-            See{' '}
+            and its code was verified by compiling it. Its illustrations were made with image models,
+            except the one for Still Ordinary Rust, a placeholder the agent drew. See{' '}
             <Link to="/docs/ai/disclaimer#documentation-and-reference-pages">
               How AI is used in this project
             </Link>
