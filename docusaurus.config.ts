@@ -108,7 +108,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/cgp-logo.png',
+    image: 'img/social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },

@@ -43,6 +43,11 @@ This generates the static site into `build/`, which any static host can serve. T
 broken internal link, because `onBrokenLinks` is set to `throw`, so a moved page needs every reference
 fixed in the same change.
 
+The social card, the image a shared link to the site shows, is `static/img/social-card.jpg`, rendered
+from the hero illustration, the project's name, and its tag line. Regenerate it after changing either
+with `python3 scripts/social-card/make.py`, which needs `google-chrome` and ImageMagick, and commit
+the result.
+
 ## Deployment
 
 The site deploys from `main` through GitHub Pages, using the workflow in
