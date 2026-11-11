@@ -9,6 +9,21 @@ const config: Config = {
   tagline: 'A language extension for Rust, with pluggable trait implementations at compile-time',
   favicon: 'img/favicon.png',
 
+  // The SVG favicon switches to a lighter red on a dark browser tab; the PNG stays as the fallback.
+  // The theme-color tags match a phone's address bar to the navbar. Both follow the operating
+  // system's colour scheme, which is also the site's default.
+  headTags: [
+    {tagName: 'link', attributes: {rel: 'icon', type: 'image/svg+xml', href: '/img/favicon.svg'}},
+    {
+      tagName: 'meta',
+      attributes: {name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#fdfaf7'},
+    },
+    {
+      tagName: 'meta',
+      attributes: {name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#161110'},
+    },
+  ],
+
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
@@ -116,8 +131,9 @@ const config: Config = {
       id: 'announcement',
       content:
         '🚀 <b>New Release:</b> <a href="/blog/v0.8.0-release">Group components with namespaces and paths in CGP v0.8.0</a> 🚀',
-      backgroundColor: '#fcefe1',
-      textColor: '#5D0705',
+      // The bar's colours follow the theme through the tokens in src/css/custom.css.
+      backgroundColor: 'var(--cgp-announce-bg)',
+      textColor: 'var(--cgp-announce-text)',
       isCloseable: true,
     },
     navbar: {
@@ -125,6 +141,8 @@ const config: Config = {
       logo: {
         alt: 'Context-Generic Programming Logo',
         src: 'img/cgp-logo.svg',
+        // The logo's red falls below 2:1 on the dark navbar, so the dark theme shows a lighter tint.
+        srcDark: 'img/cgp-logo-dark.svg',
       },
       items: [
         {to: '/docs/tutorials/hello', label: 'Tutorials', position: 'left'},

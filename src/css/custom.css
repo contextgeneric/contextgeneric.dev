@@ -1,52 +1,278 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * The site's theme. Every colour on the site comes from the tokens below, defined once for each theme.
+ * The palette keeps the CGP logo's red, #8f1f1d, and builds the rest around it: a tint scale of the
+ * same hue, warm neutrals, and code, admonition, and status colours made for it. In the dark theme the
+ * logo's red falls below 2:1 against the background, so it fills buttons and bars there while a
+ * lighter tint of the same hue carries links and other text.
+ *
+ * Page styles use these tokens rather than hex colours. The knowledge base's website section records
+ * the palette and the contrast check that keeps every text token at WCAG AA.
  */
 
-/* You can override the default Infima variables here. */
-:root {
-  --ifm-color-primary: #5D0705;
-  --ifm-color-primary-dark: #4A0504;
-  --ifm-color-primary-darker: #370304;
-  --ifm-color-primary-darkest: #240202;
-  --ifm-color-primary-light: #D4A5A0;
-  --ifm-color-primary-lighter: #E8D4CF;
-  --ifm-color-primary-lightest: #F5E9E6;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+/* The light theme. `html[data-theme=...]` matches the specificity of Infima's own dark-theme rules. */
+:root,
+html[data-theme='light'] {
+  /* The brand red and its tint scale. */
+  --cgp-red: #8f1f1d;
+  --cgp-red-50: #fcf1ef;
+  --cgp-red-100: #f8e1dd;
+  --cgp-red-200: #f0c2bb;
+  --cgp-red-300: #e59a90;
+  --cgp-red-400: #d06b61;
+  --cgp-red-500: #b23a33;
+  --cgp-red-700: #741816;
+  --cgp-red-800: #5a1311;
+  --cgp-red-900: #3d0d0c;
+
+  /* Warm neutrals. */
+  --cgp-bg: #fdfaf7;
+  --cgp-surface: #f7f0ea;
+  --cgp-surface-raised: #ffffff;
+  --cgp-border: #e3d5cb;
+  --cgp-text: #261d1b;
+  --cgp-text-muted: #66574f;
+  --cgp-heading: #1d1514;
+
+  /* Roles. */
+  --cgp-link: var(--cgp-red);
+  --cgp-link-hover: var(--cgp-red-700);
+  --cgp-focus: var(--cgp-red-500);
+  --cgp-code-bg: #f4ece5;
+  --cgp-inline-code-bg: #f1e6de;
+  --cgp-highlight-line: rgba(214, 150, 40, 0.18);
+  --cgp-selection: rgba(178, 58, 51, 0.18);
+  --cgp-image-frame: #ffffff;
+  --cgp-announce-bg: var(--cgp-red-100);
+  --cgp-announce-text: var(--cgp-red-800);
+  --cgp-footer-bg: #4a1110;
+  --cgp-footer-text: #f3e2df;
+  --cgp-footer-title: #ffffff;
+  --cgp-footer-link: #f9cfc9;
+  --cgp-on-red: #ffffff;
+
+  /* Infima: the primary scale. */
+  --ifm-color-primary: var(--cgp-red);
+  --ifm-color-primary-dark: #811c1a;
+  --ifm-color-primary-darker: #7a1a19;
+  --ifm-color-primary-darkest: #641614;
+  --ifm-color-primary-light: #9d2220;
+  --ifm-color-primary-lighter: #a42422;
+  --ifm-color-primary-lightest: #b72826;
+
+  /* Infima: the warm grey scale that borders, hovers, and secondary text use. */
+  --ifm-color-emphasis-0: #ffffff;
+  --ifm-color-emphasis-100: #f5efea;
+  --ifm-color-emphasis-200: #ebe2dc;
+  --ifm-color-emphasis-300: #ddd1ca;
+  --ifm-color-emphasis-400: #c4b6ae;
+  --ifm-color-emphasis-500: #a39189;
+  --ifm-color-emphasis-600: #7d6b64;
+  --ifm-color-emphasis-700: #5e504c;
+  --ifm-color-emphasis-800: #45393a;
+  --ifm-color-emphasis-900: #2b2221;
+  --ifm-color-emphasis-1000: #120d0c;
+
+  /* Infima: surfaces and text. */
+  --ifm-background-color: var(--cgp-bg);
+  --ifm-background-surface-color: var(--cgp-surface);
+  --ifm-font-color-base: var(--cgp-text);
+  --ifm-font-color-secondary: var(--cgp-text-muted);
+  --ifm-heading-color: var(--cgp-heading);
+  --ifm-link-color: var(--cgp-link);
+  --ifm-link-hover-color: var(--cgp-link-hover);
+  --ifm-navbar-background-color: var(--cgp-bg);
+  --ifm-navbar-link-color: var(--cgp-text);
+  --ifm-navbar-link-hover-color: var(--cgp-link);
+  --ifm-menu-color: var(--cgp-text-muted);
+  --ifm-menu-color-active: var(--cgp-red);
+  --ifm-menu-color-background-active: var(--cgp-red-50);
+  --ifm-menu-color-background-hover: var(--ifm-color-emphasis-100);
+  --ifm-toc-border-color: var(--cgp-border);
+  --ifm-hr-background-color: var(--cgp-border);
+  --ifm-table-border-color: var(--cgp-border);
+  --ifm-table-stripe-background: rgba(143, 31, 29, 0.03);
+  --ifm-table-head-background: var(--cgp-surface);
+  --ifm-code-background: var(--cgp-inline-code-bg);
+  --ifm-pre-background: var(--cgp-code-bg);
+  --ifm-card-background-color: var(--cgp-surface-raised);
+  --ifm-dropdown-background-color: var(--cgp-surface-raised);
+  --ifm-breadcrumb-item-background-active: var(--cgp-red-50);
+  --ifm-code-font-size: 92%;
   --ifm-container-width-xl: 1400px;
+  --docusaurus-highlighted-code-line-bg: var(--cgp-highlight-line);
+
+  /* Infima: admonitions. `note` uses secondary, `tip` success, `info` info, `warning` warning, and
+     `danger` danger. Each hue sits away from the brand red, so a link never looks like a warning. */
+  --ifm-color-info: #4f7387;
+  --ifm-color-info-dark: #4f7387;
+  --ifm-color-info-contrast-background: #edf3f6;
+  --ifm-color-info-contrast-foreground: #1c2f3a;
+  --ifm-color-success: #4a7a55;
+  --ifm-color-success-dark: #4a7a55;
+  --ifm-color-success-contrast-background: #edf4ee;
+  --ifm-color-success-contrast-foreground: #1b3522;
+  --ifm-color-secondary: #e9e0da;
+  --ifm-color-secondary-dark: #95857e;
+  --ifm-color-secondary-contrast-background: #f4efeb;
+  --ifm-color-secondary-contrast-foreground: #362b28;
+  --ifm-color-warning: #b9821f;
+  --ifm-color-warning-dark: #b9821f;
+  --ifm-color-warning-contrast-background: #fbf3e2;
+  --ifm-color-warning-contrast-foreground: #45300c;
+  --ifm-color-danger: #c4372b;
+  --ifm-color-danger-dark: #c4372b;
+  --ifm-color-danger-contrast-background: #fcebe9;
+  --ifm-color-danger-contrast-foreground: #4a1111;
 }
 
-.footer {
-  --ifm-footer-background-color: #504938;
-  --ifm-link-color: #FCF7E9;
+/* The dark theme. */
+html[data-theme='dark'] {
+  --cgp-red-50: #2a1716;
+  --cgp-red-100: #3a1b19;
+  --cgp-red-300: #c9584f;
+  --cgp-red-400: #e0766c;
+  --cgp-red-500: #ef8f86;
+
+  --cgp-bg: #161110;
+  --cgp-surface: #1f1817;
+  --cgp-surface-raised: #261e1d;
+  --cgp-border: #3a2e2c;
+  --cgp-text: #ece3df;
+  --cgp-text-muted: #b3a39e;
+  --cgp-heading: #f7f0ed;
+
+  --cgp-link: #ef8f86;
+  --cgp-link-hover: #f7b6ae;
+  --cgp-focus: #ef8f86;
+  --cgp-code-bg: #211918;
+  --cgp-inline-code-bg: #2d2322;
+  --cgp-highlight-line: rgba(230, 170, 60, 0.14);
+  --cgp-selection: rgba(239, 143, 134, 0.28);
+  --cgp-image-frame: #fdfaf7;
+  --cgp-announce-bg: #3d0d0c;
+  --cgp-announce-text: #f8e1dd;
+  --cgp-footer-bg: #2b0c0b;
+  --cgp-footer-text: #e9d6d2;
+  --cgp-footer-title: #ffffff;
+  --cgp-footer-link: #f4b3ab;
+
+  --ifm-color-primary: #ef8f86;
+  --ifm-color-primary-dark: #ec7d72;
+  --ifm-color-primary-darker: #ea7369;
+  --ifm-color-primary-darkest: #e2554a;
+  --ifm-color-primary-light: #f2a19a;
+  --ifm-color-primary-lighter: #f4aba4;
+  --ifm-color-primary-lightest: #f8c9c4;
+
+  --ifm-color-emphasis-0: #161110;
+  --ifm-color-emphasis-100: #221a19;
+  --ifm-color-emphasis-200: #2f2524;
+  --ifm-color-emphasis-300: #433634;
+  --ifm-color-emphasis-400: #5d4d4a;
+  --ifm-color-emphasis-500: #7f6d69;
+  --ifm-color-emphasis-600: #a3918c;
+  --ifm-color-emphasis-700: #c1b2ad;
+  --ifm-color-emphasis-800: #dccfca;
+  --ifm-color-emphasis-900: #ede4e0;
+  --ifm-color-emphasis-1000: #fbf7f5;
+
+  --ifm-background-color: var(--cgp-bg);
+  --ifm-background-surface-color: var(--cgp-surface);
+  --ifm-font-color-base: var(--cgp-text);
+  --ifm-font-color-secondary: var(--cgp-text-muted);
+  --ifm-heading-color: var(--cgp-heading);
+  --ifm-link-color: var(--cgp-link);
+  --ifm-link-hover-color: var(--cgp-link-hover);
+  --ifm-navbar-background-color: var(--cgp-bg);
+  --ifm-navbar-link-color: var(--cgp-text);
+  --ifm-navbar-link-hover-color: var(--cgp-link);
+  --ifm-menu-color: var(--cgp-text-muted);
+  --ifm-menu-color-active: var(--cgp-link);
+  --ifm-menu-color-background-active: var(--cgp-red-50);
+  --ifm-menu-color-background-hover: var(--ifm-color-emphasis-100);
+  --ifm-toc-border-color: var(--cgp-border);
+  --ifm-hr-background-color: var(--cgp-border);
+  --ifm-table-border-color: var(--cgp-border);
+  --ifm-table-stripe-background: rgba(239, 143, 134, 0.04);
+  --ifm-table-head-background: var(--cgp-surface);
+  --ifm-code-background: var(--cgp-inline-code-bg);
+  --ifm-pre-background: var(--cgp-code-bg);
+  --ifm-card-background-color: var(--cgp-surface-raised);
+  --ifm-dropdown-background-color: var(--cgp-surface-raised);
+  --ifm-breadcrumb-item-background-active: var(--cgp-red-50);
+  --docusaurus-highlighted-code-line-bg: var(--cgp-highlight-line);
+
+  --ifm-color-info: #7ea3b7;
+  --ifm-color-info-dark: #7ea3b7;
+  --ifm-color-info-contrast-background: #1a2328;
+  --ifm-color-info-contrast-foreground: #d7e4eb;
+  --ifm-color-success: #79a884;
+  --ifm-color-success-dark: #79a884;
+  --ifm-color-success-contrast-background: #18231b;
+  --ifm-color-success-contrast-foreground: #d4e8d9;
+  --ifm-color-secondary: #3a2e2c;
+  --ifm-color-secondary-dark: #8d7c76;
+  --ifm-color-secondary-contrast-background: #221c1b;
+  --ifm-color-secondary-contrast-foreground: #e6dcd8;
+  --ifm-color-warning: #d4a246;
+  --ifm-color-warning-dark: #d4a246;
+  --ifm-color-warning-contrast-background: #2a2114;
+  --ifm-color-warning-contrast-foreground: #f1e1c2;
+  --ifm-color-danger: #e8746a;
+  --ifm-color-danger-dark: #e8746a;
+  --ifm-color-danger-contrast-background: #2c1716;
+  --ifm-color-danger-contrast-foreground: #f3d4d0;
 }
 
+::selection {
+  background-color: var(--cgp-selection);
+}
+
+/* A visible focus ring on every link, button, and control. */
+:focus-visible {
+  outline: 2px solid var(--cgp-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Prose links are underlined, because colour alone does not separate them from body text. Heading
+   anchors and the generated category cards keep their own styles. */
+.markdown a:not(.hash-link):not(.card) {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+.markdown a:not(.hash-link):not(.card):hover {
+  text-decoration-color: currentColor;
+}
+
+/* The navbar sits on the page background with a hairline below it. */
+.navbar {
+  box-shadow: none;
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+/* The announcement bar takes its colours from the config, which points them at these tokens. */
 .theme-announcement-bar {
-  font-size: 1.2em;
+  font-size: 1.1em;
+  border-bottom: 1px solid var(--cgp-border);
 }
 
-[data-theme='light'] {
-  --ifm-color-primary: #5D0705;
-  --ifm-color-primary-dark: #4A0504;
-  --ifm-color-primary-darker: #370304;
-  --ifm-color-primary-darkest: #240202;
-  --ifm-color-primary-light: #D4A5A0;
-  --ifm-color-primary-lighter: #E8D4CF;
-  --ifm-color-primary-lightest: #F5E9E6;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+.theme-announcement-bar a {
+  color: inherit;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #E8A89A;
-  --ifm-color-primary-dark: #D99080;
-  --ifm-color-primary-darker: #CA7868;
-  --ifm-color-primary-darkest: #AB5F50;
-  --ifm-color-primary-light: #F5D4CC;
-  --ifm-color-primary-lighter: #F9E4DD;
-  --ifm-color-primary-lightest: #FCF0EB;
-  --docusaurus-highlighted-code-line-bg: rgba(232, 168, 154, 0.1);
+/* The footer is a deep red in both themes. */
+.footer--dark {
+  --ifm-footer-background-color: var(--cgp-footer-bg);
+  --ifm-footer-color: var(--cgp-footer-text);
+  --ifm-footer-link-color: var(--cgp-footer-link);
+  --ifm-footer-link-hover-color: var(--cgp-footer-title);
+  --ifm-footer-title-color: var(--cgp-footer-title);
+}
+
+.footer--dark a {
+  color: var(--cgp-footer-link);
 }

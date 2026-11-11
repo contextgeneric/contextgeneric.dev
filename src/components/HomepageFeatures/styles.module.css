@@ -24,7 +24,7 @@
   height: auto;
   margin: 0 auto 1rem;
   border-radius: 20px;
-  background: #ffffff;
+  background: var(--cgp-image-frame);
   box-shadow: 0 0 0 1px var(--ifm-color-emphasis-200);
 }
 
