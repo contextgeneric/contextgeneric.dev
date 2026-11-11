@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `CanEncode`
+  --> tests/compile_fail/front_page/rust_accepts_only_one.rs:16:1
+   |
+12 | impl<T: Display> CanEncode for T {
+   | -------------------------------- first implementation here
+...
+16 | impl<T: AsRef<[u8]>> CanEncode for T {          // error[E0119]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation
