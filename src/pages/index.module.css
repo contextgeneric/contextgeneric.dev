@@ -563,6 +563,25 @@ html[data-theme='dark'] .heroArt {
   }
 }
 
+/* Two code windows side by side need about 1240 px for their 70-character lines at a readable size.
+   Below 1360 px the code sets a little smaller, and below 1240 px the windows stack, so neither
+   scrolls sideways. */
+@media screen and (max-width: 1360px) {
+  .windowCode pre {
+    font-size: 0.76rem;
+  }
+}
+
+@media screen and (max-width: 1239px) {
+  .codeColumns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .windowCode pre {
+    font-size: 0.82rem;
+  }
+}
+
 @media screen and (max-width: 1100px) {
   .routeGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
