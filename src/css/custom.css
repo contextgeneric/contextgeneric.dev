@@ -140,6 +140,9 @@ html[data-theme='light'] {
     Consolas, monospace;
   --ifm-container-width-xl: 1400px;
   --docusaurus-highlighted-code-line-bg: var(--cgp-highlight-line);
+  --ifm-scrollbar-track-background-color: transparent;
+  --ifm-scrollbar-thumb-background-color: var(--ifm-color-emphasis-400);
+  --ifm-scrollbar-thumb-hover-background-color: var(--ifm-color-emphasis-500);
 
   /* Infima: admonitions. `note` uses secondary, `tip` success, `info` info, `warning` warning, and
      `danger` danger. Each hue sits away from the brand red, so a link never looks like a warning. */
@@ -241,6 +244,9 @@ html[data-theme='dark'] {
   --ifm-dropdown-background-color: var(--cgp-surface-raised);
   --ifm-breadcrumb-item-background-active: var(--cgp-red-50);
   --docusaurus-highlighted-code-line-bg: var(--cgp-highlight-line);
+  --ifm-scrollbar-track-background-color: transparent;
+  --ifm-scrollbar-thumb-background-color: var(--ifm-color-emphasis-400);
+  --ifm-scrollbar-thumb-hover-background-color: var(--ifm-color-emphasis-500);
 
   --ifm-color-info: #7ea3b7;
   --ifm-color-info-dark: #7ea3b7;
@@ -273,6 +279,13 @@ kbd {
 
 .navbar__title {
   font-family: var(--ifm-heading-font-family);
+}
+
+/* Firefox styles scrollbars only through `scrollbar-color`, so the sidebar's thin scrollbar takes the
+   theme's colours there too, instead of a white track beside the dark sidebar. */
+.thin-scrollbar {
+  scrollbar-color: var(--ifm-scrollbar-thumb-background-color)
+    var(--ifm-scrollbar-track-background-color);
 }
 
 ::selection {
