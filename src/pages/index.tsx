@@ -264,12 +264,10 @@ function NameEach(): ReactNode {
             message for a test, while the code that calls <code>send_email</code> is the same in
             both:
           </p>
-          <p>
-            <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
-            shows the traits behind these lines and the plain Rust they expand to.
-          </p>
         </div>
-        <div className={styles.example}>
+        {/* The wiring follows the sentence that introduces it, so on a phone, where the columns
+            stack, the colon still leads straight into the code. */}
+        <div className={clsx(styles.example, styles.prose)}>
           <CodeBlock language="rust">{EMAIL_WIRING}</CodeBlock>
           <div className={styles.diagramFrame}>
             <img
@@ -278,6 +276,10 @@ function NameEach(): ReactNode {
               alt="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
             />
           </div>
+          <p className={styles.exampleNote}>
+            <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
+            shows the traits behind these lines and the plain Rust they expand to.
+          </p>
         </div>
       </div>
     </section>

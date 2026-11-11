@@ -419,6 +419,10 @@ html[data-theme='dark'] .heroArt {
   font-size: 0.8rem;
 }
 
+.exampleNote {
+  margin-top: 1rem;
+}
+
 .diagramFrame {
   overflow-x: auto;
   border: 1px solid var(--cgp-border);
