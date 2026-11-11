@@ -1,9 +1,10 @@
 /**
- * The site's theme. Every colour on the site comes from the tokens below, defined once for each theme.
- * The palette keeps the CGP logo's red, #8f1f1d, and builds the rest around it: a tint scale of the
- * same hue, warm neutrals, and code, admonition, and status colours made for it. In the dark theme the
- * logo's red falls below 2:1 against the background, so it fills buttons and bars there while a
- * lighter tint of the same hue carries links and other text.
+ * The site's theme: colour tokens for each theme, the Infima variables they feed, and the fonts. The
+ * palette keeps the CGP logo's red, #8f1f1d, and builds the rest around it: a tint scale of the same
+ * hue, warm neutrals, and admonition and status colours made for it. The code colours live in
+ * src/prism/themes.ts. In the dark theme the logo's red falls below 2:1 against the background, so a
+ * lighter tint of the same hue carries links and other text, and `--cgp-red` stays for filled
+ * elements with white text.
  *
  * Page styles use these tokens rather than hex colours. The knowledge base's website section records
  * the palette and the contrast check that keeps every text token at WCAG AA.
@@ -20,9 +21,12 @@
   font-display: swap;
 }
 
+/* The fallback names a bold face and declares the heading weights, so the browser does not embolden
+   an already bold face. */
 @font-face {
   font-family: 'Space Grotesk Fallback';
   src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Arial');
+  font-weight: 500 700;
   size-adjust: 103%;
   ascent-override: 95.5%;
   descent-override: 28.3%;
@@ -61,7 +65,16 @@ html[data-theme='light'] {
   --cgp-red-800: #5a1311;
   --cgp-red-900: #3d0d0c;
 
-  /* Warm neutrals. */
+  /* Warm neutrals. Infima's own grey scale is cool, so it takes the same warm values. */
+  --ifm-color-gray-100: #f5efea;
+  --ifm-color-gray-200: #ebe2dc;
+  --ifm-color-gray-300: #ddd1ca;
+  --ifm-color-gray-400: #c4b6ae;
+  --ifm-color-gray-500: #a39189;
+  --ifm-color-gray-600: #7d6b64;
+  --ifm-color-gray-700: #5e504c;
+  --ifm-color-gray-800: #45393a;
+  --ifm-color-gray-900: #2b2221;
   --cgp-bg: #fdfaf7;
   --cgp-surface: #f7f0ea;
   --cgp-surface-raised: #ffffff;
@@ -109,7 +122,12 @@ html[data-theme='light'] {
   --ifm-color-emphasis-900: #2b2221;
   --ifm-color-emphasis-1000: #120d0c;
 
-  /* Infima: surfaces and text. */
+  /* Infima: surfaces and text. Infima sets the two content colours to literal greys, which the table of
+     contents and other secondary text read, so they point at the tokens too. */
+  --ifm-color-content: var(--cgp-text);
+  --ifm-color-content-secondary: var(--cgp-text-muted);
+  --ifm-color-primary-contrast-background: var(--cgp-red-50);
+  --ifm-color-primary-contrast-foreground: var(--cgp-red-800);
   --ifm-background-color: var(--cgp-bg);
   --ifm-background-surface-color: var(--cgp-surface);
   --ifm-font-color-base: var(--cgp-text);
@@ -145,7 +163,8 @@ html[data-theme='light'] {
   --ifm-scrollbar-thumb-hover-background-color: var(--ifm-color-emphasis-500);
 
   /* Infima: admonitions. `note` uses secondary, `tip` success, `info` info, `warning` warning, and
-     `danger` danger. Each hue sits away from the brand red, so a link never looks like a warning. */
+     `danger` danger. The four kinds the site uses sit away from the brand red, so a link never looks
+     like an admonition; `danger`, which no page uses, keeps a red distinct from the brand's. */
   --ifm-color-info: #4f7387;
   --ifm-color-info-dark: #4f7387;
   --ifm-color-info-contrast-background: #edf3f6;
@@ -168,7 +187,9 @@ html[data-theme='light'] {
   --ifm-color-danger-contrast-foreground: #4a1111;
 }
 
-/* The dark theme. */
+/* The dark theme. It redefines the tints of the red scale that it uses, so a tint keeps its role in
+   both themes: `--cgp-red-50` is the faint surface behind an active item, and `--cgp-red-500` the
+   strongest red text. */
 html[data-theme='dark'] {
   --cgp-red-50: #2a1716;
   --cgp-red-100: #3a1b19;
@@ -219,6 +240,10 @@ html[data-theme='dark'] {
   --ifm-color-emphasis-900: #ede4e0;
   --ifm-color-emphasis-1000: #fbf7f5;
 
+  --ifm-color-content: var(--cgp-text);
+  --ifm-color-content-secondary: var(--cgp-text-muted);
+  --ifm-color-primary-contrast-background: var(--cgp-red-50);
+  --ifm-color-primary-contrast-foreground: #f8e1dd;
   --ifm-background-color: var(--cgp-bg);
   --ifm-background-surface-color: var(--cgp-surface);
   --ifm-font-color-base: var(--cgp-text);
@@ -268,6 +293,28 @@ html[data-theme='dark'] {
   --ifm-color-danger-dark: #e8746a;
   --ifm-color-danger-contrast-background: #2c1716;
   --ifm-color-danger-contrast-foreground: #f3d4d0;
+}
+
+/* Inline code and links inside an admonition get a tint of the admonition's own hue, in place of
+   Infima's bright green, blue, and red. */
+.alert--info {
+  --ifm-alert-background-color-highlight: rgba(79, 115, 135, 0.14);
+}
+
+.alert--success {
+  --ifm-alert-background-color-highlight: rgba(74, 122, 85, 0.14);
+}
+
+.alert--secondary {
+  --ifm-alert-background-color-highlight: rgba(149, 133, 126, 0.16);
+}
+
+.alert--warning {
+  --ifm-alert-background-color-highlight: rgba(185, 130, 31, 0.14);
+}
+
+.alert--danger {
+  --ifm-alert-background-color-highlight: rgba(196, 55, 43, 0.12);
 }
 
 /* Code shows the characters a reader types, so `->` and `=>` never join into one glyph. */

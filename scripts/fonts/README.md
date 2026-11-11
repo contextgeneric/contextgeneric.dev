@@ -1,6 +1,7 @@
 # Fonts
 
-The site self-hosts two font families under the SIL Open Font License 1.1, each beside its licence:
+The site self-hosts two font families under `static/fonts/`, under the SIL Open Font License 1.1, each
+beside its licence:
 
 - `space-grotesk/`: Space Grotesk, for headings, limited to weights 500 to 700.
 - `jetbrains-mono/`: JetBrains Mono, for code, limited to weights 400 to 700, without its ligature

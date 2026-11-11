@@ -11,8 +11,9 @@ const config: Config = {
 
   // The heading font is preloaded, because every page's title uses it. The SVG favicon switches to a
   // lighter red on a dark browser tab; the PNG stays as the fallback.
-  // The theme-color tags match a phone's address bar to the navbar. Both follow the operating
-  // system's colour scheme, which is also the site's default.
+  // The theme-color tags match a phone's address bar to the navbar, using the values of `--cgp-bg`
+  // in src/css/custom.css. Both follow the operating system's colour scheme, which is also the site's
+  // default.
   headTags: [
     {tagName: 'link', attributes: {rel: 'icon', type: 'image/svg+xml', href: '/img/favicon.svg'}},
     {
@@ -219,7 +220,7 @@ const config: Config = {
     prism: {
       theme: prismLight,
       darkTheme: prismDark,
-      // Prism's default bundle lacks these, so their fenced blocks rendered as plain text. The
+      // Prism's default bundle lacks these, so their fenced blocks would render as plain text. The
       // grammars ship in the `prismjs` package Docusaurus already installs. Scala extends Java's
       // grammar, so Java comes first.
       additionalLanguages: ['toml', 'bash', 'ebnf', 'haskell', 'ocaml', 'java', 'scala'],

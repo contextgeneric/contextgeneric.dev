@@ -2,7 +2,8 @@ import type {PrismTheme} from 'prism-react-renderer';
 
 // The code colours for the site's two themes, made for the palette in src/css/custom.css. The plain
 // background matches the `--cgp-code-bg` token of each theme. No token uses the brand red, so code
-// never looks like a link or an error, and each colour keeps WCAG AA contrast against the background.
+// never looks like a link or an error, and each colour keeps WCAG AA contrast against the background,
+// and against a highlighted line's tint.
 
 export const lightTheme: PrismTheme = {
   plain: {
@@ -65,7 +66,7 @@ export const darkTheme: PrismTheme = {
   styles: [
     {
       types: ['comment', 'prolog', 'doctype', 'cdata', 'doc-comment'],
-      style: {color: '#a0908a', fontStyle: 'italic'},
+      style: {color: '#ae9f99', fontStyle: 'italic'},
     },
     {
       types: ['keyword', 'selector', 'important', 'atrule', 'rule'],
