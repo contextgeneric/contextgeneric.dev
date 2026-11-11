@@ -402,3 +402,23 @@ html[data-theme='dark'] .markdown img {
   text-decoration: underline;
   text-underline-offset: 0.18em;
 }
+
+/* Infima's primary hero, which the blog archive's header uses, fills with the primary colour: the full
+   brand red in the light theme and a loud coral in the dark one. It takes the warm surface instead,
+   with the heading colour for its text. */
+.hero--primary {
+  --ifm-hero-background-color: var(--cgp-surface);
+  --ifm-hero-text-color: var(--cgp-heading);
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+/* The blog list's post titles are links set at heading size; they take the heading colour and turn
+   red on hover, so a page of posts does not read as a wall of red. */
+article > header > h2 > a {
+  color: var(--ifm-heading-color);
+}
+
+article > header > h2 > a:hover {
+  color: var(--ifm-link-color);
+  text-decoration: none;
+}
