@@ -7,15 +7,17 @@ beside its licence:
 - `jetbrains-mono/`: JetBrains Mono, for code, limited to weights 400 to 700, without its ligature
   feature.
 
-Each file is a Latin subset in WOFF2, cut from the variable font in the
-[Google Fonts repository](https://github.com/google/fonts/tree/main/ofl) with `fonttools`:
+Each file is a WOFF2 subset, cut from the variable font in the
+[Google Fonts repository](https://github.com/google/fonts/tree/main/ofl) with `fonttools`. Both keep
+Latin; the code font also keeps Greek, superscripts and subscripts, and box drawing, which the site's
+code blocks and quoted diagnostics use:
 
 ```sh
 fonttools varLib.instancer 'SpaceGrotesk[wght].ttf' wght=500:700 -o sg.ttf
 pyftsubset sg.ttf --unicodes="$LATIN" --layout-features='kern,liga,mark,mkmk,ss01' \
   --flavor=woff2 --output-file=space-grotesk-latin.woff2
 fonttools varLib.instancer 'JetBrainsMono[wght].ttf' wght=400:700 -o jb.ttf
-pyftsubset jb.ttf --unicodes="$LATIN,U+2500-257F,U+2022,U+25B6,U+2713,U+2717" \
+pyftsubset jb.ttf --unicodes="$LATIN,U+0370-03FF,U+2070-209F,U+2500-257F,U+2022,U+25B6,U+2713,U+2717" \
   --layout-features='kern,mark,mkmk' --flavor=woff2 --output-file=jetbrains-mono-latin.woff2
 ```
 
