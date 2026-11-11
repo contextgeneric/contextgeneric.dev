@@ -6,8 +6,9 @@
  * lighter tint of the same hue carries links and other text, and `--cgp-red` stays for filled
  * elements with white text.
  *
- * Page styles use these tokens rather than hex colours. The knowledge base's website section records
- * the palette and the contrast check that keeps every text token at WCAG AA.
+ * Page styles use these tokens rather than hex colours. After changing a colour, run
+ * `python3 scripts/theme/contrast.py`, which checks every pair against WCAG AA. The knowledge base's
+ * website section records the palette and its reasons.
  */
 
 /* The fonts: Space Grotesk for headings and JetBrains Mono for code, self-hosted under static/fonts/.

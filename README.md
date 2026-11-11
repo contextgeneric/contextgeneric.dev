@@ -48,6 +48,20 @@ from the hero illustration, the project's name, and its tag line. Regenerate it 
 with `python3 scripts/social-card/make.py`, which needs `google-chrome` and ImageMagick, and commit
 the result.
 
+## Theme
+
+The site's colours are tokens in [`src/css/custom.css`](src/css/custom.css), defined once for each
+theme, with the code colours in [`src/prism/themes.ts`](src/prism/themes.ts); page styles use the
+tokens rather than hex colours. After changing a colour, run the contrast check, which needs only
+Python 3 and exits non-zero when a pair falls below WCAG AA:
+
+```sh
+python3 scripts/theme/contrast.py
+```
+
+The heading and code fonts are self-hosted under `static/fonts/`, and
+[`scripts/fonts/README.md`](scripts/fonts/README.md) gives the commands that cut them.
+
 ## Deployment
 
 The site deploys from `main` through GitHub Pages, using the workflow in

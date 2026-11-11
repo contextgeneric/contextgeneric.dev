@@ -92,6 +92,7 @@ block to match. These are the actionable rules here:
 - Take a page's position from `sidebar_position` and its directory's `_category_.json`.
 - Update the announcement bar in `docusaurus.config.ts` by hand with every release announcement.
 - Keep the site stock: do not add plugins, and do not add React beyond the landing page.
+- Use the theme's tokens from `src/css/custom.css` in page styles, never a hex colour.
 
 ## Content conventions
 
