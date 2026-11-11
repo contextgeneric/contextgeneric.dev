@@ -1,4 +1,4 @@
-import {themes as prismThemes} from 'prism-react-renderer';
+import {lightTheme as prismLight, darkTheme as prismDark} from './src/prism/themes';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
@@ -206,8 +206,12 @@ const config: Config = {
       copyright: `Licensed by <a href="https://maybevoid.com">MaybeVoid</a> under a <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismLight,
+      darkTheme: prismDark,
+      // Prism's default bundle lacks these, so their fenced blocks rendered as plain text. The
+      // grammars ship in the `prismjs` package Docusaurus already installs. Scala extends Java's
+      // grammar, so Java comes first.
+      additionalLanguages: ['toml', 'bash', 'ebnf', 'haskell', 'ocaml', 'java', 'scala'],
     },
   } satisfies Preset.ThemeConfig,
 };
