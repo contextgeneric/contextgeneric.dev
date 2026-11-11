@@ -169,13 +169,6 @@
   margin-bottom: 0.4rem;
 }
 
-.provenance {
-  margin-top: 2.5rem;
-  font-size: 0.9rem;
-  font-style: italic;
-  color: var(--ifm-color-emphasis-700);
-}
-
 @media screen and (max-width: 996px) {
   .heroInner {
     flex-direction: column;

@@ -82,7 +82,7 @@ function Hero(): ReactNode {
               Quickstart
             </Link>
             <Link className={clsx("button button--lg", styles.secondaryLink)} to="#costs">
-              What it costs
+              Costs and maturity
             </Link>
             <iframe
               className={styles.starButton}
@@ -159,9 +159,9 @@ function Essay(): ReactNode {
           <Heading as="h2">Name each implementation, and let the application choose</Heading>
           <p>
             CGP gives each implementation its own provider type, owned by the crate that writes it,
-            so neither the overlap rule nor the orphan rule objects. Each wired type then
-            names exactly one provider, so a call is as unambiguous as it ever was. Coherence still
-            holds, scoped to each type's choice.
+            so neither the overlap rule nor the orphan rule objects. Each wired type then names
+            exactly one provider, so every lookup still finds a single answer, which is the guarantee
+            coherence exists for.
           </p>
           <p>
             So far the wired type has been the data, which gets one choice for the whole program.
@@ -286,16 +286,6 @@ function Essay(): ReactNode {
               <strong>Help build it:</strong> <Link to="/docs/contribute">Contribute</Link>.
             </li>
           </ul>
-          <p className={styles.provenance}>
-            An AI agent wrote this page using the{' '}
-            <Link to="https://github.com/contextgeneric/cgp-knowledge-base">CGP knowledge base</Link>,
-            and its code was verified by compiling it. Its illustrations were made with image models,
-            except the one for Still Ordinary Rust, a placeholder the agent drew. See{' '}
-            <Link to="/docs/ai/disclaimer#documentation-and-reference-pages">
-              How AI is used in this project
-            </Link>
-            .
-          </p>
         </div>
       </section>
     </>

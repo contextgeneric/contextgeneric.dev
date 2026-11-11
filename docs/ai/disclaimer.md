@@ -137,8 +137,9 @@ concerns.
 ## How pages are marked
 
 New or substantially rewritten pages carry a short note at their foot, linking to the section here
-that describes how they were made. Older pages receive a note only after their provenance has been
-established, so the absence of a note does not mean a page was written without AI assistance.
+that describes how they were made. The front page is the one exception and carries no note. Older
+pages receive a note only after their provenance has been established, so the absence of a note does
+not mean a page was written without AI assistance.
 
 ---
 
