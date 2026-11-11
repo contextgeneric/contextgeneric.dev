@@ -153,7 +153,8 @@ const config: Config = {
       logo: {
         alt: 'Context-Generic Programming Logo',
         src: 'img/cgp-logo.svg',
-        // The logo's red falls below 2:1 on the dark navbar, so the dark theme shows a lighter tint.
+        // The logo's red reaches only about 2:1 on the dark navbar, so the dark theme shows a lighter
+        // tint.
         srcDark: 'img/cgp-logo-dark.svg',
       },
       items: [

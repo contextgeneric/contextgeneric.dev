@@ -2,9 +2,9 @@
  * The site's theme: colour tokens for each theme, the Infima variables they feed, and the fonts. The
  * palette keeps the CGP logo's red, #8f1f1d, and builds the rest around it: a tint scale of the same
  * hue, warm neutrals, and admonition and status colours made for it. The code colours live in
- * src/prism/themes.ts. In the dark theme the logo's red falls below 2:1 against the background, so a
- * lighter tint of the same hue carries links and other text, and `--cgp-red` stays for filled
- * elements with white text.
+ * src/prism/themes.ts. In the dark theme the logo's red reaches only about 2:1 against the
+ * background, so a lighter tint of the same hue carries links and other text, and `--cgp-red` stays
+ * for filled elements with white text.
  *
  * Page styles use these tokens rather than hex colours. After changing a colour, run
  * `python3 scripts/theme/contrast.py`, which checks every pair against WCAG AA. The knowledge base's
