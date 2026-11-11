@@ -138,12 +138,13 @@ function Essay(): ReactNode {
         <div className={styles.prose}>
           <Heading as="h2">Why Rust allows this only once</Heading>
           <p>
-            Rust rejects the second implementation to keep every trait lookup consistent. Its trait
+            Rust rejects the second implementation to keep every trait lookup consistent. The trait
             system finds implementations for you: when a generic implementation requires{' '}
             <code>T: Display</code>, the compiler finds the <code>Display</code> implementation, and
             everything that implementation needs in turn, without the caller naming any of it. That
-            works only because every lookup finds the same answer, which the overlap and orphan rules
-            guarantee. Coherence is therefore a guarantee Rust gives you, not a defect.
+            works only because every lookup finds the same answer. The overlap and orphan rules,
+            together called coherence, ensure that single answer. Coherence is therefore a guarantee
+            Rust gives you, not a defect.
           </p>
           <p>
             Without CGP, a second implementation needs a workaround: a newtype for each case, or a
@@ -165,9 +166,9 @@ function Essay(): ReactNode {
           </p>
           <p>
             To let each application choose, wire a type you define to stand for the application, which
-            CGP calls a <strong>context</strong>. So far the wired type has been the data, which gets
-            one choice for the whole program; a context is your own type, so you can define as many as
-            you need. Here <code>App</code> sends real mail and <code>TestApp</code> records each
+            CGP calls a <strong>context</strong>. Because a context is your own type, you can define as
+            many as you need. The types wired above are data, so each of them gets one choice for the
+            whole program. Here <code>App</code> sends real mail and <code>TestApp</code> records each
             message for a test, while the code that calls <code>send_email</code> is the same in
             both:
           </p>
@@ -190,17 +191,17 @@ function Essay(): ReactNode {
         <div className={styles.prose}>
           <Heading as="h2">What that gives you</Heading>
           <p>
-            <strong>Many implementations, chosen per application.</strong> Production and test, or
-            two deployments, choose different providers for the same interface, without{' '}
-            <code>dyn</code> or a framework.
+            <strong>Many implementations, chosen per application.</strong> A production application
+            and its test application, or two deployments, choose different providers for the same
+            interface, without <code>dyn</code> or a framework.
           </p>
           <p>
             <strong>Direct calls.</strong> Provider selection happens at compile time, so a wired call
             compiles to a direct call, without a container or a vtable lookup.
           </p>
           <p>
-            <strong>Checked dependencies.</strong> The build fails when a context lacks what a provider
-            needs, once the wiring is checked. A provider states its requirements, as{' '}
+            <strong>Checked dependencies.</strong> Once the wiring is checked, the build fails when a
+            context lacks what a provider needs. A provider states its requirements, as{' '}
             <code>#[uses(Display)]</code> does above, and a <code>check_components!</code> assertion
             or a use of the component checks them. A wiring entry alone does not check them, so the
             check is code you write.
@@ -221,8 +222,8 @@ function Essay(): ReactNode {
           <p>
             CGP applies the same mechanism to types, data, and computation.{' '}
             <Link to="/docs/concepts/abstract-types">Abstract types</Link> let a context choose its
-            own types, so an error type or a runtime stops being a parameter every layer has to
-            carry. <Link to="/docs/concepts/extensible-records">Extensible records</Link> and{' '}
+            own types, so an error type or a runtime no longer has to be a type parameter that every
+            layer declares. <Link to="/docs/concepts/extensible-records">Extensible records</Link> and{' '}
             <Link to="/docs/concepts/extensible-variants">variants</Link> let generic code work over
             a type's fields and variants. <Link to="/docs/concepts/handlers">Handlers</Link> compose
             small steps into a computation.
@@ -239,7 +240,7 @@ function Essay(): ReactNode {
             CGP adds declarations and wiring that a plain trait does not need, so for a trait with one
             implementation, a plain trait is the right tool. The macros and the type checking add
             compile-time work.
-            Raw compiler errors from wiring are verbose:{' '}
+            Raw compiler errors from wiring are verbose.{' '}
             <Link to="/docs/cargo-cgp">
               <code>cargo cgp check</code>
             </Link>{' '}

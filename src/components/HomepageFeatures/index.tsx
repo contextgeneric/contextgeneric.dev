@@ -41,7 +41,7 @@ const FEATURES: Feature[] = [
   },
   {
     title: 'Still Ordinary Rust',
-    line: 'Adopt one component at a time; plain trait implementations still work.',
+    line: 'Adopt CGP one component at a time, beside plain trait implementations.',
     to: '/docs/quickstart',
     image: '/img/features/still-ordinary-rust.webp',
   },
