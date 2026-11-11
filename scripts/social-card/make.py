@@ -2,7 +2,7 @@
 """Render the site's social card, the image a shared link to contextgeneric.dev shows.
 
 The card is the hero illustration beside the project's name, its tag line, and the site address, at
-1200x630. Run it from the website's root after changing the tag line or the hero illustration:
+1200x630, in the site theme's colours, with the name in the site's heading font. Run it from the website's root after changing the tag line or the hero illustration:
 
     python3 scripts/social-card/make.py
 
@@ -16,6 +16,7 @@ import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 HERO = ROOT / "static/img/cgp-hero.webp"
+HEADING_FONT = ROOT / "static/fonts/space-grotesk/space-grotesk-latin.woff2"
 OUT = ROOT / "static/img/social-card.jpg"
 TAG_LINE = "A language extension for Rust, with pluggable trait implementations at compile-time."
 
@@ -31,13 +32,16 @@ def background_colour():
 
 def page(colour):
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+  @font-face {{ font-family: 'Space Grotesk'; src: url('{HEADING_FONT.as_uri()}') format('woff2');
+               font-weight: 500 700; }}
   body {{ margin: 0; width: 1200px; height: 630px; background: {colour}; display: flex;
          align-items: center; gap: 36px; padding: 0 64px; box-sizing: border-box;
          font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }}
   img {{ width: 500px; flex-shrink: 0; }}
-  h1 {{ margin: 0; font-size: 60px; line-height: 1.12; font-weight: 800; color: #5d0705; }}
-  p {{ margin: 22px 0 0; font-size: 30px; line-height: 1.4; color: #7a1614; }}
-  .url {{ margin-top: 34px; font-size: 26px; font-weight: 700; color: #911f1c; }}
+  h1 {{ margin: 0; font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 62px;
+        line-height: 1.1; font-weight: 700; color: #8f1f1d; }}
+  p {{ margin: 22px 0 0; font-size: 30px; line-height: 1.4; color: #45393a; }}
+  .url {{ margin-top: 34px; font-size: 26px; font-weight: 700; color: #8f1f1d; }}
 </style></head><body>
   <img src="{HERO.as_uri()}" alt="">
   <div><h1>Context-Generic Programming</h1>

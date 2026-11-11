@@ -9,11 +9,22 @@ const config: Config = {
   tagline: 'A language extension for Rust, with pluggable trait implementations at compile-time',
   favicon: 'img/favicon.png',
 
-  // The SVG favicon switches to a lighter red on a dark browser tab; the PNG stays as the fallback.
+  // The heading font is preloaded, because every page's title uses it. The SVG favicon switches to a
+  // lighter red on a dark browser tab; the PNG stays as the fallback.
   // The theme-color tags match a phone's address bar to the navbar. Both follow the operating
   // system's colour scheme, which is also the site's default.
   headTags: [
     {tagName: 'link', attributes: {rel: 'icon', type: 'image/svg+xml', href: '/img/favicon.svg'}},
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preload',
+        href: '/fonts/space-grotesk/space-grotesk-latin.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossorigin: 'anonymous',
+      },
+    },
     {
       tagName: 'meta',
       attributes: {name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#fdfaf7'},

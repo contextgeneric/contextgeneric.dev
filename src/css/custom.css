@@ -9,6 +9,43 @@
  * the palette and the contrast check that keeps every text token at WCAG AA.
  */
 
+/* The fonts: Space Grotesk for headings and JetBrains Mono for code, self-hosted under static/fonts/.
+   Body text stays on the system font stack. Each face has a fallback sized to its metrics, so text
+   does not shift when the font arrives. */
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/fonts/space-grotesk/space-grotesk-latin.woff2') format('woff2');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space Grotesk Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Arial');
+  size-adjust: 103%;
+  ascent-override: 95.5%;
+  descent-override: 28.3%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/jetbrains-mono/jetbrains-mono-latin.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono Fallback';
+  src: local('Courier New'), local('Liberation Mono');
+  size-adjust: 100%;
+  ascent-override: 102%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
 /* The light theme. `html[data-theme=...]` matches the specificity of Infima's own dark-theme rules. */
 :root,
 html[data-theme='light'] {
@@ -97,7 +134,10 @@ html[data-theme='light'] {
   --ifm-card-background-color: var(--cgp-surface-raised);
   --ifm-dropdown-background-color: var(--cgp-surface-raised);
   --ifm-breadcrumb-item-background-active: var(--cgp-red-50);
-  --ifm-code-font-size: 92%;
+  --ifm-code-font-size: 90%;
+  --ifm-heading-font-family: 'Space Grotesk', 'Space Grotesk Fallback', var(--ifm-font-family-base);
+  --ifm-font-family-monospace: 'JetBrains Mono', 'JetBrains Mono Fallback', SFMono-Regular, Menlo,
+    Consolas, monospace;
   --ifm-container-width-xl: 1400px;
   --docusaurus-highlighted-code-line-bg: var(--cgp-highlight-line);
 
@@ -222,6 +262,17 @@ html[data-theme='dark'] {
   --ifm-color-danger-dark: #e8746a;
   --ifm-color-danger-contrast-background: #2c1716;
   --ifm-color-danger-contrast-foreground: #f3d4d0;
+}
+
+/* Code shows the characters a reader types, so `->` and `=>` never join into one glyph. */
+code,
+pre,
+kbd {
+  font-variant-ligatures: none;
+}
+
+.navbar__title {
+  font-family: var(--ifm-heading-font-family);
 }
 
 ::selection {
