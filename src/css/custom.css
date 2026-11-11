@@ -189,8 +189,7 @@ html[data-theme='light'] {
 }
 
 /* The dark theme. It redefines the tints of the red scale that it uses, so a tint keeps its role in
-   both themes: `--cgp-red-50` is the faint surface behind an active item, and `--cgp-red-500` the
-   strongest red text. */
+   both themes: `--cgp-red-50`, for example, is the faint surface behind the active sidebar item. */
 html[data-theme='dark'] {
   --cgp-red-50: #2a1716;
   --cgp-red-100: #3a1b19;
