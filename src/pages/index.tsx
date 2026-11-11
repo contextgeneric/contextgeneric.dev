@@ -138,16 +138,16 @@ function Essay(): ReactNode {
         <div className={styles.prose}>
           <Heading as="h2">Why Rust allows this only once</Heading>
           <p>
-            Rust's trait system finds implementations for you. When a generic implementation
-            requires <code>T: Display</code>, the compiler finds the <code>Display</code>{' '}
-            implementation, and everything that implementation needs in turn, without the caller
-            naming any of it. That works only because every lookup finds the same answer, and the
-            overlap and orphan rules are what guarantee it. Coherence is a guarantee Rust gives you,
-            not a mistake to work around.
+            Rust rejects the second implementation to keep every trait lookup consistent. Its trait
+            system finds implementations for you: when a generic implementation requires{' '}
+            <code>T: Display</code>, the compiler finds the <code>Display</code> implementation, and
+            everything that implementation needs in turn, without the caller naming any of it. That
+            works only because every lookup finds the same answer, which the overlap and orphan rules
+            guarantee. Coherence is therefore a guarantee Rust gives you, not a defect.
           </p>
           <p>
-            When you need a second implementation anyway, the usual escapes are a newtype for each
-            case, or a marker struct and a helper trait written by hand.{' '}
+            Without CGP, a second implementation needs a workaround: a newtype for each case, or a
+            marker struct and a helper trait written by hand.{' '}
             <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
             what they cost in practice.
           </p>
@@ -159,17 +159,17 @@ function Essay(): ReactNode {
           <Heading as="h2">Name each implementation, and let the application choose</Heading>
           <p>
             CGP gives each implementation its own provider type, owned by the crate that writes it,
-            so neither the overlap rule nor the orphan rule objects. Each wired type then names
+            so neither the overlap rule nor the orphan rule rejects it. Each wired type then names
             exactly one provider, so every lookup still finds a single answer, which is the guarantee
             coherence exists for.
           </p>
           <p>
-            So far the wired type has been the data, which gets one choice for the whole program.
-            The move that makes the choice yours is to wire a type you define to stand for your
-            application, and because it is yours, you can define as many as you need. CGP calls that
-            type a <strong>context</strong>. Here <code>App</code> sends real mail and{' '}
-            <code>TestApp</code> records each message for a test, while the code that calls{' '}
-            <code>send_email</code> is the same in both:
+            To let each application choose, wire a type you define to stand for the application, which
+            CGP calls a <strong>context</strong>. So far the wired type has been the data, which gets
+            one choice for the whole program; a context is your own type, so you can define as many as
+            you need. Here <code>App</code> sends real mail and <code>TestApp</code> records each
+            message for a test, while the code that calls <code>send_email</code> is the same in
+            both:
           </p>
           <CodeBlock language="rust">{EMAIL_WIRING}</CodeBlock>
           <div className={styles.diagramFrame}>
@@ -195,19 +195,20 @@ function Essay(): ReactNode {
             <code>dyn</code> or a framework.
           </p>
           <p>
-            <strong>No runtime cost.</strong> Provider selection happens at compile time, so a wired
-            call compiles to a direct call, with no container and no vtable lookup.
+            <strong>Direct calls.</strong> Provider selection happens at compile time, so a wired call
+            compiles to a direct call, without a container or a vtable lookup.
           </p>
           <p>
-            <strong>Checked dependencies.</strong> A provider states what it needs, as{' '}
+            <strong>Checked dependencies.</strong> The build fails when a context lacks what a provider
+            needs, once the wiring is checked. A provider states its requirements, as{' '}
             <code>#[uses(Display)]</code> does above, and a <code>check_components!</code> assertion
-            or a use of the component fails the build when a context cannot supply it. A wiring entry
-            alone checks nothing, so the check is code you write.
+            or a use of the component checks them. A wiring entry alone does not check them, so the
+            check is code you write.
           </p>
           <p>
-            <strong>Still ordinary Rust.</strong> A consumer trait is an ordinary trait that you can
-            still implement directly, so you can adopt CGP one trait at a time. The{' '}
-            <Link to="/docs/overview">Overview</Link> walks through every feature.
+            <strong>Still ordinary Rust.</strong> You can adopt CGP one trait at a time, because a
+            consumer trait stays an ordinary trait that you can implement directly. The{' '}
+            <Link to="/docs/overview">Overview</Link> describes every feature in detail.
           </p>
         </div>
       </section>
@@ -218,13 +219,13 @@ function Essay(): ReactNode {
         <div className={styles.prose}>
           <Heading as="h2">More than trait implementations</Heading>
           <p>
-            The same mechanism reaches further.{' '}
+            CGP applies the same mechanism to types, data, and computation.{' '}
             <Link to="/docs/concepts/abstract-types">Abstract types</Link> let a context choose its
             own types, so an error type or a runtime stops being a parameter every layer has to
             carry. <Link to="/docs/concepts/extensible-records">Extensible records</Link> and{' '}
             <Link to="/docs/concepts/extensible-variants">variants</Link> let generic code work over
-            a type's fields and variants. <Link to="/docs/concepts/handlers">Handlers</Link> build
-            pipelines from small steps.
+            a type's fields and variants. <Link to="/docs/concepts/handlers">Handlers</Link> compose
+            small steps into a computation.
           </p>
         </div>
       </section>
@@ -235,8 +236,9 @@ function Essay(): ReactNode {
             What it costs
           </Heading>
           <p>
-            CGP is more machinery than a plain trait, and for a trait with one implementation, a
-            plain trait is the right tool. The macros and the type checking add compile-time work.
+            CGP adds declarations and wiring that a plain trait does not need, so for a trait with one
+            implementation, a plain trait is the right tool. The macros and the type checking add
+            compile-time work.
             Raw compiler errors from wiring are verbose:{' '}
             <Link to="/docs/cargo-cgp">
               <code>cargo cgp check</code>
@@ -249,12 +251,12 @@ function Essay(): ReactNode {
             adopt it for a mission-critical project, expect to investigate some problems on your own.
             Learning its patterns takes time, and <code>cargo-cgp</code> is itself an early release.
             CGP publishes an <Link to="/docs/ai/skills">agent skill</Link> that helps an assistant
-            with the vocabulary, the diagnostics, and the wiring, which makes those costs smaller
-            rather than removing them, and code an assistant writes still needs your review.
+            with the vocabulary, the diagnostics, and the wiring. It makes those costs smaller but
+            does not remove them, and code an assistant writes still needs your review.
           </p>
           <p>
-            The way to try it is on a small part of a project whose implementation choices already
-            vary. <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows
+            Try CGP first on a small part of a project whose implementation choices already vary.{' '}
+            <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows
             when a plain trait is enough.
           </p>
         </div>
