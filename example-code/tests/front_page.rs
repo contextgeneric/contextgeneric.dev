@@ -17,12 +17,12 @@ mod first_screen {
     use core::fmt::Display;
 
     // front-page:cgp-block:begin
-    #[cgp_component(Encoder)]
+    #[cgp_component(Encoder)]     // generates the provider trait Encoder
     pub trait CanEncode {
         fn encode(&self) -> Vec<u8>;
     }
 
-    #[cgp_impl(new EncodeAsText)]
+    #[cgp_impl(new EncodeAsText)] // a provider: one named implementation
     #[uses(Display)]
     impl Encoder {
         fn encode(&self) -> Vec<u8> { self.to_string().into_bytes() }

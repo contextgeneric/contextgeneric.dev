@@ -47,12 +47,12 @@ const REJECTED_DIAGNOSTIC = `error[E0119]: conflicting implementations of trait 
 // front-page:rejected-diagnostic:end
 
 // front-page:cgp-block:begin
-const CGP_BLOCK = `#[cgp_component(Encoder)]
+const CGP_BLOCK = `#[cgp_component(Encoder)]     // generates the provider trait Encoder
 pub trait CanEncode {
     fn encode(&self) -> Vec<u8>;
 }
 
-#[cgp_impl(new EncodeAsText)]
+#[cgp_impl(new EncodeAsText)] // a provider: one named implementation
 #[uses(Display)]
 impl Encoder {
     fn encode(&self) -> Vec<u8> { self.to_string().into_bytes() }
