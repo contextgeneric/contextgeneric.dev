@@ -222,7 +222,7 @@ html[data-theme='dark'] .heroArt {
   background: var(--cgp-surface-raised);
   font-family: var(--ifm-heading-font-family);
   font-size: 0.98rem;
-  font-weight: 700;
+  font-weight: var(--ifm-heading-font-weight);
   color: var(--ifm-heading-color);
 }
 
@@ -341,7 +341,7 @@ html[data-theme='dark'] .heroArt {
 .captionQuote {
   font-family: var(--ifm-heading-font-family);
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: var(--ifm-heading-font-weight);
   line-height: 1.2;
   letter-spacing: -0.01em;
   color: var(--cgp-heading);
@@ -503,7 +503,7 @@ html[data-theme='dark'] .heroArt {
 .tileTitle {
   font-family: var(--ifm-heading-font-family);
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: var(--ifm-heading-font-weight);
   color: var(--cgp-heading);
 }
 
@@ -559,7 +559,7 @@ html[data-theme='dark'] .heroArt {
 .routeReader {
   font-family: var(--ifm-heading-font-family);
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: var(--ifm-heading-font-weight);
   color: var(--ifm-heading-color);
 }
 

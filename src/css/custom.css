@@ -22,6 +22,18 @@
 @font-face {
   font-family: 'Inter Fallback';
   src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  font-weight: 400 500;
+  size-adjust: 104.93%;
+  ascent-override: 92.32%;
+  descent-override: 22.99%;
+  line-gap-override: 0%;
+}
+
+/* The bold fallback names a bold face, so the browser does not embolden the regular one. */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Helvetica Bold');
+  font-weight: 600 700;
   size-adjust: 104.93%;
   ascent-override: 92.32%;
   descent-override: 22.99%;
@@ -317,12 +329,17 @@ html[data-theme='dark'] {
 }
 
 /* Code shows the characters a reader types, so `->` and `=>` never join into one glyph. JetBrains
-   Mono's regular weight looks thin beside Inter, so code sets at 500. */
+   Mono's regular weight looks thin beside Inter, so code sets at 500, except inside bold text,
+   headings, and table headers, where it keeps the weight around it. */
 code,
 pre,
 kbd {
   font-variant-ligatures: none;
   font-weight: 500;
+}
+
+:is(strong, b, th, h1, h2, h3, h4, h5, h6) :is(code, kbd) {
+  font-weight: inherit;
 }
 
 .navbar__title {
