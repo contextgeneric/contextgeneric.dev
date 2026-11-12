@@ -6,7 +6,7 @@ beside its licence:
 - `inter/`: Inter, for body text and headings, weights 400 to 700, upright and italic, at the
   text optical size. Headings use weight 600.
 - `jetbrains-mono/`: JetBrains Mono, for code, weights 400 to 700, upright only and without its
-  ligature feature; the code themes set comments upright.
+  ligature feature. Code sets at weight 500, and the code themes set comments upright.
 
 Each file is a WOFF2 subset, cut from the variable font in the
 [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl) with `fonttools`, run

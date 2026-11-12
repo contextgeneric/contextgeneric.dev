@@ -316,11 +316,13 @@ html[data-theme='dark'] {
   --ifm-alert-background-color-highlight: rgba(196, 55, 43, 0.12);
 }
 
-/* Code shows the characters a reader types, so `->` and `=>` never join into one glyph. */
+/* Code shows the characters a reader types, so `->` and `=>` never join into one glyph. JetBrains
+   Mono's regular weight looks thin beside Inter, so code sets at 500. */
 code,
 pre,
 kbd {
   font-variant-ligatures: none;
+  font-weight: 500;
 }
 
 .navbar__title {
