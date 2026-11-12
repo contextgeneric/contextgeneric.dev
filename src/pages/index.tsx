@@ -210,7 +210,7 @@ function CodeBand(): ReactNode {
 
 function WhyOnce(): ReactNode {
   return (
-    <section className={styles.section}>
+    <section className={clsx(styles.section, styles.sectionTinted)}>
       <div className={clsx(styles.container, styles.split)}>
         <Heading as="h2" className={styles.sectionTitle}>
           Why Rust allows this only once
@@ -307,7 +307,7 @@ const BREADTH: Breadth[] = [
 
 function MoreThanTraits(): ReactNode {
   return (
-    <section className={styles.section}>
+    <section className={clsx(styles.section, styles.sectionTinted)}>
       <div className={styles.container}>
         <Heading as="h2" className={styles.sectionTitle}>
           More than trait implementations

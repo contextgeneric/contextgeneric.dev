@@ -7,6 +7,11 @@
 
 .page {
   --page-gutter: 1.5rem;
+  /* One spacing scale for the page: the padding of each section band, the gap between blocks inside a
+     band, and the gap that ties a mark to the text it introduces. */
+  --space-section: 4rem;
+  --space-block: 1.5rem;
+  --space-tight: 0.75rem;
   /* Wide enough that the numbered rejected block, whose longest line is 70 characters, fits its
      window at 1440 px without scrolling. */
   --page-width: 1280px;
@@ -40,11 +45,13 @@ html[data-theme='dark'] .hero {
 
 .heroGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  /* The copy column stops near the tag line's width, and the art centres in the rest, so the hero
+     leaves no wide gap between them on a large screen. */
+  grid-template-columns: minmax(0, 52rem) minmax(auto, 1fr);
   align-items: center;
   gap: 2.5rem;
-  padding-top: 1.75rem;
-  padding-bottom: 1.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .heroTitle {
@@ -62,12 +69,13 @@ html[data-theme='dark'] .hero {
   color: var(--cgp-heading);
   margin: 0 0 0.5rem;
   max-width: 34em;
+  text-wrap: balance;
 }
 
 .heroReassurance {
   font-size: 1.05rem;
   color: var(--cgp-text-muted);
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   max-width: 40em;
 }
 
@@ -76,7 +84,7 @@ html[data-theme='dark'] .hero {
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  margin: 0 0 1rem;
+  margin: 0 0 0.75rem;
   padding: 0.35rem 0.4rem 0.35rem 0.9rem;
   border: 1px solid var(--cgp-border);
   border-radius: 10px;
@@ -168,6 +176,7 @@ html[data-theme='dark'] .hero {
 .heroArtFrame {
   display: grid;
   place-items: center;
+  justify-self: center;
 }
 
 .heroArt {
@@ -196,9 +205,10 @@ html[data-theme='dark'] .heroArtFrame {
   filter: brightness(0.9);
 }
 
-/* The code band: two editor windows side by side. */
+/* The code band: two editor windows side by side, ending on the caption. The tinted section below it
+   marks where the band ends. */
 .codeBand {
-  padding: 1.25rem 0 3rem;
+  padding: 0.75rem 0 2.5rem;
 }
 
 .codeColumns {
@@ -331,7 +341,8 @@ html[data-theme='dark'] .heroArtFrame {
 }
 
 /* The caption: its reason at body size, then its conclusion set large in the heading colour, under a
-   short rule in the link colour. */
+   short rule in the link colour. The rule sits twice as close to the quote as to the reason, so it
+   reads as the quote's mark. */
 .caption {
   max-width: calc(860px + 2 * var(--page-gutter));
   margin-top: 1.75rem;
@@ -341,7 +352,7 @@ html[data-theme='dark'] .heroArtFrame {
 .captionReason {
   font-size: 1.05rem;
   color: var(--cgp-text-muted);
-  margin: 0 0 0.4rem;
+  margin: 0 0 1rem;
 }
 
 .captionQuote {
@@ -359,14 +370,15 @@ html[data-theme='dark'] .heroArtFrame {
   display: block;
   width: 3rem;
   height: 3px;
-  margin: 0 auto 0.9rem;
+  margin: 0 auto 0.5rem;
   border-radius: 2px;
   background: var(--cgp-link);
 }
 
-/* The essay. Each section takes the layout that fits its content. */
+/* The essay. Each section takes the layout that fits its content, and the sections alternate between
+   the page and the tint, so every one meets a change of background. */
 .section {
-  padding: 4rem 0;
+  padding: var(--space-section) 0;
 }
 
 .sectionTinted {
@@ -393,7 +405,7 @@ html[data-theme='dark'] .heroArtFrame {
 .lead {
   font-size: 1.15rem;
   color: var(--cgp-text-muted);
-  margin: -0.5rem 0 1.5rem;
+  margin: -0.5rem 0 var(--space-block);
 }
 
 /* Prose links on the page are underlined, as in Markdown content. */
@@ -423,7 +435,7 @@ html[data-theme='dark'] .heroArtFrame {
 
 /* Section 2: the four features, whose cards live in src/components/HomepageFeatures/. */
 .sectionNote {
-  margin: 1.5rem 0 0;
+  margin: var(--space-block) 0 0;
   font-size: 1.05rem;
 }
 
@@ -633,6 +645,10 @@ html[data-theme='dark'] .heroArtFrame {
 
   /* Between the phone layout and 1240 px the hero copy has less room beside the art, so the art and
      the title shrink, and the first code window still starts high on the screen. */
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
   .heroArt {
     width: 200px;
   }
@@ -660,6 +676,7 @@ html[data-theme='dark'] .heroArtFrame {
 @media screen and (max-width: 996px) {
   .page {
     --page-gutter: 1rem;
+    --space-section: 2.75rem;
   }
 
   .heroGrid {
@@ -715,10 +732,6 @@ html[data-theme='dark'] .heroArtFrame {
 
   .captionQuote {
     font-size: 1.5rem;
-  }
-
-  .section {
-    padding: 2.75rem 0;
   }
 
   .sectionTitle {
