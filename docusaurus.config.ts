@@ -4,23 +4,38 @@ import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+// The site's fonts, declared here rather than in src/css/custom.css: a url() in that stylesheet is
+// copied to a hashed file name, which the preload below could not name, so the browser would fetch
+// the preloaded file and then the hashed one. These rules name the files under static/fonts/.
+const FONT_FACES = [
+  ['Inter', '/fonts/inter/inter-latin.woff2', 'normal'],
+  ['Inter', '/fonts/inter/inter-latin-italic.woff2', 'italic'],
+  ['JetBrains Mono', '/fonts/jetbrains-mono/jetbrains-mono-latin.woff2', 'normal'],
+]
+  .map(
+    ([family, url, style]) =>
+      `@font-face{font-family:'${family}';src:url('${url}') format('woff2');font-weight:400 700;font-style:${style};font-display:swap}`,
+  )
+  .join('');
+
 const config: Config = {
   title: 'CGP — Context-Generic Programming',
   tagline: 'A language extension for Rust, with pluggable trait implementations at compile-time',
   favicon: 'img/favicon.png',
 
-  // The heading font is preloaded, because every page's title uses it. The SVG favicon switches to a
+  // The upright Inter face is preloaded, because every page's text and titles use it. The SVG favicon switches to a
   // lighter red on a dark browser tab; the PNG stays as the fallback.
   // The theme-color tags match a phone's address bar to the navbar, using the values of `--cgp-bg`
   // in src/css/custom.css. Both follow the operating system's colour scheme, which is also the site's
   // default.
   headTags: [
+    {tagName: 'style', attributes: {}, innerHTML: FONT_FACES},
     {tagName: 'link', attributes: {rel: 'icon', type: 'image/svg+xml', href: '/img/favicon.svg'}},
     {
       tagName: 'link',
       attributes: {
         rel: 'preload',
-        href: '/fonts/space-grotesk/space-grotesk-latin.woff2',
+        href: '/fonts/inter/inter-latin.woff2',
         as: 'font',
         type: 'font/woff2',
         crossorigin: 'anonymous',

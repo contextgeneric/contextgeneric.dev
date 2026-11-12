@@ -11,35 +11,21 @@
  * website section records the palette and its reasons.
  */
 
-/* The fonts: Space Grotesk for headings and JetBrains Mono for code, self-hosted under static/fonts/.
-   Body text stays on the system font stack. Each face has a fallback sized to its metrics, so text
-   does not shift when the font arrives. */
-@font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk/space-grotesk-latin.woff2') format('woff2');
-  font-weight: 500 700;
-  font-style: normal;
-  font-display: swap;
-}
+/* The fonts: Inter for body text and headings, and JetBrains Mono for code, self-hosted under
+   static/fonts/. Their @font-face rules are a style tag in docusaurus.config.ts, because a url() here
+   would be copied to a hashed name that the preload cannot match. Each face has a fallback sized to
+   its metrics, so text does not shift when the font arrives. The site ships no italic code face, so
+   the code themes set comments upright. */
 
-/* The fallback names a bold face and declares the heading weights, so the browser does not embolden
-   an already bold face. */
+/* Inter's average width is 104.93% of Arial's, and its ascent and descent are 0.969 and 0.241 em,
+   so the overrides divide those by the size adjustment. */
 @font-face {
-  font-family: 'Space Grotesk Fallback';
-  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold'), local('Arial');
-  font-weight: 500 700;
-  size-adjust: 103%;
-  ascent-override: 95.5%;
-  descent-override: 28.3%;
+  font-family: 'Inter Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Helvetica');
+  size-adjust: 104.93%;
+  ascent-override: 92.32%;
+  descent-override: 22.99%;
   line-gap-override: 0%;
-}
-
-@font-face {
-  font-family: 'JetBrains Mono';
-  src: url('/fonts/jetbrains-mono/jetbrains-mono-latin.woff2') format('woff2');
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: swap;
 }
 
 @font-face {
@@ -161,7 +147,10 @@ html[data-theme='light'] {
   --ifm-dropdown-background-color: var(--cgp-surface-raised);
   --ifm-breadcrumb-item-background-active: var(--cgp-red-50);
   --ifm-code-font-size: 90%;
-  --ifm-heading-font-family: 'Space Grotesk', 'Space Grotesk Fallback', var(--ifm-font-family-base);
+  --ifm-font-family-base: 'Inter', 'Inter Fallback', system-ui, -apple-system, 'Segoe UI', Roboto,
+    Ubuntu, Cantarell, 'Noto Sans', sans-serif;
+  --ifm-heading-font-family: var(--ifm-font-family-base);
+  --ifm-heading-font-weight: 600;
   --ifm-font-family-monospace: 'JetBrains Mono', 'JetBrains Mono Fallback', SFMono-Regular, Menlo,
     Consolas, monospace;
   --ifm-container-width-xl: 1400px;
