@@ -54,8 +54,8 @@ const FEATURES: Feature[] = [
     title: 'Abstract Over Every Dependency',
     body: (
       <>
-        Core logic names abstract error, runtime, and I/O types, each context supplies concrete ones,
-        and the core builds for <code>no_std</code> where the chosen implementations allow.
+        Core logic names abstract error, runtime, and I/O types, and each context supplies concrete
+        ones, so the core builds for <code>no_std</code> where the chosen implementations allow.
       </>
     ),
     to: '/docs/concepts/modular-error-handling',

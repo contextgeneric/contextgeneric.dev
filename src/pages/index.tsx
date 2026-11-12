@@ -226,22 +226,22 @@ function WhyOnce(): ReactNode {
             gives you, not a defect.
           </p>
           <p>
-            Without CGP, then, a second implementation needs a workaround: a newtype for each case,
-            or a marker struct and a helper trait written by hand.{' '}
+            Because the rules stay, a second implementation in plain Rust needs a workaround: a
+            newtype for each case, or a marker struct and a helper trait written by hand.{' '}
             <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
             what they cost in practice.
           </p>
           <p>
-            CGP keeps coherence and moves the choice instead. Each implementation gets its own
-            provider type, owned by the crate that writes it, so neither the overlap rule nor the
-            orphan rule rejects it. Each wired type then names exactly one provider, so every lookup
-            still finds a single answer.
+            CGP keeps the rules and moves the choice of implementation instead. Each implementation
+            gets its own provider type, owned by the crate that writes it, so neither the overlap
+            rule nor the orphan rule rejects it. Because each wired type then names exactly one
+            provider, every lookup still finds a single answer.
           </p>
           <p>
             The types wired above are data, though, so each of them gets one choice for the whole
             program. To let each application choose, you wire a type you define to stand for the
-            application, which CGP calls a <strong>context</strong>, and because a context is your
-            own type, you can define as many as you need.{' '}
+            application, which CGP calls a <strong>context</strong>. Because a context is your own
+            type, you can define as many as you need.{' '}
             <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
             shows an application and its test choosing different providers.
           </p>
@@ -259,7 +259,8 @@ function Features(): ReactNode {
           What that gives you
         </Heading>
         <p className={styles.lead}>
-          Naming each implementation and letting each application choose give CGP its main features:
+          Those two moves, naming each implementation and letting each application choose, give CGP
+          its main features:
         </p>
         <FeatureCards />
         <p className={styles.sectionNote}>
@@ -359,8 +360,8 @@ const COSTS: Cost[] = [
     body: (
       <>
         The ecosystem is small and community support is limited, so on a mission-critical project,
-        expect to investigate some problems on your own.{' '}
-        <code>cargo-cgp</code> is itself an early release.
+        expect to investigate some problems on your own. The diagnostics tool,{' '}
+        <code>cargo-cgp</code>, is also an early release.
       </>
     ),
   },
@@ -369,8 +370,8 @@ const COSTS: Cost[] = [
     body: (
       <>
         Learning the patterns takes time. CGP's <Link to="/docs/ai/skills">agent skill</Link> helps
-        an assistant with the vocabulary, the diagnostics, and the wiring, which makes these costs
-        smaller, but code it writes still needs your review.
+        an assistant with the vocabulary, the diagnostics, and the wiring, so these costs shrink,
+        though code the assistant writes still needs your review.
       </>
     ),
   },
@@ -388,8 +389,8 @@ function Costs(): ReactNode {
               What it costs
             </Heading>
             <p className={styles.costLead}>
-              For a trait with one implementation, a plain trait is the right tool, because CGP has
-              these costs:
+              CGP adds the costs below, and for a trait with one implementation they buy nothing, so a
+              plain trait remains the right tool there.
             </p>
           </div>
           <div className={styles.prose}>
