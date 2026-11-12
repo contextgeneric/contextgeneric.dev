@@ -507,7 +507,8 @@ html[data-theme='dark'] .heroArt {
   color: var(--cgp-heading);
 }
 
-.tile:hover .tileTitle {
+.tile:hover .tileTitle,
+.tile:focus-visible .tileTitle {
   color: var(--cgp-link);
 }
 

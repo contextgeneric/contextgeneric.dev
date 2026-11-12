@@ -59,7 +59,8 @@
   color: var(--cgp-heading);
 }
 
-.card:hover .title {
+.card:hover .title,
+.card:focus-visible .title {
   color: var(--cgp-link);
 }
 
