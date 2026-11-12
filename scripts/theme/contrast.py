@@ -3,8 +3,9 @@
 
 Reads the token values for each theme from `src/css/custom.css`, resolves `var()` references, blends
 translucent colours over their background, and checks each pair below: text at 4.5:1, and focus rings,
-admonition borders, and the two navbar logos at 3:1. It also checks every token colour of the two Prism
-themes in `src/prism/themes.ts`, on the code background and on a highlighted line's tint.
+admonition borders, the two navbar logos, and the front page's diff marks at 3:1. It also checks every
+token colour of the two Prism themes in `src/prism/themes.ts`, on the code background, on a highlighted
+line's tint, and on the front page's two diff tints.
 
 Run it from the repository's root after changing a colour:
 
@@ -48,6 +49,14 @@ PAIRS = [
     ("--ifm-color-secondary-dark", "--ifm-color-secondary-contrast-background", 3.0, "note admonition border and icon"),
     ("--ifm-color-warning-dark", "--ifm-color-warning-contrast-background", 3.0, "warning admonition border and icon"),
     ("--ifm-color-danger-dark", "--ifm-color-danger-contrast-background", 3.0, "danger admonition border and icon"),
+    ("--ifm-color-danger", "--cgp-surface", 4.5, "the front page's quoted diagnostic, first line"),
+    ("--cgp-surface-raised", "--cgp-diff-removed-mark", 3.0, "the rejected window's cross badge"),
+    ("--cgp-surface-raised", "--cgp-diff-added-mark", 3.0, "the accepted window's tick badge"),
+]
+# The front page's diff tints, laid over the code background: (tint token, its gutter mark, what).
+DIFFS = [
+    ("--cgp-diff-removed", "--cgp-diff-removed-mark", "the line Rust rejects"),
+    ("--cgp-diff-added", "--cgp-diff-added-mark", "the lines CGP adds"),
 ]
 LIGHT_ONLY = [("--cgp-on-red", "--cgp-red", 4.5, "text on a red button")]
 REPORT_ONLY = [("--cgp-link", "--cgp-text", "links against body text (links are underlined)")]
@@ -174,12 +183,20 @@ def main(argv):
         b = rgba(bg)
         tokens = themes[theme]
         hl = over(rgba(resolve(tokens, tokens["--cgp-highlight-line"])), b)
+        tints = [over(rgba(resolve(tokens, tokens[tint])), b) for tint, _, _ in DIFFS]
         for name, c in [("plain", fg)] + styles:
             r = ratio(rgba(c), b)
             rh = ratio(rgba(c), hl)
-            ok = min(r, rh) >= 4.5
+            rd = [ratio(rgba(c), t) for t in tints]
+            ok = min([r, rh] + rd) >= 4.5
             failed += not ok
-            print(f"  {'ok  ' if ok else 'FAIL'} {r:5.2f} / {rh:5.2f} highlighted >= 4.5 {name}")
+            diffs = " / ".join(f"{x:5.2f}" for x in rd)
+            print(f"  {'ok  ' if ok else 'FAIL'} {r:5.2f} / {rh:5.2f} highlighted / {diffs} diff >= 4.5 {name}")
+        for (tint, mark, what), t in zip(DIFFS, tints):
+            r = ratio(rgba(resolve(tokens, tokens[mark])), t)
+            ok = r >= 3.0
+            failed += not ok
+            print(f"  {'ok  ' if ok else 'FAIL'} {r:5.2f} >= 3.0 the gutter mark on {what}")
     print("all pairs pass" if not failed else f"{failed} pair(s) below the minimum")
     return 1 if failed else 0
 

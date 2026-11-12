@@ -91,6 +91,12 @@ html[data-theme='light'] {
   --cgp-code-bg: #f4ece5;
   --cgp-inline-code-bg: #f1e6de;
   --cgp-highlight-line: rgba(214, 150, 40, 0.18);
+  /* The front page's diff lines: a tint for the line Rust rejects and the lines CGP adds, and a
+     stronger colour for each one's gutter mark and verdict badge. */
+  --cgp-diff-removed: rgba(196, 55, 43, 0.1);
+  --cgp-diff-added: rgba(40, 150, 70, 0.16);
+  --cgp-diff-removed-mark: var(--ifm-color-danger);
+  --cgp-diff-added-mark: #2f7a40;
   --cgp-selection: rgba(178, 58, 51, 0.18);
   --cgp-image-frame: #ffffff;
   --cgp-hero-art-bg: #fdefe1;
@@ -212,6 +218,9 @@ html[data-theme='dark'] {
   --cgp-code-bg: #211918;
   --cgp-inline-code-bg: #2d2322;
   --cgp-highlight-line: rgba(230, 170, 60, 0.14);
+  --cgp-diff-removed: rgba(232, 116, 106, 0.14);
+  --cgp-diff-added: rgba(100, 200, 120, 0.16);
+  --cgp-diff-added-mark: #7cc58a;
   --cgp-selection: rgba(239, 143, 134, 0.28);
   --cgp-image-frame: #fdfaf7;
   --cgp-announce-bg: #261c1b;

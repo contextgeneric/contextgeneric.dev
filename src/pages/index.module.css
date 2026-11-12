@@ -10,13 +10,6 @@
   /* Wide enough that the numbered rejected block, whose longest line is 70 characters, fits its
      window at 1440 px without scrolling. */
   --page-width: 1280px;
-  /* The strength of a changed line's tint. The light theme's is lower, so a comment on a tinted line
-     keeps 4.5:1. */
-  --diff-tint: 9%;
-}
-
-html[data-theme='dark'] .page {
-  --diff-tint: 14%;
 }
 
 /* One container for every band, so the title, the code, and the essay share a left edge. */
@@ -66,7 +59,7 @@ html[data-theme='dark'] .hero {
   font-size: 1.4rem;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--cgp-link);
+  color: var(--cgp-heading);
   margin: 0 0 0.5rem;
   max-width: 34em;
 }
@@ -190,7 +183,7 @@ html[data-theme='dark'] .heroArtFrame {
   height: 270px;
   border-radius: 50%;
   background: var(--cgp-hero-art-bg);
-  box-shadow: 0 0 0 6px color-mix(in srgb, var(--cgp-red-300) 25%, transparent);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--cgp-hero-art-bg) 30%, transparent);
 }
 
 html[data-theme='dark'] .heroArt {
@@ -245,11 +238,11 @@ html[data-theme='dark'] .heroArt {
 }
 
 .rejected .verdictMark {
-  background: var(--ifm-color-danger);
+  background: var(--cgp-diff-removed-mark);
 }
 
 .accepted .verdictMark {
-  background: var(--ifm-color-success);
+  background: var(--cgp-diff-added-mark);
 }
 
 .windowCode {
@@ -275,14 +268,16 @@ html[data-theme='dark'] .heroArt {
 /* The changed lines read like a diff: a tint and a gutter mark in each window's own colour, a cross
    on the line Rust rejects and a plus on the lines CGP adds. The rejected block shows line numbers,
    which Docusaurus lays out as table rows, so its mark sits in the line-number cell; a pseudo-element
-   on the row itself would become a cell of its own. */
+   on the row itself would become a cell of its own. The tints and marks are theme tokens, which
+   `scripts/theme/contrast.py` checks against every code colour. The line-number cell is opaque, so it
+   lays the tint over the code background. */
 .rejected :global(.theme-code-block-highlighted-line) {
-  background: color-mix(in srgb, var(--ifm-color-danger) var(--diff-tint), transparent);
+  background: var(--cgp-diff-removed);
 }
 
 .rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber'] {
-  background: color-mix(in srgb, var(--ifm-color-danger) var(--diff-tint), var(--cgp-code-bg));
-  box-shadow: inset 3px 0 0 var(--ifm-color-danger);
+  background: linear-gradient(var(--cgp-diff-removed), var(--cgp-diff-removed)), var(--cgp-code-bg);
+  box-shadow: inset 3px 0 0 var(--cgp-diff-removed-mark);
 }
 
 .rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber']::after {
@@ -291,13 +286,13 @@ html[data-theme='dark'] .heroArt {
   position: absolute;
   left: 0.45rem;
   font-weight: 700;
-  color: var(--ifm-color-danger);
+  color: var(--cgp-diff-removed-mark);
 }
 
 .accepted :global(.theme-code-block-highlighted-line) {
   position: relative;
-  background: color-mix(in srgb, var(--ifm-color-success) var(--diff-tint), transparent);
-  box-shadow: inset 3px 0 0 var(--ifm-color-success);
+  background: var(--cgp-diff-added);
+  box-shadow: inset 3px 0 0 var(--cgp-diff-added-mark);
 }
 
 .accepted :global(.theme-code-block-highlighted-line)::before {
@@ -306,11 +301,11 @@ html[data-theme='dark'] .heroArt {
   position: absolute;
   left: 0.45rem;
   font-weight: 700;
-  color: var(--ifm-color-success);
+  color: var(--cgp-diff-added-mark);
 }
 
 /* The compiler's error, quoted under the rejected block, reads as terminal output with its first
-   line in the rejection's colour. */
+   line in the rejection's colour, a pair the contrast script checks. */
 .diagnostic {
   margin: 0;
   padding: 0.9rem 1.4rem 1rem;
@@ -329,7 +324,8 @@ html[data-theme='dark'] .heroArt {
   font-weight: 700;
 }
 
-/* The caption: its reason at body size, then its conclusion set large. */
+/* The caption: its reason at body size, then its conclusion set large in the heading colour, under a
+   short rule in the link colour. */
 .caption {
   max-width: calc(860px + 2 * var(--page-gutter));
   margin-top: 1.75rem;
@@ -348,8 +344,18 @@ html[data-theme='dark'] .heroArt {
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.01em;
-  color: var(--cgp-link);
+  color: var(--cgp-heading);
   margin: 0;
+}
+
+.captionQuote::before {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 3px;
+  margin: 0 auto 0.9rem;
+  border-radius: 2px;
+  background: var(--cgp-link);
 }
 
 /* The essay. Each section takes the layout that fits its content. */
@@ -455,7 +461,6 @@ html[data-theme='dark'] .heroArt {
 .benefit {
   padding: 1.4rem 1.5rem;
   border: 1px solid var(--cgp-border);
-  border-top: 3px solid var(--cgp-link);
   border-radius: 14px;
   background: var(--cgp-surface-raised);
 }
@@ -499,6 +504,10 @@ html[data-theme='dark'] .heroArt {
   font-family: var(--ifm-heading-font-family);
   font-size: 1.15rem;
   font-weight: 700;
+  color: var(--cgp-heading);
+}
+
+.tile:hover .tileTitle {
   color: var(--cgp-link);
 }
 
