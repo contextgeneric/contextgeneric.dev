@@ -4,8 +4,9 @@ import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
 
-// The five headline features, in the order and with the titles the knowledge base's identity.md
-// fixes. Each card is one link to the page that answers it, and each illustration is decorative
+// The first four headline features, in the order and with the titles the knowledge base's
+// identity.md fixes; the hero's reassurance line carries the fifth, Still Ordinary Rust, so no card
+// repeats it. Each card is one link to the page that answers it, and each illustration is decorative
 // beside its title, so its alt text is empty.
 type Feature = {
   title: string;
@@ -59,17 +60,6 @@ const FEATURES: Feature[] = [
     ),
     to: '/docs/concepts/modular-error-handling',
     image: '/img/features/abstract-over-every-dependency.webp',
-  },
-  {
-    title: 'Still Ordinary Rust',
-    body: (
-      <>
-        A consumer trait stays an ordinary trait that you can implement directly, so you can adopt CGP
-        one component at a time.
-      </>
-    ),
-    to: '/docs/quickstart',
-    image: '/img/features/still-ordinary-rust.webp',
   },
 ];
 
