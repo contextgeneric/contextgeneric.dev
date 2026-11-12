@@ -72,7 +72,7 @@ block to match. These are the actionable rules here:
 - Never disparage another crate, language, or community; say where a simpler tool is the better choice.
 - Concede the learning curve, the verbose diagnostics, and the young ecosystem where a reader looks for
   them.
-- Use natural-writing for `docs/concepts/` and `docs/cargo-cgp/` pages.
+- Use natural-writing for `docs/concepts/` and `docs/cargo-cgp/` pages and for the front page.
 
 ## Blog posts
 

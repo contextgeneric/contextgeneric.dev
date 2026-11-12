@@ -4,12 +4,12 @@ import Heading from '@theme/Heading';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
 
-// The five headline features, in the order and wording the knowledge base's identity.md fixes.
-// Each title links to the page that answers it, and each illustration is decorative beside its
-// title, so its alt text is empty.
+// The five headline features, in the order and with the titles the knowledge base's identity.md
+// fixes. Each card is one link to the page that answers it, and each illustration is decorative
+// beside its title, so its alt text is empty.
 type Feature = {
   title: string;
-  line: string;
+  body: ReactNode;
   to: string;
   image: string;
 };
@@ -17,59 +17,85 @@ type Feature = {
 const FEATURES: Feature[] = [
   {
     title: 'One Interface, Many Implementations',
-    line: 'Implementations of one interface coexist, and each application names its choice.',
+    body: (
+      <>
+        The two encoders above coexist because each one lives on its own provider type, and each
+        application names the one it uses.
+      </>
+    ),
     to: '/docs/concepts/coherence',
     image: '/img/features/one-interface-many-implementations.webp',
   },
   {
     title: 'Zero-Cost Abstraction',
-    line: 'Provider selection resolves at compile time into direct calls.',
+    body: (
+      <>
+        Provider selection resolves at compile time into a direct call, without a container or a
+        vtable lookup.
+      </>
+    ),
     to: '/docs/comparisons/dynamic-dispatch',
     image: '/img/features/zero-cost-abstraction.webp',
   },
   {
     title: 'Type-Safe Wiring',
-    line: 'A missing dependency fails the build once the wiring is checked.',
+    body: (
+      <>
+        A provider states what it needs, as <code>#[uses(Display)]</code> does above, and a{' '}
+        <code>check_components!</code> assertion or a use of the component fails the build when a
+        context lacks it.
+      </>
+    ),
     to: '/docs/comparisons/dependency-injection',
     image: '/img/features/type-safe-wiring.webp',
   },
   {
     title: 'Abstract Over Every Dependency',
-    line: 'Core logic names its error and runtime types, and each context supplies them.',
+    body: (
+      <>
+        Core logic names its error, runtime, and I/O types, each context supplies them, and the core
+        builds for <code>no_std</code> where the chosen implementations allow.
+      </>
+    ),
     to: '/docs/concepts/modular-error-handling',
     image: '/img/features/abstract-over-every-dependency.webp',
   },
   {
     title: 'Still Ordinary Rust',
-    line: 'Adopt CGP one component at a time, beside plain trait implementations.',
+    body: (
+      <>
+        A consumer trait stays an ordinary trait that you can implement directly, so you can adopt CGP
+        one component at a time.
+      </>
+    ),
     to: '/docs/quickstart',
     image: '/img/features/still-ordinary-rust.webp',
   },
 ];
 
-// Each card is one link, so the whole card is the target; its title stays a heading inside it.
-function FeatureCard({title, line, to, image}: Feature): ReactNode {
+function FeatureCard({title, body, to, image}: Feature): ReactNode {
   return (
     <li>
       <Link className={styles.card} to={to}>
         <img className={styles.image} src={useBaseUrl(image)} alt="" width={180} height={180} />
-        <Heading as="h3" className={styles.title}>
-          {title}
-        </Heading>
-        <p className={styles.line}>{line}</p>
+        <span className={styles.text}>
+          <Heading as="h3" className={styles.title}>
+            {title}
+          </Heading>
+          <span className={styles.body}>{body}</span>
+        </span>
       </Link>
     </li>
   );
 }
 
+// The cards sit two to a row, each illustration beside its text, and one to a row on a phone.
 export default function FeatureCards(): ReactNode {
   return (
-    <section className={styles.features} aria-label="The five headline features">
-      <ul className={styles.cards}>
-        {FEATURES.map((feature) => (
-          <FeatureCard key={feature.title} {...feature} />
-        ))}
-      </ul>
-    </section>
+    <ul className={styles.cards}>
+      {FEATURES.map((feature) => (
+        <FeatureCard key={feature.title} {...feature} />
+      ))}
+    </ul>
   );
 }

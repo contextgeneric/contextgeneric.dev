@@ -399,8 +399,8 @@ html[data-theme='dark'] .heroArtFrame {
 /* Prose links on the page are underlined, as in Markdown content. */
 .prose a,
 .lead a,
-.benefit a,
-.routeLinks a {
+.sectionNote a,
+.routeReason a {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
@@ -452,8 +452,12 @@ html[data-theme='dark'] .heroArtFrame {
   padding: 0.75rem;
 }
 
-/* Section 3: the four benefits as a grid of cards. */
-.benefitGrid,
+/* Section 3: the five features, whose cards live in src/components/HomepageFeatures/. */
+.sectionNote {
+  margin: 1.5rem 0 0;
+  font-size: 1.05rem;
+}
+
 .tileGrid,
 .routeGrid {
   list-style: none;
@@ -461,26 +465,6 @@ html[data-theme='dark'] .heroArtFrame {
   padding: 0;
   display: grid;
   gap: 1.25rem;
-}
-
-.benefitGrid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.benefit {
-  padding: 1.4rem 1.5rem;
-  border: 1px solid var(--cgp-border);
-  border-radius: 14px;
-  background: var(--cgp-surface-raised);
-}
-
-.benefitTitle {
-  font-size: 1.2rem;
-  margin: 0 0 0.5rem;
-}
-
-.benefit p {
-  margin: 0;
 }
 
 /* Section 4: three link tiles. */
@@ -543,6 +527,20 @@ html[data-theme='dark'] .heroArtFrame {
   max-width: 52em;
 }
 
+/* Each cost is a bold label and one sentence. */
+.costList {
+  margin: 0 0 1rem;
+  padding-left: 1.2rem;
+}
+
+.costList li {
+  margin-bottom: 0.6rem;
+}
+
+.costList strong {
+  color: var(--cgp-heading);
+}
+
 .costAdvice {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
@@ -550,19 +548,64 @@ html[data-theme='dark'] .heroArtFrame {
   font-weight: 600;
 }
 
-/* Section 6: one card per reader, ending the page on a choice. */
+/* Section 6: one card per reader, ending the page on a choice. Each card's main link stretches over
+   the whole card through a positioned pseudo-element, so the card is one target, and a second link in
+   its reason sits above that layer. The main link's focus ring outlines the whole card. */
 .routeGrid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .route {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.4rem;
   padding: 1.2rem 1.25rem;
   border: 1px solid var(--cgp-border);
   border-radius: 14px;
   background: var(--cgp-surface-raised);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.route:hover {
+  border-color: var(--cgp-link);
+  transform: translateY(-2px);
+}
+
+.routeLink {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.routeLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+}
+
+.routeLink:focus-visible {
+  outline: none;
+}
+
+.routeLink:focus-visible::after {
+  outline: 2px solid var(--cgp-focus);
+  outline-offset: 2px;
+}
+
+.routeLink::before {
+  content: '→ ';
+  content: '→ ' / '';
+}
+
+.routeReason {
+  font-size: 0.92rem;
+  color: var(--cgp-text-muted);
+}
+
+.routeReason a {
+  position: relative;
+  z-index: 1;
 }
 
 .routeReader {
@@ -572,16 +615,14 @@ html[data-theme='dark'] .heroArtFrame {
   color: var(--ifm-heading-color);
 }
 
-.routeLinks {
-  font-size: 0.95rem;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .tile {
+  .tile,
+  .route {
     transition: none;
   }
 
-  .tile:hover {
+  .tile:hover,
+  .route:hover {
     transform: none;
   }
 }
@@ -670,7 +711,6 @@ html[data-theme='dark'] .heroArtFrame {
   .codeColumns,
   .split,
   .sideBySide,
-  .benefitGrid,
   .tileGrid {
     grid-template-columns: minmax(0, 1fr);
   }

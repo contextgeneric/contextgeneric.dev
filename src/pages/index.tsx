@@ -225,19 +225,18 @@ function WhyOnce(): ReactNode {
         </Heading>
         <div className={styles.prose}>
           <p>
-            Rust rejects the second implementation to keep every trait lookup consistent. The trait
-            system finds implementations for you: when a generic implementation requires{' '}
+            The compiler rejects the second implementation for a good reason. Rust's trait system
+            finds implementations for you: when a generic implementation requires{' '}
             <code>T: Display</code>, the compiler finds the <code>Display</code> implementation, and
             everything that implementation needs in turn, without the caller naming any of it. That
-            works only because every lookup finds the same answer. The overlap and orphan rules,
-            together called coherence, ensure that single answer. Coherence is therefore a guarantee
-            Rust gives you, not a defect.
+            search works only because every lookup finds the same answer, and the overlap and orphan
+            rules, together called coherence, make sure it does. So coherence is a guarantee Rust
+            gives you, not a defect.
           </p>
           <p>
-            Without CGP, a second implementation needs a workaround: a newtype for each case, or a
-            marker struct and a helper trait written by hand.{' '}
-            <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
-            what they cost in practice.
+            So without CGP, a second implementation needs a workaround: a newtype for each case, or a
+            marker struct and a helper trait written by hand. <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the
+            rules and what they cost in practice.
           </p>
         </div>
       </div>
@@ -254,18 +253,18 @@ function NameEach(): ReactNode {
             Name each implementation, and let the application choose
           </Heading>
           <p>
-            CGP gives each implementation its own provider type, owned by the crate that writes it,
-            so neither the overlap rule nor the orphan rule rejects it. Each wired type then names
-            exactly one provider, so every lookup still finds a single answer, which is the guarantee
-            coherence exists for.
+            CGP keeps that guarantee and moves the choice. It gives each implementation its own
+            provider type, owned by the crate that writes it, so neither the overlap rule nor the
+            orphan rule rejects it. Each wired type then names exactly one provider, so every lookup
+            still finds a single answer.
           </p>
           <p>
-            To let each application choose, wire a type you define to stand for the application, which
-            CGP calls a <strong>context</strong>. Because a context is your own type, you can define as
-            many as you need. The types wired above are data, so each of them gets one choice for the
-            whole program. Here <code>App</code> sends real mail and <code>TestApp</code> records each
-            message for a test, while the code that calls <code>send_email</code> is the same in
-            both:
+            The types wired above are data, though, so each of them gets one choice for the whole
+            program. To let each application choose, wire a type you define to stand for the
+            application, which CGP calls a <strong>context</strong>. Because a context is your own
+            type, you can define as many as you need. Here <code>App</code> sends real mail and{' '}
+            <code>TestApp</code> records each message for a test, while the code that calls{' '}
+            <code>send_email</code> is the same in both:
           </p>
         </div>
         {/* The wiring follows the sentence that introduces it, so on a phone, where the columns
@@ -289,65 +288,20 @@ function NameEach(): ReactNode {
   );
 }
 
-type Benefit = {title: string; body: ReactNode};
-
-const BENEFITS: Benefit[] = [
-  {
-    title: 'Many implementations, chosen per application',
-    body: (
-      <>
-        A production application and its test application, or two deployments, choose different
-        providers for the same interface, without <code>dyn</code> or a framework.
-      </>
-    ),
-  },
-  {
-    title: 'Direct calls',
-    body: (
-      <>
-        Provider selection happens at compile time, so a wired call compiles to a direct call,
-        without a container or a vtable lookup.
-      </>
-    ),
-  },
-  {
-    title: 'Checked dependencies',
-    body: (
-      <>
-        Once the wiring is checked, the build fails when a context lacks what a provider needs. A
-        provider states its requirements, as <code>#[uses(Display)]</code> does above, and a{' '}
-        <code>check_components!</code> assertion or a use of the component checks them. A wiring entry
-        alone does not check them, so the check is code you write.
-      </>
-    ),
-  },
-  {
-    title: 'Still ordinary Rust',
-    body: (
-      <>
-        You can adopt CGP one trait at a time, because a consumer trait stays an ordinary trait that
-        you can implement directly. The <Link to="/docs/overview">Overview</Link> describes every
-        feature in detail.
-      </>
-    ),
-  },
-];
-
-function Benefits(): ReactNode {
+function Features(): ReactNode {
   return (
     <section className={styles.section}>
       <div className={styles.container}>
         <Heading as="h2" className={styles.sectionTitle}>
           What that gives you
         </Heading>
-        <ul className={styles.benefitGrid}>
-          {BENEFITS.map(({title, body}) => (
-            <li key={title} className={styles.benefit}>
-              <h3 className={styles.benefitTitle}>{title}</h3>
-              <p>{body}</p>
-            </li>
-          ))}
-        </ul>
+        <p className={styles.lead}>
+          Those two ideas give CGP its main features:
+        </p>
+        <FeatureCards />
+        <p className={styles.sectionNote}>
+          The <Link to="/docs/overview">Overview</Link> describes each feature in more detail.
+        </p>
       </div>
     </section>
   );
@@ -361,20 +315,30 @@ const BREADTH: Breadth[] = [
     to: '/docs/concepts/abstract-types',
     body: (
       <>
-        A context chooses its own types, so an error type or a runtime no longer has to be a type
-        parameter that every layer declares.
+        A context chooses its own types, so an error or runtime type stops being a parameter that
+        every layer declares.
       </>
     ),
   },
   {
     title: 'Extensible records and variants',
     to: '/docs/concepts/extensible-records',
-    body: <>Generic code works over a type's fields and variants.</>,
+    body: (
+      <>
+        A struct or enum that opts in with a derive exposes its fields and variants to generic code
+        that builds and matches them.
+      </>
+    ),
   },
   {
     title: 'Handlers',
     to: '/docs/concepts/handlers',
-    body: <>Small steps compose into a computation.</>,
+    body: (
+      <>
+        Small steps, synchronous or async, compose into a pipeline whose steps you can change one at
+        a time.
+      </>
+    ),
   },
 ];
 
@@ -401,6 +365,54 @@ function MoreThanTraits(): ReactNode {
   );
 }
 
+type Cost = {label: string; body: ReactNode};
+
+// The costs as labelled statements. The `cargo cgp check` sentence is the knowledge base's canonical
+// qualification, copied word for word.
+const COSTS: Cost[] = [
+  {
+    label: 'More declarations.',
+    body: <>Components, providers, and wiring add code that a plain trait does not need.</>,
+  },
+  {
+    label: 'Compile-time work.',
+    body: <>The macros and the type checking add work at compile time.</>,
+  },
+  {
+    label: 'Verbose raw errors.',
+    body: (
+      <>
+        Raw wiring errors are long, but{' '}
+        <Link to="/docs/cargo-cgp">
+          <code>cargo cgp check</code>
+        </Link>{' '}
+        leads with the root cause for the classes it recognizes, and the tool does not yet reshape
+        every class.
+      </>
+    ),
+  },
+  {
+    label: 'A young ecosystem.',
+    body: (
+      <>
+        The ecosystem is small and community support is limited, so on a mission-critical project,
+        expect to investigate some problems on your own.{' '}
+        <code>cargo-cgp</code> is itself an early release.
+      </>
+    ),
+  },
+  {
+    label: 'Learning time.',
+    body: (
+      <>
+        Learning the patterns takes time. CGP's <Link to="/docs/ai/skills">agent skill</Link> helps
+        an assistant with the vocabulary, the diagnostics, and the wiring, which makes these costs
+        smaller, but code it writes still needs your review.
+      </>
+    ),
+  },
+];
+
 function Costs(): ReactNode {
   return (
     <section className={styles.section}>
@@ -411,27 +423,20 @@ function Costs(): ReactNode {
           </Heading>
           <div className={styles.prose}>
             <p>
-              CGP adds declarations and wiring that a plain trait does not need, so for a trait with
-              one implementation, a plain trait is the right tool. The macros and the type checking add
-              compile-time work. Raw compiler errors from wiring are verbose.{' '}
-              <Link to="/docs/cargo-cgp">
-                <code>cargo cgp check</code>
-              </Link>{' '}
-              leads with the root cause for the classes it recognizes, and the tool does not yet
-              reshape every class.
+              For a trait with one implementation, a plain trait is the right tool, because CGP has
+              these costs:
             </p>
-            <p>
-              CGP is also young. Its ecosystem is small and community support is limited, so if you
-              adopt it for a mission-critical project, expect to investigate some problems on your
-              own. Learning its patterns takes time, and <code>cargo-cgp</code> is itself an early
-              release. CGP publishes an <Link to="/docs/ai/skills">agent skill</Link> that helps an
-              assistant with the vocabulary, the diagnostics, and the wiring. It makes those costs
-              smaller but does not remove them, and code an assistant writes still needs your review.
-            </p>
+            <ul className={styles.costList}>
+              {COSTS.map(({label, body}) => (
+                <li key={label}>
+                  <strong>{label}</strong> {body}
+                </li>
+              ))}
+            </ul>
             <p className={styles.costAdvice}>
-              Try CGP first on a small part of a project whose implementation choices already vary.{' '}
-              <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows when a
-              plain trait is enough.
+              So try CGP first on a small part of a project whose implementation choices already
+              vary. <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows
+              when a plain trait is enough.
             </p>
           </div>
         </div>
@@ -440,48 +445,60 @@ function Costs(): ReactNode {
   );
 }
 
-type Route = {reader: string; links: ReactNode};
+type Route = {reader: string; to: string; link: string; reason: ReactNode};
 
+// Each route card is one stretched link to its main page, with an optional second link above the
+// stretched area, because a link inside a link is invalid.
 const ROUTES: Route[] = [
   {
     reader: 'Try it',
-    links: (
+    to: '/docs/quickstart',
+    link: 'Quickstart',
+    reason: (
       <>
-        The <Link to="/docs/quickstart">Quickstart</Link>, then the{' '}
+        Install CGP and run one program, then the{' '}
         <Link to="/docs/tutorials/hello">Hello World tutorial</Link>.
       </>
     ),
   },
   {
     reader: 'Understand the idea',
-    links: (
+    to: '/docs/concepts/coherence',
+    link: 'Bypassing coherence',
+    reason: (
       <>
-        <Link to="/docs/concepts/coherence">Bypassing coherence</Link> and{' '}
+        The argument in full, then{' '}
         <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>.
       </>
     ),
   },
   {
     reader: 'Decide whether it fits',
-    links: (
+    to: '/docs/concepts/modularity-hierarchy',
+    link: 'Modularity Hierarchy',
+    reason: (
       <>
-        <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> and the{' '}
+        When a simpler tool is enough, and the{' '}
         <Link to="/docs/projects">projects built with CGP</Link>.
       </>
     ),
   },
   {
     reader: 'Go deeper',
-    links: (
+    to: '/docs/overview',
+    link: 'Overview',
+    reason: (
       <>
-        The <Link to="/docs/overview">Overview</Link>, the{' '}
-        <Link to="/docs/comparisons">comparisons</Link>, and the <Link to="/blog">blog</Link>.
+        Every feature, then the <Link to="/docs/comparisons">comparisons</Link> and the{' '}
+        <Link to="/blog">blog</Link>.
       </>
     ),
   },
   {
     reader: 'Help build it',
-    links: <Link to="/docs/contribute">Contribute</Link>,
+    to: '/docs/contribute',
+    link: 'Contribute',
+    reason: <>Join the discussions, or improve the code and the documentation.</>,
   },
 ];
 
@@ -492,11 +509,17 @@ function WhereNext(): ReactNode {
         <Heading as="h2" className={styles.sectionTitle}>
           Where to go next
         </Heading>
+        <p className={styles.lead}>
+          Pick the next step that fits what you want from CGP.
+        </p>
         <ul className={styles.routeGrid}>
-          {ROUTES.map(({reader, links}) => (
+          {ROUTES.map(({reader, to, link, reason}) => (
             <li key={reader} className={styles.route}>
               <span className={styles.routeReader}>{reader}</span>
-              <span className={styles.routeLinks}>{links}</span>
+              <Link className={styles.routeLink} to={to}>
+                {link}
+              </Link>
+              <span className={styles.routeReason}>{reason}</span>
             </li>
           ))}
         </ul>
@@ -529,8 +552,7 @@ export default function Home(): ReactNode {
         <CodeBand />
         <WhyOnce />
         <NameEach />
-        <Benefits />
-        <FeatureCards />
+        <Features />
         <MoreThanTraits />
         <Costs />
         <WhereNext />
