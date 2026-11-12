@@ -190,6 +190,12 @@ html[data-theme='dark'] .heroArt {
   width: 236px;
 }
 
+/* The art's own background is the brightest thing on the dark page, so the dark theme dims the art
+   and its circle together, without redrawing them. */
+html[data-theme='dark'] .heroArtFrame {
+  filter: brightness(0.9);
+}
+
 /* The code band: two editor windows side by side. */
 .codeBand {
   padding: 1.25rem 0 3rem;
@@ -429,16 +435,19 @@ html[data-theme='dark'] .heroArt {
   margin-top: 1rem;
 }
 
+/* The diagram is drawn inline, and its colours read the theme's tokens, so it sits on a raised
+   surface in both themes rather than in an image frame. */
 .diagramFrame {
   overflow-x: auto;
   border: 1px solid var(--cgp-border);
   border-radius: 14px;
-  background: var(--cgp-image-frame);
+  background: var(--cgp-surface-raised);
 }
 
 .diagram {
   display: block;
   width: 100%;
+  height: auto;
   min-width: 520px;
   padding: 0.75rem;
 }
@@ -593,6 +602,25 @@ html[data-theme='dark'] .heroArt {
 
   .windowCode pre {
     font-size: 0.82rem;
+  }
+
+  /* Between the phone layout and 1240 px the hero copy has less room beside the art, so the art and
+     the title shrink, and the first code window still starts high on the screen. */
+  .heroArt {
+    width: 200px;
+  }
+
+  html[data-theme='dark'] .heroArtFrame {
+    width: 196px;
+    height: 196px;
+  }
+
+  html[data-theme='dark'] .heroArt {
+    width: 170px;
+  }
+
+  .heroTitle {
+    font-size: 2.6rem;
   }
 }
 

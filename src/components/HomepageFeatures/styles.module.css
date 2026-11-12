@@ -52,6 +52,12 @@
   box-shadow: 0 0 0 1px var(--ifm-color-emphasis-200);
 }
 
+/* The illustrations' white is the images' own background, so the dark theme dims each image and its
+   frame together, as it does the hero art. */
+html[data-theme='dark'] .image {
+  filter: brightness(0.9);
+}
+
 .title {
   font-size: 1.05rem;
   line-height: 1.3;

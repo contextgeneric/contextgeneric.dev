@@ -7,6 +7,9 @@ import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import CodeBlock from '@theme/CodeBlock';
 import FeatureCards from '@site/src/components/HomepageFeatures';
+// Docusaurus's SVGR support turns the file into a component, so the diagram is drawn inline and its
+// colours read the theme's tokens; the Concepts pages load the same file as an image.
+import WiringTable from '@site/static/img/wiring-table.svg';
 
 import styles from './index.module.css';
 
@@ -270,10 +273,10 @@ function NameEach(): ReactNode {
         <div className={clsx(styles.example, styles.prose)}>
           <CodeBlock language="rust">{EMAIL_WIRING}</CodeBlock>
           <div className={styles.diagramFrame}>
-            <img
+            <WiringTable
               className={styles.diagram}
-              src={useBaseUrl('/img/wiring-table.svg')}
-              alt="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
+              role="img"
+              title="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
             />
           </div>
           <p className={styles.exampleNote}>
