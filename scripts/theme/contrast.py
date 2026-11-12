@@ -4,7 +4,7 @@
 Reads the token values for each theme from `src/css/custom.css`, resolves `var()` references, blends
 translucent colours over their background, and checks each pair below: text at 4.5:1, and focus rings,
 admonition borders, the two navbar logos, and the front page's diff marks at 3:1. Text pairs include
-the front page's cards and inline wiring diagram on the raised surface. It also checks every token
+the front page's cards on the raised surface. It also checks every token
 colour of the two Prism themes in `src/prism/themes.ts`, on the code background, on a highlighted
 line's tint, and on the front page's two diff tints.
 
@@ -53,9 +53,9 @@ PAIRS = [
     ("--ifm-color-danger", "--cgp-surface", 4.5, "the front page's quoted diagnostic, first line"),
     ("--cgp-surface-raised", "--cgp-diff-removed-mark", 3.0, "the rejected window's cross badge"),
     ("--cgp-surface-raised", "--cgp-diff-added-mark", 3.0, "the accepted window's tick badge"),
-    ("--cgp-text", "--cgp-surface-raised", 4.5, "the front page's wiring diagram, text on its frame"),
-    ("--cgp-text-muted", "--cgp-surface-raised", 4.5, "the front page's wiring diagram, notes on its frame"),
-    ("--cgp-link", "--cgp-surface-raised", 4.5, "the front page's wiring diagram, red text on its frame"),
+    ("--cgp-text", "--cgp-surface-raised", 4.5, "the front page's cards, text on the raised surface"),
+    ("--cgp-text-muted", "--cgp-surface-raised", 4.5, "the front page's cards, secondary text on the raised surface"),
+    ("--cgp-link", "--cgp-surface-raised", 4.5, "the front page's cards, links on the raised surface"),
     ("--cgp-heading", "--cgp-surface", 4.5, "headings and cost labels on a surface"),
     ("--cgp-heading", "--cgp-surface-raised", 4.5, "card titles on the raised surface"),
 ]

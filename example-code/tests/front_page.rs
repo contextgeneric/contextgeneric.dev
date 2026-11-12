@@ -1,13 +1,13 @@
 //! Runnable check for the code shown on the front page, `src/pages/index.tsx`.
 //!
 //! The front page belongs to no `docs/` section, so it gets its own test binary, as the Quickstart
-//! does. The page shows two blocks: the hero's encoder pair under CGP, and section 2's two wiring
-//! lines for an application and its test. The rejected half of the hero, the same pair without CGP,
-//! cannot compile, so it is a compile-fail fixture at `tests/compile_fail/front_page/`.
+//! does. The page's one compiling block is the hero's encoder pair under CGP. The rejected half of the
+//! hero, the same pair without CGP, cannot compile, so it is a compile-fail fixture at
+//! `tests/compile_fail/front_page/`.
 //!
 //! The text between each pair of `front-page:` marker comments is exactly what the page shows, so a
 //! test can compare it with `index.tsx`. Everything outside the markers is what the page omits: the
-//! imports, the email swap's consumer trait, providers, and contexts, and the checks. The rejected
+//! imports and the checks. The rejected
 //! block starts at its fixture's first line, so the page's quoted `E0119` names the lines the page
 //! numbers; that fixture carries only the end marker.
 
@@ -54,64 +54,6 @@ mod first_screen {
         assert_eq!(42u64.encode(), b"42");
         assert_eq!("hi".to_owned().encode(), b"hi");
         assert_eq!(vec![0xffu8, 0x00].encode(), vec![0xff, 0x00]);
-    }
-}
-
-// Section 2's application shape: one consumer trait, a production provider and a test provider, and
-// two contexts that choose between them. The page shows only the two wiring lines.
-mod name_each_implementation {
-    use cgp::prelude::*;
-    use std::cell::RefCell;
-
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
-    }
-
-    #[cgp_impl(new SendViaSmtp)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] smtp_host: &str, to: &str, body: &str) {
-            // A real provider would connect to `smtp_host`; the page does not show the body.
-            let _ = (smtp_host, to, body);
-        }
-    }
-
-    #[cgp_impl(new RecordEmails)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] outbox: &RefCell<Vec<String>>, to: &str, body: &str) {
-            outbox.borrow_mut().push(format!("{to}: {body}"));
-        }
-    }
-
-    #[derive(HasField)]
-    pub struct App {
-        pub smtp_host: String,
-    }
-
-    #[derive(HasField)]
-    pub struct TestApp {
-        pub outbox: RefCell<Vec<String>>,
-    }
-
-    // front-page:email-wiring:begin
-    delegate_components! { App     { EmailSenderComponent: SendViaSmtp  } }
-    delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
-    // front-page:email-wiring:end
-
-    check_components! { App { EmailSenderComponent } }
-    check_components! { TestApp { EmailSenderComponent } }
-
-    // Property: the same call, `send_email`, runs the provider each context names. `TestApp` records
-    // the message, which is how a test observes it; `App`'s provider records nothing, so the call
-    // compiling and running for both is the claim the page makes.
-    #[test]
-    fn each_application_sends_through_the_provider_it_names() {
-        let test_app = TestApp { outbox: RefCell::new(Vec::new()) };
-        test_app.send_email("ada@example.com", "hello");
-        assert_eq!(*test_app.outbox.borrow(), vec!["ada@example.com: hello".to_owned()]);
-
-        let app = App { smtp_host: "smtp.example.com".to_owned() };
-        app.send_email("ada@example.com", "hello");
     }
 }
 
@@ -179,13 +121,11 @@ mod page_text {
             rust_text(&leading_region(&rejected, "rejected-block")),
             "the page's `rejected-block` differs from the compiled code"
         );
-        for name in ["cgp-block", "email-wiring"] {
-            assert_eq!(
-                tsx_text(&region(&page, name)),
-                rust_text(&region(&compiled, name)),
-                "the page's `{name}` differs from the compiled code"
-            );
-        }
+        assert_eq!(
+            tsx_text(&region(&page, "cgp-block")),
+            rust_text(&region(&compiled, "cgp-block")),
+            "the page's `cgp-block` differs from the compiled code"
+        );
     }
 
     // Property: the diagnostic the page quotes under the rejected block equals the compiler's output

@@ -7,9 +7,6 @@ import Layout from '@theme/Layout';
 import Heading from '@theme/Heading';
 import CodeBlock from '@theme/CodeBlock';
 import FeatureCards from '@site/src/components/HomepageFeatures';
-// Docusaurus's SVGR support turns the file into a component, so the diagram is drawn inline and its
-// colours read the theme's tokens; the Concepts pages load the same file as an image.
-import WiringTable from '@site/static/img/wiring-table.svg';
 
 import styles from './index.module.css';
 
@@ -72,11 +69,6 @@ delegate_components! { u64     { EncoderComponent: EncodeAsText } }
 delegate_components! { String  { EncoderComponent: EncodeAsText } }
 delegate_components! { Vec<u8> { EncoderComponent: EncodeAsBytes } }`;
 // front-page:cgp-block:end
-
-// front-page:email-wiring:begin
-const EMAIL_WIRING = `delegate_components! { App     { EmailSenderComponent: SendViaSmtp  } }
-delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }`;
-// front-page:email-wiring:end
 
 const INSTALL_COMMAND = 'cargo add cgp';
 
@@ -234,54 +226,24 @@ function WhyOnce(): ReactNode {
             gives you, not a defect.
           </p>
           <p>
-            So without CGP, a second implementation needs a workaround: a newtype for each case, or a
-            marker struct and a helper trait written by hand.{' '}
+            Without CGP, then, a second implementation needs a workaround: a newtype for each case,
+            or a marker struct and a helper trait written by hand.{' '}
             <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
             what they cost in practice.
           </p>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function NameEach(): ReactNode {
-  return (
-    <section className={clsx(styles.section, styles.sectionTinted)}>
-      <div className={clsx(styles.container, styles.sideBySide)}>
-        <div className={styles.prose}>
-          <Heading as="h2" className={styles.sectionTitle}>
-            Name each implementation, and let the application choose
-          </Heading>
           <p>
-            CGP keeps that guarantee and moves the choice. It gives each implementation its own
+            CGP keeps coherence and moves the choice instead. Each implementation gets its own
             provider type, owned by the crate that writes it, so neither the overlap rule nor the
             orphan rule rejects it. Each wired type then names exactly one provider, so every lookup
             still finds a single answer.
           </p>
           <p>
             The types wired above are data, though, so each of them gets one choice for the whole
-            program. To let each application choose, wire a type you define to stand for the
-            application, which CGP calls a <strong>context</strong>. Because a context is your own
-            type, you can define as many as you need. Here <code>App</code> sends real mail and{' '}
-            <code>TestApp</code> records each message for a test, while the code that calls{' '}
-            <code>send_email</code> is the same in both:
-          </p>
-        </div>
-        {/* The wiring follows the sentence that introduces it, so on a phone, where the columns
-            stack, the colon still leads straight into the code. */}
-        <div className={clsx(styles.example, styles.prose)}>
-          <CodeBlock language="rust">{EMAIL_WIRING}</CodeBlock>
-          <div className={styles.diagramFrame}>
-            <WiringTable
-              className={styles.diagram}
-              role="img"
-              title="Two contexts, App and TestApp, map the same component key to different providers, and a call resolves through the table at compile time to a direct call."
-            />
-          </div>
-          <p className={styles.exampleNote}>
+            program. To let each application choose, you wire a type you define to stand for the
+            application, which CGP calls a <strong>context</strong>, and because a context is your
+            own type, you can define as many as you need.{' '}
             <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
-            shows the traits behind these lines and the plain Rust they expand to.
+            shows an application and its test choosing different providers.
           </p>
         </div>
       </div>
@@ -297,7 +259,7 @@ function Features(): ReactNode {
           What that gives you
         </Heading>
         <p className={styles.lead}>
-          Those two ideas give CGP its main features:
+          Naming each implementation and letting each application choose give CGP its main features:
         </p>
         <FeatureCards />
         <p className={styles.sectionNote}>
@@ -556,7 +518,6 @@ export default function Home(): ReactNode {
         <Hero />
         <CodeBand />
         <WhyOnce />
-        <NameEach />
         <Features />
         <MoreThanTraits />
         <Costs />

@@ -20,8 +20,8 @@ const FEATURES: Feature[] = [
     title: 'One Interface, Many Implementations',
     body: (
       <>
-        The two encoders above coexist because each one lives on its own provider type, and each
-        application names the one it uses.
+        The two encoders above coexist because each one lives on its own provider type, and each type
+        names the one it uses.
       </>
     ),
     to: '/docs/concepts/coherence',
