@@ -217,31 +217,32 @@ function WhyOnce(): ReactNode {
         </Heading>
         <div className={styles.prose}>
           <p>
-            The compiler rejects the second implementation for a good reason. Rust's trait system
-            finds implementations for you. When a generic implementation requires{' '}
-            <code>T: Display</code>, the compiler finds the <code>Display</code> implementation and
-            everything it needs in turn, without the caller naming any of it. That
-            search works only because every lookup finds the same answer, and the overlap and orphan
-            rules, together called coherence, make sure it does. So coherence is a guarantee Rust
-            gives you, not a defect.
+            Both encoders apply to <code>String</code>, so a call to <code>encode()</code> would
+            leave the compiler with a choice it cannot make. Normally, Rust resolves trait
+            dependencies for you: when an implementation requires <code>T: Display</code>, the
+            compiler finds the <code>Display</code> implementation and resolves its dependencies
+            in turn. That lookup needs an unambiguous answer. Rust's overlap and orphan rules
+            preserve this guarantee, known as coherence.
           </p>
           <p>
-            With those rules in place, a second implementation in plain Rust needs a workaround: a
-            newtype for each case, or a marker struct and a helper trait written by hand.{' '}
+            To keep both implementations in plain Rust, you need to give the compiler a way to
+            distinguish them, such as a newtype for each case or a marker struct with a helper trait.{' '}
             <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
             what they cost in practice.
           </p>
           <p>
-            CGP keeps the rules and moves the choice of implementation instead. Each implementation
-            gets its own provider type, owned by the crate that writes it, so neither the overlap
-            rule nor the orphan rule rejects it. Because each wired type then names exactly one
-            provider, every lookup still finds a single answer.
+            CGP gives each implementation a name through a <strong>provider</strong> type, such as{' '}
+            <code>EncodeAsText</code> or <code>EncodeAsBytes</code>. Each provider is a type of its
+            own, owned by the crate that writes it, so the providers can coexist under Rust's
+            overlap and orphan rules. Wiring then selects one provider for each type that uses the trait, so
+            the compiler still has an unambiguous answer.
           </p>
           <p>
-            The types wired above are data, though, so each of them gets one choice for the whole
-            program. To let each application choose, you wire a type you define to stand for the
-            application, which CGP calls a <strong>context</strong>. Because a context is your own
-            type, you can define as many as you need.{' '}
+            In the example above, the wired types are the data being encoded, so each gets one
+            choice for the whole program. To make that choice per application, you define a type
+            that represents the application and wire its providers. CGP calls this type a{' '}
+            <strong>context</strong>. You can define as many contexts as you need, each with its own
+            choices.{' '}
             <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
             shows an application and its test choosing different providers.
           </p>
@@ -259,8 +260,8 @@ function Features(): ReactNode {
           What that gives you
         </Heading>
         <p className={styles.lead}>
-          Those two moves, naming each implementation and letting each application choose, give CGP
-          its main features:
+          Choosing providers for each application lets you reuse implementations in different
+          combinations, which gives CGP its main features:
         </p>
         <FeatureCards />
         <p className={styles.sectionNote}>
@@ -279,8 +280,8 @@ const BREADTH: Breadth[] = [
     to: '/docs/concepts/abstract-types',
     body: (
       <>
-        A context chooses its own types, so an error or runtime type stops being a parameter that
-        every layer declares.
+        A context chooses types such as its error or runtime, so you do not have to declare them as
+        separate parameters at every layer.
       </>
     ),
   },
@@ -289,8 +290,7 @@ const BREADTH: Breadth[] = [
     to: '/docs/concepts/extensible-records',
     body: (
       <>
-        A struct or enum that opts in with a derive exposes its fields and variants to generic code
-        that builds and matches them.
+        Add a derive to a struct or enum to let generic code build and match its fields and variants.
       </>
     ),
   },
@@ -299,8 +299,7 @@ const BREADTH: Breadth[] = [
     to: '/docs/concepts/handlers',
     body: (
       <>
-        Small steps, synchronous or async, compose into a pipeline that you can change one step at a
-        time.
+        Combine synchronous or async steps into a pipeline, then change individual steps as needed.
       </>
     ),
   },
@@ -313,7 +312,10 @@ function MoreThanTraits(): ReactNode {
         <Heading as="h2" className={styles.sectionTitle}>
           More than trait implementations
         </Heading>
-        <p className={styles.lead}>The same mechanism also applies to types, data, and computation.</p>
+        <p className={styles.lead}>
+          Choosing implementations is the starting point. CGP also lets you choose the types they
+          work with, write generic code over data, and compose computations:
+        </p>
         <ul className={styles.tileGrid}>
           {BREADTH.map(({title, to, body}) => (
             <li key={title}>
@@ -359,8 +361,8 @@ const COSTS: Cost[] = [
     label: 'A young ecosystem',
     body: (
       <>
-        The ecosystem is small and community support is limited, so on a mission-critical project,
-        expect to investigate some problems on your own. The diagnostics tool,{' '}
+        CGP has a small ecosystem and limited community support. If you use it on a mission-critical
+        project, expect to investigate some problems on your own. Its diagnostics tool,{' '}
         <code>cargo-cgp</code>, is also an early release.
       </>
     ),
@@ -369,9 +371,9 @@ const COSTS: Cost[] = [
     label: 'Learning time',
     body: (
       <>
-        Learning the patterns takes time. CGP's <Link to="/docs/ai/skills">agent skill</Link> helps
-        an assistant with the vocabulary, the diagnostics, and the wiring, so these costs shrink,
-        though code the assistant writes still needs your review.
+        Learning the patterns takes time. If you work with an assistant, CGP's{' '}
+        <Link to="/docs/ai/skills">agent skill</Link> helps it with the vocabulary, diagnostics, and
+        wiring, reducing some of that work. You still need to review the code it writes.
       </>
     ),
   },
@@ -389,8 +391,8 @@ function Costs(): ReactNode {
               What it costs
             </Heading>
             <p className={styles.costLead}>
-              CGP adds the costs below, and for a trait with one implementation they buy nothing, so a
-              plain trait remains the right tool there.
+              If your trait needs only one implementation, a plain trait is the right tool.
+              Choosing between implementations with CGP adds declarations, wiring, and other costs:
             </p>
           </div>
           <div className={styles.prose}>
@@ -405,9 +407,10 @@ function Costs(): ReactNode {
               ))}
             </dl>
             <p className={styles.costAdvice}>
-              So try CGP first on a small part of a project whose implementation choices already
-              vary. <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows
-              when a plain trait is enough.
+              To see whether those costs are worthwhile, try CGP on a small part of a project
+              whose implementation choices already vary. If you are unsure where to start,{' '}
+              <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> explains
+              when a plain trait is enough and when providers help.
             </p>
           </div>
         </div>
@@ -427,7 +430,7 @@ const ROUTES: Route[] = [
     link: 'Quickstart',
     reason: (
       <>
-        Install CGP and run one program, then the{' '}
+        Install CGP and run a program, then follow the{' '}
         <Link to="/docs/tutorials/hello">Hello World tutorial</Link>.
       </>
     ),
@@ -438,7 +441,7 @@ const ROUTES: Route[] = [
     link: 'Bypassing coherence',
     reason: (
       <>
-        The argument in full, then{' '}
+        Explore why coherence matters, then see how CGP works in{' '}
         <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>.
       </>
     ),
@@ -449,7 +452,7 @@ const ROUTES: Route[] = [
     link: 'Modularity Hierarchy',
     reason: (
       <>
-        When a simpler tool is enough, and the{' '}
+        Learn when a simpler tool is enough, and explore{' '}
         <Link to="/docs/projects">projects built with CGP</Link>.
       </>
     ),
@@ -460,7 +463,8 @@ const ROUTES: Route[] = [
     link: 'Overview',
     reason: (
       <>
-        Every feature, then the <Link to="/docs/comparisons">comparisons</Link> and the{' '}
+        Take a tour of the features, compare CGP with{' '}
+        <Link to="/docs/comparisons">related approaches</Link>, or read the{' '}
         <Link to="/blog">blog</Link>.
       </>
     ),
