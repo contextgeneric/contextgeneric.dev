@@ -383,7 +383,7 @@ function Costs(): ReactNode {
         {/* The heading and its lead sit in a column beside the costs, as section 1's title does, so
             the list fills the panel's width at a readable line length. */}
         <div className={clsx(styles.costPanel, styles.costSplit)}>
-          <div>
+          <div className={styles.costIntro}>
             <Heading as="h2" id="costs" className={styles.sectionTitle}>
               What it costs
             </Heading>

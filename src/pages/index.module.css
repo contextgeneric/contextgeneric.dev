@@ -516,6 +516,13 @@ html[data-theme='dark'] .heroArtFrame {
   max-width: none;
 }
 
+/* The heading and its lead stay in view beside the costs while the reader scrolls through them, as
+   section 1's title does. */
+.costIntro {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1.5rem);
+}
+
 .costLead {
   font-size: 1.05rem;
   margin: 0;
@@ -733,7 +740,8 @@ html[data-theme='dark'] .heroArtFrame {
     gap: 0;
   }
 
-  .split > .sectionTitle {
+  .split > .sectionTitle,
+  .costIntro {
     position: static;
   }
 
