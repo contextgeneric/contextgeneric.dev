@@ -41,9 +41,9 @@ const FEATURES: Feature[] = [
     title: 'Type-Safe Wiring',
     body: (
       <>
-        A provider states what it needs, as <code>#[uses(Display)]</code> does above, and a{' '}
+        A provider states its needs, as <code>#[uses(Display)]</code> does above, and a{' '}
         <code>check_components!</code> assertion or a use of the component fails the build when a
-        context lacks it.
+        context lacks one.
       </>
     ),
     to: '/docs/comparisons/dependency-injection',
@@ -53,8 +53,8 @@ const FEATURES: Feature[] = [
     title: 'Abstract Over Every Dependency',
     body: (
       <>
-        Core logic names its error, runtime, and I/O types, each context supplies them, and the core
-        builds for <code>no_std</code> where the chosen implementations allow.
+        Core logic names abstract error, runtime, and I/O types, each context supplies concrete ones,
+        and the core builds for <code>no_std</code> where the chosen implementations allow.
       </>
     ),
     to: '/docs/concepts/modular-error-handling',

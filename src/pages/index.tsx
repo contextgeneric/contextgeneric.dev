@@ -235,8 +235,9 @@ function WhyOnce(): ReactNode {
           </p>
           <p>
             So without CGP, a second implementation needs a workaround: a newtype for each case, or a
-            marker struct and a helper trait written by hand. <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the
-            rules and what they cost in practice.
+            marker struct and a helper trait written by hand.{' '}
+            <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
+            what they cost in practice.
           </p>
         </div>
       </div>
