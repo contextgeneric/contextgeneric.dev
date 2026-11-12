@@ -521,29 +521,39 @@ html[data-theme='dark'] .heroArtFrame {
   margin: 0;
 }
 
-/* Each cost is a bold label and one sentence. */
-.costList {
-  margin: 0 0 1rem;
-  padding-left: 1.2rem;
+/* The costs read as a table: each row sets its label in a column of its own beside one statement,
+   with a rule between rows, so a reader scans the labels down the left edge. */
+.costTable {
+  margin: 0;
+  border-top: 1px solid var(--cgp-border);
 }
 
-.costList li {
-  margin-bottom: 0.6rem;
+.costRow {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: var(--space-block);
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--cgp-border);
 }
 
-.costList strong {
+.costRow dt {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: var(--ifm-heading-font-weight);
   color: var(--cgp-heading);
+  margin: 0;
+}
+
+.costRow dd {
+  margin: 0;
 }
 
 /* A command or crate name such as `cargo-cgp` would otherwise break at its hyphen. */
-.costList code {
+.costTable code {
   white-space: nowrap;
 }
 
 .costAdvice {
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--cgp-border);
+  margin: var(--space-block) 0 0;
   font-weight: 600;
 }
 
@@ -741,6 +751,12 @@ html[data-theme='dark'] .heroArtFrame {
 
   .costPanel {
     padding: 1.5rem 1.25rem;
+  }
+
+  /* On a phone the label sits above its statement. */
+  .costRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
   }
 
   .routeGrid {

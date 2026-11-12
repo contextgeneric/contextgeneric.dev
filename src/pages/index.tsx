@@ -330,19 +330,19 @@ function MoreThanTraits(): ReactNode {
 
 type Cost = {label: string; body: ReactNode};
 
-// The costs as labelled statements. The `cargo cgp check` sentence is the knowledge base's canonical
+// The costs as a two-column list of labels and statements. The `cargo cgp check` sentence is the knowledge base's canonical
 // qualification, copied word for word.
 const COSTS: Cost[] = [
   {
-    label: 'More declarations.',
+    label: 'More declarations',
     body: <>Components, providers, and wiring add code that a plain trait does not need.</>,
   },
   {
-    label: 'Compile-time work.',
+    label: 'Compile-time work',
     body: <>The macros and the type checking add work at compile time.</>,
   },
   {
-    label: 'Verbose raw errors.',
+    label: 'Verbose raw errors',
     body: (
       <>
         Raw wiring errors are long, but{' '}
@@ -355,7 +355,7 @@ const COSTS: Cost[] = [
     ),
   },
   {
-    label: 'A young ecosystem.',
+    label: 'A young ecosystem',
     body: (
       <>
         The ecosystem is small and community support is limited, so on a mission-critical project,
@@ -365,7 +365,7 @@ const COSTS: Cost[] = [
     ),
   },
   {
-    label: 'Learning time.',
+    label: 'Learning time',
     body: (
       <>
         Learning the patterns takes time. CGP's <Link to="/docs/ai/skills">agent skill</Link> helps
@@ -393,13 +393,16 @@ function Costs(): ReactNode {
             </p>
           </div>
           <div className={styles.prose}>
-            <ul className={styles.costList}>
+            {/* A description list rather than a table: each row pairs one label with one statement, and
+                the rows share no other columns. */}
+            <dl className={styles.costTable}>
               {COSTS.map(({label, body}) => (
-                <li key={label}>
-                  <strong>{label}</strong> {body}
-                </li>
+                <div key={label} className={styles.costRow}>
+                  <dt>{label}</dt>
+                  <dd>{body}</dd>
+                </div>
               ))}
-            </ul>
+            </dl>
             <p className={styles.costAdvice}>
               So try CGP first on a small part of a project whose implementation choices already
               vary. <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> shows
