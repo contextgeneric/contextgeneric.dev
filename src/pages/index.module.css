@@ -523,8 +523,20 @@ html[data-theme='dark'] .heroArtFrame {
   background: var(--cgp-surface);
 }
 
-.costPanel .prose {
-  max-width: 52em;
+.costSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.costSplit .prose {
+  max-width: none;
+}
+
+.costLead {
+  font-size: 1.05rem;
+  margin: 0;
 }
 
 /* Each cost is a bold label and one sentence. */
@@ -539,6 +551,11 @@ html[data-theme='dark'] .heroArtFrame {
 
 .costList strong {
   color: var(--cgp-heading);
+}
+
+/* A command or crate name such as `cargo-cgp` would otherwise break at its hyphen. */
+.costList code {
+  white-space: nowrap;
 }
 
 .costAdvice {
@@ -711,12 +728,17 @@ html[data-theme='dark'] .heroArtFrame {
   .codeColumns,
   .split,
   .sideBySide,
+  .costSplit,
   .tileGrid {
     grid-template-columns: minmax(0, 1fr);
   }
 
   .split {
     gap: 0;
+  }
+
+  .costSplit {
+    gap: 1rem;
   }
 
   .captionQuote {

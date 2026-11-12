@@ -418,15 +418,19 @@ function Costs(): ReactNode {
   return (
     <section className={styles.section}>
       <div className={styles.container}>
-        <div className={styles.costPanel}>
-          <Heading as="h2" id="costs" className={styles.sectionTitle}>
-            What it costs
-          </Heading>
-          <div className={styles.prose}>
-            <p>
+        {/* The heading and its lead sit in a column beside the costs, as section 1's title does, so
+            the list fills the panel's width at a readable line length. */}
+        <div className={clsx(styles.costPanel, styles.costSplit)}>
+          <div>
+            <Heading as="h2" id="costs" className={styles.sectionTitle}>
+              What it costs
+            </Heading>
+            <p className={styles.costLead}>
               For a trait with one implementation, a plain trait is the right tool, because CGP has
               these costs:
             </p>
+          </div>
+          <div className={styles.prose}>
             <ul className={styles.costList}>
               {COSTS.map(({label, body}) => (
                 <li key={label}>
