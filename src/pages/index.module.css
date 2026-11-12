@@ -8,10 +8,11 @@
 .page {
   --page-gutter: 1.5rem;
   /* One spacing scale for the page: the padding of each section band, the gap between blocks inside a
-     band, and the gap that ties a mark to the text it introduces. */
+     band, the gap between the parts of one group, and the gap that ties a mark to its text. */
   --space-section: 4rem;
   --space-block: 1.5rem;
-  --space-tight: 0.75rem;
+  --space-group: 1rem;
+  --space-tight: 0.5rem;
   /* Wide enough that the numbered rejected block, whose longest line is 70 characters, fits its
      window at 1440 px without scrolling. */
   --page-width: 1280px;
@@ -341,8 +342,8 @@ html[data-theme='dark'] .heroArtFrame {
 }
 
 /* The caption: its reason at body size, then its conclusion set large in the heading colour, under a
-   short rule in the link colour. The rule sits twice as close to the quote as to the reason, so it
-   reads as the quote's mark. */
+   short rule in the link colour. The rule sits closer to the quote than to the reason, so it reads as
+   the quote's mark rather than an underline of the reason. */
 .caption {
   max-width: calc(860px + 2 * var(--page-gutter));
   margin-top: 1.75rem;
@@ -352,7 +353,7 @@ html[data-theme='dark'] .heroArtFrame {
 .captionReason {
   font-size: 1.05rem;
   color: var(--cgp-text-muted);
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-group);
 }
 
 .captionQuote {
@@ -370,7 +371,7 @@ html[data-theme='dark'] .heroArtFrame {
   display: block;
   width: 3rem;
   height: 3px;
-  margin: 0 auto 0.5rem;
+  margin: 0 auto var(--space-tight);
   border-radius: 2px;
   background: var(--cgp-link);
 }
