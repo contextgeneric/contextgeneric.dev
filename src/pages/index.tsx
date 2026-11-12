@@ -218,15 +218,15 @@ function WhyOnce(): ReactNode {
         <div className={styles.prose}>
           <p>
             The compiler rejects the second implementation for a good reason. Rust's trait system
-            finds implementations for you: when a generic implementation requires{' '}
-            <code>T: Display</code>, the compiler finds the <code>Display</code> implementation, and
-            everything that implementation needs in turn, without the caller naming any of it. That
+            finds implementations for you. When a generic implementation requires{' '}
+            <code>T: Display</code>, the compiler finds the <code>Display</code> implementation and
+            everything it needs in turn, without the caller naming any of it. That
             search works only because every lookup finds the same answer, and the overlap and orphan
             rules, together called coherence, make sure it does. So coherence is a guarantee Rust
             gives you, not a defect.
           </p>
           <p>
-            Because the rules stay, a second implementation in plain Rust needs a workaround: a
+            With those rules in place, a second implementation in plain Rust needs a workaround: a
             newtype for each case, or a marker struct and a helper trait written by hand.{' '}
             <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
             what they cost in practice.
@@ -299,8 +299,8 @@ const BREADTH: Breadth[] = [
     to: '/docs/concepts/handlers',
     body: (
       <>
-        Small steps, synchronous or async, compose into a pipeline whose steps you can change one at
-        a time.
+        Small steps, synchronous or async, compose into a pipeline that you can change one step at a
+        time.
       </>
     ),
   },
@@ -313,7 +313,7 @@ function MoreThanTraits(): ReactNode {
         <Heading as="h2" className={styles.sectionTitle}>
           More than trait implementations
         </Heading>
-        <p className={styles.lead}>CGP applies the same mechanism to types, data, and computation.</p>
+        <p className={styles.lead}>The same mechanism also applies to types, data, and computation.</p>
         <ul className={styles.tileGrid}>
           {BREADTH.map(({title, to, body}) => (
             <li key={title}>
