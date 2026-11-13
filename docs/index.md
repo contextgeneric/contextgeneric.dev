@@ -25,11 +25,6 @@ Four words name the parts of that choice, and the rest of this documentation use
 - **[Wiring](/docs/reference/glossary#wiring):** the table on a context that selects a provider for
   each component, resolved at compile time.
 
-Because the trait that callers use stays an ordinary Rust trait, you can still implement it
-directly, and bring in providers and wiring only where interchangeable implementations or reuse
-make them worth having. [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits)
-shows how the two sides fit together.
-
 ## Start here
 
 If you want to write code, these pages take you from installing CGP to wiring and checking
