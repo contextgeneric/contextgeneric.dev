@@ -75,8 +75,8 @@ That is the whole program. CGP is installed and working in your project.
 
 ## Next
 
-The [Hello World tutorial](/docs/tutorials/hello) walks through the same program and then does the
-thing that makes it worth using: it runs `greet` unchanged on a second, different context.
+The [Hello World tutorial](/docs/tutorials/hello) walks through a program like this one and then
+shows what makes it worth using: it runs `greet` unchanged on a second, different context.
 
 ---
 

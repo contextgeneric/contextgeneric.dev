@@ -10,7 +10,8 @@ description: 'A tour of what Context-Generic Programming adds to Rust: each feat
 [Context-Generic Programming](/docs/) (CGP) is a language extension for Rust, with pluggable trait
 implementations at compile-time. This page walks through what that gives you, one feature at a
 time: each section names the problem, shows a short example, states where the feature stops, and
-links the page that explains it. Every example compiles against `cgp` 0.8.0. To run a program
+links the page that explains it. The examples are fragments of programs that compile against
+`cgp` 0.8.0, leaving out the imports and the definitions they do not need to show. To run a program
 first, start with the [Quickstart](/docs/quickstart).
 
 The five headline features follow one application that fetches users' profile pictures from object
@@ -23,10 +24,12 @@ how the code is arranged rather than what it does.
 ### One Interface, Many Implementations
 
 Several implementations of one interface can coexist, and each application chooses the one it uses.
-In plain Rust, two blanket implementations of a trait cannot overlap, so a program offering both
-needs a newtype or a hand-written dispatch for each case. CGP gives each implementation its own
-**provider** type, so the implementations never overlap, and each **context**, the type that stands
-for one application's choices, selects a provider for the **component**:
+In plain Rust, each application type can implement the trait itself, but then the S3 code belongs to
+that one type. To reuse it, you would write a blanket implementation for every type with an S3
+client, and another for every type with a Google Cloud client, and Rust rejects the pair because one
+type could have both. CGP gives each implementation its own **provider** type, so the
+implementations never overlap, and each **context**, the type that stands for one application's
+choices, selects a provider for the **component**:
 
 ```rust
 #[async_trait]
@@ -145,7 +148,8 @@ Wiring alone checks nothing: an entry compiles until the component is used or ch
 each context where you assemble it. The checks establish that the components fit together, not that
 the application is correct. The raw compiler error for the same mistake spells the field's name as
 a nested type, `Symbol<9, Chars<'b', …>>`. `cargo cgp check` leads with the root cause for the
-classes it recognizes, and the tool does not yet reshape every class. [Check traits](/docs/concepts/check-traits) explains the checks, the
+classes it recognizes, and the tool does not yet reshape every class.
+[Check traits](/docs/concepts/check-traits) explains the checks, the
 [checking tutorial](/docs/tutorials/area-calculation/checking) walks through a mis-wiring, and
 [Dependency injection](/docs/comparisons/dependency-injection) compares the wiring with a container.
 
@@ -181,10 +185,11 @@ A context then chooses the error type in one wiring entry, such as
 `ErrorTypeProviderComponent: UseType<anyhow::Error>`, beside the provider that converts each source
 error. Another context can choose its own error enum without touching this code, as long as it also
 supplies the conversions. The same arrangement works for a runtime or a storage backend, and it lets
-a core library stay `no_std` when the providers chosen for it are. A provider that needs an operating
-system still needs one, and async code may need attention to
-[`Send` bounds](/docs/concepts/send-bounds). [Modular error handling](/docs/concepts/modular-error-handling)
-and [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explain both halves.
+a core library stay `no_std` when the providers chosen for it are. A provider that needs an
+operating system still needs one, and async code may need attention to
+[`Send` bounds](/docs/concepts/send-bounds).
+[Modular error handling](/docs/concepts/modular-error-handling) and
+[Impl-side dependencies](/docs/concepts/impl-side-dependencies) explain both halves.
 
 ### Still Ordinary Rust
 
@@ -203,13 +208,14 @@ pub async fn get_user(
 }
 ```
 
-Any context with a `database` field gains `get_user`, without wiring or a trait implementation.
-Providers use familiar `impl` syntax, and the trait that callers use stays an ordinary trait: the
-hand-written implementation under *Zero-Cost Abstraction* is a valid way to implement it directly.
-So you can adopt CGP one component at a time. The cost is the provider model you learn and the
-wiring you maintain. [Implicit arguments](/docs/concepts/implicit-arguments) explains the field
-reads, and [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) shows how much of CGP a
-problem needs.
+`#[cgp_fn]` turns the function into a trait with a
+[blanket implementation](/docs/reference/glossary#blanket-implementation), so any context with a
+`PgPool` field named `database` gains `get_user`, without wiring. Providers use familiar `impl`
+syntax, and the trait that callers use stays an ordinary trait: the hand-written implementation
+under *Zero-Cost Abstraction* is a valid way to implement it directly. So you can adopt CGP one
+component at a time. The cost is the provider model you learn and the wiring you maintain.
+[Implicit arguments](/docs/concepts/implicit-arguments) explains the field reads, and
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) shows how much of CGP a problem needs.
 
 ## Beyond choosing implementations
 
@@ -218,9 +224,9 @@ over data, and composes small steps into larger operations.
 
 ### Abstract types
 
-A context can choose a type, such as its error type, so that code passing it along does not carry
-it as a generic parameter. In plain Rust, every function that forwards a fallible call names the
-error type as a parameter of its own:
+A context can choose a type, such as its error type, that every trait and function using it then
+shares. When the error type is a generic parameter, every function that forwards a fallible call
+carries it as a parameter of its own:
 
 ```rust
 pub fn load_profile<Context, Error>(context: &Context, user: &str) -> Result<String, Error>
@@ -242,7 +248,10 @@ pub fn load_profile(&self, user: &str) -> Result<String, Error> {
 }
 ```
 
-These are Rust associated types, so their guarantees come from the bounds you declare, and a type
+A plain associated type already removes the parameter from one trait. CGP adds one type, chosen in
+the context's wiring, that every trait importing `HasErrorType` agrees on, so a loader and a storage
+fetcher on the same context return the same error. These are Rust associated types, so their
+guarantees come from the bounds you declare, and a type
 that appears in an interface, such as a returned error, still belongs in that interface. For a
 function with one or two independent type parameters, ordinary generics may be clearer.
 [Abstract types](/docs/concepts/abstract-types) explains the mechanism.
@@ -363,11 +372,11 @@ answer it:
 | Problem | On this page | Explained in |
 | --- | --- | --- |
 | Rust rejects two implementations of a trait for the same type | [One Interface, Many Implementations](#one-interface-many-implementations) | [Bypassing coherence](/docs/concepts/coherence) |
-| A trait for a type you do not own needs a newtype | [One Interface, Many Implementations](#one-interface-many-implementations) | [Bypassing coherence](/docs/concepts/coherence) |
+| A trait for a type you do not own needs a newtype | Not shown here | [Bypassing coherence](/docs/concepts/coherence) |
 | Tests need a different implementation from production | [One Interface, Many Implementations](#one-interface-many-implementations) | [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) |
 | Feature flags already select between backends | [One Interface, Many Implementations](#one-interface-many-implementations) | [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) |
 | Changing the error type or runtime touches every layer | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Modular error handling](/docs/concepts/modular-error-handling) |
-| A trait has grown until no implementation needs all of it | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
+| A trait has grown until no implementation needs all of it | Not shown here | [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) |
 | An implementation's dependencies leak into the public interface | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
 | Generic parameters repeat through every layer | [Abstract types](#abstract-types) | [Abstract types](/docs/concepts/abstract-types) |
 | Generic code needs to work over any struct or enum | [Extensible records and variants](#extensible-records-and-variants) | [Extensible records](/docs/concepts/extensible-records) |
@@ -378,9 +387,9 @@ answer it:
 For a trait with one implementation, a plain trait is the right tool. CGP adds declarations and
 wiring that a plain trait does not need, compile-time work for its macros and type checking, and
 long raw errors, though `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool does not yet reshape every class. Learning the
-patterns takes time; if you work with an assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the
-vocabulary, the diagnostics, and the wiring, and you still review what it writes. The
+and the tool does not yet reshape every class. Learning the patterns takes time; if you work with an
+assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, the diagnostics, and
+the wiring, and you still review what it writes. The
 [front page's costs](/#costs) state the project's maturity, and
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) explains when a plain trait is enough
 and when providers help.
@@ -389,7 +398,8 @@ and when providers help.
 
 Each of these pages continues from a different part of this tour:
 
-- **Run code:** the [Quickstart](/docs/quickstart), then the [Hello World tutorial](/docs/tutorials/hello).
+- **Run code:** the [Quickstart](/docs/quickstart), then the
+  [Hello World tutorial](/docs/tutorials/hello).
 - **Understand the mechanism:** the [Concepts](/docs/concepts), starting with
   [Bypassing coherence](/docs/concepts/coherence).
 - **Compare with what you know:** the [Comparisons](/docs/comparisons).
@@ -398,4 +408,5 @@ Each of these pages continues from a different part of this tour:
 ---
 
 *An AI agent wrote this page using the CGP knowledge base, and its examples were verified by
-compiling them. See [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
+compiling them. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

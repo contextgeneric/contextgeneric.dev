@@ -20,8 +20,8 @@ uses.
 
 Every page in this documentation uses four words for the parts of that arrangement:
 
-- **[Context](/docs/reference/glossary#context):** a type that stands for one set of choices, such as
-  an application, and holds the data its implementations need.
+- **[Context](/docs/reference/glossary#context):** a type that stands for one set of choices, such
+  as an application, and holds the data its implementations need.
 - **[Component](/docs/reference/glossary#component):** an interface whose implementation a context
   chooses.
 - **[Provider](/docs/reference/glossary#provider):** a named implementation of a component.
@@ -38,8 +38,8 @@ works.
 These take you from installing CGP to wiring and checking your own components:
 
 1. [Quickstart](/docs/quickstart): install CGP and run a first program in a few minutes.
-2. [Hello World](/docs/tutorials/hello): a program like the Quickstart's, then the idea that makes it
-   worth using.
+2. [Hello World](/docs/tutorials/hello): a program like the Quickstart's, then the idea that makes
+   it worth using.
 3. [Area calculation](/docs/tutorials/area-calculation): a series that grows ordinary Rust functions
    into components and providers, and ends with how to check wiring and read its errors.
 
