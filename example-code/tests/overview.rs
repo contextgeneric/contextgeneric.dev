@@ -1,8 +1,8 @@
 //! Code from `docs/overview.md`, the feature tour.
 //!
 //! The Overview is a standalone page rather than a section, so it gets its own test binary, as the
-//! Quickstart and the front page do. One module per heading, in the page's order. The headline
-//! features run the profile-picture scenario under the names the `cgp` README uses; the clients and
+//! Quickstart and the front page do. One module per key feature, in the page's order. The features
+//! run the profile-picture scenario under the names the `cgp` README uses; the clients and
 //! the pool are stand-ins defined below, because the page shows only their types.
 
 /// Stand-in for the AWS SDK's S3 client, which the page names as `aws_sdk_s3::Client`.

@@ -109,11 +109,11 @@ impl CanFetchStorageObject for App {
 ```
 
 The trait that providers implement takes the context as a type parameter, here
-`StorageObjectFetcher<App>`, which is how one provider can serve many contexts. Nothing sits
-between the call and the provider: no runtime registry, no reflection, and no virtual
-method table. The provider itself is a type that is never instantiated. Its own work, such as the
-request to S3, still runs, and generic code can add compile time and code size. If you want to see
-what the macros generate, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints it, and
+`StorageObjectFetcher<App>`, which is how one provider can serve many contexts. Nothing sits between
+the call and the provider: no runtime registry, no reflection, and no virtual method table. The
+provider itself is a type that is never instantiated. Its own work, such as the request to S3, still
+runs, and generic code can add compile time and code size. If you want to see what the macros
+generate, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints it, and
 [Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this approach with `dyn Trait`.
 
 ### Type-Safe Wiring
@@ -199,10 +199,10 @@ impl StorageObjectFetcher {
 }
 ```
 
-This definition of `CanFetchStorageObject` replaces the earlier one. `#[use_type(HasErrorType.Error)]`
-lets the trait and the provider write `Error` for whatever error type the context chooses.
-`#[uses(CanRaiseError<std::io::Error>)]` asks the context to be able to turn a file error into that
-type, which `Self::raise_error` then does.
+This definition of `CanFetchStorageObject` replaces the earlier one. Its `#[use_type]` attribute
+lets the trait and the provider write `Error` for whatever error type the context chooses. The
+provider's `#[uses]` attribute asks the context to be able to turn a file error into that type,
+which `Self::raise_error` then does.
 
 The S3 and Google Cloud providers change in the same way: each returns `Error` and declares, with
 `#[uses]`, the conversion it needs from its client's error. A context then chooses its error type in
@@ -213,10 +213,10 @@ own without touching this code, as long as it supplies those conversions as well
 The same arrangement works for other dependencies, such as an async runtime, and it lets a core
 library stay `no_std` as long as the providers chosen for it are `no_std` too. A provider that reads
 files, like this one, still needs `std`, and its blocking read suits a test context, where an
-application would use an async file API. [Modular error handling](/docs/concepts/modular-error-handling)
-explains how a context chooses its error type, and
-[Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains how a provider keeps its
-needs out of the interface.
+application would use an async file API.
+[Modular error handling](/docs/concepts/modular-error-handling) explains how a context chooses its
+error type, and [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains how a
+provider keeps its needs out of the interface.
 
 ### Still Ordinary Rust
 
@@ -296,11 +296,11 @@ signatures. The table below starts from the problem and links the Concepts page 
 All of this comes at a cost, so for a trait with only one implementation, a plain trait is the right
 tool. CGP adds declarations and wiring that a plain trait does not need, compile-time work for its
 macros and type checking, and long raw errors, which [*Type-Safe Wiring*](#type-safe-wiring)
-describes along with the tool that helps. Learning the patterns also takes time. If you work with an assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the
-vocabulary, the diagnostics, and the wiring, although you still need to review what it writes. The
-[front page's costs](/#costs) state the project's maturity, and
-[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) explains when a plain trait is enough
-and when providers start to help.
+describes along with the tool that helps. Learning the patterns also takes time. If you work with an
+assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, the diagnostics, and
+the wiring, although you still need to review what it writes. The [front page's costs](/#costs)
+state the project's maturity, and [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
+explains when a plain trait is enough and when providers start to help.
 
 ## Where to go next
 
