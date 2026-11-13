@@ -87,7 +87,7 @@ List(List([Ident(Ident("*")), Literal(Literal(2)), List(List([Ident(Ident("+")),
 ## Two entries, one provider
 
 The context's module,
-[`add_mult_binary_op.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult_binary_op.rs),
+[`add_mult_binary_op.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_binary_op.rs),
 has its own copy of `add_mult`'s enums, its context `Interpreter`, and its wrappers. Its wiring
 differs in two lines, the conversion entries for the binary operators:
 

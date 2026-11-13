@@ -73,7 +73,7 @@ pub trait CanFetchStorageObject {
 
 Placing it after `#[cgp_component]` also works, because the component macro copies an attribute it does
 not recognize onto each trait it generates, where `#[async_trait]` then rewrites it. The async components
-of the [`transfer`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/transfer/src/interfaces/finance.rs)
+of the [`transfer`](https://github.com/contextgeneric/cgp-examples/blob/main/transfer/src/interfaces/finance.rs)
 example are written that way.
 
 With [`#[cgp_fn]`](./cgp_fn.md), which *generates* the trait from a function, put it **below** `#[cgp_fn]` on

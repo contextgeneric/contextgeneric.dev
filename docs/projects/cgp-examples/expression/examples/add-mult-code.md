@@ -87,7 +87,7 @@ List(List([Ident(Ident("*")), Literal(Literal(2)), List(List([Ident(Ident("+")),
 ## The marker is part of the key
 
 The context's module,
-[`add_mult_code.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult_code.rs),
+[`add_mult_code.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_code.rs),
 opens one component, and every entry names both the operation and the input:
 
 ```rust

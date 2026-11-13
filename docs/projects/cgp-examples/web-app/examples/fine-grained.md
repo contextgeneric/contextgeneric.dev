@@ -55,7 +55,7 @@ The check passes. For this stage, that means `ProductionApp` satisfies all nine 
 ## One component per operation
 
 The module,
-[`fine_grained.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/fine_grained.rs),
+[`fine_grained.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/fine_grained.rs),
 gives each operation a component of its own, with the one method the manager had:
 
 ```rust

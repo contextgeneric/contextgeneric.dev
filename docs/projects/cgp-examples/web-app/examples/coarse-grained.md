@@ -53,7 +53,7 @@ four components, including everything those providers need.
 ## One component per domain
 
 The module,
-[`coarse_grained.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/coarse_grained.rs),
+[`coarse_grained.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/coarse_grained.rs),
 defines a manager trait for each domain, and a small trait for each content filter:
 
 ```rust

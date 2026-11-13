@@ -55,7 +55,7 @@ components.
 ## Each component gets a path
 
 The module,
-[`namespace.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/namespace.rs),
+[`namespace.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/namespace.rs),
 declares the same nine components as the previous stage, each with a
 [`#[prefix]`](/docs/reference/attributes/prefix) that registers it under a path:
 

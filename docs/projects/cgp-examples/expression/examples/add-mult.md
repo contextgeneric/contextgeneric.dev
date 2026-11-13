@@ -81,7 +81,7 @@ the same three expressions to Lisp, so `2 * (3 + 4)` becomes the tree for `(* 2 
 ## The language is an enum of operator structs
 
 The context's module,
-[`add_mult.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult.rs),
+[`add_mult.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult.rs),
 defines the language and the Lisp output as two enums:
 
 ```rust

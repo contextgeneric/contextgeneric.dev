@@ -60,7 +60,7 @@ It evaluates `2 + 3` to `5`, `2 * 3` to `6`, `2 - 3` to `-1`, and `-2 * (3 + 4)`
 ## A new enum, from old parts and new ones
 
 The context's module,
-[`add_mult_neg.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/expression/src/contexts/add_mult_neg.rs),
+[`add_mult_neg.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_neg.rs),
 defines the larger language as a new enum:
 
 ```rust

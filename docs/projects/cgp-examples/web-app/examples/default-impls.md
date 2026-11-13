@@ -54,7 +54,7 @@ satisfies all nine components.
 ## A namespace of defaults
 
 The module,
-[`default_impls.rs`](https://github.com/contextgeneric/cgp-examples/blob/v0.8.0/web-app/src/default_impls.rs),
+[`default_impls.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/default_impls.rs),
 keeps the previous stage's components and paths, and declares a namespace of its own that inherits
 `DefaultNamespace`:
 
