@@ -62,7 +62,7 @@ export const lightTheme: PrismTheme = {
 export const darkTheme: PrismTheme = {
   plain: {
     color: '#ece3df',
-    backgroundColor: '#211918',
+    backgroundColor: '#191515',
   },
   styles: [
     {

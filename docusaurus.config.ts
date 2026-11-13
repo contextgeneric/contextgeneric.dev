@@ -47,7 +47,7 @@ const config: Config = {
     },
     {
       tagName: 'meta',
-      attributes: {name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#161110'},
+      attributes: {name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0e0c0c'},
     },
   ],
 

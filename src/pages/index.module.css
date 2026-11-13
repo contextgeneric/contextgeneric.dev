@@ -40,7 +40,7 @@
 
 html[data-theme='dark'] .hero {
   background-image:
-    radial-gradient(circle at 82% 45%, color-mix(in srgb, var(--cgp-red-300) 22%, transparent) 0, transparent 34%),
+    radial-gradient(circle at 82% 45%, color-mix(in srgb, var(--cgp-red-300) 11%, transparent) 0, transparent 34%),
     radial-gradient(color-mix(in srgb, var(--cgp-text) 8%, transparent) 1px, transparent 1px);
 }
 
