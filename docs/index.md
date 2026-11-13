@@ -8,17 +8,19 @@ description: 'What Context-Generic Programming is, the four words every page of 
 # Introduction
 
 Context-Generic Programming (CGP) is a language extension for Rust, with pluggable trait
-implementations at compile-time. You write several implementations of one interface, and each
-application chooses the one it uses. CGP is a library on stable Rust that you adopt one trait at a
-time: its macros generate ordinary traits and implementations, and the compiler resolves each choice
-into a direct call.
+implementations at compile-time. It lets you write several implementations of one interface and
+have each application choose the one it uses. That may sound like a new language to learn, but CGP
+is an ordinary library on stable Rust: its macros generate plain traits and implementations, the
+compiler turns each choice into a direct call, and you can adopt it one trait at a time.
 
-For example, an application can fetch stored files from Amazon S3, a second deployment of it from
-Google Cloud Storage, and its tests from a local folder. All three use the same interface, so the
-code that asks for a file stays the same, and each application type states which implementation it
-uses.
+A small example shows what that choice looks like. Suppose an application fetches stored files from
+Amazon S3, a second deployment of it fetches them from Google Cloud Storage, and its tests read them
+from a local folder. All three go through the same interface, so the code that asks for a file stays
+the same. The only difference between them is one line in each application type, which names the
+implementation that application uses.
 
-Every page in this documentation uses four words for the parts of that arrangement:
+Four words describe the parts of that arrangement, and the rest of this documentation uses them
+throughout:
 
 - **[Context](/docs/reference/glossary#context):** a type that stands for one set of choices, such
   as an application, and holds the data its implementations need.
@@ -28,14 +30,15 @@ Every page in this documentation uses four words for the parts of that arrangeme
 - **[Wiring](/docs/reference/glossary#wiring):** the table on a context that selects a provider for
   each component, resolved at compile time.
 
-The trait that callers use stays an ordinary Rust trait, so you can still implement it directly and
-add providers and wiring only where interchangeable implementations or reuse justify them.
-[Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) shows how the split
-works.
+Because the trait that callers use stays an ordinary Rust trait, you can still implement it
+directly, and bring in providers and wiring only where interchangeable implementations or reuse
+make them worth having. [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits)
+shows how the two sides fit together.
 
 ## Start here
 
-These take you from installing CGP to wiring and checking your own components:
+If you want to write code, these pages take you from installing CGP to wiring and checking
+components of your own, in this order:
 
 1. [Quickstart](/docs/quickstart): install CGP and run a first program in a few minutes.
 2. [Hello World](/docs/tutorials/hello): a program like the Quickstart's, then the idea that makes
@@ -45,7 +48,8 @@ These take you from installing CGP to wiring and checking your own components:
 
 ## Find what you need
 
-Each line names a question and the part of the documentation that answers it:
+If you arrived with a particular question, each line below names it and the part of the
+documentation that answers it:
 
 - **What can CGP do, feature by feature?** The [Overview](/docs/overview).
 - **Why does CGP work this way?** [Bypassing coherence](/docs/concepts/coherence) and
@@ -63,8 +67,9 @@ Each line names a question and the part of the documentation that answers it:
 - **Where are the crates, talks, and community?** [Resources](/docs/resources).
 - **How can I help?** [Contribute](/docs/contribute).
 
-The [blog](/blog) records releases, design discussions, and talks; older posts describe the library
-as it was when they were published.
+The [blog](/blog) is a record of releases, design discussions, and talks. Its older posts describe
+the library as it was when they were published, so the pages above are the better guide to CGP as
+it is now.
 
 ---
 

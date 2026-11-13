@@ -9,16 +9,17 @@ description: 'Install Context-Generic Programming and get a working Rust program
 
 [Context-Generic Programming](/docs/) (CGP) enables pluggable trait implementations in Rust, and
 this page gets a program that uses it compiling and running on your machine. It explains nothing
-along the way; the [Hello World tutorial](/docs/tutorials/hello) teaches the idea behind the code
-below.
+along the way, because the [Hello World tutorial](/docs/tutorials/hello) does that next, with a
+program much like this one.
 
-You need Rust 1.89 or newer on the stable toolchain, and nothing else. Check with `rustc --version`
-first: on an older toolchain the build fails, often because `cargo add` picks an old release of
-`cgp` that lacks what this program uses. `rustup update stable` brings the toolchain up to date.
+The only thing you need is Rust 1.89 or newer on the stable toolchain, so check your version with
+`rustc --version` before you start. The version matters because on an older toolchain `cargo add`
+often picks an old release of `cgp`, one that lacks what this program uses, and the build fails.
+`rustup update stable` brings the toolchain up to date.
 
 ## Install
 
-Create a project and add the crate:
+Create a project and add the crate to it:
 
 ```bash
 cargo new hello-cgp
@@ -26,7 +27,7 @@ cd hello-cgp
 cargo add cgp
 ```
 
-That writes the dependency into your `Cargo.toml`:
+`cargo add` writes the dependency into your `Cargo.toml`:
 
 ```toml title="Cargo.toml"
 [dependencies]
@@ -61,22 +62,24 @@ fn main() {
 
 ## Run it
 
+Run the program with Cargo:
+
 ```bash
 cargo run
 ```
 
-You should see:
+It should print:
 
 ```text
 Hello, World!
 ```
 
-That is the whole program. CGP is installed and working in your project.
+If it does, CGP is installed and working in your project.
 
 ## Next
 
-The [Hello World tutorial](/docs/tutorials/hello) walks through a program like this one and then
-shows what makes it worth using: it runs `greet` unchanged on a second, different context.
+The [Hello World tutorial](/docs/tutorials/hello) walks through a program like this one, then shows
+what makes it worth using: the same `greet` runs unchanged on a second, different context.
 
 ---
 
