@@ -96,16 +96,16 @@ impl CanFetchStorageObject for App {
 ```
 
 There is no runtime registry, reflection, or virtual method table between the call and the
-provider, and a provider is a type that is never instantiated. The provider's own work still costs
-what it costs, and generic code can add compile time and code size.
+provider, and a provider is a type that is never instantiated. The provider's own work, such as the
+request to S3, still runs, and generic code can add compile time and code size.
 [`cargo cgp expand`](/docs/cargo-cgp/expand) prints what the macros actually generate, and
 [Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this with `dyn Trait`.
 
 ### Type-Safe Wiring
 
-A context that cannot satisfy its provider fails to build. `FetchS3Object` reads a `bucket_id`
-field, so wiring it on a context without one, and checking that wiring with `check_components!`, is
-a compile error:
+A context that cannot satisfy its provider fails to build once its wiring is checked.
+`FetchS3Object` reads a `bucket_id` field, so wiring it on a context without one, and checking that
+wiring with `check_components!`, is a compile error:
 
 ```rust
 #[derive(HasField)]
@@ -184,9 +184,9 @@ impl StorageObjectFetcher {
 A context then chooses the error type in one wiring entry, such as
 `ErrorTypeProviderComponent: UseType<anyhow::Error>`, beside the provider that converts each source
 error. Another context can choose its own error enum without touching this code, as long as it also
-supplies the conversions. The same arrangement works for a runtime or a storage backend, and it lets
-a core library stay `no_std` when the providers chosen for it are. A provider that needs an
-operating system still needs one, and async code may need attention to
+supplies the conversions. The same arrangement works for other dependencies, such as an async
+runtime, and it lets a core library stay `no_std` when the providers chosen for it are. A provider
+that reads files, like this one, still needs `std`, and async code may need attention to
 [`Send` bounds](/docs/concepts/send-bounds).
 [Modular error handling](/docs/concepts/modular-error-handling) and
 [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explain both halves.
@@ -251,9 +251,9 @@ pub fn load_profile(&self, user: &str) -> Result<String, Error> {
 A plain associated type already removes the parameter from one trait. CGP adds one type, chosen in
 the context's wiring, that every trait importing `HasErrorType` agrees on, so a loader and a storage
 fetcher on the same context return the same error. These are Rust associated types, so their
-guarantees come from the bounds you declare, and a type
-that appears in an interface, such as a returned error, still belongs in that interface. For a
-function with one or two independent type parameters, ordinary generics may be clearer.
+guarantees come from the bounds you declare, and a type that appears in an interface, such as a
+returned error, still belongs in that interface. For a function with one or two independent type
+parameters, ordinary generics may be clearer.
 [Abstract types](/docs/concepts/abstract-types) explains the mechanism.
 
 ### Extensible records and variants
@@ -307,6 +307,7 @@ delegate_components! {
 }
 ```
 
+`#[cgp_computer]` turns each function into a provider named after it, `Double` and `Increment`.
 Computing on `App` with the input 5 returns 11. Ordinary function calls are simpler when a sequence
 never needs interchangeable steps. [Handlers](/docs/concepts/handlers) covers the family and its
 combinators.
@@ -314,8 +315,9 @@ combinators.
 ### Namespaces
 
 A namespace is a wiring table that several contexts share, so each context lists only what differs.
-Components register under a path in the namespace, a namespace binds the paths every context agrees
-on, and a context joins it and fills the rest:
+Each component registers under a path, such as `@app.GreeterComponent` in `AppNamespace`, with a
+`#[prefix]` attribute. `AppDefaults` extends that namespace with the bindings every context shares,
+and a context joins it and fills in the rest:
 
 ```rust
 cgp_namespace! {
@@ -386,8 +388,8 @@ is one, and the Concepts page that explains it:
 
 For a trait with one implementation, a plain trait is the right tool. CGP adds declarations and
 wiring that a plain trait does not need, compile-time work for its macros and type checking, and
-long raw errors, though `cargo cgp check` leads with the root cause for the classes it recognizes,
-and the tool does not yet reshape every class. Learning the patterns takes time; if you work with an
+long raw errors. `cargo cgp check` leads with the root cause for the classes it recognizes, and the
+tool does not yet reshape every class. Learning the patterns takes time; if you work with an
 assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, the diagnostics, and
 the wiring, and you still review what it writes. The
 [front page's costs](/#costs) state the project's maturity, and

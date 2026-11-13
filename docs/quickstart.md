@@ -13,7 +13,7 @@ along the way; the [Hello World tutorial](/docs/tutorials/hello) teaches the ide
 below.
 
 You need Rust 1.89 or newer on the stable toolchain, and nothing else. Check with `rustc --version`
-first: on an older toolchain the build fails, often because `cargo add` picked an old release of
+first: on an older toolchain the build fails, often because `cargo add` picks an old release of
 `cgp` that lacks what this program uses. `rustup update stable` brings the toolchain up to date.
 
 ## Install

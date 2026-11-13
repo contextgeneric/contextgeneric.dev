@@ -15,7 +15,7 @@ into a direct call.
 
 For example, an application can fetch stored files from Amazon S3, a second deployment of it from
 Google Cloud Storage, and its tests from a local folder. All three use the same interface, so the
-code that fetches a file stays the same, and each application type states which implementation it
+code that asks for a file stays the same, and each application type states which implementation it
 uses.
 
 Every page in this documentation uses four words for the parts of that arrangement:
