@@ -191,14 +191,14 @@ impl StorageObjectFetcher {
 
 The S3 and Google Cloud providers change in the same way: each returns `Error` and declares, with
 `#[uses]`, the conversion it needs from its client's error. A context then chooses its error type in
-a single wiring entry, such as
-`ErrorTypeProviderComponent: UseType<anyhow::Error>`, next to the providers that convert each source
-error into it. Another context can choose an error enum of its own without touching this code, as
-long as it supplies those conversions as well. The same arrangement works for other dependencies,
-such as an async runtime, and it lets a core library stay `no_std` as long as the providers chosen
-for it are `no_std` too. A provider that reads files, like this one, still needs `std`, and its
-blocking read suits a test context, where an application would use an async file API. Async code may
-also need attention to [`Send` bounds](/docs/concepts/send-bounds).
+a single wiring entry, such as `ErrorTypeProviderComponent: UseType<anyhow::Error>`, next to the
+providers that convert each source error into it. Another context can choose an error enum of its
+own without touching this code, as long as it supplies those conversions as well. The same
+arrangement works for other dependencies, such as an async runtime, and it lets a core library stay
+`no_std` as long as the providers chosen for it are `no_std` too. A provider that reads files, like
+this one, still needs `std`, and its blocking read suits a test context, where an application would
+use an async file API. Async code may also need attention to
+[`Send` bounds](/docs/concepts/send-bounds).
 [Modular error handling](/docs/concepts/modular-error-handling) and
 [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explain the two halves of this
 arrangement.
@@ -239,8 +239,8 @@ steps can be composed into larger operations.
 
 ### Abstract types
 
-The error type from earlier is one case of a broader problem. In plain Rust, each trait that can fail
-usually declares its own associated error type. A function that uses two such traits must then
+The error type from earlier is one case of a broader problem. In plain Rust, a trait that can fail
+often declares its own associated error type. A function that uses two such traits must then
 either convert between their errors or state that they are the same type, and that bound travels
 with it to every generic caller:
 
@@ -368,7 +368,7 @@ covers the family and its combinators.
 
 ### Namespaces
 
-As an application grows, so does its wiring, and several contexts often repeat most of the same
+As an application grows, so does its wiring, and its contexts can end up repeating most of the same
 entries. A namespace gives them a wiring table they share, so each context lists only what differs.
 Each component registers under a path, such as `@app.GreeterComponent` in `AppNamespace`, with a
 `#[prefix]` attribute. `AppDefaults` then extends that namespace with the bindings every context
@@ -437,7 +437,7 @@ it, where there is one, along with the Concepts page that explains it:
 | Changing the error type or runtime touches every layer | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Modular error handling](/docs/concepts/modular-error-handling) |
 | A trait has grown until no implementation needs all of it | Not shown here | [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) |
 | An implementation's dependencies leak into the public interface | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
-| Generic parameters repeat through every layer | [Abstract types](#abstract-types) | [Abstract types](/docs/concepts/abstract-types) |
+| Generic parameters and their bounds repeat through every layer | [Abstract types](#abstract-types) | [Abstract types](/docs/concepts/abstract-types) |
 | Generic code needs to work over any struct or enum | [Extensible records and variants](#extensible-records-and-variants) | [Extensible records](/docs/concepts/extensible-records) |
 | A wiring error buries its cause in generated types | [Type-Safe Wiring](#type-safe-wiring) | [Check traits](/docs/concepts/check-traits) |
 

@@ -16,8 +16,8 @@ compiler turns each choice into a direct call, and you can adopt it one trait at
 A small example shows what that choice looks like. Suppose an application fetches stored files from
 Amazon S3, a second deployment of it fetches them from Google Cloud Storage, and its tests read them
 from a local folder. All three go through the same interface, so the code that asks for a file stays
-the same. The only difference between them is one line in each application type, which names the
-implementation that application uses.
+the same. Each application type differs only in the data it holds, such as its storage client, and
+in one line that names the implementation it uses.
 
 Four words describe the parts of that arrangement, and the rest of this documentation uses them
 throughout:
