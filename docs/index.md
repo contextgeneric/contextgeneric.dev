@@ -2,7 +2,7 @@
 title: 'Introduction: pluggable trait implementations'
 sidebar_label: 'Introduction'
 sidebar_position: 1
-description: 'What Context-Generic Programming is, the four words every page of its documentation uses, and where to go for each question you bring.'
+description: 'What Context-Generic Programming is, the four words the rest of its documentation builds on, and where to go for each question you bring.'
 ---
 
 # Introduction

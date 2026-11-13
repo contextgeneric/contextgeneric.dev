@@ -136,15 +136,11 @@ check_components! {
 ```
 
 [cargo-cgp](/docs/cargo-cgp), CGP's error toolchain, reports the missing field first, followed by
-the chain of requirements that led to it:
+the chain of requirements that led to it. Here is its report, without the source excerpt that points
+at the check:
 
 ```text
 error[E0277]: [CGP-E001] missing field `bucket_id` on `App`
-  --> src/lib.rs:48:9
-   |
-48 |         StorageObjectFetcherComponent,
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
    = note: root cause: [CGP-E110] missing field `bucket_id` on `App`
            this is required through the dependency chain:
              [CGP-E101] consumer trait impl `CanFetchStorageObject` for context `App`
@@ -193,13 +189,16 @@ impl StorageObjectFetcher {
 }
 ```
 
-A context then chooses its error type in a single wiring entry, such as
+The S3 and Google Cloud providers change in the same way: each returns `Error` and declares, with
+`#[uses]`, the conversion it needs from its client's error. A context then chooses its error type in
+a single wiring entry, such as
 `ErrorTypeProviderComponent: UseType<anyhow::Error>`, next to the providers that convert each source
 error into it. Another context can choose an error enum of its own without touching this code, as
 long as it supplies those conversions as well. The same arrangement works for other dependencies,
 such as an async runtime, and it lets a core library stay `no_std` as long as the providers chosen
-for it are `no_std` too. A provider that reads files, like this one, still needs `std`, and async
-code may need attention to [`Send` bounds](/docs/concepts/send-bounds).
+for it are `no_std` too. A provider that reads files, like this one, still needs `std`, and its
+blocking read suits a test context, where an application would use an async file API. Async code may
+also need attention to [`Send` bounds](/docs/concepts/send-bounds).
 [Modular error handling](/docs/concepts/modular-error-handling) and
 [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explain the two halves of this
 arrangement.
@@ -240,37 +239,52 @@ steps can be composed into larger operations.
 
 ### Abstract types
 
-The error type from earlier is one case of a broader problem. When a type such as an error is a
-generic parameter, every function that forwards a fallible call has to carry it as a parameter of
-its own:
+The error type from earlier is one case of a broader problem. In plain Rust, each trait that can fail
+usually declares its own associated error type. A function that uses two such traits must then
+either convert between their errors or state that they are the same type, and that bound travels
+with it to every generic caller:
 
 ```rust
-pub fn load_profile<Context, Error>(context: &Context, user: &str) -> Result<String, Error>
+pub trait Load {
+    type Error;
+    fn load(&self, path: &str) -> Result<String, Self::Error>;
+}
+
+pub trait Save {
+    type Error;
+    fn save(&self, path: &str, contents: &str) -> Result<(), Self::Error>;
+}
+
+pub fn back_up_profile<Context>(
+    context: &Context,
+    user: &str,
+) -> Result<(), <Context as Load>::Error>
 where
-    Context: Load<Error>,
+    Context: Load + Save<Error = <Context as Load>::Error>,
 {
-    context.load(&format!("profiles/{user}"))
+    let profile = context.load(&format!("profiles/{user}"))?;
+    context.save(&format!("backups/{user}"), &profile)
 }
 ```
 
-With CGP, the function imports the context's error type instead, so neither it nor its callers have
-to name one:
+With CGP, both traits import the context's one error type, so the function has nothing to equate
+and names no error type at all:
 
 ```rust
 #[cgp_fn]
-#[uses(CanLoad)]
+#[uses(CanLoad, CanSave)]
 #[use_type(HasErrorType.Error)]
-pub fn load_profile(&self, user: &str) -> Result<String, Error> {
-    self.load(&format!("profiles/{user}"))
+pub fn back_up_profile(&self, user: &str) -> Result<(), Error> {
+    let profile = self.load(&format!("profiles/{user}"))?;
+    self.save(&format!("backups/{user}"), &profile)
 }
 ```
 
-A plain associated type would already remove the parameter from a single trait, so it is worth
-being precise about what CGP adds. The context chooses one error type in its wiring, and every trait
-that imports `HasErrorType` agrees on it, so a loader and a storage fetcher on the same context
-return the same error. These are still Rust associated types, which means their guarantees come only
-from the bounds you declare, and a type that appears in an interface, such as a returned error,
-still belongs in that interface. For a function with one or two independent type parameters,
+The context chooses that error type once, in its wiring, and every trait that imports
+`HasErrorType` agrees on it, so a loader and a saver on the same context always return the same
+error. These are still Rust associated types, which means their guarantees come only from the bounds
+you declare, and a type that appears in an interface, such as a returned error, still belongs in that
+interface. For a function with one or two independent type parameters,
 ordinary generics may be clearer. [Abstract types](/docs/concepts/abstract-types) explains the
 mechanism.
 
@@ -297,7 +311,28 @@ let config = AppConfig::builder()
 
 Here `DatabaseConfig` and `HttpConfig` are structs with one of the fields each, and they derive
 `CgpData` too. The compiler checks that the pieces cover every field, so nothing is discovered at
-runtime, but in return a type takes part only if it has the derive.
+runtime.
+
+Variants work the same way from the other side. With `#[cgp_auto_dispatch]` on a trait, an enum
+implements that trait from its variants:
+
+```rust
+#[cgp_auto_dispatch]
+pub trait CanDescribe {
+    fn describe(&self) -> String;
+}
+
+#[derive(CgpData)]
+pub enum Shape {
+    Circle(Circle),
+    Rectangle(Rectangle),
+}
+```
+
+`Circle` and `Rectangle` each implement `CanDescribe` as ordinary types, and `Shape` gains
+`describe` without a `match`, calling the implementation of whichever variant it holds. In both
+directions a type takes part only if it has the derive, and an enum dispatches only when every
+variant's payload implements the trait.
 [Extensible records](/docs/concepts/extensible-records),
 [Extensible variants](/docs/concepts/extensible-variants), and
 [Dispatching](/docs/concepts/dispatching) cover the patterns and their limits.

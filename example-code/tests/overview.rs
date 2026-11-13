@@ -336,21 +336,59 @@ pub mod still_ordinary_rust {
 
 /// ## Abstract types
 pub mod abstract_types {
-    /// The plain-Rust version the page shows first: the error type is a parameter of every layer.
+    /// The plain-Rust version the page shows first: each trait has its own associated error type,
+    /// so a function using both must state that they are equal, and its callers repeat the bound.
     pub mod before {
-        pub trait Load<Error> {
-            fn load(&self, path: &str) -> Result<String, Error>;
+        pub trait Load {
+            type Error;
+            fn load(&self, path: &str) -> Result<String, Self::Error>;
         }
 
-        pub fn load_profile<Context, Error>(context: &Context, user: &str) -> Result<String, Error>
+        pub trait Save {
+            type Error;
+            fn save(&self, path: &str, contents: &str) -> Result<(), Self::Error>;
+        }
+
+        pub fn back_up_profile<Context>(
+            context: &Context,
+            user: &str,
+        ) -> Result<(), <Context as Load>::Error>
         where
-            Context: Load<Error>,
+            Context: Load + Save<Error = <Context as Load>::Error>,
         {
-            context.load(&format!("profiles/{user}"))
+            let profile = context.load(&format!("profiles/{user}"))?;
+            context.save(&format!("backups/{user}"), &profile)
+        }
+
+        // The page shows no implementation; this one lets the test call the function.
+        pub struct App;
+
+        impl Load for App {
+            type Error = String;
+            fn load(&self, path: &str) -> Result<String, String> {
+                Ok(format!("contents of {path}"))
+            }
+        }
+
+        impl Save for App {
+            type Error = String;
+            fn save(&self, path: &str, _contents: &str) -> Result<(), String> {
+                if path.ends_with('/') {
+                    return Err("empty name".to_owned());
+                }
+                Ok(())
+            }
+        }
+
+        #[test]
+        fn the_function_equates_the_two_error_types() {
+            assert!(back_up_profile(&App, "ada").is_ok());
+            assert_eq!(back_up_profile(&App, "").unwrap_err(), "empty name");
         }
     }
 
-    /// The CGP version: the context chooses the error type, and the function names neither.
+    /// The CGP version: both traits import the context's error type, so the function equates
+    /// nothing and names no error type.
     pub mod after {
         use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
         use cgp::extra::error::RaiseFrom;
@@ -362,11 +400,31 @@ pub mod abstract_types {
             fn load(&self, path: &str) -> Result<String, Error>;
         }
 
-        #[cgp_fn]
-        #[uses(CanLoad)]
+        #[cgp_component(Saver)]
         #[use_type(HasErrorType.Error)]
-        pub fn load_profile(&self, user: &str) -> Result<String, Error> {
-            self.load(&format!("profiles/{user}"))
+        pub trait CanSave {
+            fn save(&self, path: &str, contents: &str) -> Result<(), Error>;
+        }
+
+        #[cgp_fn]
+        #[uses(CanLoad, CanSave)]
+        #[use_type(HasErrorType.Error)]
+        pub fn back_up_profile(&self, user: &str) -> Result<(), Error> {
+            let profile = self.load(&format!("profiles/{user}"))?;
+            self.save(&format!("backups/{user}"), &profile)
+        }
+
+        // The page leaves the saver's provider to the Concepts page it links.
+        #[cgp_impl(new SaveOrFail)]
+        #[uses(CanRaiseError<String>)]
+        #[use_type(HasErrorType.Error)]
+        impl Saver {
+            fn save(&self, path: &str, _contents: &str) -> Result<(), Error> {
+                if path.ends_with('/') {
+                    return Err(Self::raise_error("empty name".to_owned()));
+                }
+                Ok(())
+            }
         }
 
         // The page leaves the provider and the context to the Concepts page it links.
@@ -390,19 +448,20 @@ pub mod abstract_types {
 
                 ErrorTypeProviderComponent: UseType<String>,
                 LoaderComponent: LoadOrFail,
+                SaverComponent: SaveOrFail,
                 @ErrorRaiserComponent.String: RaiseFrom,
             }
         }
 
         mod check_app {
             use super::*;
-            check_components! { App { LoaderComponent } }
+            check_components! { App { LoaderComponent, SaverComponent } }
         }
 
         #[test]
         fn the_function_never_names_the_error_type() {
-            assert_eq!(App.load_profile("ada").unwrap(), "contents of profiles/ada");
-            assert_eq!(App.load_profile("").unwrap_err(), "empty name");
+            assert!(App.back_up_profile("ada").is_ok());
+            assert_eq!(App.back_up_profile("").unwrap_err(), "empty name");
         }
     }
 }
@@ -439,6 +498,54 @@ pub mod extensible_records_and_variants {
 
         assert_eq!(config.database_url, "postgres://localhost");
         assert_eq!(config.http_timeout, 30);
+    }
+
+    /// The variant half: an enum implements a trait from its variants' implementations.
+    pub mod variants {
+        use cgp::prelude::*;
+
+        #[cgp_auto_dispatch]
+        pub trait CanDescribe {
+            fn describe(&self) -> String;
+        }
+
+        #[derive(CgpData)]
+        pub enum Shape {
+            Circle(Circle),
+            Rectangle(Rectangle),
+        }
+
+        // The page names the two payload types and their implementations in prose.
+        pub struct Circle {
+            pub radius: f64,
+        }
+
+        pub struct Rectangle {
+            pub width: f64,
+            pub height: f64,
+        }
+
+        impl CanDescribe for Circle {
+            fn describe(&self) -> String {
+                format!("circle of radius {}", self.radius)
+            }
+        }
+
+        impl CanDescribe for Rectangle {
+            fn describe(&self) -> String {
+                format!("{}x{} rectangle", self.width, self.height)
+            }
+        }
+
+        #[test]
+        fn the_enum_describes_whichever_variant_it_holds() {
+            assert_eq!(Shape::Circle(Circle { radius: 2.0 }).describe(), "circle of radius 2");
+            let rectangle = Shape::Rectangle(Rectangle {
+                width: 3.0,
+                height: 4.0,
+            });
+            assert_eq!(rectangle.describe(), "3x4 rectangle");
+        }
     }
 }
 
