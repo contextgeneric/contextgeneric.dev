@@ -11,8 +11,8 @@ description: 'A tour of what Context-Generic Programming adds to Rust: the five 
 implementations at compile-time. This page is a tour of what that gives you. It takes the five
 headline features one at a time, and for each one it starts from a problem you may already have,
 shows a short example, says where the feature stops helping, and links the page that explains it in
-full. A short list after them names what CGP offers beyond the five, for when they feel familiar. If
-you are new to CGP, you may prefer to begin with its simplest form, under
+full. A short list after them names what CGP offers beyond the five, to explore once they feel
+familiar. If you are new to CGP, you may prefer to begin with its simplest form, under
 [*Still Ordinary Rust*](#still-ordinary-rust), or to run a program first with the
 [Quickstart](/docs/quickstart).
 
@@ -112,10 +112,11 @@ impl CanFetchStorageObject for App {
 In that implementation, `StorageObjectFetcher<App>` is the provider trait with the context as its
 type parameter, which is how one provider can serve many contexts. Because the call names the
 provider directly, nothing sits between the two: no runtime registry, no reflection, and no virtual
-method table. The provider itself is a type that is never instantiated. Its own work, such as the
-request to S3, still runs, and generic code can add compile time and code size. If you want to see
-what the macros generate, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints it, and
-[Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this approach with `dyn Trait`.
+method table. The provider is never instantiated either, since it exists only as a type. Its own
+work still runs, though, such as the request to S3, and generic code can add compile time and code
+size. If you want to see what the macros generate, [`cargo cgp expand`](/docs/cargo-cgp/expand)
+prints it, and [Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this approach with
+`dyn Trait`.
 
 ### Type-Safe Wiring
 
