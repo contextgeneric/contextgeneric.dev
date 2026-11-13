@@ -14,7 +14,7 @@ program much like this one.
 
 The only thing you need is Rust 1.89 or newer on the stable toolchain, so check your version with
 `rustc --version` before you start. The version matters because on an older toolchain `cargo add`
-often picks an old release of `cgp`, one that lacks what this program uses, and the build fails.
+picks an older release of `cgp`, one that lacks what this program uses, and the build fails.
 `rustup update stable` brings the toolchain up to date.
 
 ## Install

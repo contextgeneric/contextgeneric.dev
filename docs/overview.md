@@ -2,22 +2,23 @@
 title: 'Overview of the features, with examples'
 sidebar_label: 'Overview'
 sidebar_position: 3
-description: 'A tour of what Context-Generic Programming adds to Rust: each feature with a compiled example, the condition it holds under, and the page that explains it.'
+description: 'A tour of what Context-Generic Programming adds to Rust: the five headline features, each with a compiled example and the condition it holds under, then what lies beyond them.'
 ---
 
 # Overview
 
 [Context-Generic Programming](/docs/) (CGP) is a language extension for Rust, with pluggable trait
-implementations at compile-time. This page is a tour of what that gives you. It takes the features
-one at a time, and for each one it starts from a problem you may already have, shows a short
-example, says where the feature stops helping, and links the page that explains it in full. If you
-would rather run a program first, start with the [Quickstart](/docs/quickstart).
+implementations at compile-time. This page is a tour of what that gives you. It takes the five
+headline features one at a time, and for each one it starts from a problem you may already have,
+shows a short example, says where the feature stops helping, and links the page that explains it in
+full. A short list after them names what CGP offers beyond the five, for when they feel familiar.
+If you would rather run a program first, start with the [Quickstart](/docs/quickstart).
 
 Every example is a fragment of a program that compiles against `cgp` 0.8.0. The fragments leave out
 the imports, the definitions they do not need to show, and the check each context needs, which
-*Type-Safe Wiring* explains. The five headline features also share one scenario, the one the
+*Type-Safe Wiring* explains. They also share one scenario, the one the
 [`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md) uses: an application that
-fetches users' profile pictures from object storage. Their examples skip the requests to each storage
+fetches users' profile pictures from object storage. The examples skip the requests to each storage
 service, because the features are about how the code is arranged rather than what it does.
 
 ## The headline features
@@ -53,6 +54,11 @@ impl StorageObjectFetcher {
     }
 }
 ```
+
+The attribute keeps `CanFetchStorageObject` as the trait that callers use, and it generates
+`StorageObjectFetcher`, the trait that each provider implements. The `#[implicit]` arguments read the
+client and the bucket from the fields of whichever type uses the provider, so a caller passes only
+the object's ID.
 
 Two more providers follow the same pattern: `FetchGCloudObject` reads a Google Cloud `Storage`
 client from the same `storage_client` field, and `FetchLocalObject` reads files from a `local_dir`
@@ -153,8 +159,8 @@ is used or checked, so check each context where you assemble it. For a simple co
 entry and checks it in the same step. Even then, the check establishes that the components fit
 together, not that the application is correct.
 
-Reading the failure has a cost too. Without the tool, the raw compiler error for this mistake spells
-the field's name as a nested type, `Symbol<9, Chars<'b', …>>`. `cargo cgp check` leads with the root
+Reading the failure has a cost too. Without the tool, the raw compiler error for this mistake is
+longer, and it spells the field's name as a nested type. `cargo cgp check` leads with the root
 cause for the classes it recognizes, and the tool does not yet reshape every class.
 [Check traits](/docs/concepts/check-traits) explains the checks, the
 [checking tutorial](/docs/tutorials/area-calculation/checking) walks through a mis-wiring, and
@@ -199,9 +205,8 @@ own without touching this code, as long as it supplies those conversions as well
 The same arrangement works for other dependencies, such as an async runtime, and it lets a core
 library stay `no_std` as long as the providers chosen for it are `no_std` too. A provider that reads
 files, like this one, still needs `std`, and its blocking read suits a test context, where an
-application would use an async file API. Async code may also need attention to
-[`Send` bounds](/docs/concepts/send-bounds). [Modular error handling](/docs/concepts/modular-error-handling)
-explains how a context chooses its error type, and
+application would use an async file API.
+[Modular error handling](/docs/concepts/modular-error-handling) explains how a context chooses its error type, and
 [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains how a provider keeps its
 needs out of the interface.
 
@@ -235,198 +240,35 @@ problem needs.
 
 ## Beyond choosing implementations
 
-Choosing implementations is the core of CGP, but the same machinery reaches further. A context can
-choose types as well as implementations, generic code can work over the structure of data, and small
-steps can be composed into larger operations.
+Choosing implementations is the core of CGP, but the same machinery reaches further. You need none of
+what follows to start, and each part is easier to learn once the features above feel familiar, so
+this page names them and leaves their examples to the pages that explain them:
 
-### Abstract types
-
-The error type from earlier is one case of a broader problem. In plain Rust, a trait that can fail
-often declares its own associated error type. A function that uses two such traits must then
-either convert between their errors or state that they are the same type, and that bound travels
-with it to every generic caller:
-
-```rust
-pub trait Load {
-    type Error;
-    fn load(&self, path: &str) -> Result<String, Self::Error>;
-}
-
-pub trait Save {
-    type Error;
-    fn save(&self, path: &str, contents: &str) -> Result<(), Self::Error>;
-}
-
-pub fn back_up_profile<Context>(
-    context: &Context,
-    user: &str,
-) -> Result<(), <Context as Load>::Error>
-where
-    Context: Load + Save<Error = <Context as Load>::Error>,
-{
-    let profile = context.load(&format!("profiles/{user}"))?;
-    context.save(&format!("backups/{user}"), &profile)
-}
-```
-
-With CGP, both traits import the context's one error type, so the function has nothing to equate
-and names no error type at all:
-
-```rust
-#[cgp_fn]
-#[uses(CanLoad, CanSave)]
-#[use_type(HasErrorType.Error)]
-pub fn back_up_profile(&self, user: &str) -> Result<(), Error> {
-    let profile = self.load(&format!("profiles/{user}"))?;
-    self.save(&format!("backups/{user}"), &profile)
-}
-```
-
-The context chooses that error type once, in its wiring, and every trait that imports
-`HasErrorType` agrees on it, so a loader and a saver on the same context always return the same
-error. These are still Rust associated types, so their guarantees come only from the bounds you
-declare, and a type that appears in an interface, such as a returned error, still belongs in that
-interface. For a function with one or two independent type parameters, though, ordinary generics may
-be clearer. [Abstract types](/docs/concepts/abstract-types) explains the mechanism.
-
-### Extensible records and variants
-
-Some generic code needs to work over the shape of data, building a struct field by field or handling
-an enum variant by variant. CGP supports this through a derive that exposes a type's fields to the
-trait system, so separate parts of a program can each build their own piece of a record:
-
-```rust
-#[derive(CgpData)]
-pub struct AppConfig {
-    pub database_url: String,
-    pub http_timeout: u32,
-}
-
-let config = AppConfig::builder()
-    .build_from(DatabaseConfig {
-        database_url: "postgres://localhost".to_owned(),
-    })
-    .build_from(HttpConfig { http_timeout: 30 })
-    .finalize_build();
-```
-
-Here `DatabaseConfig` and `HttpConfig` are structs with one of the fields each, and they derive
-`CgpData` too. The compiler checks that the pieces cover every field, so nothing is discovered at
-runtime.
-
-Enums work the same way, variant by variant. With `#[cgp_auto_dispatch]` on a trait, an enum
-implements that trait from its variants:
-
-```rust
-#[cgp_auto_dispatch]
-pub trait CanDescribe {
-    fn describe(&self) -> String;
-}
-
-#[derive(CgpData)]
-pub enum Shape {
-    Circle(Circle),
-    Rectangle(Rectangle),
-}
-```
-
-`Circle` and `Rectangle` are ordinary types that each implement `CanDescribe`, and `Shape` gains
-`describe` without a `match`, calling the implementation of whichever variant it holds. For records
-and variants alike, a type takes part only if it has the derive, and an enum dispatches only when every
-variant's payload implements the trait.
-[Extensible records](/docs/concepts/extensible-records),
-[Extensible variants](/docs/concepts/extensible-variants), and
-[Dispatching](/docs/concepts/dispatching) cover the patterns and their limits.
-
-### Composable handlers
-
-CGP also has a family of handler components for computations, synchronous or async, fallible or
-not. Providers for them compose into pipelines whose input and output types must agree, and a
-context chooses the steps in its wiring:
-
-```rust
-#[cgp_computer]
-fn double(x: u64) -> u64 {
-    x * 2
-}
-
-#[cgp_computer]
-fn increment(x: u64) -> u64 {
-    x + 1
-}
-
-delegate_components! {
-    App {
-        ComputerComponent: PipeHandlers<Product![Double, Increment]>,
-    }
-}
-```
-
-`#[cgp_computer]` turns each function into a provider named after it, `Double` and `Increment`, so
-computing on `App` with the input 5 doubles it and then adds one, returning 11. When a sequence never
-needs interchangeable steps, ordinary function calls are simpler. [Handlers](/docs/concepts/handlers)
-covers the family and its combinators.
-
-### Namespaces
-
-As an application grows, so does its wiring, and its contexts can end up repeating most of the same
-entries. A namespace gives them a wiring table they share, so each context lists only what differs.
-In the example below, each component has registered under a path in `AppNamespace`, such as
-`@app.GreeterComponent`, through a `#[prefix]` attribute on its definition. `AppDefaults` extends
-that namespace with the bindings every context shares, and a context joins it and fills in the rest:
-
-```rust
-cgp_namespace! {
-    new AppDefaults: AppNamespace {
-        @app.FarewellComponent: SayGoodbye,
-    }
-}
-
-delegate_components! {
-    App {
-        namespace AppDefaults;
-        @app.GreeterComponent: GreetHello,
-    }
-}
-```
-
-A `TestApp` that joins the same namespace with a different greeter differs from `App` by one line.
-The sharing has a limit, though: a context that joins a namespace cannot override a binding the
-namespace makes, so a namespace should bind only what every context shares. For a component with a
-type parameter there is also a lighter option, an `open` statement in the wiring, which dispatches
-per type without defining a namespace at all. [Namespaces](/docs/concepts/namespaces) explains both.
-
-### Higher-order providers
-
-Providers can also build on one another. A provider can take another provider as a parameter, so a
-single wrapper can serve many implementations. `ScaledArea` scales whatever area its inner provider
-computes, and a context chooses both in a single entry:
-
-```rust
-#[cgp_impl(new ScaledArea<Inner>)]
-#[use_provider(Inner: AreaCalculator)]
-impl<Inner> AreaCalculator {
-    fn area(&self, #[implicit] scale: f64) -> f64 {
-        Inner::area(self) * scale * scale
-    }
-}
-
-delegate_components! {
-    ScaledRectangle {
-        AreaCalculatorComponent: ScaledArea<RectangleArea>,
-    }
-}
-```
-
-The price of this flexibility is indirection, because each layer adds a step to follow when you
-trace which code runs. [Higher-order providers](/docs/concepts/higher-order-providers) shows how the
-bounds compose.
+- **Abstract types:** a context chooses types as well as implementations. When several traits import
+  the context's error type, they all agree on it, so a function that uses them needs no bound to
+  equate their errors, and the error type stops being a parameter that every layer has to carry.
+  [Abstract types](/docs/concepts/abstract-types) explains how.
+- **Extensible records and variants:** a derive exposes a struct's fields or an enum's variants to
+  the trait system, so generic code can build a record from separate pieces, or call a trait on an
+  enum through whichever variant it holds without writing a `match`.
+  [Extensible records](/docs/concepts/extensible-records),
+  [Extensible variants](/docs/concepts/extensible-variants), and
+  [Dispatching](/docs/concepts/dispatching) cover the patterns.
+- **Composable handlers:** a family of components for computations, synchronous or async, fallible
+  or not, whose providers chain into pipelines that a context chooses in its wiring.
+  [Handlers](/docs/concepts/handlers) covers the family.
+- **Namespaces:** a wiring table that several contexts share, so each context lists only the entries
+  where it differs. [Namespaces](/docs/concepts/namespaces) explains them, along with the lighter
+  `open` statement for choosing a provider per type.
+- **Higher-order providers:** a provider that takes another provider as a parameter, such as a
+  wrapper that scales whatever area its inner provider computes.
+  [Higher-order providers](/docs/concepts/higher-order-providers) shows how they compose.
 
 ## The problems it solves
 
 The features above are easier to judge against the problems you have. CGP helps most where
 a program already needs several implementations, or where dependencies spread through its
-signatures. The table below starts from the problem and links the section of this page that shows
+signatures. The table below starts from the problem and links the section of this page that covers
 it, where there is one, along with the Concepts page that explains it:
 
 | Problem | On this page | Explained in |
@@ -438,8 +280,8 @@ it, where there is one, along with the Concepts page that explains it:
 | Changing the error type or runtime touches every layer | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Modular error handling](/docs/concepts/modular-error-handling) |
 | A trait has grown until no implementation needs all of it | Not shown here | [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) |
 | An implementation's dependencies leak into the public interface | [Abstract Over Every Dependency](#abstract-over-every-dependency) | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
-| Generic parameters and their bounds repeat through every layer | [Abstract types](#abstract-types) | [Abstract types](/docs/concepts/abstract-types) |
-| Generic code needs to work over any struct or enum | [Extensible records and variants](#extensible-records-and-variants) | [Extensible records](/docs/concepts/extensible-records) |
+| Generic parameters and their bounds repeat through every layer | [Beyond choosing implementations](#beyond-choosing-implementations) | [Abstract types](/docs/concepts/abstract-types) |
+| Generic code needs to work over any struct or enum | [Beyond choosing implementations](#beyond-choosing-implementations) | [Extensible records](/docs/concepts/extensible-records) |
 | A wiring error buries its cause in generated types | [Type-Safe Wiring](#type-safe-wiring) | [Check traits](/docs/concepts/check-traits) |
 
 ## When a plain trait is enough
