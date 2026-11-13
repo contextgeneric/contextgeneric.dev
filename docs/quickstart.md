@@ -1,24 +1,28 @@
 ---
-title: 'Quickstart: install CGP and run a program'
+title: 'Quickstart: install and run a first program'
 sidebar_label: 'Quickstart'
 sidebar_position: 2
-description: 'Install Context-Generic Programming and get a working Rust program running, with nothing to configure and no concepts to learn first.'
+description: 'Install Context-Generic Programming and get a working Rust program running in a few minutes, with nothing to configure and no concepts to learn first.'
 ---
 
 # Quickstart
 
-Context-Generic Programming (CGP) is a language extension for Rust, with pluggable trait
-implementations at compile-time. This page does one thing: it gets a program that uses CGP compiling
-and running on your machine. It explains nothing along the way. The [Introduction](/docs/) says what
-CGP is, and the [Hello World tutorial](/docs/tutorials/hello) teaches the idea behind the code below.
+[Context-Generic Programming](/docs/) (CGP) enables pluggable trait implementations in Rust, and
+this page gets a program that uses it compiling and running on your machine. It explains nothing
+along the way; the [Hello World tutorial](/docs/tutorials/hello) teaches the idea behind the code
+below.
 
-You need Rust installed, and nothing else. CGP is an ordinary library on the stable toolchain.
+You need Rust 1.89 or newer on the stable toolchain, and nothing else. Check with `rustc --version`
+first: on an older toolchain the build fails, often because `cargo add` picked an old release of
+`cgp` that lacks what this program uses. `rustup update stable` brings the toolchain up to date.
 
 ## Install
 
-In a new or existing project, add the crate:
+Create a project and add the crate:
 
 ```bash
+cargo new hello-cgp
+cd hello-cgp
 cargo add cgp
 ```
 
@@ -31,7 +35,7 @@ cgp = "0.8.0"
 
 ## The program
 
-Put this in `src/main.rs`:
+Replace the contents of `src/main.rs` with this program:
 
 ```rust title="src/main.rs"
 use cgp::prelude::*;
