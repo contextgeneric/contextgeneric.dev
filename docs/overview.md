@@ -366,8 +366,8 @@ Each layer adds a step to follow when you trace which code runs.
 ## The problems it solves
 
 CGP helps most where a program already needs several implementations, or where dependencies spread
-through its signatures. Each problem below links the section of this page and the Concepts page that
-answer it:
+through its signatures. Each problem below links the section of this page that shows it, where there
+is one, and the Concepts page that explains it:
 
 | Problem | On this page | Explained in |
 | --- | --- | --- |
