@@ -11,8 +11,9 @@ description: 'A tour of what Context-Generic Programming adds to Rust: each feat
 implementations at compile-time. This page is a tour of what that gives you. It takes the features
 one at a time, and for each one it starts from a problem you may already have, shows a short
 example, says where the feature stops helping, and links the page that explains it in full. The
-examples are fragments of programs that compile against `cgp` 0.8.0, with the imports and the
-definitions they do not need to show left out. If you would rather run a program first, start with
+examples are fragments of programs that compile against `cgp` 0.8.0, with the imports, the
+definitions they do not need to show, and each context's check left out; *Type-Safe Wiring* shows
+what that check is for. If you would rather run a program first, start with
 the [Quickstart](/docs/quickstart).
 
 The first five features follow one scenario, the one the
@@ -150,7 +151,9 @@ error[E0277]: [CGP-E001] missing field `bucket_id` on `App`
 ```
 
 The check matters, because wiring on its own checks nothing. An entry compiles until the component
-is used or checked, so check each context where you assemble it. Even then, the check establishes
+is used or checked, so check each context where you assemble it. For a simple context,
+[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) wires each
+entry and checks it in the same step. Even then, the check establishes
 that the components fit together, not that the application is correct. The diagnostics have a cost
 as well: the raw compiler error for this mistake spells the field's name as a nested type,
 `Symbol<9, Chars<'b', …>>`. `cargo cgp check` leads with the root cause for the classes it
