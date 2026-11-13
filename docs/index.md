@@ -16,10 +16,10 @@ None of this needs a new language or a new compiler. CGP is a library on stable 
 expand to ordinary traits and implementations, and the compiler resolves every choice into a direct
 call. You can bring it into an existing project one trait at a time.
 
-The documentation uses these terms to describe how the pieces fit together:
+The rest of the documentation describes how a type makes that choice with four terms:
 
 - **[Context](/docs/reference/glossary#context):** a type, such as an application type, that
-  holds the data its implementations need and identifies which implementations to use.
+  holds the data its implementations need and chooses which implementations it uses.
 - **[Component](/docs/reference/glossary#component):** an interface whose implementation a context
   chooses.
 - **[Provider](/docs/reference/glossary#provider):** a named implementation of a component.
@@ -39,7 +39,7 @@ components:
 
 ## Find what you need
 
-If you have a particular question, use these links to find the relevant documentation:
+If you came with a particular question, find it below beside the page that answers it:
 
 - **What can CGP do, feature by feature?** The [Overview](/docs/overview).
 - **Why does CGP work this way?** [Bypassing coherence](/docs/concepts/coherence) and
@@ -57,8 +57,8 @@ If you have a particular question, use these links to find the relevant document
 - **Where are the crates, talks, and community?** [Resources](/docs/resources).
 - **How can I help?** [Contribute](/docs/contribute).
 
-For releases, design discussions, and talks, visit the [blog](/blog). Older posts describe the
-library at the time of publication, so use the documentation above for guidance on current CGP.
+For releases, design discussions, and talks, visit the [blog](/blog). Its older posts describe the
+library as it was when they were published, so for CGP as it is today, rely on the pages above.
 
 ---
 
