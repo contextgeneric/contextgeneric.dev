@@ -272,7 +272,7 @@ html[data-theme='dark'] {
   --ifm-toc-border-color: var(--cgp-border);
   --ifm-hr-background-color: var(--cgp-border);
   --ifm-table-border-color: var(--cgp-border);
-  --ifm-table-stripe-background: rgba(239, 143, 134, 0.04);
+  --ifm-table-stripe-background: rgba(236, 227, 223, 0.03);
   --ifm-table-head-background: var(--cgp-surface);
   --ifm-code-background: var(--cgp-inline-code-bg);
   --ifm-pre-background: var(--cgp-code-bg);
@@ -294,7 +294,7 @@ html[data-theme='dark'] {
   --ifm-color-success-contrast-foreground: #d4e8d9;
   --ifm-color-secondary: #332c2b;
   --ifm-color-secondary-dark: #8d7c76;
-  --ifm-color-secondary-contrast-background: #221c1b;
+  --ifm-color-secondary-contrast-background: #1b1717;
   --ifm-color-secondary-contrast-foreground: #e6dcd8;
   --ifm-color-warning: #d4a246;
   --ifm-color-warning-dark: #d4a246;
