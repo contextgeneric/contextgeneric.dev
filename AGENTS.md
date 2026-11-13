@@ -72,7 +72,8 @@ block to match. These are the actionable rules here:
 - Never disparage another crate, language, or community; say where a simpler tool is the better choice.
 - Concede the learning curve, the verbose diagnostics, and the young ecosystem where a reader looks for
   them.
-- Use natural-writing for `docs/concepts/` and `docs/cargo-cgp/` pages and for the front page.
+- Write every page in natural-writing's natural style by default, the front page and every page under
+  `docs/` included; follow a page kind's writing guide where it names another style.
 
 ## Blog posts
 
