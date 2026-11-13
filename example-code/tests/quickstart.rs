@@ -43,8 +43,7 @@ fn the_page_shows_this_program() {
     let source = fs::read_to_string(root.join("tests/quickstart.rs")).unwrap();
     let from = source.find("use cgp::prelude::*;").unwrap();
     let to = source.find("\n/// The program between").unwrap();
-    let compiled = source[from..to]
-        .replace("#[test]\nfn quickstart_program_runs()", "fn main()");
+    let compiled = source[from..to].replace("#[test]\nfn quickstart_program_runs()", "fn main()");
 
     assert_eq!(shown.trim_end(), compiled.trim_end());
 }

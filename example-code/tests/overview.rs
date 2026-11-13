@@ -539,7 +539,10 @@ pub mod extensible_records_and_variants {
 
         #[test]
         fn the_enum_describes_whichever_variant_it_holds() {
-            assert_eq!(Shape::Circle(Circle { radius: 2.0 }).describe(), "circle of radius 2");
+            assert_eq!(
+                Shape::Circle(Circle { radius: 2.0 }).describe(),
+                "circle of radius 2"
+            );
             let rectangle = Shape::Rectangle(Rectangle {
                 width: 3.0,
                 height: 4.0,
