@@ -34,7 +34,7 @@ pulls in a module tree that mirrors that section's pages:
 - `tests/blog_tests.rs` → `tests/blog/`, the current release draft's worked examples
 
 **A standalone page gets a test binary of its own instead**, since there is no section tree for it to
-sit in: `tests/quickstart.rs` answers `docs/quickstart.md`, and `tests/front_page.rs` answers the front page. Use this form only for a page that has no
+sit in: `tests/quickstart.rs` answers `docs/quickstart.md`, `tests/overview.rs` answers `docs/overview.md`, and `tests/front_page.rs` answers the front page. Use this form only for a page that has no
 section; a page inside one belongs in that section's module tree.
 
 One file per page, at the matching path with the file name in `snake_case`:
@@ -49,6 +49,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 | `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |
 | `blog/2026-05-10-v0.8.0-release.md` | complete — `tests/blog/v0_8_0_release.rs` checks each wiring stage, the default-binding alternatives, and the migrated configuration; the deliberate missing-field error is a compile-fail fixture |
 | front page (`src/pages/index.tsx`) | complete — `tests/front_page.rs`, a standalone binary for the hero's CGP block, with the hero's rejected block at `tests/compile_fail/front_page/`; the text between each `front-page:` marker pair is exactly what the page shows, the rejected block starts at its fixture's first line so the page's quoted `E0119` names the lines the page numbers, and a test compares that quote with the fixture's snapshot |
+| `docs/overview.md` | complete — `tests/overview.rs`, a standalone binary with one module per heading and stand-ins for the storage clients and the database pool the page names; the type-safe-wiring section's missing-field program is at `tests/compile_fail/overview/` |
 | remaining orientation pages | none yet |
 
 Within a covered section the mapping is mechanical: `docs/concepts/coherence.md` is answered by
