@@ -195,6 +195,14 @@ const config: Config = {
               to: '/docs',
             },
             {
+              label: 'Quickstart',
+              to: '/docs/quickstart',
+            },
+            {
+              label: 'Overview',
+              to: '/docs/overview',
+            },
+            {
               label: 'Tutorials',
               to: '/docs/category/tutorials',
             },
