@@ -105,9 +105,23 @@ pub mod one_interface_many_implementations {
         pub local_dir: String,
     }
 
-    delegate_components! { App { StorageObjectFetcherComponent: FetchS3Object } }
-    delegate_components! { GCloudApp { StorageObjectFetcherComponent: FetchGCloudObject } }
-    delegate_components! { TestApp { StorageObjectFetcherComponent: FetchLocalObject } }
+    delegate_components! {
+        App {
+            StorageObjectFetcherComponent: FetchS3Object,
+        }
+    }
+
+    delegate_components! {
+        GCloudApp {
+            StorageObjectFetcherComponent: FetchGCloudObject,
+        }
+    }
+
+    delegate_components! {
+        TestApp {
+            StorageObjectFetcherComponent: FetchLocalObject,
+        }
+    }
 
     mod check_contexts {
         use super::*;
