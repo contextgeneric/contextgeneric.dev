@@ -9,14 +9,14 @@ description: 'Learn what Context-Generic Programming is, get to know its core te
 
 Context-Generic Programming (CGP) is a language extension for Rust, with pluggable trait
 implementations at compile-time. In plain Rust, a type has at most one implementation of each
-trait. CGP lets you write several implementations of the same trait and decide, for each type that
-uses it, which one applies.
+trait. With CGP, you can instead write several implementations of the same trait and decide, for
+each type that uses it, which one applies.
 
 None of this needs a new language or a new compiler. CGP is a library on stable Rust whose macros
 expand to ordinary traits and implementations, and the compiler resolves every choice into a direct
 call. You can bring it into an existing project one trait at a time.
 
-The rest of the documentation describes how a type makes that choice with four terms:
+Four terms name the parts of that choice, and the rest of the documentation uses them throughout:
 
 - **[Context](/docs/reference/glossary#context):** a type, such as an application type, that
   holds the data its implementations need and chooses which implementations it uses.
