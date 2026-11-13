@@ -11,9 +11,10 @@ description: 'A tour of what Context-Generic Programming adds to Rust: the five 
 implementations at compile-time. This page is a tour of what that gives you. It takes the five
 headline features one at a time, and for each one it starts from a problem you may already have,
 shows a short example, says where the feature stops helping, and links the page that explains it in
-full. A short list after them names what CGP offers beyond the five, for when they feel familiar.
-If you are new to CGP, [*Still Ordinary Rust*](#still-ordinary-rust) shows its simplest form, and
-the [Quickstart](/docs/quickstart) runs a program before any of this.
+full. A short list after them names what CGP offers beyond the five, for when they feel familiar. If
+you are new to CGP, you may prefer to begin with its simplest form, under
+[*Still Ordinary Rust*](#still-ordinary-rust), or to run a program first with the
+[Quickstart](/docs/quickstart).
 
 Every example is a fragment of a program that compiles against `cgp` 0.8.0. The fragments leave out
 the imports, the definitions they do not need to show, and the check each context needs, which
@@ -56,10 +57,10 @@ impl StorageObjectFetcher {
 }
 ```
 
-The attribute keeps `CanFetchStorageObject` as the trait that callers use, and it generates
-`StorageObjectFetcher`, the trait that each provider implements. The `#[implicit]` arguments read the
-client and the bucket from the fields of whichever type uses the provider, so a caller passes only
-the object's ID.
+The `#[cgp_component]` attribute keeps `CanFetchStorageObject` as the trait that callers use, and it
+generates `StorageObjectFetcher`, the trait that each provider implements. The `#[implicit]`
+arguments read the client and the bucket from the fields of whichever type uses the provider, so a
+caller passes only the object's ID.
 
 Two more providers follow the same pattern: `FetchGCloudObject` reads a Google Cloud `Storage`
 client from the same `storage_client` field, and `FetchLocalObject` reads files from a `local_dir`
@@ -108,12 +109,12 @@ impl CanFetchStorageObject for App {
 }
 ```
 
-The trait that providers implement takes the context as a type parameter, here
-`StorageObjectFetcher<App>`, which is how one provider can serve many contexts. Nothing sits between
-the call and the provider: no runtime registry, no reflection, and no virtual method table. The
-provider itself is a type that is never instantiated. Its own work, such as the request to S3, still
-runs, and generic code can add compile time and code size. If you want to see what the macros
-generate, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints it, and
+In that implementation, `StorageObjectFetcher<App>` is the provider trait with the context as its
+type parameter, which is how one provider can serve many contexts. Because the call names the
+provider directly, nothing sits between the two: no runtime registry, no reflection, and no virtual
+method table. The provider itself is a type that is never instantiated. Its own work, such as the
+request to S3, still runs, and generic code can add compile time and code size. If you want to see
+what the macros generate, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints it, and
 [Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this approach with `dyn Trait`.
 
 ### Type-Safe Wiring
@@ -212,8 +213,8 @@ own without touching this code, as long as it supplies those conversions as well
 
 The same arrangement works for other dependencies, such as an async runtime, and it lets a core
 library stay `no_std` as long as the providers chosen for it are `no_std` too. A provider that reads
-files, like this one, still needs `std`, and its blocking read suits a test context, where an
-application would use an async file API.
+files, like this one, still needs `std`. Its blocking read also suits a test context better than an
+application, which would use an async file API.
 [Modular error handling](/docs/concepts/modular-error-handling) explains how a context chooses its
 error type, and [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains how a
 provider keeps its needs out of the interface.
@@ -248,9 +249,9 @@ problem needs.
 
 ## Beyond choosing implementations
 
-Choosing implementations is the core of CGP, but the same machinery reaches further. You need none of
-what follows to start, and each part is easier to learn once the features above feel familiar, so
-this page names them and leaves their examples to the pages that explain them:
+Choosing implementations is the core of CGP, but the same machinery reaches further. You need none
+of what follows to start, and each part is easier to learn once the features above feel familiar. So
+this page only names them and leaves their examples to the pages that explain them:
 
 - **Abstract types:** a context chooses types as well as implementations. When several traits import
   the context's error type, they all agree on it, so a function that uses them needs no bound to
@@ -293,9 +294,9 @@ signatures. The table below starts from the problem and links the Concepts page 
 
 ## When a plain trait is enough
 
-All of this comes at a cost, so for a trait with only one implementation, a plain trait is the right
-tool. CGP adds declarations and wiring that a plain trait does not need, compile-time work for its
-macros and type checking, and long raw errors, which [*Type-Safe Wiring*](#type-safe-wiring)
+All of this comes at a cost. For a trait with only one implementation, a plain trait is the right
+tool, because CGP adds declarations and wiring that a plain trait does not need, compile-time work
+for its macros and type checking, and long raw errors, which [*Type-Safe Wiring*](#type-safe-wiring)
 describes along with the tool that helps. Learning the patterns also takes time. If you work with an
 assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, the diagnostics, and
 the wiring, although you still need to review what it writes. The [front page's costs](/#costs)
