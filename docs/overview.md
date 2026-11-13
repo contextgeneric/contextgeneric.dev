@@ -10,15 +10,14 @@ description: 'A tour of what Context-Generic Programming adds to Rust: each feat
 [Context-Generic Programming](/docs/) (CGP) is a language extension for Rust, with pluggable trait
 implementations at compile-time. This page is a tour of what that gives you. It takes the features
 one at a time, and for each one it starts from a problem you may already have, shows a short
-example, says where the feature stops helping, and links the page that explains it in full. The
-examples are fragments of programs that compile against `cgp` 0.8.0, with the imports, the
-definitions they do not need to show, and each context's check left out; *Type-Safe Wiring* shows
-what that check is for. If you would rather run a program first, start with
-the [Quickstart](/docs/quickstart).
+example, says where the feature stops helping, and links the page that explains it in full. If you
+would rather run a program first, start with the [Quickstart](/docs/quickstart).
 
-The first five features follow one scenario, the one the
+The examples are fragments of programs that compile against `cgp` 0.8.0. They leave out the imports,
+the definitions they do not need to show, and the check each context needs, which *Type-Safe Wiring*
+explains. The first five features follow one scenario, the one the
 [`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md) also uses: an application
-that fetches users' profile pictures from object storage. The examples leave out the actual requests
+that fetches users' profile pictures from object storage. Those examples also leave out the requests
 to each storage service, because the features are about how the code is arranged rather than what
 it does.
 
@@ -29,8 +28,8 @@ it does.
 Suppose the application stores its pictures in Amazon S3, a second deployment of it uses Google
 Cloud Storage, and its tests read from a local folder. In plain Rust, each application type can
 implement a fetching trait itself, but then the S3 code belongs to that one type. Reusing it means
-writing a blanket implementation for every type with an S3 client, and another for every type with a
-Google Cloud client, and Rust rejects that pair because one type could have both clients.
+writing a blanket implementation for every type with an S3 client and another for every type with a
+Google Cloud client. Rust rejects that pair, because one type could have both clients.
 
 CGP avoids the conflict by giving each implementation a type of its own, called a **provider**.
 Because the providers are different types, their implementations never overlap. Here is the
@@ -104,8 +103,8 @@ impl CanFetchStorageObject for App {
 ```
 
 Nothing sits between the call and the provider: no runtime registry, no reflection, and no virtual
-method table, and the provider itself is a type that is never instantiated. The provider's own work,
-such as the request to S3, still runs, and generic code can add compile time and code size. If you
+method table. The provider itself is a type that is never instantiated. Its own work, such as the
+request to S3, still runs, and generic code can add compile time and code size. If you
 want to see what the macros actually generate, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints
 it, and [Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this approach with
 `dyn Trait`.
@@ -153,11 +152,12 @@ error[E0277]: [CGP-E001] missing field `bucket_id` on `App`
 The check matters, because wiring on its own checks nothing. An entry compiles until the component
 is used or checked, so check each context where you assemble it. For a simple context,
 [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) wires each
-entry and checks it in the same step. Even then, the check establishes
-that the components fit together, not that the application is correct. The diagnostics have a cost
-as well: the raw compiler error for this mistake spells the field's name as a nested type,
-`Symbol<9, Chars<'b', …>>`. `cargo cgp check` leads with the root cause for the classes it
-recognizes, and the tool does not yet reshape every class.
+entry and checks it in the same step. Even then, the check establishes that the components fit
+together, not that the application is correct.
+
+Reading the failure has a cost too. Without the tool, the raw compiler error for this mistake spells
+the field's name as a nested type, `Symbol<9, Chars<'b', …>>`. `cargo cgp check` leads with the root
+cause for the classes it recognizes, and the tool does not yet reshape every class.
 [Check traits](/docs/concepts/check-traits) explains the checks, the
 [checking tutorial](/docs/tutorials/area-calculation/checking) walks through a mis-wiring, and
 [Dependency injection](/docs/comparisons/dependency-injection) compares wiring with a container.
@@ -196,13 +196,13 @@ The S3 and Google Cloud providers change in the same way: each returns `Error` a
 `#[uses]`, the conversion it needs from its client's error. A context then chooses its error type in
 a single wiring entry, such as `ErrorTypeProviderComponent: UseType<anyhow::Error>`, next to the
 providers that convert each source error into it. Another context can choose an error enum of its
-own without touching this code, as long as it supplies those conversions as well. The same
-arrangement works for other dependencies, such as an async runtime, and it lets a core library stay
-`no_std` as long as the providers chosen for it are `no_std` too. A provider that reads files, like
-this one, still needs `std`, and its blocking read suits a test context, where an application would
-use an async file API. Async code may also need attention to
-[`Send` bounds](/docs/concepts/send-bounds).
-[Modular error handling](/docs/concepts/modular-error-handling) and
+own without touching this code, as long as it supplies those conversions as well.
+
+The same arrangement works for other dependencies, such as an async runtime, and it lets a core
+library stay `no_std` as long as the providers chosen for it are `no_std` too. A provider that reads
+files, like this one, still needs `std`, and its blocking read suits a test context, where an
+application would use an async file API. Async code may also need attention to
+[`Send` bounds](/docs/concepts/send-bounds). [Modular error handling](/docs/concepts/modular-error-handling) and
 [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explain the two halves of this
 arrangement.
 
@@ -228,8 +228,8 @@ pub async fn get_user(
 `PgPool` field named `database` gains `get_user`, with no wiring at all. The rest of CGP stays close
 to Rust in the same way. Providers use familiar `impl` syntax, and the trait that callers use remains
 an ordinary trait, so the hand-written implementation under *Zero-Cost Abstraction* is a valid way
-to implement it directly. This is why you can adopt CGP one component at a time. The cost is the
-provider model you have to learn and the wiring you have to maintain.
+to implement it directly. This is why you can adopt CGP one component at a time. The price is
+learning the provider model and maintaining the wiring.
 [Implicit arguments](/docs/concepts/implicit-arguments) explains the field reads, and
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) helps you judge how much of CGP a
 problem needs.
@@ -285,10 +285,10 @@ pub fn back_up_profile(&self, user: &str) -> Result<(), Error> {
 
 The context chooses that error type once, in its wiring, and every trait that imports
 `HasErrorType` agrees on it, so a loader and a saver on the same context always return the same
-error. These are still Rust associated types, which means their guarantees come only from the bounds
-you declare, and a type that appears in an interface, such as a returned error, still belongs in that
-interface. For a function with one or two independent type parameters,
-ordinary generics may be clearer. [Abstract types](/docs/concepts/abstract-types) explains the
+error. These are still Rust associated types, so their guarantees come only from the bounds you
+declare, and a type that appears in an interface, such as a returned error, still belongs in that
+interface. For a function with one or two independent type parameters, though, ordinary generics may
+be clearer. [Abstract types](/docs/concepts/abstract-types) explains the
 mechanism.
 
 ### Extensible records and variants
@@ -373,9 +373,9 @@ covers the family and its combinators.
 
 As an application grows, so does its wiring, and its contexts can end up repeating most of the same
 entries. A namespace gives them a wiring table they share, so each context lists only what differs.
-Each component registers under a path, such as `@app.GreeterComponent` in `AppNamespace`, with a
-`#[prefix]` attribute. `AppDefaults` then extends that namespace with the bindings every context
-shares, and a context joins it and fills in the rest:
+In the example below, each component has registered under a path in `AppNamespace`, such as
+`@app.GreeterComponent`, through a `#[prefix]` attribute on its definition. `AppDefaults` extends
+that namespace with the bindings every context shares, and a context joins it and fills in the rest:
 
 ```rust
 cgp_namespace! {
@@ -446,8 +446,8 @@ it, where there is one, along with the Concepts page that explains it:
 
 ## When a plain trait is enough
 
-All of this comes at a cost, and for a trait with only one implementation, a plain trait is the
-right tool. CGP adds declarations and wiring that a plain trait does not need, compile-time work for
+All of this comes at a cost, so for a trait with only one implementation, a plain trait is the right
+tool. CGP adds declarations and wiring that a plain trait does not need, compile-time work for
 its macros and type checking, and long raw errors. `cargo cgp check` leads with the root cause for
 the classes it recognizes, and the tool does not yet reshape every class. Learning the patterns also
 takes time. If you work with an assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the
