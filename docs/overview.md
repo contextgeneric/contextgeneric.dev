@@ -110,9 +110,17 @@ pub struct App {
     pub storage_client: aws_sdk_s3::Client,
 }
 
-delegate_components! { App { StorageObjectFetcherComponent: FetchS3Object } }
+delegate_components! {
+    App {
+        StorageObjectFetcherComponent: FetchS3Object,
+    }
+}
 
-check_components! { App { StorageObjectFetcherComponent } }
+check_components! {
+    App {
+        StorageObjectFetcherComponent,
+    }
+}
 ```
 
 [cargo-cgp](/docs/cargo-cgp), CGP's error toolchain, reports the missing field first and then the

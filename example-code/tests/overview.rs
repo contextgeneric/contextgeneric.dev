@@ -216,9 +216,17 @@ pub mod type_safe_wiring {
         pub bucket_id: String,
     }
 
-    delegate_components! { App { StorageObjectFetcherComponent: FetchS3Object } }
+    delegate_components! {
+        App {
+            StorageObjectFetcherComponent: FetchS3Object,
+        }
+    }
 
-    check_components! { App { StorageObjectFetcherComponent } }
+    check_components! {
+        App {
+            StorageObjectFetcherComponent,
+        }
+    }
 }
 
 /// ## Abstract Over Every Dependency
