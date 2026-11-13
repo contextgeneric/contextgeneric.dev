@@ -2,24 +2,23 @@
 title: 'Quickstart: install and run a first program'
 sidebar_label: 'Quickstart'
 sidebar_position: 2
-description: 'Install Context-Generic Programming and get a working Rust program running in a few minutes, with nothing to configure and no concepts to learn first.'
+description: 'Install Context-Generic Programming and run your first Rust program with it in a few minutes.'
 ---
 
 # Quickstart
 
-[Context-Generic Programming](/docs/) (CGP) enables pluggable trait implementations in Rust, and
-this page gets a program that uses it compiling and running on your machine. It explains nothing
-along the way, because the [Hello World tutorial](/docs/tutorials/hello) does that next, with a
-program much like this one.
+[Context-Generic Programming](/docs/) (CGP) enables pluggable trait implementations in Rust. To
+try it, you will create a Rust project and run a small program that prints a greeting. You can
+follow the steps without learning the concepts first, because the
+[Hello World tutorial](/docs/tutorials/hello) explains them afterward.
 
-The only thing you need is Rust 1.89 or newer on the stable toolchain, so check your version with
-`rustc --version` before you start. The version matters because on an older toolchain `cargo add`
-picks an older release of `cgp`, one that lacks what this program uses, and the build fails.
-`rustup update stable` brings the toolchain up to date.
+You need Rust 1.89 or newer on the stable toolchain. Check your version with `rustc --version`
+before you start. On an older toolchain, `cargo add` picks an older release of `cgp` that lacks the
+features this program uses, so the build fails. Run `rustup update stable` if you need to update.
 
 ## Install
 
-Create a project and add the crate to it:
+Create a project, open its directory, and add CGP:
 
 ```bash
 cargo new hello-cgp
@@ -36,7 +35,7 @@ cgp = "0.8.0"
 
 ## The program
 
-Replace the contents of `src/main.rs` with this program:
+With CGP installed, replace the contents of `src/main.rs` with this greeting program:
 
 ```rust title="src/main.rs"
 use cgp::prelude::*;
@@ -74,14 +73,15 @@ It should print:
 Hello, World!
 ```
 
-If it does, CGP is installed and working in your project.
+If you see that greeting, CGP is working in your project.
 
 ## Next
 
-The [Hello World tutorial](/docs/tutorials/hello) walks through a program like this one, then shows
-what makes it worth using: the same `greet` runs unchanged on a second, different context.
+The [Hello World tutorial](/docs/tutorials/hello) explains a program like this one, then shows how
+the same `greet` function runs unchanged on a different context.
 
 ---
 
 *An AI agent wrote this page using the CGP knowledge base, and its program was verified by compiling
-and running it. See [How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
+and running it. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

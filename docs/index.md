@@ -2,23 +2,24 @@
 title: 'Introduction: pluggable trait implementations'
 sidebar_label: 'Introduction'
 sidebar_position: 1
-description: 'What Context-Generic Programming is, the four words the rest of its documentation builds on, and where to go for each question you bring.'
+description: 'Learn what Context-Generic Programming is, get to know its core terms, and find the documentation you need.'
 ---
 
 # Introduction
 
+An application might read files from cloud storage while its tests read them from a local folder.
 Context-Generic Programming (CGP) is a language extension for Rust, with pluggable trait
-implementations at compile-time. It lets you write several implementations of one interface and
-have each application choose the one it uses, as when an application reads its files from cloud
-storage while its tests read them from a local folder. That may sound like a new language to learn,
-but CGP is an ordinary library on stable Rust: its macros generate plain traits and
-implementations, the compiler turns each choice into a direct call, and you can adopt it one trait
-at a time.
+implementations at compile-time, so both can use the same interface while each chooses its own
+implementation.
 
-Four words name the parts of that choice, and the rest of this documentation uses them throughout:
+CGP is still an ordinary library on stable Rust, not a new language to learn. Its macros generate
+plain traits and implementations, and the compiler turns each choice into a direct call. You can
+adopt it one trait at a time.
 
-- **[Context](/docs/reference/glossary#context):** a type that stands for one set of choices, such
-  as an application, and holds the data its implementations need.
+The documentation uses these terms to describe how the pieces fit together:
+
+- **[Context](/docs/reference/glossary#context):** a type, such as an application type, that
+  holds the data its implementations need and identifies which implementations to use.
 - **[Component](/docs/reference/glossary#component):** an interface whose implementation a context
   chooses.
 - **[Provider](/docs/reference/glossary#provider):** a named implementation of a component.
@@ -27,19 +28,18 @@ Four words name the parts of that choice, and the rest of this documentation use
 
 ## Start here
 
-If you want to write code, these pages take you from installing CGP to wiring and checking
-components of your own, in this order:
+To start writing code, follow these pages from installation through wiring and checking your own
+components:
 
 1. [Quickstart](/docs/quickstart): install CGP and run a first program in a few minutes.
-2. [Hello World](/docs/tutorials/hello): a program like the Quickstart's, then the idea that makes
-   it worth using.
-3. [Area calculation](/docs/tutorials/area-calculation): a series that grows ordinary Rust functions
-   into components and providers, and ends with how to check wiring and read its errors.
+2. [Hello World](/docs/tutorials/hello): understand a program like the Quickstart's, then see the
+   same function work on a second context.
+3. [Area calculation](/docs/tutorials/area-calculation): turn ordinary Rust functions into
+   components and providers, then learn to check their wiring and understand errors.
 
 ## Find what you need
 
-If you arrived with a particular question, each line below names it and the part of the
-documentation that answers it:
+If you have a particular question, use these links to find the relevant documentation:
 
 - **What can CGP do, feature by feature?** The [Overview](/docs/overview).
 - **Why does CGP work this way?** [Bypassing coherence](/docs/concepts/coherence) and
@@ -57,9 +57,8 @@ documentation that answers it:
 - **Where are the crates, talks, and community?** [Resources](/docs/resources).
 - **How can I help?** [Contribute](/docs/contribute).
 
-The [blog](/blog) is a record of releases, design discussions, and talks. Its older posts describe
-the library as it was when they were published, so the pages above are the better guide to CGP as
-it is now.
+For releases, design discussions, and talks, visit the [blog](/blog). Older posts describe the
+library at the time of publication, so use the documentation above for guidance on current CGP.
 
 ---
 

@@ -2,36 +2,35 @@
 title: 'Overview of the features, with examples'
 sidebar_label: 'Overview'
 sidebar_position: 3
-description: 'A tour of what Context-Generic Programming adds to Rust: the five headline features, each with a compiled example and the condition it holds under, then what lies beyond them.'
+description: 'Explore Context-Generic Programming through Rust examples, from choosing implementations to checking wiring and abstracting over dependencies.'
 ---
 
 # Overview
 
-[Context-Generic Programming](/docs/) (CGP) is a language extension for Rust, with pluggable trait
-implementations at compile-time. This page is a tour of what that gives you. It takes the five
-headline features one at a time, and for each one it starts from a problem you may already have,
-shows a short example, says where the feature stops helping, and links the page that explains it in
-full. A short list after them names what CGP offers beyond the five, to explore once they feel
-familiar. If you are new to CGP, you may prefer to begin with its simplest form, under
-[*Still Ordinary Rust*](#still-ordinary-rust), or to run a program first with the
+When deployments and tests need different implementations of the same interface, sharing code can
+become difficult. [Context-Generic Programming](/docs/) (CGP) is a language extension for Rust, with
+pluggable trait implementations at compile-time. The examples below show how those choices work, how
+the compiler checks them, and where the approach has limits.
+
+If you are new to CGP, you can begin with its simplest form under
+[*Still Ordinary Rust*](#still-ordinary-rust), or run a program with the
 [Quickstart](/docs/quickstart).
 
-Every example is a fragment of a program that compiles against `cgp` 0.8.0. The fragments leave out
-the imports, the definitions they do not need to show, and the check each context needs, which
-*Type-Safe Wiring* explains. They also share one scenario, the one the
-[`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md) uses: an application that
-fetches users' profile pictures from object storage. The examples skip the requests to each storage
-service, because the features are about how the code is arranged rather than what it does.
+The examples follow an application that fetches users' profile pictures from object storage, as in
+the [`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md). Each is a fragment of
+a program that compiles against `cgp` 0.8.0. To focus on how the code fits together, the fragments
+omit imports, supporting definitions, and requests to the storage services. They also omit the
+context checks explained under [*Type-Safe Wiring*](#type-safe-wiring).
 
 ## Key features
 
 ### One Interface, Many Implementations
 
-Suppose the application stores its pictures in Amazon S3, a second deployment of it uses Google
-Cloud Storage, and its tests read from a local folder. In plain Rust, each application type can
-implement a fetching trait itself, but then the S3 code belongs to that one type. Reusing it means
-writing a blanket implementation for every type with an S3 client and another for every type with a
-Google Cloud client. Rust rejects that pair, because one type could have both clients.
+Suppose one deployment stores its pictures in Amazon S3, another uses Google Cloud Storage, and
+tests read from a local folder. In plain Rust, each application type can implement a fetching trait
+itself, but then the S3 code belongs to that one type. To share that code, you might try writing a
+blanket implementation for every type with an S3 client and another for every type with a Google
+Cloud client. Rust rejects that pair, because one type could have both clients.
 
 CGP avoids the conflict by giving each implementation a type of its own, called a **provider**.
 Because the providers are different types, their implementations never overlap. Here is the
@@ -87,18 +86,18 @@ delegate_components! {
 }
 ```
 
-Code that calls `fetch_storage_object` stays the same in all three contexts. That does not mean
-Rust's coherence rules have been disabled. They still apply to everything the macros generate, and
-CGP only changes how the implementations are arranged, so that they no longer conflict.
+Code that calls `fetch_storage_object` stays the same in all three contexts. Rust's coherence rules
+still apply to everything the macros generate. CGP only arranges the implementations so that they no
+longer conflict.
 [Bypassing coherence](/docs/concepts/coherence) explains the rules, and
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) shows how a call reaches
 the chosen provider.
 
 ### Zero-Cost Abstraction
 
-A natural question about choosing implementations is what the choice costs at runtime. The answer is
-nothing, because the compiler resolves the wiring into a direct call. `App`'s wiring above amounts to
-the following implementation, which you could also write by hand:
+Choosing a provider adds no runtime overhead because the compiler resolves the wiring into a direct
+call. For `App`, the wiring above amounts to this implementation, which you could also write by
+hand:
 
 ```rust
 impl CanFetchStorageObject for App {
@@ -109,21 +108,22 @@ impl CanFetchStorageObject for App {
 }
 ```
 
-In that implementation, `StorageObjectFetcher<App>` is the provider trait with the context as its
-type parameter, which is how one provider can serve many contexts. Because the call names the
-provider directly, nothing sits between the two: no runtime registry, no reflection, and no virtual
-method table. The provider is never instantiated either, since it exists only as a type. Its own
-work still runs, though, such as the request to S3, and generic code can add compile time and code
-size. If you want to see what the macros generate, [`cargo cgp expand`](/docs/cargo-cgp/expand)
-prints it, and [Dynamic dispatch](/docs/comparisons/dynamic-dispatch) compares this approach with
-`dyn Trait`.
+Here, `StorageObjectFetcher<App>` is the provider trait with `App` as its context parameter.
+That parameter lets one provider serve many contexts. The call names the provider directly,
+without a runtime registry, reflection, or a virtual method table, and the provider itself is never
+instantiated: it exists only as a type.
+
+The work inside the provider, such as the request to S3, still has its usual runtime cost.
+Generic code can also increase compile time and code size. To inspect the generated code, use
+[`cargo cgp expand`](/docs/cargo-cgp/expand). For a comparison with `dyn Trait`, see
+[Dynamic dispatch](/docs/comparisons/dynamic-dispatch).
 
 ### Type-Safe Wiring
 
-Choosing providers is only useful if a wrong choice is caught early. With CGP it is caught at compile
-time: a context that cannot give its provider what it needs fails to build once its wiring is
-checked. For example, `FetchS3Object` reads a `bucket_id` field, so wiring it on a context that
-lacks one, and checking that wiring with `check_components!`, is a compile error:
+A provider needs more than a place in the wiring table: its context must supply the fields and
+traits it uses. The compiler checks those requirements when you use the component or check its
+wiring explicitly. For example, `FetchS3Object` needs a `bucket_id` field. This context lacks that
+field, so `check_components!` produces a compile error:
 
 ```rust
 #[derive(HasField)]
@@ -158,14 +158,14 @@ error[E0277]: [CGP-E001] missing field `bucket_id` on `App`
    = help: add the field `bucket_id` to `App`
 ```
 
-The check matters, because wiring on its own checks nothing. An entry compiles until the component
-is used or checked, so check each context where you assemble it. For a simple context,
+Because wiring alone does not check those requirements, check each context where you assemble it.
+For a simple context,
 [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) wires each
 entry and checks it in the same step. Even then, the check establishes that the components fit
 together, not that the application is correct.
 
-Reading the failure has a cost too. Without the tool, the raw compiler error for this mistake is
-longer, and it spells the field's name as a nested type. `cargo cgp check` leads with the root
+Without cargo-cgp, this error takes more effort to read: the raw compiler message is longer and
+represents the field's name as a nested type. `cargo cgp check` leads with the root
 cause for the classes it recognizes, and the tool does not yet reshape every class.
 [Check traits](/docs/concepts/check-traits) explains the checks, the
 [checking tutorial](/docs/tutorials/area-calculation/checking) walks through a mis-wiring, and
@@ -174,8 +174,8 @@ cause for the classes it recognizes, and the tool does not yet reshape every cla
 ### Abstract Over Every Dependency
 
 So far the component has returned `anyhow::Result`, which ties every implementation to one error
-type. Core logic does not have to fix that choice. It can name the dependencies it needs, such as
-an error type, and leave each context to supply them. Here the same component uses the context's
+type. To let each context choose its own error type, the component can declare that dependency
+without naming a concrete type. Here the same component uses the context's
 error type instead of `anyhow::Error`, and a provider declares the conversion it needs with
 `#[uses]`, without adding it to the interface:
 
@@ -203,8 +203,8 @@ impl StorageObjectFetcher {
 
 This definition of `CanFetchStorageObject` replaces the earlier one. Its `#[use_type]` attribute
 lets the trait and the provider write `Error` for whatever error type the context chooses. The
-provider's `#[uses]` attribute asks the context to be able to turn a file error into that type,
-which `Self::raise_error` then does.
+provider's `#[uses]` attribute requires a conversion from a file error into that type. The call to
+`Self::raise_error` performs that conversion.
 
 The S3 and Google Cloud providers change in the same way: each returns `Error` and declares, with
 `#[uses]`, the conversion it needs from its client's error. A context then chooses its error type in
@@ -222,8 +222,8 @@ provider keeps its needs out of the interface.
 
 ### Still Ordinary Rust
 
-None of this asks you to leave ordinary Rust behind. CGP is a library on stable Rust, and its
-simplest form is a function whose `#[implicit]` arguments come from the context's fields:
+CGP is a library on stable Rust, and you can use it without defining providers or wiring at all.
+Its simplest form is a function whose `#[implicit]` arguments come from the context's fields:
 
 ```rust
 #[cgp_fn]
@@ -250,9 +250,9 @@ problem needs.
 
 ## Beyond choosing implementations
 
-Choosing implementations is the core of CGP, but the same machinery reaches further. You need none
-of what follows to start, and each part is easier to learn once the features above feel familiar. So
-this page only names them and leaves their examples to the pages that explain them:
+Once you are comfortable choosing implementations, you can use the same mechanisms to share types,
+work over the shape of data, compose computations and providers, and reuse wiring. These features
+are optional, and the linked pages explain each one with examples:
 
 - **Abstract types:** a context chooses types as well as implementations. When several traits import
   the context's error type, they all agree on it, so a function that uses them needs no bound to
@@ -264,8 +264,8 @@ this page only names them and leaves their examples to the pages that explain th
   [Extensible records](/docs/concepts/extensible-records),
   [Extensible variants](/docs/concepts/extensible-variants), and
   [Dispatching](/docs/concepts/dispatching) cover the patterns.
-- **Composable handlers:** a family of components for computations, synchronous or async, fallible
-  or not, whose providers chain into pipelines that a context chooses in its wiring.
+- **Composable handlers:** components for synchronous or async computations that may be fallible
+  or infallible. Their providers form pipelines that a context selects in its wiring.
   [Handlers](/docs/concepts/handlers) covers the family.
 - **Namespaces:** a wiring table that several contexts share, so each context lists only the entries
   where it differs. [Namespaces](/docs/concepts/namespaces) explains them, along with the lighter
@@ -276,9 +276,9 @@ this page only names them and leaves their examples to the pages that explain th
 
 ## The problems it solves
 
-The features above are easier to judge against the problems you have. CGP helps most where
-a program already needs several implementations, or where dependencies spread through its
-signatures. The table below starts from the problem and links the Concepts page that explains it:
+CGP helps most when a program already needs several implementations or repeats dependencies
+through its signatures. If those problems sound familiar, these concept pages explain how CGP
+addresses them:
 
 | Problem | Explained in |
 | --- | --- |
@@ -295,18 +295,19 @@ signatures. The table below starts from the problem and links the Concepts page 
 
 ## When a plain trait is enough
 
-All of this comes at a cost. For a trait with only one implementation, a plain trait is the right
-tool, because CGP adds declarations and wiring that a plain trait does not need, compile-time work
-for its macros and type checking, and long raw errors, which [*Type-Safe Wiring*](#type-safe-wiring)
-describes along with the tool that helps. Learning the patterns also takes time. If you work with an
-assistant, [CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, the diagnostics, and
-the wiring, although you still need to review what it writes. The [front page's costs](/#costs)
-state the project's maturity, and [Modularity Hierarchy](/docs/concepts/modularity-hierarchy)
-explains when a plain trait is enough and when providers start to help.
+For a trait with only one implementation, a plain trait is the right tool. CGP adds declarations
+and wiring, and its macros and type checking add compile-time work. Its raw compiler errors can
+also be long, as [*Type-Safe Wiring*](#type-safe-wiring) shows.
+
+Learning the provider model and wiring patterns takes time too. If you work with an assistant,
+[CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, diagnostics, and wiring,
+although you still need to review what it writes. The [front page's costs](/#costs) describe the
+project's maturity, and [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) explains when
+a plain trait is enough and when providers start to help.
 
 ## Where to go next
 
-Where you go from here depends on which part of this tour caught your interest:
+To try these patterns in your own code or learn how they work, continue with these pages:
 
 - **Run code:** the [Quickstart](/docs/quickstart), then the
   [Hello World tutorial](/docs/tutorials/hello).
