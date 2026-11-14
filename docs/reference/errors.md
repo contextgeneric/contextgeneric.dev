@@ -63,7 +63,8 @@ Match the compiler's code and the shape of the message.
 | `E0277` the size for values of type `[u8]` cannot be known | A field-type shorthand lowered to an unsized type | [A field-type shorthand without a rule](#a-field-type-shorthand-without-a-rule) |
 | `E0271` type mismatch resolving `<… as …>::Assoc == …` | A type pinned one way and wired another | [When two decisions disagree about a type](#when-two-decisions-disagree-about-a-type) |
 | `E0119` conflicting implementations | Two wiring entries claim one key | [The wiring itself does not compile](#the-wiring-itself-does-not-compile) |
-| `E0425` / `E0782` a wiring name resolves to nothing | A component or provider named wrongly in a table | [A wiring name that resolves to nothing](#a-wiring-name-that-resolves-to-nothing) |
+| `E0425` / `E0782` a wiring name resolves to nothing | A component or provider named wrongly in a table, or a provider header's component not imported | [A wiring name that resolves to nothing](#a-wiring-name-that-resolves-to-nothing) |
+| `E0107` missing generics for struct `…Component` | A component key with parameters, derived by a provider header | [A wiring name that resolves to nothing](#a-wiring-name-that-resolves-to-nothing) |
 | `E0428` the name … is defined multiple times | A generated name declared twice | [Two entries claim one key](#two-entries-claim-one-key) |
 | `E0275` overflow evaluating the requirement | A wiring or inheritance cycle | [A lookup that never terminates](#a-lookup-that-never-terminates) |
 | `E0210` / `E0117` [orphan rule](/docs/reference/glossary#orphan-rule) | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
@@ -413,6 +414,14 @@ path. The tool words each shape with its own code: `[CGP-E040]` for a consumer t
 `[CGP-E041]` for a component not in scope, `[CGP-E042]` for a key guessed from a trait's name,
 `[CGP-E043]` for an undeclared provider, and `[CGP-E044]` for an undeclared type in a path. A
 `#[cgp_impl]` provider never declared is `[CGP-E038]`.
+
+A provider header names a component too, without writing it. `#[cgp_impl]` and `#[cgp_provider]`
+derive the key from the provider trait's path, so `impl Greeter` names `GreeterComponent`, and a
+provider in another module than its component imports the key beside the trait. A missing import
+is an `E0425` on the trait's name, which the tool words as `[CGP-E041]` with the import. A trait
+imported under another name, or a component whose `name:` renames its key or gives it parameters,
+derives a name that is not the component's, which the tool words as `[CGP-E070]`, naming the key in
+the attribute, as `#[cgp_impl(new UnitArea: AreaComponent)]`.
 
 ### Joining more than one namespace
 

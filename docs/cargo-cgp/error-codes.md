@@ -487,14 +487,20 @@ Replace the trait with the component marker named by the `help` line.
 
 ### CGP-E041
 
-The component exists, but the table cannot see it. For example, `ErrorTypeProviderComponent`
-needs an explicit import because it is not exported by the prelude:
+The component exists, but the code that names it cannot see it. A wiring table names it as a key,
+as `ErrorTypeProviderComponent`, which needs an explicit import because the prelude does not
+export it. A `#[cgp_impl]` or `#[cgp_provider]` header names it too, without writing it: the macro
+derives `GreeterComponent` from `impl Greeter`, so a provider in another module imports the key
+beside the trait, and the error sits on the trait's name:
 
 ```text
 [CGP-E041] the component `<Component>` is not in scope
 ```
 
-To fix it, add the `use` line the `help` line gives.
+To fix it, add the `use` line the `help` line gives. A header that names the trait by its path
+derives the key through the same path, so one written through a module that re-exports the trait
+without its key reads `` the component `<Component>` is not in module `<module>` ``; name the trait
+through the module the `help` line gives, or re-export the key beside the trait.
 
 ### CGP-E042
 
@@ -549,6 +555,25 @@ Follow the reported cause to choose the correction: remove a duplicate setting o
 set a missing field, supply a compatible variant or payload, or use the derive or method named
 in `help`. [Extensible variants](/docs/concepts/extensible-variants) and
 [extensible records](/docs/concepts/extensible-records) explain the state each operation requires.
+
+## Mistakes in what a macro was given, continued
+
+### CGP-E070
+
+A `#[cgp_impl]` or `#[cgp_provider]` header derives its component from the trait's name as written,
+and that name is not the component's. The trait may be imported under another name, so
+`use …::Greeter as G;` and `impl G` derive `GComponent`, or the component's `name:` may rename its
+key or give it parameters:
+
+```text
+[CGP-E070] the header derives the component `<Derived>` from the trait name `<Written>`, but the component of `<ProviderTrait>` is `<Component>`
+```
+
+To fix it, name the component in the attribute, in the form the `help` line gives, such as
+`#[cgp_impl(new UnitArea: AreaComponent)]` or `#[cgp_provider(GreeterComponent)]`; a key with
+parameters takes the header's arguments, as `AreaCalculatorComponent<Square>`. For a renamed import,
+importing the trait under its own name works too, and the `note` explains why the compiler calls
+the key's import unused.
 
 ## Steps of the dependency chain
 
