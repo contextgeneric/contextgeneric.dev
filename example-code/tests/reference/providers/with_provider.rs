@@ -49,10 +49,10 @@ pub mod examples {
 pub mod when_to_use_it {
     use core::marker::PhantomData;
 
+    use cgp::core::component::WithContext;
     use cgp::core::field::impls::WithField;
     use cgp::core::types::TypeProviderComponent;
     use cgp::prelude::*;
-    use cgp::core::component::WithContext;
 
     #[cgp_type]
     pub trait HasWidthType {

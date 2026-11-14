@@ -1,6 +1,6 @@
 use cgp::core::field::traits::FinalizeExtractResult;
-use cgp::prelude::*;
 use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::prelude::*;
 
 pub struct Circle {
     pub radius: f64,

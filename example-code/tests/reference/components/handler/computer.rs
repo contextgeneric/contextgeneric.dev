@@ -102,9 +102,9 @@ pub mod examples {
     use core::marker::PhantomData;
 
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::PromoteComputer;
     use cgp::extra::handler::{CanCompute, CanTryCompute};
     use cgp::prelude::*;
-    use cgp::extra::handler::PromoteComputer;
 
     #[cgp_new_provider]
     impl<Context, Code> Computer<Context, Code, u64> for Double {

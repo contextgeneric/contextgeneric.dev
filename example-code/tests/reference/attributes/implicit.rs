@@ -33,8 +33,8 @@ pub mod overview {
 /// The Usage snippet as a `#[cgp_fn]`, the raw-identifier rule, and one function per row of the
 /// access table, each run against a context holding the field type the row names.
 pub mod usage {
-    use cgp::prelude::*;
     use cgp::core::field::types::MRef;
+    use cgp::prelude::*;
 
     #[cgp_fn]
     pub fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {

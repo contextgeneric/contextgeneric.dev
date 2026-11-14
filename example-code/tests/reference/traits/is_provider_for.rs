@@ -9,8 +9,8 @@
 ///
 /// One component parameter is passed directly as `Params`.
 pub mod usage {
-    use cgp::prelude::*;
     use cgp::core::component::IsProviderFor;
+    use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
     pub trait CanCalculateArea<Shape> {

@@ -5,9 +5,9 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromFields;
     use cgp::core::field::traits::ToFields;
+    use cgp::prelude::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Config {

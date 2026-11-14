@@ -4,8 +4,8 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::traits::ToFieldsRef;
+    use cgp::prelude::*;
 
     #[derive(HasFields)]
     pub struct Config {

@@ -9,9 +9,9 @@ pub mod examples {
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
+    use cgp::extra::handler::HandlerRefComponent;
     use cgp::extra::handler::{CanHandleRef, HandlerRef};
     use cgp::prelude::*;
-    use cgp::extra::handler::HandlerRefComponent;
 
     #[cgp_impl(new NonEmptyLength)]
     #[uses(CanRaiseError<String>)]

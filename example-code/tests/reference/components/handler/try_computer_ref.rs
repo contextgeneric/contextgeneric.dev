@@ -10,9 +10,9 @@ pub mod examples {
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
+    use cgp::extra::handler::TryComputerRefComponent;
     use cgp::extra::handler::{CanTryComputeRef, TryComputerRef};
     use cgp::prelude::*;
-    use cgp::extra::handler::TryComputerRefComponent;
 
     #[cgp_impl(new ParsePort)]
     #[uses(CanRaiseError<ParseIntError>)]

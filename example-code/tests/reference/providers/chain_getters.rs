@@ -5,9 +5,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::component::WithProvider;
     use cgp::core::field::impls::ChainGetters;
     use cgp::prelude::*;
-    use cgp::core::component::WithProvider;
 
     #[cgp_getter]
     pub trait HasName {

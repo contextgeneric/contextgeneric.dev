@@ -6,9 +6,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::PromoteAsyncComputer;
     use cgp::extra::handler::{CanComputeAsync, CanHandle};
     use cgp::prelude::*;
-    use cgp::extra::handler::PromoteAsyncComputer;
 
     #[cgp_computer]
     pub async fn double_later(value: u64) -> u64 {
@@ -49,10 +49,10 @@ pub mod examples {
 /// `AsyncComputerRefComponent` is `PromoteRef<P>`, one step from the base, so a hand-written
 /// `AsyncComputer` whose input is a borrow answers it.
 pub mod under_the_hood {
-    use cgp::extra::handler::CanComputeAsyncRef;
-    use cgp::prelude::*;
     use cgp::extra::handler::AsyncComputerRefComponent;
+    use cgp::extra::handler::CanComputeAsyncRef;
     use cgp::extra::handler::PromoteAsyncComputer;
+    use cgp::prelude::*;
 
     #[cgp_new_provider]
     impl<'a, Context, Code> AsyncComputer<Context, Code, &'a u64> for DoubleRefLater {

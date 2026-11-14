@@ -8,10 +8,10 @@
 /// The accepted rewrite the page recommends, with a payload struct that derives `CgpRecord`, a
 /// generic enum, and the variantless enum it says is accepted.
 pub mod usage {
-    use cgp::prelude::*;
     use cgp::core::field::traits::ExtractField;
     use cgp::core::field::traits::FromVariant;
     use cgp::core::field::traits::HasExtractor;
+    use cgp::prelude::*;
 
     #[derive(CgpRecord, Debug, PartialEq)]
     pub struct Circle {
@@ -57,10 +57,10 @@ pub mod rejected_struct_style_variant {}
 /// `area`, an extraction chain closed with no wildcard arm. The page names `Circle` and `Rectangle`
 /// without declaring them, so they are declared here.
 pub mod examples {
-    use cgp::core::field::traits::FinalizeExtractResult;
-    use cgp::prelude::*;
     use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FinalizeExtractResult;
     use cgp::core::field::traits::HasExtractor;
+    use cgp::prelude::*;
 
     pub struct Circle {
         pub radius: f64,
@@ -113,8 +113,8 @@ pub mod examples {
 /// projections, so a variant may share a name with one of them. Helper attributes of another derive
 /// stay on the enum.
 pub mod no_reserved_names {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
     use serde::Serialize;
 
     #[derive(CgpData, Serialize)]

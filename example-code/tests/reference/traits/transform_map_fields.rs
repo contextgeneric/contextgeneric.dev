@@ -6,10 +6,10 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::IsPresent;
+    use cgp::core::field::traits::IntoBuilder;
     use cgp::core::field::traits::{TransformMap, TransformMapFields};
     use cgp::prelude::*;
-    use cgp::core::field::traits::IntoBuilder;
-    use cgp::core::field::impls::IsPresent;
 
     // Doubles every present number and keeps it present.
     pub struct Double;
@@ -60,10 +60,10 @@ pub mod examples {
 pub mod under_the_hood {
     use std::cell::RefCell;
 
+    use cgp::core::field::impls::IsPresent;
+    use cgp::core::field::traits::IntoBuilder;
     use cgp::core::field::traits::{TransformMap, TransformMapFields};
     use cgp::prelude::*;
-    use cgp::core::field::traits::IntoBuilder;
-    use cgp::core::field::impls::IsPresent;
 
     thread_local! {
         static SEEN: RefCell<Vec<u32>> = const { RefCell::new(Vec::new()) };

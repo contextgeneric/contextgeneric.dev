@@ -6,10 +6,10 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::core::field::impls::WithField;
-    use cgp::prelude::*;
     use cgp::core::component::WithProvider;
+    use cgp::core::field::impls::WithField;
     use cgp::core::field::traits::FieldGetter;
+    use cgp::prelude::*;
 
     #[cgp_getter(NameGetter)]
     pub trait HasName {

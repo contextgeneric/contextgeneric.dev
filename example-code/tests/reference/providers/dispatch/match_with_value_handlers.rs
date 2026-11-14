@@ -9,9 +9,9 @@
 /// `MatchWithValueHandlersRef` answers `ComputerComponent` over a borrowed enum with a provider over
 /// borrowed payloads, and `ComputerRefComponent` with a `ComputerRef` provider over the payloads.
 pub mod usage {
+    use cgp::extra::dispatch::MatchWithValueHandlersRef;
     use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef};
     use cgp::prelude::*;
-    use cgp::extra::dispatch::MatchWithValueHandlersRef;
 
     pub struct Circle {
         pub radius: f64,
@@ -98,10 +98,10 @@ pub mod usage {
 /// A named provider needs no per-type entries, and `MatchWithValueHandlersMut` hands each payload
 /// to a provider over `&mut` payloads, which can change the value in place.
 pub mod usage_named_and_mut {
-    use cgp::extra::handler::CanCompute;
-    use cgp::prelude::*;
     use cgp::extra::dispatch::MatchWithValueHandlers;
     use cgp::extra::dispatch::MatchWithValueHandlersMut;
+    use cgp::extra::handler::CanCompute;
+    use cgp::prelude::*;
 
     pub struct Circle {
         pub radius: f64,
@@ -198,9 +198,9 @@ pub mod usage_named_and_mut {
 
 /// ## Examples
 pub mod examples {
+    use cgp::extra::dispatch::MatchWithValueHandlers;
     use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
-    use cgp::extra::dispatch::MatchWithValueHandlers;
 
     pub struct Circle {
         pub radius: f64,

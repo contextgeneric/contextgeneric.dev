@@ -7,8 +7,8 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::impls::CanUpcast;
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {

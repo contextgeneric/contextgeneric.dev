@@ -44,8 +44,8 @@ pub mod overview {
 /// The derived name, the bare override, and the keyed form, each in its own module.
 pub mod usage {
     pub mod derived_name {
-        use cgp::prelude::*;
         use cgp::core::component::UseFields;
+        use cgp::prelude::*;
 
         #[cgp_getter]
         pub trait HasName {
@@ -71,8 +71,8 @@ pub mod usage {
     }
 
     pub mod bare_override {
-        use cgp::prelude::*;
         use cgp::core::component::UseFields;
+        use cgp::prelude::*;
 
         #[cgp_getter(GetName)]
         pub trait HasName {
@@ -99,8 +99,8 @@ pub mod usage {
 
     /// A trait without the `Has` prefix, which gets no default and so names its provider.
     pub mod keyed_form {
-        use cgp::prelude::*;
         use cgp::core::component::UseFields;
+        use cgp::prelude::*;
 
         #[cgp_getter {
             provider: DimensionsGetter,
@@ -136,9 +136,9 @@ pub mod usage {
 /// All three providers, and the direct impl. `WithProvider` is reached through its `WithField`
 /// alias, which wraps the field-getter provider `UseField`.
 pub mod what_a_context_can_wire_it_to {
-    use cgp::prelude::*;
     use cgp::core::component::UseFields;
     use cgp::core::component::WithProvider;
+    use cgp::prelude::*;
 
     #[cgp_getter]
     pub trait HasName {
@@ -227,8 +227,8 @@ pub mod what_a_context_can_wire_it_to {
 /// The page's three snippets: `UseField` on `Person`, `UseFields` on `Employee`, and the direct
 /// impl on `Anonymous`. The page does not declare `Employee`; it has a `name` field here.
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::component::UseFields;
+    use cgp::prelude::*;
 
     #[cgp_getter]
     pub trait HasName {

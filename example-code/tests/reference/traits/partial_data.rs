@@ -5,8 +5,8 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::traits::PartialData;
+    use cgp::prelude::*;
 
     #[derive(Debug, PartialEq, BuildField)]
     pub struct Person {

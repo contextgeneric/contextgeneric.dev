@@ -166,9 +166,9 @@ pub mod examples {
 ///
 /// The expansion the page shows, and the byte length a multi-byte string records.
 pub mod under_the_hood {
-    use cgp::prelude::*;
     use cgp::core::field::types::Chars;
     use cgp::core::field::types::Symbol;
+    use cgp::prelude::*;
 
     #[test]
     fn the_expansion_is_a_length_and_a_character_list() {

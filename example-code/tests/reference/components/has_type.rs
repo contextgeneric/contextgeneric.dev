@@ -5,9 +5,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::types::HasType;
     use cgp::core::types::{TypeOf, TypeProviderComponent};
     use cgp::prelude::*;
-    use cgp::core::types::HasType;
 
     pub struct ScalarTag;
 

@@ -11,10 +11,10 @@
 pub mod usage {
     use core::marker::PhantomData;
 
-    use cgp::extra::handler::{CanComputeAsync, PromoteRef};
-    use cgp::prelude::*;
     use cgp::extra::handler::AsyncComputerRef;
     use cgp::extra::handler::AsyncComputerRefComponent;
+    use cgp::extra::handler::{CanComputeAsync, PromoteRef};
+    use cgp::prelude::*;
 
     #[cgp_new_provider]
     impl<Context, Code> AsyncComputerRef<Context, Code, String> for CountWords {
@@ -57,10 +57,10 @@ pub mod usage {
 pub mod examples {
     use core::marker::PhantomData;
 
-    use cgp::extra::handler::CanComputeAsyncRef;
-    use cgp::prelude::*;
     use cgp::extra::handler::AsyncComputerRef;
     use cgp::extra::handler::AsyncComputerRefComponent;
+    use cgp::extra::handler::CanComputeAsyncRef;
+    use cgp::prelude::*;
 
     #[cgp_new_provider]
     impl<Context, Code> AsyncComputerRef<Context, Code, String> for CountWords {

@@ -5,14 +5,14 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::IsMut;
     use cgp::core::field::impls::IsOwned;
-    use cgp::prelude::*;
+    use cgp::core::field::impls::IsRef;
     use cgp::core::field::traits::ExtractField;
     use cgp::core::field::traits::HasExtractorMut;
     use cgp::core::field::traits::HasExtractorRef;
-    use cgp::core::field::impls::IsMut;
-    use cgp::core::field::impls::IsRef;
     use cgp::core::field::traits::MapTypeRef;
+    use cgp::prelude::*;
 
     pub fn by_ref<'a>(value: <IsRef as MapTypeRef>::Map<'a, String>) -> &'a String {
         value

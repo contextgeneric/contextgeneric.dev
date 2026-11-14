@@ -10,8 +10,8 @@
 pub mod usage {
     use core::marker::PhantomData;
 
-    use cgp::prelude::*;
     use cgp::core::component::WithContext;
+    use cgp::prelude::*;
 
     #[cgp_getter]
     pub trait HasName {
@@ -54,9 +54,9 @@ pub mod usage {
 pub mod examples {
     use core::marker::PhantomData;
 
+    use cgp::core::component::WithContext;
     use cgp::core::types::TypeProviderComponent;
     use cgp::prelude::*;
-    use cgp::core::component::WithContext;
 
     #[cgp_type]
     pub trait HasNameType {

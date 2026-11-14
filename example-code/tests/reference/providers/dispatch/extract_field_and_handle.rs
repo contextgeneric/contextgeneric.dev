@@ -6,9 +6,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasExtractor;
     use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue};
     use cgp::prelude::*;
-    use cgp::core::field::traits::HasExtractor;
 
     pub struct Circle {
         pub radius: f64,

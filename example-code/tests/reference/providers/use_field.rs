@@ -94,9 +94,9 @@ pub mod under_the_hood {
         use core::marker::PhantomData;
 
         use cgp::core::field::impls::WithField;
+        use cgp::core::types::HasType;
         use cgp::core::types::TypeProviderComponent;
         use cgp::prelude::*;
-        use cgp::core::types::HasType;
 
         #[cgp_type]
         pub trait HasWidthType {

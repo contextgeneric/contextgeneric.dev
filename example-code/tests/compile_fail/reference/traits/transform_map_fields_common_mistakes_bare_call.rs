@@ -1,7 +1,7 @@
+use cgp::core::field::impls::IsPresent;
+use cgp::core::field::traits::IntoBuilder;
 use cgp::core::field::traits::{TransformMap, TransformMapFields};
 use cgp::prelude::*;
-use cgp::core::field::traits::IntoBuilder;
-use cgp::core::field::impls::IsPresent;
 
 pub struct Keep;
 

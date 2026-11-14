@@ -6,8 +6,8 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::types::MRef;
+    use cgp::prelude::*;
 
     #[cgp_getter]
     pub trait HasGreeting {

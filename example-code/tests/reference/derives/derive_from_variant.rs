@@ -9,8 +9,8 @@
 ///
 /// The opening claim: `from_variant` with a tag is the same construction as naming the variant.
 pub mod overview {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Circle {
@@ -41,8 +41,8 @@ pub mod overview {
 ///
 /// The accepted enum, a generic one, and the variantless enum the page says produces no impls.
 pub mod usage {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Circle {
@@ -81,8 +81,8 @@ pub mod rejected_struct_style_variant {}
 /// The `wrap` function the page shows: one function that builds either variant, staying generic over
 /// the tag and naming its payload type through the trait.
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {

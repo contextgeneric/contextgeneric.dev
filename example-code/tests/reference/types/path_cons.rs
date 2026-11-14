@@ -7,9 +7,9 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::base::traits::ConcatPath;
     use cgp::core::base::types::PathCons;
+    use cgp::prelude::*;
 
     #[cgp_component(FooProvider)]
     pub trait CanFoo {

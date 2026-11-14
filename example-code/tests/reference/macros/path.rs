@@ -7,9 +7,9 @@
 ///
 /// The three example paths, and one segment of each kind in the page's table.
 pub mod usage {
+    use cgp::core::base::types::PathCons;
     use cgp::core::error::ErrorRaiserComponent;
     use cgp::prelude::*;
-    use cgp::core::base::types::PathCons;
 
     pub type One = Path!(@app);
     pub type Two = Path!(@app.error);
@@ -46,9 +46,9 @@ pub mod usage {
 /// into one program so the route resolves. The page names `FooProviderComponent`,
 /// `MyFooComponent`, `AppNamespace`, `ShowWithDebug`, and `MyApp` without declaring them here.
 pub mod examples {
+    use cgp::core::base::types::PathCons;
     use cgp::core::error::ErrorRaiserComponent;
     use cgp::prelude::*;
-    use cgp::core::base::types::PathCons;
 
     pub type ErrorRoute = Path!(@app.error.ErrorRaiserComponent);
 
@@ -119,11 +119,11 @@ pub mod examples {
 /// The fully expanded symbol segment and the embedded forms' paths, checked against the traits
 /// the macros implement: the namespace's redirect `Delegate`, and the prefix route.
 pub mod under_the_hood {
-    use cgp::prelude::*;
     use cgp::core::base::types::PathCons;
     use cgp::core::component::RedirectLookup;
     use cgp::core::field::types::Chars;
     use cgp::core::field::types::Symbol;
+    use cgp::prelude::*;
 
     pub use super::examples::{
         AppNamespace, FooProviderComponent, MyFooComponent, MyNamespace, ShowImplComponent,
@@ -155,8 +155,8 @@ pub mod under_the_hood {
 pub mod primitive_like_names {
     use core::marker::PhantomData;
 
-    use cgp::prelude::*;
     use cgp::core::base::types::PathCons;
+    use cgp::prelude::*;
 
     #[test]
     fn f_is_a_symbol() {

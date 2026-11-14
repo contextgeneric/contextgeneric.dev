@@ -8,9 +8,9 @@
 pub mod usage {
     use core::marker::PhantomData;
 
+    use cgp::core::types::HasType;
     use cgp::core::types::{TypeProviderComponent, UseDelegatedType};
     use cgp::prelude::*;
-    use cgp::core::types::HasType;
 
     pub struct ScalarTag;
     pub struct IndexTag;

@@ -5,8 +5,8 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::component::CanUseComponent;
+    use cgp::prelude::*;
 
     #[cgp_auto_getter]
     pub trait HasName {

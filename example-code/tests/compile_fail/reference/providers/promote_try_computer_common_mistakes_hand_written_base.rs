@@ -1,6 +1,6 @@
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::prelude::*;
 use cgp::extra::handler::PromoteTryComputer;
+use cgp::prelude::*;
 
 #[cgp_new_provider]
 impl<Context, Code> Computer<Context, Code, u64> for CheckedDouble

@@ -6,8 +6,8 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::traits::ToFields;
+    use cgp::prelude::*;
 
     #[derive(HasFields)]
     pub enum Shape {

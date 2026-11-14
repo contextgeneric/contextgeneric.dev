@@ -9,9 +9,9 @@
 ///
 /// The opening extraction, and the payload types the page names without declaring.
 pub mod overview {
-    use cgp::prelude::*;
     use cgp::core::field::traits::ExtractField;
     use cgp::core::field::traits::HasExtractor;
+    use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Circle {
@@ -54,9 +54,9 @@ pub mod overview {
 /// The accepted enum, the payload-struct rewrite the page recommends, and the variantless enum the
 /// page says degenerates.
 pub mod usage {
-    use cgp::prelude::*;
     use cgp::core::field::traits::ExtractField;
     use cgp::core::field::traits::HasExtractor;
+    use cgp::prelude::*;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {
@@ -122,12 +122,12 @@ pub mod rejected_variant_shapes {}
 /// The three snippets the page shows: the owned chain closed with `finalize_extract_result`, the
 /// borrowed read, and the mutable modification.
 pub mod examples {
-    use cgp::core::field::traits::FinalizeExtractResult;
-    use cgp::prelude::*;
     use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FinalizeExtractResult;
     use cgp::core::field::traits::HasExtractor;
     use cgp::core::field::traits::HasExtractorMut;
     use cgp::core::field::traits::HasExtractorRef;
+    use cgp::prelude::*;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {

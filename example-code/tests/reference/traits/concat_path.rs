@@ -6,8 +6,8 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::base::traits::ConcatPath;
+    use cgp::prelude::*;
 
     pub type Outer = Path!(@a.b);
     pub type Inner = Path!(@c.d);

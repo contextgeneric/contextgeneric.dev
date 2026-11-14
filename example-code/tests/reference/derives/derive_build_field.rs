@@ -114,8 +114,8 @@ pub mod usage {
 /// field back out mid-build, and taking a field out and putting it back.
 pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
-    use cgp::prelude::*;
     use cgp::core::field::traits::IntoBuilder;
+    use cgp::prelude::*;
 
     // `build_from` recurses over the *source's* field list, so the source needs `HasFields` as
     // well as the builder. The page says so under *The three ways to fill a field*.
@@ -207,8 +207,8 @@ pub mod examples {
 /// The derives that emit no companion type leave field helper attributes alone, so `serde`'s
 /// `rename` coexists with them. The companion-emitting case is a trybuild fixture.
 pub mod common_mistakes {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
     use serde::Serialize;
 
     #[derive(Serialize, HasField, HasFields)]

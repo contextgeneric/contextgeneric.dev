@@ -1,5 +1,5 @@
-use cgp::prelude::*;
 use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

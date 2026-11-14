@@ -248,8 +248,8 @@ pub mod examples {
 /// The impl the attribute emits, written by hand for an unprefixed component, resolves the same
 /// way as the attribute's own output.
 pub mod under_the_hood {
-    use cgp::prelude::*;
     use cgp::core::component::RedirectLookup;
+    use cgp::prelude::*;
 
     cgp_namespace! {
         new AppNamespace {}

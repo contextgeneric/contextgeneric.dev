@@ -5,9 +5,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::IntoBuilder;
     use cgp::extra::field::impls::{FinalizeOptional, SetOptional, ToOptional};
     use cgp::prelude::*;
-    use cgp::core::field::traits::IntoBuilder;
 
     #[derive(Debug, PartialEq, CgpData)]
     pub struct Context {

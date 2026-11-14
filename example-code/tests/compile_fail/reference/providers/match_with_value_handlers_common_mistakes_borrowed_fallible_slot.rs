@@ -1,6 +1,6 @@
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::prelude::*;
 use cgp::extra::dispatch::MatchWithValueHandlersRef;
+use cgp::prelude::*;
 
 pub struct Circle {
     pub radius: f64,

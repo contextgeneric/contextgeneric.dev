@@ -8,9 +8,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::PromoteComputer;
     use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute};
     use cgp::prelude::*;
-    use cgp::extra::handler::PromoteComputer;
 
     #[cgp_computer]
     pub fn double(value: u64) -> u64 {
@@ -63,8 +63,8 @@ pub mod examples {
 /// whose input is a borrow answers it.
 pub mod under_the_hood {
     use cgp::extra::handler::CanComputeRef;
-    use cgp::prelude::*;
     use cgp::extra::handler::PromoteComputer;
+    use cgp::prelude::*;
 
     #[cgp_new_provider]
     impl<'a, Context, Code> Computer<Context, Code, &'a u64> for DoubleRef {
@@ -101,8 +101,8 @@ pub mod under_the_hood {
 /// `AsyncComputerComponent` to `PromoteAsync`, each of which needs only the `Computer`.
 pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
-    use cgp::prelude::*;
     use cgp::extra::handler::PromoteComputer;
+    use cgp::prelude::*;
 
     #[cgp_new_provider]
     impl<Context, Code> Computer<Context, Code, u64> for Double {

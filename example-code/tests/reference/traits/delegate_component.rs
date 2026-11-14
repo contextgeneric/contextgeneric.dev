@@ -8,8 +8,8 @@
 ///
 /// Reading an entry is a bound plus a projection of `Delegate`.
 pub mod usage {
-    use cgp::prelude::*;
     use cgp::core::component::DelegateComponent;
+    use cgp::prelude::*;
 
     pub fn provider_for<Table, Key>() -> PhantomData<<Table as DelegateComponent<Key>>::Delegate>
     where

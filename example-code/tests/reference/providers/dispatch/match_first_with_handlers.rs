@@ -91,9 +91,9 @@ pub mod examples {
 ///
 /// `MatchFirstWithValueHandlers` builds the same list from the enum's variants.
 pub mod when_to_use_it {
+    use cgp::extra::dispatch::MatchFirstWithValueHandlers;
     use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
-    use cgp::extra::dispatch::MatchFirstWithValueHandlers;
 
     pub struct Circle {
         pub radius: f64,

@@ -1,8 +1,8 @@
 use core::marker::PhantomData;
 
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::prelude::*;
 use cgp::extra::handler::PromoteProducer;
+use cgp::prelude::*;
 
 #[cgp_new_provider]
 impl<Context, Code> Producer<Context, Code> for MagicNumber {

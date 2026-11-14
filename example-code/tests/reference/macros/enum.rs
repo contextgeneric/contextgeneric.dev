@@ -47,8 +47,8 @@ pub mod usage {
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::traits::FromFields;
+    use cgp::prelude::*;
 
     #[derive(Debug, PartialEq, CgpData)]
     pub enum Value {

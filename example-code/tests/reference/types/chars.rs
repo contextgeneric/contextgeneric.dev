@@ -7,9 +7,9 @@
 
 /// ## Examples
 pub mod examples {
-    use cgp::prelude::*;
     use cgp::core::field::types::Chars;
     use cgp::core::field::types::Symbol;
+    use cgp::prelude::*;
 
     // The tag names the field the function reads.
     pub fn name_of<Context>(context: &Context) -> &str

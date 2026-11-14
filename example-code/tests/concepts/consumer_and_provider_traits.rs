@@ -86,9 +86,9 @@ pub mod splitting_one_trait_in_two {
 /// page's own note about reserved names and the spelled-out delegate refers to. Check the text
 /// against `expand`; check the shape against this module.
 pub mod how_a_call_finds_its_provider {
-    use cgp::prelude::*;
     use cgp::core::component::DelegateComponent;
     use cgp::core::component::IsProviderFor;
+    use cgp::prelude::*;
 
     pub trait CanSendEmail {
         fn send_email(&self, to: &str, body: &str);

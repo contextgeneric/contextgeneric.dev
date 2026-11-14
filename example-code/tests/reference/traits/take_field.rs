@@ -5,9 +5,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::IntoBuilder;
     use cgp::core::field::traits::TakeField;
     use cgp::prelude::*;
-    use cgp::core::field::traits::IntoBuilder;
 
     #[derive(Debug, PartialEq, BuildField)]
     pub struct Person {
