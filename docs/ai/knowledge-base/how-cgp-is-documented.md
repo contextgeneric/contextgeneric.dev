@@ -130,9 +130,9 @@ code is enforced by agents following the rules and by the author's review, and b
 sentence.
 
 A document can therefore lag behind the code or state something wrong, and so can a page derived
-from it, as [its current state](index.md#its-current-state) describes. The aim is to improve the
-knowledge base step by step toward full accuracy, meaning agreement with the author's intent as well
-as with the source.
+from it. The knowledge base's [current state](index.md#its-current-state) says how to weigh a
+document with that in mind. The aim is to improve the knowledge base step by step toward full
+accuracy, meaning agreement with the author's intent as well as with the source.
 
 The process does not make agent-written documentation correct. It makes an error checkable against a
 public record and correctable at its source, after which the correction reaches the skill and the

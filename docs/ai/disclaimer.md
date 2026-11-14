@@ -37,9 +37,10 @@ which [How CGP's Documentation Is Written](/docs/ai/knowledge-base/how-cgp-is-do
 in full.
 
 The knowledge base is checked against the source, but the checks can miss a stale sentence or an
-inconsistency, so some of its documents contain errors that no review has found yet. Each report of
-one moves it toward full accuracy, meaning agreement with the author's intent as well as with the
-source, and the pages written from it share whatever errors it still holds.
+inconsistency, so some of its documents contain errors that no review has found yet. Each error
+reported and fixed moves the knowledge base toward full accuracy, meaning agreement with the author's
+intent as well as with the source, and the pages written from it share whatever errors it still
+holds.
 
 **The source code is authoritative.** Agents must check claims about accepted syntax, generated
 names, and macro expansions against the code, tests, or expansion snapshots. When documentation and
