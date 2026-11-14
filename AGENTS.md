@@ -1,8 +1,8 @@
 # AGENTS.md: the CGP website
 
-Read the knowledge base's [website section](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/README.md)
-for the page you are about to touch before writing. Find the checkout at `../cgp-knowledge-base`, or
-read the file on GitHub when it is absent.
+Follow these rules for every change to this repository. Read the knowledge base's
+[website section](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/README.md)
+before writing, from the checkout at `../cgp-knowledge-base`, or on GitHub when it is absent.
 
 ## Universal rules
 
@@ -10,6 +10,8 @@ The [knowledge base's AGENTS.md](https://github.com/contextgeneric/cgp-knowledge
 is the canonical wording. Read it first; change a universal rule there first, then update this
 block to match. These are the actionable rules here:
 
+- Learn CGP and its tools from the `/cgp` skill and the knowledge base; never restate them in this
+  file.
 - Prefer the local sibling checkout when reading another project.
 - Write a cross-project link as a GitHub URL on `main`.
 - Name official release versions only, never a pre-release.
@@ -19,53 +21,56 @@ block to match. These are the actionable rules here:
 - Ask the user when a decision is ambiguous.
 - Apply point-first writing to internal prose.
 
-## Versions
+## Task guides
 
-- The site describes `cgp` 0.8.0 and `cargo-cgp` 0.1.0.
-- Quote command output with the official version.
+Before a task in this list, read its guide in the knowledge base's `website/` section:
+
+- **Writing or revising a page:** the page kind's guide in `writing-guides/`, with the shared set and
+  the page kind's row of its
+  [reading map](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/README.md#the-reading-map),
+  and the page's record.
+- **Adding or moving a page, or writing a blog post:** `writing-guides/README.md` and
+  `information-architecture.md`.
+- **Changing the theme or a page's styles:** `visual-design.md`.
+- **Changing the build, the navigation, or the `example-code` crate:** `site.md` and
+  [example-code/README.md](example-code/README.md).
 
 ## Links
 
 - Never link a published page into the knowledge base.
-- The two hand-written exceptions are `docs/ai/disclaimer.md` and the pages under
-  `docs/ai/knowledge-base/`, within the bounds the knowledge base's website rules set.
-- The published skill pages under `docs/ai/skills/` may cite the knowledge base by deep GitHub URL;
-  nobody hand-writes them, and another page must not link there.
+- Make only two hand-written exceptions: `docs/ai/disclaimer.md`, which may link the base's front
+  door and its issue tracker, and the pages under `docs/ai/knowledge-base/`, which may also link the
+  four top-level entry files (`README.md`, `summary.md`, `AGENTS.md`, and `sibling-projects.md`) and
+  name a section's directory in prose rather than link a document inside it.
+- Let only the published skill pages under `docs/ai/skills/` cite the knowledge base by deep GitHub
+  URL; nobody hand-writes them, and another page must not link there.
 - Do not correct these links or extend the exception to another page.
-- In the knowledge-base pages, name a section's directory in prose rather than linking a document
-  inside it.
 - Link only public resources: other pages on this site, the `cgp` repository and its siblings,
   docs.rs, crates.io, and ordinary external sources.
 
 ## Legacy resources
 
-- Do not link, list, or recommend the CGP Patterns book or the Hermes SDK.
+- Do not link, list, or recommend the CGP Patterns book or the Hermes SDK, or direct a page to
+  present either.
 - Point a reader who wants a first-principles explanation or a real system at this site's Concepts and
   Projects pages instead.
 - Leave the book's record, the project history, and the blog records that mention them as they are.
-- Leave an acknowledgement of where CGP came from to the author.
+- Leave an acknowledgement of where CGP came from to the author, and raise a page that already
+  mentions a legacy resource with the author.
 
-## Code
+## The agent skill
 
-- Verify every snippet against the current `cgp` release, the `cgp` source, or its tests.
-- Invoke the `/cgp` skill before writing CGP code.
-- Prefer code already verified in the knowledge base's `examples/` directory.
-- Say which of CGP's three context shapes a page's code is in; an introductory page may record it
-  in its knowledge-base record instead.
-- Never take current syntax from an existing blog post; read the post's internal document for its
-  stale parts first.
-- Put a page's code in the website repository's `example-code/` crate, except a Projects page, whose
-  code is checked against the project's repository.
-- Run the `example-code` tests after changing a page's code, as
-  [example-code/README.md](example-code/README.md) describes.
-- Use the knowledge base's `releases/` directory to date an unfamiliar construct.
+- Do not edit the symlinks under `docs/ai/skills/`; correct the skill in `cgp-skills`.
+- Leave the `cgp-skills` submodule pointer to the author.
+- Read the `../cgp-skills` checkout for what the skill says, and treat a lagging published snapshot
+  as normal: it is not a defect and needs no issue, note, or fix.
 
 ## Public prose
 
-- Read the shared set and the page kind's row of the knowledge base's
-  [reading map](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/README.md#the-reading-map)
-  before outlining or drafting a page, and a strategy document whole when the page makes a claim
-  its row does not cover.
+- Read the author-personality and voice-and-register documents of the knowledge base's
+  communication strategy before any prose, and `message.md` whenever a page makes a claim about what
+  CGP is good for, satisfying its pain, strength, objection, and boundary.
+- Read a strategy document whole when the page makes a claim its reading-map row does not cover.
 - Name Context-Generic Programming in each page's prose and relate a short form of the tag line to its
   content, following the knowledge base's
   [naming rule](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/identity.md#the-name-and-the-tag-line-on-every-page);
@@ -76,46 +81,58 @@ block to match. These are the actionable rules here:
   them.
 - Write every page in natural-writing's natural style by default, the front page and every page under
   `docs/` included; follow a page kind's writing guide where it names another style.
+- Let agents draft the pages, and have the author read in full before publication the pages the
+  knowledge base's
+  [AI disclosure policy](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/ai-disclosure.md#the-two-claims-that-are-easiest-to-get-wrong)
+  lists; ship everything else on its guide plus a spot check, and flag a judgement call for the
+  author's reading rather than deciding alone.
+- Add one provenance line at the foot of each page written or substantially rewritten, linking the
+  section of the AI disclosure page that matches how it was made, and record the level in the page's
+  record; leave the front page without one, add none to an existing page unless the author asks, and
+  add none to a scaffolded stub.
+
+## Code
+
+- Invoke the `/cgp` skill before writing CGP code, and verify every snippet against the current `cgp`
+  release, the `cgp` source, or its tests.
+- Prefer code already verified in the knowledge base's `examples/` directory, and the idioms its
+  guides teach.
+- Say which context shape a page's code is in, with the qualifiers the knowledge base's
+  `vocabulary.md` defines; an introductory page may record the shape in its record instead.
+- Never take current syntax from an existing blog post; read the post's record for its stale parts
+  first, and use the knowledge base's `releases/` directory to date an unfamiliar construct.
+- Put a page's code in the `example-code/` crate, one module per heading, except a Projects page,
+  whose code is checked against the project's repository; do not mirror the knowledge base's own
+  snippets there.
+- Run the `example-code` tests after changing a page's code, as
+  [example-code/README.md](example-code/README.md) describes.
+- Fill an elided body with a comment saying so, write a rejected snippet as a compile-fail fixture,
+  and prefer duplication between files over a shared helper neither page shows.
+- Treat a page without an `example-code` file as unvisited, not unverified, and check generated code
+  with `cargo cgp expand`, which the crate does not replace.
 
 ## Blog posts
 
-- Do not rewrite a published post; it is a dated artifact.
-- Annotate a misleading post, supersede it with a new one, or record the drift in its internal
-  document, as the author decides.
-- Never change a published post's `slug`.
+- Do not rewrite a published post; it is a dated artifact, edited only when its record says it was
+  published unfinished.
+- Annotate a misleading post, supersede it with a new one, or record the drift in its record, as the
+  author decides; record the drift by default for release notes.
+- Never change a published post's `slug`, and never rewrite a snippet in it.
 - Correct a page under `docs/` in place, without a changelog note.
 
 ## Build
 
-- Install with `npm ci`, and run `npm start` for the dev server and `npm run build` for the static
-  output, or the `node_modules` binaries of the same names.
-- Check the build's exit status rather than its output.
+- Build and serve the site with the commands in [README.md](README.md), and check the build's exit
+  status rather than its output.
 - Keep `onBrokenLinks` and `onBrokenAnchors` set to `throw`; fix every reference when a page or heading
   moves.
 - Take a page's position from `sidebar_position` and its directory's `_category_.json`.
 - Update the announcement bar in `docusaurus.config.ts` by hand with every release announcement.
 - Keep the site stock: do not add plugins, and do not add React beyond the landing page.
 - Use the theme's tokens from `src/css/custom.css` in page styles, never a hex colour.
-
-## Content conventions
-
-- Name a blog post `blog/<YYYY-MM-DD>-<name>.md`, or a directory with an `index.md` when it carries
-  images.
-- Set `authors`, `tags` from the fixed set, and usually an explicit `slug`; separate the excerpt with
-  `{/* truncate */}`.
-- Match a new release slug to its neighbours rather than assuming one rule.
-- Do not edit the symlinks under `docs/ai/skills/`; correct the skill in `cgp-skills`, and leave the
-  submodule pointer to the author.
-- Treat a lagging skill snapshot as normal; it is not a defect and needs no issue or fix.
 - Treat `notes/` as working material, not site content; do not edit or copy from it.
-
-## Committing
-
-- Commit only when the user explicitly asks, one commit per request, on the current branch.
-- Do not commit as a side effect, bring commits up unprompted, or treat a request as standing
-  authorization.
 
 ## Knowledge base
 
-- Add or revise the page's knowledge-base document in the same change.
+- Add or revise the page's knowledge-base record in the same change.
 - State what needs updating in the knowledge base when its checkout is absent.
