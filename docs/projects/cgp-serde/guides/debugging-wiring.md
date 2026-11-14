@@ -57,11 +57,12 @@ error[E0277]: [CGP-E001] missing wiring for `@ValueSerializerComponent.Vec<u8>` 
              [CGP-E101] consumer trait impl `CanSerializeValue<Payload>` for context `App`
              └─ [CGP-E103] redirect lookup to `@ValueSerializerComponent` in `App`
                └─ [CGP-E102] provider trait impl `ValueSerializer<Payload>` with context `App` for provider `SerializeRecordFields`
-                 └─ [CGP-E104] trait impl `FieldsSerializer` for `Struct! { quantity: u64, data: Vec<u8> }`
-                   └─ [CGP-E104] trait impl `FieldsSerializer` for `Struct! { data: Vec<u8> }`
+                 └─ [CGP-E104] trait impl `FieldsSerializer<App, Payload>` for `Struct! { quantity: u64, data: Vec<u8> }`
+                   └─ [CGP-E104] trait impl `FieldsSerializer<App, Payload>` for `Struct! { data: Vec<u8> }`
                      └─ [CGP-E101] consumer trait impl `CanSerializeValue<Vec<u8>>` for context `App`
                        └─ [CGP-E103] redirect lookup to `@ValueSerializerComponent` in `App`
                          └─ [CGP-E113] missing wiring for `@ValueSerializerComponent.Vec<u8>` on `App`
+   = help: wire `@ValueSerializerComponent.Vec<u8>` to a provider in the wiring of `App`
 ```
 
 The chain reads from the top down: serializing `Payload` goes to `SerializeRecordFields`, which
@@ -158,17 +159,15 @@ Plain `cargo check` reports only that the method exists for `Ctx` but its trait 
 satisfied. `cargo cgp check` names what is missing:
 
 ```text
-error[E0599]: [CGP-E003] the trait `CanDeserializeJsonString<_>` is not implemented for context `Ctx`
+error[E0599]: [CGP-E003] missing wiring for `ErrorTypeProviderComponent` and `ErrorRaiserComponent` on `Ctx`
    = note: root causes:
-             - [CGP-E113] missing wiring for `@ValueDeserializerComponent` on `Ctx`
              - [CGP-E113] missing wiring for `ErrorTypeProviderComponent` on `Ctx`
              - [CGP-E113] missing wiring for `ErrorRaiserComponent` on `Ctx`
+   = help: wire `ErrorTypeProviderComponent` and `ErrorRaiserComponent` to providers in the wiring of `Ctx`
 ```
 
-The two error entries are the real causes. The first cause appears because the call failed before
-the compiler worked out the target type, so the tree asks for an unknown type; it goes away once
-the error entries are wired. The fix is the two entries from [wiring a
-context](./wiring-a-context.md#4-wire-an-error-type-when-the-json-providers-are-used).
+The root causes and the help line name the same two entries, which [wiring a
+context](./wiring-a-context.md#4-wire-an-error-type-when-the-json-providers-are-used) adds.
 
 ## A provider depends on itself
 
