@@ -84,8 +84,12 @@ Each repository has an `AGENTS.md` at its root, and it is the first file your ag
 [`cgp`](https://github.com/contextgeneric/cgp/blob/main/AGENTS.md),
 [`cargo-cgp`](https://github.com/contextgeneric/cargo-cgp/blob/main/AGENTS.md),
 [`cgp-skills`](https://github.com/contextgeneric/cgp-skills/blob/main/AGENTS.md), [the knowledge
-base](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md), and [the
-website](https://github.com/contextgeneric/contextgeneric.dev/blob/main/AGENTS.md). Each one gives
+base](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md), [the
+website](https://github.com/contextgeneric/contextgeneric.dev/blob/main/AGENTS.md), and the example
+and project repositories
+[`cgp-examples`](https://github.com/contextgeneric/cgp-examples/blob/main/AGENTS.md),
+[`hypershell`](https://github.com/contextgeneric/hypershell/blob/main/AGENTS.md), and
+[`cgp-serde`](https://github.com/contextgeneric/cgp-serde/blob/main/AGENTS.md). Each one gives
 the rules that repository follows and names the guide to read before each kind of task, so your
 agent reads the detailed rules only for the work in front of it. The code repositories' files also
 point to the checks that build and test them.
