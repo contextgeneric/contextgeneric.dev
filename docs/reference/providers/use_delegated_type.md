@@ -42,9 +42,8 @@ to concrete types:
 
 ```rust
 use core::marker::PhantomData;
-use cgp::core::types::HasType;
+use cgp::core::types::{HasType, TypeProviderComponent, UseDelegatedType};
 use cgp::prelude::*;
-use cgp::core::types::{TypeProviderComponent, UseDelegatedType};
 
 pub struct ScalarTag;
 pub struct IndexTag;

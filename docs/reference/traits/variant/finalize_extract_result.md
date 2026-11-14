@@ -57,9 +57,8 @@ dischargeable, so it applies the moment a chain has tried every variant.
 Closing a chain, which is the whole use:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractor};
 use cgp::prelude::*;
-use cgp::core::field::traits::FinalizeExtractResult;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

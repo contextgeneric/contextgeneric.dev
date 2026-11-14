@@ -54,9 +54,8 @@ and mutable accessors.
 Reading through a borrow, as a single attempt and as a full chain, leaves the value intact:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, HasExtractorRef};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractorRef};
 use cgp::prelude::*;
-use cgp::core::field::traits::FinalizeExtractResult;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

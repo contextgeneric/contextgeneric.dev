@@ -59,9 +59,8 @@ and shared-borrow accessors.
 Changing whichever payload is present, without rebuilding the enum:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, HasExtractorMut};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractorMut};
 use cgp::prelude::*;
-use cgp::core::field::traits::FinalizeExtractResult;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

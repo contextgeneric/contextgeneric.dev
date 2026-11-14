@@ -68,9 +68,8 @@ The chain reads as a sequence of attempts, each handling one variant, closed by
 [`finalize_extract_result`](./finalize_extract_result.md), written here in both orders:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractor};
 use cgp::prelude::*;
-use cgp::core::field::traits::FinalizeExtractResult;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

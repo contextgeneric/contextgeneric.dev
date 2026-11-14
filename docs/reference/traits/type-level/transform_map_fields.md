@@ -75,9 +75,8 @@ A transform of your own, applied at a concrete call site and through a bound:
 
 ```rust
 use cgp::core::field::impls::IsPresent;
-use cgp::core::field::traits::IntoBuilder;
+use cgp::core::field::traits::{IntoBuilder, TransformMap, TransformMapFields};
 use cgp::prelude::*;
-use cgp::core::field::traits::{TransformMap, TransformMapFields};
 
 // Doubles every present number and keeps it present.
 pub struct Double;

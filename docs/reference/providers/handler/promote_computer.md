@@ -59,10 +59,9 @@ Here `Double` comes from [`#[cgp_computer]`](../../macros/cgp_computer.md), whic
 One `#[cgp_computer]` function answers four members of the family through the bundle:
 
 ```rust
-use cgp::extra::handler::PromoteComputer;
+use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute, PromoteComputer};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute};
 
 #[cgp_computer]
 pub fn double(value: u64) -> u64 {

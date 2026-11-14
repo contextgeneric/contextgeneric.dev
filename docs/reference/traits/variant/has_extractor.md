@@ -56,9 +56,8 @@ through [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) and
 Starting a chain, which is `to_extractor`'s job, and a round trip through `from_extractor`:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractor};
 use cgp::prelude::*;
-use cgp::core::field::traits::FinalizeExtractResult;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

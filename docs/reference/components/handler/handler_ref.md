@@ -79,11 +79,10 @@ An async, fallible provider over a borrowed request, wired into a context and aw
 
 ```rust
 use core::marker::PhantomData;
-use cgp::extra::handler::HandlerRefComponent;
+use cgp::extra::handler::{CanHandleRef, HandlerRef, HandlerRefComponent};
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::RaiseFrom;
-use cgp::extra::handler::{CanHandleRef, HandlerRef};
 
 #[cgp_impl(new NonEmptyLength)]
 #[uses(CanRaiseError<String>)]

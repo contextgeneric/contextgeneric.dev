@@ -62,9 +62,8 @@ A marker that fills absent fields from `Default`, one impl per source state, app
 with one field set:
 
 ```rust
-use cgp::core::field::impls::{IsNothing, IsPresent};
+use cgp::core::field::impls::{IsNothing, IsOptional, IsPresent};
 use cgp::prelude::*;
-use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::{TransformMap, TransformMapFields};
 
 pub struct FillDefaults;

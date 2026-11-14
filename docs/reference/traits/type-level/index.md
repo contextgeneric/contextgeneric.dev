@@ -17,7 +17,7 @@ generically by their field and variant names. They are the type-level layer bene
 [casts](../casting/index.md): the markers that record what state one field is in, and the operations
 that grow and reshape a type's field list. You meet them in an error message from code that walks a
 [shape](/docs/reference/glossary#shape) far more often than in code you wrote, and this group exists
-so that such a message is legible. Most are not in the prelude.
+so that such a message is legible. None is in the prelude.
 
 The group divides into the state markers and the list operations.
 

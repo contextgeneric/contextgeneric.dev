@@ -65,7 +65,6 @@ so it needs [`#[derive(FromVariant)]`](../../derives/derive_from_variant.md).
 A narrow enum widened into a wider one, with each side deriving only what the cast needs:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, FromVariant};
 use cgp::prelude::*;
 use cgp::core::field::impls::CanUpcast;
 

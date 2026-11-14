@@ -80,11 +80,10 @@ context's error:
 ```rust
 use core::marker::PhantomData;
 use core::num::ParseIntError;
-use cgp::extra::handler::TryComputerRefComponent;
+use cgp::extra::handler::{CanTryComputeRef, TryComputerRef, TryComputerRefComponent};
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::RaiseFrom;
-use cgp::extra::handler::{CanTryComputeRef, TryComputerRef};
 
 #[cgp_impl(new ParsePort)]
 #[uses(CanRaiseError<ParseIntError>)]

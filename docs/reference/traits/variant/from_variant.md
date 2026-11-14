@@ -70,7 +70,7 @@ One `wrap` builds either variant, with its payload type following the tag, and a
 into `Shape`:
 
 ```rust
-use cgp::core::field::traits::{ExtractField, FromVariant};
+use cgp::core::field::traits::FromVariant;
 use cgp::prelude::*;
 use cgp::core::field::impls::CanUpcast;
 

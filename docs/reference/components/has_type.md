@@ -97,8 +97,7 @@ the shared name, rewrites a bare type name and adds the bound inside a definitio
 A direct use defines no new component and resolves an abstract type by tag through `UseType`:
 
 ```rust
-use cgp::core::types::{TypeOf, TypeProviderComponent};
-use cgp::core::types::HasType;
+use cgp::core::types::{HasType, TypeOf, TypeProviderComponent};
 use cgp::prelude::*;
 
 pub struct ScalarTag;

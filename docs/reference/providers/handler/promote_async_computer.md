@@ -52,10 +52,9 @@ delegate_components! {
 An async `#[cgp_computer]` function is the base, and the bundle answers `handle` from it:
 
 ```rust
-use cgp::extra::handler::PromoteAsyncComputer;
+use cgp::extra::handler::{CanComputeAsync, CanHandle, PromoteAsyncComputer};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::extra::handler::{CanComputeAsync, CanHandle};
 
 #[cgp_computer]
 pub async fn double_later(value: u64) -> u64 {

@@ -76,10 +76,9 @@ if you write the machinery yourself.
 What each standard marker stores at a lifetime, and the two borrowed extractors that fix it:
 
 ```rust
-use cgp::core::field::impls::{IsMut, IsRef};
+use cgp::core::field::impls::{IsMut, IsOwned, IsRef};
 use cgp::core::field::traits::{ExtractField, HasExtractorMut, HasExtractorRef, MapTypeRef};
 use cgp::prelude::*;
-use cgp::core::field::impls::IsOwned;
 
 pub fn by_ref<'a>(value: <IsRef as MapTypeRef>::Map<'a, String>) -> &'a String {
     value

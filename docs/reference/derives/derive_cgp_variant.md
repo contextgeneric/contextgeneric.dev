@@ -92,8 +92,7 @@ An extraction chain checks exhaustiveness through the type of its remainder. Eac
 either the payload or a remainder whose type rules out that variant:
 
 ```rust
-use cgp::core::field::traits::FinalizeExtractResult;
-use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractor};
 use cgp::prelude::*;
 
 #[derive(CgpVariant)]

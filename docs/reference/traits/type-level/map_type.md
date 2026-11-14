@@ -85,10 +85,9 @@ value-level side, carrying the functions that actually convert a field from one 
 What each standard marker stores, checked as type equalities, and generic code bounded on the trait:
 
 ```rust
-use cgp::core::field::impls::{IsNothing, IsPresent, IsVoid};
+use cgp::core::field::impls::{IsNothing, IsOptional, IsPresent, IsVoid};
 use cgp::core::field::traits::MapType;
 use cgp::prelude::*;
-use cgp::core::field::impls::IsOptional;
 
 // Each function compiles only if the projection is the type on its right.
 pub fn present(value: <IsPresent as MapType>::Map<String>) -> String {

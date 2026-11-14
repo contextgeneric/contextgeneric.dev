@@ -76,9 +76,8 @@ from `cgp::core::field::impls`.
 One marker applied over a product and over a sum, checked as type equalities:
 
 ```rust
-use cgp::core::field::impls::{IsNothing, IsPresent};
+use cgp::core::field::impls::{IsNothing, IsOptional, IsPresent};
 use cgp::prelude::*;
-use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::MapFields;
 
 pub type Fields = Product![String, u16, bool];

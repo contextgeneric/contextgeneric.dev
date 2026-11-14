@@ -40,7 +40,6 @@ check completeness.
 Apply `ExtractField` to an enum without arguments or helper attributes:
 
 ```rust
-use cgp::core::field::traits::ExtractField;
 use cgp::prelude::*;
 
 #[derive(ExtractField)]
@@ -53,6 +52,11 @@ pub enum Shape {
 Each variant's name becomes a [`Symbol!`](../macros/symbol.md) tag and its payload type becomes the value
 that tag yields. Generic parameters, lifetimes, and a `where` clause are carried onto both companion types and
 every generated impl.
+
+The derive comes with the prelude, but the traits it implements do not. Code that calls
+`to_extractor`, `extract_field`, or `finalize_extract` imports `HasExtractor`, `ExtractField`, or
+`FinalizeExtract` from `cgp::core::field::traits`, and the borrowed extractors need
+`HasExtractorRef` or `HasExtractorMut` from the same module.
 
 ### Every variant needs one unnamed payload or none
 
@@ -120,8 +124,7 @@ extractor back into the original enum.
 `Circle` and `Rectangle` are payload structs with `radius`, and `width` and `height`, fields:
 
 ```rust
-use cgp::core::field::traits::FinalizeExtractResult;
-use cgp::core::field::traits::{ExtractField, HasExtractor};
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractor};
 use cgp::prelude::*;
 
 #[derive(ExtractField)]
@@ -313,8 +316,9 @@ companion enums, so both the headline and the note can point to the derive.
 enum does not implement them for the companion. Use `.ok()`, `.is_ok()`, or a `match` to inspect the
 result instead of printing or comparing the whole `Result<Payload, Remainder>`.
 
-**`FinalizeExtractResult` is not in the prelude.** Import it from `cgp::core::field::traits` to call
-`finalize_extract_result`.
+**The extractor traits are not in the prelude.** Import `FinalizeExtractResult` from
+`cgp::core::field::traits` to call `finalize_extract_result`, as you import `HasExtractor`,
+`ExtractField`, and `FinalizeExtract` from there to call their methods.
 
 **Finalizing early does not compile, and the error names the companion.** The all-void impl does not apply
 while any marker is still `IsPresent`, so the method's trait bounds fail. After only the `Circle` attempt

@@ -73,9 +73,8 @@ A provider that counts the words of a borrowed string, wired into a context and 
 
 ```rust
 use core::marker::PhantomData;
-use cgp::extra::handler::{AsyncComputerRef, AsyncComputerRefComponent};
+use cgp::extra::handler::{AsyncComputerRef, AsyncComputerRefComponent, CanComputeAsyncRef};
 use cgp::prelude::*;
-use cgp::extra::handler::CanComputeAsyncRef;
 
 #[cgp_new_provider]
 impl<Context, Code> AsyncComputerRef<Context, Code, String> for CountWords {

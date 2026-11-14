@@ -53,10 +53,9 @@ resolve.
 A fallible `#[cgp_computer]` function answers the fallible members through the bundle:
 
 ```rust
-use cgp::extra::handler::PromoteTryComputer;
+use cgp::extra::handler::{CanHandle, CanTryCompute, PromoteTryComputer};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::extra::handler::{CanHandle, CanTryCompute};
 
 #[cgp_computer]
 pub fn checked_double(value: u64) -> Result<u64, String> {

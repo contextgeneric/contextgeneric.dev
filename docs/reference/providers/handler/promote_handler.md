@@ -54,10 +54,9 @@ base over an owned `u64` answers only `HandlerComponent`.
 An async `#[cgp_computer]` function returning `Result` answers `handle` through the bundle:
 
 ```rust
-use cgp::extra::handler::PromoteHandler;
+use cgp::extra::handler::{CanHandle, PromoteHandler};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::extra::handler::CanHandle;
 
 #[cgp_computer]
 pub async fn checked_double(value: u64) -> Result<u64, String> {

@@ -76,9 +76,8 @@ a getter, and a direct call through `UseContext`:
 
 ```rust
 use cgp::core::component::WithProvider;
-use cgp::core::field::traits::FieldGetter;
+use cgp::core::field::traits::{FieldGetter, FieldMapper};
 use cgp::prelude::*;
-use cgp::core::field::traits::FieldMapper;
 
 pub struct ThenGet<First, Second>(pub PhantomData<(First, Second)>);
 

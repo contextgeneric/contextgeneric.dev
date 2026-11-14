@@ -66,9 +66,8 @@ gains `take_field` without an impl of its own.
 Taking a field out of a full builder, changing it, and putting it back:
 
 ```rust
-use cgp::core::field::traits::IntoBuilder;
+use cgp::core::field::traits::{IntoBuilder, TakeField};
 use cgp::prelude::*;
-use cgp::core::field::traits::TakeField;
 
 #[derive(Debug, PartialEq, BuildField)]
 pub struct Person {

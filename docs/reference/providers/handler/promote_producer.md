@@ -51,10 +51,9 @@ delegate_components! {
 A `#[cgp_producer]` function answers the producer and two input-taking members:
 
 ```rust
-use cgp::extra::handler::PromoteProducer;
+use cgp::extra::handler::{CanCompute, CanProduce, CanTryCompute, PromoteProducer};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
-use cgp::extra::handler::{CanCompute, CanProduce, CanTryCompute};
 
 #[cgp_producer]
 pub fn default_port() -> u16 {

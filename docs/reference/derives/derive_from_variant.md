@@ -35,7 +35,6 @@ payload from an enum.
 Apply `FromVariant` to an enum without arguments or helper attributes:
 
 ```rust
-use cgp::core::field::traits::FromVariant;
 use cgp::prelude::*;
 
 #[derive(FromVariant)]
@@ -48,6 +47,9 @@ pub enum Shape {
 Each variant's name becomes a [`Symbol!`](../macros/symbol.md) tag and its payload type becomes the
 constructor's value type. Generic parameters, lifetimes, and a `where` clause are carried onto every generated
 impl.
+
+The derive comes with the prelude, but the `FromVariant` trait it implements does not, so code that
+calls `from_variant` imports the trait from `cgp::core::field::traits`.
 
 ### Every variant needs one unnamed payload or none
 
