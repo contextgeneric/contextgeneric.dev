@@ -46,8 +46,9 @@ pub struct PathCons<Head: ?Sized, Tail: ?Sized>(pub PhantomData<Head>, pub Phant
 `Head` is the first segment, and `Tail` is the remainder, which is another `PathCons` or
 [`Nil`](nil.md) at the end. Both bounds are `?Sized`, so any type may occupy a segment. The struct
 holds nothing at run time. Like the other type-level building blocks, it exists through
-[`PhantomData`](phantom_data.md) so that trait resolution can name and match a route. It is in the
-prelude, so `use cgp::prelude::*;` is enough.
+[`PhantomData`](phantom_data.md) so that trait resolution can name and match a route. It is not in
+the prelude, so import it from `cgp::core::base::types`, or let the prelude's `Path!` macro write it
+for you.
 
 ## Behavior
 

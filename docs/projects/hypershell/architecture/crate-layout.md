@@ -43,7 +43,7 @@ them adds their crates and joins a larger language, as
 
 A program file needs one import, `hypershell::prelude::*`. It brings the syntax, the `hypershell!`
 macro, the two contexts `HypershellCli` and `HypershellHttp`, the `anyhow` error type as `Error`,
-and the CGP names a program uses. Two things are imported separately: `HypershellNamespace`, from
+and the CGP names a program uses, the handler traits and their keys among them. Two things are imported separately: `HypershellNamespace`, from
 `hypershell::namespaces`, which a context of your own joins; and `ToTokioAsyncRead`, from
 `hypershell_tokio_components::dsl`, the adapter an HTTP stream needs before `StreamToString`.
 
