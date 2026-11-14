@@ -73,9 +73,11 @@ Which of the two you use depends only on whether the struct already exists.
 | `#[cgp_new_provider]` | Declared by the macro. Must *not* be declared separately. |
 
 Both accept the same single optional argument: the **component type** to use in the generated marker
-impl. Omitted, it defaults to the provider trait's name plus `Component`, so implementing
-`AreaCalculator` targets `AreaCalculatorComponent`. Pass it explicitly when the component's marker
-does not follow that convention, as when the component renamed it with the `name:` key:
+impl. Omitted, it defaults to the provider trait's path with `Component` appended, so implementing
+`AreaCalculator` targets `AreaCalculatorComponent`, which must be in scope beside the trait, and
+implementing `crate::shapes::AreaCalculator` targets `crate::shapes::AreaCalculatorComponent`, which
+the module need not import. Pass it explicitly when the component's marker does not follow that
+convention, as when the component renamed it with the `name:` key:
 
 ```rust
 #[cgp_component {
@@ -346,10 +348,10 @@ CgpProviderArgs -> ComponentType?
 ComponentType   -> Type
 ```
 
-Omitted, the component defaults to the provider trait's name plus `Component`; given, that `Type` is
-substituted into the first position of the generated marker impl. `Type` is the Rust type production.
-The struct declaration that distinguishes `#[cgp_new_provider]` is implied by the macro name and is not
-written in the argument.
+Omitted, the component defaults to the provider trait's path with `Component` appended to its last
+segment; given, that `Type` is substituted into the first position of the generated marker impl.
+`Type` is the Rust type production. The struct declaration that distinguishes `#[cgp_new_provider]`
+is implied by the macro name and is not written in the argument.
 
 ## Common Mistakes
 

@@ -81,7 +81,14 @@ impl AreaCalculator {
 |---|---|
 | `new` | Optional. Also emits `pub struct RectangleArea;`, so you need not declare the provider separately. |
 | provider name | Required. The type that takes the `Self` position in the generated provider impl. |
-| `: ComponentType` | Optional. Overrides which component this provider is registered as implementing. Defaults to the provider trait's name plus `Component`. |
+| `: ComponentType` | Optional. Overrides which component this provider is registered as implementing. Defaults to the provider trait's path with `Component` appended. |
+
+The default component follows the path you name the trait by. The header `impl AreaCalculator`
+registers the provider for `AreaCalculatorComponent`, which must be in scope beside the trait. The
+header `impl crate::shapes::AreaCalculator` registers it for
+`crate::shapes::AreaCalculatorComponent`, so that module needs no import of the key. When the key is
+not in scope, the compiler reports *cannot find type `AreaCalculatorComponent` in this scope* on the
+trait's name in the header.
 
 The `for Context` clause is optional. Omitting it, as most examples on this page do, lets the macro
 insert a generic context parameter for you: write `impl AreaCalculator`, not
@@ -430,7 +437,8 @@ ComponentType -> Type
 `ProviderType` is the type taking the `Self` position of the generated impl: a plain provider name, a
 generic provider such as `ScaledAreaCalculator<InnerCalculator>`, or the literal `Self` for the
 passthrough form. `ComponentType` overrides the component in the generated `IsProviderFor` impl,
-defaulting to the provider trait's name plus `Component`. Both are Rust `Type` productions.
+defaulting to the provider trait's path with `Component` appended to its last segment. Both are Rust
+`Type` productions.
 
 ## Common Mistakes
 
