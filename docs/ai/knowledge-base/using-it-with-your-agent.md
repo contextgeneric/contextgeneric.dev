@@ -67,9 +67,9 @@ the rules it finds there. Include three instructions in your prompt:
    the full index: `cgp/reference/` for a construct, `cgp/errors/` for a compile error,
    `cgp/implementation/` for how a macro is built, and `related-work/` for a comparison.
 
-The `AGENTS.md` files describe how the knowledge base's own documents are written and maintained.
-They bind an agent that edits the base, not one that only reads it, and the README tells the agent
-so.
+The knowledge base's `AGENTS.md` and the writing guides in its sections describe how its own
+documents are written and maintained. They bind an agent that edits the base, not one that only
+reads it, and the README tells the agent so.
 
 Ask the agent to read selectively, because reading costs context. The index of every document,
 [summary.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/summary.md), is roughly

@@ -79,12 +79,14 @@ misunderstanding across all views, which is relatively unlikely.
 
 ## Written rules
 
-The rules agents follow are written down in the knowledge base and are public. A top-level
+The rules agents follow are written down in the knowledge base and are public. Its
 [AGENTS.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md) holds the
-rules for the whole base, and each section adds its own: how a reference document is structured, how
-an implementation document indexes the tests, how an error class is documented with the example that
-produces it. Each code repository has an `AGENTS.md` of its own that points back to these. Agents
-load the CGP skill and the relevant rules before a task and read
+rules every document follows, and each section has a writing guide for its own kind of document:
+how a reference document is structured, how an implementation document indexes the tests, how an
+error class is documented with the example that produces it. Each code repository has an `AGENTS.md`
+of its own, which sends its agents to the CGP skill and the knowledge base to learn CGP rather than
+teaching it again. Before a task, agents load the CGP skill, the rules, and the guide for that kind
+of document, and read
 [summary.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/summary.md), a one-line
 index of every document, to find the few documents the task needs.
 
