@@ -5,6 +5,7 @@
 
 /// ## Usage
 pub mod usage {
+    use cgp::core::field::types::Void;
     use cgp::prelude::*;
 
     #[test]
@@ -19,6 +20,10 @@ pub mod usage {
 /// The enum whose derived variant list the page shows, extended with the two payload shapes the
 /// page describes in prose: several unnamed fields, keyed by `Index`, and a unit variant.
 pub mod examples {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Field;
+    use cgp::core::field::types::Index;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     #[derive(HasFields)]
@@ -63,6 +68,8 @@ pub mod examples {
 ///
 /// The `Either`/`Void` chain, and the position of each alternative in it.
 pub mod under_the_hood {
+    use cgp::core::field::types::Either;
+    use cgp::core::field::types::Void;
     use cgp::prelude::*;
 
     pub struct A;

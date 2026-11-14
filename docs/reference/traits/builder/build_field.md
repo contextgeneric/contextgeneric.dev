@@ -46,7 +46,7 @@ hood](#under-the-hood).
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude**, though its derive is. Import it from `cgp::core::field::traits`.
 
 The `PhantomData<Tag>` argument names the field, the same way a
 [`HasField`](../field-access/has_field.md) read does: `PhantomData::<Symbol!("first_name")>` for a
@@ -63,8 +63,9 @@ A record built one field at a time, in either order, and a wider record built fr
 field:
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder};
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, HasFields, BuildField)]
 pub struct Person {

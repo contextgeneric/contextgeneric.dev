@@ -1,3 +1,4 @@
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 pub fn read_first_name<Context>(context: &Context) -> &String

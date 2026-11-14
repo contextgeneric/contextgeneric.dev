@@ -7,6 +7,10 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     // `build_from` walks the *source's* field list, so the source needs `HasFields` too.

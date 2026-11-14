@@ -5,6 +5,7 @@
 /// What an implicit argument stands in for: a field requirement declared by hand and a read that
 /// carries a type-level tag.
 pub mod reading_a_field_spelled_out {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

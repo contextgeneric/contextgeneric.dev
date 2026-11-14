@@ -1,4 +1,5 @@
 use cgp::core::field::traits::FieldGetter;
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 #[cgp_getter(NameGetter)]

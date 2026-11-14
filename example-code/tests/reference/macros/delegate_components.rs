@@ -50,6 +50,7 @@ pub mod overview {
 pub mod defining_the_target_at_the_same_time {
     use core::marker::PhantomData;
 
+    use cgp::core::field::types::Life;
     use cgp::prelude::*;
 
     pub use super::overview::{AreaCalculatorComponent, CanCalculateArea, RectangleArea};

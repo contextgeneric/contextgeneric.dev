@@ -86,6 +86,7 @@ pub mod a_fallible_function {
 pub mod a_pipeline_is_a_wiring_entry {
     use core::marker::PhantomData;
 
+    use cgp::core::field::traits::HasField;
     use cgp::extra::handler::{Computer, ComputerComponent, PipeHandlers};
     use cgp::prelude::*;
 

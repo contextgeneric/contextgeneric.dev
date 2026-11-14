@@ -110,6 +110,7 @@ and the source also derives `HasFields` so `build_from` can traverse its fields:
 
 ```rust
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder};
 use cgp::prelude::*;
 
 // The source of a `build_from` needs its field list too, so it derives `HasFields` as well.

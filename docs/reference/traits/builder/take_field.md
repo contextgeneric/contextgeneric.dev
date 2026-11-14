@@ -47,7 +47,7 @@ that supplies this is shown in [Under the hood](#under-the-hood).
 
 ## Usage
 
-**It is not in the prelude**, the one member of the core builder family that is not. Import it from
+**It is not in the prelude**, like the rest of the core builder family. Import it from
 `cgp::core::field::traits` when you call `take_field` directly:
 
 ```rust
@@ -66,7 +66,7 @@ gains `take_field` without an impl of its own.
 Taking a field out of a full builder, changing it, and putting it back:
 
 ```rust
-use cgp::core::field::traits::{IntoBuilder, TakeField};
+use cgp::core::field::traits::{BuildField, FinalizeBuild, IntoBuilder, TakeField};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]
@@ -145,8 +145,8 @@ it into the target with [`build_field`](./build_field.md), which is why a merge 
 
 ## Common Mistakes
 
-**It is not in the prelude.** Import from `cgp::core::field::traits`. Every other trait in the core
-builder family is.
+**It is not in the prelude.** Import from `cgp::core::field::traits`. The rest of the core builder
+family comes from there too.
 
 **Taking an absent field does not compile.** Taking `first_name` from an empty builder:
 

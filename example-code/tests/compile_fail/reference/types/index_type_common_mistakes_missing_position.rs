@@ -1,6 +1,8 @@
 // A position a tuple struct lacks has no `HasField` impl, so reading it is a compile error rather
 // than a runtime panic. This is the `Index` page's *Common Mistakes* entry on an absent position.
 
+use cgp::core::field::traits::HasField;
+use cgp::core::field::types::Index;
 use cgp::prelude::*;
 
 #[derive(HasField)]

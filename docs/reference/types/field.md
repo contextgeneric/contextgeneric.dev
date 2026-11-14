@@ -47,8 +47,8 @@ pub struct Field<Tag, Value> {
 stored field. It is usually a [type-level string](/docs/reference/glossary#type-level-string) such
 as `Symbol!("name")` for a named field, or a type-level number such as `Index<0>` for a tuple
 position. `Value` is the field's actual type, and `value` is the only data the struct keeps. Apart
-from the tag, a `Field` is a thin wrapper around its `Value`. It is in the prelude, so
-`use cgp::prelude::*;` is enough.
+from the tag, a `Field` is a thin wrapper around its `Value`. It is not in the prelude, so import it
+from `cgp::core::field::types`.
 
 ## Behavior
 
@@ -82,6 +82,7 @@ of `Field` entries, and [`to_fields`](../traits/shape/to_fields.md) turns a valu
 
 ```rust
 use cgp::core::field::traits::ToFields;
+use cgp::core::field::types::{Cons, Field, Index, Nil};
 use cgp::prelude::*;
 
 #[derive(HasFields)]

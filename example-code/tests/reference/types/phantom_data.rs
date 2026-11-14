@@ -25,6 +25,7 @@ pub mod why_a_marker_needs_it {
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

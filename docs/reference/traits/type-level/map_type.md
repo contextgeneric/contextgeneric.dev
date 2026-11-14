@@ -87,6 +87,7 @@ What each standard marker stores, checked as type equalities, and generic code b
 ```rust
 use cgp::core::field::impls::{IsNothing, IsOptional, IsPresent, IsVoid};
 use cgp::core::field::traits::MapType;
+use cgp::core::field::types::Void;
 use cgp::prelude::*;
 
 // Each function compiles only if the projection is the type on its right.

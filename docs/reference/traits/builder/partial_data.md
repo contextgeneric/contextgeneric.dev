@@ -70,7 +70,7 @@ directly.
 A generic function naming the destination of a partial value, at two configurations:
 
 ```rust
-use cgp::core::field::traits::PartialData;
+use cgp::core::field::traits::{BuildField, HasBuilder, PartialData};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]

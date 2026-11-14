@@ -65,9 +65,9 @@ the same descent for a getter:
 
 ```rust
 use cgp::core::component::WithProvider;
+use cgp::core::field::impls::{ChainGetters, UseField};
+use cgp::core::field::traits::{HasField, MapField};
 use cgp::prelude::*;
-use cgp::core::field::impls::ChainGetters;
-use cgp::core::field::traits::MapField;
 
 pub fn inner_name<Context, Inner>(context: &Context) -> &String
 where

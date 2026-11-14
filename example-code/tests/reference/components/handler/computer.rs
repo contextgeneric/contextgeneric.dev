@@ -54,6 +54,7 @@ pub mod usage {
     pub mod use_field {
         use core::marker::PhantomData;
 
+        use cgp::core::field::impls::UseField;
         use cgp::extra::handler::CanCompute;
         use cgp::extra::handler::Computer;
         use cgp::extra::handler::ComputerComponent;

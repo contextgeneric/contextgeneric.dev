@@ -47,12 +47,12 @@ The borrowed form `MatchWithFieldHandlersRef<Provider>` matches `&Input` and han
 One provider describes every variant of two enums, reading the variant name from the tag:
 
 ```rust
-use core::fmt::Display;
-use cgp::extra::handler::{Computer, ComputerComponent};
-use cgp::prelude::*;
 use cgp::core::field::traits::StaticString;
+use cgp::core::field::types::Field;
 use cgp::extra::dispatch::MatchWithFieldHandlers;
-use cgp::extra::handler::CanCompute;
+use cgp::extra::handler::{CanCompute, Computer, ComputerComponent};
+use cgp::prelude::*;
+use core::fmt::Display;
 
 #[derive(CgpData)]
 pub enum Reading {

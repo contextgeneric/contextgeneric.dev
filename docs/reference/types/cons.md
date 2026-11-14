@@ -44,8 +44,9 @@ and `.0` and `.1` reach its parts. Unlike the zero-sized [`Chars`](chars.md) and
 [`PathCons`](path_cons.md) lists, `Cons` holds real values. It is as large as its nested elements,
 without boxing or indirection. It derives `Eq`, `PartialEq`, `Clone`, `Default`, and `Debug`, so a
 list of values that implement those traits inherits them structurally: equality compares head to
-head down the chain, and `Default` gives the list of defaults. It is in the prelude, and so is
-`Nil`.
+head down the chain, and `Default` gives the list of defaults. Neither it nor `Nil` is in the
+prelude, since `Product!` writes both for you. Import them from `cgp::core::field::types` when you
+name one.
 
 ## Behavior
 
@@ -67,7 +68,8 @@ A `product!` value is the nested `Cons` value, a struct's shape is a `Cons` chai
 [`Field`](field.md) entries, and a fold over the list is one impl for `Nil` and one for `Cons`:
 
 ```rust
-use cgp::core::field::traits::ToFields;
+use cgp::core::field::traits::{HasFields, ToFields};
+use cgp::core::field::types::{Cons, Field, Nil};
 use cgp::prelude::*;
 
 #[derive(HasFields)]

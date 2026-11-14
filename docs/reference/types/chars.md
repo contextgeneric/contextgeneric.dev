@@ -69,7 +69,8 @@ A type-level string most often appears as the tag in a
 provider reads. The same type rebuilds its string through `Display`:
 
 ```rust
-use cgp::core::field::types::{Chars, Symbol};
+use cgp::core::field::traits::HasField;
+use cgp::core::field::types::{Chars, Nil, Symbol};
 use cgp::prelude::*;
 
 // The tag names the field the function reads.

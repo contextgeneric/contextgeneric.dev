@@ -52,9 +52,9 @@ call site which field it means when several `HasField` impls are in scope, so a 
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. An implementation states the field it
-needs in its `where` clause and reads it with `get_field`; a context gets the impls by deriving
-them:
+It is not in the prelude, though its derive is, so import it from `cgp::core::field::traits` when
+you name it. An implementation states the field it needs in its `where` clause and reads it with
+`get_field`; a context gets the impls by deriving them:
 
 ```rust
 #[derive(HasField)]
@@ -74,6 +74,7 @@ A provider that bounds on a field and reads it, and a generic function that read
 through a `Box`:
 
 ```rust
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 #[cgp_component(Greeter)]
@@ -204,7 +205,7 @@ a bound on `Symbol!("first_name")`, and the mismatch reports as a missing `HasFi
 each name spelled out character by character:
 
 ```text
-error[E0277]: the trait bound `Person: cgp::prelude::HasField<cgp::macro_prelude::Symbol<10, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
+error[E0277]: the trait bound `Person: cgp::macro_prelude::HasField<cgp::macro_prelude::Symbol<10, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
 ...
       but trait `HasField<Symbol<9, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'N', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>` is implemented for it
 ```
@@ -233,7 +234,7 @@ impl Deref for Wrapper {
 ```
 
 ```text
-error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Wrapper`
+error[E0119]: conflicting implementations of trait `cgp::macro_prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Wrapper`
 ```
 
 Fields the target lacks are unaffected, so rename the wrapper's field or drop the `Deref` impl.

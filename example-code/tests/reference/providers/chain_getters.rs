@@ -7,6 +7,7 @@
 pub mod examples {
     use cgp::core::component::WithProvider;
     use cgp::core::field::impls::ChainGetters;
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]

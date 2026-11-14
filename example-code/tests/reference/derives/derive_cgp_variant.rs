@@ -8,8 +8,11 @@
 /// The accepted rewrite the page recommends, with a payload struct that derives `CgpRecord`, a
 /// generic enum, and the variantless enum it says is accepted.
 pub mod usage {
+    use cgp::core::field::traits::BuildField;
     use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FinalizeBuild;
     use cgp::core::field::traits::FromVariant;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::core::field::traits::HasExtractor;
     use cgp::prelude::*;
 

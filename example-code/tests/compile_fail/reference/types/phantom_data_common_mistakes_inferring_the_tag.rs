@@ -2,6 +2,7 @@
 // a bare `PhantomData` leaves the tag to inference, and nothing fixes it. This is the `PhantomData`
 // page's *Common Mistakes* entry on the turbofish.
 
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 #[derive(HasField)]

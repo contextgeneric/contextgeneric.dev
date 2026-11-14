@@ -35,7 +35,8 @@ pub struct Life<'a>(pub PhantomData<*mut &'a ()>);
 ```
 
 The struct holds nothing at run time. Its only job is to carry the lifetime `'a` in the type system
-through [`PhantomData`](phantom_data.md). It is in the prelude, so `use cgp::prelude::*;` is enough.
+through [`PhantomData`](phantom_data.md). It is not in the prelude, so import it from
+`cgp::core::field::types`.
 
 The phantom type `*mut &'a ()` decides how `Life<'a>` behaves under subtyping. A `*mut T` is
 *invariant* in `T`, so wrapping `&'a ()` behind a `*mut` makes `Life<'a>` invariant in `'a`: a
@@ -74,6 +75,8 @@ A borrowing getter component, wired on a context that holds a borrow, and checke
 parameter tuple:
 
 ```rust
+use cgp::core::field::traits::HasField;
+use cgp::core::field::types::Life;
 use cgp::prelude::*;
 
 #[cgp_component(ReferenceGetter)]

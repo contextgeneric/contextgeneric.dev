@@ -9,6 +9,8 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::traits::FinalizeExtractResult;
+    use cgp::core::field::types::Either;
+    use cgp::core::field::types::Void;
     use cgp::prelude::*;
 
     pub type Token = Sum![u32, bool];

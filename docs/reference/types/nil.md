@@ -33,8 +33,8 @@ pub struct Nil;
 
 It holds nothing. Used as a tail it terminates a chain, and used on its own it is the empty list. It
 derives `Eq`, `PartialEq`, `Clone`, `Default`, and `Debug`, so a list ending in `Nil` inherits those
-traits structurally, and `Nil` itself compares equal to `Nil`. It is in the prelude, so
-`use cgp::prelude::*;` is enough.
+traits structurally, and `Nil` itself compares equal to `Nil`. It is not in the prelude, so import
+it from `cgp::core::field::types`.
 
 ## Behavior
 
@@ -59,7 +59,7 @@ Each list ends in `Nil`, and the empty product, the empty string, and a unit str
 ```rust
 use cgp::core::base::types::PathCons;
 use cgp::core::field::traits::ToFields;
-use cgp::core::field::types::{Chars, Symbol};
+use cgp::core::field::types::{Chars, Cons, Nil, Symbol};
 use cgp::prelude::*;
 
 #[derive(HasFields)]

@@ -1,4 +1,5 @@
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::{FinalizeBuild, HasBuilder};
 use cgp::prelude::*;
 
 // The source spells the field `surname`; the target calls it `last_name`.

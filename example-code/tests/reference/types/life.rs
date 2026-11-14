@@ -8,6 +8,8 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::types::Life;
     use cgp::prelude::*;
 
     #[cgp_component(ReferenceGetter)]
@@ -106,6 +108,7 @@ pub mod examples {
 /// `PhantomData<&'l ()>` compiles, while the same function over `Life<'l>` is the fixture
 /// `life_definition_invariant.rs`. A `Life` is zero-sized.
 pub mod definition {
+    use cgp::core::field::types::Life;
     use cgp::prelude::*;
 
     pub fn shorten<'s, 'l: 's>(marker: PhantomData<&'l ()>) -> PhantomData<&'s ()> {

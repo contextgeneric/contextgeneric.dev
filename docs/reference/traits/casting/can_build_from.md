@@ -60,8 +60,9 @@ Two independent records merged into a third, and a merge followed by the one fie
 not carry:
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder};
+use cgp::prelude::*;
 
 #[derive(CgpData)]
 pub struct FooBar {

@@ -77,6 +77,7 @@ A getter returning `MRef` lets one context lend a stored field and another build
 generic code reads both the same way:
 
 ```rust
+use cgp::core::field::impls::UseField;
 use cgp::core::field::types::MRef;
 use cgp::prelude::*;
 

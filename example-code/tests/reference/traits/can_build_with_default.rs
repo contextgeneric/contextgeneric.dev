@@ -6,6 +6,7 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::extra::field::impls::{CanBuildWithDefault, CanFinalizeWithDefault};
     use cgp::prelude::*;
 

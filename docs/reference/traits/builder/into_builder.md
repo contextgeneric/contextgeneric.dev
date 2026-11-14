@@ -57,7 +57,7 @@ The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.m
 Swapping one field of a complete record, the usual form of a redistribution:
 
 ```rust
-use cgp::core::field::traits::{IntoBuilder, TakeField};
+use cgp::core::field::traits::{BuildField, FinalizeBuild, IntoBuilder, TakeField};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]

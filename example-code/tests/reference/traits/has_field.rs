@@ -6,6 +6,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

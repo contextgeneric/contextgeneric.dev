@@ -1,15 +1,15 @@
 error[E0271]: type mismatch resolving `<__PartialFooBarBaz<IsPresent, IsPresent, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsPresent>>::Mapper == IsNothing`
-  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_overlapping_sources.rs:27:10
+  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_overlapping_sources.rs:28:10
    |
-27 |         .build_from(FooBaz { foo: 2, baz: true })
+28 |         .build_from(FooBaz { foo: 2, baz: true })
    |          ^^^^^^^^^^ type mismatch resolving `<__PartialFooBarBaz<IsPresent, IsPresent, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsPresent>>::Mapper == IsNothing`
    |
 note: expected this to be `IsNothing`
-  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_overlapping_sources.rs:16:10
+  --> tests/compile_fail/reference/traits/can_build_from_common_mistakes_overlapping_sources.rs:17:10
    |
-16 | #[derive(CgpData)]
+17 | #[derive(CgpData)]
    |          ^^^^^^^
    = note: required for `__PartialFooBarBaz<IsPresent, IsPresent, IsNothing>` to implement `BuildField<Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>`
-   = note: required for `Cons<cgp::prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>, u64>, Cons<cgp::prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'b', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'z', Nil>>>>, bool>, Nil>>` to implement `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder<__PartialFooBaz<IsPresent, IsPresent>, __PartialFooBarBaz<IsPresent, IsPresent, IsNothing>>`
+   = note: required for `Cons<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>, u64>, Cons<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'b', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'z', Nil>>>>, bool>, Nil>>` to implement `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder<__PartialFooBaz<IsPresent, IsPresent>, __PartialFooBarBaz<IsPresent, IsPresent, IsNothing>>`
    = note: required for `__PartialFooBarBaz<IsPresent, IsPresent, IsNothing>` to implement `CanBuildFrom<FooBaz>`
    = note: this error originates in the derive macro `CgpData` (in Nightly builds, run with -Z macro-backtrace for more info)

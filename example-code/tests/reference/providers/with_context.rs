@@ -11,6 +11,7 @@ pub mod usage {
     use core::marker::PhantomData;
 
     use cgp::core::component::WithContext;
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_getter]

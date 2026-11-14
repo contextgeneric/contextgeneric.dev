@@ -7,6 +7,8 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::traits::AppendProduct;
+    use cgp::core::field::types::Field;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     pub type Base = Product![Field<Symbol!("host"), String>];

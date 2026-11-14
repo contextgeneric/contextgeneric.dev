@@ -54,6 +54,7 @@ pub mod usage {
 pub mod the_struct_cgp_new_provider_declares {
     use core::marker::PhantomData;
 
+    use cgp::core::field::types::Life;
     use cgp::prelude::*;
 
     #[cgp_component(Labeler)]
@@ -253,6 +254,7 @@ pub mod under_the_hood {
         use core::fmt::Display;
         use core::marker::PhantomData;
 
+        use cgp::core::field::traits::HasField;
         use cgp::extra::handler::{ComputerRef, ComputerRefComponent};
         use cgp::prelude::*;
 

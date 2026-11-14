@@ -1,13 +1,13 @@
 error[E0599]: the method `finalize_with_default` exists for struct `__PartialServer<IsPresent, IsNothing>`, but its trait bounds were not satisfied
-  --> tests/compile_fail/reference/traits/can_finalize_with_default_common_mistakes_no_default.rs:16:10
+  --> tests/compile_fail/reference/traits/can_finalize_with_default_common_mistakes_no_default.rs:17:10
    |
- 8 |   pub struct Server {
+ 9 |   pub struct Server {
    |   ----------------- method `finalize_with_default` not found for this struct because `__PartialServer<IsPresent, IsNothing>` doesn't implement `PartialData` or `TransformMapFields`
 ...
-14 |       let _ = Server::builder()
+15 |       let _ = Server::builder()
    |  _____________-
-15 | |         .build_field(PhantomData::<Symbol!("host")>, "localhost".to_owned())
-16 | |         .finalize_with_default();
+16 | |         .build_field(PhantomData::<Symbol!("host")>, "localhost".to_owned())
+17 | |         .finalize_with_default();
    | |         -^^^^^^^^^^^^^^^^^^^^^ method cannot be called on `__PartialServer<IsPresent, IsNothing>` due to unsatisfied trait bounds
    | |_________|
    |

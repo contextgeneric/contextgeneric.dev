@@ -1,13 +1,13 @@
 error[E0277]: the trait bound `ReadDisplayName: IsProviderFor<NameGetterComponent, Account>` is not satisfied
-  --> tests/compile_fail/reference/traits/field_getter_common_mistakes_without_with_provider.rs:40:9
+  --> tests/compile_fail/reference/traits/field_getter_common_mistakes_without_with_provider.rs:41:9
    |
-40 |         NameGetterComponent,
+41 |         NameGetterComponent,
    |         ^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `IsProviderFor<NameGetterComponent, Account>` is not implemented for `ReadDisplayName`
-  --> tests/compile_fail/reference/traits/field_getter_common_mistakes_without_with_provider.rs:18:1
+  --> tests/compile_fail/reference/traits/field_getter_common_mistakes_without_with_provider.rs:19:1
    |
-18 | pub struct ReadDisplayName;
+19 | pub struct ReadDisplayName;
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
    = help: the following other types implement trait `IsProviderFor<Component, Context, Params>`:
              `Account` implements `IsProviderFor<NameGetterComponent, __Context__, __Params__>`
@@ -21,12 +21,12 @@ help: the trait `IsProviderFor<NameGetterComponent, Account>` is not implemented
            and $N others
    = note: required for `Account` to implement `CanUseComponent<NameGetterComponent>`
 note: required by a bound in `__CheckAccount`
-  --> tests/compile_fail/reference/traits/field_getter_common_mistakes_without_with_provider.rs:38:1
+  --> tests/compile_fail/reference/traits/field_getter_common_mistakes_without_with_provider.rs:39:1
    |
-38 | / check_components! {
-39 | |     Account {
-40 | |         NameGetterComponent,
-41 | |     }
-42 | | }
+39 | / check_components! {
+40 | |     Account {
+41 | |         NameGetterComponent,
+42 | |     }
+43 | | }
    | |_^ required by this bound in `__CheckAccount`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

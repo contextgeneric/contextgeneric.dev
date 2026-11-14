@@ -9,9 +9,14 @@
 /// The two inputs the page opens on, the shape-specific faces, and the shapes the page says are
 /// accepted. The one it says is rejected is a trybuild fixture, named in the module below this one.
 pub mod usage {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
     use cgp::core::field::traits::FromFields;
     use cgp::core::field::traits::FromVariant;
+    use cgp::core::field::traits::HasBuilder;
+    use cgp::core::field::traits::HasField;
     use cgp::core::field::traits::ToFields;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq)]
@@ -108,7 +113,10 @@ pub mod rejected_struct_style_variant {}
 ///
 /// The umbrella page's own snippet: one derive covering both halves of a program.
 pub mod examples {
+    use cgp::core::field::traits::BuildField;
     use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::core::field::traits::HasExtractor;
     use cgp::prelude::*;
 

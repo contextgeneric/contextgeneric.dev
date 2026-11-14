@@ -48,8 +48,8 @@ struct is empty, so a value of `Index<I>` holds nothing, and the number lives en
 The derived `Default`, `Clone`, and `Copy` make a value available whenever code needs one. `Eq` and
 `PartialEq` treat any two values of the same `Index<I>` as equal, because they hold nothing.
 `Index<I>` also implements `Display` and `Debug`, and both print the underlying number. So
-`Index<0>` displays as `0`, and output and diagnostics show the position a tag stands for. It is in
-the prelude, so `use cgp::prelude::*;` is enough.
+`Index<0>` displays as `0`, and output and diagnostics show the position a tag stands for. It is not
+in the prelude, so import it from `cgp::core::field::types`.
 
 ## Behavior
 
@@ -76,6 +76,8 @@ A tuple struct that derives `HasField` is read by position, and an `Index` print
 stands for:
 
 ```rust
+use cgp::core::field::traits::HasField;
+use cgp::core::field::types::Index;
 use cgp::prelude::*;
 
 #[derive(HasField)]
@@ -134,7 +136,7 @@ pub fn sixth(point: &Point) -> f64 {
 ```
 
 The compiler reports
-``error[E0277]: the trait bound `Point: cgp::prelude::HasField<cgp::prelude::Index<5>>` is not satisfied``,
+``error[E0277]: the trait bound `Point: cgp::macro_prelude::HasField<cgp::macro_prelude::Index<5>>` is not satisfied``,
 and lists the three `HasField<Index<0>>` to `HasField<Index<2>>` impls the struct does have. Indices
 count from zero, as Rust's own `.0` access does, so an off-by-one error surfaces the same way.
 
@@ -142,7 +144,7 @@ count from zero, as Rust's own `.0` access does, so an off-by-one error surfaces
 into a type, not by a string of the digit, so `Symbol!("0")` never matches a tuple field and the
 derive never generates it. `pair.get_field(PhantomData::<Symbol!("0")>)` on the `Pair` above fails
 with
-``error[E0277]: the trait bound `Pair: cgp::prelude::HasField<cgp::macro_prelude::Symbol<1, cgp::macro_prelude::Chars<'0', Nil>>>` is not satisfied``.
+``error[E0277]: the trait bound `Pair: cgp::macro_prelude::HasField<cgp::macro_prelude::Symbol<1, cgp::macro_prelude::Chars<'0', Nil>>>` is not satisfied``.
 
 ## Related constructs
 

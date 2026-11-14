@@ -57,8 +57,9 @@ The results are types, so the check is a type equality: each function compiles o
 `Output` is the type it is returned as.
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::traits::AppendProduct;
+use cgp::core::field::types::{Field, Nil};
+use cgp::prelude::*;
 
 pub type Base = Product![Field<Symbol!("host"), String>];
 

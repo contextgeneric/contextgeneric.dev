@@ -1,33 +1,33 @@
 error[E0284]: type annotations needed
-  --> tests/compile_fail/reference/types/phantom_data_common_mistakes_inferring_the_tag.rs:14:33
+  --> tests/compile_fail/reference/types/phantom_data_common_mistakes_inferring_the_tag.rs:15:33
    |
-14 |     let name = person.get_field(PhantomData);
+15 |     let name = person.get_field(PhantomData);
    |                       --------- ^^^^^^^^^^^ cannot infer type of the type parameter `T` declared on the struct `PhantomData`
    |                       |
    |                       type must be known at this point
    |
-   = note: cannot satisfy `<Person as cgp::prelude::HasField<_>>::Value == _`
+   = note: cannot satisfy `<Person as cgp::macro_prelude::HasField<_>>::Value == _`
 help: consider specifying a concrete type for the type parameter `T`
    |
-14 |     let name = person.get_field(PhantomData::</* Type */>);
+15 |     let name = person.get_field(PhantomData::</* Type */>);
    |                                            ++++++++++++++
 
 error[E0283]: type annotations needed
-  --> tests/compile_fail/reference/types/phantom_data_common_mistakes_inferring_the_tag.rs:14:33
+  --> tests/compile_fail/reference/types/phantom_data_common_mistakes_inferring_the_tag.rs:15:33
    |
-14 |     let name = person.get_field(PhantomData);
+15 |     let name = person.get_field(PhantomData);
    |                       --------- ^^^^^^^^^^^ cannot infer type of the type parameter `T` declared on the struct `PhantomData`
    |                       |
    |                       required by a bound introduced by this call
    |
-note: multiple `impl`s satisfying `Person: cgp::prelude::HasField<_>` found
-  --> tests/compile_fail/reference/types/phantom_data_common_mistakes_inferring_the_tag.rs:9:9
+note: multiple `impl`s satisfying `Person: cgp::macro_prelude::HasField<_>` found
+  --> tests/compile_fail/reference/types/phantom_data_common_mistakes_inferring_the_tag.rs:10:9
    |
- 9 |     pub name: String,
+10 |     pub name: String,
    |         ^^^^
-10 |     pub age: u8,
+11 |     pub age: u8,
    |         ^^^
 help: consider specifying a concrete type for the type parameter `T`
    |
-14 |     let name = person.get_field(PhantomData::</* Type */>);
+15 |     let name = person.get_field(PhantomData::</* Type */>);
    |                                            ++++++++++++++

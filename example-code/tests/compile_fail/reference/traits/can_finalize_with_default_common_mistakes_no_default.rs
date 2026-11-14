@@ -1,3 +1,4 @@
+use cgp::core::field::traits::{BuildField, HasBuilder};
 use cgp::extra::field::impls::CanFinalizeWithDefault;
 use cgp::prelude::*;
 

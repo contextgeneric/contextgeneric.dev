@@ -6,6 +6,7 @@
 ///
 /// `Person` wires the getter to a field whose name differs from the method's.
 pub mod overview {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -138,6 +139,7 @@ pub mod usage {
 pub mod what_a_context_can_wire_it_to {
     use cgp::core::component::UseFields;
     use cgp::core::component::WithProvider;
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -228,6 +230,7 @@ pub mod what_a_context_can_wire_it_to {
 /// impl on `Anonymous`. The page does not declare `Employee`; it has a `name` field here.
 pub mod examples {
     use cgp::core::component::UseFields;
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]

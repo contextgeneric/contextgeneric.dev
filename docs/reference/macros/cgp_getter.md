@@ -101,6 +101,7 @@ The case `#[cgp_auto_getter]` cannot express: the trait method is `name`, and th
 in `first_name`.
 
 ```rust
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 
 #[cgp_getter]
@@ -293,7 +294,7 @@ for a single-method trait, because each supplies one field. Wiring a two-method 
 with the tag expanded into its raw list:
 
 ```text
-error[E0277]: the trait bound `cgp::prelude::UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', …>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
+error[E0277]: the trait bound `UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', …>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
 ```
 
 Nothing in that says the trait had too many methods, which is the actual cause. Use `UseFields`, or split

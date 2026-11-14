@@ -2,6 +2,7 @@
 // `#[cgp_impl(new ...)]` declares over a lifetime holds a `PhantomData<Life<'a>>`, so it is not
 // `Send` either. This pins the `Life` page's *Definition*.
 
+use cgp::core::field::types::Life;
 use cgp::prelude::*;
 
 #[cgp_component(NameGetter)]

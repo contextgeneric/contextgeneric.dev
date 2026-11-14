@@ -35,6 +35,7 @@ pub mod usage {
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
     use cgp::extra::handler::Computer;
     use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::{CanCompute, PipeHandlers};

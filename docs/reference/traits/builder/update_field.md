@@ -81,7 +81,7 @@ named:
 
 ```rust
 use cgp::core::field::impls::{IsNothing, IsPresent};
-use cgp::core::field::traits::UpdateField;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder, UpdateField};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]

@@ -6,6 +6,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::UseField;
     use cgp::core::field::types::MRef;
     use cgp::prelude::*;
 

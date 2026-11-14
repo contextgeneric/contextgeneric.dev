@@ -4,6 +4,7 @@
 
 /// ## Overview
 pub mod overview {
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[test]
@@ -15,6 +16,11 @@ pub mod overview {
 
 /// ## Usage
 pub mod usage {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Either;
+    use cgp::core::field::types::Field;
+    use cgp::core::field::types::Nil;
+    use cgp::core::field::types::Void;
     use cgp::prelude::*;
 
     #[derive(HasFields)]
@@ -48,6 +54,8 @@ pub mod usage {
 /// ## Examples
 pub mod examples {
     use cgp::core::field::traits::FromFields;
+    use cgp::core::field::types::Either;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(Debug, PartialEq, CgpData)]
@@ -75,6 +83,10 @@ pub mod examples {
 
 /// ## Under the hood
 pub mod under_the_hood {
+    use cgp::core::field::types::Either;
+    use cgp::core::field::types::Field;
+    use cgp::core::field::types::Nil;
+    use cgp::core::field::types::Void;
     use cgp::prelude::*;
 
     #[test]

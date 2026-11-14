@@ -1,5 +1,6 @@
 use cgp::core::field::impls::IsNothing;
 use cgp::core::field::impls::IsPresent;
+use cgp::core::field::traits::{BuildField, HasBuilder};
 use cgp::core::field::traits::{TransformMap, TransformMapFields};
 use cgp::prelude::*;
 

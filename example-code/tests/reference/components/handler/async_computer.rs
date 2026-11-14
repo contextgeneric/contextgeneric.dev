@@ -50,6 +50,7 @@ pub mod usage {
     pub mod sources {
         use core::marker::PhantomData;
 
+        use cgp::core::field::impls::UseField;
         use cgp::extra::handler::AsyncComputerComponent;
         use cgp::extra::handler::CanComputeAsync;
         use cgp::prelude::*;

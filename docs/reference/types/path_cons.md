@@ -76,6 +76,7 @@ A path is a type, so the checks here are type equalities. The
 ```rust
 use cgp::core::base::traits::ConcatPath;
 use cgp::core::base::types::PathCons;
+use cgp::core::field::types::Nil;
 use cgp::prelude::*;
 
 #[cgp_component(FooProvider)]

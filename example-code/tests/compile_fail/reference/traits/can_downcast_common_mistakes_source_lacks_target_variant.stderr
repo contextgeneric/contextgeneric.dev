@@ -16,7 +16,7 @@ help: the following other types implement trait `ExtractField<Tag>`
    |     ^^^ `__PartialFooBar<IsPresent, __F1__>` implements `ExtractField<Symbol<3, cgp::macro_prelude::Chars<'F', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>`
  7 |     Bar(String),
    |     ^^^ `__PartialFooBar<__F0__, IsPresent>` implements `ExtractField<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'r', Nil>>>>>`
-   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'Q', cgp::macro_prelude::Chars<'u', cgp::macro_prelude::Chars<'x', Nil>>>>, char>, Void>` to implement `FieldsExtractor<__PartialFooBar<IsVoid, IsPresent>, FooQux>`
+   = note: required for `Either<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'Q', cgp::macro_prelude::Chars<'u', cgp::macro_prelude::Chars<'x', Nil>>>>, char>, Void>` to implement `FieldsExtractor<__PartialFooBar<IsVoid, IsPresent>, FooQux>`
    = note: 1 redundant requirement hidden
-   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'F', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>, u64>, Either<cgp::prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'Q', cgp::macro_prelude::Chars<'u', cgp::macro_prelude::Chars<'x', Nil>>>>, char>, Void>>` to implement `FieldsExtractor<__PartialFooBar<IsPresent, IsPresent>, FooQux>`
+   = note: required for `Either<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'F', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>, u64>, Either<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'Q', cgp::macro_prelude::Chars<'u', cgp::macro_prelude::Chars<'x', Nil>>>>, char>, Void>>` to implement `FieldsExtractor<__PartialFooBar<IsPresent, IsPresent>, FooQux>`
    = note: required for `FooBar` to implement `CanDowncast<FooQux>`

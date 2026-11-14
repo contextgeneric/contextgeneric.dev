@@ -50,7 +50,7 @@ argument the rest of this page works out.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 `finalize_build` consumes the partial value and returns `Self::Target`. It takes only `self`:
 nothing is left to decide by the time it applies.
@@ -66,6 +66,7 @@ per record.
 A generic finalize over any complete builder, including a fieldless record:
 
 ```rust
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]

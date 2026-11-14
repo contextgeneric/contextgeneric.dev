@@ -62,6 +62,7 @@ pub mod examples {
 /// The borrowed views the plain `UseField` already serves: `&[u8]` over `Vec<u8>`, and `Option<&T>`
 /// and `Option<&str>` over `Option<T>` and `Option<String>`.
 pub mod when_to_use_it {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]

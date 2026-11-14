@@ -10,6 +10,7 @@
 /// The name component pair the opening snippet wires. The page declares neither trait there; the
 /// getter appears under *Examples* and the type component is declared here.
 pub mod overview {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_type]
@@ -434,6 +435,7 @@ pub mod what_is_wired_and_what_is_checked {
 /// The getter context, and the mixed table whose skipped entry a per-layer `#[check_providers]`
 /// block verifies. The page names `RectanglePerimeter` and reuses the scaled-area providers.
 pub mod examples {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -517,6 +519,8 @@ pub mod examples {
 pub mod under_the_hood {
     use core::marker::PhantomData;
 
+    use cgp::core::field::impls::UseField;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     pub use super::overview::{HasName, NameGetterComponent, NameTypeProviderComponent};

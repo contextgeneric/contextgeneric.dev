@@ -57,9 +57,10 @@ It is an **associated function**, called on the target: `Point3d::build_with_def
 Widening a record without naming a field, in one call and as the three calls it stands for:
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::HasBuilder;
 use cgp::extra::field::impls::{CanBuildWithDefault, CanFinalizeWithDefault};
+use cgp::prelude::*;
 
 #[derive(Debug, Clone, Eq, PartialEq, CgpData)]
 pub struct Point2d {

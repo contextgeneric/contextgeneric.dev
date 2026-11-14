@@ -53,8 +53,9 @@ The results are types, so the check is a type equality, here for the worked conc
 two `Nil` identities:
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::traits::{AppendProduct, ConcatProduct};
+use cgp::core::field::types::{Field, Nil};
+use cgp::prelude::*;
 
 pub type Base = Product![Field<Symbol!("host"), String>];
 

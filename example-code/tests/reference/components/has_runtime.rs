@@ -8,6 +8,7 @@ pub mod examples {
     use cgp::extra::runtime::{
         HasRuntime, RuntimeGetterComponent, RuntimeOf, RuntimeTypeProviderComponent,
     };
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     pub struct TokioRuntime;

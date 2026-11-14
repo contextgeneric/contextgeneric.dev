@@ -10,7 +10,9 @@
 /// The `Fields` type the page opens on, checked by naming it explicitly.
 pub mod overview {
     use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::HasFields;
     use cgp::core::field::traits::ToFields;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
@@ -46,8 +48,12 @@ pub mod overview {
 /// variant shapes in the single enum the page uses for them.
 pub mod usage {
     use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::HasFields;
     use cgp::core::field::traits::HasFieldsRef;
     use cgp::core::field::traits::ToFields;
+    use cgp::core::field::types::Field;
+    use cgp::core::field::types::Index;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
@@ -165,8 +171,10 @@ pub mod usage {
 /// The `Config` pairing the page shows, the borrowed form, and the enum whose shape is a sum.
 pub mod examples {
     use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::HasFields;
     use cgp::core::field::traits::ToFields;
     use cgp::core::field::traits::ToFieldsRef;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasField, HasFields)]
@@ -256,6 +264,8 @@ pub mod examples {
 ///
 /// The listings' inputs, for `cargo cgp expand`, and the variantless enum whose shape is `Void`.
 pub mod under_the_hood {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Void;
     use cgp::prelude::*;
 
     #[derive(HasFields)]
@@ -280,6 +290,8 @@ pub mod under_the_hood {
 /// Field order is part of the type: two structs with the same fields in different orders have
 /// different shapes.
 pub mod common_mistakes {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(HasFields)]

@@ -68,8 +68,9 @@ is free of the bound. [Common Mistakes](#common-mistakes) shows what rustc repor
 Filling a gap rather than reporting it, from an optional builder and from a core one:
 
 ```rust
-use cgp::prelude::*;
+use cgp::core::field::traits::{BuildField, HasBuilder};
 use cgp::extra::field::impls::{CanFinalizeWithDefault, HasOptionalBuilder, SetOptional};
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]
 pub struct Context {

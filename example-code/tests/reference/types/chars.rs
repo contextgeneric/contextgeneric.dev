@@ -7,7 +7,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
     use cgp::core::field::types::Chars;
+    use cgp::core::field::types::Nil;
     use cgp::core::field::types::Symbol;
     use cgp::prelude::*;
 

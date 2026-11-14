@@ -257,6 +257,7 @@ pub mod examples {
 /// The hand-written expansion of the page's listing, under another trait name so it can sit
 /// beside the macro's own output, plus the slice and mutable bounds the section names.
 pub mod under_the_hood {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     pub trait RectangleArea {

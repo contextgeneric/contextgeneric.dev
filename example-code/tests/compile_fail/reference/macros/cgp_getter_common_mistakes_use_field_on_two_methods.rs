@@ -1,5 +1,6 @@
 //! `docs/reference/macros/cgp_getter.md`, *Common Mistakes*: a multi-method trait gets no `UseField` provider.
 
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 
 #[cgp_getter]

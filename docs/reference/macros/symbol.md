@@ -75,6 +75,7 @@ The everyday appearance is a wiring entry that points a getter at a particular f
 value context here, the type whose own field the getter reads:
 
 ```rust
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 
 #[cgp_getter]

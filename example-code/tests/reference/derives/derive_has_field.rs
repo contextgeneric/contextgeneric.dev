@@ -10,6 +10,7 @@
 /// The page opens on the bound an implementation writes. The component and the context are shown
 /// further down under *Examples*; they are declared here so the opening bound has something to hold.
 pub mod overview {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[derive(HasField)]
@@ -41,6 +42,8 @@ pub mod overview {
 /// field, tuple fields, a unit struct, and a generic struct. The unit struct is the one whose whole
 /// point is that it compiles and emits nothing.
 pub mod usage {
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     #[derive(HasField)]
@@ -123,6 +126,7 @@ pub mod usage {
 /// argument that generates the same bound. Two components are declared rather than one, since the
 /// page shows the second form as a replacement for the first and one context cannot wire both.
 pub mod examples {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

@@ -168,6 +168,7 @@ pub mod under_the_hood {
     use core::fmt::Display;
     use core::marker::PhantomData;
 
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     pub trait Greet {

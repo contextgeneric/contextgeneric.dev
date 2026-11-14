@@ -51,7 +51,7 @@ type Fields = Product![
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude**, though its derive is. Import it from `cgp::core::field::traits`.
 
 The shape's construction follows one rule everywhere: a named field or variant is keyed by
 [`Symbol!`](../../macros/symbol.md), a positional field by [`Index<N>`](../../types/index_type.md),
@@ -94,6 +94,8 @@ The shapes a struct, an enum, and a one-field tuple struct derive, each checked 
 that pins `Fields`:
 
 ```rust
+use cgp::core::field::traits::HasFields;
+use cgp::core::field::types::Field;
 use cgp::prelude::*;
 
 #[derive(HasField, HasFields)]

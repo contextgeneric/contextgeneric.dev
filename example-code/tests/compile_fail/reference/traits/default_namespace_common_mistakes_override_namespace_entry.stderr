@@ -7,7 +7,7 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<ShowImplCompon
 33 |         ShowImplComponent: ShowWithDisplay,
    |         ^^^^^^^^^^^^^^^^^ conflicting implementation for `App`
    |
-   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<ShowImplComponent, _, _>` for type `cgp::macro_prelude::RedirectLookup<App, cgp::macro_prelude::PathCons<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::macro_prelude::PathCons<ShowImplComponent, cgp::prelude::Nil>>>`
+   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<ShowImplComponent, _, _>` for type `cgp::macro_prelude::RedirectLookup<App, cgp::macro_prelude::PathCons<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Nil>>>>>, cgp::macro_prelude::PathCons<ShowImplComponent, cgp::macro_prelude::Nil>>>`
 
 error[E0119]: conflicting implementations of trait `DelegateComponent<ShowImplComponent>` for type `App`
   --> tests/compile_fail/reference/traits/default_namespace_common_mistakes_override_namespace_entry.rs:33:9

@@ -2,6 +2,8 @@
 
 /// ## An enum as a list of named variants
 pub mod an_enum_as_a_list_of_named_variants {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq, CgpData)]
@@ -58,6 +60,7 @@ pub mod one_handler_per_variant {
     use core::fmt::Display;
 
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::core::field::types::Field;
     use cgp::extra::dispatch::MatchWithFieldHandlers;
     use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;

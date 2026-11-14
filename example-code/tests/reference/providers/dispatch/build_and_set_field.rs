@@ -5,6 +5,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
     use cgp::extra::dispatch::{BuildAndSetField, BuildWithHandlers};
     use cgp::extra::handler::CanCompute;
     use cgp::extra::handler::Computer;

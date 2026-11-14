@@ -2,7 +2,7 @@
 // does not convert to a `Life<'s>` even when `'l` outlives `'s`. This pins the `Life` page's
 // *Definition*; the same function over a covariant `PhantomData<&'l ()>` compiles.
 
-use cgp::prelude::*;
+use cgp::core::field::types::Life;
 
 pub fn shorten<'s, 'l: 's>(marker: Life<'l>) -> Life<'s> {
     marker

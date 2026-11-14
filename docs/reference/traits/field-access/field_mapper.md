@@ -75,9 +75,9 @@ A two-step getter provider that reads through the field one provider returns wit
 a getter, and a direct call through `UseContext`:
 
 ```rust
-use cgp::core::component::WithProvider;
-use cgp::core::field::traits::{FieldGetter, FieldMapper};
-use cgp::core::component::UseContext;
+use cgp::core::component::{UseContext, WithProvider};
+use cgp::core::field::impls::UseField;
+use cgp::core::field::traits::{FieldGetter, FieldMapper, HasField};
 use cgp::prelude::*;
 
 pub struct ThenGet<First, Second>(pub PhantomData<(First, Second)>);

@@ -9,6 +9,7 @@
 pub mod usage {
     use cgp::core::base::types::PathCons;
     use cgp::core::error::ErrorRaiserComponent;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     pub type One = Path!(@app);
@@ -48,6 +49,7 @@ pub mod usage {
 pub mod examples {
     use cgp::core::base::types::PathCons;
     use cgp::core::error::ErrorRaiserComponent;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     pub type ErrorRoute = Path!(@app.error.ErrorRaiserComponent);
@@ -122,6 +124,7 @@ pub mod under_the_hood {
     use cgp::core::base::types::PathCons;
     use cgp::core::component::RedirectLookup;
     use cgp::core::field::types::Chars;
+    use cgp::core::field::types::Nil;
     use cgp::core::field::types::Symbol;
     use cgp::prelude::*;
 
@@ -156,6 +159,7 @@ pub mod primitive_like_names {
     use core::marker::PhantomData;
 
     use cgp::core::base::types::PathCons;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     #[test]

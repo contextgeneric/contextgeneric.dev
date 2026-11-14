@@ -19,6 +19,6 @@ help: the following other types implement trait `UpdateField<Tag, M>`
 16 |     pub z: u64,
    |         ^ `__PartialPoint3d<__F0__, __F1__, __M1__>` implements `UpdateField<Symbol<1, cgp::macro_prelude::Chars<'z', Nil>>, __M2__>`
    = note: required for `__PartialPoint3d<IsPresent, IsPresent, IsNothing>` to implement `BuildField<Symbol<5, cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'b', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'l', Nil>>>>>>>`
-   = note: required for `Cons<cgp::prelude::Field<Symbol<5, cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'b', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'l', Nil>>>>>>, String>, Nil>` to implement `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder<__PartialLabeledPoint2d<IsNothing, IsNothing, IsPresent>, __PartialPoint3d<IsPresent, IsPresent, IsNothing>>`
+   = note: required for `Cons<cgp::macro_prelude::Field<Symbol<5, cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'b', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'l', Nil>>>>>>, String>, Nil>` to implement `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder<__PartialLabeledPoint2d<IsNothing, IsNothing, IsPresent>, __PartialPoint3d<IsPresent, IsPresent, IsNothing>>`
    = note: required for `__PartialPoint3d<IsNothing, IsNothing, IsNothing>` to implement `CanBuildFrom<LabeledPoint2d>`
    = note: required for `Point3d` to implement `CanBuildWithDefault<LabeledPoint2d>`

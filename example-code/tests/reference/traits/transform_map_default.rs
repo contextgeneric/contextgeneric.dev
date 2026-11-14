@@ -6,6 +6,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::impls::IsPresent;
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::core::field::traits::TransformMapFields;
     use cgp::extra::field::impls::TransformMapDefault;
     use cgp::prelude::*;

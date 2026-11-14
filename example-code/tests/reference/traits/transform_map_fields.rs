@@ -7,6 +7,7 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::impls::IsPresent;
+    use cgp::core::field::traits::FinalizeBuild;
     use cgp::core::field::traits::IntoBuilder;
     use cgp::core::field::traits::{TransformMap, TransformMapFields};
     use cgp::prelude::*;
@@ -61,6 +62,7 @@ pub mod under_the_hood {
     use std::cell::RefCell;
 
     use cgp::core::field::impls::IsPresent;
+    use cgp::core::field::traits::FinalizeBuild;
     use cgp::core::field::traits::IntoBuilder;
     use cgp::core::field::traits::{TransformMap, TransformMapFields};
     use cgp::prelude::*;

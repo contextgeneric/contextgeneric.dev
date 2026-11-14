@@ -43,8 +43,9 @@ pub enum Either<Head, Tail> {
 `Head` is the type of the current branch, and `Tail` is the rest of the chain, which is another
 `Either` or, at the end, [`Void`](void.md). `Left(Head)` carries a value of the head type, and
 `Right(Tail)` carries a value that belongs further down the chain. It derives `Eq`, `PartialEq`,
-`Debug`, and `Clone`, so a sum of values that implement those traits inherits them. It is in the
-prelude, and so is `Void`.
+`Debug`, and `Clone`, so a sum of values that implement those traits inherits them. Neither it nor
+`Void` is in the prelude, since `Sum!` writes both for you. Import them from
+`cgp::core::field::types` when you name one.
 
 ## Behavior
 
@@ -73,6 +74,7 @@ depth, with the `Void` arm closing the match:
 
 ```rust
 use cgp::core::field::traits::ToFields;
+use cgp::core::field::types::{Cons, Either, Nil, Void};
 use cgp::prelude::*;
 
 #[derive(HasFields)]

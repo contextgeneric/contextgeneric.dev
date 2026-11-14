@@ -58,9 +58,9 @@ You call it on a partial value, as `builder.to_optional()`.
 Relaxing a partly filled core builder, and then a complete value:
 
 ```rust
-use cgp::core::field::traits::IntoBuilder;
-use cgp::prelude::*;
+use cgp::core::field::traits::{BuildField, HasBuilder, IntoBuilder};
 use cgp::extra::field::impls::{FinalizeOptional, SetOptional, ToOptional};
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]
 pub struct Context {

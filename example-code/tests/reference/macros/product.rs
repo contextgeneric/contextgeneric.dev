@@ -7,6 +7,7 @@
 ///
 /// The type, its value, the empty list, and a trailing comma.
 pub mod usage {
+    use cgp::core::field::types::{Cons, Nil};
     use cgp::prelude::*;
 
     #[test]
@@ -27,6 +28,10 @@ pub mod usage {
 /// `MyContext`, `Multiply`, and `Add` without declaring them; `Multiply<Tag>` and `Add<Tag>` are
 /// computers reading a `u64` field named by `Tag`.
 pub mod examples {
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Cons;
+    use cgp::core::field::types::Field;
     use cgp::extra::handler::{CanCompute, Computer, ComputerComponent, PipeHandlers};
     use cgp::prelude::*;
 
@@ -108,6 +113,8 @@ pub mod examples {
 
 /// ## Under the hood
 pub mod under_the_hood {
+    use cgp::core::field::types::Cons;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     pub struct A;
@@ -126,6 +133,7 @@ pub mod under_the_hood {
 /// A one-element list is a distinct type from its element. The misplaced-macro snippets are
 /// trybuild fixtures.
 pub mod common_mistakes {
+    use cgp::core::field::types::{Cons, Nil};
     use cgp::prelude::*;
 
     #[test]

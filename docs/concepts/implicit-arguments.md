@@ -16,9 +16,9 @@ fit.
 
 ## Reading a field explicitly
 
-A generic provider reads a context field through `HasField`, a trait keyed by the field's name.
-The following fragment assumes a `Greeter` component with a `greet(&self) -> String` method and
-imports from `cgp::prelude::*`:
+A generic provider reads a context field through `HasField`, a trait keyed by the field's name. The
+following fragment assumes a `Greeter` component with a `greet(&self) -> String` method and imports
+`cgp::prelude::*` and `HasField` from `cgp::core::field::traits`:
 
 ```rust
 #[cgp_impl(new GreetByName)]

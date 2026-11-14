@@ -56,6 +56,7 @@ pub mod overview {
 pub mod usage {
     use cgp::core::field::traits::ExtractField;
     use cgp::core::field::traits::HasExtractor;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     #[derive(Debug, PartialEq)]

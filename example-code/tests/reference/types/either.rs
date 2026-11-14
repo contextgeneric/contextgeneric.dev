@@ -7,6 +7,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::field::traits::ToFields;
+    use cgp::core::field::types::Cons;
+    use cgp::core::field::types::Either;
+    use cgp::core::field::types::{Nil, Void};
     use cgp::prelude::*;
 
     #[derive(HasFields)]

@@ -10,7 +10,7 @@ pub mod examples {
     use cgp::core::field::impls::IsPresent;
     use cgp::core::field::impls::IsVoid;
     use cgp::core::field::traits::MapType;
-    use cgp::prelude::*;
+    use cgp::core::field::types::Void;
 
     // Each function compiles only if the projection is the type on its right.
     pub fn present(value: <IsPresent as MapType>::Map<String>) -> String {

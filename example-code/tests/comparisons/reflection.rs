@@ -5,6 +5,8 @@
 
 /// ## A type's shape becomes a type, not a descriptor
 pub mod a_types_shape_becomes_a_type {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(HasFields)]
@@ -26,7 +28,12 @@ pub mod a_types_shape_becomes_a_type {
 pub mod reflection_driven_serialization {
     use core::fmt::Debug;
 
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::traits::HasFields;
     use cgp::core::field::traits::StaticString;
+    use cgp::core::field::types::Cons;
+    use cgp::core::field::types::Field;
+    use cgp::core::field::types::Nil;
     use cgp::prelude::*;
 
     #[cgp_component(ValueWriter)]

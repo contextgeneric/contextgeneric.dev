@@ -51,10 +51,10 @@ error type and return the provider's error.
 The second step reads the field the first one set:
 
 ```rust
-use cgp::extra::handler::{Computer, ComputerComponent};
-use cgp::prelude::*;
+use cgp::core::field::traits::HasField;
 use cgp::extra::dispatch::{BuildAndSetField, BuildWithHandlers};
-use cgp::extra::handler::CanCompute;
+use cgp::extra::handler::{CanCompute, Computer, ComputerComponent};
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]
 pub struct PoolConfig {

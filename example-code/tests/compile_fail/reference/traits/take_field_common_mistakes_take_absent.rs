@@ -1,3 +1,4 @@
+use cgp::core::field::traits::HasBuilder;
 use cgp::core::field::traits::TakeField;
 use cgp::prelude::*;
 

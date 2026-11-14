@@ -51,7 +51,7 @@ companion at its all-absent configuration, ready to fill.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 `builder()` is called without a receiver, as `Person::builder()` or `T::builder()` in generic code.
 You rarely name the `Builder` type yourself, but it appears in an error when a build is incomplete.
@@ -69,8 +69,9 @@ about whether you are assembling a record or redistributing one.
 A record extended from a narrower one, and a field read back off a still-incomplete builder:
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder, HasField};
+use cgp::prelude::*;
 
 // `build_from` walks the *source's* field list, so the source needs `HasFields` too.
 #[derive(HasFields, BuildField)]

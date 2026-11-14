@@ -36,8 +36,8 @@ in wiring, never constructed.
 
 ## Usage
 
-`UseField` is in the prelude, so `use cgp::prelude::*;` is enough to name it. It takes one type
-parameter, the field tag, and appears as the value of a getter component's wiring entry:
+`UseField` is not in the prelude, so import it from `cgp::core::field::impls` to name it. It takes
+one type parameter, the field tag, and appears as the value of a getter component's wiring entry:
 
 ```rust
 delegate_components! {
@@ -62,6 +62,7 @@ simpler [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) cannot express. The
 the context stores the value in `first_name`:
 
 ```rust
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 
 #[cgp_getter]
@@ -198,7 +199,7 @@ consumer trait; see [`Computer`](../components/handler/computer.md#usage).
 to `UseField<Symbol!("foo")>` fails at the check:
 
 ```text
-error[E0277]: the trait bound `cgp::prelude::UseField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>: IsProviderFor<FooBarGetterComponent, App>` is not satisfied
+error[E0277]: the trait bound `UseField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>: IsProviderFor<FooBarGetterComponent, App>` is not satisfied
 ```
 
 Wire such a getter to [`UseFields`](use_fields.md) when each method reads a same-named field, or split

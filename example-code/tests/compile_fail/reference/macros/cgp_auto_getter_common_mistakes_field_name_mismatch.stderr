@@ -8,17 +8,17 @@ error[E0599]: the method `name` exists for reference `&Person`, but its trait bo
    |            ^^^^ method cannot be called on `&Person` due to unsatisfied trait bounds
    |
 note: the following trait bounds were not satisfied:
-      `&Person: cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
-      `<&Person as cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>::Value = String`
-      `<Person as cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>::Value = String`
-      `Person: cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
+      `&Person: cgp::macro_prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
+      `<&Person as cgp::macro_prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `<Person as cgp::macro_prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `Person: cgp::macro_prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
   --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_field_name_mismatch.rs:5:1
    |
  5 | #[cgp_auto_getter]
    | ^^^^^^^^^^^^^^^^^^
  6 | pub trait HasName {
    |           ^^^^^^^
-note: the trait `cgp::prelude::HasField` must be implemented
+note: the trait `cgp::macro_prelude::HasField` must be implemented
   --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/has_field.rs:10:1
    |
 10 | pub trait HasField<Tag> {

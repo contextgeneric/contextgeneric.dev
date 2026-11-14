@@ -86,10 +86,10 @@ A generic function that drives the optional conversion across any builder, and a
 builder passed through it:
 
 ```rust
-use cgp::prelude::*;
 use cgp::core::field::impls::IsOptional;
-use cgp::core::field::traits::TransformMapFields;
+use cgp::core::field::traits::{BuildField, HasBuilder, TransformMapFields};
 use cgp::extra::field::impls::{FinalizeOptional, SetOptional, TransformOptional};
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]
 pub struct Context {

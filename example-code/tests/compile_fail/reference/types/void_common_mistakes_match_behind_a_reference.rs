@@ -2,6 +2,7 @@
 // Rust does not treat an uninhabited type reached through a reference as unreachable. This is the
 // `Void` page's *Common Mistakes* entry on the closing arm.
 
+use cgp::core::field::types::Either;
 use cgp::prelude::*;
 
 pub type Token = Sum![u32, bool];

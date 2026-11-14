@@ -7,7 +7,7 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<GreeterCompone
 22 |         GreeterComponent: GreetHello,
    |         ^^^^^^^^^^^^^^^^ conflicting implementation for `App`
    |
-   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<GreeterComponent, _, _>` for type `cgp::macro_prelude::RedirectLookup<App, cgp::macro_prelude::PathCons<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Chars<'p', cgp::prelude::Nil>>>>, cgp::macro_prelude::PathCons<GreeterComponent, cgp::prelude::Nil>>>`
+   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<GreeterComponent, _, _>` for type `cgp::macro_prelude::RedirectLookup<App, cgp::macro_prelude::PathCons<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Nil>>>>, cgp::macro_prelude::PathCons<GreeterComponent, cgp::macro_prelude::Nil>>>`
 
 error[E0119]: conflicting implementations of trait `DelegateComponent<GreeterComponent>` for type `App`
   --> tests/compile_fail/reference/providers/redirect_lookup_common_mistakes_bare_key.rs:22:9

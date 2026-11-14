@@ -64,6 +64,7 @@ reference:
 
 ```rust
 use cgp::core::field::traits::HasFieldsRef;
+use cgp::core::field::types::Field;
 use cgp::prelude::*;
 
 #[derive(HasFields)]

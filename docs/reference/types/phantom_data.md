@@ -124,6 +124,7 @@ struct with a `PhantomData<Tag>` field, and the body passes the tag to `get_fiel
 `PhantomData::<Tag>`:
 
 ```rust
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 #[cgp_component(Greeter)]
@@ -223,7 +224,7 @@ The compiler reports two errors, headed `error[E0284]: type annotations needed` 
 `error[E0283]: type annotations needed`, and the second names the cause:
 
 ```text
-note: multiple `impl`s satisfying `Person: cgp::prelude::HasField<_>` found
+note: multiple `impl`s satisfying `Person: cgp::macro_prelude::HasField<_>` found
 ```
 
 Write `PhantomData::<Symbol!("name")>` to name the field.

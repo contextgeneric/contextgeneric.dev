@@ -9,6 +9,8 @@ pub mod examples {
     use cgp::core::base::types::PathCons;
     use cgp::core::field::traits::ToFields;
     use cgp::core::field::types::Chars;
+    use cgp::core::field::types::Cons;
+    use cgp::core::field::types::Nil;
     use cgp::core::field::types::Symbol;
     use cgp::prelude::*;
 

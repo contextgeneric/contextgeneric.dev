@@ -257,6 +257,7 @@ pub mod falling_back_to_the_context {
 /// `GetName<Tag>` is generic, and its parameter is a field name rather than a provider — nothing is
 /// delegated to, so none of the machinery above applies.
 pub mod not_every_generic_provider {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_component(NameGetter)]

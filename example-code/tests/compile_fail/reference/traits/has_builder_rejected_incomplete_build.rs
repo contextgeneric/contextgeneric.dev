@@ -1,3 +1,4 @@
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder};
 use cgp::prelude::*;
 
 #[derive(BuildField)]

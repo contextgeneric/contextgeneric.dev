@@ -62,6 +62,7 @@ example, `build_from` moves the shared fields from `Person` into an `Employee` b
 
 ```rust
 use cgp::core::field::impls::CanBuildFrom;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder};
 use cgp::prelude::*;
 
 #[derive(CgpRecord)]

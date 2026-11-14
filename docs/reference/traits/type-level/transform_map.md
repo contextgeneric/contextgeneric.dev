@@ -63,8 +63,8 @@ with one field set:
 
 ```rust
 use cgp::core::field::impls::{IsNothing, IsOptional, IsPresent};
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder, TransformMap, TransformMapFields};
 use cgp::prelude::*;
-use cgp::core::field::traits::{TransformMap, TransformMapFields};
 
 pub struct FillDefaults;
 

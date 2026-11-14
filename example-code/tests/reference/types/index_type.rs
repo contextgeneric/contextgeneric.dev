@@ -7,6 +7,8 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     #[derive(HasField)]

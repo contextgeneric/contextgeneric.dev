@@ -11,6 +11,7 @@ pub mod usage {
     use core::fmt::Display;
 
     use cgp::core::field::traits::StaticString;
+    use cgp::core::field::types::Field;
     use cgp::extra::dispatch::MatchWithFieldHandlersRef;
     use cgp::extra::handler::CanCompute;
     use cgp::extra::handler::ComputerComponent;
@@ -58,6 +59,7 @@ pub mod examples {
     use core::fmt::Display;
 
     use cgp::core::field::traits::StaticString;
+    use cgp::core::field::types::Field;
     use cgp::extra::dispatch::MatchWithFieldHandlers;
     use cgp::extra::handler::CanCompute;
     use cgp::extra::handler::ComputerComponent;

@@ -1,3 +1,4 @@
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 // Two chained reads tie the inner borrow to a lifetime `Inner` is not known to outlive.

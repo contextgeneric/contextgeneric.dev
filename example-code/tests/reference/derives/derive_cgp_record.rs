@@ -8,6 +8,11 @@
 /// The struct shapes the page lists: a raw-identifier field, a tuple struct keyed by position, a
 /// fieldless struct whose builder finalizes at once, and a generic struct.
 pub mod usage {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     #[derive(CgpRecord, Debug, Eq, PartialEq)]
@@ -54,6 +59,9 @@ pub mod usage {
 /// The record half: `promote`, which merges one record into another's builder.
 pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::prelude::*;
 
     #[derive(CgpRecord, Debug, Eq, PartialEq)]
@@ -98,6 +106,7 @@ pub mod examples {
 ///
 /// A single-field tuple struct's representation is the inner type, not a one-element product.
 pub mod common_mistakes {
+    use cgp::core::field::traits::HasFields;
     use cgp::prelude::*;
 
     #[derive(CgpRecord)]

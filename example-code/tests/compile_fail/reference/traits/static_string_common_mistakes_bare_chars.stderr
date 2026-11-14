@@ -1,10 +1,9 @@
-error[E0277]: the trait bound `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>: StaticString` is not satisfied
+error[E0277]: the trait bound `cgp::macro_prelude::Chars<'a', Nil>: StaticString` is not satisfied
   --> tests/compile_fail/reference/traits/static_string_common_mistakes_bare_chars.rs:6:25
    |
  6 | pub const NAME: &str = <Chars<'a', Nil> as StaticString>::VALUE;
-   |                         ^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |                         ^^^^^^^^^^^^^^^ the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', Nil>`
    |
-   = help: the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>`
 help: the following other types implement trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes`
   --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/static_string.rs:34:1
    |
@@ -14,5 +13,5 @@ help: the following other types implement trait `cgp::cgp_core::cgp_field::trait
    | |______________________^ `Symbol<LEN, Chars>`
 ...
 41 |   impl StaticBytes for Nil {
-   |   ^^^^^^^^^^^^^^^^^^^^^^^^ `cgp::prelude::Nil`
-   = note: required for `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>` to implement `StaticString`
+   |   ^^^^^^^^^^^^^^^^^^^^^^^^ `Nil`
+   = note: required for `cgp::macro_prelude::Chars<'a', Nil>` to implement `StaticString`

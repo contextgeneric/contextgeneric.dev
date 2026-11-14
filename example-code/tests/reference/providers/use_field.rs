@@ -7,6 +7,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -46,6 +47,7 @@ pub mod examples {
 ///
 /// The borrowed-view getters `UseField` already handles: `-> &[u8]` over a `Vec<u8>` field.
 pub mod when_to_use_it {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -93,6 +95,7 @@ pub mod under_the_hood {
     pub mod type_provider {
         use core::marker::PhantomData;
 
+        use cgp::core::field::impls::UseField;
         use cgp::core::field::impls::WithField;
         use cgp::core::types::HasType;
         use cgp::core::types::TypeProviderComponent;

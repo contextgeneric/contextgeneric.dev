@@ -1,10 +1,10 @@
 error[E0599]: the method `finalize_optional` exists for struct `__PartialContext<IsNothing, IsNothing>`, but its trait bounds were not satisfied
-  --> tests/compile_fail/reference/traits/finalize_optional_common_mistakes_core_builder.rs:12:32
+  --> tests/compile_fail/reference/traits/finalize_optional_common_mistakes_core_builder.rs:13:32
    |
- 5 | pub struct Context {
+ 6 | pub struct Context {
    | ------------------ method `finalize_optional` not found for this struct
 ...
-12 |     let _ = Context::builder().finalize_optional();
+13 |     let _ = Context::builder().finalize_optional();
    |                                ^^^^^^^^^^^^^^^^^
    |
    = note: the following trait bounds were not satisfied:

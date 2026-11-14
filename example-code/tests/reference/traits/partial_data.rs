@@ -5,6 +5,8 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::core::field::traits::PartialData;
     use cgp::prelude::*;
 

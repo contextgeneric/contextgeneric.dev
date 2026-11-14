@@ -41,6 +41,8 @@ pub mod a_struct_is_a_closed_row {
 
 /// ## Building a record is row combination
 pub mod building_a_record_is_row_combination {
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::prelude::*;
 
     #[derive(CgpData)]

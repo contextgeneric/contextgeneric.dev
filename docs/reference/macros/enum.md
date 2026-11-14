@@ -69,6 +69,7 @@ A function bounded on an enum's shape converts a value built in that shape into 
 
 ```rust
 use cgp::core::field::traits::FromFields;
+use cgp::core::field::types::{Either, Field};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]

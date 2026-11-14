@@ -82,9 +82,9 @@ passed through it:
 
 ```rust
 use cgp::core::field::impls::IsPresent;
-use cgp::prelude::*;
-use cgp::core::field::traits::TransformMapFields;
+use cgp::core::field::traits::{BuildField, FinalizeBuild, HasBuilder, TransformMapFields};
 use cgp::extra::field::impls::TransformMapDefault;
+use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]
 pub struct Context {

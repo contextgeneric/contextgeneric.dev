@@ -13,14 +13,14 @@ error[E0283]: type annotations needed for `__PartialPoint<_>`
              ToBuildAndMergeHandler
              TryPromoteProviders
    = note: cannot satisfy `<_ as MapType>::Map<u32> == _`
-   = note: required for `Cons<cgp::prelude::Field<Symbol<1, cgp::macro_prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<IsPresent>, _, _>`
+   = note: required for `Cons<cgp::macro_prelude::Field<Symbol<1, cgp::macro_prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<IsPresent>, _, _>`
    = note: required for `__PartialPoint<IsPresent>` to implement `TransformMapFields<_, _>`
 note: required because it appears within the type `__PartialPoint<_>`
   --> tests/compile_fail/reference/traits/transform_map_fields_common_mistakes_bare_call.rs:15:12
    |
 15 | pub struct Point {
    |            ^^^^^
-   = note: required for `Cons<cgp::prelude::Field<Symbol<1, cgp::macro_prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<IsPresent>, _, _>`
+   = note: required for `Cons<cgp::macro_prelude::Field<Symbol<1, cgp::macro_prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<IsPresent>, _, _>`
    = note: required for `__PartialPoint<IsPresent>` to implement `TransformMapFields<_, _>`
 help: consider giving this pattern a type, where the type for type parameter `TargetMap` is specified
    |
@@ -41,7 +41,7 @@ note: multiple `impl`s satisfying `_: TransformMap<IsPresent, _, u32>` found
    = note: and more `impl`s found in the following crates: `cgp_field_extra`:
            - impl<T> TransformMap<IsPresent, IsOptional, T> for TransformOptional;
            - impl<T> TransformMap<IsPresent, IsPresent, T> for TransformMapDefault;
-   = note: required for `Cons<cgp::prelude::Field<Symbol<1, cgp::macro_prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<IsPresent>, _, _>`
+   = note: required for `Cons<cgp::macro_prelude::Field<Symbol<1, cgp::macro_prelude::Chars<'x', Nil>>, u32>, Nil>` to implement `cgp::cgp_core::cgp_field::traits::transform_map::TransformMapFieldsImpl<__PartialPoint<IsPresent>, _, _>`
    = note: required for `__PartialPoint<IsPresent>` to implement `TransformMapFields<_, _>`
 help: try using a fully qualified path to specify the expected types
    |

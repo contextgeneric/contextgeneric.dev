@@ -84,9 +84,9 @@ differently named field and a hand-written provider reading a nested one:
 
 ```rust
 use cgp::core::component::WithProvider;
-use cgp::core::field::traits::FieldGetter;
-use cgp::prelude::*;
 use cgp::core::field::impls::WithField;
+use cgp::core::field::traits::{FieldGetter, HasField};
+use cgp::prelude::*;
 
 #[cgp_getter(NameGetter)]
 pub trait HasName {

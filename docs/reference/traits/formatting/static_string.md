@@ -156,9 +156,9 @@ pub const NAME: &str = <Chars<'a', Nil> as StaticString>::VALUE;
 ```
 
 ```text
-error[E0277]: the trait bound `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>: StaticString` is not satisfied
+error[E0277]: the trait bound `cgp::macro_prelude::Chars<'a', Nil>: StaticString` is not satisfied
 ...
-   = help: the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>`
+   |                         ^^^^^^^^^^^^^^^ the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', Nil>`
 ```
 
 ## Related constructs

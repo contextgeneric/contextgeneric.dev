@@ -110,6 +110,7 @@ An implementation declares the field it needs as a bound. Here, `GreetHello` req
 field named `name`:
 
 ```rust
+use cgp::core::field::traits::HasField;
 use cgp::prelude::*;
 
 #[cgp_component(Greeter)]
@@ -306,7 +307,7 @@ impl Deref for Outer {
 ```
 
 ```text
-error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Outer`
+error[E0119]: conflicting implementations of trait `cgp::macro_prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Outer`
 ```
 
 Fields whose names the target lacks derive without trouble. Rename the colliding field, drop the

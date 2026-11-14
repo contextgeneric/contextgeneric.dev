@@ -1,5 +1,6 @@
 //! `docs/reference/macros/cgp_getter.md`, *Common Mistakes*: the field must have the type the return type calls for.
 
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 
 #[cgp_getter]

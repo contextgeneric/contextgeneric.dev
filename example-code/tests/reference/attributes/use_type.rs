@@ -327,6 +327,7 @@ pub mod when_to_use_it {
 pub mod under_the_hood {
     use core::ops::Mul;
 
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[cgp_type]

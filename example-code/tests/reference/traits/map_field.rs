@@ -8,6 +8,8 @@
 pub mod examples {
     use cgp::core::component::WithProvider;
     use cgp::core::field::impls::ChainGetters;
+    use cgp::core::field::impls::UseField;
+    use cgp::core::field::traits::HasField;
     use cgp::core::field::traits::MapField;
     use cgp::prelude::*;
 

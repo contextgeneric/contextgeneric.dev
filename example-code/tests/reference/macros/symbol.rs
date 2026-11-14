@@ -8,6 +8,7 @@
 ///
 /// The literal forms the page lists, and the field bound it shows twice.
 pub mod overview_and_usage {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     pub type Name = Symbol!("name");
@@ -47,6 +48,8 @@ b")>;
 
 /// ### The tag for a tuple field
 pub mod the_tag_for_a_tuple_field {
+    use cgp::core::field::traits::HasField;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     #[derive(HasField)]
@@ -61,6 +64,7 @@ pub mod the_tag_for_a_tuple_field {
 
 /// ### Raw identifiers
 pub mod raw_identifiers {
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 
     #[derive(HasField)]
@@ -80,6 +84,7 @@ pub mod raw_identifiers {
 /// The getter wired to a differently-named field, the hand-written field bound, and the runtime
 /// string. The page names `Greeter` without declaring it.
 pub mod examples {
+    use cgp::core::field::impls::UseField;
     use cgp::prelude::*;
 
     #[cgp_getter]
@@ -113,6 +118,7 @@ pub mod examples {
     }
 
     pub mod hand_written_bound {
+        use cgp::core::field::traits::HasField;
         use cgp::prelude::*;
 
         #[cgp_component(Greeter)]
@@ -167,6 +173,7 @@ pub mod examples {
 /// The expansion the page shows, and the byte length a multi-byte string records.
 pub mod under_the_hood {
     use cgp::core::field::types::Chars;
+    use cgp::core::field::types::Nil;
     use cgp::core::field::types::Symbol;
     use cgp::prelude::*;
 

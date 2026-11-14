@@ -45,7 +45,7 @@ Import it from `cgp_serde::providers`, and wire it for `Nil` in both directions:
 @ValueDeserializerComponent.Nil: SerializeUnit,
 ```
 
-`Nil` is in `cgp::prelude`, so the entry needs no further import.
+`Nil` is not in `cgp::prelude`, so a table that names it imports it from `cgp::core::field::types`.
 
 ## Behavior
 

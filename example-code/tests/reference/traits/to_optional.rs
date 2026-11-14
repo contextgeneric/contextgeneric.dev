@@ -5,6 +5,8 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::core::field::traits::IntoBuilder;
     use cgp::extra::field::impls::{FinalizeOptional, SetOptional, ToOptional};
     use cgp::prelude::*;

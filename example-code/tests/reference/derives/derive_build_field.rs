@@ -9,6 +9,9 @@
 ///
 /// The opening builder chain. The page shows it against `Person`, which it declares under *Usage*.
 pub mod overview {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::prelude::*;
 
     #[derive(BuildField, Debug, Eq, PartialEq)]
@@ -62,6 +65,10 @@ pub mod rejected_build_from_without_has_fields {}
 /// The shapes the page lists: a named-field struct, a tuple struct keyed by position, and the
 /// fieldless struct whose `builder()` is immediately finalizable.
 pub mod usage {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
+    use cgp::core::field::types::Index;
     use cgp::prelude::*;
 
     #[derive(BuildField, Debug, Eq, PartialEq)]
@@ -114,6 +121,10 @@ pub mod usage {
 /// field back out mid-build, and taking a field out and putting it back.
 pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
+    use cgp::core::field::traits::HasField;
     use cgp::core::field::traits::IntoBuilder;
     use cgp::prelude::*;
 
@@ -208,6 +219,7 @@ pub mod examples {
 /// `rename` coexists with them. The companion-emitting case is a trybuild fixture.
 pub mod common_mistakes {
     use cgp::core::field::traits::FromVariant;
+    use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
     use serde::Serialize;
 

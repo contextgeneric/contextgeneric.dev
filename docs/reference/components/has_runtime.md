@@ -84,6 +84,7 @@ A context declares its runtime type and the field holding the value, and a provi
 generically:
 
 ```rust
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 use cgp::extra::runtime::{
     HasRuntime, RuntimeGetterComponent, RuntimeOf, RuntimeTypeProviderComponent,

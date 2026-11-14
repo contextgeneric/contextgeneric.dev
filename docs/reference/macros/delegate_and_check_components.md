@@ -196,6 +196,7 @@ instead is a key inside a nested table, as [Common Mistakes](#common-mistakes) r
 The intended use is a straightforward context, wired and proven together:
 
 ```rust
+use cgp::core::field::impls::UseField;
 use cgp::prelude::*;
 
 #[cgp_getter]

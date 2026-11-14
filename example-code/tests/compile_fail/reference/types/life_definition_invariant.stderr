@@ -9,6 +9,6 @@ error: lifetime may not live long enough
   |     ^^^^^^ function was supposed to return data with lifetime `'l` but it is returning data with lifetime `'s`
   |
   = help: consider adding the following bound: `'s: 'l`
-  = note: requirement occurs because of the type `cgp::prelude::Life<'_>`, which makes the generic argument `'_` invariant
-  = note: the struct `cgp::prelude::Life<'a>` is invariant over the parameter `'a`
+  = note: requirement occurs because of the type `Life<'_>`, which makes the generic argument `'_` invariant
+  = note: the struct `Life<'a>` is invariant over the parameter `'a`
   = help: see <https://doc.rust-lang.org/nomicon/subtyping.html> for more information about variance

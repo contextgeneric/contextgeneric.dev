@@ -34,7 +34,7 @@ Its variant list is empty, so it is uninhabited, like Rust's never type `!` or
 [`Infallible`](https://doc.rust-lang.org/std/convert/enum.Infallible.html). CGP defines its own so
 that the terminator of a sum is named for that job. It derives the standard traits so that a sum
 ending in `Void` can inherit them. But code never builds a value of `Void`, so those impls never run
-on one. It is in the prelude, so `use cgp::prelude::*;` is enough.
+on one. It is not in the prelude, so import it from `cgp::core::field::types`.
 
 ## Behavior
 
@@ -76,6 +76,7 @@ that cannot fail:
 
 ```rust
 use cgp::core::field::traits::FinalizeExtractResult;
+use cgp::core::field::types::{Either, Void};
 use cgp::prelude::*;
 
 pub type Token = Sum![u32, bool];
@@ -153,7 +154,7 @@ pub fn describe(token: &Token) -> String {
 ```
 
 This fails with
-``error[E0004]: non-exhaustive patterns: `&cgp::prelude::Either::Right(cgp::prelude::Either::Right(_))` not covered``,
+``error[E0004]: non-exhaustive patterns: `&Either::Right(Either::Right(_))` not covered``,
 and the compiler says why:
 
 ```text

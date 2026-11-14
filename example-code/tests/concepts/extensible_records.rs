@@ -2,6 +2,8 @@
 
 /// ## A struct as a list of named fields
 pub mod a_struct_as_a_list_of_named_fields {
+    use cgp::core::field::traits::HasFields;
+    use cgp::core::field::types::Field;
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq, CgpData)]
@@ -40,6 +42,8 @@ pub mod a_struct_as_a_list_of_named_fields {
 
 /// ## Building one field at a time
 pub mod building_one_field_at_a_time {
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::HasBuilder;
     use cgp::prelude::*;
 
     #[derive(Debug, Eq, PartialEq, CgpData)]

@@ -280,6 +280,7 @@ pub mod examples {
 /// `?Sized` bound admits. The page names `FooComponent` and `ReferenceGetterComponent` without
 /// declaring them.
 pub mod under_the_hood {
+    use cgp::core::field::types::Life;
     use cgp::prelude::*;
 
     #[cgp_component(FooProvider)]
