@@ -67,10 +67,9 @@ Before a task in this list, read its guide in the knowledge base's `website/` se
 
 ## Public prose
 
-- Read the author-personality and voice-and-register documents of the knowledge base's
-  communication strategy before any prose, and `message.md` whenever a page makes a claim about what
-  CGP is good for, satisfying its pain, strength, objection, and boundary.
-- Read a strategy document whole when the page makes a claim its reading-map row does not cover.
+- Read the knowledge base's `communication-strategy/message.md` whenever a page makes a claim about
+  what CGP is good for, satisfying its pain, strength, objection, and boundary, and read any strategy
+  document whole when the page makes a claim its reading-map row does not cover.
 - Name Context-Generic Programming in each page's prose and relate a short form of the tag line to its
   content, following the knowledge base's
   [naming rule](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/identity.md#the-name-and-the-tag-line-on-every-page);
