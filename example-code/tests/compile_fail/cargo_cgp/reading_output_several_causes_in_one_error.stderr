@@ -5,7 +5,7 @@ error[E0277]: the trait bound `Rectangle: CanUseComponent<AreaCalculatorComponen
    |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `HasField<Symbol<5, Chars<'w', Chars<'i', Chars<'d', Chars<'t', Chars<'h', Nil>>>>>>>` is not implemented for `Rectangle`
-      but trait `HasField<Symbol<6, Chars<'l', Chars<'e', Chars<'n', Chars<'g', Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>>` is implemented for it
+      but trait `HasField<Symbol<6, Chars<'l', Chars<'e', Chars<'n', Chars<'g', Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>>` is implemented for it
   --> tests/compile_fail/cargo_cgp/reading_output_several_causes_in_one_error.rs:19:9
    |
 19 |     pub length: f64,

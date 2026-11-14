@@ -267,9 +267,9 @@ Put downstream wiring in the namespace body instead.
 already wires through its registered default, overlaps the loop's impl:
 
 ```text
-error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>, _, _>` for type `App`
+error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>, _, _>` for type `App`
 ...
-error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>>` for type `App`
+error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>>` for type `App`
 ```
 
 **The registration impl carries none of the provider's bounds**, which is deliberate: they are checked

@@ -219,8 +219,8 @@ note: required by a bound in `__compute_area__`
    = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider further restricting type parameter `__Variants__` with trait `HasExtractor`
    |
-12 | pub trait HasSurface + cgp::prelude::HasExtractor {
-   |                      ++++++++++++++++++++++++++++
+12 | pub trait HasSurface + cgp::macro_prelude::HasExtractor {
+   |                      ++++++++++++++++++++++++++++++++++
 
 error[E0277]: the trait bound `for<'__a__> UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeArea>>>: Computer<(), (), &'__a__ __Variants__>` is not satisfied
   --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_shared_method_name.rs:11:1
@@ -358,5 +358,5 @@ note: required by a bound in `__compute_area__`
    = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider further restricting type parameter `__Variants__` with trait `HasExtractorRef`
    |
-12 | pub trait HasSurface + cgp::prelude::HasExtractorRef {
-   |                      +++++++++++++++++++++++++++++++
+12 | pub trait HasSurface + cgp::macro_prelude::HasExtractorRef {
+   |                      +++++++++++++++++++++++++++++++++++++

@@ -7,6 +7,10 @@
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ToFields;
+    use cgp::core::base::types::PathCons;
+    use cgp::core::field::types::Chars;
+    use cgp::core::field::types::Symbol;
 
     #[derive(HasFields)]
     pub struct Marker;

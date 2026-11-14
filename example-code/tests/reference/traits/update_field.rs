@@ -7,6 +7,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::impls::IsNothing;
+    use cgp::core::field::impls::IsPresent;
+    use cgp::core::field::traits::UpdateField;
 
     #[derive(Debug, PartialEq, BuildField)]
     pub struct Person {

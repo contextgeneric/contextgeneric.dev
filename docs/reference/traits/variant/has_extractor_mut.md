@@ -49,7 +49,7 @@ call reads without a written lifetime and the borrow ends where the extractor is
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 The impls come from [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md), alongside the owning
 and shared-borrow accessors.
@@ -59,6 +59,7 @@ and shared-borrow accessors.
 Changing whichever payload is present, without rebuilding the enum:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, HasExtractorMut};
 use cgp::prelude::*;
 use cgp::core::field::traits::FinalizeExtractResult;
 

@@ -26,9 +26,10 @@ every CGP provider, it carries no runtime value.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one optional type parameter, the
-per-variant provider. With the default `UseContext`, it is wired by input type with the [`open`
-statement](../../macros/delegate_components.md#choosing-a-provider-per-type-the-open-statement),
+It is not in the prelude; import it from `cgp::extra::dispatch`. It takes one optional type
+parameter, the per-variant provider. With the default `UseContext`, it is wired by input type with
+the
+[`open` statement](../../macros/delegate_components.md#choosing-a-provider-per-type-the-open-statement),
 beside the entries that answer each payload type:
 
 ```rust
@@ -80,6 +81,7 @@ resolve, because `PromoteRef` lends only a shared borrow. The multi-argument for
 A context that computes each shape directly, and a `Shape` enum by matching it:
 
 ```rust
+use cgp::extra::dispatch::MatchWithValueHandlers;
 use cgp::prelude::*;
 use cgp::extra::handler::CanCompute;
 
@@ -231,7 +233,7 @@ matchers behind them implement only `Computer` and `AsyncComputer`, so wiring
 `HandlerComponent: MatchWithValueHandlersRef<ComputeAreaOfRef>` fails at the check:
 
 ```text
-   = note: required for `cgp::prelude::MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
 ```
 
 The owned `MatchWithValueHandlers` has the same limit. Wire the matcher to `ComputerComponent` or

@@ -5,7 +5,7 @@ error[E0277]: the trait bound `PlainCircle: CanUseComponent<AreaCalculatorCompon
    |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `HasField<Symbol<5, Chars<'w', Chars<'i', Chars<'d', Chars<'t', Chars<'h', Nil>>>>>>>` is not implemented for `PlainCircle`
-      but trait `HasField<Symbol<6, Chars<'r', Chars<'a', Chars<'d', Chars<'i', Chars<'u', cgp::prelude::Chars<'s', Nil>>>>>>>>` is implemented for it
+      but trait `HasField<Symbol<6, Chars<'r', Chars<'a', Chars<'d', Chars<'i', Chars<'u', cgp::macro_prelude::Chars<'s', Nil>>>>>>>>` is implemented for it
   --> tests/compile_fail/tutorials/area_calculation_checking_miswired.rs:49:9
    |
 49 |     pub radius: f64,

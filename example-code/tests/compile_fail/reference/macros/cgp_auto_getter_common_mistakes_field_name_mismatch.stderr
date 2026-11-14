@@ -8,10 +8,10 @@ error[E0599]: the method `name` exists for reference `&Person`, but its trait bo
    |            ^^^^ method cannot be called on `&Person` due to unsatisfied trait bounds
    |
 note: the following trait bounds were not satisfied:
-      `&Person: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
-      `<&Person as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
-      `<Person as cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>::Value = String`
-      `Person: cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+      `&Person: cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
+      `<&Person as cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `<Person as cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>::Value = String`
+      `Person: cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
   --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_field_name_mismatch.rs:5:1
    |
  5 | #[cgp_auto_getter]

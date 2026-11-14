@@ -34,8 +34,8 @@ the failure path. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-provider:
+It is not in the prelude; import it from `cgp::extra::handler`. It takes one type parameter, the
+base provider:
 
 ```rust
 delegate_components! {
@@ -54,6 +54,7 @@ base over an owned `u64` answers only `HandlerComponent`.
 An async `#[cgp_computer]` function returning `Result` answers `handle` through the bundle:
 
 ```rust
+use cgp::extra::handler::PromoteHandler;
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::CanHandle;

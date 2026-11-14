@@ -1,10 +1,10 @@
-error[E0277]: the trait bound `cgp::prelude::UseField<cgp::prelude::Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
+error[E0277]: the trait bound `cgp::prelude::UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'d', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
   --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_use_field_on_two_methods.rs:25:9
    |
 25 |         DimensionsGetterComponent,
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-   = help: the trait `IsProviderFor<DimensionsGetterComponent, Rectangle>` is not implemented for `cgp::prelude::UseField<cgp::prelude::Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>`
+   = help: the trait `IsProviderFor<DimensionsGetterComponent, Rectangle>` is not implemented for `cgp::prelude::UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'d', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>`
 help: the following other types implement trait `IsProviderFor<Component, Context, Params>`
   --> /home/soares/development/context-generic/cgp/crates/extra/cgp-handler/src/components/async_computer.rs:47:1
    |

@@ -42,7 +42,7 @@ that converted a value to its extractor hand the enum back when it does not go o
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 The `Extractor` type is where a chain starts, and the type that appears in an error when a chain is
 finalized too early.
@@ -56,6 +56,7 @@ through [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) and
 Starting a chain, which is `to_extractor`'s job, and a round trip through `from_extractor`:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, HasExtractor};
 use cgp::prelude::*;
 use cgp::core::field::traits::FinalizeExtractResult;
 

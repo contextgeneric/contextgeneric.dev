@@ -68,6 +68,7 @@ A function bounded on an enum's shape converts a value built in that shape into 
 `Value` derives the whole variant family, and `from_shape` works for any enum with the same variants:
 
 ```rust
+use cgp::core::field::traits::FromFields;
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, CgpData)]

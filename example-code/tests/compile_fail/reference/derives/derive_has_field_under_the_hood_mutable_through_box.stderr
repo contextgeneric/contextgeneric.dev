@@ -1,11 +1,11 @@
 error[E0521]: borrowed data escapes outside of function
-  --> tests/compile_fail/reference/derives/derive_has_field_under_the_hood_mutable_through_box.rs:13:13
+  --> tests/compile_fail/reference/derives/derive_has_field_under_the_hood_mutable_through_box.rs:14:13
    |
-12 | pub fn rename<'a>(boxed: &mut Box<Borrowed<'a>>) {
+13 | pub fn rename<'a>(boxed: &mut Box<Borrowed<'a>>) {
    |               --  ----- `boxed` is a reference that is only valid in the function body
    |               |
    |               lifetime `'a` defined here
-13 |     let _ = boxed.get_field_mut(PhantomData::<Symbol!("name")>);
+14 |     let _ = boxed.get_field_mut(PhantomData::<Symbol!("name")>);
    |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |             |
    |             `boxed` escapes the function body here

@@ -72,6 +72,7 @@ An enum's shape is an `Either` chain of `Field` branches, and a `match` on it se
 depth, with the `Void` arm closing the match:
 
 ```rust
+use cgp::core::field::traits::ToFields;
 use cgp::prelude::*;
 
 #[derive(HasFields)]

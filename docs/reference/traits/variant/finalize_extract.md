@@ -39,7 +39,7 @@ all-ruled-out configuration of each partial enum, owned and borrowed.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 **You will usually call [`FinalizeExtractResult`](./finalize_extract_result.md) instead**, which collapses
 the `Result` a last extraction returns and calls this on the error half. Reaching for `finalize_extract`
@@ -54,6 +54,7 @@ for `Void` and `Infallible`.
 Called directly, on a remainder a nested `match` has unwrapped:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, FinalizeExtract, HasExtractor};
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq)]

@@ -1,4 +1,4 @@
-error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` for type `Wrapper`
+error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Wrapper`
   --> tests/compile_fail/reference/traits/has_field_common_mistakes_deref_overlap.rs:13:9
    |
 13 |     pub name: String,

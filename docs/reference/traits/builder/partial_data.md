@@ -55,7 +55,7 @@ projection rather than declaring one of their own.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 You bound on it when a signature must mention the destination while holding a partial value, as
 `Partial::Target` in the `target_name` function of the [example](#examples).
@@ -70,6 +70,7 @@ directly.
 A generic function naming the destination of a partial value, at two configurations:
 
 ```rust
+use cgp::core::field::traits::PartialData;
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]

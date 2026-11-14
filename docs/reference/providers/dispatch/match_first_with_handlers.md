@@ -142,8 +142,8 @@ is simpler. When every payload goes to one provider, the convenience aliases bui
 enum: `MatchFirstWithValueHandlers<ScaledArea>` answers the example above without the list, and
 `MatchFirstWithFieldHandlers` keeps each payload tagged. They come in the same three input modes as
 their plain counterparts, [`MatchWithValueHandlers`](match_with_value_handlers.md) and
-[`MatchWithFieldHandlers`](match_with_field_handlers.md). The value forms are in the prelude; the
-field forms are imported from `cgp::extra::dispatch`.
+[`MatchWithFieldHandlers`](match_with_field_handlers.md). Both forms are
+imported from `cgp::extra::dispatch`.
 
 ## Under the hood
 

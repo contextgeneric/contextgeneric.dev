@@ -54,6 +54,7 @@ so the arguments travel on with the remainder. Both forms implement `Computer` a
 Two arms called by hand, to show the `Result` a matcher's loop passes between them:
 
 ```rust
+use cgp::core::field::traits::HasExtractor;
 use cgp::prelude::*;
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue};
 

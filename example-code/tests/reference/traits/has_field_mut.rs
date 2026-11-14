@@ -6,6 +6,7 @@
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::HasFieldMut;
 
     #[cgp_component(Counter)]
     pub trait CanCount {

@@ -64,6 +64,7 @@ A generic function that reads the `name` of a context's `inner` field, and the w
 the same descent for a getter:
 
 ```rust
+use cgp::core::component::WithProvider;
 use cgp::prelude::*;
 use cgp::core::field::impls::ChainGetters;
 use cgp::core::field::traits::MapField;

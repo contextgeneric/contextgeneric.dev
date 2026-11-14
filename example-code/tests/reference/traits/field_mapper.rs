@@ -7,6 +7,8 @@
 pub mod examples {
     use cgp::core::field::traits::FieldMapper;
     use cgp::prelude::*;
+    use cgp::core::component::WithProvider;
+    use cgp::core::field::traits::FieldGetter;
 
     pub struct ThenGet<First, Second>(pub PhantomData<(First, Second)>);
 

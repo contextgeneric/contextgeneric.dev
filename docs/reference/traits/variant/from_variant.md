@@ -52,10 +52,10 @@ choosing the impl **is** choosing the variant.
 
 ## Usage
 
-The trait is in the prelude, so `use cgp::prelude::*;` names it. You rarely write a `FromVariant` impl
-yourself: the derive supplies one per variant, and you either call
-`T::from_variant(PhantomData::<Symbol!("Variant")>, value)` at a concrete site or bound on the trait in
-code generic over the tag.
+The trait is not in the prelude; import it from `cgp::core::field::traits`. You rarely write a
+`FromVariant` impl yourself: the derive supplies one per variant, and you either call
+`T::from_variant(PhantomData::<Symbol!("Variant")>, value)` at a concrete site or bound on the trait
+in code generic over the tag.
 
 The associated `Value` makes a generic signature possible: a function that does not know the variant
 still needs to name the type it takes, and projects it through the trait as
@@ -70,6 +70,7 @@ One `wrap` builds either variant, with its payload type following the tag, and a
 into `Shape`:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, FromVariant};
 use cgp::prelude::*;
 use cgp::core::field::impls::CanUpcast;
 
@@ -201,7 +202,7 @@ rustc does not pick the impl from the payload's type, since two variants could s
 ```text
 error[E0283]: type annotations needed
 ...
-note: multiple `impl`s satisfying `Shape: cgp::prelude::FromVariant<_>` found
+note: multiple `impl`s satisfying `Shape: cgp::macro_prelude::FromVariant<_>` found
 ```
 
 A one-variant enum has a single impl, so there the tag is inferred.
@@ -214,7 +215,7 @@ types, so `Shape::from_variant(PhantomData::<Symbol!("circle")>, circle)` report
 bound:
 
 ```text
-error[E0277]: the trait bound `Shape: cgp::prelude::FromVariant<cgp::prelude::Symbol<6, cgp::prelude::Chars<'c', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>` is not satisfied
+error[E0277]: the trait bound `Shape: cgp::macro_prelude::FromVariant<cgp::macro_prelude::Symbol<6, cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>` is not satisfied
 ```
 
 **A hand-written impl for a variant the derive covers conflicts with it.** Adding
@@ -222,7 +223,7 @@ error[E0277]: the trait bound `Shape: cgp::prelude::FromVariant<cgp::prelude::Sy
 primary label sits on the variant:
 
 ```text
-error[E0119]: conflicting implementations of trait `cgp::prelude::FromVariant<cgp::prelude::Symbol<6, cgp::prelude::Chars<'C', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'c', cgp::prelude::Chars<'l', cgp::prelude::Chars<'e', Nil>>>>>>>>` for type `Shape`
+error[E0119]: conflicting implementations of trait `cgp::macro_prelude::FromVariant<cgp::macro_prelude::Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>` for type `Shape`
 ...
 14 |     Circle(Circle),
    |     ^^^^^^ conflicting implementation for `Shape`

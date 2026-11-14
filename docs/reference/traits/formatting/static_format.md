@@ -53,9 +53,8 @@ use cgp::core::base::traits::StaticFormat;
 ```
 
 That module is where the base type-level crate is re-exported, and it is a different home from its
-neighbours: [`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
-[`ConcatPath`](./concat_path.md), which lives in the same crate as this trait, is in the prelude.
-Three neighbouring traits, three different imports.
+neighbours: [`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, while
+[`ConcatPath`](./concat_path.md), which lives in the same crate as this trait, shares its module.
 
 Most of the time you reach the effect rather than the trait. Any type-level string can be
 interpolated or turned into an owned `String` without any import:
@@ -175,10 +174,10 @@ So any type-level string can be interpolated or turned into an owned `String`, a
 
 ## Common Mistakes
 
-**It is not in the prelude, and its import differs from both its neighbours'.** This trait comes from
-`cgp::core::base::traits`, [`StaticString`](./static_string.md) from `cgp::core::field::traits`, and
-[`ConcatPath`](./concat_path.md), defined in the same crate as this one, is in the prelude. Reaching for
-the wrong module is the usual first failure.
+**It is not in the prelude, and its module differs from [`StaticString`](./static_string.md)'s.**
+This trait and [`ConcatPath`](./concat_path.md) come from `cgp::core::base::traits`, and
+`StaticString` from `cgp::core::field::traits`. Reaching for the wrong module is the usual first
+failure.
 
 **Prefer a `Display` bound where one will do.** Any code that only needs to *format* a type-level
 string should require `Display`, which needs nothing imported and is what the trait produces.

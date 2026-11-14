@@ -1,11 +1,11 @@
 error[E0599]: no method named `finalize_extract_result` found for enum `Result<T, E>` in the current scope
-   --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_missing_import.rs:25:10
+   --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_missing_import.rs:26:10
     |
- 22 |       let _circle = shape
+ 23 |       let _circle = shape
     |  ___________________-
- 23 | |         .to_extractor()
- 24 | |         .extract_field(PhantomData::<Symbol!("Circle")>)
- 25 | |         .finalize_extract_result();
+ 24 | |         .to_extractor()
+ 25 | |         .extract_field(PhantomData::<Symbol!("Circle")>)
+ 26 | |         .finalize_extract_result();
     | |         -^^^^^^^^^^^^^^^^^^^^^^^ method not found in `Result<Circle, __PartialShape<IsVoid>>`
     | |_________|
     |

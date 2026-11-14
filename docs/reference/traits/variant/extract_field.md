@@ -49,7 +49,7 @@ extractor with this one variant ruled out. `extract_field` consumes the extracto
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 `Self` is an extractor rather than the enum, so a chain begins by obtaining one:
 [`to_extractor`](./has_extractor.md) to consume the value, [`extractor_ref`](./has_extractor_ref.md) to
@@ -68,6 +68,7 @@ The chain reads as a sequence of attempts, each handling one variant, closed by
 [`finalize_extract_result`](./finalize_extract_result.md), written here in both orders:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, HasExtractor};
 use cgp::prelude::*;
 use cgp::core::field::traits::FinalizeExtractResult;
 

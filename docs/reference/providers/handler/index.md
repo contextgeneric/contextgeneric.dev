@@ -22,9 +22,8 @@ be glued into a larger one, on a [**context**](/docs/reference/glossary#context)
 implementation runs against. Like every CGP provider, each combinator is zero-sized: its type
 parameters ride in `PhantomData`.
 
-The promotion bundles are in the prelude. Every other combinator here, from `ComposeHandlers` to
-`UseInputDelegate`, is imported from `cgp::extra::handler`, as are the consumer traits such as
-`CanCompute` that call them.
+Every combinator here, the promotion bundles included, is imported from `cgp::extra::handler`, as
+are the consumer traits such as `CanCompute` that call them.
 
 ## The handler family
 

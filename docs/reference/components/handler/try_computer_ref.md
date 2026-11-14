@@ -56,9 +56,9 @@ Its attributes:
 
 ## Usage
 
-`TryComputerRefComponent` is in the prelude. The provider trait `TryComputerRef` and the consumer
-trait `CanTryComputeRef` are not, and are imported from `cgp::extra::handler`. The method borrows
-the input and returns a `Result`:
+`TryComputerRefComponent`, the provider trait `TryComputerRef`, and the consumer trait
+`CanTryComputeRef` are not in the prelude, and are imported from `cgp::extra::handler`. The method
+borrows the input and returns a `Result`:
 
 ```rust
 fn try_compute_ref(&self, _code: PhantomData<Code>, input: &Input) -> Result<Self::Output, Error>;
@@ -80,6 +80,7 @@ context's error:
 ```rust
 use core::marker::PhantomData;
 use core::num::ParseIntError;
+use cgp::extra::handler::TryComputerRefComponent;
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::RaiseFrom;

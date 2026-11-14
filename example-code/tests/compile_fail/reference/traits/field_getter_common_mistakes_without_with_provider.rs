@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::field::traits::FieldGetter;
 
 #[cgp_getter(NameGetter)]
 pub trait HasName {

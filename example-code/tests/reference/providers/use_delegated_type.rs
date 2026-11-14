@@ -10,6 +10,7 @@ pub mod usage {
 
     use cgp::core::types::{TypeProviderComponent, UseDelegatedType};
     use cgp::prelude::*;
+    use cgp::core::types::HasType;
 
     pub struct ScalarTag;
     pub struct IndexTag;

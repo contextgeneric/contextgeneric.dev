@@ -4,12 +4,12 @@ error[E0277]: the trait bound `GeometryComponents: CanUseComponent<AreaCalculato
 24 |         AreaCalculatorComponent: RectangleArea,
    |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-help: the trait `cgp::prelude::HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is not implemented for `GeometryComponents`
+help: the trait `cgp::prelude::HasField<Symbol<5, cgp::macro_prelude::Chars<'w', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'d', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>` is not implemented for `GeometryComponents`
   --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:23:9
    |
 23 |     new GeometryComponents {
    |         ^^^^^^^^^^^^^^^^^^
-help: the trait `cgp::prelude::HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is implemented for `Rectangle`
+help: the trait `cgp::prelude::HasField<Symbol<5, cgp::macro_prelude::Chars<'w', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'d', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>` is implemented for `Rectangle`
   --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_aggregate_provider.rs:17:9
    |
 17 |     pub width: f64,

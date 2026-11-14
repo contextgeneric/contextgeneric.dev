@@ -198,7 +198,7 @@ let _ = Point3d::build_with_default(LabeledPoint2d {
 lacks a slot to go into:
 
 ```text
-error[E0277]: the trait bound `__PartialPoint3d<IsPresent, IsPresent, IsNothing>: UpdateField<Symbol<5, cgp::prelude::Chars<'l', cgp::prelude::Chars<'a', cgp::prelude::Chars<'b', cgp::prelude::Chars<'e', cgp::prelude::Chars<'l', Nil>>>>>>, IsPresent>` is not satisfied
+error[E0277]: the trait bound `__PartialPoint3d<IsPresent, IsPresent, IsNothing>: UpdateField<Symbol<5, cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'b', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'l', Nil>>>>>>, IsPresent>` is not satisfied
 ```
 
 The widening runs one way only: the target may have fields the source lacks, never the reverse.

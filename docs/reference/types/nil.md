@@ -57,6 +57,9 @@ Each list ends in `Nil`, and the empty product, the empty string, and a unit str
 `Nil`:
 
 ```rust
+use cgp::core::base::types::PathCons;
+use cgp::core::field::traits::ToFields;
+use cgp::core::field::types::{Chars, Symbol};
 use cgp::prelude::*;
 
 #[derive(HasFields)]

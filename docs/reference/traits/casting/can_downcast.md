@@ -168,7 +168,7 @@ let _ = FooBar::Foo(1).downcast(PhantomData::<FooQux>);
 the walk cannot extract `Qux` from what remains of the source:
 
 ```text
-error[E0277]: the trait bound `__PartialFooBar<IsVoid, IsPresent>: ExtractField<Symbol<3, cgp::prelude::Chars<'Q', cgp::prelude::Chars<'u', cgp::prelude::Chars<'x', Nil>>>>>` is not satisfied
+error[E0277]: the trait bound `__PartialFooBar<IsVoid, IsPresent>: ExtractField<Symbol<3, cgp::macro_prelude::Chars<'Q', cgp::macro_prelude::Chars<'u', cgp::macro_prelude::Chars<'x', Nil>>>>>` is not satisfied
 ...
    = note: required for `FooBar` to implement `CanDowncast<FooQux>`
 ```

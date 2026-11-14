@@ -4,7 +4,7 @@ error[E0277]: the trait bound `Person: CanUseComponent<GreeterComponent>` is not
 36 |         GreeterComponent,
    |         ^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-help: the trait `HasField<Symbol<4, Chars<'n', Chars<'a', Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` is not implemented for `Person`
+help: the trait `HasField<Symbol<4, Chars<'n', Chars<'a', Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` is not implemented for `Person`
       but trait `HasField<Symbol<3, Chars<'a', Chars<'g', Chars<'e', Nil>>>>>` is implemented for it
   --> tests/compile_fail/reference/errors_the_fix_1.rs:23:9
    |

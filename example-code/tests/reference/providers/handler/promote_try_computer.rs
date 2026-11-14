@@ -9,6 +9,7 @@ pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::{CanHandle, CanTryCompute};
     use cgp::prelude::*;
+    use cgp::extra::handler::PromoteTryComputer;
 
     #[cgp_computer]
     pub fn checked_double(value: u64) -> Result<u64, String> {
@@ -53,6 +54,7 @@ pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::{CanComputeAsync, PromoteAsync, TryPromote};
     use cgp::prelude::*;
+    use cgp::extra::handler::PromoteTryComputer;
 
     #[cgp_new_provider]
     impl<Context, Code> Computer<Context, Code, u64> for CheckedDouble

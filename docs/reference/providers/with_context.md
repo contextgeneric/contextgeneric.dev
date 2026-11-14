@@ -33,8 +33,8 @@ the least-used member of the `With…` family.
 
 ## Usage
 
-`WithContext` is in the prelude, so `use cgp::prelude::*;` is enough. It takes no type parameter and
-appears as the value of a type component's or single-method getter's wiring entry:
+`WithContext` is not in the prelude; import it from `cgp::core::component`. It takes no type
+parameter and appears as the value of a type component's or single-method getter's wiring entry:
 
 ```rust
 delegate_components! {
@@ -62,6 +62,7 @@ component to that answer with `WithContext`:
 
 ```rust
 use core::marker::PhantomData;
+use cgp::core::component::WithContext;
 use cgp::prelude::*;
 use cgp::core::types::TypeProviderComponent;
 

@@ -52,7 +52,7 @@ type may be described owned, borrowed, or both.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits this
 alongside [`HasFields`](./has_fields.md) rather than as a separate opt-in.
@@ -63,6 +63,7 @@ The borrowed shapes of two structs at the `'static` lifetime, one with a field t
 reference:
 
 ```rust
+use cgp::core::field::traits::HasFieldsRef;
 use cgp::prelude::*;
 
 #[derive(HasFields)]

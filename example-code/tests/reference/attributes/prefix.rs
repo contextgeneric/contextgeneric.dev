@@ -249,6 +249,7 @@ pub mod examples {
 /// way as the attribute's own output.
 pub mod under_the_hood {
     use cgp::prelude::*;
+    use cgp::core::component::RedirectLookup;
 
     cgp_namespace! {
         new AppNamespace {}

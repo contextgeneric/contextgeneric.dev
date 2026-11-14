@@ -65,7 +65,7 @@ provider trait's whole dependency set.
 
 ## Usage
 
-The trait is in the prelude, so `use cgp::prelude::*;` names it.
+The trait is not in the prelude; import it from `cgp::core::component`.
 
 ### How `Params` is filled
 
@@ -278,7 +278,7 @@ as `RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>`, a
 bound, which rustc reports with the mismatch:
 
 ```text
-error[E0277]: the trait bound `RectangleArea: cgp::prelude::IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>` is not satisfied
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>` is not satisfied
 ...
    = help: for that trait implementation, expected `Rectangle`, found `(Rectangle,)`
 ```

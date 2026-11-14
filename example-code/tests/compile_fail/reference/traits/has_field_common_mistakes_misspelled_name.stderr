@@ -1,10 +1,10 @@
-error[E0277]: the trait bound `Person: cgp::prelude::HasField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
+error[E0277]: the trait bound `Person: cgp::prelude::HasField<cgp::macro_prelude::Symbol<10, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
   --> tests/compile_fail/reference/traits/has_field_common_mistakes_misspelled_name.rs:21:29
    |
 21 |     let _ = read_first_name(&person);
    |                             ^^^^^^^ unsatisfied trait bound
    |
-help: the trait `HasField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is not implemented for `Person`
+help: the trait `HasField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'_', Chars<'n', Chars<'a', Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` is not implemented for `Person`
       but trait `HasField<Symbol<9, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'N', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>` is implemented for it
   --> tests/compile_fail/reference/traits/has_field_common_mistakes_misspelled_name.rs:14:9
    |

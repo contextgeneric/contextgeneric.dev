@@ -9,7 +9,7 @@ note: expected this to be `String`
    |
 12 |     pub first_name: &'static str,
    |                     ^^^^^^^^^^^^
-note: required for `cgp::prelude::UseField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` to implement `IsProviderFor<NameGetterComponent, Person>`
+note: required for `cgp::prelude::UseField<cgp::macro_prelude::Symbol<10, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` to implement `IsProviderFor<NameGetterComponent, Person>`
   --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_field_type_mismatch.rs:5:1
    |
  5 | #[cgp_getter]

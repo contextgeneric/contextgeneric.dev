@@ -306,7 +306,7 @@ impl Deref for Outer {
 ```
 
 ```text
-error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` for type `Outer`
+error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Outer`
 ```
 
 Fields whose names the target lacks derive without trouble. Rename the colliding field, drop the

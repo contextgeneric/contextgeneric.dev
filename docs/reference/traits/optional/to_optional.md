@@ -58,6 +58,7 @@ You call it on a partial value, as `builder.to_optional()`.
 Relaxing a partly filled core builder, and then a complete value:
 
 ```rust
+use cgp::core::field::traits::IntoBuilder;
 use cgp::prelude::*;
 use cgp::extra::field::impls::{FinalizeOptional, SetOptional, ToOptional};
 

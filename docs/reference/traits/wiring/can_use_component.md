@@ -62,8 +62,10 @@ behind it.
 
 ## Usage
 
-The trait is in the prelude. A [`check_components!`](../../macros/check_components.md) entry asserts
-it, carrying the component's parameters after a colon:
+The trait is not in the prelude, since the check macros name it for you; import it from
+`cgp::core::component` when you write it yourself. A
+[`check_components!`](../../macros/check_components.md) entry asserts it, carrying the component's
+parameters after a colon:
 
 ```rust
 check_components! {
@@ -90,6 +92,7 @@ where
 Two components checked on one context, one without parameters and one with a shape parameter:
 
 ```rust
+use cgp::core::component::CanUseComponent;
 use cgp::prelude::*;
 
 #[cgp_auto_getter]

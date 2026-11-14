@@ -10,6 +10,8 @@
 /// The `Fields` type the page opens on, checked by naming it explicitly.
 pub mod overview {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::ToFields;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Person {
@@ -44,6 +46,9 @@ pub mod overview {
 /// variant shapes in the single enum the page uses for them.
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::ToFields;
+    use cgp::core::field::traits::HasFieldsRef;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasFields)]
     pub struct Named {
@@ -160,6 +165,9 @@ pub mod usage {
 /// The `Config` pairing the page shows, the borrowed form, and the enum whose shape is a sum.
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::ToFieldsRef;
+    use cgp::core::field::traits::ToFields;
 
     #[derive(Clone, Debug, Eq, PartialEq, HasField, HasFields)]
     pub struct Config {

@@ -34,7 +34,7 @@ the call reads `Person::from_fields(fields)`, or `T::from_fields(fields)` in gen
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough. The impls come from
+**It is not in the prelude.** Import it from `cgp::core::field::traits`. The impls come from
 [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all five shape traits
 together.
 
@@ -47,6 +47,7 @@ be accepted, which makes the conversion total.
 A generic round trip through the shape, for a struct and an enum:
 
 ```rust
+use cgp::core::field::traits::{FromFields, ToFields};
 use cgp::prelude::*;
 
 #[derive(Clone, Debug, Eq, PartialEq, HasFields)]

@@ -8,6 +8,7 @@ pub mod examples {
     use cgp::core::field::traits::TransformMapFields;
     use cgp::extra::field::impls::TransformMapDefault;
     use cgp::prelude::*;
+    use cgp::core::field::impls::IsPresent;
 
     #[derive(Debug, PartialEq, CgpData)]
     pub struct Context {

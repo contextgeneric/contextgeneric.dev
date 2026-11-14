@@ -12,6 +12,8 @@ pub mod usage {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::CanComputeAsyncRef;
     use cgp::prelude::*;
+    use cgp::extra::handler::AsyncComputerRefComponent;
+    use cgp::extra::handler::PromoteHandler;
 
     #[cgp_new_provider]
     impl<'a, Context, Code> AsyncComputer<Context, Code, &'a u64> for CheckedDoubleRef
@@ -56,6 +58,7 @@ pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::CanHandle;
     use cgp::prelude::*;
+    use cgp::extra::handler::PromoteHandler;
 
     #[cgp_computer]
     pub async fn checked_double(value: u64) -> Result<u64, String> {

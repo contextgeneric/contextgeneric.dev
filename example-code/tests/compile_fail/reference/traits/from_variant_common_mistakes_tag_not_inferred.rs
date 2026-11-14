@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::field::traits::FromVariant;
 
 #[derive(Debug, PartialEq)]
 pub struct Circle {

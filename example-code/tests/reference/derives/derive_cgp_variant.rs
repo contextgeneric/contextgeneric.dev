@@ -9,6 +9,9 @@
 /// generic enum, and the variantless enum it says is accepted.
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FromVariant;
+    use cgp::core::field::traits::HasExtractor;
 
     #[derive(CgpRecord, Debug, PartialEq)]
     pub struct Circle {
@@ -56,6 +59,8 @@ pub mod rejected_struct_style_variant {}
 pub mod examples {
     use cgp::core::field::traits::FinalizeExtractResult;
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractor;
 
     pub struct Circle {
         pub radius: f64,
@@ -109,6 +114,7 @@ pub mod examples {
 /// stay on the enum.
 pub mod no_reserved_names {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromVariant;
     use serde::Serialize;
 
     #[derive(CgpData, Serialize)]

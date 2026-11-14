@@ -39,8 +39,8 @@ and names the field with `PhantomData<Tag>`, as `get_field` does.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. An implementation that mutates declares
-the bound on `Self`, pinning `Value` through the supertrait, and takes `&mut self`:
+It is not in the prelude; import it from `cgp::core::field::traits`. An implementation that mutates
+declares the bound on `Self`, pinning `Value` through the supertrait, and takes `&mut self`:
 
 ```rust
 Self: HasFieldMut<Symbol!("counter"), Value = u64>
@@ -58,6 +58,7 @@ A provider that increments a counter on its context, and a generic function that
 a `Box`:
 
 ```rust
+use cgp::core::field::traits::HasFieldMut;
 use cgp::prelude::*;
 
 #[cgp_component(Counter)]

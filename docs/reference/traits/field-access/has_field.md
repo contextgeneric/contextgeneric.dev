@@ -204,9 +204,9 @@ a bound on `Symbol!("first_name")`, and the mismatch reports as a missing `HasFi
 each name spelled out character by character:
 
 ```text
-error[E0277]: the trait bound `Person: cgp::prelude::HasField<cgp::prelude::Symbol<10, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
+error[E0277]: the trait bound `Person: cgp::prelude::HasField<cgp::macro_prelude::Symbol<10, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` is not satisfied
 ...
-      but trait `HasField<cgp::prelude::Symbol<9, cgp::prelude::Chars<'f', cgp::prelude::Chars<'i', cgp::prelude::Chars<'r', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'N', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>` is implemented for it
+      but trait `HasField<Symbol<9, Chars<'f', Chars<'i', Chars<'r', Chars<'s', Chars<'t', Chars<'N', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>>>>>>` is implemented for it
 ```
 
 The leading number is the name's length, and the `Chars` list spells it. A tuple field is keyed by
@@ -233,7 +233,7 @@ impl Deref for Wrapper {
 ```
 
 ```text
-error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>` for type `Wrapper`
+error[E0119]: conflicting implementations of trait `cgp::prelude::HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>` for type `Wrapper`
 ```
 
 Fields the target lacks are unaffected, so rename the wrapper's field or drop the `Deref` impl.

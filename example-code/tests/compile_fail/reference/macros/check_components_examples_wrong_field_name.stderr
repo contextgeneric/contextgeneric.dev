@@ -5,7 +5,7 @@ error[E0277]: the trait bound `Person: CanUseComponent<GreeterComponent>` is not
    |         ^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `HasField<Symbol<4, Chars<'n', Chars<'a', Chars<'m', Chars<'e', Nil>>>>>>` is not implemented for `Person`
-      but trait `HasField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Chars<'_', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>>>>>` is implemented for it
+      but trait `HasField<Symbol<10, Chars<'f', Chars<'i', Chars<'r', Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>>` is implemented for it
   --> tests/compile_fail/reference/macros/check_components_examples_wrong_field_name.rs:17:9
    |
 17 |     pub first_name: String, // GreetHello needs `name`

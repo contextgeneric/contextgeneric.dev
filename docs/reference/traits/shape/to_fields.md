@@ -42,8 +42,9 @@ takes `self` by value, so it consumes the value to produce the owned shape.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough. Writing `T: HasFields + ToFields` is
-common and harmless, though `T: ToFields` alone already gives you `Fields` through the supertrait.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`. Writing
+`T: HasFields + ToFields` is common and harmless, though `T: ToFields` alone already gives you
+`Fields` through the supertrait.
 
 The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all
 five shape traits together.
@@ -53,6 +54,7 @@ five shape traits together.
 A value taken apart by a generic function, read from the product, and rebuilt:
 
 ```rust
+use cgp::core::field::traits::{FromFields, ToFields};
 use cgp::prelude::*;
 
 #[derive(Clone, Debug, Eq, PartialEq, HasFields)]

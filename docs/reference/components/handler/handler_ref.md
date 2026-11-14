@@ -57,8 +57,8 @@ Its attributes:
 
 ## Usage
 
-`HandlerRefComponent` is in the prelude. The provider trait `HandlerRef` and the consumer trait
-`CanHandleRef` are not, and are imported from `cgp::extra::handler`. The method is `async`, borrows
+`HandlerRefComponent`, the provider trait `HandlerRef`, and the consumer trait `CanHandleRef` are
+not in the prelude, and are imported from `cgp::extra::handler`. The method is `async`, borrows
 the input, and returns a `Result`:
 
 ```rust
@@ -79,6 +79,7 @@ An async, fallible provider over a borrowed request, wired into a context and aw
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::HandlerRefComponent;
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::RaiseFrom;

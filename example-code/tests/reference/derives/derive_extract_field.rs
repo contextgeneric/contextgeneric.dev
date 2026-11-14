@@ -10,6 +10,8 @@
 /// The opening extraction, and the payload types the page names without declaring.
 pub mod overview {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractor;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Circle {
@@ -53,6 +55,8 @@ pub mod overview {
 /// page says degenerates.
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractor;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {
@@ -120,6 +124,10 @@ pub mod rejected_variant_shapes {}
 pub mod examples {
     use cgp::core::field::traits::FinalizeExtractResult;
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractor;
+    use cgp::core::field::traits::HasExtractorMut;
+    use cgp::core::field::traits::HasExtractorRef;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {

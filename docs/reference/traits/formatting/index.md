@@ -13,9 +13,8 @@ Recovering a field name as runtime data, and joining the paths a lookup follows.
 [Context-Generic Programming (CGP)](/docs/) encodes field and variant names as *types*, so that a
 name can drive trait resolution. A program eventually needs those names as ordinary strings, to
 report a missing field or to build a key, and two of these traits are how a name comes back out,
-while the third joins the type-level paths a redirected lookup follows. They sit in three different
-homes, which is the group's sharpest edge: one is in the prelude and the other two each need a
-different import.
+while the third joins the type-level paths a redirected lookup follows. None of them is in the
+prelude, and they sit in two different modules, which is the group's sharpest edge.
 
 - [`StaticString`](static_string.md) decodes a [`Symbol!`](../../macros/symbol.md) into a compile-time
   `&'static str` constant. This is the one to reach for when you need a name as data. Import it from
@@ -25,7 +24,7 @@ different import.
   on `Symbol`, so a `Display` bound is usually all you need. Reach for the trait itself only where a
   value to format is missing. Import it from `cgp::core::base::traits`.
 - [`ConcatPath`](concat_path.md) joins two type-level [`Path!`](../../macros/path.md) routes, the
-  path-level analogue of `ConcatProduct`. It is in the prelude.
+  path-level analogue of `ConcatProduct`. Import it from `cgp::core::base::traits`.
 
 ## The ideas behind them
 

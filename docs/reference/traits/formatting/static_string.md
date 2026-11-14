@@ -134,8 +134,9 @@ name.
 
 ## Common Mistakes
 
-**It is not in the prelude** while [`ConcatPath`](./concat_path.md) is, an asymmetry between two traits
-that do neighbouring jobs. Import `StaticString` from `cgp::core::field::traits`.
+**It is not in the prelude, and its module differs from its neighbours'.** Import `StaticString`
+from `cgp::core::field::traits`; [`ConcatPath`](./concat_path.md) and
+[`StaticFormat`](./static_format.md) come from `cgp::core::base::traits`.
 
 **`VALUE` is a constant, so it is named through the trait.** Write
 `<Symbol!("name") as StaticString>::VALUE`; the trait lacks a method.
@@ -155,9 +156,9 @@ pub const NAME: &str = <Chars<'a', Nil> as StaticString>::VALUE;
 ```
 
 ```text
-error[E0277]: the trait bound `cgp::prelude::Chars<'a', cgp::prelude::Nil>: StaticString` is not satisfied
+error[E0277]: the trait bound `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>: StaticString` is not satisfied
 ...
-   = help: the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::prelude::Chars<'a', cgp::prelude::Nil>`
+   = help: the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', cgp::prelude::Nil>`
 ```
 
 ## Related constructs

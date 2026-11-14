@@ -34,8 +34,8 @@ Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-provider, a `Computer` returning `Result`:
+It is not in the prelude; import it from `cgp::extra::handler`. It takes one type parameter, the
+base provider, a `Computer` returning `Result`:
 
 ```rust
 delegate_components! {
@@ -53,6 +53,7 @@ resolve.
 A fallible `#[cgp_computer]` function answers the fallible members through the bundle:
 
 ```rust
+use cgp::extra::handler::PromoteTryComputer;
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanHandle, CanTryCompute};

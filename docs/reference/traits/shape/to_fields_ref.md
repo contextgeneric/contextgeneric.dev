@@ -43,7 +43,7 @@ the value.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all
 five shape traits together.
@@ -53,6 +53,7 @@ five shape traits together.
 Reading one entry of a value's borrowed shape, and using the value afterwards:
 
 ```rust
+use cgp::core::field::traits::ToFieldsRef;
 use cgp::prelude::*;
 
 #[derive(HasFields)]

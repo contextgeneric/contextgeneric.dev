@@ -11,6 +11,7 @@ pub mod examples {
     use cgp::extra::error::RaiseFrom;
     use cgp::extra::handler::{CanHandleRef, HandlerRef};
     use cgp::prelude::*;
+    use cgp::extra::handler::HandlerRefComponent;
 
     #[cgp_impl(new NonEmptyLength)]
     #[uses(CanRaiseError<String>)]

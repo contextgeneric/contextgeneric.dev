@@ -44,7 +44,8 @@ lives in a [`PhantomData<Tail>`](phantom_data.md), so a `Chars` chain does not c
 and compiles to a zero-sized value. A `Symbol<const LEN: usize, Chars>` then wraps such a chain
 together with the string's byte length. The wrapper stores the length explicitly because stable Rust
 cannot compute it inside a const-generic context, and the [`Symbol!`](../macros/symbol.md) page
-explains why. Both `Chars` and `Symbol` are in the prelude.
+explains why. Neither type is in the prelude, since the macro writes them for you; import both from
+`cgp::core::field::types` when you name one.
 
 ## Behavior
 
@@ -68,6 +69,7 @@ A type-level string most often appears as the tag in a
 provider reads. The same type rebuilds its string through `Display`:
 
 ```rust
+use cgp::core::field::types::{Chars, Symbol};
 use cgp::prelude::*;
 
 // The tag names the field the function reads.
@@ -157,8 +159,8 @@ The compiler's help line names the missing tag, and the tag the context does hav
 character:
 
 ```text
-help: the trait `HasField<Symbol<5, cgp::prelude::Chars<'w', cgp::prelude::Chars<'i', cgp::prelude::Chars<'d', cgp::prelude::Chars<'t', cgp::prelude::Chars<'h', Nil>>>>>>>` is not implemented for `Rectangle`
-      but trait `HasField<Symbol<6, cgp::prelude::Chars<'h', cgp::prelude::Chars<'e', cgp::prelude::Chars<'i', cgp::prelude::Chars<'g', cgp::prelude::Chars<'h', cgp::prelude::Chars<'t', Nil>>>>>>>>` is implemented for it
+help: the trait `HasField<Symbol<5, Chars<'w', Chars<'i', Chars<'d', Chars<'t', Chars<'h', Nil>>>>>>>` is not implemented for `Rectangle`
+      but trait `HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<'h', cgp::macro_prelude::Chars<'t', Nil>>>>>>>>` is implemented for it
 ```
 
 [`cargo cgp check`](/docs/cargo-cgp/check) reads the chain back into the name, and reports

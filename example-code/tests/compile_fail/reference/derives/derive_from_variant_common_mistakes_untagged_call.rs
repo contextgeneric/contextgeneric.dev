@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::field::traits::FromVariant;
 
 pub struct Circle {
     pub radius: f64,

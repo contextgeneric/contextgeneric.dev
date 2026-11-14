@@ -5,8 +5,8 @@ error[E0599]: the method `person_name` exists for reference `&__Context__`, but 
    |                                ^^^^^^^^^^^ method cannot be called on `&__Context__` due to unsatisfied trait bounds
    |
 note: the following trait bounds were not satisfied:
-      `&__Context__: HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
-      `__Context__: HasField<Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>`
+      `&__Context__: HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
+      `__Context__: HasField<Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>`
   --> tests/compile_fail/cargo_cgp/reading_output_a_fix_in_a_help_line.rs:5:1
    |
  5 | #[cgp_fn]

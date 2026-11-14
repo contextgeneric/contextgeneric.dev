@@ -9,6 +9,7 @@
 pub mod usage {
     use cgp::core::error::ErrorRaiserComponent;
     use cgp::prelude::*;
+    use cgp::core::base::types::PathCons;
 
     pub type One = Path!(@app);
     pub type Two = Path!(@app.error);
@@ -47,6 +48,7 @@ pub mod usage {
 pub mod examples {
     use cgp::core::error::ErrorRaiserComponent;
     use cgp::prelude::*;
+    use cgp::core::base::types::PathCons;
 
     pub type ErrorRoute = Path!(@app.error.ErrorRaiserComponent);
 
@@ -118,6 +120,10 @@ pub mod examples {
 /// the macros implement: the namespace's redirect `Delegate`, and the prefix route.
 pub mod under_the_hood {
     use cgp::prelude::*;
+    use cgp::core::base::types::PathCons;
+    use cgp::core::component::RedirectLookup;
+    use cgp::core::field::types::Chars;
+    use cgp::core::field::types::Symbol;
 
     pub use super::examples::{
         AppNamespace, FooProviderComponent, MyFooComponent, MyNamespace, ShowImplComponent,
@@ -150,6 +156,7 @@ pub mod primitive_like_names {
     use core::marker::PhantomData;
 
     use cgp::prelude::*;
+    use cgp::core::base::types::PathCons;
 
     #[test]
     fn f_is_a_symbol() {

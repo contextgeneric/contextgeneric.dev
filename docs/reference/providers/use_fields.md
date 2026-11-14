@@ -40,8 +40,8 @@ named in wiring.
 
 ## Usage
 
-`UseFields` is in the prelude, so `use cgp::prelude::*;` is enough. It takes no type parameter and
-appears as the value of a getter component's wiring entry:
+`UseFields` is not in the prelude; import it from `cgp::core::component`. It takes no type parameter
+and appears as the value of a getter component's wiring entry:
 
 ```rust
 delegate_components! {
@@ -63,6 +63,7 @@ A getter with two methods, each read from its same-named field, which is the cas
 serve:
 
 ```rust
+use cgp::core::component::UseFields;
 use cgp::prelude::*;
 
 #[cgp_getter]

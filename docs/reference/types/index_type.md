@@ -142,7 +142,7 @@ count from zero, as Rust's own `.0` access does, so an off-by-one error surfaces
 into a type, not by a string of the digit, so `Symbol!("0")` never matches a tuple field and the
 derive never generates it. `pair.get_field(PhantomData::<Symbol!("0")>)` on the `Pair` above fails
 with
-``error[E0277]: the trait bound `Pair: cgp::prelude::HasField<cgp::prelude::Symbol<1, cgp::prelude::Chars<'0', Nil>>>` is not satisfied``.
+``error[E0277]: the trait bound `Pair: cgp::prelude::HasField<cgp::macro_prelude::Symbol<1, cgp::macro_prelude::Chars<'0', Nil>>>` is not satisfied``.
 
 ## Related constructs
 

@@ -108,6 +108,7 @@ a fallible computer:
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::PromoteComputer;
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanCompute, CanTryCompute};

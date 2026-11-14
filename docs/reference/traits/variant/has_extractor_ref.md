@@ -44,7 +44,7 @@ lifetime, which is why the call reads without a written lifetime.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 The impls come from [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md), alongside the owning
 and mutable accessors.
@@ -54,6 +54,7 @@ and mutable accessors.
 Reading through a borrow, as a single attempt and as a full chain, leaves the value intact:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, HasExtractorRef};
 use cgp::prelude::*;
 use cgp::core::field::traits::FinalizeExtractResult;
 

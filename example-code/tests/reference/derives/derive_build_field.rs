@@ -115,6 +115,7 @@ pub mod usage {
 pub mod examples {
     use cgp::core::field::impls::CanBuildFrom;
     use cgp::prelude::*;
+    use cgp::core::field::traits::IntoBuilder;
 
     // `build_from` recurses over the *source's* field list, so the source needs `HasFields` as
     // well as the builder. The page says so under *The three ways to fill a field*.
@@ -207,6 +208,7 @@ pub mod examples {
 /// `rename` coexists with them. The companion-emitting case is a trybuild fixture.
 pub mod common_mistakes {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromVariant;
     use serde::Serialize;
 
     #[derive(Serialize, HasField, HasFields)]

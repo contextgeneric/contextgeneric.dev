@@ -62,6 +62,7 @@ A marker that fills absent fields from `Default`, one impl per source state, app
 with one field set:
 
 ```rust
+use cgp::core::field::impls::{IsNothing, IsPresent};
 use cgp::prelude::*;
 use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::{TransformMap, TransformMapFields};
@@ -177,7 +178,7 @@ name:
 ```text
 error[E0271]: type mismatch resolving `<__PartialConfig<IsPresent, IsPresent> as UpdateField<Symbol<4, Chars<'p', Chars<'o', Chars<'r', Chars<'t', Nil>>>>>, IsNothing>>::Mapper == IsNothing`
 ...
-error[E0277]: the trait bound `OnlyAbsent: TransformMap<cgp::prelude::IsPresent, cgp::prelude::IsPresent, u16>` is not satisfied
+error[E0277]: the trait bound `OnlyAbsent: TransformMap<IsPresent, IsPresent, u16>` is not satisfied
 ```
 
 Read the second: the source marker is the case to add.

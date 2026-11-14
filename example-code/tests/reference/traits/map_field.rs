@@ -9,6 +9,7 @@ pub mod examples {
     use cgp::core::field::impls::ChainGetters;
     use cgp::core::field::traits::MapField;
     use cgp::prelude::*;
+    use cgp::core::component::WithProvider;
 
     pub fn inner_name<Context, Inner>(context: &Context) -> &String
     where

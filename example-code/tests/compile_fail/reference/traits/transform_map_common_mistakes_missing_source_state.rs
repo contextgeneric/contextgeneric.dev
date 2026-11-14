@@ -1,5 +1,7 @@
 use cgp::core::field::traits::{TransformMap, TransformMapFields};
 use cgp::prelude::*;
+use cgp::core::field::impls::IsNothing;
+use cgp::core::field::impls::IsPresent;
 
 // Only the `IsNothing` case, so a field that is already present has no conversion.
 pub struct OnlyAbsent;

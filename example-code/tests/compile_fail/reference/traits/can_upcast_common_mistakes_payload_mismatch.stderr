@@ -11,5 +11,5 @@ note: expected this to be `u64`
    |
 12 |     Foo(u32),
    |         ^^^
-   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::prelude::Chars<'F', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>, u64>, Void>` to implement `FieldsExtractor<__PartialFoo64<IsPresent>, Foo32Bar>`
+   = note: required for `Either<cgp::prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'F', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>, u64>, Void>` to implement `FieldsExtractor<__PartialFoo64<IsPresent>, Foo32Bar>`
    = note: required for `Foo64` to implement `CanUpcast<Foo32Bar>`

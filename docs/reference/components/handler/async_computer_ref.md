@@ -51,8 +51,8 @@ Its attributes:
 
 ## Usage
 
-`AsyncComputerRef` and `AsyncComputerRefComponent` are in the prelude. The consumer trait
-`CanComputeAsyncRef` is not, and is imported from `cgp::extra::handler`. The method is `async` and
+`AsyncComputerRef`, `AsyncComputerRefComponent`, and the consumer trait `CanComputeAsyncRef` are
+not in the prelude, and are imported from `cgp::extra::handler`. The method is `async` and
 borrows the input:
 
 ```rust
@@ -73,6 +73,7 @@ A provider that counts the words of a borrowed string, wired into a context and 
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::{AsyncComputerRef, AsyncComputerRefComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::CanComputeAsyncRef;
 

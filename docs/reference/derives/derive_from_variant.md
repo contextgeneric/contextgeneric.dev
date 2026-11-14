@@ -35,6 +35,7 @@ payload from an enum.
 Apply `FromVariant` to an enum without arguments or helper attributes:
 
 ```rust
+use cgp::core::field::traits::FromVariant;
 use cgp::prelude::*;
 
 #[derive(FromVariant)]
@@ -89,6 +90,7 @@ struct analogue, setting one field of a value being assembled, is [`#[derive(Bui
 A function can use `FromVariant<Tag>` to stay generic over the variant it constructs:
 
 ```rust
+use cgp::core::field::traits::FromVariant;
 use cgp::prelude::*;
 
 #[derive(FromVariant)]

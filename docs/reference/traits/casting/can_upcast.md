@@ -65,6 +65,7 @@ so it needs [`#[derive(FromVariant)]`](../../derives/derive_from_variant.md).
 A narrow enum widened into a wider one, with each side deriving only what the cast needs:
 
 ```rust
+use cgp::core::field::traits::{ExtractField, FromVariant};
 use cgp::prelude::*;
 use cgp::core::field::impls::CanUpcast;
 
@@ -184,7 +185,7 @@ let _ = FooBar::Foo(1).upcast(PhantomData::<FooBaz>);
 the error names the missing constructor, then the walk that needed it:
 
 ```text
-error[E0277]: the trait bound `FooBaz: FromVariant<Symbol<3, cgp::prelude::Chars<'B', cgp::prelude::Chars<'a', cgp::prelude::Chars<'r', Nil>>>>>` is not satisfied
+error[E0277]: the trait bound `FooBaz: FromVariant<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'r', Nil>>>>>` is not satisfied
 ...
    = note: required for `FooBar` to implement `CanUpcast<FooBaz>`
 ```

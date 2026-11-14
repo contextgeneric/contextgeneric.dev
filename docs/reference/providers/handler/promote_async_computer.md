@@ -33,8 +33,8 @@ every CGP provider, it carries no runtime value.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-`AsyncComputer` provider. It answers `HandlerComponent`, `AsyncComputerRefComponent`, and
+It is not in the prelude; import it from `cgp::extra::handler`. It takes one type parameter, the
+base `AsyncComputer` provider. It answers `HandlerComponent`, `AsyncComputerRefComponent`, and
 `HandlerRefComponent` but not `AsyncComputerComponent`, so the base is wired to
 `AsyncComputerComponent` directly and the bundle fills in the rest:
 
@@ -52,6 +52,7 @@ delegate_components! {
 An async `#[cgp_computer]` function is the base, and the bundle answers `handle` from it:
 
 ```rust
+use cgp::extra::handler::PromoteAsyncComputer;
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanComputeAsync, CanHandle};

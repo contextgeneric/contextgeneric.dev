@@ -63,7 +63,7 @@ directions.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 The `M` parameter is the target marker, and **it is not inferred from the value you pass**. The
 argument's type is the projection `M::Map<Self::Value>`, and rustc does not solve a projection
@@ -80,6 +80,8 @@ The two transitions `BuildField` and `TakeField` pin, written as direct calls wi
 named:
 
 ```rust
+use cgp::core::field::impls::{IsNothing, IsPresent};
+use cgp::core::field::traits::UpdateField;
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, BuildField)]
@@ -209,7 +211,7 @@ reports the missing `UpdateField` bound with the tag spelled out, rather than sa
 not exist, and lists the fields that do have impls:
 
 ```text
-error[E0277]: the trait bound `__PartialPerson<IsNothing, IsNothing>: UpdateField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'g', cgp::prelude::Chars<'e', Nil>>>>, IsPresent>` is not satisfied
+error[E0277]: the trait bound `__PartialPerson<IsNothing, IsNothing>: UpdateField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'e', Nil>>>>, IsPresent>` is not satisfied
 ...
 help: the following other types implement trait `UpdateField<Tag, M>`
 ```

@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::field::traits::HasFieldMut;
 
 #[derive(HasField)]
 pub struct Borrowed<'a> {

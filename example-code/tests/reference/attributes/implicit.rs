@@ -34,6 +34,7 @@ pub mod overview {
 /// access table, each run against a context holding the field type the row names.
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::field::types::MRef;
 
     #[cgp_fn]
     pub fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {

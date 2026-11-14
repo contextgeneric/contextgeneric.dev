@@ -54,8 +54,8 @@ the supertrait's `Value`. `Self` is the provider and `Context` is the type being
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. A getter whose method takes `&mut self`
-and returns `&mut T` is wired the same way as a read, with `WithField<Tag>` from
+It is not in the prelude; import it from `cgp::core::field::traits`. A getter whose method takes
+`&mut self` and returns `&mut T` is wired the same way as a read, with `WithField<Tag>` from
 `cgp::core::field::impls`:
 
 ```rust

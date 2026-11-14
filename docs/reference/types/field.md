@@ -81,6 +81,7 @@ A struct's shape, as [`#[derive(HasFields)]`](../derives/derive_has_fields.md) a
 of `Field` entries, and [`to_fields`](../traits/shape/to_fields.md) turns a value into that list:
 
 ```rust
+use cgp::core::field::traits::ToFields;
 use cgp::prelude::*;
 
 #[derive(HasFields)]

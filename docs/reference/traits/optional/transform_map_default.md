@@ -81,6 +81,7 @@ A generic function that drives the defaulting conversion across any builder, and
 passed through it:
 
 ```rust
+use cgp::core::field::impls::IsPresent;
 use cgp::prelude::*;
 use cgp::core::field::traits::TransformMapFields;
 use cgp::extra::field::impls::TransformMapDefault;

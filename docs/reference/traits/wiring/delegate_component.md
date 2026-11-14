@@ -63,7 +63,7 @@ has no data, so the table exists only in the type system.
 
 ## Usage
 
-The trait is in the prelude, so `use cgp::prelude::*;` is enough to name it.
+The trait is not in the prelude; import it from `cgp::core::component`.
 
 ### Setting an entry, and reading one
 

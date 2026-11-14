@@ -6,6 +6,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FinalizeExtract;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractor;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {

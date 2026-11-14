@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::component::IsProviderFor;
 
 #[cgp_component(AreaCalculator)]
 pub trait CanCalculateArea<Shape> {

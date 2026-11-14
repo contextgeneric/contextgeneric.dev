@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::extra::dispatch::MatchWithValueHandlers;
 
 pub struct Circle {
     pub radius: f64,

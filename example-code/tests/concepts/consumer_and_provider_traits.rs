@@ -87,6 +87,8 @@ pub mod splitting_one_trait_in_two {
 /// against `expand`; check the shape against this module.
 pub mod how_a_call_finds_its_provider {
     use cgp::prelude::*;
+    use cgp::core::component::DelegateComponent;
+    use cgp::core::component::IsProviderFor;
 
     pub trait CanSendEmail {
         fn send_email(&self, to: &str, body: &str);

@@ -242,7 +242,7 @@ let _ = Employee::builder()
 has nowhere to put `surname`, and the error is on `build_from`:
 
 ```text
-error[E0277]: the trait bound `__PartialEmployee<IsPresent, IsNothing>: UpdateField<Symbol<7, cgp::prelude::Chars<'s', cgp::prelude::Chars<'u', cgp::prelude::Chars<'r', cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>>>>, IsPresent>` is not satisfied
+error[E0277]: the trait bound `__PartialEmployee<IsPresent, IsNothing>: UpdateField<Symbol<7, cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'u', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>, IsPresent>` is not satisfied
 ...
    = note: required for `__PartialEmployee<IsNothing, IsNothing>` to implement `CanBuildFrom<Person>`
 ```

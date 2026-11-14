@@ -149,7 +149,7 @@ tag still appears as a type-level string, however, with one type per character. 
 with `_`:
 
 ```text
-help: the trait `HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<_, cgp::prelude::Chars<'t', Nil>>>>>>>>` is not implemented for `Rectangle`
+help: the trait `HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<_, cgp::macro_prelude::Chars<'t', Nil>>>>>>>>` is not implemented for `Rectangle`
 ```
 
 Even with the cause exposed, the raw diagnostic runs to about thirty lines and leads with the

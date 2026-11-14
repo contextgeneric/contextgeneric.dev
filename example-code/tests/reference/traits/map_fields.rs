@@ -9,6 +9,8 @@ pub mod examples {
     use cgp::core::field::impls::IsOptional;
     use cgp::core::field::traits::MapFields;
     use cgp::prelude::*;
+    use cgp::core::field::impls::IsNothing;
+    use cgp::core::field::impls::IsPresent;
 
     pub type Fields = Product![String, u16, bool];
 

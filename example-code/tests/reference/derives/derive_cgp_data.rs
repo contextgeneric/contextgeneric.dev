@@ -10,6 +10,9 @@
 /// accepted. The one it says is rejected is a trybuild fixture, named in the module below this one.
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromFields;
+    use cgp::core::field::traits::FromVariant;
+    use cgp::core::field::traits::ToFields;
 
     #[derive(Debug, Eq, PartialEq)]
     pub struct Circle {
@@ -106,6 +109,8 @@ pub mod rejected_struct_style_variant {}
 /// The umbrella page's own snippet: one derive covering both halves of a program.
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractor;
 
     #[derive(CgpData)]
     pub struct Circle {

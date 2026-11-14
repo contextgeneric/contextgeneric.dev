@@ -60,6 +60,7 @@ pub mod usage {
 /// One getter per row of the table, then the mutable mirrors, which the page lists in prose.
 pub mod how_the_return_type_decides_the_read {
     use cgp::prelude::*;
+    use cgp::core::field::types::MRef;
 
     #[cgp_auto_getter]
     pub trait HasForms {

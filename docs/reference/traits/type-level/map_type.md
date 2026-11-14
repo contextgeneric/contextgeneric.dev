@@ -54,8 +54,9 @@ storage reads `M: MapType<Map<String> = String>`, and one that leaves it open is
 
 ## Usage
 
-Four state markers implement it, and they are the ones a partial type is parameterized by. **Three
-are in the prelude; `IsOptional` is not.** Import it from `cgp::core::field::impls`. The library
+Four state markers implement it, and they are the ones a partial type is parameterized by. **Neither
+the trait nor its markers is in the prelude.** Import `MapType` from `cgp::core::field::traits` and
+the markers from `cgp::core::field::impls`. The library
 also implements it for two list mappers that are not field states, `TryPromoteProviders` in
 [`PipeMonadic`](../../providers/monad/pipe_monadic.md) and `ToBuildAndMergeHandler` in
 [`BuildAndMergeOutputs`](../../providers/dispatch/build_and_merge_outputs.md), which
@@ -84,6 +85,8 @@ value-level side, carrying the functions that actually convert a field from one 
 What each standard marker stores, checked as type equalities, and generic code bounded on the trait:
 
 ```rust
+use cgp::core::field::impls::{IsNothing, IsPresent, IsVoid};
+use cgp::core::field::traits::MapType;
 use cgp::prelude::*;
 use cgp::core::field::impls::IsOptional;
 
@@ -180,8 +183,8 @@ transition on a value.
 (`Void`). Records use the first, variants the second, and an error naming the wrong one usually means the
 two families have been crossed.
 
-**`IsOptional` is not in the prelude.** Import it from `cgp::core::field::impls`. The other three
-`MapType` markers are.
+**The markers are not in the prelude.** Import all four, `IsOptional` included, from
+`cgp::core::field::impls`.
 
 **`MapType` and [`MapFields`](./map_fields.md) are different traits.** One marker naming one field's
 storage, against one marker applied across a whole list. The names are close and the jobs are not.

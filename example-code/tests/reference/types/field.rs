@@ -8,6 +8,7 @@
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ToFields;
 
     #[derive(HasFields)]
     pub struct Person {

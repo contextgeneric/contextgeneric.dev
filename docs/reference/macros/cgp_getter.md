@@ -293,7 +293,7 @@ for a single-method trait, because each supplies one field. Wiring a two-method 
 with the tag expanded into its raw list:
 
 ```text
-error[E0277]: the trait bound `cgp::prelude::UseField<cgp::prelude::Symbol<5, cgp::prelude::Chars<'w', …>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
+error[E0277]: the trait bound `cgp::prelude::UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', …>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
 ```
 
 Nothing in that says the trait had too many methods, which is the actual cause. Use `UseFields`, or split

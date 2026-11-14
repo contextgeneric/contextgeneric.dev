@@ -198,7 +198,7 @@ consumer trait; see [`Computer`](../components/handler/computer.md#usage).
 to `UseField<Symbol!("foo")>` fails at the check:
 
 ```text
-error[E0277]: the trait bound `cgp::prelude::UseField<cgp::prelude::Symbol<3, cgp::prelude::Chars<'f', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>>: IsProviderFor<FooBarGetterComponent, App>` is not satisfied
+error[E0277]: the trait bound `cgp::prelude::UseField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>: IsProviderFor<FooBarGetterComponent, App>` is not satisfied
 ```
 
 Wire such a getter to [`UseFields`](use_fields.md) when each method reads a same-named field, or split

@@ -1,4 +1,4 @@
-error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>, _, _>` for type `App`
+error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>, _, _>` for type `App`
   --> tests/compile_fail/reference/traits/default_impls1_common_mistakes_override_registered_default.rs:37:33
    |
 33 |             @test.ShowImplComponent.T: Provider,
@@ -7,10 +7,10 @@ error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<Symbo
 37 |         @test.ShowImplComponent.String: ShowWithDisplay,
    |                                 ^^^^^^ conflicting implementation for `App`
    |
-   = note: downstream crates may implement trait `cgp::prelude::IsProviderFor<cgp::prelude::PathCons<cgp::prelude::Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::prelude::PathCons<ShowImplComponent, cgp::prelude::PathCons<std::string::String, _>>>, _, _>` for type `ShowString`
-   = note: downstream crates may implement trait `cgp::prelude::IsProviderFor<cgp::prelude::PathCons<cgp::prelude::Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::prelude::PathCons<ShowImplComponent, cgp::prelude::PathCons<std::string::String, _>>>, _, _>` for type `ShowWithDisplay`
+   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<cgp::macro_prelude::PathCons<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::macro_prelude::PathCons<ShowImplComponent, cgp::macro_prelude::PathCons<std::string::String, _>>>, _, _>` for type `ShowString`
+   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<cgp::macro_prelude::PathCons<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::prelude::Nil>>>>>, cgp::macro_prelude::PathCons<ShowImplComponent, cgp::macro_prelude::PathCons<std::string::String, _>>>, _, _>` for type `ShowWithDisplay`
 
-error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<Symbol<4, cgp::prelude::Chars<'t', cgp::prelude::Chars<'e', cgp::prelude::Chars<'s', cgp::prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>>` for type `App`
+error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<Symbol<4, cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', Nil>>>>>, PathCons<ShowImplComponent, PathCons<String, _>>>>` for type `App`
   --> tests/compile_fail/reference/traits/default_impls1_common_mistakes_override_registered_default.rs:37:33
    |
 33 |             @test.ShowImplComponent.T: Provider,

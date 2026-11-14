@@ -33,8 +33,8 @@ discards. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-`Producer` provider. The base answers `ProducerComponent`, and `PromoteProducer` answers
+It is not in the prelude; import it from `cgp::extra::handler`. It takes one type parameter, the
+base `Producer` provider. The base answers `ProducerComponent`, and `PromoteProducer` answers
 `ComputerComponent` and the rest of the family by discarding the input and calling the producer:
 
 ```rust
@@ -51,6 +51,7 @@ delegate_components! {
 A `#[cgp_producer]` function answers the producer and two input-taking members:
 
 ```rust
+use cgp::extra::handler::PromoteProducer;
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanCompute, CanProduce, CanTryCompute};

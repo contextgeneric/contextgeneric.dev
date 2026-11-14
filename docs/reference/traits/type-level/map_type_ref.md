@@ -53,8 +53,9 @@ at whatever lifetime a caller has.
 
 ## Usage
 
-**`IsRef` and `IsMut` are in the prelude; `IsOwned` is not.** Import it from `cgp::core::field::impls`.
-The trait itself comes with the prelude. Three markers implement it:
+**Neither the trait nor its markers is in the prelude.** Import `MapTypeRef` from
+`cgp::core::field::traits`, and `IsRef`, `IsMut`, and `IsOwned` from `cgp::core::field::impls`.
+Three markers implement it:
 
 ```rust
 impl MapTypeRef for IsRef   { type Map<'a, T: 'a> = &'a T; }
@@ -75,6 +76,8 @@ if you write the machinery yourself.
 What each standard marker stores at a lifetime, and the two borrowed extractors that fix it:
 
 ```rust
+use cgp::core::field::impls::{IsMut, IsRef};
+use cgp::core::field::traits::{ExtractField, HasExtractorMut, HasExtractorRef, MapTypeRef};
 use cgp::prelude::*;
 use cgp::core::field::impls::IsOwned;
 
@@ -180,7 +183,8 @@ stays valid for the whole of the borrow.
 **`IsOwned` is unused by CGP.** It is a legal marker that nothing consumes, so selecting it means
 writing the machinery that uses it yourself.
 
-**`IsOwned` is not in the prelude.** Import it from `cgp::core::field::impls`. `IsRef` and `IsMut` are.
+**The markers are not in the prelude.** Import `IsOwned`, like `IsRef` and `IsMut`, from
+`cgp::core::field::impls`.
 
 **This is not [`MapType`](./map_type.md).** One decides presence per field, the other decides ownership
 across the whole borrowed view, and a generated borrowed type carries both. An error naming the wrong one

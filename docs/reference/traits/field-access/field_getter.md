@@ -59,8 +59,8 @@ rather than a component provider trait, so its impls carry no
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. A getter component takes a `FieldGetter`
-provider wrapped in `WithProvider`, most often through the `WithField<Tag>` alias for
+It is not in the prelude; import it from `cgp::core::field::traits`. A getter component takes a
+`FieldGetter` provider wrapped in `WithProvider`, most often through the `WithField<Tag>` alias for
 `WithProvider<UseField<Tag>>`, which is imported from `cgp::core::field::impls`:
 
 ```rust
@@ -83,6 +83,8 @@ One getter component answered on two contexts by two `FieldGetter` providers, `U
 differently named field and a hand-written provider reading a nested one:
 
 ```rust
+use cgp::core::component::WithProvider;
+use cgp::core::field::traits::FieldGetter;
 use cgp::prelude::*;
 use cgp::core::field::impls::WithField;
 

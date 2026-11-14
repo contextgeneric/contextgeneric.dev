@@ -67,6 +67,7 @@ A `product!` value is the nested `Cons` value, a struct's shape is a `Cons` chai
 [`Field`](field.md) entries, and a fold over the list is one impl for `Nil` and one for `Cons`:
 
 ```rust
+use cgp::core::field::traits::ToFields;
 use cgp::prelude::*;
 
 #[derive(HasFields)]

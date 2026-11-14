@@ -40,6 +40,7 @@ check completeness.
 Apply `ExtractField` to an enum without arguments or helper attributes:
 
 ```rust
+use cgp::core::field::traits::ExtractField;
 use cgp::prelude::*;
 
 #[derive(ExtractField)]
@@ -120,6 +121,7 @@ extractor back into the original enum.
 
 ```rust
 use cgp::core::field::traits::FinalizeExtractResult;
+use cgp::core::field::traits::{ExtractField, HasExtractor};
 use cgp::prelude::*;
 
 #[derive(ExtractField)]

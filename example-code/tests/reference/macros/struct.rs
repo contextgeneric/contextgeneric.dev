@@ -17,6 +17,7 @@ pub mod overview {
 /// ## Usage
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::field::traits::ToFields;
 
     #[test]
     fn the_form_comes_from_the_entries() {
@@ -64,6 +65,7 @@ pub mod usage {
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::field::traits::FromFields;
 
     #[derive(Debug, PartialEq, HasFields)]
     pub struct Person {

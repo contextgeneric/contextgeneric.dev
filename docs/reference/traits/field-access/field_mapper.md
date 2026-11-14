@@ -75,6 +75,8 @@ A two-step getter provider that reads through the field one provider returns wit
 a getter, and a direct call through `UseContext`:
 
 ```rust
+use cgp::core::component::WithProvider;
+use cgp::core::field::traits::FieldGetter;
 use cgp::prelude::*;
 use cgp::core::field::traits::FieldMapper;
 

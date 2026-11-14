@@ -74,6 +74,8 @@ compile, as [Common Mistakes](#common-mistakes) shows.
 A transform of your own, applied at a concrete call site and through a bound:
 
 ```rust
+use cgp::core::field::impls::IsPresent;
+use cgp::core::field::traits::IntoBuilder;
 use cgp::prelude::*;
 use cgp::core::field::traits::{TransformMap, TransformMapFields};
 
@@ -204,7 +206,7 @@ marker, so `Point { x: 1 }.into_builder().transform_map_fields()` fails with:
 ```text
 error[E0283]: type annotations needed for `__PartialPoint<_>`
 ...
-   = note: required for `__PartialPoint<cgp::prelude::IsPresent>` to implement `TransformMapFields<_, _>`
+   = note: required for `__PartialPoint<IsPresent>` to implement `TransformMapFields<_, _>`
 ```
 
 Name both on the trait, as the [example](#examples)'s `doubled` does.

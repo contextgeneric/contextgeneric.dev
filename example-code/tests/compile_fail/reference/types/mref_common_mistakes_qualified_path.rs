@@ -6,7 +6,7 @@ use cgp::prelude::*;
 
 #[cgp_auto_getter]
 pub trait HasGreeting {
-    fn greeting(&self) -> cgp::prelude::MRef<'_, String>;
+    fn greeting(&self) -> cgp::core::field::types::MRef<'_, String>;
 }
 
 fn main() {}

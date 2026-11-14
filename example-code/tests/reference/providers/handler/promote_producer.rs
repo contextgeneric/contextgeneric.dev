@@ -10,6 +10,7 @@ pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::{CanCompute, CanProduce, CanTryCompute};
     use cgp::prelude::*;
+    use cgp::extra::handler::PromoteProducer;
 
     #[cgp_producer]
     pub fn default_port() -> u16 {

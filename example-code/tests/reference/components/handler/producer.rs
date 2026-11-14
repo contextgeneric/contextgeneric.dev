@@ -136,6 +136,7 @@ pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::CanTryCompute;
     use cgp::prelude::*;
+    use cgp::extra::handler::PromoteProducer;
 
     #[cgp_new_provider]
     impl<Context, Code> Producer<Context, Code> for MagicNumber {

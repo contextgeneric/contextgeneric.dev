@@ -50,8 +50,8 @@ Its attributes:
 
 ## Usage
 
-`HasType` and the provider trait `TypeProvider` are in the prelude. The wiring key
-`TypeProviderComponent` and the `TypeOf` alias come from `cgp::core::types`. `HasType` carries a
+`HasType`, the provider trait `TypeProvider`, the wiring key `TypeProviderComponent`, and the
+`TypeOf` alias all come from `cgp::core::types`; none of them is in the prelude. `HasType` carries a
 `Tag` parameter, the type-level name that distinguishes one abstract type from another within a
 context, and an associated `Type` that the tag resolves to. A context supplies the type in one of
 two ways.
@@ -98,6 +98,7 @@ A direct use defines no new component and resolves an abstract type by tag throu
 
 ```rust
 use cgp::core::types::{TypeOf, TypeProviderComponent};
+use cgp::core::types::HasType;
 use cgp::prelude::*;
 
 pub struct ScalarTag;

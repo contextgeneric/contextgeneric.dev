@@ -22,7 +22,7 @@ error[E0271]: type mismatch resolving `<UseFieldRef<Symbol<4, Chars<'n', Chars<'
 22 |         NameGetterComponent,
    |         ^^^^^^^^^^^^^^^^^^^ expected `String`, found `str`
    |
-note: required for `WithProvider<UseFieldRef<cgp::prelude::Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>, str>>` to implement `IsProviderFor<NameGetterComponent, Person>`
+note: required for `WithProvider<UseFieldRef<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>, str>>` to implement `IsProviderFor<NameGetterComponent, Person>`
   --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:4:1
    |
  4 | #[cgp_getter]
@@ -47,8 +47,8 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
    |         ^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
    |
    = help: the trait `Sized` is not implemented for `str`
-   = note: required for `UseFieldRef<cgp::prelude::Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>, str>` to implement `cgp::prelude::FieldGetter<Person, NameGetterComponent>`
-note: required for `WithProvider<UseFieldRef<cgp::prelude::Symbol<4, cgp::prelude::Chars<'n', cgp::prelude::Chars<'a', cgp::prelude::Chars<'m', cgp::prelude::Chars<'e', Nil>>>>>, str>>` to implement `IsProviderFor<NameGetterComponent, Person>`
+   = note: required for `UseFieldRef<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>, str>` to implement `FieldGetter<Person, NameGetterComponent>`
+note: required for `WithProvider<UseFieldRef<cgp::macro_prelude::Symbol<4, cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>, str>>` to implement `IsProviderFor<NameGetterComponent, Person>`
   --> tests/compile_fail/reference/providers/with_field_ref_common_mistakes_unsized_value.rs:4:1
    |
  4 | #[cgp_getter]

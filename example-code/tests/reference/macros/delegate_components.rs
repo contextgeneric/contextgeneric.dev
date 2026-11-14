@@ -292,6 +292,7 @@ pub mod the_key_forms {
     use cgp::core::error::{ErrorRaiserComponent, ErrorWrapperComponent};
     use cgp::extra::error::RaiseFrom;
     use cgp::prelude::*;
+    use cgp::core::component::DelegateComponent;
 
     pub use super::the_operators::{
         AreaCalculatorComponent, PerimeterCalculatorComponent, RectangleGeometry,

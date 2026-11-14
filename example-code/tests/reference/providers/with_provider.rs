@@ -52,6 +52,7 @@ pub mod when_to_use_it {
     use cgp::core::field::impls::WithField;
     use cgp::core::types::TypeProviderComponent;
     use cgp::prelude::*;
+    use cgp::core::component::WithContext;
 
     #[cgp_type]
     pub trait HasWidthType {

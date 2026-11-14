@@ -47,7 +47,8 @@ pub enum MRef<'a, T> {
 `Ref` borrows a `T` for the lifetime `'a`, and `Owned` carries a `T` by value. The lifetime applies
 only to the borrowed case, so an `MRef` built from an owned value is effectively unbounded in `'a`.
 The enum is an ordinary owned value, with nothing type-level about it, and it is the payload a
-getter passes back to its caller. It is in the prelude, so `use cgp::prelude::*;` is enough.
+getter passes back to its caller. It is not in the prelude; import it from
+`cgp::core::field::types`.
 
 ## Behavior
 
@@ -67,8 +68,8 @@ Code reads a borrowed `MRef` cheaply and promotes it to ownership only on reques
 The getter macros recognize `MRef<'_, T>` by its shape: a single-segment path named `MRef` with a
 lifetime and a type argument. The same form works for an [`#[implicit]`](../attributes/implicit.md)
 argument, which then lends the field as `MRef::Ref`. A differently shaped or fully qualified `MRef`,
-such as `cgp::prelude::MRef<'_, T>`, is not recognized. It falls through to the owned form, which
-expects a field of that type, and with `'_` in it the definition does not compile.
+such as `cgp::core::field::types::MRef<'_, T>`, is not recognized. It falls through to the owned
+form, which expects a field of that type, and with `'_` in it the definition does not compile.
 
 ## Examples
 
@@ -76,6 +77,7 @@ A getter returning `MRef` lets one context lend a stored field and another build
 generic code reads both the same way:
 
 ```rust
+use cgp::core::field::types::MRef;
 use cgp::prelude::*;
 
 #[cgp_getter]
@@ -178,8 +180,8 @@ is free when the getter already owns the value and costs a clone when it borrowe
 need ownership.
 
 **A qualified path is not recognized.** A getter declared as
-`fn greeting(&self) -> cgp::prelude::MRef<'_, String>;` is treated as returning an owned field of
-that type, so its `'_` lands in a `HasField` bound and the definition fails with
+`fn greeting(&self) -> cgp::core::field::types::MRef<'_, String>;` is treated as returning an owned
+field of that type, so its `'_` lands in a `HasField` bound and the definition fails with
 ``error[E0637]: `'_` cannot be used here``. Import `MRef` and write it bare.
 
 **`Deref` makes the variants transparent, so you rarely match on them.** Reading through `&*` or

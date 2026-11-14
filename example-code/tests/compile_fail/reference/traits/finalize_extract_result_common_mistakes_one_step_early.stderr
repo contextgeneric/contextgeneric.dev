@@ -1,14 +1,14 @@
 error[E0599]: the method `finalize_extract_result` exists for enum `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>`, but its trait bounds were not satisfied
-  --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_one_step_early.rs:27:10
+  --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_one_step_early.rs:28:10
    |
-16 |   pub enum Shape {
+17 |   pub enum Shape {
    |   -------------- doesn't satisfy `__PartialShape<IsPresent, IsVoid>: FinalizeExtract`
 ...
-24 |       let _rect = shape
+25 |       let _rect = shape
    |  _________________-
-25 | |         .to_extractor()
-26 | |         .extract_field(PhantomData::<Symbol!("Rectangle")>)
-27 | |         .finalize_extract_result();
+26 | |         .to_extractor()
+27 | |         .extract_field(PhantomData::<Symbol!("Rectangle")>)
+28 | |         .finalize_extract_result();
    | |         -^^^^^^^^^^^^^^^^^^^^^^^ method cannot be called due to unsatisfied trait bounds
    | |_________|
    |

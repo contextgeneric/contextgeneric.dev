@@ -49,8 +49,9 @@ generated entries is where this provider appears. Like every CGP provider, it ca
 
 ## Usage
 
-`RedirectLookup` is in the prelude, but you do not name it directly. It appears where the namespace and
-`open` machinery generate it. A component registers under a path with the
+You do not name `RedirectLookup` directly, so it is not in the prelude; import it from
+`cgp::core::component` if you need it. It appears where the namespace and `open` machinery generate
+it. A component registers under a path with the
 [`#[prefix(@path in Namespace)]`](../attributes/prefix.md) attribute, and a context that joins the
 namespace binds the component's provider at that path, in its own table:
 

@@ -28,9 +28,8 @@ through a [promotion](../handler/index.md). The builders implement `Computer`,
 [`TryComputer`](../../components/handler/try_computer.md), and
 [`Handler`](../../components/handler/handler.md), propagating a step's error in the fallible forms.
 
-The value matchers `MatchWithValueHandlers`, `MatchWithValueHandlersRef`,
-`MatchWithValueHandlersMut`, and their `MatchFirstWith…` counterparts are in the prelude. Every
-other name here is imported from `cgp::extra::dispatch`.
+None of these names is in the prelude. Every one of them, the value matchers included, is
+imported from `cgp::extra::dispatch`.
 
 ## The matchers
 
@@ -96,9 +95,7 @@ The ideas behind it:
 ## Source
 
 - The provider structs are in `cgp-dispatch` under
-  [`providers/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-dispatch/src/providers),
-  and the prelude re-exports the value matchers from
-  [`cgp-extra`](https://github.com/contextgeneric/cgp/blob/main/crates/main/cgp-extra/src/prelude.rs).
+  [`providers/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-dispatch/src/providers).
 
 ---
 

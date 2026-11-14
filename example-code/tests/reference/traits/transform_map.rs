@@ -9,6 +9,8 @@ pub mod examples {
     use cgp::core::field::impls::IsOptional;
     use cgp::core::field::traits::{TransformMap, TransformMapFields};
     use cgp::prelude::*;
+    use cgp::core::field::impls::IsNothing;
+    use cgp::core::field::impls::IsPresent;
 
     pub struct FillDefaults;
 

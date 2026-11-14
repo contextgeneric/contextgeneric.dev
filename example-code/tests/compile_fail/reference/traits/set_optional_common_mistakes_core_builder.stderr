@@ -9,7 +9,7 @@ note: expected this to be `IsOptional`
    |
  4 | #[derive(CgpData)]
    |          ^^^^^^^
-   = note: required for `__PartialContext<IsNothing, IsNothing>` to implement `SetOptional<cgp::prelude::Symbol<3, cgp::prelude::Chars<'f', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>>`
+   = note: required for `__PartialContext<IsNothing, IsNothing>` to implement `SetOptional<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>`
    = note: this error originates in the derive macro `CgpData` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<__PartialContext<IsNothing, IsNothing> as UpdateField<Symbol<3, Chars<'f', Chars<'o', Chars<'o', Nil>>>>, IsOptional>>::Output == __PartialContext<IsNothing, IsNothing>`
@@ -25,5 +25,5 @@ note: expected this to be `__PartialContext<IsNothing, IsNothing>`
    |          ^^^^^^^
    = note: expected struct `__PartialContext<IsNothing, IsNothing>`
               found struct `__PartialContext<IsOptional, IsNothing>`
-   = note: required for `__PartialContext<IsNothing, IsNothing>` to implement `SetOptional<cgp::prelude::Symbol<3, cgp::prelude::Chars<'f', cgp::prelude::Chars<'o', cgp::prelude::Chars<'o', Nil>>>>>`
+   = note: required for `__PartialContext<IsNothing, IsNothing>` to implement `SetOptional<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>`
    = note: this error originates in the derive macro `CgpData` (in Nightly builds, run with -Z macro-backtrace for more info)

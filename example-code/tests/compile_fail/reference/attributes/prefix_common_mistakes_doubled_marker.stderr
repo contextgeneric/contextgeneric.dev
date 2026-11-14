@@ -1,10 +1,10 @@
-error[E0277]: the trait bound `PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, PathCons<String, Nil>>>>: cgp::prelude::DefaultNamespace<App>` is not satisfied
+error[E0277]: the trait bound `PathCons<Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, PathCons<String, Nil>>>>: cgp::prelude::DefaultNamespace<App>` is not satisfied
   --> tests/compile_fail/reference/attributes/prefix_common_mistakes_doubled_marker.rs:33:9
    |
 33 |         ShowImplComponent: String,
    |         ^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-   = help: the trait `cgp::prelude::DefaultNamespace<App>` is not implemented for `PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, PathCons<String, Nil>>>>`
+   = help: the trait `cgp::prelude::DefaultNamespace<App>` is not implemented for `PathCons<Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, PathCons<String, Nil>>>>`
    = help: the following other types implement trait `cgp::prelude::DefaultNamespace<Components>`:
              AsyncComputerComponent
              AsyncComputerRefComponent
@@ -15,7 +15,7 @@ error[E0277]: the trait bound `PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::
              ErrorWrapperComponent
              HandlerComponent
            and $N others
-note: required for `App` to implement `DelegateComponent<PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, PathCons<String, Nil>>>>>`
+note: required for `App` to implement `DelegateComponent<PathCons<Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, PathCons<String, Nil>>>>>`
   --> tests/compile_fail/reference/attributes/prefix_common_mistakes_doubled_marker.rs:22:1
    |
 22 | / delegate_components! {
@@ -25,7 +25,7 @@ note: required for `App` to implement `DelegateComponent<PathCons<Symbol<3, cgp:
 ...  |
 28 | | }
    | |_^
-note: required for `RedirectLookup<App, PathCons<Symbol<3, cgp::prelude::Chars<'a', cgp::prelude::Chars<'p', cgp::prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, Nil>>>>` to implement `IsProviderFor<ShowImplComponent, App, String>`
+note: required for `RedirectLookup<App, PathCons<Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'p', cgp::macro_prelude::Chars<'p', Nil>>>>, PathCons<ShowImplComponent, PathCons<ShowImplComponent, Nil>>>>` to implement `IsProviderFor<ShowImplComponent, App, String>`
   --> tests/compile_fail/reference/attributes/prefix_common_mistakes_doubled_marker.rs:7:1
    |
  7 | #[cgp_component(ShowImpl)]

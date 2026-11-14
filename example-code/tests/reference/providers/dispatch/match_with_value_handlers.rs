@@ -11,6 +11,7 @@
 pub mod usage {
     use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef};
     use cgp::prelude::*;
+    use cgp::extra::dispatch::MatchWithValueHandlersRef;
 
     pub struct Circle {
         pub radius: f64,
@@ -99,6 +100,8 @@ pub mod usage {
 pub mod usage_named_and_mut {
     use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
+    use cgp::extra::dispatch::MatchWithValueHandlers;
+    use cgp::extra::dispatch::MatchWithValueHandlersMut;
 
     pub struct Circle {
         pub radius: f64,
@@ -197,6 +200,7 @@ pub mod usage_named_and_mut {
 pub mod examples {
     use cgp::extra::handler::CanCompute;
     use cgp::prelude::*;
+    use cgp::extra::dispatch::MatchWithValueHandlers;
 
     pub struct Circle {
         pub radius: f64,

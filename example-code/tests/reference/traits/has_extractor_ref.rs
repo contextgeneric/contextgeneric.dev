@@ -7,6 +7,8 @@
 pub mod examples {
     use cgp::core::field::traits::FinalizeExtractResult;
     use cgp::prelude::*;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::HasExtractorRef;
 
     #[derive(Debug, PartialEq)]
     pub struct Circle {

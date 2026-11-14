@@ -38,13 +38,13 @@ provider, it carries no runtime value.
 
 ## Usage
 
-`WithProvider` is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the
-foundational provider to adapt, and appears as the value of a named component's wiring entry. In
-practice you write one of its aliases instead:
+`WithProvider` is not in the prelude; import it from `cgp::core::component`. It takes one type
+parameter, the foundational provider to adapt, and appears as the value of a named component's
+wiring entry. In practice you write one of its aliases instead:
 
 | Alias | Expands to | Import from |
 |---|---|---|
-| [`WithContext`](with_context.md) | `WithProvider<UseContext>` | prelude |
+| [`WithContext`](with_context.md) | `WithProvider<UseContext>` | `cgp::core::component` |
 | [`WithType<Type>`](with_type.md) | `WithProvider<UseType<Type>>` | `cgp::core::types` |
 | [`WithField<Tag>`](with_field.md) | `WithProvider<UseField<Tag>>` | `cgp::core::field::impls` |
 | [`WithFieldRef<Tag, Value>`](with_field_ref.md) | `WithProvider<UseFieldRef<Tag, Value>>` | `cgp::core::field::impls` |

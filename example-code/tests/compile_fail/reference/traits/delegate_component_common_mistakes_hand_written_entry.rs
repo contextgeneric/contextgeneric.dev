@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::component::DelegateComponent;
 
 #[cgp_component(Greeter)]
 pub trait CanGreet {

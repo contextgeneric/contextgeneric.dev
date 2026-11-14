@@ -12,6 +12,7 @@ pub mod examples {
     use cgp::extra::error::RaiseFrom;
     use cgp::extra::handler::{CanTryComputeRef, TryComputerRef};
     use cgp::prelude::*;
+    use cgp::extra::handler::TryComputerRefComponent;
 
     #[cgp_impl(new ParsePort)]
     #[uses(CanRaiseError<ParseIntError>)]

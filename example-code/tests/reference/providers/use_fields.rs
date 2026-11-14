@@ -6,6 +6,7 @@
 /// ## Usage
 pub mod usage {
     use cgp::prelude::*;
+    use cgp::core::component::UseFields;
 
     #[cgp_getter]
     pub trait HasFoo {
@@ -39,6 +40,7 @@ pub mod usage {
 /// ## Examples
 pub mod examples {
     use cgp::prelude::*;
+    use cgp::core::component::UseFields;
 
     #[cgp_getter]
     pub trait HasFooBar {

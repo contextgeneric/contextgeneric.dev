@@ -68,13 +68,15 @@ use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::MapFields;
 ```
 
-`IsPresent`, `IsNothing`, and `IsVoid` are in the prelude; `IsOptional` is not.
+None of the markers is in the prelude; import `IsPresent`, `IsNothing`, `IsVoid`, and `IsOptional`
+from `cgp::core::field::impls`.
 
 ## Examples
 
 One marker applied over a product and over a sum, checked as type equalities:
 
 ```rust
+use cgp::core::field::impls::{IsNothing, IsPresent};
 use cgp::prelude::*;
 use cgp::core::field::impls::IsOptional;
 use cgp::core::field::traits::MapFields;

@@ -1,4 +1,5 @@
 use cgp::prelude::*;
+use cgp::core::field::traits::UpdateField;
 
 #[derive(BuildField)]
 pub struct Person {

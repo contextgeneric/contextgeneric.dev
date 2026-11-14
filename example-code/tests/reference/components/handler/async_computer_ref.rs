@@ -13,6 +13,8 @@ pub mod usage {
 
     use cgp::extra::handler::{CanComputeAsync, PromoteRef};
     use cgp::prelude::*;
+    use cgp::extra::handler::AsyncComputerRef;
+    use cgp::extra::handler::AsyncComputerRefComponent;
 
     #[cgp_new_provider]
     impl<Context, Code> AsyncComputerRef<Context, Code, String> for CountWords {
@@ -57,6 +59,8 @@ pub mod examples {
 
     use cgp::extra::handler::CanComputeAsyncRef;
     use cgp::prelude::*;
+    use cgp::extra::handler::AsyncComputerRef;
+    use cgp::extra::handler::AsyncComputerRefComponent;
 
     #[cgp_new_provider]
     impl<Context, Code> AsyncComputerRef<Context, Code, String> for CountWords {

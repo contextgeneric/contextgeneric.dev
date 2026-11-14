@@ -33,9 +33,10 @@ single-step promotion. Like every CGP provider, it carries no runtime value.
 
 ## Usage
 
-It is in the prelude, so `use cgp::prelude::*;` is enough. It takes one type parameter, the base
-`Computer` provider. `PromoteComputer` answers every family member *except* `ComputerComponent`, so
-the base is wired to `ComputerComponent` directly and the bundle fills in the rest:
+It is not in the prelude; import it from `cgp::extra::handler`. It takes one type parameter, the
+base `Computer` provider. `PromoteComputer` answers every family member *except*
+`ComputerComponent`, so the base is wired to `ComputerComponent` directly and the bundle fills in
+the rest:
 
 ```rust
 delegate_components! {
@@ -58,6 +59,7 @@ Here `Double` comes from [`#[cgp_computer]`](../../macros/cgp_computer.md), whic
 One `#[cgp_computer]` function answers four members of the family through the bundle:
 
 ```rust
+use cgp::extra::handler::PromoteComputer;
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute};

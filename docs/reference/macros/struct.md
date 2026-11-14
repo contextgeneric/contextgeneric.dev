@@ -72,6 +72,7 @@ A function generic over every struct with a given shape bounds the shape directl
 turns a value of the shape into any type whose `Fields` it is:
 
 ```rust
+use cgp::core::field::traits::FromFields;
 use cgp::prelude::*;
 
 #[derive(Debug, PartialEq, HasFields)]

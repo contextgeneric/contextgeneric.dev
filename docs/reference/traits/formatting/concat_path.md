@@ -49,17 +49,16 @@ nothing runs.
 
 ## Usage
 
-**`ConcatPath` is in the prelude**: `use cgp::prelude::*;` names it, which makes it the one member
-of this group that comes with the prelude. Its two neighbours each need a different import:
-[`StaticString`](./static_string.md) comes from `cgp::core::field::traits`, and
-[`StaticFormat`](./static_format.md), defined in the same crate as this trait, from
-`cgp::core::base::traits`.
+**`ConcatPath` is not in the prelude.** Import it from `cgp::core::base::traits`, the same module as
+[`StaticFormat`](./static_format.md), which is defined in the same crate.
+[`StaticString`](./static_string.md) comes from `cgp::core::field::traits` instead.
 
 ## Examples
 
 Two paths joined at the type level, and a generic signature naming a composed route:
 
 ```rust
+use cgp::core::base::traits::ConcatPath;
 use cgp::prelude::*;
 
 pub type Outer = Path!(@a.b);
@@ -166,8 +165,9 @@ the segments as text, decode the symbols with [`StaticString`](./static_string.m
 **Both sides may be unsized**, which is why the trait carries `?Sized` on the parameter and the output,
 a detail worth noticing if you write a bound over it and get an unexpected `Sized` error.
 
-**It is in the prelude while [`StaticString`](./static_string.md) is not.** The asymmetry between two
-neighbouring traits catches people importing one and assuming the other came with it.
+**Its module differs from [`StaticString`](./static_string.md)'s.** `ConcatPath` comes from
+`cgp::core::base::traits` and `StaticString` from `cgp::core::field::traits`, which catches people
+importing one and assuming the other came with it.
 
 **Order is part of the type.** `@a.b` then `@c.d` is a different path from the reverse, and nothing
 normalizes them.

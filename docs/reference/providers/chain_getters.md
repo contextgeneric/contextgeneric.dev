@@ -66,6 +66,7 @@ context with the getter that reads the field. Here an `App` holds a `Config`, an
 `Config`'s `name`:
 
 ```rust
+use cgp::core::component::WithProvider;
 use cgp::prelude::*;
 use cgp::core::field::impls::ChainGetters; // not in the prelude
 

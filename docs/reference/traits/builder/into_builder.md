@@ -44,7 +44,7 @@ field already set.
 
 ## Usage
 
-**It is in the prelude**, so `use cgp::prelude::*;` is enough.
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
 
 Unlike `builder()`, this is a method taking `self`, so it is called on a value: `person.into_builder()`.
 
@@ -57,6 +57,7 @@ The impls come from [`#[derive(BuildField)]`](../../derives/derive_build_field.m
 Swapping one field of a complete record, the usual form of a redistribution:
 
 ```rust
+use cgp::core::field::traits::IntoBuilder;
 use cgp::prelude::*;
 use cgp::core::field::traits::TakeField;
 
