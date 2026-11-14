@@ -10,6 +10,9 @@
 /// borrowed payloads, and `ComputerRefComponent` with a `ComputerRef` provider over the payloads.
 pub mod usage {
     use cgp::extra::dispatch::MatchWithValueHandlersRef;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::ComputerRefComponent;
     use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef};
     use cgp::prelude::*;
 
@@ -101,6 +104,8 @@ pub mod usage_named_and_mut {
     use cgp::extra::dispatch::MatchWithValueHandlers;
     use cgp::extra::dispatch::MatchWithValueHandlersMut;
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {
@@ -200,6 +205,8 @@ pub mod usage_named_and_mut {
 pub mod examples {
     use cgp::extra::dispatch::MatchWithValueHandlers;
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {

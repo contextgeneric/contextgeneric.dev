@@ -8,6 +8,8 @@
 pub mod examples {
     use cgp::core::field::traits::HasExtractor;
     use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue};
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {

@@ -7,6 +7,10 @@
 pub mod one_function_the_whole_family {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
+    use cgp::extra::handler::AsyncComputer;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::Handler;
+    use cgp::extra::handler::TryComputer;
     use cgp::prelude::*;
 
     #[cgp_computer]
@@ -46,6 +50,7 @@ pub mod one_function_the_whole_family {
 pub mod a_fallible_function {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
+    use cgp::extra::handler::TryComputer;
     use cgp::prelude::*;
 
     #[cgp_computer]

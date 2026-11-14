@@ -40,6 +40,7 @@ Wired this way, computing over any input returns that input unchanged.
 `ReturnInput` as the middle stage of a pipeline, where it changes nothing:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::{CanCompute, PipeHandlers, ReturnInput};
 

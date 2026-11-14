@@ -10,6 +10,9 @@
 pub mod usage {
     use core::marker::PhantomData;
 
+    use cgp::extra::handler::AsyncComputerComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::{CanComputeAsync, PromoteAsync};
     use cgp::prelude::*;
 
@@ -47,6 +50,7 @@ pub mod usage {
     pub mod sources {
         use core::marker::PhantomData;
 
+        use cgp::extra::handler::AsyncComputerComponent;
         use cgp::extra::handler::CanComputeAsync;
         use cgp::prelude::*;
 
@@ -100,6 +104,8 @@ pub mod usage {
 pub mod examples {
     use core::marker::PhantomData;
 
+    use cgp::extra::handler::AsyncComputer;
+    use cgp::extra::handler::AsyncComputerComponent;
     use cgp::extra::handler::CanComputeAsync;
     use cgp::prelude::*;
 

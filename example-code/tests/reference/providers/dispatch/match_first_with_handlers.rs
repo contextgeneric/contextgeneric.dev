@@ -10,6 +10,8 @@ pub mod examples {
         ExtractFirstFieldAndHandle, HandleFirstFieldValue, MatchFirstWithHandlers,
     };
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {
@@ -93,6 +95,8 @@ pub mod examples {
 pub mod when_to_use_it {
     use cgp::extra::dispatch::MatchFirstWithValueHandlers;
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {

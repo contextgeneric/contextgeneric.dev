@@ -49,8 +49,8 @@ Its attributes:
 
 ## Usage
 
-`ComputerRefComponent` is in the prelude. The provider trait `ComputerRef` and the consumer trait
-`CanComputeRef` are not, and are imported from `cgp::extra::handler`. The method borrows the input:
+`ComputerRefComponent`, the provider trait `ComputerRef`, and the consumer trait `CanComputeRef`
+are imported from `cgp::extra::handler`. The method borrows the input:
 
 ```rust
 fn compute_ref(&self, _code: PhantomData<Code>, input: &Input) -> Self::Output;
@@ -78,6 +78,7 @@ an owned input that dereferences to it:
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::{Computer, ComputerComponent, ComputerRefComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef, PromoteRef};
 
@@ -140,7 +141,7 @@ because the promotion asks `Double` for `u64` borrowed at every lifetime. The co
 that requirement:
 
 ```text
-   = note: required for `Double` to implement `for<'a> cgp::prelude::Computer<App, (), &'a u64>`
+   = note: required for `Double` to implement `for<'a> Computer<App, (), &'a u64>`
 ```
 
 The same applies to the `ComputerRefComponent` entry of the `PromoteComputer` bundle and to a

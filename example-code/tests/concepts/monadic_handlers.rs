@@ -24,8 +24,9 @@ pub mod plain_composition_is_wrong {}
 pub mod chaining_through_the_err_monad {
     #[test]
     fn the_first_error_becomes_the_output() {
-        use super::{ErrMonadic, Increment, PipeMonadic};
+        use cgp::extra::handler::Computer;
         use cgp::prelude::*;
+        use super::{ErrMonadic, Increment, PipeMonadic};
 
         let context = ();
         let code = PhantomData::<()>;
@@ -50,6 +51,7 @@ pub mod chaining_through_the_err_monad {
 
 /// ## The identity monad recovers plain composition
 pub mod the_identity_monad_recovers_plain_composition {
+    use cgp::extra::handler::Computer;
     use cgp::prelude::*;
 
     #[cgp_computer]

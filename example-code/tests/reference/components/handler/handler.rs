@@ -9,6 +9,9 @@ pub mod examples {
     use core::marker::PhantomData;
 
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
     use cgp::extra::handler::{CanHandle, Promote, PromoteAsync};
     use cgp::prelude::*;
 

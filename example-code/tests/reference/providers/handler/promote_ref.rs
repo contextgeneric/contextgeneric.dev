@@ -5,6 +5,9 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::ComputerRefComponent;
     use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef, PromoteRef};
     use cgp::prelude::*;
 

@@ -1,10 +1,10 @@
-error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>: IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>` is not satisfied
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:50:9
+error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>: IsProviderFor<HandlerComponent, App, ((), &'a Shape)>` is not satisfied
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:52:9
    |
-50 |         HandlerComponent: <'a> ((), &'a Shape),
+52 |         HandlerComponent: <'a> ((), &'a Shape),
    |         ^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-   = help: the trait `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>` is not implemented for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>`
+   = help: the trait `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>` is not implemented for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>`
 help: `MatchWithHandlersRef<Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
   --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:13:1
    |
@@ -15,7 +15,7 @@ help: `MatchWithHandlersRef<Handlers>` implements trait `IsProviderFor<Component
 17 | |     DispatchMatchers<Handlers>:
 18 | |         Computer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
 19 | |     Remainder: FinalizeExtract,
-   | |_______________________________^ `IsProviderFor<cgp::prelude::ComputerComponent, Context, (Code, &Input)>`
+   | |_______________________________^ `IsProviderFor<ComputerComponent, Context, (Code, &Input)>`
 ...
 29 | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> AsyncComputer<Context, Code, &'a Input>
 30 | |     for MatchWithHandlersRef<Handlers>
@@ -25,28 +25,28 @@ help: `MatchWithHandlersRef<Handlers>` implements trait `IsProviderFor<Component
 34 | |         AsyncComputer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
 35 | |     Remainder: FinalizeExtract,
    | |_______________________________^ `IsProviderFor<AsyncComputerComponent, Context, (Code, &Input)>`
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeAreaOfRef>>>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeAreaOfRef>>>` to implement `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>`
    = note: 1 redundant requirement hidden
-   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::HandlerComponent, ((), &'a Shape)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>`
+   = note: required for `App` to implement `CanUseComponent<HandlerComponent, ((), &'a Shape)>`
 note: required by a bound in `__CheckApp`
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:48:1
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:50:1
    |
-48 | / check_components! {
-49 | |     App {
-50 | |         HandlerComponent: <'a> ((), &'a Shape),
-51 | |     }
-52 | | }
+50 | / check_components! {
+51 | |     App {
+52 | |         HandlerComponent: <'a> ((), &'a Shape),
+53 | |     }
+54 | | }
    | |_^ required by this bound in `__CheckApp`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>: DelegateComponent<cgp::prelude::HandlerComponent>` is not satisfied
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:50:9
+error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>: DelegateComponent<HandlerComponent>` is not satisfied
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:52:9
    |
-50 |         HandlerComponent: <'a> ((), &'a Shape),
+52 |         HandlerComponent: <'a> ((), &'a Shape),
    |         ^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-   = help: the trait `DelegateComponent<cgp::prelude::HandlerComponent>` is not implemented for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>`
+   = help: the trait `DelegateComponent<HandlerComponent>` is not implemented for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>`
    = help: the following other types implement trait `DelegateComponent<Key>`:
              App
              BuildAndMergeOutputs<Output, Handlers>
@@ -58,17 +58,17 @@ error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<S
              PromoteComputer<Provider>
            and $N others
    = note: required for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>` to implement `Handler<App, (), &'a Shape>`
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeAreaOfRef>>>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeAreaOfRef>>>` to implement `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>`
    = note: 1 redundant requirement hidden
-   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::HandlerComponent, ((), &'a Shape)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>`
+   = note: required for `App` to implement `CanUseComponent<HandlerComponent, ((), &'a Shape)>`
 note: required by a bound in `__CheckApp`
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:48:1
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_borrowed_fallible_slot.rs:50:1
    |
-48 | / check_components! {
-49 | |     App {
-50 | |         HandlerComponent: <'a> ((), &'a Shape),
-51 | |     }
-52 | | }
+50 | / check_components! {
+51 | |     App {
+52 | |         HandlerComponent: <'a> ((), &'a Shape),
+53 | |     }
+54 | | }
    | |_^ required by this bound in `__CheckApp`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -5,6 +5,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::extra::handler::Computer;
     use cgp::extra::handler::PipeHandlers;
     use cgp::extra::monad::monadic::ident::IdentMonadic;
     use cgp::extra::monad::monadic::ok::BindOk;

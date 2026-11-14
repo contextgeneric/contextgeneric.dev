@@ -11,6 +11,8 @@
 pub mod usage {
     use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlersRef};
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {
@@ -80,6 +82,8 @@ pub mod usage {
 pub mod examples {
     use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {
@@ -159,6 +163,10 @@ pub mod examples {
 pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanHandle, CanTryCompute, Promote, PromoteAsync};
     use cgp::prelude::*;
 

@@ -54,8 +54,8 @@ Its attributes:
 
 ## Usage
 
-`TryComputer` and `TryComputerComponent` are in the prelude. The consumer trait `CanTryCompute` is
-not, and is imported from `cgp::extra::handler`. The consumer method mirrors `compute` but returns a
+`TryComputer`, `TryComputerComponent`, and the consumer trait `CanTryCompute` are imported from
+`cgp::extra::handler`. The consumer method mirrors `compute` but returns a
 `Result`:
 
 ```rust
@@ -94,6 +94,7 @@ context's error:
 ```rust
 use core::marker::PhantomData;
 use core::num::ParseIntError;
+use cgp::extra::handler::{TryComputer, TryComputerComponent};
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::RaiseFrom;

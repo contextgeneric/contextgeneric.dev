@@ -240,8 +240,8 @@ subtle.
 ## Under the hood
 
 `#[cgp_provider]` emits two items: your impl, passed through unchanged, and a marker impl derived from
-it. From this input, where `ComputerRef` is imported from `cgp::extra::handler` and
-`ComputerRefComponent` comes from the prelude:
+it. From this input, where `ComputerRef` and `ComputerRefComponent` are imported from
+`cgp::extra::handler`:
 
 ```rust
 #[cgp_provider]

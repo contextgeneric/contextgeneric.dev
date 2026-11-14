@@ -43,6 +43,7 @@ delivers, forwarding `(Value, Args)`. Both implement `Computer` and `AsyncComput
 `HandleFieldValue`:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
 use cgp::extra::handler::CanCompute;

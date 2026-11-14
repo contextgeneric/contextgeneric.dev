@@ -47,6 +47,7 @@ builder whose providers are handlers is wired to `HandlerComponent`.
 The same two subsystems as on the [`BuildAndMerge`](build_and_merge.md) page, listed bare:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::BuildAndMergeOutputs;
 use cgp::extra::handler::CanCompute;

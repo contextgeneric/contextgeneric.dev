@@ -7,6 +7,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::core::component::UseContext;
     use cgp::prelude::*;
 
     #[cgp_component(Encoder)]

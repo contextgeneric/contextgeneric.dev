@@ -7,7 +7,9 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::HandlerComponent;
     use cgp::extra::handler::PromoteTryComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanHandle, CanTryCompute};
     use cgp::prelude::*;
 
@@ -52,7 +54,12 @@ pub mod examples {
 /// `Result`; the async one keeps the `Result` as its output.
 pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::AsyncComputerComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
     use cgp::extra::handler::PromoteTryComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanComputeAsync, PromoteAsync, TryPromote};
     use cgp::prelude::*;
 

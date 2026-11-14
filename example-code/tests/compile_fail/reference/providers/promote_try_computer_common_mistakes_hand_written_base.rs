@@ -1,5 +1,7 @@
 use cgp::core::error::ErrorTypeProviderComponent;
+use cgp::extra::handler::ComputerComponent;
 use cgp::extra::handler::PromoteTryComputer;
+use cgp::extra::handler::{Computer, HandlerComponent};
 use cgp::prelude::*;
 
 #[cgp_new_provider]

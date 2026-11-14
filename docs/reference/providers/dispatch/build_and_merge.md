@@ -52,6 +52,7 @@ the provider's error.
 Two subsystems each build their part of an `App`:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{BuildAndMerge, BuildWithHandlers};
 use cgp::extra::handler::CanCompute;

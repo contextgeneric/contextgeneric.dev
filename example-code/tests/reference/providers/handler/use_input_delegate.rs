@@ -5,6 +5,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::{CanCompute, UseInputDelegate};
     use cgp::prelude::*;
 

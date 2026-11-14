@@ -9,6 +9,7 @@ pub mod examples {
         DowncastAndHandle, ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers,
     };
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     pub struct Circle {

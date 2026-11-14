@@ -50,6 +50,7 @@ delegate_components! {
 Both directions on one context, each from a hand-written provider:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent, ComputerRefComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef, PromoteRef};
 

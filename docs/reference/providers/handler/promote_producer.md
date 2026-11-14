@@ -52,6 +52,9 @@ A `#[cgp_producer]` function answers the producer and two input-taking members:
 
 ```rust
 use cgp::extra::handler::{CanCompute, CanProduce, CanTryCompute, PromoteProducer};
+use cgp::extra::handler::{
+    Computer, ComputerComponent, Producer, ProducerComponent, TryComputer, TryComputerComponent,
+};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 
@@ -133,7 +136,7 @@ producer not wired to the bundle has none, so wiring `TryComputerComponent` to
 `PromoteProducer<MagicNumber>` fails at the check:
 
 ```text
-error[E0277]: the trait bound `MagicNumber: DelegateComponent<cgp::prelude::ComputerComponent>` is not satisfied
+error[E0277]: the trait bound `MagicNumber: DelegateComponent<ComputerComponent>` is not satisfied
 ...
    = note: required for `MagicNumber` to implement `Computer<App, (), ()>`
 ```

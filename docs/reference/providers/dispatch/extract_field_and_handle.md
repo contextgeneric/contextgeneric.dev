@@ -55,6 +55,7 @@ Two arms called by hand, to show the `Result` a matcher's loop passes between th
 
 ```rust
 use cgp::core::field::traits::HasExtractor;
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue};
 

@@ -1,7 +1,9 @@
 use core::marker::PhantomData;
 
 use cgp::core::error::ErrorTypeProviderComponent;
+use cgp::extra::handler::ProducerComponent;
 use cgp::extra::handler::PromoteProducer;
+use cgp::extra::handler::{ComputerComponent, Producer, TryComputerComponent};
 use cgp::prelude::*;
 
 #[cgp_new_provider]

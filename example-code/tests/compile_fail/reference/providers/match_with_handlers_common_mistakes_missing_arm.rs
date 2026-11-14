@@ -1,4 +1,5 @@
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 
 pub struct Circle {

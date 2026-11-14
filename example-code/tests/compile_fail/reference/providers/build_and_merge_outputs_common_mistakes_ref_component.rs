@@ -1,4 +1,5 @@
 use cgp::extra::dispatch::BuildAndMergeOutputs;
+use cgp::extra::handler::ComputerRefComponent;
 use cgp::prelude::*;
 
 #[derive(CgpData)]

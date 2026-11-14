@@ -48,6 +48,7 @@ A pipeline of three fallible computers, wired under `ErrMonadic` and called thro
 trait:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::CanCompute;
 use cgp::extra::monad::monadic::err::ErrMonadic;
@@ -89,6 +90,7 @@ under `OkMonadicTrans<ErrMonadic>` the err monad handles the outer `Result` whil
 the one inside it, so the pipeline stops on an outer `Err` or an inner `Ok`:
 
 ```rust
+use cgp::extra::handler::{Computer, TryComputer};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::monad::monadic::err::ErrMonadic;

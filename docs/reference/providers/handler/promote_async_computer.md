@@ -53,6 +53,7 @@ An async `#[cgp_computer]` function is the base, and the bundle answers `handle`
 
 ```rust
 use cgp::extra::handler::{CanComputeAsync, CanHandle, PromoteAsyncComputer};
+use cgp::extra::handler::{AsyncComputer, AsyncComputerComponent, Handler, HandlerComponent};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 

@@ -56,6 +56,7 @@ have an error type.
 An `AppBuilder` context holds the configuration, and two steps build an `App` from it:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{BuildAndMerge, BuildAndSetField, BuildWithHandlers};
 use cgp::extra::handler::CanCompute;

@@ -201,6 +201,7 @@ pub mod examples {
 /// context's own wiring. The page names `IterSum` without defining it; here it sums the areas of
 /// a context's shapes, reading each through the context's wiring for that shape.
 pub mod when_to_use_it {
+    use cgp::core::component::UseContext;
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]

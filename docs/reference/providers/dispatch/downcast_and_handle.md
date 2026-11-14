@@ -53,6 +53,7 @@ of its variants must be a variant of the input with the same name and payload ty
 Counting the corners of a shape, with the two quadrilaterals handled as one group:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{
     DowncastAndHandle, ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers,

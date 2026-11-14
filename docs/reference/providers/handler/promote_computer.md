@@ -60,6 +60,10 @@ One `#[cgp_computer]` function answers four members of the family through the bu
 
 ```rust
 use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute, PromoteComputer};
+use cgp::extra::handler::{
+    AsyncComputer, AsyncComputerComponent, Computer, ComputerComponent, Handler, HandlerComponent,
+    TryComputer, TryComputerComponent,
+};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 
@@ -158,7 +162,7 @@ wired to the bundle lacks, so the check fails:
 error[E0277]: the trait bound `Double: DelegateComponent<TryComputerComponent>` is not satisfied
 ...
    = note: required for `Double` to implement `TryComputer<App, (), u64>`
-   = note: required for `PromoteAsync<Double>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), u64)>`
+   = note: required for `PromoteAsync<Double>` to implement `IsProviderFor<HandlerComponent, App, ((), u64)>`
 ```
 
 Spell the two steps out as `PromoteAsync<Promote<Double>>`, or write the base with

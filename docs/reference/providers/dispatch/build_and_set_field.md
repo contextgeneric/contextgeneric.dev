@@ -51,6 +51,7 @@ error type and return the provider's error.
 The second step reads the field the first one set:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{BuildAndSetField, BuildWithHandlers};
 use cgp::extra::handler::CanCompute;

@@ -44,6 +44,7 @@ A fallback chain built by hand: `Classify` accepts a small value and hands a lar
 and the bind step runs `Halve` only on that `Err`:
 
 ```rust
+use cgp::extra::handler::Computer;
 use cgp::prelude::*;
 use cgp::extra::handler::PipeHandlers;
 use cgp::extra::monad::monadic::ident::IdentMonadic;

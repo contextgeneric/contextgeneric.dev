@@ -48,8 +48,8 @@ program's structure without preventing its handlers from receiving runtime input
 ## Providers give syntax its behavior
 
 A provider implements one syntax form and asks the context to interpret its subexpressions.
-This addition provider assumes the `CanCompute` consumer trait is imported from
-`cgp::extra::handler`; the `Computer` provider trait comes from the prelude:
+This addition provider assumes the `CanCompute` consumer trait, the `Computer` provider trait,
+and its `ComputerComponent` key are imported from `cgp::extra::handler`:
 
 ```rust
 #[cgp_impl(new EvalAdd)]

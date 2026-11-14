@@ -45,6 +45,7 @@ Both directions on one context, each from a hand-written provider:
 
 ```rust
 use core::num::ParseIntError;
+use cgp::extra::handler::{Computer, ComputerComponent, TryComputer, TryComputerComponent};
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::{DebugError, RaiseFrom};

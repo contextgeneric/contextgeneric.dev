@@ -54,6 +54,7 @@ A fallible `#[cgp_computer]` function answers the fallible members through the b
 
 ```rust
 use cgp::extra::handler::{CanHandle, CanTryCompute, PromoteTryComputer};
+use cgp::extra::handler::{Handler, HandlerComponent, TryComputer, TryComputerComponent};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 
@@ -138,7 +139,7 @@ so they serve any `Computer` returning `Result`; the async entry keeps the `Resu
 error[E0277]: the trait bound `CheckedDouble: DelegateComponent<TryComputerComponent>` is not satisfied
 ...
    = note: required for `CheckedDouble` to implement `TryComputer<App, (), u64>`
-   = note: required for `PromoteAsync<CheckedDouble>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), u64)>`
+   = note: required for `PromoteAsync<CheckedDouble>` to implement `IsProviderFor<HandlerComponent, App, ((), u64)>`
 ```
 
 Write the base with `#[cgp_computer]`, or wire the handler slot as

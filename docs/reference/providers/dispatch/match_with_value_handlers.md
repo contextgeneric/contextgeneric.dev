@@ -82,6 +82,7 @@ A context that computes each shape directly, and a `Shape` enum by matching it:
 
 ```rust
 use cgp::extra::dispatch::MatchWithValueHandlers;
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::CanCompute;
 
@@ -221,7 +222,7 @@ delegate_components! {
 whose field list is a product, has no list and no extractor. Wiring a `Scene` struct fails with:
 
 ```text
-error[E0277]: the trait bound `MatchWithHandlers<_>: cgp::prelude::Computer<App, (), Scene>` is not satisfied
+error[E0277]: the trait bound `MatchWithHandlers<_>: Computer<App, (), Scene>` is not satisfied
 ```
 
 Handle a struct's fields one by one instead, or build a record with the
@@ -233,7 +234,7 @@ matchers behind them implement only `Computer` and `AsyncComputer`, so wiring
 `HandlerComponent: MatchWithValueHandlersRef<ComputeAreaOfRef>` fails at the check:
 
 ```text
-   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), &'a Shape)>`
+   = note: required for `MatchWithValueHandlersRef<ComputeAreaOfRef>` to implement `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>`
 ```
 
 The owned `MatchWithValueHandlers` has the same limit. Wire the matcher to `ComputerComponent` or

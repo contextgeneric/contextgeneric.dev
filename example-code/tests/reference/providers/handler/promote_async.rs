@@ -9,6 +9,12 @@ pub mod examples {
 
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::{DebugError, RaiseFrom};
+    use cgp::extra::handler::AsyncComputerComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
+    use cgp::extra::handler::TryComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanComputeAsync, CanHandle, PromoteAsync};
     use cgp::prelude::*;
 

@@ -49,6 +49,7 @@ A pipeline of field-reading computers over a context, where `Multiply<Field>` an
 a factor or an addend from a context field:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::{CanCompute, PipeHandlers};
 

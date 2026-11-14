@@ -37,7 +37,7 @@ position is never read.
 
 ## Usage
 
-`UseContext` is in the prelude, so `use cgp::prelude::*;` is enough. It takes no type parameter and
+`UseContext` is imported from `cgp::core::component`. It takes no type parameter and
 appears in two places. Most often it is a [higher-order provider](/docs/reference/glossary#higher-order-provider)'s default inner provider, written in
 the provider's struct definition:
 
@@ -62,6 +62,7 @@ The idiomatic use is as the default inner provider of a higher-order provider. `
 `UseContext`, so the elements are encoded by whatever the context already wires for their type:
 
 ```rust
+use cgp::core::component::UseContext;
 use cgp::prelude::*;
 
 #[cgp_component(Encoder)]

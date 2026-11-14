@@ -1,4 +1,5 @@
 use cgp::extra::dispatch::{BuildAndMerge, BuildWithHandlers};
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 
 #[derive(CgpData)]

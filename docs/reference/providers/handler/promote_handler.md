@@ -55,6 +55,7 @@ An async `#[cgp_computer]` function returning `Result` answers `handle` through 
 
 ```rust
 use cgp::extra::handler::{CanHandle, PromoteHandler};
+use cgp::extra::handler::{Handler, HandlerComponent};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 

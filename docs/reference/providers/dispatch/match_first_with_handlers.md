@@ -54,6 +54,7 @@ take the same list: `MatchFirstWithHandlersRef<Handlers>` over `(&Input, Args)` 
 A `Shape` enum whose area is scaled by a factor passed with it:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{
     ExtractFirstFieldAndHandle, HandleFirstFieldValue, MatchFirstWithHandlers,

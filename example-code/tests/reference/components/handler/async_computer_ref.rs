@@ -11,6 +11,7 @@
 pub mod usage {
     use core::marker::PhantomData;
 
+    use cgp::extra::handler::AsyncComputerComponent;
     use cgp::extra::handler::AsyncComputerRef;
     use cgp::extra::handler::AsyncComputerRefComponent;
     use cgp::extra::handler::{CanComputeAsync, PromoteRef};

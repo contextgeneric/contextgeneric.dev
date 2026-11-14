@@ -7,6 +7,12 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
+    use cgp::extra::handler::Producer;
+    use cgp::extra::handler::ProducerComponent;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanCompute, CanHandle, CanTryCompute, Promote, PromoteAsync};
     use cgp::prelude::*;
 

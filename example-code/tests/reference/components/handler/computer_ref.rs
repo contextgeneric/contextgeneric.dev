@@ -9,6 +9,8 @@
 pub mod examples {
     use core::marker::PhantomData;
 
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::ComputerRefComponent;
     use cgp::extra::handler::{CanCompute, CanComputeRef, ComputerRef, PromoteRef};
     use cgp::prelude::*;
 
@@ -59,6 +61,7 @@ pub mod common_mistakes {
     use core::marker::PhantomData;
 
     use cgp::extra::handler::CanComputeRef;
+    use cgp::extra::handler::ComputerRefComponent;
     use cgp::prelude::*;
 
     #[cgp_computer]

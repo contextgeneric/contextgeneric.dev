@@ -235,6 +235,7 @@ pub mod declaring_the_provider_struct_separately {
     pub mod defaulted_inner_provider {
         use core::marker::PhantomData;
 
+        use cgp::core::component::UseContext;
         use cgp::prelude::*;
 
         #[cgp_component(AreaCalculator)]

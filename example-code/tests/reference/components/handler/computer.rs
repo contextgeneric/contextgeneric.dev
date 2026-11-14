@@ -12,6 +12,8 @@ pub mod usage {
     use core::marker::PhantomData;
 
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     #[cgp_new_provider]
@@ -53,6 +55,8 @@ pub mod usage {
         use core::marker::PhantomData;
 
         use cgp::extra::handler::CanCompute;
+        use cgp::extra::handler::Computer;
+        use cgp::extra::handler::ComputerComponent;
         use cgp::prelude::*;
 
         #[cgp_new_provider]
@@ -102,7 +106,10 @@ pub mod examples {
     use core::marker::PhantomData;
 
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::PromoteComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanCompute, CanTryCompute};
     use cgp::prelude::*;
 
@@ -150,6 +157,8 @@ pub mod common_mistakes {
     use core::marker::PhantomData;
 
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     #[cgp_new_provider]

@@ -6,6 +6,8 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::AsyncComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
     use cgp::extra::handler::PromoteAsyncComputer;
     use cgp::extra::handler::{CanComputeAsync, CanHandle};
     use cgp::prelude::*;
@@ -49,6 +51,8 @@ pub mod examples {
 /// `AsyncComputerRefComponent` is `PromoteRef<P>`, one step from the base, so a hand-written
 /// `AsyncComputer` whose input is a borrow answers it.
 pub mod under_the_hood {
+    use cgp::extra::handler::AsyncComputer;
+    use cgp::extra::handler::AsyncComputerComponent;
     use cgp::extra::handler::AsyncComputerRefComponent;
     use cgp::extra::handler::CanComputeAsyncRef;
     use cgp::extra::handler::PromoteAsyncComputer;

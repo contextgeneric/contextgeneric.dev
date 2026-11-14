@@ -75,6 +75,7 @@ All three implement `Computer` and `AsyncComputer`, and nothing else.
 A `Shape` enum dispatched to one area provider with an impl per payload type:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
 use cgp::extra::handler::CanCompute;
@@ -219,10 +220,10 @@ error[E0277]: the trait bound `__PartialShape<IsVoid, IsPresent>: FinalizeExtrac
 ```text
 help: `MatchWithHandlers<Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
 ...
-   | |_______________________________^ `IsProviderFor<cgp::prelude::ComputerComponent, Context, (Code, Input)>`
+   | |_______________________________^ `IsProviderFor<ComputerComponent, Context, (Code, Input)>`
 ...
    | |_______________________________^ `IsProviderFor<AsyncComputerComponent, Context, (Code, Input)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::HandlerComponent, ((), Shape)>`
+   = note: required for `App` to implement `CanUseComponent<HandlerComponent, ((), Shape)>`
 ```
 
 Lift it with the handler promotions instead, as `TryComputerComponent: Promote<AreaMatcher>` and

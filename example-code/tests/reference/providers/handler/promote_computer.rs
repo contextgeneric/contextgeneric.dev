@@ -8,7 +8,11 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::AsyncComputerComponent;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::HandlerComponent;
     use cgp::extra::handler::PromoteComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanCompute, CanComputeAsync, CanHandle, CanTryCompute};
     use cgp::prelude::*;
 
@@ -63,6 +67,9 @@ pub mod examples {
 /// whose input is a borrow answers it.
 pub mod under_the_hood {
     use cgp::extra::handler::CanComputeRef;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::ComputerRefComponent;
     use cgp::extra::handler::PromoteComputer;
     use cgp::prelude::*;
 
@@ -101,7 +108,11 @@ pub mod under_the_hood {
 /// `AsyncComputerComponent` to `PromoteAsync`, each of which needs only the `Computer`.
 pub mod common_mistakes {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::AsyncComputerComponent;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::PromoteComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::prelude::*;
 
     #[cgp_new_provider]

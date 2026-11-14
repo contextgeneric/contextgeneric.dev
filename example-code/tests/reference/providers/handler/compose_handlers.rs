@@ -4,6 +4,7 @@
 
 /// ## Examples
 pub mod examples {
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::{CanCompute, ComposeHandlers};
     use cgp::prelude::*;
 

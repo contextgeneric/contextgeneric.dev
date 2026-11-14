@@ -42,6 +42,7 @@ One `?`-style bind step built by hand, which is what `PipeMonadic` composes for 
 under `ErrMonadic`:
 
 ```rust
+use cgp::extra::handler::Computer;
 use cgp::prelude::*;
 use cgp::extra::handler::PipeHandlers;
 use cgp::extra::monad::monadic::err::BindErr;

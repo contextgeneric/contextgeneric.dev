@@ -49,9 +49,10 @@ Its attributes:
 
 ## Usage
 
-`Computer` and `ComputerComponent` are in the prelude. The consumer trait `CanCompute` is not, and
-is imported from `cgp::extra::handler`. The consumer method takes the context, a `PhantomData<Code>`
-naming which computation is wanted, and the `Input` by value, and returns the associated `Output`:
+`Computer`, `ComputerComponent`, and the consumer trait `CanCompute` are all imported from
+`cgp::extra::handler`, since the prelude leaves out the handler family. The consumer method takes
+the context, a `PhantomData<Code>` naming which computation is wanted, and the `Input` by value, and
+returns the associated `Output`:
 
 ```rust
 fn compute(&self, _code: PhantomData<Code>, input: Input) -> Self::Output;
@@ -109,6 +110,7 @@ a fallible computer:
 ```rust
 use core::marker::PhantomData;
 use cgp::extra::handler::{CanCompute, CanTryCompute, PromoteComputer};
+use cgp::extra::handler::{Computer, ComputerComponent, TryComputer, TryComputerComponent};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 
@@ -172,19 +174,18 @@ context.
 ## Common Mistakes
 
 **Calling `compute` on a concrete context by its bare name is ambiguous.** A context that delegates
-`ComputerComponent` also implements the `Computer` provider trait, which the prelude brings into
-scope, so once `CanCompute` is imported as well, `App::compute(&App, PhantomData::<()>, 21)` has two
-candidates:
+`ComputerComponent` also implements the `Computer` provider trait, so in a module that imports both
+`CanCompute` and `Computer`, `App::compute(&App, PhantomData::<()>, 21)` has two candidates:
 
 ```text
 error[E0034]: multiple applicable items in scope
-  --> src/main.rs:24:18
+  --> src/main.rs:25:18
    |
-24 |     let _ = App::compute(&App, PhantomData::<()>, 21);
+25 |     let _ = App::compute(&App, PhantomData::<()>, 21);
    |                  ^^^^^^^ multiple `compute` found
    |
    = note: candidate #1 is defined in an impl of the trait `CanCompute` for the type `__Context__`
-   = note: candidate #2 is defined in an impl of the trait `cgp::prelude::Computer` for the type `__Provider__`
+   = note: candidate #2 is defined in an impl of the trait `Computer` for the type `__Provider__`
 ```
 
 Use method syntax, as in `App.compute(PhantomData::<()>, 21)`, since only the consumer trait takes

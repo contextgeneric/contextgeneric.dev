@@ -5,6 +5,7 @@
 
 /// ## Usage
 pub mod usage {
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::{CanCompute, ReturnInput};
     use cgp::prelude::*;
 
@@ -24,6 +25,7 @@ pub mod usage {
 
 /// ## Examples
 pub mod examples {
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::handler::{CanCompute, PipeHandlers, ReturnInput};
     use cgp::prelude::*;
 

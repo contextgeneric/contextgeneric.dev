@@ -7,6 +7,7 @@
 /// ## Examples
 pub mod examples {
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::extra::monad::monadic::err::ErrMonadic;
     use cgp::extra::monad::providers::PipeMonadic;
     use cgp::prelude::*;
@@ -45,6 +46,8 @@ pub mod examples {
     /// handlers under plain `OkMonadic` through `try_compute`.
     pub mod stacked {
         use cgp::core::error::ErrorTypeProviderComponent;
+        use cgp::extra::handler::Computer;
+        use cgp::extra::handler::TryComputer;
         use cgp::extra::monad::monadic::err::ErrMonadic;
         use cgp::extra::monad::monadic::ok::{OkMonadic, OkMonadicTrans};
         use cgp::extra::monad::providers::PipeMonadic;

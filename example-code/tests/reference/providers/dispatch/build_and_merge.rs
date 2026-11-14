@@ -7,6 +7,8 @@
 pub mod examples {
     use cgp::extra::dispatch::{BuildAndMerge, BuildWithHandlers};
     use cgp::extra::handler::CanCompute;
+    use cgp::extra::handler::Computer;
+    use cgp::extra::handler::ComputerComponent;
     use cgp::prelude::*;
 
     #[derive(Debug, PartialEq, CgpData)]

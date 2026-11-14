@@ -42,11 +42,12 @@ by-reference sibling, a component of its own whose method takes `&Input`:
 such sibling, because it has no input to borrow, and no async one either. The variant pages lean on
 their base member for the shared model.
 
-The prelude carries the provider traits `Computer`, `AsyncComputer`, `TryComputer`, `Handler`, and
-`Producer`, with their wiring keys and `ComputerRefComponent`. The consumer traits (`CanCompute`,
-`CanTryCompute`, `CanHandle`, `CanProduce`, and their siblings), the other by-reference provider
-traits and keys, the promotion bundles, and the one-step promotion providers are imported from
-`cgp::extra::handler`.
+Every member of the family is imported from `cgp::extra::handler`: the consumer traits
+(`CanCompute`, `CanTryCompute`, `CanHandle`, `CanProduce`, and their siblings), the provider traits,
+their wiring keys, the promotion bundles, and the one-step promotion providers. The prelude carries
+only the macros that define handlers, `#[cgp_computer]`, `#[cgp_producer]`, and
+`#[cgp_auto_dispatch]`. A provider written with `#[cgp_impl]` on `Computer` also needs
+`ComputerComponent` in scope, because the macro names the key the trait belongs to.
 
 Two wiring details apply to every member. Because a context that delegates a member also implements
 its provider trait, calling a method on a concrete context by its bare name, as

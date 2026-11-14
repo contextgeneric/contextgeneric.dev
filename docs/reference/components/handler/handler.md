@@ -56,8 +56,8 @@ Its attributes:
 
 ## Usage
 
-`Handler` and `HandlerComponent` are in the prelude. The consumer trait `CanHandle` is not, and is
-imported from `cgp::extra::handler`. The consumer method is `async` and returns a `Result` in the
+`Handler`, `HandlerComponent`, and the consumer trait `CanHandle` are imported from
+`cgp::extra::handler`. The consumer method is `async` and returns a `Result` in the
 context's error type:
 
 ```rust
@@ -93,6 +93,7 @@ lifted in two steps:
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::{Computer, ComputerComponent, Handler, HandlerComponent};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanHandle, Promote, PromoteAsync};
@@ -166,7 +167,7 @@ promote it. The simpler provider stays usable in the positions a `Handler` canno
 error[E0277]: the trait bound `Double: DelegateComponent<TryComputerComponent>` is not satisfied
 ...
    = note: required for `Double` to implement `TryComputer<App, (), u64>`
-   = note: required for `PromoteAsync<Double>` to implement `IsProviderFor<cgp::prelude::HandlerComponent, App, ((), u64)>`
+   = note: required for `PromoteAsync<Double>` to implement `IsProviderFor<HandlerComponent, App, ((), u64)>`
 ```
 
 Spell both steps as `PromoteAsync<Promote<Double>>`, or write the provider with

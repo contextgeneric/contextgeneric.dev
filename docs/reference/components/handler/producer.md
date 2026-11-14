@@ -48,8 +48,8 @@ Its attributes:
 
 ## Usage
 
-`Producer` and `ProducerComponent` are in the prelude. The consumer trait `CanProduce` is not, and
-is imported from `cgp::extra::handler`. The consumer method takes only the context and a `Code` tag,
+`Producer`, `ProducerComponent`, and the consumer trait `CanProduce` are imported from
+`cgp::extra::handler`. The consumer method takes only the context and a `Code` tag,
 with no `Input`:
 
 ```rust
@@ -91,6 +91,7 @@ A producer wired into a context and invoked directly:
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::{Producer, ProducerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::CanProduce;
 
@@ -148,10 +149,10 @@ members wrap the whole `Result` in `Ok`, so an `Err` short-circuits nothing down
 for the hand-written `MagicNumber` above, fails at the check:
 
 ```text
-error[E0277]: the trait bound `MagicNumber: DelegateComponent<cgp::prelude::ComputerComponent>` is not satisfied
+error[E0277]: the trait bound `MagicNumber: DelegateComponent<ComputerComponent>` is not satisfied
 ...
    = note: required for `MagicNumber` to implement `Computer<App, (), ()>`
-   = note: required for `Promote<MagicNumber>` to implement `IsProviderFor<cgp::prelude::TryComputerComponent, App, ((), ())>`
+   = note: required for `Promote<MagicNumber>` to implement `IsProviderFor<TryComputerComponent, App, ((), ())>`
 ```
 
 Write the producer with [`#[cgp_producer]`](../../macros/cgp_producer.md), which wires it to

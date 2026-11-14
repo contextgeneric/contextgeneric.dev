@@ -1,28 +1,28 @@
 error[E0277]: the trait bound `__PartialShape<IsVoid, IsPresent>: FinalizeExtract` is not satisfied
-  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:51:9
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:52:9
    |
-51 |         ComputerComponent: ((), Shape),
+52 |         ComputerComponent: ((), Shape),
    |         ^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `FinalizeExtract` is not implemented for `__PartialShape<IsVoid, IsPresent>`
-  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:14:1
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:15:1
    |
-14 | pub enum Shape {
+15 | pub enum Shape {
    | ^^^^^^^^^^^^^^
 help: the trait `FinalizeExtract` is implemented for `__PartialShape<IsVoid, IsVoid>`
-  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:14:10
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:15:10
    |
-14 | pub enum Shape {
+15 | pub enum Shape {
    |          ^^^^^
-   = note: required for `MatchWithHandlers<Cons<ExtractFieldAndHandle<cgp::macro_prelude::Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeArea>>, Nil>>` to implement `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), Shape)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerComponent, ((), Shape)>`
+   = note: required for `MatchWithHandlers<Cons<ExtractFieldAndHandle<cgp::macro_prelude::Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeArea>>, Nil>>` to implement `IsProviderFor<ComputerComponent, App, ((), Shape)>`
+   = note: required for `App` to implement `CanUseComponent<ComputerComponent, ((), Shape)>`
 note: required by a bound in `__CheckApp`
-  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:49:1
+  --> tests/compile_fail/reference/providers/match_with_handlers_common_mistakes_missing_arm.rs:50:1
    |
-49 | / check_components! {
-50 | |     App {
-51 | |         ComputerComponent: ((), Shape),
-52 | |     }
-53 | | }
+50 | / check_components! {
+51 | |     App {
+52 | |         ComputerComponent: ((), Shape),
+53 | |     }
+54 | | }
    | |_^ required by this bound in `__CheckApp`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

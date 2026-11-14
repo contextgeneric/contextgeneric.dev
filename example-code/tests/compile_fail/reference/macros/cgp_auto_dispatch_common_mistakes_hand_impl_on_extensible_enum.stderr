@@ -7,4 +7,4 @@ error[E0119]: conflicting implementations of trait `HasArea` for type `Shape`
 25 | impl HasArea for Shape {
    | ---------------------- first implementation here
    |
-   = note: upstream crates may add a new impl of trait `cgp::macro_prelude::IsProviderFor<cgp::prelude::ComputerComponent, (), ((), &'__a__ Shape)>` for type `cgp::macro_prelude::MatchWithValueHandlersRef<ComputeArea>` in future versions
+   = note: upstream crates may add a new impl of trait `cgp::macro_prelude::IsProviderFor<cgp::macro_prelude::ComputerComponent, (), ((), &'__a__ Shape)>` for type `cgp::macro_prelude::MatchWithValueHandlersRef<ComputeArea>` in future versions

@@ -43,6 +43,10 @@ A context serves both async members from hand-written synchronous providers:
 
 ```rust
 use core::num::ParseIntError;
+use cgp::extra::handler::{
+    AsyncComputer, AsyncComputerComponent, Computer, ComputerComponent, Handler, HandlerComponent,
+    TryComputer, TryComputerComponent,
+};
 use cgp::prelude::*;
 use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
 use cgp::extra::error::{DebugError, RaiseFrom};

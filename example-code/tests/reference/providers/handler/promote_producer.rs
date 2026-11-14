@@ -8,7 +8,10 @@
 /// ## Examples
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::ProducerComponent;
     use cgp::extra::handler::PromoteProducer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanCompute, CanProduce, CanTryCompute};
     use cgp::prelude::*;
 

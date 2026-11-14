@@ -1,10 +1,10 @@
-error[E0277]: the trait bound `MatchWithHandlers<_>: cgp::prelude::Computer<App, (), Scene>` is not satisfied
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:48:9
+error[E0277]: the trait bound `MatchWithHandlers<_>: Computer<App, (), Scene>` is not satisfied
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:49:9
    |
-48 |         ComputerComponent: ((), Scene),
-   |         ^^^^^^^^^^^^^^^^^ the trait `cgp::prelude::Computer<App, (), Scene>` is not implemented for `MatchWithHandlers<_>`
+49 |         ComputerComponent: ((), Scene),
+   |         ^^^^^^^^^^^^^^^^^ the trait `Computer<App, (), Scene>` is not implemented for `MatchWithHandlers<_>`
    |
-help: the trait `cgp::prelude::Computer<Context, Code, Input>` is conditionally implemented for `MatchWithHandlers<Handlers>`
+help: the trait `Computer<Context, Code, Input>` is conditionally implemented for `MatchWithHandlers<Handlers>`
   --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers.rs:18:1
    |
 18 | / impl<Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, Input>
@@ -16,23 +16,23 @@ help: the trait `cgp::prelude::Computer<Context, Code, Input>` is conditionally 
 23 | |         Computer<Context, Code, Input::Extractor, Output = Result<Output, Remainder>>,
 24 | |     Remainder: FinalizeExtract,
    | |_______________________________^
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>` to implement `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), Scene)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerComponent, ((), Scene)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>` to implement `IsProviderFor<ComputerComponent, App, ((), Scene)>`
+   = note: required for `App` to implement `CanUseComponent<ComputerComponent, ((), Scene)>`
 note: required by a bound in `__CheckApp`
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:46:1
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:47:1
    |
-46 | / check_components! {
-47 | |     App {
-48 | |         ComputerComponent: ((), Scene),
-49 | |     }
-50 | | }
+47 | / check_components! {
+48 | |     App {
+49 | |         ComputerComponent: ((), Scene),
+50 | |     }
+51 | | }
    | |_^ required by this bound in `__CheckApp`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `Cons<cgp::prelude::Field<Symbol<6, cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, Circle>, Cons<cgp::prelude::Field<Symbol<9, cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, Rectangle>, Nil>>: dispatch::providers::matchers::to_field_handlers::ToFieldHandlers<dispatch::providers::matchers::to_field_handlers::MapExtractFieldAndHandle<HandleFieldValue<ComputeArea>>>` is not satisfied
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:48:9
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:49:9
    |
-48 |         ComputerComponent: ((), Scene),
+49 |         ComputerComponent: ((), Scene),
    |         ^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
    = help: the trait `dispatch::providers::matchers::to_field_handlers::ToFieldHandlers<dispatch::providers::matchers::to_field_handlers::MapExtractFieldAndHandle<HandleFieldValue<ComputeArea>>>` is not implemented for `Cons<cgp::prelude::Field<Symbol<6, cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, Circle>, Cons<cgp::prelude::Field<Symbol<9, cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, Rectangle>, Nil>>`
@@ -48,41 +48,41 @@ help: the following other types implement trait `dispatch::providers::matchers::
 33 |   impl<Provider> ToFieldHandlers<Provider> for Void {
    |   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `Void` implements `dispatch::providers::matchers::to_field_handlers::ToFieldHandlers<Provider>`
    = note: required for `Scene` to implement `dispatch::providers::matchers::to_field_handlers::HasFieldHandlers<dispatch::providers::matchers::to_field_handlers::MapExtractFieldAndHandle<HandleFieldValue<ComputeArea>>>`
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>` to implement `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), Scene)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerComponent, ((), Scene)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>` to implement `IsProviderFor<ComputerComponent, App, ((), Scene)>`
+   = note: required for `App` to implement `CanUseComponent<ComputerComponent, ((), Scene)>`
 note: required by a bound in `__CheckApp`
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:46:1
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:47:1
    |
-46 | / check_components! {
-47 | |     App {
-48 | |         ComputerComponent: ((), Scene),
-49 | |     }
-50 | | }
+47 | / check_components! {
+48 | |     App {
+49 | |         ComputerComponent: ((), Scene),
+50 | |     }
+51 | | }
    | |_^ required by this bound in `__CheckApp`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the trait bound `Scene: HasExtractor` is not satisfied
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:48:9
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:49:9
    |
-48 |         ComputerComponent: ((), Scene),
+49 |         ComputerComponent: ((), Scene),
    |         ^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
 help: the trait `HasExtractor` is not implemented for `Scene`
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:33:1
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:34:1
    |
-33 | pub struct Scene {
+34 | pub struct Scene {
    | ^^^^^^^^^^^^^^^^
-   = note: required for `MatchWithHandlers<_>` to implement `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), Scene)>`
+   = note: required for `MatchWithHandlers<_>` to implement `IsProviderFor<ComputerComponent, App, ((), Scene)>`
    = note: 1 redundant requirement hidden
-   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>` to implement `IsProviderFor<cgp::prelude::ComputerComponent, App, ((), Scene)>`
-   = note: required for `App` to implement `CanUseComponent<cgp::prelude::ComputerComponent, ((), Scene)>`
+   = note: required for `UseInputDelegate<MatchWithFieldHandlersInputs<HandleFieldValue<ComputeArea>>>` to implement `IsProviderFor<ComputerComponent, App, ((), Scene)>`
+   = note: required for `App` to implement `CanUseComponent<ComputerComponent, ((), Scene)>`
 note: required by a bound in `__CheckApp`
-  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:46:1
+  --> tests/compile_fail/reference/providers/match_with_value_handlers_common_mistakes_struct_input.rs:47:1
    |
-46 | / check_components! {
-47 | |     App {
-48 | |         ComputerComponent: ((), Scene),
-49 | |     }
-50 | | }
+47 | / check_components! {
+48 | |     App {
+49 | |         ComputerComponent: ((), Scene),
+50 | |     }
+51 | | }
    | |_^ required by this bound in `__CheckApp`
    = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

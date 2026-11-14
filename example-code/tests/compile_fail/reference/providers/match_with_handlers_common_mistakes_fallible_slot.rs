@@ -1,5 +1,7 @@
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::dispatch::{ExtractFieldAndHandle, HandleFieldValue, MatchWithHandlers};
+use cgp::extra::handler::ComputerComponent;
+use cgp::extra::handler::{Computer, HandlerComponent};
 use cgp::prelude::*;
 
 pub struct Circle {

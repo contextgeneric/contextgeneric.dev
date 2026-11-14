@@ -68,6 +68,7 @@ delegate_components! {
 Two area computers routed by input type, once through the legacy table and once through `open`:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::{CanCompute, UseInputDelegate};
 

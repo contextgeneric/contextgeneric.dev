@@ -12,6 +12,8 @@ pub mod usage {
     use core::marker::PhantomData;
 
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::ComputerComponent;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::extra::handler::{CanCompute, CanTryCompute};
     use cgp::prelude::*;
 
@@ -50,6 +52,9 @@ pub mod usage {
         use core::marker::PhantomData;
 
         use cgp::core::error::ErrorTypeProviderComponent;
+        use cgp::extra::handler::ComputerComponent;
+        use cgp::extra::handler::TryComputer;
+        use cgp::extra::handler::TryComputerComponent;
         use cgp::extra::handler::{CanCompute, TryPromote};
         use cgp::prelude::*;
 
@@ -100,6 +105,8 @@ pub mod examples {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
     use cgp::extra::handler::CanTryCompute;
+    use cgp::extra::handler::TryComputer;
+    use cgp::extra::handler::TryComputerComponent;
     use cgp::prelude::*;
 
     #[cgp_impl(new ParseU64)]

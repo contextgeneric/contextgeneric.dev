@@ -179,6 +179,7 @@ pub mod composing_without_naming_a_context {
 pub mod falling_back_to_the_context {
     use core::marker::PhantomData;
 
+    use cgp::core::component::UseContext;
     use cgp::prelude::*;
 
     #[cgp_component(ShapeAreaCalculator)]

@@ -47,6 +47,10 @@ Each lift takes exactly one step. A `Computer` reaches a `Handler` in two, as
 A context fills three slots from two hand-written providers, one lift each and one chain of two:
 
 ```rust
+use cgp::extra::handler::{
+    Computer, ComputerComponent, Handler, HandlerComponent, Producer, ProducerComponent,
+    TryComputer, TryComputerComponent,
+};
 use cgp::prelude::*;
 use cgp::core::error::ErrorTypeProviderComponent;
 use cgp::extra::handler::{CanCompute, CanHandle, CanTryCompute, Promote, PromoteAsync};

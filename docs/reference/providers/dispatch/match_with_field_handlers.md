@@ -48,6 +48,7 @@ One provider describes every variant of two enums, reading the variant name from
 
 ```rust
 use core::fmt::Display;
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::core::field::traits::StaticString;
 use cgp::extra::dispatch::MatchWithFieldHandlers;

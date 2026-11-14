@@ -45,6 +45,7 @@ and folds it into nested `ComposeHandlers`.
 Two computers composed and wired as one:
 
 ```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::{CanCompute, ComposeHandlers};
 

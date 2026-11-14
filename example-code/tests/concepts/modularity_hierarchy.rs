@@ -188,6 +188,7 @@ pub mod tier_4 {
 pub mod tier_5 {
     use core::marker::PhantomData;
 
+    use cgp::core::component::UseContext;
     use cgp::prelude::*;
 
     use super::tier_4::{EncodeAsHex, EncodeAsText, Encoder, EncoderComponent};

@@ -52,8 +52,8 @@ Its attributes:
 
 ## Usage
 
-`AsyncComputer` and `AsyncComputerComponent` are in the prelude. The consumer trait
-`CanComputeAsync` is not, and is imported from `cgp::extra::handler`. The method is `async` and
+`AsyncComputer`, `AsyncComputerComponent`, and the consumer trait `CanComputeAsync` are imported
+from `cgp::extra::handler`. The method is `async` and
 takes the input by value:
 
 ```rust
@@ -82,6 +82,7 @@ An async computer provider, wired into a context and awaited through the consume
 
 ```rust
 use core::marker::PhantomData;
+use cgp::extra::handler::{AsyncComputer, AsyncComputerComponent};
 use cgp::prelude::*;
 use cgp::extra::handler::CanComputeAsync;
 

@@ -10,6 +10,8 @@
 /// from the base, so a hand-written `AsyncComputer` returning `Result` over a borrow answers it.
 pub mod usage {
     use cgp::core::error::ErrorTypeProviderComponent;
+    use cgp::extra::handler::AsyncComputer;
+    use cgp::extra::handler::AsyncComputerComponent;
     use cgp::extra::handler::AsyncComputerRefComponent;
     use cgp::extra::handler::CanComputeAsyncRef;
     use cgp::extra::handler::PromoteHandler;
@@ -57,6 +59,7 @@ pub mod usage {
 pub mod examples {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::extra::handler::CanHandle;
+    use cgp::extra::handler::HandlerComponent;
     use cgp::extra::handler::PromoteHandler;
     use cgp::prelude::*;
 
