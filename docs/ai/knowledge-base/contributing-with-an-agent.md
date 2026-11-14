@@ -41,8 +41,8 @@ before you submit it.
 ## Report problems in the knowledge base
 
 Finding problems in the knowledge base is one of the most useful contributions, and it needs no
-local setup. The knowledge base is in an early phase, and many of its documents still need further
-review by the author and by agents, as [its current state](index.md#its-current-state) describes. An
+local setup. The checks behind the knowledge base can miss errors, so some of its documents still
+contain them, as [its current state](index.md#its-current-state) describes. An
 error you find, or an inconsistency between two documents or between a document and the code, is
 review the project would otherwise have to do itself.
 

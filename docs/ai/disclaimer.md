@@ -36,11 +36,10 @@ agents must follow. Readers can inspect both the documentation and the process t
 which [How CGP's Documentation Is Written](/docs/ai/knowledge-base/how-cgp-is-documented) describes
 in full.
 
-The knowledge base is in an early phase and under active development. Many of its documents still
-need further review, by the author and by agents, and some contain errors or inconsistencies that no
-review has found yet. The aim is to improve it step by step toward full accuracy, meaning agreement
-with the author's intent as well as with the source, and the pages written from it inherit its
-current state.
+The knowledge base is checked against the source, but the checks can miss a stale sentence or an
+inconsistency, so some of its documents contain errors that no review has found yet. Each report of
+one moves it toward full accuracy, meaning agreement with the author's intent as well as with the
+source, and the pages written from it share whatever errors it still holds.
 
 **The source code is authoritative.** Agents must check claims about accepted syntax, generated
 names, and macro expansions against the code, tests, or expansion snapshots. When documentation and
@@ -121,8 +120,8 @@ the fix, since the CGP maintainers may run similar prompts themselves rather tha
 request directly. [Contributing to CGP with an
 Agent](/docs/ai/knowledge-base/contributing-with-an-agent) gives the policy in full.
 
-Finding and reporting problems in the knowledge base is itself a useful contribution while it is
-still being reviewed. File them on its
+Finding and reporting problems in the knowledge base is itself a useful contribution, since the
+checks can miss them. File them on its
 [issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues).
 
 ## Responsibility

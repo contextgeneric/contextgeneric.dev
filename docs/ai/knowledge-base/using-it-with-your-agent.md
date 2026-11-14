@@ -80,8 +80,8 @@ which section owns the question.
 
 Review the agent's answer before relying on it. The knowledge base gives an agent a checked record
 to work from, but the agent can still misread a document, and a document can lag behind the code.
-The knowledge base is also in an early phase, and many of its documents still need further review,
-as [its current state](index.md#its-current-state) describes.
+Some of its documents also contain errors that no review has found yet, as
+[its current state](index.md#its-current-state) describes.
 Ask the agent to name the documents it used, so you can check each claim at its source.
 
 When an answer disagrees with the code, the code is right. If the disagreement comes from the

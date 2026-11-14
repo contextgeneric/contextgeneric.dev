@@ -41,9 +41,10 @@ contribute.
 
 ## Its current state
 
-The knowledge base is in an early phase and under active development. Many of its documents still
-need further review, by the author and by agents, and some contain errors or inconsistencies that no
-review has found yet. Read any one document as the current best record rather than a finished one.
+The knowledge base is checked against the source code, but the checks can miss a stale sentence or
+an inconsistency, so some of its documents contain errors that no review has found yet. Read any one
+document as the best record available, checked against the source but not guaranteed to be free of
+errors.
 
 The aim is to improve the knowledge base step by step until it is fully accurate, meaning that it
 agrees with the author's intent for CGP as well as with the source code. Finding a problem in it is

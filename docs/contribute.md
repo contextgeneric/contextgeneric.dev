@@ -32,8 +32,8 @@ how the repositories are set up, the rules each one follows, and the policy for 
 contributions.
 
 Reporting problems is also a contribution. The CGP knowledge base, which the documentation is
-written from, is in an early phase, and an error or inconsistency you find in it is worth filing as
-an issue; [Report problems in the knowledge
+written from, can still hold errors its checks missed, and an error or inconsistency you find in it
+is worth filing as an issue; [Report problems in the knowledge
 base](/docs/ai/knowledge-base/contributing-with-an-agent#report-problems-in-the-knowledge-base)
 explains how.
 
