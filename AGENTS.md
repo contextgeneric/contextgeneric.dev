@@ -50,6 +50,8 @@ block to match. These are the actionable rules here:
 - Verify every snippet against the current `cgp` release, the `cgp` source, or its tests.
 - Invoke the `/cgp` skill before writing CGP code.
 - Prefer code already verified in the knowledge base's `examples/` directory.
+- Say which of CGP's three context shapes a page's code is in; an introductory page may record it
+  in its knowledge-base record instead.
 - Never take current syntax from an existing blog post; read the post's internal document for its
   stale parts first.
 - Put a page's code in the website repository's `example-code/` crate, except a Projects page, whose
