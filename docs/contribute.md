@@ -23,14 +23,14 @@ subreddit. A question that a page should have answered also shows which page nee
 
 If a page on this site confuses you, or says something the code contradicts, report it in GitHub
 Discussions or as an issue on the
-[website's repository](https://github.com/contextgeneric/contextgeneric.dev/issues). The pages are
-written from the CGP knowledge base, a public record of CGP written for agents, and its checks can
-miss an error or an inconsistency between two documents. So reporting a problem you find saves the
-project a review it would otherwise have to do itself.
-File a problem in the knowledge base on its
-[issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues), and see
+[website's repository](https://github.com/contextgeneric/contextgeneric.dev/issues).
+
+The pages are written from the CGP knowledge base, a public record of CGP written for agents. Its
+checks can miss an error or an inconsistency between two documents, so a problem you find there
+saves the project a review it would otherwise have to do itself. File it on the knowledge base's
+[issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues);
 [Report problems in the knowledge base](/docs/ai/knowledge-base/contributing-with-an-agent#report-problems-in-the-knowledge-base)
-for what to include.
+says what to include.
 
 ## Write about CGP and share it
 
