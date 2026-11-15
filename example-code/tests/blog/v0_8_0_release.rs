@@ -1413,3 +1413,32 @@ mod alloc_feature {
     #[allow(unused_imports)]
     use cgp::extra::error::{DebugError, DisplayError};
 }
+
+mod borrow_any_string_field {
+    use std::borrow::Cow;
+
+    use cgp::prelude::*;
+
+    #[cgp_fn]
+    pub fn label(&self, #[implicit] name: &str, #[implicit] nickname: Option<&str>) -> String {
+        match nickname {
+            Some(nickname) => format!("{name} ({nickname})"),
+            None => name.to_owned(),
+        }
+    }
+
+    #[derive(HasField)]
+    pub struct Account {
+        pub name: Cow<'static, str>,
+        pub nickname: Option<Box<str>>,
+    }
+
+    #[test]
+    fn reads_cow_and_optional_box_fields() {
+        let account = Account {
+            name: Cow::Borrowed("Ada"),
+            nickname: Some("ada".into()),
+        };
+        assert_eq!(account.label(), "Ada (ada)");
+    }
+}
