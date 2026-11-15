@@ -21,6 +21,12 @@ The notes cover two artifacts, which release on their own schedules:
 - **[cargo-cgp](/docs/release-notes/cargo-cgp):** CGP's error toolchain, which rewrites CGP's
   compile errors and prints a crate's macro expansion. The newest release is [v0.1.0](/docs/release-notes/cargo-cgp/v0.1.0).
 
+## Versioning
+
+`cgp` is a 0.x library, and Cargo treats the minor number as the one that may break code: a requirement such as `cgp = "0.7"` accepts every 0.7 release, and a move to the next minor number is a deliberate upgrade. Each minor release from [v0.2.0](/docs/release-notes/cgp/v0.2.0) to [v0.8.0](/docs/release-notes/cgp/v0.8.0) carries breaking changes, which its page lists under *Breaking changes* with the steps to take.
+
+A patch release is not always compatible either. [v0.4.1](/docs/release-notes/cgp/v0.4.1) and [v0.4.2](/docs/release-notes/cgp/v0.4.2) each changed an item that earlier code used, so a project that accepts patch releases automatically can meet a break there. [v0.3.1](/docs/release-notes/cgp/v0.3.1) raised the minimum Rust version and nothing else, and [v0.6.1](/docs/release-notes/cgp/v0.6.1) changed no existing item. Read the page of a patch release before accepting it.
+
 ## Reading a page
 
 A page opens with the release's date, its links, and a summary of its main changes. *Compatibility*
