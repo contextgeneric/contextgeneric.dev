@@ -1,4 +1,5 @@
 ---
+slug: /cargo-cgp/command-reference
 title: 'cargo-cgp command reference: commands, options, variables'
 sidebar_label: 'Command reference'
 sidebar_position: 9

@@ -1,4 +1,4 @@
-//! Code from `docs/cargo-cgp/expand.md` — *Expand*.
+//! Code from `docs/tooling/cargo-cgp/expand.md` — *Expand*.
 //!
 //! The same program as [`super::check`] with its missing `height` field restored, which is the state
 //! the page expands. The listing the page shows is *generated* code, so this file can only confirm the

@@ -1,4 +1,4 @@
-//! Code from `docs/cargo-cgp/reading-output.md` — *Reading the output*.
+//! Code from `docs/tooling/cargo-cgp/reading-output.md` — *Reading the output*.
 //!
 //! Every program the page shows is broken on purpose and is a `trybuild` fixture under
 //! `tests/compile_fail/cargo_cgp/reading_output_*.rs`. The programs here are the two fixes it gives

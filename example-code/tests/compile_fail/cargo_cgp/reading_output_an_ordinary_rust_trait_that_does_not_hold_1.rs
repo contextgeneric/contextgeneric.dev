@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/reading-output.md, An ordinary Rust trait that does not hold: at a check.
+// From docs/tooling/cargo-cgp/reading-output.md, An ordinary Rust trait that does not hold: at a check.
 
 use cgp::prelude::*;
 

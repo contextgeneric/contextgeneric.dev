@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/check.md, Check the wiring where you write it: print_area replaced by a check.
+// From docs/tooling/cargo-cgp/check.md, Check the wiring where you write it: print_area replaced by a check.
 
 use cgp::prelude::*;
 

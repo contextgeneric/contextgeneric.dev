@@ -1,4 +1,5 @@
 ---
+slug: /cargo-cgp/error-codes
 title: 'cargo-cgp error codes: every CGP-E code explained'
 sidebar_label: 'Error codes'
 sidebar_position: 8

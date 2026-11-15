@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/index.md, The problem it solves: the unchecked call hides the missing field.
+// From docs/tooling/cargo-cgp/index.md, The problem it solves: the unchecked call hides the missing field.
 
 use cgp::prelude::*;
 

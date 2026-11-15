@@ -1,4 +1,5 @@
 ---
+slug: /cargo-cgp/check
 title: 'cargo cgp check: CGP errors, root cause first'
 sidebar_label: 'Check'
 sidebar_position: 3

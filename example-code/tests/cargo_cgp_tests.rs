@@ -1,4 +1,4 @@
-//! Runnable checks for the code shown on the `docs/cargo-cgp/` pages.
+//! Runnable checks for the code shown on the `docs/tooling/cargo-cgp/` pages.
 //!
 //! One module per page, under `tests/cargo_cgp/`. See the crate `README.md` for the layout and for
 //! how the rejected snippets are handled (they live under `tests/compile_fail/`).

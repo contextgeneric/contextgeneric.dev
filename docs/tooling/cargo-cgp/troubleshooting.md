@@ -1,4 +1,5 @@
 ---
+slug: /cargo-cgp/troubleshooting
 title: 'Troubleshooting cargo-cgp'
 sidebar_label: 'Troubleshooting'
 sidebar_position: 7

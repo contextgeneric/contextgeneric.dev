@@ -1,4 +1,5 @@
 ---
+slug: /cargo-cgp/reading-output
 title: 'Reading cargo-cgp output: the parts of a CGP error'
 sidebar_label: 'Reading the output'
 sidebar_position: 4

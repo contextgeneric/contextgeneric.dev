@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/check.md, Try it on a deliberate mistake.
+// From docs/tooling/cargo-cgp/check.md, Try it on a deliberate mistake.
 
 use cgp::prelude::*;
 

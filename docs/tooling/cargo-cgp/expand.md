@@ -1,4 +1,5 @@
 ---
+slug: /cargo-cgp/expand
 title: 'cargo cgp expand: see what CGP macros generate'
 sidebar_label: 'Expand'
 sidebar_position: 5

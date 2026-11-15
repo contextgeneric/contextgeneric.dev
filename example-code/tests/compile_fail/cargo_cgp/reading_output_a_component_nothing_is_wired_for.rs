@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/reading-output.md, A component nothing is wired for.
+// From docs/tooling/cargo-cgp/reading-output.md, A component nothing is wired for.
 
 use cgp::prelude::*;
 

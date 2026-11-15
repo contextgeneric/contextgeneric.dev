@@ -1,4 +1,4 @@
-//! Code from the pages under `docs/cargo-cgp/`.
+//! Code from the pages under `docs/tooling/cargo-cgp/`.
 //!
 //! Four of the nine pages show Rust: `index.md`, `check.md`, `reading-output.md`, and `expand.md`.
 //! The rest are shell commands, quoted messages, and tables, so they have no file here.

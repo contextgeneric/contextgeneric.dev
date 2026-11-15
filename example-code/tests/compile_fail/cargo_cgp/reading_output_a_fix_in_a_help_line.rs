@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/reading-output.md, A fix in a help line.
+// From docs/tooling/cargo-cgp/reading-output.md, A fix in a help line.
 
 use cgp::prelude::*;
 

@@ -1,4 +1,4 @@
-//! Code from `docs/cargo-cgp/check.md` — *Check*.
+//! Code from `docs/tooling/cargo-cgp/check.md` — *Check*.
 //!
 //! Both programs on the page are broken on purpose, so both are `trybuild` fixtures:
 //!

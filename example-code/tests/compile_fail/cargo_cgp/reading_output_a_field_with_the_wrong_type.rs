@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/reading-output.md, A field with the wrong type.
+// From docs/tooling/cargo-cgp/reading-output.md, A field with the wrong type.
 
 use cgp::prelude::*;
 

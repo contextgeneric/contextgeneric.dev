@@ -1,4 +1,4 @@
-// From docs/cargo-cgp/reading-output.md, Several causes in one error.
+// From docs/tooling/cargo-cgp/reading-output.md, Several causes in one error.
 
 use cgp::prelude::*;
 
