@@ -34,7 +34,9 @@ components:
 1. [Quickstart](/docs/quickstart): install CGP and run a first program in a few minutes.
 2. [Hello World](/docs/tutorials/hello): understand a program like the Quickstart's, then see the
    same function work on a second context.
-3. [Area calculation](/docs/tutorials/area-calculation): turn ordinary Rust functions into
+3. [Swap a Storage Backend per Application](/docs/tutorials/storage-backend): build a small
+   application, then give its tests their own storage backend with a component and two providers.
+4. [Area calculation](/docs/tutorials/area-calculation): turn ordinary Rust functions into
    components and providers, then learn to check their wiring and understand errors.
 
 ## Find what you need

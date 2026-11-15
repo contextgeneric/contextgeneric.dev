@@ -9,4 +9,5 @@
 
 mod tutorials {
     mod area_calculation_checking;
+    mod storage_backend;
 }
