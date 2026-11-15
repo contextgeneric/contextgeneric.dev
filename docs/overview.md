@@ -310,7 +310,8 @@ a plain trait is enough and when providers start to help.
 To try these patterns in your own code or learn how they work, continue with these pages:
 
 - **Run code:** the [Quickstart](/docs/quickstart), then the
-  [Hello World tutorial](/docs/tutorials/hello).
+  [Hello World tutorial](/docs/tutorials/hello), or build this page's storage example step by step
+  in [Swap a Storage Backend per Application](/docs/tutorials/storage-backend).
 - **Understand the mechanism:** the [Concepts](/docs/concepts), starting with
   [Bypassing coherence](/docs/concepts/coherence).
 - **Compare with what you know:** the [Comparisons](/docs/comparisons).

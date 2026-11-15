@@ -2,7 +2,7 @@
 title: 'Static dispatch: give one trait several implementations'
 sidebar_label: 'Static Dispatch'
 sidebar_position: 2
-description: 'Hit the coherence error that rejects two blanket implementations of one trait, then fix it with CGP components, named providers, compile-time wiring, and higher-order providers.'
+description: 'Hit the coherence error that rejects two blanket impls of one trait, then fix it with components, named providers, wiring, and higher-order providers.'
 ---
 
 # Static Dispatch

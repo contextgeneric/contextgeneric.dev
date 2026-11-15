@@ -2,7 +2,7 @@
 title: 'Swap a Storage Backend per Application'
 sidebar_label: 'Swap a Storage Backend'
 sidebar_position: 3
-description: 'Build a profile-picture lookup in Rust whose application reads pictures from a folder while its tests read them from memory, with each choice wired and checked at compile time.'
+description: 'A Rust tutorial: a profile-picture lookup that reads from a folder in the app and from memory in tests, each choice wired and checked at compile time.'
 ---
 
 # Swap a Storage Backend per Application
@@ -112,7 +112,8 @@ Notice that callers never pass `database` or `local_dir`. `#[cgp_fn]` turns each
 method on any type whose fields match the implicit arguments by name and type, so `App` gains
 `get_user` and `fetch_storage_object` without an `impl` block of its own. The `local_dir` argument
 reads the `String` field as a `&str`. Both functions are async, so each also carries
-`#[async_trait]`, which keeps the async method that `#[cgp_fn]` generates free of warnings.
+`#[async_trait]`; without it, Rust warns about the `async fn` in the public trait that `#[cgp_fn]`
+generates.
 
 To try them, `main` writes a picture into a `pictures` folder, builds an `App` with one user, and
 calls both methods:

@@ -2,7 +2,7 @@
 title: 'Hello World: one function for many structs'
 sidebar_label: 'Hello World Tutorial'
 sidebar_position: 2
-description: 'Write your first Context-Generic Programming code in Rust: a greet function that reads a name from a struct field and works unchanged on two different structs.'
+description: 'Write your first Context-Generic Programming code in Rust: a greet function that reads a name from a field and works on two different structs.'
 ---
 
 # Hello World Tutorial

@@ -1,7 +1,7 @@
 ---
 title: 'Area calculation: from plain Rust functions to providers'
 sidebar_label: 'Area Calculation Tutorial'
-description: 'A Rust tutorial series that grows one area calculation from plain functions to context-generic functions, interchangeable providers, and checked wiring.'
+description: 'A Rust tutorial series that grows an area calculation from plain functions to context-generic functions, providers, and checked wiring.'
 ---
 
 # Area Calculation Tutorial

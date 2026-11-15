@@ -2,7 +2,7 @@
 title: 'Context-generic functions: read fields as arguments'
 sidebar_label: 'Context-Generic Functions'
 sidebar_position: 1
-description: 'Turn plain Rust functions into context-generic functions with #[cgp_fn] and #[implicit], so one definition reads its arguments from the fields of any struct that has them.'
+description: 'Use #[cgp_fn] and #[implicit] to turn plain Rust functions into ones that read their arguments from the fields of any struct that has them.'
 ---
 
 # Context-Generic Functions
