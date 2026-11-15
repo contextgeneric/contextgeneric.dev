@@ -1,57 +1,71 @@
 ---
+title: 'Contribute to Context-Generic Programming'
+sidebar_label: 'Contribute to CGP'
 sidebar_position: 11
+description: 'The ways to help Context-Generic Programming, from asking a question or reporting a problem to publishing components, changing CGP itself, and sponsoring its author.'
 ---
 
-# Contribute to CGP
+# Contribute
 
-We welcome contributors who are passionate about promoting CGP within the Rust ecosystem. Whether you're a beginner or an experienced Rust developer, there are numerous ways you can contribute to the project.
+[Context-Generic Programming](/docs/) (CGP) lets you write several implementations of a Rust trait
+and choose, for each type, which one applies. This page lists the ways you can help it, from the
+smallest commitment to the largest, so you can stop at the first one that fits the time you have.
+Each route helps on its own, and none of them requires the ones after it.
 
-In this page, we'll explore different ways you can get involved and help grow the CGP community. Your contributions, regardless of your level of expertise, are valuable and appreciated!
+## Join the discussion
 
-## Participate in Discussions
+Ask questions about CGP, and suggest what the documentation should cover next, in the project's
+discussion channels: [GitHub Discussions](https://github.com/orgs/contextgeneric/discussions), the
+[Discord server](https://discord.gg/Hgk3rCw6pQ), and the [r/cgp](https://www.reddit.com/r/cgp/)
+subreddit. A question that a page should have answered also shows which page needs work.
 
-Join the conversation on platforms like [**Discord**](https://discord.gg/Hgk3rCw6pQ), [**GitHub**](https://github.com/orgs/contextgeneric/discussions) or [**Reddit**](https://www.reddit.com/r/cgp/). Whether you have questions about CGP or ideas for new topics or content, these forums are great places to share your thoughts and engage with the community.
+## Report a problem
 
-## Read The Documentation
+If a page on this site confuses you, or says something the code contradicts, report it in GitHub
+Discussions or as an issue on the
+[website's repository](https://github.com/contextgeneric/contextgeneric.dev/issues). The pages are
+written from the CGP knowledge base, a public record of CGP written for agents, and its checks can
+miss an error or an inconsistency between two documents. So reporting a problem you find saves the
+project a review it would otherwise have to do itself.
+[Report problems in the knowledge base](/docs/ai/knowledge-base/contributing-with-an-agent#report-problems-in-the-knowledge-base)
+says where to file a problem in the knowledge base and what to include.
 
-We encourage you to explore the documentation available on this website. Your feedback is invaluable to us—if you encounter anything confusing or unclear, please let us know so we can improve the content and make it more accessible to everyone.
+## Write about CGP and share it
 
-## Publish Your own CGP Components
+A blog post, a tutorial, or a talk about what you built with CGP, or how you learned it, helps other
+readers even where this site already covers the topic, because a second explanation can reach a
+reader the first one did not. You can also follow CGP on Bluesky at
+[@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) for news of its development, and
+share what you find useful there.
 
-The modularity provided by CGP can benefit everyone, even for those who do _not_ care about modularity. An ideal future for CGP is to have a community that publishes large amount of reusable components, that can be used by anyone to build modular applications with minimal application-specific code.
+## Publish reusable components
 
-When that happens, it would become possible for CGP to be used by anyone, without having to write their own context-generic code. Instead, the majority of the users will only need to define the wirings of existing components that have been published by the community.
+CGP aims at an ecosystem of published components and providers, in which most users write only the
+wiring that selects them and little context-generic code of their own. A developer who wants
+interchangeable implementations could then use them without first learning to write providers. That
+ecosystem does not exist yet. If you write context-generic code, publishing your components and
+providers as crates is the most direct way to help start it.
 
-If you _care_ about modularity and would like to contribute, the best way is to start publishing context-generic components, and help build up an ecosystem that benefits the rest of developers.
+## Change CGP itself
 
-## Contribute Code or Documentation
-
-To change CGP itself, with or without a coding agent, start from
-[Contributing to CGP with an Agent](/docs/ai/knowledge-base/contributing-with-an-agent). It explains
-how the repositories are set up, the rules each one follows, and the policy for AI-assisted
-contributions.
-
-Reporting problems is also a contribution. The CGP knowledge base, which the documentation is
-written from, can still hold errors its checks missed, and an error or inconsistency you find in it
-is worth filing as an issue; [Report problems in the knowledge
-base](/docs/ai/knowledge-base/contributing-with-an-agent#report-problems-in-the-knowledge-base)
-explains how.
-
-## Spread on Social Media
-
-Help raise awareness of CGP by sharing it on social media. Follow our official BlueSky account [@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) to stay updated on CGP’s development and latest news.
-
-## Write About It
-
-If you find CGP interesting, consider writing your own blog posts or tutorials to share your learning journey. Sharing your insights can help others learn CGP in different ways, and even if the topic is
-already covered on the official site, your perspective might make it clearer to others.
+To change the library, the [cargo-cgp](/docs/cargo-cgp) toolchain, the agent skill, or the
+documentation, start from
+[Contributing to CGP with an Agent](/docs/ai/knowledge-base/contributing-with-an-agent). It gives the
+contribution policy, how to set up the repositories, and the rules each repository follows, whether
+or not you work with a coding agent.
 
 ## Sponsor Me
 
 If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](https://github.com/sponsors/soareschen/), [Patreon](https://www.patreon.com/c/maybevoid/about), and [Ko-Fi](https://ko-fi.com/maybevoid).
 
-# Acknowledgement
+## Acknowledgement
 
 CGP is created by [Soares Chen](https://maybevoid.com/), with inspiration drawn from various programming languages and paradigms, particularly Haskell typeclasses.
 
 The development of CGP would not have been possible without the strong support of my employer, [Informal Systems](https://informal.systems/). CGP was initially introduced and refined as part of the [Hermes SDK](https://github.com/informalsystems/hermes-sdk/) project, which leverages CGP to build a highly modular relayer for inter-blockchain communication.
+
+---
+
+*An AI agent rewrote this page, apart from the sponsorship section and the acknowledgement, which are
+the author's own. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*
