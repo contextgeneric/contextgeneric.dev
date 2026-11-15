@@ -234,7 +234,7 @@ impl AreaCalculator {
 }
 ```
 
-When we write blanket implementations that are generic over the context type, we can omit the generic parameter and just refer to the generic context as `Self`.
+When we write blanket implementations that are generic over the context type, we can omit the generic parameter and just refer to the generic context as `Self`. This shorter form, with `#[uses]` in place of the `where` clause, is the one to write in your own code; the longer form above shows what it stands for.
 
 `#[cgp_impl]` also supports the same shorthand as `#[cgp_fn]`, so we can use `#[uses]` to import the CGP functions `RectangleArea` and `CircleArea` to be used in our implementations.
 
