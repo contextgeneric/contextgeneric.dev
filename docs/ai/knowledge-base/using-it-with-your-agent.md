@@ -57,7 +57,7 @@ the rules it finds there. Include three instructions in your prompt:
 
 1. **Load the CGP skill** so the agent knows the vocabulary the documents use. If your agent does
    not load skills, attach the skill's
-   [SKILL.md](https://raw.githubusercontent.com/contextgeneric/cgp-skills/v0.8.0/cgp/SKILL.md)
+   [SKILL.md](https://raw.githubusercontent.com/contextgeneric/cgp-skills/main/cgp/SKILL.md)
    instead, as [Installing the CGP Skill](/docs/ai/skills/installation#agents-without-skill-support)
    describes.
 2. **Read the README first.** The
