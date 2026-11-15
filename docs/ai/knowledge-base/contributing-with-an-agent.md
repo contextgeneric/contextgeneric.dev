@@ -9,41 +9,42 @@ description: 'Meet CGP''s policy for AI-assisted contributions, report problems 
 
 [Context-Generic Programming (CGP)](/docs/) is a Rust library for writing several implementations
 of a trait and choosing which one each type uses. This page is for contributors who want to change
-CGP itself, whether the library, the [cargo-cgp](/docs/tooling/cargo-cgp) toolchain, the agent
-skill, or the documentation, with a coding agent's help. It covers the policy for AI-assisted
-contributions, reporting problems in the knowledge base, the local setup the repositories expect,
-and the rules your agent follows while it works. It assumes you already use an agent and have
-contributed to a Rust project through GitHub before.
+CGP itself with a coding agent's help. Your contribution might involve the library, the
+[cargo-cgp](/docs/tooling/cargo-cgp) toolchain, the agent skill, or the documentation. Before you
+start, you'll need to know the contribution policy and how to set up the repositories so your agent
+can follow their rules. This page walks through that preparation and explains how to report
+problems you find in the knowledge base. It assumes you already use an agent and have contributed
+to a Rust project through GitHub before.
 
 ## Contribution policy
 
-**An AI-assisted contribution to any CGP repository must use the
-[CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base).** If an agent writes or
-changes code or documentation in your contribution, direct it to read the knowledge base, which is
-written for agents, and to follow the `AGENTS.md` file of each repository it touches. The
-contribution then carries the documentation and skill updates the change requires, and it uses the
-vocabulary and the current syntax the knowledge base records.
+If an agent writes or changes code or documentation in your contribution, it must use the
+[CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base). This requirement applies
+to every CGP repository. Direct your agent to read the knowledge base, which is written for agents,
+and to follow the `AGENTS.md` file of each repository it touches. These sources give it CGP's
+vocabulary and current syntax, and tell it which documentation and skill updates to include with
+your change.
 
 The policy exists because an agent working from its training alone reproduces CGP's outdated
 syntax and invents semantics the knowledge base already records.
 [How CGP's Documentation Is Written](how-cgp-is-documented.md) explains the problem and the process
-that answers it.
+used to address it.
 
 **An AI-assisted pull request or issue must include the prompts used to produce it:** the prompt
 that verified the issue, or the prompt that applied the fix. The CGP maintainers may run similar
 prompts themselves rather than merge a pull request directly, so the prompt can be as useful to them
 as the change.
 
-This is a deliberately light policy, and a more detailed one will follow. Until then, it asks for
-nothing beyond these two requirements. You remain responsible for reviewing what your agent produces
-before you submit it.
+The policy is deliberately light, and a more detailed one will follow. For now, it asks only that
+your agent use the knowledge base and that you include the prompts. You remain responsible for
+reviewing what your agent produces before you submit it.
 
 ## Report problems in the knowledge base
 
-Finding problems in the knowledge base is one of the most useful contributions, and it needs no
-local setup. The checks behind the knowledge base can miss errors, so some of its documents still
-contain them, as [its current state](index.md#its-current-state) describes. An error you find, or an
-inconsistency between two documents or between a document and the code, saves the project a review
+Finding problems in the knowledge base is one of the most useful ways to contribute, and you can do
+it without setting up anything locally. Its checks can miss errors, so some documents still contain
+them, as [its current state](index.md#its-current-state) describes. When you find an error or an
+inconsistency between documents or between a document and the code, you save the project review work
 it would otherwise have to do itself.
 
 File each problem on the knowledge base's
@@ -67,36 +68,39 @@ git clone https://github.com/contextgeneric/cargo-cgp.git
 git clone https://github.com/contextgeneric/contextgeneric.dev.git
 ```
 
-The layout matters in these places:
+Some repositories have specific requirements for this layout:
 
-- **The skill.** The CGP skill lives in `cgp-skills`, and a change to a construct updates it there
+- **The skill.** The CGP skill lives in `cgp-skills`. A change to a construct must update the skill
   in the same contribution, so clone it beside `cgp`.
 - **The `cargo-cgp` tests.** Its UI test suite compiles fixtures against a `cgp` checkout at
   `../cgp`. Work on its compiler driver may also consult the Rust compiler's source, which its
   `AGENTS.md` expects at `../external/rust`.
-- **The rest of the family.** The full list of repositories, including the projects built with CGP,
-  is in the knowledge base's
-  [sibling-projects.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/sibling-projects.md).
+
+For the full list of repositories, including projects built with CGP, see the knowledge base's
+[sibling-projects.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/sibling-projects.md).
 
 ## Follow the repository rules
 
-Each repository has an `AGENTS.md` at its root, and it is the first file your agent should read:
-[`cgp`](https://github.com/contextgeneric/cgp/blob/main/AGENTS.md),
-[`cargo-cgp`](https://github.com/contextgeneric/cargo-cgp/blob/main/AGENTS.md),
-[`cgp-skills`](https://github.com/contextgeneric/cgp-skills/blob/main/AGENTS.md), [the knowledge
-base](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md), [the
-website](https://github.com/contextgeneric/contextgeneric.dev/blob/main/AGENTS.md), and the example
-and project repositories
-[`cgp-examples`](https://github.com/contextgeneric/cgp-examples/blob/main/AGENTS.md),
-[`hypershell`](https://github.com/contextgeneric/hypershell/blob/main/AGENTS.md), and
-[`cgp-serde`](https://github.com/contextgeneric/cgp-serde/blob/main/AGENTS.md). Each one gives
-the rules that repository follows and names the guide to read before each kind of task, so your
-agent reads the detailed rules only for the work in front of it. The code repositories' files also
-point to the checks that build and test them.
+Once the repositories are in place, have your agent read the `AGENTS.md` at the root of each one
+it will work in. This should be the first file it reads in that repository. Each file gives the
+repository's rules and names the guide to read for each kind of task, so your agent loads the
+detailed instructions relevant to its work. In code repositories, it also points to the build and
+test checks.
 
-One obligation runs through all of them: **a change carries its documentation in the same
-contribution.** The code is the authority, and the knowledge base, the skill, and the site are
-views of it that must not drift. Each kind of change carries its own updates:
+You can find these rules in the following repositories:
+
+- [`cgp`](https://github.com/contextgeneric/cgp/blob/main/AGENTS.md)
+- [`cargo-cgp`](https://github.com/contextgeneric/cargo-cgp/blob/main/AGENTS.md)
+- [`cgp-skills`](https://github.com/contextgeneric/cgp-skills/blob/main/AGENTS.md)
+- [The knowledge base](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md)
+- [The website](https://github.com/contextgeneric/contextgeneric.dev/blob/main/AGENTS.md)
+- [`cgp-examples`](https://github.com/contextgeneric/cgp-examples/blob/main/AGENTS.md)
+- [`hypershell`](https://github.com/contextgeneric/hypershell/blob/main/AGENTS.md)
+- [`cgp-serde`](https://github.com/contextgeneric/cgp-serde/blob/main/AGENTS.md)
+
+All of these repositories require you to include documentation updates in the same contribution as
+the change. The code is the authority, so the knowledge base, skill, and site must stay consistent
+with it. The updates you need depend on what you change:
 
 - **A change to a construct** (its syntax, its expansion, its defaults, or its errors) updates the
   knowledge base's reference and implementation documents, the expansion snapshots, and the matching
@@ -104,8 +108,8 @@ views of it that must not drift. Each kind of change carries its own updates:
 - **A change to `cargo-cgp`'s behavior** updates the knowledge base's `cargo-cgp/` documents and the
   UI fixtures that pin the output.
 - **A change to a page on this site** updates the knowledge base's record of that page.
-- **A correction to a document** starts in the knowledge base and then reaches whatever was written
-  from it: the matching part of the skill, and the page on this site ported from it.
+- **A correction to a document** starts in the knowledge base, then applies to the material written
+  from it: the matching part of the skill and the page on this site adapted from it.
 
 A contribution that spans repositories needs a pull request in each. Link them to each other so
 they can be reviewed together.
@@ -113,22 +117,22 @@ they can be reviewed together.
 Before your agent starts, the rules ask it to load the CGP skill from
 [`cgp-skills`](https://github.com/contextgeneric/cgp-skills), so make that skill available in the
 way your agent loads skills, as [Installing the CGP Skill](/docs/ai/skills/installation) describes.
-For the prose your agent writes, they name the `point-first-writing` skill as well. That skill is
-optional and not part of the CGP repositories, so your agent uses it only when it is available.
+For prose, the rules also name the `point-first-writing` skill. That skill is optional and isn't
+part of the CGP repositories, so your agent uses it only when it is available.
 
-The rules also shape how the agent works with you. It stops and asks you when a choice has more than
-one defensible answer, such as an unclear intended behavior, rather than guessing. And it creates
-commits only when you ask for them, so you decide when the work is ready to commit and submit.
+The rules also shape how the agent works with you. When a choice has more than one defensible
+answer, such as when the intended behavior is unclear, it stops and asks you. It also creates
+commits only when you ask, so you decide when the work is ready to commit and submit.
 
 ## Use an established workflow
 
-The `cgp` and `cargo-cgp` repositories each name a complete workflow for their most common kind of
-change, written in the knowledge base, which an agent can follow from start to finish:
+For common tasks, your agent can follow a complete workflow in the knowledge base. The `cgp` and
+`cargo-cgp` repositories each point to one:
 
 - **Reviewing a macro.** The `cgp` repository's [macro review
   workflow](https://github.com/contextgeneric/cgp/blob/main/AGENTS.md#macro-review-workflow) hardens
-  one macro at a time: fixing bugs and corner cases, closing test gaps, checking spans and hygiene,
-  and updating every view of the macro together.
+  one macro at a time by fixing bugs and corner cases, closing test gaps, checking spans and
+  hygiene, and updating every view of the macro together.
 - **Improving an error message.** The `cargo-cgp` repository's [error-message
   loop](https://github.com/contextgeneric/cargo-cgp/blob/main/AGENTS.md#improving-error-messages-against-real-world-cgp-code)
   reproduces a confusing diagnostic as a small test fixture before changing the tool, then confirms

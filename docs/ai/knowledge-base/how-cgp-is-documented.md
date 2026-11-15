@@ -7,55 +7,59 @@ description: 'AI agents write CGP''s documentation from a public knowledge base 
 
 # How CGP's Documentation Is Written
 
-AI agents write most of the documentation of [Context-Generic Programming (CGP)](/docs/), a Rust
-library for writing several implementations of a trait and choosing which one each type uses. This
-page describes how they write it, for a reader deciding how far to trust the result. The agents work
-from the public [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base), a record
-written for agents and checked against the library's source. The sections below cover the problem
-that record answers, the rules that keep it true, who directs the work, and where its checks stop.
-For who reviews which page, see the [AI disclaimer](/docs/ai/disclaimer).
+How much can you trust documentation written by an AI agent? Agents write most of the documentation
+for [Context-Generic Programming (CGP)](/docs/), a Rust library for writing several implementations
+of a trait and choosing which one each type uses. To assess that work, it helps to understand what
+the agents write from and how their claims are checked.
+
+The agents use the public [CGP knowledge
+base](https://github.com/contextgeneric/cgp-knowledge-base), a record written for agents and checked
+against the library's source. This page explains why that record is needed, how it is maintained,
+and where the checks stop. For details of who reviews which pages, see the [AI
+disclaimer](/docs/ai/disclaimer).
 
 ## The problem with one-shot prompts
 
-An agent asked to write about CGP in a single prompt, with no written record to work from, falls
-back on what it learned in training, and for CGP that is a poor source. CGP's syntax has changed
+When an agent is asked to write about CGP in a single prompt, without a written record to work from,
+it falls back on what it learned in training. For CGP, that is a poor source: the syntax has changed
 across releases, and much of what has been published about it, including many posts on this site's
 blog, shows constructs the current release no longer accepts, such as `#[cgp_context]` and
-`cgp_preset!`. An agent writing from training reproduces that syntax, and it fills the gaps in what
-it remembers with plausible guesses about what the macros generate.
+`cgp_preset!`. An agent writing from training reproduces that syntax and fills the gaps in what it
+remembers with plausible guesses about what the macros generate.
 
-Giving the agent the source code does not solve this alone. CGP is implemented mostly as procedural
-macros, so the source shows token-stream transformations rather than the traits and impls they
-produce. Knowing that `#[cgp_component]` generates a consumer trait, a provider trait, and the
+Giving the agent the source code does not solve the problem on its own. CGP is implemented mostly as
+procedural macros, so the source shows token-stream transformations rather than the traits and impls
+they produce. Knowing that `#[cgp_component]` generates a consumer trait, a provider trait, and the
 blanket impls that connect them requires mentally running the macro. Every agent that reads the
 source has to repeat that reconstruction, and two agents can reconstruct it differently.
 
 ## A written record, kept true
 
-The knowledge base records each of those reconstructions once, in prose, so that later agents read
-the conclusion instead of deriving it again. Each document owns one subject: a construct, a
-cross-cutting concept, a class of compile errors, a worked example, the internals of one macro, or a
-page of this site. A document that mentions another subject links to the document that owns it
-rather than explaining it a second time, so there is one explanation to keep current instead of
-two that can drift apart.
+The knowledge base records each reconstruction in prose so that later agents can read the conclusion
+without deriving it again. Each document covers one subject: a construct, a concept that applies
+across constructs, a class of compile errors, a worked example, the internals of one macro, or a
+page of this site. When it mentions another subject, it links to the document that explains that
+subject. This leaves one explanation to keep current and avoids duplicating accounts that can drift
+apart.
 
-The record is only useful while it is true, so these rules govern every document:
+For that record to remain useful, it must stay accurate. These rules govern every document:
 
 - **The source outranks every document.** When a document and the code disagree, the code is right
   and the document has a defect. Agents check claims about accepted syntax, generated names, and
   macro expansions against the source, the tests, and the expansion snapshots, not against memory or
   an earlier draft of the document.
-- **A change carries its documentation.** A change to how a construct behaves updates the matching
-  documents in the same change. A stale document counts as a bug in the change that made it stale.
+- **Behavior and documentation change together.** When a change affects how a construct behaves,
+  the matching documents must be updated in the same change. A stale document counts as a bug in
+  the change that made it stale.
 - **Documents describe the present.** A document states how the code works now, without a history of
   how it got there. The version history is recorded separately, in the `releases/` section,
-  including when each construct was renamed or removed, so an agent that meets old syntax can find
-  what replaced it.
+  including when each construct was renamed or removed, so an agent that encounters old syntax can
+  find what replaced it.
 
 ## One construct, five views
 
-A single construct is described in five places, and the rules require all five to agree. Following
-`#[cgp_component]` through them shows what "kept in sync" means in practice:
+The rules require the accounts of a construct to agree wherever it is described. For
+`#[cgp_component]`, that means keeping the following sources in sync:
 
 - **The implementation:** the parsing and code generation in
   [`cgp-macro-core`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_component).
@@ -77,68 +81,69 @@ source decides which one is wrong.
 
 ## Written rules
 
-The rules agents follow are written down in the knowledge base and are public. Its
+These rules are public. The knowledge base's
 [AGENTS.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md) holds the
-rules every document follows, and each section has a writing guide for its own kind of document:
-how a reference document is structured, how an implementation document indexes the tests, how an
-error class is documented with the example that produces it. Each code repository has an `AGENTS.md`
-of its own, which sends its agents to the CGP skill and the knowledge base to learn CGP rather than
-teaching it again. Before a task, agents load the CGP skill, the rules, and the guide for that kind
-of document, and read
-[summary.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/summary.md), a one-line
-index of every document, to find the few documents the task needs.
+rules that apply to every document, while each section has a writing guide for its own kind of
+document. Those guides explain how to structure a reference document, index tests in an
+implementation document, or document an error class with an example that produces it.
 
-Public writing follows written rules too. The `communication-strategy/` section fixes how CGP is
-presented: the voice of each kind of page, the vocabulary, how costs are stated beside benefits, and
-how other projects are described. The `website/` section holds a writing guide for each kind of page
-on this site and a record of each page: which documents it rests on, how it was made, and what a
-revision must preserve.
+Each code repository has an `AGENTS.md` of its own, which directs agents to the CGP skill and the
+knowledge base to learn CGP. Before a task, agents load the skill, the rules, and the guide for the
+kind of document they are working on. They also read
+[summary.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/summary.md), a one-line
+index of every document, to find the documents the task needs.
+
+Public writing follows written rules too. The `communication-strategy/` section sets out how to
+present CGP, including the voice of each kind of page, the vocabulary, how to state costs alongside
+benefits, and how to describe other projects. The `website/` section provides a writing guide for
+each kind of page on this site. It also records which documents each page draws on, how it was
+written, and what a revision must preserve.
 
 ## Who directs the work
 
 Agents write the documents, but they do not decide what CGP is or what gets documented. The author
 designs every CGP construct, writes and revises the rules above, and chooses what the knowledge base
-and this site cover. The rules tell an agent to stop and ask the person directing it when a choice
-has more than one defensible answer, such as an unclear intended behavior or a document whose right
-home is uncertain, rather than guessing and building on the guess.
+and this site cover. When a choice has more than one defensible answer, the rules tell the agent to
+stop and ask the person directing it. For example, an agent must ask when the intended behavior is
+unclear or it is uncertain where a document belongs, so it does not build further work on a guess.
 
-The work also moves in separate passes rather than one prompt. A review of a document first checks
-every claim against the source, and only then improves how the document reads, so polished prose
-cannot hide a wrong claim. A new kind of page on this site gets a writing guide before the page is
-written, stating the page's job and what must not appear on it, and the draft is checked against
-that guide.
+The work proceeds in separate passes. During review, every claim in a document is checked against
+the source before its prose is improved, so polished wording cannot hide a wrong claim. Before a new
+kind of page is written for this site, a writing guide defines its purpose and what must not appear
+on it. The draft is then checked against that guide.
 
 ## From the record to this site
 
-The agent skill and this site's pages are derived from the record rather than written fresh. The
-skill condenses it. This site's reference pages are ported from the knowledge base's reference
-documents, its Concepts pages from the concept documents, and its comparison pages from the
-related-work documents, each rewritten for a person rather than an agent. Code shown on a page is
-also added to a test crate in the website's repository when the page is written or revised, so a
-snippet there that stops compiling fails a test.
+The knowledge base also supplies the material for the agent skill and this site's pages. The skill
+condenses that material, while the site's pages adapt it for people. Reference pages come from the
+knowledge base's reference documents, Concepts pages from its concept documents, and comparison
+pages from its related-work documents.
 
-Human review varies by page. The
-[AI disclaimer](/docs/ai/disclaimer#documentation-and-reference-pages) states which pages the author
+When a page is written or revised, its code examples are also added to a test crate in the website's
+repository. If one of those snippets stops compiling, it fails a test.
+
+Human review varies by page. The [AI
+disclaimer](/docs/ai/disclaimer#documentation-and-reference-pages) states which pages the author
 reads in full and which receive spot checks.
 
 ## Where the checks stop
 
-Some checks are mechanical and most are not. Expansion snapshots fail a test when a macro's output
-changes, the [cargo-cgp](/docs/tooling/cargo-cgp) test fixtures fail when a diagnostic changes, and the
-website's test crate fails when a snippet it holds no longer compiles. Agreement between prose and
-code is enforced by agents following the rules and by the author's review, and both can miss a stale
-sentence.
+Some of these checks are mechanical, but most depend on judgment. Expansion snapshots fail a test
+when a macro's output changes, the [cargo-cgp](/docs/tooling/cargo-cgp) test fixtures fail when a
+diagnostic changes, and the website's test crate fails when a snippet it holds no longer compiles.
+Agreement between prose and code is enforced by agents following the rules and by the author's
+review, and both can miss a stale sentence.
 
 A document can therefore lag behind the code or state something wrong, and so can a page derived
-from it. The knowledge base's [current state](index.md#its-current-state) says how to weigh a
-document with that in mind. The aim is to improve the knowledge base step by step toward full
-accuracy, meaning agreement with the author's intent as well as with the source.
+from it. The knowledge base's [current state](index.md#its-current-state) explains how to assess a
+document with that limitation in mind. The aim is to improve the knowledge base step by step toward
+full accuracy, meaning agreement with the author's intent as well as with the source.
 
-The process does not make agent-written documentation correct. It makes an error checkable against a
-public record and correctable at its source, after which the correction reaches the skill and the
-site. If you find an error or an inconsistency in the knowledge base, file it on its
-[issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues). For an error in a page
-on this site or in the code, report it on the repository it concerns.
+This process cannot guarantee that agent-written documentation is correct. It does, however, make an
+error checkable against a public record and correctable at its source, after which the correction
+reaches both the skill and the site. If you find an error or an inconsistency in the knowledge base,
+file it on its [issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues). For an
+error in a page on this site or in the code, report it on the repository it concerns.
 
 ---
 
