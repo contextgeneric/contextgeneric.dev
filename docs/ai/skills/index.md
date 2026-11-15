@@ -39,17 +39,17 @@ The skill is written for an agent that needs dense rules and worked examples for
 time, so it is a poor way to learn CGP yourself. For that, start with the
 [tutorials](/docs/tutorials/hello) and the [Concepts](/docs/concepts) pages instead.
 
-Your agent can also outgrow the skill, when a question needs a macro's corner cases or how it is
+Your agent can also outgrow the skill when a question needs a macro's corner cases or how a macro is
 implemented. The skill is written from the CGP knowledge base, which holds that detail, and
 [Using the Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent) shows
 how to point your agent at it.
 
 ## What is published here
 
-The skill pages on this site show the repository at one revision, without changes, so the
-repository may already hold newer ones. Install the skill from the repository, as the installation
-page describes, and report a mistake in a skill there. Each skill has its own directory in this
-section, so more skills can join the `/cgp` skill later.
+The skill pages on this site show the repository at one revision, without changes, so the repository
+may already hold a newer version. Install the skill from the repository, as the installation page
+describes, and report a mistake in a skill there. Each skill has its own directory in this section,
+so more skills can join the `/cgp` skill later.
 
 ---
 

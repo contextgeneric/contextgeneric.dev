@@ -11,9 +11,9 @@ AI agents do much of the work on [Context-Generic Programming (CGP)](/docs/), a 
 writing several implementations of a trait and choosing which one each type uses. They write most of
 its documentation and most of its error toolchain, maintain much of its test suite, and help
 implement parts of the library. The author designs every CGP construct and interface, and writes the
-core library almost entirely by hand. This page explains where that line falls and why, then goes
-through each part of the project, from the most agent-written to the least, saying who does the
-work, how it is checked, and where the checks stop.
+core library almost entirely by hand. This page explains where the line between their work and the
+author's falls, and why, then goes through each part of the project, from the most agent-written to
+the least, saying who does the work, how it is checked, and where the checks stop.
 
 ## Why the levels differ
 
@@ -27,7 +27,7 @@ place, and passing tests cannot settle that.
 
 Agents therefore do the most writing where the result stays out of your program and can be checked,
 and the least in the core library, whose design sets the behavior everything else must follow. These
-criteria decide who writes each part; they do not make any part correct.
+criteria decide who writes each part, but they do not make any part correct.
 
 ## Documentation and reference pages
 
@@ -45,8 +45,8 @@ page is written or revised. Agreement between prose and code depends on agents f
 and on review, and both can miss a stale sentence. So some documents still contain errors that no
 review has found yet, and the pages written from them share those errors.
 
-The author directs this work, designing CGP, writing the rules agents follow, and choosing what gets
-documented, and the rules tell an agent to ask rather than guess when a choice has more than one
+The author directs this work: designing CGP, writing the rules agents follow, and choosing what gets
+documented. Those rules tell an agent to ask rather than guess when a choice has more than one
 reasonable answer. A commit an agent contributed to carries a `Co-Authored-By` trailer naming the
 model, so you can see which changes agents made. That record shows who contributed, not that every
 statement is correct. [How CGP's Documentation Is Written](/docs/ai/knowledge-base/how-cgp-is-documented)
@@ -80,8 +80,8 @@ current process.
 
 Agents write most of [cargo-cgp](/docs/tooling/cargo-cgp), CGP's error toolchain, and maintain much
 of CGP's test suite. Neither becomes part of your compiled program: `cargo-cgp` runs on your
-project, and the tests exercise the library. Both can be checked, `cargo-cgp`'s output against its
-test fixtures and the tests against the library's behavior.
+project, and the tests exercise the library. Both can be checked: `cargo-cgp`'s output against its
+test fixtures, and the tests against the library's behavior.
 
 Agents also extend the tests across the many syntax forms the procedural macros accept. That work is
 broad and repetitive, and agents make coverage practical beyond what the author could maintain
@@ -99,11 +99,11 @@ responsibility for its design and implementation.
 
 Agents help with correctness checks, code-quality review, and the implementation of the procedural
 macros, and the author directs and reviews that work. The
-[cgp repository](https://github.com/contextgeneric/cgp) records it with `Co-Authored-By` trailers,
-including on the macros. The line therefore falls between design and implementation: the author
-decides what CGP provides and how its interfaces fit together, and agents help implement and check
-some of those decisions. The library does contain AI contributions, and its checks cannot guarantee
-that every implementation is correct.
+[cgp repository](https://github.com/contextgeneric/cgp) records that work with `Co-Authored-By`
+trailers, including on the macros. The line therefore falls between design and implementation: the
+author decides what CGP provides and how its interfaces fit together, and agents help implement and
+check some of those decisions. The library does contain AI contributions, and its checks cannot
+guarantee that every implementation is correct.
 
 ## Contributions from others
 

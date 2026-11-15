@@ -110,12 +110,11 @@ views of it that must not drift. Each kind of change carries its own updates:
 A contribution that spans repositories needs a pull request in each. Link them to each other so
 they can be reviewed together.
 
-The rules also ask your agent to load the CGP skill, from
-[`cgp-skills`](https://github.com/contextgeneric/cgp-skills), before it works, so make it available
-in the way your agent loads skills, as [Installing the CGP Skill](/docs/ai/skills/installation)
-describes. For the prose an agent writes, the rules also name the `point-first-writing` skill. That
-skill is optional and not part of the CGP repositories, so your agent uses it only when it is
-available.
+Before your agent starts, the rules ask it to load the CGP skill from
+[`cgp-skills`](https://github.com/contextgeneric/cgp-skills), so make that skill available in the
+way your agent loads skills, as [Installing the CGP Skill](/docs/ai/skills/installation) describes.
+For the prose your agent writes, they name the `point-first-writing` skill as well. That skill is
+optional and not part of the CGP repositories, so your agent uses it only when it is available.
 
 The rules also shape how the agent works with you. It stops and asks you when a choice has more than
 one defensible answer, such as an unclear intended behavior, rather than guessing. And it creates
