@@ -65,9 +65,9 @@ codex plugin marketplace add contextgeneric/cgp-skills --ref v0.8.0
 codex plugin add cgp@cgp-skills
 ```
 
-Codex then lists the skill as `cgp:cgp`. You can also ask Codex's built-in `$skill-installer` to
-install `https://github.com/contextgeneric/cgp-skills/tree/v0.8.0/cgp`, or copy the skill into
-`~/.agents/skills/cgp`, or `.agents/skills/cgp` in a project, where it is listed as `cgp`.
+Codex then lists the skill as `cgp:cgp`. Its built-in `$skill-installer` can also install
+`https://github.com/contextgeneric/cgp-skills/tree/v0.8.0/cgp` when you ask it to. A copy goes in
+`~/.agents/skills/cgp`, or `.agents/skills/cgp` in a project, where Codex lists it as `cgp`.
 
 ### Cursor
 
@@ -162,7 +162,7 @@ or `cgp:cgp` for a plugin. A question about CGP code, such as what a `delegate_c
 does, should then lead the agent to load the skill. The skill tells the agent to compare your
 project's `cgp` version with the one it describes, and to say when they differ.
 
-The skill teaches the agent, so it does not make the agent's code correct. Review what the agent
+The skill teaches the agent, but it does not make the agent's code correct. Review what the agent
 writes with it as you would any other change.
 
 ## Updating to a newer version

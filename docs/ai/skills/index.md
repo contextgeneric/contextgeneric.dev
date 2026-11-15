@@ -9,8 +9,8 @@ sidebar_position: 1
 A coding agent working on a [Context-Generic Programming (CGP)](/docs/) project meets Rust code
 whose meaning is not all in the source. CGP's macros generate the traits and impls that wiring
 connects, and what the agent learned in training may show syntax the library no longer accepts. An
-agent skill supplies what the source leaves out: it is a set of Markdown instructions that the agent
-loads when a task needs them. This section publishes CGP's skills from the
+agent skill gives the agent that missing knowledge: it is a set of Markdown instructions that the
+agent loads when a task needs them. This section publishes CGP's skills from the
 [cgp-skills repository](https://github.com/contextgeneric/cgp-skills), so you can read what your
 agent reads.
 
@@ -25,7 +25,7 @@ it sends the agent to the reference that owns the task, from
 [namespaces](/docs/ai/skills/cgp/references/namespaces); the sidebar lists them all. The skill
 describes `cgp` v0.8.0 and `cargo-cgp` v0.1.0.
 
-The skill teaches the agent, so it does not make the agent's code correct. Review what the agent
+The skill teaches the agent, but it does not make the agent's code correct. Review what the agent
 writes as you would any other change, and read the skill when you want to see the instructions the
 agent follows.
 
@@ -45,9 +45,10 @@ how.
 
 ## What is published here
 
-The skill pages on this site are a snapshot of the repository at one revision, shown without
-changes. The repository may hold newer changes, so install from it, and report a mistake in a skill
-there. Each skill has its own directory in this section, so more can join the `/cgp` skill later.
+The skill pages on this site show the repository at one revision, without changes, so the
+repository may already hold newer ones. Install the skill from the repository, as the installation
+page describes, and report a mistake in a skill there. Each skill has its own directory in this
+section, so more skills can join the `/cgp` skill later.
 
 ---
 
