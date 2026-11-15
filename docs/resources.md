@@ -16,15 +16,17 @@ Each entry says in a line what it is and who it is for.
 
 - [`cgp`](https://crates.io/crates/cgp): the main crate, with the macros, traits, and providers
   that every CGP program uses.
-- [`cgp-error-anyhow`](https://crates.io/crates/cgp-error-anyhow): an error backend that makes
-  `anyhow::Error` a context's error type, with providers that raise other errors into it and add
-  detail to it.
-- [`cgp-error-eyre`](https://crates.io/crates/cgp-error-eyre): the same backend for `eyre::Report`.
+- [`cgp-error-anyhow`](https://crates.io/crates/cgp-error-anyhow): an error backend for an
+  application that already reports errors with `anyhow`. It makes `anyhow::Error` a context's error
+  type, with providers that raise other errors into it and add detail to it.
+- [`cgp-error-eyre`](https://crates.io/crates/cgp-error-eyre): the same backend for an application
+  that uses `eyre::Report`.
 - [`cgp-error-std`](https://crates.io/crates/cgp-error-std): the same backend for a boxed standard
   error, for code that avoids a third-party error crate.
 - [`cgp-serde`](https://crates.io/crates/cgp-serde): Serde's `Serialize` and `Deserialize` rebuilt
-  as CGP components, so each context chooses how a value type is encoded. Its
-  [Projects section](/docs/projects/cgp-serde/) walks through its examples.
+  as CGP components, so each context chooses how a value type is encoded, for applications that need
+  the same types encoded in different ways. Its [Projects section](/docs/projects/cgp-serde/) walks
+  through its examples.
 
 ## Tools
 
@@ -57,12 +59,13 @@ The talk explains why Rust's coherence rules exist before showing how CGP works 
 
 ## Projects
 
-- [CGP Examples](https://github.com/contextgeneric/cgp-examples): a repository of small example
-  programs, each showing one area of CGP in use, from an HTTP service to a modular interpreter. Its
-  [Projects section](/docs/projects/cgp-examples/) walks through them.
-- [Hypershell](https://github.com/contextgeneric/hypershell): a type-level DSL for shell scripting in
-  Rust, built with CGP. Its [Projects section](/docs/projects/hypershell/) walks through its
-  examples.
+- [CGP Examples](https://github.com/contextgeneric/cgp-examples): small example programs, each
+  showing one area of CGP in use, from an HTTP service to a modular interpreter, for a reader who
+  wants complete code rather than fragments. Its [Projects section](/docs/projects/cgp-examples/)
+  walks through them.
+- [Hypershell](https://github.com/contextgeneric/hypershell): a type-level DSL for shell scripting
+  in Rust, built with CGP, for a reader who wants to see a whole project's design rather than one
+  example. Its [Projects section](/docs/projects/hypershell/) walks through its examples.
 
 ---
 

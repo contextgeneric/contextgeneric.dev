@@ -7,7 +7,7 @@ description: 'Rewrite a trait''s async fn declarations into the lint-clean impl 
 
 # `#[async_trait]`
 
-Rewrite a trait's `async fn` declarations into the lint-clean `-> impl Future` form that async component methods use.
+Rewrite a trait's `async fn` declarations into the lint-clean `-> impl Future` form that the library's async traits use.
 
 ## Overview
 

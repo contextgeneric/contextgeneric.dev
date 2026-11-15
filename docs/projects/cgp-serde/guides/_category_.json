@@ -3,6 +3,6 @@
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "How to wire a cgp-serde context, write a provider, use a format, and debug the wiring, in a serialization library built with Context-Generic Programming (CGP)."
+    "description": "How to wire a context, write a provider, use a format, and debug the wiring in cgp-serde, a serialization library built with Context-Generic Programming (CGP)."
   }
 }
