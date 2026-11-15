@@ -573,7 +573,8 @@ To fix it, name the component in the attribute, as the fix under the `help` line
 `#[cgp_impl(new UnitArea: AreaComponent)]` or `#[cgp_provider(GreeterComponent)]`; a key with
 parameters takes the header's arguments, as `AreaCalculatorComponent<Square>`. When the module does
 not import the key, the same fix adds its `use` line, and an editor offers the fix on the trait's
-name. For a renamed import, the `note` explains why the compiler calls the key's import unused.
+name. When a renamed import sits beside an import of the key, the `note` explains why the
+compiler calls that import unused.
 
 ## Steps of the dependency chain
 
