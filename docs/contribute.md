@@ -56,7 +56,7 @@ or not you work with a coding agent.
 
 ## Sponsor Me
 
-If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have sponsorship pages on [Github Sponsor](https://github.com/sponsors/soareschen/), [Patreon](https://www.patreon.com/c/maybevoid/about), and [Ko-Fi](https://ko-fi.com/maybevoid).
+If you appreciate my work and want to see CGP gain wider adoption, the best way to support it is to *sponsor* me, regardless of the amount. I have a sponsorship page on [Github Sponsor](https://github.com/sponsors/soareschen/).
 
 ## Acknowledgement
 
