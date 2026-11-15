@@ -27,8 +27,10 @@ Discussions or as an issue on the
 written from the CGP knowledge base, a public record of CGP written for agents, and its checks can
 miss an error or an inconsistency between two documents. So reporting a problem you find saves the
 project a review it would otherwise have to do itself.
+File a problem in the knowledge base on its
+[issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues), and see
 [Report problems in the knowledge base](/docs/ai/knowledge-base/contributing-with-an-agent#report-problems-in-the-knowledge-base)
-says where to file a problem in the knowledge base and what to include.
+for what to include.
 
 ## Write about CGP and share it
 

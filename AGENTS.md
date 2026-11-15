@@ -87,14 +87,15 @@ Every snippet on a page is verified against current CGP:
 
 ## Links
 
-A published page links only public resources, and links into the knowledge base only through two
-exceptions:
+A published page links only public resources, and links into the knowledge base only through the
+exceptions below:
 
 - Never link a published page into the knowledge base.
-- Make only two hand-written exceptions: `docs/ai/disclaimer.md`, which may link the base's repository
-  page and its issue tracker, and the pages under `docs/ai/knowledge-base/`, which may also link the
-  four top-level entry files (`README.md`, `summary.md`, `AGENTS.md`, and `sibling-projects.md`) and
-  name a section's directory in prose rather than link a document inside it.
+- Make only three hand-written exceptions: `docs/ai/disclaimer.md`, which may link the base's
+  repository page and its issue tracker; `docs/contribute.md`, which may link the issue tracker
+  alone; and the pages under `docs/ai/knowledge-base/`, which may also link the four top-level entry
+  files (`README.md`, `summary.md`, `AGENTS.md`, and `sibling-projects.md`) and name a section's
+  directory in prose rather than link a document inside it.
 - Let only the published skill pages under `docs/ai/skills/` cite the knowledge base by deep GitHub
   URL; nobody hand-writes them, and another page must not link there.
 - Do not correct these links or extend the exception to another page.
