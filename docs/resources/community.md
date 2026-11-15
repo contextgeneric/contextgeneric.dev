@@ -7,9 +7,9 @@ description: 'Where to ask questions about Context-Generic Programming, discuss 
 
 # Community
 
-[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
-while you learn it or use it in your own code, you may have a question the documentation does not
-answer. This page lists the places where you can ask it, talk with other users, and follow news of
+[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust. As you
+learn it, or use it in your own code, you may run into a question the documentation does not
+answer. This page lists where to ask it, where to talk with other users, and where to follow news of
 CGP's development.
 
 ## Ask a question or start a discussion
@@ -24,12 +24,12 @@ Each channel suits a different kind of conversation, so pick the one that fits y
 - **[r/cgp](https://www.reddit.com/r/cgp/):** the subreddit, for public discussion of CGP and of
   what people write about it.
 
-If a page is wrong rather than unclear, [Report a problem](/docs/contribute#report-a-problem) says
-where the report goes.
+If a page confuses you or contradicts the code, the Contribute page's
+[Report a problem](/docs/contribute#report-a-problem) says where to report it.
 
 ## Follow CGP's news
 
-CGP posts news of its development on Bluesky, at
+News of CGP's development appears on Bluesky, at
 [@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev). Release announcements and longer
 articles appear on the [blog](/blog), which you can also follow through its
 [RSS feed](https://contextgeneric.dev/blog/rss.xml).

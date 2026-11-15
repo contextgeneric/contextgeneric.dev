@@ -14,9 +14,9 @@ Each route helps on its own, and none of them requires the ones after it.
 
 ## Join the discussion
 
-Ask questions about CGP, and suggest what the documentation should cover next, in the project's
-discussion channels, which the [Community](/docs/resources/community) page lists with what each one
-is for. A question that a page should have answered also shows which page needs work.
+Ask questions about CGP, and suggest what the documentation should cover next. The
+[Community](/docs/resources/community) page lists the discussion channels and what each one suits.
+Even a question helps, because one that a page should have answered shows which page needs work.
 
 ## Report a problem
 
@@ -35,8 +35,8 @@ says what to include.
 
 A blog post, a tutorial, or a talk about what you built with CGP, or how you learned it, helps other
 readers even where this site already covers the topic, because a second explanation can reach a
-reader the first one did not. You can also follow CGP on Bluesky, which the
-[Community](/docs/resources/community) page links, and share what you find useful there.
+reader the first one did not. You can also follow CGP on Bluesky, linked from the
+[Community](/docs/resources/community) page, and share what you find useful there.
 
 ## Publish reusable components
 

@@ -10,8 +10,8 @@ description: 'This section collects material about Context-Generic Programming b
 The rest of this site's documentation explains [Context-Generic Programming (CGP)](/docs/), which
 enables pluggable trait implementations in Rust. Sometimes, though, you want to meet CGP another
 way: in a talk you can watch, in a conversation with other users, or through the crate's API as
-rustdoc shows it. This section gathers that material from outside the documentation, along with the
-places where people discuss CGP.
+rustdoc shows it. This section gathers that material from outside the documentation, and the places
+where people discuss CGP.
 
 ## Videos
 
@@ -22,9 +22,9 @@ can also read it at your own pace.
 
 ## Community
 
-When you have a question, want to talk with other users, or want to follow news of CGP's
-development, go to the [Community](/docs/resources/community) page. It says what each channel is
-for: the Discord server, GitHub Discussions, the r/cgp subreddit, and CGP's Bluesky account.
+If you have a question, want to talk with other users, or want to follow CGP's news, the
+[Community](/docs/resources/community) page says where to go. It covers the Discord server, GitHub
+Discussions, the r/cgp subreddit, and CGP's Bluesky account, with what each one is for.
 
 ## API documentation
 
