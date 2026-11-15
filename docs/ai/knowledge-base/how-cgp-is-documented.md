@@ -7,12 +7,12 @@ description: 'AI agents write CGP''s documentation from a public knowledge base 
 
 # How CGP's Documentation Is Written
 
-[Context-Generic Programming (CGP)](/docs/) is a language extension for Rust, with pluggable trait
-implementations at compile-time. AI agents write most of its documentation from the public
+AI agents write most of the documentation of [Context-Generic Programming (CGP)](/docs/), and this
+page describes how, for a reader deciding how far to trust it. The agents work from the public
 [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base), a record written for
-agents and checked against the library's source. This page describes that process, the problem it
-answers, and where its checks stop. The [AI disclaimer](/docs/ai/disclaimer) summarizes who writes
-and reviews each part of the project; this page gives the full account of the documentation process.
+agents and checked against the library's source. The sections below cover the problem that record
+answers, the rules that keep it true, who directs the work, and where its checks stop. For who
+reviews which page, see the [AI disclaimer](/docs/ai/disclaimer).
 
 ## The problem with one-shot prompts
 
@@ -35,7 +35,8 @@ The knowledge base records each of those reconstructions once, in prose, so that
 the conclusion instead of deriving it again. Each document owns one subject: a construct, a
 cross-cutting concept, a class of compile errors, a worked example, the internals of one macro, or a
 page of this site. A document that mentions another subject links to the document that owns it
-rather than explaining it a second time, so two explanations cannot drift apart.
+rather than explaining it a second time, so there is one explanation to keep current instead of
+two that can drift apart.
 
 The record is only useful while it is true, so these rules govern every document:
 
@@ -72,10 +73,6 @@ A single construct is described in five places, and the rules require all five t
 When the macro's output changes, the snapshot changes with it, and the reference document, the
 implementation document, and the skill are updated in the same change. When the views disagree, the
 source decides which one is wrong.
-
-Repeating the explanation in different views keeps agents from drifting away from the correct
-understanding of a given CGP construct. Doing so would require the agent to maintain the same
-misunderstanding across all views, which is relatively unlikely.
 
 ## Written rules
 

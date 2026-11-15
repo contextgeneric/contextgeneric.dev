@@ -2,51 +2,53 @@
 title: 'AI-Assisted Development'
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'How to work with CGP through a coding agent, using its agent skill and knowledge base, and how the CGP project itself uses AI to write its documentation, tools, and tests.'
+description: 'How a coding agent can help you work with CGP through its agent skill and knowledge base, and how the CGP project itself uses AI to write its documentation, tools, and tests.'
 ---
 
 # AI-Assisted Development
 
-[Context-Generic Programming (CGP)](/docs/) is a language extension for Rust, with pluggable trait
-implementations at compile-time. This section covers CGP and AI coding agents in two directions:
-help for you when you work on CGP code with an agent, and an account of how the CGP project uses
-agents itself. The two are separate subjects, and the pages below keep them apart.
+Coding agents meet [Context-Generic Programming (CGP)](/docs/) in two ways, and this section covers
+both. You may want an agent's help with your own CGP code, which means the agent has to know CGP
+better than its training does. Or you may want to know how much of the documentation you are
+reading an agent wrote, and how that work is checked. The two questions are separate, so their pages
+are kept apart below.
 
 ## Working with CGP through an agent
 
-CGP publishes material that teaches a coding agent its vocabulary, its recommended syntax, and how
-to read its compile errors. That can reduce the work of learning CGP, writing its wiring, and
-reading its diagnostics, but it does not replace your own review: an agent can still produce wrong
-code, and you remain the one who has to understand it.
+Much of what has been published about CGP shows syntax the library no longer accepts, and an agent
+reading your code cannot see what CGP's macros generate from it. CGP publishes two things that fill
+those gaps. The agent skill teaches an agent CGP's vocabulary, its current syntax, and how to read
+its compile errors, and the knowledge base holds the complete record the skill is written from.
+Together they can make learning CGP, writing its wiring, and reading its diagnostics less work. Your
+agent can still write wrong code, though, so review what it produces as you would any other change.
 
 Choose the page for what you want to do:
 
 - **Have your agent read and write CGP code.** Start with [CGP's agent skill](/docs/ai/skills),
-  which your agent loads and which covers everyday work.
-- **Get a deeper answer than the skill gives.** Read
-  [Using the Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent) to
-  point your agent at the full record behind the skill.
-- **Contribute to CGP with an agent's help.** Read
-  [Contributing to CGP with an Agent](/docs/ai/knowledge-base/contributing-with-an-agent) for the
-  policy for AI-assisted contributions, how to report problems in the knowledge base, the setup, and
-  the rules your agent follows.
+  then follow [Installing the CGP Skill](/docs/ai/skills/installation) for the agent you use.
+- **Get an answer the skill does not carry,** such as a macro's corner case or how it is
+  implemented. [Using the Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent)
+  shows how to point your agent at the full record.
+- **Change CGP itself with an agent's help.** [Contributing to CGP with an
+  Agent](/docs/ai/knowledge-base/contributing-with-an-agent) gives the contribution policy, the
+  setup, and the rules your agent follows.
 
-To learn CGP yourself, start with the [tutorials](/docs/tutorials/hello) and the
-[Concepts](/docs/concepts) pages instead. The skill and the knowledge base are written for agents.
+The skill and the knowledge base are written for agents rather than people. To learn CGP yourself,
+start with the [tutorials](/docs/tutorials/hello) and the [Concepts](/docs/concepts) pages instead.
 
 ## How the CGP project uses AI
 
-AI agents write most of CGP's documentation and most of `cargo-cgp`, maintain much of CGP's test
-suite, and assist with parts of the library's implementation. The author designs every CGP construct
-and writes the core library almost entirely by hand. These pages explain the arrangement and how it
-is checked:
+AI agents write most of CGP's documentation and most of `cargo-cgp`, maintain much of its test
+suite, and help implement parts of the library. The author designs every CGP construct and writes
+the core library almost entirely by hand. Three pages explain this arrangement and how it is
+checked:
 
-- **Which parts of the project are written by AI, and who reviews them?** Read [How AI Is Used in
-  the CGP Project](/docs/ai/disclaimer). New pages written with AI assistance link to it from a note
-  at their foot.
-- **How is agent-written documentation kept accurate?** Read
-  [How CGP's Documentation Is Written](/docs/ai/knowledge-base/how-cgp-is-documented).
-- **What is the knowledge base the documentation comes from?** Read
+- **Which parts of the project do agents write, and who reviews them?** Read [How AI Is Used in the
+  CGP Project](/docs/ai/disclaimer). Pages written with an agent's help link to it from a note at
+  their foot.
+- **How is agent-written documentation kept accurate?** Read [How CGP's Documentation Is
+  Written](/docs/ai/knowledge-base/how-cgp-is-documented).
+- **What is the record that documentation comes from?** Read
   [The CGP Knowledge Base](/docs/ai/knowledge-base).
 
 ---

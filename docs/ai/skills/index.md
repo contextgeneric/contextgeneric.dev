@@ -33,16 +33,16 @@ agent follows.
 To install it, give your agent the repository's URL and ask it to install the `/cgp` skill, or
 follow the steps for your harness on [Installing the CGP Skill](/docs/ai/skills/installation).
 
-## Learning CGP yourself
+## Beyond the skill
 
 The skill is written for an agent that needs dense rules and worked examples for one task at a
-time. To learn CGP yourself, start with the [tutorials](/docs/tutorials/hello) and the
-[Concepts](/docs/concepts) pages instead.
+time, so it is a poor way to learn CGP yourself. For that, start with the
+[tutorials](/docs/tutorials/hello) and the [Concepts](/docs/concepts) pages instead.
 
-When your agent's question needs more than the skill carries, such as a macro's corner cases or how
-it is implemented, point it at the knowledge base the skill is written from.
+Your agent can also outgrow the skill, when a question needs a macro's corner cases or how it is
+implemented. The skill is written from the CGP knowledge base, which holds that detail, and
 [Using the Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent) shows
-how.
+how to point your agent at it.
 
 ## What is published here
 

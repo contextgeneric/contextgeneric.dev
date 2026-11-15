@@ -7,12 +7,13 @@ description: 'Direct a coding agent to the CGP knowledge base when a question ab
 
 # Using the Knowledge Base with Your Agent
 
-[Context-Generic Programming (CGP)](/docs/) is a language extension for Rust, with pluggable trait
-implementations at compile-time. This page shows how to direct a coding agent to the [CGP knowledge
-base](https://github.com/contextgeneric/cgp-knowledge-base) when you want a deeper answer than the
-[agent skill](/docs/ai/skills) gives. The knowledge base is written for agents rather than people,
-so the page is about directing your agent to it. It assumes you already use an agent and know how to
-give it files or a repository to read.
+Your agent can learn the everyday use of [Context-Generic Programming (CGP)](/docs/) from the
+[agent skill](/docs/ai/skills), but some questions need more than the skill carries. For those, you
+can point the agent at the public
+[CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base), the full record the
+skill is written from. The knowledge base is written for agents rather than people, so this page is
+about directing your agent to it. It assumes you already use a coding agent and know how to give it
+files or a repository to read.
 
 ## When to use it
 
@@ -33,8 +34,8 @@ Use the knowledge base when a question needs the complete record:
   [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) prints and the knowledge base explains.
 - **A comparison:** how CGP relates to an idea from another language you already know.
 
-The skill already links to knowledge-base documents for details it leaves out, so an agent with the
-skill may fetch some of them on its own. The steps below make that reading deliberate.
+The skill already links to knowledge-base documents for the details it leaves out, so an agent
+with the skill may fetch some of them on its own. The steps below make that reading deliberate.
 
 ## Give the agent access
 
@@ -82,8 +83,7 @@ which section owns the question.
 Review the agent's answer before relying on it. The knowledge base gives an agent a checked record
 to work from, but the agent can still misread a document, and a document can lag behind the code or
 hold an error that no review has found yet, as [its current state](index.md#its-current-state)
-describes.
-Ask the agent to name the documents it used, so you can check each claim at its source.
+describes. Ask the agent to name the documents it used, so you can check each claim at its source.
 
 When an answer disagrees with the code, the code is right. If the disagreement comes from the
 document rather than the agent's reading of it, file it on the knowledge base's

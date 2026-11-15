@@ -7,84 +7,81 @@ description: 'The public, agent-written record that CGP''s documentation and age
 
 # The CGP Knowledge Base
 
-[Context-Generic Programming (CGP)](/docs/) is a language extension for Rust, with pluggable trait
-implementations at compile-time. The
-[CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base) is a public repository of
-documents that record what CGP's constructs mean, how its macros and tools are built, and how the
-project presents itself. AI agents write and maintain it, and agents are its main readers. The
-reference pages on this site, most of its other documentation, and the
-[agent skill](/docs/ai/skills) are written from it.
+Most of the documentation of [Context-Generic Programming (CGP)](/docs/), on this site and in its
+[agent skill](/docs/ai/skills), is written from one public repository: the
+[CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base). It records what each of
+CGP's constructs means, how its macros and tools are built, and how the project presents itself. AI
+agents write and maintain it, and agents are its main readers.
 
 ## What it is for
 
-The knowledge base gives an agent a written record of CGP to read, so the agent does not have to
-reconstruct CGP from the macro source or hallucinate on what a given syntax really means. It records
-the semantics of each construct, including the syntax forms it accepts and the code each macro
-expands to. It also holds the internals of the macros and of [cargo-cgp](/docs/tooling/cargo-cgp), the classes
-of compile error CGP produces, worked examples, and comparisons with related ideas from other languages.
+An agent working with CGP has to know what a piece of syntax means, and neither the macro source nor
+its training tells it reliably. The macro source shows token-stream transformations rather than the
+traits and impls they produce, and much of what has been published about CGP shows syntax the
+library no longer accepts. The knowledge base writes that meaning down once, so an agent can read it
+instead of reconstructing it or guessing. It records the syntax each construct accepts and the code
+its macro expands to, the internals of the macros and of [cargo-cgp](/docs/tooling/cargo-cgp), the
+classes of compile error CGP produces, worked examples, and comparisons with related ideas from
+other languages.
 
-The [agent skill](/docs/ai/skills) is the part of this record sized for everyday work: it fits in an
-assistant's context and teaches it to read and write CGP code. The knowledge base is the exhaustive
-record behind it, for questions the skill does not answer, such as a corner case of one macro, how a
-macro is implemented, or why a diagnostic reads as it does.
+The agent skill is the part of this record sized for everyday work: it fits in an agent's context
+beside your code and teaches the agent to read and write CGP. The knowledge base is the complete
+record behind it, for the questions the skill does not answer, such as a corner case of one macro,
+how a macro is implemented, or why a diagnostic reads as it does.
 
 ## Who reads it
 
 The knowledge base is written for agents, not for people learning CGP. Its documents assume the
-agent skill's vocabulary, favor completeness over a gentle introduction, and record unfinished work
-and known defects beside current behavior. To learn CGP, start with the
+skill's vocabulary, prefer completeness to a gentle introduction, and record unfinished work and
+known defects beside current behavior. To learn CGP yourself, start with the
 [tutorials](/docs/tutorials/hello) and the [Concepts](/docs/concepts) pages.
 
-You can still read it directly. It is useful when you want the complete record of a construct, when
-you want to check how a page on this site was produced, or when you are deciding whether to
-contribute.
-
-## Its current state
-
-The knowledge base is checked against the source code, but the checks can miss a stale sentence or
-an inconsistency, so some of its documents contain errors that no review has found yet. Read any one
-document as the best record available, checked against the source but not guaranteed to be free of
-errors.
-
-The aim is to improve the knowledge base step by step until it is fully accurate, meaning that it
-agrees with the author's intent for CGP as well as with the source code. Finding a problem in it is
-a useful contribution: file it on the knowledge base's
-[issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues), as
-[Contributing to CGP with an Agent](contributing-with-an-agent.md) describes.
+You can still read it yourself when you want the complete record of a construct, when you want to
+check how a page on this site was produced, or when you are deciding whether to contribute.
 
 ## How it relates to the code
 
-CGP's source code is the final authority. When a document in the knowledge base disagrees with the
-code, the document is wrong and is corrected. The knowledge base records what the source means, the
-agent skill condenses that record, and the pages on this site are written from the record in a form
-meant for people. A correction therefore starts in the source or the knowledge base and moves
-outward to the skill and the site.
+CGP's source code is the final authority. When a document disagrees with the code, the document is
+wrong and is corrected. The knowledge base records what the source means, the agent skill condenses
+that record, and the pages on this site rewrite it for people. A correction therefore starts in the
+source or the knowledge base and moves outward to the skill and the site.
+
+## Its current state
+
+Agents check the knowledge base against the source code, but the checks can miss a stale sentence
+or an inconsistency, so some documents still contain errors that no review has found yet. Read each
+document as the best record available: checked against the source, but not guaranteed to be free of
+errors.
+
+Each error reported and fixed brings the knowledge base closer to full accuracy, meaning agreement
+with the author's intent for CGP as well as with the source. If you find one, file it on the
+knowledge base's [issue tracker](https://github.com/contextgeneric/cgp-knowledge-base/issues), as
+[Contributing to CGP with an Agent](contributing-with-an-agent.md#report-problems-in-the-knowledge-base)
+describes.
 
 ## What it contains
 
-The knowledge base is divided into top-level sections, each with a `README.md` that catalogs its
-documents:
+Each top-level section of the knowledge base has a `README.md` that lists its documents:
 
-- **`cgp/`:** The CGP library, with a reference document for every construct, concept overviews,
+- **`cgp/`:** the CGP library, with a reference document for every construct, concept overviews,
   guides for choosing between constructs, a catalog of compile errors, and the macros' internals.
-- **`cargo-cgp/`:** The error toolchain's usage, internals, open issues, and error codes.
-- **`examples/`:** Worked examples, each developing one use case, which serve as the verified source
-  of most code on this site.
-- **`related-work/`:** Comparisons with ideas CGP resembles, such as type classes, dependency
+- **`cargo-cgp/`:** the error toolchain's usage, internals, open issues, and error codes.
+- **`examples/`:** worked examples, each developing one use case, which supply most of the code on
+  this site.
+- **`related-work/`:** comparisons with the ideas CGP resembles, such as type classes, dependency
   injection, and ML modules.
-- **`communication-strategy/`:** How CGP is presented in public, including the policy behind the
+- **`communication-strategy/`:** how CGP is presented in public, including the policy behind the
   [AI disclaimer](/docs/ai/disclaimer).
-- **`website/`:** A record of each page on this site and a guide for each kind of page.
-- **`releases/`:** The version history, including when each construct was renamed or removed.
-- **`projects/`:** Libraries built with CGP, such as Hypershell and cgp-serde.
-- **`skills/`:** Writing skills that the knowledge base's rules ask an agent to load.
+- **`website/`:** a record of each page on this site, and a guide for each kind of page.
+- **`releases/`:** the version history, including when each construct was renamed or removed.
+- **`projects/`:** the libraries built with CGP, such as Hypershell and cgp-serde.
 
-These files at the top level orient an agent before it opens any section:
+Four files at the top level orient an agent before it opens any section:
 
 - **[README.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/README.md):** how the
   knowledge base is organized, and what an agent that only reads it needs to know.
 - **[summary.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/summary.md):** every
-  document, with a one-line summary of each.
+  document, each with a one-line summary.
 - **[AGENTS.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/AGENTS.md):** the
   rules for writing and maintaining the documents.
 - **[sibling-projects.md](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/sibling-projects.md):**
