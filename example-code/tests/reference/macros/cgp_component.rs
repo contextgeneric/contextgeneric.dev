@@ -74,6 +74,61 @@ pub mod usage {
     }
 }
 
+/// ### Where the component key lives
+///
+/// The module that re-exports the component's traits with its key, and a provider importing
+/// both from it. The page names `components` without showing it.
+pub mod where_the_component_key_lives {
+    pub mod components {
+        use cgp::prelude::*;
+
+        #[cgp_component(AreaCalculator)]
+        pub trait CanCalculateArea {
+            fn area(&self) -> f64;
+        }
+    }
+
+    pub mod shapes {
+        pub use super::components::{AreaCalculator, AreaCalculatorComponent, CanCalculateArea};
+    }
+
+    pub mod providers {
+        use cgp::prelude::*;
+
+        use super::shapes::{AreaCalculator, AreaCalculatorComponent};
+
+        #[cgp_impl(new UnitArea)]
+        impl AreaCalculator {
+            fn area(&self) -> f64 {
+                1.0
+            }
+        }
+    }
+
+    use cgp::prelude::*;
+
+    use shapes::{AreaCalculatorComponent, CanCalculateArea};
+
+    pub struct Unit;
+
+    delegate_components! {
+        Unit {
+            AreaCalculatorComponent: providers::UnitArea,
+        }
+    }
+
+    check_components! {
+        Unit {
+            AreaCalculatorComponent,
+        }
+    }
+
+    #[test]
+    fn the_reexported_key_wires_the_provider() {
+        assert_eq!(Unit.area(), 1.0);
+    }
+}
+
 /// ## Companion attributes
 ///
 /// The `#[use_type(HasErrorType.Error)]` component. The page shows only the trait, so a provider

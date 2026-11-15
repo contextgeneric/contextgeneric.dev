@@ -164,6 +164,142 @@ pub mod usage {
     }
 }
 
+/// ### Importing the component key
+///
+/// A provider in another module than its component, importing the key beside the provider trait.
+/// The page names `components` and `shapes` without showing them; they are declared here, with a
+/// provider for each other form the page describes in prose: the trait named by its path, both
+/// forms through a module that re-exports the trait and its key, and `Computer` from
+/// `cgp::extra::handler` with its key. The modules nest here, so their paths start from `super::`
+/// where the page writes `crate::`. The program without the import is the fixture
+/// `tests/compile_fail/reference/macros/cgp_impl_importing_the_component_key.rs`.
+pub mod importing_the_component_key {
+    pub mod components {
+        use cgp::prelude::*;
+
+        #[cgp_component(AreaCalculator)]
+        pub trait CanCalculateArea {
+            fn area(&self) -> f64;
+        }
+    }
+
+    pub mod shapes {
+        pub use super::components::{AreaCalculator, AreaCalculatorComponent};
+    }
+
+    pub mod providers {
+        use cgp::prelude::*;
+
+        use super::components::{AreaCalculator, AreaCalculatorComponent};
+
+        #[cgp_impl(new RectangleArea)]
+        impl AreaCalculator {
+            fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+                width * height
+            }
+        }
+    }
+
+    pub mod by_path {
+        use cgp::prelude::*;
+
+        #[cgp_impl(new UnitArea)]
+        impl super::components::AreaCalculator {
+            fn area(&self) -> f64 {
+                1.0
+            }
+        }
+
+        #[cgp_impl(new HalfArea)]
+        impl super::shapes::AreaCalculator {
+            fn area(&self) -> f64 {
+                0.5
+            }
+        }
+    }
+
+    pub mod through_shapes {
+        use cgp::prelude::*;
+
+        use super::shapes::{AreaCalculator, AreaCalculatorComponent};
+
+        #[cgp_impl(new QuarterArea)]
+        impl AreaCalculator {
+            fn area(&self) -> f64 {
+                0.25
+            }
+        }
+    }
+
+    pub mod library_component {
+        use core::marker::PhantomData;
+
+        use cgp::extra::handler::{Computer, ComputerComponent};
+        use cgp::prelude::*;
+
+        #[cgp_impl(new Double)]
+        impl<Code> Computer<Code, u64> {
+            type Output = u64;
+
+            fn compute(&self, _code: PhantomData<Code>, input: u64) -> u64 {
+                input * 2
+            }
+        }
+    }
+
+    use core::marker::PhantomData;
+
+    use cgp::extra::handler::{CanCompute, ComputerComponent};
+    use cgp::prelude::*;
+
+    use components::{AreaCalculatorComponent, CanCalculateArea};
+
+    #[derive(HasField)]
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    delegate_components! {
+        Rectangle {
+            AreaCalculatorComponent: providers::RectangleArea,
+            ComputerComponent: library_component::Double,
+        }
+    }
+
+    check_components! {
+        Rectangle {
+            AreaCalculatorComponent,
+            ComputerComponent: ((), u64),
+        }
+    }
+
+    pub struct Unit;
+    delegate_components! { Unit { AreaCalculatorComponent: by_path::UnitArea } }
+    check_components! { Unit { AreaCalculatorComponent } }
+
+    pub struct Half;
+    delegate_components! { Half { AreaCalculatorComponent: by_path::HalfArea } }
+    check_components! { Half { AreaCalculatorComponent } }
+
+    pub struct Quarter;
+    delegate_components! { Quarter { AreaCalculatorComponent: through_shapes::QuarterArea } }
+    check_components! { Quarter { AreaCalculatorComponent } }
+
+    #[test]
+    fn every_import_form_reaches_its_provider() {
+        let rect = Rectangle {
+            width: 3.0,
+            height: 4.0,
+        };
+        assert_eq!(rect.area(), 12.0);
+        assert_eq!(rect.compute(PhantomData::<()>, 21), 42);
+        assert_eq!(Unit.area(), 1.0);
+        assert_eq!(Half.area(), 0.5);
+        assert_eq!(Quarter.area(), 0.25);
+    }
+}
+
 /// ### Declaring the provider struct separately
 ///
 /// One provider implementing two components, with `new` on one block only, and a higher-order

@@ -86,9 +86,9 @@ impl AreaCalculator {
 The default component follows the path you name the trait by. The header `impl AreaCalculator`
 registers the provider for `AreaCalculatorComponent`, which must be in scope beside the trait. The
 header `impl crate::shapes::AreaCalculator` registers it for
-`crate::shapes::AreaCalculatorComponent`, so that module needs no import of the key. When the key is
-not in scope, the compiler reports *cannot find type `AreaCalculatorComponent` in this scope* on the
-trait's name in the header.
+`crate::shapes::AreaCalculatorComponent`, so that module needs no import of the key.
+[Importing the component key](#importing-the-component-key) shows what this means for a provider in
+another module.
 
 The `for Context` clause is optional. Omitting it, as most examples on this page do, lets the macro
 insert a generic context parameter for you: write `impl AreaCalculator`, not
@@ -114,6 +114,65 @@ impl<InnerCalculator> AreaCalculator {
     }
 }
 ```
+
+### Importing the component key
+
+A provider usually lives in a different module from its component, and there it needs the
+component's key as well as its provider trait. The header names the key without writing it, so
+importing the trait alone is not enough. One `use` line brings in both:
+
+```rust
+mod providers {
+    use cgp::prelude::*;
+
+    use crate::components::{AreaCalculator, AreaCalculatorComponent};
+
+    #[cgp_impl(new RectangleArea)]
+    impl AreaCalculator {
+        fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+            width * height
+        }
+    }
+}
+```
+
+You don't have to remember the key's name. Hover over `AreaCalculator` in the `use` line, and the
+trait's documentation ends by naming the component key a provider imports beside it. Or skip the
+import and name the trait by its path, as `impl crate::components::AreaCalculator`, which derives
+`crate::components::AreaCalculatorComponent` for you. A module that re-exports a provider trait for
+other code to implement should re-export the key in the same line,
+`pub use crate::components::{AreaCalculator, AreaCalculatorComponent};`, so that both forms work
+through it as well. The rule is the same for a component from a library: a provider on CGP's own
+[`Computer`](../components/handler/computer.md) imports `ComputerComponent` beside it from
+`cgp::extra::handler`.
+
+Without the key's import, the compiler reports the missing key on the trait's name in the header, as
+*cannot find type `AreaCalculatorComponent` in this scope*. For a component in your own crate,
+`cargo check` suggests the import, which rust-analyzer offers as a quick fix on the module's first
+`use` line. For a component from a library, stable Rust suggests no import.
+[`cargo cgp check`](/docs/cargo-cgp/check) names the import for a component from anywhere:
+
+```text
+error[E0425]: [CGP-E041] the component `AreaCalculatorComponent` is not in scope
+  --> src/main.rs:16:10
+   |
+16 |     impl AreaCalculator {
+   |          ^^^^^^^^^^^^^^
+   |
+help: import the component
+   |
+11 +     use crate::components::AreaCalculatorComponent;
+   |
+```
+
+The fix is a suggestion that an editor running `cargo cgp check` offers on the trait's name, as
+[Editor integration](/docs/cargo-cgp/editor-integration#importing-a-component-key) describes. A key
+the header cannot derive needs the `: ComponentType` part instead. That covers a trait imported under
+another name, as in `use crate::components::AreaCalculator as Area;`, and a component whose `name:`
+renames its key or gives it parameters, as
+[`#[cgp_component]`](./cgp_component.md#where-the-component-key-lives) shows. `cargo cgp check` reports those
+headers as [`[CGP-E070]`](/docs/cargo-cgp/error-codes#cgp-e070)
+and offers to write the part for you.
 
 ### Declaring the provider struct separately
 

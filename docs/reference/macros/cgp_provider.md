@@ -76,8 +76,12 @@ Both accept the same single optional argument: the **component type** to use in 
 impl. Omitted, it defaults to the provider trait's path with `Component` appended, so implementing
 `AreaCalculator` targets `AreaCalculatorComponent`, which must be in scope beside the trait, and
 implementing `crate::shapes::AreaCalculator` targets `crate::shapes::AreaCalculatorComponent`, which
-the module need not import. Pass it explicitly when the component's marker does not follow that
-convention, as when the component renamed it with the `name:` key:
+the module need not import. So a provider in another module than its component imports the key with
+the trait, as `use crate::shapes::{AreaCalculator, AreaCalculatorComponent};`, or names the trait by
+its path, exactly as for [`#[cgp_impl]`](./cgp_impl.md#importing-the-component-key), which also shows
+what `cargo cgp check` reports when the import is missing. Pass the component explicitly when the
+component's marker does not follow that convention, as when the component renamed it with the
+`name:` key:
 
 ```rust
 #[cgp_component {

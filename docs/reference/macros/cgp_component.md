@@ -106,6 +106,27 @@ macro reproduces every one of them on the provider trait. The one declaration it
 generic parameter on the trait itself, for the reason given under
 [Common Mistakes](#common-mistakes).
 
+### Where the component key lives
+
+The macro declares the component key beside the two traits, in the module that defines the
+component, so code in other modules imports the key along with them. A wiring table names the key
+directly. A provider written with [`#[cgp_impl]`](./cgp_impl.md) names it without writing it,
+deriving it from the provider trait's name, so that provider imports the key beside the trait, as
+[Importing the component key](./cgp_impl.md#importing-the-component-key) shows. A module that
+re-exports a component for other code to use should re-export its key in the same `use`:
+
+```rust
+pub mod shapes {
+    pub use crate::components::{AreaCalculator, AreaCalculatorComponent, CanCalculateArea};
+}
+```
+
+A provider elsewhere then writes `use crate::shapes::{AreaCalculator, AreaCalculatorComponent};`.
+The generated provider trait's documentation names its key, so hovering the trait in that `use` line
+shows which key to import. A key that `name:` renames, such as `name: AreaComponent`, or gives
+parameters is not the name a provider header derives, so each provider names it in its attribute,
+as `#[cgp_impl(new UnitArea: AreaComponent)]`.
+
 ### Companion attributes
 
 The attributes below may be written above the trait, beside `#[cgp_component]`, and each changes what

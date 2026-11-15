@@ -82,6 +82,26 @@ add the field `height: f64` to `Rectangle`
 The compiler's own code, `E0599` here, stays attached to the error, as it does in a terminal.
 [Reading the output](./reading-output.md) explains each part.
 
+## Importing a component key
+
+A provider written in another module than its component imports the component's key beside its
+provider trait, as [`#[cgp_impl]`](/docs/reference/macros/cgp_impl#importing-the-component-key)
+explains. The header names that key without writing it, so rust-analyzer's own import assist has
+nothing to offer on the header. With the override in place, `cargo cgp check` reports the missing key
+as [`[CGP-E041]`](./error-codes.md#cgp-e041) on the provider trait's name and attaches the import as
+a fix. The quick-fix menu on that name, and on a wiring key that names a component the module does
+not import, offers it under the title *import the component*, followed by the `use` line it inserts.
+rust-analyzer marks it as the preferred fix when only one path imports the key.
+[`[CGP-E070]`](./error-codes.md#cgp-e070)'s fix, which names in the attribute a key the header cannot
+derive, appears on the trait's name the same way.
+
+The plain check behaves differently. The compiler's own import suggestion, when it makes one, appears
+as a quick fix only on the module's first `use` line, not on the header, and stable Rust suggests no
+import for a component from a library. Two things help under either check. rust-analyzer's import
+assist offers to import a key written in the source, such as a wiring entry's key or the key in
+`#[cgp_impl(new RectangleArea: AreaCalculatorComponent)]`. And hovering a provider trait in a `use`
+line shows its documentation, which names the key a provider imports beside it.
+
 ## What changes when the editor runs the tool
 
 The override changes how the check runs as well as the wording of its diagnostics. These
@@ -159,11 +179,12 @@ Only the on-save check uses this command. Completion, hover types, go-to-definit
 as-you-type diagnostics come from rust-analyzer's own analysis, so this override does not
 change them.
 
-Verification covered the rust-analyzer language server on Linux, started with the configuration
-VS Code would pass. Saving the example produced the rewritten diagnostic, the quoted startup
-warnings, and the observed omission of rust-analyzer's other check options. The VS Code window
-itself was not tested. Other rust-analyzer editors can express `check.overrideCommand` in their
-own configuration formats, but those editors, macOS, and Windows have not been tried.
+Verification covered the rust-analyzer language server on Linux, started with the configuration VS
+Code would pass. Saving the example produced the rewritten diagnostic, the quoted startup warnings,
+and the observed omission of rust-analyzer's other check options. On a crate with providers missing
+their keys, the quick-fix menus held the import fixes described above. The VS Code window itself was
+not tested. Other rust-analyzer editors can express `check.overrideCommand` in their own
+configuration formats, but those editors, macOS, and Windows have not been tried.
 
 ---
 
