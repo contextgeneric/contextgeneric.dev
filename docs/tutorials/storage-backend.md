@@ -9,9 +9,9 @@ description: 'A Rust tutorial: a profile-picture lookup that reads from a folder
 
 Most applications reach a point where one operation needs a different backend in different
 places. A deployment reads its files from disk, for example, while its tests would rather not touch
-the disk at all. [Context-Generic Programming](/docs/) (CGP) is a Rust library for that kind of
-choice: it enables pluggable trait implementations in Rust, and each application type chooses the
-implementation it uses at compile time.
+the disk at all. [Context-Generic Programming](/docs/) (CGP) is a library for that kind of choice.
+It enables pluggable trait implementations in Rust, so each application type can choose, at compile
+time, which implementation it uses.
 
 In this tutorial, we will build a working profile-picture lookup and link out to the details as we
 go. By the end, one lookup function will read pictures from a folder in the application and from
@@ -59,11 +59,11 @@ pub struct User {
 }
 ```
 
-The application itself is a struct called `App`. In CGP, a type like this is called a **context**:
-a type that stands for this application, which is where its choices live. This one has fields, the
-values its operations need. Its `database` is a `HashMap` standing in for a real database, which
-keeps the tutorial runnable without a server, and its `local_dir` names the folder that holds the
-pictures:
+The application itself is a struct called `App`. CGP calls a type like this a **context**: a type
+that stands for this application, which is where its choices live. A context can be an empty
+struct, but this one has fields that hold the values its operations need. Its `database` is a
+`HashMap` standing in for a real database, so the tutorial runs without a server, and its
+`local_dir` names the folder that holds the pictures:
 
 ```rust
 #[derive(HasField)]
@@ -73,8 +73,8 @@ pub struct App {
 }
 ```
 
-The `#[derive(HasField)]` line lets CGP code read those fields by name, which is what the next
-step relies on.
+The `#[derive(HasField)]` line lets CGP code read those fields by name, and the next step relies on
+it.
 
 ## Read the application's data with functions
 
@@ -110,10 +110,11 @@ pub async fn fetch_storage_object(
 
 Notice that callers never pass `database` or `local_dir`. `#[cgp_fn]` turns each function into a
 method on any type whose fields match the implicit arguments by name and type, so `App` gains
-`get_user` and `fetch_storage_object` without an `impl` block of its own. The `local_dir` argument
-reads the `String` field as a `&str`. Both functions are async, so each also carries
-`#[async_trait]`; without it, Rust warns about the `async fn` in the public trait that `#[cgp_fn]`
-generates.
+`get_user` and `fetch_storage_object` without an `impl` block of its own. The match allows a
+borrowed form, too: the `local_dir` argument is a `&str`, and it reads `App`'s `String` field.
+
+Both functions are async, so each also carries `#[async_trait]`. Without it, Rust would warn about
+the `async fn` in the public trait that `#[cgp_fn]` generates.
 
 To try them, `main` writes a picture into a `pictures` folder, builds an `App` with one user, and
 calls both methods:
@@ -193,8 +194,8 @@ Replace the last lines of `main`, from `let user` onwards, with a call to the co
 ## Add a backend for tests
 
 So far there is one way to fetch a picture, and it reads the disk. A test of
-`get_user_profile_picture` would rather keep its pictures in memory, so it needs a second way to
-fetch them, chosen by the test's own context. A `#[cgp_fn]` function has exactly one
+`get_user_profile_picture` should keep its pictures in memory instead, which needs a second way to
+fetch them, chosen by the test's own context. But a `#[cgp_fn]` function has exactly one
 implementation, so the storage step needs something that can have several.
 
 That something is a CGP **component**. We replace the `fetch_storage_object` function with a
@@ -210,8 +211,8 @@ pub trait CanFetchStorageObject {
 
 Code calls `CanFetchStorageObject` as an ordinary trait, while `StorageObjectFetcher` names the
 trait each implementation targets. An implementation is called a **provider**, and we write one
-with `#[cgp_impl]`, giving it a name. The disk-reading provider is the old function's body, under
-the name `FetchLocalObject`, and it still reads `local_dir` as an implicit argument:
+with `#[cgp_impl]`, giving it a name. The disk-reading provider, `FetchLocalObject`, takes over the
+old function's body and still reads `local_dir` as an implicit argument:
 
 ```rust
 #[cgp_impl(new FetchLocalObject)]
@@ -330,11 +331,11 @@ Amazon S3 and Google Cloud Storage written against this same component.
 
 ## Check the wiring
 
-A wiring table is lazy: adding an entry does not check that the context has what the provider
-needs. The check happens when the component is used, and if something is missing, the error points
-at the place it was used, which may be far from the table that caused it. CGP's
-`check_components!` moves that check next to the table, so add one for each context, `App`'s after
-its table and `TestApp`'s inside the test module:
+Wiring is lazy: adding a table entry does not check that the context has what the provider needs.
+The check happens when the component is used, and if something is missing, the error points at the
+place it was used, which may be far from the table that caused it. CGP's `check_components!` moves
+that check next to the table, so add one for each context, `App`'s after its table and `TestApp`'s
+inside the test module:
 
 ```rust
 check_components! {

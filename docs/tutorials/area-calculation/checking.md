@@ -239,9 +239,9 @@ recognizes.
 Neither is optional equipment once a context has more than a couple of components. Wire a context,
 check it, and you will never be more than one line away from knowing whether it works.
 
-To see the same constructs in an application rather than a shape,
-[Swap a Storage Backend per Application](/docs/tutorials/storage-backend) builds a context that
-stands for an application, gives its tests their own backend, and checks both wirings.
+To see the same constructs at work in a program rather than on a shape,
+[Swap a Storage Backend per Application](/docs/tutorials/storage-backend) builds an application
+context, gives its tests their own storage backend, and checks both wirings.
 
 ---
 
