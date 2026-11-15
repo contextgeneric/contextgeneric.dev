@@ -117,8 +117,8 @@ impl<InnerCalculator> AreaCalculator {
 
 ### Importing the component key
 
-A provider usually lives in a different module from its component, and there it needs the
-component's key as well as its provider trait. The header names the key without writing it, so
+A provider in a different module from its component needs the component's key as well as its
+provider trait. The header names the key without writing it, so
 importing the trait alone is not enough. One `use` line brings in both:
 
 ```rust
@@ -136,7 +136,7 @@ mod providers {
 }
 ```
 
-You don't have to remember the key's name. Hover over `AreaCalculator` in the `use` line, and the
+You need not remember the key's name. Hover over `AreaCalculator` in the `use` line, and the
 trait's documentation ends by naming the component key a provider imports beside it. Or skip the
 import and name the trait by its path, as `impl crate::components::AreaCalculator`, which derives
 `crate::components::AreaCalculatorComponent` for you. A module that re-exports a provider trait for
@@ -150,7 +150,8 @@ Without the key's import, the compiler reports the missing key on the trait's na
 *cannot find type `AreaCalculatorComponent` in this scope*. For a component in your own crate,
 `cargo check` suggests the import, which rust-analyzer offers as a quick fix on the module's first
 `use` line. For a component from a library, stable Rust suggests no import.
-[`cargo cgp check`](/docs/cargo-cgp/check) names the import for a component from anywhere:
+[`cargo cgp check`](/docs/cargo-cgp/check) names the import for a component of your crate or of a
+library:
 
 ```text
 error[E0425]: [CGP-E041] the component `AreaCalculatorComponent` is not in scope
@@ -166,13 +167,17 @@ help: import the component
 ```
 
 The fix is a suggestion that an editor running `cargo cgp check` offers on the trait's name, as
-[Editor integration](/docs/cargo-cgp/editor-integration#importing-a-component-key) describes. A key
-the header cannot derive needs the `: ComponentType` part instead. That covers a trait imported under
-another name, as in `use crate::components::AreaCalculator as Area;`, and a component whose `name:`
-renames its key or gives it parameters, as
-[`#[cgp_component]`](./cgp_component.md#where-the-component-key-lives) shows. `cargo cgp check` reports those
-headers as [`[CGP-E070]`](/docs/cargo-cgp/error-codes#cgp-e070)
-and offers to write the part for you.
+[Editor integration](/docs/cargo-cgp/editor-integration#importing-a-component-key) describes.
+`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
+reshape every class.
+
+A key the header cannot derive goes in the `: ComponentType` part, and that key must be in scope
+too. That covers a trait imported under another name, as in
+`use crate::components::AreaCalculator as Area;`, and a component whose `name:` renames its key or
+gives it parameters, as [`#[cgp_component]`](./cgp_component.md#where-the-component-key-lives)
+shows. `cargo cgp check` reports those headers as
+[`[CGP-E070]`](/docs/cargo-cgp/error-codes#cgp-e070) and offers to write the part for you, importing
+the key when the module lacks it.
 
 ### Declaring the provider struct separately
 

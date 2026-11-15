@@ -47,7 +47,9 @@ Every member of the family is imported from `cgp::extra::handler`: the consumer 
 their wiring keys, the promotion bundles, and the one-step promotion providers. The prelude carries
 only the macros that define handlers, `#[cgp_computer]`, `#[cgp_producer]`, and
 `#[cgp_auto_dispatch]`. A provider written with `#[cgp_impl]` on `Computer` also needs
-`ComputerComponent` in scope, because the macro names the key the trait belongs to.
+`ComputerComponent` in scope, because the macro names the key the trait belongs to, unless its header
+names the trait by path, as `impl<Code> cgp::extra::handler::Computer<Code, u64>`; see
+[Importing the component key](../../macros/cgp_impl.md#importing-the-component-key).
 
 Two wiring details apply to every member. Because a context that delegates a member also implements
 its provider trait, calling a method on a concrete context by its bare name, as

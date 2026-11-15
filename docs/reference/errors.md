@@ -417,7 +417,9 @@ path. The tool words each shape with its own code: `[CGP-E040]` for a consumer t
 
 A provider header names a component too, without writing it. `#[cgp_impl]` and `#[cgp_provider]`
 derive the key from the provider trait's path, so `impl Greeter` names `GreeterComponent`, and a
-provider in another module than its component imports the key beside the trait. A missing import
+provider in another module than its component imports the key beside the trait or names the trait
+by its path, as [Importing the component key](./macros/cgp_impl.md#importing-the-component-key)
+shows. A missing import
 is an `E0425` on the trait's name, which the tool words as `[CGP-E041]` with the import. A trait
 imported under another name, or a component whose `name:` renames its key or gives it parameters,
 derives a name that is not the component's, which the tool words as `[CGP-E070]`, naming the key in
