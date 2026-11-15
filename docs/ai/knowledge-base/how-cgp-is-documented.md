@@ -67,7 +67,7 @@ A single construct is described in five places, and the rules require all five t
   expansion, its corner cases, and every test that covers it, at
   `cgp/implementation/entrypoints/cgp_component.md`.
 - **The agent skill:** the condensed explanation an assistant loads, in the skill's
-  [Components](/docs/ai/skills/references/components) reference.
+  [Components](/docs/ai/skills/cgp/references/components) reference.
 
 When the macro's output changes, the snapshot changes with it, and the reference document, the
 implementation document, and the skill are updated in the same change. When the views disagree, the

@@ -112,11 +112,11 @@ const config: Config = {
         docs: {
           showLastUpdateTime: true,
           sidebarPath: './sidebars.ts',
-          // The `cgp-skills` submodule is checked out inside `docs/ai/skills/` so
-          // the skill pages can symlink to it from next door. Its own files are the
-          // source, not pages: the ones we publish are reached through those
-          // symlinks, and the rest (README, AGENTS, sibling-projects) are not site
-          // content at all.
+          // The `cgp-skills` submodule is checked out at the repository root, and
+          // each skill's pages under `docs/ai/skills/<skill>/` are symlinks into it.
+          // Its own files are the source, not pages: the ones we publish are reached
+          // through those symlinks, and the rest (README, AGENTS, sibling-projects)
+          // are not site content at all.
           exclude: ['**/cgp-skills/**'],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.

@@ -1,1 +1,0 @@
-../../../../cgp-skills/cgp/references/higher-order-providers.md

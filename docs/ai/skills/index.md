@@ -1,59 +1,53 @@
 ---
+title: Agent Skills
+description: The agent skills that teach a coding agent to read, write, and debug Context-Generic Programming code, and the skill pages this site publishes.
 sidebar_position: 1
 ---
 
-# CGP's Agent Skill
+# Agent Skills
 
-CGP's agent skill teaches coding assistants how to read, write, and debug CGP code. It is a set of
-Markdown instructions in the [cgp-skills repository](https://github.com/contextgeneric/cgp-skills).
-The pages in this section publish a snapshot of those files without changing their content.
+A coding agent working on a [Context-Generic Programming (CGP)](/docs/) project meets Rust code
+whose meaning is not all in the source. CGP's macros generate the traits and impls that wiring
+connects, and what the agent learned in training may show syntax the library no longer accepts. An
+agent skill closes that gap: it is a set of Markdown instructions that the agent loads when a task
+needs them. This section publishes CGP's skills from the
+[cgp-skills repository](https://github.com/contextgeneric/cgp-skills), so you can read what your
+agent reads.
 
-## What it is for
+## The `/cgp` skill
 
-The skill gives an assistant the CGP vocabulary and patterns it needs to work with the library.
-It explains consumer and provider traits, component wiring, implementation dependencies, macro
-expansions, and compiler errors. Without that guidance, an assistant may write a plain trait
-implementation where a provider is needed or produce incorrect wiring.
+The [`/cgp` skill](/docs/ai/skills/cgp/SKILL) teaches an agent to read, write, debug, and explain
+CGP code. Its main page introduces consumer and provider traits, wiring, and impl-side dependencies,
+shows what the macros expand to, and recommends `cargo-cgp` for readable compiler errors. From there
+it sends the agent to the reference that owns the task, from
+[components](/docs/ai/skills/cgp/references/components) and
+[wiring](/docs/ai/skills/cgp/references/wiring) to
+[namespaces](/docs/ai/skills/cgp/references/namespaces); the sidebar lists them all. The skill
+describes `cgp` v0.8.0 and `cargo-cgp` v0.1.0.
 
-You still need to review the assistant's code. The skill supplies instructions and examples; it
-does not guarantee correct output or replace your understanding of the application.
+The skill teaches the agent, so it does not make the agent's code correct. Review what the agent
+writes as you would any other change, and read the skill when you want to see the instructions the
+agent follows.
 
-## Using it
+To install it, give your agent the repository's URL and ask it to install the `/cgp` skill, or
+follow the steps in the repository's README for your harness.
 
-For a first look, download
-[SKILL.md](https://raw.githubusercontent.com/contextgeneric/cgp-skills/refs/heads/main/cgp/SKILL.md)
-and attach it to your assistant's conversation. The file introduces the core model and identifies
-the reference files needed for particular tasks. Make those files available when the assistant needs
-their detailed rules and examples.
+## Learning CGP yourself
 
-For ongoing work, download the complete skill so the assistant can open its references as needed.
-Clone the repository:
+The skill is written for an agent that needs dense rules and worked examples for one task at a
+time. To learn CGP yourself, start with the [tutorials](/docs/tutorials/hello) and the
+[Concepts](/docs/concepts) pages instead.
 
-```sh
-git clone https://github.com/contextgeneric/cgp-skills.git
-```
-
-Install the `cgp/` directory using your assistant's skill-loading instructions. Keep `cgp/SKILL.md`
-and `cgp/references/` together so the relative links resolve. Cloning the repository downloads the
-files; your assistant's setup determines how it discovers and loads them.
-
-## Reading it yourself
-
-The [tutorials](/docs/tutorials/hello) and [Concepts](/docs/concepts) pages are the starting points
-for learning CGP. The skill is written for an assistant that needs dense rules and worked examples
-for a specific task. Read it when you want that detail or want to see the instructions your
-assistant receives.
-
-When a question needs more than the skill carries, such as a macro's corner cases or how it is
-implemented, point your assistant at the knowledge base the skill is written from. [Using the
-Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent) shows how.
+When your agent's question needs more than the skill carries, such as a macro's corner cases or how
+it is implemented, point it at the knowledge base the skill is written from.
+[Using the Knowledge Base with Your Agent](/docs/ai/knowledge-base/using-it-with-your-agent) shows
+how.
 
 ## What is published here
 
-The skill pages on this site are pinned to a particular repository revision. The repository may
-contain newer changes, so use it as the authoritative source and report skill corrections there.
-The site provides a place to browse the published snapshot; the repository supplies the files to
-install.
+The skill pages on this site are a snapshot of the repository at one revision, shown without
+changes. The repository may hold newer changes, so install from it, and report a mistake in a skill
+there. Each skill has its own directory in this section, so more can join the `/cgp` skill later.
 
 ---
 
