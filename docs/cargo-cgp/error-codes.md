@@ -569,11 +569,11 @@ key or give it parameters:
 [CGP-E070] the header derives the component `<Derived>` from the trait name `<Written>`, but the component of `<ProviderTrait>` is `<Component>`
 ```
 
-To fix it, name the component in the attribute, in the form the `help` line gives, such as
+To fix it, name the component in the attribute, as the fix under the `help` line does, such as
 `#[cgp_impl(new UnitArea: AreaComponent)]` or `#[cgp_provider(GreeterComponent)]`; a key with
-parameters takes the header's arguments, as `AreaCalculatorComponent<Square>`. For a renamed import,
-importing the trait under its own name works too, and the `note` explains why the compiler calls
-the key's import unused.
+parameters takes the header's arguments, as `AreaCalculatorComponent<Square>`. When the module does
+not import the key, the same fix adds its `use` line, and an editor offers the fix on the trait's
+name. For a renamed import, the `note` explains why the compiler calls the key's import unused.
 
 ## Steps of the dependency chain
 
