@@ -13,6 +13,10 @@ CGP from beyond those pages, with one page for each kind. For now it holds
 [videos](/docs/resources/videos) of talks about CGP, and more kinds, such as events, will be added
 in the future.
 
+The `cgp` crate's API documentation is on [docs.rs](https://docs.rs/cgp). Its pages list the
+traits and macros, but for what each construct does and the code it generates, the
+[Reference](/docs/reference) is more complete.
+
 ---
 
 *An AI agent wrote this page using the CGP knowledge base. See
