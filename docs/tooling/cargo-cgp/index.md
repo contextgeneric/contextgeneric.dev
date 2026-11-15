@@ -1,5 +1,4 @@
 ---
-slug: /cargo-cgp
 title: 'cargo-cgp: readable CGP compile errors'
 sidebar_label: 'Overview'
 sidebar_position: 1

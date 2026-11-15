@@ -150,7 +150,7 @@ Without the key's import, the compiler reports the missing key on the trait's na
 *cannot find type `AreaCalculatorComponent` in this scope*. For a component in your own crate,
 `cargo check` suggests the import, which rust-analyzer offers as a quick fix on the module's first
 `use` line. For a component from a library, stable Rust suggests no import.
-[`cargo cgp check`](/docs/cargo-cgp/check) names the import for a component of your crate or of a
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) names the import for a component of your crate or of a
 library:
 
 ```text
@@ -167,7 +167,7 @@ help: import the component
 ```
 
 The fix is a suggestion that an editor running `cargo cgp check` offers on the trait's name, as
-[Editor integration](/docs/cargo-cgp/editor-integration#importing-a-component-key) describes.
+[Editor integration](/docs/tooling/cargo-cgp/editor-integration#importing-a-component-key) describes.
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
 reshape every class.
 
@@ -176,7 +176,7 @@ too. That covers a trait imported under another name, as in
 `use crate::components::AreaCalculator as Area;`, and a component whose `name:` renames its key or
 gives it parameters, as [`#[cgp_component]`](./cgp_component.md#where-the-component-key-lives)
 shows. `cargo cgp check` reports those headers as
-[`[CGP-E070]`](/docs/cargo-cgp/error-codes#cgp-e070) and offers to write the part for you, importing
+[`[CGP-E070]`](/docs/tooling/cargo-cgp/error-codes#cgp-e070) and offers to write the part for you, importing
 the key when the module lacks it.
 
 ### Declaring the provider struct separately

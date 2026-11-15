@@ -32,7 +32,7 @@ The two are the identical type, and it is exactly the `Fields` the derive gives 
 body. Reach for `Struct!` wherever code *names* a shape rather than deriving it: a
 [trait bound](https://doc.rust-lang.org/book/ch10-02-traits.html) on `HasFields`, a trait
 implemented for a shape, or a wiring entry. It is also the form
-[`cargo cgp check`](/docs/cargo-cgp/check) and [`cargo cgp expand`](/docs/cargo-cgp/expand) print
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) and [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) print
 a shape in, so a shape read in the tool's output can be copied back into code.
 
 ## Usage

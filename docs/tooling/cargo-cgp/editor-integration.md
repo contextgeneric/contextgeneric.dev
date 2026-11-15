@@ -1,5 +1,4 @@
 ---
-slug: /cargo-cgp/editor-integration
 title: 'Use cargo-cgp in VS Code with rust-analyzer'
 sidebar_label: 'Editor integration'
 sidebar_position: 6

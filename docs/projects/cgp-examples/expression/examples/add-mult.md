@@ -290,7 +290,7 @@ shows.
 
 Remove the evaluation entry for `Times`, the line
 `@ComputerComponent.<Code> Code.Times<MathExpr>: EvalMultiply`, and run
-[`cargo cgp check`](/docs/cargo-cgp/check). The check names the missing entry:
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check). The check names the missing entry:
 
 ```text
 error[E0277]: [CGP-E001] missing wiring for `@ComputerComponent.Eval.Times<…>` on `…`

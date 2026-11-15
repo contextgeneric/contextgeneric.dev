@@ -12,7 +12,7 @@ recognize once seen. cgp-serde rebuilds Serde's `Serialize` and `Deserialize` as
 [Context-Generic Programming (CGP)](/docs/). This guide shows each mistake with the code that makes
 it, the error, and the fix.
 
-The errors below come from [`cargo cgp check`](/docs/cargo-cgp/check), CGP's error tool, run in
+The errors below come from [`cargo cgp check`](/docs/tooling/cargo-cgp/check), CGP's error tool, run in
 place of `cargo check`. `cargo cgp check` leads with the root cause for the classes it recognizes,
 and the tool does not yet reshape every class. Each mistake is caught by a
 [`check_components!`](/docs/reference/macros/check_components) table listing the context's types,
@@ -259,7 +259,7 @@ context](./wiring-a-context.md#3-write-keys-for-references-lifetimes-and-arrays)
 ## Where to go next
 
 - [Wiring a context](./wiring-a-context.md): the steps that avoid these mistakes.
-- [`cargo cgp check`](/docs/cargo-cgp/check): the tool, and the error classes it recognizes.
+- [`cargo cgp check`](/docs/tooling/cargo-cgp/check): the tool, and the error classes it recognizes.
 - [Checking your wiring](/docs/concepts/check-traits): why CGP checks wiring lazily, and what a
   check forces.
 

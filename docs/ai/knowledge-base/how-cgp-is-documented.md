@@ -126,7 +126,7 @@ reads in full and which receive spot checks.
 ## Where the checks stop
 
 Some checks are mechanical and most are not. Expansion snapshots fail a test when a macro's output
-changes, the [cargo-cgp](/docs/cargo-cgp) test fixtures fail when a diagnostic changes, and the
+changes, the [cargo-cgp](/docs/tooling/cargo-cgp) test fixtures fail when a diagnostic changes, and the
 website's test crate fails when a snippet it holds no longer compiles. Agreement between prose and
 code is enforced by agents following the rules and by the author's review, and both can miss a stale
 sentence.

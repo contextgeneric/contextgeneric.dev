@@ -357,7 +357,7 @@ also require reading several component and provider mappings.
 
 CGP shares the costs of monomorphized generic code, including compilation work and potentially
 larger binaries. Its generated types can make trait errors difficult to read;
-[`cargo cgp check`](/docs/cargo-cgp/check) explains the error classes it recognizes. These costs
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) explains the error classes it recognizes. These costs
 belong alongside the benefits of independently selected implementations.
 
 ## Where a template is the better choice

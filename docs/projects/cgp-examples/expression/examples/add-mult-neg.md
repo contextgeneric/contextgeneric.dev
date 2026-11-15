@@ -153,7 +153,7 @@ block:
 (ToLisp, MathPlusExpr),
 ```
 
-Run [`cargo cgp check`](/docs/cargo-cgp/check), and the check reports that conversion was never
+Run [`cargo cgp check`](/docs/tooling/cargo-cgp/check), and the check reports that conversion was never
 wired:
 
 ```text

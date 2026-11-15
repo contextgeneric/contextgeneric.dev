@@ -11,7 +11,7 @@ for one spans every layer of wiring between the context, the type the program ru
 part that failed. [Hypershell](../index.md) is a shell-scripting language whose programs are Rust
 types, built with [Context-Generic Programming](/docs/) (CGP), a Rust library whose wiring selects
 the implementation behind each trait. This guide shows the common mistakes, each with the code
-that triggers it, the root cause [`cargo cgp check`](/docs/cargo-cgp/check) reports, and the fix.
+that triggers it, the root cause [`cargo cgp check`](/docs/tooling/cargo-cgp/check) reports, and the fix.
 Each output below comes from compiling the program against `cargo-cgp` built from its current
 source, sometimes through a `check_components!` and sometimes at the `handle` call, and is trimmed
 to its headline and root cause. Long type paths are abridged with an ellipsis, and the dependency
@@ -42,7 +42,7 @@ step, which follows the walk on the
 [assembly](../architecture/assembly.md#following-one-piece-of-syntax) page. Read it from the bottom:
 the last line is the part that failed. Each step names the table it looked in, so the chain shows
 whether the failure is in the context, in a bundle, or in an input dispatcher. The codes in brackets
-are listed on the [error codes](/docs/cargo-cgp/error-codes) page.
+are listed on the [error codes](/docs/tooling/cargo-cgp/error-codes) page.
 
 ## A context lacks a field
 
@@ -276,7 +276,7 @@ wiring, and does not mention CGP. It means the prelude is not imported: the macr
   check forces.
 - [Compile errors](/docs/reference/errors): the classes of CGP compile error, each with the program
   behind it.
-- [`cargo cgp check`](/docs/cargo-cgp/check): installing and running the checker.
+- [`cargo cgp check`](/docs/tooling/cargo-cgp/check): installing and running the checker.
 
 ---
 

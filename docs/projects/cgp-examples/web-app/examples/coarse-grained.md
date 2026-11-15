@@ -151,7 +151,7 @@ adds real ones.
 ## Try a change
 
 Remove the censor's entry, the line `UsernameCensorComponent: DummyUserCensor,`, and run
-[`cargo cgp check`](/docs/cargo-cgp/check). The whole user manager fails:
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check). The whole user manager fails:
 
 ```text
 error[E0277]: [CGP-E001] missing wiring for `UsernameCensorComponent` on `…ProductionApp`

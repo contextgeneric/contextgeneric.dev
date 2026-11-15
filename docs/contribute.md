@@ -50,7 +50,7 @@ providers as crates is the most direct way to help start it.
 
 ## Change CGP itself
 
-To change the library, the [cargo-cgp](/docs/cargo-cgp) toolchain, the agent skill, or the
+To change the library, the [cargo-cgp](/docs/tooling/cargo-cgp) toolchain, the agent skill, or the
 documentation, start from
 [Contributing to CGP with an Agent](/docs/ai/knowledge-base/contributing-with-an-agent). It gives the
 contribution policy, how to set up the repositories, and the rules each repository follows, whether

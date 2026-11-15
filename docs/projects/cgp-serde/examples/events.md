@@ -173,7 +173,7 @@ any error.
 ## Try a change
 
 Remove the server's `@ValueDeserializerComponent.Nil: SerializeUnit` entry, remove
-`(Life<'de>, Nil)` from its check, and run [`cargo cgp check`](/docs/cargo-cgp/check). The check
+`(Life<'de>, Nil)` from its check, and run [`cargo cgp check`](/docs/tooling/cargo-cgp/check). The check
 fails on the three types that contain an event, and the tool names the missing entry as the root
 cause:
 

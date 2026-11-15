@@ -281,7 +281,7 @@ functors adds another type-level concern. Tools such as Functoria organize that 
 
 CGP moves many assembly choices into a context, at the cost of generated traits and indirect
 dependency resolution. A reader may need to follow the wiring to find an implementation, and a
-failed bound can produce a long diagnostic. [`cargo cgp check`](/docs/cargo-cgp/check) helps explain
+failed bound can produce a long diagnostic. [`cargo cgp check`](/docs/tooling/cargo-cgp/check) helps explain
 the error classes it recognizes. [Monomorphization](/docs/reference/glossary#monomorphization) can also increase compile time and generated code;
 static provider selection permits direct calls but does not guarantee that every call is inlined.
 

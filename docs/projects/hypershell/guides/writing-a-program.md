@@ -138,7 +138,7 @@ check_components! {
 
 One check can list several programs, or several inputs, as an array:
 `HandlerComponent: [(Hello, Vec<u8>), (Cat, ())]`. Read failures with
-[`cargo cgp check`](/docs/cargo-cgp/check); the [debugging guide](./debugging.md) shows the common
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check); the [debugging guide](./debugging.md) shows the common
 ones. A failure reported at the `handle` call itself often carries no root cause, which is the
 practical reason to check. `cargo cgp check` leads with the root cause for the classes it
 recognizes, and the tool does not yet reshape every class.

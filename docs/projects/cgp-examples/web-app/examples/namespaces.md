@@ -143,7 +143,7 @@ asserts all nine components on each.
 
 ## Try a change
 
-Remove `TestApp`'s `@app.extra` line, and run [`cargo cgp check`](/docs/cargo-cgp/check). The two
+Remove `TestApp`'s `@app.extra` line, and run [`cargo cgp check`](/docs/tooling/cargo-cgp/check). The two
 creators fail, each with the filter its wrapper uses:
 
 ```text

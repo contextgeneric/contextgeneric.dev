@@ -318,7 +318,7 @@ where Swift, Rust, Scala, and Haskell each draw the line ([Racordon, Flesselle &
 CGP requires explicit wiring to choose providers. Providers also need a component declared with
 [`#[cgp_component]`](/docs/reference/macros/cgp_component), adding code beyond a plain trait. Trait
 resolution adds compile-time work and can produce long errors over generated types.
-[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it recognizes,
 and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page compares these costs with simpler
 approaches.

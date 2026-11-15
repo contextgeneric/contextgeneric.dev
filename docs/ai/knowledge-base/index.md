@@ -20,7 +20,7 @@ reference pages on this site, most of its other documentation, and the
 The knowledge base gives an agent a written record of CGP to read, so the agent does not have to
 reconstruct CGP from the macro source or hallucinate on what a given syntax really means. It records
 the semantics of each construct, including the syntax forms it accepts and the code each macro
-expands to. It also holds the internals of the macros and of [cargo-cgp](/docs/cargo-cgp), the classes
+expands to. It also holds the internals of the macros and of [cargo-cgp](/docs/tooling/cargo-cgp), the classes
 of compile error CGP produces, worked examples, and comparisons with related ideas from other languages.
 
 The [agent skill](/docs/ai/skills) is the part of this record sized for everyday work: it fits in an

@@ -163,7 +163,7 @@ bundle.
 ## Try a change
 
 Remove `UsernameCensorComponent` from the last list, so the censor has no entry, and run
-[`cargo cgp check`](/docs/cargo-cgp/check). This time only the operation that uses the censor fails:
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check). This time only the operation that uses the censor fails:
 
 ```text
 error[E0277]: [CGP-E001] missing wiring for `UsernameCensorComponent` on `…ProductionApp`

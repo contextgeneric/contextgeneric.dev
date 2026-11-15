@@ -107,7 +107,7 @@ know first:
   definitions it serves. A type with no entry is a compile error, not a runtime surprise.
 - **Mistakes produce long compile errors.** A missing entry deep inside a nested type fails to
   compile, and the compiler's raw message lists every step it took to find it. Checking the context
-  with `check_components!` and reading the error with [`cargo cgp check`](/docs/cargo-cgp/check)
+  with `check_components!` and reading the error with [`cargo cgp check`](/docs/tooling/cargo-cgp/check)
   names the missing entry: `cargo cgp check` leads with the root cause for the classes it
   recognizes, and the tool does not yet reshape every class. The [debugging
   guide](./guides/debugging-wiring.md) shows the common mistakes.

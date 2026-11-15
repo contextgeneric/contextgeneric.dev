@@ -262,7 +262,7 @@ separates global uniqueness from coherence and confluence.
 CGP requires component declarations and provider selection through wiring or declared defaults.
 This adds code to maintain and trait-resolution work during compilation. Tracing a selection can
 also require following delegation through several tables. Raw diagnostics expose generated traits
-and types: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
+and types: [`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it
 recognizes, and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) weighs these costs against simpler forms.
 

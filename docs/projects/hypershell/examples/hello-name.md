@@ -141,7 +141,7 @@ check_components! {
 }
 ```
 
-[`cargo cgp check`](/docs/cargo-cgp/check) reports the failure with its root cause, shown here with
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) reports the failure with its root cause, shown here with
 the long types abridged:
 
 ```text

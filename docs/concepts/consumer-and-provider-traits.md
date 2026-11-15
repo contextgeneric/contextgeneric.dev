@@ -201,7 +201,7 @@ requirements that a consumer-trait error can hide.
 The listings use shorter names to keep this connection readable. In an actual expansion, the
 parameters are `__Context__` and `__Provider__`, and the delegate is spelled as
 `<__Provider__ as DelegateComponent<EmailSenderComponent>>::Delegate`. You can inspect the full
-expansion of a concrete component with [`cargo cgp expand`](/docs/cargo-cgp/expand).
+expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
 
 ## Writing it
 
@@ -288,7 +288,7 @@ When you do use wiring, the compiler checks whether it supplies a usable impleme
 code requires the trait. Until then, a missing entry or unsatisfied provider dependency may remain
 undetected. [`check_components!`](/docs/reference/macros/check_components) brings those checks to
 a place you choose, usually beside the table. If one fails,
-[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it recognizes,
 though it does not yet reshape every class. [Checking your wiring](./check-traits.md) explains
 those diagnostics and their limits.
 

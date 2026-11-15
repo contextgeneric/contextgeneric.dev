@@ -307,7 +307,7 @@ respective designs.
 
 CGP adds declarations, wiring, and compile-time work without supplying confinement or capture
 checking. Programs that need those properties must obtain them elsewhere. Its generated trait
-machinery also affects diagnostics: [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root
+machinery also affects diagnostics: [`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root
 cause for the classes it recognizes, and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) compares this machinery
 with simpler Rust abstractions.

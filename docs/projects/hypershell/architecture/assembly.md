@@ -134,7 +134,7 @@ Running `SimpleExec` on `HypershellCli` passes through all three layers:
 
 The compiler does this walk while it type-checks the program, so none of it happens at run time: the
 call becomes a direct call to `HandleSimpleExec`. When something along the way is missing,
-[`cargo cgp check`](/docs/cargo-cgp/check) prints the same walk step by step, which is what the
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) prints the same walk step by step, which is what the
 [debugging guide](../guides/debugging.md) teaches a reader to follow.
 
 ## What it costs

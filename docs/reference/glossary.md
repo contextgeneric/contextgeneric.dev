@@ -130,7 +130,7 @@ The ordinary Rust a CGP macro generates: the traits, impls, and marker types beh
 also called what a construct desugars to. `cargo cgp expand` prints it with CGP's type-level
 constructs restored to readable macro notation.
 
-[`cargo cgp expand`](/docs/cargo-cgp/expand) ·
+[`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) ·
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits)
 
 ### extensible record

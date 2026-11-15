@@ -157,7 +157,7 @@ pub type Program = hypershell! {
 };
 ```
 
-The program then fails at its `handle` call, and [`cargo cgp check`](/docs/cargo-cgp/check) names
+The program then fails at its `handle` call, and [`cargo cgp check`](/docs/tooling/cargo-cgp/check) names
 the missing entry, shown here with the long types abridged:
 
 ```text

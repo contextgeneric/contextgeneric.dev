@@ -349,7 +349,7 @@ const COSTS: Cost[] = [
     body: (
       <>
         Raw wiring errors are long, but{' '}
-        <Link to="/docs/cargo-cgp">
+        <Link to="/docs/tooling/cargo-cgp">
           <code>cargo cgp check</code>
         </Link>{' '}
         leads with the root cause for the classes it recognizes, and the tool does not yet reshape

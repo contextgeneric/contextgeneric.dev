@@ -146,7 +146,7 @@ reason that field is required.
 The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
 next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
-reshape every class; [Reading the output](/docs/cargo-cgp/reading-output#errors-that-pass-through-unchanged)
+reshape every class; [Reading the output](/docs/tooling/cargo-cgp/reading-output#errors-that-pass-through-unchanged)
 lists the ones that pass through unchanged. Output details depend on the compiler and tool version.
 
 ## Checking a stack one layer at a time

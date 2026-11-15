@@ -9,7 +9,7 @@ description: 'Meet CGP''s policy for AI-assisted contributions, report problems 
 
 [Context-Generic Programming (CGP)](/docs/) is a language extension for Rust, with pluggable trait
 implementations at compile-time. This page is for contributors who want to change CGP itself (the
-library, the [cargo-cgp](/docs/cargo-cgp) toolchain, the agent skill, or the documentation) with a
+library, the [cargo-cgp](/docs/tooling/cargo-cgp) toolchain, the agent skill, or the documentation) with a
 coding agent's help. It covers the policy for AI-assisted contributions, reporting problems in the
 knowledge base, the local setup the repositories expect, and the rules your agent follows while it
 works. It assumes you already use an agent and have contributed to a Rust project through GitHub

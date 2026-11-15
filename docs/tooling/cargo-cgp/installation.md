@@ -1,5 +1,4 @@
 ---
-slug: /cargo-cgp/installation
 title: 'Install cargo-cgp with cargo or Nix'
 sidebar_label: 'Installation'
 sidebar_position: 2

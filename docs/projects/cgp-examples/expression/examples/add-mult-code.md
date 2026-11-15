@@ -154,7 +154,7 @@ operand of a `ToLisp` computation is converted.
 
 Remove the conversion entry for `Plus`, the line
 `@ComputerRefComponent.ToLisp.Plus<MathExpr>: BinaryOpToLisp<Symbol!("+")>`, and run
-[`cargo cgp check`](/docs/cargo-cgp/check). The check names the missing entry, with both parts of
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check). The check names the missing entry, with both parts of
 its key:
 
 ```text

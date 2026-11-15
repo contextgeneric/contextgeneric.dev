@@ -164,7 +164,7 @@ help: the trait `HasField<Symbol<5, Chars<'w', Chars<'i', Chars<'d', Chars<'t', 
       but trait `HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<'h', cgp::macro_prelude::Chars<'t', Nil>>>>>>>>` is implemented for it
 ```
 
-[`cargo cgp check`](/docs/cargo-cgp/check) reads the chain back into the name, and reports
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) reads the chain back into the name, and reports
 ``[CGP-E110] missing field `width` on `Rectangle` `` as the root cause. `cargo cgp check` leads with
 the root cause for the classes it recognizes, and the tool does not yet reshape every class.
 

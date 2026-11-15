@@ -51,7 +51,7 @@ If you came with a particular question, find it below beside the page that answe
   injection and type classes to ML modules and dynamic dispatch.
 - **What does a construct do, or a term mean?** The [Reference](/docs/reference) and the
   [Glossary](/docs/reference/glossary).
-- **How do I read a CGP compile error?** [cargo-cgp](/docs/cargo-cgp), CGP's error toolchain.
+- **How do I read a CGP compile error?** [cargo-cgp](/docs/tooling/cargo-cgp), CGP's error toolchain.
 - **What has been built with it?** The [Projects](/docs/projects).
 - **How do I use CGP with a coding agent?** The [AI section](/docs/ai), with CGP's agent skill.
 - **Where can I watch a talk about CGP?** The [Videos](/docs/resources/videos) page in Resources.

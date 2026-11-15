@@ -272,7 +272,7 @@ v0.4](https://gleam.run/news/gleam-v0.4-released/)).
 CGP requires derives and type-level tags, plus wiring for operations supplied by components. Missing
 dependencies can produce long trait errors.
 [`check_components!`](/docs/reference/macros/check_components) checks the listed components beside
-the wiring. [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it
+the wiring. [`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it
 recognizes, and the tool does not yet reshape every class. A direct `match`
 can still be easier to understand and debug.
 

@@ -155,7 +155,7 @@ and wire it in `ProductionApp`, beside the namespace line:
 @app.core.user.UserGetterComponent: GetCachedUser,
 ```
 
-Run [`cargo cgp check`](/docs/cargo-cgp/check), and the entry is rejected:
+Run [`cargo cgp check`](/docs/tooling/cargo-cgp/check), and the entry is rejected:
 
 ```text
 error[E0119]: [CGP-E011] conflicting wiring: `…ProductionApp` wires `@app.core.user.…UserGetterComponent`, which `DefaultAppComponents` already covers

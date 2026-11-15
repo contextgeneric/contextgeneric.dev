@@ -292,7 +292,7 @@ raises this concern.
 
 CGP requires exposed field shapes, explicit wiring, and specialized code for each field list.
 Learning the type-level representation and tracing recursive trait errors are additional costs.
-[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it recognizes,
 and the tool does not yet reshape every class. The
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) compares these costs with simpler
 approaches.

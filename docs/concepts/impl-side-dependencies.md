@@ -280,7 +280,7 @@ The resulting errors can describe generated bounds rather than the dependencies 
 For example, an implicit field may appear as a missing `HasField` implementation with a nested
 type-level field name. [`check_components!`](/docs/reference/macros/check_components) puts the check
 where you choose, usually beside the wiring, and helps expose the missing dependency. For the
-classes it recognizes, [`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause, though
+classes it recognizes, [`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause, though
 it does not yet reshape every class. [Checking your wiring](./check-traits.md) explains those
 diagnostics and their limits.
 

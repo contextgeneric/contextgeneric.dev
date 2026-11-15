@@ -176,7 +176,7 @@ it. Two situations put its name in your hands, and both are about diagnosis:
   that something in the stack is unsatisfied; `#[check_providers(...)]` asserts `IsProviderFor` on
   each named provider instead, so a dependency missing only from the outer wrapper errors on its
   line alone, while one missing from the inner provider errors on both.
-- **Reading a diagnostic.** A compiler note or a [`cargo cgp check`](/docs/cargo-cgp/check) chain
+- **Reading a diagnostic.** A compiler note or a [`cargo cgp check`](/docs/tooling/cargo-cgp/check) chain
   that names `IsProviderFor<C, Ctx, P>` for a provider means "this provider's requirements, for this
   context", and the frame below it names the requirement.
 

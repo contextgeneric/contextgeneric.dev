@@ -143,7 +143,7 @@ stays open.
 ## Try a change
 
 Remove the error route, keeping the `WebSocket` entry. The program then fails at its `handle` call,
-and [`cargo cgp check`](/docs/cargo-cgp/check) reports the missing route, shown here with the long
+and [`cargo cgp check`](/docs/tooling/cargo-cgp/check) reports the missing route, shown here with the long
 type abridged:
 
 ```text

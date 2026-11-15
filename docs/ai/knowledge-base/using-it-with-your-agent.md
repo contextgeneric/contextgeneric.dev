@@ -26,11 +26,11 @@ Use the knowledge base when a question needs the complete record:
 - **A corner case:** an unusual syntax form, how a macro treats lifetimes, or an interaction between
   two constructs.
 - **An unfamiliar error:** a compile error whose cause the skill and
-  [cargo-cgp](/docs/cargo-cgp) do not make clear.
+  [cargo-cgp](/docs/tooling/cargo-cgp) do not make clear.
 - **The implementation:** how a macro produces its expansion, for learning or for auditing the
   source.
 - **The generated code:** what the macros add to your own crate, which
-  [`cargo cgp expand`](/docs/cargo-cgp/expand) prints and the knowledge base explains.
+  [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) prints and the knowledge base explains.
 - **A comparison:** how CGP relates to an idea from another language you already know.
 
 The skill already links to knowledge-base documents for details it leaves out, so an agent with the

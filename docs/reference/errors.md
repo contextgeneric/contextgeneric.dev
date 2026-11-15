@@ -19,7 +19,7 @@ It is meant to be looked up rather than read through. If you have an error in fr
 
 ## Run the checker first
 
-**Before decoding anything, run [`cargo cgp check`](/docs/cargo-cgp/check) in place of
+**Before decoding anything, run [`cargo cgp check`](/docs/tooling/cargo-cgp/check) in place of
 `cargo check`.** For the worst class it recovers a cause that plain `cargo check` discards entirely,
 and every "what you see" example below is its real output.
 
@@ -757,7 +757,7 @@ always kept beside it, so `rustc --explain` still works and nothing is reclassif
 code in the **headline** classifies the error; a code in the **root-cause tree** labels one link in
 the chain.
 
-[Error codes](/docs/cargo-cgp/error-codes) lists every code with its message, its meaning, its fix,
+[Error codes](/docs/tooling/cargo-cgp/error-codes) lists every code with its message, its meaning, its fix,
 and the section of this page that explains its class.
 
 ## Related constructs
@@ -768,7 +768,7 @@ and the section of this page that explains its class.
 - [`IsProviderFor`](./traits/wiring/is_provider_for.md) — the marker that carries a provider's requirements into
   a diagnostic; the reason a checked error names the cause at all.
 - [`CanUseComponent`](./traits/wiring/can_use_component.md) — what a check asserts.
-- [`cargo cgp check`](/docs/cargo-cgp/check) — the tool every rewritten output on this page came from.
+- [`cargo cgp check`](/docs/tooling/cargo-cgp/check) — the tool every rewritten output on this page came from.
 - [`Symbol!`](./macros/symbol.md) — the type-level field name whose raw `Chars<…>` list the tool
   resugars.
 

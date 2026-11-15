@@ -354,7 +354,7 @@ Wiring failures can produce verbose diagnostics involving generated types and tr
 [`check_components!`](/docs/reference/macros/check_components) forces selected requirements to be
 checked near the wiring. `cargo cgp check` leads with the root cause for the classes it recognizes,
 and the tool does not yet reshape every class. The
-[cargo-cgp documentation](/docs/cargo-cgp/) explains the checking workflow.
+[cargo-cgp documentation](/docs/tooling/cargo-cgp/) explains the checking workflow.
 
 The compiler does additional work through macros, trait resolution, and
 [monomorphization](/docs/reference/glossary#monomorphization). Its effect needs measuring in the

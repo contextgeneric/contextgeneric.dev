@@ -234,7 +234,7 @@ Recording the choice leaves another question open: whether the provider's requir
 the context. Rust checks those requirements when the trait is checked or used, so a table can
 compile even though a later call will fail. To check beside the wiring, use
 [`check_components!`](/docs/reference/macros/check_components). If the check fails,
-[`cargo cgp check`](/docs/cargo-cgp/check) leads with the root cause for the classes it recognizes,
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it recognizes,
 though it does not yet reshape every class. [Checking your wiring](./check-traits.md) explains
 those diagnostics and their limits.
 

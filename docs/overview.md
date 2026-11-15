@@ -115,7 +115,7 @@ instantiated: it exists only as a type.
 
 The work inside the provider, such as the request to S3, still has its usual runtime cost.
 Generic code can also increase compile time and code size. To inspect the generated code, use
-[`cargo cgp expand`](/docs/cargo-cgp/expand). For a comparison with `dyn Trait`, see
+[`cargo cgp expand`](/docs/tooling/cargo-cgp/expand). For a comparison with `dyn Trait`, see
 [Dynamic dispatch](/docs/comparisons/dynamic-dispatch).
 
 ### Type-Safe Wiring
@@ -144,7 +144,7 @@ check_components! {
 }
 ```
 
-[cargo-cgp](/docs/cargo-cgp), CGP's error toolchain, reports the missing field first, followed by
+[cargo-cgp](/docs/tooling/cargo-cgp), CGP's error toolchain, reports the missing field first, followed by
 the chain of requirements that led to it. Here is its report, without the source excerpt that points
 at the check:
 

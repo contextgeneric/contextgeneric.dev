@@ -745,7 +745,7 @@ does not accept attributes anywhere and rejects any it finds.
 unmet, still compiles. The failure appears later, at the place where code uses the trait, often as a
 long error naming types you did not write. The answer is to check the table (see
 [`check_components!`](./check_components.md)) and to read failures through
-[`cargo cgp check`](/docs/cargo-cgp/check) in place of `cargo check`. `cargo cgp check` leads with the
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) in place of `cargo check`. `cargo cgp check` leads with the
 root cause for the classes it recognizes, and the tool does not yet reshape every class.
 
 **Statements must lead the block**, and getting it wrong produces a misleading message. Once the parser
@@ -775,10 +775,10 @@ end.
 [`#[cgp_impl]`](./cgp_impl.md) *without* the `new` keyword and never declared it separately. The
 error is `E0425`, ``cannot find type `SquareArea` in this scope``, which names an unresolved type
 rather than anything about wiring. When no type of that name exists anywhere,
-[`cargo cgp check`](/docs/cargo-cgp/error-codes#cgp-e043) reports it as an undeclared provider,
+[`cargo cgp check`](/docs/tooling/cargo-cgp/error-codes#cgp-e043) reports it as an undeclared provider,
 `[CGP-E043]`. A key that names a consumer trait, a component that exists but is not imported, a
 component guessed from a consumer trait's name, or a type in an `@`-path nothing declares gets one
-of the [wiring-name codes](/docs/cargo-cgp/error-codes#wiring-keys-and-values-that-do-not-resolve),
+of the [wiring-name codes](/docs/tooling/cargo-cgp/error-codes#wiring-keys-and-values-that-do-not-resolve),
 `[CGP-E040]` to `[CGP-E042]` or `[CGP-E044]`; a key the tool cannot settle, such as a misspelled
 component name, keeps the compiler's `E0425`. A provider or a type declared elsewhere but not
 imported keeps the compiler's message and its import suggestion.

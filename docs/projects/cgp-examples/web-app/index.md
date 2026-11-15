@@ -66,7 +66,7 @@ cargo check -p cgp-example-web-app
 
 It builds on stable Rust 1.90 or later. The check passes, which means every context in every stage
 satisfies every component it wires. The stage pages make one change each and show what
-[`cargo cgp check`](/docs/cargo-cgp/check) then reports.
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) then reports.
 
 ## Where to go next
 

@@ -263,7 +263,7 @@ and implements Serde's own `Serialize` trait, so any Serde format accepts it unc
 ## Try a change
 
 Remove `i64` from `AppB`'s `UseSerde` entry, leaving `[u64, String]`, and run
-[`cargo cgp check`](/docs/cargo-cgp/check). The check on `AppB` fails, and the tool names the
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check). The check on `AppB` fails, and the tool names the
 missing entry as the root cause:
 
 ```text

@@ -31,7 +31,7 @@ Enum! { Circle(f64), Square(f64) }
 The two are the identical type, and it is exactly the `Fields` the derive gives an enum with that
 body. Reach for `Enum!` wherever code *names* a variant set's shape rather than deriving it, such as
 a [trait bound](https://doc.rust-lang.org/book/ch10-02-traits.html) on `FromFields`. It is also the
-form [`cargo cgp check`](/docs/cargo-cgp/check) and [`cargo cgp expand`](/docs/cargo-cgp/expand)
+form [`cargo cgp check`](/docs/tooling/cargo-cgp/check) and [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand)
 print a variant list in, so a list read in the tool's output can be copied back into code.
 
 ## Usage

@@ -83,7 +83,7 @@ current process.
 
 ## Tooling and tests
 
-Agents write most of [cargo-cgp](/docs/cargo-cgp) and maintain much of CGP's test suite. Neither
+Agents write most of [cargo-cgp](/docs/tooling/cargo-cgp) and maintain much of CGP's test suite. Neither
 becomes part of your compiled program: `cargo-cgp` runs on a project, and the tests exercise the
 library. Their results can be checked against test fixtures and the library's behavior.
 

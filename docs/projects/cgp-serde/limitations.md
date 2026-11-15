@@ -68,7 +68,7 @@ reaches. See [wiring a context](./guides/wiring-a-context.md).
 
 A missing entry is a compile error, and the compiler's raw message lists every step from the
 top-level type down to the entry it could not find. Checking the context with `check_components!`
-and reading the error with [`cargo cgp check`](/docs/cargo-cgp/check) gets to the cause faster:
+and reading the error with [`cargo cgp check`](/docs/tooling/cargo-cgp/check) gets to the cause faster:
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
 reshape every class. The [debugging
 guide](./guides/debugging-wiring.md) shows the common mistakes.

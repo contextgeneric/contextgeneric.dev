@@ -139,7 +139,7 @@ cargo install --locked cargo-cgp
 cargo cgp setup
 ```
 
-The [installation page](/docs/cargo-cgp/installation) covers the other ways to get it, including the
+The [installation page](/docs/tooling/cargo-cgp/installation) covers the other ways to get it, including the
 Nix flake, and explains why `setup` is a separate step. `cargo cgp check` then runs the same check as
 `cargo check` and rewrites the errors it recognizes. On the same broken program:
 

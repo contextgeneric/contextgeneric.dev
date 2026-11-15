@@ -16,16 +16,16 @@ required, because CGP compiles on stable Rust without them.
 
 ## cargo-cgp
 
-[`cargo-cgp`](/docs/cargo-cgp) helps with both. When an error is hard to read, run
+[`cargo-cgp`](/docs/tooling/cargo-cgp) helps with both. When an error is hard to read, run
 `cargo cgp check` in place of `cargo check`. `cargo cgp check` leads with the root cause for the
 classes it recognizes, and the tool does not yet reshape every class. When you want to see the code
-behind a macro, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints the Rust that CGP's macros
+behind a macro, [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) prints the Rust that CGP's macros
 generate.
 
-To start using it, follow the [installation guide](/docs/cargo-cgp/installation), then try it on a
-project with [the check page](/docs/cargo-cgp/check). Once the tool reports an error,
-[reading the output](/docs/cargo-cgp/reading-output) explains each part of it, and
-[the error-codes page](/docs/cargo-cgp/error-codes) explains each code it prints.
+To start using it, follow the [installation guide](/docs/tooling/cargo-cgp/installation), then try it on a
+project with [the check page](/docs/tooling/cargo-cgp/check). Once the tool reports an error,
+[reading the output](/docs/tooling/cargo-cgp/reading-output) explains each part of it, and
+[the error-codes page](/docs/tooling/cargo-cgp/error-codes) explains each code it prints.
 
 ## More tools to come
 
