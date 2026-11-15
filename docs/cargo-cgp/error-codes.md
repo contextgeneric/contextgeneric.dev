@@ -497,7 +497,8 @@ beside the trait, and the error sits on the trait's name:
 [CGP-E041] the component `<Component>` is not in scope
 ```
 
-To fix it, add the `use` line the `help` line gives. A header that names the trait by its path
+To fix it, add the `use` line the `help` line gives, which an editor can apply from the trait's
+name or the key. A header that names the trait by its path
 derives the key through the same path, so one written through a module that re-exports the trait
 without its key reads `` the component `<Component>` is not in module `<module>` ``; name the trait
 through the module the `help` line gives, or re-export the key beside the trait.
