@@ -2,7 +2,7 @@
 title: 'Tooling for Context-Generic Programming'
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'The programs you can run beside the cgp library, starting with cargo-cgp, which explains CGP compile errors and expands CGP macros.'
+description: 'These pages cover the optional programs you run beside the cgp library, starting with cargo-cgp for reading CGP compile errors and macro expansions.'
 ---
 
 # Tooling
@@ -16,7 +16,8 @@ can run beside those commands. They are optional, because CGP compiles on stable
 [`cargo-cgp`](/docs/cargo-cgp) helps you understand compile errors and macro expansions in CGP
 code. Run `cargo cgp check` in place of `cargo check` when an error is hard to read:
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
-reshape every class. To read the Rust code that CGP's macros generate, run `cargo cgp expand`.
+reshape every class. To read the Rust code that CGP's macros generate, run
+[`cargo cgp expand`](/docs/cargo-cgp/expand).
 
 Its pages start with [installation](/docs/cargo-cgp/installation), then cover
 [checking a project](/docs/cargo-cgp/check), [reading the output](/docs/cargo-cgp/reading-output),
