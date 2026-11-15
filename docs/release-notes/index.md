@@ -7,10 +7,10 @@ description: 'What each official release of the cgp library and the cargo-cgp to
 
 # Release notes
 
-These pages list what each official release of
+Each page in this section lists what one official release of
 [Context-Generic Programming (CGP)](/docs/), a Rust library whose macros generate traits and their
-wiring, changed that a user can see, and what a project does to upgrade to it. Each release has its own
-page, dated and kept as it was published, so a page always describes the version it names.
+wiring, changed for its users, and how a project upgrades to it. A page is dated and kept as it was
+published, so it always describes the version it names.
 
 ## The artifacts
 
