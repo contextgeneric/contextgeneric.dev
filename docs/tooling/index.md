@@ -7,26 +7,30 @@ description: 'These pages cover the optional programs you run beside the cgp lib
 
 # Tooling
 
-[Context-Generic Programming (CGP)](/docs/) is a Rust library, so you build, check, and test CGP
-code with the same cargo commands as any other Rust project. This section covers the programs you
-can run beside those commands. They are optional, because CGP compiles on stable Rust without them.
+[Context-Generic Programming (CGP)](/docs/) is a Rust library, so the cargo commands you already
+use build, check, and test CGP code as they do any other Rust code. Now and then, though, you need
+more than those commands give you. CGP's macros generate ordinary Rust traits, so a compile error
+may name that generated code while leaving the failed requirement unclear, or you may want to read
+the code a macro produced. The programs in this section help at those moments. None of them is
+required, because CGP compiles on stable Rust without them.
 
 ## cargo-cgp
 
-[`cargo-cgp`](/docs/cargo-cgp) helps you understand compile errors and macro expansions in CGP
-code. Run `cargo cgp check` in place of `cargo check` when an error is hard to read:
-`cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet
-reshape every class. To read the Rust code that CGP's macros generate, run
-[`cargo cgp expand`](/docs/cargo-cgp/expand).
+[`cargo-cgp`](/docs/cargo-cgp) helps with both. When an error is hard to read, run
+`cargo cgp check` in place of `cargo check`. `cargo cgp check` leads with the root cause for the
+classes it recognizes, and the tool does not yet reshape every class. When you want to see the code
+behind a macro, [`cargo cgp expand`](/docs/cargo-cgp/expand) prints the Rust that CGP's macros
+generate.
 
-Its pages start with [installation](/docs/cargo-cgp/installation), then cover
-[checking a project](/docs/cargo-cgp/check), [reading the output](/docs/cargo-cgp/reading-output),
-and the [error codes](/docs/cargo-cgp/error-codes) the tool prints.
+To start using it, follow the [installation guide](/docs/cargo-cgp/installation), then try it on a
+project with [the check page](/docs/cargo-cgp/check). Once the tool reports an error,
+[reading the output](/docs/cargo-cgp/reading-output) explains each part of it, and
+[the error-codes page](/docs/cargo-cgp/error-codes) explains each code it prints.
 
 ## More tools to come
 
-`cargo-cgp` is the only tool in this section today. More tooling for CGP will be added here in the
-future.
+For now, `cargo-cgp` is the only program in this section. More tooling for CGP will be added here
+in the future.
 
 ---
 
