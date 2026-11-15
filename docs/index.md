@@ -54,8 +54,8 @@ If you came with a particular question, find it below beside the page that answe
 - **How do I read a CGP compile error?** [cargo-cgp](/docs/cargo-cgp), CGP's error toolchain.
 - **What has been built with it?** The [Projects](/docs/projects).
 - **How do I use CGP with a coding agent?** The [AI section](/docs/ai), with CGP's agent skill.
-- **Where are the crates, talks, and community?** [Resources](/docs/resources).
-- **How can I help?** [Contribute](/docs/contribute).
+- **Where can I watch a talk about CGP?** The [Videos](/docs/resources/videos) in Resources.
+- **How can I join the community or help?** [Contribute](/docs/contribute).
 
 For releases, design discussions, and talks, visit the [blog](/blog). Its older posts describe the
 library as it was when they were published, so for CGP as it is today, rely on the pages above.

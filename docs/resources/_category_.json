@@ -1,0 +1,8 @@
+{
+  "label": "Resources",
+  "position": 10,
+  "link": {
+    "type": "doc",
+    "id": "resources/index"
+  }
+}
