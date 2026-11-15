@@ -302,6 +302,52 @@ Without the rewrite, the compiler refers to a method on the generated `&__Contex
 and never names the attribute. Many codes from `[CGP-E030]` through `[CGP-E039]` similarly
 identify a mistake in a macro's input and offer a specific correction.
 
+Some fixes go one step further and come as an edit the tool attaches to the error. A provider whose
+module imports its provider trait but not the trait's component key is one case:
+
+```rust
+mod components {
+    use cgp::prelude::*;
+
+    #[cgp_component(AreaCalculator)]
+    pub trait CanCalculateArea {
+        fn area(&self) -> f64;
+    }
+}
+
+mod providers {
+    use cgp::prelude::*;
+
+    use crate::components::AreaCalculator;
+
+    #[cgp_impl(new RectangleArea)]
+    impl AreaCalculator {
+        fn area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+            width * height
+        }
+    }
+}
+```
+
+```text
+error[E0425]: [CGP-E041] the component `AreaCalculatorComponent` is not in scope
+  --> src/main.rs:16:10
+   |
+16 |     impl AreaCalculator {
+   |          ^^^^^^^^^^^^^^
+   |
+help: import the component
+   |
+11 +     use crate::components::AreaCalculatorComponent;
+   |
+```
+
+The `help` shows the line it would insert, marked `+`, rather than describing it. Because the edit
+travels with the error, an editor running `cargo cgp check` offers it as a quick fix on the trait's
+name, as [Editor integration](./editor-integration.md#importing-a-component-key) describes.
+[`[CGP-E070]`](./error-codes.md#cgp-e070)'s fix, which names a component in the provider's attribute,
+works the same way.
+
 ## Errors that pass through unchanged
 
 `cargo cgp check` leads with the root cause for the classes it recognizes, and the tool does not yet reshape
