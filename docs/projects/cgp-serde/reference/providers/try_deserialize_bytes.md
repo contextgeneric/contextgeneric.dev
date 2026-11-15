@@ -11,10 +11,12 @@ Read a value from a byte slice through a fallible `TryFrom` conversion.
 
 ## Overview
 
-`TryDeserializeBytes` reads bytes the way [`SerializeBytes`](./serialize_bytes.md) does, then
-converts them into the target type with `TryFrom`, reporting a failed conversion as an error. A
-fixed-size array is the typical target, since a slice converts to one only when the lengths match.
-It asks the **context**, the type whose wiring holds an application's choices, for nothing.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `TryDeserializeBytes` reads bytes the way
+[`SerializeBytes`](./serialize_bytes.md) does, then converts them into the target type with
+`TryFrom`, reporting a failed conversion as an error. A fixed-size array is the typical target,
+since a slice converts to one only when the lengths match. It asks the **context**, the type whose
+wiring holds an application's choices, for nothing.
 
 ## Definition
 

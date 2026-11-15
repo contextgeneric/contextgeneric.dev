@@ -7,15 +7,15 @@ description: 'Make rust-analyzer run cargo cgp check when you save, so VS Code s
 
 # Editor integration
 
-You can have rust-analyzer run `cargo cgp check` when you save, bringing the rewritten CGP errors
-into your editor. One setting replaces its usual `cargo check` command, so errors from the check
-lead with the same root causes as they do in a terminal.
+You can have rust-analyzer run `cargo cgp check` when you save, bringing the rewritten errors of
+[Context-Generic Programming (CGP)](/docs/) code into your editor. One setting replaces its usual
+`cargo check` command, so errors from the check lead with the same root causes as they do in a
+terminal.
 
 This page covers VS Code with the
 [rust-analyzer extension](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer).
-Before configuring it, [install](./installation.md) the [`cargo-cgp`](./index.md) toolchain for
-[Context-Generic Programming (CGP)](/docs/) and confirm that `cargo cgp check` works in a terminal
-inside your project.
+Before configuring it, [install](./installation.md) the [`cargo-cgp`](./index.md) toolchain and
+confirm that `cargo cgp check` works in a terminal inside your project.
 
 ## Set it up
 

@@ -9,8 +9,9 @@ description: 'How to write a new cgp-serde provider: one struct for both directi
 A new encoding in [cgp-serde](../index.md) is a new provider: a type that implements one or both of
 the library's serialization components, which a **context**, the type whose wiring holds an
 application's choices, then names in its wiring. cgp-serde rebuilds Serde's `Serialize` and
-`Deserialize` as components of [CGP](/docs/). This guide shows a provider pair, then how to
-structure one, how to hand nested values back to the context, and how to report errors.
+`Deserialize` as components of [Context-Generic Programming (CGP)](/docs/). This guide shows a
+provider pair, then how to structure one, how to hand nested values back to the context, and how to
+report errors.
 
 ## Start from an example
 

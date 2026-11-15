@@ -11,11 +11,13 @@ Write a reference or smart pointer as the value it points to.
 
 ## Overview
 
-`SerializeDeref` dereferences a value and asks the **context**, the type whose wiring holds the
-application's choices, to write the target. Its main use is one generic entry that forwards every
-reference to the context's choice for the referenced type, which a context needs whenever it writes
-a collection with [`SerializeIterator`](./serialize_iterator.md), since walking a collection by
-reference yields references.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeDeref` dereferences a value and asks the
+**context**, the type whose wiring holds the application's choices, to write the target. Its main
+use is one generic entry that forwards every reference to the context's choice for the referenced
+type, which a context needs whenever it writes a collection with
+[`SerializeIterator`](./serialize_iterator.md), since walking a collection by reference yields
+references.
 
 ## Definition
 

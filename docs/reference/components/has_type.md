@@ -7,7 +7,7 @@ sidebar_position: 4
 
 # `HasType`
 
-CGP's tag-indexed abstract-type component: a type per tag that a context resolves through wiring.
+The tag-indexed abstract-type component: a type per tag that a context resolves through wiring.
 
 ## Overview
 

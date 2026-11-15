@@ -9,8 +9,9 @@ description: 'How to use a cgp-serde context with serde_json, RON, and other Ser
 A [cgp-serde](../index.md) **context**, the type whose wiring holds an application's choices, works
 with any Serde format through the format's ordinary `Serializer` and `Deserializer`, so using one is
 a matter of handing the format a value that carries the context. cgp-serde rebuilds Serde's
-`Serialize` and `Deserialize` as components of [CGP](/docs/). This guide shows how to write and read
-with `serde_json` and another format, and which formats fit the library's output.
+`Serialize` and `Deserialize` as components of [Context-Generic Programming (CGP)](/docs/). This
+guide shows how to write and read with `serde_json` and another format, and which formats fit the
+library's output.
 
 ## Write with any format
 

@@ -8,10 +8,10 @@ description: 'How cgp-serde works, in outline: Serde''s data-type layer replaced
 
 How can one type be serialized two different ways in two applications, when Rust allows it only one
 `Serialize` impl? [cgp-serde](../index.md) answers by rebuilding Serde's `Serialize` and
-`Deserialize` as components of [CGP](/docs/), a language extension for Rust with pluggable trait
-implementations at compile-time. This page explains the design in outline: which part of Serde it
-replaces, what decides a type's encoding, and how that decision reaches every value nested inside
-another. Each idea has a page of its own with the details.
+`Deserialize` as components of [Context-Generic Programming (CGP)](/docs/), a language extension for
+Rust with pluggable trait implementations at compile-time. This page explains the design in outline:
+which part of Serde it replaces, what decides a type's encoding, and how that decision reaches every
+value nested inside another. Each idea has a page of its own with the details.
 
 ## It replaces one layer of Serde
 

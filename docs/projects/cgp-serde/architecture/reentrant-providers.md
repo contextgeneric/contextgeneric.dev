@@ -8,10 +8,11 @@ description: 'How a cgp-serde provider hands each nested value back to the conte
 
 When an application wires `Vec<u8>` to hex, how does that choice reach a byte field three structs
 deep, when none of the providers in between knows about it? [cgp-serde](../index.md) rebuilds
-Serde's `Serialize` and `Deserialize` as components of [CGP](/docs/), and its providers never encode
-the values nested inside the one they are given. They hand each one back to the **context**, the
-type whose wiring holds an application's choices, which is called re-entering it. This page explains
-the two ways a provider re-enters the context, and what that asks of the context's wiring.
+Serde's `Serialize` and `Deserialize` as components of [Context-Generic Programming (CGP)](/docs/),
+and its providers never encode the values nested inside the one they are given. They hand each one
+back to the **context**, the type whose wiring holds an application's choices, which is called
+re-entering it. This page explains the two ways a provider re-enters the context, and what that asks
+of the context's wiring.
 
 ## A provider asks the context, not the next impl
 

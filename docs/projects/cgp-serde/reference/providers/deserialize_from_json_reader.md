@@ -11,8 +11,9 @@ Read a value from any `serde_json` reader through the context, and reject anythi
 
 ## Overview
 
-`DeserializeFromJsonReader` makes reading JSON an operation the **context**, the type whose wiring
-holds an application's choices, runs through CGP's
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeFromJsonReader` makes reading JSON an
+operation the **context**, the type whose wiring holds an application's choices, runs through CGP's
 [`TryComputer`](/docs/reference/components/handler/try_computer). It reads from any of
 `serde_json`'s input sources: a string, a byte slice, or a stream. It is keyed on the marker type
 `DeserializeJson<T>`, from `cgp_serde_json::code`, which names the type to read.

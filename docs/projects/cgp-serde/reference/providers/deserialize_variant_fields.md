@@ -11,7 +11,8 @@ Read an enum from `{"Variant": payload}`, reading the payload through the contex
 
 ## Overview
 
-`DeserializeVariantFields` is the reading half of
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeVariantFields` is the reading half of
 [`SerializeVariantFields`](./serialize_variant_fields.md). It reads the variant's name, asks the
 **context**, the type whose wiring holds the application's choices, to read that variant's payload,
 and builds the enum. The enum derives only CGP's variant traits, through

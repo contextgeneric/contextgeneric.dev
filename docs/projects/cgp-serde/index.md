@@ -7,10 +7,11 @@ description: 'cgp-serde rebuilds Serde''s Serialize and Deserialize as CGP compo
 # cgp-serde
 
 cgp-serde rebuilds [Serde](https://serde.rs/)'s `Serialize` and `Deserialize` traits as components
-of [CGP](/docs/), a language extension for Rust with pluggable trait implementations at
-compile-time. With Serde, a type has one encoding for the whole program, chosen by whoever owns the
-type. With cgp-serde, the encoding of each type is chosen by the application instead, so two
-applications can write the same value differently, and neither needs to own the type or wrap it.
+of [Context-Generic Programming (CGP)](/docs/), a language extension for Rust with pluggable trait
+implementations at compile-time. With Serde, a type has one encoding for the whole program, chosen
+by whoever owns the type. With cgp-serde, the encoding of each type is chosen by the application
+instead, so two applications can write the same value differently, and neither needs to own the type
+or wrap it.
 
 cgp-serde is a proof of concept. It replaces Serde's per-type implementations and keeps everything
 else: Serde's data model, its formats such as `serde_json`, and any `Serialize` impl a type already

@@ -11,10 +11,11 @@ Write bytes as a standard, padded base64 string, and read one back into a `Vec<u
 
 ## Overview
 
-`SerializeBase64` is the compact text encoding of bytes in `cgp-serde-extra`. It converts bytes to a
-base64 `String` and asks the **context**, the type whose wiring holds the application's choices, to
-write that string, and it reads a string through the context and decodes it. One struct implements
-both directions.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeBase64` is the compact text encoding of bytes
+in `cgp-serde-extra`. It converts bytes to a base64 `String` and asks the **context**, the type
+whose wiring holds the application's choices, to write that string, and it reads a string through
+the context and decodes it. One struct implements both directions.
 
 ## Definition
 

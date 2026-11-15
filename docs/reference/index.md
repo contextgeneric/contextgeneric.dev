@@ -6,9 +6,9 @@ description: 'The complete reference for every CGP construct, grouped by job, wi
 
 # Reference
 
-This is the complete reference for every CGP construct: what each one is for, when to reach for it,
-how to write it, and what it generates. It is the place to look when you already know the name of the
-thing you need.
+This is the complete reference for every construct of [Context-Generic Programming (CGP)](/docs/):
+what each one is for, when to reach for it, how to write it, and what it generates. It is the place
+to look when you already know the name of the thing you need.
 
 If you are still learning CGP, the [tutorials](/docs/tutorials/hello) are the better starting point.
 This section assumes you know what a component and a provider are, and it explains constructs one at a

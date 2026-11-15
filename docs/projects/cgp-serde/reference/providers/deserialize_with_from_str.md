@@ -11,9 +11,10 @@ Read any `FromStr` value by parsing a string.
 
 ## Overview
 
-`DeserializeWithFromStr` is the reading half of an encoding through text. It asks the **context**,
-the type whose wiring holds the application's choices, to read a `&str` borrowed from the input,
-then parses it with `FromStr`. It reads back what
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeWithFromStr` is the reading half of an
+encoding through text. It asks the **context**, the type whose wiring holds the application's
+choices, to read a `&str` borrowed from the input, then parses it with `FromStr`. It reads back what
 [`SerializeWithDisplay`](./serialize_with_display.md) writes, for a type whose `Display` and
 `FromStr` agree.
 

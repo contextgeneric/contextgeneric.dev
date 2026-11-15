@@ -11,10 +11,12 @@ Write any `Display` value as the string it formats to.
 
 ## Overview
 
-`SerializeWithDisplay` covers every type whose natural encoding is its printed form, such as an
-identifier or a unit of measure, with one provider. It formats the value with `Display`, then asks
-the **context**, the type whose wiring holds the application's choices, to write the resulting
-`String`, so how strings are written stays the context's choice.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeWithDisplay` covers every type whose natural
+encoding is its printed form, such as an identifier or a unit of measure, with one provider. It
+formats the value with `Display`, then asks the **context**, the type whose wiring holds the
+application's choices, to write the resulting `String`, so how strings are written stays the
+context's choice.
 
 ## Definition
 

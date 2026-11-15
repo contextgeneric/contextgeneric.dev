@@ -6,12 +6,12 @@ description: 'The cgp-serde examples as short tutorials: a JSON round trip with 
 
 # cgp-serde examples
 
-These pages walk through the examples in the [cgp-serde
-repository](https://github.com/contextgeneric/cgp-serde), one example per page.
+These pages walk through the examples in the
+[cgp-serde repository](https://github.com/contextgeneric/cgp-serde), one example per page.
 [cgp-serde](../index.md) rebuilds Serde's `Serialize` and `Deserialize` traits as components of
-[CGP](/docs/), so that each application chooses how a type is encoded. Each page runs an example,
-explains how its wiring produces what it prints, and names the CGP pattern it shows, so the pages
-work as short tutorials on those patterns.
+[Context-Generic Programming (CGP)](/docs/), so that each application chooses how a type is encoded.
+Each page runs an example, explains how its wiring produces what it prints, and names the CGP
+pattern it shows, so the pages work as short tutorials on those patterns.
 
 The pages are in the order they teach. Each stands alone, but a reader new to cgp-serde should start
 with [`basic`](./basic.md), since the later pages build on the wiring it introduces.

@@ -6,7 +6,7 @@ description: 'The type-level building blocks CGP is made of, the markers and rec
 
 # Types
 
-The types CGP is built from: the type-level building blocks that carry information in the type system, and
+The types the library is built from: the type-level building blocks that carry information in the type system, and
 the one ordinary runtime type you return from a getter.
 
 ## Overview

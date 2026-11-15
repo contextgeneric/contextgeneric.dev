@@ -11,9 +11,11 @@ Write any value as Serde's unit, and read a unit back as the type's default.
 
 ## Overview
 
-`SerializeUnit` is the provider for a type with nothing to write. Its main use is `Nil`, the payload
-that [`#[derive(CgpVariant)]`](/docs/reference/derives/derive_cgp_variant) gives an enum variant
-with no fields, such as `Empty`, `Empty()`, or `Empty {}`. The
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeUnit` is the provider for a type with nothing
+to write. Its main use is `Nil`, the payload that
+[`#[derive(CgpVariant)]`](/docs/reference/derives/derive_cgp_variant) gives an enum variant with no
+fields, such as `Empty`, `Empty()`, or `Empty {}`. The
 [variant providers](./serialize_variant_fields.md) ask the **context**, the type whose wiring holds
 the application's choices, to write and read each payload, so a context with such a variant needs an
 entry for `Nil`, and `SerializeUnit` is the usual one.

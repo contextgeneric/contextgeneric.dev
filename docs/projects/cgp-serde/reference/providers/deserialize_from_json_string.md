@@ -12,9 +12,11 @@ provider.
 
 ## Overview
 
-`DeserializeFromJsonString` saves a caller from building a reader. It is wired in the table of a
-**context**, the type whose wiring holds an application's choices, and accepts a `String`, a `&str`,
-or any `AsRef<str>`, wraps it in `serde_json`'s string reader, and passes it to an inner provider,
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeFromJsonString` saves a caller from
+building a reader. It is wired in the table of a **context**, the type whose wiring holds an
+application's choices, and accepts a `String`, a `&str`, or any `AsRef<str>`, wraps it in
+`serde_json`'s string reader, and passes it to an inner provider,
 [`DeserializeFromJsonReader`](./deserialize_from_json_reader.md) unless another is named. It is a
 small [higher-order provider](/docs/concepts/higher-order-providers), parameterized by the provider
 it delegates to.

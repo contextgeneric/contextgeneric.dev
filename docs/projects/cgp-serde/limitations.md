@@ -6,10 +6,11 @@ description: 'The limits of cgp-serde: a proof of concept, the part of Serde it 
 
 # Limitations
 
-cgp-serde is a proof of concept built to show what CGP's wiring does for serialization, and its
-design has limits worth knowing before relying on it. [cgp-serde](./index.md) rebuilds Serde's
-`Serialize` and `Deserialize` as components of [CGP](/docs/). This page describes those limits,
-and the cases where plain Serde is the better choice.
+cgp-serde is a proof of concept built to show what the wiring of
+[Context-Generic Programming (CGP)](/docs/) does for serialization, and its design has limits worth
+knowing before relying on it. [cgp-serde](./index.md) rebuilds Serde's `Serialize` and `Deserialize`
+as CGP components. This page describes those limits, and the cases where plain Serde is the better
+choice.
 
 ## It is a demonstration, not a library to depend on
 

@@ -11,8 +11,9 @@ Write a struct as a map from each field's name to its value, asking the context 
 
 ## Overview
 
-`SerializeRecordFields` serializes a struct that derives nothing from Serde. It reads the struct's
-field list through CGP's field traits, which
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeRecordFields` serializes a struct that
+derives nothing from Serde. It reads the struct's field list through CGP's field traits, which
 [`#[derive(CgpData)]`](/docs/reference/derives/derive_cgp_data) provides, and asks the **context**,
 the type whose wiring holds the application's choices, to write each field's value. So one generic
 provider serves every struct, and each field is encoded however the context encodes its type.

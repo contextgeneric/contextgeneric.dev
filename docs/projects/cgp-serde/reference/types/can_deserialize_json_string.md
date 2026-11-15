@@ -11,9 +11,11 @@ Give a context a `deserialize_json_string` method that reads a value from a JSON
 
 ## Overview
 
-`CanDeserializeJsonString<T>` is the shortest way to read JSON with a context. Any **context**, the
-type whose wiring holds an application's choices, that can read `T` and has an error type gets the
-method automatically, with no `TryComputer` entries to wire.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `CanDeserializeJsonString<T>` is the shortest way to
+read JSON with a context. Any **context**, the type whose wiring holds an application's choices,
+that can read `T` and has an error type gets the method automatically, with no `TryComputer` entries
+to wire.
 
 ## Definition
 

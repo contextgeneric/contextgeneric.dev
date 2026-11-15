@@ -7,9 +7,10 @@ description: 'Short definitions of the CGP, Rust, and related terms used across 
 
 # Glossary
 
-Short definitions of the words used across this documentation, each pointing at the page that
-explains the idea properly. It is a place to look a term up, not a place to learn CGP: every entry is
-a sentence or two and a link onward.
+Short definitions of the words used across the documentation of
+[Context-Generic Programming (CGP)](/docs/), each pointing at the page that explains the idea
+properly. It is a place to look a term up, not a place to learn CGP: every entry is a sentence or
+two and a link onward.
 
 If you arrived knowing the name of a *construct* rather than a word, such as `IsPresent` or
 `#[cgp_new_provider]`, the [reference index](./index.md) is the page that routes those.

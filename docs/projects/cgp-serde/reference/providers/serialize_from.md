@@ -11,10 +11,12 @@ Encode a value through another type it converts to or from with `Into`.
 
 ## Overview
 
-`SerializeFrom<Target>` lets a type borrow another type's encoding. Writing converts the value into
-`Target` and asks the **context**, the type whose wiring holds the application's choices, to write
-the `Target`; reading asks the context for the other type and converts from it. So a newtype or a
-narrow integer can be encoded exactly as a wider type the context already knows how to write.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeFrom<Target>` lets a type borrow another
+type's encoding. Writing converts the value into `Target` and asks the **context**, the type whose
+wiring holds the application's choices, to write the `Target`; reading asks the context for the
+other type and converts from it. So a newtype or a narrow integer can be encoded exactly as a wider
+type the context already knows how to write.
 
 ## Definition
 

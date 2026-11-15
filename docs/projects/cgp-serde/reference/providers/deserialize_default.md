@@ -11,9 +11,11 @@ Read a null input as the type's `Default`, and pass any other input to an inner 
 
 ## Overview
 
-`DeserializeDefault<Provider>` makes a value optional in the input without making it an `Option`. It
-is a [higher-order provider](/docs/concepts/higher-order-providers): it takes another provider as a
-type parameter and calls it directly, for the same type, whenever the input is not null, instead of
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeDefault<Provider>` makes a value optional
+in the input without making it an `Option`. It is a
+[higher-order provider](/docs/concepts/higher-order-providers): it takes another provider as a type
+parameter and calls it directly, for the same type, whenever the input is not null, instead of
 asking the **context**, the type whose wiring holds an application's choices, which provider to use.
 
 ## Definition

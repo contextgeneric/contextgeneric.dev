@@ -12,9 +12,11 @@ can lend.
 
 ## Overview
 
-`SerializeBytes` is a leaf provider for binary data. It hands the bytes to the format's own byte
-method, so the format decides how bytes look, and it reads a value back from a byte slice. It asks
-the **context**, the type whose wiring holds an application's choices, for nothing.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeBytes` is a leaf provider for binary data. It
+hands the bytes to the format's own byte method, so the format decides how bytes look, and it reads
+a value back from a byte slice. It asks the **context**, the type whose wiring holds an
+application's choices, for nothing.
 
 ## Definition
 

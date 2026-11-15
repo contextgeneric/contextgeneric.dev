@@ -11,11 +11,12 @@ Encode a value through another type, with a conversion that can fail.
 
 ## Overview
 
-`TrySerializeFrom<Target>` is the fallible form of [`SerializeFrom`](./serialize_from.md). It
-converts with `TryInto` rather than `Into`, and reports a failed conversion as an error, so it can
-encode through a type the value does not always fit, such as a narrower integer. Like
-`SerializeFrom`, it asks the **context**, the type whose wiring holds an application's choices, to
-encode the other type.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `TrySerializeFrom<Target>` is the fallible form of
+[`SerializeFrom`](./serialize_from.md). It converts with `TryInto` rather than `Into`, and reports a
+failed conversion as an error, so it can encode through a type the value does not always fit, such
+as a narrower integer. Like `SerializeFrom`, it asks the **context**, the type whose wiring holds an
+application's choices, to encode the other type.
 
 ## Definition
 

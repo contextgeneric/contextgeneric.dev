@@ -11,11 +11,13 @@ Read a borrowed `&'a Value` by reading an owned `Value` and allocating it throug
 
 ## Overview
 
-`DeserializeAndAllocate` lets a deserialized value hold references to other deserialized values,
-such as a `Vec<&'a Coord>`, without the references pointing into the input. It reads each value as
-an owned `Value`, then asks the **context**, the type whose wiring holds the application's choices,
-to allocate it with [`CanAlloc`](../components/can_alloc.md), and returns the reference. It knows
-nothing about where the value is stored, which is the context's choice.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeAndAllocate` lets a deserialized value hold
+references to other deserialized values, such as a `Vec<&'a Coord>`, without the references pointing
+into the input. It reads each value as an owned `Value`, then asks the **context**, the type whose
+wiring holds the application's choices, to allocate it with
+[`CanAlloc`](../components/can_alloc.md), and returns the reference. It knows nothing about where
+the value is stored, which is the context's choice.
 
 ## Definition
 

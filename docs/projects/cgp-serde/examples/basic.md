@@ -9,8 +9,8 @@ description: 'A cgp-serde example that writes a struct to JSON and reads it back
 This example writes a struct to a JSON string and reads it back, through a **context**, the type
 whose wiring holds the application's choices, which decides how each of the struct's field types is
 encoded. It is an example from [cgp-serde](../index.md), which rebuilds Serde's `Serialize` and
-`Deserialize` traits as components of [CGP](/docs/). The struct derives nothing from Serde, and its
-bytes come out as hex because one wiring line says so.
+`Deserialize` traits as components of [Context-Generic Programming (CGP)](/docs/). The struct
+derives nothing from Serde, and its bytes come out as hex because one wiring line says so.
 
 :::tip
 

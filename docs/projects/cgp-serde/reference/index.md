@@ -7,11 +7,11 @@ description: 'Every cgp-serde provider, adapter type, and component, with what e
 # cgp-serde reference
 
 This reference documents the public items of [cgp-serde](../index.md), one page per item. cgp-serde
-rebuilds Serde's `Serialize` and `Deserialize` as components of [CGP](/docs/), so most of its items
-are **providers**: implementations a **context**, the type whose wiring holds an application's
-choices, names in its wiring table to say how a type is encoded. The tables below list every
-provider by what it handles and what it asks the context for, which is what a context must also
-wire.
+rebuilds Serde's `Serialize` and `Deserialize` as components of
+[Context-Generic Programming (CGP)](/docs/), so most of its items are **providers**: implementations
+a **context**, the type whose wiring holds an application's choices, names in its wiring table to
+say how a type is encoded. The tables below list every provider by what it handles and what it asks
+the context for, which is what a context must also wire.
 
 :::tip
 

@@ -7,11 +7,11 @@ description: 'Every CGP macro grouped by the job it does: defining a component a
 
 # Macros
 
-CGP's procedural macros cover a few kinds of work: defining a component and writing the providers that
-implement it, wiring a concrete type to the providers it uses and checking that wiring holds, and
-building the type-level values (strings, lists, paths) that the rest of the system runs on. This
-page groups every macro in this section by the kind of work it does, in roughly the order most CGP
-code uses them.
+The procedural macros of [Context-Generic Programming (CGP)](/docs/) cover a few kinds of work:
+defining a component and writing the providers that implement it, wiring a concrete type to the
+providers it uses and checking that wiring holds, and building the type-level values (strings,
+lists, paths) that the rest of the system runs on. This page groups every macro in this section by
+the kind of work it does, in roughly the order most CGP code uses them.
 
 If you are new to CGP, start with the [six essentials](/docs/reference/#start-with-these-six) on the
 reference overview rather than here; this page is the fuller reference for once those six are

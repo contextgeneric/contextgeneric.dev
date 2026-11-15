@@ -11,11 +11,13 @@ Move a value into storage that lives for `'a`, and return a reference to it.
 
 ## Overview
 
-`CanAlloc<'a, T>` separates what a deserializer needs, somewhere to put a value, from how that is
-provided. [`DeserializeAndAllocate`](../providers/deserialize_and_allocate.md) asks the context for
-it, and a **context**, the type whose wiring holds an application's choices, wires it to an
-allocation provider such as [`AllocateWithArena`](../providers/allocate_with_arena.md). So swapping
-the allocator is one wiring entry, and no deserializer changes.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `CanAlloc<'a, T>` separates what a deserializer needs,
+somewhere to put a value, from how that is provided.
+[`DeserializeAndAllocate`](../providers/deserialize_and_allocate.md) asks the context for it, and a
+**context**, the type whose wiring holds an application's choices, wires it to an allocation
+provider such as [`AllocateWithArena`](../providers/allocate_with_arena.md). So swapping the
+allocator is one wiring entry, and no deserializer changes.
 
 ## Definition
 

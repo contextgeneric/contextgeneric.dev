@@ -11,8 +11,9 @@ Write an enum as `{"Variant": payload}`, asking the context to write the payload
 
 ## Overview
 
-`SerializeVariantFields` serializes an enum that derives nothing from Serde. It reads the enum's
-variants through CGP's field traits, which
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeVariantFields` serializes an enum that
+derives nothing from Serde. It reads the enum's variants through CGP's field traits, which
 [`#[derive(CgpVariant)]`](/docs/reference/derives/derive_cgp_variant) provides, and asks the
 **context**, the type whose wiring holds the application's choices, to write the active variant's
 payload. So one generic provider serves every such enum, and each payload is encoded however the

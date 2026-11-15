@@ -11,8 +11,10 @@ Allocate a value into the arena the context supplies.
 
 ## Overview
 
-`AllocateWithArena` implements the allocation component, [`CanAlloc`](../components/can_alloc.md),
-over the [`typed-arena`](https://docs.rs/typed-arena) crate. It gets a `typed_arena::Arena` from the
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `AllocateWithArena` implements the allocation
+component, [`CanAlloc`](../components/can_alloc.md), over the
+[`typed-arena`](https://docs.rs/typed-arena) crate. It gets a `typed_arena::Arena` from the
 **context**, the type whose wiring holds the application's choices, through the arena getter
 `HasArena`, and moves each value into it. Every value in an arena is freed together when the arena
 is dropped.

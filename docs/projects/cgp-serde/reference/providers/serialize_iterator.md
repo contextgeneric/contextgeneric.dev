@@ -11,10 +11,11 @@ Write any collection that can be iterated by reference as a sequence of its item
 
 ## Overview
 
-`SerializeIterator` writes a `Vec`, a slice, a set, or any other collection as a Serde sequence,
-and asks the **context**, the type whose wiring holds the application's choices, to write each item.
-So the items follow the context's choices: a `Vec<Vec<u8>>` in a context that wires `Vec<u8>` to hex
-is a list of hex strings.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeIterator` writes a `Vec`, a slice, a set, or
+any other collection as a Serde sequence, and asks the **context**, the type whose wiring holds the
+application's choices, to write each item. So the items follow the context's choices: a
+`Vec<Vec<u8>>` in a context that wires `Vec<u8>` to hex is a list of hex strings.
 
 ## Definition
 

@@ -7,10 +7,10 @@ description: 'Run cargo cgp check in place of cargo check to get CGP compile err
 
 # Check
 
-When a CGP error is hard to read, run `cargo cgp check` where you would normally run `cargo check`.
-It checks your project and rewrites recognized CGP errors to lead with their root causes.
-The command belongs to [`cargo-cgp`](./index.md), the error toolchain for
-[Context-Generic Programming (CGP)](/docs/):
+When an error in code written with [Context-Generic Programming (CGP)](/docs/) is hard to read, run
+`cargo cgp check` where you would normally run `cargo check`. It checks your project and rewrites
+recognized CGP errors to lead with their root causes. The command belongs to
+[`cargo-cgp`](./index.md), CGP's error toolchain:
 
 ```sh
 cargo cgp check

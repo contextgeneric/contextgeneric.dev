@@ -11,10 +11,11 @@ Write a `DateTime<Utc>` as an RFC 3339 string, and read one back.
 
 ## Overview
 
-`SerializeRfc3339Date` is one of the two date encodings in `cgp-serde-extra`. It formats a
-[`chrono`](https://docs.rs/chrono) `DateTime<Utc>` as an RFC 3339 `String` and asks the **context**,
-the type whose wiring holds the application's choices, to write it, and it reads a string through
-the context and parses it. One struct implements both directions.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeRfc3339Date` is one of the two date encodings
+in `cgp-serde-extra`. It formats a [`chrono`](https://docs.rs/chrono) `DateTime<Utc>` as an RFC 3339
+`String` and asks the **context**, the type whose wiring holds the application's choices, to write
+it, and it reads a string through the context and parses it. One struct implements both directions.
 
 ## Definition
 

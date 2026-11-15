@@ -19,10 +19,10 @@ dispatched on a type parameter: the `open` statement of
 [`delegate_components!`](../macros/delegate_components.md) does the same job through machinery every
 component already has, without a separate table or a wrapper.
 
-**Prefer `open` for anything new.** This page exists because you will meet the older form, including in
-CGP's own error and handler components, which are still defined with this attribute, and because a
-component that keeps it stays compatible with existing wiring. The project expects to deprecate the
-attribute once `open` is shown to cover every dispatch case.
+**Prefer `open` for anything new.** This page exists because you will meet the older form, including
+in the library's own error and handler components, which are still defined with this attribute, and
+because a component that keeps it stays compatible with existing wiring. The project expects to
+deprecate the attribute once `open` is shown to cover every dispatch case.
 
 :::
 

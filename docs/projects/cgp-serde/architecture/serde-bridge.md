@@ -8,9 +8,9 @@ description: 'Which layer of Serde cgp-serde replaces and which it keeps, how va
 
 How can a library replace `Serialize` and still work with `serde_json`, and with every type that
 already implements `Serialize`? [cgp-serde](../index.md) rebuilds Serde's data-type traits as
-components of [CGP](/docs/), and keeps the rest of Serde as it is. This page explains which layer
-it replaces, how values cross between cgp-serde and ordinary Serde code in each direction, and where
-errors are reported.
+components of [Context-Generic Programming (CGP)](/docs/), and keeps the rest of Serde as it is.
+This page explains which layer it replaces, how values cross between cgp-serde and ordinary Serde
+code in each direction, and where errors are reported.
 
 ## Serde has two sides, and cgp-serde replaces one
 

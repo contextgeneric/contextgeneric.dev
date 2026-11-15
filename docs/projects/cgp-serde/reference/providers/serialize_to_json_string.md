@@ -11,8 +11,9 @@ Write a value as a compact JSON string, as a fallible operation the context runs
 
 ## Overview
 
-`SerializeToJsonString` makes writing JSON something a **context**, the type whose wiring holds an
-application's choices, can do through CGP's
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeToJsonString` makes writing JSON something a
+**context**, the type whose wiring holds an application's choices, can do through CGP's
 [`TryComputer`](/docs/reference/components/handler/try_computer), an interface for a fallible
 computation chosen by a marker type. It runs `serde_json` over the value with the context attached,
 so the JSON follows the context's choices, and it turns a `serde_json::Error` into the context's own

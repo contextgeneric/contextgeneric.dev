@@ -11,10 +11,12 @@ Read a sequence into any collection that starts empty and can be extended item b
 
 ## Overview
 
-`DeserializeExtend` reads a Serde sequence into a `Vec`, a set, or any collection that implements
-`Default` and `Extend`, and asks the **context**, the type whose wiring holds the application's
-choices, to read each item. So the items follow the context's choices, including items that borrow
-from an arena through [`DeserializeAndAllocate`](./deserialize_and_allocate.md).
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeExtend` reads a Serde sequence into a
+`Vec`, a set, or any collection that implements `Default` and `Extend`, and asks the **context**,
+the type whose wiring holds the application's choices, to read each item. So the items follow the
+context's choices, including items that borrow from an arena through
+[`DeserializeAndAllocate`](./deserialize_and_allocate.md).
 
 ## Definition
 

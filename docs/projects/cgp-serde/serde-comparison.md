@@ -9,9 +9,10 @@ description: 'cgp-serde and Serde compared: what they share, what cgp-serde adds
 [cgp-serde](./index.md) is built on [Serde](https://serde.rs/) and depends on it, so this is not a
 comparison between rival libraries. It compares two ways of implementing one layer of Serde: Serde's
 own `Serialize` and `Deserialize` traits with their derive, and cgp-serde's
-[CGP](/docs/) components with their providers. Serde is the mature, widely adopted library of
-the two, and the foundation cgp-serde stands on. This page sets out what the two share, what
-cgp-serde adds, how Serde's idioms map onto it, and when plain Serde is the better choice.
+[Context-Generic Programming (CGP)](/docs/) components with their providers. Serde is the mature,
+widely adopted library of the two, and the foundation cgp-serde stands on. This page sets out what
+the two share, what cgp-serde adds, how Serde's idioms map onto it, and when plain Serde is the
+better choice.
 
 ## What they share
 

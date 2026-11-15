@@ -11,12 +11,13 @@ Write anything that can be viewed as a `str` as a Serde string, and read an owne
 
 ## Overview
 
-`SerializeString` is a leaf provider for text. It writes any type that implements `AsRef<str>` with
-Serde's string method, so `String`, `&str`, and `Box<str>` all come out as plain strings, and it
-reads a `String` back. It asks the **context**, the type whose wiring holds an application's
-choices, for nothing, which makes it one of the providers a context's table ends on: the hex,
-base64, and RFC 3339 encodings each produce a `String` and ask the context to write it, and
-`SerializeString` or [`UseSerde`](./use_serde.md) is what writes it.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeString` is a leaf provider for text. It
+writes any type that implements `AsRef<str>` with Serde's string method, so `String`, `&str`, and
+`Box<str>` all come out as plain strings, and it reads a `String` back. It asks the **context**, the
+type whose wiring holds an application's choices, for nothing, which makes it one of the providers a
+context's table ends on: the hex, base64, and RFC 3339 encodings each produce a `String` and ask the
+context to write it, and `SerializeString` or [`UseSerde`](./use_serde.md) is what writes it.
 
 ## Definition
 

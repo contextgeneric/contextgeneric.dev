@@ -11,11 +11,12 @@ Pair a context with a target type as a Serde `DeserializeSeed`.
 
 ## Overview
 
-`DeserializeWithContext` is the way to read with any Serde format. Serde's `Deserialize` has no
-receiver, so there is nowhere to put a **context**, the type whose wiring holds an application's
-choices. Serde's `DeserializeSeed` is the trait for deserializing with state, and this adapter is a
-seed whose state is the context: driving it with a format's deserializer reads the target type
-through the context's wiring.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeWithContext` is the way to read with any
+Serde format. Serde's `Deserialize` has no receiver, so there is nowhere to put a **context**, the
+type whose wiring holds an application's choices. Serde's `DeserializeSeed` is the trait for
+deserializing with state, and this adapter is a seed whose state is the context: driving it with a
+format's deserializer reads the target type through the context's wiring.
 
 ## Definition
 

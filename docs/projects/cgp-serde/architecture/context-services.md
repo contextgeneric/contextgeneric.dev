@@ -8,10 +8,10 @@ description: 'How a cgp-serde deserializer takes a service such as an arena from
 
 How does a deserializer get hold of something it needs while it works, such as an arena to allocate
 into, when Serde's `Deserialize` receives nothing but the input? [cgp-serde](../index.md) rebuilds
-Serde's `Serialize` and `Deserialize` as components of [CGP](/docs/), and every provider in it
-receives the context. This page explains how a provider uses that to take a service from the
-context, the layers the library's arena support is built in, and the lifetimes that let deserialized
-values outlive the context.
+Serde's `Serialize` and `Deserialize` as components of [Context-Generic Programming (CGP)](/docs/),
+and every provider in it receives the context. This page explains how a provider uses that to take a
+service from the context, the layers the library's arena support is built in, and the lifetimes that
+let deserialized values outlive the context.
 
 ## A provider can ask the context for anything
 

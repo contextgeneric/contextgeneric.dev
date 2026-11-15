@@ -11,11 +11,12 @@ Write a `DateTime<Utc>` as a Unix timestamp in whole seconds, and read one back.
 
 ## Overview
 
-`SerializeTimestamp` is the numeric date encoding in `cgp-serde-extra`. It converts a
-[`chrono`](https://docs.rs/chrono) `DateTime<Utc>` to the number of seconds since the Unix epoch, an
-`i64`, and asks the **context**, the type whose wiring holds the application's choices, to write
-that number. Because it goes through the context, a context that uses it needs an entry for `i64`,
-even when no field in its data is an `i64`.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeTimestamp` is the numeric date encoding in
+`cgp-serde-extra`. It converts a [`chrono`](https://docs.rs/chrono) `DateTime<Utc>` to the number of
+seconds since the Unix epoch, an `i64`, and asks the **context**, the type whose wiring holds the
+application's choices, to write that number. Because it goes through the context, a context that
+uses it needs an entry for `i64`, even when no field in its data is an `i64`.
 
 ## Definition
 

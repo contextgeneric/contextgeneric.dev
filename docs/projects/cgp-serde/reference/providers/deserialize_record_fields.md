@@ -12,7 +12,8 @@ field.
 
 ## Overview
 
-`DeserializeRecordFields` is the reading half of
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `DeserializeRecordFields` is the reading half of
 [`SerializeRecordFields`](./serialize_record_fields.md). It reads a map, asks the **context**, the
 type whose wiring holds the application's choices, to read each field's value, and collects the
 values in CGP's builder for the struct until every field is present. The struct derives only CGP's

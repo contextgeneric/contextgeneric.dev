@@ -9,8 +9,8 @@ description: 'A cgp-serde example in which two applications write and read back 
 This example writes a batch of chat events to JSON and reads it back, under two applications that
 encode bytes and dates differently, and then has each application read the other's JSON. It is an
 example from [cgp-serde](../index.md), which rebuilds Serde's `Serialize` and `Deserialize` traits
-as components of [CGP](/docs/). The events are an enum whose variants hold structs, and none of the
-types derives anything from Serde.
+as components of [Context-Generic Programming (CGP)](/docs/). The events are an enum whose variants
+hold structs, and none of the types derives anything from Serde.
 
 :::tip
 

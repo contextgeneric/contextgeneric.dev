@@ -11,11 +11,12 @@ Pair a context with a value as an ordinary Serde `Serialize` value.
 
 ## Overview
 
-`SerializeWithContext` is the way into Serde's formats. Serde's functions, such as
-`serde_json::to_string`, accept a value that implements `Serialize` and have no place for a
-**context**, the type whose wiring holds an application's choices. The adapter carries both, and its
-`Serialize` impl writes the value through the context's wiring. Providers use the same adapter to
-hand each nested value back to the context from inside Serde's compound writers.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeWithContext` is the way into Serde's formats.
+Serde's functions, such as `serde_json::to_string`, accept a value that implements `Serialize` and
+have no place for a **context**, the type whose wiring holds an application's choices. The adapter
+carries both, and its `Serialize` impl writes the value through the context's wiring. Providers use
+the same adapter to hand each nested value back to the context from inside Serde's compound writers.
 
 ## Definition
 

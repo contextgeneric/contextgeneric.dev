@@ -7,9 +7,10 @@ description: 'How cgp-serde serializes a struct that derives only CGP''s general
 # Derive-free records
 
 Can a struct be serialized if it derives nothing from Serde? [cgp-serde](../index.md) rebuilds
-Serde's `Serialize` and `Deserialize` as components of [CGP](/docs/), and it serializes structs
-that derive only CGP's general-purpose field traits. This page explains why that matters, what a
-struct still has to derive, and what the approach gives up compared with Serde's derive.
+Serde's `Serialize` and `Deserialize` as components of [Context-Generic Programming (CGP)](/docs/),
+and it serializes structs that derive only CGP's general-purpose field traits. This page explains
+why that matters, what a struct still has to derive, and what the approach gives up compared with
+Serde's derive.
 
 ## With Serde, the type's owner decides
 

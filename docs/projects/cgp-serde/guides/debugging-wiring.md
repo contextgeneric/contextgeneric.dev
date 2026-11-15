@@ -9,7 +9,8 @@ description: 'The common cgp-serde wiring mistakes, each with the code that make
 Most compile errors in a [cgp-serde](../index.md) **context**, the type whose wiring holds an
 application's choices, come from a handful of wiring mistakes, and each has an error that is easy to
 recognize once seen. cgp-serde rebuilds Serde's `Serialize` and `Deserialize` as components of
-[CGP](/docs/). This guide shows each mistake with the code that makes it, the error, and the fix.
+[Context-Generic Programming (CGP)](/docs/). This guide shows each mistake with the code that makes
+it, the error, and the fix.
 
 The errors below come from [`cargo cgp check`](/docs/cargo-cgp/check), CGP's error tool, run in
 place of `cargo check`. `cargo cgp check` leads with the root cause for the classes it recognizes,

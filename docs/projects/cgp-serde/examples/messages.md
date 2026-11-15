@@ -8,9 +8,10 @@ description: 'A cgp-serde example in which two application contexts encode one n
 
 This example serializes one nested archive of messages twice, under two applications that disagree
 about how bytes and dates should look. It is an example from [cgp-serde](../index.md), which
-rebuilds Serde's `Serialize` and `Deserialize` traits as components of [CGP](/docs/). The data types
-name no encoding, and the two applications differ in three wiring lines, which is the whole
-difference between the two JSON documents they produce.
+rebuilds Serde's `Serialize` and `Deserialize` traits as components of
+[Context-Generic Programming (CGP)](/docs/). The data types name no encoding, and the two
+applications differ in three wiring lines, which is the whole difference between the two JSON
+documents they produce.
 
 :::tip
 

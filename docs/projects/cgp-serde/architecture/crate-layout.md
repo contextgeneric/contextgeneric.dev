@@ -9,8 +9,8 @@ description: 'Why cgp-serde is five crates split along their external dependenci
 Why is a serialization library split into five crates? So that each external library it builds on
 lives in a crate of its own, and an application compiles only the ones its wiring names.
 [cgp-serde](../index.md) rebuilds Serde's `Serialize` and `Deserialize` as components of
-[CGP](/docs/). This page lists its crates and what each adds, where items are imported from, and
-what the workspace needs to build.
+[Context-Generic Programming (CGP)](/docs/). This page lists its crates and what each adds, where
+items are imported from, and what the workspace needs to build.
 
 ## One crate per external dependency
 

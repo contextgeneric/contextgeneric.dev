@@ -11,12 +11,13 @@ Serialize or deserialize a value through the value type's own Serde impl.
 
 ## Overview
 
-`UseSerde` is how a cgp-serde context reuses Serde. Wired for a type, it calls that type's
-`Serialize` or `Deserialize` impl, so every impl in the standard library and in other crates is
-available to a **context**, the type whose wiring holds an application's choices, without a
-provider being written for it. It is the usual choice for the scalar types at the bottom of a
-context's table, such as `u64`, `i64`, and `String`, where the application has no reason to choose
-an encoding.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `UseSerde` is how a cgp-serde context reuses Serde.
+Wired for a type, it calls that type's `Serialize` or `Deserialize` impl, so every impl in the
+standard library and in other crates is available to a **context**, the type whose wiring holds an
+application's choices, without a provider being written for it. It is the usual choice for the
+scalar types at the bottom of a context's table, such as `u64`, `i64`, and `String`, where the
+application has no reason to choose an encoding.
 
 ## Definition
 

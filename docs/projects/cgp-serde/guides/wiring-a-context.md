@@ -8,8 +8,8 @@ description: 'How to build a cgp-serde context''s wiring table: opening the comp
 
 A cgp-serde context is a type that stands for an application, and its wiring table names a provider
 for every type the application encodes. [cgp-serde](../index.md) rebuilds Serde's `Serialize` and
-`Deserialize` as components of [CGP](/docs/). This guide gives the steps for building the table,
-the key syntax some types need, and the checks that prove it complete.
+`Deserialize` as components of [Context-Generic Programming (CGP)](/docs/). This guide gives the
+steps for building the table, the key syntax some types need, and the checks that prove it complete.
 
 ## 1. Open the components and choose per type
 

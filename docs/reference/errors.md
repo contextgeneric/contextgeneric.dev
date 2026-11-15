@@ -6,7 +6,8 @@ description: 'The compile errors CGP code produces after macro expansion, how to
 
 # Compile errors
 
-The errors CGP produces after macro expansion, and how to read each one back to the mistake behind it.
+The errors that code written with [Context-Generic Programming (CGP)](/docs/) produces after macro
+expansion, and how to read each one back to the mistake behind it.
 
 CGP's macros expand to ordinary Rust, so most mistakes are not caught by a macro at all. They are
 caught by the compiler afterwards, checking code you did not write, which is why a CGP error can

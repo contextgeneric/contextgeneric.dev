@@ -8,9 +8,9 @@ description: 'Why cgp-serde moves the encoded value out of Self so the applicati
 
 Why does moving one type out of `Self` change who chooses how a value is encoded?
 [cgp-serde](../index.md) rebuilds Serde's `Serialize` and `Deserialize` as components of
-[CGP](/docs/), and its components differ from Serde's traits in exactly that move. This page
-explains the move and what it makes possible, how one provider can serve both directions, and how
-deserializing carries Serde's lifetime.
+[Context-Generic Programming (CGP)](/docs/), and its components differ from Serde's traits in
+exactly that move. This page explains the move and what it makes possible, how one provider can
+serve both directions, and how deserializing carries Serde's lifetime.
 
 ## Serde's trait belongs to the value
 

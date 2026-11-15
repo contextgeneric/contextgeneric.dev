@@ -11,10 +11,12 @@ Write bytes as a lowercase hexadecimal string, and read a hex string back.
 
 ## Overview
 
-`SerializeHex` is one of the four encodings in `cgp-serde-extra` that an application commonly wants
-to choose for itself. It converts bytes to a hex `String` and asks the **context**, the type whose
-wiring holds the application's choices, to write that string, and it reads a string through the
-context and decodes it. One struct implements both directions, so a context names it in both tables.
+In [cgp-serde](../../index.md), a serialization library built with
+[Context-Generic Programming (CGP)](/docs/), `SerializeHex` is one of the four encodings in
+`cgp-serde-extra` that an application commonly wants to choose for itself. It converts bytes to a
+hex `String` and asks the **context**, the type whose wiring holds the application's choices, to
+write that string, and it reads a string through the context and decodes it. One struct implements
+both directions, so a context names it in both tables.
 
 ## Definition
 

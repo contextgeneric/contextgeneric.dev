@@ -8,7 +8,7 @@ description: 'The standard-library marker that lets a type carry a type paramete
 # `PhantomData`
 
 The standard-library marker that lets a type carry a type parameter without storing a value of it.
-It makes CGP's zero-sized providers and type-level markers legal, and it is the value you pass to
+It makes zero-sized providers and type-level markers legal, and it is the value you pass to
 give a function a type instead of data.
 
 ## Overview
