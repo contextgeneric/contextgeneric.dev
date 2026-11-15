@@ -1,0 +1,9 @@
+{
+  "label": "cargo-cgp",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "slug": "/release-notes/cargo-cgp",
+    "description": "The release notes of cargo-cgp, the error toolchain for Context-Generic Programming (CGP) that rewrites CGP's compile errors and prints macro expansions: one page per official release, newest first."
+  }
+}
