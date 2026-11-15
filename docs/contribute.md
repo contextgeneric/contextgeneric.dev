@@ -1,6 +1,6 @@
 ---
 title: 'Contribute to Context-Generic Programming'
-sidebar_label: 'Contribute to CGP'
+sidebar_label: 'Contribute'
 sidebar_position: 11
 description: 'The ways to help Context-Generic Programming, from asking a question or reporting a problem to publishing components, changing CGP itself, and sponsoring its author.'
 ---
