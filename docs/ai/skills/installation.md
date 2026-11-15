@@ -171,7 +171,7 @@ writes with it as you would any other change.
 Fixes and better explanations reach `main` between `cgp` releases, so update the skill from time to
 time, and whenever your project moves to a newer `cgp`. The skill helps with the second case: when
 your project's `cgp` is newer than the releases it describes, it has the agent check `main` and tell
-you when a newer skill is there, with the command for your route:
+you when a newer skill is there. Each route updates with its own command:
 
 - **Claude Code:** run `claude plugin marketplace update cgp-skills`, then
   `claude plugin update cgp@cgp-skills`, and start a new session. To have it update by itself, open

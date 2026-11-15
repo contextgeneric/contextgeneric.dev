@@ -23,8 +23,8 @@ it sends the agent to the reference that owns the task, from
 [components](/docs/ai/skills/cgp/references/components) and
 [wiring](/docs/ai/skills/cgp/references/wiring) to
 [namespaces](/docs/ai/skills/cgp/references/namespaces); the sidebar lists them all. The skill
-supports `cgp` v0.8.0 and every later release, and when your project's `cgp` is newer than the
-skill, it has the agent check for a newer skill.
+supports `cgp` v0.8.0 and every later release. When your project's `cgp` is newer than the releases
+the skill describes, it has the agent check for a newer skill.
 
 The skill teaches the agent, but it does not make the agent's code correct. Review what the agent
 writes as you would any other change, and read the skill when you want to see the instructions the
