@@ -8,8 +8,8 @@ description: 'What each official release of the cgp library and the cargo-cgp to
 # Release notes
 
 These pages list what each official release of
-[Context-Generic Programming (CGP)](/docs/), a Rust library for pluggable trait implementations,
-changed that a user can see, and what a project does to upgrade to it. Each release has its own
+[Context-Generic Programming (CGP)](/docs/), a Rust library whose macros generate traits and their
+wiring, changed that a user can see, and what a project does to upgrade to it. Each release has its own
 page, dated and kept as it was published, so a page always describes the version it names.
 
 ## The artifacts
@@ -19,8 +19,7 @@ The notes cover two artifacts, which release on their own schedules:
 - **[cgp](/docs/release-notes/cgp):** the library, its facade crate, and the workspace crates
   released with it. The newest release is [v0.8.0](/docs/release-notes/cgp/v0.8.0).
 - **[cargo-cgp](/docs/release-notes/cargo-cgp):** CGP's error toolchain, which rewrites CGP's
-  compile errors to lead with their root cause and prints a crate's macro expansion. The newest
-  release is [v0.1.0](/docs/release-notes/cargo-cgp/v0.1.0).
+  compile errors and prints a crate's macro expansion. The newest release is [v0.1.0](/docs/release-notes/cargo-cgp/v0.1.0).
 
 ## Reading a page
 
