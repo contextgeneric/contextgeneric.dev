@@ -30,15 +30,18 @@ or only in this project.
 
 The repository's README holds steps written for an agent: it asks you for the scope, uses your
 harness's own installer when there is one, and otherwise copies the skill into the harness's skills
-directory. Check the result as [Checking that it loaded](#checking-that-it-loaded) describes, and
-review any command the agent proposes before it runs.
+directory. Some harnesses, Claude Code and Codex among them, protect their skills folders, so expect
+to approve the step that copies the skill there; review that command, and any other the agent
+proposes, before it runs. Then check the result as
+[Checking that it loaded](#checking-that-it-loaded) describes.
 
 ## Installing it yourself
 
 If you would rather run the commands yourself, find your harness below. Each section gives the
 harness's own installer where it has one, then the directory to copy the skill into, first for you
 in every project and then for a single project. The copy itself is described in
-[Copying the skill by hand](#copying-the-skill-by-hand).
+[Copying the skill by hand](#copying-the-skill-by-hand). Choose one route per harness, because a
+plugin and a copy installed together give the agent two copies of the skill.
 
 ### Claude Code
 
