@@ -9,8 +9,8 @@ sidebar_position: 1
 A coding agent working on a [Context-Generic Programming (CGP)](/docs/) project meets Rust code
 whose meaning is not all in the source. CGP's macros generate the traits and impls that wiring
 connects, and what the agent learned in training may show syntax the library no longer accepts. An
-agent skill closes that gap: it is a set of Markdown instructions that the agent loads when a task
-needs them. This section publishes CGP's skills from the
+agent skill supplies what the source leaves out: it is a set of Markdown instructions that the agent
+loads when a task needs them. This section publishes CGP's skills from the
 [cgp-skills repository](https://github.com/contextgeneric/cgp-skills), so you can read what your
 agent reads.
 
@@ -30,7 +30,7 @@ writes as you would any other change, and read the skill when you want to see th
 agent follows.
 
 To install it, give your agent the repository's URL and ask it to install the `/cgp` skill, or
-follow the steps in the repository's README for your harness.
+follow the steps for your harness on [Installing the CGP Skill](/docs/ai/skills/installation).
 
 ## Learning CGP yourself
 
