@@ -1266,3 +1266,150 @@ mod update_attribute_syntax {
     }
     delegate_and_check_components! { App { LoaderComponent: Load } }
 }
+
+mod import_the_component_key {
+    mod components {
+        use cgp::prelude::*;
+
+        #[cgp_component(Greeter)]
+        pub trait CanGreet {
+            fn greet(&self);
+        }
+    }
+
+    mod providers {
+        use cgp::prelude::*;
+
+        use super::components::{Greeter, GreeterComponent};
+
+        #[cgp_impl(new GreetHello)]
+        impl Greeter {
+            fn greet(&self, #[implicit] name: &str) {
+                println!("Hello, {name}!");
+            }
+        }
+    }
+
+    // The header names the trait by its path, so the key follows that path without an import.
+    mod path_providers {
+        use cgp::prelude::*;
+
+        #[cgp_impl(new GreetByPath)]
+        impl super::components::Greeter {
+            fn greet(&self, #[implicit] name: &str) {
+                println!("Hello, {name}!");
+            }
+        }
+    }
+
+    mod contexts {
+        use cgp::prelude::*;
+
+        use super::components::GreeterComponent;
+        use super::path_providers::GreetByPath;
+        use super::providers::GreetHello;
+
+        #[derive(HasField)]
+        pub struct Person {
+            pub name: String,
+        }
+
+        delegate_and_check_components! {
+            Person {
+                GreeterComponent: GreetHello,
+            }
+        }
+
+        #[derive(HasField)]
+        pub struct Robot {
+            pub name: Box<str>,
+        }
+
+        delegate_and_check_components! {
+            Robot {
+                GreeterComponent: GreetByPath,
+            }
+        }
+    }
+}
+
+mod import_what_the_prelude_no_longer_exports {
+    use cgp::core::component::DelegateComponent;
+    use cgp::core::field::traits::HasField;
+    use cgp::extra::handler::{Computer, ComputerComponent};
+    use cgp::prelude::*;
+
+    #[cgp_impl(new Double)]
+    impl<Code> Computer<Code, u64> {
+        type Output = u64;
+
+        fn compute(&self, _code: PhantomData<Code>, input: u64) -> u64 {
+            input * 2
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            ComputerComponent: Double,
+        }
+    }
+
+    check_components! {
+        App {
+            ComputerComponent: ((), u64),
+        }
+    }
+
+    fn uses_the_table<Context: DelegateComponent<ComputerComponent>>() {}
+
+    fn read_count<Context: HasField<Symbol!("count"), Value = u64>>(context: &Context) -> u64 {
+        *context.get_field(PhantomData)
+    }
+
+    #[test]
+    fn the_imported_names_resolve() {
+        uses_the_table::<App>();
+    }
+}
+
+mod use_type_in_another_context {
+    use core::ops::Mul;
+
+    use cgp::prelude::*;
+
+    #[cgp_type]
+    pub trait HasScalarType {
+        type Scalar;
+    }
+
+    #[cgp_fn]
+    #[use_type(HasScalarType.Scalar in Types)]
+    pub fn rectangle_area<Types>(
+        &self,
+        #[implicit] width: Scalar,
+        #[implicit] height: Scalar,
+    ) -> Scalar
+    where
+        Scalar: Mul<Output = Scalar> + Copy,
+    {
+        width * height
+    }
+}
+
+mod derive_delegate_attribute {
+    use cgp::prelude::*;
+
+    #[cgp_component(AreaCalculator)]
+    #[derive_delegate(UseDelegate<Shape>)]
+    pub trait CanCalculateArea<Shape> {
+        fn area(&self, shape: &Shape) -> f64;
+    }
+}
+
+mod alloc_feature {
+    // The crate's manifest turns on `cgp`'s `alloc` feature, which these providers need.
+    #[allow(unused_imports)]
+    use cgp::extra::error::{DebugError, DisplayError};
+}
