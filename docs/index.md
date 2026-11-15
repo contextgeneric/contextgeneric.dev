@@ -57,7 +57,9 @@ If you came with a particular question, find it below beside the page that answe
 - **What has been built with it?** The [Projects](/docs/projects).
 - **How do I use CGP with a coding agent?** The [AI section](/docs/ai), with CGP's agent skill.
 - **Where can I watch a talk about CGP?** The [Videos](/docs/resources/videos) page in Resources.
-- **How can I join the community or help?** [Contribute](/docs/contribute).
+- **Where can I ask a question or follow CGP's news?** The [Community](/docs/resources/community)
+  page in Resources.
+- **How can I help CGP?** [Contribute](/docs/contribute).
 
 For releases, design discussions, and talks, visit the [blog](/blog). Its older posts describe the
 library as it was when they were published, so for CGP as it is today, rely on the pages above.

@@ -223,6 +223,10 @@ const config: Config = {
               label: 'Reddit',
               href: 'https://www.reddit.com/r/cgp/',
             },
+            {
+              label: 'Bluesky',
+              href: 'https://bsky.app/profile/contextgeneric.dev',
+            },
           ],
         },
         {

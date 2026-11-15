@@ -15,14 +15,13 @@ Each route helps on its own, and none of them requires the ones after it.
 ## Join the discussion
 
 Ask questions about CGP, and suggest what the documentation should cover next, in the project's
-discussion channels: [GitHub Discussions](https://github.com/orgs/contextgeneric/discussions), the
-[Discord server](https://discord.gg/Hgk3rCw6pQ), and the [r/cgp](https://www.reddit.com/r/cgp/)
-subreddit. A question that a page should have answered also shows which page needs work.
+discussion channels, which the [Community](/docs/resources/community) page lists with what each one
+is for. A question that a page should have answered also shows which page needs work.
 
 ## Report a problem
 
-If a page on this site confuses you, or says something the code contradicts, report it in GitHub
-Discussions or as an issue on the
+If a page on this site confuses you, or says something the code contradicts, report it in [GitHub
+Discussions](https://github.com/orgs/contextgeneric/discussions) or as an issue on the
 [website's repository](https://github.com/contextgeneric/contextgeneric.dev/issues).
 
 The pages are written from the CGP knowledge base, a public record of CGP written for agents. Its
@@ -36,9 +35,8 @@ says what to include.
 
 A blog post, a tutorial, or a talk about what you built with CGP, or how you learned it, helps other
 readers even where this site already covers the topic, because a second explanation can reach a
-reader the first one did not. You can also follow CGP on Bluesky at
-[@contextgeneric.dev](https://bsky.app/profile/contextgeneric.dev) for news of its development, and
-share what you find useful there.
+reader the first one did not. You can also follow CGP on Bluesky, which the
+[Community](/docs/resources/community) page links, and share what you find useful there.
 
 ## Publish reusable components
 
