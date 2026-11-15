@@ -9,7 +9,7 @@ description: 'This section collects material about Context-Generic Programming b
 
 [Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
 the rest of this site's documentation explains how it works. This section collects material about
-CGP from beyond those pages. Each kind of resource has a section below that says what it holds and
+CGP beyond those pages. Each kind of resource has a section below that says what it holds and
 links where it lives.
 
 ## Videos

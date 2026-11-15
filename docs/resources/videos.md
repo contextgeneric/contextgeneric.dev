@@ -7,8 +7,9 @@ description: "Recorded talks about Context-Generic Programming, starting with th
 
 # Videos
 
-[Context-Generic Programming (CGP)](/docs/) enables pluggable trait implementations in Rust, and
-the talks on this page explain how it works, for a reader who would rather watch than read. Each entry says what the talk covers and links its transcript where one exists.
+The talks on this page introduce [Context-Generic Programming (CGP)](/docs/), which enables
+pluggable trait implementations in Rust, for a reader who would rather watch than read. Each entry
+says what the talk covers and links its transcript where one exists.
 
 ## RustLab 2025: How to stop fighting with coherence
 
