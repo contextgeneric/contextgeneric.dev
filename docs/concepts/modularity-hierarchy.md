@@ -362,7 +362,7 @@ program being evaluated. Although static dispatch removes runtime provider looku
 costs do not necessarily correspond to runtime work that the program would otherwise have done.
 
 The vocabulary and generated code take time to learn. CGP's
-[agent skill](https://github.com/contextgeneric/cgp-skills) can help a coding assistant explain
+[agent skill](/docs/ai/skills/) can help a coding assistant explain
 providers, trace wiring, and diagnose missing requirements. Reviewers still need to understand the
 result, and assistance does not make an unnecessary abstraction worthwhile.
 
