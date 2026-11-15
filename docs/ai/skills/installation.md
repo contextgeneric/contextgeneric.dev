@@ -133,8 +133,8 @@ read.
 
 ## Copying the skill by hand
 
-A copy works in every harness above. Clone the repository, then copy the `cgp/` directory to the path your
-harness's section gives. For Claude Code, installing for yourself, the commands are:
+A copy works in every harness above. Clone the repository, then copy the `cgp/` directory to the
+path your harness's section gives. For Claude Code, installing for yourself, the commands are:
 
 ```sh
 git clone --depth 1 https://github.com/contextgeneric/cgp-skills.git
