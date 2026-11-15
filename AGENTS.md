@@ -131,9 +131,11 @@ A published post is a dated artifact, so a correction goes beside it rather than
 - Do not rewrite a published post; it is a dated artifact, edited only when its record says it was
   published unfinished.
 - Annotate a misleading post, supersede it with a new one, or record the drift in its record, as the
-  author decides; record the drift by default for release notes.
+  author decides; record the drift by default for release posts.
 - Never change a published post's `slug`, and never rewrite a snippet in it.
-- Correct a page under `docs/` in place, without a changelog note.
+- Correct a page under `docs/` in place, without a changelog note, except a page under
+  `docs/release-notes/`: it is dated like a post, so correct it only where it misstates its own
+  release, and record a later change on the later release's page.
 
 ## Build
 
