@@ -76,7 +76,7 @@ natural. The field's type is inferred from what you return:
 | `&str` | `String` | `.as_ref()` |
 | `&[T]` | any `'static` type implementing `AsRef<[T]>` | `.as_ref()` |
 | `Option<&T>` | `Option<T>` | `.as_ref()` |
-| `Option<&str>` | `Option<String>` | `.as_deref()` |
+| `Option<&str>` | `Option<String>` | `.option_as_ref()` |
 | [`MRef<'_, T>`](../types/mref.md) | `T` | by reference, wrapped as `MRef::Ref(…)` |
 | An owned type (`f64`, `String`, a tuple, an array) | the same type | by reference, then `.clone()` |
 

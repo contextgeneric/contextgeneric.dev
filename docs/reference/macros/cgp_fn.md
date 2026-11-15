@@ -268,7 +268,8 @@ Learn to recognize a few details of the real output. The context type parameter 
 it as `Self`. [`Symbol!("width")`](./symbol.md) is a [type-level string](/docs/reference/glossary#type-level-string) standing for the field name.
 The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and `cargo cgp expand`
 resugars it back to this. An *owned* implicit argument compiles to a trailing `.clone()`. A `&str`
-argument ends in `.as_str()` instead, and a plain `&T` in nothing at all.
+argument ends in `.as_ref()` instead, which borrows any field implementing `AsRef<str>`, and a
+plain `&T` in nothing at all.
 
 The generics split shows up in the same impl. Given the `scale` function above, the generic goes on
 both items while the function's `where` bound stays on the impl, ordered *before* the implicit field
@@ -314,7 +315,8 @@ Two smaller placements matter because neither is visible in the source you wrote
 function's visibility becomes the trait's**, and the impl's method keeps inherited visibility. So
 `pub fn rectangle_area` yields `pub trait RectangleArea`, and a private `fn` yields a private trait
 usable only in its own module. And **the macro copies an attribute it does not recognize onto both
-items**, so `#[allow(...)]`, `#[doc]`, or a doc comment carries onto the trait and the impl alike.
+items**, so `#[allow(...)]` carries onto the trait and the impl alike. A doc comment on the function
+documents the trait's method instead, and the trait gets a generated line naming the operation.
 
 ## Formal grammar
 
