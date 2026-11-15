@@ -7,9 +7,10 @@ description: 'Direct a coding agent to the CGP knowledge base when a question ab
 
 # Using the Knowledge Base with Your Agent
 
-Your agent can learn the everyday use of [Context-Generic Programming (CGP)](/docs/) from the
-[agent skill](/docs/ai/skills), but some questions need more than the skill carries. For those, you
-can point the agent at the public
+[Context-Generic Programming (CGP)](/docs/) is a Rust library for writing several implementations
+of a trait and choosing which one each type uses, and your agent can learn its everyday use from the
+[agent skill](/docs/ai/skills). Some questions need more than the skill carries, though. For those,
+you can point the agent at the public
 [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base), the full record the
 skill is written from. The knowledge base is written for agents rather than people, so this page is
 about directing your agent to it. It assumes you already use a coding agent and know how to give it

@@ -7,12 +7,13 @@ description: 'AI agents write CGP''s documentation from a public knowledge base 
 
 # How CGP's Documentation Is Written
 
-AI agents write most of the documentation of [Context-Generic Programming (CGP)](/docs/), and this
-page describes how, for a reader deciding how far to trust it. The agents work from the public
-[CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base), a record written for
-agents and checked against the library's source. The sections below cover the problem that record
-answers, the rules that keep it true, who directs the work, and where its checks stop. For who
-reviews which page, see the [AI disclaimer](/docs/ai/disclaimer).
+AI agents write most of the documentation of [Context-Generic Programming (CGP)](/docs/), a Rust
+library for writing several implementations of a trait and choosing which one each type uses. This
+page describes how they write it, for a reader deciding how far to trust the result. The agents work
+from the public [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base), a record
+written for agents and checked against the library's source. The sections below cover the problem
+that record answers, the rules that keep it true, who directs the work, and where its checks stop.
+For who reviews which page, see the [AI disclaimer](/docs/ai/disclaimer).
 
 ## The problem with one-shot prompts
 

@@ -7,11 +7,11 @@ description: 'How a coding agent can help you work with CGP through its agent sk
 
 # AI-Assisted Development
 
-Coding agents meet [Context-Generic Programming (CGP)](/docs/) in two ways, and this section covers
-both. You may want an agent's help with your own CGP code, which means the agent has to know CGP
-better than its training does. Or you may want to know how much of the documentation you are
-reading an agent wrote, and how that work is checked. The two questions are separate, so their pages
-are kept apart below.
+This section is about coding agents and [Context-Generic Programming (CGP)](/docs/), a Rust library
+that lets you write several implementations of a trait and choose which one each type uses. It
+answers two separate questions. One is how an agent can help with your own CGP code, which needs the
+agent to know CGP better than its training does. The other is how much of the documentation you are
+reading an agent wrote, and how that work is checked. The pages for each are kept apart below.
 
 ## Working with CGP through an agent
 

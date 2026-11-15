@@ -7,7 +7,8 @@ description: 'The public, agent-written record that CGP''s documentation and age
 
 # The CGP Knowledge Base
 
-Most of the documentation of [Context-Generic Programming (CGP)](/docs/), on this site and in its
+[Context-Generic Programming (CGP)](/docs/) is a Rust library for writing several implementations
+of a trait and choosing which one each type uses. Most of its documentation, on this site and in its
 [agent skill](/docs/ai/skills), is written from one public repository: the
 [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base). It records what each of
 CGP's constructs means, how its macros and tools are built, and how the project presents itself. AI
