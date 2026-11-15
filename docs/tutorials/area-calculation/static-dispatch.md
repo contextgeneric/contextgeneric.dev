@@ -1,12 +1,15 @@
 ---
+title: 'Static dispatch: give one trait several implementations'
+sidebar_label: 'Static Dispatch'
 sidebar_position: 2
+description: 'Hit the coherence error that rejects two blanket implementations of one trait, then fix it with CGP components, named providers, compile-time wiring, and higher-order providers.'
 ---
 
 # Static Dispatch
 
 In the previous tutorial, we learned how `#[cgp_fn]` and `#[implicit]` arguments let us define context-generic functions that extract field values automatically from any conforming context. We came away with `rectangle_area` and `scaled_rectangle_area` working cleanly across multiple rectangle contexts, all without any manual forwarding or per-context implementation.
 
-In this tutorial, we will introduce a second shape — the circle — and motivate the need for a unified `CanCalculateArea` interface that works across all shapes. We will then run into one of Rust's most well-known limitations when trying to generalize this: the [coherence](/docs/reference/glossary#coherence) problem. After examining why plain [blanket implementations](/docs/reference/glossary#blanket-implementation) fall short, we will see how CGP's `#[cgp_component]` macro and named providers resolve the problem. Finally, we will wire everything together using `delegate_components!` for concise, compile-time static dispatch, and generalize further with [higher-order providers](/docs/reference/glossary#higher-order-provider) that compose behavior without duplication.
+In this tutorial, we will introduce a second shape — the circle — and motivate the need for a unified `CanCalculateArea` interface that works across all shapes. We will then run into one of Rust's most well-known limitations when trying to generalize this: the [coherence](/docs/reference/glossary#coherence) problem. After examining why plain [blanket implementations](/docs/reference/glossary#blanket-implementation) fall short, we will see how the `#[cgp_component]` macro of [Context-Generic Programming](/docs/) (CGP) and named providers resolve the problem. Finally, we will wire everything together using `delegate_components!` for concise, compile-time static dispatch, and generalize further with [higher-order providers](/docs/reference/glossary#higher-order-provider) that compose behavior without duplication.
 
 ## Using CGP functions with Rust traits
 

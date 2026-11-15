@@ -1,10 +1,13 @@
 ---
+title: 'Context-generic functions: read fields as arguments'
+sidebar_label: 'Context-Generic Functions'
 sidebar_position: 1
+description: 'Turn plain Rust functions into context-generic functions with #[cgp_fn] and #[implicit], so one definition reads its arguments from the fields of any struct that has them.'
 ---
 
 # Context-Generic Functions
 
-In the previous part of this tutorial, we identified two problems with plain Rust code: explicit function parameters accumulate quickly as call chains grow longer, and grouping fields into a concrete context struct creates tight coupling between implementations and a specific type. In this tutorial, we will address both of these problems at once using `#[cgp_fn]` — CGP's mechanism for defining functions that accept **implicit arguments** extracted automatically from any conforming context.
+In the previous part of this tutorial, we identified two problems with plain Rust code: explicit function parameters accumulate quickly as call chains grow longer, and grouping fields into a concrete context struct creates tight coupling between implementations and a specific type. In this tutorial, we will address both of these problems at once using `#[cgp_fn]` — the mechanism [Context-Generic Programming](/docs/) (CGP) provides for defining functions that accept **implicit arguments** extracted automatically from any conforming context.
 
 By the end of this tutorial, we will have defined `rectangle_area`, `scaled_rectangle_area`, and `print_rectangle_area` as context-generic functions, and seen how `#[cgp_fn]` and `#[implicit]` arguments work together to let a single function definition run cleanly on any context that contains the required fields — without any manual forwarding or boilerplate.
 

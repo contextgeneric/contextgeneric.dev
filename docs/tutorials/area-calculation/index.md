@@ -1,6 +1,12 @@
+---
+title: 'Area calculation: from plain Rust functions to providers'
+sidebar_label: 'Area Calculation Tutorial'
+description: 'A Rust tutorial series that grows one area calculation from plain functions to context-generic functions, interchangeable providers, and checked wiring.'
+---
+
 # Area Calculation Tutorial
 
-In this tutorial series, we will explore CGP — Context-Generic Programming — through a concrete, hands-on example: computing the area of different shapes. We will start with familiar plain Rust code, identify its limitations, and progressively introduce the CGP tools that address them. No prior knowledge of CGP is required, though a basic familiarity with Rust traits will be helpful.
+In this tutorial series, we will explore [Context-Generic Programming](/docs/) (CGP) through a concrete, hands-on example: computing the area of different shapes. We will start with familiar plain Rust code, identify its limitations, and progressively introduce the CGP tools that address them. No prior knowledge of CGP is required, though a basic familiarity with Rust traits will be helpful.
 
 ## Plain Functions and Explicit Dependencies
 

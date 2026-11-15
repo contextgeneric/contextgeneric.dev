@@ -1,10 +1,13 @@
 ---
+title: 'Hello World: one function for many structs'
+sidebar_label: 'Hello World Tutorial'
 sidebar_position: 2
+description: 'Write your first Context-Generic Programming code in Rust: a greet function that reads a name from a struct field and works unchanged on two different structs.'
 ---
 
 # Hello World Tutorial
 
-In this tutorial, we will build a small working program that greets people by name, using CGP's core features. Along the way we will encounter CGP functions, implicit arguments, struct-based contexts, and `HasField` derivation. By the end you will have seen a complete working example and will understand at a high level how CGP leverages Rust's trait system to let you write highly reusable code without any runtime overhead.
+In this tutorial, we will build a small working program that greets people by name, using the core features of [Context-Generic Programming](/docs/) (CGP). Along the way we will encounter CGP functions, implicit arguments, struct-based contexts, and `HasField` derivation. By the end you will have seen a complete working example and will understand at a high level how CGP leverages Rust's trait system to let you write highly reusable code without any runtime overhead.
 
 ## Using the `cgp` crate
 

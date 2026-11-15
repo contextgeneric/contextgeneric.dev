@@ -42,11 +42,11 @@ Finished `dev` profile [unoptimized + debuginfo] target(s)
 
 It compiles. Nothing warns, nothing fails, and the mistake sits in the code waiting.
 
-This is worth understanding rather than working around, because it is not a bug. CGP wiring is
-**lazy**: writing a `delegate_components!` entry records which provider a context uses, and Rust
-checks whether that provider's requirements are met only when something actually asks the context to
-do the work. Until then there is nothing to check against. The entry is a promise, and nobody has
-called it in.
+This is worth understanding rather than working around, because it is not a bug.
+[Context-Generic Programming](/docs/) (CGP) wiring is **lazy**: writing a `delegate_components!`
+entry records which provider a context uses, and Rust checks whether that provider's requirements
+are met only when something actually asks the context to do the work. Until then there is nothing to
+check against. The entry is a promise, and nobody has called it in.
 
 ## Where the mistake surfaces instead
 
