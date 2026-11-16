@@ -282,33 +282,34 @@ A wrapper given through `RUSTC_WRAPPER`, such as `sccache`, does keep running al
 
 ## A check hangs or prints different output between runs
 
-The pinned nightly checks your code on several threads by default, a change the Rust project calls
-the parallel front end and explains in
-[Enabling the parallel frontend on nightly](https://blog.rust-lang.org/2026/11/16/enabling-parallel-frontend-on-nightly/). A check is
-meant to print the same output on every run, however many threads the compiler uses. So if a check
-never finishes, or prints different errors from one run to the next, the parallel front end may be
-involved, and you can rule it out by running the check on one thread:
+The pinned nightly checks your code on several threads by default. The Rust project calls this the
+parallel front end and explains it in
+[Enabling the parallel frontend on nightly](https://blog.rust-lang.org/2026/11/16/enabling-parallel-frontend-on-nightly/).
+A check is meant to print the same output on every run, however many threads the compiler uses, so
+a check that never finishes, or that prints different errors from one run to the next, may have met
+a bug in that parallel code. You can rule it out by running the check on one thread:
 
 ```sh
 RUSTFLAGS="-Zunstable-options --jobs-frontend=1" cargo cgp check
 ```
 
-The tool passes the flags to the compiler unchanged. Set them in the environment rather than in your
-project's `.cargo/config.toml`, because a setting there also reaches your ordinary builds, and
-stable Rust rejects `-Z` flags. The first check with the flags recompiles your dependencies, since
-cargo rebuilds whenever `RUSTFLAGS` changes, and later checks reuse that build.
+The tool passes these flags to the compiler unchanged. Set them in the environment, as here, rather
+than in your project's `.cargo/config.toml`: a setting there also reaches your ordinary builds, and
+stable Rust rejects `-Z` flags. Because cargo rebuilds whenever `RUSTFLAGS` changes, the first check
+with the flags recompiles your dependencies, and later checks reuse that build.
 
-One difference comes from the compiler and stays in a check: an error about a cycle can describe
-the cycle from a different starting point on each run. Any other difference is worth reporting.
+One difference is expected, so look for it before reporting anything. The compiler can describe a
+cycle error from a different starting point on each run, and a check keeps that error as the
+compiler wrote it.
 
-If the problem goes away on one thread, check whether the compiler shows it too. Run plain
-`cargo +nightly-YYYY-MM-DD check` without the flags, using the pinned nightly that the driver's
-`--version` names, [run as shown above](#the-driver-cannot-load-the-compiler). If that check also
-hangs or crashes, the bug is in the compiler, and the blog post says where to report it. Otherwise,
-please report it on the [issue tracker](https://github.com/contextgeneric/cargo-cgp/issues) with
-the output of both runs of `cargo cgp check`. A different order of errors from one plain
-`cargo check` run to the next is expected under the parallel front end, as the post explains, so it
-does not point to the compiler on its own.
+If the problem goes away on one thread, the next question is whether the compiler has it too.
+Run plain `cargo +nightly-YYYY-MM-DD check` without the flags, using the pinned nightly that the
+driver's `--version` names, [run as shown above](#the-driver-cannot-load-the-compiler). If that check also
+hangs or crashes, the bug is in the compiler, and the blog post says where to report it. If it does
+not, please report the problem on the
+[issue tracker](https://github.com/contextgeneric/cargo-cgp/issues) with the output of both runs of
+`cargo cgp check`. A plain check that lists its errors in a different order on each run is no sign
+of a bug: the post describes that as expected under the parallel front end.
 
 ## Still stuck
 

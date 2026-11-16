@@ -172,14 +172,14 @@ and build location. The changes work together:
 A check also orders its output differently. It prints errors in the order of the code they point
 at: by file, then by position, with an error on an expression ahead of one on the expression around
 it. The pinned nightly checks your code on several threads, through the
-[parallel front end](https://blog.rust-lang.org/2026/11/16/enabling-parallel-frontend-on-nightly/), so it can
-find the errors in a different order each time, but a check sorts them first, and its output stays
-the same from one run to the next. If it does not,
-[Troubleshooting](./troubleshooting.md#a-check-hangs-or-prints-different-output-between-runs) shows
-how to run the check on one thread. `cargo check` prints them in the order the compiler finds them, so the same error can sit in
-another place in its output. When one mistake breaks several places, such as a
+[parallel front end](https://blog.rust-lang.org/2026/11/16/enabling-parallel-frontend-on-nightly/), so it
+can find the errors in a different order each time, but a check sorts them first and prints the same
+output on every run. `cargo check` prints them in the order the compiler finds them, so the same
+error can sit in another place in its output. When one mistake breaks several places, such as a
 `check_components!` entry and a call, `cargo cgp check` reports it once, at the
-`check_components!` entry if there is one.
+`check_components!` entry if there is one. If a check's output does change between runs,
+[Troubleshooting](./troubleshooting.md#a-check-hangs-or-prints-different-output-between-runs) shows
+how to run it on one thread.
 
 Using a separate compiler and solver makes this a diagnostic pass rather than a reproduction
 of your project's check. Like Clippy under its own settings, it can give a different result.
