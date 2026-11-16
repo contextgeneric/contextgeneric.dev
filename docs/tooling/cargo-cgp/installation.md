@@ -127,8 +127,8 @@ success, the driver prints three lines:
 
 ```text
 cargo-cgp-driver 0.1.0
-pinned-toolchain: nightly-2026-11-05
-built-against-rustc: rustc 1.101.0-nightly (2d20b42b8 2026-11-04)
+pinned-toolchain: nightly-2026-11-15
+built-against-rustc: rustc 1.102.0-nightly (5f4effd57 2026-11-13)
 ```
 
 Read the nightly from `pinned-toolchain:` and the compiler identity from `built-against-rustc:`
