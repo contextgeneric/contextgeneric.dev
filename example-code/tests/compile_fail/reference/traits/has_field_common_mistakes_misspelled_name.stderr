@@ -14,7 +14,6 @@ note: required by a bound in `read_first_name`
   --> tests/compile_fail/reference/traits/has_field_common_mistakes_misspelled_name.rs:6:14
    |
  4 | pub fn read_first_name<Context>(context: &Context) -> &String
-   |        --------------- required by a bound in this function
  5 | where
  6 |     Context: HasField<Symbol!("first_name"), Value = String>,
    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `read_first_name`

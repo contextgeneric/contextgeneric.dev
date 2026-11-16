@@ -1,15 +1,14 @@
 error[E0599]: the method `finalize_with_default` exists for struct `__PartialServer<IsOptional, IsOptional>`, but its trait bounds were not satisfied
   --> tests/compile_fail/reference/traits/can_finalize_with_default_common_mistakes_optional_needs_default.rs:18:10
    |
- 9 |   pub struct Server {
-   |   ----------------- method `finalize_with_default` not found for this struct because `__PartialServer<IsOptional, IsOptional>` doesn't implement `PartialData` or `TransformMapFields`
+ 9 | pub struct Server {
+   | ----------------- method `finalize_with_default` not found for this struct because `__PartialServer<IsOptional, IsOptional>` doesn't implement `PartialData` or `TransformMapFields`
 ...
-15 |       let _ = Server::optional_builder()
-   |  _____________-
-16 | |         .set(PhantomData::<Symbol!("host")>, "localhost".to_owned())
-17 | |         .set(PhantomData::<Symbol!("port")>, Port(8080))
-18 | |         .finalize_with_default();
-   | |_________-^^^^^^^^^^^^^^^^^^^^^
+15 |     let _ = Server::optional_builder()
+16 |         .set(PhantomData::<Symbol!("host")>, "localhost".to_owned())
+17 |         .set(PhantomData::<Symbol!("port")>, Port(8080))
+18 |         .finalize_with_default();
+   |          ^^^^^^^^^^^^^^^^^^^^^
    |
    = note: the following trait bounds were not satisfied:
            `__PartialServer<IsOptional, IsOptional>: TransformMapFields<TransformMapDefault, IsPresent>`

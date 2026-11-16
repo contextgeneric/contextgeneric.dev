@@ -16,7 +16,6 @@ note: required by a bound in `Greeter`
   --> tests/compile_fail/reference/attributes/extend_common_mistakes_provider_without_uses.rs:9:10
    |
  8 | #[cgp_component(Greeter)]
-   |                 ------- required by a bound in this trait
  9 | #[extend(HasName)]
    |          ^^^^^^^ required by this bound in `Greeter`
    = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the attribute macro `cgp_auto_getter` (in Nightly builds, run with -Z macro-backtrace for more info)

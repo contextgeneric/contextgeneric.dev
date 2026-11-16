@@ -4,11 +4,11 @@ error: cannot find attribute `use_provider` in this scope
  22 | #[use_provider(RectangleArea: AreaCalculator)]
     |   ^^^^^^^^^^^^
     |
-   ::: /home/soares/development/context-generic/cgp/crates/macros/cgp-macro/src/lib.rs:136:1
+note: similarly named attribute macro `cgp_provider` defined here
+   --> /home/soares/development/context-generic/cgp/crates/macros/cgp-macro/src/lib.rs:136:1
     |
 136 | pub fn cgp_provider(attr: TokenStream, item: TokenStream) -> TokenStream {
-    | ------------------------------------------------------------------------ similarly named attribute macro `cgp_provider` defined here
-    |
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 help: an attribute macro with a similar name exists
     |
  22 - #[use_provider(RectangleArea: AreaCalculator)]

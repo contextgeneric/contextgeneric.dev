@@ -37,7 +37,6 @@ note: required by a bound in `assert_provider`
   --> tests/compile_fail/reference/traits/is_provider_for_common_mistakes_one_element_tuple.rs:26:20
    |
 24 | fn assert_provider()
-   |    --------------- required by a bound in this function
 25 | where
 26 |     RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>,
    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `assert_provider`

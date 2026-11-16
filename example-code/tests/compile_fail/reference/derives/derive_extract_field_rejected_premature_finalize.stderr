@@ -1,17 +1,14 @@
 error[E0599]: the method `finalize_extract_result` exists for enum `Result<Circle, __PartialShape<IsVoid, IsPresent>>`, but its trait bounds were not satisfied
   --> tests/compile_fail/reference/derives/derive_extract_field_rejected_premature_finalize.rs:26:10
    |
-14 |   pub enum Shape {
-   |   -------------- doesn't satisfy `__PartialShape<IsVoid, IsPresent>: FinalizeExtract`
+14 | pub enum Shape {
+   | -------------- doesn't satisfy `__PartialShape<IsVoid, IsPresent>: FinalizeExtract`
 ...
-23 |       let _ = shape
-   |  _____________-
-24 | |         .to_extractor()
-25 | |         .extract_field(PhantomData::<Symbol!("Circle")>)
-26 | |         .finalize_extract_result();
-   | |         -^^^^^^^^^^^^^^^^^^^^^^^ method cannot be called on `Result<Circle, __PartialShape<IsVoid, IsPresent>>` due to unsatisfied trait bounds
-   | |_________|
-   |
+23 |     let _ = shape
+24 |         .to_extractor()
+25 |         .extract_field(PhantomData::<Symbol!("Circle")>)
+26 |         .finalize_extract_result();
+   |          ^^^^^^^^^^^^^^^^^^^^^^^ method cannot be called on `Result<Circle, __PartialShape<IsVoid, IsPresent>>` due to unsatisfied trait bounds
    |
    = note: the following trait bounds were not satisfied:
            `__PartialShape<IsVoid, IsPresent>: FinalizeExtract`

@@ -4,11 +4,11 @@ error[E0576]: cannot find associated type `Output` in trait `MapFields`
  6 | pub type Mapped = <Product![u8, u16] as MapFields<IsPresent>>::Output;
    |                                                                ^^^^^^ not found in `MapFields`
    |
-  ::: /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/map_fields.rs:10:5
+note: associated type `Mapped` defined here
+  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/map_fields.rs:10:5
    |
 10 |     type Mapped;
-   |     ----------- associated type `Mapped` defined here
-   |
+   |     ^^^^^^^^^^^
 help: maybe you meant this associated type
    |
  6 - pub type Mapped = <Product![u8, u16] as MapFields<IsPresent>>::Output;
