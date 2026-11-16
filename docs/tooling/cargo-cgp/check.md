@@ -173,7 +173,9 @@ A check also prints its errors in the order of the code they point at: by file, 
 with an error on an expression ahead of one on the expression around it. `cargo check` prints them
 in the order the compiler finds them, so the same error can appear in another place in its output.
 The compiler checks your code on several threads and can find the errors in a different order each
-time, but a check sorts them first, so its output stays the same from one run to the next.
+time, but a check sorts them first, so its output stays the same from one run to the next. When the
+same mistake breaks several places, such as a check and a call, the check reports it once, at the
+`check_components!` entry if there is one.
 
 Using a separate compiler and solver makes this a diagnostic pass rather than a reproduction
 of your project's check. Like Clippy under its own settings, it can give a different result.
