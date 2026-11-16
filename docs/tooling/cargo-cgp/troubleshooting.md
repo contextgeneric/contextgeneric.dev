@@ -65,7 +65,7 @@ Most failures below can be repaired with `cargo cgp setup`, which installs the p
 and builds a driver matching both that compiler and the front end. Before rerunning setup,
 read the diagnostic to identify which part failed.
 
-The examples name `nightly-2026-11-15`; your output names your build's pinned nightly. Driver
+The examples name `nightly-2026-11-16`; your output names your build's pinned nightly. Driver
 messages also show the binary's path and where it was found: through `CARGO_CGP_DRIVER`, beside
 the front end, or on `PATH`.
 
@@ -73,10 +73,10 @@ The preflight begins by checking for the pinned nightly. If rustup cannot find i
 includes rustup's explanation:
 
 ```text
-error: toolchain `nightly-2026-11-15` is not available:
+error: toolchain `nightly-2026-11-16` is not available:
 
-  error: toolchain 'nightly-2026-11-15-x86_64-unknown-linux-gnu' is not installed
-  help: run `rustup toolchain install nightly-2026-11-15-x86_64-unknown-linux-gnu` to install it
+  error: toolchain 'nightly-2026-11-16-x86_64-unknown-linux-gnu' is not installed
+  help: run `rustup toolchain install nightly-2026-11-16-x86_64-unknown-linux-gnu` to install it
 
 help: run `cargo cgp setup`
 ```
@@ -85,7 +85,7 @@ The front end finds the pinned nightly through rustup, so a machine without rust
 Here `setup` cannot help, since it needs rustup too:
 
 ```text
-error: rustup was not found on PATH, and cargo-cgp installs and selects its toolchain `nightly-2026-11-15` through rustup
+error: rustup was not found on PATH, and cargo-cgp installs and selects its toolchain `nightly-2026-11-16` through rustup
 
 help: install rustup, or install cargo-cgp through its Nix flake, which needs no rustup
 ```
@@ -97,7 +97,7 @@ point usually means the driver was built against another nightly. The diagnostic
 loader's message so you can see which library could not be loaded:
 
 ```text
-error: the cargo-cgp-driver at /home/you/.cargo/bin/cargo-cgp-driver (beside cargo-cgp) could not run under toolchain `nightly-2026-11-15` (it was likely built against a different nightly):
+error: the cargo-cgp-driver at /home/you/.cargo/bin/cargo-cgp-driver (beside cargo-cgp) could not run under toolchain `nightly-2026-11-16` (it was likely built against a different nightly):
 
   /home/you/.cargo/bin/cargo-cgp-driver: error while loading shared libraries: librustc_driver-a1ed262f84b24882.so: cannot open shared object file: No such file or directory
 
@@ -118,7 +118,7 @@ built. The preflight compares the build-time compiler with the one the pinned to
 provides and reports a mismatch:
 
 ```text
-error: the cargo-cgp-driver at /home/you/.cargo/bin/cargo-cgp-driver (beside cargo-cgp) was built against `rustc 1.99.0-nightly (0000000 2026-01-01)`, but toolchain `nightly-2026-11-15` provides `rustc 1.102.0-nightly (5f4effd57 2026-11-13)`
+error: the cargo-cgp-driver at /home/you/.cargo/bin/cargo-cgp-driver (beside cargo-cgp) was built against `rustc 1.99.0-nightly (0000000 2026-01-01)`, but toolchain `nightly-2026-11-16` provides `rustc 1.102.0-nightly (5f4effd57 2026-11-13)`
 
 help: run `cargo cgp setup`
 ```
@@ -243,8 +243,8 @@ Caused by:
 `cargo cgp setup` installs the toolchain through rustup, so without rustup it stops at once:
 
 ```text
-  Installing toolchain `nightly-2026-11-15` with rustc-dev and llvm-tools
-error: rustup was not found on PATH, and `cargo cgp setup` installs the toolchain `nightly-2026-11-15` through rustup
+  Installing toolchain `nightly-2026-11-16` with rustc-dev and llvm-tools
+error: rustup was not found on PATH, and `cargo cgp setup` installs the toolchain `nightly-2026-11-16` through rustup
 
 help: install rustup, or install cargo-cgp through its Nix flake, which needs no rustup
 ```
