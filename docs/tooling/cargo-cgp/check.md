@@ -165,8 +165,6 @@ and build location. The changes work together:
   matches the one that builds your code. Your project's toolchain is untouched.
 - **The next-generation trait solver:** this solver works out the missing requirement in the cases where
   the default solver only says that a method's bounds were not satisfied.
-- **One compiler thread:** a check type-checks your code on one thread, even when your configuration
-  asks for more, so its errors come out in the same order on every run.
 - **Its own build directory:** a check builds into `target/cgp` rather than `target`. Cargo locks a target
   directory while it builds there, so a shared one would make each check wait for your other cargo runs
   and your editor's, and the reverse.
@@ -174,6 +172,8 @@ and build location. The changes work together:
 A check also prints its errors in the order of the code they point at: by file, then by position,
 with an error on an expression ahead of one on the expression around it. `cargo check` prints them
 in the order the compiler finds them, so the same error can appear in another place in its output.
+The compiler checks your code on several threads and can find the errors in a different order each
+time, but a check sorts them first, so its output stays the same from one run to the next.
 
 Using a separate compiler and solver makes this a diagnostic pass rather than a reproduction
 of your project's check. Like Clippy under its own settings, it can give a different result.
