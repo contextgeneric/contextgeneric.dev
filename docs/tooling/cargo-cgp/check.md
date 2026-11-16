@@ -171,6 +171,10 @@ and build location. The changes work together:
   directory while it builds there, so a shared one would make each check wait for your other cargo runs
   and your editor's, and the reverse.
 
+A check also prints its errors in the order of the code they point at: by file, then by position,
+with an error on an expression ahead of one on the expression around it. `cargo check` prints them
+in the order the compiler finds them, so the same error can appear in another place in its output.
+
 Using a separate compiler and solver makes this a diagnostic pass rather than a reproduction
 of your project's check. Like Clippy under its own settings, it can give a different result.
 Mutually inheriting namespaces, for example, pass this check but are rejected by stable Rust.
