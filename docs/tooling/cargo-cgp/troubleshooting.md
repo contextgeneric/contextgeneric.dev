@@ -2,7 +2,7 @@
 title: 'Troubleshooting cargo-cgp'
 sidebar_label: 'Troubleshooting'
 sidebar_position: 7
-description: 'Match an error from cargo-cgp itself to its cause and fix: the setup check, a driver that will not load or cannot be found, wrong invocations, and slow checks.'
+description: 'Match a cargo-cgp error to its cause and fix: the setup check, a driver that will not load or cannot be found, wrong invocations, and slow or unsteady checks.'
 ---
 
 # Troubleshooting
@@ -37,6 +37,7 @@ Find the distinctive part of your error in the left column, then read the sectio
 | `unexpected argument` | a flag `cargo check` does not know | [The command itself fails](#the-command-itself-fails) |
 | `is cargo on PATH?` | cargo is not installed, or not on `PATH` | [The command itself fails](#the-command-itself-fails) |
 | `RUSTC_WORKSPACE_WRAPPER is set` | a compiler wrapper of your own will not run | [Your own compiler wrapper stopped running](#your-own-compiler-wrapper-stopped-running) |
+| no error: a check never finishes, or its errors change between runs | a bug under the compiler's parallel front end | [A check hangs or prints different output between runs](#a-check-hangs-or-prints-different-output-between-runs) |
 
 Some problems print no error at all: a check that disagrees with `cargo check`, and a slow first check.
 Each has a section near the end of the page.
@@ -278,6 +279,30 @@ warning: RUSTC_WORKSPACE_WRAPPER is set to `/usr/local/bin/my-wrapper`; cargo-cg
 ```
 
 A wrapper given through `RUSTC_WRAPPER`, such as `sccache`, does keep running alongside the driver.
+
+## A check hangs or prints different output between runs
+
+The pinned nightly checks your code on several threads by default, a change the Rust project calls
+the parallel front end and explains in
+[Enabling the parallel frontend on nightly](https://blog.rust-lang.org/2026/11/16/enabling-parallel-frontend-on-nightly/). A check is
+meant to print the same output on every run, however many threads the compiler uses. So if a check
+never finishes, or prints different errors from one run to the next, the parallel front end may be
+involved, and you can rule it out by running the check on one thread:
+
+```sh
+RUSTFLAGS="-Zunstable-options --jobs-frontend=1" cargo cgp check
+```
+
+The tool passes the flags to the compiler unchanged. Set them in the environment rather than in your
+project's `.cargo/config.toml`, because a setting there also reaches your ordinary builds, and
+stable Rust rejects `-Z` flags. The first check with the flags recompiles your dependencies, since
+cargo rebuilds whenever `RUSTFLAGS` changes, and later checks reuse that build.
+
+If the problem goes away on one thread, please report it on the
+[issue tracker](https://github.com/contextgeneric/cargo-cgp/issues) with the output of both runs. If
+plain `cargo +nightly-YYYY-MM-DD check`, with the pinned nightly that `cargo-cgp-driver --version`
+names, fails the same way without the flags, the bug is in the compiler, and the blog post says
+where to report it.
 
 ## Still stuck
 
