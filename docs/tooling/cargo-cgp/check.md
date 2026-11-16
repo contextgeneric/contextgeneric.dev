@@ -165,6 +165,8 @@ and build location. The changes work together:
   matches the one that builds your code. Your project's toolchain is untouched.
 - **The next-generation trait solver:** this solver works out the missing requirement in the cases where
   the default solver only says that a method's bounds were not satisfied.
+- **One compiler thread:** a check type-checks your code on one thread, even when your configuration
+  asks for more, so its errors come out in the same order on every run.
 - **Its own build directory:** a check builds into `target/cgp` rather than `target`. Cargo locks a target
   directory while it builds there, so a shared one would make each check wait for your other cargo runs
   and your editor's, and the reverse.
