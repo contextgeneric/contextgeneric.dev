@@ -169,12 +169,13 @@ and build location. The changes work together:
   directory while it builds there, so a shared one would make each check wait for your other cargo runs
   and your editor's, and the reverse.
 
-A check also prints its errors in the order of the code they point at: by file, then by position,
-with an error on an expression ahead of one on the expression around it. `cargo check` prints them
-in the order the compiler finds them, so the same error can appear in another place in its output.
-The compiler checks your code on several threads and can find the errors in a different order each
-time, but a check sorts them first, so its output stays the same from one run to the next. When the
-same mistake breaks several places, such as a check and a call, the check reports it once, at the
+A check also orders its output differently. It prints errors in the order of the code they point
+at: by file, then by position, with an error on an expression ahead of one on the expression around
+it. The pinned nightly checks your code on several threads, so it can find the errors in a different
+order each time, but a check sorts them first, and its output stays the same from one run to the
+next. `cargo check` prints them in the order the compiler finds them, so the same error can sit in
+another place in its output. When one mistake breaks several places, such as a
+`check_components!` entry and a call, `cargo cgp check` reports it once, at the
 `check_components!` entry if there is one.
 
 Using a separate compiler and solver makes this a diagnostic pass rather than a reproduction

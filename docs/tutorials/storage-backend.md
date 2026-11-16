@@ -367,9 +367,9 @@ help: the trait `HasField<Symbol<9, Chars<'l', Chars<'o', Chars<'c', Chars<'a', 
 [cargo-cgp](/docs/tooling/cargo-cgp), CGP's error toolchain, explains the same failure more
 directly. After [installing it](/docs/tooling/cargo-cgp/installation), run `cargo cgp check` in
 place of `cargo check`. It names the missing field first, then the chain of requirements that led to
-it. It also shows the mistake only once: the compiler reports it at the check and again at the call
-to `get_user_profile_picture` in `main`, and `cargo cgp check` keeps the check's report. Here it is,
-without the source excerpt that points at the check:
+it. The compiler reports the mistake twice, at the check and again at the call to
+`get_user_profile_picture` in `main`, and `cargo cgp check` shows it once, keeping the check's
+report. Here it is, without the source excerpt that points at the check:
 
 ```text
 error[E0277]: [CGP-E001] missing field `local_dir` on `App`
