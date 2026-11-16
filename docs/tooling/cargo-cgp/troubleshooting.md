@@ -2,7 +2,7 @@
 title: 'Troubleshooting cargo-cgp'
 sidebar_label: 'Troubleshooting'
 sidebar_position: 7
-description: 'Match a cargo-cgp error to its cause and fix: the setup check, a driver that will not load or cannot be found, wrong invocations, and slow or unsteady checks.'
+description: 'Match a cargo-cgp error to its cause and fix: the setup check, a driver that will not load or cannot be found, wrong invocations, and slow or varying checks.'
 ---
 
 # Troubleshooting
@@ -298,11 +298,17 @@ project's `.cargo/config.toml`, because a setting there also reaches your ordina
 stable Rust rejects `-Z` flags. The first check with the flags recompiles your dependencies, since
 cargo rebuilds whenever `RUSTFLAGS` changes, and later checks reuse that build.
 
-If the problem goes away on one thread, please report it on the
-[issue tracker](https://github.com/contextgeneric/cargo-cgp/issues) with the output of both runs. If
-plain `cargo +nightly-YYYY-MM-DD check`, with the pinned nightly that `cargo-cgp-driver --version`
-names, fails the same way without the flags, the bug is in the compiler, and the blog post says
-where to report it.
+One difference comes from the compiler and stays in a check: an error about a cycle can describe
+the cycle from a different starting point on each run. Any other difference is worth reporting.
+
+If the problem goes away on one thread, check whether the compiler shows it too. Run plain
+`cargo +nightly-YYYY-MM-DD check` without the flags, using the pinned nightly that the driver's
+`--version` names, [run as shown above](#the-driver-cannot-load-the-compiler). If that check also
+hangs or crashes, the bug is in the compiler, and the blog post says where to report it. Otherwise,
+please report it on the [issue tracker](https://github.com/contextgeneric/cargo-cgp/issues) with
+the output of both runs of `cargo cgp check`. A different order of errors from one plain
+`cargo check` run to the next is expected under the parallel front end, as the post explains, so it
+does not point to the compiler on its own.
 
 ## Still stuck
 
