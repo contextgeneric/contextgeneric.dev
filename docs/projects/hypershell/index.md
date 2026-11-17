@@ -12,9 +12,10 @@ implementations at compile time. A Hypershell program is a Rust *type*, and the 
 it, a type whose wiring chooses how each piece behaves, is its interpreter. So both the language's
 syntax and its meaning can be extended without editing the crates that define it.
 
-Hypershell is an experimental proof of concept. It is not a replacement for a shell, and it builds
-only on nightly Rust. It is also the most complete example of a type-level language built with CGP,
-and these pages show what its design makes possible while being candid about its gaps.
+Hypershell is an experimental proof of concept. It is not a replacement for a shell, and its
+largest programs need nightly Rust. It is also the most complete example of a type-level language
+built with CGP, and these pages show what its design makes possible while being candid about its
+gaps.
 
 ## A program that is a type
 
@@ -96,10 +97,11 @@ become the subject, and that is where the learning cost falls.
 
 Hypershell is a demonstration, and these are the costs a reader evaluating it should know first:
 
-- **Nightly Rust.** The repository pins nightly and enables the next-generation trait solver with
-  `-Z next-solver=globally`. The largest examples, which nest whole programs inside others,
-  exhausted memory while type-checking on stable Rust without it, growing `rustc` to about 7 GB. On
-  nightly with the new solver, the same check took about 9 seconds and 460 MB. See [crate
+- **Nightly Rust for large programs.** The library and small programs, such as the one above, build
+  on stable Rust. The largest examples, which nest whole programs inside others, exhausted memory
+  while type-checking on stable Rust, growing `rustc` to about 7 GB; on nightly with the
+  next-generation trait solver, `-Z next-solver=globally`, a check of one of them took about 9
+  seconds and 460 MB. The repository pins nightly and turns the solver on. See [crate
   layout](./architecture/crate-layout.md#what-the-workspace-needs-to-build).
 - **Programs are fixed at compile time.** A program is a type, so it cannot be loaded or changed
   while the application runs. Values a program needs at run time, such as a URL, come from fields of
@@ -155,10 +157,19 @@ root, such as `cargo run --example hello`. The repository's toolchain file selec
 its `.cargo/config.toml` enables the new trait solver, so no setup is needed beyond `rustup`. Most
 examples need the network and a few common command-line tools; each example page says which.
 
-To use Hypershell from your own crate, depend on the repository by git, and copy its
-`rust-toolchain.toml` and `.cargo/config.toml` so that your crate builds with the same toolchain and
-solver. The `hypershell` crates published on crates.io are an earlier release, built on an older
-version of CGP with a different design, and the code on these pages does not compile against them.
+To use Hypershell from your own crate, add it from crates.io with `cgp` and an async runtime. The
+`hypershell!` macro's expansion names the `cgp` crate, so your crate depends on it as well:
+
+```toml
+[dependencies]
+cgp = "0.8.0"
+hypershell = "0.2.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+```
+
+A small program builds on stable Rust. A crate whose programs nest others, as the largest examples
+do, can copy the repository's `rust-toolchain.toml` and `.cargo/config.toml` to build with the same
+nightly and solver.
 
 ## Where to go next
 

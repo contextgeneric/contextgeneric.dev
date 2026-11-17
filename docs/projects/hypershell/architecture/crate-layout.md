@@ -55,14 +55,15 @@ the largest programs, the ones that nest whole programs inside others. Checked o
 without it, the two largest examples grew the compiler to about 7 GB of memory before they were
 stopped; on nightly with the new solver, `parallel_compare`, one of the two, checked in about 9
 seconds and 460 MB. Why the solvers differ so much was not investigated. A crate of your own with
-large programs should use the same settings.
+large programs should use the same settings, while a small program, such as
+[`hello`](../examples/hello.md), builds on stable Rust in a crate of its own.
 
 ## What it costs
 
 The split keeps each crate's dependencies small, at the price of more crates to depend on: a program
 using an extension imports from several Hypershell crates and from the library the extension wraps,
 such as `sha2` for checksums. The nightly requirement is the larger cost, because it applies to
-every crate that builds Hypershell programs of any size, not only to Hypershell itself.
+every crate that builds Hypershell programs that large, not only to Hypershell itself.
 
 ## Where to go next
 

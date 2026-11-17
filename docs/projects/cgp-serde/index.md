@@ -148,11 +148,18 @@ Clone the [repository](https://github.com/contextgeneric/cgp-serde) and run an e
 with `cargo run -p cgp-serde-examples --example <name>`. The repository's toolchain file selects the
 Rust version, and no example needs a network or any program outside the build.
 
-To use cgp-serde from your own crate, depend on its crates from the repository by git: `cgp-serde`
-for the components and core providers, and `cgp-serde-extra`, `cgp-serde-json`, `cgp-serde-alloc`,
-or `cgp-serde-typed-arena` for the providers your wiring names. The crates published on crates.io
-are an earlier release, built on an older version of CGP, and the code on these pages does not
-compile against them.
+To use cgp-serde from your own crate, add its crates from crates.io beside `cgp`: `cgp-serde` for
+the components and core providers, then `cgp-serde-extra`, `cgp-serde-json`, `cgp-serde-alloc`, or
+`cgp-serde-typed-arena` for the providers your wiring names, and a Serde format such as
+`serde_json` to write the output:
+
+```toml
+[dependencies]
+cgp = "0.8.0"
+cgp-serde = "0.3.0"
+cgp-serde-extra = "0.3.0"
+serde_json = "1"
+```
 
 ## Where to go next
 

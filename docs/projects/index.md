@@ -19,8 +19,8 @@ can judge the evidence for what it is.
 ## The projects
 
 - **[Hypershell](./hypershell/index.md)** — a shell-scripting language whose programs are Rust
-  types, interpreted at compile time through CGP wiring. A proof of concept that builds on nightly
-  Rust, and the most complete example of a type-level language built with CGP.
+  types, interpreted at compile time through CGP wiring. A proof of concept whose largest programs
+  need nightly Rust, and the most complete example of a type-level language built with CGP.
 - **[cgp-serde](./cgp-serde/index.md)** — Serde's `Serialize` and `Deserialize` rebuilt as CGP
   components, so each application chooses how a type is encoded. A proof of concept on stable Rust,
   and the clearest example of CGP letting two applications choose differently for the same types.

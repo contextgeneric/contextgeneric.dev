@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Limitations'
 sidebar_position: 10
-description: 'The limits of Hypershell: a proof of concept, programs fixed at compile time, a nightly toolchain, and when a shell or plain Rust fits better.'
+description: 'The limits of Hypershell: a proof of concept, programs fixed at compile time, a nightly toolchain for large programs, and when a shell or plain Rust fits better.'
 ---
 
 # Limitations
@@ -45,11 +45,12 @@ what new syntax means, but the base language's own syntax always means what the 
 says. The [assembly](./architecture/assembly.md) page explains the layers this follows from, and the
 [namespaces](/docs/concepts/namespaces) page explains the rule.
 
-## Building it needs nightly Rust
+## Large programs need nightly Rust
 
 The repository builds with nightly Rust and the compiler's next-generation trait solver. The largest
 examples nest whole programs inside others, and on stable Rust they exhausted the compiler's memory
-while type-checking. A crate of your own with programs of that size needs the same toolchain. Large
+while type-checking. A crate of your own with programs of that size needs the same toolchain, while
+small programs build on stable Rust. Large
 programs also take noticeable time to compile, since the compiler resolves every piece of every
 program.
 
