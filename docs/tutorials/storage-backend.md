@@ -327,7 +327,7 @@ Run `cargo test`, and the test passes without touching the disk. Neither
 storage backend in one line of its table, and the same lookup ran against a folder in the
 application and against memory in the test. Adding a third backend, such as a cloud bucket, would
 be one more provider and one more table entry. The [Overview](/docs/overview) shows providers for
-Amazon S3 and Google Cloud Storage written against this same component.
+Amazon S3 and Google Cloud Storage, written against a synchronous version of this component.
 
 ## Check the wiring
 
@@ -397,7 +397,7 @@ go further:
   [Implicit arguments](/docs/concepts/implicit-arguments) how fields become arguments.
 - **Let each context choose its error type too:** the Overview's
   [Abstract Over Every Dependency](/docs/overview#abstract-over-every-dependency) replaces
-  `anyhow::Result` in this same component.
+  `anyhow::Result` in a synchronous version of this component.
 - **Write generic code over structs and enums:** for framework and library authors,
   [Extensible records](/docs/concepts/extensible-records) and
   [Extensible variants](/docs/concepts/extensible-variants) show code that works over any type's
