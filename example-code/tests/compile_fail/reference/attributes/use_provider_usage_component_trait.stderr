@@ -5,9 +5,9 @@ error: cannot find attribute `use_provider` in this scope
     |   ^^^^^^^^^^^^
     |
 note: similarly named attribute macro `cgp_provider` defined here
-   --> /home/soares/development/context-generic/cgp/crates/macros/cgp-macro/src/lib.rs:136:1
+   --> /home/soares/development/context-generic/cgp/crates/macros/cgp-macro/src/lib.rs:133:1
     |
-136 | pub fn cgp_provider(attr: TokenStream, item: TokenStream) -> TokenStream {
+133 | pub fn cgp_provider(attr: TokenStream, item: TokenStream) -> TokenStream {
     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 help: an attribute macro with a similar name exists
     |
