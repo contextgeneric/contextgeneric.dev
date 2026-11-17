@@ -35,14 +35,13 @@ The notes cover four artifacts, which release on their own schedules:
 
 A patch release is not always compatible either. [v0.4.1](/docs/release-notes/cgp/v0.4.1) and [v0.4.2](/docs/release-notes/cgp/v0.4.2) each changed an item that earlier code used, so a project that accepts patch releases automatically can meet a break there. [v0.3.1](/docs/release-notes/cgp/v0.3.1) raised the minimum Rust version and nothing else, and [v0.6.1](/docs/release-notes/cgp/v0.6.1) changed no existing item. Read the page of a patch release before accepting it.
 
-cgp-serde and Hypershell follow the same numbering, and each of their minor releases so far moves to
-a newer `cgp` minor release: cgp-serde [v0.1.0](/docs/release-notes/cgp-serde/v0.1.0) builds on
-`cgp` 0.6, [v0.2.0](/docs/release-notes/cgp-serde/v0.2.0) on 0.7, and
-[v0.3.0](/docs/release-notes/cgp-serde/v0.3.0) on 0.8, and Hypershell
-[v0.1.0](/docs/release-notes/hypershell/v0.1.0) on `cgp` 0.4 and
-[v0.2.0](/docs/release-notes/hypershell/v0.2.0) on 0.8. That move is a breaking change on its own,
-because an application's wiring of their components must use the `cgp` release they were built on,
-so an application upgrades `cgp` and the project together. Neither project has a patch release yet.
+cgp-serde and Hypershell number their releases the same way. Each of their releases so far builds
+on a newer `cgp` minor release: cgp-serde [v0.1.0](/docs/release-notes/cgp-serde/v0.1.0),
+[v0.2.0](/docs/release-notes/cgp-serde/v0.2.0), and [v0.3.0](/docs/release-notes/cgp-serde/v0.3.0)
+on `cgp` 0.6, 0.7, and 0.8, and Hypershell [v0.1.0](/docs/release-notes/hypershell/v0.1.0) and
+[v0.2.0](/docs/release-notes/hypershell/v0.2.0) on `cgp` 0.4 and 0.8. That move alone breaks code,
+because an application must wire a project's components with the `cgp` release the project was
+built on, so it upgrades `cgp` and the project together. Neither project has had a patch release.
 
 ## Reading a page
 
