@@ -169,6 +169,8 @@ serde_json = "1"
 - [Hello World](/docs/tutorials/hello): a first CGP program, for a reader new to CGP.
 - [Announcing cgp-serde](/blog/cgp-serde-release): the post that announced the library, with its
   motivation. Its code predates the current design.
+- [cgp-serde's release notes](/docs/release-notes/cgp-serde): what each official release changed, and the
+  steps to upgrade from the one before.
 
 ---
 

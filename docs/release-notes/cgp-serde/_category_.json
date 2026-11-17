@@ -1,0 +1,9 @@
+{
+  "label": "cgp-serde",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "slug": "/release-notes/cgp-serde",
+    "description": "The release notes of cgp-serde, which rebuilds Serde's traits as Context-Generic Programming (CGP) components so each application chooses how a type is encoded: one page per official release, newest first."
+  }
+}

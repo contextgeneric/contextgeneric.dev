@@ -1,25 +1,31 @@
 ---
-title: 'Release notes for cgp and cargo-cgp'
+title: 'Release notes for cgp, cargo-cgp, cgp-serde, and Hypershell'
 sidebar_label: 'Overview'
 sidebar_position: 0
-description: 'What each official release of the cgp library and the cargo-cgp tool changed, one dated page per release, with the steps to upgrade to it.'
+description: 'What each official release of cgp, cargo-cgp, cgp-serde, and Hypershell changed, one dated page per release, with the steps to upgrade to it.'
 ---
 
 # Release notes
 
 Each page in this section lists what one official release of
 [Context-Generic Programming (CGP)](/docs/), a Rust library whose macros generate traits and their
-wiring, changed for its users, and how a project upgrades to it. A page is dated and kept as it was
+wiring, or of a project built with it, changed for its users, and how a project upgrades to it. A page is dated and kept as it was
 published, so it always describes the version it names.
 
 ## The artifacts
 
-The notes cover two artifacts, which release on their own schedules:
+The notes cover four artifacts, which release on their own schedules:
 
 - **[cgp](/docs/release-notes/cgp):** the library, its facade crate, and the workspace crates
   released with it. The newest release is [v0.8.0](/docs/release-notes/cgp/v0.8.0).
 - **[cargo-cgp](/docs/release-notes/cargo-cgp):** CGP's error toolchain, which rewrites CGP's
   compile errors and prints a crate's macro expansion. The newest release is [v0.1.0](/docs/release-notes/cargo-cgp/v0.1.0).
+- **[cgp-serde](/docs/release-notes/cgp-serde):** Serde's `Serialize` and `Deserialize` rebuilt as
+  CGP components, so each application chooses how a type is encoded. See
+  [its Projects pages](/docs/projects/cgp-serde/).
+- **[hypershell](/docs/release-notes/hypershell):** a type-level DSL for shell-script-like programs,
+  written as Rust types and run by handlers that a context chooses. See
+  [its Projects pages](/docs/projects/hypershell/).
 
 ## Versioning
 

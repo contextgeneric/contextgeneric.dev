@@ -179,6 +179,8 @@ nightly and solver.
 - [Hello World](/docs/tutorials/hello): a first CGP program, for a reader new to CGP.
 - [Hypershell: a type-level DSL for shell-scripting in Rust](/blog/hypershell-release): the post that
   announced the project, with its history and motivation. Its code predates the current design.
+- [Hypershell's release notes](/docs/release-notes/hypershell): what each official release changed, and the
+  steps to upgrade from the one before.
 
 ---
 
