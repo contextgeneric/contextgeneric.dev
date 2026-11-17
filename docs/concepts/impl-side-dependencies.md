@@ -102,8 +102,8 @@ bounds. [Consumer and provider traits](./consumer-and-provider-traits.md) explai
 ## Two providers, two sets of requirements, one interface
 
 For object storage, the useful requirements depend on where the objects live. An S3 provider needs
-a client and a bucket, while a local provider needs a folder. Each can request its own getter
-without adding that requirement to the shared interface:
+a client and a bucket, while a local provider needs a folder. Each provider can request its own
+getter trait without adding that requirement to the shared interface:
 
 ```rust
 use cgp::prelude::*;
@@ -132,8 +132,8 @@ impl StorageObjectFetcher {
 
 Each `#[uses]` attribute adds a context bound to its provider's implementation. The bound
 `HasS3Bucket` supplies `storage_client() -> &aws_sdk_s3::Client` and `bucket_id() -> &str`, while
-`HasLocalDir` supplies `local_dir() -> &str`. The S3 body is omitted here, and the local body shows
-how it reads the object from the folder.
+`HasLocalDir` supplies `local_dir() -> &str`. The S3 request is omitted here, while the local body
+reads the object from the folder that its getter returns.
 
 Those getter requirements stay with the providers, so a caller can use either behavior through
 `CanFetchStorageObject` alone:
@@ -149,8 +149,8 @@ where
 
 A production `App` can select `FetchS3Object`, while a `TestApp` selects `FetchLocalObject`. These
 contexts represent applications, and each supplies the dependencies of its chosen provider. That
-lets `load_picture` accept both with the same bound. Since the test context selects the local
-provider, it only needs the folder and has no need for an S3 client.
+lets `load_picture` accept both with the same bound. Because the test context selects the local
+provider, it needs only the folder, without an S3 client.
 
 ## Traits, values, and types {#the-three-things-an-implementation-can-ask-for}
 

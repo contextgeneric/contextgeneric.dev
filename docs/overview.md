@@ -20,10 +20,9 @@ The examples follow an application that fetches users' profile pictures from obj
 the [`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md). Each is a fragment of
 a program that compiles against `cgp` 0.8.0. To focus on how the code fits together, the fragments
 omit imports, supporting definitions, and requests to the storage services. They also omit the
-context checks explained under [*Type-Safe Wiring*](#type-safe-wiring). The methods are synchronous
-to keep the fragments short. A real storage client would be async, as in
-[Swap a Storage Backend per Application](/docs/tutorials/storage-backend), which builds the
-example step by step.
+context checks explained under [*Type-Safe Wiring*](#type-safe-wiring). To keep the fragments
+short, the methods are synchronous, although a real storage client would be async, as
+[Swap a Storage Backend per Application](/docs/tutorials/storage-backend) shows.
 
 ## Key features
 

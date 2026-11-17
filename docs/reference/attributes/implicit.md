@@ -176,9 +176,9 @@ impl StorageObjectFetcher {
 }
 ```
 
-Callers still write `app.fetch_storage_object(object_id)`. The provider's requirements from its
-context, a `storage_client` field and a `bucket_id` field borrowed here as a `&str` from a
-`String`, never appear in the trait everyone else calls. The context here is an
+Callers still write `app.fetch_storage_object(object_id)`. The provider needs two fields from its
+context, `storage_client` and `bucket_id`, the second borrowed here as a `&str` from a `String`,
+and neither requirement appears in the trait everyone else calls. The context here is an
 [environmental context](/docs/reference/glossary#environmental-context), an `app` that carries the
 application's settings rather than being the data a method acts on.
 

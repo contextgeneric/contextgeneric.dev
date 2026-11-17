@@ -16,9 +16,10 @@ inspect.
 
 ## A context can be wrong and still compile
 
-Consider a provider that reads stored objects from a folder named in a `local_dir` field. Its
-wiring can still name a context with only a `bucket_id` field, as this example shows. The fragment
-imports CGP's prelude and defines both the `StorageObjectFetcher` component and the local provider:
+Consider a provider that reads stored objects from the folder in a `local_dir` field. A context's
+wiring can still select that provider when the context has only a `bucket_id` field, as this
+example shows. The fragment imports CGP's prelude and defines both the `StorageObjectFetcher`
+component and the local provider:
 
 ```rust
 use cgp::prelude::*;

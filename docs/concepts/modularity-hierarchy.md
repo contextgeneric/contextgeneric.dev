@@ -170,8 +170,8 @@ delegate_components! {
 ```
 
 The omitted S3 body would need a client and a bucket, while the local body would need the path of
-its folder. `App` and `TestApp` supply the appropriate dependencies. Their
-separate wiring lets callers use the same consumer trait in either environment.
+its folder. `App` and `TestApp` supply the appropriate dependencies. Their separate wiring lets
+callers use the same consumer trait in either environment.
 
 The application owns both context types, so it can wire them independently even though the
 consumer trait has no target parameter. This makes tier 3 sufficient for many service operations

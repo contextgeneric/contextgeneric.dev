@@ -52,15 +52,17 @@ impl CanFetchStorageObject for TestApp {
 ```
 
 Here, `App` and `TestApp` are the contexts on which `fetch_storage_object` operates. Each represents
-an application and carries the data its implementation needs. The S3 body is omitted, while the
-test implementation reads the object from a file in its folder. The method is synchronous to keep
-the example short. A real storage client would be async, as in
-[Swap a Storage Backend per Application](/docs/tutorials/storage-backend).
+an application and carries the data its implementation needs: an S3 client and a bucket for `App`,
+and a folder for `TestApp`. The S3 request is omitted, while the test implementation reads the
+object from a file in its folder. To keep the example short, the method is synchronous, although a
+real storage client would be async, as
+[Swap a Storage Backend per Application](/docs/tutorials/storage-backend) shows.
 
 To share each behavior with other application types, it might seem natural to write a
 [blanket implementation](/docs/reference/glossary#blanket-implementation). The S3 implementation
-could work for any type with `HasS3Client`, and the local implementation for any type with
-`HasLocalDir`. Offering both, however, creates a conflict:
+could work for any type that has an S3 client, expressed as a `HasS3Client` bound, and the local
+implementation for any type that names a folder, through `HasLocalDir`. Offering both, however,
+creates a conflict:
 
 ```rust
 impl<T: HasS3Client> CanFetchStorageObject for T { /* ... */ }
@@ -290,8 +292,8 @@ delegate_components! {
 
 Each `#[implicit]` argument reads a same-named field exposed by the context's `HasField` derive.
 The macro turns it into a local binding and removes it from the public signature, so callers still
-write `app.fetch_storage_object(object_id)`. The S3 body is still a placeholder; the local provider
-reads the object from a file in the test application's folder.
+write `app.fetch_storage_object(object_id)`. The S3 request is still a placeholder, while the local
+provider reads the object from a file in the test application's folder.
 
 The fields differ between providers: `FetchS3Object` needs `storage_client` and `bucket_id`, while
 `FetchLocalObject` needs `local_dir`. Because these are
