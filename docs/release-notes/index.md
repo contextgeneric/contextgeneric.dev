@@ -21,10 +21,12 @@ The notes cover four artifacts, which release on their own schedules:
 - **[cargo-cgp](/docs/release-notes/cargo-cgp):** CGP's error toolchain, which rewrites CGP's
   compile errors and prints a crate's macro expansion. The newest release is [v0.1.0](/docs/release-notes/cargo-cgp/v0.1.0).
 - **[cgp-serde](/docs/release-notes/cgp-serde):** Serde's `Serialize` and `Deserialize` rebuilt as
-  CGP components, so each application chooses how a type is encoded. See
+  CGP components, so each application chooses how a type is encoded. The newest release is
+  [v0.3.0](/docs/release-notes/cgp-serde/v0.3.0), and the project is documented in
   [its Projects pages](/docs/projects/cgp-serde/).
 - **[hypershell](/docs/release-notes/hypershell):** a type-level DSL for shell-script-like programs,
-  written as Rust types and run by handlers that a context chooses. See
+  written as Rust types and run by handlers that a context chooses. The newest release is
+  [v0.2.0](/docs/release-notes/hypershell/v0.2.0), and the project is documented in
   [its Projects pages](/docs/projects/hypershell/).
 
 ## Versioning
@@ -32,6 +34,15 @@ The notes cover four artifacts, which release on their own schedules:
 `cgp` is a 0.x library, and Cargo treats the minor number as the one that may break code: a requirement such as `cgp = "0.7"` accepts every 0.7 release, and a move to the next minor number is a deliberate upgrade. Each minor release from [v0.2.0](/docs/release-notes/cgp/v0.2.0) to [v0.8.0](/docs/release-notes/cgp/v0.8.0) carries breaking changes, which its page lists under *Breaking changes* with the steps to take.
 
 A patch release is not always compatible either. [v0.4.1](/docs/release-notes/cgp/v0.4.1) and [v0.4.2](/docs/release-notes/cgp/v0.4.2) each changed an item that earlier code used, so a project that accepts patch releases automatically can meet a break there. [v0.3.1](/docs/release-notes/cgp/v0.3.1) raised the minimum Rust version and nothing else, and [v0.6.1](/docs/release-notes/cgp/v0.6.1) changed no existing item. Read the page of a patch release before accepting it.
+
+cgp-serde and Hypershell follow the same numbering, and each of their minor releases so far moves to
+a newer `cgp` minor release: cgp-serde [v0.1.0](/docs/release-notes/cgp-serde/v0.1.0) builds on
+`cgp` 0.6, [v0.2.0](/docs/release-notes/cgp-serde/v0.2.0) on 0.7, and
+[v0.3.0](/docs/release-notes/cgp-serde/v0.3.0) on 0.8, and Hypershell
+[v0.1.0](/docs/release-notes/hypershell/v0.1.0) on `cgp` 0.4 and
+[v0.2.0](/docs/release-notes/hypershell/v0.2.0) on 0.8. That move is a breaking change on its own,
+because an application's wiring of their components must use the `cgp` release they were built on,
+so an application upgrades `cgp` and the project together. Neither project has a patch release yet.
 
 ## Reading a page
 
