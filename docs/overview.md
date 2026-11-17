@@ -20,7 +20,10 @@ The examples follow an application that fetches users' profile pictures from obj
 the [`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md). Each is a fragment of
 a program that compiles against `cgp` 0.8.0. To focus on how the code fits together, the fragments
 omit imports, supporting definitions, and requests to the storage services. They also omit the
-context checks explained under [*Type-Safe Wiring*](#type-safe-wiring).
+context checks explained under [*Type-Safe Wiring*](#type-safe-wiring). The methods are synchronous
+to keep the fragments short. A real storage client would be async, as in
+[Swap a Storage Backend per Application](/docs/tutorials/storage-backend), which builds the
+example step by step.
 
 ## Key features
 
@@ -37,15 +40,14 @@ Because the providers are different types, their implementations never overlap. 
 interface, defined as a CGP **component**, and the provider that fetches from S3:
 
 ```rust
-#[async_trait]
 #[cgp_component(StorageObjectFetcher)]
 pub trait CanFetchStorageObject {
-    async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
 #[cgp_impl(new FetchS3Object)]
 impl StorageObjectFetcher {
-    async fn fetch_storage_object(
+    fn fetch_storage_object(
         &self,
         #[implicit] storage_client: &aws_sdk_s3::Client,
         #[implicit] bucket_id: &str,
@@ -101,9 +103,8 @@ hand:
 
 ```rust
 impl CanFetchStorageObject for App {
-    async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
         <FetchS3Object as StorageObjectFetcher<App>>::fetch_storage_object(self, object_id)
-            .await
     }
 }
 ```
@@ -180,18 +181,17 @@ error type instead of `anyhow::Error`, and a provider declares the conversion it
 `#[uses]`, without adding it to the interface:
 
 ```rust
-#[async_trait]
 #[cgp_component(StorageObjectFetcher)]
 #[use_type(HasErrorType.Error)]
 pub trait CanFetchStorageObject {
-    async fn fetch_storage_object(&self, object_id: &str) -> Result<Vec<u8>, Error>;
+    fn fetch_storage_object(&self, object_id: &str) -> Result<Vec<u8>, Error>;
 }
 
 #[cgp_impl(new FetchLocalObject)]
 #[uses(CanRaiseError<std::io::Error>)]
 #[use_type(HasErrorType.Error)]
 impl StorageObjectFetcher {
-    async fn fetch_storage_object(
+    fn fetch_storage_object(
         &self,
         #[implicit] local_dir: &str,
         object_id: &str,
@@ -214,8 +214,7 @@ own without touching this code, as long as it supplies those conversions as well
 
 The same arrangement works for other dependencies, such as an async runtime, and it lets a core
 library stay `no_std` as long as the providers chosen for it are `no_std` too. A provider that reads
-files, like this one, still needs `std`. Its blocking read also suits a test context better than an
-application, which would use an async file API.
+files, like this one, still needs `std`.
 [Modular error handling](/docs/concepts/modular-error-handling) explains how a context chooses its
 error type, and [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains how a
 provider keeps its needs out of the interface.
@@ -227,8 +226,7 @@ Its simplest form is a function whose `#[implicit]` arguments come from the cont
 
 ```rust
 #[cgp_fn]
-#[async_trait]
-pub async fn get_user(
+pub fn get_user(
     &self,
     #[implicit] database: &PgPool,
     user_id: &UserId,

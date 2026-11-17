@@ -10,7 +10,7 @@ pub mod aws_sdk_s3 {
     pub struct Client;
 
     impl Client {
-        pub async fn get_object(
+        pub fn get_object(
             &self,
             bucket_id: &str,
             object_id: &str,
@@ -27,7 +27,7 @@ pub mod google_cloud_storage {
         pub struct Storage;
 
         impl Storage {
-            pub async fn read_object(
+            pub fn read_object(
                 &self,
                 bucket_id: &str,
                 object_id: &str,
@@ -44,42 +44,41 @@ pub mod one_interface_many_implementations {
 
     use super::{aws_sdk_s3, google_cloud_storage};
 
-    #[async_trait]
     #[cgp_component(StorageObjectFetcher)]
     pub trait CanFetchStorageObject {
-        async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
     #[cgp_impl(new FetchS3Object)]
     impl StorageObjectFetcher {
-        async fn fetch_storage_object(
+        fn fetch_storage_object(
             &self,
             #[implicit] storage_client: &aws_sdk_s3::Client,
             #[implicit] bucket_id: &str,
             object_id: &str,
         ) -> anyhow::Result<Vec<u8>> {
             // The page elides the request to Amazon S3.
-            storage_client.get_object(bucket_id, object_id).await
+            storage_client.get_object(bucket_id, object_id)
         }
     }
 
     // The page names this provider in prose.
     #[cgp_impl(new FetchGCloudObject)]
     impl StorageObjectFetcher {
-        async fn fetch_storage_object(
+        fn fetch_storage_object(
             &self,
             #[implicit] storage_client: &google_cloud_storage::client::Storage,
             #[implicit] bucket_id: &str,
             object_id: &str,
         ) -> anyhow::Result<Vec<u8>> {
-            storage_client.read_object(bucket_id, object_id).await
+            storage_client.read_object(bucket_id, object_id)
         }
     }
 
     // The page names this provider in prose.
     #[cgp_impl(new FetchLocalObject)]
     impl StorageObjectFetcher {
-        async fn fetch_storage_object(
+        fn fetch_storage_object(
             &self,
             #[implicit] local_dir: &str,
             object_id: &str,
@@ -132,8 +131,6 @@ pub mod one_interface_many_implementations {
 
     #[test]
     fn each_context_fetches_through_its_own_provider() {
-        use futures::executor::block_on;
-
         let app = App {
             storage_client: aws_sdk_s3::Client,
             bucket_id: "pictures".to_owned(),
@@ -147,15 +144,15 @@ pub mod one_interface_many_implementations {
         };
 
         assert_eq!(
-            block_on(app.fetch_storage_object("ada.png")).unwrap(),
+            app.fetch_storage_object("ada.png").unwrap(),
             b"s3://pictures/ada.png".to_vec()
         );
         assert_eq!(
-            block_on(gcloud.fetch_storage_object("ada.png")).unwrap(),
+            gcloud.fetch_storage_object("ada.png").unwrap(),
             b"gs://pictures/ada.png".to_vec()
         );
-        assert!(block_on(test.fetch_storage_object("Cargo.toml")).is_ok());
-        assert!(block_on(test.fetch_storage_object("no-such-object")).is_err());
+        assert!(test.fetch_storage_object("Cargo.toml").is_ok());
+        assert!(test.fetch_storage_object("no-such-object").is_err());
     }
 }
 
@@ -178,22 +175,19 @@ pub mod zero_cost_abstraction {
     }
 
     impl CanFetchStorageObject for App {
-        async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
             <FetchS3Object as StorageObjectFetcher<App>>::fetch_storage_object(self, object_id)
-                .await
         }
     }
 
     #[test]
     fn the_hand_written_impl_calls_the_provider() {
-        use futures::executor::block_on;
-
         let app = App {
             storage_client: aws_sdk_s3::Client,
             bucket_id: "pictures".to_owned(),
         };
         assert_eq!(
-            block_on(app.fetch_storage_object("ada.png")).unwrap(),
+            app.fetch_storage_object("ada.png").unwrap(),
             b"s3://pictures/ada.png".to_vec()
         );
     }
@@ -235,18 +229,17 @@ pub mod abstract_over_every_dependency {
     use cgp::extra::error::RaiseFrom;
     use cgp::prelude::*;
 
-    #[async_trait]
     #[cgp_component(StorageObjectFetcher)]
     #[use_type(HasErrorType.Error)]
     pub trait CanFetchStorageObject {
-        async fn fetch_storage_object(&self, object_id: &str) -> Result<Vec<u8>, Error>;
+        fn fetch_storage_object(&self, object_id: &str) -> Result<Vec<u8>, Error>;
     }
 
     #[cgp_impl(new FetchLocalObject)]
     #[uses(CanRaiseError<std::io::Error>)]
     #[use_type(HasErrorType.Error)]
     impl StorageObjectFetcher {
-        async fn fetch_storage_object(
+        fn fetch_storage_object(
             &self,
             #[implicit] local_dir: &str,
             object_id: &str,
@@ -277,14 +270,12 @@ pub mod abstract_over_every_dependency {
 
     #[test]
     fn the_context_chooses_the_error_type() {
-        use futures::executor::block_on;
-
         let test = TestApp {
             local_dir: env!("CARGO_MANIFEST_DIR").to_owned(),
         };
-        assert!(block_on(test.fetch_storage_object("Cargo.toml")).is_ok());
+        assert!(test.fetch_storage_object("Cargo.toml").is_ok());
         let error: anyhow::Error =
-            block_on(test.fetch_storage_object("no-such-object")).unwrap_err();
+            test.fetch_storage_object("no-such-object").unwrap_err();
         assert!(error.downcast_ref::<std::io::Error>().is_some());
     }
 }
@@ -304,8 +295,7 @@ pub mod still_ordinary_rust {
     }
 
     #[cgp_fn]
-    #[async_trait]
-    pub async fn get_user(
+    pub fn get_user(
         &self,
         #[implicit] database: &PgPool,
         user_id: &UserId,
@@ -325,10 +315,8 @@ pub mod still_ordinary_rust {
 
     #[test]
     fn a_context_with_the_field_gains_the_method() {
-        use futures::executor::block_on;
-
         let app = App { database: PgPool };
-        let user = block_on(app.get_user(&UserId(7))).unwrap();
+        let user = app.get_user(&UserId(7)).unwrap();
         assert_eq!(user.name, "user 7");
         assert!(user.profile_picture_object_id.is_none());
     }

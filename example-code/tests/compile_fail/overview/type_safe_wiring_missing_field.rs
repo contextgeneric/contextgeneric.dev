@@ -8,7 +8,7 @@ pub mod aws_sdk_s3 {
     pub struct Client;
 
     impl Client {
-        pub async fn get_object(
+        pub fn get_object(
             &self,
             bucket_id: &str,
             object_id: &str,
@@ -18,21 +18,20 @@ pub mod aws_sdk_s3 {
     }
 }
 
-#[async_trait]
 #[cgp_component(StorageObjectFetcher)]
 pub trait CanFetchStorageObject {
-    async fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
 #[cgp_impl(new FetchS3Object)]
 impl StorageObjectFetcher {
-    async fn fetch_storage_object(
+    fn fetch_storage_object(
         &self,
         #[implicit] storage_client: &aws_sdk_s3::Client,
         #[implicit] bucket_id: &str,
         object_id: &str,
     ) -> anyhow::Result<Vec<u8>> {
-        storage_client.get_object(bucket_id, object_id).await
+        storage_client.get_object(bucket_id, object_id)
     }
 }
 

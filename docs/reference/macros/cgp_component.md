@@ -25,12 +25,12 @@ that connect them without requiring you to write anything.
 
 The macro lets one trait have several overlapping implementations at the same time, which an
 ordinary Rust trait does not allow. A [trait](https://doc.rust-lang.org/book/ch10-02-traits.html)
-can have only one implementation per type, a rule called [coherence](/docs/concepts/coherence).
-That rule is usually the right one, because it lets the compiler resolve a `where T: Display` bound
+can have only one implementation per type, a rule called [coherence](/docs/concepts/coherence). That
+rule is usually the right one, because it lets the compiler resolve a `where T: Display` bound
 without anyone naming which implementation applies. But it also means a trait with several plausible
-implementations cannot hold the alternatives. A type can send real email or record it for a test,
-but not both. Switching between the two means editing the impl itself rather than choosing between
-them at the point of use.
+implementations cannot hold the alternatives. A type can fetch its stored objects from Amazon S3 or
+from a local folder for a test, but not both. Switching between the two means editing the impl
+itself rather than choosing between them at the point of use.
 
 `#[cgp_component]` solves that by splitting the one trait into two, the
 [consumer and provider traits](/docs/concepts/consumer-and-provider-traits), so that a caller and an

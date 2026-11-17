@@ -20,54 +20,55 @@ connections, where application state lives, and what the separation costs.
 ## What an ordinary Rust trait does, and where it stops
 
 An ordinary Rust trait lets different types expose the same method with different behavior.
-For example, a production application may send email through SMTP, while a test application
-records messages for inspection. Each type can implement `CanSendEmail`, giving callers a
-shared interface:
+For example, a production application may fetch stored objects from Amazon S3, while a test
+application reads them from a local folder. Each type can implement `CanFetchStorageObject`,
+giving callers a shared interface:
 
 ```rust
-use core::cell::RefCell;
-
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
 pub struct App {
-    pub smtp_server: String,
+    pub storage_client: aws_sdk_s3::Client,
+    pub bucket_id: String,
 }
 
 pub struct TestApp {
-    pub sent_emails: RefCell<Vec<String>>,
+    pub local_dir: String,
 }
 
-impl CanSendEmail for App {
-    fn send_email(&self, to: &str, body: &str) {
-        // open a connection to self.smtp_server and send
+impl CanFetchStorageObject for App {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        // fetch `object_id` from `self.bucket_id` through `self.storage_client`
     }
 }
 
-impl CanSendEmail for TestApp {
-    fn send_email(&self, to: &str, body: &str) {
-        self.sent_emails.borrow_mut().push(format!("{to}: {body}"));
+impl CanFetchStorageObject for TestApp {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        Ok(std::fs::read(format!("{}/{object_id}", self.local_dir))?)
     }
 }
 ```
 
-Here, `App` and `TestApp` are the contexts on which `send_email` operates. Each represents an
-application and carries the data its implementation needs. The SMTP body is omitted, while the
-test implementation records the recipient and message in a vector.
+Here, `App` and `TestApp` are the contexts on which `fetch_storage_object` operates. Each represents
+an application and carries the data its implementation needs. The S3 body is omitted, while the
+test implementation reads the object from a file in its folder. The method is synchronous to keep
+the example short. A real storage client would be async, as in
+[Swap a Storage Backend per Application](/docs/tutorials/storage-backend).
 
 To share each behavior with other application types, it might seem natural to write a
-[blanket implementation](/docs/reference/glossary#blanket-implementation). The SMTP implementation
-could work for any type with `HasSmtpConfig`, and the recording implementation for any type with
-`HasRecordedEmails`. Offering both, however, creates a conflict:
+[blanket implementation](/docs/reference/glossary#blanket-implementation). The S3 implementation
+could work for any type with `HasS3Client`, and the local implementation for any type with
+`HasLocalDir`. Offering both, however, creates a conflict:
 
 ```rust
-impl<T: HasSmtpConfig>     CanSendEmail for T { /* over SMTP */ }
-impl<T: HasRecordedEmails> CanSendEmail for T { /* record it */ }   // error[E0119]
+impl<T: HasS3Client> CanFetchStorageObject for T { /* ... */ }
+impl<T: HasLocalDir> CanFetchStorageObject for T { /* ... */ }   // error[E0119]
 ```
 
-A type could satisfy both bounds, leaving Rust with two implementations of `CanSendEmail` for
-that type. The compiler therefore rejects the pair. Helper functions and other composition
+A type could satisfy both bounds, leaving Rust with two implementations of `CanFetchStorageObject`
+for that type. The compiler therefore rejects the pair. Helper functions and other composition
 techniques can still share the code, with each application connecting its trait implementation
 to the behavior it wants. CGP makes that connection through a separate trait for reusable
 implementations and a wiring table that selects one.
@@ -83,13 +84,16 @@ which the call trace explains later:
 
 ```rust
 // what callers use
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
 // what implementations target
-pub trait EmailSender<Context> {
-    fn send_email(context: &Context, to: &str, body: &str);
+pub trait StorageObjectFetcher<Context> {
+    fn fetch_storage_object(
+        context: &Context,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>>;
 }
 ```
 
@@ -101,17 +105,22 @@ The implementations can now keep their original context bounds while using separ
 structs as `Self`. With the method bodies omitted, their declarations look like this:
 
 ```rust
-pub struct SendViaSmtp;
-pub struct RecordEmails;
+pub struct FetchS3Object;
+pub struct FetchLocalObject;
 
-impl<Context: HasSmtpConfig> EmailSender<Context> for SendViaSmtp { /* ... */ }
-impl<Context: HasRecordedEmails> EmailSender<Context> for RecordEmails { /* ... */ }
+impl<Context: HasS3Client> StorageObjectFetcher<Context> for FetchS3Object {
+    /* ... */
+}
+
+impl<Context: HasLocalDir> StorageObjectFetcher<Context> for FetchLocalObject {
+    /* ... */
+}
 ```
 
-Even if a context satisfies both `HasSmtpConfig` and `HasRecordedEmails`, these implementations
-have different `Self` types and can coexist. Each local provider struct also lets its crate
-implement a provider trait defined elsewhere. The split therefore follows ordinary Rust coherence
-rules, as [Bypassing coherence](./coherence.md) explains.
+Even if a context satisfies both `HasS3Client` and `HasLocalDir`, these implementations have
+different `Self` types and can coexist. Each local provider struct also lets its crate implement a
+provider trait defined elsewhere. The split therefore follows ordinary Rust coherence rules, as
+[Bypassing coherence](./coherence.md) explains.
 
 The same split applies to a component with several methods, associated types, or constants. Those
 items can stay together when one provider choice should determine their implementation; this
@@ -119,10 +128,10 @@ example uses a single method to make the relationship easier to see.
 
 ## A provider is a name, not a value
 
-The structs `SendViaSmtp` and `RecordEmails` serve as names for implementations. They are
+The structs `FetchS3Object` and `FetchLocalObject` serve as names for implementations. They are
 zero-sized, and CGP neither constructs values of them nor stores application data in them.
 That data stays in the context, while explicit method arguments supply inputs such as the
-recipient and message body.
+object's ID.
 
 Because the state belongs to the context, it helps to distinguish the two meanings of `Self`
 when reading provider code. In [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), the method's
@@ -133,145 +142,175 @@ Rust provider implementation, `Self` simply names the provider type following `f
 ## How a call finds its provider
 
 With the behaviors defined, each application needs to choose which provider supplies its
-`send_email` method. Wiring records that choice in a table of types that the compiler resolves:
+`fetch_storage_object` method. Wiring records that choice in a table of types that the compiler
+resolves:
 
 ```rust
-delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
-delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
-```
+delegate_components! {
+    App {
+        StorageObjectFetcherComponent: FetchS3Object,
+    }
+}
 
-The table maps the same component key to a different provider for each context.
-
-![Diagram: the wiring table has three columns, context, component key, and provider. App maps EmailSenderComponent to SendViaSmtp, and TestApp maps it to RecordEmails. A call resolves through the table at compile time to a direct call on the selected provider.](/img/wiring-table.svg)
-
-The key in both tables is `EmailSenderComponent`, a marker generated alongside the two traits.
-Those traits, the marker, and the forwarding implementations form the **component**. The entry
-for this key selects `SendViaSmtp` on `App` and `RecordEmails` on `TestApp`.
-
-When a caller writes `app.send_email("a@b.c", "hi")`, the compiler follows `App`'s selection to
-`SendViaSmtp` and checks whether that provider can work with `App`. This is static dispatch,
-so the running program needs neither a wiring table nor a provider lookup.
-
-To see how method syntax reaches that selection, consider the two generated blanket
-implementations. The consumer implementation supplies `CanSendEmail` whenever the context
-implements `EmailSender` for itself:
-
-```rust
-impl<Context> CanSendEmail for Context
-where
-    Context: EmailSender<Context>,
-{
-    fn send_email(&self, to: &str, body: &str) {
-        Context::send_email(self, to, body)
+delegate_components! {
+    TestApp {
+        StorageObjectFetcherComponent: FetchLocalObject,
     }
 }
 ```
 
-Satisfying `Context: EmailSender<Context>` takes us to the second implementation. It gives a
-delegating type the provider trait of the type selected by its table. Here, `DelegateComponent`
-represents the table entry, and its `Delegate` associated type names the selected provider:
+The table maps the same component key to a different provider for each context.
+
+![Diagram: the wiring table has three columns, context, component key, and provider. App maps StorageObjectFetcherComponent to FetchS3Object, and TestApp maps it to FetchLocalObject. A call resolves through the table at compile time to a direct call on the selected provider.](/img/wiring-table.svg)
+
+The key in both tables is `StorageObjectFetcherComponent`, a marker generated alongside the two
+traits. Those traits, the marker, and the forwarding implementations form the **component**. The
+entry for this key selects `FetchS3Object` on `App` and `FetchLocalObject` on `TestApp`.
+
+When a caller writes `app.fetch_storage_object("alice.png")`, the compiler follows `App`'s
+selection to `FetchS3Object` and checks whether that provider can work with `App`. This is static
+dispatch, so the running program needs neither a wiring table nor a provider lookup.
+
+To see how method syntax reaches that selection, consider the two generated blanket
+implementations. The consumer implementation supplies `CanFetchStorageObject` whenever the context
+implements `StorageObjectFetcher` for itself:
 
 ```rust
-impl<Context, Provider> EmailSender<Context> for Provider
+impl<Context> CanFetchStorageObject for Context
 where
-    Provider: DelegateComponent<EmailSenderComponent>
-        + IsProviderFor<EmailSenderComponent, Context, ()>,
-    Provider::Delegate: EmailSender<Context>,
+    Context: StorageObjectFetcher<Context>,
 {
-    fn send_email(context: &Context, to: &str, body: &str) {
-        Provider::Delegate::send_email(context, to, body)
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        Context::fetch_storage_object(self, object_id)
+    }
+}
+```
+
+Satisfying `Context: StorageObjectFetcher<Context>` takes us to the second implementation. It
+gives a delegating type the provider trait of the type selected by its table. Here,
+`DelegateComponent` represents the table entry, and its `Delegate` associated type names the
+selected provider:
+
+```rust
+impl<Context, Provider> StorageObjectFetcher<Context> for Provider
+where
+    Provider: DelegateComponent<StorageObjectFetcherComponent>
+        + IsProviderFor<StorageObjectFetcherComponent, Context, ()>,
+    Provider::Delegate: StorageObjectFetcher<Context>,
+{
+    fn fetch_storage_object(
+        context: &Context,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        Provider::Delegate::fetch_storage_object(context, object_id)
     }
 }
 ```
 
 For the call on `App`, both `Context` and `Provider` initially stand for `App`. In this
 implementation, `Provider` names the type whose table is consulted, so its `Delegate` is
-`SendViaSmtp`. As long as `SendViaSmtp` implements `EmailSender<App>`, the delegation gives `App`
-its own `EmailSender<App>` implementation, which in turn supplies `CanSendEmail` through the first
-blanket implementation. The context stays `App` throughout, so the final provider receives the
-same application value on which the caller invoked the method.
+`FetchS3Object`. As long as `FetchS3Object` implements `StorageObjectFetcher<App>`, the delegation
+gives `App` its own `StorageObjectFetcher<App>` implementation, which in turn supplies
+`CanFetchStorageObject` through the first blanket implementation. The context stays `App`
+throughout, so the final provider receives the same application value on which the caller invoked
+the method.
 
 The other bound, [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), helps check
 that the provider's dependencies hold. Provider macros generate an implementation of this trait
 with the provider's bounds, and the provider trait requires it as a
 [supertrait](/docs/reference/glossary#supertrait). This is the checking bound omitted from the
-earlier `EmailSender` declaration. Explicit component checks use it to expose missing
+earlier `StorageObjectFetcher` declaration. Explicit component checks use it to expose missing
 requirements that a consumer-trait error can hide.
 
 The listings use shorter names to keep this connection readable. In an actual expansion, the
 parameters are `__Context__` and `__Provider__`, and the delegate is spelled as
-`<__Provider__ as DelegateComponent<EmailSenderComponent>>::Delegate`. You can inspect the full
-expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
+`<__Provider__ as DelegateComponent<StorageObjectFetcherComponent>>::Delegate`. You can inspect the
+full expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
 
 ## Writing it
 
 The macros generate these connections while letting you write methods from the context's point
 of view. `#[cgp_component]` produces the trait pair and forwarding implementations, and
-`#[cgp_impl]` lets each provider keep a familiar receiver. For the email example, that gives:
+`#[cgp_impl]` lets each provider keep a familiar receiver. For the storage example, that gives:
 
 ```rust
 use cgp::prelude::*;
-use core::cell::RefCell;
 
-#[cgp_component(EmailSender)]
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+#[cgp_component(StorageObjectFetcher)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
-#[cgp_impl(new SendViaSmtp)]
-impl EmailSender {
-    fn send_email(&self, #[implicit] smtp_server: &str, to: &str, body: &str) {
-        // open a connection to `smtp_server` and send the message
+#[cgp_impl(new FetchS3Object)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] storage_client: &aws_sdk_s3::Client,
+        #[implicit] bucket_id: &str,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        // fetch `object_id` from `bucket_id` through `storage_client`
     }
 }
 
-#[cgp_impl(new RecordEmails)]
-impl EmailSender {
-    fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
-        sent_emails.borrow_mut().push(format!("{to}: {body}"));
+#[cgp_impl(new FetchLocalObject)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] local_dir: &str,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        Ok(std::fs::read(format!("{local_dir}/{object_id}"))?)
     }
 }
 
 #[derive(HasField)]
 pub struct App {
-    pub smtp_server: String,
+    pub storage_client: aws_sdk_s3::Client,
+    pub bucket_id: String,
 }
 
 #[derive(HasField)]
 pub struct TestApp {
-    pub sent_emails: RefCell<Vec<String>>,
+    pub local_dir: String,
 }
 
-delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
-delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
+delegate_components! {
+    App {
+        StorageObjectFetcherComponent: FetchS3Object,
+    }
+}
+
+delegate_components! {
+    TestApp {
+        StorageObjectFetcherComponent: FetchLocalObject,
+    }
+}
 ```
 
 Each `#[implicit]` argument reads a same-named field exposed by the context's `HasField` derive.
-The macro turns it into a local binding and removes it from the public signature, so callers
-still write `app.send_email(to, body)`. The SMTP body is still a placeholder; the recording
-provider stores the message in the test application's vector.
+The macro turns it into a local binding and removes it from the public signature, so callers still
+write `app.fetch_storage_object(object_id)`. The S3 body is still a placeholder; the local provider
+reads the object from a file in the test application's folder.
 
-The fields differ between providers: `SendViaSmtp` needs `smtp_server`, while `RecordEmails` needs
-`sent_emails`. Because these are [impl-side dependencies](./impl-side-dependencies.md), neither
-requirement appears in `CanSendEmail`. A caller can therefore use the selected behavior with
-that trait bound alone:
+The fields differ between providers: `FetchS3Object` needs `storage_client` and `bucket_id`, while
+`FetchLocalObject` needs `local_dir`. Because these are
+[impl-side dependencies](./impl-side-dependencies.md), neither requirement appears in
+`CanFetchStorageObject`. A caller can therefore use the selected behavior with that trait bound
+alone:
 
 ```rust
-pub fn send_welcome(app: &impl CanSendEmail, to: &str) {
-    app.send_email(to, "Welcome!");
+pub fn fetch_profile_picture(
+    app: &impl CanFetchStorageObject,
+    object_id: &str,
+) -> anyhow::Result<Vec<u8>> {
+    app.fetch_storage_object(object_id)
 }
-
-let test_app = TestApp {
-    sent_emails: RefCell::new(Vec::new()),
-};
-send_welcome(&test_app, "a@b.c");
-
-assert_eq!(test_app.sent_emails.borrow().as_slice(), ["a@b.c: Welcome!"]);
 ```
 
-The same `send_welcome` function accepts `App` as well as `TestApp`. Its bound names only
-`CanSendEmail`, so each application's wiring supplies the behavior without the function knowing
-the provider or its fields.
+The same `fetch_profile_picture` function accepts `App` as well as `TestApp`. Its bound names only
+`CanFetchStorageObject`, so each application's wiring supplies the behavior without the function
+knowing the provider or its fields.
 
 Because the consumer trait is still an ordinary Rust trait, a context can also implement it
 directly and omit providers and wiring, as at the start of the page. This lets an application
@@ -294,7 +333,7 @@ those diagnostics and their limits.
 
 Even with static dispatch, a reader tracing the call has to find the table entry and follow it
 to the provider. The split is useful when it lets several contexts reuse a provider or select
-different behaviors while a caller such as `send_welcome` keeps the same interface.
+different behaviors while a caller such as `fetch_profile_picture` keeps the same interface.
 
 ## Where to go next
 

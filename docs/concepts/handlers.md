@@ -16,9 +16,9 @@ its work calls for.
 
 ## Computation as something a context decides
 
-An application-specific component gives a name to an operation, such as `send_email` or `load_file`.
-A handler gives it a uniform computation interface instead, allowing generic combinators to
-connect it to other computations.
+An application-specific component gives a name to an operation, such as `fetch_storage_object` or
+`get_user`. A handler gives it a uniform computation interface instead, allowing generic combinators
+to connect it to other computations.
 
 In that interface, an input-taking handler receives a context, a `Code` tag, and an `Input`.
 The context supplies its dependencies and wiring, while the input carries the value being processed.

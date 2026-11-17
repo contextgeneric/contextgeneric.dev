@@ -1,28 +1,28 @@
-error[E0277]: the trait bound `BrokenApp: CanUseComponent<EmailSenderComponent>` is not satisfied
-  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:28:9
+error[E0277]: the trait bound `BrokenApp: CanUseComponent<StorageObjectFetcherComponent>` is not satisfied
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:30:9
    |
-28 |         EmailSenderComponent,
-   |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+30 |         StorageObjectFetcherComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
    |
-help: the trait `HasField<Symbol<11, Chars<'s', Chars<'e', Chars<'n', Chars<'t', Chars<'_', Chars<'e', Chars<'m', Chars<'a', Chars<'i', Chars<'l', Chars<'s', Nil>>>>>>>>>>>>>` is not implemented for `BrokenApp`
-      but trait `HasField<Symbol<11, Chars<'s', Chars<'m', Chars<'t', Chars<'p', Chars<'_', Chars<'s', Chars<'e', Chars<'r', Chars<'v', Chars<'e', Chars<'r', Nil>>>>>>>>>>>>>` is implemented for it
-  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:20:9
+help: the trait `HasField<Symbol<9, Chars<'l', Chars<'o', Chars<'c', Chars<'a', Chars<'l', Chars<'_', Chars<'d', Chars<'i', Chars<'r', Nil>>>>>>>>>>>` is not implemented for `BrokenApp`
+      but trait `HasField<Symbol<9, Chars<'b', Chars<'u', Chars<'c', Chars<'k', Chars<'e', Chars<'t', Chars<'_', Chars<'i', Chars<'d', Nil>>>>>>>>>>>` is implemented for it
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:22:9
    |
-20 |     pub smtp_server: String,
-   |         ^^^^^^^^^^^
-note: required for `RecordEmails` to implement `IsProviderFor<EmailSenderComponent, BrokenApp>`
-  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:10:1
+22 |     pub bucket_id: String,
+   |         ^^^^^^^^^
+note: required for `FetchLocalObject` to implement `IsProviderFor<StorageObjectFetcherComponent, BrokenApp>`
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:8:1
    |
-10 | #[cgp_impl(new RecordEmails)]
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   = note: required for `BrokenApp` to implement `CanUseComponent<EmailSenderComponent>`
+ 8 | #[cgp_impl(new FetchLocalObject)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `BrokenApp` to implement `CanUseComponent<StorageObjectFetcherComponent>`
 note: required by a bound in `__CheckBrokenApp`
-  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:26:1
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:28:1
    |
-26 | / check_components! {
-27 | |     BrokenApp {
-28 | |         EmailSenderComponent,
-29 | |     }
-30 | | }
+28 | / check_components! {
+29 | |     BrokenApp {
+30 | |         StorageObjectFetcherComponent,
+31 | |     }
+32 | | }
    | |_^ required by this bound in `__CheckBrokenApp`
    = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

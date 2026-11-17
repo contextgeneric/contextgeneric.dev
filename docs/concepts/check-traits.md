@@ -16,38 +16,45 @@ inspect.
 
 ## A context can be wrong and still compile
 
-Consider a provider that records outgoing email in a `sent_emails` field. Its wiring can still
-name a context with only an `smtp_server` field, as this example shows. The fragment imports
-CGP's prelude and defines both the `EmailSender` component and the recording provider:
+Consider a provider that reads stored objects from a folder named in a `local_dir` field. Its
+wiring can still name a context with only a `bucket_id` field, as this example shows. The fragment
+imports CGP's prelude and defines both the `StorageObjectFetcher` component and the local provider:
 
 ```rust
 use cgp::prelude::*;
-use core::cell::RefCell;
 
-#[cgp_component(EmailSender)]
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+#[cgp_component(StorageObjectFetcher)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
-#[cgp_impl(new RecordEmails)]
-impl EmailSender {
-    fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
-        sent_emails.borrow_mut().push(format!("{to}: {body}"));
+#[cgp_impl(new FetchLocalObject)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] local_dir: &str,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        Ok(std::fs::read(format!("{local_dir}/{object_id}"))?)
     }
 }
 
 #[derive(HasField)]
 pub struct BrokenApp {
-    pub smtp_server: String,
+    pub bucket_id: String,
 }
 
-delegate_components! { BrokenApp { EmailSenderComponent: RecordEmails } }
+delegate_components! {
+    BrokenApp {
+        StorageObjectFetcherComponent: FetchLocalObject,
+    }
+}
 ```
 
 This table establishes which provider `BrokenApp` selects without proving that it can use that
-provider. The missing proof would require the `sent_emails` field read by `RecordEmails`' implicit
-argument. Because this fragment never asks for `CanSendEmail` on `BrokenApp`, the missing field has
-not yet caused a compilation failure.
+provider. The missing proof would require the `local_dir` field read by `FetchLocalObject`'s
+implicit argument. Because this fragment never asks for `CanFetchStorageObject` on `BrokenApp`, the
+missing field has not yet caused a compilation failure.
 
 Deferring that proof is useful for reusable wiring. An [aggregate provider](./aggregate-providers.md)
 can collect choices before the contexts that use it are even defined. Those contexts must eventually
@@ -56,24 +63,25 @@ meet the providers' requirements, but the bundle itself needs only to record the
 ## Where the failure surfaces instead
 
 An unchecked wiring error appears when code first requires the trait. A call to
-`app.send_email(to, body)` on `&BrokenApp` produces an error like this abbreviated diagnostic:
+`app.fetch_storage_object(object_id)` on a `BrokenApp` value produces an error like this abbreviated
+diagnostic:
 
 ```text
-error[E0599]: the method `send_email` exists for reference `&BrokenApp`,
+error[E0599]: the method `fetch_storage_object` exists for struct `BrokenApp`,
               but its trait bounds were not satisfied
    |
-   | pub struct BrokenApp { pub smtp_server: String }
-   | -------------------- doesn't satisfy `BrokenApp: CanSendEmail`
-   |                      or `BrokenApp: EmailSender<BrokenApp>`
+   | pub struct BrokenApp {
+   | -------------------- method `fetch_storage_object` not found for this struct
+   |                      because it doesn't satisfy `BrokenApp: CanFetchStorageObject`
+   |                      or `BrokenApp: StorageObjectFetcher<BrokenApp>`
    |
-note: the following trait bounds were not satisfied:
-      `BrokenApp: EmailSender<BrokenApp>`
+note: trait bound `BrokenApp: StorageObjectFetcher<BrokenApp>` was not satisfied
 ```
 
-The diagnostic stops at the unsatisfied trait implementations: `BrokenApp` lacks `CanSendEmail`
-and `EmailSender<BrokenApp>`. It leaves the missing `sent_emails` field hidden behind the generated
-implementations. If the first call occurs in another module or crate, the error can also appear a
-long way from the table that selected the provider.
+The diagnostic stops at the unsatisfied trait implementations: `BrokenApp` lacks
+`CanFetchStorageObject` and `StorageObjectFetcher<BrokenApp>`. It leaves the missing `local_dir`
+field hidden behind the generated implementations. If the first call occurs in another module or
+crate, the error can also appear a long way from the table that selected the provider.
 
 ## Asking the question at a line you chose
 
@@ -81,13 +89,13 @@ A check trait forces the compiler to verify a bound where you write its implemen
 technique uses an ordinary Rust [supertrait](/docs/reference/glossary#supertrait) and an empty implementation:
 
 ```rust
-trait CanUseApp: CanSendEmail {}
+trait CanUseApp: CanFetchStorageObject {}
 impl CanUseApp for App {}
 ```
 
-For Rust to accept the empty implementation, it must establish `App: CanSendEmail` at that line.
-Putting it beside the wiring moves a failure there. But the requirement still goes through the
-consumer trait, so its diagnostic can remain as vague as the method-call error.
+For Rust to accept the empty implementation, it must establish `App: CanFetchStorageObject` at that
+line. Putting it beside the wiring moves a failure there. But the requirement still goes through
+the consumer trait, so its diagnostic can remain as vague as the method-call error.
 
 To expose the provider's requirements, the check needs a path through more than the consumer
 trait. [`check_components!`](/docs/reference/macros/check_components) generates that check:
@@ -95,7 +103,7 @@ trait. [`check_components!`](/docs/reference/macros/check_components) generates 
 ```rust
 check_components! {
     BrokenApp {
-        EmailSenderComponent,
+        StorageObjectFetcherComponent,
     }
 }
 ```
@@ -105,22 +113,22 @@ entry and the chosen provider's dependencies for the context being checked. The 
 therefore appears in the diagnostic:
 
 ```text
-error[E0277]: the trait bound `BrokenApp: CanUseComponent<EmailSenderComponent>`
+error[E0277]: the trait bound `BrokenApp: CanUseComponent<StorageObjectFetcherComponent>`
               is not satisfied
    |
-help: the trait `HasField<Symbol<_, Chars<_, Chars<'e', Chars<'n', Chars<'t', …>>>>>>`
+help: the trait `HasField<Symbol<9, Chars<'l', Chars<'o', Chars<'c', …>>>>>`
       is not implemented for `BrokenApp`
-      but trait `HasField<Symbol<_, Chars<_, Chars<'m', Chars<'t', Chars<'p', …>>>>>>`
+      but trait `HasField<Symbol<9, Chars<'b', Chars<'u', Chars<'c', …>>>>>`
       is implemented for it
    |
-note: required for `RecordEmails` to implement
-      `IsProviderFor<EmailSenderComponent, BrokenApp>`
+note: required for `FetchLocalObject` to implement
+      `IsProviderFor<StorageObjectFetcherComponent, BrokenApp>`
 ```
 
-Following this checking path exposes `RecordEmails`' requirement for a `HasField` implementation.
-The cause is closer to the surface, but the field tags still appear as nested character types,
-leaving `sent_emails` and `smtp_server` difficult to recognize. The headline also refers to the
-generated `CanUseComponent` bound rather than the public trait.
+Following this checking path exposes `FetchLocalObject`'s requirement for a `HasField`
+implementation. The cause is closer to the surface, but the field tags still appear as nested
+character types, leaving `local_dir` and `bucket_id` difficult to recognize. The headline also
+refers to the generated `CanUseComponent` bound rather than the public trait.
 
 ## Reading it through the toolchain
 
@@ -129,19 +137,19 @@ with readable field names and dependency chains. For this missing-field case, it
 identifies both the unavailable trait and its cause:
 
 ```text
-error[E0277]: [CGP-E001] missing field `sent_emails` on `BrokenApp`
+error[E0277]: [CGP-E001] missing field `local_dir` on `BrokenApp`
    |
-   = note: root cause: [CGP-E110] missing field `sent_emails` on `BrokenApp`
+   = note: root cause: [CGP-E110] missing field `local_dir` on `BrokenApp`
            this is required through the dependency chain:
-             [CGP-E101] consumer trait impl `CanSendEmail` for context `BrokenApp`
-             └─ [CGP-E102] provider trait impl `EmailSender` with context `BrokenApp`
-                           for provider `RecordEmails`
-               └─ [CGP-E110] missing field `sent_emails` on `BrokenApp`
+             [CGP-E101] consumer trait impl `CanFetchStorageObject` for context `BrokenApp`
+             └─ [CGP-E102] provider trait impl `StorageObjectFetcher` with context `BrokenApp`
+                           for provider `FetchLocalObject`
+               └─ [CGP-E110] missing field `local_dir` on `BrokenApp`
 ```
 
-Here the dependency chain connects the application's need for `CanSendEmail` to the provider it
-selected and then to the missing `sent_emails` field. This gives the reader both the cause and the
-reason that field is required.
+Here the dependency chain connects the application's need for `CanFetchStorageObject` to the
+provider it selected and then to the missing `local_dir` field. This gives the reader both the
+cause and the reason that field is required.
 
 The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
 next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.
@@ -208,8 +216,8 @@ remain verbose.
 Even a successful check establishes only the trait requirements. A provider may depend on an
 ordinary bound such as `Value: Display`, which still needs an ordinary Rust implementation. Without
 the corresponding CGP machinery, that trait cannot itself be listed as a component to check.
-And satisfying these bounds says nothing about whether the email body was recorded correctly;
-that behavior still needs tests.
+And satisfying these bounds says nothing about whether the provider reads the right file; that
+behavior still needs tests.
 
 ## Where to go next
 

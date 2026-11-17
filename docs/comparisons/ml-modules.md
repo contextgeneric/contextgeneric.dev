@@ -240,15 +240,15 @@ use cgp::core::error::ErrorTypeProviderComponent;
 
 delegate_components! {
     App {
-        EmailSenderComponent: SendViaSmtp,
+        StorageObjectFetcherComponent: FetchS3Object,
         ErrorTypeProviderComponent: UseType<anyhow::Error>,
         // ... further components, in any order
     }
 }
 ```
 
-`App` is an **[environmental context](/docs/reference/glossary#environmental-context)** representing the application. Its `smtp_server` field supplies
-the runtime data used by `SendViaSmtp`, while the table selects behavior and the error type. The
+`App` is an **[environmental context](/docs/reference/glossary#environmental-context)** representing the application. Its `storage_client` and `bucket_id` fields supply
+the runtime data used by `FetchS3Object`, while the table selects behavior and the error type. The
 entry order has no execution meaning: the table does not construct objects or schedule startup.
 This is the part of functor assembly that the comparison covers, rather than all of Functoria's
 configuration and build functions.

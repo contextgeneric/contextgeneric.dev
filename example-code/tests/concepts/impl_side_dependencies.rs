@@ -52,86 +52,98 @@ pub mod moving_the_requirement {
 
 /// ## Two providers, two sets of requirements, one interface
 pub mod two_providers_two_requirements {
-    use core::cell::RefCell;
-
     use cgp::prelude::*;
 
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    /// Stand-in for the AWS SDK's S3 client, which the page names as `aws_sdk_s3::Client`.
+    pub mod aws_sdk_s3 {
+        pub struct Client;
+    }
+
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+    }
+
+    // The page names these getters and their methods in prose without declaring them.
+    #[cgp_auto_getter]
+    pub trait HasS3Bucket {
+        fn storage_client(&self) -> &aws_sdk_s3::Client;
+
+        fn bucket_id(&self) -> &str;
     }
 
     #[cgp_auto_getter]
-    pub trait HasSmtpServer {
-        fn smtp_server(&self) -> &str;
+    pub trait HasLocalDir {
+        fn local_dir(&self) -> &str;
     }
 
-    #[cgp_auto_getter]
-    pub trait HasSentEmails {
-        fn sent_emails(&self) -> &RefCell<Vec<String>>;
-    }
-
-    #[cgp_impl(new SendViaSmtp)]
-    #[uses(HasSmtpServer)]
-    impl EmailSender {
-        fn send_email(&self, to: &str, body: &str) {
-            let _ = (self.smtp_server(), to, body);
+    #[cgp_impl(new FetchS3Object)]
+    #[uses(HasS3Bucket)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            // The page elides the request; the stand-in returns the object's address instead.
+            let _ = self.storage_client();
+            Ok(format!("s3://{}/{object_id}", self.bucket_id()).into_bytes())
         }
     }
 
-    #[cgp_impl(new RecordEmails)]
-    #[uses(HasSentEmails)]
-    impl EmailSender {
-        fn send_email(&self, to: &str, body: &str) {
-            self.sent_emails()
-                .borrow_mut()
-                .push(format!("{to}: {body}"));
+    #[cgp_impl(new FetchLocalObject)]
+    #[uses(HasLocalDir)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(std::fs::read(format!("{}/{object_id}", self.local_dir()))?)
         }
     }
 
     #[derive(HasField)]
     pub struct App {
-        pub smtp_server: String,
+        pub storage_client: aws_sdk_s3::Client,
+        pub bucket_id: String,
     }
 
     #[derive(HasField)]
     pub struct TestApp {
-        pub sent_emails: RefCell<Vec<String>>,
+        pub local_dir: String,
     }
 
-    delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
-    delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
+    delegate_components! { App     { StorageObjectFetcherComponent: FetchS3Object } }
+    delegate_components! { TestApp { StorageObjectFetcherComponent: FetchLocalObject } }
 
     mod check_app {
         use super::*;
-        check_components! { App { EmailSenderComponent } }
+        check_components! { App { StorageObjectFetcherComponent } }
     }
 
     mod check_test_app {
         use super::*;
-        check_components! { TestApp { EmailSenderComponent } }
+        check_components! { TestApp { StorageObjectFetcherComponent } }
     }
 
     /// Neither requirement reaches a caller: this function bounds on the trait alone, and it
     /// accepts both contexts even though they satisfy it for entirely different reasons.
-    pub fn notify<Context>(context: &Context)
+    pub fn load_picture<Context>(context: &Context) -> anyhow::Result<Vec<u8>>
     where
-        Context: CanSendEmail,
+        Context: CanFetchStorageObject,
     {
-        context.send_email("a@b.c", "hi");
+        context.fetch_storage_object("alice.png")
     }
 
     #[test]
     fn one_bound_accepts_both_contexts() {
-        let test_app = TestApp {
-            sent_emails: RefCell::new(Vec::new()),
-        };
-        notify(&test_app);
-        notify(&App {
-            smtp_server: "localhost".to_owned(),
-        });
+        let dir = std::env::temp_dir().join("cgp-impl-side-dependencies");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("alice.png"), b"picture").unwrap();
 
-        assert_eq!(test_app.sent_emails.borrow().as_slice(), ["a@b.c: hi"]);
+        let test_app = TestApp {
+            local_dir: dir.to_str().unwrap().to_owned(),
+        };
+        assert_eq!(load_picture(&test_app).unwrap(), b"picture");
+
+        let app = App {
+            storage_client: aws_sdk_s3::Client,
+            bucket_id: "pictures".to_owned(),
+        };
+        assert_eq!(load_picture(&app).unwrap(), b"s3://pictures/alice.png");
     }
 }
 

@@ -173,7 +173,7 @@ pub mod usage {
 /// ## Examples
 ///
 /// The complete trait, the mutable example, and the `#[cgp_impl]` fragment. The page assumes the
-/// `EmailSender` component and the `App` context without declaring them.
+/// `StorageObjectFetcher` component, the `App` context, and the S3 client without declaring them.
 pub mod examples {
     use cgp::prelude::*;
 
@@ -202,33 +202,46 @@ pub mod examples {
         pub name: String,
     }
 
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    /// Stand-in for the AWS SDK's S3 client, which the page names as `aws_sdk_s3::Client`.
+    pub mod aws_sdk_s3 {
+        pub struct Client;
     }
 
-    #[cgp_impl(new SendViaSmtp)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] smtp_server: &str, to: &str, body: &str) {
-            // connect to `smtp_server` and send the message
-            let _ = (smtp_server, to, body);
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+    }
+
+    #[cgp_impl(new FetchS3Object)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(
+            &self,
+            #[implicit] storage_client: &aws_sdk_s3::Client,
+            #[implicit] bucket_id: &str,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            // fetch `object_id` from `bucket_id` through `storage_client`
+            // The page elides the request; the stand-in returns the object's address instead.
+            let _ = storage_client;
+            Ok(format!("s3://{bucket_id}/{object_id}").into_bytes())
         }
     }
 
     #[derive(HasField)]
     pub struct App {
-        pub smtp_server: String,
+        pub storage_client: aws_sdk_s3::Client,
+        pub bucket_id: String,
     }
 
     delegate_components! {
         App {
-            EmailSenderComponent: SendViaSmtp,
+            StorageObjectFetcherComponent: FetchS3Object,
         }
     }
 
     check_components! {
         App {
-            EmailSenderComponent,
+            StorageObjectFetcherComponent,
         }
     }
 
@@ -246,9 +259,13 @@ pub mod examples {
         assert_eq!(person.name, "ADA");
 
         let app = App {
-            smtp_server: "smtp.example.com".to_owned(),
+            storage_client: aws_sdk_s3::Client,
+            bucket_id: "pictures".to_owned(),
         };
-        app.send_email("to@example.com", "hi");
+        assert_eq!(
+            app.fetch_storage_object("alice.png").unwrap(),
+            b"s3://pictures/alice.png"
+        );
     }
 }
 

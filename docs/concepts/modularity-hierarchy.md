@@ -142,26 +142,35 @@ The provider operates on that value, and wiring selects one provider for it. Thi
 adding reusable behavior to a value while retaining a self-targeted interface.
 
 In the **environmental-context** arrangement, `Self` carries an application's dependencies and
-implementation choices. An operation such as sending email belongs to that context:
+implementation choices. An operation such as fetching a stored object belongs to that context:
 
 ```rust
-#[cgp_component(EmailSender)]
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+#[cgp_component(StorageObjectFetcher)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
-#[cgp_impl(new SendViaSmtp)]
-impl EmailSender { /* connect and send over SMTP */ }
+#[cgp_impl(new FetchS3Object)]
+impl StorageObjectFetcher { /* fetch the object from Amazon S3 */ }
 
-#[cgp_impl(new RecordEmails)]
-impl EmailSender { /* record to a Vec a test can read */ }
+#[cgp_impl(new FetchLocalObject)]
+impl StorageObjectFetcher { /* read the object from a test's folder */ }
 
-delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
-delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
+delegate_components! {
+    App {
+        StorageObjectFetcherComponent: FetchS3Object,
+    }
+}
+
+delegate_components! {
+    TestApp {
+        StorageObjectFetcherComponent: FetchLocalObject,
+    }
+}
 ```
 
-The omitted SMTP body would need connection settings or a client, while the recording body would
-need storage for captured messages. `App` and `TestApp` supply the appropriate dependencies. Their
+The omitted S3 body would need a client and a bucket, while the local body would need the path of
+its folder. `App` and `TestApp` supply the appropriate dependencies. Their
 separate wiring lets callers use the same consumer trait in either environment.
 
 The application owns both context types, so it can wire them independently even though the
@@ -268,8 +277,8 @@ another type. These arrangements answer different needs:
 | A wrapper needs a particular inner implementation | Higher-order provider (tier 5) | A choice within that provider composition |
 
 Testing alone does not require moving to tier 4. At tier 3, `App` and `TestApp` can already select
-different providers for an operation such as sending email. A target parameter earns its place
-when the operation acts on a separate value whose treatment must vary between applications,
+different providers for an operation such as fetching a stored object. A target parameter earns its
+place when the operation acts on a separate value whose treatment must vary between applications,
 independently of that value's own trait implementations.
 
 Whichever tier supplies the needed choices, several contexts may repeat part of their wiring.

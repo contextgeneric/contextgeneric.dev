@@ -74,41 +74,59 @@ pub mod delegate_components_replaces_functor_application {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::prelude::*;
 
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    /// Stand-in for the AWS SDK's S3 client, which the page names as `aws_sdk_s3::Client`.
+    pub mod aws_sdk_s3 {
+        pub struct Client;
     }
 
-    #[cgp_impl(new SendViaSmtp)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] smtp_server: &str, to: &str, body: &str) {
-            // The page elides the body; a real provider opens a connection to `smtp_server`.
-            let _ = (smtp_server, to, body);
+    // The page wires this component and provider without declaring them; the declarations
+    // follow the site's object-storage example.
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+    }
+
+    #[cgp_impl(new FetchS3Object)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(
+            &self,
+            #[implicit] storage_client: &aws_sdk_s3::Client,
+            #[implicit] bucket_id: &str,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            // The page elides the body; the stand-in returns the object's address instead.
+            let _ = storage_client;
+            Ok(format!("s3://{bucket_id}/{object_id}").into_bytes())
         }
     }
 
     #[derive(HasField)]
     pub struct App {
-        pub smtp_server: String,
+        pub storage_client: aws_sdk_s3::Client,
+        pub bucket_id: String,
     }
 
     delegate_components! {
         App {
-            EmailSenderComponent: SendViaSmtp,
+            StorageObjectFetcherComponent: FetchS3Object,
             ErrorTypeProviderComponent: UseType<anyhow::Error>,
         }
     }
 
     mod check_app {
         use super::*;
-        check_components! { App { EmailSenderComponent, ErrorTypeProviderComponent } }
+        check_components! { App { StorageObjectFetcherComponent, ErrorTypeProviderComponent } }
     }
 
     #[test]
     fn the_table_is_resolved_in_any_order() {
         let app = App {
-            smtp_server: "smtp.example.com".to_owned(),
+            storage_client: aws_sdk_s3::Client,
+            bucket_id: "pictures".to_owned(),
         };
-        app.send_email("ada@example.com", "hello");
+        assert_eq!(
+            app.fetch_storage_object("alice.png").unwrap(),
+            b"s3://pictures/alice.png"
+        );
     }
 }

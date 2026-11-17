@@ -1,11 +1,11 @@
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
-pub trait HasSmtpConfig {}
-pub trait HasRecordedEmails {}
+pub trait HasS3Client {}
+pub trait HasLocalDir {}
 
-impl<T: HasSmtpConfig>     CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }
-impl<T: HasRecordedEmails> CanSendEmail for T { fn send_email(&self, to: &str, body: &str) {} }   // error[E0119]
+impl<T: HasS3Client> CanFetchStorageObject for T { fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> { Ok(Vec::new()) } }
+impl<T: HasLocalDir> CanFetchStorageObject for T { fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> { Ok(Vec::new()) } }   // error[E0119]
 
 fn main() {}

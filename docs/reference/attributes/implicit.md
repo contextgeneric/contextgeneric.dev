@@ -158,22 +158,27 @@ pub fn shout(&mut self, #[implicit] name: &mut str) {
 ```
 
 Inside a [`#[cgp_impl]`](../macros/cgp_impl.md) provider the attribute behaves the same way and mixes
-with the method's ordinary arguments. This fragment assumes an `EmailSender` component whose
-`send_email(&self, to: &str, body: &str)` method is defined elsewhere. The macro removes the implicit
-argument from the signature and keeps `to` and `body`:
+with the method's ordinary arguments. This fragment assumes a `StorageObjectFetcher` component
+whose `fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>` method is defined
+elsewhere. The macro removes the implicit arguments from the signature and keeps `object_id`:
 
 ```rust
-#[cgp_impl(new SendViaSmtp)]
-impl EmailSender {
-    fn send_email(&self, #[implicit] smtp_server: &str, to: &str, body: &str) {
-        // connect to `smtp_server` and send the message
+#[cgp_impl(new FetchS3Object)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] storage_client: &aws_sdk_s3::Client,
+        #[implicit] bucket_id: &str,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        // fetch `object_id` from `bucket_id` through `storage_client`
     }
 }
 ```
 
-Callers still write `app.send_email(to, body)`. The provider's requirement from its context, an
-`smtp_server` field borrowed here as a `&str` from a `String`, never appears in the trait everyone
-else calls. The context here is an
+Callers still write `app.fetch_storage_object(object_id)`. The provider's requirements from its
+context, a `storage_client` field and a `bucket_id` field borrowed here as a `&str` from a
+`String`, never appear in the trait everyone else calls. The context here is an
 [environmental context](/docs/reference/glossary#environmental-context), an `app` that carries the
 application's settings rather than being the data a method acts on.
 

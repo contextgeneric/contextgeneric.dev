@@ -82,37 +82,41 @@ pub mod tier_3 {
     }
 
     // The application shape: the wired type stands for the application, not for data.
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
-    #[cgp_impl(new SendViaSmtp)]
-    impl EmailSender {
-        // The page elides this body as `/* connect and send over SMTP */`.
-        fn send_email(&self, to: &str, body: &str) {}
+    #[cgp_impl(new FetchS3Object)]
+    impl StorageObjectFetcher {
+        // The page elides this body as `/* fetch the object from Amazon S3 */`.
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(Vec::new())
+        }
     }
 
-    #[cgp_impl(new RecordEmails)]
-    impl EmailSender {
-        // The page elides this body as `/* record to a Vec a test can read */`.
-        fn send_email(&self, to: &str, body: &str) {}
+    #[cgp_impl(new FetchLocalObject)]
+    impl StorageObjectFetcher {
+        // The page elides this body as `/* read the object from a test's folder */`.
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(Vec::new())
+        }
     }
 
     pub struct App;
     pub struct TestApp;
 
-    delegate_components! { App { EmailSenderComponent: SendViaSmtp } }
-    delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
+    delegate_components! { App     { StorageObjectFetcherComponent: FetchS3Object } }
+    delegate_components! { TestApp { StorageObjectFetcherComponent: FetchLocalObject } }
 
     mod check_app {
         use super::*;
-        check_components! { App { EmailSenderComponent } }
+        check_components! { App { StorageObjectFetcherComponent } }
     }
 
     mod check_test_app {
         use super::*;
-        check_components! { TestApp { EmailSenderComponent } }
+        check_components! { TestApp { StorageObjectFetcherComponent } }
     }
 }
 

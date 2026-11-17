@@ -1,31 +1,33 @@
-use core::cell::RefCell;
-
 use cgp::prelude::*;
 
-#[cgp_component(EmailSender)]
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+#[cgp_component(StorageObjectFetcher)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
-#[cgp_impl(new RecordEmails)]
-impl EmailSender {
-    fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
-        sent_emails.borrow_mut().push(format!("{to}: {body}"));
+#[cgp_impl(new FetchLocalObject)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] local_dir: &str,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        Ok(std::fs::read(format!("{local_dir}/{object_id}"))?)
     }
 }
 
-// The mistake: `BrokenApp` has no `sent_emails` field, though `RecordEmails` reads one.
+// The mistake: `BrokenApp` has no `local_dir` field, though `FetchLocalObject` reads one.
 #[derive(HasField)]
 pub struct BrokenApp {
-    pub smtp_server: String,
+    pub bucket_id: String,
 }
 
-delegate_components! { BrokenApp { EmailSenderComponent: RecordEmails } }
+delegate_components! { BrokenApp { StorageObjectFetcherComponent: FetchLocalObject } }
 
 // The check forces the failure to the wiring site and names the missing field.
 check_components! {
     BrokenApp {
-        EmailSenderComponent,
+        StorageObjectFetcherComponent,
     }
 }
 

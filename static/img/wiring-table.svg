@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 300" role="img" aria-labelledby="title desc" style="font-family: var(--ifm-font-family-base, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif)">
   <title id="title">A wiring table selects a provider for each component</title>
-  <desc id="desc">Two contexts, App and TestApp, map the same component key EmailSenderComponent to different provider types. A caller's method call resolves through the table at compile time to a direct call on the selected provider.</desc>
+  <desc id="desc">Two contexts, App and TestApp, map the same component key StorageObjectFetcherComponent to different provider types. A caller's method call resolves through the table at compile time to a direct call on the selected provider.</desc>
   <!-- Each colour reads a site theme token from src/css/custom.css, with the light theme's value as
        its fallback. Drawn inline on the front page, the diagram follows the theme switch; loaded as an
        image, as on the Concepts pages, the tokens are undefined and the fallbacks apply. -->
@@ -20,14 +20,14 @@
   <path d="M 24 82 L 556 82" stroke-width="1" style="stroke: var(--ifm-color-emphasis-400, #c9b9b0)"/>
 
   <text x="34" y="118" font-size="14" style="fill: var(--cgp-text, #261d1b)">App</text>
-  <text x="214" y="118" font-size="13" style="fill: var(--cgp-text-muted, #5e504c)">EmailSenderComponent</text>
-  <text x="434" y="118" font-size="14" style="fill: var(--cgp-link, #8f1f1d)">SendViaSmtp</text>
+  <text x="214" y="118" font-size="12" style="fill: var(--cgp-text-muted, #5e504c)">StorageObjectFetcherComponent</text>
+  <text x="434" y="118" font-size="14" style="fill: var(--cgp-link, #8f1f1d)">FetchS3Object</text>
 
   <path d="M 24 138 L 556 138" stroke-width="1" style="stroke: var(--cgp-border, #e3d5cb)"/>
 
   <text x="34" y="174" font-size="14" style="fill: var(--cgp-text, #261d1b)">TestApp</text>
-  <text x="214" y="174" font-size="13" style="fill: var(--cgp-text-muted, #5e504c)">EmailSenderComponent</text>
-  <text x="434" y="174" font-size="14" style="fill: var(--cgp-link, #8f1f1d)">RecordEmails</text>
+  <text x="214" y="174" font-size="12" style="fill: var(--cgp-text-muted, #5e504c)">StorageObjectFetcherComponent</text>
+  <text x="434" y="174" font-size="14" style="fill: var(--cgp-link, #8f1f1d)">FetchLocalObject</text>
 
   <text x="34" y="220" font-size="13" style="fill: var(--cgp-text-muted, #5e504c)">The same key, a different choice for each context.</text>
 
@@ -37,7 +37,7 @@
 
   <rect x="650" y="60" width="220" height="170" rx="10" stroke-width="1.5" style="fill: var(--cgp-surface-raised, #ffffff); stroke: var(--cgp-link, #8f1f1d)"/>
   <text x="760" y="90" text-anchor="middle" font-size="14" font-weight="600" style="fill: var(--cgp-link, #8f1f1d)">call site</text>
-  <text x="760" y="120" text-anchor="middle" font-size="13" style="fill: var(--cgp-text, #261d1b)">app.send_email(to, body)</text>
+  <text x="760" y="120" text-anchor="middle" font-size="13" style="fill: var(--cgp-text, #261d1b)">app.fetch_storage_object(id)</text>
   <path d="M 690 140 L 830 140" stroke-width="1" style="stroke: var(--cgp-border, #e3d5cb)"/>
   <text x="760" y="166" text-anchor="middle" font-size="13" style="fill: var(--cgp-text-muted, #5e504c)">direct call to</text>
   <text x="760" y="188" text-anchor="middle" font-size="13" style="fill: var(--cgp-text-muted, #5e504c)">the selected provider</text>

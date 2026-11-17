@@ -2,32 +2,34 @@
 
 /// ## A context can be wrong and still compile
 ///
-/// `RecordEmails` needs a `sent_emails` field and `BrokenApp` has none. Every line here compiles,
+/// `FetchLocalObject` needs a `local_dir` field and `BrokenApp` has none. Every line here compiles,
 /// because nothing has asked whether the provider's requirements hold for this context yet.
 pub mod a_context_can_be_wrong_and_still_compile {
-    use core::cell::RefCell;
-
     use cgp::prelude::*;
 
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
-    #[cgp_impl(new RecordEmails)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
-            sent_emails.borrow_mut().push(format!("{to}: {body}"));
+    #[cgp_impl(new FetchLocalObject)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(
+            &self,
+            #[implicit] local_dir: &str,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            Ok(std::fs::read(format!("{local_dir}/{object_id}"))?)
         }
     }
 
     #[derive(HasField)]
     pub struct BrokenApp {
-        pub smtp_server: String,
+        pub bucket_id: String,
     }
 
     // Accepted. The table records a choice; it does not verify one.
-    delegate_components! { BrokenApp { EmailSenderComponent: RecordEmails } }
+    delegate_components! { BrokenApp { StorageObjectFetcherComponent: FetchLocalObject } }
 }
 
 /// ## Where the failure surfaces instead
@@ -50,26 +52,32 @@ pub mod where_the_failure_surfaces {}
 pub mod a_check_is_an_empty_impl {
     use cgp::prelude::*;
 
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
-    #[cgp_impl(new RecordEmails)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] sent_emails: &Vec<String>, to: &str, body: &str) {}
+    #[cgp_impl(new FetchLocalObject)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(
+            &self,
+            #[implicit] local_dir: &str,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            Ok(std::fs::read(format!("{local_dir}/{object_id}"))?)
+        }
     }
 
     #[derive(HasField)]
     pub struct App {
-        pub sent_emails: Vec<String>,
+        pub local_dir: String,
     }
 
-    delegate_components! { App { EmailSenderComponent: RecordEmails } }
+    delegate_components! { App { StorageObjectFetcherComponent: FetchLocalObject } }
 
     // The plain-Rust version: nothing to prove in the body, so it compiles exactly when the
     // supertrait holds.
-    trait CanUseApp: CanSendEmail {}
+    trait CanUseApp: CanFetchStorageObject {}
     impl CanUseApp for App {}
 
     // What `check_components!` writes instead, which reports the missing requirement rather than
@@ -78,7 +86,7 @@ pub mod a_check_is_an_empty_impl {
         use super::*;
         check_components! {
             App {
-                EmailSenderComponent,
+                StorageObjectFetcherComponent,
             }
         }
     }

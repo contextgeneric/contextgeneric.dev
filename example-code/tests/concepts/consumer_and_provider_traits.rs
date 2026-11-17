@@ -2,7 +2,13 @@
 //!
 //! Module names follow the page's headings. Rejected code lives in trybuild fixtures. The two
 //! generated-code listings are assembled by hand in [`how_a_call_finds_its_provider`]; that checks
-//! their structure, while macro expansion establishes what the library generates.
+//! their structure, while macro expansion establishes what the library generates. The page's S3
+//! client is a stand-in defined below, because the page shows only its type.
+
+/// Stand-in for the AWS SDK's S3 client, which the page names as `aws_sdk_s3::Client`.
+pub mod aws_sdk_s3 {
+    pub struct Client;
+}
 
 /// ## What an ordinary Rust trait does, and where it stops
 ///
@@ -10,34 +16,38 @@
 /// which is what the paragraph after it says.
 ///
 /// The section's second block does not, and is the reason the first one does not scale. The two
-/// marker traits it bounds on are undeclared on the page, so they are declared here; without them
+/// marker traits it bounds on are undeclared on the page, so they are declared there; without them
 /// the failure would be an unresolved name rather than the overlap it is meant to show:
 ///
 /// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs`.
 pub mod what_an_ordinary_rust_trait_does {
-    use core::cell::RefCell;
+    use super::aws_sdk_s3;
 
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
     pub struct App {
-        pub smtp_server: String,
+        pub storage_client: aws_sdk_s3::Client,
+        pub bucket_id: String,
     }
 
     pub struct TestApp {
-        pub sent_emails: RefCell<Vec<String>>,
+        pub local_dir: String,
     }
 
-    impl CanSendEmail for App {
-        fn send_email(&self, to: &str, body: &str) {
-            // open a connection to self.smtp_server and send
+    impl CanFetchStorageObject for App {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            // fetch `object_id` from `self.bucket_id` through `self.storage_client`
+            // The page elides the request; the stand-in client has none to make.
+            let _ = (&self.storage_client, &self.bucket_id, object_id);
+            Ok(Vec::new())
         }
     }
 
-    impl CanSendEmail for TestApp {
-        fn send_email(&self, to: &str, body: &str) {
-            self.sent_emails.borrow_mut().push(format!("{to}: {body}"));
+    impl CanFetchStorageObject for TestApp {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(std::fs::read(format!("{}/{object_id}", self.local_dir))?)
         }
     }
 }
@@ -49,27 +59,34 @@ pub mod what_an_ordinary_rust_trait_does {
 /// missing, so they are filled in here.
 pub mod splitting_one_trait_in_two {
     // what callers use
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
     // what implementations target
-    pub trait EmailSender<Context> {
-        fn send_email(context: &Context, to: &str, body: &str);
+    pub trait StorageObjectFetcher<Context> {
+        fn fetch_storage_object(
+            context: &Context,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>>;
     }
 
-    pub trait HasSmtpConfig {}
-    pub trait HasRecordedEmails {}
+    pub trait HasS3Client {}
+    pub trait HasLocalDir {}
 
-    pub struct SendViaSmtp;
-    pub struct RecordEmails;
+    pub struct FetchS3Object;
+    pub struct FetchLocalObject;
 
-    impl<Context: HasSmtpConfig> EmailSender<Context> for SendViaSmtp {
-        fn send_email(context: &Context, to: &str, body: &str) {}
+    impl<Context: HasS3Client> StorageObjectFetcher<Context> for FetchS3Object {
+        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(Vec::new())
+        }
     }
 
-    impl<Context: HasRecordedEmails> EmailSender<Context> for RecordEmails {
-        fn send_email(context: &Context, to: &str, body: &str) {}
+    impl<Context: HasLocalDir> StorageObjectFetcher<Context> for FetchLocalObject {
+        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(Vec::new())
+        }
     }
 }
 
@@ -90,70 +107,83 @@ pub mod how_a_call_finds_its_provider {
     use cgp::core::component::IsProviderFor;
     use cgp::prelude::*;
 
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
-    pub trait EmailSender<Context>: IsProviderFor<EmailSenderComponent, Context, ()> {
-        fn send_email(context: &Context, to: &str, body: &str);
+    pub trait StorageObjectFetcher<Context>:
+        IsProviderFor<StorageObjectFetcherComponent, Context, ()>
+    {
+        fn fetch_storage_object(
+            context: &Context,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>>;
     }
 
-    // The key. The page calls it "a marker type generated alongside the two traits".
-    pub struct EmailSenderComponent;
+    // The key. The page calls it "a marker generated alongside the two traits".
+    pub struct StorageObjectFetcherComponent;
 
-    pub struct SendViaSmtp;
-    pub struct RecordEmails;
+    pub struct FetchS3Object;
+    pub struct FetchLocalObject;
 
-    impl<Context> EmailSender<Context> for SendViaSmtp {
-        fn send_email(context: &Context, to: &str, body: &str) {}
+    impl<Context> StorageObjectFetcher<Context> for FetchS3Object {
+        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(b"s3".to_vec())
+        }
     }
 
-    impl<Context> EmailSender<Context> for RecordEmails {
-        fn send_email(context: &Context, to: &str, body: &str) {}
+    impl<Context> StorageObjectFetcher<Context> for FetchLocalObject {
+        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(b"local".to_vec())
+        }
     }
 
     // Provider macros generate these checking implementations with the provider's bounds.
-    impl<Context> IsProviderFor<EmailSenderComponent, Context, ()> for SendViaSmtp {}
-    impl<Context> IsProviderFor<EmailSenderComponent, Context, ()> for RecordEmails {}
+    impl<Context> IsProviderFor<StorageObjectFetcherComponent, Context, ()> for FetchS3Object {}
+    impl<Context> IsProviderFor<StorageObjectFetcherComponent, Context, ()> for FetchLocalObject {}
 
     pub struct App;
     pub struct TestApp;
 
-    delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
-    delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
+    delegate_components! { App     { StorageObjectFetcherComponent: FetchS3Object } }
+    delegate_components! { TestApp { StorageObjectFetcherComponent: FetchLocalObject } }
 
     // The first generated implementation: a context that implements the provider trait for itself
     // gets the consumer trait.
-    impl<Context> CanSendEmail for Context
+    impl<Context> CanFetchStorageObject for Context
     where
-        Context: EmailSender<Context>,
+        Context: StorageObjectFetcher<Context>,
     {
-        fn send_email(&self, to: &str, body: &str) {
-            Context::send_email(self, to, body)
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Context::fetch_storage_object(self, object_id)
         }
     }
 
     // The second: anything with a table entry inherits the provider trait from what the entry names.
-    impl<Context, Provider> EmailSender<Context> for Provider
+    impl<Context, Provider> StorageObjectFetcher<Context> for Provider
     where
-        Provider: DelegateComponent<EmailSenderComponent>
-            + IsProviderFor<EmailSenderComponent, Context, ()>,
-        Provider::Delegate: EmailSender<Context>,
+        Provider: DelegateComponent<StorageObjectFetcherComponent>
+            + IsProviderFor<StorageObjectFetcherComponent, Context, ()>,
+        Provider::Delegate: StorageObjectFetcher<Context>,
     {
-        fn send_email(context: &Context, to: &str, body: &str) {
-            Provider::Delegate::send_email(context, to, body)
+        fn fetch_storage_object(
+            context: &Context,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            Provider::Delegate::fetch_storage_object(context, object_id)
         }
     }
 
     /// The three-step resolution the page traces, asserted as a bound rather than described.
     #[test]
     fn a_call_resolves_through_the_table() {
-        fn resolves<Context: CanSendEmail>() {}
+        fn resolves<Context: CanFetchStorageObject>() {}
 
         resolves::<App>();
         resolves::<TestApp>();
 
-        App.send_email("a@b.c", "hi");
+        assert_eq!(App.fetch_storage_object("alice.png").unwrap(), b"s3");
+        assert_eq!(TestApp.fetch_storage_object("alice.png").unwrap(), b"local");
     }
 }
 
@@ -163,64 +193,92 @@ pub mod how_a_call_finds_its_provider {
 /// the two traits, the marker, and both blanket impls come from `#[cgp_component]`, and each
 /// provider is a `#[cgp_impl]` block in consumer-trait shape.
 pub mod writing_it {
-    use core::cell::RefCell;
-
     use cgp::prelude::*;
 
-    #[cgp_component(EmailSender)]
-    pub trait CanSendEmail {
-        fn send_email(&self, to: &str, body: &str);
+    use super::aws_sdk_s3;
+
+    #[cgp_component(StorageObjectFetcher)]
+    pub trait CanFetchStorageObject {
+        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
     }
 
-    #[cgp_impl(new SendViaSmtp)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] smtp_server: &str, to: &str, body: &str) {
-            // open a connection to `smtp_server` and send the message
+    #[cgp_impl(new FetchS3Object)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(
+            &self,
+            #[implicit] storage_client: &aws_sdk_s3::Client,
+            #[implicit] bucket_id: &str,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            // fetch `object_id` from `bucket_id` through `storage_client`
+            // The page elides the request; the stand-in returns the object's address instead.
+            let _ = storage_client;
+            Ok(format!("s3://{bucket_id}/{object_id}").into_bytes())
         }
     }
 
-    #[cgp_impl(new RecordEmails)]
-    impl EmailSender {
-        fn send_email(&self, #[implicit] sent_emails: &RefCell<Vec<String>>, to: &str, body: &str) {
-            sent_emails.borrow_mut().push(format!("{to}: {body}"));
+    #[cgp_impl(new FetchLocalObject)]
+    impl StorageObjectFetcher {
+        fn fetch_storage_object(
+            &self,
+            #[implicit] local_dir: &str,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>> {
+            Ok(std::fs::read(format!("{local_dir}/{object_id}"))?)
         }
     }
 
     #[derive(HasField)]
     pub struct App {
-        pub smtp_server: String,
+        pub storage_client: aws_sdk_s3::Client,
+        pub bucket_id: String,
     }
 
     #[derive(HasField)]
     pub struct TestApp {
-        pub sent_emails: RefCell<Vec<String>>,
+        pub local_dir: String,
     }
 
-    delegate_components! { App     { EmailSenderComponent: SendViaSmtp } }
-    delegate_components! { TestApp { EmailSenderComponent: RecordEmails } }
+    delegate_components! { App     { StorageObjectFetcherComponent: FetchS3Object } }
+    delegate_components! { TestApp { StorageObjectFetcherComponent: FetchLocalObject } }
 
     mod check_app {
         use super::*;
-        check_components! { App { EmailSenderComponent } }
+        check_components! { App { StorageObjectFetcherComponent } }
     }
 
     mod check_test_app {
         use super::*;
-        check_components! { TestApp { EmailSenderComponent } }
+        check_components! { TestApp { StorageObjectFetcherComponent } }
     }
 
-    pub fn send_welcome(app: &impl CanSendEmail, to: &str) {
-        app.send_email(to, "Welcome!");
+    pub fn fetch_profile_picture(
+        app: &impl CanFetchStorageObject,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        app.fetch_storage_object(object_id)
     }
 
-    /// A generic caller needs only the consumer trait, while the selected provider reads its field.
+    /// A generic caller needs only the consumer trait, while each context's selected provider
+    /// reads its own fields.
     #[test]
-    fn generic_caller_uses_the_selected_recording_provider() {
-        let test_app = TestApp {
-            sent_emails: RefCell::new(Vec::new()),
-        };
-        send_welcome(&test_app, "a@b.c");
+    fn generic_caller_uses_each_selected_provider() {
+        let dir = std::env::temp_dir().join("cgp-consumer-and-provider-traits");
+        std::fs::create_dir_all(&dir).unwrap();
+        std::fs::write(dir.join("alice.png"), b"picture").unwrap();
 
-        assert_eq!(test_app.sent_emails.borrow().as_slice(), ["a@b.c: Welcome!"]);
+        let test_app = TestApp {
+            local_dir: dir.to_str().unwrap().to_owned(),
+        };
+        assert_eq!(fetch_profile_picture(&test_app, "alice.png").unwrap(), b"picture");
+
+        let app = App {
+            storage_client: aws_sdk_s3::Client,
+            bucket_id: "pictures".to_owned(),
+        };
+        assert_eq!(
+            fetch_profile_picture(&app, "alice.png").unwrap(),
+            b"s3://pictures/alice.png"
+        );
     }
 }

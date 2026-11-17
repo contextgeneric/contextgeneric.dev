@@ -101,60 +101,60 @@ bounds. [Consumer and provider traits](./consumer-and-provider-traits.md) explai
 
 ## Two providers, two sets of requirements, one interface
 
-For email sending, the useful requirements depend on how the message is handled. An SMTP provider
-needs a server address, while a recording provider needs a buffer. Each can request its own getter
+For object storage, the useful requirements depend on where the objects live. An S3 provider needs
+a client and a bucket, while a local provider needs a folder. Each can request its own getter
 without adding that requirement to the shared interface:
 
 ```rust
 use cgp::prelude::*;
 
-#[cgp_component(EmailSender)]
-pub trait CanSendEmail {
-    fn send_email(&self, to: &str, body: &str);
+#[cgp_component(StorageObjectFetcher)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
 }
 
-#[cgp_impl(new SendViaSmtp)]
-#[uses(HasSmtpServer)]
-impl EmailSender {
-    fn send_email(&self, to: &str, body: &str) {
-        // open a connection to `self.smtp_server()` and send
+#[cgp_impl(new FetchS3Object)]
+#[uses(HasS3Bucket)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        // fetch `object_id` from `self.bucket_id()` via `self.storage_client()`
     }
 }
 
-#[cgp_impl(new RecordEmails)]
-#[uses(HasSentEmails)]
-impl EmailSender {
-    fn send_email(&self, to: &str, body: &str) {
-        self.sent_emails().borrow_mut().push(format!("{to}: {body}"));
+#[cgp_impl(new FetchLocalObject)]
+#[uses(HasLocalDir)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        Ok(std::fs::read(format!("{}/{object_id}", self.local_dir()))?)
     }
 }
 ```
 
 Each `#[uses]` attribute adds a context bound to its provider's implementation. The bound
-`HasSmtpServer` supplies `smtp_server() -> &str`, while `HasSentEmails` supplies
-`sent_emails() -> &RefCell<Vec<String>>`. The SMTP body is omitted here, and the recording body
-shows how it stores a message in the buffer.
+`HasS3Bucket` supplies `storage_client() -> &aws_sdk_s3::Client` and `bucket_id() -> &str`, while
+`HasLocalDir` supplies `local_dir() -> &str`. The S3 body is omitted here, and the local body shows
+how it reads the object from the folder.
 
 Those getter requirements stay with the providers, so a caller can use either behavior through
-`CanSendEmail` alone:
+`CanFetchStorageObject` alone:
 
 ```rust
-pub fn notify<Context>(context: &Context)
+pub fn load_picture<Context>(context: &Context) -> anyhow::Result<Vec<u8>>
 where
-    Context: CanSendEmail,
+    Context: CanFetchStorageObject,
 {
-    context.send_email("a@b.c", "hi");
+    context.fetch_storage_object("alice.png")
 }
 ```
 
-A production `App` can select `SendViaSmtp`, while a `TestApp` selects `RecordEmails`. These contexts
-represent applications, and each supplies the dependencies of its chosen provider. That lets
-`notify` accept both with the same bound. Since the test context selects the recording provider,
-it only needs the buffer and has no need for an SMTP server.
+A production `App` can select `FetchS3Object`, while a `TestApp` selects `FetchLocalObject`. These
+contexts represent applications, and each supplies the dependencies of its chosen provider. That
+lets `load_picture` accept both with the same bound. Since the test context selects the local
+provider, it only needs the folder and has no need for an S3 client.
 
 ## Traits, values, and types {#the-three-things-an-implementation-can-ask-for}
 
-The email providers ask the context for behavior through getter traits. Other implementations
+The storage providers ask the context for behavior through getter traits. Other implementations
 may need a field value or a type choice. CGP expresses these dependencies with attributes that
 generate ordinary Rust bounds:
 
