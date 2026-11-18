@@ -70,6 +70,31 @@ publishes it. Every other branch and every pull request runs the same build thro
 [`.github/workflows/test-deploy.yaml`](.github/workflows/test-deploy.yaml) without deploying, and that
 workflow also runs the `example-code` snippet tests.
 
+## Search engines
+
+Search engines learn about the site from its sitemap, which Docusaurus generates at `/sitemap.xml`,
+and Google reads it through Search Console. Bing and the engines that share its index can also be
+told about changed pages straight away through IndexNow, and `scripts/indexnow/submit.py` sends
+those notices.
+
+IndexNow checks that a submission comes from the site's owner by fetching a key file from the site.
+That file is `static/251047bc35e2154870673d415006ae6e.txt`, whose name and only content are the key.
+It looks like a stray file, but it has to stay deployed, and the script refuses to send anything
+while the live copy is missing or differs.
+
+After a deploy that changes pages, run the script from the repository's root with the URLs of those
+pages:
+
+```sh
+python3 scripts/indexnow/submit.py https://contextgeneric.dev/docs/quickstart/
+```
+
+Each URL must be on `https://contextgeneric.dev`, in the trailing-slash form the sitemap uses.
+`--dry-run` prints what would be sent and whether the live key file matches, without sending
+anything. `--all` sends every URL in the live sitemap together with the redirect stubs under
+`static/`. That suits only a relaunch or a move of many pages, because IndexNow asks sites to submit
+just the pages that changed.
+
 ## Writing a page
 
 Read the knowledge base's [website section](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/README.md)
