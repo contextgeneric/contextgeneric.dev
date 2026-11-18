@@ -13,6 +13,10 @@ perform part of its work. This separates a reusable transformation, such as scal
 the inner implementation that produces the result. Wiring can then combine the same wrapper with
 different inner providers, while both operate on the same context.
 
+This page builds a scaling wrapper, shows the bound that names its inner provider, and covers
+compositions named before any context uses them, the `UseContext` default, and what deeper
+compositions cost.
+
 ## Choosing is not the only thing you can do with a provider
 
 Scaling an area illustrates what a wrapper can share. Whatever calculation produces the base area,
@@ -203,8 +207,8 @@ These pages explain related forms of composition and their checks:
 - [`UseContext`](/docs/reference/providers/use_context): Forwarding to the context's consumer trait.
 - [`#[cgp_impl]`](/docs/reference/macros/cgp_impl): Provider definitions and explicit provider structs.
 - [`delegate_components!`](/docs/reference/macros/delegate_components): Wiring and `open` dispatch.
-- [Comparison: ML modules](/docs/comparisons/ml-modules): higher-order providers as functors, and the wiring table in place of functor application.
-- [Comparison: Policy-based design](/docs/comparisons/policy-based-design): a host template with policy parameters as a higher-order provider.
+- [Comparison: ML modules](/docs/comparisons/ml-modules): Higher-order providers as functors, with the wiring table in place of functor application.
+- [Comparison: Policy-based design](/docs/comparisons/policy-based-design): A host template with policy parameters as a higher-order provider.
 
 ---
 

@@ -14,6 +14,9 @@ so a missing dependency can remain unnoticed until a later method call. An expli
 that failure back beside the wiring, where the context and its selected providers are easier to
 inspect.
 
+This page follows one broken context from the unchecked error, through an explicit check, to the
+toolchain's output, then covers checks on provider layers and what a check does not prove.
+
 ## A context can be wrong and still compile
 
 Consider a provider that reads stored objects from the folder in a `local_dir` field. A context's
@@ -87,7 +90,8 @@ crate, the error can also appear a long way from the table that selected the pro
 ## Asking the question at a line you chose
 
 A check trait forces the compiler to verify a bound where you write its implementation. The basic
-technique uses an ordinary Rust [supertrait](/docs/reference/glossary#supertrait) and an empty implementation:
+technique uses an ordinary Rust [supertrait](/docs/reference/glossary#supertrait) and an empty
+implementation. Here it checks a working `App`, whose `local_dir` field satisfies the provider:
 
 ```rust
 trait CanUseApp: CanFetchStorageObject {}
@@ -133,7 +137,7 @@ refers to the generated `CanUseComponent` bound rather than the public trait.
 
 ## Reading it through the toolchain
 
-[`cargo cgp check`](https://github.com/contextgeneric/cargo-cgp) rewrites recognized CGP diagnostics
+[`cargo cgp check`](/docs/tooling/cargo-cgp/check) rewrites recognized CGP diagnostics
 with readable field names and dependency chains. For this missing-field case, its abbreviated output
 identifies both the unavailable trait and its cause:
 

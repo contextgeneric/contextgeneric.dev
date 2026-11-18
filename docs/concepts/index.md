@@ -11,8 +11,8 @@ description: 'The concept pages of Context-Generic Programming: coherence, the c
 connecting reusable implementations to the types that use them through compile-time wiring.
 Understanding that connection explains how providers obtain dependencies, how contexts choose shared
 types and values, and how implementations compose into larger operations. These pages develop those
-ideas alongside their costs. You can read them without running code, with familiarity with Rust
-traits and generic bounds as a starting point.
+ideas alongside their costs. You can read them without running code, and familiarity with Rust
+traits and generic bounds is enough to start.
 
 If you want to learn by building a program, the [tutorials](/docs/tutorials/hello) introduce the
 same ideas through working code. Once you need the syntax or precise behavior of a construct, the

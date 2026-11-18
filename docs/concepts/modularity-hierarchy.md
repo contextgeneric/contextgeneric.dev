@@ -216,7 +216,7 @@ delegate_components! {
 owning either context can supply that wiring even when it owns neither the component nor `String`.
 Ownership of the context satisfies Rust's rules for the wiring implementation.
 
-Making the value a parameter is what enables these independent application choices. A self-targeted
+Making the value a parameter enables these independent application choices. A self-targeted
 trait cannot gain that separation through wiring alone, because its interface still treats the
 context as the value. With the parameter-targeted interface, each context must cover the target
 types it uses, although generic entries can supply providers for whole families of targets.

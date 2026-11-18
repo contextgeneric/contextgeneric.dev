@@ -13,6 +13,9 @@ can return the same error type without deciding whether it is a string or a doma
 out calculations using the scalar type their application selects. Rust's associated types express
 that relationship, and CGP lets each context make the choice through wiring.
 
+This page starts from Rust's associated types, shows how wiring selects one and how providers share
+it, and ends with what an abstract type does not hide.
+
 ## Rust already has this
 
 Rust's associated types let a trait name a type that each implementer supplies. For example,
@@ -195,8 +198,8 @@ These pages explain related dependencies and the constructs used here:
   [`UseType`](/docs/reference/providers/use_type): Declaring and selecting an abstract type.
 - [`#[use_type]`](/docs/reference/attributes/use_type): Importing an associated type into a definition.
 - [`HasType`](/docs/reference/components/has_type): The built-in component for tagged type choices.
-- [Comparison: ML modules](/docs/comparisons/ml-modules): abstract-type components beside a signature's abstract `type t`, and what sealing CGP does not do.
-- [Comparison: Implicit parameters](/docs/comparisons/implicit-parameters): an abstract type as a functional dependency: a type the context determines.
+- [Comparison: ML modules](/docs/comparisons/ml-modules): Abstract-type components beside a signature's abstract `type t`, and the sealing CGP does not provide.
+- [Comparison: Implicit parameters](/docs/comparisons/implicit-parameters): An abstract type as a functional dependency, a type the context determines.
 
 ---
 

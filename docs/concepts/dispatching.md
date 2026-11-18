@@ -16,7 +16,9 @@ required fields or variants.
 
 [Extensible records](./extensible-records.md) and [extensible variants](./extensible-variants.md)
 expose data to generic code through field and variant traits. Dispatchers use those traits to run
-the computations that build a record or handle the current variant.
+the computations that build a record or handle the current variant. This page covers both
+directions, matching variants and building records, then the shortcut that forwards a trait from an
+enum to its payloads.
 
 ## Two directions, one idea
 

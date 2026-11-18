@@ -13,6 +13,9 @@ several contexts can reuse. Each context delegates a group of components to that
 the shared choices can update them together. The chosen providers still receive the original context
 and use its data; the bundle only connects them.
 
+This page defines a bundle, traces a call through it, explains why a bundle is checked through a
+context that uses it, and compares it with a namespace.
+
 ## A table whose target is not a context
 
 `delegate_components!` can give a wiring table to a provider type. The `new` keyword declares that
@@ -158,7 +161,7 @@ These pages explain related wiring choices and checks:
 - [Checking your wiring](./check-traits.md): Context checks and checks on individual providers.
 - [`delegate_components!`](/docs/reference/macros/delegate_components): The `new` and grouped-key forms.
 - [`check_components!`](/docs/reference/macros/check_components): The `#[check_providers]` form.
-- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): delegation through a bundle with `self` still bound to the context.
+- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): Delegation through a bundle, with `self` still bound to the context.
 
 ---
 

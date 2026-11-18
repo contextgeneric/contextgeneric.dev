@@ -14,6 +14,9 @@ them into a pipeline through wiring. The family has separate forms for synchrono
 fallible results, and owned or borrowed inputs, so a simple computation needs only the requirements
 its work calls for.
 
+This page explains the handler interface and its forms, how promotion lets one provider serve
+several of them, and how wiring builds pipelines and selects computations by tag.
+
 ## Computation as something a context decides
 
 An application-specific component gives a name to an operation, such as `fetch_storage_object` or
@@ -200,7 +203,7 @@ These pages explain composition and specify the handler interfaces:
 - [`#[cgp_computer]`](/docs/reference/macros/cgp_computer) and
   [`#[cgp_producer]`](/docs/reference/macros/cgp_producer): Generating providers from functions.
 - [Handler combinators](/docs/reference/providers/handler): Composition and promotion adapters.
-- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): the handler family beside effect handlers, and the continuation CGP never captures.
+- [Comparison: Algebraic effects](/docs/comparisons/algebraic-effects): The handler family beside effect handlers, and the continuation CGP never captures.
 
 ---
 

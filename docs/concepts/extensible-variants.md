@@ -15,7 +15,9 @@ checks that every variant is covered, even when independently written handlers s
 
 This uses the same field representation as [extensible records](./extensible-records.md), but an
 enum contains one alternative at a time. That difference changes how generic code takes a value
-apart and proves that it has handled every possibility.
+apart and proves that it has handled every possibility. This page follows that difference from the
+variant list a derive exposes, through extraction that proves coverage, to handlers shared across
+enums and casts between them.
 
 ## The problem a `match` builds in
 
@@ -181,7 +183,7 @@ These pages explain the related representations and operations:
   [`FromVariant`](/docs/reference/traits/variant/from_variant): Construction by variant name.
 - [`CanUpcast`](/docs/reference/traits/casting/can_upcast) and
   [`CanDowncast`](/docs/reference/traits/casting/can_downcast): Widening and narrowing compatible enums.
-- [Comparison: Row polymorphism](/docs/comparisons/row-polymorphism): variants as row-typed sums: injection, branching, and the expression problem.
+- [Comparison: Row polymorphism](/docs/comparisons/row-polymorphism): Variants as row-typed sums, with injection, branching, and the expression problem.
 
 ---
 

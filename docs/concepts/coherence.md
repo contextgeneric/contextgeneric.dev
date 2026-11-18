@@ -198,7 +198,7 @@ delegate_components! { String  { EncoderComponent: EncodeAsText } }
 delegate_components! { Vec<u8> { EncoderComponent: EncodeAsHex  } }
 ```
 
-Rust's rule still holds. What changes is where the choice is recorded: coherence is scoped to each
+Rust's rule still holds, but the choice now lives in the wiring: coherence is scoped to each
 provider type, and each value type names one of them.
 
 ![Diagram: both blanket impls match String, so Rust rejects the second with E0119. CGP gives each encoder its own provider type, so String is wired to EncodeAsText and Vec of bytes to EncodeAsHex, and both impls coexist while each value type names one provider.](/img/coherence-scoped.svg)

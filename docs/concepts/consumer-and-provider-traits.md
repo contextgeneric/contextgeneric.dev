@@ -188,7 +188,7 @@ where
 }
 ```
 
-Satisfying `Context: StorageObjectFetcher<Context>` takes us to the second implementation. It
+Satisfying `Context: StorageObjectFetcher<Context>` leads to the second implementation. It
 gives a delegating type the provider trait of the type selected by its table. Here,
 `DelegateComponent` represents the table entry, and its `Delegate` associated type names the
 selected provider:

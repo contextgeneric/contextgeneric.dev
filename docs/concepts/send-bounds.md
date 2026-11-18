@@ -14,6 +14,9 @@ leaves that guarantee open. CGP's `#[async_trait]` returns an unboxed future wit
 expose the stronger guarantee, with forwarding implementations that verify it for concrete context
 and API pairs.
 
+This page shows what the async rewrite promises, why spawning needs more, and how a companion trait
+with concrete forwarding implementations supplies the guarantee.
+
 ## What the async trait promises
 
 CGP's `#[async_trait]` rewrites an async method into a method returning `impl Future`. This

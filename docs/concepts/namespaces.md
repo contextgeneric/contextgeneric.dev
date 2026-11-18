@@ -8,10 +8,13 @@ description: 'How a namespace names and routes shared wiring, how contexts inher
 # Namespaces
 
 [Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
-namespaces keep the table that selects them short. Namespaces give shared wiring a name that
-contexts can inherit. They organize component lookups under paths, allowing a shared table to bind
+namespaces keep the table that selects them short. A namespace gives shared wiring a name that
+contexts can inherit. It organizes component lookups under paths, allowing a shared table to bind
 the choices its contexts have in common and leave other destinations for each context to fill. The
 distinction matters: a context can fill an unbound path, but it cannot replace an inherited binding.
+
+This page starts from repeated wiring, follows a lookup along its path, shows why a bound entry
+cannot be overridden, and ends with presets and per-type dispatch.
 
 ## Repeated wiring obscures the differences
 

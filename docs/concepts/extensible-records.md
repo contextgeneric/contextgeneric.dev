@@ -14,6 +14,9 @@ struct, so several independent providers can supply parts of a larger value. As 
 assembled, the builder's type tracks which fields are present, letting the compiler check that
 construction is complete.
 
+This page starts from a struct literal, shows the field list a derive exposes, and follows a
+builder that merges records into a target the compiler checks.
+
 ## What a closed struct cannot do
 
 A struct literal assembles a known type by supplying its fields in one expression. Individual field
@@ -165,8 +168,8 @@ These pages explain related data operations and the traits used here:
   [`HasBuilder`](/docs/reference/traits/builder/has_builder): Partial records and construction.
 - [`HasFields`](/docs/reference/traits/shape/has_fields), [`Field`](/docs/reference/types/field), and
   [`Symbol!`](/docs/reference/macros/symbol): The types that describe a record's fields.
-- [Comparison: Row polymorphism](/docs/comparisons/row-polymorphism): records as rows: containment, concatenation, and presence flags.
-- [Comparison: Reflection](/docs/comparisons/reflection): a derived shape beside runtime and compile-time reflection descriptors.
+- [Comparison: Row polymorphism](/docs/comparisons/row-polymorphism): Records as rows, with containment, concatenation, and presence flags.
+- [Comparison: Reflection](/docs/comparisons/reflection): A derived shape beside runtime and compile-time reflection descriptors.
 
 ---
 

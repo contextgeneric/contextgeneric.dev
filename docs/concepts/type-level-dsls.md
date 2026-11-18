@@ -16,7 +16,9 @@ execute when called.
 
 The [handler](./handlers.md) family's `Code` parameter gives the program type a place in a
 computation's interface. An interpreter can use the structure of that type to choose and combine
-providers for the program's parts.
+providers for the program's parts. This page builds a small arithmetic language, shows what the
+compiler resolves and what still runs, and covers extending the language and adding a surface
+syntax.
 
 ## A program represented as a type
 

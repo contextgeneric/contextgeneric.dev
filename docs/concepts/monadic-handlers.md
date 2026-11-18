@@ -8,14 +8,15 @@ description: 'How monadic handlers put a pipeline continuation rule in a type, t
 # Monadic handlers
 
 [Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and
-monadic handlers make the rule that joins them a choice too. Monadic handlers separate a pipeline's
+monadic handlers make the rule that joins them a choice too. They separate a pipeline's
 computations from the rule that decides whether another step should run. The same composition
 machinery can stop at the first error, stop at the first success, or pass every output onward. A
 monad supplies that continuation rule, while the providers supply the work performed at each step.
 
 Ordinary [handler composition](./handlers.md) already connects outputs to inputs. Monadic
 composition extends that connection to cases where the next step needs a value inside a result,
-or where one branch should end the pipeline.
+or where one branch should end the pipeline. This page shows where direct composition stops, how a
+monad marker sets the continuation rule, and how the resulting pipeline is wired.
 
 ## When direct composition does not fit
 
