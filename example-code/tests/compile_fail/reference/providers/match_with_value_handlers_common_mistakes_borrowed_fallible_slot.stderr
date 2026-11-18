@@ -6,24 +6,24 @@ error[E0277]: the trait bound `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<S
    |
    = help: the trait `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>` is not implemented for `MatchWithHandlersRef<Cons<ExtractFieldAndHandle<Symbol<6, cgp::macro_prelude::Chars<'C', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Cons<ExtractFieldAndHandle<Symbol<9, cgp::macro_prelude::Chars<'R', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'c', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, HandleFieldValue<ComputeAreaOfRef>>, Nil>>>`
 help: `MatchWithHandlersRef<Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/match_with_handlers_ref.rs:13:1
+  --> $CARGO/cgp-dispatch-$VERSION/src/providers/with_handlers/match_with_handlers_ref.rs
    |
-13 | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, &'a Input>
-14 | |     for MatchWithHandlersRef<Handlers>
-15 | | where
-16 | |     Input: HasExtractorRef,
-17 | |     DispatchMatchers<Handlers>:
-18 | |         Computer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
-19 | |     Remainder: FinalizeExtract,
+   | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> Computer<Context, Code, &'a Input>
+   | |     for MatchWithHandlersRef<Handlers>
+   | | where
+   | |     Input: HasExtractorRef,
+   | |     DispatchMatchers<Handlers>:
+   | |         Computer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
+   | |     Remainder: FinalizeExtract,
    | |_______________________________^ `IsProviderFor<ComputerComponent, Context, (Code, &Input)>`
 ...
-29 | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> AsyncComputer<Context, Code, &'a Input>
-30 | |     for MatchWithHandlersRef<Handlers>
-31 | | where
-32 | |     Input: HasExtractorRef,
-33 | |     DispatchMatchers<Handlers>:
-34 | |         AsyncComputer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
-35 | |     Remainder: FinalizeExtract,
+   | / impl<'a, Context, Code, Input, Output, Remainder, Handlers> AsyncComputer<Context, Code, &'a Input>
+   | |     for MatchWithHandlersRef<Handlers>
+   | | where
+   | |     Input: HasExtractorRef,
+   | |     DispatchMatchers<Handlers>:
+   | |         AsyncComputer<Context, Code, Input::ExtractorRef<'a>, Output = Result<Output, Remainder>>,
+   | |     Remainder: FinalizeExtract,
    | |_______________________________^ `IsProviderFor<AsyncComputerComponent, Context, (Code, &Input)>`
    = note: required for `UseInputDelegate<MatchWithFieldHandlersInputsRef<HandleFieldValue<ComputeAreaOfRef>>>` to implement `IsProviderFor<HandlerComponent, App, ((), &'a Shape)>`
    = note: 1 redundant requirement hidden

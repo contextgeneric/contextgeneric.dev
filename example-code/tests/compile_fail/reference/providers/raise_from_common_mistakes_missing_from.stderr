@@ -5,12 +5,12 @@ error[E0277]: the trait bound `RaiseFrom: ErrorRaiser<App, ParseIntError>` is no
    |         ^^^^^^^^^^^^^^^^^^^ the trait `ErrorRaiser<App, ParseIntError>` is not implemented for `RaiseFrom`
    |
 help: the trait `ErrorRaiser<Context, E>` is conditionally implemented for `RaiseFrom`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-error-extra/src/impls/raise_from.rs:5:1
+  --> $CARGO/cgp-error-extra-$VERSION/src/impls/raise_from.rs
    |
- 5 | / impl<Context, E> ErrorRaiser<Context, E> for RaiseFrom
- 6 | | where
- 7 | |     Context: HasErrorType,
- 8 | |     Context::Error: From<E>,
+   | / impl<Context, E> ErrorRaiser<Context, E> for RaiseFrom
+   | | where
+   | |     Context: HasErrorType,
+   | |     Context::Error: From<E>,
    | |_____________________-------^
    |                       |
    |                       unsatisfied requirement introduced here: `<App as cgp::prelude::HasErrorType>::Error: From<ParseIntError>`

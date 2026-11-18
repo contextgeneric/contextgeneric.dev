@@ -14,7 +14,7 @@ error[E0599]: the method `finalize_extract_result` exists for enum `Result<Recta
            `__PartialShape<IsPresent, IsVoid>: FinalizeExtract`
            which is required by `Result<Rectangle, __PartialShape<IsPresent, IsVoid>>: FinalizeExtractResult`
 note: the trait `FinalizeExtract` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:73:1
+  --> $CARGO/cgp-field-$VERSION/src/traits/extract_field.rs
    |
-73 | pub trait FinalizeExtract {
+   | pub trait FinalizeExtract {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^

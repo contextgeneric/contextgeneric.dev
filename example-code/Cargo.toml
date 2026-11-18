@@ -6,8 +6,8 @@ publish = false
 description = "Compiled counterparts of the code shown on contextgeneric.dev. Not part of the site."
 
 [dependencies]
-# The `cgp` release the site documents, taken from the repository until it is on crates.io.
-cgp = { git = "https://github.com/contextgeneric/cgp.git", features = ["alloc"] }
+# The `cgp` release the site documents.
+cgp = { version = "0.8.0", features = ["alloc"] }
 
 [dev-dependencies]
 anyhow = "1.0.104"
@@ -16,8 +16,3 @@ futures = "0.3.34"
 serde = { version = "1.0.229", features = ["derive"] }
 tokio = { version = "1.54.1", features = ["fs", "macros", "rt-multi-thread"] }
 trybuild = "1.0.125"
-
-# The site documents the `cgp` release its sibling checkout prepares, which the repository's `main` does
-# not hold yet. Remove this once that release is on `main`.
-[patch."https://github.com/contextgeneric/cgp.git"]
-cgp = { path = "../../cgp/crates/main/cgp" }

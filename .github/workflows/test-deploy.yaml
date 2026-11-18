@@ -55,17 +55,12 @@ jobs:
     env:
       CARGO_TERM_COLOR: always
     steps:
-      # `example-code` patches `cgp` to a sibling checkout at `../../cgp`, so the
-      # two repositories are checked out side by side.
+      # `example-code` takes `cgp` from crates.io, so the website is the only
+      # checkout.
       - name: Check out the website
         uses: actions/checkout@v4
         with:
           path: contextgeneric.dev
-      - name: Check out cgp beside it
-        uses: actions/checkout@v4
-        with:
-          repository: contextgeneric/cgp
-          path: cgp
       # `example-code/rust-toolchain.toml` pins the compiler the snapshots are
       # blessed with; rustup installs that channel from this directory.
       - name: Install the pinned Rust toolchain
@@ -73,8 +68,7 @@ jobs:
         run: rustup toolchain install
       # The pages' snippets are compiled here, so a page cannot drift from the
       # library without a red build. The compile-fail snapshots are skipped
-      # because each quotes the absolute path of the `cgp` checkout, which only
-      # matches where it was blessed; run them locally with `cargo test`.
+      # here; run them locally with `cargo test`.
       - name: Run the snippet tests
         working-directory: contextgeneric.dev/example-code
         run: cargo test -- --skip rejected_snippets_do_not_compile

@@ -17,8 +17,7 @@ The code lives in **integration tests**, which a plain `cargo check` skips; use 
 (or `cargo check --tests`) for a compile-only pass. The crate has no library or binary target.
 
 CI runs the same suite with the compile-fail snapshots skipped
-(`cargo test -- --skip rejected_snippets_do_not_compile`), because each snapshot quotes the absolute
-path of the `cgp` checkout and only matches where it was blessed. Run the full command locally.
+(`cargo test -- --skip rejected_snippets_do_not_compile`). Run the full command locally.
 
 ## The layout mirrors `docs/`
 
@@ -47,7 +46,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 | `docs/comparisons/` | complete — one file per page under `tests/comparisons/`; only the CGP side of each page is checked here, since the other language's snippets are compiled against the toolchain the page names |
 | `docs/tutorials/` | partial — `area-calculation/checking.md`, whose three quoted diagnostics are the reason it is mirrored, and `storage-backend.md`, one module per step assembled from the page's blocks, with its deliberate mistake at `tests/compile_fail/tutorials/`; the rest is filled in lazily |
 | `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |
-| `blog/2026-05-10-v0.8.0-release.md` | complete — `tests/blog/v0_8_0_release.rs` checks each wiring stage, the default-binding alternatives, and the migrated configuration; the deliberate missing-field error is a compile-fail fixture |
+| `blog/2026-11-18-v0.8.0-release.md` | complete — `tests/blog/v0_8_0_release.rs` checks each wiring stage, the default-binding alternatives, and the migrated configuration; the deliberate missing-field error is a compile-fail fixture |
 | front page (`src/pages/index.tsx`) | complete — `tests/front_page.rs`, a standalone binary for the hero's CGP block, with the hero's rejected block at `tests/compile_fail/front_page/`; the text between each `front-page:` marker pair is exactly what the page shows, the rejected block starts at its fixture's first line so the page's quoted `E0119` names the lines the page numbers, and a test compares that quote with the fixture's snapshot |
 | `docs/overview.md` | complete — `tests/overview.rs`, a standalone binary with one module per key feature and stand-ins for the storage clients and the database pool the page names; the type-safe-wiring section's missing-field program is at `tests/compile_fail/overview/` |
 | remaining orientation pages | none yet |
@@ -105,11 +104,11 @@ them after a bump rather than editing them by hand:
 TRYBUILD=overwrite cargo test --test compile_fail_tests
 ```
 
-A snapshot that quotes a line from the `cgp` checkout carries that checkout's absolute path, since the
-manifest depends on `cgp` by path. The crate's own files and the standard library are written as
-`tests/…` and `$RUST/…`, so a checkout elsewhere fails only the snapshots naming `cgp`, and re-blessing
-writes the new path in. A snapshot also quotes rustc's own wording, so
-[`rust-toolchain.toml`](rust-toolchain.toml) pins the compiler and a bump re-blesses the suite.
+A snapshot that quotes a line from `cgp` writes its path as `$CARGO/…`, the registry source trybuild
+normalizes, just as the crate's own files and the standard library are written as `tests/…` and
+`$RUST/…`, so no snapshot depends on where the checkout lives. A snapshot also quotes rustc's own
+wording, so [`rust-toolchain.toml`](rust-toolchain.toml) pins the compiler and a bump re-blesses the
+suite.
 
 ## Diagnostic capture programs
 
@@ -150,8 +149,8 @@ rejected snippet means writing a fixture under `tests/compile_fail/`, blessing i
 
 ## The `cgp` version
 
-The crate checks the pages against the 0.8.0 release before it is on crates.io. Its manifest names the
-`cgp` repository and patches it to a sibling checkout at `../../cgp`, which holds that release, so `cargo
-test` needs that checkout on the release's branch. Once the release is on the repository's `main`, remove
-the patch, and once 0.8.0 is published, pin `cgp = "0.8.0"` from crates.io instead, alongside the version
-pins in the tutorials. Each step changes the paths in the `.stderr` files, so re-bless them.
+The crate checks the pages against the `cgp` release the site documents, pinned from crates.io as
+`cgp = "0.8.0"`, the same pin the Quickstart and the tutorials show. The `.stderr` files quote that
+release's sources through trybuild's `$CARGO` path, so they do not depend on the machine. At the next
+release, change the pin with the pages' pins and re-bless the snapshots, since quoted line numbers
+can move.

@@ -1,19 +1,19 @@
 error[E0599]: no method named `finalize_extract_result` found for enum `Result<T, E>` in the current scope
-   --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_missing_import.rs:26:10
-    |
- 23 |     let _circle = shape
- 24 |         .to_extractor()
- 25 |         .extract_field(PhantomData::<Symbol!("Circle")>)
- 26 |         .finalize_extract_result();
-    |          ^^^^^^^^^^^^^^^^^^^^^^^ method not found in `Result<Circle, __PartialShape<IsVoid>>`
-    |
-   ::: /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:101:8
-    |
-101 |     fn finalize_extract_result(self) -> Self::Output;
-    |        ----------------------- the method is available for `Result<Circle, __PartialShape<IsVoid>>` here
-    |
-    = help: items from traits can only be used if the trait is in scope
+  --> tests/compile_fail/reference/traits/finalize_extract_result_common_mistakes_missing_import.rs:26:10
+   |
+23 |     let _circle = shape
+24 |         .to_extractor()
+25 |         .extract_field(PhantomData::<Symbol!("Circle")>)
+26 |         .finalize_extract_result();
+   |          ^^^^^^^^^^^^^^^^^^^^^^^ method not found in `Result<Circle, __PartialShape<IsVoid>>`
+   |
+  ::: $CARGO/cgp-field-$VERSION/src/traits/extract_field.rs
+   |
+   |     fn finalize_extract_result(self) -> Self::Output;
+   |        ----------------------- the method is available for `Result<Circle, __PartialShape<IsVoid>>` here
+   |
+   = help: items from traits can only be used if the trait is in scope
 help: trait `FinalizeExtractResult` which provides `finalize_extract_result` is implemented but not in scope; perhaps you want to import it
-    |
-  1 + use cgp::cgp_core::cgp_field::traits::FinalizeExtractResult;
-    |
+   |
+ 1 + use cgp::cgp_core::cgp_field::traits::FinalizeExtractResult;
+   |

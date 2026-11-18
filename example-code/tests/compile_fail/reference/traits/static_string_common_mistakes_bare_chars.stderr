@@ -1,17 +1,17 @@
 error[E0277]: the trait bound `cgp::macro_prelude::Chars<'a', Nil>: StaticString` is not satisfied
-  --> tests/compile_fail/reference/traits/static_string_common_mistakes_bare_chars.rs:6:25
-   |
- 6 | pub const NAME: &str = <Chars<'a', Nil> as StaticString>::VALUE;
-   |                         ^^^^^^^^^^^^^^^ the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', Nil>`
-   |
+ --> tests/compile_fail/reference/traits/static_string_common_mistakes_bare_chars.rs:6:25
+  |
+6 | pub const NAME: &str = <Chars<'a', Nil> as StaticString>::VALUE;
+  |                         ^^^^^^^^^^^^^^^ the trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes` is not implemented for `cgp::macro_prelude::Chars<'a', Nil>`
+  |
 help: the following other types implement trait `cgp::cgp_core::cgp_field::traits::static_string::StaticBytes`
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/static_string.rs:34:1
-   |
-34 | / impl<const LEN: usize, Chars> StaticBytes for Symbol<LEN, Chars>
-35 | | where
-36 | |     Chars: MaybeChars,
-   | |______________________^ `Symbol<LEN, Chars>`
+ --> $CARGO/cgp-field-$VERSION/src/traits/static_string.rs
+  |
+  | / impl<const LEN: usize, Chars> StaticBytes for Symbol<LEN, Chars>
+  | | where
+  | |     Chars: MaybeChars,
+  | |______________________^ `Symbol<LEN, Chars>`
 ...
-41 |   impl StaticBytes for Nil {
-   |   ^^^^^^^^^^^^^^^^^^^^^^^^ `Nil`
-   = note: required for `cgp::macro_prelude::Chars<'a', Nil>` to implement `StaticString`
+  |   impl StaticBytes for Nil {
+  |   ^^^^^^^^^^^^^^^^^^^^^^^^ `Nil`
+  = note: required for `cgp::macro_prelude::Chars<'a', Nil>` to implement `StaticString`

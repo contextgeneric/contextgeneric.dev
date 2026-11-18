@@ -5,12 +5,12 @@ error[E0004]: non-exhaustive patterns: `&Either::Right(Either::Right(_))` not co
    |           ^^^^^ pattern `&Either::Right(Either::Right(_))` not covered
    |
 note: `Either<u32, Either<bool, Void>>` defined here
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/types/sum.rs:6:1
+  --> $CARGO/cgp-field-$VERSION/src/types/sum.rs
    |
- 6 | pub enum Either<Head, Tail> {
+   | pub enum Either<Head, Tail> {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ...
-10 |     Right(Tail),
+   |     Right(Tail),
    |     -----
    |     |
    |     not covered

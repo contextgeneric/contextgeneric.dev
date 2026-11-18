@@ -19,9 +19,9 @@ note: the following trait bounds were not satisfied:
  6 | pub trait HasName {
    |           ^^^^^^^
 note: the trait `cgp::macro_prelude::HasField` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/has_field.rs:10:1
+  --> $CARGO/cgp-field-$VERSION/src/traits/has_field.rs
    |
-10 | pub trait HasField<Tag> {
+   | pub trait HasField<Tag> {
    | ^^^^^^^^^^^^^^^^^^^^^^^
    = help: items from traits can only be used if the trait is implemented and in scope
 note: `HasName` defines an item `name`, perhaps you need to implement it

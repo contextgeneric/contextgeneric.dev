@@ -21,9 +21,9 @@ error[E0599]: the method `downcast` exists for enum `__PartialFooBarBaz<IsVoid, 
            `&mut __PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: HasExtractor`
            which is required by `&mut __PartialFooBarBaz<IsVoid, IsPresent, IsPresent>: CanDowncast<_>`
 note: the trait `HasExtractor` must be implemented
-  --> /home/soares/development/context-generic/cgp/crates/core/cgp-field/src/traits/extract_field.rs:10:1
+  --> $CARGO/cgp-field-$VERSION/src/traits/extract_field.rs
    |
-10 | pub trait HasExtractor {
+   | pub trait HasExtractor {
    | ^^^^^^^^^^^^^^^^^^^^^^
    = help: items from traits can only be used if the trait is implemented and in scope
    = note: the following trait defines an item `downcast`, perhaps you need to implement it:

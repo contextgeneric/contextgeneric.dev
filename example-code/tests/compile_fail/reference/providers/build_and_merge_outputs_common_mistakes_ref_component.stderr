@@ -6,32 +6,32 @@ error[E0277]: the trait bound `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDa
    |
    = help: the trait `IsProviderFor<ComputerRefComponent, AppBuilder, ((), ())>` is not implemented for `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDatabaseConfig>, Cons<BuildAndMerge<BuildHttpConfig>, Nil>>>`
 help: `BuildWithHandlers<Output, Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
-  --> /home/soares/development/context-generic/cgp/crates/extra/cgp-dispatch/src/providers/with_handlers/build_with_handlers.rs:17:1
+  --> $CARGO/cgp-dispatch-$VERSION/src/providers/with_handlers/build_with_handlers.rs
    |
-17 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Computer<Context, Code, Input>
-18 | |     for BuildWithHandlers<Output, Handlers>
-19 | | where
-20 | |     Output: HasBuilder<Builder = Builder>,
-21 | |     PipeHandlers<Handlers>: Computer<Context, Code, Builder, Output = Res>,
-22 | |     Res: FinalizeBuild<Target = Output>,
+   | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Computer<Context, Code, Input>
+   | |     for BuildWithHandlers<Output, Handlers>
+   | | where
+   | |     Output: HasBuilder<Builder = Builder>,
+   | |     PipeHandlers<Handlers>: Computer<Context, Code, Builder, Output = Res>,
+   | |     Res: FinalizeBuild<Target = Output>,
    | |________________________________________^ `IsProviderFor<ComputerComponent, Context, (Code, Input)>`
 ...
-32 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> TryComputer<Context, Code, Input>
-33 | |     for BuildWithHandlers<Output, Handlers>
-34 | | where
-35 | |     Context: HasErrorType,
-36 | |     Output: HasBuilder<Builder = Builder>,
-37 | |     PipeHandlers<Handlers>: TryComputer<Context, Code, Builder, Output = Res>,
-38 | |     Res: FinalizeBuild<Target = Output>,
+   | / impl<Context, Code, Input, Output, Builder, Handlers, Res> TryComputer<Context, Code, Input>
+   | |     for BuildWithHandlers<Output, Handlers>
+   | | where
+   | |     Context: HasErrorType,
+   | |     Output: HasBuilder<Builder = Builder>,
+   | |     PipeHandlers<Handlers>: TryComputer<Context, Code, Builder, Output = Res>,
+   | |     Res: FinalizeBuild<Target = Output>,
    | |________________________________________^ `IsProviderFor<TryComputerComponent, Context, (Code, Input)>`
 ...
-52 | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Handler<Context, Code, Input>
-53 | |     for BuildWithHandlers<Output, Handlers>
-54 | | where
-55 | |     Context: HasErrorType,
-56 | |     Output: HasBuilder<Builder = Builder>,
-57 | |     PipeHandlers<Handlers>: Handler<Context, Code, Builder, Output = Res>,
-58 | |     Res: FinalizeBuild<Target = Output>,
+   | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Handler<Context, Code, Input>
+   | |     for BuildWithHandlers<Output, Handlers>
+   | | where
+   | |     Context: HasErrorType,
+   | |     Output: HasBuilder<Builder = Builder>,
+   | |     PipeHandlers<Handlers>: Handler<Context, Code, Builder, Output = Res>,
+   | |     Res: FinalizeBuild<Target = Output>,
    | |________________________________________^ `IsProviderFor<HandlerComponent, Context, (Code, Input)>`
    = note: required for `BuildAndMergeOutputs<App, Cons<BuildDatabaseConfig, Cons<BuildHttpConfig, Nil>>>` to implement `IsProviderFor<ComputerRefComponent, AppBuilder, ((), ())>`
    = note: required for `AppBuilder` to implement `CanUseComponent<ComputerRefComponent, ((), ())>`
