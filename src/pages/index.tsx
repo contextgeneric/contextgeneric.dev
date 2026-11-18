@@ -217,32 +217,22 @@ function WhyOnce(): ReactNode {
         </Heading>
         <div className={styles.prose}>
           <p>
-            Both encoders apply to <code>String</code>, so a call to <code>encode()</code> would
-            leave the compiler with a choice it cannot make. Normally, Rust resolves trait
-            dependencies for you: when an implementation requires <code>T: Display</code>, the
-            compiler finds the <code>Display</code> implementation and resolves its dependencies
-            in turn. That lookup needs an unambiguous answer. Rust's overlap and orphan rules
-            preserve this guarantee, known as coherence.
+            Both encoders apply to <code>String</code>, so Rust could not tell which one a call to{' '}
+            <code>encode()</code> means. The refusal protects something useful: when an
+            implementation requires <code>T:&nbsp;Display</code>, the compiler finds the one{' '}
+            <code>Display</code> implementation for you, and coherence keeps that answer unique.
           </p>
           <p>
-            To keep both implementations in plain Rust, you need to give the compiler a way to
-            distinguish them, such as a newtype for each case or a marker struct with a helper trait.{' '}
-            <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
-            what they cost in practice.
+            Plain Rust keeps both only through a workaround, such as a newtype for each case. CGP
+            instead gives each implementation its own <strong>provider</strong> type, owned by the
+            crate that writes it, and the wiring picks one provider per type, so every lookup still
+            has one answer. <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains
+            the rules and the workarounds.
           </p>
           <p>
-            CGP gives each implementation a name through a <strong>provider</strong> type, such as{' '}
-            <code>EncodeAsText</code> or <code>EncodeAsBytes</code>. Each provider is a type of its
-            own, owned by the crate that writes it, so the providers can coexist under Rust's
-            overlap and orphan rules. Wiring then selects one provider for each type that uses the trait, so
-            the compiler still has an unambiguous answer.
-          </p>
-          <p>
-            In the example above, the wired types are the data being encoded, so each gets one
-            choice for the whole program. To make that choice per application, you define a type
-            that represents the application and wire its providers. CGP calls this type a{' '}
-            <strong>context</strong>. You can define as many contexts as you need, each with its own
-            choices.{' '}
+            Here the wired types are the data, so each gets one choice for the whole program. To
+            choose per application, you wire a type that stands for the application, called a{' '}
+            <strong>context</strong>, and you can define as many as you need.{' '}
             <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
             shows an application and its test choosing different providers.
           </p>

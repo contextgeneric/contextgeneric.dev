@@ -364,6 +364,7 @@ html[data-theme='dark'] .heroArtFrame {
   letter-spacing: -0.01em;
   color: var(--cgp-heading);
   margin: 0;
+  text-wrap: balance;
 }
 
 .captionQuote::before {
@@ -392,6 +393,9 @@ html[data-theme='dark'] .heroArtFrame {
   font-size: 2rem;
   line-height: 1.15;
   margin: 0 0 1.25rem;
+  /* A title that wraps, as section 1's does in its narrow column and every title does on a phone,
+     splits into lines of even length rather than leaving one word on the last line. */
+  text-wrap: balance;
 }
 
 .prose {
