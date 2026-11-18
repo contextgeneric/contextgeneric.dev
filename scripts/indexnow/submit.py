@@ -12,11 +12,11 @@ Run it from the repository's root after a deploy, naming the changed pages:
 `--all` submits every URL in the live sitemap and every redirect stub under `static/`, which suits
 only a relaunch or migration; after one, submit only the pages that changed. `--dry-run` prints the
 list and whether the live key file matches, without sending anything. `--from` reads the sitemap
-and the key file from another origin, such as `npm run serve`, and `--endpoint` sends to another
-IndexNow endpoint.
+from another origin, such as `npm run serve`, and `--endpoint` sends to another IndexNow endpoint.
 
-It refuses a URL on another host, and refuses to send while the live key file is missing or differs
-from the one in `static/`. It exits 0 when the endpoint answers 200 or 202, and 1 otherwise.
+It refuses a URL on another host, and refuses to send while the key file on the live site is
+missing or differs from the one in `static/`, since the engines check the live site. It exits 0
+when the endpoint answers 200 or 202, and 1 otherwise.
 """
 import argparse
 import json
@@ -62,8 +62,14 @@ def fetch(url):
     try:
         with urllib.request.urlopen(url, timeout=30) as response:
             return response.read().decode()
-    except (urllib.error.URLError, TimeoutError):
+    except (OSError, UnicodeDecodeError):
         return None
+
+
+def live_key_matches(key):
+    """Return whether the live site serves the key file the engines will check."""
+    live = fetch(f"{SITE}/{key}.txt")
+    return live is not None and live.strip() == key
 
 
 def stub_urls():
@@ -90,7 +96,7 @@ def main():
     parser.add_argument("urls", nargs="*", help="the changed pages' URLs")
     parser.add_argument("--all", action="store_true", help="every sitemap URL and redirect stub")
     parser.add_argument("--dry-run", action="store_true", help="print the list without sending")
-    parser.add_argument("--from", dest="origin", default=SITE, help="where to read the sitemap and key")
+    parser.add_argument("--from", dest="origin", default=SITE, help="where to read the sitemap")
     parser.add_argument("--endpoint", default=ENDPOINT, help="the IndexNow endpoint")
     args = parser.parse_args()
 
@@ -99,14 +105,13 @@ def main():
     key = find_key()
     urls = all_urls(args.origin.rstrip("/")) if args.all else args.urls
 
-    foreign = [url for url in urls if urlsplit(url).scheme != "https" or urlsplit(url).netloc != HOST]
+    foreign = [u for u in urls if urlsplit(u).scheme != "https" or urlsplit(u).netloc != HOST]
     if foreign:
         sys.exit("not on https://" + HOST + ":\n  " + "\n  ".join(foreign))
     if len(urls) > MAX_URLS:
         sys.exit(f"{len(urls)} URLs exceed IndexNow's limit of {MAX_URLS} per request")
 
-    live = fetch(f"{args.origin.rstrip('/')}/{key}.txt")
-    key_ok = live is not None and live.strip() == key
+    key_ok = live_key_matches(key)
     key_status = "matches" if key_ok else "is missing or differs from static/"
     count = f"{len(urls)} URL" if len(urls) == 1 else f"{len(urls)} URLs"
 
@@ -131,8 +136,8 @@ def main():
             status = response.status
     except urllib.error.HTTPError as error:
         status = error.code
-    except urllib.error.URLError as error:
-        sys.exit(f"not sent: {error.reason}")
+    except OSError as error:
+        sys.exit(f"not sent: {getattr(error, 'reason', error)}")
     print(f"{count} sent to {args.endpoint}: {status} {MEANINGS.get(status, 'unexpected')}")
     return 0 if status in (200, 202) else 1
 

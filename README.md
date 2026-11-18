@@ -72,10 +72,10 @@ workflow also runs the `example-code` snippet tests.
 
 ## Search engines
 
-Search engines learn about the site from its sitemap, which Docusaurus generates at `/sitemap.xml`,
-and Google reads it through Search Console. Bing and the engines that share its index can also be
-told about changed pages straight away through IndexNow, and `scripts/indexnow/submit.py` sends
-those notices.
+Search engines learn about the site from its sitemap, which Docusaurus generates at `/sitemap.xml`
+and `static/robots.txt` names for every crawler, and Google also reads it through Search Console.
+Bing and the engines that share its index can be told about changed pages straight away through
+IndexNow, and `scripts/indexnow/submit.py` sends those notices.
 
 IndexNow checks that a submission comes from the site's owner by fetching a key file from the site.
 That file is `static/251047bc35e2154870673d415006ae6e.txt`, whose name and only content are the key.
