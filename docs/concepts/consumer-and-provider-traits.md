@@ -101,7 +101,7 @@ pub trait StorageObjectFetcher<Context> {
 
 The diagram shows the two roles and the provider structs that implement the second one.
 
-![Diagram: one trait splits into a consumer trait that callers use and a provider trait that implementations target. Two provider structs implement the provider trait, and the context's wiring selects one of them.](/img/consumer-provider-split.svg)
+![Diagram: one trait splits into a consumer trait that callers use and a provider trait that implementations target. Two provider structs implement the provider trait, and a call through the consumer trait goes through the context's wiring, which selects one of them.](/img/consumer-provider-split.svg)
 
 The implementations can now keep their original context bounds while using separate marker
 structs as `Self`. With the method bodies omitted, their declarations look like this:
