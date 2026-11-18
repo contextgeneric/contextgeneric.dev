@@ -476,7 +476,7 @@ Furthermore, the use of extensible data types applies not only to the traits in 
 
 ### Full Example
 
-The complete working example of this customized serialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/messages.rs).
+The complete working example of this customized serialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/v0.2.0/crates/cgp-serde-tests/src/tests/messages.rs).
 
 ---
 
@@ -646,7 +646,7 @@ As we can see, we have successfully utilized the custom arena allocator provided
 
 ### Full Example
 
-The full working example of the arena allocator deserialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-tests/src/tests/arena_simplified.rs).
+The full working example of the arena allocator deserialization is available on [GitHub](https://github.com/contextgeneric/cgp-serde/blob/v0.2.0/crates/cgp-serde-tests/src/tests/arena_simplified.rs).
 
 ---
 
