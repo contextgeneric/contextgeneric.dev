@@ -47,7 +47,9 @@ const REJECTED_DIAGNOSTIC = `error[E0119]: conflicting implementations of trait 
 // front-page:rejected-diagnostic:end
 
 // front-page:cgp-block:begin
-const CGP_BLOCK = `#[cgp_component(Encoder)]     // generates the provider trait Encoder
+const CGP_BLOCK = `use cgp::prelude::*;
+
+#[cgp_component(Encoder)]     // generates the provider trait Encoder
 pub trait CanEncode {
     fn encode(&self) -> Vec<u8>;
 }
@@ -193,7 +195,7 @@ function CodeBand(): ReactNode {
         <CodeWindow
           label="With CGP, both encoders compile"
           verdict="accepted"
-          metastring="{1,6-7,12-13,18-21}"
+          metastring="{1,3,8-9,14-15,20-23}"
           code={CGP_BLOCK}
         />
       </div>

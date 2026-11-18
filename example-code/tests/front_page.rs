@@ -7,16 +7,18 @@
 //!
 //! The text between each pair of `front-page:` marker comments is exactly what the page shows, so a
 //! test can compare it with `index.tsx`. Everything outside the markers is what the page omits: the
-//! imports and the checks. The rejected
+//! standard library's imports and the checks. The rejected
 //! block starts at its fixture's first line, so the page's quoted `E0119` names the lines the page
 //! numbers; that fixture carries only the end marker.
 
-// The hero's CGP block. The page omits these two imports.
+// The hero's CGP block. The page shows the prelude import and omits the `Display` import, as the
+// rejected block does.
 mod first_screen {
-    use cgp::prelude::*;
     use core::fmt::Display;
 
     // front-page:cgp-block:begin
+    use cgp::prelude::*;
+
     #[cgp_component(Encoder)]     // generates the provider trait Encoder
     pub trait CanEncode {
         fn encode(&self) -> Vec<u8>;
