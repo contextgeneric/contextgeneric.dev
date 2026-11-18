@@ -1,4 +1,4 @@
-//! Compiled counterparts of `blog/2026-05-10-v0.8.0-release.md`.
+//! Compiled counterparts of `blog/2026-11-18-v0.8.0-release.md`.
 //! Modules follow the walkthrough. Old-version migration snippets are historical input;
 //! the missing-height program is a compile-fail fixture under `tests/compile_fail/blog/`.
 #![allow(dead_code, unused_variables)]
