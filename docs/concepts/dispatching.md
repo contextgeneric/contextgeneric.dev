@@ -22,9 +22,9 @@ enum to its payloads.
 
 ## Two directions, one idea
 
-The data traits used by a dispatcher describe how to extract a variant or set a field. To do
-useful work with those operations, the dispatcher also needs handlers: one can process an extracted
-payload, while another can produce a value for a field.
+The data traits describe how to extract a variant or set a field, but to do useful work with those
+operations, a dispatcher also needs handlers: one can process an extracted payload, while another
+can produce a value for a field.
 
 These operations lead to two forms of dispatch. A matcher tries variants until it finds the
 current payload, then runs the corresponding handler. A builder instead runs its handlers in

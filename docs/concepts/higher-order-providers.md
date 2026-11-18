@@ -97,7 +97,7 @@ implementations, rather than their struct declarations. A library can therefore 
 a name, publish it, and wrap it again before any application chooses a context for it.
 
 Naming the composition does not prove that a context can use it, and neither does a wiring entry
-alone. That proof is required at a use or an explicit check. Here it requires the dimensions read
+alone. That proof comes only at a use or an explicit check, and here it requires the dimensions read
 by `RectangleArea` and the `scale` field read by both wrappers. Because both layers read the same
 scale, they apply its square twice: a base area of `12` with scale `2` becomes `192`.
 
@@ -148,9 +148,9 @@ To choose a different element calculation for this sum alone, the table can name
 `SumAreas<AnotherCalculator>`. That inner step calls `AnotherCalculator` directly, while continuing
 to pass the original context. The context must therefore meet that provider's requirements too.
 
-Declare the provider struct explicitly to give its parameter the `UseContext` default. The
-`#[cgp_impl(SumAreas<Inner>)]` block implements that existing struct; the `new` form declares a
-provider but does not supply this default.
+To give the parameter its `UseContext` default, declare the provider struct explicitly, as above.
+The `#[cgp_impl(SumAreas<Inner>)]` block then implements that existing struct, because the `new`
+form would declare a provider without the default.
 
 ## Not every generic provider is one of these
 

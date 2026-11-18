@@ -38,8 +38,8 @@ Nesting the markers represents a compound expression:
 type Program = Multiply<Add<Literal<2>, Literal<3>>, Literal<4>>;
 ```
 
-The nesting describes `(2 + 3) * 4`, but the markers themselves do not evaluate it. They form the
-language's **abstract syntax**, leaving providers to decide what the expression means. One
+The nesting describes `(2 + 3) * 4`, but the markers themselves do not evaluate it. Instead, they
+form the language's **abstract syntax**, leaving providers to decide what the expression means. One
 interpreter can calculate its value while another formats the same expression as text.
 
 As the language grows, its syntax can include type-level collections and strings too.

@@ -56,8 +56,8 @@ delegate_components! {
 ```
 
 This table establishes which provider `BrokenApp` selects without proving that it can use that
-provider. The missing proof would require the `local_dir` field read by `FetchLocalObject`'s
-implicit argument. Because this fragment never asks for `CanFetchStorageObject` on `BrokenApp`, the
+provider. That proof would need the `local_dir` field read by `FetchLocalObject`'s implicit
+argument, and because this fragment never asks for `CanFetchStorageObject` on `BrokenApp`, the
 missing field has not yet caused a compilation failure.
 
 Deferring that proof is useful for reusable wiring. An [aggregate provider](./aggregate-providers.md)
@@ -99,7 +99,7 @@ impl CanUseApp for App {}
 ```
 
 For Rust to accept the empty implementation, it must establish `App: CanFetchStorageObject` at that
-line. Putting it beside the wiring moves a failure there. But the requirement still goes through
+line. Putting it beside the wiring moves any failure there, but the requirement still goes through
 the consumer trait, so its diagnostic can remain as vague as the method-call error.
 
 To expose the provider's requirements, the check needs a path through more than the consumer
@@ -153,8 +153,8 @@ error[E0277]: [CGP-E001] missing field `local_dir` on `BrokenApp`
 ```
 
 Here the dependency chain connects the application's need for `CanFetchStorageObject` to the
-provider it selected and then to the missing `local_dir` field. This gives the reader both the
-cause and the reason that field is required.
+provider it selected and then to the missing `local_dir` field, so the reader sees both the cause
+and the reason that field is required.
 
 The tool can also recover causes that ordinary compiler output omits. It uses the compiler's
 next-generation trait solver for diagnostic recovery, then translates the recognized CGP structures.
@@ -187,8 +187,8 @@ debugging a [higher-order provider](./higher-order-providers.md).
 
 ## What to check, and when to fuse it
 
-Placing checks beside each context's wiring catches missing entries and dependencies before a
-caller happens to need them. For basic `Component: Provider` entries, the checks can be part of the
+Placing checks beside each context's wiring catches missing entries and dependencies before a caller
+happens to need them, and for basic `Component: Provider` entries the checks can even be part of the
 same declaration.
 
 [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) combines

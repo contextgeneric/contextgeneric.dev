@@ -136,10 +136,10 @@ Generic construction requires the corresponding traits. Deriving `CgpData` suppl
 supported struct, but a foreign struct without that support does not become accessible automatically.
 A local wrapper or explicit conversion may be needed at that boundary.
 
-Matching names and types is enough for the compiler, so contributors must also agree on what
-the fields mean. Two subsystems using `timeout: u32` for unrelated purposes still describe the
-same field. Conversely, renaming a required field changes that contract and can break a merge
-or leave the target incomplete when checked.
+Because the compiler checks only names and types, contributors must also agree on what the fields
+mean. Two subsystems using `timeout: u32` for unrelated purposes still describe the same field.
+Conversely, renaming a required field changes that contract and can break a merge or leave the
+target incomplete when checked.
 
 The types that enforce completeness can also make failures harder to read. An error may show the
 target's fields and presence markers rather than simply naming an omitted field. When that happens,

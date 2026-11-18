@@ -7,12 +7,12 @@ description: 'Why Rust rejects overlapping blanket implementations, and how CGP 
 
 # Bypassing coherence
 
-Rust's coherence rules keep trait lookup consistent across a program. For a given trait, its
-type arguments, and an implementing type, at most one implementation applies. Generic code can
-therefore rely on trait bounds without asking callers to choose an implementation, but the same
-guarantee rules out overlapping implementations even when each would be useful on its own.
+Rust's coherence rules keep trait lookup consistent across a program. For a given trait, its type
+arguments, and an implementing type, at most one implementation applies. Generic code can therefore
+rely on trait bounds without asking callers to choose an implementation, but the same guarantee
+rules out overlapping implementations even when each would be useful on its own.
 [Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations by
-giving each implementation a separate provider type, and a context selects one through wiring.
+giving each implementation its own provider type, from which a context selects one through wiring.
 
 This page explains why that guarantee matters, how the provider split works within it, and where
 ownership and wiring limit the available choices.
@@ -31,8 +31,8 @@ pub fn describe<T: Display>(value: &T) -> String {
 ```
 
 Calling `describe(&42)` supplies the value, while the compiler finds the `Display` implementation
-for `i32`. The caller never names or passes that implementation. This is a form of dependency
-injection already available in ordinary Rust.
+for `i32`. The caller never names or passes that implementation, so ordinary Rust already offers a
+form of dependency injection.
 
 The selected implementation can have dependencies of its own. A pair, for example, can implement
 `Display` by asking each of its fields to format itself:
@@ -52,9 +52,9 @@ implementation and follows its bounds to `&str: Display` and `u32: Display`. The
 function still needs only `T: Display`, because the field requirements belong to the pair's
 implementation.
 
-That separation keeps implementation details out of generic callers. An implementation can gain
-a dependency while callers retain their existing bounds, provided the concrete types still
-satisfy the full chain.
+That separation keeps implementation details out of generic callers: an implementation can gain a
+dependency while its callers keep their existing bounds, provided the concrete types still satisfy
+the full chain.
 
 ## That only works because every lookup finds the same answer
 
@@ -84,8 +84,8 @@ impl<T: AsRef<[u8]>> CanEncode for T {
 ```
 
 Both bounds hold for `String`, so Rust would have two answers for `String: CanEncode`. Each
-implementation is valid on its own, but a call site has no way to choose between them. The compiler
-therefore rejects the pair.
+implementation is valid on its own, but a call site would have no way to choose between them, so the
+compiler rejects the pair.
 
 Overlap can also arise when unrelated crates define implementations independently. The
 **orphan rule** prevents those crates from supplying conflicting implementations for the same
@@ -101,23 +101,23 @@ impl Display for Vec<u8> {
 }
 ```
 
-A local type in a trait's parameters can allow further implementations under the orphan rule.
-The [Rust Reference](https://doc.rust-lang.org/reference/items/implementations.html#orphan-rules)
-specifies those cases. Together, the orphan and overlap rules keep trait resolution consistent
-as crates are combined into a program.
+A local type among a trait's parameters can allow further implementations, in cases the [Rust
+Reference](https://doc.rust-lang.org/reference/items/implementations.html#orphan-rules) specifies.
+Together, the orphan and overlap rules keep trait resolution consistent as crates are combined into
+a program.
 
 ## What the guarantee costs
 
-For `CanEncode`, keeping one answer means choosing which of the overlapping blanket
-implementations to offer. Several blanket implementations can coexist when Rust can establish
-that they do not overlap, but the bounds above do overlap. Knowing which behavior an application
-wants for each type does not give the trait a way to record those choices.
+For `CanEncode`, keeping one answer means choosing which of the overlapping blanket implementations
+to offer. Several blanket implementations can coexist when Rust can establish that they do not
+overlap, but the bounds above do overlap. Even an author who knows which behavior each type should
+get has no way to record those choices in the trait.
 
-In ordinary Rust, a newtype can express a distinct choice by wrapping the value in a locally
-defined type. That wrapper satisfies the orphan requirement for a foreign trait such as
-`Display`, though its implementations must still avoid overlap. Its name can also make the
-different behavior explicit. The cost is that callers must use the wrapper, and operations on
-the underlying value may need forwarding methods or trait implementations.
+In ordinary Rust, a newtype can express a distinct choice by wrapping the value in a locally defined
+type. That wrapper satisfies the orphan requirement for a foreign trait such as `Display`, though
+its implementations must still avoid overlap. Its name can also make the different behavior
+explicit. In exchange, callers must use the wrapper, and operations on the underlying value may need
+forwarding methods or trait implementations.
 
 Another way to express the choice is to name each implementation with a helper type. Each helper
 implements a trait parameterized by the data type, so several helpers can accept the same data.
@@ -126,8 +126,7 @@ helper.
 
 ## The move: make `Self` a type you own
 
-For encoding, the interface callers use can remain `CanEncode`. In CGP, this is the
-**consumer trait**:
+The interface callers use can stay `CanEncode`, which CGP calls the **consumer trait**:
 
 ```rust
 use cgp::prelude::*;
@@ -138,11 +137,11 @@ pub trait CanEncode {
 }
 ```
 
-The `#[cgp_component]` macro also generates a **provider trait**, `Encoder<Context>`. Moving the
-value's type into the `Context` parameter leaves the implementing type available for a provider
-struct. With a separate struct for each implementation, the original `Display` and `AsRef<[u8]>`
-bounds can describe two providers. Here, the byte-based provider uses hexadecimal encoding, which
-makes the difference between their outputs visible:
+The `#[cgp_component]` macro also generates a **provider trait**, `Encoder<Context>`. Because the
+value's type moves into the `Context` parameter, the implementing type is free for a provider
+struct, and a separate struct for each implementation lets the original `Display` and `AsRef<[u8]>`
+bounds describe two providers. The byte-based provider here encodes as hexadecimal, so the two
+outputs differ visibly:
 
 ```rust
 #[cgp_impl(new EncodeAsText)]
@@ -183,10 +182,10 @@ assert_eq!(<EncodeAsText as Encoder<String>>::encode(&value), b"hi");
 assert_eq!(<EncodeAsHex as Encoder<String>>::encode(&value), b"6869");
 ```
 
-The provider struct also gives its crate a local implementing type. Because of that, the crate
-can supply a provider even when both the trait and context type are defined elsewhere. Distinct
-provider types avoid overlap, and local ownership satisfies the orphan rule, so the generated
-code follows both coherence rules.
+The provider struct also gives its crate a local implementing type, so the crate can supply a
+provider even when both the trait and the context type are defined elsewhere. Distinct provider
+types avoid overlap, and local ownership satisfies the orphan rule, so the generated code follows
+both coherence rules.
 
 ## Selecting one provider for each type {#coherence-comes-back-one-type-at-a-time}
 
@@ -226,9 +225,9 @@ Separating implementations adds declarations: a provider trait, a
 it. When a trait only needs one implementation, a plain trait or
 [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) may provide enough reuse on its own.
 
-The wiring itself also needs to be read and maintained. In the example, every wired type needs
-an entry naming its provider. Shared bundles and namespaces can reduce repetition, but
-tracing a choice then means following it through those additional definitions.
+The wiring itself also has to be read and maintained, since every wired type needs an entry naming
+its provider. Shared bundles and namespaces can reduce that repetition, but tracing a choice then
+means following it through their additional definitions.
 
 Recording the choice leaves another question open: whether the provider's requirements hold for
 the context. Rust checks those requirements when the trait is checked or used, so a table can
@@ -238,11 +237,11 @@ compile even though a later call will fail. To check beside the wiring, use
 though it does not yet reshape every class. [Checking your wiring](./check-traits.md) explains
 those diagnostics and their limits.
 
-The choices also apply specifically to the component interface you define. They do not give an
-existing trait such as `Ord` multiple implementations or change which ordering standard collections
-use. Ordinary traits remain a good fit when one consistent implementation per type expresses the
-intended contract. The provider split becomes useful when you need the combination illustrated
-here: several reusable implementations and an explicit way to select one for normal method calls.
+These choices also apply only to the component interface you define. They do not give an existing
+trait such as `Ord` multiple implementations or change which ordering standard collections use.
+Ordinary traits remain a good fit when one consistent implementation per type expresses the intended
+contract. The provider split becomes useful when you need the combination illustrated here: several
+reusable implementations and an explicit way to select one for normal method calls.
 
 ## Where to go next
 

@@ -20,7 +20,7 @@ monad marker sets the continuation rule, and how the resulting pipeline is wired
 
 ## When direct composition does not fit
 
-When computers compose directly, one step passes its whole output to the next. That works only if
+When computers compose directly, one step passes its whole output to the next, which works only if
 the next computer accepts that type. A fallible increment makes the difficulty visible; this
 fragment assumes imports from `cgp::prelude::*`:
 

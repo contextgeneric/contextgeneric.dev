@@ -69,11 +69,11 @@ impl<T: HasS3Client> CanFetchStorageObject for T { /* ... */ }
 impl<T: HasLocalDir> CanFetchStorageObject for T { /* ... */ }   // error[E0119]
 ```
 
-A type could satisfy both bounds, leaving Rust with two implementations of `CanFetchStorageObject`
-for that type. The compiler therefore rejects the pair. Helper functions and other composition
-techniques can still share the code, with each application connecting its trait implementation
-to the behavior it wants. CGP makes that connection through a separate trait for reusable
-implementations and a wiring table that selects one.
+A type could satisfy both bounds, which would leave Rust with two implementations of
+`CanFetchStorageObject` for that type, so the compiler rejects the pair. Helper functions and other
+composition techniques can still share the code, with each application connecting its trait
+implementation to the behavior it wants. CGP makes that connection through a separate trait for
+reusable implementations and a wiring table that selects one.
 
 ## Splitting one trait in two
 
@@ -130,10 +130,10 @@ example uses a single method to make the relationship easier to see.
 
 ## A provider is a name, not a value
 
-The structs `FetchS3Object` and `FetchLocalObject` serve as names for implementations. They are
-zero-sized, and CGP neither constructs values of them nor stores application data in them.
-That data stays in the context, while explicit method arguments supply inputs such as the
-object's ID.
+The structs `FetchS3Object` and `FetchLocalObject` serve only as names for implementations. They are
+zero-sized, and CGP neither constructs values of them nor stores application data in them. Instead,
+that data stays in the context, while explicit method arguments supply inputs such as the object's
+ID.
 
 Because the state belongs to the context, it helps to distinguish the two meanings of `Self`
 when reading provider code. In [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), the method's
@@ -169,9 +169,9 @@ The key in both tables is `StorageObjectFetcherComponent`, a marker generated al
 traits. Those traits, the marker, and the forwarding implementations form the **component**. The
 entry for this key selects `FetchS3Object` on `App` and `FetchLocalObject` on `TestApp`.
 
-When a caller writes `app.fetch_storage_object("alice.png")`, the compiler follows `App`'s
-selection to `FetchS3Object` and checks whether that provider can work with `App`. This is static
-dispatch, so the running program needs neither a wiring table nor a provider lookup.
+When a caller writes `app.fetch_storage_object("alice.png")`, the compiler follows `App`'s selection
+to `FetchS3Object` and checks whether that provider can work with `App`. Because this is static
+dispatch, the running program needs neither a wiring table nor a provider lookup.
 
 To see how method syntax reaches that selection, consider the two generated blanket
 implementations. The consumer implementation supplies `CanFetchStorageObject` whenever the context

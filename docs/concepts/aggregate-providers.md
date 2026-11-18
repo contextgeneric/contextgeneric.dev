@@ -48,8 +48,8 @@ delegate_components! {
 ```
 
 With these entries, `Rectangle` uses the bundle's choices for both components, provided it meets
-their requirements. Another context can delegate the same keys to `GeometryComponents` and share
-those choices. Editing the bundle then changes both contexts together.
+their requirements. Another context can delegate the same keys to `GeometryComponents` to share
+those choices, and editing the bundle then changes both contexts together.
 
 ## The context stays the context
 
@@ -144,8 +144,8 @@ adds further tables to that trace, even though the compiler resolves the chain s
 shared choices need to justify this extra reading.
 
 Repeated wiring across contexts provides a concrete reason to maintain a bundle. With only one
-context, however, the bundle may add a name and a delegation step without reducing repetition.
-Anticipated reuse alone may not be enough to justify it.
+context, however, the bundle may add a name and a delegation step without reducing repetition, and
+reuse that is only anticipated may not be enough to justify it.
 
 The bundle's role is a convention rather than a separate kind of declaration. Both a context and
 a bundle can receive a delegation table, which is why the wrong check can treat the bundle as a

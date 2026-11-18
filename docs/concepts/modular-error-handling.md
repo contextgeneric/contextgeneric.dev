@@ -27,8 +27,8 @@ take a generic error parameter, or use an associated error type.
 
 CGP builds on the associated-type approach by giving a context one shared error type. Operations
 that use this type can propagate each other's errors directly. To produce an error in the first
-place, reusable code asks the context to convert a source error into the shared type. Other code
-can then ask it to attach detail, such as the path of a configuration file.
+place, reusable code asks the context to convert a source error into the shared type, and other code
+can later ask it to attach detail, such as the path of a configuration file.
 
 These choices belong to separate built-in components:
 
@@ -36,9 +36,9 @@ These choices belong to separate built-in components:
 - **`CanRaiseError<SourceError>`:** Converts a source error into that shared type.
 - **`CanWrapError<Detail>`:** Attaches detail to an existing error.
 
-The context selects providers for these components through wiring. That lets it choose both the
-error type and how to construct or enrich it. Reusable code only declares which raising and
-wrapping operations it needs.
+The context selects providers for these components through wiring, which lets it choose both the
+error type and how to construct or enrich it. Reusable code only declares which raising and wrapping
+operations it needs.
 
 ## A parser with an abstract error type
 
@@ -154,11 +154,12 @@ Because `AppError` implements `From` for both source types, `StrictApp` can send
 `AppError::InvalidNumber`, while parsing `"65536"` returns one containing `AppError::InvalidPort`.
 A caller that knows this context can match on either variant.
 
-The parser itself has not changed. It raises the same source values through the same operations,
-but the context preserves them in a different return type. An application can also choose an
-error-library backend, such as `cgp-error-anyhow` for `anyhow::Error` or `cgp-error-eyre` for `eyre`.
-These optional crates package compatible type providers, raisers, and wrappers. The application
-selects them in its wiring, while reusable code continues to use the shared error traits.
+The parser itself has not changed: it raises the same source values through the same operations,
+while the context preserves them in a different return type. An application can also choose an
+error-library backend, such as `cgp-error-anyhow` for `anyhow::Error` or `cgp-error-eyre` for
+`eyre`. These optional crates package compatible type providers, raisers, and wrappers. The
+application selects them in its wiring, while reusable code continues to use the shared error
+traits.
 
 ## Attaching detail as an error propagates
 
@@ -193,7 +194,7 @@ though both already support the parser.
 Choosing behavior by source type works well when the type identifies the failure. In `StrictApp`,
 for example, every raised `String` becomes `AppError::InvalidPort`. That suits a context where
 strings only report port failures, but a web service may use strings to describe many unrelated
-problems. It needs more information to choose the right error.
+problems, and it then needs more information to choose the right error.
 
 An application-specific component can supply that information explicitly. For HTTP errors, it can
 accept a status marker alongside the detail:

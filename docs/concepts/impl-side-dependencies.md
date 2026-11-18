@@ -47,16 +47,16 @@ where
 }
 ```
 
-The calls to `greet` are why `greet_twice` needs `HasName`, even though it never reads the name
-itself. Further generic callers must supply or imply the same bound. If `greet` gains another
-dependency, those forwarding layers may need new bounds as well. Repeating them is straightforward
-in a small API, but maintaining them becomes harder as the chain grows.
+`greet_twice` needs `HasName` only because it calls `greet`; it never reads the name itself. Further
+generic callers must supply or imply the same bound. If `greet` gains another dependency, those
+forwarding layers may need new bounds as well. Repeating them is straightforward in a small API, but
+maintaining them becomes harder as the chain grows.
 
 ## Moving the requirement onto the implementation
 
-A trait gives the caller a way to request the greeting operation itself. Its
-[blanket implementation](/docs/reference/glossary#blanket-implementation) can supply that operation
-for contexts that provide a name:
+A trait instead lets the caller request the greeting operation itself, and its [blanket
+implementation](/docs/reference/glossary#blanket-implementation) can supply that operation for
+contexts that provide a name:
 
 ```rust
 pub trait CanGreet {
@@ -147,16 +147,16 @@ where
 }
 ```
 
-A production `App` can select `FetchS3Object`, while a `TestApp` selects `FetchLocalObject`. These
-contexts represent applications, and each supplies the dependencies of its chosen provider. That
-lets `load_picture` accept both with the same bound. Because the test context selects the local
-provider, it needs only the folder, without an S3 client.
+A production `App` can select `FetchS3Object`, while a `TestApp` selects `FetchLocalObject`. Each
+context represents an application and supplies the dependencies of the provider it chose, so
+`load_picture` accepts both with the same bound. Because the test context selects the local
+provider, it needs only the folder and no S3 client.
 
 ## Traits, values, and types {#the-three-things-an-implementation-can-ask-for}
 
-The storage providers ask the context for behavior through getter traits. Other implementations
-may need a field value or a type choice. CGP expresses these dependencies with attributes that
-generate ordinary Rust bounds:
+The storage providers ask the context for behavior through getter traits, but other implementations
+may need a field value or a type choice instead. CGP expresses these dependencies with attributes
+that generate ordinary Rust bounds:
 
 - **Traits:** `#[uses(Trait)]` requires the context to implement a trait. It accepts ordinary
   Rust traits such as `AsRef<[u8]>` as well as CGP consumer traits.

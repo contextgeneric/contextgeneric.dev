@@ -39,8 +39,8 @@ where
 [impl-side dependency](./impl-side-dependencies.md): it constrains this provider without adding a
 field requirement to the consumer trait.
 
-The explicit form separates the requirement from the read. For a provider that only needs a local
-value, an implicit argument can express both together.
+The explicit form states the requirement and the read separately. When a provider only needs the
+value locally, an implicit argument can express both at once.
 
 ## The same provider with an implicit argument
 

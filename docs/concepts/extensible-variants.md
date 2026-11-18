@@ -29,10 +29,10 @@ Some of the work inside those cases may already be reusable. A circle-area calcu
 several shape enums, including a larger one that adds triangles. Ordinary helper functions share
 that calculation, but each match must still connect its particular enum variants to those helpers.
 
-Separating those helpers from the enum-specific connection is the purpose of CGP's generic
-dispatcher. Existing payload handlers can keep working when another enum introduces additional
-cases, provided those cases have handlers too. The enums remain ordinary closed Rust types:
-a downstream crate defines a new enum rather than adding variants to an upstream definition.
+CGP's generic dispatcher separates those helpers from the enum-specific connection. Existing payload
+handlers can keep working when another enum introduces additional cases, provided those cases have
+handlers too. The enums remain ordinary closed Rust types: a downstream crate defines a new enum
+rather than adding variants to an upstream definition.
 
 ## An enum as a list of named variants
 
@@ -78,8 +78,8 @@ which only `Rectangle` is possible. The value survives a failed attempt, but its
 that it cannot be a circle. Continuing this process until every variant has been excluded leaves
 an uninhabited remainder: a type that cannot contain a value.
 
-To finish extraction, the remainder must be uninhabited. This requirement is how the compiler
-checks coverage: an unhandled variant would leave a possible value and prevent finalization from
+To finish extraction, the remainder must be uninhabited, and the compiler checks coverage through
+this requirement: an unhandled variant would leave a possible value and prevent finalization from
 compiling. Once coverage is complete, the final operation can eliminate the impossible remainder
 without a wildcard arm or `unreachable!()`. Borrowed and mutable extractors track the same cases
 while keeping the original enum in place.

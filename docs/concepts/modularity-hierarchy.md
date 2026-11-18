@@ -133,9 +133,9 @@ A table entry alone does not force Rust to verify all of the selected provider's
 
 ### Value contexts and application contexts
 
-In this example the wired type is the value being encoded. But a type can also represent an
-application environment, carrying dependencies and implementation choices for its operations.
-Both arrangements fit tier 3, even though “one choice per type” serves a different purpose in each.
+In this example the wired type is the value being encoded, but a type can also represent an
+application environment, carrying dependencies and implementation choices for its operations. Both
+arrangements fit tier 3, even though “one choice per type” serves a different purpose in each.
 
 In the **value-context** arrangement, `Self` is the data, as `u32` is in the encoding example.
 The provider operates on that value, and wiring selects one provider for it. This arrangement suits
@@ -302,8 +302,8 @@ alongside CGP:
 | **A local macro** | The generated pattern is narrow and specific to the crate. | Repeated helper traits and marker types amount to a reusable component system. |
 
 Runtime choices can live inside a CGP context. For example, a provider can call through a trait
-object stored in a field. Static wiring selects that provider; the [trait object](/docs/reference/glossary#trait-object) still performs
-its own runtime dispatch.
+object stored in a field: static wiring selects that provider, while the [trait
+object](/docs/reference/glossary#trait-object) still performs its own runtime dispatch.
 
 ## Where provider wiring does not help
 

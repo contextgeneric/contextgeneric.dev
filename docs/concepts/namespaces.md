@@ -40,9 +40,9 @@ delegate_components! {
 }
 ```
 
-Here the greeter changes, while the farewell and announcer entries must stay in agreement.
-A larger shared table would leave more entries to keep synchronized. Giving those entries a
-namespace lets both contexts inherit the common choices and state their differences separately.
+Only the greeter changes, yet the farewell and announcer entries must be kept in agreement, and a
+larger shared table would leave more entries to keep synchronized. Giving those entries a namespace
+lets both contexts inherit the common choices and state their differences separately.
 
 ## Lookups follow a path
 
@@ -73,10 +73,10 @@ delegate_components! {
 }
 ```
 
-The context entry completes the route declared by `AppNamespace`, and Rust resolves both parts
-at compile time. This works because the destination was left unbound. Had the namespace already
-bound it, adding a local entry would create an overlap; joining a namespace gives local entries
-no priority over inherited ones.
+The context entry completes the route declared by `AppNamespace`, and Rust resolves both parts at
+compile time. This works only because the destination was left unbound. Had the namespace already
+bound it, a local entry would overlap the inherited one, since joining a namespace gives local
+entries no priority.
 
 The route can also cover a group of components. Redirecting a shared prefix sends the subsystem's
 lookups to another prefix, while the rest of each path still identifies the component and its

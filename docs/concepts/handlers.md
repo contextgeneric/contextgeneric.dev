@@ -167,7 +167,8 @@ structure, as the programs in [type-level DSLs](./type-level-dsls.md) show.
 ## What it costs
 
 Compared with an ordinary function call, even the smallest handler call needs a type tag.
-`PhantomData::<()>` fills that role when there is only one computation, but the extra syntax remains.
+`PhantomData::<()>` fills that role when there is only one computation, though the extra syntax
+remains.
 
 Larger compositions also require familiarity with the component and adapter family. Execution,
 error handling, and ownership explain the names, but a reader must still know which interface each

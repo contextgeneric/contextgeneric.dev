@@ -29,8 +29,9 @@ Choose an entry point for the question you want answered:
 - **Should I use CGP?** [Modularity Hierarchy](./modularity-hierarchy.md) compares ordinary traits,
   blanket implementations, and wired components so you can choose what your problem requires.
 
-If you need more background on traits or generic bounds, the [tutorials](/docs/tutorials/hello)
-introduce them in working programs before returning to these explanations.
+If you would like more background on traits or generic bounds first, the
+[tutorials](/docs/tutorials/hello) show them in working programs, and these explanations will still
+be here when you return.
 
 ## The ideas, grouped
 

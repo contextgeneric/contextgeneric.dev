@@ -7,12 +7,11 @@ description: 'How a companion trait exposes a sendable future when an async CGP 
 
 # Recovering `Send` bounds
 
-[Context-Generic Programming](/docs/) (CGP) leaves `Send` out of its async trait methods.
-Recovering a `Send` bound lets generic code require a sendable future from an async interface that
-leaves that guarantee open. CGP's `#[async_trait]` returns an unboxed future without promising
-`Send`, so a caller cannot infer sendability from the consumer trait alone. A companion trait can
-expose the stronger guarantee, with forwarding implementations that verify it for concrete context
-and API pairs.
+[Context-Generic Programming](/docs/) (CGP) leaves `Send` out of the futures its async trait methods
+return, so generic code that needs a sendable future has to recover that bound. CGP's
+`#[async_trait]` returns an unboxed future without promising `Send`, and a caller cannot infer
+sendability from the consumer trait alone. A companion trait can expose the stronger guarantee, with
+forwarding implementations that verify it for concrete context and API pairs.
 
 This page shows what the async rewrite promises, why spawning needs more, and how a companion trait
 with concrete forwarding implementations supplies the guarantee.
@@ -38,8 +37,9 @@ particular implementation returns a sendable future, generic code with only
 `App: CanHandleApi<Api>` cannot rely on that property.
 
 Leaving `Send` out of the signature permits implementations whose futures cannot move between
-threads. Others may return sendable futures, but generic callers have to support either case.
-An explicit `+ Send` in the opaque return type would make the stronger promise available to them.
+threads. Other implementations may return sendable futures, but generic callers have to allow for
+either case. An explicit `+ Send` in the opaque return type would make the stronger promise
+available to them.
 
 ## Why spawning needs a stronger bound
 
