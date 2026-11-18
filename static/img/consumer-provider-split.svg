@@ -3,7 +3,7 @@
   <desc id="desc">A caller's trait such as CanFetchStorageObject becomes a consumer trait that callers use and a provider trait parameterized by the context, which two provider structs implement. A call through the consumer trait goes through the context's wiring, which selects the provider that answers it.</desc>
 
   <defs>
-    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
       <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f1f1d"/>
     </marker>
   </defs>
@@ -30,10 +30,10 @@
   <text x="640" y="194" text-anchor="middle" font-size="13" fill="#5e504c">StorageObjectFetcher&lt;Context&gt;</text>
 
   <!-- the two providers, labelled as the page declares them -->
-  <path d="M 640 216 L 640 240" stroke="#8f1f1d" stroke-width="2"/>
-  <path d="M 512 240 L 752 240" stroke="#8f1f1d" stroke-width="2"/>
-  <path d="M 512 240 L 512 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
-  <path d="M 752 240 L 752 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 640 216 L 640 230" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 512 230 L 752 230" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 512 230 L 512 255" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 752 230 L 752 255" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
 
   <rect x="400" y="258" width="224" height="84" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
   <text x="512" y="284" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">FetchS3Object</text>
