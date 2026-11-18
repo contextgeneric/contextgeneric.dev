@@ -62,6 +62,10 @@ const config: Config = {
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
+  // GitHub Pages serves each page from a directory and redirects a URL without the trailing slash, so
+  // the sitemap, canonical tags, and links name the slash form that answers directly.
+  trailingSlash: true,
+
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'contextgeneric', // Usually your GitHub org/user name.
