@@ -11,39 +11,42 @@
   <rect x="250" y="10" width="380" height="52" rx="10" fill="#f7f0ea" stroke="#7d6b64" stroke-width="1.5"/>
   <text x="440" y="42" text-anchor="middle" font-size="16" font-weight="600" fill="#261d1b">one trait: CanFetchStorageObject</text>
 
+  <!-- the split -->
   <path d="M 440 62 L 440 84" stroke="#8f1f1d" stroke-width="2"/>
-  <path d="M 200 84 L 680 84" stroke="#8f1f1d" stroke-width="2"/>
-  <path d="M 200 84 L 200 116" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
-  <path d="M 680 84 L 680 116" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 170 84 L 640 84" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 170 84 L 170 116" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 640 84 L 640 116" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
 
   <!-- consumer side -->
-  <rect x="60" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
-  <text x="200" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#8f1f1d">consumer trait</text>
-  <text x="200" y="170" text-anchor="middle" font-size="13" fill="#261d1b">what callers use</text>
-  <text x="200" y="194" text-anchor="middle" font-size="13" fill="#5e504c">app.fetch_storage_object(id)</text>
+  <rect x="30" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
+  <text x="170" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#8f1f1d">consumer trait</text>
+  <text x="170" y="170" text-anchor="middle" font-size="13" fill="#261d1b">what callers use</text>
+  <text x="170" y="194" text-anchor="middle" font-size="13" fill="#5e504c">app.fetch_storage_object(id)</text>
 
   <!-- provider side -->
-  <rect x="540" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
-  <text x="680" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#8f1f1d">provider trait</text>
-  <text x="680" y="170" text-anchor="middle" font-size="13" fill="#261d1b">what implementations target</text>
-  <text x="680" y="194" text-anchor="middle" font-size="13" fill="#5e504c">StorageObjectFetcher&lt;Context&gt;</text>
+  <rect x="500" y="120" width="280" height="96" rx="10" fill="#ffffff" stroke="#8f1f1d" stroke-width="1.5"/>
+  <text x="640" y="146" text-anchor="middle" font-size="15" font-weight="600" fill="#8f1f1d">provider trait</text>
+  <text x="640" y="170" text-anchor="middle" font-size="13" fill="#261d1b">what implementations target</text>
+  <text x="640" y="194" text-anchor="middle" font-size="13" fill="#5e504c">StorageObjectFetcher&lt;Context&gt;</text>
 
-  <rect x="472" y="256" width="196" height="80" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
-  <text x="570" y="282" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">FetchS3Object</text>
-  <text x="570" y="306" text-anchor="middle" font-size="13" fill="#5e504c">impl StorageObjectFetcher</text>
-  <text x="570" y="324" text-anchor="middle" font-size="13" fill="#5e504c">for FetchS3Object</text>
+  <!-- the two providers, labelled as the page declares them -->
+  <path d="M 640 216 L 640 240" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 512 240 L 752 240" stroke="#8f1f1d" stroke-width="2"/>
+  <path d="M 512 240 L 512 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M 752 240 L 752 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
 
-  <rect x="680" y="256" width="196" height="80" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
-  <text x="778" y="282" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">FetchLocalObject</text>
-  <text x="778" y="306" text-anchor="middle" font-size="13" fill="#5e504c">impl StorageObjectFetcher</text>
-  <text x="778" y="324" text-anchor="middle" font-size="13" fill="#5e504c">for FetchLocalObject</text>
+  <rect x="400" y="258" width="224" height="84" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
+  <text x="512" y="284" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">FetchS3Object</text>
+  <text x="512" y="308" text-anchor="middle" font-size="11" fill="#5e504c">impl StorageObjectFetcher&lt;Context&gt;</text>
+  <text x="512" y="326" text-anchor="middle" font-size="11" fill="#5e504c">for FetchS3Object</text>
 
-  <path d="M 680 216 L 680 240" stroke="#8f1f1d" stroke-width="2"/>
-  <path d="M 570 240 L 778 240" stroke="#8f1f1d" stroke-width="2"/>
-  <path d="M 570 240 L 570 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
-  <path d="M 778 240 L 778 254" stroke="#8f1f1d" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="640" y="258" width="224" height="84" rx="10" fill="#fdfaf7" stroke="#7d6b64"/>
+  <text x="752" y="284" text-anchor="middle" font-size="14" font-weight="600" fill="#261d1b">FetchLocalObject</text>
+  <text x="752" y="308" text-anchor="middle" font-size="11" fill="#5e504c">impl StorageObjectFetcher&lt;Context&gt;</text>
+  <text x="752" y="326" text-anchor="middle" font-size="11" fill="#5e504c">for FetchLocalObject</text>
 
-  <text x="200" y="282" text-anchor="middle" font-size="13" fill="#5e504c">the context's wiring</text>
-  <text x="200" y="302" text-anchor="middle" font-size="13" fill="#5e504c">selects one provider</text>
-  <path d="M 330 296 L 466 296" stroke="#8f1f1d" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+  <!-- the wiring's choice -->
+  <text x="170" y="290" text-anchor="middle" font-size="13" fill="#5e504c">the context's wiring</text>
+  <text x="170" y="310" text-anchor="middle" font-size="13" fill="#5e504c">selects one provider</text>
+  <path d="M 268 300 L 394 300" stroke="#8f1f1d" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
 </svg>
