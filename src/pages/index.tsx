@@ -199,8 +199,8 @@ function CodeBand(): ReactNode {
       </div>
       <div className={clsx(styles.container, styles.caption)}>
         <p className={styles.captionReason}>
-          Both implementations compile, because each one now has a name, and each type names the one
-          it uses, so a call to <code>encode()</code> is as unambiguous as it ever was.
+          With CGP, both encoders compile: each one now has a name, and each type names the one it
+          uses, so a call to <code>encode()</code> is as unambiguous as it ever was.
         </p>
         <p className={styles.captionQuote}>Coherence is not repealed; it is scoped.</p>
       </div>
