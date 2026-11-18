@@ -184,14 +184,14 @@ function CodeBand(): ReactNode {
     <section className={styles.codeBand} aria-label="The same two implementations, without and with CGP">
       <div className={clsx(styles.container, styles.codeColumns)}>
         <CodeWindow
-          label="Rust accepts only one of these"
+          label="Rust rejects the overlapping implementations"
           verdict="rejected"
           metastring="showLineNumbers {11}"
           code={REJECTED_BLOCK}
           diagnostic={REJECTED_DIAGNOSTIC}
         />
         <CodeWindow
-          label="With CGP, both compile"
+          label="With CGP, both encoders compile"
           verdict="accepted"
           metastring="{1,6-7,12-13,18-21}"
           code={CGP_BLOCK}
@@ -199,10 +199,10 @@ function CodeBand(): ReactNode {
       </div>
       <div className={clsx(styles.container, styles.caption)}>
         <p className={styles.captionReason}>
-          With CGP, both encoders compile: each one now has a name, and each type names the one it
-          uses, so a call to <code>encode()</code> is as unambiguous as it ever was.
+          CGP gives each encoder a name. Here, <code>String</code> selects <code>EncodeAsText</code>{' '}
+          and <code>Vec&lt;u8&gt;</code> selects <code>EncodeAsBytes</code>.
         </p>
-        <p className={styles.captionQuote}>Coherence is not repealed; it is scoped.</p>
+        <p className={styles.captionQuote}>For each type, a call to <code>encode()</code> still selects a single encoder.</p>
       </div>
     </section>
   );
@@ -213,26 +213,30 @@ function WhyOnce(): ReactNode {
     <section className={clsx(styles.section, styles.sectionTinted)}>
       <div className={clsx(styles.container, styles.split)}>
         <Heading as="h2" className={styles.sectionTitle}>
-          Why Rust allows this only once
+          Why the encoders overlap
         </Heading>
         <div className={styles.prose}>
           <p>
-            Both encoders apply to <code>String</code>, so Rust could not tell which one a call to{' '}
-            <code>encode()</code> means. The refusal protects something useful: when an
-            implementation requires <code>T:&nbsp;Display</code>, the compiler finds the one{' '}
-            <code>Display</code> implementation for you, and coherence keeps that answer unique.
+            <code>String</code> implements both <code>Display</code> and <code>AsRef&lt;[u8]&gt;</code>,
+            so it qualifies for both implementations of <code>CanEncode</code> in the first example.
+            Rust rejects the pair because a call to <code>encode()</code> on a string would be
+            ambiguous. The rule that keeps trait implementations unique for a given type is called{' '}
+            <strong>coherence</strong>. You rely on it whenever you write a bound like{' '}
+            <code>T:&nbsp;Display</code> and let the compiler find the implementation.
           </p>
           <p>
-            Plain Rust keeps both only through a workaround, such as a newtype for each case. CGP
-            instead gives each implementation its own <strong>provider</strong> type, owned by the
-            crate that writes it, and the wiring picks one provider per type, so every lookup still
-            has one answer. <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains
-            the rules and the workarounds.
+            In plain Rust, one way to keep both encoders is to wrap the data in a different newtype
+            for each case. With CGP, the crate that defines an encoder gives the implementation its
+            own type, called a <strong>provider</strong>. Each data type can then select a provider
+            for its encoder, as <code>String</code> does above.{' '}
+            <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
+            other ways to handle overlap.
           </p>
           <p>
-            Here the wired types are the data, so each gets one choice for the whole program. To
-            choose per application, you wire a type that stands for the application, called a{' '}
-            <strong>context</strong>, and you can define as many as you need.{' '}
+            Choosing an encoder for <code>String</code> fixes that choice for the whole program.
+            To choose per application, you can select the provider on a type that represents the
+            application. That type is called a <strong>context</strong>, and you can define as many
+            contexts as you need.{' '}
             <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
             shows an application and its test choosing different providers.
           </p>
@@ -247,11 +251,11 @@ function Features(): ReactNode {
     <section className={styles.section}>
       <div className={styles.container}>
         <Heading as="h2" className={styles.sectionTitle}>
-          What that gives you
+          Reusing providers across applications
         </Heading>
         <p className={styles.lead}>
-          Choosing providers for each application lets you reuse implementations in different
-          combinations. CGP's main features follow from that choice:
+          Once each application can choose its providers, you can reuse the same implementations in
+          different combinations. CGP's main features build on that choice.
         </p>
         <FeatureCards />
         <p className={styles.sectionNote}>
@@ -303,8 +307,8 @@ function MoreThanTraits(): ReactNode {
           More than trait implementations
         </Heading>
         <p className={styles.lead}>
-          Choosing implementations is the starting point. CGP also lets you choose the types they
-          work with, write generic code over data, and compose computations:
+          Beyond choosing implementations, you can use CGP to choose the types they work with, write
+          generic code for structs and enums, and combine steps into a pipeline.
         </p>
         <ul className={styles.tileGrid}>
           {BREADTH.map(({title, to, body}) => (
@@ -332,7 +336,7 @@ const COSTS: Cost[] = [
   },
   {
     label: 'Compile-time work',
-    body: <>The macros and the type checking add work at compile time.</>,
+    body: <>The compiler has extra macros to expand and types to check.</>,
   },
   {
     label: 'Verbose raw errors',
@@ -361,9 +365,9 @@ const COSTS: Cost[] = [
     label: 'Learning time',
     body: (
       <>
-        Learning the patterns takes time. If you work with an assistant, CGP's{' '}
-        <Link to="/docs/ai/skills">agent skill</Link> helps it with the vocabulary, diagnostics, and
-        wiring, so it can take on some of that work. You still need to review the code it writes.
+        It takes time to learn how to choose and connect providers. If you use a coding assistant, CGP's{' '}
+        <Link to="/docs/ai/skills">agent skill</Link> helps it use the terminology, interpret diagnostics,
+        and connect providers. You still need to review the code it writes.
       </>
     ),
   },
@@ -381,8 +385,8 @@ function Costs(): ReactNode {
               What it costs
             </Heading>
             <p className={styles.costLead}>
-              If your trait needs only one implementation, a plain trait is the right tool.
-              Choosing between implementations with CGP has these costs:
+              Use a plain trait when one implementation is enough. When you need several, weigh the
+              flexibility of choosing providers against the work it adds.
             </p>
           </div>
           <div className={styles.prose}>
@@ -397,8 +401,8 @@ function Costs(): ReactNode {
               ))}
             </dl>
             <p className={styles.costAdvice}>
-              To see whether those costs are worthwhile, try CGP on a small part of a project
-              whose implementation choices already vary. If you are unsure where to start,{' '}
+              To see whether those costs are worthwhile, try CGP in a small part of your project
+              where you already use different implementations. If you are unsure where to start,{' '}
               <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> explains
               when a plain trait is enough and when providers help.
             </p>
@@ -475,7 +479,8 @@ function WhereNext(): ReactNode {
           Where to go next
         </Heading>
         <p className={styles.lead}>
-          Pick the next step that fits what you want from CGP.
+          Start with a working example, explore how providers fit together, or see how other
+          projects use them.
         </p>
         <ul className={styles.routeGrid}>
           {ROUTES.map(({reader, to, link, reason}) => (
@@ -496,7 +501,7 @@ function WhereNext(): ReactNode {
 export default function Home(): ReactNode {
   return (
     <Layout
-      description="A language extension for Rust, with pluggable trait implementations at compile-time. Give one interface several implementations and choose per application.">
+      description="Context-Generic Programming lets you give a Rust trait several implementations. Each application chooses the one it needs, and the compiler resolves that choice at compile time.">
       {/*
         The front page names the project first, which Docusaurus's own title formatter cannot do:
         passing `title` to Layout renders `{title} | {siteTitle}`, so the project name could only ever

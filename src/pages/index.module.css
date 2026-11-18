@@ -345,7 +345,8 @@ html[data-theme='dark'] .heroArtFrame {
    short rule in the link colour. The rule sits closer to the quote than to the reason, so it reads as
    the quote's mark rather than an underline of the reason. */
 .caption {
-  max-width: calc(860px + 2 * var(--page-gutter));
+  /* Wide enough for the pull quote to stay on one line at desktop widths. */
+  max-width: calc(1040px + 2 * var(--page-gutter));
   margin-top: 1.75rem;
   text-align: center;
 }
@@ -365,6 +366,12 @@ html[data-theme='dark'] .heroArtFrame {
   color: var(--cgp-heading);
   margin: 0;
   text-wrap: balance;
+}
+
+/* Code in the pull quote sets a little smaller than the heading type, so its box does not outweigh
+   the words around it. */
+.captionQuote code {
+  font-size: 0.85em;
 }
 
 .captionQuote::before {
