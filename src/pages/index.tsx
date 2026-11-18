@@ -251,7 +251,7 @@ function Features(): ReactNode {
         </Heading>
         <p className={styles.lead}>
           Choosing providers for each application lets you reuse implementations in different
-          combinations, which gives CGP its main features:
+          combinations. CGP's main features follow from that choice:
         </p>
         <FeatureCards />
         <p className={styles.sectionNote}>
@@ -352,7 +352,7 @@ const COSTS: Cost[] = [
     body: (
       <>
         CGP has a small ecosystem and limited community support. If you use it on a mission-critical
-        project, expect to investigate some problems on your own. Its diagnostics tool,{' '}
+        project, expect to investigate some problems on your own. Its error toolchain,{' '}
         <code>cargo-cgp</code>, is also an early release.
       </>
     ),
@@ -363,7 +363,7 @@ const COSTS: Cost[] = [
       <>
         Learning the patterns takes time. If you work with an assistant, CGP's{' '}
         <Link to="/docs/ai/skills">agent skill</Link> helps it with the vocabulary, diagnostics, and
-        wiring, reducing some of that work. You still need to review the code it writes.
+        wiring, so it can take on some of that work. You still need to review the code it writes.
       </>
     ),
   },
@@ -382,7 +382,7 @@ function Costs(): ReactNode {
             </Heading>
             <p className={styles.costLead}>
               If your trait needs only one implementation, a plain trait is the right tool.
-              Choosing between implementations with CGP adds declarations, wiring, and other costs:
+              Choosing between implementations with CGP has these costs:
             </p>
           </div>
           <div className={styles.prose}>
