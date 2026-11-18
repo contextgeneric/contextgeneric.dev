@@ -1,0 +1,17 @@
+error[E0119]: conflicting implementations of trait `IsProviderFor<GreeterComponent, _, _>` for type `TestApp`
+  --> tests/compile_fail/concepts/namespaces_a_bound_entry_is_not_overridable_1.rs:26:9
+   |
+24 |         namespace AppDefaults;
+   |                   ----------- first implementation here
+25 |
+26 |         GreeterComponent: GreetQuietly,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `TestApp`
+
+error[E0119]: conflicting implementations of trait `DelegateComponent<GreeterComponent>` for type `TestApp`
+  --> tests/compile_fail/concepts/namespaces_a_bound_entry_is_not_overridable_1.rs:26:9
+   |
+24 |         namespace AppDefaults;
+   |                   ----------- first implementation here
+25 |
+26 |         GreeterComponent: GreetQuietly,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `TestApp`

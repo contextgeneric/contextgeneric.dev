@@ -1,0 +1,8 @@
+{
+  "label": "Wiring and checking",
+  "position": 1,
+  "link": {
+    "type": "doc",
+    "id": "reference/traits/wiring/index"
+  }
+}

@@ -1,0 +1,16 @@
+error[E0034]: multiple applicable items in scope
+  --> tests/compile_fail/reference/components/can_raise_error_usage_ambiguous_concrete_call.rs:19:18
+   |
+19 |     let _ = App::raise_error("boom".to_owned());
+   |                  ^^^^^^^^^^^ multiple `raise_error` found
+   |
+   = note: candidate #1 is defined in an impl of the trait `cgp::prelude::CanRaiseError` for the type `__Context__`
+   = note: candidate #2 is defined in an impl of the trait `ErrorRaiser` for the type `__Provider__`
+help: use fully-qualified syntax to disambiguate
+   |
+19 -     let _ = App::raise_error("boom".to_owned());
+19 +     let _ = <App as ErrorRaiser>::raise_error("boom".to_owned());
+   |
+19 -     let _ = App::raise_error("boom".to_owned());
+19 +     let _ = <App as cgp::prelude::CanRaiseError>::raise_error("boom".to_owned());
+   |

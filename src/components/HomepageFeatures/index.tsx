@@ -1,104 +1,91 @@
 import type {ReactNode} from 'react';
-import clsx from 'clsx';
+import Link from '@docusaurus/Link';
 import Heading from '@theme/Heading';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
 
-type FeatureItem = {
+// The first four headline features, in the order and with the titles the knowledge base's
+// identity.md fixes; the hero's reassurance line carries the fifth, Still Ordinary Rust, so no card
+// repeats it. Each card is one link to the page that answers it, and each illustration is decorative
+// beside its title, so its alt text is empty.
+type Feature = {
   title: string;
+  body: ReactNode;
+  to: string;
   image: string;
-  description: ReactNode;
 };
 
-const FeatureList: FeatureItem[] = [
+const FEATURES: Feature[] = [
   {
-    title: 'Modular Component System',
-    image: '/img/features/modular-component-system-480p.png',
-    description: (
+    title: 'One Interface, Many Implementations',
+    body: (
       <>
-        Decouple interface definitions from implementations using provider traits.
-        Write multiple context-generic providers that can coexist without conflicts.
+        The two encoders above coexist because each one lives on its own provider type, and each type
+        names the one it uses.
       </>
     ),
-  },
-  {
-    title: 'Highly Expressive Macros',
-    image: '/img/features/highly-expressive-macros-480p.png',
-    description: (
-      <>
-        Write abstract programs generic over contexts without managing long lists
-        of generic parameters. Achieve expressiveness rivaling dynamic languages.
-      </>
-    ),
-  },
-  {
-    title: 'Type-Safe Composition',
-    image: '/img/features/type-safe-composition-480p.png',
-    description: (
-      <>
-        All component wiring is verified at compile time. Missing dependencies are
-        caught early, with no runtime errors possible from CGP constructs.
-      </>
-    ),
-  },
-  {
-    title: 'No-Std Friendly',
-    image: '/img/features/no-std-friendly-480p.png',
-    description: (
-      <>
-        Build fully abstract programs without concrete dependencies. Deploy to
-        embedded systems, kernels, WebAssembly, or symbolic execution platforms.
-      </>
-    ),
+    to: '/docs/concepts/coherence',
+    image: '/img/features/one-interface-many-implementations.webp',
   },
   {
     title: 'Zero-Cost Abstraction',
-    image: '/img/features/zero-cost-abstraction-480p.png',
-    description: (
+    body: (
       <>
-        All CGP operations happen at compile time using Rust's type system.
-        No runtime overhead, upholding Rust's zero-cost abstraction guarantee.
+        Provider selection resolves at compile time into a direct call, without a container or a
+        vtable lookup.
       </>
     ),
+    to: '/docs/comparisons/dynamic-dispatch',
+    image: '/img/features/zero-cost-abstraction.webp',
   },
   {
-    title: 'Bypass Coherence Rules',
-    image: '/img/features/bypass-coherence-rules-480p.png',
-    description: (
+    title: 'Type-Safe Wiring',
+    body: (
       <>
-        Enable overlapping and orphan trait implementations without restriction.
-        Define implementations for types you don't own and traits you don't control.
+        A provider states its needs, as <code>#[uses(Display)]</code> does above, and a{' '}
+        <code>check_components!</code> assertion or a use of the component fails the build when a
+        context lacks one.
       </>
     ),
+    to: '/docs/comparisons/dependency-injection',
+    image: '/img/features/type-safe-wiring.webp',
+  },
+  {
+    title: 'Abstract Over Every Dependency',
+    body: (
+      <>
+        Core logic names abstract error, runtime, and I/O types, and each context supplies concrete
+        ones, so the core builds for <code>no_std</code> where the chosen implementations allow.
+      </>
+    ),
+    to: '/docs/concepts/modular-error-handling',
+    image: '/img/features/abstract-over-every-dependency.webp',
   },
 ];
 
-function Feature({title, image, description}: FeatureItem) {
+function FeatureCard({title, body, to, image}: Feature): ReactNode {
   return (
-    <div className={clsx('col col--4')}>
-      <div className="text--center">
-        <img className={styles.featureSvg} src={image} alt={title} />
-      </div>
-      <div className="text--center padding-horiz--md">
-        <Heading as="h3">{title}</Heading>
-        <p>{description}</p>
-      </div>
-    </div>
+    <li>
+      <Link className={styles.card} to={to}>
+        <img className={styles.image} src={useBaseUrl(image)} alt="" width={180} height={180} />
+        <span className={styles.text}>
+          <Heading as="h3" className={styles.title}>
+            {title}
+          </Heading>
+          <span className={styles.body}>{body}</span>
+        </span>
+      </Link>
+    </li>
   );
 }
 
-export default function HomepageFeatures(): ReactNode {
+// The cards sit two to a row, each illustration beside its text, and one to a row on a phone.
+export default function FeatureCards(): ReactNode {
   return (
-    <section className={styles.features}>
-      <div className="container">
-        <Heading as="h2" className={clsx(styles.featuresTitle, 'text--center')}>
-          Why Context-Generic Programming?
-        </Heading>
-        <div className="row">
-          {FeatureList.map((props, idx) => (
-            <Feature key={idx} {...props} />
-          ))}
-        </div>
-      </div>
-    </section>
+    <ul className={styles.cards}>
+      {FEATURES.map((feature) => (
+        <FeatureCard key={feature.title} {...feature} />
+      ))}
+    </ul>
   );
 }

@@ -1,0 +1,9 @@
+error: defaults for generic parameters are not allowed here
+ --> tests/compile_fail/reference/attributes/impl_generics_rejected_default.rs:7:17
+  |
+7 | #[impl_generics(Total: Display = u32)]
+  |                 ^^^^^^^^^^^^^^^^^^^^
+  |
+  = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+  = note: for more information, see issue #36887 <https://github.com/rust-lang/rust/issues/36887>
+  = note: `#[deny(invalid_type_param_default)]` (part of `#[deny(future_incompatible)]`) on by default

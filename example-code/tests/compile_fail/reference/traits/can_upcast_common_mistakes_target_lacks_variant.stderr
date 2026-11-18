@@ -1,0 +1,24 @@
+error[E0277]: the trait bound `FooBaz: FromVariant<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'r', Nil>>>>>` is not satisfied
+  --> tests/compile_fail/reference/traits/can_upcast_common_mistakes_target_lacks_variant.rs:18:35
+   |
+18 |     let _ = FooBar::Foo(1).upcast(PhantomData::<FooBaz>);
+   |                            ------ ^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |                            |
+   |                            required by a bound introduced by this call
+   |
+help: the trait `FromVariant<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'r', Nil>>>>>` is not implemented for `FooBaz`
+  --> tests/compile_fail/reference/traits/can_upcast_common_mistakes_target_lacks_variant.rs:12:1
+   |
+12 | pub enum FooBaz {
+   | ^^^^^^^^^^^^^^^
+help: `FooBaz` implements trait `FromVariant<Tag>`
+  --> tests/compile_fail/reference/traits/can_upcast_common_mistakes_target_lacks_variant.rs:13:5
+   |
+13 |     Foo(u64),
+   |     ^^^ `FromVariant<Symbol<3, cgp::macro_prelude::Chars<'F', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>>`
+14 |     Baz(bool),
+   |     ^^^ `FromVariant<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'z', Nil>>>>>`
+   = note: required for `Either<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'r', Nil>>>>, String>, Void>` to implement `FieldsExtractor<__PartialFooBar<IsVoid, IsPresent>, FooBaz>`
+   = note: 1 redundant requirement hidden
+   = note: required for `Either<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'F', cgp::macro_prelude::Chars<'o', cgp::macro_prelude::Chars<'o', Nil>>>>, u64>, Either<cgp::macro_prelude::Field<Symbol<3, cgp::macro_prelude::Chars<'B', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'r', Nil>>>>, String>, Void>>` to implement `FieldsExtractor<__PartialFooBar<IsPresent, IsPresent>, FooBaz>`
+   = note: required for `FooBar` to implement `CanUpcast<FooBaz>`

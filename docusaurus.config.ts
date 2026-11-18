@@ -1,13 +1,55 @@
-import {themes as prismThemes} from 'prism-react-renderer';
+import {lightTheme as prismLight, darkTheme as prismDark} from './src/prism/themes';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+// The site's fonts, declared here rather than in src/css/custom.css: a url() in that stylesheet is
+// copied to a hashed file name, which the preload below could not name, so the browser would fetch
+// the preloaded file and then the hashed one. These rules name the files under static/fonts/.
+const FONT_FACES = [
+  ['Inter', '/fonts/inter/inter-latin.woff2', 'normal'],
+  ['Inter', '/fonts/inter/inter-latin-italic.woff2', 'italic'],
+  ['JetBrains Mono', '/fonts/jetbrains-mono/jetbrains-mono-latin.woff2', 'normal'],
+]
+  .map(
+    ([family, url, style]) =>
+      `@font-face{font-family:'${family}';src:url('${url}') format('woff2');font-weight:400 700;font-style:${style};font-display:swap}`,
+  )
+  .join('');
+
 const config: Config = {
-  title: 'Context-Generic Programming',
-  tagline: 'Modular programming paradigm for Rust',
+  title: 'CGP — Context-Generic Programming',
+  tagline: 'A language extension for Rust, with pluggable trait implementations at compile-time',
   favicon: 'img/favicon.png',
+
+  // The upright Inter face is preloaded, because every page's text and titles use it. The SVG favicon switches to a
+  // lighter red on a dark browser tab; the PNG stays as the fallback.
+  // The theme-color tags match a phone's address bar to the navbar, using the values of `--cgp-bg`
+  // in src/css/custom.css. Both follow the operating system's colour scheme, which is also the site's
+  // default.
+  headTags: [
+    {tagName: 'style', attributes: {}, innerHTML: FONT_FACES},
+    {tagName: 'link', attributes: {rel: 'icon', type: 'image/svg+xml', href: '/img/favicon.svg'}},
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'preload',
+        href: '/fonts/inter/inter-latin.woff2',
+        as: 'font',
+        type: 'font/woff2',
+        crossorigin: 'anonymous',
+      },
+    },
+    {
+      tagName: 'meta',
+      attributes: {name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#fdfaf7'},
+    },
+    {
+      tagName: 'meta',
+      attributes: {name: 'theme-color', media: '(prefers-color-scheme: dark)', content: '#0e0c0c'},
+    },
+  ],
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -26,6 +68,18 @@ const config: Config = {
   projectName: 'contextgeneric.dev', // Usually your repo name.
 
   onBrokenLinks: 'throw',
+  onBrokenAnchors: 'throw',
+
+  // Parse `.md` as CommonMark and `.mdx` as MDX, rather than treating every file
+  // as MDX. The skill pages under `docs/ai/skills/` are symlinks into the
+  // `cgp-skills` submodule — plain markdown written for coding agents, by a
+  // repository that has no reason to know about MDX — and MDX would read an
+  // autolink like `<https://example.com>` as a JSX tag and fail the build. No page
+  // on this site uses MDX-only syntax (imports, exports, or JSX components), so
+  // nothing else changes: admonitions and raw HTML work under both.
+  markdown: {
+    format: 'detect',
+  },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -35,6 +89,22 @@ const config: Config = {
     locales: ['en'],
   },
 
+  plugins: [
+    // Keep webpack from resolving a symlink to its real path. The skill pages
+    // under `docs/ai/skills/` are symlinks into the `cgp-skills` submodule, whose
+    // real path sits outside `docs/`; resolved, the compiled module no longer
+    // matches the metadata the docs plugin registered for the symlink, and every
+    // such page fails to render with `Cannot read properties of undefined`.
+    function resolveSymlinkedDocs() {
+      return {
+        name: 'resolve-symlinked-docs',
+        configureWebpack() {
+          return {resolve: {symlinks: false}};
+        },
+      };
+    },
+  ],
+
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -42,6 +112,12 @@ const config: Config = {
         docs: {
           showLastUpdateTime: true,
           sidebarPath: './sidebars.ts',
+          // The `cgp-skills` submodule is checked out at the repository root, and
+          // each skill's pages under `docs/ai/skills/<skill>/` are symlinks into it.
+          // Its own files are the source, not pages: the ones we publish are reached
+          // through those symlinks, and the rest (README, AGENTS, sibling-projects)
+          // are not site content at all.
+          exclude: ['**/cgp-skills/**'],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -74,16 +150,17 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/cgp-logo.png',
+    image: 'img/social-card.jpg',
     colorMode: {
       respectPrefersColorScheme: true,
     },
     announcementBar: {
       id: 'announcement',
       content:
-        '🚀 <b>New Release:</b> <a href="/blog/v0.7.0-release">Supercharge Rust functions with implicit arguments using CGP v0.7.0</a> 🚀',
-      backgroundColor: '#fcefe1',
-      textColor: '#5D0705',
+        '🚀 <b>New Release:</b> <a href="/blog/v0.8.0-release">Group components with namespaces and paths in CGP v0.8.0</a> 🚀',
+      // The bar's colours follow the theme through the tokens in src/css/custom.css.
+      backgroundColor: 'var(--cgp-announce-bg)',
+      textColor: 'var(--cgp-announce-text)',
       isCloseable: true,
     },
     navbar: {
@@ -91,6 +168,9 @@ const config: Config = {
       logo: {
         alt: 'Context-Generic Programming Logo',
         src: 'img/cgp-logo.svg',
+        // The logo's red reaches only about 2:1 on the dark navbar, so the dark theme shows a lighter
+        // tint.
+        srcDark: 'img/cgp-logo-dark.svg',
       },
       items: [
         {to: '/docs/tutorials/hello', label: 'Tutorials', position: 'left'},
@@ -115,6 +195,14 @@ const config: Config = {
               to: '/docs',
             },
             {
+              label: 'Quickstart',
+              to: '/docs/quickstart',
+            },
+            {
+              label: 'Overview',
+              to: '/docs/overview',
+            },
+            {
               label: 'Tutorials',
               to: '/docs/category/tutorials',
             },
@@ -135,6 +223,10 @@ const config: Config = {
               label: 'Reddit',
               href: 'https://www.reddit.com/r/cgp/',
             },
+            {
+              label: 'Bluesky',
+              href: 'https://bsky.app/profile/contextgeneric.dev',
+            },
           ],
         },
         {
@@ -154,8 +246,12 @@ const config: Config = {
       copyright: `Licensed by <a href="https://maybevoid.com">MaybeVoid</a> under a <a href="https://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismLight,
+      darkTheme: prismDark,
+      // Prism's default bundle lacks these, so their fenced blocks would render as plain text. The
+      // grammars ship in the `prismjs` package Docusaurus already installs. Scala extends Java's
+      // grammar, so Java comes first.
+      additionalLanguages: ['toml', 'bash', 'ebnf', 'haskell', 'ocaml', 'java', 'scala'],
     },
   } satisfies Preset.ThemeConfig,
 };

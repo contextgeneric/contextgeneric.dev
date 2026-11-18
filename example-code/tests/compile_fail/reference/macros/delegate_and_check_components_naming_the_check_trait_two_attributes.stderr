@@ -1,0 +1,5 @@
+error: Expected exactly one attribute for the check trait name
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_naming_the_check_trait_two_attributes.rs:24:5
+   |
+24 |     #[check_trait(CheckRectangleAgain)]
+   |     ^

@@ -1,0 +1,10 @@
+error[E0119]: conflicting implementations of trait `FooExt` for type `Ctx`
+  --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_hand_written_impl.rs:9:1
+   |
+ 9 | #[blanket_trait]
+   | ^^^^^^^^^^^^^^^^ conflicting implementation for `Ctx`
+...
+23 | impl FooExt for Ctx {
+   | ------------------- first implementation here
+   |
+   = note: this error originates in the attribute macro `blanket_trait` (in Nightly builds, run with -Z macro-backtrace for more info)

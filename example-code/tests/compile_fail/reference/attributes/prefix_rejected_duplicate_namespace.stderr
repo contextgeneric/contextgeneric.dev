@@ -1,0 +1,10 @@
+error[E0119]: conflicting implementations of trait `AppNamespace<_>` for type `GreeterComponent`
+ --> tests/compile_fail/reference/attributes/prefix_rejected_duplicate_namespace.rs:8:1
+  |
+8 | #[cgp_component(Greeter)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^
+  | |
+  | first implementation here
+  | conflicting implementation for `GreeterComponent`
+  |
+  = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)

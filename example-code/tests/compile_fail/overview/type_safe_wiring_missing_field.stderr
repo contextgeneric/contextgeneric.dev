@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `App: CanUseComponent<StorageObjectFetcherComponent>` is not satisfied
+  --> tests/compile_fail/overview/type_safe_wiring_missing_field.rs:51:9
+   |
+51 |         StorageObjectFetcherComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<Symbol<9, Chars<'b', Chars<'u', Chars<'c', Chars<'k', Chars<'e', Chars<'t', Chars<'_', Chars<'i', Chars<'d', Nil>>>>>>>>>>>` is not implemented for `App`
+      but trait `HasField<Symbol<14, Chars<'s', Chars<'t', Chars<'o', Chars<'r', Chars<'a', Chars<'g', Chars<'e', Chars<'_', Chars<'c', cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'e', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'t', Nil>>>>>>>>>>>>>>>>` is implemented for it
+  --> tests/compile_fail/overview/type_safe_wiring_missing_field.rs:40:9
+   |
+40 |     pub storage_client: aws_sdk_s3::Client,
+   |         ^^^^^^^^^^^^^^
+note: required for `FetchS3Object` to implement `IsProviderFor<StorageObjectFetcherComponent, App>`
+  --> tests/compile_fail/overview/type_safe_wiring_missing_field.rs:26:1
+   |
+26 | #[cgp_impl(new FetchS3Object)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `App` to implement `CanUseComponent<StorageObjectFetcherComponent>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/overview/type_safe_wiring_missing_field.rs:49:1
+   |
+49 | / check_components! {
+50 | |     App {
+51 | |         StorageObjectFetcherComponent,
+52 | |     }
+53 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

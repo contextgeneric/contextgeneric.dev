@@ -1,156 +1,790 @@
 /**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
+ * The front page's layout, on the site theme's tokens from src/css/custom.css; no colour here is a
+ * literal. The knowledge base's homepage guide sets the targets: the hero copy beside the hero art,
+ * then both code blocks side by side, so the whole first screen fits at 1920x1080 and the tops of both
+ * blocks show at 1440x900.
  */
 
-.hero {
-  background-color: #fcefe1;
+.page {
+  --page-gutter: 1.5rem;
+  /* One spacing scale for the page: the padding of each section band, the gap between blocks inside a
+     band, the gap between the parts of one group, and the gap that ties a mark to its text. */
+  --space-section: 4rem;
+  --space-block: 1.5rem;
+  --space-group: 1rem;
+  --space-tight: 0.5rem;
+  /* Wide enough that the numbered rejected block, whose longest line is 70 characters, fits its
+     window at 1440 px without scrolling. */
+  --page-width: 1280px;
 }
 
-.heroInner {
-  padding: 4rem 2rem;
-}
-
-.heroOuter {
-  display: flex;
-  align-items: center;
+/* One container for every band, so the title, the code, and the essay share a left edge. */
+.container {
+  max-width: calc(var(--page-width) + 2 * var(--page-gutter));
   margin: 0 auto;
-  max-width: 1100px;
-  padding: 0 0.5rem;
-  gap: 1.5rem;
+  padding: 0 var(--page-gutter);
 }
 
-.heroProjectTagline {
-  color: var(--ifm-color-primary-dark);
+/* The hero. A soft glow in the brand's tints sits behind the art, and a faint dot grid across the
+   band, both drawn in CSS. */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--cgp-surface);
+  background-image:
+    radial-gradient(circle at 82% 45%, color-mix(in srgb, var(--cgp-red-200) 45%, transparent) 0, transparent 34%),
+    radial-gradient(color-mix(in srgb, var(--cgp-text) 9%, transparent) 1px, transparent 1px);
+  background-size: auto, 22px 22px;
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+html[data-theme='dark'] .hero {
+  background-image:
+    radial-gradient(circle at 82% 45%, color-mix(in srgb, var(--cgp-red-300) 11%, transparent) 0, transparent 34%),
+    radial-gradient(color-mix(in srgb, var(--cgp-text) 8%, transparent) 1px, transparent 1px);
+}
+
+.heroGrid {
+  display: grid;
+  /* The copy column stops near the tag line's width, and the art centres in the rest, so the hero
+     leaves no wide gap between them on a large screen. */
+  grid-template-columns: minmax(0, 52rem) minmax(auto, 1fr);
+  align-items: center;
+  gap: 2.5rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.heroTitle {
   font-size: 3rem;
-  margin: 0;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.6rem;
 }
 
-.heroLogo {
-  display: block;
-  margin: 0;
-  margin-left: auto;
-  width: 300px;
-  flex-shrink: 0;
+.heroTagline {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--cgp-heading);
+  margin: 0 0 0.5rem;
+  max-width: 34em;
+  text-wrap: balance;
 }
 
-.heroTitleTextHtml {
-  display: block;
-  margin-top: 0.5rem;
-  line-height: 1.2;
+.heroReassurance {
+  font-size: 1.05rem;
+  color: var(--cgp-text-muted);
+  margin: 0 0 0.75rem;
+  max-width: 40em;
 }
 
-.heroTitleTextHtml b {
-  color: #911f1c;
+/* The install line looks like a terminal prompt, with a button that copies the command. */
+.install {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 0.75rem;
+  padding: 0.35rem 0.4rem 0.35rem 0.9rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 10px;
+  background: var(--cgp-code-bg);
 }
 
-.indexCtas {
-  --ifm-button-size-multiplier: 1.2;
+.install code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 0.95rem;
+  color: var(--cgp-text);
+}
+
+.prompt {
+  color: var(--cgp-text-muted);
+  user-select: none;
+}
+
+.copy {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 7px;
+  background: var(--cgp-surface-raised);
+  color: var(--cgp-text-muted);
+  cursor: pointer;
+}
+
+.copy:hover {
+  color: var(--cgp-link);
+  border-color: var(--cgp-link);
+}
+
+.heroLinks {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.indexCtasGitHubButtonWrapper {
-  display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
 
-.indexCtasGitHubButton {
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0 1.4rem;
+  border-radius: 10px;
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.primaryButton,
+.primaryButton:hover {
+  background: var(--cgp-red);
+  color: var(--cgp-on-red);
+  text-decoration: none;
+}
+
+.primaryButton:hover {
+  background: var(--cgp-red-700);
+}
+
+.secondaryButton,
+.secondaryButton:hover {
+  border: 1px solid var(--ifm-color-emphasis-400);
+  color: var(--ifm-heading-color);
+  text-decoration: none;
+}
+
+.secondaryButton:hover {
+  background: var(--cgp-surface-raised);
+  border-color: var(--cgp-link);
+}
+
+.starButton {
   border: 0;
   overflow: hidden;
+  margin-left: 0.25rem;
 }
 
-.section {
-  padding: 4rem 2rem;
+/* The hero art has an opaque background of its own. Its edges fade out, so it never shows a
+   rectangle against the band; in the dark theme it sits on a circle of its own background colour. */
+.heroArtFrame {
+  display: grid;
+  place-items: center;
+  justify-self: center;
 }
 
-.sectionAlt {
-  background-color: var(--ifm-color-emphasis-200);
+.heroArt {
+  display: block;
+  width: 280px;
+  height: auto;
+  /* A mask reads only alpha, so its colour stands for "opaque", not for a colour on the page. */
+  mask-image: radial-gradient(closest-side, black 72%, transparent 100%);
 }
 
-[data-theme='dark'] .sectionAlt {
-  background-color: var(--ifm-color-emphasis-200);
+html[data-theme='dark'] .heroArtFrame {
+  width: 270px;
+  height: 270px;
+  border-radius: 50%;
+  background: var(--cgp-hero-art-bg);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--cgp-hero-art-bg) 30%, transparent);
 }
 
-.codeExample {
-  background-color: var(--ifm-code-background);
-  border-radius: var(--ifm-code-border-radius);
-  padding: 1rem;
-  overflow-x: auto;
+html[data-theme='dark'] .heroArt {
+  width: 236px;
 }
 
-.codeExample pre {
+/* The art's own background is the brightest thing on the dark page, so the dark theme dims the art
+   and its circle together, without redrawing them. */
+html[data-theme='dark'] .heroArtFrame {
+  filter: brightness(0.9);
+}
+
+/* The code band: two editor windows side by side, ending on the caption. The tinted section below it
+   marks where the band ends. */
+.codeBand {
+  padding: 0.75rem 0 2.5rem;
+}
+
+.codeColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.window {
+  display: flex;
+  flex-direction: column;
   margin: 0;
-  padding: 0;
-  background: transparent;
-  font-size: 0.9rem;
+  min-width: 0;
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--cgp-code-bg);
+}
+
+.windowBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 1px solid var(--cgp-border);
+  background: var(--cgp-surface-raised);
+  font-family: var(--ifm-heading-font-family);
+  font-size: 0.98rem;
+  font-weight: var(--ifm-heading-font-weight);
+  color: var(--ifm-heading-color);
+}
+
+.verdictMark {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--cgp-surface-raised);
+}
+
+.rejected .verdictMark {
+  background: var(--cgp-diff-removed-mark);
+}
+
+.accepted .verdictMark {
+  background: var(--cgp-diff-added-mark);
+}
+
+.windowCode {
+  flex: 1;
+  /* A wider gutter leaves room for the glyph that marks a changed line. */
+  --ifm-pre-padding: 1.3rem;
+}
+
+.windowCode :global(.theme-code-block) {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.windowCode pre {
+  font-size: 0.8rem;
   line-height: 1.5;
 }
 
-.problemCard {
-  padding: 1.5rem;
-  border-radius: 8px;
-  height: 100%;
-  background-color: var(--ifm-card-background-color);
-  border: 1px solid var(--ifm-color-emphasis-300);
+/* Decorative glyphs below give an empty alternative text after a plain fallback, so a screen reader
+   skips them and an older browser still draws them. */
+
+/* The changed lines read like a diff: a tint and a gutter mark in each window's own colour, a cross
+   on the line Rust rejects and a plus on the lines CGP adds. The rejected block shows line numbers,
+   which Docusaurus lays out as table rows, so its mark sits in the line-number cell; a pseudo-element
+   on the row itself would become a cell of its own. The tints and marks are theme tokens, which
+   `scripts/theme/contrast.py` checks against every code colour. The line-number cell is opaque, so it
+   lays the tint over the code background. */
+.rejected :global(.theme-code-block-highlighted-line) {
+  background: var(--cgp-diff-removed);
 }
 
-.problemCard h3 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+.rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber'] {
+  background: linear-gradient(var(--cgp-diff-removed), var(--cgp-diff-removed)), var(--cgp-code-bg);
+  box-shadow: inset 3px 0 0 var(--cgp-diff-removed-mark);
 }
 
-.buttons {
+.rejected :global(.theme-code-block-highlighted-line) [class*='codeLineNumber']::after {
+  content: '✗';
+  content: '✗' / '';
+  position: absolute;
+  left: 0.45rem;
+  font-weight: 700;
+  color: var(--cgp-diff-removed-mark);
+}
+
+.accepted :global(.theme-code-block-highlighted-line) {
+  position: relative;
+  background: var(--cgp-diff-added);
+  box-shadow: inset 3px 0 0 var(--cgp-diff-added-mark);
+}
+
+.accepted :global(.theme-code-block-highlighted-line)::before {
+  content: '+';
+  content: '+' / '';
+  position: absolute;
+  left: 0.45rem;
+  font-weight: 700;
+  color: var(--cgp-diff-added-mark);
+}
+
+/* The compiler's error, quoted under the rejected block, reads as terminal output with its first
+   line in the rejection's colour, a pair the contrast script checks. */
+.diagnostic {
+  margin: 0;
+  padding: 0.9rem 1.4rem 1rem;
+  border-top: 1px dashed var(--cgp-border);
+  border-radius: 0;
+  background: var(--cgp-surface);
+  color: var(--cgp-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.diagnostic::first-line {
+  color: var(--ifm-color-danger);
+  font-weight: 700;
+}
+
+/* The caption: its reason at body size, then its conclusion set large in the heading colour, under a
+   short rule in the link colour. The rule sits closer to the quote than to the reason, so it reads as
+   the quote's mark rather than an underline of the reason. */
+.caption {
+  /* Wide enough for the pull quote to stay on one line at desktop widths. */
+  max-width: calc(1040px + 2 * var(--page-gutter));
+  margin-top: 1.75rem;
+  text-align: center;
+}
+
+.captionReason {
+  font-size: 1.05rem;
+  color: var(--cgp-text-muted);
+  margin: 0 0 var(--space-group);
+}
+
+.captionQuote {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 2rem;
+  font-weight: var(--ifm-heading-font-weight);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--cgp-heading);
+  margin: 0;
+  text-wrap: balance;
+}
+
+/* Code in the pull quote sets a little smaller than the heading type, so its box does not outweigh
+   the words around it. */
+.captionQuote code {
+  font-size: 0.85em;
+}
+
+.captionQuote::before {
+  content: '';
+  display: block;
+  width: 3rem;
+  height: 3px;
+  margin: 0 auto var(--space-tight);
+  border-radius: 2px;
+  background: var(--cgp-link);
+}
+
+/* The essay. Each section takes the layout that fits its content, and the sections alternate between
+   the page and the tint, so every one meets a change of background. */
+.section {
+  padding: var(--space-section) 0;
+}
+
+.sectionTinted {
+  background: var(--cgp-surface);
+  border-top: 1px solid var(--cgp-border);
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+.sectionTitle {
+  font-size: 2rem;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+  /* A title that wraps, as section 1's does in its narrow column and every title does on a phone,
+     splits into lines of even length rather than leaving one word on the last line. */
+  text-wrap: balance;
+}
+
+.prose {
+  font-size: 1.05rem;
+  max-width: 44em;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.lead {
+  font-size: 1.15rem;
+  color: var(--cgp-text-muted);
+  margin: -0.5rem 0 var(--space-block);
+}
+
+/* Prose links on the page are underlined, as in Markdown content. */
+.prose a,
+.lead a,
+.sectionNote a,
+.routeReason a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+}
+
+/* Section 1: the title in its own column beside the prose. The prose runs several paragraphs, so on
+   a wide screen the title stays in view below the navbar while the reader scrolls through them. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.split > .sectionTitle {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1.5rem);
+}
+
+/* Section 2: the four features, whose cards live in src/components/HomepageFeatures/. */
+.sectionNote {
+  margin: var(--space-block) 0 0;
+  font-size: 1.05rem;
+}
+
+.tileGrid,
+.routeGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* Section 3: three link tiles. */
+.tileGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.tile {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.4rem;
+  height: 100%;
+  padding: 1.3rem 1.4rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  background: var(--cgp-surface-raised);
+  color: var(--cgp-text);
+  text-decoration: none;
+  transition: border-color 0.15s, transform 0.15s;
 }
 
-.getStartedButton {
-  --ifm-button-background-color: var(--ifm-color-primary-dark);
-  --ifm-button-border-color: var(--ifm-color-primary-darkest);
-
-  color: white;
+.tile:hover {
+  color: var(--cgp-text);
+  text-decoration: none;
+  border-color: var(--cgp-link);
+  transform: translateY(-2px);
 }
 
-.tutorialButton {
-  --ifm-button-background-color: var(--ifm-color-primary-lighter);
-  --ifm-button-border-color: var(--ifm-color-primary-lighter);
+.tileTitle {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.15rem;
+  font-weight: var(--ifm-heading-font-weight);
+  color: var(--cgp-heading);
 }
 
-/* Responsive adjustments */
-@media screen and (max-width: 996px) {
-  .heroInner {
-    padding: 0.5rem 1rem;
+.tile:hover .tileTitle,
+.tile:focus-visible .tileTitle {
+  color: var(--cgp-link);
+}
+
+.tileTitle::after {
+  content: ' →';
+  content: ' →' / '';
+}
+
+.tileBody {
+  color: var(--cgp-text-muted);
+}
+
+/* Section 4: the costs in a framed panel, ending on the advice. */
+.costPanel {
+  padding: 2rem 2.25rem;
+  border: 1px solid var(--cgp-border);
+  border-left: 4px solid var(--ifm-color-warning);
+  border-radius: 14px;
+  background: var(--cgp-surface);
+}
+
+.costSplit {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+  gap: 2.5rem;
+  align-items: start;
+}
+
+.costSplit .prose {
+  max-width: none;
+}
+
+/* The heading and its lead stay in view beside the costs while the reader scrolls through them, as
+   section 1's title does. */
+.costIntro {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1.5rem);
+}
+
+.costLead {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+/* The costs read as a table: each row sets its label in a column of its own beside one statement,
+   with a rule between rows, so a reader scans the labels down the left edge. */
+.costTable {
+  margin: 0;
+  border-top: 1px solid var(--cgp-border);
+}
+
+.costRow {
+  display: grid;
+  grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  gap: var(--space-block);
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--cgp-border);
+}
+
+.costRow dt {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: var(--ifm-heading-font-weight);
+  color: var(--cgp-heading);
+  margin: 0;
+}
+
+.costRow dd {
+  margin: 0;
+}
+
+/* A command or crate name such as `cargo-cgp` would otherwise break at its hyphen. */
+.costTable code {
+  white-space: nowrap;
+}
+
+.costAdvice {
+  margin: var(--space-block) 0 0;
+  font-weight: 600;
+}
+
+/* Section 5: one card per reader, ending the page on a choice. Each card's main link stretches over
+   the whole card through a positioned pseudo-element, so the card is one target, and a second link in
+   its reason sits above that layer. The main link's focus ring outlines the whole card. */
+.routeGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.route {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.2rem 1.25rem;
+  border: 1px solid var(--cgp-border);
+  border-radius: 14px;
+  background: var(--cgp-surface-raised);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.route:hover {
+  border-color: var(--cgp-link);
+  transform: translateY(-2px);
+}
+
+.routeLink {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.routeLink::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+}
+
+.routeLink:focus-visible {
+  outline: none;
+}
+
+.routeLink:focus-visible::after {
+  outline: 2px solid var(--cgp-focus);
+  outline-offset: 2px;
+}
+
+.routeLink::before {
+  content: '→ ';
+  content: '→ ' / '';
+}
+
+.routeReason {
+  font-size: 0.92rem;
+  color: var(--cgp-text-muted);
+}
+
+.routeReason a {
+  position: relative;
+  z-index: 1;
+}
+
+.routeReader {
+  font-family: var(--ifm-heading-font-family);
+  font-size: 1.1rem;
+  font-weight: var(--ifm-heading-font-weight);
+  color: var(--ifm-heading-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .route {
+    transition: none;
   }
 
-  .heroProjectTagline {
-    font-size: 2rem;
+  .tile:hover,
+  .route:hover {
+    transform: none;
+  }
+}
+
+/* Two code windows side by side need about 1240 px for their 70-character lines at a readable size.
+   Below 1360 px the code sets a little smaller, and below 1240 px the windows stack, so neither
+   scrolls sideways. */
+@media screen and (max-width: 1360px) {
+  .windowCode pre {
+    font-size: 0.76rem;
+  }
+}
+
+@media screen and (max-width: 1239px) {
+  .codeColumns {
+    grid-template-columns: minmax(0, 1fr);
   }
 
-  .heroOuter {
-    display: block;
+  .windowCode pre {
+    font-size: 0.82rem;
   }
 
-  .heroLogo {
+  /* Between the phone layout and 1240 px the hero copy has less room beside the art, so the art and
+     the title shrink, and the first code window still starts high on the screen. */
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .heroArt {
     width: 200px;
-    margin: 0 auto;
   }
 
-  .section {
-    padding: 2rem 1rem;
+  html[data-theme='dark'] .heroArtFrame {
+    width: 196px;
+    height: 196px;
   }
 
-  .indexCtas {
-    flex-direction: column;
+  html[data-theme='dark'] .heroArt {
+    width: 170px;
   }
 
-  .indexCtasGitHubButtonWrapper {
-    width: 100%;
-    justify-content: center;
+  .heroTitle {
+    font-size: 2.6rem;
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .routeGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 996px) {
+  .page {
+    --page-gutter: 1rem;
+    --space-section: 2.75rem;
+  }
+
+  .heroGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    padding-top: 1.25rem;
+  }
+
+  .heroArtFrame {
+    order: -1;
+    justify-self: center;
+  }
+
+  .heroArt {
+    width: 150px;
+  }
+
+  html[data-theme='dark'] .heroArtFrame {
+    width: 160px;
+    height: 160px;
+  }
+
+  html[data-theme='dark'] .heroArt {
+    width: 134px;
+  }
+
+  .heroTitle {
+    font-size: 2.2rem;
+  }
+
+  .heroTagline {
+    font-size: 1.2rem;
+  }
+
+  .codeColumns,
+  .split,
+  .costSplit,
+  .tileGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .split {
+    gap: 0;
+  }
+
+  .split > .sectionTitle,
+  .costIntro {
+    position: static;
+  }
+
+  .costSplit {
+    gap: 1rem;
+  }
+
+  .captionQuote {
+    font-size: 1.5rem;
+  }
+
+  .sectionTitle {
+    font-size: 1.6rem;
+  }
+
+  .costPanel {
+    padding: 1.5rem 1.25rem;
+  }
+
+  /* On a phone the label sits above its statement. */
+  .costRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.2rem;
+  }
+
+  .routeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .routeGrid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

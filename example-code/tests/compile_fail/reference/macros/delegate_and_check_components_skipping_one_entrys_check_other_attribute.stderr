@@ -1,0 +1,5 @@
+error: Expected either `#[skip_check]` or `#[check_params]` attribute for specifying the check generics
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_skipping_one_entrys_check_other_attribute.rs:24:9
+   |
+24 |         #[allow(unused)]
+   |         ^

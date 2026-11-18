@@ -1,0 +1,41 @@
+error[E0275]: overflow evaluating the requirement `__Key__: A<__BComponents>`
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_inheritance_cycle.rs:5:1
+  |
+5 | cgp_namespace! { new A: B {} }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: consider increasing the recursion limit by adding a `#![recursion_limit = "256"]` attribute to your crate (`$CRATE`)
+note: required for `__Key__` to implement `B<__AComponents>`
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_inheritance_cycle.rs:7:1
+  |
+7 | cgp_namespace! { new B: A {} }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required for `__Key__` to implement `A<__AComponents>`
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_inheritance_cycle.rs:5:1
+  |
+5 | cgp_namespace! { new A: B {} }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: 3 redundant requirements hidden
+  = note: required for `__Key__` to implement `B<__Table__>`
+  = note: this error originates in the macro `cgp_namespace` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0275]: overflow evaluating the requirement `__Key__: B<__AComponents>`
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_inheritance_cycle.rs:7:1
+  |
+7 | cgp_namespace! { new B: A {} }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = help: consider increasing the recursion limit by adding a `#![recursion_limit = "256"]` attribute to your crate (`$CRATE`)
+note: required for `__Key__` to implement `A<__BComponents>`
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_inheritance_cycle.rs:5:1
+  |
+5 | cgp_namespace! { new A: B {} }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: required for `__Key__` to implement `B<__BComponents>`
+ --> tests/compile_fail/reference/macros/cgp_namespace_common_mistakes_inheritance_cycle.rs:7:1
+  |
+7 | cgp_namespace! { new B: A {} }
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  = note: 3 redundant requirements hidden
+  = note: required for `__Key__` to implement `A<__Table__>`
+  = note: this error originates in the macro `cgp_namespace` (in Nightly builds, run with -Z macro-backtrace for more info)

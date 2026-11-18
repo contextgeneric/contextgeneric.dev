@@ -1,6 +1,12 @@
+---
+title: 'Area calculation: from plain Rust functions to providers'
+sidebar_label: 'Area Calculation Tutorial'
+description: 'A Rust tutorial series that grows an area calculation from plain functions to context-generic functions, providers, and checked wiring.'
+---
+
 # Area Calculation Tutorial
 
-In this tutorial series, we will explore CGP — Context-Generic Programming — through a concrete, hands-on example: computing the area of different shapes. We will start with familiar plain Rust code, identify its limitations, and progressively introduce the CGP tools that address them. No prior knowledge of CGP is required, though a basic familiarity with Rust traits will be helpful.
+In this tutorial series, we will explore [Context-Generic Programming](/docs/) (CGP) through a concrete, hands-on example: computing the area of different shapes. We will start with familiar plain Rust code, identify its limitations, and progressively introduce the CGP tools that address them. No prior knowledge of CGP is required, though a basic familiarity with Rust traits will be helpful.
 
 ## Plain Functions and Explicit Dependencies
 
@@ -83,4 +89,9 @@ We have now identified the two core limitations of conventional Rust approaches:
 
 In the first tutorial, Context-Generic Functions, we will see how the `#[cgp_fn]` macro and `#[implicit]` arguments address both of these limitations at once, allowing us to write a single `rectangle_area` function that works cleanly across any context that provides the required fields. We will also explore how CGP functions can import each other via `#[uses]`, and take an optional look at how the macro desugars into plain Rust traits under the hood.
 
-In the second tutorial, Static Dispatch, we will introduce a second shape — the circle — and define a unified `CanCalculateArea` trait as a common interface across all shapes. We will run into Rust's coherence restrictions when trying to provide blanket implementations, and then resolve this with CGP's `#[cgp_component]` macro and named providers. Finally, we will see how `delegate_components!` wires contexts to providers at compile time, and how higher-order providers allow provider implementations to compose generically, with zero runtime overhead.
+In the second tutorial, Static Dispatch, we will introduce a second shape — the circle — and define a unified `CanCalculateArea` trait as a common interface across all shapes. We will run into Rust's [coherence](/docs/reference/glossary#coherence) restrictions when trying to provide [blanket implementations](/docs/reference/glossary#blanket-implementation), and then resolve this with CGP's `#[cgp_component]` macro and named providers. Finally, we will see how `delegate_components!` wires contexts to providers at compile time, and how [higher-order providers](/docs/reference/glossary#higher-order-provider) allow provider implementations to compose generically, with zero runtime overhead.
+
+In the third tutorial, Checking and Debugging, we will make a wiring mistake on purpose. We will find
+that CGP wiring is *lazy* — a mis-wired context compiles until something asks it to do the work — and
+learn to catch the mistake at the line that made it with `check_components!`, then read the resulting
+error with `cargo cgp check`.

@@ -1,0 +1,5 @@
+error: the component name's parameter `T` is not a generic parameter of the trait `CanShape`
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_undeclared_parameter_in_name.rs:6:57
+  |
+6 | #[cgp_component { provider: Shape, name: ShapeComponent<T> }]
+  |                                                         ^

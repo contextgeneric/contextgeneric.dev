@@ -1,0 +1,10 @@
+error[E0428]: the name `RectangleArea` is defined multiple times
+  --> tests/compile_fail/reference/macros/cgp_provider_common_mistakes_struct_already_declared.rs:14:43
+   |
+11 | pub struct RectangleArea;
+   | ------------------------- previous definition of the type `RectangleArea` here
+...
+14 | impl<Context> AreaCalculator<Context> for RectangleArea {
+   |                                           ^^^^^^^^^^^^^ `RectangleArea` redefined here
+   |
+   = note: `RectangleArea` must be defined only once in the type namespace of this module

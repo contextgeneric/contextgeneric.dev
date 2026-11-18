@@ -1,0 +1,5 @@
+error: invalid impl generics syntax
+  --> tests/compile_fail/reference/macros/delegate_components_formal_grammar_key_generic_default.rs:27:9
+   |
+27 |         <T = u32> WidthKey<T>: RectangleArea,
+   |         ^^^^^^^^^

@@ -1,0 +1,5 @@
+error: const item require implementation expression
+ --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_const_without_default.rs:9:5
+  |
+9 |     const LIMIT: u32;
+  |     ^^^^^^^^^^^^^^^^^

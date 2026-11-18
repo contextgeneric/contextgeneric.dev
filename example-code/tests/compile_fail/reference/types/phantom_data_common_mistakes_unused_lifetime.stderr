@@ -1,0 +1,7 @@
+error[E0392]: lifetime parameter `'a` is never used
+ --> tests/compile_fail/reference/types/phantom_data_common_mistakes_unused_lifetime.rs:4:22
+  |
+4 | pub struct Borrowing<'a>;
+  |                      ^^ unused lifetime parameter
+  |
+  = help: consider removing `'a`, referring to it in a field, or using a marker such as `PhantomData`

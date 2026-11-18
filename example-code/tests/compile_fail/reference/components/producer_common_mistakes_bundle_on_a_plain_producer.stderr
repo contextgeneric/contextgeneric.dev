@@ -1,0 +1,63 @@
+error[E0277]: the trait bound `MagicNumber: DelegateComponent<ComputerComponent>` is not satisfied
+  --> tests/compile_fail/reference/components/producer_common_mistakes_bundle_on_a_plain_producer.rs:29:29
+   |
+29 |         [ComputerComponent, TryComputerComponent]: ((), ()),
+   |                             ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `DelegateComponent<ComputerComponent>` is not implemented for `MagicNumber`
+  --> tests/compile_fail/reference/components/producer_common_mistakes_bundle_on_a_plain_producer.rs:10:49
+   |
+10 | impl<Context, Code> Producer<Context, Code> for MagicNumber {
+   |                                                 ^^^^^^^^^^^
+   = help: the following other types implement trait `DelegateComponent<Key>`:
+             App
+             BuildAndMergeOutputs<Output, Handlers>
+             MatchWithFieldHandlersRef<Provider>
+             MatchWithValueHandlersMut<Provider>
+             MatchWithValueHandlersRef<Provider>
+             PipeMonadic<M, Providers>
+             PromoteProducer<Provider>
+   = note: required for `MagicNumber` to implement `Computer<App, (), ()>`
+   = note: required for `Promote<MagicNumber>` to implement `IsProviderFor<TryComputerComponent, App, ((), ())>`
+   = note: 1 redundant requirement hidden
+   = note: required for `PromoteProducer<MagicNumber>` to implement `IsProviderFor<TryComputerComponent, App, ((), ())>`
+   = note: required for `App` to implement `CanUseComponent<TryComputerComponent, ((), ())>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/components/producer_common_mistakes_bundle_on_a_plain_producer.rs:27:1
+   |
+27 | / check_components! {
+28 | |     App {
+29 | |         [ComputerComponent, TryComputerComponent]: ((), ()),
+30 | |     }
+31 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `MagicNumber: IsProviderFor<ComputerComponent, App, ((), ())>` is not satisfied
+  --> tests/compile_fail/reference/components/producer_common_mistakes_bundle_on_a_plain_producer.rs:29:29
+   |
+29 |         [ComputerComponent, TryComputerComponent]: ((), ()),
+   |                             ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<ComputerComponent, App, ((), ())>` is not implemented for `MagicNumber`
+      but trait `IsProviderFor<ProducerComponent, App, ((), ())>` is implemented for it
+  --> tests/compile_fail/reference/components/producer_common_mistakes_bundle_on_a_plain_producer.rs:10:1
+   |
+10 | impl<Context, Code> Producer<Context, Code> for MagicNumber {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `ProducerComponent`, found `ComputerComponent`
+   = note: required for `MagicNumber` to implement `Computer<App, (), ()>`
+   = note: required for `Promote<MagicNumber>` to implement `IsProviderFor<TryComputerComponent, App, ((), ())>`
+   = note: 1 redundant requirement hidden
+   = note: required for `PromoteProducer<MagicNumber>` to implement `IsProviderFor<TryComputerComponent, App, ((), ())>`
+   = note: required for `App` to implement `CanUseComponent<TryComputerComponent, ((), ())>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/components/producer_common_mistakes_bundle_on_a_plain_producer.rs:27:1
+   |
+27 | / check_components! {
+28 | |     App {
+29 | |         [ComputerComponent, TryComputerComponent]: ((), ()),
+30 | |     }
+31 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

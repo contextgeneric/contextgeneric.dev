@@ -1,41 +1,105 @@
-# Website
+[![Deploy to GitHub Pages](https://github.com/contextgeneric/contextgeneric.dev/actions/workflows/deploy.yaml/badge.svg)](https://github.com/contextgeneric/contextgeneric.dev/actions/workflows/deploy.yaml)
+[![Test deployment](https://github.com/contextgeneric/contextgeneric.dev/actions/workflows/test-deploy.yaml/badge.svg)](https://github.com/contextgeneric/contextgeneric.dev/actions/workflows/test-deploy.yaml)
+![License: Apache-2.0 for code](https://img.shields.io/badge/license-Apache_2.0-blue.svg)
+![Content: CC BY-SA 4.0](https://img.shields.io/badge/content-CC_BY--SA_4.0-lightgrey.svg)
+![Node 24+](https://img.shields.io/badge/node-24+-green.svg)
 
-This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
+# The CGP website: contextgeneric.dev
 
-## Installation
+**The public documentation site for [Context-Generic Programming (CGP)](https://contextgeneric.dev/),
+published at [contextgeneric.dev](https://contextgeneric.dev/).**
 
-```bash
-yarn
+The site is a stock [Docusaurus](https://docusaurus.io/) installation: the quickstart, the tutorials,
+the concepts, the construct reference, the comparisons, the project pages, the `cargo-cgp` guide, the
+AI section, and the blog. It is deliberately unmodified, without plugins or custom React beyond the landing
+page, so a contributor's work is almost entirely writing Markdown.
+
+## Install
+
+```sh
+npm ci
 ```
 
-## Local Development
+The repository carries `package-lock.json`, and CI installs with `npm ci`, so use `npm` rather than
+another package manager. Node 24 or newer is required. CI runs the version `.nvmrc` pins, and
+`nvm use` selects the same one locally.
 
-```bash
-yarn start
+## Local development
+
+```sh
+npm start
 ```
 
-This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
+This starts a local development server and opens a browser window. Most changes are reflected live
+without restarting the server.
 
 ## Build
 
-```bash
-yarn build
+```sh
+npm run build
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service.
+This generates the static site into `build/`, which any static host can serve. The build fails on a
+broken internal link, because `onBrokenLinks` is set to `throw`, so a moved page needs every reference
+fixed in the same change.
+
+The social card, the image a shared link to the site shows, is `static/img/social-card.jpg`, rendered
+from the hero illustration, the project's name, and its tag line. Regenerate it after changing either
+with `python3 scripts/social-card/make.py`, which needs `google-chrome` and ImageMagick, and commit
+the result.
+
+## Theme
+
+The site's colours are tokens in [`src/css/custom.css`](src/css/custom.css), defined once for each
+theme, with the code colours in [`src/prism/themes.ts`](src/prism/themes.ts); page styles use the
+tokens rather than hex colours. After changing a colour, run the contrast check, which needs only
+Python 3 and exits non-zero when a pair falls below WCAG AA:
+
+```sh
+python3 scripts/theme/contrast.py
+```
+
+The heading and code fonts are self-hosted under `static/fonts/`, and
+[`scripts/fonts/README.md`](scripts/fonts/README.md) gives the commands that cut them.
 
 ## Deployment
 
-Using SSH:
+The site deploys from `main` through GitHub Pages, using the workflow in
+[`.github/workflows/deploy.yaml`](.github/workflows/deploy.yaml): a push to `main` builds the site and
+publishes it. Every other branch and every pull request runs the same build through
+[`.github/workflows/test-deploy.yaml`](.github/workflows/test-deploy.yaml) without deploying, and that
+workflow also runs the `example-code` snippet tests.
 
-```bash
-USE_SSH=true yarn deploy
-```
+## Writing a page
 
-Not using SSH:
+Read the knowledge base's [website section](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/README.md)
+for the page you are about to touch before writing. It records, for every page the site publishes,
+what that page says, which knowledge-base documents own its content, and how far its code has drifted
+from the current release. The [writing guides](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/website/writing-guides/README.md)
+say how each kind of page should be written.
 
-```bash
-GIT_USER=<Your GitHub username> yarn deploy
-```
+The site documents `cgp` v0.8.0 and `cargo-cgp` v0.1.0. Verify every snippet against the current
+release, the `cgp` source, or its tests, and prefer code already verified in the knowledge base's
+`examples/` directory. The `example-code` crate in this repository compiles the snippets the pages
+show, so a page cannot drift from the library without a failing test.
 
-If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
+## Links
+
+A published page never links into the knowledge base, apart from the two hand-written exceptions the
+knowledge base's website rules set: `docs/ai/disclaimer.md` and the pages under
+`docs/ai/knowledge-base/`. The published skill pages under `docs/ai/skills/` may cite the knowledge
+base by deep GitHub URL, because nobody hand-writes them.
+
+Link only public resources: other pages on this site, the `cgp` repository and its siblings, docs.rs,
+crates.io, and ordinary external sources.
+
+## License
+
+The repository's source code is licensed under the Apache License, Version 2.0, the same as `cgp`. The
+published pages are licensed under
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), as the site's footer states.
+
+## Related repositories
+
+The [CGP knowledge base](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/sibling-projects.md)
+lists every repository in the ecosystem and the revision of each to read.

@@ -1,0 +1,149 @@
+---
+title: 'WithDelegatedType — types from a shared table'
+description: 'The alias WithProvider<UseDelegatedType<Table>>: several #[cgp_type] components answered from one table keyed by their component markers.'
+sidebar_label: 'WithDelegatedType'
+sidebar_position: 6.5
+---
+
+# `WithDelegatedType`
+
+Resolve one or more abstract-type components from a shared table, through the `WithProvider` adapter.
+
+## Overview
+
+Under [Context-Generic Programming (CGP)](/docs/), several abstract types can be resolved from one
+shared table, and `WithDelegatedType<Components>` is the alias
+`WithProvider<UseDelegatedType<Components>>`. It answers a context's abstract-type components by
+looking each type tag up in the `Components` table, on a
+[**context**](/docs/reference/glossary#context), the type that implements the trait, by adapting the
+foundational [`UseDelegatedType`](use_delegated_type.md) provider through the
+[`WithProvider`](with_provider.md) layer. Like every CGP provider, it carries no runtime value.
+
+Unlike [`WithType`](with_type.md), this alias is not an alternative to a directly-wireable provider
+on a `#[cgp_type]` component: the bare [`UseDelegatedType`](use_delegated_type.md) supplies only the
+foundational [`TypeProvider`](../components/has_type.md), so `WithDelegatedType` is the form you wire
+there. The bare form serves only the built-in `TypeProviderComponent`, as its page shows.
+
+## Usage
+
+`WithDelegatedType` is not in the prelude. Import it from `cgp::core::types`. It takes one type
+parameter, the lookup table, and appears as the value of one or more abstract-type components' wiring
+entries:
+
+```rust
+use cgp::core::types::WithDelegatedType;
+
+delegate_components! {
+    App {
+        [
+            ScalarTypeProviderComponent,
+            IndexTypeProviderComponent,
+        ]: WithDelegatedType<AppTypes>,
+    }
+}
+```
+
+The `Components` parameter is a type that maps each component marker to a concrete type, built as an
+ordinary [`delegate_components!`](../macros/delegate_components.md) table. The key is the marker
+because the `WithProvider` impl `#[cgp_type]` generates asks its inner provider for
+`TypeProvider<Context, ScalarTypeProviderComponent>`. A component the table has no entry for is
+unresolved, and the context does not implement that abstract type.
+
+## Examples
+
+A lookup table maps type tags to concrete types, and a context wires several type components through it:
+
+```rust
+use cgp::core::types::WithDelegatedType;
+use cgp::prelude::*;
+
+#[cgp_type]
+pub trait HasScalarType {
+    type Scalar;
+}
+
+#[cgp_type]
+pub trait HasIndexType {
+    type Index;
+}
+
+pub struct App;
+pub struct AppTypes;
+
+delegate_components! {
+    AppTypes {
+        ScalarTypeProviderComponent: f64,
+        IndexTypeProviderComponent: usize,
+    }
+}
+
+delegate_components! {
+    App {
+        [
+            ScalarTypeProviderComponent,
+            IndexTypeProviderComponent,
+        ]: WithDelegatedType<AppTypes>,
+    }
+}
+
+check_components! {
+    App {
+        ScalarTypeProviderComponent,
+        IndexTypeProviderComponent,
+    }
+}
+```
+
+`App` routes both its scalar and index type components through `WithDelegatedType<AppTypes>`. For `App`'s
+`Scalar` the provider finds `f64` in `AppTypes`, and for `Index` it finds `usize`. One provider entry on
+`App` answers two [abstract types](/docs/reference/glossary#abstract-type), with the concrete choices held in one place where they can be reused,
+swapped, or supplied by a namespace.
+
+## When to use it
+
+**Reach for `WithDelegatedType` when several abstract types should be answered from one shared table**,
+so a context points its type components at the table rather than fixing each one at the wiring site.
+
+Prefer [`WithType<T>`](with_type.md) or the plain [`UseType<T>`](use_type.md) for the common case of
+fixing one abstract type to one concrete type, which needs no table.
+
+## Under the hood
+
+`WithDelegatedType<Components>` is a type alias:
+
+```rust
+pub type WithDelegatedType<Components> = WithProvider<UseDelegatedType<Components>>;
+```
+
+The [`WithProvider`](with_provider.md) adapter forwards a type component's provider-trait method to the
+inner provider's foundational method, and [`UseDelegatedType<Components>`](use_delegated_type.md) is the
+foundational [`TypeProvider`](../components/has_type.md) that resolves each tag through a
+[`DelegateComponent`](../traits/wiring/delegate_component.md) lookup. The `UseDelegatedType` mechanism is
+documented on the [`UseDelegatedType`](use_delegated_type.md) page, and the generated `WithProvider` impl
+on the [`WithProvider`](with_provider.md) page.
+
+## Related constructs
+
+- [`WithProvider`](with_provider.md) — the adapter this alias specializes.
+- [`UseDelegatedType`](use_delegated_type.md) — the foundational provider it wraps, where the table
+  lookup is documented.
+- [`WithType`](with_type.md) — the sibling alias for a single fixed concrete type.
+- [`DelegateComponent`](../traits/wiring/delegate_component.md) — the table the lookup reads.
+- [`HasType` / `TypeProvider`](../components/has_type.md) — the abstract-type component it answers for.
+- [`#[cgp_type]`](../macros/cgp_type.md) — defines the abstract-type components it resolves.
+
+The ideas behind it:
+
+- [Abstract types](/docs/concepts/abstract-types) — the associated types a context chooses for itself,
+  here from a shared table.
+
+## Source
+
+- The alias:
+  [`use_delegated_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-type/src/impls/use_delegated_type.rs)
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

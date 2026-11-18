@@ -1,0 +1,43 @@
+error[E0599]: the method `area` exists for reference `&Rectangle`, but its trait bounds were not satisfied
+  --> tests/compile_fail/cargo_cgp/index_the_problem_it_solves.rs:30:30
+   |
+18 | pub struct Rectangle {
+   | -------------------- doesn't satisfy `Rectangle: AreaCalculator<Rectangle>` or `Rectangle: CanCalculateArea`
+...
+30 |     println!("{}", rectangle.area());
+   |                              ^^^^ this is an associated function, not a method
+   |
+   = note: found the following associated functions; to be used as methods, functions must have a `self` parameter
+note: the candidate is defined in the trait `AreaCalculator`
+  --> tests/compile_fail/cargo_cgp/index_the_problem_it_solves.rs:7:5
+   |
+ 7 |     fn area(&self) -> f64;
+   |     ^^^^^^^^^^^^^^^^^^^^^^
+note: the following trait bounds were not satisfied:
+      `&Rectangle: AreaCalculator<&Rectangle>`
+      `Rectangle: AreaCalculator<Rectangle>`
+  --> tests/compile_fail/cargo_cgp/index_the_problem_it_solves.rs:5:1
+   |
+ 5 | #[cgp_component(AreaCalculator)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ 6 | pub trait CanCalculateArea {
+   |           ^^^^^^^^^^^^^^^^
+note: the trait `AreaCalculator` must be implemented
+  --> tests/compile_fail/cargo_cgp/index_the_problem_it_solves.rs:6:1
+   |
+ 6 | / pub trait CanCalculateArea {
+ 7 | |     fn area(&self) -> f64;
+ 8 | | }
+   | |_^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `CanCalculateArea` defines an item `area`, perhaps you need to implement it
+  --> tests/compile_fail/cargo_cgp/index_the_problem_it_solves.rs:6:1
+   |
+ 6 | pub trait CanCalculateArea {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use associated function syntax instead
+   |
+30 -     println!("{}", rectangle.area());
+30 +     println!("{}", Rectangle::area());
+   |

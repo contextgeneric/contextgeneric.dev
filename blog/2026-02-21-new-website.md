@@ -1,13 +1,14 @@
 ---
 authors: [soares]
 tags: [release]
+description: 'Why the CGP site moved from Zola to Docusaurus, the decision to keep the installation stock, and how LLM assistance was used in the redesign.'
 ---
 
 # CGP has a new website, and why we moved from Zola to Docusaurus
 
 If you have visited our website before, you might have noticed that the CGP project website has received a beautiful overhaul redesign with a fresh look and feel. This transformation comes from our migration away from [Zola](https://www.getzola.org/) to [Docusaurus](https://docusaurus.io/), a move driven by our commitment to significantly expand and improve the documentation for CGP.
 
-{/* truncate */}
+<!--truncate-->
 
 ## The journey to a better documentation home
 

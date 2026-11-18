@@ -1,0 +1,5 @@
+error: expected a type: a type-level shape lists field types, not values
+ --> tests/compile_fail/reference/macros/struct_common_mistakes_value.rs:6:27
+  |
+6 | type Shape = Struct! { a: 1 };
+  |                           ^

@@ -1,0 +1,5 @@
+error[E0425]: cannot find type `Name` in this scope
+  --> tests/compile_fail/reference/attributes/impl_generics_rejected_bare_parameter_in_signature.rs:11:54
+   |
+11 | pub fn owned_name(&self, #[implicit] name: &Name) -> Name {
+   |                                                      ^^^^ not found in this scope

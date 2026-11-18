@@ -1,0 +1,5 @@
+error: `#[implicit]` does not take any arguments; write it as a bare `#[implicit]`
+ --> tests/compile_fail/reference/attributes/implicit_common_mistakes_arguments.rs:5:16
+  |
+5 | fn area(&self, #[implicit(width)] width: f64) -> f64 {
+  |                ^^^^^^^^^^^^^^^^^^

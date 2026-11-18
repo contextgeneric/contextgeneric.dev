@@ -1,0 +1,19 @@
+error[E0117]: only traits defined in the current crate can be implemented for types defined outside of the crate
+ --> tests/compile_fail/concepts/coherence_every_lookup_finds_the_same_answer_2.rs:5:1
+  |
+5 | impl Display for Vec<u8> {
+  | ^^^^^^^^^^^^^^^^^-------
+  |                  |
+  |                  `Vec` is not defined in the current crate
+  |
+  = note: impl doesn't have any local type before any uncovered type parameters
+  = note: for more information see https://doc.rust-lang.org/reference/items/implementations.html#orphan-rules
+  = note: define and implement a trait or new type instead
+
+warning: unused variable: `f`
+ --> tests/compile_fail/concepts/coherence_every_lookup_finds_the_same_answer_2.rs:6:19
+  |
+6 |     fn fmt(&self, f: &mut Formatter) -> fmt::Result { Ok(()) }
+  |                   ^ help: if this is intentional, prefix it with an underscore: `_f`
+  |
+  = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default

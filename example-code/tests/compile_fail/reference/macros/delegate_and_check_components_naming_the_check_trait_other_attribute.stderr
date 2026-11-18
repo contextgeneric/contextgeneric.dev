@@ -1,0 +1,5 @@
+error: Expected `#[check_trait]` attribute for specifying the check trait name
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_naming_the_check_trait_other_attribute.rs:23:5
+   |
+23 |     #[allow(unused)]
+   |     ^

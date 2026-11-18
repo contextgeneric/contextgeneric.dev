@@ -1,0 +1,39 @@
+error[E0599]: the method `area` exists for reference `&Plain`, but its trait bounds were not satisfied
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:36:11
+   |
+20 | pub enum Plain {
+   | -------------- doesn't satisfy `Plain: HasArea` or `Plain: HasExtractor`
+...
+36 |     shape.area()
+   |           ^^^^ method cannot be called on `&Plain` due to unsatisfied trait bounds
+   |
+  ::: $CARGO/cgp-dispatch-$VERSION/src/providers/matchers/match_with_field_handlers.rs
+   |
+   | pub struct MatchWithValueHandlersRef<Provider = UseContext>(pub PhantomData<Provider>);
+   | ----------------------------------------------------------- doesn't satisfy `<_ as Computer<(), (), &&Plain>>::Output = f64`, `<_ as Computer<(), (), &Plain>>::Output = f64`, `_: Computer<(), (), &&Plain>` or `_: Computer<(), (), &Plain>`
+   |
+note: the following trait bounds were not satisfied:
+      `&Plain: HasExtractor`
+      `<MatchWithValueHandlersRef<ComputeArea> as Computer<(), (), &'__a__ &Plain>>::Output = f64`
+      `<MatchWithValueHandlersRef<ComputeArea> as Computer<(), (), &'__a__ Plain>>::Output = f64`
+      `MatchWithValueHandlersRef<ComputeArea>: Computer<(), (), &'__a__ &Plain>`
+      `MatchWithValueHandlersRef<ComputeArea>: Computer<(), (), &'__a__ Plain>`
+      `Plain: HasExtractor`
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:24:1
+   |
+24 | #[cgp_auto_dispatch]
+   | ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound introduced here
+25 | pub trait HasArea {
+   |           -------
+note: the trait `HasExtractor` must be implemented
+  --> $CARGO/cgp-field-$VERSION/src/traits/extract_field.rs
+   |
+   | pub trait HasExtractor {
+   | ^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `HasArea` defines an item `area`, perhaps you need to implement it
+  --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_missing_derive.rs:25:1
+   |
+25 | pub trait HasArea {
+   | ^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `cgp_auto_dispatch` (in Nightly builds, run with -Z macro-backtrace for more info)

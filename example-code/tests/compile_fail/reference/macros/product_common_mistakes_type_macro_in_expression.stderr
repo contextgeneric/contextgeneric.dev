@@ -1,0 +1,5 @@
+error: expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+ --> tests/compile_fail/reference/macros/product_common_mistakes_type_macro_in_expression.rs:5:25
+  |
+5 |     let _row = Product![1, 2];
+  |                         ^

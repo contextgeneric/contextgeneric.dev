@@ -1,0 +1,47 @@
+error[E0277]: the trait bound `UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'d', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>: IsProviderFor<DimensionsGetterComponent, Rectangle>` is not satisfied
+  --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_use_field_on_two_methods.rs:26:9
+   |
+26 |         DimensionsGetterComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+   = help: the trait `IsProviderFor<DimensionsGetterComponent, Rectangle>` is not implemented for `UseField<cgp::macro_prelude::Symbol<5, cgp::macro_prelude::Chars<'w', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'d', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'h', Nil>>>>>>>`
+help: the following other types implement trait `IsProviderFor<Component, Context, Params>`
+  --> $CARGO/cgp-field-$VERSION/src/impls/use_field.rs
+   |
+   | / impl<Context, TypeTag, FieldTag, Field> IsProviderFor<TypeProviderComponent, Context, TypeTag>
+   | |     for UseField<FieldTag>
+   | | where
+   | |     Context: HasField<FieldTag, Value = Field>,
+   | |_______________________________________________^ `UseField<FieldTag>` implements `IsProviderFor<TypeProviderComponent, Context, TypeTag>`
+   |
+  ::: $CARGO/cgp-handler-$VERSION/src/components/async_computer.rs
+   |
+   | / impl<Context, Code, Input, Tag, Output> AsyncComputer<Context, Code, Input> for UseField<Tag>
+   | | where
+   | |     Context: HasField<Tag>,
+   | |     Context::Value: CanComputeAsync<Code, Input, Output = Output>,
+   | |__________________________________________________________________^ `UseField<Tag>` implements `IsProviderFor<AsyncComputerComponent, Context, (Code, Input)>`
+   |
+  ::: $CARGO/cgp-handler-$VERSION/src/components/computer.rs
+   |
+   | / impl<Context, Code, Input, Tag, Output> Computer<Context, Code, Input> for UseField<Tag>
+   | | where
+   | |     Context: HasField<Tag>,
+   | |     Context::Value: CanCompute<Code, Input, Output = Output>,
+   | |_____________________________________________________________^ `UseField<Tag>` implements `IsProviderFor<ComputerComponent, Context, (Code, Input)>`
+   |
+  ::: $CARGO/cgp-runtime-$VERSION/src/traits/has_runtime.rs
+   |
+   |   #[cgp_getter]
+   |   ^^^^^^^^^^^^^ `UseField<__Tag__>` implements `IsProviderFor<RuntimeGetterComponent, __Context__>`
+   = note: required for `Rectangle` to implement `CanUseComponent<DimensionsGetterComponent>`
+note: required by a bound in `__CheckRectangle`
+  --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_use_field_on_two_methods.rs:24:1
+   |
+24 | / check_components! {
+25 | |     Rectangle {
+26 | |         DimensionsGetterComponent,
+27 | |     }
+28 | | }
+   | |_^ required by this bound in `__CheckRectangle`
+   = note: this error originates in the attribute macro `cgp_getter` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

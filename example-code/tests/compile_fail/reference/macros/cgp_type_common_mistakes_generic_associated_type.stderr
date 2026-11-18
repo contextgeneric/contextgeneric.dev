@@ -1,0 +1,5 @@
+error: generic associated type and where clause are not supported
+ --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_generic_associated_type.rs:6:1
+  |
+6 | pub trait HasContainerType {
+  | ^^^

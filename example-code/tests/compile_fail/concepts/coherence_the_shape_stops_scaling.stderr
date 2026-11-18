@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `CanEncodeValue<_>` for type `ApiServer`
+  --> tests/compile_fail/concepts/coherence_the_shape_stops_scaling.rs:15:1
+   |
+ 9 | impl<V: Display> CanEncodeValue<V> for ApiServer {
+   | ------------------------------------------------ first implementation here
+...
+15 | impl<V: AsRef<[u8]>> CanEncodeValue<V> for ApiServer {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `ApiServer`

@@ -1,0 +1,17 @@
+//! Code from the pages under `docs/reference/types/`.
+//!
+//! Most of these types are type-level markers a reader recognizes rather than writes, so a page gets a
+//! module only where it shows code a compiler can check: a shape a derive assigns, a value built from a
+//! marker, a call site that passes a tag. The overview page, which shows no code, gets none.
+
+pub mod chars;
+pub mod cons;
+pub mod either;
+pub mod field;
+pub mod index_type;
+pub mod life;
+pub mod mref;
+pub mod nil;
+pub mod path_cons;
+pub mod phantom_data;
+pub mod void;

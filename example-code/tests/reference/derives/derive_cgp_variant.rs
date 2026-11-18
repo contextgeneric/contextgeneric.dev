@@ -1,0 +1,140 @@
+//! Code from `docs/reference/derives/derive_cgp_variant.md` — *`#[derive(CgpVariant)]`*.
+//!
+//! The page's worked example, run, plus the shape it rejects. Written with `CgpVariant` rather than
+//! the umbrella, which is the page's own claim that the two emit the same output on an enum.
+
+/// ## Usage
+///
+/// The accepted rewrite the page recommends, with a payload struct that derives `CgpRecord`, a
+/// generic enum, and the variantless enum it says is accepted.
+pub mod usage {
+    use cgp::core::field::traits::BuildField;
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FinalizeBuild;
+    use cgp::core::field::traits::FromVariant;
+    use cgp::core::field::traits::HasBuilder;
+    use cgp::core::field::traits::HasExtractor;
+    use cgp::prelude::*;
+
+    #[derive(CgpRecord, Debug, PartialEq)]
+    pub struct Circle {
+        pub radius: f64,
+    }
+
+    #[derive(CgpVariant, Debug, PartialEq)]
+    pub enum Shape {
+        Circle(Circle),
+    }
+
+    #[derive(CgpVariant)]
+    pub enum Generic<T> {
+        Item(T),
+    }
+
+    #[derive(CgpVariant)]
+    pub enum Never {}
+
+    #[test]
+    fn test_the_payload_struct_is_a_record_too() {
+        let circle: Circle = Circle::builder()
+            .build_field(PhantomData::<Symbol!("radius")>, 2.0)
+            .finalize_build();
+        let shape = Shape::from_variant(PhantomData::<Symbol!("Circle")>, circle);
+
+        assert_eq!(shape, Shape::Circle(Circle { radius: 2.0 }));
+        assert!(Generic::Item(1u8)
+            .to_extractor()
+            .extract_field(PhantomData::<Symbol!("Item")>)
+            .is_ok());
+    }
+}
+
+/// The page's rejected snippet: a struct-style variant has no single payload type, so the derive
+/// fails. Every variant must carry exactly one unnamed payload, with no per-variant opt-out.
+///
+/// Rejected snippet — trybuild fixture `tests/compile_fail/reference/derives/derive_cgp_variant_rejected_struct_style_variant.rs`.
+pub mod rejected_struct_style_variant {}
+
+/// ## Examples
+///
+/// `area`, an extraction chain closed with no wildcard arm. The page names `Circle` and `Rectangle`
+/// without declaring them, so they are declared here.
+pub mod examples {
+    use cgp::core::field::traits::ExtractField;
+    use cgp::core::field::traits::FinalizeExtractResult;
+    use cgp::core::field::traits::HasExtractor;
+    use cgp::prelude::*;
+
+    pub struct Circle {
+        pub radius: f64,
+    }
+
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    #[derive(CgpVariant)]
+    pub enum Shape {
+        Circle(Circle),
+        Rectangle(Rectangle),
+    }
+
+    pub fn area(shape: Shape) -> f64 {
+        match shape
+            .to_extractor()
+            .extract_field(PhantomData::<Symbol!("Circle")>)
+        {
+            Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
+            Err(remainder) => {
+                let rect = remainder
+                    .extract_field(PhantomData::<Symbol!("Rectangle")>)
+                    .finalize_extract_result();
+                rect.width * rect.height
+            }
+        }
+    }
+
+    #[test]
+    fn test_area_of_each_variant() {
+        assert_eq!(
+            area(Shape::Circle(Circle { radius: 1.0 })),
+            core::f64::consts::PI
+        );
+
+        assert_eq!(
+            area(Shape::Rectangle(Rectangle {
+                width: 3.0,
+                height: 4.0,
+            })),
+            12.0
+        );
+    }
+}
+
+/// No variant name is reserved: the generated impls name their associated types through qualified
+/// projections, so a variant may share a name with one of them. Helper attributes of another derive
+/// stay on the enum.
+pub mod no_reserved_names {
+    use cgp::core::field::traits::FromVariant;
+    use cgp::prelude::*;
+    use serde::Serialize;
+
+    #[derive(CgpData, Serialize)]
+    pub enum Shape {
+        #[serde(rename = "value")]
+        Value(u32),
+        Fields(u32),
+        FieldsRef(u32),
+        Remainder(u32),
+        Extractor(u32),
+        ExtractorRef(u32),
+        ExtractorMut(u32),
+    }
+
+    #[test]
+    fn a_variant_named_value_is_constructed() {
+        let shape = Shape::from_variant(PhantomData::<Symbol!("Value")>, 1);
+        assert!(matches!(shape, Shape::Value(1)));
+    }
+}

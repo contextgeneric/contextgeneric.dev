@@ -1,0 +1,15 @@
+error[E0107]: missing generics for trait `AreaCalculator`
+  --> tests/compile_fail/reference/attributes/uses_common_mistakes_provider_trait.rs:10:8
+   |
+10 | #[uses(AreaCalculator)]
+   |        ^^^^^^^^^^^^^^ expected 1 generic argument
+   |
+note: trait defined here, with 1 generic parameter: `__Context__`
+  --> tests/compile_fail/reference/attributes/uses_common_mistakes_provider_trait.rs:3:17
+   |
+ 3 | #[cgp_component(AreaCalculator)]
+   | ----------------^^^^^^^^^^^^^^--
+help: add missing generic argument
+   |
+10 | #[uses(AreaCalculator<__Context__>)]
+   |                      +++++++++++++

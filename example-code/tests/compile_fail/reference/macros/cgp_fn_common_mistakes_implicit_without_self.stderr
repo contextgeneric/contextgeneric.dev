@@ -1,0 +1,7 @@
+error: The first argument of a function with implicit arguments must be `self`
+ --> tests/compile_fail/reference/macros/cgp_fn_common_mistakes_implicit_without_self.rs:5:1
+  |
+5 | #[cgp_fn]
+  | ^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cgp_fn` (in Nightly builds, run with -Z macro-backtrace for more info)

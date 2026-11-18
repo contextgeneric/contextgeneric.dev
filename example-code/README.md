@@ -1,0 +1,156 @@
+# Website example code: compiled counterparts of the site's snippets
+
+This crate holds compiled counterparts of the code shown on <https://contextgeneric.dev>. **It is not
+part of the website.** Nothing here is rendered, linked, or served, no page refers to it, and readers
+are not meant to find it. It exists for the agent revising a documentation page, so that the code on
+that page can be checked against something the compiler has agreed to rather than read and assumed
+correct.
+
+Run it from this directory:
+
+```sh
+cargo test              # the full check: the code compiles, and the rejected snippets still fail
+cargo test --no-run     # the fast check: everything compiles, nothing runs
+```
+
+The code lives in **integration tests**, which a plain `cargo check` skips; use `cargo test --no-run`
+(or `cargo check --tests`) for a compile-only pass. The crate has no library or binary target.
+
+CI runs the same suite with the compile-fail snapshots skipped
+(`cargo test -- --skip rejected_snippets_do_not_compile`). Run the full command locally.
+
+## The layout mirrors `docs/`
+
+The code lives under `tests/`, as one integration-test binary per `docs/` section. Each entrypoint
+pulls in a module tree that mirrors that section's pages:
+
+- `tests/concepts_tests.rs` → `tests/concepts/`, mirroring `docs/concepts/`
+- `tests/reference_tests.rs` → `tests/reference/`, mirroring `docs/reference/`
+- `tests/cargo_cgp_tests.rs` → `tests/cargo_cgp/`, mirroring `docs/tooling/cargo-cgp/`
+- `tests/comparisons_tests.rs` → `tests/comparisons/`, mirroring `docs/comparisons/`
+- `tests/tutorials_tests.rs` → `tests/tutorials/`, mirroring `docs/tutorials/`
+- `tests/compile_fail_tests.rs` → `tests/compile_fail/`, the snippets the pages **reject** (see below)
+- `tests/blog_tests.rs` → `tests/blog/`, the current release draft's worked examples
+
+**A standalone page gets a test binary of its own instead**, since there is no section tree for it to
+sit in: `tests/quickstart.rs` answers `docs/quickstart.md`, `tests/overview.rs` answers `docs/overview.md`, and `tests/front_page.rs` answers the front page. Use this form only for a page that has no
+section; a page inside one belongs in that section's module tree.
+
+One file per page, at the matching path with the file name in `snake_case`:
+
+| Section | Coverage |
+|---|---|
+| `docs/concepts/` | complete — one file under `tests/concepts/` per page that shows code |
+| `docs/reference/` | partial — `errors.md`, every `macros/` page and every `attributes/` page that shows code, all of `derives/`, every `traits/` construct page, all of `providers/` that shows code (the singletons, and all of `error/`, `handler/`, `monad/`, and `dispatch/`; `use_field_ref` shows its example on its alias page), all of `components/` (each component page that shows code, including the `handler/` subsection), and all of `types/` (each type page that shows code, the `spines/` subsection included); the section is filled in lazily |
+| `docs/tooling/cargo-cgp/` | complete — the four pages that show Rust: the programs they say compile under `tests/cargo_cgp/`, and the deliberate mistakes under `tests/compile_fail/cargo_cgp/` |
+| `docs/comparisons/` | complete — one file per page under `tests/comparisons/`; only the CGP side of each page is checked here, since the other language's snippets are compiled against the toolchain the page names |
+| `docs/tutorials/` | partial — `area-calculation/checking.md`, whose three quoted diagnostics are the reason it is mirrored, and `storage-backend.md`, one module per step assembled from the page's blocks, with its deliberate mistake at `tests/compile_fail/tutorials/`; the rest is filled in lazily |
+| `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |
+| `blog/2026-11-18-v0.8.0-release.md` | complete — `tests/blog/v0_8_0_release.rs` checks each wiring stage, the default-binding alternatives, and the migrated configuration; the deliberate missing-field error is a compile-fail fixture |
+| front page (`src/pages/index.tsx`) | complete — `tests/front_page.rs`, a standalone binary for the hero's CGP block, with the hero's rejected block at `tests/compile_fail/front_page/`; the text between each `front-page:` marker pair is exactly what the page shows, the rejected block starts at its fixture's first line so the page's quoted `E0119` names the lines the page numbers, and a test compares that quote with the fixture's snapshot |
+| `docs/overview.md` | complete — `tests/overview.rs`, a standalone binary with one module per key feature and stand-ins for the storage clients and the database pool the page names; the type-safe-wiring section's missing-field program is at `tests/compile_fail/overview/` |
+| remaining orientation pages | none yet |
+
+Within a covered section the mapping is mechanical: `docs/concepts/coherence.md` is answered by
+`tests/concepts/coherence.rs`, and `docs/concepts/consumer-and-provider-traits.md` by
+`tests/concepts/consumer_and_provider_traits.rs`.
+
+A page that shows no code gets no file: `docs/concepts/modularity-hierarchy.md` is prose and tables,
+so it has no module here, and neither does a section index.
+
+Inside a file, **one module per heading of the page**, named after that heading and in the page's
+order, so a snippet can be found from where it sits on the page rather than by searching. Where two
+consecutive headings are really one program, one module covers both and says so.
+
+**Duplication between files is expected and wanted.** Each file answers for one page on its own, so a
+scenario two pages share is written out twice rather than factored into a helper that neither page
+shows. A reader comparing a page against its file should never have to follow an import to see what
+the page said.
+
+## What "matches" means
+
+A page shows the shape of a program; this crate shows a program. The two differ in ways that are
+correct, and confusing an expected difference for a defect wastes more time than the check saves.
+
+**Expected, and not a defect.** A body the page elides as `/* ... */` is filled in here, and every
+such fill-in carries a comment saying the page elided it. Imports the page omits are present.
+Types the page names without declaring, such as a provider it has not introduced yet or a context it
+introduces two sections later, are declared. `check_components!` assertions are added for every
+wired context, since that is what proves the wiring resolves rather than merely parses, and pages do
+not show them. Tests are added where a page quotes an output or makes a claim worth pinning.
+
+**A defect, in one or the other.** Anything else: a signature, a trait bound, an attribute, a derive,
+a wiring line, a provider name, an item that exists on one side and not the other. When they
+disagree, find out which is wrong rather than assuming: the crate is checked by the compiler and the
+page is not, so the page is the likelier culprit, but a stale file here is worse than no file.
+
+## Code a page deliberately rejects
+
+Several pages show code the compiler refuses, quoting the error as the point of the snippet. That code
+cannot live in a module, so each rejected snippet is a standalone fixture under `tests/compile_fail/`,
+at the page's mirrored path, and [`trybuild`](https://docs.rs/trybuild) compiles each one and checks
+that it fails. The harness is `tests/compile_fail_tests.rs`.
+
+Each fixture is a **complete program** whose only fault is the intended one: the elided bodies are
+filled in, an item-only snippet carries a trailing `fn main() {}`, and a snippet with statements is
+wrapped in `fn main() { ... }`, the way rustdoc wraps the doctest these were carried as before.
+
+trybuild compares each fixture's output against a sibling `.stderr` file. **What that genuinely guards
+is the regression that matters: a snippet the page calls rejected that the compiler has started
+accepting.** The exact wording of a `.stderr` is toolchain- and `cgp`-version-specific, so re-bless
+them after a bump rather than editing them by hand:
+
+```sh
+TRYBUILD=overwrite cargo test --test compile_fail_tests
+```
+
+A snapshot that quotes a line from `cgp` writes its path as `$CARGO/…`, the registry source trybuild
+normalizes, just as the crate's own files and the standard library are written as `tests/…` and
+`$RUST/…`, so no snapshot depends on where the checkout lives. A snapshot also quotes rustc's own
+wording, so [`rust-toolchain.toml`](rust-toolchain.toml) pins the compiler and a bump re-blesses the
+suite.
+
+## Diagnostic capture programs
+
+`diagnostics/cgp_serde/` holds complete programs for the cgp-serde debugging guide's missing
+`Vec<u8>` entry, missing iterator-reference entry, absent JSON error wiring, and fixed-size array
+key rejected by the macro parser. Each program is intended to fail. The diagnostic capture harness
+compiles each file as a library with the sibling `cgp` and `cgp-serde` checkouts, using cargo-cgp's
+pinned nightly and local driver.
+
+`diagnostics/reference/shared_missing_name.rs` reproduces the compile-errors page's merged
+diagnostic: three checked components need the same absent field. The capture must show all three
+check entries and both secondary labels, so a single call failure cannot substitute for it.
+
+These programs are checked by the diagnostic capture harness. The cgp-serde cases need the project's
+own dependencies, and the reference case checks cargo-cgp's diagnostic merging. `cargo test` and CI
+do not compile these files; fresh diagnostic captures check their failures. The remaining Projects
+examples are checked in their project checkouts.
+
+## Generated code
+
+Two of these pages show what a macro *generates*, in simplified form. A hand-rolled rendering of such
+a listing, as `concepts::consumer_and_provider_traits::how_a_call_finds_its_provider` carries, is a
+weaker check than the rest of this crate: it shows the listing is structurally sound, not that its
+text is current. **The authority on what a macro emits is `cargo cgp expand`**, run against the test
+target the example lives in (for example `cargo cgp expand --test concepts_tests --item …`). Check the
+text with `expand`; check the shape here.
+
+## Adding a file
+
+Files are added **lazily**: when a page that shows code is written, or revised, or reviewed, its file
+is created or brought back into agreement in the same change. There is no obligation to backfill
+pages nobody is working on, and a missing file means only that nobody has been through that page yet.
+
+Adding a runnable one means creating it at the mirrored path under `tests/<section>/`, registering it
+in the parent `mod.rs`, adding a row to the table above, and leaving `cargo test` green. Adding a
+rejected snippet means writing a fixture under `tests/compile_fail/`, blessing its `.stderr` with
+`TRYBUILD=overwrite cargo test --test compile_fail_tests`, and leaving `cargo test` green.
+
+## The `cgp` version
+
+The crate checks the pages against the `cgp` release the site documents, pinned from crates.io as
+`cgp = "0.8.0"`, the same pin the Quickstart and the tutorials show. The `.stderr` files quote that
+release's sources through trybuild's `$CARGO` path, so they do not depend on the machine. At the next
+release, change the pin with the pages' pins and re-bless the snapshots, since quoted line numbers
+can move.

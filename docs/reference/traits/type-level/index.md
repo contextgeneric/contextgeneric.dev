@@ -1,0 +1,43 @@
+---
+sidebar_label: 'Overview'
+sidebar_position: 0
+description: 'The per-field state markers, the per-field and whole-record conversions between them, and the operations that grow and reshape type-level field lists.'
+---
+
+# Type-level list algebra
+
+The per-field state markers and list operations the extensible-data families are built from.
+
+## Overview
+
+These are the least user-facing traits in the reference of
+[Context-Generic Programming (CGP)](/docs/), which builds and reads Rust structs and enums
+generically by their field and variant names. They are the type-level layer beneath the
+[builders](../builder/index.md), [extractors](../variant/index.md), and
+[casts](../casting/index.md): the markers that record what state one field is in, and the operations
+that grow and reshape a type's field list. You meet them in an error message from code that walks a
+[shape](/docs/reference/glossary#shape) far more often than in code you wrote, and this group exists
+so that such a message is legible. None is in the prelude.
+
+The group divides into the state markers and the list operations.
+
+The **state markers** name how one field of a partial type is stored. [`MapType`](map_type.md) is the
+marker trait, and its `IsPresent`, `IsNothing`, and `IsVoid` markers are what a builder or extractor
+error prints. [`MapTypeRef`](map_type_ref.md) does the same for a borrowed view, adding a lifetime.
+[`TransformMap`](transform_map.md) carries the function that converts one field between markers, and
+[`TransformMapFields`](transform_map_fields.md) lifts that conversion across a whole record.
+
+The **list operations** compute new field lists from old ones. [`AppendProduct`](append_product.md) adds
+one entry to a product and [`ConcatProduct`](concat_product.md) splices two together, while
+[`MapFields`](map_fields.md) rewrites every entry of a product or a sum through one marker.
+
+## The ideas behind them
+
+- [Extensible records](/docs/concepts/extensible-records): presence tracking on a [partial record](/docs/reference/glossary#partial-record).
+- [Extensible variants](/docs/concepts/extensible-variants): possibility tracking on a partial variant.
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

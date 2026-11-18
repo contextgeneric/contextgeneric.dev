@@ -1,0 +1,42 @@
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>` is not satisfied
+  --> tests/compile_fail/reference/traits/is_provider_for_common_mistakes_one_element_tuple.rs:26:5
+   |
+26 |     RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>` is not implemented for `RectangleArea`
+      but trait `IsProviderFor<AreaCalculatorComponent, App, Rectangle>` is implemented for it
+  --> tests/compile_fail/reference/traits/is_provider_for_common_mistakes_one_element_tuple.rs:15:1
+   |
+15 | / impl AreaCalculator<Rectangle> {
+16 | |     fn area(&self, rectangle: &Rectangle) -> f64 {
+17 | |         rectangle.width * rectangle.height
+18 | |     }
+19 | | }
+   | |_^
+   = help: for that trait implementation, expected `Rectangle`, found `(Rectangle,)`
+
+error[E0277]: the trait bound `RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>` is not satisfied
+  --> tests/compile_fail/reference/traits/is_provider_for_common_mistakes_one_element_tuple.rs:31:5
+   |
+31 |     assert_provider();
+   |     ^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>` is not implemented for `RectangleArea`
+      but trait `IsProviderFor<AreaCalculatorComponent, App, Rectangle>` is implemented for it
+  --> tests/compile_fail/reference/traits/is_provider_for_common_mistakes_one_element_tuple.rs:15:1
+   |
+15 | / impl AreaCalculator<Rectangle> {
+16 | |     fn area(&self, rectangle: &Rectangle) -> f64 {
+17 | |         rectangle.width * rectangle.height
+18 | |     }
+19 | | }
+   | |_^
+   = help: for that trait implementation, expected `Rectangle`, found `(Rectangle,)`
+note: required by a bound in `assert_provider`
+  --> tests/compile_fail/reference/traits/is_provider_for_common_mistakes_one_element_tuple.rs:26:20
+   |
+24 | fn assert_provider()
+25 | where
+26 |     RectangleArea: IsProviderFor<AreaCalculatorComponent, App, (Rectangle,)>,
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `assert_provider`

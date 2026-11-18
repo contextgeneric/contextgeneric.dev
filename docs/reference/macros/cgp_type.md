@@ -1,0 +1,370 @@
+---
+title: '#[cgp_type] — abstract types per context'
+sidebar_label: '#[cgp_type]'
+sidebar_position: 7
+description: 'Define an abstract-type component whose concrete type each context chooses for itself, for an error type, a runtime, or any type generic code has to name.'
+---
+
+# `#[cgp_type]`
+
+Define an abstract-type component, whose concrete type each context chooses for itself.
+
+## Overview
+
+In [Context-Generic Programming (CGP)](/docs/), generic code often has to name a type it should not
+choose. A fallible operation returns *some* error, a
+geometry routine computes in *some* scalar, a storage layer holds *some* connection handle. Code
+written once for many applications cannot decide which. Rust's answer is an
+[associated type](https://doc.rust-lang.org/reference/items/associated-items.html): declare
+`trait HasScalarType { type Scalar; }`, and code written against it says `Self::Scalar` while leaving the
+actual type open.
+
+An [abstract type](/docs/reference/glossary#abstract-type) in CGP is exactly that trait and nothing more exotic. `#[cgp_type]` adds the ability to
+fill the slot by **wiring** rather than by writing an impl. Without it, giving a context a
+concrete scalar means writing a provider by hand: a whole impl whose only content is
+`type Scalar = f64;`. Since every abstract-type provider has that same trivial shape, `#[cgp_type]`
+generates it once and for all. A **context** is the type that implements the trait, and it supplies
+the values and types it needs. It names the concrete type directly in its wiring table:
+
+```rust
+delegate_components! {
+    App {
+        ScalarTypeProviderComponent: UseType<f64>,
+    }
+}
+```
+
+That is the benefit: `App` now implements `HasScalarType` with `Scalar = f64`, and no provider was written
+anywhere. The arrangement mirrors what [`#[cgp_getter]`](./cgp_getter.md) does for values: one
+general-purpose provider, parameterized by the thing the context wants to supply.
+
+A couple of consequences are worth knowing early. Because the type is chosen per context, two applications can
+pick differently from the same generic code. And because the trait is an ordinary Rust trait, a context
+can skip the wiring entirely and write `impl HasScalarType for App { type Scalar = f64; }`, barely
+longer, and the clearest way to see that nothing unusual is happening.
+
+## Usage
+
+Apply the attribute to a trait containing **exactly one associated type and no methods**:
+
+```rust
+#[cgp_type]
+pub trait HasScalarType {
+    type Scalar;
+}
+```
+
+Like [`#[cgp_component]`](./cgp_component.md), the component needs a provider trait name, and
+`#[cgp_type]` derives one. **The default is keyed off the associated type's name, not the trait's**:
+`type Scalar` yields the provider trait `ScalarTypeProvider` and the marker
+`ScalarTypeProviderComponent`. This is worth fixing in mind, because every other macro derives its
+default from the trait name.
+
+Pass an identifier to override it, exactly as with `#[cgp_component]`:
+
+```rust
+#[cgp_type(ProvideScalar)]
+pub trait HasScalarType {
+    type Scalar;
+}
+```
+
+The keyed form works here too, so `name`, `provider`, and `context` can each be set explicitly. Only the
+default for `provider` differs.
+
+The companion attributes of `#[cgp_component]` apply unchanged, so
+[`#[prefix(...)]`](../attributes/prefix.md) registers the abstract type into a namespace. CGP's own
+`HasErrorType` carries `#[prefix(@cgp.core.error in DefaultNamespace)]` this way.
+
+The trait may carry generic parameters, which the macro handles exactly as `#[cgp_component]` does:
+they follow the context in the provider trait, and a context chooses the type per parameter value,
+through `open` or [`#[derive_delegate]`](../attributes/derive_delegate.md). So
+`pub trait HasLabelType<Kind> { type Label; }` lets a context that declares
+`open LabelTypeProviderComponent;` wire `@LabelTypeProviderComponent.u32: UseType<String>`.
+
+### Bounds on the associated type
+
+A bound on the associated type is carried everywhere the type appears, and enforced on whatever concrete
+type a context picks:
+
+```rust
+#[cgp_type]
+pub trait HasScalarType {
+    type Scalar: Copy;
+}
+```
+
+A context whose wiring names a type that does not satisfy the bound is rejected (`UseType<String>` here,
+since `String` is not `Copy`), so the bound is written once on the declaration and enforced against every
+context's choice.
+
+**It is enforced lazily, though, like all CGP wiring.** The `delegate_components!` entry naming
+`UseType<String>` compiles on its own; the failure appears only once a
+[`check_components!`](./check_components.md) forces the question, or the type is finally used. The bound is a
+real constraint, not a wiring-site guard.
+
+## Examples
+
+An abstract scalar, a context that supplies it, and generic code that never names a concrete type:
+
+```rust
+use cgp::prelude::*;
+
+#[cgp_type]
+pub trait HasScalarType {
+    type Scalar: Copy;
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ScalarTypeProviderComponent: UseType<f64>,
+    }
+}
+
+check_components! {
+    App {
+        ScalarTypeProviderComponent,
+    }
+}
+
+pub fn zero<Context>() -> Context::Scalar
+where
+    Context: HasScalarType,
+    Context::Scalar: Default,
+{
+    Default::default()
+}
+```
+
+`App` implements `HasScalarType` with `Scalar = f64` through the generated
+[`UseType`](../providers/use_type.md) impl, and the `check_components!` block confirms that `f64` satisfies
+the `Copy` bound.
+
+The point compounds when several pieces of code share one type. Because the type lives on a trait the
+context implements, everything that mentions a scalar refers to the *same* `Self::Scalar`, so one wiring
+line fixes it for all of them:
+
+```rust
+#[cgp_component(AreaCalculator)]
+#[use_type(HasScalarType.Scalar)]
+pub trait CanCalculateArea<Shape> {
+    fn area(&self, shape: &Shape) -> Scalar;
+}
+```
+
+Here `Rectangle` and `Circle` carry no scalar type of their own; the context computing their areas does,
+and changing its `UseType<f32>` to `UseType<f64>` changes the scalar for every shape at once. The bare
+`Scalar` in that signature is [`#[use_type]`](../attributes/use_type.md) at work, which is how an
+abstract type is *imported* wherever it is used.
+
+Direct implementation stays available in place of the wiring, and is often clearer for a single
+context. A context takes one or the other, since the two impls would overlap:
+
+```rust
+impl HasScalarType for App {
+    type Scalar = f64;
+}
+```
+
+## When to use it
+
+**Use `#[cgp_type]` whenever generic code has to name a type the context should choose.** The error
+type is the canonical instance. CGP's own [`HasErrorType`](../components/has_error_type.md) is defined
+exactly this way, which is why every fallible trait can say `Error` and mean whatever the
+application picked.
+
+The decision worth making deliberately is **whether the type needs to be abstract at all**, because
+a cheaper option often covers the case.
+
+- **Prefer an inferred impl parameter while the type only flows through values.** If the type appears
+  solely because a provider reads a field of it,
+  [`#[impl_generics]`](../attributes/impl_generics.md) on a `#[cgp_fn]` puts a parameter on
+  the implementation alone. Nothing is wired, nothing is declared, and a context qualifies by
+  carrying a field of a compatible type.
+- **Move up to an abstract type when the type must be nameable.** Two things force it: the trait's own
+  signature has to mention the type, or two traits have to agree they mean the *same* type. An
+  inferred parameter can do neither, since it exists only where a value of it passes through.
+- **Never thread it as a generic parameter on the trait.** A parameter is an input the caller
+  supplies, so it lands in every intermediate signature whether that layer touches the type or not. An
+  abstract type is determined by the context and propagates nowhere. That difference is the whole
+  benefit of the construct, and it is why a context can decide many types without any signature
+  growing.
+- **Use plain [`#[cgp_component]`](./cgp_component.md) when the trait carries methods.** `#[cgp_type]` is
+  only for a trait whose entire content is one associated type. A trait with a method *and* a type it
+  produces is an ordinary component; CGP's own `CanCompute` is that shape.
+
+One alternative looks like this construct and is not. A getter written with
+[`#[cgp_auto_getter]`](./cgp_auto_getter.md) may declare an associated type and return it, inferring it
+from the field. When the type's only job is to be a getter's return type, that is shorter and needs no
+wiring; `#[cgp_type]` is for a type that stands on its own.
+
+## Under the hood
+
+`#[cgp_type]` emits everything [`#[cgp_component]`](./cgp_component.md) would, then adds two provider
+impls of its own. The component half is the familiar shape: consumer trait, provider trait, two blanket
+impls, marker, and the standard [`UseContext`](../providers/use_context.md) and
+[`RedirectLookup`](../providers/redirect_lookup.md) impls, differing only in that every blanket impl
+forwards an *associated type* rather than a method:
+
+```rust
+pub trait ScalarTypeProvider<__Context__>:
+    IsProviderFor<ScalarTypeProviderComponent, __Context__, ()>
+{
+    type Scalar: Copy;
+}
+```
+
+The first addition is the **`UseType` impl**, and it is the core of the macro. It implements the provider
+trait for `UseType<Scalar>` by setting the abstract type to the generic parameter:
+
+```rust
+impl<Scalar, __Context__> ScalarTypeProvider<__Context__> for UseType<Scalar>
+where
+    Scalar: Copy,
+{
+    type Scalar = Scalar;
+}
+```
+
+Read it as: `UseType<T>` is a provider that supplies `T`. Wiring a context's component to `UseType<f64>`
+therefore gives it `Scalar = f64` with nothing written. Note the declaration's `Copy` bound copied into
+the impl's `where` clause: it turns an unsuitable concrete type into an error wherever the context is
+required to implement the trait, which a `check_components!` block makes the wiring site.
+
+The second addition is a [`WithProvider`](../providers/with_provider.md) impl, which adapts CGP's
+foundational abstract-type machinery into this component:
+
+```rust
+impl<__Provider__, Scalar, __Context__> ScalarTypeProvider<__Context__>
+    for WithProvider<__Provider__>
+where
+    Scalar: Copy,
+    __Provider__: TypeProvider<__Context__, ScalarTypeProviderComponent, Type = Scalar>,
+{
+    type Scalar = Scalar;
+}
+```
+
+[`HasType` / `TypeProvider`](../components/has_type.md) is CGP's tag-indexed abstract-type component,
+and this impl lets any `TypeProvider` back the named component when the context wires
+`WithProvider<P>`, with the component's own key as the tag. A provider written once for
+`TypeProvider`, such as [`UseDelegatedType`](../providers/use_delegated_type.md), then serves every
+`#[cgp_type]` component. `UseType<T>` needs no adapter, since the first addition covers it directly.
+
+Each generated provider impl is paired with a matching
+[`IsProviderFor`](../traits/wiring/is_provider_for.md) impl carrying the same bounds, as everywhere else.
+
+A bound that names the type it constrains is rewritten rather than refused. Declaring
+`type Scalar: Mul<Output = Self::Scalar> + Clone;` leaves the bound as written on the two traits, where
+`Self::Scalar` still means what it says. But the copy landing on the `UseType` and `WithProvider` impls
+becomes `Scalar: Mul<Output = Scalar> + Clone`, with every `Self::Scalar` replaced by the free parameter.
+Copied unchanged it would have named an associated type of the wrong `Self`.
+
+## Formal grammar
+
+The attribute argument is the same grammar as [`#[cgp_component]`](./cgp_component.md)'s, in the Rust
+Reference's [notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+CgpTypeArgs -> CgpComponentArgs    // see #[cgp_component]
+```
+
+A bare provider name, or the keyed `name` / `provider` / `context` form. The only difference from
+`#[cgp_component]` is the default applied when `provider` is omitted: rather than being required, it is
+derived from the **associated type's** name plus `TypeProvider`, so `type Scalar;` yields
+`ScalarTypeProvider`. Every other key and default behaves as documented there.
+
+## Common Mistakes
+
+**The trait must contain exactly one associated type and nothing else.** A method beside the type, a
+second type, or no type at all each report the same thing:
+
+```text
+error: type trait should contain exactly one associated type item
+```
+
+A trait that needs a method alongside a type it produces is an ordinary
+[`#[cgp_component]`](./cgp_component.md).
+
+**The associated type may not be generic or carry a `where` clause**, since the `UseType` impl supplies
+one concrete type per wiring and has nowhere to put either:
+
+```text
+error: generic associated type and where clause are not supported
+```
+
+**The default provider name comes from the type, not the trait.** `HasScalarType` declaring
+`type Scalar` yields `ScalarTypeProviderComponent`, not `HasScalarTypeComponent`, so a wiring entry
+guessed from the trait name names a component that does not exist, and the error is an unresolved type
+rather than anything about wiring:
+
+```text
+error[E0425]: cannot find type `HasScalarTypeComponent` in this scope
+```
+
+**Do not give the associated type the name of the trait that bounds it.** In
+`type Database: Database`, the bound resolves to the associated type being declared, which the
+generated impls have turned into a type parameter, rather than to the trait of that name:
+
+```text
+error[E0404]: expected trait, found type parameter `Database`
+```
+
+Name the two apart, as in `type Db: Database`.
+
+**A bound on the type is not enforced at the wiring line.** Wiring `UseType<String>` for a type declared
+`Copy` compiles; nothing complains until a check evaluates the lookup, and then the primary span is the
+component name in the `check_components!` block rather than the offending wiring entry:
+
+```text
+error[E0277]: the trait bound `String: Copy` is not satisfied
+   |
+   |         ScalarTypeProviderComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Copy` is not implemented for `String`
+   |
+note: required for `cgp::prelude::UseType<String>` to implement `IsProviderFor<ScalarTypeProviderComponent, App>`
+   |
+   | #[cgp_type]
+   | ^^^^^^^^^^^
+   | pub trait HasScalarType {
+   |     type Scalar: Copy;
+   |                  ---- unsatisfied trait bound introduced here
+```
+
+The offending type and the declaration that demanded the bound are both in the notes rather than the
+headline, so read downward. **Without a check the mistake is silent**, which is the ordinary consequence of
+[lazy wiring](./delegate_components.md#common-mistakes) rather than anything specific to abstract types.
+
+## Related constructs
+
+- [`#[cgp_component]`](./cgp_component.md) — the general macro this specializes.
+- [`UseType`](../providers/use_type.md) — the provider a context wires to supply the concrete type.
+- [`#[use_type]`](../attributes/use_type.md) — imports an abstract type so its name can be written bare;
+  a different construct from the `UseType` provider despite the shared name.
+- [`HasType`](../components/has_type.md) — CGP's tag-indexed abstract-type component, which the
+  generated `WithProvider` impl adapts.
+- [`HasErrorType`](../components/has_error_type.md) — the canonical abstract type, defined this way.
+- [`UseDelegatedType`](../providers/use_delegated_type.md) — resolves the type through a table rather than
+  fixing it.
+- [`WithProvider`](../providers/with_provider.md) — the adapter the second generated impl is for.
+- [`#[cgp_getter]`](./cgp_getter.md) — the value-level counterpart, using `UseField` where this uses
+  `UseType`.
+
+The ideas behind it:
+
+- [Abstract types](/docs/concepts/abstract-types) — why a context choosing its own type propagates
+  nowhere, unlike a parameter.
+
+## Source
+
+- Entry point: [`cgp_type.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/cgp_type.rs)
+- Implementation: [`types/cgp_type/item.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_type/item.rs)
+- Runtime `HasType`, `TypeProvider`, and `UseType`: [`cgp-type/src/`](https://github.com/contextgeneric/cgp/tree/main/crates/core/cgp-type/src/)
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

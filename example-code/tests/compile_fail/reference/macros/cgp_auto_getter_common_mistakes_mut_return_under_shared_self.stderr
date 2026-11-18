@@ -1,0 +1,5 @@
+error: &mut self is required for mutable field reference `& mut u32`
+ --> tests/compile_fail/reference/macros/cgp_auto_getter_common_mistakes_mut_return_under_shared_self.rs:7:26
+  |
+7 |     fn counter(&self) -> &mut u32;
+  |                          ^

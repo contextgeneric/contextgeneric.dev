@@ -1,0 +1,5 @@
+error: `#[skip_check]` does not take any arguments
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_skipping_one_entrys_check_arguments.rs:24:9
+   |
+24 |         #[skip_check(AreaCalculatorComponent)]
+   |         ^

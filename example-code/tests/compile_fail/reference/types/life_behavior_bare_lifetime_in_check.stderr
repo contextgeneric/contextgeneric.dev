@@ -1,0 +1,5 @@
+error: at least one trait is required for an object type
+  --> tests/compile_fail/reference/types/life_behavior_bare_lifetime_in_check.rs:34:36
+   |
+34 |         ReferenceGetterComponent: ('a, Config),
+   |                                    ^^

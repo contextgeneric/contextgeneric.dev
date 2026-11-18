@@ -1,0 +1,16 @@
+error[E0034]: multiple applicable items in scope
+  --> tests/compile_fail/reference/components/can_wrap_error_usage_ambiguous_concrete_call.rs:16:18
+   |
+16 |     let _ = App::wrap_error("failed".to_owned(), "detail".to_owned());
+   |                  ^^^^^^^^^^ multiple `wrap_error` found
+   |
+   = note: candidate #1 is defined in an impl of the trait `cgp::prelude::CanWrapError` for the type `__Context__`
+   = note: candidate #2 is defined in an impl of the trait `ErrorWrapper` for the type `__Provider__`
+help: use fully-qualified syntax to disambiguate
+   |
+16 -     let _ = App::wrap_error("failed".to_owned(), "detail".to_owned());
+16 +     let _ = <App as ErrorWrapper>::wrap_error("failed".to_owned(), "detail".to_owned());
+   |
+16 -     let _ = App::wrap_error("failed".to_owned(), "detail".to_owned());
+16 +     let _ = <App as cgp::prelude::CanWrapError>::wrap_error("failed".to_owned(), "detail".to_owned());
+   |

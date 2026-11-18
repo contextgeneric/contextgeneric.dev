@@ -1,0 +1,15 @@
+error[E0658]: return type notation is experimental
+  --> tests/compile_fail/concepts/send_bounds_the_bound_a_caller_cannot_write.rs:16:38
+   |
+16 |     App: CanHandleApi<Api, handle_api(..): Send> + Send + 'static,
+   |                                      ^^^^
+   |
+   = note: see issue #109417 <https://github.com/rust-lang/rust/issues/109417> for more information
+
+warning: unused variable: `app`
+  --> tests/compile_fail/concepts/send_bounds_the_bound_a_caller_cannot_write.rs:14:28
+   |
+14 | fn spawn_handler<App, Api>(app: App)
+   |                            ^^^ help: if this is intentional, prefix it with an underscore: `_app`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default

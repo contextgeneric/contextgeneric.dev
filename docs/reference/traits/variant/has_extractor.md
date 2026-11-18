@@ -1,0 +1,210 @@
+---
+title: 'HasExtractor — an enum as an extractor'
+sidebar_label: 'HasExtractor'
+sidebar_position: 2
+description: 'Turn an enum into the extractor the variant-narrowing traits operate on, and back, since ExtractField narrows an extractor rather than an enum.'
+---
+
+# `HasExtractor`
+
+Turning an enum into an extractor, and back.
+
+## Overview
+
+In [Context-Generic Programming (CGP)](/docs/), [`ExtractField`](./extract_field.md) narrows an
+*extractor*, not an enum. `HasExtractor` is where one comes from. It is the owning member of a group of three, and choosing between them is most of using the
+extractor family:
+
+| | payloads come out as | the original |
+|---|---|---|
+| `HasExtractor` | owned | consumed |
+| [`HasExtractorRef`](./has_extractor_ref.md) | `&T` | survives |
+| [`HasExtractorMut`](./has_extractor_mut.md) | `&mut T` | survives, mutably borrowed |
+
+## Definition
+
+`HasExtractor` converts an enum into an extractor, and back:
+
+```rust
+pub trait HasExtractor {
+    type Extractor;
+
+    fn to_extractor(self) -> Self::Extractor;
+    fn from_extractor(extractor: Self::Extractor) -> Self;
+}
+```
+
+`Self` is the enum. `Extractor` is the partial companion enum at its all-possible configuration,
+with every variant still available. `to_extractor` **consumes** the value and yields an extractor
+whose payloads are owned, which a chain needs when it will take a payload away. `from_extractor`
+reverses it, rebuilding the enum from an extractor that was not narrowed, which lets generic code
+that converted a value to its extractor hand the enum back when it does not go on to extract.
+
+## Usage
+
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
+
+The `Extractor` type is where a chain starts, and the type that appears in an error when a chain is
+finalized too early.
+
+The impls come from [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md), also available
+through [`#[derive(CgpVariant)]`](../../derives/derive_cgp_variant.md) and
+[`#[derive(CgpData)]`](../../derives/derive_cgp_data.md).
+
+## Examples
+
+Starting a chain, which is `to_extractor`'s job, and a round trip through `from_extractor`:
+
+```rust
+use cgp::core::field::traits::{ExtractField, FinalizeExtractResult, HasExtractor};
+use cgp::prelude::*;
+
+#[derive(Debug, PartialEq)]
+pub struct Circle {
+    pub radius: f64,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[derive(Debug, PartialEq, ExtractField)]
+pub enum Shape {
+    Circle(Circle),
+    Rectangle(Rectangle),
+}
+
+pub fn area(shape: Shape) -> f64 {
+    match shape.to_extractor().extract_field(PhantomData::<Symbol!("Circle")>) {
+        Ok(circle) => core::f64::consts::PI * circle.radius * circle.radius,
+        Err(remainder) => {
+            let rect = remainder
+                .extract_field(PhantomData::<Symbol!("Rectangle")>)
+                .finalize_extract_result();
+            rect.width * rect.height
+        }
+    }
+}
+
+// Any extractable enum survives the round trip unchanged.
+pub fn round_trip<E: HasExtractor>(value: E) -> E {
+    E::from_extractor(value.to_extractor())
+}
+
+pub fn demo() {
+    assert_eq!(area(Shape::Rectangle(Rectangle { width: 3.0, height: 4.0 })), 12.0);
+
+    let shape = Shape::Circle(Circle { radius: 2.0 });
+    assert_eq!(round_trip(shape), Shape::Circle(Circle { radius: 2.0 }));
+}
+```
+
+`round_trip` works for any extractable enum because it never narrows: `from_extractor` accepts only
+the all-possible extractor `to_extractor` returns. Once a variant has been ruled out the type has
+changed, and the rebuild no longer applies.
+
+## When to use it
+
+**Reach for `to_extractor` only when the chain will take payloads by value**, and prefer a borrowing
+accessor otherwise; the weakest that works is the right one.
+
+- **[`HasExtractorRef`](./has_extractor_ref.md)** for a read-only operation over a value you do not own.
+  This is the common case, and requiring ownership where a borrow would do forces callers to clone or
+  give up their value.
+- **[`HasExtractorMut`](./has_extractor_mut.md)** to change a payload in place.
+- **`HasExtractor`** when the payload must be moved out: returned, stored, or handed on by value.
+- **A `match`** when the enum is concrete. The family is for code that cannot name it.
+- **The [dispatch combinators](../../providers/dispatch/index.md)** rather than a hand-written chain,
+  since they derive it from the enum's variant list.
+
+## Under the hood
+
+The derive generates a companion enum with one [`MapType`](../type-level/map_type.md) parameter per
+variant, and this trait fixes the starting configuration to all-possible. `cargo cgp expand` on the
+example's `Shape` shows the impl:
+
+```rust
+impl HasExtractor for Shape {
+    type Extractor = __PartialShape<IsPresent, IsPresent>;
+    fn to_extractor(self) -> <Self as HasExtractor>::Extractor {
+        match self {
+            Self::Circle(value) => __PartialShape::Circle(value),
+            Self::Rectangle(value) => __PartialShape::Rectangle(value),
+        }
+    }
+    fn from_extractor(extractor: <Self as HasExtractor>::Extractor) -> Self {
+        match extractor {
+            __PartialShape::Circle(value) => Self::Circle(value),
+            __PartialShape::Rectangle(value) => Self::Rectangle(value),
+        }
+    }
+}
+```
+
+Because `IsPresent::Map<T>` is `T`, the all-possible companion holds exactly the enum's own payloads,
+so `to_extractor` is a variant-for-variant move rather than a wrapping, and `from_extractor` is the
+same move back.
+
+The companion also implements [`PartialData`](../builder/partial_data.md), with `Target` naming the
+original enum, so generic code holding an extractor can name the enum it came from; that is the one
+trait the builder and extractor families share directly. `from_extractor` does not need it, since
+its own `match` names every variant.
+
+Narrowing from here is [`ExtractField`](./extract_field.md), and the chain ends at
+[`FinalizeExtract`](./finalize_extract.md).
+
+## Common Mistakes
+
+**It consumes the value.** Reach for [`HasExtractorRef`](./has_extractor_ref.md) when the original must
+survive. This is the commonest over-requirement in the family.
+
+**`from_extractor` only accepts an un-narrowed extractor.** Once a variant is ruled out the type is
+different and the rebuild no longer applies, which is correct, since the value may no longer be
+representable.
+
+**The extractor carries none of the enum's attributes.** The companion is generated without your
+derives, so it is neither `Debug` nor `PartialEq` however the enum is derived;
+[`ExtractField`](./extract_field.md#common-mistakes) shows the error.
+
+**`Extractor` is not the enum.** A signature that returns `Self::Extractor` is returning a companion
+type, and naming it in a public API exposes a generated name.
+
+**Every variant must carry one unnamed payload or none** for the derive to apply at all, the family's
+one real restriction, covered on the
+[derive's page](../../derives/derive_extract_field.md). A variant with no fields is extracted as
+`Nil`, or as `&Nil` and `&mut Nil` through the borrowed extractors.
+
+## Related constructs
+
+- [`ExtractField`](./extract_field.md): what narrows the extractor this produces.
+- [`HasExtractorRef`](./has_extractor_ref.md) and [`HasExtractorMut`](./has_extractor_mut.md): the two
+  borrowing accessors.
+- [`FinalizeExtract`](./finalize_extract.md) and
+  [`FinalizeExtractResult`](./finalize_extract_result.md): how a chain ends.
+- [`FromVariant`](./from_variant.md): constructing an enum from one named variant.
+- [`PartialData`](../builder/partial_data.md): what names the enum a companion belongs to.
+- [`MapType`](../type-level/map_type.md): the `IsPresent`/`IsVoid` markers the companion is parameterized by.
+- [`CanUpcast`](../casting/can_upcast.md) and [`CanDowncast`](../casting/can_downcast.md): casts built on this recursion.
+- [`#[derive(ExtractField)]`](../../derives/derive_extract_field.md): generates the companion and this
+  impl.
+- [`HasBuilder`](../builder/has_builder.md): the struct analogue.
+
+The ideas behind it:
+
+- [Extensible variants](/docs/concepts/extensible-variants): partial variants and the extensible visitor
+  pattern.
+
+## Source
+
+- [`extract_field.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/extract_field.rs):
+  `HasExtractor` and the rest of the family
+- [`partial_data.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/partial_data.rs):
+  `PartialData`, which the companions also implement
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

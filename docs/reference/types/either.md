@@ -1,0 +1,194 @@
+---
+title: 'Either — the sum list cell'
+sidebar_label: 'Either'
+sidebar_position: 7
+description: 'The head-or-rest cell of the type-level sum list, which describes an enum one variant at a time so generic code can match any enum''s variants.'
+---
+
+# `Either`
+
+The head-or-rest cell of the sum list: the recursive list that describes an enum, one variant at a
+time.
+
+## Overview
+
+In [Context-Generic Programming (CGP)](/docs/), `Either<Head, Tail>` represents a choice among
+several types as a single type, so that generic code can reason about an enum's variants. The [product list](cons.md) holds a value for *every* element at once.
+The sum list holds a value for exactly *one* of its branches, which makes it a tagged union, or
+*anonymous sum type*. `Either` branches at each step, and [`Void`](void.md) marks the end. Together they
+form a coproduct that code can walk without knowing the concrete enum it came from.
+
+This list makes structural, variant-by-variant operations work across every enum in the same way.
+[`HasFields`](../traits/shape/has_fields.md) exposes an enum's variants as one sum type, so a provider
+written once to recurse over the `Either` and `Void` branches can match, dispatch on, or construct *any*
+enum's variants. CGP's extensible-variant machinery rests on this. It reaches a variant by walking the
+nested branches rather than by a `match` written against a fixed enum.
+
+You write this list through the [`Sum!`](../macros/sum.md) macro. `Sum![A, B, C]` is the right-nested
+`Either` chain terminated by `Void`. The branches are most often [`Field`](field.md) entries that pair a
+variant name with its payload, so an enum's [shape](/docs/reference/glossary#shape) becomes a `Sum!` of `Field` branches over this list.
+
+## Definition
+
+`Either` is a two-case enum that selects the head or defers to the rest:
+
+```rust
+#[derive(Eq, PartialEq, Debug, Clone)]
+pub enum Either<Head, Tail> {
+    Left(Head),
+    Right(Tail),
+}
+```
+
+`Head` is the type of the current branch, and `Tail` is the rest of the chain, which is another
+`Either` or, at the end, [`Void`](void.md). `Left(Head)` carries a value of the head type, and
+`Right(Tail)` carries a value that belongs further down the chain. It derives `Eq`, `PartialEq`,
+`Debug`, and `Clone`, so a sum of values that implement those traits inherits them. Neither it nor
+`Void` is in the prelude, since `Sum!` writes both for you. Import them from
+`cgp::core::field::types` when you name one.
+
+## Behavior
+
+A sum of any width is an `Either` chain ending in `Void`, nested to the right. The type
+`Sum![A, B, C]` is `Either<A, Either<B, Either<C, Void>>>`, and the empty `Sum![]` is `Void` alone.
+A value selects one branch by its nesting depth: `Left(a)` is an `A`, `Right(Left(b))` is a `B`, and
+`Right(Right(Left(c)))` is a `C`. A value at the `Void` position would match none of the listed
+branches. That is impossible, because a value of `Void` cannot exist, so the chain is closed at its
+end.
+
+Generic code consumes the sum by recursing on its cases, in the same way it folds the product list, but it
+branches instead of pairing. The code handles a `Left` directly as the head. A `Right` defers to a trait
+impl on the `Tail`, which recurses until it finds a `Left`. The base case is the [`Void`](void.md)
+terminator, and here the difference from the product list matters. A product ends in the constructible
+[`Nil`](nil.md), but a sum ends in the uninhabited `Void`, because an empty choice cannot hold a value.
+
+An enum's shape follows each variant's own form. A variant with one unnamed field has that field's
+type as its payload, a variant with named fields has a product of `Field` entries keyed by name, a
+variant with several unnamed fields has one keyed by [`Index`](index_type.md), and a unit variant
+has [`Nil`](nil.md).
+
+## Examples
+
+An enum's shape is an `Either` chain of `Field` branches, and a `match` on it selects a variant by
+depth, with the `Void` arm closing the match:
+
+```rust
+use cgp::core::field::traits::ToFields;
+use cgp::core::field::types::{Cons, Either, Nil, Void};
+use cgp::prelude::*;
+
+#[derive(HasFields)]
+pub enum Shape {
+    Circle(f64),
+    Rectangle { width: f64, height: f64 },
+}
+
+pub fn area(shape: Shape) -> f64 {
+    match shape.to_fields() {
+        Either::Left(circle) => core::f64::consts::PI * circle.value * circle.value,
+        Either::Right(Either::Left(rectangle)) => {
+            let Cons(width, Cons(height, Nil)) = rectangle.value;
+            width.value * height.value
+        }
+        Either::Right(Either::Right(void)) => match void {},
+    }
+}
+
+pub type Token = Sum![u32, String, bool];
+
+pub fn demo() {
+    assert_eq!(
+        area(Shape::Rectangle {
+            width: 2.0,
+            height: 3.0
+        }),
+        6.0
+    );
+
+    // The `String` branch sits one `Right` deep.
+    let token: Token = Either::Right(Either::Left("hi".to_owned()));
+    assert_eq!(token, Either::Right(Either::Left("hi".to_owned())));
+
+    // `Sum!` is the right-nested `Either` chain ending in `Void`.
+    let _: PhantomData<Either<u32, Either<String, Either<bool, Void>>>> = PhantomData::<Token>;
+}
+```
+
+The derive writes `Shape`'s shape with the macros:
+
+```rust
+impl HasFields for Shape {
+    type Fields = Sum![
+        Field<Symbol!("Circle"), f64>,
+        Field<Symbol!("Rectangle"), Product![
+            Field<Symbol!("width"), f64>,
+            Field<Symbol!("height"), f64>,
+        ]>,
+    ];
+}
+```
+
+The `Void` arm in `area` states that the chain ends, and `match void {}` is accepted because `Void`
+is uninhabited. Here the arm may also be left out, since `to_fields` returns the shape by value and
+Rust lets a match on a value omit an arm whose payload is uninhabited. Behind a reference the arm is
+required, as the [`Void`](void.md) page shows.
+
+## When to use it
+
+**Read `Either` in an expansion, and write [`Sum!`](../macros/sum.md) instead.** The macro produces the
+list. Writing the chain out yourself is longer, harder to change, and identical in meaning.
+
+- **Use [`#[derive(HasFields)]`](../derives/derive_has_fields.md) for an enum's shape** rather than
+  declaring the `Either` chain yourself.
+- **Decode an `Either` chain in an error by counting the `Right` wrappers.** The depth says which variant
+  a value selects, and the compiler reports a mismatch as a mismatch between two `Either` chains.
+- **Use [`Cons`](cons.md), not `Either`, when every element is present at once.** A product holds a
+  value for every element, and a sum holds a value for exactly one. They are duals, and mixing them
+  produces a type error rather than a subtle bug.
+- **Use the [extractor family](../traits/variant/extract_field.md)** to take an enum apart by
+  variant name in generic code. A `match` on the `Either` chain, as above, is positional and belongs
+  where the enum's order is known.
+
+## Common Mistakes
+
+**A sum holds one branch, not all of them.** `Either<A, Either<B, Void>>` is a value that is
+*either* an `A` or a `B`, not both. This is the opposite of the [product list](cons.md), and a type
+written with one where the other is expected fails as a mismatch between an `Either` chain and a
+`Cons` chain.
+
+**The empty sum is the uninhabited [`Void`](void.md), not a value.** `Sum![]` is `Void`, which is
+uninhabited, so code cannot construct an empty choice. It can construct an empty record, because a record
+ends in [`Nil`](nil.md).
+
+**Branch order is part of the type.** `Sum![A, B]` and `Sum![B, A]` are unrelated types. Because the
+branches are name-tagged [`Field`](field.md)s and the operations match on names, this matters less than
+it sounds, but the types still differ.
+
+## Related constructs
+
+- [`Void`](void.md): the uninhabited end marker that terminates this list.
+- [`Cons`](cons.md) and [`Nil`](nil.md): the product list, the record-shaped dual of this one.
+- [`Sum!`](../macros/sum.md): the macro that folds element types onto this list.
+- [`Field`](field.md): what the branches usually are, pairing a variant name with its payload.
+- [`HasFields`](../traits/shape/has_fields.md): exposes an enum's shape as one of these lists.
+- [`ExtractField`](../traits/variant/extract_field.md): the extractor family that takes an enum
+  apart by variant name.
+
+The ideas behind it:
+
+- [Extensible variants](/docs/concepts/extensible-variants): the variant representation this list encodes.
+
+## Source
+
+- `Either` and [`Void`](void.md) are both in
+  [`sum.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/types/sum.rs)
+- The `Sum!` fold:
+  [`types/sum.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/sum.rs)
+- The enum `HasFields` derive that emits a `Sum!` of entries:
+  [`derive_has_fields/sum.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_has_fields/sum.rs)
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

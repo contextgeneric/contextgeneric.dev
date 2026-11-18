@@ -1,0 +1,29 @@
+error[E0271]: type mismatch resolving `<Rectangle as HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<'h', Chars<'t', Nil>>>>>>>>>::Value == f64`
+  --> tests/compile_fail/cargo_cgp/reading_output_a_field_with_the_wrong_type.rs:31:9
+   |
+31 |         AreaCalculatorComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<Rectangle as HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<'h', Chars<'t', Nil>>>>>>>>>::Value == f64`
+   |
+note: expected this to be `f64`
+  --> tests/compile_fail/cargo_cgp/reading_output_a_field_with_the_wrong_type.rs:20:17
+   |
+20 |     pub height: u32,
+   |                 ^^^
+note: required for `RectangleArea` to implement `IsProviderFor<AreaCalculatorComponent, Rectangle>`
+  --> tests/compile_fail/cargo_cgp/reading_output_a_field_with_the_wrong_type.rs:10:1
+   |
+10 | #[cgp_impl(new RectangleArea)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: associated types for the current `impl` cannot be restricted in `where` clauses
+   = note: associated types for the current `impl` cannot be restricted in `where` clauses
+   = note: required for `Rectangle` to implement `CanUseComponent<AreaCalculatorComponent>`
+note: required by a bound in `__CheckRectangle`
+  --> tests/compile_fail/cargo_cgp/reading_output_a_field_with_the_wrong_type.rs:29:1
+   |
+29 | / check_components! {
+30 | |     Rectangle {
+31 | |         AreaCalculatorComponent,
+32 | |     }
+33 | | }
+   | |_^ required by this bound in `__CheckRectangle`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

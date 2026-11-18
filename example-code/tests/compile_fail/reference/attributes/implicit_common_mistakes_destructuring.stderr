@@ -1,0 +1,5 @@
+error: Expected an identifier
+ --> tests/compile_fail/reference/attributes/implicit_common_mistakes_destructuring.rs:5:28
+  |
+5 | fn area(&self, #[implicit] (width, height): (f64, f64)) -> f64 {
+  |                            ^^^^^^^^^^^^^^^

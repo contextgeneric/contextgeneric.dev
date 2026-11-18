@@ -1,0 +1,13 @@
+error: cannot find attribute `blanket_trait` in this scope
+ --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_not_in_prelude.rs:9:3
+  |
+9 | #[blanket_trait]
+  |   ^^^^^^^^^^^^^
+
+warning: unused import: `cgp::prelude::*`
+ --> tests/compile_fail/reference/macros/blanket_trait_common_mistakes_not_in_prelude.rs:3:5
+  |
+3 | use cgp::prelude::*;
+  |     ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

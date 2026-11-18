@@ -1,0 +1,15 @@
+error[E0119]: conflicting implementations of trait `IsProviderFor<GreeterComponent, _, _>` for type `App`
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_duplicate_entry.rs:28:9
+   |
+27 |         GreeterComponent: GreetHello,
+   |         ---------------- first implementation here
+28 |         GreeterComponent: GreetHi,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `App`
+
+error[E0119]: conflicting implementations of trait `DelegateComponent<GreeterComponent>` for type `App`
+  --> tests/compile_fail/reference/traits/delegate_component_common_mistakes_duplicate_entry.rs:28:9
+   |
+27 |         GreeterComponent: GreetHello,
+   |         ---------------- first implementation here
+28 |         GreeterComponent: GreetHi,
+   |         ^^^^^^^^^^^^^^^^ conflicting implementation for `App`

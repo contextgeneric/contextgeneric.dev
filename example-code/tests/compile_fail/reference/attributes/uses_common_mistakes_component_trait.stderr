@@ -1,0 +1,5 @@
+error: `#[uses]` declares the dependencies of a provider, not of a trait; write `#[extend(CanCalculateArea)]` to make it a supertrait
+  --> tests/compile_fail/reference/attributes/uses_common_mistakes_component_trait.rs:10:1
+   |
+10 | #[uses(CanCalculateArea)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^

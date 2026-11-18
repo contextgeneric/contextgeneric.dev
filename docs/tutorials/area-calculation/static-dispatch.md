@@ -1,12 +1,15 @@
 ---
+title: 'Static dispatch: give one trait several implementations'
+sidebar_label: 'Static Dispatch'
 sidebar_position: 2
+description: 'Hit the coherence error that rejects two blanket impls of one trait, then fix it with components, named providers, wiring, and higher-order providers.'
 ---
 
 # Static Dispatch
 
 In the previous tutorial, we learned how `#[cgp_fn]` and `#[implicit]` arguments let us define context-generic functions that extract field values automatically from any conforming context. We came away with `rectangle_area` and `scaled_rectangle_area` working cleanly across multiple rectangle contexts, all without any manual forwarding or per-context implementation.
 
-In this tutorial, we will introduce a second shape — the circle — and motivate the need for a unified `CanCalculateArea` interface that works across all shapes. We will then run into one of Rust's most well-known limitations when trying to generalize this: the coherence problem. After examining why plain blanket implementations fall short, we will see how CGP's `#[cgp_component]` macro and named providers resolve the problem. Finally, we will wire everything together using `delegate_components!` for concise, compile-time static dispatch, and generalize further with higher-order providers that compose behavior without duplication.
+In this tutorial, we will introduce a second shape — the circle — and motivate the need for a unified `CanCalculateArea` interface that works across all shapes. We will then run into one of Rust's most well-known limitations when trying to generalize this: the [coherence](/docs/reference/glossary#coherence) problem. After examining why plain [blanket implementations](/docs/reference/glossary#blanket-implementation) fall short, we will see how the `#[cgp_component]` macro of [Context-Generic Programming](/docs/) (CGP) and named providers resolve the problem. Finally, we will wire everything together using `delegate_components!` for concise, compile-time static dispatch, and generalize further with [higher-order providers](/docs/reference/glossary#higher-order-provider) that compose behavior without duplication.
 
 ## Using CGP functions with Rust traits
 
@@ -234,7 +237,7 @@ impl AreaCalculator {
 }
 ```
 
-When we write blanket implementations that are generic over the context type, we can omit the generic parameter and just refer to the generic context as `Self`.
+When we write blanket implementations that are generic over the context type, we can omit the generic parameter and just refer to the generic context as `Self`. This shorter form, with `#[uses]` in place of the `where` clause, is the one to write in your own code; the longer form above shows what it stands for.
 
 `#[cgp_impl]` also supports the same shorthand as `#[cgp_fn]`, so we can use `#[uses]` to import the CGP functions `RectangleArea` and `CircleArea` to be used in our implementations.
 
@@ -607,7 +610,7 @@ This also shows that CGP providers are just plain Rust types. By leveraging gene
 
 ## Summary
 
-Over the course of this tutorial series, we have worked through the full arc from plain Rust code to configurable static dispatch with CGP.
+Over the course of this tutorial so far, we have worked through the arc from plain Rust code to configurable static dispatch with CGP.
 
 In the introduction, we identified the two fundamental limitations of conventional Rust approaches: explicit parameter threading and tight coupling between methods and concrete context structs.
 
@@ -616,3 +619,5 @@ In the first tutorial, we addressed those limitations with `#[cgp_fn]`, which le
 In this tutorial, we resolved the remaining boilerplate using CGP components. We annotated `CanCalculateArea` with `#[cgp_component]` to generate a provider trait, defined named provider implementations with `#[cgp_impl]`, and wired them to contexts using `delegate_components!`. We then saw how `#[use_provider]` enables providers to compose with other providers, and how higher-order providers like `ScaledAreaCalculator` use Rust generics to work across all inner calculators without duplication.
 
 Every step of this process is safe, zero-cost Rust: all wiring happens at compile time through the trait system, with no runtime overhead and no unsafe code.
+
+One question remains unasked. Every context we wired happened to be wired correctly — so what happens when one is not? In [Checking and Debugging](/docs/tutorials/area-calculation/checking), we will make that mistake on purpose and find out where Rust reports it.

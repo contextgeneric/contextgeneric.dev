@@ -1,0 +1,44 @@
+error[E0599]: the method `same` exists for struct `App`, but its trait bounds were not satisfied
+  --> tests/compile_fail/cargo_cgp/reading_output_an_ordinary_rust_trait_that_does_not_hold_2.rs:37:9
+   |
+27 | pub struct App;
+   | -------------- method `same` not found for this struct because it doesn't satisfy `App: CanCompareScalars` or `App: ScalarEquality<App>`
+...
+37 |     App.same(&1.0, &2.0)
+   |         ^^^^ this is an associated function, not a method
+   |
+   = note: found the following associated functions; to be used as methods, functions must have a `self` parameter
+note: the candidate is defined in the trait `ScalarEquality`
+  --> tests/compile_fail/cargo_cgp/reading_output_an_ordinary_rust_trait_that_does_not_hold_2.rs:13:5
+   |
+13 |     fn same(&self, a: &Scalar, b: &Scalar) -> bool;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+note: trait bound `App: ScalarEquality<App>` was not satisfied
+  --> tests/compile_fail/cargo_cgp/reading_output_an_ordinary_rust_trait_that_does_not_hold_2.rs:10:1
+   |
+10 | #[cgp_component(ScalarEquality)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+11 | #[use_type(HasScalarType.Scalar)]
+12 | pub trait CanCompareScalars {
+   |           ^^^^^^^^^^^^^^^^^
+note: the trait `ScalarEquality` must be implemented
+  --> tests/compile_fail/cargo_cgp/reading_output_an_ordinary_rust_trait_that_does_not_hold_2.rs:12:1
+   |
+12 | / pub trait CanCompareScalars {
+13 | |     fn same(&self, a: &Scalar, b: &Scalar) -> bool;
+14 | | }
+   | |_^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `CanCompareScalars` defines an item `same`, perhaps you need to implement it
+  --> tests/compile_fail/cargo_cgp/reading_output_an_ordinary_rust_trait_that_does_not_hold_2.rs:12:1
+   |
+12 | / pub trait CanCompareScalars {
+13 | |     fn same(&self, a: &Scalar, b: &Scalar) -> bool;
+14 | | }
+   | |_^
+   = note: this error originates in the attribute macro `cgp_component` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use associated function syntax instead
+   |
+37 -     App.same(&1.0, &2.0)
+37 +     App::same(&1.0, &2.0)
+   |

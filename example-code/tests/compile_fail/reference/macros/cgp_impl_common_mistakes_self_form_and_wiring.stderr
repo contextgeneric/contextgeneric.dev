@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `CanCalculateArea` for type `Square`
+  --> tests/compile_fail/reference/macros/cgp_impl_common_mistakes_self_form_and_wiring.rs:21:1
+   |
+ 6 | #[cgp_component(AreaCalculator)]
+   | -------------------------------- first implementation here
+...
+21 | impl CanCalculateArea for Square {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `Square`

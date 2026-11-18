@@ -1,7 +1,8 @@
 {
-  "label": "AI Assisted Development",
-  "position": 4,
+  "label": "AI-Assisted Development",
+  "position": 10,
   "link": {
-    "type": "generated-index"
+    "type": "doc",
+    "id": "ai/index"
   }
 }

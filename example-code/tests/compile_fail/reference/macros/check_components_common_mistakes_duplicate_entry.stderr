@@ -1,0 +1,11 @@
+error[E0119]: conflicting implementations of trait `__CheckRectangle<AreaCalculatorComponent, ()>` for type `Rectangle`
+  --> tests/compile_fail/reference/macros/check_components_common_mistakes_duplicate_entry.rs:28:1
+   |
+28 | // check_components! {
+29 | ||     Rectangle {
+30 | ||         [AreaCalculatorComponent, AreaCalculatorComponent],
+   | ||________________________________-________________________^ conflicting implementation for `Rectangle`
+   | |_________________________________|
+   |                                   first implementation here
+   |
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

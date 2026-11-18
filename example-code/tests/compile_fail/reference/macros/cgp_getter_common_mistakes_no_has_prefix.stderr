@@ -1,0 +1,7 @@
+error: the `provider` key must be given
+ --> tests/compile_fail/reference/macros/cgp_getter_common_mistakes_no_has_prefix.rs:5:1
+  |
+5 | #[cgp_getter]
+  | ^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cgp_getter` (in Nightly builds, run with -Z macro-backtrace for more info)

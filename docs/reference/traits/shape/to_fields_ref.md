@@ -1,0 +1,167 @@
+---
+title: 'ToFieldsRef — read a shape without consuming'
+sidebar_label: 'ToFieldsRef'
+sidebar_position: 5
+description: 'Walk a value''s shape without consuming it, for code that only reads the fields of a struct or enum it cannot name.'
+---
+
+# `ToFieldsRef`
+
+Walking a value's shape without consuming it.
+
+## Overview
+
+In [Context-Generic Programming (CGP)](/docs/), [`ToFields`](./to_fields.md) takes a value apart
+into its shape and consumes it in the process. Code
+that only reads (a validator, a serializer, a routine that inspects a struct and hands it back)
+should not have to. `ToFieldsRef` produces the **borrowed** shape instead. The original survives,
+and every entry in the result holds a reference rather than a value.
+
+**It is the weaker requirement, so prefer it wherever it suffices.** Bounding on
+[`ToFields`](./to_fields.md) when a borrow would do forces every caller to give up ownership or
+clone, which is the most common over-requirement in this family.
+
+## Definition
+
+`ToFieldsRef` adds one borrowing method to the borrowed-shape trait it extends:
+
+```rust
+pub trait ToFieldsRef: HasFieldsRef {
+    fn to_fields_ref<'a>(&'a self) -> Self::FieldsRef<'a>
+    where
+        Self: 'a;
+}
+```
+
+It [supertraits](/docs/reference/glossary#supertrait) [`HasFieldsRef`](./has_fields_ref.md) rather
+than [`HasFields`](./has_fields.md), which is the one structural difference from its owning
+counterpart [`ToFields`](./to_fields.md): the borrowed shape and the owned shape are named by two
+independent traits, and each conversion supertraits the one it produces. The method borrows `self`
+for `'a` and returns the borrowed [`FieldsRef<'a>`](./has_fields_ref.md) shape at that lifetime, so
+the original stays intact, and the `where Self: 'a` clause keeps the borrowed shape from outliving
+the value.
+
+## Usage
+
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
+
+The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits all
+five shape traits together.
+
+## Examples
+
+Reading one entry of a value's borrowed shape, and using the value afterwards:
+
+```rust
+use cgp::core::field::traits::ToFieldsRef;
+use cgp::prelude::*;
+
+#[derive(HasFields)]
+pub struct Config {
+    pub host: String,
+    pub port: u16,
+}
+
+pub fn host_of(config: &Config) -> &String {
+    config.to_fields_ref().0.value
+}
+
+pub fn demo() {
+    let config = Config {
+        host: "localhost".to_owned(),
+        port: 8080,
+    };
+
+    assert_eq!(host_of(&config), "localhost");
+    assert_eq!(config.port, 8080); // `config` is still usable
+}
+```
+
+`to_fields_ref().0` is the first entry, and its `value` is a `&String` borrowed from `config`, which
+stays usable.
+
+## When to use it
+
+**Bound on it whenever generic code reads a shape and the caller keeps the value.** This is most
+read-only structural code.
+
+- **[`ToFields`](./to_fields.md)** when the code genuinely consumes: a conversion, a merge, a
+  rebuild.
+- **[`FromFields`](./from_fields.md)** for constructing a value, which has no borrowing counterpart:
+  a borrowed shape cannot yield an owned value.
+- **[`HasFieldsRef`](./has_fields_ref.md) alone** when the code only *names* the borrowed shape.
+- **[`HasField`](../field-access/has_field.md)** when one named field is all that is wanted.
+
+There is one thing this cannot do that [`ToFields`](./to_fields.md) can: hand the entries' values
+onward by ownership. A routine that must move a field out of a struct needs the owning form.
+
+## Under the hood
+
+The generated impl borrows each field and converts the borrow into the entry of the borrowed shape,
+under the reserved lifetime name `'__a` that [`HasFieldsRef`](./has_fields_ref.md#under-the-hood)
+declares. `cargo cgp expand` on the example's `Config` shows:
+
+```rust
+impl ToFieldsRef for Config {
+    fn to_fields_ref<'__a>(&'__a self) -> <Self as HasFieldsRef>::FieldsRef<'__a>
+    where
+        Self: '__a,
+    {
+        Cons((&self.host).into(), Cons((&self.port).into(), Nil))
+    }
+}
+```
+
+The `where Self: 'a` clause on both the trait method and the associated type keeps the result
+tied to the borrow it came from, so the shape cannot outlive the value.
+
+One consequence follows from the rewrite being per-entry rather than structural: **a field that is
+already a reference gains another one**, appearing as `&'__a &'a Name`. That is correct, and it is
+the detail most likely to look wrong in an error message.
+
+An enum's borrowed conversion matches the concrete variant and produces the corresponding arm of the
+borrowed sum, with the payload borrowed rather than moved, which is also how
+[`HasExtractorRef`](../variant/has_extractor_ref.md) reads a variant without consuming the value.
+
+## Common Mistakes
+
+**It supertraits [`HasFieldsRef`](./has_fields_ref.md), not [`HasFields`](./has_fields.md).**
+Bounding on `ToFieldsRef` does not give you `Fields`; require both traits if the code needs both
+shapes.
+
+**A field that is already borrowed gets a second borrow** in the result, which is correct and
+surprising.
+
+**There is no `FromFieldsRef`.** The borrowed half of the family is read-only by construction.
+
+**The lifetime usually has to be spelled out.** A signature that returns or stores `FieldsRef<'a>`
+inherits the `where Self: 'a` clause and rarely elides cleanly.
+
+**A newtype's borrowed shape is a borrow of the inner type**, not a one-element product. It is the
+same special case the owned shape has.
+
+## Related constructs
+
+- [`HasFieldsRef`](./has_fields_ref.md): the supertrait that names the borrowed shape.
+- [`ToFields`](./to_fields.md): the owning counterpart, which consumes the value.
+- [`FromFields`](./from_fields.md): rebuilding a value, which has no borrowing form.
+- [`HasFields`](./has_fields.md): the owned shape, and where the family is explained in full.
+- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
+- [`HasExtractorRef`](../variant/has_extractor_ref.md): the same borrow-rather-than-consume idea on
+  the enum side.
+- [`Field`](../../types/field.md): one entry of a shape.
+
+The ideas behind it:
+
+- [Extensible records](/docs/concepts/extensible-records): a struct as a product of named fields.
+
+## Source
+
+- [`to_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/to_fields.rs):
+  `ToFieldsRef` and `ToFields`
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

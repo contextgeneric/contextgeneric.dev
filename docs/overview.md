@@ -1,89 +1,321 @@
 ---
-sidebar_position: 2
+title: 'Overview of the features, with examples'
+sidebar_label: 'Overview'
+sidebar_position: 3
+description: 'Explore Context-Generic Programming through Rust examples, from choosing implementations to checking wiring and abstracting over dependencies.'
 ---
 
 # Overview
 
-This page provides a quick overview and highlight the key features of CGP. For a deeper dive into the concepts and patterns of CGP, explore our comprehensive book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/).
+When deployments and tests need different implementations of the same interface, sharing code can
+become difficult. [Context-Generic Programming](/docs/) (CGP) is a language extension for Rust, with
+pluggable trait implementations at compile-time. The examples below show how those choices work, how
+the compiler checks them, and where the approach has limits.
 
-# Key Features
+If you are new to CGP, you can begin with its simplest form under
+[*Still Ordinary Rust*](#still-ordinary-rust), or run a program with the
+[Quickstart](/docs/quickstart).
 
-This section highlights some of the key advantages that Context-Generic Programming (CGP) offers.
+The examples follow an application that fetches users' profile pictures from object storage, as in
+the [`cgp` README](https://github.com/contextgeneric/cgp/blob/main/README.md). Each is a fragment of
+a program that compiles against `cgp` 0.8.0. To focus on how the code fits together, the fragments
+omit imports, supporting definitions, and requests to the storage services. They also omit the
+context checks explained under [*Type-Safe Wiring*](#type-safe-wiring). To keep the fragments
+short, the methods are synchronous, although a real storage client would be async, as
+[Swap a Storage Backend per Application](/docs/tutorials/storage-backend) shows.
 
-## Modular Component System
+## Key features
 
-CGP leverages Rust's powerful trait system to define generic component _interfaces_ that decouple the code that _consumes_ an interface from the code that _implements_ it. This is achieved by introducing:
+### One Interface, Many Implementations
 
-- **Provider traits**, which define the implementation of a component interface.
-- **Consumer traits**, which specify how a component interface is consumed.
+Suppose one deployment stores its pictures in Amazon S3, another uses Google Cloud Storage, and
+tests read from a local folder. In plain Rust, each application type can implement a fetching trait
+itself, but then the S3 code belongs to that one type. To share that code, you might try writing a
+blanket implementation for every type with an S3 client and another for every type with a Google
+Cloud client. Rust rejects that pair, because one type could have both clients.
 
-By separating provider traits from consumer traits, CGP enables multiple context-generic provider implementations to coexist. This approach circumvents Rust's usual limitation on overlapping or orphaned trait implementations, offering greater flexibility and modularity.
+CGP avoids the conflict by giving each implementation a type of its own, called a **provider**.
+Because the providers are different types, their implementations never overlap. Here is the
+interface, defined as a CGP **component**, and the provider that fetches from S3:
 
-## Highly Expressive Macros
+```rust
+#[cgp_component(StorageObjectFetcher)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
+}
 
-CGP empowers developers to write _abstract programs_ that are generic over a context, including all its associated types and methods. This capability eliminates the need to explicitly specify an extensive list of generic parameters in type signatures, streamlining code structure and readability.
+#[cgp_impl(new FetchS3Object)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] storage_client: &aws_sdk_s3::Client,
+        #[implicit] bucket_id: &str,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        // Fetch the object from Amazon S3.
+    }
+}
+```
 
-Additionally, CGP offers powerful _macros_ for defining component interfaces and simplifies the process of wiring component implementations for use with a specific context.
+The `#[cgp_component]` attribute keeps `CanFetchStorageObject` as the trait that callers use, and it
+generates `StorageObjectFetcher`, the trait that each provider implements. The `#[implicit]`
+arguments read the client and the bucket from the fields of whichever type uses the provider, so a
+caller passes only the object's ID.
 
-With CGP, Rust code can achieve a level of expressiveness comparable to, if not exceeding, that of other popular programming paradigms, such as object-oriented programming and dynamically typed programming.
+Two more providers follow the same pattern: `FetchGCloudObject` reads a Google Cloud `Storage`
+client from the same `storage_client` field, and `FetchLocalObject` reads files from a `local_dir`
+field for tests. Each application type, which CGP calls a **context**, then chooses one provider in
+its **wiring**:
 
-## Type-Safe Composition
+```rust
+delegate_components! {
+    App {
+        StorageObjectFetcherComponent: FetchS3Object,
+    }
+}
 
-CGP leverages Rust's robust type system to guarantee that all component wiring is _type-safe_, ensuring that any missing dependencies are caught at compile time. It operates entirely within safe Rust, avoiding dynamic typing techniques such as `dyn traits`, `Any`, or runtime reflection.
+delegate_components! {
+    GCloudApp {
+        StorageObjectFetcherComponent: FetchGCloudObject,
+    }
+}
 
-This strict adherence to type safety ensures that no CGP-specific errors can occur during application runtime, providing developers with greater confidence in their code's reliability.
+delegate_components! {
+    TestApp {
+        StorageObjectFetcherComponent: FetchLocalObject,
+    }
+}
+```
 
-## No-Std Friendly
+Code that calls `fetch_storage_object` stays the same in all three contexts. Rust's coherence rules
+still apply to everything the macros generate. CGP only arranges the implementations so that they no
+longer conflict.
+[Bypassing coherence](/docs/concepts/coherence) explains the rules, and
+[Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) shows how a call reaches
+the chosen provider.
 
-CGP enables the creation of _fully abstract programs_ that can be defined without relying on any concrete dependencies — except for other abstract CGP components. This abstraction extends to dependencies such as I/O, runtime, cryptographic operations, and encoding schemes, allowing these concerns to be separated from the core application logic.
+### Zero-Cost Abstraction
 
-As a result, the core logic of an application can be seamlessly instantiated with specialized dependencies, making it compatible with no-std environments. These include embedded systems, operating system kernels, sandboxed environments like WebAssembly, and symbolic execution platforms such as Kani.
+Choosing a provider adds no runtime overhead because the compiler resolves the wiring into a direct
+call. For `App`, the wiring above amounts to this implementation, which you could also write by
+hand:
 
-## Zero-Cost Abstraction
+```rust
+impl CanFetchStorageObject for App {
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        <FetchS3Object as StorageObjectFetcher<App>>::fetch_storage_object(self, object_id)
+    }
+}
+```
 
-CGP operates entirely at compile-time, leveraging Rust's type system to ensure correctness without introducing runtime overhead. This approach upholds Rust's hallmark of _zero-cost abstraction_, enabling developers to use CGP's features without sacrificing runtime performance.
+Here, `StorageObjectFetcher<App>` is the provider trait with `App` as its context parameter.
+That parameter lets one provider serve many contexts. The call names the provider directly,
+without a runtime registry, reflection, or a virtual method table, and the provider itself is never
+instantiated: it exists only as a type.
 
+The work inside the provider, such as the request to S3, still has its usual runtime cost.
+Generic code can also increase compile time and code size. To inspect the generated code, use
+[`cargo cgp expand`](/docs/tooling/cargo-cgp/expand). For a comparison with `dyn Trait`, see
+[Dynamic dispatch](/docs/comparisons/dynamic-dispatch).
 
-# Problems Solved
+### Type-Safe Wiring
 
-Here are some common problems in Rust that CGP helps to address.
+A provider needs more than a place in the wiring table: its context must supply the fields and
+traits it uses. The compiler checks those requirements when you use the component or check its
+wiring explicitly. For example, `FetchS3Object` needs a `bucket_id` field. This context lacks that
+field, so `check_components!` produces a compile error:
 
-## Error Handling
+```rust
+#[derive(HasField)]
+pub struct App {
+    pub storage_client: aws_sdk_s3::Client,
+}
 
-Rather than being tied to a specific error crate like `anyhow` or `eyre`, CGP's `HasErrorType` and `CanRaiseError` traits allow the decoupling of core application logic from error handling. This enables concrete applications to choose their preferred error library and select the error-handling strategy that best suits their needs, such as deciding whether or not to include stack traces in errors.
+delegate_components! {
+    App {
+        StorageObjectFetcherComponent: FetchS3Object,
+    }
+}
 
-For more detailed information on error handling, refer to the [error handling chapter](https://patterns.contextgeneric.dev/error-handling.html) in our book
+check_components! {
+    App {
+        StorageObjectFetcherComponent,
+    }
+}
+```
 
-## Async Runtime
+[cargo-cgp](/docs/tooling/cargo-cgp), CGP's error toolchain, reports the missing field first, followed by
+the chain of requirements that led to it. Here is its report, without the source excerpt that points
+at the check:
 
-Rather than committing to a specific runtime crate like `tokio` or `async-std`, CGP enables the application core logic to rely on an abstract runtime context that provides only the features required by the application.
+```text
+error[E0277]: [CGP-E001] missing field `bucket_id` on `App`
+   = note: root cause: [CGP-E110] missing field `bucket_id` on `App`
+           this is required through the dependency chain:
+             [CGP-E101] consumer trait impl `CanFetchStorageObject` for context `App`
+             └─ [CGP-E102] provider trait impl `StorageObjectFetcher` with context `App` for provider `FetchS3Object`
+               └─ [CGP-E110] missing field `bucket_id` on `App`
+   = help: add the field `bucket_id` to `App`
+```
 
-Unlike monolithic runtime traits, an abstract runtime context in CGP does _not_ require a comprehensive or upfront design of all possible runtime features any application might need. This flexibility allows easy switching between concrete runtime implementations, depending on the specific runtime features the application utilizes.
+Because wiring alone does not check those requirements, check each context where you assemble it.
+For a simple context,
+[`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) wires each
+entry and checks it in the same step. Even then, the check establishes that the components fit
+together, not that the application is correct.
 
-## Overlapping Implementations
+Without cargo-cgp, this error takes more effort to read: the raw compiler message is longer and
+represents the field's name as a nested type. `cargo cgp check` leads with the root
+cause for the classes it recognizes, and the tool does not yet reshape every class.
+[Check traits](/docs/concepts/check-traits) explains the checks, the
+[checking tutorial](/docs/tutorials/area-calculation/checking) walks through a mis-wiring, and
+[Dependency injection](/docs/comparisons/dependency-injection) compares wiring with a container.
 
-A common frustration among Rust programmers is the restriction on overlapping trait implementations. A typical workaround is to use newtype wrappers, but this can become cumbersome when dealing with multiple composite types that need to be extended.
+### Abstract Over Every Dependency
 
-Rust requires a crate to own either the type or the trait for a trait implementation, which often places a significant burden on the author of a new type to implement all the common traits their users might need. This can lead to bloated type definitions, with excessive trait implementations such as `Eq`, `Clone`, `TryFrom`, `Hash`, and `Serialize`. Despite careful design, libraries may still face requests from users to implement less common traits, which can only be implemented by the crate that owns the type.
+So far the component has returned `anyhow::Result`, which ties every implementation to one error
+type. To let each context choose its own error type, the component can declare that dependency
+without naming a concrete type. Here the same component uses the context's
+error type instead of `anyhow::Error`, and a provider declares the conversion it needs with
+`#[uses]`, without adding it to the interface:
 
-With the introduction of _provider traits_, CGP removes these restrictions on overlapping implementations. Both the owner and non-owners of a type can define custom implementations for that type. When multiple provider implementations are available, users can choose one and wire it up easily using CGP constructs.
+```rust
+#[cgp_component(StorageObjectFetcher)]
+#[use_type(HasErrorType.Error)]
+pub trait CanFetchStorageObject {
+    fn fetch_storage_object(&self, object_id: &str) -> Result<Vec<u8>, Error>;
+}
 
-CGP also favors the use of _abstract types_ over newtype wrappers. For instance, a type like `f64` can be directly used for both `Context::Distance` and `Context::Weight`, with the associated types still treated as distinct within the abstract code. CGP also enables specialized provider implementations, even if the crate does not own the primitive type (e.g., `f64`) or the provider trait.
+#[cgp_impl(new FetchLocalObject)]
+#[uses(CanRaiseError<std::io::Error>)]
+#[use_type(HasErrorType.Error)]
+impl StorageObjectFetcher {
+    fn fetch_storage_object(
+        &self,
+        #[implicit] local_dir: &str,
+        object_id: &str,
+    ) -> Result<Vec<u8>, Error> {
+        std::fs::read(format!("{local_dir}/{object_id}")).map_err(Self::raise_error)
+    }
+}
+```
 
-## Dynamic Dispatch
+This definition of `CanFetchStorageObject` replaces the earlier one. Its `#[use_type]` attribute
+lets the trait and the provider write `Error` for whatever error type the context chooses. The
+provider's `#[uses]` attribute requires a conversion from a file error into that type. The call to
+`Self::raise_error` performs that conversion.
 
-A common approach for newcomers to support polymorphism in Rust is to use dynamic dispatch with `dyn Trait` objects. However, this severely limits the functionality to a restricted subset of _dyn-compatible_ (object-safe) features in Rust. Often, this limitation spreads throughout the entire codebase, requiring non-trivial workarounds for non-dyn-compatible constructs, such as `Clone`.
+The S3 and Google Cloud providers change in the same way: each returns `Error` and declares, with
+`#[uses]`, the conversion it needs from its client's error. A context then chooses its error type in
+a single wiring entry, such as `ErrorTypeProviderComponent: UseType<anyhow::Error>`, next to the
+providers that convert each source error into it. Another context can choose an error enum of its
+own without touching this code, as long as it supplies those conversions as well.
 
-Even when dynamic dispatch is not used, many Rust programmers rely on ad-hoc polymorphism, defining enums to represent all potential variants of types in the application. This results in numerous `match` expressions scattered across the codebase, making it difficult to decouple logic for each branch. Additionally, adding new variants to the enum becomes challenging, as every branch must be updated, even when the new variant is only used in a small portion of the code.
+The same arrangement works for other dependencies, such as an async runtime, and it lets a core
+library stay `no_std` as long as the providers chosen for it are `no_std` too. A provider that reads
+files, like this one, still needs `std`.
+[Modular error handling](/docs/concepts/modular-error-handling) explains how a context chooses its
+error type, and [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains how a
+provider keeps its needs out of the interface.
 
-CGP provides several solutions to address the dynamic dispatch problem by delegating the "assembly" of the variant collection to the concrete context. The core application logic can be written generically over the context and the associated type representing the abstract enum. CGP also facilitates powerful datatype-generic patterns that allow providers for each variant to be implemented separately and combined to work with enums that contain any combination of variants.
+### Still Ordinary Rust
 
-## Monolithic Traits
+CGP is a library on stable Rust, and you can use it without defining providers or wiring at all.
+Its simplest form is a function whose `#[implicit]` arguments come from the context's fields:
 
-Even without CGP, Rust's trait system provides powerful mechanisms for building abstractions that would be difficult to achieve in other mainstream languages. One common best practice is to write abstract code that is generic over a context type, but this often involves an implicit trait bound tied directly to the generic context.
+```rust
+#[cgp_fn]
+pub fn get_user(
+    &self,
+    #[implicit] database: &PgPool,
+    user_id: &UserId,
+) -> anyhow::Result<User> {
+    // Query `database` for the user row.
+}
+```
 
-Unlike CGP, traits in this pattern are typically designed as monolithic, encompassing all the dependencies that the core application might need. Without CGP, an abstract caller must also include all trait bounds required by the generic functions it invokes. As a result, any additional generic trait bounds tend to propagate throughout the codebase, leading developers to combine all these trait bounds into one monolithic trait for convenience.
+`#[cgp_fn]` turns the function into a trait with a
+[blanket implementation](/docs/reference/glossary#blanket-implementation), so any context with a
+`PgPool` field named `database` gains `get_user`, with no wiring at all. The rest of CGP stays close
+to ordinary Rust too. Providers use familiar `impl` syntax, and the trait that callers use remains
+an ordinary trait, so the hand-written implementation under *Zero-Cost Abstraction* is a valid way
+to implement it directly. This is why you can adopt CGP one component at a time. The price is
+learning the provider model and maintaining the wiring.
+[Implicit arguments](/docs/concepts/implicit-arguments) explains the field reads, and
+[Modularity Hierarchy](/docs/concepts/modularity-hierarchy) helps you judge how much of CGP a
+problem needs.
 
-Monolithic traits can quickly become bottlenecks that prevent large projects from scaling. It's not uncommon for such traits to become bloated with dozens or even hundreds of methods and types. This overgrowth makes it increasingly difficult to introduce new implementations or modify existing ones. Additionally, with Rust's current practices, breaking down or decoupling these monolithic traits into smaller, more manageable traits can be challenging.
+## Beyond choosing implementations
 
-CGP offers significant improvements over this traditional pattern, making it possible to write abstract Rust code without the risk of creating unwieldy, monolithic traits. CGP enables the decomposition of large traits into many small, focused traits, each ideally consisting of just a single method or type. This is made possible by the dependency injection pattern used in CGP, which allows implementations to introduce only the minimal trait bounds they need directly within the implementation, rather than bundling everything into a single, monolithic structure.
+Once you are comfortable choosing implementations, you can use the same mechanisms to share types,
+work over the shape of data, compose computations and providers, and reuse wiring. These features
+are optional, and the linked pages explain each one with examples:
+
+- **Abstract types:** a context chooses types as well as implementations. When several traits import
+  the context's error type, they all agree on it, so a function that uses them needs no bound to
+  equate their errors, and the error type stops being a parameter that every layer has to carry.
+  [Abstract types](/docs/concepts/abstract-types) explains how.
+- **Extensible records and variants:** a derive exposes a struct's fields or an enum's variants to
+  the trait system, so generic code can build a record from separate pieces, or call a trait on an
+  enum through whichever variant it holds without writing a `match`.
+  [Extensible records](/docs/concepts/extensible-records),
+  [Extensible variants](/docs/concepts/extensible-variants), and
+  [Dispatching](/docs/concepts/dispatching) cover the patterns.
+- **Composable handlers:** components for synchronous or async computations that may be fallible
+  or infallible. Their providers form pipelines that a context selects in its wiring.
+  [Handlers](/docs/concepts/handlers) covers the family.
+- **Namespaces:** a wiring table that several contexts share, so each context lists only the entries
+  where it differs. [Namespaces](/docs/concepts/namespaces) explains them, along with the lighter
+  `open` statement for choosing a provider per type.
+- **Higher-order providers:** a provider that takes another provider as a parameter, such as a
+  wrapper that scales whatever area its inner provider computes.
+  [Higher-order providers](/docs/concepts/higher-order-providers) shows how they compose.
+
+## The problems it solves
+
+CGP helps most when a program already needs several implementations or repeats dependencies
+through its signatures. If those problems sound familiar, these concept pages explain how CGP
+addresses them:
+
+| Problem | Explained in |
+| --- | --- |
+| Rust rejects two implementations of a trait for the same type | [Bypassing coherence](/docs/concepts/coherence) |
+| A trait for a type you do not own needs a newtype | [Bypassing coherence](/docs/concepts/coherence) |
+| Tests need a different implementation from production | [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) |
+| Feature flags already select between backends | [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) |
+| Changing the error type or runtime touches every layer | [Modular error handling](/docs/concepts/modular-error-handling) |
+| A trait has grown until no implementation needs all of it | [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) |
+| An implementation's dependencies leak into the public interface | [Impl-side dependencies](/docs/concepts/impl-side-dependencies) |
+| Generic parameters and their bounds repeat through every layer | [Abstract types](/docs/concepts/abstract-types) |
+| Generic code needs to work over any struct or enum | [Extensible records](/docs/concepts/extensible-records) |
+| A wiring error buries its cause in generated types | [Check traits](/docs/concepts/check-traits) |
+
+## When a plain trait is enough
+
+For a trait with only one implementation, a plain trait is the right tool. CGP adds declarations
+and wiring, and its macros and type checking add compile-time work. Its raw compiler errors can
+also be long, as [*Type-Safe Wiring*](#type-safe-wiring) shows.
+
+Learning the provider model and wiring patterns takes time too. If you work with an assistant,
+[CGP's agent skill](/docs/ai/skills/) helps it with the vocabulary, diagnostics, and wiring,
+although you still need to review what it writes. The [front page's costs](/#costs) describe the
+project's maturity, and [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) explains when
+a plain trait is enough and when providers start to help.
+
+## Where to go next
+
+To try these patterns in your own code or learn how they work, continue with these pages:
+
+- **Run code:** the [Quickstart](/docs/quickstart), then the
+  [Hello World tutorial](/docs/tutorials/hello), or build this page's storage example step by step
+  in [Swap a Storage Backend per Application](/docs/tutorials/storage-backend).
+- **Understand the mechanism:** the [Concepts](/docs/concepts), starting with
+  [Bypassing coherence](/docs/concepts/coherence).
+- **Compare with what you know:** the [Comparisons](/docs/comparisons).
+- **Look up a construct:** the [Reference](/docs/reference).
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base, and its examples were verified by
+compiling them. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

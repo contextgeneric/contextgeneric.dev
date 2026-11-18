@@ -1,0 +1,304 @@
+---
+title: '#[extend] — add a supertrait'
+sidebar_label: '#[extend]'
+sidebar_position: 5
+description: 'Add a trait as a supertrait of a generated trait, so callers can rely on it too, which is the only way to declare one on a CGP function.'
+---
+
+# `#[extend]`
+
+Add a trait as a [supertrait](/docs/reference/glossary#supertrait) of a generated trait, so callers can rely on it too.
+
+## Overview
+
+In [Context-Generic Programming (CGP)](/docs/), `#[extend]` declares that a trait is part of what a
+generated trait *guarantees*, rather than something its implementation happens to need. Where [`#[uses]`](uses.md) adds a private requirement, `#[extend]` adds a
+supertrait. Every **context** implementing the trait, meaning every type the method runs on,
+must also satisfy it, and every caller may rely on it.
+
+```rust
+#[extend(HasName)]
+```
+
+**`#[extend]` relates to `#[uses]` as `pub use` relates to `use`.** This comparison is the clearest way
+to tell the pair apart. Both take the same syntax and both read as imports. But `#[uses]` imports a
+trait for the implementation's own use and keeps it private, whereas `#[extend]` re-exports it as
+part of the contract.
+
+The same comparison explains why CGP prefers `#[extend]` over Rust's native supertrait syntax on a
+[`#[cgp_component]`](../macros/cgp_component.md). Writing `pub trait CanGreet: HasName` reads as
+inheritance from a parent, an is-a relationship that a CGP supertrait is not. `#[extend(HasName)]` reads
+as importing a trait that `CanGreet` passes on to its callers, which is the accurate description. The two generate the
+same trait, so this is a choice about how the definition reads.
+
+On [`#[cgp_fn]`](../macros/cgp_fn.md) the attribute is necessary, not only preferred. The `#[cgp_fn]`
+macro treats a `where` clause you write as an implementation detail and never puts it on the generated
+trait, so you cannot write a supertrait by hand. `#[extend]` is the only way to add one.
+
+## Usage
+
+`#[extend(...)]` takes a comma-separated list of trait bounds, each becoming a supertrait of the generated
+trait:
+
+```rust
+#[extend(HasName, HasTitle)]
+```
+
+Each entry names a trait, optionally with type arguments. You may list several in one attribute or spread
+them across attributes, and they accumulate. Prefer one attribute carrying the whole list, as with
+[`#[uses]`](uses.md).
+
+The attribute is accepted on [`#[cgp_fn]`](../macros/cgp_fn.md), on
+[`#[cgp_component]`](../macros/cgp_component.md), and on the macros built on it:
+[`#[cgp_type]`](../macros/cgp_type.md), [`#[cgp_getter]`](../macros/cgp_getter.md), and
+[`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md). The macro does **not** accept it on
+[`#[cgp_impl]`](../macros/cgp_impl.md), because a provider does not define a trait that a supertrait
+could attach to. The supertraits belong to the component's trait, and a provider states its private needs
+with [`#[uses]`](uses.md) instead.
+
+### When the supertrait supplies a type
+
+If the reason for the supertrait is that the trait's signatures name a type the other component provides
+(an error type, a scalar, a runtime), use [`#[use_type]`](use_type.md) instead. It adds the supertrait
+*and* rewrites bare mentions of the type into their fully qualified form, so the signature reads
+`Result<String, Error>` rather than `Result<String, <Self as HasErrorType>::Error>`:
+
+```rust
+#[cgp_component(Loader)]
+#[use_type(HasErrorType.Error)]
+pub trait CanLoad {
+    fn load(&self, path: &str) -> Result<String, Error>;
+}
+```
+
+`#[extend]` is therefore for a **method** supertrait, one whose methods matter and whose associated
+types the signatures do not name.
+
+## Examples
+
+A `#[cgp_fn]` trait that guarantees two getters alongside its own method:
+
+```rust
+use cgp::prelude::*;
+
+#[cgp_auto_getter]
+pub trait HasName {
+    fn name(&self) -> &str;
+}
+
+#[cgp_auto_getter]
+pub trait HasTitle {
+    fn title(&self) -> &str;
+}
+
+#[cgp_fn]
+#[extend(HasName, HasTitle)]
+pub fn full_label(&self) -> String {
+    format!("{} {}", self.title(), self.name())
+}
+```
+
+The body can call both getters, and so can anyone holding a `T: FullLabel`. That is the difference from
+`#[uses]`. A function that takes a labelled value can format its name without asking for `HasName`
+separately.
+
+On a component the effect is on the consumer trait, and the supertrait becomes part of the consumer
+trait's contract:
+
+```rust
+#[cgp_component(Greeter)]
+#[extend(HasName)]
+pub trait CanGreet {
+    fn greet(&self);
+}
+```
+
+`CanGreet` now means "can greet, and can tell you its name", and every caller may rely on the name being
+available. A provider of the component must still import `HasName` itself, with `#[uses]`, because the
+provider trait carries the supertrait as a `where` bound that each implementation has to satisfy:
+
+```rust
+#[cgp_impl(new GreetHello)]
+#[uses(HasName)]
+impl Greeter {
+    fn greet(&self) {
+        println!("Hello, {}!", self.name());
+    }
+}
+```
+
+## When to use it
+
+**Reach for `#[extend]` when callers of the trait must be able to rely on the supertrait too**, and for
+a method supertrait on a `#[cgp_component]` in preference to native `:` syntax. Use something else
+when the requirement belongs elsewhere. The choice turns on where the requirement should be visible.
+
+- **The implementation needs it privately.** Use [`#[uses]`](uses.md). This is the common case by a wide
+  margin: most dependencies are private to the implementation, and putting one on the trait forces it on
+  every context and every caller whether they touch it or not.
+- **The signatures name a type it supplies.** Use [`#[use_type]`](use_type.md), which adds the supertrait
+  and removes the qualified paths.
+- **The requirement is a predicate rather than a supertrait**, a bound on a generic parameter rather than
+  on `Self`. Use [`#[extend_where]`](extend_where.md), which puts it on the generated trait's own `where`
+  clause.
+
+A supertrait widens the contract permanently, and that cost decides whether to promote a requirement.
+You cannot later remove it without breaking every implementor, and it demands the supertrait from
+contexts that only call the one method the trait declares. Prefer `#[uses]` unless callers need the
+guarantee.
+
+## Under the hood
+
+On a `#[cgp_fn]`, each entry lands on both the generated trait, as a supertrait, and the generated
+implementation, as a `Self:` predicate. From this input:
+
+```rust
+#[cgp_fn]
+#[extend(HasName, HasTitle)]
+pub fn full_label(&self) -> String {
+    format!("{} {}", self.title(), self.name())
+}
+```
+
+the macro emits:
+
+```rust
+pub trait FullLabel: HasName + HasTitle {
+    fn full_label(&self) -> String;
+}
+
+impl<__Context__> FullLabel for __Context__
+where
+    Self: HasName + HasTitle,
+{
+    fn full_label(&self) -> String { /* ... */ }
+}
+```
+
+Callers see the supertrait, and the predicate on the implementation lets the body call the methods.
+Compare [`#[uses]`](uses.md), which emits only the predicate and leaves the trait declaration bare.
+That single difference is the whole of the distinction. When a function carries both attributes,
+their entries share the one `Self:` predicate, the `#[extend]` entries first.
+
+On a `#[cgp_component]` the supertrait goes on the consumer trait, and it also joins the `where` clause of
+the generated consumer blanket implementation, because that implementation can only apply where the
+supertrait holds:
+
+```rust
+pub trait CanGreet: HasName {
+    fn greet(&self);
+}
+
+impl<__Context__> CanGreet for __Context__
+where
+    __Context__: HasName,
+    __Context__: Greeter<__Context__>,
+{
+    fn greet(&self) {
+        __Context__::greet(self)
+    }
+}
+```
+
+The provider trait carries the same requirement, but as a `where` bound rather than a supertrait, since its
+context is a type parameter:
+
+```rust
+pub trait Greeter<__Context__>: IsProviderFor<GreeterComponent, __Context__, ()>
+where
+    __Context__: HasName,
+{
+    fn greet(__context__: &__Context__);
+}
+```
+
+Rust does not let an implementation assume a trait's `where` bound, so every provider impl must prove
+`__Context__: HasName` itself. That is why the provider in [Examples](#examples) carries
+`#[uses(HasName)]` even though the component already names the trait.
+
+The consumer trait is identical to `pub trait CanGreet: HasName`, so on a component `#[extend]`
+generates only what the language can already express. It remains the preferred form because it
+presents the bound as an import rather than as inheritance, and because it keeps the `use`/`pub use`
+pairing with `#[uses]` reading consistently across both macros.
+
+## Formal grammar
+
+The attribute argument is a comma-separated list of bounds, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+ExtendArgs -> TypeParamBound ( `,` TypeParamBound )* `,`?
+```
+
+This is the same production [`#[uses]`](uses.md) accepts, the Rust grammar's own bound, so a
+lifetime, a `?Sized`, or an associated-type equality parses as readily as a plain trait name. Rust
+still rejects a relaxed bound on a trait, so `#[extend(?Sized)]` fails with
+`relaxed bounds are not permitted in supertrait bounds`. The list may be empty, and the attribute
+may be repeated, with every occurrence's entries collected together. The two attributes differ in
+where the bounds land, not in the grammar.
+
+## Common Mistakes
+
+**On a `#[cgp_impl]` the compiler does not recognize the attribute**, rather than accepting and ignoring
+it. The macro does not consume it, so it reaches the compiler as an unknown attribute:
+
+```rust
+#[cgp_impl(new GreetHello)]
+#[extend(HasName)]
+impl Greeter {
+    fn greet(&self) {
+        println!("Hello, {}!", self.name());
+    }
+}
+```
+
+```text
+error: cannot find attribute `extend` in this scope
+```
+
+Expect a second error alongside it, because the bound was never added. The body's calls to the
+trait's method
+then fail with `E0599`, reporting that the method exists but its trait bounds were not satisfied. Both
+errors have the same cause, and one fix removes both: move the requirement to [`#[uses]`](uses.md), or
+onto the component's trait where supertraits belong.
+
+**A provider of an extended component must import the supertrait again.** Leaving `#[uses(HasName)]` off
+a `GreetHello` provider for the `CanGreet` component above fails at the provider, whether or not its body
+calls `name()`:
+
+```text
+error[E0277]: the trait bound `__Context__: HasName` is not satisfied
+```
+
+The component's `#[extend]` guarantees the trait to callers of `CanGreet`. It does not supply it to the
+implementations that make `CanGreet` true, each of which states its own requirements.
+
+**A supertrait cannot be narrowed later.** Because every implementor and every caller may now rely on it,
+removing an entry from `#[extend]` is a breaking change in a way removing one from `#[uses]` is not. This
+is the practical reason to default to `#[uses]`.
+
+## Related constructs
+
+- [`#[uses]`](uses.md) — the same syntax as a private bound on the implementation; the usual choice.
+- [`#[extend_where]`](extend_where.md) — a predicate on the generated trait rather than a supertrait.
+- [`#[use_type]`](use_type.md) — preferred when the supertrait exists to supply a type.
+- [`#[cgp_fn]`](../macros/cgp_fn.md) — where `#[extend]` is the only way to declare a supertrait.
+- [`#[cgp_component]`](../macros/cgp_component.md) — where it is preferred over native `:` syntax.
+- [`#[cgp_auto_getter]`](../macros/cgp_auto_getter.md) — defines the getter traits most often extended.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the distinction between a
+  requirement callers see and one they do not.
+
+## Source
+
+- Parsing: [`types/attributes/function.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/function.rs)
+- On `#[cgp_fn]`: [`types/cgp_fn/preprocessed.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/cgp_fn/preprocessed.rs)
+- On `#[cgp_component]`: [`types/attributes/cgp_component_attributes.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-core/src/types/attributes/cgp_component_attributes.rs)
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

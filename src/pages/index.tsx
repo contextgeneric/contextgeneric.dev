@@ -1,187 +1,530 @@
-import type {ReactNode} from 'react';
+import {useState, type ReactNode} from 'react';
 import clsx from 'clsx';
 import Link from '@docusaurus/Link';
-import useDocusaurusContext from '@docusaurus/useDocusaurusContext';
+import Head from '@docusaurus/Head';
 import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
-import HomepageFeatures from '@site/src/components/HomepageFeatures';
 import Heading from '@theme/Heading';
 import CodeBlock from '@theme/CodeBlock';
+import FeatureCards from '@site/src/components/HomepageFeatures';
 
 import styles from './index.module.css';
 
-function HeroBanner() {
+// The front page is written as its own markup and stylesheet on the site theme's tokens, inside the
+// Docusaurus layout. Its copy, code, and art follow the knowledge base's homepage guide.
+
+// The page's code. `example-code/tests/front_page.rs` compiles each block and compares the text
+// between each pair of `front-page:` markers with the same markers in its own sources, so a change
+// here needs the same change there. The knowledge base's homepage guide specifies the blocks.
+
+// front-page:rejected-block:begin
+const REJECTED_BLOCK = `// Rust allows only one of these. \`String\` is both \`Display\` and
+// \`AsRef<[u8]>\`, so the compiler has no principled way to choose.
+pub trait CanEncode {
+    fn encode(&self) -> Vec<u8>;
+}
+
+impl<T: Display> CanEncode for T {
+    fn encode(&self) -> Vec<u8> { self.to_string().into_bytes() }
+}
+
+impl<T: AsRef<[u8]>> CanEncode for T {          // error[E0119]
+    fn encode(&self) -> Vec<u8> { self.as_ref().to_vec() }
+}`;
+// front-page:rejected-block:end
+
+// The compiler's error for the rejected block, from its compile-fail snapshot, without the location
+// line, which names the fixture's path. The block starts at the fixture's first line, so the line
+// numbers here are the ones the page shows beside the block.
+// front-page:rejected-diagnostic:begin
+const REJECTED_DIAGNOSTIC = `error[E0119]: conflicting implementations of trait \`CanEncode\`
+   |
+ 7 | impl<T: Display> CanEncode for T {
+   | -------------------------------- first implementation here
+...
+11 | impl<T: AsRef<[u8]>> CanEncode for T {          // error[E0119]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation`;
+// front-page:rejected-diagnostic:end
+
+// front-page:cgp-block:begin
+const CGP_BLOCK = `#[cgp_component(Encoder)]     // generates the provider trait Encoder
+pub trait CanEncode {
+    fn encode(&self) -> Vec<u8>;
+}
+
+#[cgp_impl(new EncodeAsText)] // a provider: one named implementation
+#[uses(Display)]
+impl Encoder {
+    fn encode(&self) -> Vec<u8> { self.to_string().into_bytes() }
+}
+
+#[cgp_impl(new EncodeAsBytes)]
+#[uses(AsRef<[u8]>)]
+impl Encoder {
+    fn encode(&self) -> Vec<u8> { self.as_ref().to_vec() }
+}
+
+// Each type names the implementation it uses:
+delegate_components! { u64     { EncoderComponent: EncodeAsText } }
+delegate_components! { String  { EncoderComponent: EncodeAsText } }
+delegate_components! { Vec<u8> { EncoderComponent: EncodeAsBytes } }`;
+// front-page:cgp-block:end
+
+const INSTALL_COMMAND = 'cargo add cgp';
+
+// The install line copies its command, so a reader can paste it without selecting the text. A
+// browser without the clipboard API, or one that refuses it, leaves the button unchanged, and the
+// command stays selectable by hand.
+function InstallLine(): ReactNode {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard
+      ?.writeText(INSTALL_COMMAND)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      })
+      .catch(() => {});
+  };
   return (
-    <div className={styles.hero} data-theme="light">
-      <div className={styles.heroOuter}>
-        <img
-          alt="Context-Generic Programming"
-          className={styles.heroLogo}
-          src={useBaseUrl('/img/cgp-hero.png')}
-        />
-        <div className={styles.heroInner}>
-          <Heading as="h1" className={styles.heroProjectTagline}>
-            <span className={styles.heroTitleTextHtml}>
-              Build <b>modular</b> Rust applications with <b>zero-cost</b> abstractions
-            </span>
+    <div className={styles.install}>
+      <code>
+        <span className={styles.prompt} aria-hidden="true">
+          $
+        </span>{' '}
+        {INSTALL_COMMAND}
+      </code>
+      <button type="button" className={styles.copy} onClick={copy} aria-live="polite">
+        {copied ? 'Copied' : 'Copy'}
+      </button>
+    </div>
+  );
+}
+
+function Hero(): ReactNode {
+  return (
+    <header className={styles.hero}>
+      <div className={clsx(styles.container, styles.heroGrid)}>
+        <div>
+          <Heading as="h1" className={styles.heroTitle}>
+            Context-Generic Programming
           </Heading>
-          <div className={styles.indexCtas}>
-            <Link className={clsx("button button--primary button--lg", styles.getStartedButton)} to="/docs">
-              Get Started
+          <p className={styles.heroTagline}>
+            A language extension for Rust, with pluggable trait implementations at compile-time.
+          </p>
+          <p className={styles.heroReassurance}>
+            Still ordinary Rust: a library on the stable toolchain, with provider selection resolved
+            at compile time, adopted one trait at a time.
+          </p>
+          <InstallLine />
+          <div className={styles.heroLinks}>
+            <Link className={styles.primaryButton} to="/docs/quickstart">
+              Quickstart
             </Link>
-            <Link
-              className={clsx("button button--secondary button--lg margin-left--md", styles.tutorialButton)}
-              to="/docs/tutorials/hello">
-              Tutorial - 5 min ⏱️
+            <Link className={styles.secondaryButton} to="#costs">
+              Costs and maturity
             </Link>
-            <span className={styles.indexCtasGitHubButtonWrapper}>
-              <iframe
-                className={styles.indexCtasGitHubButton}
-                src="https://ghbtns.com/github-btn.html?user=contextgeneric&amp;repo=cgp&amp;type=star&amp;count=true&amp;size=large"
-                width={160}
-                height={30}
-                title="GitHub Stars"
-              />
-            </span>
+            <iframe
+              className={styles.starButton}
+              src="https://ghbtns.com/github-btn.html?user=contextgeneric&amp;repo=cgp&amp;type=star&amp;count=true"
+              width={110}
+              height={20}
+              title="Star CGP on GitHub"
+            />
           </div>
         </div>
+        <div className={styles.heroArtFrame}>
+          <img
+            className={styles.heroArt}
+            src={useBaseUrl('/img/cgp-hero.webp')}
+            alt="The Context-Generic Programming logo"
+            width={280}
+            height={202}
+          />
+        </div>
       </div>
-    </div>
+    </header>
   );
 }
 
-function CodeExampleSection() {
+type CodeWindowProps = {
+  label: string;
+  verdict: 'rejected' | 'accepted';
+  metastring: string;
+  code: string;
+  diagnostic?: string;
+};
+
+// A code block framed as an editor window. The title bar states the verdict with a mark as well as
+// a colour, and the highlighted lines carry a gutter glyph, so the two blocks differ for a reader who
+// cannot tell red from green.
+function CodeWindow({label, verdict, metastring, code, diagnostic}: CodeWindowProps): ReactNode {
   return (
-    <div className={clsx(styles.section, styles.sectionAlt)}>
-      <div className="container">
-        <div className="row">
-          <div className="col col--6">
-            <Heading as="h2">Bypass Coherence Restrictions</Heading>
-            <p>
-              CGP enables you to write <b>overlapping</b> and <b>orphan</b> implementations
-              of any trait, breaking free from Rust's coherence rules while maintaining
-              type safety.
-            </p>
-            <p>
-              Annotate any trait with <code>#[cgp_component]</code>, write named implementations
-              with <code>#[cgp_impl]</code>, and selectively enable them using{' '}
-              <code>delegate_components!</code>.
-            </p>
-
-            <Link className="button button--primary button--lg" to="/docs">
-              Learn More
-            </Link>
-          </div>
-          <div className="col col--6">
-            <div className={styles.codeExample}>
-              <CodeBlock language="rust">
-{
-`#[cgp_component(HashProvider)]
-pub trait Hash { ... }
-
-// Named overlappable implementation with provider trait
-#[cgp_impl(HashWithDisplay)]
-impl HashProvider
-where
-    Self: Display,
-{ ... }
-
-pub struct MyData { ... }
-impl Display for MyData { ... }
-
-delegate_components! {
-    MyData {
-        // Implements Hash automatically
-        HashProviderComponent: HashWithDisplay,
-    }
-}`
-}
-              </CodeBlock>
-            </div>
-          </div>
-        </div>
+    <figure className={clsx(styles.window, styles[verdict])}>
+      <figcaption className={styles.windowBar}>
+        <span className={styles.verdictMark} aria-hidden="true">
+          {verdict === 'rejected' ? '✗' : '✓'}
+        </span>
+        {label}
+      </figcaption>
+      <div className={styles.windowCode}>
+        <CodeBlock language="rust" metastring={metastring}>
+          {code}
+        </CodeBlock>
       </div>
-    </div>
+      {diagnostic && (
+        <pre className={styles.diagnostic}>{diagnostic}</pre>
+      )}
+    </figure>
   );
 }
 
-function ProblemsSection() {
+function CodeBand(): ReactNode {
   return (
-    <div className={styles.section}>
-      <div className="container">
-        <Heading as="h2" className="text--center margin-bottom--xl">
-          Common Rust Problems, Solved
-        </Heading>
-        <div className="row">
-          <div className="col col--4">
-            <div className={styles.problemCard}>
-              <Heading as="h3">⚡ No More Monolithic Traits</Heading>
-              <p>
-                Break down large traits into small, focused components.
-                Compose features without trait bounds propagating everywhere.
-              </p>
-            </div>
-          </div>
-          <div className="col col--4">
-            <div className={styles.problemCard}>
-              <Heading as="h3">🔄 Overlapping Implementations</Heading>
-              <p>
-                Implement traits in multiple ways without newtype wrappers.
-                Choose the right implementation for your context.
-              </p>
-            </div>
-          </div>
-          <div className="col col--4">
-            <div className={styles.problemCard}>
-              <Heading as="h3">🎯 Decouple Dependencies</Heading>
-              <p>
-                Write core logic independent of error handling, async runtimes,
-                or serialization libraries. Wire them up at the edges.
-              </p>
-            </div>
-          </div>
-        </div>
+    <section className={styles.codeBand} aria-label="The same two implementations, without and with CGP">
+      <div className={clsx(styles.container, styles.codeColumns)}>
+        <CodeWindow
+          label="Rust rejects the overlapping implementations"
+          verdict="rejected"
+          metastring="showLineNumbers {11}"
+          code={REJECTED_BLOCK}
+          diagnostic={REJECTED_DIAGNOSTIC}
+        />
+        <CodeWindow
+          label="With CGP, both encoders compile"
+          verdict="accepted"
+          metastring="{1,6-7,12-13,18-21}"
+          code={CGP_BLOCK}
+        />
       </div>
-    </div>
-  );
-}
-
-function CallToActionSection() {
-  return (
-    <div className={clsx(styles.section, styles.sectionAlt)}>
-      <div className="container text--center">
-        <Heading as="h2">Ready to Get Started?</Heading>
-        <p className="margin-bottom--lg">
-          CGP is in active development and perfect for early adopters who want to
-          experiment with advanced Rust patterns.
+      <div className={clsx(styles.container, styles.caption)}>
+        <p className={styles.captionReason}>
+          CGP gives each encoder a name. Here, <code>String</code> selects <code>EncodeAsText</code>{' '}
+          and <code>Vec&lt;u8&gt;</code> selects <code>EncodeAsBytes</code>.
         </p>
-        <div className={styles.buttons}>
-          <Link className="button button--primary button--lg" to="/docs">
-            Read the Docs
-          </Link>
-          <Link
-            className="button button--secondary button--lg margin-left--md"
-            to="/docs/contribute">
-            Contribute to CGP
-          </Link>
+        <p className={styles.captionQuote}>For each type, a call to <code>encode()</code> still selects a single encoder.</p>
+      </div>
+    </section>
+  );
+}
+
+function WhyOnce(): ReactNode {
+  return (
+    <section className={clsx(styles.section, styles.sectionTinted)}>
+      <div className={clsx(styles.container, styles.split)}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          Why the encoders overlap
+        </Heading>
+        <div className={styles.prose}>
+          <p>
+            <code>String</code> implements both <code>Display</code> and <code>AsRef&lt;[u8]&gt;</code>,
+            so it qualifies for both implementations of <code>CanEncode</code> in the first example.
+            Rust rejects the pair because a call to <code>encode()</code> on a string would be
+            ambiguous. The rule that keeps trait implementations unique for a given type is called{' '}
+            <strong>coherence</strong>. You rely on it whenever you write a bound like{' '}
+            <code>T:&nbsp;Display</code> and let the compiler find the implementation.
+          </p>
+          <p>
+            In plain Rust, one way to keep both encoders is to wrap the data in a different newtype
+            for each case. With CGP, the crate that defines an encoder gives the implementation its
+            own type, called a <strong>provider</strong>. Each data type can then select a provider
+            for its encoder, as <code>String</code> does above.{' '}
+            <Link to="/docs/concepts/coherence">Bypassing coherence</Link> explains the rules and
+            other ways to handle overlap.
+          </p>
+          <p>
+            Choosing an encoder for <code>String</code> fixes that choice for the whole program.
+            To choose per application, you can select the provider on a type that represents the
+            application. That type is called a <strong>context</strong>, and you can define as many
+            contexts as you need.{' '}
+            <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>{' '}
+            shows an application and its test choosing different providers.
+          </p>
         </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function Features(): ReactNode {
+  return (
+    <section className={styles.section}>
+      <div className={styles.container}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          Reusing providers across applications
+        </Heading>
+        <p className={styles.lead}>
+          Once each application can choose its providers, you can reuse the same implementations in
+          different combinations. CGP's main features build on that choice.
+        </p>
+        <FeatureCards />
+        <p className={styles.sectionNote}>
+          The <Link to="/docs/overview">Overview</Link> describes each feature in more detail.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+type Breadth = {title: string; to: string; body: ReactNode};
+
+const BREADTH: Breadth[] = [
+  {
+    title: 'Abstract types',
+    to: '/docs/concepts/abstract-types',
+    body: (
+      <>
+        A context chooses types such as its error or runtime, so you do not have to declare them as
+        separate parameters at every layer.
+      </>
+    ),
+  },
+  {
+    title: 'Extensible records and variants',
+    to: '/docs/concepts/extensible-records',
+    body: (
+      <>
+        Add a derive to a struct or enum to let generic code build and match its fields and variants.
+      </>
+    ),
+  },
+  {
+    title: 'Handlers',
+    to: '/docs/concepts/handlers',
+    body: (
+      <>
+        Combine synchronous or async steps into a pipeline, then change individual steps as needed.
+      </>
+    ),
+  },
+];
+
+function MoreThanTraits(): ReactNode {
+  return (
+    <section className={clsx(styles.section, styles.sectionTinted)}>
+      <div className={styles.container}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          More than trait implementations
+        </Heading>
+        <p className={styles.lead}>
+          Beyond choosing implementations, you can use CGP to choose the types they work with, write
+          generic code for structs and enums, and combine steps into a pipeline.
+        </p>
+        <ul className={styles.tileGrid}>
+          {BREADTH.map(({title, to, body}) => (
+            <li key={title}>
+              <Link className={styles.tile} to={to}>
+                <span className={styles.tileTitle}>{title}</span>
+                <span className={styles.tileBody}>{body}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+type Cost = {label: string; body: ReactNode};
+
+// The costs as a two-column list of labels and statements. The `cargo cgp check` sentence is the knowledge base's canonical
+// qualification, copied word for word.
+const COSTS: Cost[] = [
+  {
+    label: 'More declarations',
+    body: <>Components, providers, and wiring add code that a plain trait does not need.</>,
+  },
+  {
+    label: 'Compile-time work',
+    body: <>The compiler has extra macros to expand and types to check.</>,
+  },
+  {
+    label: 'Verbose raw errors',
+    body: (
+      <>
+        Raw wiring errors are long, but{' '}
+        <Link to="/docs/tooling/cargo-cgp">
+          <code>cargo cgp check</code>
+        </Link>{' '}
+        leads with the root cause for the classes it recognizes, and the tool does not yet reshape
+        every class.
+      </>
+    ),
+  },
+  {
+    label: 'A young ecosystem',
+    body: (
+      <>
+        CGP has a small ecosystem and limited community support. If you use it on a mission-critical
+        project, expect to investigate some problems on your own. Its error toolchain,{' '}
+        <code>cargo-cgp</code>, is also an early release.
+      </>
+    ),
+  },
+  {
+    label: 'Learning time',
+    body: (
+      <>
+        It takes time to learn how to choose and connect providers. If you use a coding assistant, CGP's{' '}
+        <Link to="/docs/ai/skills">agent skill</Link> helps it use the terminology, interpret diagnostics,
+        and connect providers. You still need to review the code it writes.
+      </>
+    ),
+  },
+];
+
+function Costs(): ReactNode {
+  return (
+    <section className={styles.section}>
+      <div className={styles.container}>
+        {/* The heading and its lead sit in a column beside the costs, as section 1's title does, so
+            the list fills the panel's width at a readable line length. */}
+        <div className={clsx(styles.costPanel, styles.costSplit)}>
+          <div className={styles.costIntro}>
+            <Heading as="h2" id="costs" className={styles.sectionTitle}>
+              What it costs
+            </Heading>
+            <p className={styles.costLead}>
+              Use a plain trait when one implementation is enough. When you need several, weigh the
+              flexibility of choosing providers against the work it adds.
+            </p>
+          </div>
+          <div className={styles.prose}>
+            {/* A description list rather than a table: each row pairs one label with one statement, and
+                the rows share no other columns. */}
+            <dl className={styles.costTable}>
+              {COSTS.map(({label, body}) => (
+                <div key={label} className={styles.costRow}>
+                  <dt>{label}</dt>
+                  <dd>{body}</dd>
+                </div>
+              ))}
+            </dl>
+            <p className={styles.costAdvice}>
+              To see whether those costs are worthwhile, try CGP in a small part of your project
+              where you already use different implementations. If you are unsure where to start,{' '}
+              <Link to="/docs/concepts/modularity-hierarchy">Modularity Hierarchy</Link> explains
+              when a plain trait is enough and when providers help.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+type Route = {reader: string; to: string; link: string; reason: ReactNode};
+
+// Each route card is one stretched link to its main page, with an optional second link above the
+// stretched area, because a link inside a link is invalid.
+const ROUTES: Route[] = [
+  {
+    reader: 'Try it',
+    to: '/docs/quickstart',
+    link: 'Quickstart',
+    reason: (
+      <>
+        Install CGP and run a program, then follow the{' '}
+        <Link to="/docs/tutorials/hello">Hello World tutorial</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Understand the idea',
+    to: '/docs/concepts/coherence',
+    link: 'Bypassing coherence',
+    reason: (
+      <>
+        Explore why coherence matters, then see how CGP works in{' '}
+        <Link to="/docs/concepts/consumer-and-provider-traits">Consumer and provider traits</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Decide whether it fits',
+    to: '/docs/concepts/modularity-hierarchy',
+    link: 'Modularity Hierarchy',
+    reason: (
+      <>
+        Learn when a simpler tool is enough, and explore{' '}
+        <Link to="/docs/projects">projects built with CGP</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Go deeper',
+    to: '/docs/overview',
+    link: 'Overview',
+    reason: (
+      <>
+        Take a tour of the features, compare CGP with{' '}
+        <Link to="/docs/comparisons">related approaches</Link>, or read the{' '}
+        <Link to="/blog">blog</Link>.
+      </>
+    ),
+  },
+  {
+    reader: 'Help build it',
+    to: '/docs/contribute',
+    link: 'Contribute',
+    reason: <>Join the discussions, or improve the code and the documentation.</>,
+  },
+];
+
+function WhereNext(): ReactNode {
+  return (
+    <section className={clsx(styles.section, styles.sectionTinted)}>
+      <div className={styles.container}>
+        <Heading as="h2" className={styles.sectionTitle}>
+          Where to go next
+        </Heading>
+        <p className={styles.lead}>
+          Start with a working example, explore how providers fit together, or see how other
+          projects use them.
+        </p>
+        <ul className={styles.routeGrid}>
+          {ROUTES.map(({reader, to, link, reason}) => (
+            <li key={reader} className={styles.route}>
+              <span className={styles.routeReader}>{reader}</span>
+              <Link className={styles.routeLink} to={to}>
+                {link}
+              </Link>
+              <span className={styles.routeReason}>{reason}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
 export default function Home(): ReactNode {
-  const {siteConfig} = useDocusaurusContext();
   return (
     <Layout
-      title={siteConfig.tagline}
-      description="Context-Generic Programming (CGP) - A modular programming paradigm for Rust">
-      <main>
-        <HeroBanner />
-        <HomepageFeatures />
-        <CodeExampleSection />
-        <ProblemsSection />
-        <CallToActionSection />
+      description="Context-Generic Programming lets you give a Rust trait several implementations. Each application chooses the one it needs, and the compiler resolves that choice at compile time.">
+      {/*
+        The front page names the project first, which Docusaurus's own title formatter cannot do:
+        passing `title` to Layout renders `{title} | {siteTitle}`, so the project name could only ever
+        come last. Setting the tag here replaces that entirely, and og:title is set with it so a
+        shared link carries the same words.
+      */}
+      <Head>
+        <title>
+          Context-Generic Programming (CGP) - Pluggable trait implementations for Rust
+        </title>
+        <meta
+          property="og:title"
+          content="Context-Generic Programming (CGP) - Pluggable trait implementations for Rust"
+        />
+      </Head>
+      <main className={styles.page}>
+        <Hero />
+        <CodeBand />
+        <WhyOnce />
+        <Features />
+        <MoreThanTraits />
+        <Costs />
+        <WhereNext />
       </main>
     </Layout>
   );

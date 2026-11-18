@@ -1,0 +1,5 @@
+error: Mutable variables are not allowed in implicit arguments. (Explicitly clone a `&` reference if you want a mutable local copy of the value)
+ --> tests/compile_fail/reference/attributes/implicit_common_mistakes_mut_binding.rs:5:28
+  |
+5 | fn area(&self, #[implicit] mut width: f64) -> f64 {
+  |                            ^^^^^^^^^

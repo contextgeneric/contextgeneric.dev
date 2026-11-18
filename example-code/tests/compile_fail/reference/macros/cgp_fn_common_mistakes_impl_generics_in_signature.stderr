@@ -1,0 +1,25 @@
+error[E0425]: cannot find type `Db` in this scope
+  --> tests/compile_fail/reference/macros/cgp_fn_common_mistakes_impl_generics_in_signature.rs:12:61
+   |
+12 | pub fn database_handle(&self, #[implicit] database: &Db) -> Db {
+   |                                                             ^^ not found in this scope
+
+warning: unused variable: `database`
+  --> tests/compile_fail/reference/macros/cgp_fn_common_mistakes_impl_generics_in_signature.rs:12:43
+   |
+12 | pub fn database_handle(&self, #[implicit] database: &Db) -> Db {
+   |                                           ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_database`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `database`
+  --> tests/compile_fail/reference/macros/cgp_fn_common_mistakes_impl_generics_in_signature.rs:18:37
+   |
+18 | pub fn fetch_row(&self, #[implicit] database: &Db) -> Db::Row {
+   |                                     ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_database`
+
+error[E0433]: cannot find type `Db` in this scope
+  --> tests/compile_fail/reference/macros/cgp_fn_common_mistakes_impl_generics_in_signature.rs:18:55
+   |
+18 | pub fn fetch_row(&self, #[implicit] database: &Db) -> Db::Row {
+   |                                                       ^^ use of undeclared type `Db`

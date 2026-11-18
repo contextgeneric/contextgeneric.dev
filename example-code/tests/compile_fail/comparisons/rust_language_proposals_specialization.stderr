@@ -1,0 +1,18 @@
+error[E0658]: specialization is experimental
+  --> tests/compile_fail/comparisons/rust_language_proposals_specialization.rs:10:5
+   |
+10 | /     default fn my_add_assign(&mut self, rhs: R) {
+11 | |         let tmp = self.clone() + rhs;
+12 | |         *self = tmp;
+13 | |     }
+   | |_____^
+   |
+   = note: see issue #31844 <https://github.com/rust-lang/rust/issues/31844> for more information
+
+warning: unused import: `AddAssign`
+ --> tests/compile_fail/comparisons/rust_language_proposals_specialization.rs:3:22
+  |
+3 | use core::ops::{Add, AddAssign};
+  |                      ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

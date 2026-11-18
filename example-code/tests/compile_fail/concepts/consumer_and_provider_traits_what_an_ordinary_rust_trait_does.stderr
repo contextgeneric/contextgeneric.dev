@@ -1,0 +1,21 @@
+error[E0119]: conflicting implementations of trait `CanFetchStorageObject`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:9:1
+  |
+8 | impl<T: HasS3Client> CanFetchStorageObject for T { fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> { Ok(Ve...
+  | ------------------------------------------------ first implementation here
+9 | impl<T: HasLocalDir> CanFetchStorageObject for T { fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> { Ok(Ve...
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation
+
+warning: unused variable: `object_id`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:8:83
+  |
+8 | ...h_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> { Ok(Vec::new()) } }
+  |                            ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_object_id`
+  |
+  = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `object_id`
+ --> tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs:9:83
+  |
+9 | ...h_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> { Ok(Vec::new()) } }   // error[E0119]
+  |                            ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_object_id`

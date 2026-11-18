@@ -1,0 +1,5 @@
+error: expected `,`
+  --> tests/compile_fail/reference/macros/delegate_components_the_value_forms_qualified_wrapper.rs:25:64
+   |
+25 |         AreaCalculatorComponent: cgp::prelude::UseDelegate<new AreaCalculatorComponents {
+   |                                                                ^^^^^^^^^^^^^^^^^^^^^^^^

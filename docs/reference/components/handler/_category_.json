@@ -1,0 +1,8 @@
+{
+  "label": "Handler family",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "reference/components/handler/index"
+  }
+}

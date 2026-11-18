@@ -1,9 +1,19 @@
 ---
 slug: 'rustlab-2025-coherence'
 authors: [soares]
+description: 'The RustLab 2025 talk, with slides and full transcript: why Rust''s coherence rules exist, and how provider traits let implementations coexist.'
 ---
 
 # How to stop fighting with coherence and start writing context-generic trait impls - RustLab 2025 transcript
+
+:::note
+
+The [cgp-serde](/docs/projects/cgp-serde/) library this talk uses as its demonstration is
+documented as it is now in the Projects section, including the [two-application
+demo](/docs/projects/cgp-serde/examples/messages), and [Coherence](/docs/concepts/coherence)
+explains the idea the talk presents.
+
+:::
 
 <p>
 <center>
@@ -15,7 +25,7 @@ This blog post contains the slides and transcript for my presentation of Context
 
 You can also read the [**PDF slides**](./cgp-rustlab-2025-slides.pdf) or watch the video recording of my presentation on [YouTube](https://www.youtube.com/watch?v=gXIfP-W9074).
 
-{/* truncate */}
+<!--truncate-->
 
 ## Discussion
 

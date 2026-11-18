@@ -1,0 +1,5 @@
+error: cannot find attribute `extend` in this scope
+  --> tests/compile_fail/reference/macros/cgp_impl_common_mistakes_misplaced_extend.rs:17:3
+   |
+17 | #[extend(HasName)]
+   |   ^^^^^^

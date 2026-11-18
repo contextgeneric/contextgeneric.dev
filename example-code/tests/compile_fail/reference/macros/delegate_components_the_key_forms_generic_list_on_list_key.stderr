@@ -1,0 +1,5 @@
+error: expected square brackets
+  --> tests/compile_fail/reference/macros/delegate_components_the_key_forms_generic_list_on_list_key.rs:27:9
+   |
+27 |         <T> [WidthKey<T>, AreaCalculatorComponent]: RectangleArea,
+   |         ^

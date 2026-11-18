@@ -1,0 +1,5 @@
+error: associated bindings (`Name = ...`) are not allowed in type arguments
+  --> tests/compile_fail/reference/attributes/use_provider_formal_grammar_associated_binding.rs:22:45
+   |
+22 | #[use_provider(Inner: AreaCalculator<Output = f64>)]
+   |                                             ^

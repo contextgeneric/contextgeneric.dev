@@ -1,0 +1,19 @@
+error[E0277]: the trait bound `Wrapped: MapType` is not satisfied
+ --> tests/compile_fail/reference/traits/map_fields_common_mistakes_not_a_marker.rs:7:22
+  |
+7 | pub fn take(_fields: <Product![u8, u16] as MapFields<Wrapped>>::Mapped) {}
+  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+  |
+help: the trait `MapType` is not implemented for `Wrapped`
+ --> tests/compile_fail/reference/traits/map_fields_common_mistakes_not_a_marker.rs:5:1
+  |
+5 | pub struct Wrapped;
+  | ^^^^^^^^^^^^^^^^^^
+  = help: the following other types implement trait `MapType`:
+            IsNothing
+            IsOptional
+            IsPresent
+            IsVoid
+            ToBuildAndMergeHandler
+            TryPromoteProviders
+  = note: required for `Cons<u8, Cons<u16, Nil>>` to implement `MapFields<Wrapped>`

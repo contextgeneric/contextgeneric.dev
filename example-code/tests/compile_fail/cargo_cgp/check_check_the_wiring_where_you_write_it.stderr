@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `Rectangle: CanUseComponent<AreaCalculatorComponent>` is not satisfied
+  --> tests/compile_fail/cargo_cgp/check_check_the_wiring_where_you_write_it.rs:31:9
+   |
+31 |         AreaCalculatorComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<Symbol<6, Chars<'h', Chars<'e', Chars<'i', Chars<'g', Chars<'h', cgp::macro_prelude::Chars<'t', Nil>>>>>>>>` is not implemented for `Rectangle`
+      but trait `HasField<Symbol<5, Chars<'w', Chars<'i', Chars<'d', Chars<'t', Chars<'h', Nil>>>>>>>` is implemented for it
+  --> tests/compile_fail/cargo_cgp/check_check_the_wiring_where_you_write_it.rs:19:9
+   |
+19 |     pub width: f64,
+   |         ^^^^^
+note: required for `RectangleArea` to implement `IsProviderFor<AreaCalculatorComponent, Rectangle>`
+  --> tests/compile_fail/cargo_cgp/check_check_the_wiring_where_you_write_it.rs:10:1
+   |
+10 | #[cgp_impl(new RectangleArea)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `Rectangle` to implement `CanUseComponent<AreaCalculatorComponent>`
+note: required by a bound in `__CheckRectangle`
+  --> tests/compile_fail/cargo_cgp/check_check_the_wiring_where_you_write_it.rs:29:1
+   |
+29 | / check_components! {
+30 | |     Rectangle {
+31 | |         AreaCalculatorComponent,
+32 | |     }
+33 | | }
+   | |_^ required by this bound in `__CheckRectangle`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

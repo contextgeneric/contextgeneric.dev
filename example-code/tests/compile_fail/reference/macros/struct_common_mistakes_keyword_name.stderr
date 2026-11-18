@@ -1,0 +1,5 @@
+error: `type` is a keyword: write the field name as `r#type`
+ --> tests/compile_fail/reference/macros/struct_common_mistakes_keyword_name.rs:6:24
+  |
+6 | type Shape = Struct! { type: u8 };
+  |                        ^^^^

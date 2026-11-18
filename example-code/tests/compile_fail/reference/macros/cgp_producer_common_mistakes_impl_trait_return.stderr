@@ -1,0 +1,5 @@
+error: Producer functions cannot return `impl Trait`
+ --> tests/compile_fail/reference/macros/cgp_producer_common_mistakes_impl_trait_return.rs:7:22
+  |
+7 | fn magic_number() -> impl core::fmt::Display {
+  |                      ^^^^^^^^^^^^^^^^^^^^^^^

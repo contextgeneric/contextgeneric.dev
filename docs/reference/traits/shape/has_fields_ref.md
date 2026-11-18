@@ -1,0 +1,188 @@
+---
+title: 'HasFieldsRef — a borrowed whole shape'
+sidebar_label: 'HasFieldsRef'
+sidebar_position: 2
+description: 'Name a type''s whole shape with every value borrowed, so generic code can read a struct or enum without consuming it. Derived rather than written.'
+---
+
+# `HasFieldsRef`
+
+A type's whole shape, with every value borrowed.
+
+:::info
+
+### Generated machinery
+
+**You are not expected to implement `HasFieldsRef`.**
+[`#[derive(HasFields)]`](../../derives/derive_has_fields.md) emits it alongside the owned shape.
+What generic code writes is a bound; this page explains the type the derive produces, including the
+reserved lifetime name that shows up in an error message.
+
+:::
+
+## Overview
+
+In [Context-Generic Programming (CGP)](/docs/), [`HasFields`](./has_fields.md) describes a type as
+a list of named entries holding owned values.
+Code that only *reads* a value should not have to consume it to walk its shape (a validator, a
+serializer, a routine that inspects a struct and hands it back), so there is a second description in
+which every entry holds a borrow instead.
+
+## Definition
+
+`HasFieldsRef` carries one generic associated type and no method:
+
+```rust
+pub trait HasFieldsRef {
+    type FieldsRef<'a>
+    where
+        Self: 'a;
+}
+```
+
+`Self` is the type being described. `FieldsRef<'a>` is the same shape as
+[`HasFields`](./has_fields.md)'s `Fields`, with each value borrowed for `'a`. It is a **generic
+associated type**, which lets one trait describe the shape at whatever lifetime a caller has, and
+the `where Self: 'a` clause keeps the borrowed shape from outliving the value it describes. There is
+no method, because the trait only names a type; the conversion that produces a value in this shape
+is [`ToFieldsRef`](./to_fields_ref.md).
+
+The two shape traits are independent rather than one extending the other, and that is deliberate: a
+type may be described owned, borrowed, or both.
+
+## Usage
+
+**It is not in the prelude.** Import it from `cgp::core::field::traits`.
+
+The impls come from [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), which emits this
+alongside [`HasFields`](./has_fields.md) rather than as a separate opt-in.
+
+## Examples
+
+The borrowed shapes of two structs at the `'static` lifetime, one with a field that is itself a
+reference:
+
+```rust
+use cgp::core::field::traits::HasFieldsRef;
+use cgp::core::field::types::Field;
+use cgp::prelude::*;
+
+#[derive(HasFields)]
+pub struct Config {
+    pub host: String,
+    pub port: u16,
+}
+
+#[derive(HasFields)]
+pub struct Greeting<'a> {
+    pub name: &'a str,
+}
+
+pub fn assert_shape_ref<'a, T, FieldsRef>()
+where
+    T: HasFieldsRef<FieldsRef<'a> = FieldsRef> + 'a,
+{
+}
+
+pub fn demo() {
+    assert_shape_ref::<
+        'static,
+        Config,
+        Product![
+            Field<Symbol!("host"), &'static String>,
+            Field<Symbol!("port"), &'static u16>,
+        ],
+    >();
+    assert_shape_ref::<
+        'static,
+        Greeting<'static>,
+        Product![
+            Field<Symbol!("name"), &'static &'static str>,
+        ],
+    >();
+}
+```
+
+Each entry's value type `T` becomes `&'a T`, so `Greeting<'a>`'s `name: &'a str` field appears as
+`&'__a &'a str`, a borrow of a borrow, which the example instantiates at `'static` for both.
+
+## When to use it
+
+**Bound on it when generic code reads a type's shape without consuming it**, and pair it with
+[`ToFieldsRef`](./to_fields_ref.md), which is the only way to obtain a value in this shape.
+
+- **Use [`HasFields`](./has_fields.md)** when the code takes ownership: building, converting,
+  destructuring.
+- **Use `HasFieldsRef` + [`ToFieldsRef`](./to_fields_ref.md)** when the original must survive. This
+  is the weaker requirement, so prefer it when it suffices.
+- **Use [`HasField`](../field-access/has_field.md)** when only one named field is needed. The
+  whole-shape traits are for code that walks everything.
+
+Being precise about which shape trait a routine requires pays, because each one narrows what
+a caller must supply.
+
+## Under the hood
+
+The derive emits the borrowed shape with a **reserved lifetime name**, `'__a`, so it cannot collide
+with a lifetime of yours. `cargo cgp expand` on the example's `Config` shows:
+
+```rust
+impl HasFieldsRef for Config {
+    type FieldsRef<'__a> = Product![
+        Field<Symbol!("host"), &'__a String>, Field<Symbol!("port"), &'__a u16>
+    ]
+    where
+        Self: '__a;
+}
+```
+
+The transformation is uniform: each entry's value type `T` becomes `&'__a T`, and the list is
+otherwise untouched: same length, same order, same tags. An enum's borrowed shape is the dual, an
+`Either` chain whose arms carry borrowed payloads.
+
+Because the rewrite is per-entry rather than structural, **a field that is already a reference gains
+another one**: a field of type `&'a Name` appears as `&'__a &'a Name`. That is correct, and it is
+the one thing about this trait that surprises people in an error message.
+
+## Common Mistakes
+
+**A field that is already borrowed gets a second borrow.** `&'a Name` becomes `&'__a &'a Name` in
+`FieldsRef`, which reads oddly in a diagnostic and is not a bug.
+
+**The `where Self: 'a` clause propagates.** Any bound naming `FieldsRef<'a>` inherits it, so a
+signature that borrows the shape usually needs the lifetime spelled out rather than elided.
+
+**It is emitted by [`#[derive(HasFields)]`](../../derives/derive_has_fields.md), not by a derive of
+its own.** There is no `#[derive(HasFieldsRef)]`.
+
+**Naming the shape is not obtaining it.** [`ToFieldsRef`](./to_fields_ref.md) is the method half;
+this trait has none.
+
+## Related constructs
+
+- [`HasFields`](./has_fields.md): the owned shape, and where the family is explained in full.
+- [`ToFieldsRef`](./to_fields_ref.md): the conversion that produces a value in this shape.
+- [`ToFields`](./to_fields.md) and [`FromFields`](./from_fields.md): the owned conversions.
+- [`#[derive(HasFields)]`](../../derives/derive_has_fields.md): generates this impl.
+- [`Product!`](../../macros/product.md) and [`Sum!`](../../macros/sum.md): the list types a shape is
+  built from.
+- [`Field`](../../types/field.md): one entry of a shape.
+- [`MapTypeRef`](../type-level/map_type_ref.md): the borrow markers the extractor family uses for
+  the same job.
+
+The ideas behind it:
+
+- [Extensible records](/docs/concepts/extensible-records): a struct as a product of named fields.
+
+## Source
+
+- [`has_fields.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/has_fields.rs):
+  `HasFieldsRef` and `HasFields`
+- Derive codegen:
+  [`cgp_data/derive_has_fields/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_data/derive_has_fields)
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

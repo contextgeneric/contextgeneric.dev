@@ -1,0 +1,5 @@
+error: Expected at most one `#[check_params]` or `#[skip_check]` attribute
+  --> tests/compile_fail/reference/macros/delegate_and_check_components_common_mistakes_two_entry_attributes.rs:25:9
+   |
+25 |         #[skip_check]
+   |         ^

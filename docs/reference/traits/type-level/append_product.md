@@ -1,0 +1,175 @@
+---
+title: 'AppendProduct — add an entry to a product'
+sidebar_label: 'AppendProduct'
+sidebar_position: 5
+description: 'Name the type-level product list with one more entry at the end, so generic code can describe in a signature the shape it will produce.'
+---
+
+# `AppendProduct`
+
+Adding one entry to the end of a type-level product list.
+
+## Overview
+
+A struct's [shape](/docs/reference/glossary#shape) in [Context-Generic Programming (CGP)](/docs/) is
+a type-level list, a [`Product!`](../../macros/product.md) of named fields. Code that processes such
+a shape generically sometimes needs to describe a *new* shape computed from an old one: the shape a
+routine promises to return after adding a field, say, or a bound relating an input shape to an
+output one.
+
+`AppendProduct<Item>` is that computation for a single entry. It takes a product and an item and names
+the product with that item added **at the end**.
+
+**This is one of the least user-facing traits in the reference, and CGP itself never uses it.** It
+is provided for generic code of your own that computes shapes, and you meet it only there or in an
+error message from such code.
+
+## Definition
+
+`AppendProduct` is parameterized by the item to add and exposes the extended list as an associated type:
+
+```rust
+pub trait AppendProduct<Item: ?Sized> {
+    type Output;
+}
+```
+
+`Self` is the existing product, `Item` is the entry to add, and `Output` is the resulting product.
+`Item` may be unsized. The trait lacks a method, because nothing needs executing: `Output` is an
+associated type the trait solver evaluates while the compiler type-checks, so it costs nothing at
+run time.
+
+## Usage
+
+**It is not in the prelude.** Import it from `cgp::core::field::traits`:
+
+```rust
+use cgp::core::field::traits::AppendProduct;
+```
+
+Every existing entry is preserved in order, and the new one lands last. Appending onto `Nil` (the empty
+product) yields a one-element list, which is the recursion's base case and occasionally useful to know
+when reading a bound.
+
+## Examples
+
+The results are types, so the check is a type equality: each function compiles only if the computed
+`Output` is the type it is returned as.
+
+```rust
+use cgp::core::field::traits::AppendProduct;
+use cgp::core::field::types::{Field, Nil};
+use cgp::prelude::*;
+
+pub type Base = Product![Field<Symbol!("host"), String>];
+
+pub type WithPort = <Base as AppendProduct<Field<Symbol!("port"), u16>>>::Output;
+
+/// The page's claim about `WithPort`.
+pub fn assert_with_port(
+    fields: WithPort,
+) -> Product![Field<Symbol!("host"), String>, Field<Symbol!("port"), u16>] {
+    fields
+}
+
+/// A generic signature naming the shape a routine will produce.
+pub fn with_extra_field<Fields, Extra>() -> PhantomData<<Fields as AppendProduct<Extra>>::Output>
+where
+    Fields: AppendProduct<Extra>,
+{
+    PhantomData
+}
+
+/// The base case the page states under *Using it*: appending onto `Nil` yields a one-element list.
+pub fn assert_nil_base_case(
+    fields: <Nil as AppendProduct<Field<Symbol!("host"), String>>>::Output,
+) -> Base {
+    fields
+}
+```
+
+`with_extra_field` is the generic form: its return type names the shape the routine promises,
+computed from its parameters.
+
+## When to use it
+
+**Reach for it when a routine must describe the shape it *will* produce** (in a signature, an
+associated type, or a `where` clause) and essentially never otherwise. Nothing in CGP names it, so
+it matters only to code of your own that computes shapes.
+
+- **Reach for [`ConcatProduct`](./concat_product.md)** to splice a whole list rather than one entry.
+  Append is its single-entry special case, so if you find yourself appending in a loop, you wanted
+  concat.
+- **Use [`HasFields`](../shape/has_fields.md) instead** if you only need a type's *existing* shape. This trait
+  computes new shapes; it is not how you obtain one.
+- **Use the [builder](../builder/has_builder.md) or [extractor](../variant/extract_field.md) family instead** if you are
+  moving *values* through a shape. This never touches a value, so if you want something to happen at run
+  time, it is the wrong layer.
+
+`AppendSum` does not exist. Growing a sum is not an operation this layer provides.
+
+## Under the hood
+
+The trait is a pair of impls, one for the list's `Cons` node and one for its `Nil` terminator. Each head
+is kept and the tail rebuilt, with a single-element list grafted on at the end:
+
+```rust
+impl<Item> AppendProduct<Item> for Nil {
+    type Output = Cons<Item, Nil>;
+}
+
+impl<Head, Tail, Item> AppendProduct<Item> for Cons<Head, Tail>
+where
+    Tail: AppendProduct<Item>,
+{
+    type Output = Cons<Head, Tail::Output>;
+}
+```
+
+Because the recursion only ever rebuilds the list, order is structurally preserved, which is why
+appending yields a *different* type from prepending, and why two products with the same entries in
+different orders are unrelated types.
+
+All of this is resolved during type checking. Neither impl contains a `fn`.
+
+## Common Mistakes
+
+**It is not in the prelude.** Import from `cgp::core::field::traits`. This is the first thing that goes
+wrong when reaching for it.
+
+**The result is `Output`, while [`MapFields`](./map_fields.md) exposes `Mapped`.** The asymmetry between
+the three product operations is easy to forget, and reaching for the wrong name is a plain
+unresolved-associated-type error.
+
+**It is product-only.** It lacks a sum equivalent.
+
+**Order is part of the type.** Appending is not commutative with prepending, and nothing reorders a list
+to make two shapes match.
+
+**A long list means a deep recursion.** This is trait resolution over the list, so a very wide shape
+costs compile time proportional to its width, as every type-level list recursion in CGP does.
+
+## Related constructs
+
+- [`ConcatProduct`](./concat_product.md): the general form; append is its single-entry case.
+- [`MapFields`](./map_fields.md): rewriting every entry rather than adding one.
+- [`Product!`](../../macros/product.md): the sugar for the lists this operates on.
+- [Type-level lists](../../types/index.md): the `Cons`/`Nil` chain underneath.
+- [`HasFields`](../shape/has_fields.md): where a type's existing shape comes from.
+- [`Field`](../../types/field.md): the entries a field list is usually made of.
+- [`HasBuilder`](../builder/has_builder.md): the family that moves values through the shapes this computes.
+
+The ideas behind it:
+
+- [Extensible records](/docs/concepts/extensible-records): where computing a new shape is put to work.
+
+## Source
+
+- [`append_product.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/core/cgp-field/src/traits/append_product.rs):
+  `AppendProduct`
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

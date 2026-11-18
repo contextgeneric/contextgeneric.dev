@@ -1,0 +1,5 @@
+error: Invalid attribute #[allow(unused)]
+  --> tests/compile_fail/reference/macros/check_components_formal_grammar_invalid_attribute.rs:19:5
+   |
+19 |     #[allow(unused)]
+   |     ^

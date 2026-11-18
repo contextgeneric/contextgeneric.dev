@@ -1,0 +1,28 @@
+error[E0277]: the trait bound `BrokenApp: CanUseComponent<StorageObjectFetcherComponent>` is not satisfied
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:30:9
+   |
+30 |         StorageObjectFetcherComponent,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `HasField<Symbol<9, Chars<'l', Chars<'o', Chars<'c', Chars<'a', Chars<'l', Chars<'_', Chars<'d', Chars<'i', Chars<'r', Nil>>>>>>>>>>>` is not implemented for `BrokenApp`
+      but trait `HasField<Symbol<9, Chars<'b', Chars<'u', Chars<'c', Chars<'k', Chars<'e', Chars<'t', Chars<'_', Chars<'i', Chars<'d', Nil>>>>>>>>>>>` is implemented for it
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:22:9
+   |
+22 |     pub bucket_id: String,
+   |         ^^^^^^^^^
+note: required for `FetchLocalObject` to implement `IsProviderFor<StorageObjectFetcherComponent, BrokenApp>`
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:8:1
+   |
+ 8 | #[cgp_impl(new FetchLocalObject)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: required for `BrokenApp` to implement `CanUseComponent<StorageObjectFetcherComponent>`
+note: required by a bound in `__CheckBrokenApp`
+  --> tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs:28:1
+   |
+28 | / check_components! {
+29 | |     BrokenApp {
+30 | |         StorageObjectFetcherComponent,
+31 | |     }
+32 | | }
+   | |_^ required by this bound in `__CheckBrokenApp`
+   = note: this error originates in the attribute macro `cgp_impl` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

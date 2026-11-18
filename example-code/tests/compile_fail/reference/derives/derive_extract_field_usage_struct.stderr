@@ -1,0 +1,5 @@
+error: expected `enum`
+ --> tests/compile_fail/reference/derives/derive_extract_field_usage_struct.rs:5:5
+  |
+5 | pub struct Circle {
+  |     ^^^^^^

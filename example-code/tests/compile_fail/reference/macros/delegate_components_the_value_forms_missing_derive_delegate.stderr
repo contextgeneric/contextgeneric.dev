@@ -1,0 +1,33 @@
+error[E0277]: the trait bound `cgp::prelude::UseDelegate<AreaCalculatorComponents>: IsProviderFor<AreaCalculatorComponent, MyApp, Rectangle>` is not satisfied
+  --> tests/compile_fail/reference/macros/delegate_components_the_value_forms_missing_derive_delegate.rs:32:9
+   |
+32 |         AreaCalculatorComponent: Rectangle,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+   = help: the trait `IsProviderFor<AreaCalculatorComponent, MyApp, Rectangle>` is not implemented for `cgp::prelude::UseDelegate<AreaCalculatorComponents>`
+   = help: `cgp::prelude::UseDelegate<__Components__>` implements trait `IsProviderFor<Component, Context, Params>`:
+             IsProviderFor<AsyncComputerComponent, __Context__, (Code, Input)>
+             IsProviderFor<AsyncComputerRefComponent, __Context__, (Code, Input)>
+             IsProviderFor<ComputerComponent, __Context__, (Code, Input)>
+             IsProviderFor<ComputerRefComponent, __Context__, (Code, Input)>
+             IsProviderFor<ErrorRaiserComponent, __Context__, SourceError>
+             IsProviderFor<ErrorWrapperComponent, __Context__, Detail>
+             IsProviderFor<HandlerComponent, __Context__, (Code, Input)>
+             IsProviderFor<HandlerRefComponent, __Context__, (Code, Input)>
+             IsProviderFor<ProducerComponent, __Context__, Code>
+             IsProviderFor<RunnerComponent, __Context__, Code>
+             IsProviderFor<SendRunnerComponent, __Context__, Code>
+             IsProviderFor<TryComputerComponent, __Context__, (Code, Input)>
+             IsProviderFor<TryComputerRefComponent, __Context__, (Code, Input)>
+             IsProviderFor<TypeProviderComponent, __Context__, Tag>
+   = note: required for `MyApp` to implement `CanUseComponent<AreaCalculatorComponent, Rectangle>`
+note: required by a bound in `__CheckMyApp`
+  --> tests/compile_fail/reference/macros/delegate_components_the_value_forms_missing_derive_delegate.rs:30:1
+   |
+30 | / check_components! {
+31 | |     MyApp {
+32 | |         AreaCalculatorComponent: Rectangle,
+33 | |     }
+34 | | }
+   | |_^ required by this bound in `__CheckMyApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

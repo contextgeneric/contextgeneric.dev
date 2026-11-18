@@ -1,0 +1,10 @@
+error[E0425]: cannot find type `AreaCalculatorComponent` in this scope
+  --> tests/compile_fail/cargo_cgp/reading_output_a_fix_in_a_help_line_import.rs:16:10
+   |
+16 |     impl AreaCalculator {
+   |          ^^^^^^^^^^^^^^ not found in this scope
+   |
+help: consider importing this struct
+   |
+11 +     use crate::components::AreaCalculatorComponent;
+   |

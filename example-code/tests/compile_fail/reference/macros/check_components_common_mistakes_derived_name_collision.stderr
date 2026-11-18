@@ -1,0 +1,11 @@
+error[E0428]: the name `__CheckRectangle` is defined multiple times
+  --> tests/compile_fail/reference/macros/check_components_common_mistakes_derived_name_collision.rs:34:1
+   |
+27 | check_components! {
+   | ----------------- previous definition of the trait `__CheckRectangle` here
+...
+34 | check_components! {
+   | ^^^^^^^^^^^^^^^^^ `__CheckRectangle` redefined here
+   |
+   = note: `__CheckRectangle` must be defined only once in the type namespace of this module
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

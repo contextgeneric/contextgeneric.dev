@@ -1,17 +1,20 @@
 ---
+title: 'Hello World: one function for many structs'
+sidebar_label: 'Hello World Tutorial'
 sidebar_position: 2
+description: 'Write your first Context-Generic Programming code in Rust: a greet function that reads a name from a field and works on two different structs.'
 ---
 
 # Hello World Tutorial
 
-In this tutorial, we will build a small working program that greets people by name, using CGP's core features. Along the way we will encounter CGP functions, implicit arguments, struct-based contexts, and `HasField` derivation. By the end you will have seen a complete working example and will understand at a high level how CGP leverages Rust's trait system to let you write highly reusable code without any runtime overhead.
+In this tutorial, we will build a small working program that greets people by name, using the core features of [Context-Generic Programming](/docs/) (CGP). Along the way we will encounter CGP functions, implicit arguments, struct-based contexts, and `HasField` derivation. By the end you will have seen a complete working example and will understand at a high level how CGP leverages Rust's trait system to let you write highly reusable code without any runtime overhead.
 
 ## Using the `cgp` crate
 
 To get started, first include the latest version of the [`cgp` crate](https://crates.io/crates/cgp) as your dependency in `Cargo.toml`:
 
 ```toml title="Cargo.toml"
-cgp = "0.7.0"
+cgp = "0.8.0"
 ```
 
 ## The CGP Prelude
@@ -50,7 +53,7 @@ pub struct Person {
 }
 ```
 
-To enable CGP functions to access the fields of a context, we use `#[derive(HasField)]` to derive the necessary CGP traits that power the generic field access machinery. In practice, this means the `greet` function will be able to find the `name` field automatically, without any further wiring on our part.
+To enable CGP functions to access the fields of a context, we use [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) to derive the necessary CGP traits that power the generic field access machinery. In practice, this means the `greet` function will be able to find the `name` field automatically, without any further wiring on our part.
 
 With the `Person` struct defined, we can call the `greet` method on it with no additional work:
 
@@ -113,7 +116,7 @@ Notice that `greet` works identically for both contexts, even though `PersonWith
 
 ## Behind the Scenes
 
-The hello world example demonstrates how CGP unlocks new capabilities for writing context-generic constructs in Rust. You might wonder how the underlying machinery works, and whether CGP employs some magic that requires unsafe code or runtime overhead. This section offers a brief look at the mechanics to dispel those concerns.
+The hello world example demonstrates how CGP lets you write context-generic constructs in Rust. You might wonder how the underlying machinery works, and whether CGP employs some magic that requires unsafe code or runtime overhead. This section offers a brief look at the mechanics to dispel those concerns.
 
 A full explanation of how CGP works is beyond this tutorial, but you can think of the `greet` function as being roughly equivalent to the following plain Rust definition:
 
@@ -136,7 +139,7 @@ where
 }
 ```
 
-The plain-Rust version is considerably more verbose, but it can be understood with a straightforward explanation. `HasName` is a *getter trait* that a context implements to expose its `name` value. `Greet` is defined as a trait with a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) that works for any context type `T` that implements `HasName`.
+The plain-Rust version is considerably more verbose, but it can be understood with a straightforward explanation. `HasName` is a *[getter trait](/docs/reference/glossary#getter-trait)* that a context implements to expose its `name` value. `Greet` is defined as a trait with a [**blanket implementation**](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/) that works for any context type `T` that implements `HasName`.
 
 When we use `#[derive(HasField)]` on a context like `Person`, we are effectively automatically implementing the `HasName` trait for it:
 
@@ -158,7 +161,7 @@ There is more advanced machinery involved in the actual desugared CGP code, but 
 
 The plain Rust expansion above illustrates a few key properties of CGP. Firstly, CGP makes heavy use of the existing machinery provided by Rust's trait system to implement context-generic abstractions. It is also worth understanding that CGP macros like `#[cgp_fn]` and `#[derive(HasField)]` act primarily as **syntactic sugar** that performs a straightforward desugaring of CGP code into plain Rust constructs, just as shown above.
 
-This means there is **no hidden logic at either compile time or runtime** used by CGP to resolve dependencies like `name`. The main contribution of CGP is that it introduces new language syntax and leverages Rust's trait system to enable new capabilities. You do not need to understand any new machinery beyond the trait system to understand how CGP works.
+This means there is **no hidden logic at either compile time or runtime** used by CGP to resolve dependencies like `name`. The main contribution of CGP is that it introduces new language syntax and leverages Rust's trait system to make that syntax work. You do not need to understand any new machinery beyond the trait system to understand how CGP works.
 
 Furthermore, implicit arguments like `#[implicit] name: &str` are automatically desugared by CGP to use getter traits similar to `HasName`. Contexts like `Person` implement those getter traits by simply returning a *reference* to the field value. This means that implicit argument access is **zero cost** and is as cheap as direct field access from a concrete context.
 
@@ -170,7 +173,7 @@ When walking through the desugared Rust code, you might wonder: since `Greet` re
 
 The answer is yes for the simplified desugared code shown above. But CGP actually employs a more generalized trait called `HasField` that works universally across all possible structs. This means there is **no need** to specifically generate a `HasName` trait to be used by `Greet`, or to implement it manually for `Person`.
 
-The full explanation of how `HasField` works is beyond the scope of this tutorial. The general idea, however, is that a `HasField` instance is implemented for every field inside a struct that uses `#[derive(HasField)]`. Traits like `Greet` then use this to access a specific field by its field name. In practice, this means that `Greet` and `Person` can be defined in entirely different crates without knowing anything about each other. When they are imported together in a third crate, `Greet` will still be automatically implemented for `Person`.
+The full explanation of how `HasField` works is beyond the scope of this tutorial — the [`#[derive(HasField)]`](/docs/reference/derives/derive_has_field) reference page covers it in full. The general idea, however, is that a `HasField` instance is implemented for every field inside a struct that uses `#[derive(HasField)]`. Traits like `Greet` then use this to access a specific field by its field name. In practice, this means that `Greet` and `Person` can be defined in entirely different crates without knowing anything about each other. When they are imported together in a third crate, `Greet` will still be automatically implemented for `Person`.
 
 ## Conclusion
 

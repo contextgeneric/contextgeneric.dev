@@ -1,76 +1,70 @@
 ---
+title: 'Introduction: pluggable trait implementations'
+sidebar_label: 'Introduction'
 sidebar_position: 1
+description: 'Learn what Context-Generic Programming is, get to know its core terms, and find the documentation you need.'
 ---
-
 
 # Introduction
 
-Context-Generic Programming (CGP) is a modular programming paradigm that enables you to bypass the **coherence restrictions** in Rust traits, allowing for **overlapping** and **orphan** implementations of any CGP trait.
+Context-Generic Programming (CGP) is a language extension for Rust, with pluggable trait
+implementations at compile-time. In plain Rust, a type has at most one implementation of each
+trait. With CGP, you can instead write several implementations of the same trait and decide, for
+each type that uses it, which one applies.
 
-You can adapt almost any existing Rust trait to use CGP today by applying the `#[cgp_component]` macro to the trait definition. After this annotation, you can write **named** implementations of the trait using `#[cgp_impl]`, which can be defined without being constrained by the coherence rules. You can then selectively enable and reuse the named implementation for your type using the `delegate_components!` macro.
+None of this needs a new language or a new compiler. CGP is a library on stable Rust whose macros
+expand to ordinary traits and implementations, and the compiler resolves every choice into a direct
+call. You can bring it into an existing project one trait at a time.
 
-For instance, we can, in principle, annotate the standard library’s [`Hash`](https://doc.rust-lang.org/std/hash/trait.Hash.html) trait with `#[cgp_component]` like this:
+Four terms name the parts of that choice, and the rest of the documentation uses them throughout:
 
-```rust
-#[cgp_component(HashProvider)]
-pub trait Hash { ... }
-```
+- **[Context](/docs/reference/glossary#context):** a type, such as an application type, that
+  holds the data its implementations need and chooses which implementations it uses.
+- **[Component](/docs/reference/glossary#component):** an interface whose implementation a context
+  chooses.
+- **[Provider](/docs/reference/glossary#provider):** a named implementation of a component.
+- **[Wiring](/docs/reference/glossary#wiring):** the table on a context that selects a provider for
+  each component, resolved at compile time.
 
-This change does not affect existing code that uses or implements `Hash`, but it allows for new, potentially overlapping implementations, such as one that works for any type that also implements `Display`:
+## Start here
 
-```rust
-#[cgp_impl(HashWithDisplay)]
-impl HashProvider
-where
-    Self: Display,
-{ ... }
-```
+To start writing code, follow these pages from installation through wiring and checking your own
+components:
 
-You can then apply and reuse this implementation on any type by using the `delegate_components!` macro:
+1. [Quickstart](/docs/quickstart): install CGP and run a first program in a few minutes.
+2. [Hello World](/docs/tutorials/hello): understand a program like the Quickstart's, then see the
+   same function work on a second context.
+3. [Swap a Storage Backend per Application](/docs/tutorials/storage-backend): build a small
+   application, then give its tests their own storage backend with a component and two providers.
+4. [Area calculation](/docs/tutorials/area-calculation): turn ordinary Rust functions into
+   components and providers, then learn to check their wiring and understand errors.
 
-```rust
-pub struct MyData { ... }
-impl Display for MyData { ... }
+## Find what you need
 
-delegate_components! {
-    MyData {
-        HashProviderComponent: HashWithDisplay,
-    }
-}
-```
+If you came with a particular question, find it below beside the page that answers it:
 
-In this example, `MyData` implements the `Hash` trait by using `delegate_components!` to delegate its implementation to the `HashWithDisplay` provider, identified by the key `HashProviderComponent`. Because `MyData` already implements `Display`, the `Hash` trait is now automatically implemented through CGP via this delegation.
+- **What can CGP do, feature by feature?** The [Overview](/docs/overview).
+- **Why does CGP work this way?** [Bypassing coherence](/docs/concepts/coherence) and
+  [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits), then the rest of the
+  [Concepts](/docs/concepts).
+- **Does CGP fit my project?** [Modularity Hierarchy](/docs/concepts/modularity-hierarchy), and the
+  [costs and maturity](/#costs) on the front page.
+- **How does it compare with what I know?** The [Comparisons](/docs/comparisons), from dependency
+  injection and type classes to ML modules and dynamic dispatch.
+- **What does a construct do, or a term mean?** The [Reference](/docs/reference) and the
+  [Glossary](/docs/reference/glossary).
+- **How do I read a CGP compile error?** [cargo-cgp](/docs/tooling/cargo-cgp), CGP's error toolchain.
+- **What has been built with it?** The [Projects](/docs/projects).
+- **How do I use CGP with a coding agent?** The [AI section](/docs/ai), with CGP's agent skill.
+- **Where can I watch a talk about CGP?** The [Videos](/docs/resources/videos) page in Resources.
+- **Where can I ask a question or follow CGP's news?** The [Community](/docs/resources/community)
+  page in Resources.
+- **How can I help CGP?** [Contribute](/docs/contribute).
+
+For releases, design discussions, and talks, visit the [blog](/blog). Its older posts describe the
+library as it was when they were published, so for CGP as it is today, rely on the pages above.
 
 ---
 
-# Current Status
-
-As of 2025, it is important to note that CGP remains in its **formative, early stages** of active development. While the potential is genuinely promising, it still has several inevitable rough edges, particularly in key areas such as comprehensive documentation, mature tooling, streamlined debugging techniques, robust community support, and overall ecosystem maturity.
-
-Consequently, embracing CGP for your mission-critical, serious projects comes with inherent challenges, and you should be advised to proceed **at your own discretion and risk**. The primary risk you face is not strictly technical, but rather stems from the current limited support available when you inevitably encounter difficulties while learning or attempting to apply CGP in production.
-
-At this pioneering stage, CGP is an ideal fit for [**early adopters and enthusiastic potential contributors**](/docs/contribute/)  who are eager to experiment with the paradigm and actively help to shape its powerful future.
-
----
-
-# Getting Started
-
-Even though the CGP project is officially still less than one year old, some of the initial documentation and resources you might find have already become slightly outdated, or they have been gracefully superseded by more intuitive and modern patterns. Nevertheless, this section is an attempt to provide you with the very best and most current guidance on how you can effectively begin to learn more about CGP.
-
-## Blog Posts
-
-The most accurate and up-to-date resources concerning CGP are currently available in the form of our [blog posts](/blog). Specifically, we recommend that the blog posts starting from the [**v0.7.0 release onward**](/blog/v0.7.0-release)  will give you a significantly more concise and modern explanation of what CGP is all about.
-
-## Hello World Tutorial
-
-The hands-on [Hello World Tutorial](/docs/tutorials/hello) provides a high-level and clear walkthrough of various fundamental CGP features by using a familiar, simple hello-world style example.
-
-## Book
-
-If your preference is to rigorously understand CGP from its **first principles**, without relying on the specific implementations within the [`cgp` crate](https://github.com/contextgeneric/cgp), your best approach is to dive into our comprehensive book, [Context-Generic Programming Patterns](https://patterns.contextgeneric.dev/). This resource provides a deep, thorough guide to understanding the complex inner workings of CGP.
-
-Please note that this book has not been updated for a while, and you might consider skipping the book entirely if your primary goal is to start using CGP quickly with the absolute minimal learning curve!
-
-## Resources
-
-Make sure to check out the dedicated [Resources](/docs/resources) page, which contains more supplementary materials and various learning tools to help you get up to speed with CGP.
+*An AI agent revised this page using the CGP knowledge base. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

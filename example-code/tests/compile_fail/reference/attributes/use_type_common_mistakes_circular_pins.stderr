@@ -1,0 +1,7 @@
+error[E0275]: overflow evaluating the requirement `<__Context__ as HasFooType>::Foo == _`
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_circular_pins.rs:14:1
+   |
+14 | #[cgp_fn]
+   | ^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cgp_fn` (in Nightly builds, run with -Z macro-backtrace for more info)

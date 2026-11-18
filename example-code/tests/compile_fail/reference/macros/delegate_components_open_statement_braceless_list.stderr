@@ -1,0 +1,5 @@
+error: expected `;`
+  --> tests/compile_fail/reference/macros/delegate_components_open_statement_braceless_list.rs:25:37
+   |
+25 |         open AreaCalculatorComponent, PerimeterCalculatorComponent;
+   |                                     ^

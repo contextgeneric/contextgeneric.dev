@@ -1,0 +1,40 @@
+error[E0275]: overflow evaluating the requirement `App: IsProviderFor<EncoderComponent, App, u32>`
+  --> tests/compile_fail/reference/providers/use_context_common_mistakes_self_cycle.rs:21:9
+   |
+21 |         EncoderComponent: u32,
+   |         ^^^^^^^^^^^^^^^^
+   |
+note: required for `App` to implement `Encoder<App, u32>`
+  --> tests/compile_fail/reference/providers/use_context_common_mistakes_self_cycle.rs:4:1
+   |
+ 4 |   #[cgp_component(Encoder)]
+   |  _^^^^^^^^^^^^^^^^^^^^^^^^^
+ 5 | | pub trait CanEncode<Value> {
+   | |__________________________^
+note: required for `App` to implement `CanEncode<u32>`
+  --> tests/compile_fail/reference/providers/use_context_common_mistakes_self_cycle.rs:4:1
+   |
+ 4 | #[cgp_component(Encoder)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 5 | pub trait CanEncode<Value> {
+   |           ^^^^^^^^^^^^^^^^
+note: required for `UseContext` to implement `IsProviderFor<EncoderComponent, App, u32>`
+  --> tests/compile_fail/reference/providers/use_context_common_mistakes_self_cycle.rs:4:1
+   |
+ 4 | #[cgp_component(Encoder)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^
+ 5 | pub trait CanEncode<Value> {
+   |           ---------------- unsatisfied trait bound introduced here
+   = note: 1 redundant requirement hidden
+   = note: required for `RedirectLookup<App, PathCons<EncoderComponent, Nil>>` to implement `IsProviderFor<EncoderComponent, App, u32>`
+   = note: required for `App` to implement `CanUseComponent<EncoderComponent, u32>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/providers/use_context_common_mistakes_self_cycle.rs:19:1
+   |
+19 | / check_components! {
+20 | |     App {
+21 | |         EncoderComponent: u32,
+22 | |     }
+23 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the attribute macro `cgp_component` which comes from the expansion of the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

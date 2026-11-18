@@ -1,0 +1,7 @@
+error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+ --> tests/compile_fail/reference/macros/path_common_mistakes_no_segment.rs:4:18
+  |
+4 | pub type Route = Path!(@);
+  |                  ^^^^^^^^
+  |
+  = note: this error originates in the macro `Path` (in Nightly builds, run with -Z macro-backtrace for more info)

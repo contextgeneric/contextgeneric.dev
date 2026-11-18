@@ -1,0 +1,19 @@
+error[E0277]: the trait bound `__PartialPerson<IsNothing, IsNothing>: UpdateField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'e', Nil>>>>, IsPresent>` is not satisfied
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:12:31
+   |
+12 |     let _ = Person::builder().build_field(PhantomData::<Symbol!("age")>, 42_u8);
+   |                               ^^^^^^^^^^^ unsatisfied trait bound
+   |
+help: the trait `UpdateField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'e', Nil>>>>, IsPresent>` is not implemented for `__PartialPerson<IsNothing, IsNothing>`
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:5:1
+   |
+ 5 | pub struct Person {
+   | ^^^^^^^^^^^^^^^^^
+help: the following other types implement trait `UpdateField<Tag, M>`
+  --> tests/compile_fail/reference/traits/update_field_common_mistakes_undeclared_field.rs:6:9
+   |
+ 6 |     pub first_name: String,
+   |         ^^^^^^^^^^ `__PartialPerson<__M1__, __F1__>` implements `UpdateField<cgp::macro_prelude::Symbol<10, cgp::macro_prelude::Chars<'f', cgp::macro_prelude::Chars<'i', cgp::macro_prelude::Chars<'r', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>>, __M2__>`
+ 7 |     pub last_name: String,
+   |         ^^^^^^^^^ `__PartialPerson<__F0__, __M1__>` implements `UpdateField<cgp::macro_prelude::Symbol<9, cgp::macro_prelude::Chars<'l', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'s', cgp::macro_prelude::Chars<'t', cgp::macro_prelude::Chars<'_', cgp::macro_prelude::Chars<'n', cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'m', cgp::macro_prelude::Chars<'e', Nil>>>>>>>>>>, __M2__>`
+   = note: required for `__PartialPerson<IsNothing, IsNothing>` to implement `cgp::macro_prelude::BuildField<cgp::macro_prelude::Symbol<3, cgp::macro_prelude::Chars<'a', cgp::macro_prelude::Chars<'g', cgp::macro_prelude::Chars<'e', Nil>>>>>`

@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `AppNamespace<_>` for type `GreeterComponent`
+  --> tests/compile_fail/reference/attributes/default_impl_common_mistakes_marker_key.rs:15:16
+   |
+10 |     new AppNamespace: DefaultNamespace {}
+   |                       ---------------- first implementation here
+...
+15 | #[default_impl(GreeterComponent in AppNamespace)]
+   |                ^^^^^^^^^^^^^^^^ conflicting implementation for `GreeterComponent`

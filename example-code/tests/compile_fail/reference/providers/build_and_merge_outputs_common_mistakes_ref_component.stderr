@@ -1,0 +1,47 @@
+error[E0277]: the trait bound `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDatabaseConfig>, Cons<BuildAndMerge<BuildHttpConfig>, Nil>>>: IsProviderFor<ComputerRefComponent, AppBuilder, ((), ())>` is not satisfied
+  --> tests/compile_fail/reference/providers/build_and_merge_outputs_common_mistakes_ref_component.rs:47:9
+   |
+47 |         ComputerRefComponent: ((), ()),
+   |         ^^^^^^^^^^^^^^^^^^^^ unsatisfied trait bound
+   |
+   = help: the trait `IsProviderFor<ComputerRefComponent, AppBuilder, ((), ())>` is not implemented for `BuildWithHandlers<App, Cons<BuildAndMerge<BuildDatabaseConfig>, Cons<BuildAndMerge<BuildHttpConfig>, Nil>>>`
+help: `BuildWithHandlers<Output, Handlers>` implements trait `IsProviderFor<Component, Context, Params>`
+  --> $CARGO/cgp-dispatch-$VERSION/src/providers/with_handlers/build_with_handlers.rs
+   |
+   | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Computer<Context, Code, Input>
+   | |     for BuildWithHandlers<Output, Handlers>
+   | | where
+   | |     Output: HasBuilder<Builder = Builder>,
+   | |     PipeHandlers<Handlers>: Computer<Context, Code, Builder, Output = Res>,
+   | |     Res: FinalizeBuild<Target = Output>,
+   | |________________________________________^ `IsProviderFor<ComputerComponent, Context, (Code, Input)>`
+...
+   | / impl<Context, Code, Input, Output, Builder, Handlers, Res> TryComputer<Context, Code, Input>
+   | |     for BuildWithHandlers<Output, Handlers>
+   | | where
+   | |     Context: HasErrorType,
+   | |     Output: HasBuilder<Builder = Builder>,
+   | |     PipeHandlers<Handlers>: TryComputer<Context, Code, Builder, Output = Res>,
+   | |     Res: FinalizeBuild<Target = Output>,
+   | |________________________________________^ `IsProviderFor<TryComputerComponent, Context, (Code, Input)>`
+...
+   | / impl<Context, Code, Input, Output, Builder, Handlers, Res> Handler<Context, Code, Input>
+   | |     for BuildWithHandlers<Output, Handlers>
+   | | where
+   | |     Context: HasErrorType,
+   | |     Output: HasBuilder<Builder = Builder>,
+   | |     PipeHandlers<Handlers>: Handler<Context, Code, Builder, Output = Res>,
+   | |     Res: FinalizeBuild<Target = Output>,
+   | |________________________________________^ `IsProviderFor<HandlerComponent, Context, (Code, Input)>`
+   = note: required for `BuildAndMergeOutputs<App, Cons<BuildDatabaseConfig, Cons<BuildHttpConfig, Nil>>>` to implement `IsProviderFor<ComputerRefComponent, AppBuilder, ((), ())>`
+   = note: required for `AppBuilder` to implement `CanUseComponent<ComputerRefComponent, ((), ())>`
+note: required by a bound in `__CheckAppBuilder`
+  --> tests/compile_fail/reference/providers/build_and_merge_outputs_common_mistakes_ref_component.rs:45:1
+   |
+45 | / check_components! {
+46 | |     AppBuilder {
+47 | |         ComputerRefComponent: ((), ()),
+48 | |     }
+49 | | }
+   | |_^ required by this bound in `__CheckAppBuilder`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

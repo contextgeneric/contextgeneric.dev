@@ -1,0 +1,225 @@
+---
+title: 'UseInputDelegate — legacy dispatch by input'
+description: 'The legacy provider that routes a handler component to a per-input-type provider through a nested table; the open statement replaces it.'
+sidebar_label: 'UseInputDelegate'
+sidebar_position: 13
+---
+
+# `UseInputDelegate`
+
+Dispatch a handler to a different inner provider per input type, through a lookup table.
+
+## Overview
+
+Under [Context-Generic Programming (CGP)](/docs/), a context chooses the provider behind each trait
+call, and `UseInputDelegate<Components>` chooses a handler provider by the type of the value being
+handled. An ordinary handler component is answered by one provider. `UseInputDelegate` performs a
+second lookup: it treats the handler's `Input` type as a key and reads the matching inner provider
+out of a table, so a single wiring entry on a [**context**](/docs/reference/glossary#context), the
+type the implementation runs against, fans out to many input-specific providers. Like every CGP
+provider, it holds no runtime value; the table rides in `PhantomData`.
+
+It is the sibling of [`UseDelegate`](../use_delegate.md). Where `UseDelegate` keys on the `Code`
+parameter of a handler, `UseInputDelegate` keys on the `Input` parameter, so the provider that
+handles a value is chosen by the type of that value. The handler components enable both dispatchers
+at once. Both are legacy forms: the `open` statement of
+[`delegate_components!`](../../macros/delegate_components.md#choosing-a-provider-per-type-the-open-statement)
+dispatches on the code, the input, or both with no table type, as the Usage section shows for the
+input.
+
+## Usage
+
+Import it from `cgp::extra::handler`; it is not in the prelude. It takes one type parameter, the
+lookup table, and is wired through a nested table that maps each concrete input type to its
+provider:
+
+```rust
+use cgp::extra::handler::UseInputDelegate;
+
+delegate_components! {
+    App {
+        ComputerComponent: UseInputDelegate<new AppComputers {
+            Circle: CircleArea,
+            Rectangle: RectangleArea,
+        }>,
+    }
+}
+```
+
+The outer entry routes the handler component to `UseInputDelegate<AppComputers>`, and the inner
+table maps each input type to the provider responsible for it. The current form stores the same
+entries on the context with `open`. Each key has one path segment per type parameter of
+`CanCompute<Code, Input>`, and a generic first segment matches any code, so the second selects by
+the input type:
+
+```rust
+delegate_components! {
+    OpenApp {
+        open ComputerComponent;
+
+        @ComputerComponent.<Code> Code.Circle: CircleArea,
+        @ComputerComponent.<Code> Code.Rectangle: RectangleArea,
+    }
+}
+```
+
+## Examples
+
+Two area computers routed by input type, once through the legacy table and once through `open`:
+
+```rust
+use cgp::extra::handler::{Computer, ComputerComponent};
+use cgp::prelude::*;
+use cgp::extra::handler::{CanCompute, UseInputDelegate};
+
+pub struct Circle {
+    pub radius: f64,
+}
+
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+}
+
+#[cgp_computer]
+pub fn circle_area(circle: Circle) -> f64 {
+    core::f64::consts::PI * circle.radius * circle.radius
+}
+
+#[cgp_computer]
+pub fn rectangle_area(rectangle: Rectangle) -> f64 {
+    rectangle.width * rectangle.height
+}
+
+pub struct App;
+
+delegate_components! {
+    App {
+        ComputerComponent: UseInputDelegate<new AppComputers {
+            Circle: CircleArea,
+            Rectangle: RectangleArea,
+        }>,
+    }
+}
+
+check_components! {
+    App {
+        ComputerComponent: [((), Circle), ((), Rectangle)],
+    }
+}
+
+pub struct OpenApp;
+
+delegate_components! {
+    OpenApp {
+        open ComputerComponent;
+
+        @ComputerComponent.<Code> Code.Circle: CircleArea,
+        @ComputerComponent.<Code> Code.Rectangle: RectangleArea,
+    }
+}
+
+check_components! {
+    OpenApp {
+        ComputerComponent: [((), Circle), ((), Rectangle)],
+    }
+}
+
+pub fn demo() {
+    let code = PhantomData::<()>;
+
+    assert_eq!(App.compute(code, Rectangle { width: 3.0, height: 4.0 }), 12.0);
+    assert_eq!(OpenApp.compute(code, Rectangle { width: 3.0, height: 4.0 }), 12.0);
+    assert!((App.compute(code, Circle { radius: 1.0 }) - core::f64::consts::PI).abs() < 1e-9);
+}
+```
+
+`App` and `OpenApp` are [environmental contexts](/docs/reference/glossary#environmental-context),
+and the component is
+**[parameter-targeted](/docs/reference/glossary#parameter-targeted-component)**: it acts on the
+`Input`, while each context decides which provider handles each input type. The two wirings answer
+the same calls.
+
+## When to use it
+
+**Read `UseInputDelegate` when you meet it in existing code, and write the `open` form instead.**
+Dispatch by input type is common with the [dispatch combinators](../dispatch/index.md), where a
+matcher routes each variant of an enum to a handler chosen by the payload type, and `open` expresses
+it without a table type. The table form still works, since every handler component keeps the
+`#[derive_delegate(UseInputDelegate<Input>)]` that generates it, so existing wiring does not need to
+change.
+
+## Under the hood
+
+`UseInputDelegate<Components>` carries the table in `PhantomData`:
+
+```rust
+pub struct UseInputDelegate<Components>(pub PhantomData<Components>);
+```
+
+Each handler component trait carries two [`#[derive_delegate]`](../../attributes/derive_delegate.md)
+directives, `UseDelegate<Code>` and `UseInputDelegate<Input>`, as on the `Computer` component:
+
+```rust
+#[cgp_component(Computer)]
+#[prefix(@cgp.extra.handler in DefaultNamespace)]
+#[derive_delegate(UseDelegate<Code>)]
+#[derive_delegate(UseInputDelegate<Input>)]
+pub trait CanCompute<Code, Input> {
+    type Output;
+
+    fn compute(&self, _code: PhantomData<Code>, input: Input) -> Self::Output;
+}
+```
+
+The second directive makes [`#[cgp_component]`](../../macros/cgp_component.md) generate a provider
+impl that looks `Components` up by the `Input` type and forwards to the matching delegate. For
+`Computer`, `cargo cgp expand` on a component with the same directive shows:
+
+```rust
+impl<__Context__, Code, Input, __Components__, __Delegate__> Computer<__Context__, Code, Input>
+for UseInputDelegate<__Components__>
+where
+    __Components__: DelegateComponent<(Input), Delegate = __Delegate__>,
+    __Delegate__: Computer<__Context__, Code, Input>,
+{
+    type Output = <__Delegate__ as Computer<__Context__, Code, Input>>::Output;
+
+    fn compute(__context__: &__Context__, _code: PhantomData<Code>, input: Input) -> Self::Output {
+        __Delegate__::compute(__context__, _code, input)
+    }
+}
+```
+
+The lookup key is `(Input)`, the bare type rather than a one-element tuple, while `Code` and the
+context pass through unchanged. The same impl shape is generated for every handler family member
+except `Producer`, which has no input.
+
+## Related constructs
+
+- [`UseDelegate`](../use_delegate.md) — the sibling that keys on the `Code` selector.
+- [`#[derive_delegate]`](../../attributes/derive_delegate.md) — generates both dispatch impls on a
+  handler component.
+- [`delegate_components!`](../../macros/delegate_components.md) — wires it through a nested table,
+  and carries the `open` statement that replaces it.
+- [Dispatch combinators](../dispatch/index.md) — the main users of input dispatch, selecting a
+  per-variant handler by payload type.
+- [`DelegateComponent`](../../traits/wiring/delegate_component.md) — the table the lookup reads.
+
+The ideas behind it:
+
+- [Handlers](/docs/concepts/handlers) — the family whose input this dispatches on.
+- [Dispatching](/docs/concepts/dispatching) — routing an extensible-data value to per-type handlers.
+
+## Source
+
+- [`types.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/extra/cgp-handler/src/types.rs),
+  with the impls generated from the `#[derive_delegate(UseInputDelegate<Input>)]` directive on the
+  handler components in
+  [`components/`](https://github.com/contextgeneric/cgp/tree/main/crates/extra/cgp-handler/src/components).
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

@@ -1,0 +1,5 @@
+error: type trait should contain exactly one associated type item
+ --> tests/compile_fail/reference/macros/cgp_type_common_mistakes_not_one_associated_type.rs:7:1
+  |
+7 | pub trait HasScalarType {
+  | ^^^

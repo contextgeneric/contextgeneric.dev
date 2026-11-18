@@ -3,7 +3,17 @@ slug: cgp-serde-release
 title: 'Announcing cgp-serde: A modular serialization library for Serde powered by CGP'
 authors: [soares]
 tags: [release]
+description: 'cgp-serde rebuilds Serde''s Serialize and Deserialize as CGP components, so two applications can encode the same data in different formats.'
 ---
+
+:::note
+
+This post describes cgp-serde as it was when the post was published, and its code predates the
+current design. The [cgp-serde pages](/docs/projects/cgp-serde/) in the Projects section document it
+as it is now, with its examples walked through as short tutorials and a reference page for each
+provider.
+
+:::
 
 I am excited to announce the release of [**cgp-serde**](https://github.com/contextgeneric/cgp-serde), a modular serialization library for [Serde](https://serde.rs/) that leverages the power of [**Context-Generic Programming**](/) (CGP).
 
@@ -11,7 +21,7 @@ In short, `cgp-serde` extends Serde’s original [`Serialize`](https://docs.rs/s
 
 Furthermore, `cgp-serde` allows us to leverage the powerful [**context and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) concepts in stable Rust today. This unlocks the ability to write context-dependent implementations of `Deserialize`, such as one that uses an arena allocator to deserialize a `'a T` value, a concept detailed in the proposal article.
 
-{/* truncate */}
+<!--truncate-->
 
 ## Preface
 

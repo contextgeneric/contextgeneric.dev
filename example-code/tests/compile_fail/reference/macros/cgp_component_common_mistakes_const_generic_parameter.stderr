@@ -1,0 +1,5 @@
+error: const generic parameters are not supported on CGP component traits
+ --> tests/compile_fail/reference/macros/cgp_component_common_mistakes_const_generic_parameter.rs:7:21
+  |
+7 | pub trait CanBuffer<const N: usize> {
+  |                     ^^^^^^^^^^^^^^

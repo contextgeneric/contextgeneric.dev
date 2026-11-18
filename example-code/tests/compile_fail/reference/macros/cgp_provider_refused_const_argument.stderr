@@ -1,0 +1,5 @@
+error: const arguments are not supported in provider impl trait arguments
+  --> tests/compile_fail/reference/macros/cgp_provider_refused_const_argument.rs:13:31
+   |
+13 | impl<Context> Sized2<Context, 3> for Provider {
+   |                               ^

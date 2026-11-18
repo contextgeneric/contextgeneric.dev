@@ -1,0 +1,16 @@
+error: cannot find attribute `use_provider` in this scope
+  --> tests/compile_fail/reference/attributes/use_provider_usage_component_trait.rs:22:3
+   |
+22 | #[use_provider(RectangleArea: AreaCalculator)]
+   |   ^^^^^^^^^^^^
+   |
+note: similarly named attribute macro `cgp_provider` defined here
+  --> $CARGO/cgp-macro-$VERSION/src/lib.rs
+   |
+   | pub fn cgp_provider(attr: TokenStream, item: TokenStream) -> TokenStream {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: an attribute macro with a similar name exists
+   |
+22 - #[use_provider(RectangleArea: AreaCalculator)]
+22 + #[cgp_provider(RectangleArea: AreaCalculator)]
+   |

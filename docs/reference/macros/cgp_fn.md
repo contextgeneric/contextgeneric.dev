@@ -1,0 +1,389 @@
+---
+title: '#[cgp_fn] — a trait from a function'
+sidebar_label: '#[cgp_fn]'
+sidebar_position: 3
+description: 'Turn a plain Rust function into a trait with a single blanket implementation, so it runs on any context that supplies the fields it needs.'
+---
+
+# `#[cgp_fn]`
+
+Define a trait with a single [blanket implementation](/docs/reference/glossary#blanket-implementation), straight from a function.
+
+## Overview
+
+`#[cgp_fn]` is the simplest construct in [Context-Generic Programming (CGP)](/docs/) that does
+anything useful. You write a plain function and mark the values it needs from the **context**. The context is the type the method runs on,
+and it supplies those values as its own fields. The macro turns the function into a trait that
+every type with those fields gets automatically:
+
+```rust
+#[cgp_fn]
+pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+    width * height
+}
+```
+
+Any struct with a `width` and a `height` can now call `.rectangle_area()`. You do not define a
+component, name a provider, or write a wiring table. The macro emits a trait and one
+[blanket implementation](https://blog.implrust.com/posts/2025/09/blanket-implementation-in-rust/)
+covering every context that satisfies the field requirements.
+
+The macro makes one tradeoff, and you should know it. A
+[`#[cgp_component]`](./cgp_component.md) supports many interchangeable implementations, one chosen per
+context, and this costs extra boilerplate. `#[cgp_fn]` supports exactly one implementation, the
+function body, and needs no component, provider, or wiring. Most traits have one natural definition,
+so `#[cgp_fn]` is the better choice for them and the recommended place to start, rather than a lesser
+form of the real thing.
+
+It is also the easiest introduction to CGP, because nothing in it is unfamiliar. A reader who
+understands functions and arguments can write a working context-generic function without first
+meeting trait bounds,
+blanket implementations, or type-level field names. An [`#[implicit]`](../attributes/implicit.md)
+parameter hides all of that and looks like an ordinary parameter.
+
+## Usage
+
+Apply the attribute to a free function. The function name becomes the method name, and its PascalCase
+form becomes the trait name: `rectangle_area` generates a `RectangleArea` trait with a
+`rectangle_area` method.
+
+Almost every `#[cgp_fn]` takes `self` as its first parameter, because reading a field from the context
+is most of what these functions do. A receiver is *required* as soon as any parameter is
+`#[implicit]`. The macro accepts a function without a receiver and produces a trait whose item is an
+associated function rather than a method. But you rarely want that here, because a function that reads
+nothing from its context computes the same answer for every context that gets it.
+
+Pass an identifier to override the trait name, which is useful when a verb-style name reads better
+than the function's:
+
+```rust
+#[cgp_fn(CanCalculateRectangleArea)]
+pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+    width * height
+}
+```
+
+The receiver may be `&self` or `&mut self`. A `&mut self` function can take a mutable implicit
+argument and write through it.
+
+### Implicit arguments
+
+The macro removes an [`#[implicit]`](../attributes/implicit.md) parameter from the method's signature
+and fills it from a same-named field on the context instead. The parameter's *name* is the field name,
+and its *type* decides how the macro reads the field: it clones an owned type out, borrows a `&str`
+from a `String` field, and borrows a plain `&T` without conversion. The full set of forms, including
+options, slices, and the mutable variants, is on the [`#[implicit]`](../attributes/implicit.md) page.
+
+Because these parameters disappear from the signature, you call `rectangle_area` above without any
+arguments: `rect.rectangle_area()`.
+
+### Generics, and where each bound lands
+
+A `#[cgp_fn]` splits its generics and its `where` clause deliberately, and knowing which goes where is
+most of what you need to learn about the macro.
+
+| You write | It lands on |
+|---|---|
+| A generic parameter on the function | Both the trait and the impl |
+| A `where` clause on the function | The impl only |
+| [`#[impl_generics(T: Bound)]`](../attributes/impl_generics.md) | The impl only |
+| [`#[extend_where(...)]`](../attributes/extend_where.md) | Both the trait and the impl |
+
+By default, generics land on both the trait and the impl, and the `where` clause lands on the impl
+alone. This hides a trait's requirements from its callers: a caller bounds on the clean trait,
+and the constraints the body actually needs stay one level down on the implementation:
+
+```rust
+#[cgp_fn]
+pub fn scale<Scalar>(&self, #[implicit] factor: Scalar) -> Scalar
+where
+    Scalar: Mul<Output = Scalar> + Copy,
+{
+    factor * factor
+}
+```
+
+`Scale<Scalar>` is the trait, and `Scalar: Mul<Output = Scalar> + Copy` appears only on the impl.
+
+#### A type the caller should not name
+
+When the function needs a type that should be inferred rather than chosen, such as a database handle
+or a displayable value, declare it with [`#[impl_generics(...)]`](../attributes/impl_generics.md).
+The parameter goes on the impl alone, so the trait stays unparameterized and callers never mention it:
+
+```rust
+#[cgp_fn]
+#[impl_generics(Name: Display)]
+pub fn describe(&self, #[implicit] name: &Name) -> String {
+    format!("{name}")
+}
+```
+
+The `Describe` trait is not generic. A context becomes eligible purely by carrying a `name` field of
+some `Display` type, and the compiler resolves the type from that field.
+
+The type is then concealed rather than named, so it cannot appear in this function's own signature,
+and two traits cannot agree on it. The [`#[impl_generics]`](../attributes/impl_generics.md)
+page says when to promote such a type to an [abstract type](/docs/reference/glossary#abstract-type) instead.
+
+### Companion attributes
+
+Several attributes shape what the macro generates, and together they are how a `#[cgp_fn]` states what
+it depends on.
+
+- [`#[uses(...)]`](../attributes/uses.md) imports the traits the body calls on `self`, reading
+  like a `use` statement rather than a hand-written `where Self: Trait` bound. It accepts ordinary Rust
+  traits as readily as CGP ones.
+- [`#[use_type(Trait.Type)]`](../attributes/use_type.md) imports an abstract type so the signature can
+  name it bare, and adds the owning trait as a [supertrait](/docs/reference/glossary#supertrait).
+- [`#[extend(...)]`](../attributes/extend.md) adds a method supertrait to the generated trait. Here
+  it is the *only* way to add one, since a `where` clause in a `#[cgp_fn]` is an implementation detail
+  rather than part of the interface.
+- [`#[extend_where(...)]`](../attributes/extend_where.md) puts a predicate on the generated trait's own
+  `where` clause, for a bound callers need to see.
+- [`#[impl_generics(...)]`](../attributes/impl_generics.md) declares a generic parameter on the
+  generated impl alone, for a type that a field of the context fixes and callers should never name.
+- [`#[use_provider(...)]`](../attributes/use_provider.md) completes an inner provider's bound when the
+  function delegates to one.
+- [`#[async_trait]`](./async_trait.md) goes directly beneath `#[cgp_fn]` on an `async fn`. The macro
+  copies it onto both generated items, so the trait ends up declaring a lint-clean `-> impl Future`.
+
+Each attribute may be repeated, and each also takes a comma-separated list inside one attribute, as
+in `#[uses(RectangleArea, HasName)]`. `#[use_provider]` is the exception: its argument ends in a
+bound list joined by `+`, so a comma after it fails to parse with *expected `+`*. Write one
+`#[use_provider]` per inner provider.
+
+## Examples
+
+A trait, another trait built on it, and a context that gets both without wiring anything:
+
+```rust
+use cgp::prelude::*;
+
+#[cgp_fn]
+pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+    width * height
+}
+
+#[cgp_fn]
+#[uses(RectangleArea)]
+pub fn scaled_rectangle_area(&self, #[implicit] scale_factor: f64) -> f64 {
+    self.rectangle_area() * scale_factor * scale_factor
+}
+
+#[derive(HasField)]
+pub struct Rectangle {
+    pub width: f64,
+    pub height: f64,
+    pub scale_factor: f64,
+}
+
+pub fn report(rect: &Rectangle) {
+    println!("base area   = {}", rect.rectangle_area());
+    println!("scaled area = {}", rect.scaled_rectangle_area());
+}
+```
+
+`scaled_rectangle_area` calls `self.rectangle_area()` because `#[uses(RectangleArea)]` declared the
+dependency. It does not know or care how that trait is implemented. `Rectangle` derives
+[`HasField`](../derives/derive_has_field.md) and happens to carry the three fields the two functions
+read, and that is its entire qualification. This program does not use `delegate_components!`
+anywhere, and adding one would change nothing. `Rectangle` is a
+[value context](/docs/reference/glossary#value-context) here, the shape whose area is computed; a
+type such as `App` that stands for an application gets the method the same way, by carrying the
+fields.
+
+## When to use it
+
+**Use `#[cgp_fn]` first.** When a trait has one natural definition, this is the form to write.
+Starting here costs nothing if that changes later, because the trait keeps its name and its method, so
+promoting it to a [`#[cgp_component]`](./cgp_component.md) leaves every call site untouched. At that
+point you add the component, a named provider, and a line of wiring per context.
+
+Use something else in these cases:
+
+- **The trait needs a second implementation, chosen per context.**
+  [`#[cgp_component]`](./cgp_component.md) is for that, and `#[cgp_fn]` cannot provide it: its
+  blanket impl already covers every context, so an alternative cannot coexist with it.
+- **The dependencies are traits rather than fields.** [`#[blanket_trait]`](./blanket_trait.md) builds
+  the same kind of single-implementation, no-wiring trait from a trait with supertraits and
+  default method bodies. Use it when the body needs other traits, and use `#[cgp_fn]` when it
+  needs values.
+- **A generic must vary per call.** A generic parameter here goes on the trait rather than the method,
+  so whatever satisfies the bounds for a given context fixes it, rather than each call site choosing
+  it. A trait that needs a per-call type parameter needs a hand-written blanket impl or a
+  component instead.
+
+Make one decision inside the macro deliberately rather than by default: **where a type the body needs
+should live.** Start with [`#[impl_generics]`](../attributes/impl_generics.md) while the type only
+ever flows through implicit
+arguments. It is shorter, does not need wiring, and reads as "this works with any `database` field of
+a compatible type". Move up to an [abstract type](./cgp_type.md) when the type must appear in the
+trait's own signature, or when two traits must agree that they mean the same one. Avoid a
+plain generic parameter on the function in both cases: it lands on the trait and makes every caller,
+and every intermediate trait built on it, declare the parameter and repeat its bounds whether
+they touch it or not.
+
+## Under the hood
+
+`#[cgp_fn]` emits exactly two items: the trait carrying the method, and a blanket impl of it for a
+generic context. From this input:
+
+```rust
+#[cgp_fn]
+pub fn rectangle_area(&self, #[implicit] width: f64, #[implicit] height: f64) -> f64 {
+    width * height
+}
+```
+
+the macro produces the trait with the implicit parameters stripped from the signature, and the impl
+with those parameters turned into [`HasField`](../traits/field-access/has_field.md) bounds and `let` bindings at the
+top of the body:
+
+```rust
+pub trait RectangleArea {
+    fn rectangle_area(&self) -> f64;
+}
+
+impl<__Context__> RectangleArea for __Context__
+where
+    Self: HasField<Symbol!("width"), Value = f64>
+        + HasField<Symbol!("height"), Value = f64>,
+{
+    fn rectangle_area(&self) -> f64 {
+        let width: f64 = self
+            .get_field(PhantomData::<Symbol!("width")>)
+            .clone();
+        let height: f64 = self
+            .get_field(PhantomData::<Symbol!("height")>)
+            .clone();
+
+        width * height
+    }
+}
+```
+
+Learn to recognize a few details of the real output. The context type parameter is literally
+`__Context__`, a reserved name chosen so it cannot collide with one of yours, and the impl refers to
+it as `Self`. [`Symbol!("width")`](./symbol.md) is a [type-level string](/docs/reference/glossary#type-level-string) standing for the field name.
+The compiler prints its expanded `Symbol<5, Chars<'w', …>>` form in errors, and `cargo cgp expand`
+resugars it back to this. An *owned* implicit argument compiles to a trailing `.clone()`. A `&str`
+argument ends in `.as_ref()` instead, which borrows any field implementing `AsRef<str>`, and a
+plain `&T` in nothing at all.
+
+The generics split shows up in the same impl. Given the `scale` function above, the generic goes on
+both items while the function's `where` bound stays on the impl, ordered *before* the implicit field
+bound:
+
+```rust
+pub trait Scale<Scalar> {
+    fn scale(&self) -> Scalar;
+}
+
+impl<__Context__, Scalar> Scale<Scalar> for __Context__
+where
+    Scalar: Mul<Output = Scalar> + Copy,
+    Self: HasField<Symbol!("factor"), Value = Scalar>,
+{
+    fn scale(&self) -> Scalar { /* ... */ }
+}
+```
+
+The companion attributes layer into these same two items, and each lands in a fixed place:
+
+- `#[uses(Trait)]` adds a `Self: Trait` predicate to the impl.
+- `#[extend(Trait)]` adds it to the impl *and* to the trait's supertraits.
+- `#[extend_where(P)]` adds `P` to both `where` clauses.
+- `#[impl_generics(T: Bound)]` inserts `T: Bound` into the impl's generic list alone. Its argument is a
+  comma-separated list of ordinary generic parameters, so a lifetime or a const parameter is accepted
+  there too.
+- `#[use_type(Trait.Type)]` adds the supertrait and rewrites every bare mention of the type into its
+  fully qualified form.
+
+The impl's `where` clause is assembled in a fixed order, which helps when reading an expansion:
+
+1. the function's own `where` clause;
+2. one `Self:` predicate joining every `#[extend]` bound and then every `#[uses]` bound;
+3. the `#[extend_where]` predicates;
+4. the implicit-argument `HasField` bounds;
+5. the predicates `#[use_type]` and then `#[use_provider]` contribute.
+
+So the field bounds are not the last entries when a function imports an abstract type or a
+provider.
+
+Two smaller placements matter because neither is visible in the source you wrote. **The
+function's visibility becomes the trait's**, and the impl's method keeps inherited visibility. So
+`pub fn rectangle_area` yields `pub trait RectangleArea`, and a private `fn` yields a private trait
+usable only in its own module. And **the macro copies an attribute it does not recognize onto both
+items**, so `#[allow(...)]` carries onto the trait and the impl alike. A doc comment on the function
+documents the trait's method instead, and the trait gets a generated line naming the operation.
+
+## Formal grammar
+
+The attribute argument is a single optional trait name, in the Rust Reference's
+[notation](https://doc.rust-lang.org/reference/notation.html):
+
+```ebnf
+CgpFnArgs -> TraitName?
+
+TraitName -> IDENTIFIER
+```
+
+When the argument is omitted, the trait name defaults to the function name converted to PascalCase. The
+`#[implicit]` markers on parameters and the companion attributes are separate attributes with grammars
+of their own, documented on their own pages.
+
+## Common Mistakes
+
+**A function with implicit arguments must take `self` first.** Without a receiver the macro cannot
+find a context to read a field from, so it reports that rather than emitting a bound that fails later:
+
+```text
+error: The first argument of a function with implicit arguments must be `self`
+```
+
+**A mutable implicit argument must be the only one.** Reading a field mutably borrows the whole context
+exclusively, so it cannot coexist with any other field read. Immutable implicit arguments do not have
+this restriction and combine freely, in any number:
+
+```text
+error: a `&mut` implicit argument must be the only implicit argument, since its mutable borrow of the context conflicts with reading any other field
+```
+
+**An `#[impl_generics]` parameter cannot appear in the trait's own signature.** Only the generated
+impl declares it, so a return type or an explicit parameter that names it leaves it unresolved in the
+trait. A bare `Db` reports `E0425` and a qualified path such as `Db::Row` reports `E0433`, both under
+the headline *cannot find type `Db` in this scope*, so search for both codes. Either the type belongs
+out of the signature, or it needs to be an [abstract type](./cgp_type.md) rather than an inferred impl
+parameter. The [`#[impl_generics]`](../attributes/impl_generics.md) page shows both diagnostics.
+
+## Related constructs
+
+- [`#[implicit]`](../attributes/implicit.md) — fills a parameter from a context field.
+- [`#[uses]`](../attributes/uses.md), [`#[use_type]`](../attributes/use_type.md),
+  [`#[extend]`](../attributes/extend.md), [`#[extend_where]`](../attributes/extend_where.md), and
+  [`#[use_provider]`](../attributes/use_provider.md) — the attributes that shape what it generates.
+- [`#[cgp_component]`](./cgp_component.md) — the step up, for when one implementation is not enough.
+- [`#[blanket_trait]`](./blanket_trait.md) — the same idea built from a trait rather than a function.
+- [`#[cgp_impl]`](./cgp_impl.md) — shares the `#[implicit]` mechanism, for writing a component's provider.
+- [`#[derive(HasField)]`](../derives/derive_has_field.md) — what a context derives to satisfy the bounds.
+- [`#[async_trait]`](./async_trait.md) — how an `async fn` trait method is declared.
+
+The ideas behind it:
+
+- [Impl-side dependencies](/docs/concepts/impl-side-dependencies) — the `where`-clause injection
+  this macro is built on.
+- [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) — the hierarchy this sits at the bottom
+  of.
+
+## Source
+
+- Entry point: [`cgp_fn.rs`](https://github.com/contextgeneric/cgp/blob/main/crates/macros/cgp-macro-lib/src/cgp_fn.rs)
+- Implementation: [`types/cgp_fn/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/cgp_fn/)
+- Implicit arguments: [`types/implicits/`](https://github.com/contextgeneric/cgp/tree/main/crates/macros/cgp-macro-core/src/types/implicits/)
+
+---
+
+*An AI agent wrote this page using the CGP knowledge base. Its content was verified against the
+library's source. See
+[How AI is used in this project](/docs/ai/disclaimer#documentation-and-reference-pages).*

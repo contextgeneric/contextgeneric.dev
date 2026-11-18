@@ -1,0 +1,22 @@
+error[E0275]: overflow evaluating the requirement `App: IsProviderFor<ErrorWrapperComponent, App, String>`
+  --> tests/compile_fail/reference/components/can_wrap_error_usage_display_error_cycle.rs:20:9
+   |
+20 |         ErrorWrapperComponent: String,
+   |         ^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: required for `App` to implement `ErrorWrapper<App, String>`
+   = note: required for `App` to implement `CanWrapError<String>`
+   = note: required for `DisplayError` to implement `IsProviderFor<ErrorWrapperComponent, App, String>`
+   = note: 1 redundant requirement hidden
+   = note: required for `RedirectLookup<App, PathCons<ErrorWrapperComponent, Nil>>` to implement `IsProviderFor<ErrorWrapperComponent, App, String>`
+   = note: required for `App` to implement `CanUseComponent<ErrorWrapperComponent, String>`
+note: required by a bound in `__CheckApp`
+  --> tests/compile_fail/reference/components/can_wrap_error_usage_display_error_cycle.rs:18:1
+   |
+18 | / check_components! {
+19 | |     App {
+20 | |         ErrorWrapperComponent: String,
+21 | |     }
+22 | | }
+   | |_^ required by this bound in `__CheckApp`
+   = note: this error originates in the macro `check_components` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,0 +1,5 @@
+error: `#[cgp_auto_dispatch]` takes no arguments
+ --> tests/compile_fail/reference/macros/cgp_auto_dispatch_common_mistakes_attribute_argument.rs:6:21
+  |
+6 | #[cgp_auto_dispatch(AreaDispatcher)]
+  |                     ^^^^^^^^^^^^^^

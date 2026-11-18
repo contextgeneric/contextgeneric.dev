@@ -1,0 +1,24 @@
+error[E0576]: cannot find associated type `Eror` in trait `HasErrorType`
+  --> tests/compile_fail/reference/attributes/use_type_common_mistakes_misspelled.rs:16:34
+   |
+16 | pub fn fail(&self) -> Result<(), Eror> {
+   |                                  ^^^^ not found in `HasErrorType`
+   |
+note: similarly named associated type `Error` defined here
+  --> $CARGO/cgp-error-$VERSION/src/traits/has_error_type.rs
+   |
+   |     type Error: Debug;
+   |     ^^^^^^^^^^^^^^^^^
+note: associated type `Error` defined here
+  --> $CARGO/cgp-error-$VERSION/src/traits/has_error_type.rs
+   |
+   |     type Error: Debug;
+   |     ^^^^^^^^^^^^^^^^^
+help: an associated type with a similar name exists
+   |
+16 | pub fn fail(&self) -> Result<(), Error> {
+   |                                    +
+help: maybe you meant this associated type
+   |
+16 | pub fn fail(&self) -> Result<(), Error> {
+   |                                    +

@@ -1,0 +1,5 @@
+error: cannot find attribute `implicit` in this scope
+ --> tests/compile_fail/reference/attributes/implicit_usage_outside_a_host.rs:2:35
+  |
+2 | pub fn area(width_source: &f64, #[implicit] width: f64) -> f64 {
+  |                                   ^^^^^^^^
