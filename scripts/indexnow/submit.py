@@ -15,8 +15,9 @@ list and whether the live key file matches, without sending anything. `--from` r
 from another origin, such as `npm run serve`, and `--endpoint` sends to another IndexNow endpoint.
 
 It refuses a URL on another host, and refuses to send while the key file on the live site is
-missing or differs from the one in `static/`, since the engines check the live site. It exits 0
-when the endpoint answers 200 or 202, and 1 otherwise.
+missing or differs from the one in `static/`, since the engines check the live site. It prints
+the endpoint's answer, with any explanation in its body, and exits 0 when the endpoint answers 200
+or 202, and 1 otherwise.
 """
 import argparse
 import json
@@ -133,12 +134,15 @@ def main():
     )
     try:
         with urllib.request.urlopen(request, timeout=60) as response:
-            status = response.status
+            status, detail = response.status, response.read()
     except urllib.error.HTTPError as error:
-        status = error.code
+        status, detail = error.code, error.read()
     except OSError as error:
         sys.exit(f"not sent: {getattr(error, 'reason', error)}")
     print(f"{count} sent to {args.endpoint}: {status} {MEANINGS.get(status, 'unexpected')}")
+    detail = detail.decode(errors="replace").strip()
+    if detail:
+        print(f"the endpoint said: {detail[:1000]}")
     return 0 if status in (200, 202) else 1
 
 
