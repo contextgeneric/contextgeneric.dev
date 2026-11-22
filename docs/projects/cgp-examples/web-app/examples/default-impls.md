@@ -107,7 +107,7 @@ cgp_namespace! {
 With these, the namespace binds every path under `@app.core` and nothing under `@app.extra`. The
 content filters are left for each context to choose.
 
-## The context wires what is left
+## Wiring the content filters
 
 `ProductionApp` joins the namespace and wires the content filters, the one group the namespace
 leaves open:

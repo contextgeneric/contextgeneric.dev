@@ -13,7 +13,7 @@ language extension for Rust with pluggable trait implementations at compile-time
 the **extensible visitor pattern**:
 new operators and new operations can be added without editing the code that handles the old ones.
 
-## The starting point: an enum and a `match`
+## An enum and a `match`
 
 The crate keeps the ordinary Rust version of the interpreter as the thing it improves on. It is one
 enum and one `match` per operation:

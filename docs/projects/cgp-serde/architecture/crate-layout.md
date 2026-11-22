@@ -34,7 +34,7 @@ chooses it, as the [`basic`](../examples/basic.md) example does with `anyhow`.
 Two more crates are not published. `cgp-serde-examples` holds the programs the
 [examples](../examples/index.md) walk through, and `cgp-serde-tests` holds the library's tests.
 
-## A data crate needs none of them
+## Data crates
 
 A crate that only defines data types depends on `cgp`, to derive the field traits the struct
 providers read, and on no cgp-serde crate and not on `serde`. The encoding is chosen by the

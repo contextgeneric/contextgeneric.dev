@@ -20,7 +20,7 @@ value, and the standard collections, and scalars and every other type are encode
 own Serde impls. These pages show
 what the design makes possible and where it stops.
 
-## One value, two encodings
+## Two encodings of one archive
 
 The library's own demonstration encodes one nested archive of messages under two applications,
 `AppA` and `AppB`. The data types derive nothing from Serde. Each application is a **context**, a

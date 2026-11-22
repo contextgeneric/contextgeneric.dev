@@ -83,7 +83,7 @@ as keys and digests. [`SerializeBase64`](./serialize_base64.md) is the more comp
 
 ## The ideas behind it
 
-- [Component design](../../architecture/component-design.md#one-provider-can-serve-both-directions):
+- [Component design](../../architecture/component-design.md#one-provider-for-both-directions):
   one provider for both directions.
 - [`messages`](../../examples/messages.md): hex in one application and base64 in another.
 

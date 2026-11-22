@@ -88,7 +88,7 @@ follow the context's choices, since `UseSerde` hands the whole struct to its own
 
 ## The ideas behind it
 
-- [The bridge to Serde](../../architecture/serde-bridge.md#going-in-using-a-types-own-serde-impl):
+- [The bridge to Serde](../../architecture/serde-bridge.md#using-a-types-own-serde-impl):
   how values cross between cgp-serde and Serde.
 - [`#[cgp_impl]`](/docs/reference/macros/cgp_impl): the macro the provider is written with.
 

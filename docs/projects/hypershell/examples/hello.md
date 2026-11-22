@@ -55,7 +55,7 @@ It needs only the `echo` command, and prints:
 hello world!
 ```
 
-## The program is a type
+## The program type
 
 The whole program is one type alias, from
 [`hello.rs`](https://github.com/contextgeneric/hypershell/blob/main/crates/hypershell-examples/examples/hello.rs):
@@ -82,7 +82,7 @@ context that runs the program, which is the reason the language can be reinterpr
 without editing it. The [abstract syntax](../architecture/abstract-syntax.md) page describes every
 kind of syntax the language has.
 
-## The macro only rewrites tokens
+## The `hypershell!` macro
 
 `hypershell!` gives the program its shell-like look, and it does nothing else. It turns the `|` into
 a `Pipe` over a type-level list, each bracketed list into a
@@ -103,7 +103,7 @@ pub type Program = Pipe<Product![
 The macro emits `Pipe`, `Product!`, and `Symbol!` without qualifying them, which is why the program
 imports `hypershell::prelude::*` rather than the macro alone.
 
-## One call runs the program
+## Running the program
 
 The program runs with one call to `handle`:
 
@@ -125,7 +125,7 @@ the asynchronous and fallible member of CGP's [handler family](/docs/concepts/ha
 Hypershell uses as its interpreter interface. The compiler works out the output type from the
 program: `StreamToStdout` produces `()`, so the call returns `Result<(), Error>`.
 
-## A context that is one line of wiring
+## The context
 
 `HypershellCli` is the **context**: the type the program runs on. It is a type that stands for one
 set of language choices, and it has no fields, because this program reads no runtime values. Its

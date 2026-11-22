@@ -12,14 +12,14 @@ and it serializes structs that derive only CGP's general-purpose field traits. T
 why that matters, what a struct still has to derive, and what the approach gives up compared with
 Serde's derive.
 
-## With Serde, the type's owner decides
+## The owner's choice in Serde
 
 A type is serializable with Serde only if its owner derives or implements Serde's traits for it.
 Rust's orphan rule stops any other crate from implementing `Serialize` for it, so a library whose
 types should be serializable has to depend on `serde` and derive the traits itself. An application
 that wants a library's type encoded differently has to wrap it in a newtype or copy it.
 
-## With cgp-serde, one general derive is enough
+## One general derive in cgp-serde
 
 A struct that derives CGP's [`CgpData`](/docs/reference/derives/derive_cgp_data) exposes its fields
 to generic code: the list of field names and types, a way to read each field, and a way to build the

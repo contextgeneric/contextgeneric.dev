@@ -51,7 +51,7 @@ borrows from it:
   `end` to reject anything after the value. This needs no error wiring at all.
 
 The first two turn `serde_json`'s errors into the context's error type, so the context wires one;
-see [wiring a context](./wiring-a-context.md#4-wire-an-error-type-when-the-json-providers-are-used).
+see [wiring a context](./wiring-a-context.md#4-wire-an-error-type-for-json).
 
 ## Read with another format
 

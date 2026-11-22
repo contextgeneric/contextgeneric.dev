@@ -143,7 +143,7 @@ ones. A failure reported at the `handle` call itself often carries no root cause
 practical reason to check. `cargo cgp check` leads with the root cause for the classes it
 recognizes, and the tool does not yet reshape every class.
 
-## Build large programs with nightly and the new trait solver
+## Build large programs on nightly
 
 A small program builds on stable Rust in a crate of its own. The Hypershell repository pins nightly
 Rust and passes `-Z next-solver=globally` to the compiler, and a crate of your own whose programs

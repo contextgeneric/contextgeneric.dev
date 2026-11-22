@@ -74,7 +74,7 @@ The users get `UserCreator`, `UserGetter`, and `UserUpdater`, and the posts get 
 `PostGetter`, `PostUpdater`, and `PostDeleter`, with the same two filters as before: nine components
 in all. Each can now have its own provider, with its own requirements.
 
-## The content check becomes a wrapper
+## The content check as a wrapper
 
 The username check no longer lives inside the Postgres code. It is a provider of its own, which
 rejects a censored name and otherwise passes the call to another creator, named as a type parameter:
@@ -100,7 +100,7 @@ be a `UserCreator` provider, and the wrapper calls it directly. So the Postgres 
 other. `FilterSpamMessage<InnerCreator>` does the same for posts. The other Postgres providers,
 `GetUserWithPostgres` and the rest, each implement one operation and read only the database.
 
-## Bundles group the providers
+## Provider bundles
 
 Three bundles, each a named wiring table, group the providers by domain:
 
@@ -122,7 +122,7 @@ creator is wired as the wrapper around the Postgres creator, which is where the 
 `PostgresPostComponents` does the same for the four post operations, and
 `AiContentFilterComponents` wires the two filters to AI-backed providers.
 
-## The context forwards to the bundles
+## Forwarding to the bundles
 
 `ProductionApp` is the **context**, a type that stands for the application and holds its choices,
 and it forwards each component to the bundle that holds it:

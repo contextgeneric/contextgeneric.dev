@@ -96,7 +96,7 @@ author id, and an emoji as a `String`, since many emoji, such as 👍🏽, are m
 CGP's empty value. The batch is a struct holding a `Vec` of events, so structs sit inside the enum
 and the enum sits inside a struct.
 
-## Each application wires both directions
+## Wiring both directions
 
 Each application is a **context**, a type whose wiring holds the application's choices. The server's
 table chooses a provider for every type the batch contains, once for writing and once for reading:

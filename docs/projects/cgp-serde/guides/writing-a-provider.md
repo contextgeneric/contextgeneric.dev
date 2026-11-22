@@ -83,7 +83,7 @@ declares the struct, and a second `new` would declare it twice.
 
 **Follow the library's naming.** Name a provider that implements both directions, or only writing,
 `Serialize…`, and one that implements only reading `Deserialize…`; see [component
-design](../architecture/component-design.md#one-provider-can-serve-both-directions).
+design](../architecture/component-design.md#one-provider-for-both-directions).
 
 **Write the impl in the consumer-trait shape**, `impl<Value> ValueSerializer<Value>` with `self` as
 the context, as the library's own providers do. `#[cgp_impl]` fills in the context parameter.
@@ -125,7 +125,7 @@ Serde's own impls does. CGP's [error handling](/docs/concepts/modular-error-hand
 edge, where the JSON providers turn the finished `serde_json::Error` into the context's error type;
 see [the bridge to Serde](../architecture/serde-bridge.md#where-errors-are-reported).
 
-## Make it work with every input a format sends
+## Support every input a format sends
 
 A few habits keep a provider working across formats and inputs:
 

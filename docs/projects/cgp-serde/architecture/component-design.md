@@ -12,7 +12,7 @@ Why does moving one type out of `Self` change who chooses how a value is encoded
 exactly that move. This page explains the move and what it makes possible, how one provider can
 serve both directions, and how deserializing carries Serde's lifetime.
 
-## Serde's trait belongs to the value
+## Serde's `Serialize`
 
 Serde's `Serialize` is implemented by the type being serialized. Its method takes the value as
 `self`:
@@ -29,7 +29,7 @@ write it: the crate that owns the type, or the crate that owns the trait. `Vec<u
 a list of numbers because Serde's impl says so, and a program that wants hex has to wrap the type or
 annotate every field.
 
-## cgp-serde's belongs to the context
+## cgp-serde's serializing component
 
 cgp-serde's serializing component, `CanSerializeValue<Value>`, keeps the method and adds one
 parameter:
@@ -72,7 +72,7 @@ component's target. The hierarchy places this shape at the tier for a target who
 vary between contexts, and serialization is its motivating case: the types being encoded are usually
 from other crates, and different applications need them encoded differently.
 
-## One provider can serve both directions
+## One provider for both directions
 
 A provider in CGP is a type that names an implementation, so one struct can implement both the
 serializing and the deserializing component. cgp-serde does this wherever the two directions are one
@@ -111,7 +111,7 @@ Sharing one struct makes agreement the intent, and a context still wires each di
 Nothing stops a context from writing with one encoding and reading with another, so a round trip in
 a test is what confirms that the two halves match.
 
-## Deserializing carries Serde's lifetime
+## The `'de` lifetime
 
 Serde's `Deserialize<'de>` has a lifetime, so that a value can borrow from its input, such as a
 `&'de str` pointing into the JSON text. `CanDeserializeValue<'de, Value>` keeps it as a parameter of

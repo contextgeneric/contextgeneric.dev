@@ -183,7 +183,7 @@ providers](/docs/concepts/aggregate-providers).
 
 The limit is that an extension can only add. It cannot change what the syntax it inherits does,
 because CGP does not let an inheriting namespace override a choice its parent has made. The
-[limitations](../limitations.md#extensions-add-to-the-language-rather-than-replace-it) page says
+[limitations](../limitations.md#extensions) page says
 more about what this means.
 
 ## Where to go next

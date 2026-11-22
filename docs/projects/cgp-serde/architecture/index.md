@@ -13,7 +13,7 @@ Rust with pluggable trait implementations at compile-time. This page explains th
 which part of Serde it replaces, what decides a type's encoding, and how that decision reaches every
 value nested inside another. Each idea has a page of its own with the details.
 
-## It replaces one layer of Serde
+## The data-type layer
 
 Serde has two sides. Formats such as `serde_json` implement its `Serializer` and `Deserializer`
 traits, which know how to write strings, numbers, maps, and sequences. Data types implement its
@@ -24,7 +24,7 @@ hand-written `Serialize` impl would, so every Serde format works with it unchang
 that already implements `Serialize` can keep using that impl. The [bridge to
 Serde](./serde-bridge.md) page explains how values cross between the two in each direction.
 
-## The application decides how a type is encoded
+## Encodings chosen per application
 
 In Serde, `Serialize` is implemented by the type being serialized, so the type gets one encoding for
 the whole program. cgp-serde's version turns this around. Its serializing component takes the value
@@ -50,7 +50,7 @@ own `Vec<u8>`. The compiler resolves each choice while it type-checks the progra
 lookup at run time. The [component design](./component-design.md) page explains the move and why
 one provider can serve both directions.
 
-## Providers hand nested values back to the context
+## Nested values through the context
 
 A provider for a struct or a collection does not encode the values inside it. It asks the context to
 encode each one, and the context's table chooses the provider for that value's type. That is how
@@ -58,7 +58,7 @@ encode each one, and the context's table chooses the provider for that value's t
 way knowing about it. The [re-entrant providers](./reentrant-providers.md) page explains the two
 ways a provider does this, and what it asks of the context's table.
 
-## A struct needs only CGP's field derive
+## Field derives instead of Serde's
 
 A struct becomes serializable by deriving CGP's general-purpose field traits, with
 [`CgpData`](/docs/reference/derives/derive_cgp_data), and nothing from Serde. Two generic providers
@@ -67,14 +67,14 @@ can define data types without depending on `serde`, and each application decides
 The [derive-free records](./derive-free-records.md) page explains what that gives and what it gives
 up.
 
-## A provider can draw on its context
+## Context services
 
 Every provider method receives the context, so a provider can use anything the context offers. A
 deserializer that needs somewhere to allocate borrowed values can take an arena from the context,
 which Serde's `Deserialize` has no way to receive. The [context services](./context-services.md)
 page explains this, and how the allocator itself becomes a wiring choice.
 
-## Each dependency lives in its own crate
+## One crate per dependency
 
 The core crate depends only on CGP and Serde. The hex, base64, and date encodings, the JSON helpers,
 and the arena allocator each live in a crate of their own, so an application compiles only the

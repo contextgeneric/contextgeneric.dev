@@ -78,7 +78,7 @@ trait callers use, a trait providers implement, and a key that wiring names. `Ca
 `message_is_spam`. This is the shape most applications start from, since it follows the way the
 domain is described.
 
-## The manager's provider needs the censor
+## The user manager's provider
 
 The user manager's provider stores users in Postgres, and checks new usernames with the censor
 before creating them:
@@ -121,7 +121,7 @@ filled from the context's field of that name, so callers never pass it. Only `cr
 censor, but `#[uses]` is on the whole impl, so the whole provider depends on it.
 `PostgresPostManager` has the same shape, with the spam detector.
 
-## The context wires and checks in one table
+## Wiring and checking the context
 
 `ProductionApp` is the context, a type that stands for the application and holds its choices. It
 holds the database handle, and wires its four components:

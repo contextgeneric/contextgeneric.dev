@@ -13,7 +13,7 @@ contains no code can be given its meaning by something else, and changed without
 meaning from elsewhere. This page shows what a Hypershell program is made of, the kinds of pieces
 it can contain, and the macro that lets it be written like a shell pipeline.
 
-## A piece of syntax is an empty struct
+## Syntax as empty structs
 
 Every piece of a Hypershell program is a struct with no fields and no methods. Its type parameters
 hold the parts nested inside it, stored in `PhantomData` so the struct stays empty:
@@ -56,7 +56,7 @@ Some syntax exists for the language's own use rather than for programs. Both com
 instance, start their process through one shared internal step, which is written as syntax too, so
 that a single provider decides how every command is started.
 
-## The macro only changes the notation
+## The `hypershell!` macro
 
 Writing nested types by hand is tiring, so the `hypershell!` macro accepts a shell-like notation and
 rewrites it into the type. It follows three rules: `|` joins stages into a pipeline, a bracketed

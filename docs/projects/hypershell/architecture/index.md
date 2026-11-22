@@ -13,7 +13,7 @@ implementation a program runs. This page explains, in outline, how a type can be
 decides what that program does, and how the language is put together. Each idea has a page of its
 own with the details.
 
-## The program only says what to do
+## Programs as types
 
 In a shell script, a pipeline is text. The shell reads it, works out which programs to start, and
 connects them. A Hypershell pipeline is written in Rust instead, as a type:
@@ -30,7 +30,7 @@ program asks for, "run `echo`" and "print the result", and contains no code for 
 `hypershell!` macro only turns the shell-like notation into that type. The [abstract
 syntax](./abstract-syntax.md) page describes every kind of piece a program can contain.
 
-## The context decides how it is done
+## The context's choices
 
 Because the program contains no code, something else must supply it. That is the **context**: the
 type the program is run on, as in `HypershellCli.handle(PhantomData::<Program>, input)`. For each
@@ -52,7 +52,7 @@ Two consequences follow, and they are why the design is interesting. The same pr
 differently on two contexts that choose different providers. And a new piece of syntax, with a
 provider for it, can be added from any crate, without touching the crates that define the language.
 
-## The language is assembled from reusable parts
+## Assembling the language
 
 A context does not list a provider for every piece of the language itself. Hypershell supplies its
 choices in layers, so that a user's context needs one line:
@@ -72,7 +72,7 @@ publishes its providers as a bundle. `HypershellNamespace` gathers the bundles i
 language, and a context that joins it gets everything in it. The [assembly](./assembly.md) page
 explains the layers, and how a context can add to them.
 
-## Stages are typed, and fit together like functions
+## Typed stages
 
 Each stage of a pipeline receives the previous stage's output, as in a shell, but here the output
 has a Rust type. One stage produces bytes, another a stream, another a decoded JSON value. The
@@ -81,7 +81,7 @@ stage's provider by that type as well as by the syntax. Most stages accept both 
 so they chain freely. The [streams and input dispatch](./streams-and-input-dispatch.md) page
 explains how, and where they do not.
 
-## Each backend lives in its own crate
+## One crate per backend
 
 The syntax lives in a crate that depends only on CGP, and each backend (Tokio, `reqwest`,
 `serde_json`, and the rest) lives in a crate of its own. A program's crate compiles only the

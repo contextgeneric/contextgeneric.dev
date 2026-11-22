@@ -57,7 +57,7 @@ deserialized: Payload { quantity: 42, message: "hello", data: [1, 2, 3] }
 `cargo test -p cgp-serde-examples --example basic` checks both: the exact JSON, and that reading it
 back gives the original value.
 
-## The struct derives nothing from Serde
+## A struct without Serde derives
 
 The data type is an ordinary struct, from
 [`basic.rs`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-examples/examples/basic.rs):
@@ -78,7 +78,7 @@ time. It is not specific to serialization, and nothing in the struct says how an
 cgp-serde's record providers read what `CgpData` exposes, as [derive-free
 records](../architecture/derive-free-records.md) explains.
 
-## One context holds every choice
+## The context
 
 The example runs on `App`, a type that stands for this application, which is where its choices live.
 It has no fields, because every choice it makes is in its wiring:
@@ -159,7 +159,7 @@ The two directions are wired separately, so they can name different providers. `
 by `SerializeString` and read by `UseSerde`, which agree on the JSON. `Vec<u8>` names `SerializeHex`
 in both directions, because one struct implements both halves of the hex encoding.
 
-## The struct's provider asks the context for its fields
+## Encoding fields through the context
 
 `SerializeRecordFields` knows how to walk a struct, but not how to encode any field. For each field,
 it asks the context to serialize the field's type, and the context's wiring answers. That is why
@@ -171,7 +171,7 @@ The same handing back is what lets a choice reach every level of a nested value.
 [Re-entrant providers](../architecture/reentrant-providers.md) explains the mechanism, and
 [`messages`](./messages.md) shows it through three levels of nesting.
 
-## JSON is an operation the context runs
+## JSON as a context operation
 
 The last two entries make JSON encoding something `App` can do. They are keyed on CGP's
 [`TryComputer`](/docs/reference/components/handler/try_computer), an interface for a fallible

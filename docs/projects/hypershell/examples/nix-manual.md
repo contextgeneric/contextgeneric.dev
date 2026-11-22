@@ -90,7 +90,7 @@ pub struct MyApp {
 The context, the type the program runs on, joins `HypershellNamespace` as in the earlier examples,
 and `main` sets `keyword` to `"Nix"`.
 
-## Arguments are a language of their own
+## The argument language
 
 Every argument in a Hypershell program is an expression that the context interprets, and the kind of
 value it must produce depends on where it appears.

@@ -64,7 +64,7 @@ Open both components when the context reads as well as writes, as in
 under `@ValueDeserializerComponent`. A context that runs the JSON providers through `try_compute`
 opens `TryComputerComponent` too, as [`basic`](../examples/basic.md) does.
 
-## 2. Wire every type the traversal reaches
+## 2. Wire the nested types
 
 List the types a traversal touches, not only the types the data names. Start from each top-level
 type, and follow what each provider asks the context for, which each provider's
@@ -107,7 +107,7 @@ Three kinds of type need care in a key:
   list of keys, so `@ValueDeserializerComponent.[u8; 32]` fails to parse. Define a type alias, such
   as `type Digest = [u8; 32];`, and key on the alias.
 
-## 4. Wire an error type when the JSON providers are used
+## 4. Wire an error type for JSON
 
 The JSON providers and the `deserialize_json_string` method turn `serde_json`'s errors into the
 context's error type, so a context that uses them wires one. With the `anyhow` backend from the
@@ -165,7 +165,7 @@ once, since both would otherwise take the same default name. Prefer a separate `
 to [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components), which
 checks only plain entries and leaves every `@` entry under an `open` statement unchecked.
 
-## 6. Share entries between contexts with a namespace
+## 6. Share entries through a namespace
 
 Two applications that make most of the same choices can put the shared entries in a
 [namespace](/docs/concepts/namespaces), a reusable wiring table that contexts join, and keep only

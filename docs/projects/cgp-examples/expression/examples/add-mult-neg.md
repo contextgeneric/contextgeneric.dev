@@ -57,7 +57,7 @@ test contexts::add_mult_neg::test::test_add_mult_neg ... ok
 
 It evaluates `2 + 3` to `5`, `2 * 3` to `6`, `2 - 3` to `-1`, and `-2 * (3 + 4)` to `-14`.
 
-## A new enum, from old parts and new ones
+## The extended enum
 
 The context's module,
 [`add_mult_neg.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_neg.rs),
@@ -81,7 +81,7 @@ instantiated at `MathPlusExpr` and with `i64` literals, since the language now h
 numbers. `Negate` and `Minus` are two more operator structs. The base language's `MathExpr` is left
 as it was; the new enum sits beside it.
 
-## The new operators get providers of their own
+## Providers for the new operators
 
 Each new operator needs an evaluation provider. `EvalNegate`, from the crate's
 `providers/eval/negate.rs`, negates its one operand:
@@ -109,7 +109,7 @@ where
 the crate, each asks the context to evaluate its operands and knows nothing about the enum they sit
 in. They could be written in another crate from the one that defines the base language.
 
-## The context mixes old providers and new
+## Wiring old and new providers
 
 `InterpreterPlus` is a new context, with a table that wires the old providers for the old operators
 and the new providers for the new ones:
@@ -134,10 +134,10 @@ delegate_components! {
 `EvalAdd`, `EvalMultiply`, and `EvalLiteral` are the providers `add_mult` wires, unchanged, now at a
 different enum and a different number type. The table is keyed on the `Eval` marker and the input,
 as in [`add_mult_code`](./add-mult-code.md), and the context has its own `DispatchEval` wrapper for
-`MathPlusExpr`, for the reason [`add_mult`](./add-mult.md#a-small-wrapper-takes-the-enum-apart)
+`MathPlusExpr`, for the reason [`add_mult`](./add-mult.md#the-dispatch-wrapper)
 gives.
 
-## Conversion is left unwired
+## Unwired conversion
 
 `InterpreterPlus` wires evaluation only. There is no `ToLisp` entry, and no abstract Lisp type, and
 the context compiles and runs regardless: CGP checks wiring where it is used, so an operation that

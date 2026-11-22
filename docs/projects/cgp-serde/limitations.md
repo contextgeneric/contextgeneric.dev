@@ -12,21 +12,21 @@ knowing before relying on it. [cgp-serde](./index.md) rebuilds Serde's `Serializ
 as CGP components. This page describes those limits, and the cases where plain Serde is the better
 choice.
 
-## It is a demonstration, not a library to depend on
+## A demonstration
 
 cgp-serde is lightly tested and not meant for production use. Its value is as a worked example: the
 clearest demonstration on this site of CGP letting different applications choose different
 implementations for the same types. Read it to learn the pattern, and expect rough edges if you
 build on it.
 
-## It replaces one layer of Serde, not Serde
+## One layer of Serde
 
 cgp-serde replaces the traits data types implement, `Serialize` and `Deserialize`, and keeps
 everything else. Its output is whatever Serde's data model can express, written by an ordinary Serde
 format. It cannot make a format do something the format does not do, and a program still depends on
 `serde` and on the format crates it uses. See [the bridge to Serde](./architecture/serde-bridge.md).
 
-## The generic providers cover structs and simple enums
+## Supported types
 
 The providers that walk a type generically handle structs with named fields, enums whose variants
 each hold one value or none, the standard collections, references, and types that convert to or
@@ -42,7 +42,7 @@ A recursive type, such as a tree whose nodes contain nodes, cannot be encoded by
 providers at all, because the compiler cannot resolve the cycle in the wiring. It needs a provider
 written for it. See [re-entrant providers](./architecture/reentrant-providers.md).
 
-## Choices are per type, not per field
+## Per-type choices
 
 A context chooses one provider for each type, and every value of that type follows it, so two fields
 of the same type in one struct are encoded the same way. There are no per-field attributes: a field
@@ -50,13 +50,13 @@ is written under its Rust name, and cannot be renamed, skipped, flattened, or de
 missing. A field that needs different treatment needs a type of its own. See [derive-free
 records](./architecture/derive-free-records.md).
 
-## The output suits self-describing formats
+## Self-describing formats
 
 The generic providers write structs as maps and start maps and sequences without declaring their
 length. Self-describing formats such as JSON and RON accept that. Length-prefixed binary formats,
 such as postcard, do not. See [using a format](./guides/formats.md).
 
-## Every type needs an entry
+## An entry for every type
 
 A context names a provider for every type it encodes, in each direction, including types that
 appear only along the way, such as a `Vec` of structs, the references a collection yields, and the
@@ -64,7 +64,7 @@ string an encoding produces. Nothing is found automatically. The table is checke
 compile time, but it is longer than the data it serves, and it grows with every type the data
 reaches. See [wiring a context](./guides/wiring-a-context.md).
 
-## Mistakes produce long compile errors
+## Long compiler errors
 
 A missing entry is a compile error, and the compiler's raw message lists every step from the
 top-level type down to the entry it could not find. Checking the context with `check_components!`

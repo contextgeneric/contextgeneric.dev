@@ -12,14 +12,14 @@ further. [Hypershell](./index.md) is a small shell-scripting language built with
 a context's wiring. This page describes those limits, and the cases where another tool is the
 better choice.
 
-## It is a demonstration, not a tool to depend on
+## A demonstration
 
 Hypershell is an experiment. It is not a replacement for a shell, it is lightly tested, and it is
 not meant for production use. Its value is as a worked example: the most complete program on this
 site that shows CGP's wiring used to build and extend a language. Read it to learn the patterns, and
 expect rough edges if you try to build on it.
 
-## Programs are fixed at compile time
+## Compile-time programs
 
 A Hypershell program is a Rust type, so it is checked and compiled with the rest of the program.
 That is the source of its guarantees, since a pipeline whose stages do not fit is a compile error
@@ -27,7 +27,7 @@ rather than a failure halfway through a run. It also means a program cannot be r
 typed by a user, or changed while an application runs. Values a program needs at run time, such as a
 URL or a file name, come from fields of the context, but the shape of the pipeline itself is fixed.
 
-## Typed stages are stricter than a shell
+## Typed stages
 
 A shell passes bytes between any two commands. Hypershell stages pass typed values, such as bytes or
 one of several kinds of stream, and two stages connect only if the second accepts what the first
@@ -35,7 +35,7 @@ produces. Most stages accept bytes and any kind of stream, so they chain freely,
 need an adapter stage in between, which the program has to name. The [streams and input
 dispatch](./architecture/streams-and-input-dispatch.md) page lists what each stage accepts.
 
-## Extensions add to the language rather than replace it
+## Extensions
 
 Anyone can add new syntax to Hypershell, from their own crate, by publishing a namespace that
 inherits the standard one or by adding entries to a single context. What an extension cannot do is
@@ -45,7 +45,7 @@ what new syntax means, but the base language's own syntax always means what the 
 says. The [assembly](./architecture/assembly.md) page explains the layers this follows from, and the
 [namespaces](/docs/concepts/namespaces) page explains the rule.
 
-## Large programs need nightly Rust
+## Nightly Rust for large programs
 
 The repository builds with nightly Rust and the compiler's next-generation trait solver. The largest
 examples nest whole programs inside others, and on stable Rust they exhausted the compiler's memory
@@ -54,7 +54,7 @@ small programs build on stable Rust. Large
 programs also take noticeable time to compile, since the compiler resolves every piece of every
 program.
 
-## Mistakes produce long compile errors
+## Long compiler errors
 
 A mistake in a program or its wiring is a compile error, and the compiler's raw message lists every
 step it took through the wiring before it failed. Checking a program with `check_components!` and

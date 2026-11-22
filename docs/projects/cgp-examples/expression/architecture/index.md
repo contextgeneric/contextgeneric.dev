@@ -13,7 +13,7 @@ implementations at compile-time, and its answer is to split the usual enum and `
 that can each be reused. This page explains the design in outline: what an operator is, what an
 operation is, and what puts them together.
 
-## Each operator is its own type
+## Operator types
 
 A plain interpreter defines its language as one enum, with the operators as its variants. Here each
 operator is a struct of its own, generic over the expression type it contains:
@@ -32,7 +32,7 @@ ordinary enum that wraps them and fills in the type parameter with itself, such 
 `Plus(Plus<MathExpr>)`. So one `Plus` serves every language that has addition, and so does every
 provider written for it.
 
-## Each operation is one provider per operator
+## One provider per operator
 
 An operation over the language, such as evaluation, is written as one provider per operator:
 `EvalAdd` for `Plus`, `EvalMultiply` for `Times`, and so on. Each implements one of CGP's
@@ -45,7 +45,7 @@ The crate has two operations. Evaluation turns an expression into a number, and 
 turns it into an S-expression tree such as `(* 2 (+ 3 4))`. The evaluation providers implement both
 computation interfaces, so a context can evaluate by value or by reference with the same providers.
 
-## A provider builds a type the context chooses
+## Abstract output types
 
 The conversion providers have to produce a Lisp expression, and they do it without naming the Lisp
 enum. The context declares which concrete type its Lisp expressions are, through an [abstract
@@ -56,7 +56,7 @@ needs, in a small enum of its own, and converts that into the full type with
 are a subset of the full one's. So `PlusToLisp` serves any Lisp type that has a list and an
 identifier.
 
-## A context puts the pieces together
+## The contexts
 
 A **context** is a type that stands for one interpreter and holds its choices. The crate has four,
 each an empty struct in its own module, with its own copy of the enums it uses. A context's wiring

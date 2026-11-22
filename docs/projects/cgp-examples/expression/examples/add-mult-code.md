@@ -84,7 +84,7 @@ The same method, `compute_ref`, evaluates with one marker and converts with the 
 List(List([Ident(Ident("*")), Literal(Literal(2)), List(List([Ident(Ident("+")), Literal(Literal(3)), Literal(Literal(4))]))]))
 ```
 
-## The marker is part of the key
+## Operation markers in the key
 
 The context's module,
 [`add_mult_code.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_code.rs),
@@ -121,7 +121,7 @@ operations. So `@ComputerRefComponent.Eval.Plus<MathExpr>: EvalAdd` reads "to co
 `Plus<MathExpr>`, use `EvalAdd`", and each operator has one entry per operation. The table chooses
 by two parameters at once, and the compiler resolves both while it type-checks the call.
 
-## The same providers, borrowed
+## Evaluating by reference
 
 Evaluation runs through [`ComputerRef`](/docs/reference/components/handler/computer_ref) here, the
 component that borrows its input, where `add_mult` evaluated by value. The evaluation providers

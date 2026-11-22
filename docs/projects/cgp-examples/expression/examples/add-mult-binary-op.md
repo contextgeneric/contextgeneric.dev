@@ -84,7 +84,7 @@ List(List([Ident(Ident("*")), Literal(Literal(2)), List(List([Ident(Ident("+")),
 14
 ```
 
-## Two entries, one provider
+## Sharing one provider
 
 The context's module,
 [`add_mult_binary_op.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult_binary_op.rs),
@@ -101,7 +101,7 @@ Both entries name the same provider, `BinaryOpToLisp`, with a different type par
 travels in the wiring rather than in the provider's code. Evaluation is unchanged: each operator
 still has its own evaluation provider, since `+` and `*` compute differently.
 
-## The provider reads its operands through a getter
+## Reading operands through a getter
 
 `BinaryOpToLisp` handles any input that has a `left` and a `right` operand. It says so with a getter
 trait, from the crate's `providers/to_lisp/binary.rs`:

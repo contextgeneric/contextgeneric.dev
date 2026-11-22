@@ -18,7 +18,7 @@ to its headline and root cause. Long type paths are abridged with an ellipsis, a
 chain the tool prints below the root cause is left out. `cargo cgp check` leads with the root cause
 for the classes it recognizes, and the tool does not yet reshape every class.
 
-## Check first, then read the root cause
+## Check the program first
 
 **Put the program in a `check_components!` before reading any error, and read the result with
 `cargo cgp check`.** A failure reported at the `handle` call often carries no root cause at all: the
@@ -109,7 +109,7 @@ error[E0277]: [CGP-E001] missing entry for `@HandlerComponent.StreamToStdout.Gen
 
 The path names the syntax and then the input type, which is exactly what the dispatcher could not
 match; see [streams and input
-dispatch](../architecture/streams-and-input-dispatch.md#a-stage-adapts-to-the-type-it-receives).
+dispatch](../architecture/streams-and-input-dispatch.md#input-dispatchers).
 **Fix:** convert the value into one of the types the dispatcher accepts, here with `BytesToHex`. The
 same form appears for an input the caller passes: `StreamingExec` given a `&'static str` reports a
 missing `@HandlerComponent.StreamingExec<…>.&str` entry, and the fix is to pass a `String` or a

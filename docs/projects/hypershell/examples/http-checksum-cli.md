@@ -96,7 +96,7 @@ delegate_components! {
 [`hello_name`](./hello-name.md) read its name. `WithStaticArgs []` is an empty argument list. `main`
 builds `MyApp` with the manual's URL and calls `handle` with an empty `Vec<u8>` as the input.
 
-## Each stage streams
+## Streaming output
 
 `StreamingExec` differs from the `SimpleExec` the earlier examples used in when it returns.
 `SimpleExec` waits for its command to finish and produces the whole output as bytes. `StreamingExec`
@@ -108,7 +108,7 @@ That changes when a failure is reported. A streaming stage has already returned 
 command fails, so a non-zero exit is reported when its output stream ends, and the stage reading
 that stream fails the program. The command's standard error becomes part of the message.
 
-## The stages must line up
+## Matching stage types
 
 Every stage's output is the next stage's input, and the compiler checks that each pair agrees. A
 `StreamingExec` stage produces a Tokio reader, wrapped in Hypershell's `TokioAsyncReadStream` type,

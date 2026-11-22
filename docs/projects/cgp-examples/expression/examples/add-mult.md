@@ -78,7 +78,7 @@ test contexts::add_mult::test::test_add_mult_to_lisp ... ok
 The first evaluates `2 + 3`, `2 * 3`, and `2 * (3 + 4)` to `5`, `6`, and `14`. The second converts
 the same three expressions to Lisp, so `2 * (3 + 4)` becomes the tree for `(* 2 (+ 3 4))`.
 
-## The language is an enum of operator structs
+## The language enum
 
 The context's module,
 [`add_mult.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/expression/src/contexts/add_mult.rs),
@@ -143,7 +143,7 @@ ability to evaluate each operand. So `EvalAdd` adds two evaluated operands witho
 of expression they are, or which enum `MathExpr` is. `EvalMultiply` is the same with `*`, and
 `EvalLiteral` returns a literal's value.
 
-## The context wires each operator to its provider
+## Wiring the operators
 
 `Interpreter` is the context. It has no fields, because every choice it makes is in its wiring:
 
@@ -188,7 +188,7 @@ types](/docs/concepts/abstract-types), type names the context fills in so that p
 them without knowing the concrete type. The conversion providers below read the Lisp one, and the
 [next example](./add-mult-binary-op.md)'s provider reads the other.
 
-## A small wrapper takes the enum apart
+## The dispatch wrapper
 
 The `MathExpr` entries go to a provider the module writes for itself:
 
@@ -215,7 +215,7 @@ which are `MathExpr` again. A wrapper written for one concrete context breaks th
 layers](../architecture/dispatch-layers.md) explains why, and every context in the crate has its
 own.
 
-## Conversion builds a type it does not name
+## Converting to Lisp
 
 The conversion providers produce a `LispExpr`, but they are written without naming the enum. This is
 the one for `Plus`, from `providers/to_lisp/add.rs`:
@@ -257,7 +257,7 @@ variants it needs, in a small local enum, and [`upcast`](/docs/reference/traits/
 turns that into the full `LispExpr`, which works because every variant of `LispSubExpr` is also a
 variant of `LispExpr`. So `PlusToLisp` serves any Lisp type that has a list and an identifier.
 
-## The checks cover every input
+## Checking every input
 
 The module asserts its wiring with
 [`check_components!`](/docs/reference/macros/check_components), listing each operation and input

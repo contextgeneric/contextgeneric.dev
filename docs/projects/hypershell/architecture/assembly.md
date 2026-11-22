@@ -13,7 +13,7 @@ of pieces of syntax, and each needs a provider, so something must gather them.
 a context's wiring. This page explains the three layers that do the gathering, how a context can
 add to them, and how one piece of syntax is traced through all three to its provider.
 
-## Three layers, from providers to a context
+## The three layers
 
 The wiring is built up in three layers, each collecting the one below it:
 
@@ -26,7 +26,7 @@ The wiring is built up in three layers, each collecting the one below it:
 The split lets each layer be reused. A bundle can serve any namespace that points at it, and a
 namespace serves every context that joins it. The rest of this page takes the layers in turn.
 
-## A bundle maps syntax to providers
+## Bundles
 
 A bundle is a table, written with CGP's
 [`delegate_components!`](/docs/reference/macros/delegate_components), with one entry per piece of
@@ -56,7 +56,7 @@ CGP calls a table like this an [aggregate provider](/docs/concepts/aggregate-pro
 choices that other wiring can point at as one unit. Hypershell has one per backend crate: the base
 bundle for the control syntax and arguments, and bundles for Tokio, `reqwest`, JSON, and WebSockets.
 
-## The namespace gathers the bundles
+## The namespace
 
 A [namespace](/docs/concepts/namespaces) is a reusable wiring table that contexts can join.
 `HypershellNamespace` routes each group of syntax to the bundle that handles it. This excerpt routes
@@ -87,7 +87,7 @@ The namespace also makes the choices that belong to the language as a whole. It 
 to `anyhow::Error`, and it says where to find the HTTP client: in a field named `http_client`, which
 is why every context that sends requests has one.
 
-## A context joins the namespace
+## Joining the namespace
 
 A context joins the namespace with one statement. Hypershell provides two ready-made contexts, which
 differ only in their fields:

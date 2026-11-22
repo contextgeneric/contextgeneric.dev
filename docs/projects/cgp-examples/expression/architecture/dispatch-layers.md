@@ -13,7 +13,7 @@ built with [Context-Generic Programming](/docs/) (CGP), which enables pluggable 
 chosen at compile time, and a **context** in it is a type that stands for one interpreter and holds
 its choices. This page explains both arrangements, and the wrapper that every context needs.
 
-## Two ways to pick the operation
+## Choosing the operation
 
 The crate runs two operations, evaluation and conversion to Lisp, and its contexts pick between them
 in one of two ways:
@@ -50,7 +50,7 @@ caller asks for an operation. The first keeps the table short while the operatio
 second puts every operation behind one method and makes each operation's providers visible entry by
 entry.
 
-## Every context wraps the dispatcher
+## Wrapping the dispatcher
 
 Each context maps its language enum not to CGP's dispatcher,
 [`MatchWithValueHandlers`](/docs/reference/providers/dispatch/match_with_value_handlers), but to a

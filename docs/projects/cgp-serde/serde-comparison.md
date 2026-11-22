@@ -61,7 +61,7 @@ field while a cgp-serde context chooses per type:
 | a hand-written `DeserializeSeed` for state | a provider that takes the state from the context |
 | a borrowed `&'de str` field | wire `&'a str` to `UseSerde`, and read from input that can lend it |
 
-## What Serde's derive does that the generic providers do not
+## Features unique to Serde's derive
 
 Serde's derive is the product of years of use, and it handles cases that cgp-serde's generic
 providers leave to it:

@@ -14,7 +14,7 @@ back to the **context**, the type whose wiring holds an application's choices, w
 re-entering it. This page explains the two ways a provider re-enters the context, and what that asks
 of the context's wiring.
 
-## A provider asks the context, not the next impl
+## Asking the context
 
 In Serde, a struct's `Serialize` impl calls each field's own `Serialize` impl, so a `Vec<u8>` field
 is written however Serde's impl for `Vec<u8>` writes it. The choice is fixed where that impl was
@@ -125,7 +125,7 @@ each top-level type and follow what each provider asks for until every request l
 such as [`UseSerde`](../reference/providers/use_serde.md), that asks for nothing. The [wiring
 guide](../guides/wiring-a-context.md) turns this into steps.
 
-## Mistakes are found at compile time
+## Compile-time errors
 
 The compiler follows these requests while it type-checks the program, so none of the traversal is
 looked up at run time, and a type with no entry is a compile error rather than a failure while

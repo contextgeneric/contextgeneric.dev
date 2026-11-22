@@ -83,7 +83,7 @@ pub type Program = hypershell! {
 stream. Its parameters are the method, the URL, and a list of headers, here empty. The URL is a
 `FieldArg`, read from the context, the type the program runs on, as before.
 
-## The client lives in a field
+## The client field
 
 The context gains a second field:
 
@@ -114,7 +114,7 @@ reading a named field. So any context that joins the namespace and has a `Client
 exactly `http_client` can run HTTP programs, and a context without one fails to compile with a root
 cause naming the missing field. `main` builds the context with `Client::new()`.
 
-## The stream kinds are converted by dispatch
+## Converting stream kinds
 
 The request produces a different kind of stream from the command stages. `reqwest` returns a reader
 from the `futures` crate, which Hypershell wraps as `FuturesAsyncReadStream`, while a command reads

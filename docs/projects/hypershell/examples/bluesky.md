@@ -86,7 +86,7 @@ The context, the type the program runs on, joins `HypershellNamespace`, and `mai
 
 Both stages are `StreamingExec`, which returns its command's output as a stream at once and keeps it
 flowing while the command runs; see
-[`http_checksum_cli`](./http-checksum-cli.md#each-stage-streams). `websocat` never closes the
+[`http_checksum_cli`](./http-checksum-cli.md#streaming-output). `websocat` never closes the
 connection, so the first stage's output never ends, and neither does the program. Each event reaches
 `grep`, and each matching line reaches standard output, as soon as it arrives.
 

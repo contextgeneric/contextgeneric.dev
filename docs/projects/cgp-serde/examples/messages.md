@@ -106,7 +106,7 @@ From the second, `AppB`, bytes are base64 and dates are Unix timestamps:
 }
 ```
 
-## The data names no encoding
+## Data without an encoding
 
 The archive is three nested structs, from
 [`messages.rs`](https://github.com/contextgeneric/cgp-serde/blob/main/crates/cgp-serde-examples/examples/messages.rs):
@@ -138,7 +138,7 @@ how either is written. [`CgpData`](/docs/reference/derives/derive_cgp_data) only
 to generic code, and `Vec<u8>` and `DateTime<Utc>` belong to other crates, so in Serde their
 encoding would be whatever their existing `Serialize` impls chose.
 
-## Each application is a context with its own table
+## One context per application
 
 `AppA` is a type that stands for the first application, which is where its choices live. It has no
 fields, and its wiring table names a provider for each type the archive contains:
@@ -209,7 +209,7 @@ Serde impls they would conflict, since a type can have only one. As entries in t
 they do not, because each choice holds only within the context that makes it.
 [Coherence](/docs/concepts/coherence) explains why that is allowed.
 
-## A choice reaches every level of nesting
+## Choices at every level
 
 Neither table says anything about where a `Vec<u8>` appears, and yet every byte field in the
 archive, at all three levels, follows its context's choice. That is because no provider encodes the
@@ -292,7 +292,7 @@ The cost is the table each application writes. `AppA` and `AppB` share all but t
 still list every one, and both carry entries, such as the reference entry and `AppB`'s `i64`, that
 serve the traversal rather than the data. The shared entries can move into a namespace the two
 contexts join, as the last step of [wiring a
-context](../guides/wiring-a-context.md#6-share-entries-between-contexts-with-a-namespace) shows, but
+context](../guides/wiring-a-context.md#6-share-entries-through-a-namespace) shows, but
 the traversal's entries are still there to write. A program that needs one encoding per type gets it
 from Serde's derive with none of this.
 

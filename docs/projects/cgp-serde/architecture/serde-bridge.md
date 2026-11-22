@@ -12,7 +12,7 @@ components of [Context-Generic Programming (CGP)](/docs/), and keeps the rest of
 This page explains which layer it replaces, how values cross between cgp-serde and ordinary Serde
 code in each direction, and where errors are reported.
 
-## Serde has two sides, and cgp-serde replaces one
+## Serde's two sides
 
 Serde separates what a value is from how a format writes it. On one side, formats such as
 `serde_json` and RON implement the `Serializer` and `Deserializer` traits, which can write and read
@@ -25,7 +25,7 @@ cgp-serde replaces the data-type side only. Its two components take the place of
 the same methods a hand-written impl would, such as `serialize_str` or `serialize_map`. So a format
 needs no changes to work with cgp-serde, and cgp-serde has no code for any particular format.
 
-## Going in: using a type's own Serde impl
+## Using a type's own Serde impl
 
 The bridge carries values in two directions. Going in, the provider
 [`UseSerde`](../reference/providers/use_serde.md) lets a **context**, the type whose wiring holds an
@@ -56,7 +56,7 @@ The trade is that the context's choices stop at that value. The type's own impl 
 contents, so a `Vec<u8>` inside it is written the way that impl writes it, whatever the context
 wires for `Vec<u8>`.
 
-## Going out: handing a context to a Serde API
+## Passing a context to a Serde API
 
 Going out, two adapter types let a context and a value enter any Serde API.
 [`SerializeWithContext`](../reference/types/serialize_with_context.md) pairs a context with a value

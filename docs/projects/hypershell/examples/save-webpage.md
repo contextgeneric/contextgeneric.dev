@@ -88,7 +88,7 @@ in [`nix_manual`](./nix-manual.md) produces a path here.
 
 The request's output is a futures reader, and `WriteFile` accepts it because its wiring starts with
 the same input dispatcher as `StreamingExec`, described in
-[`http_checksum_client`](./http-checksum-client.md#the-stream-kinds-are-converted-by-dispatch). The
+[`http_checksum_client`](./http-checksum-client.md#converting-stream-kinds). The
 file is written as the response streams in.
 
 `WriteFile` produces `()`, so the program's output is `()` and `handle` returns `Result<(), Error>`.

@@ -109,7 +109,7 @@ Arguments nest because each one is interpreted through the context. `UrlEncodeAr
 works because the encoder asks the context for its inner argument's value, and the context's wiring
 answers with the field. Any argument the context can interpret may appear inside another.
 
-## A header, and a response decoded by type
+## Headers and typed responses
 
 `WithHeaders` is a list of `Header` entries, each a name and a value given as arguments. GitHub's
 API rejects requests without a `User-Agent`, so the program sends one.

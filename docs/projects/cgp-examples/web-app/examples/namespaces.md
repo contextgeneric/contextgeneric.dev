@@ -52,7 +52,7 @@ cargo check -p cgp-example-web-app
 The check passes. For this stage, that means both `ProductionApp` and `TestApp` satisfy all nine
 components.
 
-## Each component gets a path
+## Component paths
 
 The module,
 [`namespace.rs`](https://github.com/contextgeneric/cgp-examples/blob/main/web-app/src/namespace.rs),
@@ -80,7 +80,7 @@ lookup for a path. The nine components fill three paths under two parents:
 So a context that joins `DefaultNamespace` and is asked for `UserGetterComponent` looks for an entry
 at `@app.core.user`, and one entry there can answer for all three user components.
 
-## Bundles are grouped by path
+## Bundles by path
 
 The providers and the three bundles of the previous stage return unchanged, along with a fourth
 bundle, `DummyContentFilterComponents`, that wires placeholder filters for testing. On top of them
@@ -112,7 +112,7 @@ its `namespace` line, because a lookup arrives at a bundle by the component's na
 namespace that turns the name into the path the bundle's entries match. Without the line, the bundle
 has no entry for the name.
 
-## Two contexts, one line apart
+## The production and test contexts
 
 The production and test contexts each join the namespace and route the two top-level paths:
 

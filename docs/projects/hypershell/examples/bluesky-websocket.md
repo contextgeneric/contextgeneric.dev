@@ -122,7 +122,7 @@ imported even though the code never mentions it otherwise.
 
 Entries like these work for syntax the namespace does not already route. A context cannot use the
 same form to give `SimpleExec` a different provider, because the namespace already binds that path;
-see the [limitations](../limitations.md#extensions-add-to-the-language-rather-than-replace-it).
+see the [limitations](../limitations.md#extensions).
 
 ## An input that stays open
 
@@ -180,7 +180,7 @@ above.
 - [Writing a program](../guides/writing-a-program.md): the steps every example shares, as a guide.
 - [Error handling in CGP](/docs/concepts/modular-error-handling): how a context chooses its error
   type and how source errors reach it.
-- [Assembly](../architecture/assembly.md#a-context-joins-the-namespace): context entries and
+- [Assembly](../architecture/assembly.md#joining-the-namespace): context entries and
   extension namespaces.
 - [Hypershell: a type-level DSL for shell-scripting in
   Rust](/blog/hypershell-release#extending-hypershell): the post that announced Hypershell, whose

@@ -168,7 +168,7 @@ error[E0599]: [CGP-E003] missing wiring for `ErrorTypeProviderComponent` and `Er
 ```
 
 The root causes and the help line name the same two entries, which [wiring a
-context](./wiring-a-context.md#4-wire-an-error-type-when-the-json-providers-are-used) adds.
+context](./wiring-a-context.md#4-wire-an-error-type-for-json) adds.
 
 ## A provider depends on itself
 
@@ -237,7 +237,7 @@ Serializing a `Node` requires serializing its `Vec<Node>`, which requires `&Node
 `Node` again, and the compiler treats that cycle as an error. No entry fixes it. The type needs a
 provider written for it, one that walks the recursion itself and asks the context only for the
 parts that are not recursive; see [writing a provider](./writing-a-provider.md) and [re-entrant
-providers](../architecture/reentrant-providers.md#mistakes-are-found-at-compile-time).
+providers](../architecture/reentrant-providers.md#compile-time-errors).
 
 ## A key does not parse
 

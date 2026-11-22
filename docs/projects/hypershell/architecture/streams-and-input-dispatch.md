@@ -32,7 +32,7 @@ one it received:
 | `FuturesAsyncReadStream` | a `futures` reader | `StreamingHttpRequest`, `WebSocket` |
 | `FuturesStream` | a `futures` stream of chunks | the adapter in front of `Checksum` |
 
-## A stage adapts to the type it receives
+## Input dispatchers
 
 A stage that runs a command needs a Tokio reader to feed the command's input. To accept bytes or a
 `futures` reader as well, it starts with a small converter, called an **input dispatcher**, that
@@ -74,7 +74,7 @@ This is also why the stream kinds each have a wrapper type. The table can only t
 reader apart if they are different types; an entry for "any reader" would match every input and
 conflict with the others.
 
-## Stages are built from small steps
+## Steps inside a stage
 
 A streaming stage is usually three providers run in order. Under Hypershell's wiring,
 `StreamingExec` is:

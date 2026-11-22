@@ -143,7 +143,7 @@ by following that wiring rather than by reading a declaration.
 ## Where to go next
 
 - [`bluesky`](./bluesky.md): the next example, a pipeline that never ends on its own.
-- [Assembly](../architecture/assembly.md#a-context-joins-the-namespace): the two predefined contexts
+- [Assembly](../architecture/assembly.md#joining-the-namespace): the two predefined contexts
   and how a context joins the language.
 - [Handlers](/docs/concepts/handlers): how a computation's output type follows from its code and
   input.

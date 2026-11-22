@@ -13,7 +13,7 @@ and every provider in it receives the context. This page explains how a provider
 service from the context, the layers the library's arena support is built in, and the lifetimes that
 let deserialized values outlive the context.
 
-## A provider can ask the context for anything
+## Services from the context
 
 Serde's `Deserialize` has no receiver, and `serde_json::from_str` has no argument for extra state,
 so a deserializer that needs an allocator, a lookup table, or a setting has nowhere to receive it. A
@@ -28,7 +28,7 @@ The library's worked case is deserializing borrowed values. A `Payload<'a>` hold
 arena is cheaper than giving each a `Box`. The deserializer needs the arena while it runs, and it
 takes it from the context.
 
-## Three layers, so the allocator is a choice
+## The allocation layers
 
 The work is split into three layers, each a separate piece of wiring, so that the deserializer does
 not decide how memory is allocated.
@@ -118,7 +118,7 @@ deserializer nor any data type changes. The allocation component and the arena i
 in separate crates for the same reason, so that a program with its own allocator depends on the
 component alone.
 
-## The values outlive the context
+## Values that outlive the context
 
 A deserialized `Payload<'a>` stays valid after the context is gone, because the context only borrows
 the arena. The caller creates the arena first and hands the context a reference to it, as
