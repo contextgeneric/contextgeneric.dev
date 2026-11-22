@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: the macro takes no argument.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: the macro takes no argument.
 
 use cgp::prelude::*;
 

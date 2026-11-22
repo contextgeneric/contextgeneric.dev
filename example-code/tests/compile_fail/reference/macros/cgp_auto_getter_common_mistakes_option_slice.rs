@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: the macro rejects `Option<&[T]>`, since the field it would read cannot exist.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: the macro rejects `Option<&[T]>`, since the field it would read cannot exist.
 
 use cgp::prelude::*;
 

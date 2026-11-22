@@ -162,7 +162,7 @@ Three impls are needed rather than one because
 [`TransformMapFields`](../type-level/transform_map_fields.md#under-the-hood) resolves a conversion per field from
 whatever state that field is in, and a record may hold fields in all three states at once.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

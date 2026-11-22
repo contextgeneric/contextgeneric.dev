@@ -153,7 +153,7 @@ The `'static` bound on the target is the one asymmetry with [`HasField`](./has_f
 forwarding, which passes the borrow through a helper instead. So a smart pointer to a type holding a
 borrowed value forwards the read and not the write.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not separately opt-in.** The derive always emits it, so a field cannot be exposed read-only
 through the derive; restricting mutation is a matter of what implementations declare.

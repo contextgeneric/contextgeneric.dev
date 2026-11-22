@@ -156,7 +156,7 @@ knows at each point exactly which variants remain, the same narrowing a hand-wri
 variant, the last remainder is uninhabited and the final `Result` closes with
 [`finalize_extract_result`](../variant/finalize_extract_result.md), as the example's last step does.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 

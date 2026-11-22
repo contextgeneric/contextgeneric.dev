@@ -45,7 +45,7 @@ promotion combinators trade on the natural orderings among these: a `Computer` i
 `Handler`. A by-reference handler serves a by-value slot by dereferencing the input, and a by-value
 handler serves a by-reference slot only when it accepts the borrow as its input.
 
-## The combinators, by role
+## The combinators by role
 
 **Composition** feeds one handler's output into the next:
 

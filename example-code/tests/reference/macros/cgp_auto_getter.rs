@@ -347,7 +347,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The compiling halves: `#[prefix]` on an auto getter is accepted and registers nothing, the
 /// workaround for the `Option` known issue, returning `Option<&mut T>` from a `&mut self` getter,

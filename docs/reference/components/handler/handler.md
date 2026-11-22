@@ -156,7 +156,7 @@ Do not *write* a `Handler` provider by hand when a simpler member fits: implemen
 fallible synchronous one, or a [`Producer`](./producer.md) for an input-free one, and let the wiring
 promote it. The simpler provider stays usable in the positions a `Handler` cannot fill.
 
-## Common Mistakes
+## Common mistakes
 
 **A promotion bundle wired on a context expects its provider to be wired to the same bundle.** The
 `HandlerComponent` entry of `PromoteComputer<P>` is `PromoteAsync<P>`, which needs `P` to be a

@@ -161,7 +161,7 @@ marker, so a borrowed chain finalizes exactly as an owned one does.
 The trait lacks a `from_extractor` counterpart: a borrowed extractor cannot rebuild an owned enum,
 and the original is still there anyway.
 
-## Common Mistakes
+## Common mistakes
 
 **It cannot rebuild the enum.** [`HasExtractor`](./has_extractor.md)'s `from_extractor` lacks a
 borrowing equivalent, which is rarely a problem since the value was never consumed.

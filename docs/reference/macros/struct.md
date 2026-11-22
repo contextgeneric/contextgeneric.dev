@@ -142,7 +142,7 @@ and hides the fact that it describes a record.
 - **Use [`Enum!`](./enum.md) for an enum's shape**, a choice among variants rather than a record.
 - **Use [`Product!`](./product.md) for a list that is not a set of named fields**, such as a handler
   pipeline, or for the one field list `Struct!` cannot spell, described under
-  [Common Mistakes](#common-mistakes).
+  [Common mistakes](#common-mistakes).
 - **Use a plain struct when no generic code walks the fields.** A shape is worth naming when
   independent code builds, reads, or converts records by their field names.
 
@@ -197,7 +197,7 @@ TupleFields -> ( Type ( `,` Type )* `,`? )?
 `IDENTIFIER` includes raw identifiers and excludes `_`, and `Type` is the Rust grammar's type
 production. The empty body matches both alternatives, and both give the same type.
 
-## Common Mistakes
+## Common mistakes
 
 **A one-element positional list has no `Struct!` spelling.** `Struct!(T)` is `T`, by the newtype
 rule, so the list holding a single `Field<Index<0>, T>` is written

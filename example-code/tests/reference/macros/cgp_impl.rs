@@ -1,7 +1,7 @@
 //! Code from `docs/reference/macros/cgp_impl.md` — *`#[cgp_impl]`*.
 //!
 //! The snippets the page rejects live under `tests/compile_fail/reference/macros/`, one fixture
-//! per *Common Mistakes* entry that fails to compile.
+//! per *Common mistakes* entry that fails to compile.
 
 /// ## Overview
 ///
@@ -754,7 +754,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The compiling halves of the entries: the qualified path that names a provider's own const, and
 /// the `Self` form with `new` and a component override, which the macro ignores. `RateLimiter` and

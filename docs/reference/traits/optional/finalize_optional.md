@@ -169,7 +169,7 @@ That short-circuiting is also why only one missing field is named: the walk stop
 last unset field in declaration order: with nothing set on `struct Context { foo: String, bar: u64 }`,
 the error is `"bar"`.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

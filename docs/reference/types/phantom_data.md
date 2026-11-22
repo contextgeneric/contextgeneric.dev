@@ -197,7 +197,7 @@ Everywhere else the macros insert it for you.
   is covariant in `'a` and keeps the struct `Send` and `Sync`, where the macro's form is invariant
   and neither.
 
-## Common Mistakes
+## Common mistakes
 
 **It costs nothing at run time.** `PhantomData<T>` is zero-sized whatever `T` is, so a struct full of
 `PhantomData` fields is still zero-sized, and a `PhantomData` argument compiles to nothing. A

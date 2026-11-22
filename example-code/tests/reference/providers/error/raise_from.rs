@@ -2,7 +2,7 @@
 //!
 //! Pins the Usage wiring and the Examples program, in which one `ErrorRaiserComponent: RaiseFrom`
 //! entry raises two different source types through the error's `From` impls. The source with no
-//! `From` impl, from Common Mistakes, is a trybuild fixture.
+//! `From` impl, from Common mistakes, is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {

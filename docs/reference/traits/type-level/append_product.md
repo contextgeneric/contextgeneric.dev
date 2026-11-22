@@ -132,7 +132,7 @@ different orders are unrelated types.
 
 All of this is resolved during type checking. Neither impl contains a `fn`.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`. This is the first thing that goes
 wrong when reaching for it.

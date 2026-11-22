@@ -270,7 +270,7 @@ attribute per inner provider and one per registration.
 Each of them acts on a *generated trait definition*, which a provider impl does not have, so they
 belong to [`#[cgp_fn]`](./cgp_fn.md) and, for `#[extend]`, to
 [`#[cgp_component]`](./cgp_component.md). Writing one here leaves a name nothing resolves; see
-[Common Mistakes](#common-mistakes). A bound the implementation needs goes in `#[uses]`, or in the
+[Common mistakes](#common-mistakes). A bound the implementation needs goes in `#[uses]`, or in the
 block's own `where` clause, which passes through untouched.
 
 ### Implementing the consumer trait directly
@@ -282,7 +282,7 @@ lacks a context to find. The form is useful when you want a hand-written impl wh
 companion attributes, which the macro processes before it looks at the provider, so `#[implicit]`,
 `#[uses]`, `#[use_type]`, and `#[use_provider]` all work here. Because the macro does not generate a
 provider struct here, `new` and the component override do nothing; see
-[Common Mistakes](#common-mistakes) for what happens if you write them anyway.
+[Common mistakes](#common-mistakes) for what happens if you write them anyway.
 
 ```rust
 #[cgp_impl(Self)]
@@ -504,7 +504,7 @@ passthrough form. `ComponentType` overrides the component in the generated `IsPr
 defaulting to the provider trait's path with `Component` appended to its last segment. Both are Rust
 `Type` productions.
 
-## Common Mistakes
+## Common mistakes
 
 **One nesting case escapes the scoping rule.** An item written inside a `macro!( … )` invocation has
 its `self`/`Self` rewritten too, because a token-level rewrite cannot see the scope the macro will

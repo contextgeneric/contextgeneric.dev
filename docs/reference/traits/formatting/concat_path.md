@@ -148,7 +148,7 @@ where
 That is how `@test.ShowImplComponent` becomes `@test.ShowImplComponent.u64` for a `u64` value, the
 key a namespaced or `open` entry is written at.
 
-## Common Mistakes
+## Common mistakes
 
 **[`Path!`](../../macros/path.md) requires a leading `@`.** `Path!(@a.b)` parses, and
 `pub type Outer = Path!(a.b);` fails with:

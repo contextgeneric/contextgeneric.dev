@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_computer.md`, *Common Mistakes*: a one-argument `Result<T>` alias is
+//! `docs/reference/macros/cgp_computer.md`, *Common mistakes*: a one-argument `Result<T>` alias is
 //! rejected, because the macro selects the fallible bundle only for `Result<T, E>`.
 
 use cgp::prelude::*;

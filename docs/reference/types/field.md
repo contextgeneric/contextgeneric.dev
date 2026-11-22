@@ -150,7 +150,7 @@ shape or in an error, and this page is mostly for that.
 - **Do not use a bare [`Product!`](../macros/product.md) of values** when you need the names. A list of
   `Field` entries carries the names, and the operations that walk a shape match on them.
 
-## Common Mistakes
+## Common mistakes
 
 **The tag is compile-time only, so it never affects equality or printing.** Two `Field` values compare
 equal when their values are equal, and `Debug` shows the value alone. The tag does not distinguish them at

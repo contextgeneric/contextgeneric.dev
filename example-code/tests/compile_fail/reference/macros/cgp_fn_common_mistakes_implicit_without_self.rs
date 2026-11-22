@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_fn.md`, *Common Mistakes*: implicit arguments need a `self` receiver.
+//! `docs/reference/macros/cgp_fn.md`, *Common mistakes*: implicit arguments need a `self` receiver.
 
 use cgp::prelude::*;
 

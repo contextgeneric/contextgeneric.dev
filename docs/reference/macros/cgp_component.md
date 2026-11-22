@@ -104,7 +104,7 @@ parameters; [Formal grammar](#formal-grammar) gives the rules.
 The trait body may declare any number of methods, associated types, and associated consts, and the
 macro reproduces every one of them on the provider trait. The one declaration it refuses is a const
 generic parameter on the trait itself, for the reason given under
-[Common Mistakes](#common-mistakes).
+[Common mistakes](#common-mistakes).
 
 ### Where the component key lives
 
@@ -170,7 +170,7 @@ The `open` statement of [`delegate_components!`](./delegate_components.md) super
 `#[uses(...)]`, `#[extend_where(...)]`, and `#[use_provider(...)]` look like they belong here, but
 only [`#[cgp_impl]`](./cgp_impl.md) and [`#[cgp_fn]`](./cgp_fn.md) read them. None of them is an
 attribute in its own right, so the macro rejects one written above a component and names `#[extend]`
-instead; see [Common Mistakes](#common-mistakes). The equivalent of `#[uses]` on a
+instead; see [Common mistakes](#common-mistakes). The equivalent of `#[uses]` on a
 component is a supertrait, written with `#[extend]`.
 
 ## Examples
@@ -467,7 +467,7 @@ The tuple drops bounds and defaults, and it names the parameters positionally an
 single-parameter `(Shape)` has no trailing comma, so it is the type `Shape` in parentheses rather
 than a one-element tuple, and every place the macro writes the tuple agrees on that. A const
 parameter cannot appear in it at all, which is why the macro rejects one; see
-[Common Mistakes](#common-mistakes).
+[Common mistakes](#common-mistakes).
 
 **Attributes on a trait method are copied to the provider trait's declaration of that method.** The
 generated impls' methods carry none, and for `#[track_caller]` that is enough, because Rust applies
@@ -508,7 +508,7 @@ name and the context name take no generics.
 The component name's parameters are bare names, such as `name: ShapeComponent<Shape>`, which the
 marker struct then declares. Each must be one of the trait's own parameters, since the macro writes
 the name wherever the component appears, and the macro rejects one the trait does not declare, as
-[Common Mistakes](#common-mistakes) shows. The parser rejects anything more:
+[Common mistakes](#common-mistakes) shows. The parser rejects anything more:
 
 - a bound fails with ``trait bounds (`A: Clone`) are not allowed in type generics``, and a lifetime
   bound with ``lifetime bounds (`'a: 'b`) are not allowed in type generics``;
@@ -525,7 +525,7 @@ A provider for such a component names the component explicitly, as in
 `{...}` for the key/value form, is ordinary Rust attribute syntax and does not change how the macro
 parses the arguments inside.
 
-## Common Mistakes
+## Common mistakes
 
 **The macro, not the compiler, rejects a const generic parameter on the trait:**
 

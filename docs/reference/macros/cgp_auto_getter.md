@@ -88,7 +88,7 @@ in the return type needs that receiver, and under `&self` the macro rejects it w
 
 Two combinations fall outside the table. `Option<&[T]>` and `Option<&dyn Trait>` have no rule of their
 own, and the macro rejects them, since an `Option<[T]>` field cannot exist. And a shared
-`Option` return under `&mut self` does not compile, as [Common Mistakes](#common-mistakes) records.
+`Option` return under `&mut self` does not compile, as [Common mistakes](#common-mistakes) records.
 
 The `&str` row is the one most often wanted and least obvious: the context stores a `String` and the
 getter hands out a borrow of it, so no context ever has to hold a `&str`. **These are the same rules an
@@ -340,7 +340,7 @@ where
 The declared bound moves onto that parameter, so `Display` is required of whatever the field holds. Note
 that the field tag still comes from the **method** name rather than from the associated type's.
 
-## Common Mistakes
+## Common mistakes
 
 **The field name is fixed to the method name.** A context storing the value under any other name does not
 satisfy the trait, and because the failure is an unmet bound on a blanket impl the method reads as missing

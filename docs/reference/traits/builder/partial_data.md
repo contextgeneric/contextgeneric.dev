@@ -129,7 +129,7 @@ build. Contrast [`FinalizeBuild`](./finalize_build.md), whose impl fixes every m
 to finalize early. The enum side implements it the same way on its extraction companions, with
 `Target` naming the original enum.
 
-## Common Mistakes
+## Common mistakes
 
 **It says nothing about completeness.** A `PartialData` bound is satisfied by an empty builder as readily
 as by a full one. Requiring completeness is [`FinalizeBuild`](./finalize_build.md).

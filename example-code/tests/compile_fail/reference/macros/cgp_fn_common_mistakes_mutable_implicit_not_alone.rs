@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_fn.md`, *Common Mistakes*: a mutable implicit argument must be the
+//! `docs/reference/macros/cgp_fn.md`, *Common mistakes*: a mutable implicit argument must be the
 //! only implicit argument.
 
 use cgp::prelude::*;

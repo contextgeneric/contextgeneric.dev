@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_computer.md`, *Common Mistakes*: the fallible members need an error
+//! `docs/reference/macros/cgp_computer.md`, *Common mistakes*: the fallible members need an error
 //! type on the context, while `compute` does not.
 
 use core::marker::PhantomData;

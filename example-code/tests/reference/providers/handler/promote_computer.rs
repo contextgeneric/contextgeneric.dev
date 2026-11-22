@@ -102,7 +102,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The one-step entries work for a hand-written base: `TryComputerComponent` goes to `Promote` and
 /// `AsyncComputerComponent` to `PromoteAsync`, each of which needs only the `Computer`.

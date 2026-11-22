@@ -130,14 +130,14 @@ That walk visits each field of the target's [`HasFields`](../shape/has_fields.md
 applies the transform, and writes it back under `IsOptional`. The transform's impls decide the
 value: `IsPresent` becomes `Some(value)` and `IsNothing` becomes `None`. **`TransformOptional` lacks
 an impl from `IsOptional`**, so a builder that is already optional cannot be converted again, as
-[Common Mistakes](#common-mistakes) shows.
+[Common mistakes](#common-mistakes) shows.
 
 Its mirror image is [`CanFinalizeWithDefault`](./can_finalize_with_default.md), which runs the same walk
 with [`TransformMapDefault`](./transform_map_default.md) toward `IsPresent`. **Both operations are the
 same recursion with a different marker**, which is why the defaulted and optional workflows behave so
 symmetrically.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

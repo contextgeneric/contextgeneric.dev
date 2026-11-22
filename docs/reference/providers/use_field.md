@@ -154,7 +154,7 @@ The `&str` return reads a `String` field and wraps the read in `AsRef::as_ref`, 
 return-type shorthand. The paired [`IsProviderFor`](../traits/wiring/is_provider_for.md)
 implementation carries the same `HasField` bound, so a check names a missing field precisely. A
 getter with more than one method gets no `UseField` implementation, since one tag cannot name
-several fields; [Common Mistakes](#common-mistakes) shows the error.
+several fields; [Common mistakes](#common-mistakes) shows the error.
 
 **The foundational field getters.** `UseField<Tag>` implements
 [`FieldGetter`](../traits/field-access/field_getter.md), which reads the field by reference:
@@ -192,7 +192,7 @@ the macro generates `UseType` and `WithProvider` implementations but no `UseFiel
 forwarding the computation to the value stored in the field, which must itself implement the
 consumer trait; see [`Computer`](../components/handler/computer.md#usage).
 
-## Common Mistakes
+## Common mistakes
 
 **A getter with more than one method cannot be wired to `UseField`.** `#[cgp_getter]` generates the
 `UseField` implementation only for a single-method getter, so wiring a two-method `HasFooBar` getter

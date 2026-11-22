@@ -186,7 +186,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 pub mod common_mistakes {
     use cgp::core::field::types::Cons;
     use cgp::core::field::types::Field;

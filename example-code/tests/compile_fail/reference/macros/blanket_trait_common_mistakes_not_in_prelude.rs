@@ -1,4 +1,4 @@
-//! `docs/reference/macros/blanket_trait.md`, *Common Mistakes*: the macro is not in the prelude.
+//! `docs/reference/macros/blanket_trait.md`, *Common mistakes*: the macro is not in the prelude.
 
 use cgp::prelude::*;
 

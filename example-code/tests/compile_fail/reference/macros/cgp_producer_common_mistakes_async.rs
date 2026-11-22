@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_producer.md`, *Common Mistakes*: a producer cannot be `async`.
+//! `docs/reference/macros/cgp_producer.md`, *Common mistakes*: a producer cannot be `async`.
 
 use cgp::prelude::*;
 

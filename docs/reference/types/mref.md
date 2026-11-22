@@ -170,7 +170,7 @@ return type when the value is not always a field the context can lend.
   [`UseField`](../providers/use_field.md) family, where a getter's return type selects the accessor the
   macro generates.
 
-## Common Mistakes
+## Common mistakes
 
 **`MRef` is not related to [`Life`](life.md).** Its `'a` is an ordinary borrow lifetime on a runtime
 value, while `Life<'a>` is a zero-sized type-level lift for provider wiring. They share only the word

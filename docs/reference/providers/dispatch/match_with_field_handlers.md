@@ -171,7 +171,7 @@ extract adapter per variant. Only the `Either`/`Void` list has impls, which is w
 matchers apply to enums and not to structs. The first-argument aliases use
 `MapExtractFirstFieldAndHandle` in the same place.
 
-## Common Mistakes
+## Common mistakes
 
 **The mistakes of `MatchWithValueHandlers` apply unchanged.** The input must be an enum, and the
 matcher answers only `Computer` and `AsyncComputer`;

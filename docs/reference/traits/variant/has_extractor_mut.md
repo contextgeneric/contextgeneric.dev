@@ -148,7 +148,7 @@ both.
 The trait lacks a rebuild counterpart, and needs none, because the value was never taken apart, only
 borrowed.
 
-## Common Mistakes
+## Common mistakes
 
 **It takes `&mut self`, so nothing else may borrow the value** for as long as the extractor or any
 payload taken from it lives. That is ordinary borrow checking.

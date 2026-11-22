@@ -28,7 +28,7 @@ reshape every class. Where a class passes through as the compiler
 wrote it, this page says so and shows the raw form instead. The raw forms quoted here are what
 stable `rustc` prints.
 
-## The one distinction that explains everything
+## Checked and hidden errors
 
 **The same mistake produces two different errors depending on how you run into it**, and
 knowing which one you are looking at decides whether there is a cause in the message to find at all.
@@ -55,18 +55,18 @@ Match the compiler's code and the shape of the message.
 
 | What the compiler says | Usually means | Section |
 |---|---|---|
-| `E0599` method exists but its trait bounds were not satisfied | A provider's dependency is unmet, reached by a method call | [A dependency is not met](#a-dependency-is-not-met) |
+| `E0599` method exists but its trait bounds were not satisfied | A provider's dependency is unmet, reached by a method call | [Unmet dependencies](#unmet-dependencies) |
 | `E0599` no associated function found for type parameter | An inner provider called but never imported | [Using something you did not declare](#using-something-you-did-not-declare) |
-| `E0277` … `CanUseComponent` is not satisfied | A checked component's provider is missing something | [A dependency is not met](#a-dependency-is-not-met) |
+| `E0277` … `CanUseComponent` is not satisfied | A checked component's provider is missing something | [Unmet dependencies](#unmet-dependencies) |
 | `E0277` the trait bound `f64: Eq` is not satisfied | An ordinary Rust bound on a wired type | [When the missing bound is an ordinary Rust trait](#when-the-missing-bound-is-an-ordinary-rust-trait) |
 | `E0277` … `IsProviderFor` is not satisfied | A provider impl written without its macro | [A provider impl written without its macro](#a-provider-impl-written-without-its-macro) |
-| `E0277` … `PathCons<…>: SomeNamespace<…>` is not satisfied | A namespace path nothing binds | [Nothing is wired there](#nothing-is-wired-there) |
+| `E0277` … `PathCons<…>: SomeNamespace<…>` is not satisfied | A namespace path nothing binds | [Missing wiring](#missing-wiring) |
 | `E0277` the size for values of type `[u8]` cannot be known | A field-type shorthand lowered to an unsized type | [A field-type shorthand without a rule](#a-field-type-shorthand-without-a-rule) |
 | `E0271` type mismatch resolving `<… as …>::Assoc == …` | A type pinned one way and wired another | [When two decisions disagree about a type](#when-two-decisions-disagree-about-a-type) |
-| `E0119` conflicting implementations | Two wiring entries claim one key | [The wiring itself does not compile](#the-wiring-itself-does-not-compile) |
-| `E0425` / `E0782` a wiring name resolves to nothing | A component or provider named wrongly in a table, or a provider header's component not imported | [A wiring name that resolves to nothing](#a-wiring-name-that-resolves-to-nothing) |
-| `E0107` missing generics for struct `…Component` | A component key with parameters, derived by a provider header | [A wiring name that resolves to nothing](#a-wiring-name-that-resolves-to-nothing) |
-| `E0428` the name … is defined multiple times | A generated name declared twice | [Two entries claim one key](#two-entries-claim-one-key) |
+| `E0119` conflicting implementations | Two wiring entries claim one key | [Structural wiring errors](#structural-wiring-errors) |
+| `E0425` / `E0782` a wiring name resolves to nothing | A component or provider named wrongly in a table, or a provider header's component not imported | [Unresolved wiring names](#unresolved-wiring-names) |
+| `E0107` missing generics for struct `…Component` | A component key with parameters, derived by a provider header | [Unresolved wiring names](#unresolved-wiring-names) |
+| `E0428` the name … is defined multiple times | A generated name declared twice | [Conflicting entries](#conflicting-entries) |
 | `E0275` overflow evaluating the requirement | A wiring or inheritance cycle | [A lookup that never terminates](#a-lookup-that-never-terminates) |
 | `E0210` / `E0117` [orphan rule](/docs/reference/glossary#orphan-rule) | Registering into a namespace you do not own | [Registering into a namespace you do not own](#registering-into-a-namespace-you-do-not-own) |
 | `E0207` type parameter is not constrained, or `[CGP-E019]` | A per-entry generic that never reaches the key | [A generic that reaches nothing](#a-generic-that-reaches-nothing) |
@@ -76,7 +76,7 @@ Match the compiler's code and the shape of the message.
 | `E0404` expected trait, found type parameter | An [abstract type](/docs/reference/glossary#abstract-type) named after its own bound | [A name the generated code cannot see](#a-name-the-generated-code-cannot-see) |
 | `E0277` / `E0271` a bound on a generated partial type | A builder, extractor, or cast in a state its value does not allow | [Extensible data](#extensible-data) |
 
-## A dependency is not met
+## Unmet dependencies
 
 This is the most common CGP failure: a provider needs something from its context, and the context
 does not supply it.
@@ -321,7 +321,7 @@ provider trait. Blocks naming `SomeProvider: SomeTrait<App>` are consequences. T
 besides: check one suspect component in its own `check_components!` block, or comment entries out
 until the failure moves.
 
-## Nothing is wired there
+## Missing wiring
 
 A neighbouring failure that reads like a dependency problem but is not: the lookup does not find a
 provider *at all*, rather than one being found whose requirements fail.
@@ -357,13 +357,13 @@ Reached by a method call instead of a check, this hides exactly as any other dep
 direct line on the context, whichever matches where the wiring belongs. When the path itself is
 wrong, reconcile the prefix and the binding so they name the same one.
 
-## The wiring itself does not compile
+## Structural wiring errors
 
 These are structural failures. The compiler reports a definite code and points at both offending
 lines, so the cause does not need hunting for. The difficulty is only mapping the message back to
 the wiring decision.
 
-### Two entries claim one key
+### Conflicting entries
 
 The same component wired twice, a generic table overlapping a specific one, an `open` header colliding
 with an explicit mapping, or a provider name declared twice. CGP lowers each block independently and
@@ -392,7 +392,7 @@ future crate could add, not a second problem.
 A duplicate **name** of your own, rather than a duplicate key, is an `E0428` instead, and passes through
 uncoded, because it already points precisely at both definitions.
 
-### A wiring name that resolves to nothing
+### Unresolved wiring names
 
 A table entry names a component marker and a provider type, and both must exist where the table is
 written. A consumer trait in the key, a component that is not imported, a key guessed from a trait's
@@ -555,7 +555,7 @@ position, and the tool reports the mistake once. A `for` loop whose key skips it
 per-entry lifetime the provider uses and a blanket entry keyed by its own parameter still keep the
 compiler's `E0207`, whose suggestions do not compile.
 
-## A macro lowered something the compiler rejects
+## Rejected macro output
 
 Here the failure is not in the wiring at all but in what a macro turned your input into. These are
 generally the clearest errors in the catalog, and most pass through unrewritten because the raw message

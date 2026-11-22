@@ -189,7 +189,7 @@ entries. The same rule holds at each level: a child cannot rebind a key its pare
 context cannot rebind a key either one binds. All of it is projections, resolved at compile time,
 with nothing at run time.
 
-## Common Mistakes
+## Common mistakes
 
 **A namespace entry cannot be overridden from the context.** A direct entry for a key the namespace
 binds is rejected rather than preferred. Wiring the example's component by its bare name:

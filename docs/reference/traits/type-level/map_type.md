@@ -177,7 +177,7 @@ So the partial type's *shape* is fixed while its *storage* is decided per instan
 transition is a change of type argument. [`UpdateField`](../builder/update_field.md) performs one such
 transition on a value.
 
-## Common Mistakes
+## Common mistakes
 
 **`IsNothing` and `IsVoid` are not interchangeable.** `IsNothing` is inhabited (`()`), `IsVoid` is not
 (`Void`). Records use the first, variants the second, and an error naming the wrong one usually means the

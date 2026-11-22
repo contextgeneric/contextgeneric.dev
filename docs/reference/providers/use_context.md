@@ -49,7 +49,7 @@ It also appears as a type argument inside a wiring entry, where a provider that 
 provider is given `UseContext` explicitly. The [dispatch combinators](dispatch/index.md), such as
 `MatchWithValueHandlers<Provider = UseContext>`, default their per-variant provider to it. It is
 never the whole value of an entry for the component it implements, which is the cycle
-[Common Mistakes](#common-mistakes) describes.
+[Common mistakes](#common-mistakes) describes.
 
 `UseContext` stands in for a provider trait only where that trait resolves to a *different*
 implementation than the one being wired: a wrapper over another trait, or a per-type dispatch entry
@@ -139,7 +139,7 @@ be a different trait, or the same trait at a different type, as `EncodeVec` dele
 `Encoder<Vec<T>>` to the context's `Encoder<T>`.
 
 The one shape `UseContext` cannot serve is a component whose only implementation on the context is that
-same delegation, which loops; [Common Mistakes](#common-mistakes) explains it. When you want a wrapper
+same delegation, which loops; [Common mistakes](#common-mistakes) explains it. When you want a wrapper
 over the *same* trait and the *same* type, name the inner provider explicitly rather than
 defaulting to `UseContext`.
 
@@ -185,7 +185,7 @@ where
 Any [supertrait](/docs/reference/glossary#supertrait) bound on the consumer trait is reproduced in
 the `where` clause, so a context must satisfy it before `UseContext` can stand in as a provider.
 
-## Common Mistakes
+## Common mistakes
 
 **Wiring a component to `UseContext` on the context whose only implementation is that same delegation
 creates a cycle.** If `App` wired `@EncoderComponent.u32: UseContext`, then `App`'s `CanEncode<u32>`

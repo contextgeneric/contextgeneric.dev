@@ -237,7 +237,7 @@ still rejects a relaxed bound on a trait, so `#[extend(?Sized)]` fails with
 may be repeated, with every occurrence's entries collected together. The two attributes differ in
 where the bounds land, not in the grammar.
 
-## Common Mistakes
+## Common mistakes
 
 **On a `#[cgp_impl]` the compiler does not recognize the attribute**, rather than accepting and ignoring
 it. The macro does not consume it, so it reaches the compiler as an unknown attribute:

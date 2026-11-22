@@ -3,7 +3,7 @@
 //! Pins the `Double` provider from the page's Examples, wired onto a context directly and through the
 //! `PromoteComputer` bundle, and the Usage section's claims: the wiring for a context that joins
 //! `DefaultNamespace`, and `UseField` forwarding to a field that computes. The ambiguous
-//! associated-function call from Common Mistakes is a trybuild fixture.
+//! associated-function call from Common mistakes is a trybuild fixture.
 
 /// ## Usage
 ///
@@ -150,7 +150,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The fix the page gives for the ambiguous call: call through the consumer trait by name. The
 /// rejected call is `tests/compile_fail/reference/components/computer_common_mistakes_ambiguous_concrete_call.rs`.

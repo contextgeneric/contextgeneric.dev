@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_type.md`, *Common Mistakes*: the default name comes from the
+//! `docs/reference/macros/cgp_type.md`, *Common mistakes*: the default name comes from the
 //! associated type, so a key guessed from the trait name does not exist.
 
 use cgp::prelude::*;

@@ -285,7 +285,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// Field order is part of the type: two structs with the same fields in different orders have
 /// different shapes.

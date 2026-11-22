@@ -41,7 +41,7 @@ pub enum Shape {
 Each variant is keyed by [`Symbol!`](../macros/symbol.md) of its name. Generic parameters, lifetimes,
 and a `where` clause are carried onto everything generated, including the companion enums.
 
-### Every variant needs one unnamed payload or none
+### Variant payloads
 
 Every variant must contain exactly one unnamed field or no fields at all. The constructor and
 extractor implementations use the field's type as the payload type. A variant with no fields,
@@ -205,7 +205,7 @@ The companion names are reserved: `__Partial{Name}` and `__PartialRef{Name}`. Th
 type's visibility. Each generated impl is aimed at the token it came from, so a conflict with a
 hand-written impl underlines that variant rather than the whole derive.
 
-## Common Mistakes
+## Common mistakes
 
 **Every variant needs one unnamed payload or none.** Individual variants cannot opt out.
 [`HasFields`](./derive_has_fields.md) accepts all variant shapes when only the representation and

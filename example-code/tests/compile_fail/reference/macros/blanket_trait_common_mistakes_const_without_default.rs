@@ -1,4 +1,4 @@
-//! `docs/reference/macros/blanket_trait.md`, *Common Mistakes*: a constant needs a default expression.
+//! `docs/reference/macros/blanket_trait.md`, *Common mistakes*: a constant needs a default expression.
 
 use cgp::core::macros::blanket_trait;
 

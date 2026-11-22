@@ -33,7 +33,7 @@ A context then **joins** it with one line inside its own table, after which ever
 directly falls through to the namespace. Its own entries fill the paths the namespace leaves open, so a
 namespace behaves like a base configuration each context completes: most of the wiring for free, and a
 handful of choices where they matter. A context cannot replace an entry the namespace binds; see
-[Common Mistakes](#common-mistakes).
+[Common mistakes](#common-mistakes).
 
 That inherit-and-complete behaviour is why **a namespace is how CGP expresses presets.** There is no
 separate preset construct: a library publishes a namespace that binds what every application shares and
@@ -116,7 +116,7 @@ cgp_namespace! {
 
 The parent may itself be parameterized, and may be named by a path. The child's entries sit beside
 everything it inherits: they may add keys the parent does not resolve, but not redefine one it does, as
-[Common Mistakes](#common-mistakes) explains. A path-rewriting entry like the one above qualifies when
+[Common mistakes](#common-mistakes) explains. A path-rewriting entry like the one above qualifies when
 the parent routes the `@cgp.core.error` prefix onward without binding it, as a parent inheriting
 `DefaultNamespace` does for CGP's error components, and it reroutes a whole subtree of those routes
 rather than a single component.
@@ -137,7 +137,7 @@ only the inheritance impl, so it compiles only where the `ExtendedNamespace` tra
 `__ExtendedNamespaceComponents` struct are already declared. The shorthand is this macro's alone, since
 [`delegate_components!`](./delegate_components.md) keeps its braces even when its table is empty.
 
-### The other two halves: registering, and joining
+### Registering and joining
 
 Defining a namespace is only one part of the pattern. A component **registers into** one with the
 [`#[prefix(...)]`](../attributes/prefix.md) attribute on its trait, which puts that component's
@@ -266,7 +266,7 @@ paths and must itself join the namespace, or the check fails reporting that `Cor
 
 A couple of things a namespace is *not* for. It will not make a single context's wiring shorter on its own; the
 entries still have to exist somewhere. And it is not how one component gets per-type dispatch, which is
-`open`'s job; the two do not combine on the same component, as the [Common Mistakes](#common-mistakes) explain.
+`open`'s job; the two do not combine on the same component, as the [Common mistakes](#common-mistakes) explain.
 
 ## Under the hood
 
@@ -370,7 +370,7 @@ The `#[prefix(...)]` attribute, which registers a component into a namespace and
 [`#[cgp_component]`](./cgp_component.md) trait, has a grammar of its own, given on
 [its page](../attributes/prefix.md#formal-grammar).
 
-## Common Mistakes
+## Common mistakes
 
 **A context cannot override a path its namespace itself terminates.** Joining with `namespace N;` emits a
 blanket `DelegateComponent` impl covering every path `N` resolves, so a direct entry for one of those

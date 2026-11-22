@@ -2,7 +2,7 @@
 //!
 //! Pins that wiring an abstract-type component to `UseType<f64>` sets the context's abstract type to
 //! `f64`, read back through generic code, and that the check enforces the `Copy` bound. The unchecked
-//! `UseType<String>` from Common Mistakes is a trybuild fixture; the `WithType` alias is covered by
+//! `UseType<String>` from Common mistakes is a trybuild fixture; the `WithType` alias is covered by
 //! `with_type.rs`.
 
 /// ## Examples

@@ -213,7 +213,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The derives that emit no companion type leave field helper attributes alone, so `serde`'s
 /// `rename` coexists with them. The companion-emitting case is a trybuild fixture.

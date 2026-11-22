@@ -2,7 +2,7 @@
 //!
 //! Pins the `StringLength` provider from the page's Examples, wired for the borrowed input and, through
 //! `PromoteRef`, for an owned input that dereferences to it, and the reference-parameter function
-//! Common Mistakes gives as the fix. The owned-input computer that cannot answer the borrowed slot is a
+//! Common mistakes gives as the fix. The owned-input computer that cannot answer the borrowed slot is a
 //! trybuild fixture.
 
 /// ## Examples
@@ -52,7 +52,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The fix the page gives: a `#[cgp_computer]` function over a reference answers `compute_ref`. The
 /// owned-input computer behind `PromoteRef` is

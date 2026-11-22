@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: a `&mut self` getter returning a shared `Option<&T>` fails with `E0308`.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: a `&mut self` getter returning a shared `Option<&T>` fails with `E0308`.
 
 use cgp::prelude::*;
 

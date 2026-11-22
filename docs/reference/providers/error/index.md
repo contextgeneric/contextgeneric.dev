@@ -33,7 +33,7 @@ an `anyhow::Error`. The providers here stay abstract over the context's error ty
 strategies that hold for any of them. A context usually wires a mix: a backend for the concrete error
 type, plus these generic providers for the cross-cutting strategies.
 
-## The seven providers, by role
+## The providers by role
 
 The seven divide into three groups.
 

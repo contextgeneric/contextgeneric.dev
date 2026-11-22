@@ -189,7 +189,7 @@ Each step changes the builder's type, marking the fields it set as present, so `
 type after the last step. The `TryComputer` and `Handler` impls run the list with `try_compute` or
 `handle`, return a step's error through `?`, and finalize the same way.
 
-## Common Mistakes
+## Common mistakes
 
 **A list that leaves a field unset does not compile.** Dropping the `user_agent` step leaves the
 final builder with that field absent, and `FinalizeBuild` exists only once every field is present,

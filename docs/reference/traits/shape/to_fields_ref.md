@@ -123,7 +123,7 @@ An enum's borrowed conversion matches the concrete variant and produces the corr
 borrowed sum, with the payload borrowed rather than moved, which is also how
 [`HasExtractorRef`](../variant/has_extractor_ref.md) reads a variant without consuming the value.
 
-## Common Mistakes
+## Common mistakes
 
 **It supertraits [`HasFieldsRef`](./has_fields_ref.md), not [`HasFields`](./has_fields.md).**
 Bounding on `ToFieldsRef` does not give you `Fields`; require both traits if the code needs both

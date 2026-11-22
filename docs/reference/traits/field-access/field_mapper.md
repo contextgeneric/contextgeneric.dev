@@ -177,7 +177,7 @@ Both `'static` bounds are on types that are `'static` in practice, the tag and t
 zero-sized marker; the field's value stays free. `ChainGetters` nests these calls, one per step, so
 a chain of any length stays free of lifetime bounds.
 
-## Common Mistakes
+## Common mistakes
 
 **A chained `get_field` inside a provider fails.** As the example notes, a provider that calls one
 getter's `get_field` on another's result fails with `E0311` on the intermediate type; call

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_impl.md`, *Common Mistakes*: `#[extend]` is not read by `#[cgp_impl]`,
+//! `docs/reference/macros/cgp_impl.md`, *Common mistakes*: `#[extend]` is not read by `#[cgp_impl]`,
 //! so it reaches the compiler as an unresolved attribute.
 
 use cgp::prelude::*;

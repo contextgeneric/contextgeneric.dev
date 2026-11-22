@@ -155,7 +155,7 @@ its own `match` names every variant.
 Narrowing from here is [`ExtractField`](./extract_field.md), and the chain ends at
 [`FinalizeExtract`](./finalize_extract.md).
 
-## Common Mistakes
+## Common mistakes
 
 **It consumes the value.** Reach for [`HasExtractorRef`](./has_extractor_ref.md) when the original must
 survive. This is the commonest over-requirement in the family.

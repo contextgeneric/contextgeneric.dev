@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_provider.md`, *Common Mistakes*: `#[cgp_new_provider]` over a struct
+//! `docs/reference/macros/cgp_provider.md`, *Common mistakes*: `#[cgp_new_provider]` over a struct
 //! that is already declared defines it twice.
 
 use cgp::prelude::*;

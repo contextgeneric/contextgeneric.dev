@@ -17,7 +17,7 @@ Fill in every member of the handler family from a provider that implements `Comp
 [`#[cgp_computer]`](../../macros/cgp_computer.md) wires the provider it generates to
 `PromoteComputer<Self>`, so one written function answers the whole handler surface. A context names
 the bundle only to route its own components through such a provider, or through the entries that
-serve any `Computer`, as [Common Mistakes](#common-mistakes) sets out. This page explains what the
+serve any `Computer`, as [Common mistakes](#common-mistakes) sets out. This page explains what the
 bundle emits.
 
 :::
@@ -150,7 +150,7 @@ of the entries take their step from a sibling rather than from the base: `Handle
 matching owned member over a borrowed input. `ComputerRefComponent` takes its step from the base,
 which must accept the borrow as its input.
 
-## Common Mistakes
+## Common mistakes
 
 **Only the one-step entries serve a hand-written `Computer`.** `TryComputerComponent` and
 `AsyncComputerComponent` need only the base, so `PromoteComputer<Double>` answers them for any

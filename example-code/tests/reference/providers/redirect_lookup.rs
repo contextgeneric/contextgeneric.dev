@@ -2,7 +2,7 @@
 //!
 //! `RedirectLookup` is generated machinery, so the code the page shows is the namespace registration
 //! that produces a redirect, and the components whose generated impls Under the hood lists. The
-//! bare-key entry from Common Mistakes is a trybuild fixture.
+//! bare-key entry from Common mistakes is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {

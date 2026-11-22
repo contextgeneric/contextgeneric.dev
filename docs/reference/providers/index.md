@@ -35,7 +35,7 @@ aliases [`WithField`](./with_field.md), [`WithType`](./with_type.md), [`WithCont
 [`WithFieldRef`](./with_field_ref.md), and [`WithDelegatedType`](./with_delegated_type.md) are how it
 usually appears in wiring.
 
-## Dispatching per type, and organizing wiring
+## Dispatching and organizing wiring
 
 [`UseDelegate`](./use_delegate.md) chooses a provider by the type of a generic parameter through a
 lookup table, the legacy form of the per-type dispatch the

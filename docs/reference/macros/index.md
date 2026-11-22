@@ -13,11 +13,11 @@ providers it uses and checking that wiring holds, and building the type-level va
 lists, paths) that the rest of the system runs on. This page groups every macro in this section by
 the kind of work it does, in roughly the order most CGP code uses them.
 
-If you are new to CGP, start with the [six essentials](/docs/reference/#start-with-these-six) on the
+If you are new to CGP, start with the [six essentials](/docs/reference/#the-core-constructs) on the
 reference overview rather than here; this page is the fuller reference for once those six are
 familiar.
 
-## Defining a component, and writing its providers
+## Components and providers
 
 [`#[cgp_component]`](./cgp_component.md) is the macro every wired trait starts from: it turns one
 trait into the consumer trait callers use, the provider trait implementations target, and the marker
@@ -45,7 +45,7 @@ answer every member of that family at once, synchronous, async, fallible, and in
 [`#[cgp_auto_dispatch]`](./cgp_auto_dispatch.md) generates a handler that routes an extensible-data
 input to a per-type trait's own implementations.
 
-## Wiring a type, and checking that wiring
+## Wiring and checking
 
 [`delegate_components!`](./delegate_components.md) is where a concrete type says which provider
 answers each component, in a table that is a compile-time fact rather than a runtime lookup. Because

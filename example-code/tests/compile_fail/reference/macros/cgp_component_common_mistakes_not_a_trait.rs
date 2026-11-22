@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: the attribute must be applied to a
+//! `docs/reference/macros/cgp_component.md`, *Common mistakes*: the attribute must be applied to a
 //! trait.
 
 use cgp::prelude::*;

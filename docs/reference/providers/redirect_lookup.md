@@ -197,7 +197,7 @@ generates a namespace impl whose delegate is `RedirectLookup<Components, Path>`,
 joined onto the component marker, so resolving the component under that namespace follows the
 prefixed path into the table.
 
-## Common Mistakes
+## Common mistakes
 
 **A context that joins a namespace cannot also bind a registered component at its bare key.** Joining
 `DefaultNamespace` already gives `App` an entry for `GreeterComponent`, the one that redirects to

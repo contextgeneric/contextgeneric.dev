@@ -132,7 +132,7 @@ So an unsatisfied bound here is always really an unsatisfied bound one layer dow
 is an associated function checked against these `where` clauses, not a method looked up on a
 receiver, rustc follows the chain to the root cause and prints each layer as a `required for` note.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

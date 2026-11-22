@@ -132,7 +132,7 @@ match.**
   payload of a variant already ruled out. An extraction that stops short leaves some variant
   `IsPresent`, and the missing `FinalizeExtract` impl is for that partly ruled-out companion.
 
-## Common Mistakes
+## Common mistakes
 
 **`Void` is uninhabited, and [`Nil`](nil.md) is not.** `Nil` is the real value of the empty product, while
 `Void` is a type without values. Records use `Nil`, and variants use `Void`. An error that names the wrong

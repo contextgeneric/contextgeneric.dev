@@ -228,12 +228,12 @@ pub mod header_without_new {
     cgp_namespace! { ExtendedNamespace: BaseNamespace }
 }
 
-/// ## The other two halves: registering, and joining
+/// ## Registering and joining
 ///
 /// A component registered under a prefix, and a context joining the namespace and binding the
 /// prefixed path. `AppNamespace` and `ShowWithDebug` are named by the page without being declared
 /// in this section (the provider appears under *Examples*), so both are declared here.
-pub mod the_other_two_halves_registering_and_joining {
+pub mod registering_and_joining {
     use cgp::prelude::*;
 
     cgp_namespace! { new AppNamespace {} }
@@ -453,7 +453,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// Every error the page quotes has a trybuild fixture.
 ///

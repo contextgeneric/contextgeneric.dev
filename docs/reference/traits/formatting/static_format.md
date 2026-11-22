@@ -172,7 +172,7 @@ So any type-level string can be interpolated or turned into an owned `String`, a
 [`StaticString`](./static_string.md), which does the same decoding once, at compile time, into a
 `&'static str` constant.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude, and its module differs from [`StaticString`](./static_string.md)'s.**
 This trait and [`ConcatPath`](./concat_path.md) come from `cgp::core::base::traits`, and

@@ -157,7 +157,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// A `Result` output is not interpreted: `produce` returns it as a value, and `try_compute` wraps
 /// it in `Ok`, which is the output the page quotes.

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_type.md`, *Common Mistakes*: a bound on the type is enforced at the
+//! `docs/reference/macros/cgp_type.md`, *Common mistakes*: a bound on the type is enforced at the
 //! check, not at the wiring line.
 
 use cgp::prelude::*;

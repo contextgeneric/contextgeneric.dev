@@ -61,7 +61,7 @@ use cgp::extra::field::impls::CanFinalizeWithDefault;
 **A field's type needs `Default` unless the field is `IsPresent`.** On a core builder that means
 every unset field. On an optional builder it means every field, set or not, because a set field is
 still `IsOptional` and only [`TransformMapDefault`](./transform_map_default.md)'s `IsPresent` impl
-is free of the bound. [Common Mistakes](#common-mistakes) shows what rustc reports.
+is free of the bound. [Common mistakes](#common-mistakes) shows what rustc reports.
 
 ## Examples
 
@@ -143,7 +143,7 @@ symmetrically.
 Because the transform targets `IsPresent`, the value handed to `finalize_build` is at exactly the
 configuration its single impl requires, so the strict check runs, and cannot fail.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

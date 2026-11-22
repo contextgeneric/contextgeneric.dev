@@ -157,7 +157,7 @@ serves any depth. The resolved stack is another marker, and everything downstrea
 one. The whole fold happens during trait resolution, so a stacked monadic pipeline is not a runtime
 structure.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

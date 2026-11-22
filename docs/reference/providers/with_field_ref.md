@@ -122,7 +122,7 @@ The `UseFieldRef` mechanism, including its mutable form, is documented on the
 [`UseFieldRef`](use_field_ref.md) page, and the generated `WithProvider` impl on the
 [`WithProvider`](with_provider.md) page.
 
-## Common Mistakes
+## Common mistakes
 
 **`WithFieldRef` cannot serve a `-> &str` getter.** `Value` must be sized, and a `&str` return
 already makes the getter macros expect a `String` field, so `WithFieldRef<Symbol!("name"), str>` fails

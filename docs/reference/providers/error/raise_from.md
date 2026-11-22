@@ -157,7 +157,7 @@ The bound `Context::Error: From<E>` makes one wiring cover many source types. Th
 [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl carries the same clause, so a
 [check](../../macros/check_components.md) reports a missing `From` impl at the wiring site.
 
-## Common Mistakes
+## Common mistakes
 
 **`RaiseFrom` accepts only sources the error has a `From` impl for.** Wiring
 `ErrorRaiserComponent: RaiseFrom` on a context whose error is `String` and raising a `ParseIntError`

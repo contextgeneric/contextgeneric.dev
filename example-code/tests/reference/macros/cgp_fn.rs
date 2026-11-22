@@ -71,10 +71,10 @@ pub mod usage {
     }
 }
 
-/// ### Generics, and where each bound lands
+/// ### Generics and bounds
 ///
 /// The `scale` function: `Scalar` lands on the trait, its `where` bound on the impl alone.
-pub mod generics_and_where_each_bound_lands {
+pub mod generics_and_bounds {
     use core::ops::Mul;
 
     use cgp::prelude::*;

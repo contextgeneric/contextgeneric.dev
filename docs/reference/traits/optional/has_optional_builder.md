@@ -157,7 +157,7 @@ operations apply: [`SetOptional`](./set_optional.md) resolves where
 [`FinalizeBuild`](../builder/finalize_build.md) does not resolve at all until a finalize has
 re-marked the fields back to `IsPresent`.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`, along with whatever else in the
 layer you use.

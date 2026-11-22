@@ -16,7 +16,7 @@ time rather than building an idea up. When a page here tells you *what* a constr
 to know *why* CGP works that way, the [concepts](/docs/concepts/) are where each idea is explained on
 its own.
 
-## Start with these six
+## The core constructs
 
 Most CGP code uses a small number of constructs over and over. If you read nothing else here, read
 these.
@@ -34,13 +34,13 @@ The first four are the full component cycle: define, implement, wire, verify. Th
 most code avoids needing that cycle at all. Reach for them first, and climb to a full component when
 a trait needs a second implementation.
 
-## By what you are trying to do
+## Constructs by task
 
 The rest of the reference is grouped by the job a construct does rather than by what kind of thing
 it is. If you know which *file* you want rather than which job, the sidebar groups the same pages by
 kind: macros, attributes, derives, and so on.
 
-### Define a trait, and implement it
+### Define and implement a trait
 
 [`#[cgp_component]`](./macros/cgp_component.md) is the foundational macro, turning one trait into
 the consumer trait callers use and the provider trait implementations target. A provider is then
@@ -52,7 +52,7 @@ function, and [`#[blanket_trait]`](./macros/blanket_trait.md) does the same from
 default methods. [`#[async_trait]`](./macros/async_trait.md) is how a CGP trait declares an
 `async fn`.
 
-### Wire a type to the implementations it uses
+### Wire a type to its implementations
 
 [`delegate_components!`](./macros/delegate_components.md) builds the table that maps each component to
 its provider, and [`check_components!`](./macros/check_components.md) asserts that the table is

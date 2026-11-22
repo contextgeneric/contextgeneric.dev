@@ -146,7 +146,7 @@ where
 `AsMut`. `UseContext` has no `MutFieldGetter` impl, so a mutable getter cannot be wired through
 `WithContext`.
 
-## Common Mistakes
+## Common mistakes
 
 **`Self` is the provider, not the context.** The context is the first type parameter, and arrives as
 `&mut Context` rather than as `&mut self`.

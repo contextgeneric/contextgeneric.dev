@@ -1,6 +1,6 @@
 //! Code from `docs/reference/providers/dispatch/match_with_handlers.md` — `MatchWithHandlers`.
 //!
-//! Pins the borrowed form from Usage, the Examples program, and the lifts Common Mistakes gives for
+//! Pins the borrowed form from Usage, the Examples program, and the lifts Common mistakes gives for
 //! the fallible slots. A list that misses a variant, and a matcher wired to `HandlerComponent`, are
 //! trybuild fixtures.
 
@@ -156,7 +156,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// A matcher implements only `Computer` and `AsyncComputer`, so the fallible slots take it through
 /// the handler promotions: `Promote` for `TryComputer`, and `PromoteAsync<Promote<…>>` for `Handler`.

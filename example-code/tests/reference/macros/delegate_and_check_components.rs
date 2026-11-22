@@ -221,11 +221,11 @@ pub mod skipping_one_entrys_check {
     }
 }
 
-/// ### Attributes on a list key merge
+/// ### Attributes on a list key
 ///
 /// The list-level and element-level `#[check_params]` combining per element. The page names
 /// `RotatorComponent` and `ShapeProvider` without declaring them.
-pub mod attributes_on_a_list_key_merge {
+pub mod attributes_on_a_list_key {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
@@ -281,12 +281,12 @@ pub mod attributes_on_a_list_key_merge {
     }
 }
 
-/// ### Two forms that quietly check nothing
+/// ### Forms that check nothing
 ///
 /// The empty `#[check_params()]`, an all-skipped table, and a key carrying only generics, which the
 /// page says is checked at unit parameters and fails for a component whose marker carries the
 /// trait's parameter (a trybuild fixture). The working `#[check_params(I)]` form is below.
-pub mod two_forms_that_quietly_check_nothing {
+pub mod forms_that_check_nothing {
     use core::marker::PhantomData;
 
     use cgp::prelude::*;
@@ -344,11 +344,11 @@ pub mod two_forms_that_quietly_check_nothing {
     }
 }
 
-/// ### What is wired, and what is checked
+/// ### What is wired and checked
 ///
 /// One table carrying every row of the page's coverage table. Only the first three rows are
 /// checked by the derivation; a standalone block checks the rest.
-pub mod what_is_wired_and_what_is_checked {
+pub mod what_is_wired_and_checked {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
@@ -578,7 +578,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The compiling half of the nested-table entry: an attribute on an inner key is dropped without
 /// an error. The failing snippets are the trybuild fixtures.

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: an enum without the extensible-data derive cannot be dispatched.
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: an enum without the extensible-data derive cannot be dispatched.
 
 use cgp::prelude::*;
 

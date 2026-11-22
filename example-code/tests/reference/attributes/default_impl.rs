@@ -229,7 +229,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes: the `#[cgp_impl(Self)]` form
+/// ## Common mistakes: the `#[cgp_impl(Self)]` form
 ///
 /// The page says the attribute is still lowered on the passthrough form, with `Delegate = Self`,
 /// which names the key. This compiles and pins that reading: the registration exists and its

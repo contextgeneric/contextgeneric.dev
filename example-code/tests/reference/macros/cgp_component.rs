@@ -1,7 +1,7 @@
 //! Code from `docs/reference/macros/cgp_component.md` — *`#[cgp_component]`*.
 //!
 //! The snippets the page rejects live under `tests/compile_fail/reference/macros/`, one fixture
-//! per *Common Mistakes* entry.
+//! per *Common mistakes* entry.
 
 /// ## Usage
 ///

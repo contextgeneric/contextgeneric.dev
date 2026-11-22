@@ -221,7 +221,7 @@ Omitted, the provider struct takes the function name converted to PascalCase; a 
 verbatim. The annotated function is plain Rust, constrained to a producer's shape (no parameters, no
 `async`, no generics, and no `impl Trait` return type), as described in [Usage](#usage).
 
-## Common Mistakes
+## Common mistakes
 
 **Each shape restriction has its own message**, so the macro tells you which one you broke:
 

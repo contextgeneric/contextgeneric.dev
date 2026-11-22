@@ -168,7 +168,7 @@ cast's notes. Its record-side analogue `FieldsBuilder`, behind
 [`CanBuildFrom`](./can_build_from.md), is private, so it cannot be named in a bound, though it still
 appears in diagnostics.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`. This is the first thing that goes
 wrong.

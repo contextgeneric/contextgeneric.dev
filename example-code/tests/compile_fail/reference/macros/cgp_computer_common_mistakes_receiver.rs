@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_computer.md`, *Common Mistakes*: a computer function takes no receiver.
+//! `docs/reference/macros/cgp_computer.md`, *Common mistakes*: a computer function takes no receiver.
 
 use cgp::prelude::*;
 

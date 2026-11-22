@@ -283,7 +283,7 @@ therefore does not make the builder printable or cloneable. Its fields use proje
 Each generated impl is aimed at the token it came from: a per-field impl at its field, a whole-struct impl at
 the struct name.
 
-## Common Mistakes
+## Common mistakes
 
 **An incomplete builder cannot call `finalize_build`.** The all-present implementation does not apply
 while any field is unset. Check the companion type in the diagnostic for `IsNothing` to identify the

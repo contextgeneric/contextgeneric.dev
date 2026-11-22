@@ -2,7 +2,7 @@
 //!
 //! Pins the decoupling the page is about: a getter method `name` reads a `first_name` field through
 //! `UseField`, the borrowed-view getter from When to use it, and the listings' inputs and
-//! type-provider forms from Under the hood. The multi-method getter from Common Mistakes is a
+//! type-provider forms from Under the hood. The multi-method getter from Common mistakes is a
 //! trybuild fixture; the `WithField` alias is covered by `with_field.rs`.
 
 /// ## Examples

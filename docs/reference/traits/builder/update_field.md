@@ -114,7 +114,7 @@ pub fn demo() {
 
 Under `IsNothing` a field is stored as `()`, so setting it hands back `()` and taking it hands back
 the value. Naming the trait with the marker is required: the marker is not inferred from the value,
-as [Common Mistakes](#common-mistakes) shows.
+as [Common mistakes](#common-mistakes) shows.
 
 ## When to use it
 
@@ -168,7 +168,7 @@ blanket impl over `UpdateField<Tag, IsPresent, Mapper = IsNothing>` and
 [`TakeField`](./take_field.md) over `UpdateField<Tag, IsNothing, Mapper = IsPresent>`. The markers
 are zero-sized, so nothing changes at run time beyond moving the value in or out of its slot.
 
-## Common Mistakes
+## Common mistakes
 
 **`Mapper` is the state *before* the call, not after.** The name reads either way, and getting it
 backwards makes a bound resolve to the wrong impl or none at all.

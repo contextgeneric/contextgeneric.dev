@@ -360,7 +360,7 @@ to meet:
   [A generic that reaches nothing](/docs/reference/errors#a-generic-that-reaches-nothing).
 - **Errors in code a macro generated:** a shorthand that lowers to an unsized type, such as a getter returning
   `Option<&Path>`, lands on the macro's attribute. See
-  [A macro lowered something the compiler rejects](/docs/reference/errors#a-macro-lowered-something-the-compiler-rejects).
+  [Rejected macro output](/docs/reference/errors#rejected-macro-output).
 - **A bare `Error` that nothing explains:** a signature that names `Error` without
   [`#[use_type]`](/docs/reference/attributes/use_type) gets the compiler's suggestion of
   `std::error::Error`, because you may have meant that type.

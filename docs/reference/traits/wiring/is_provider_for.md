@@ -245,7 +245,7 @@ surfaces everything `GreetHello` requires. When a context delegates to a provide
 delegates further, each table forwards to the next, so a requirement unmet several tables deep still
 reaches the check.
 
-## Common Mistakes
+## Common mistakes
 
 **Read the error as "because", not "instead".** Give the example's `Person` a differently named
 field, and its check fails:

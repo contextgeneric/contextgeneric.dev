@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: a variant payload without an impl fails where the method is called.
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: a variant payload without an impl fails where the method is called.
 
 use cgp::prelude::*;
 

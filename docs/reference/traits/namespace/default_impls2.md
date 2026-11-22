@@ -61,7 +61,7 @@ nothing to pattern-match against. The [next section](#usage) shows what a use lo
 use cgp::core::component::DefaultImpls2;
 ```
 
-The positional rule is [`DefaultImpls1`](./default_impls1.md#the-one-thing-to-get-right)'s, extended by
+The positional rule is [`DefaultImpls1`](./default_impls1.md#which-type-is-self)'s, extended by
 one: **`Self` is the key type and the leading parameters are whatever you wrote inside the namespace
 path.** So `#[default_impl(Key in DefaultImpls2<Component, Other>)]` emits
 
@@ -179,7 +179,7 @@ the provider's own `where` clause, so a provider with
 bounds are checked when a real context resolves it. Because nothing in the library emits this trait,
 the impls you see are the ones you or the attribute wrote.
 
-## Common Mistakes
+## Common mistakes
 
 **Nothing inside CGP uses it.** The library emits nothing to pattern-match against and does not ship
 a worked example.

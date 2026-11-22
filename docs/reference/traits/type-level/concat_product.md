@@ -128,7 +128,7 @@ append is a special case.
 The recursion walks the *first* list only, so its cost is proportional to the left operand's length
 rather than to the result's.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 

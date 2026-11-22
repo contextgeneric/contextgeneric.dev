@@ -166,7 +166,7 @@ The result is a partial value at a configuration the core builder never reaches 
 makes [`SetOptional`](./set_optional.md) resolve and the strict
 [`FinalizeBuild`](../builder/finalize_build.md) not.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

@@ -50,7 +50,7 @@ Naming follows the family's rules: a named struct field or a variant is keyed by
 [`Index<N>`](../types/index_type.md). Generic parameters, lifetimes, and a `where` clause are carried onto
 everything generated, including the companion types.
 
-### What each shape emits, and where it is documented
+### What each shape emits
 
 `CgpData` generates the same output as the matching shape-specific derive. These pages document each
 output in detail:
@@ -150,7 +150,7 @@ All three derives reject unions, since the family models structs and enums. `Cgp
 `expect body to be either a struct or enum`, while `CgpRecord` and `CgpVariant` report
 ``expected `struct` `` and ``expected `enum` `` for any input of the wrong kind.
 
-## Common Mistakes
+## Common mistakes
 
 The applicable restrictions depend on the input shape. The
 [record page](./derive_cgp_record.md#common-mistakes) covers cleared companion attributes, positional

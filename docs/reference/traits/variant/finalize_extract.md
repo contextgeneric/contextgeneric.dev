@@ -150,7 +150,7 @@ ruled-out variant is a state no value can be in. That is why a builder needs an 
 [`FinalizeBuild`](../builder/finalize_build.md) impl that moves each field into the struct, while an
 extractor discharges its remainder with an empty `match`.
 
-## Common Mistakes
+## Common mistakes
 
 **Finalizing early does not compile, and the error names the partial enum.** The all-void impl does
 not apply while any marker is still `IsPresent`. Trying only `Rectangle` before finalizing:

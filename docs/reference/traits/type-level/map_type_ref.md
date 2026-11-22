@@ -177,7 +177,7 @@ The `T: 'a` bound and the `: 'a` bound on the associated type are what keep the 
 well-formed: a payload cannot be borrowed for longer than it lives, and the resulting storage type
 stays valid for the whole of the borrow.
 
-## Common Mistakes
+## Common mistakes
 
 **`IsOwned` is unused by CGP.** It is a legal marker that nothing consumes, so selecting it means
 writing the machinery that uses it yourself.

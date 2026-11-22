@@ -151,7 +151,7 @@ short-circuit branch lift its `Err(err)` into the same output type the continue 
 branches call. Because the transformer forms implement both by delegating to the base monad after
 handling their own layer, the constraint composes without any depth-specific code.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

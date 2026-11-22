@@ -186,9 +186,9 @@ call costs exactly what the concrete one does.
 
 The trait itself is defined in the library; the derive supplies only these per-variant impls. Each
 is spanned at the variant it came from, so a conflict with a hand-written impl underlines that
-variant rather than the whole derive, as [Common Mistakes](#common-mistakes) shows.
+variant rather than the whole derive, as [Common mistakes](#common-mistakes) shows.
 
-## Common Mistakes
+## Common mistakes
 
 **The tag must be written out whenever the enum has two or more variants.** With a bare
 `PhantomData`:

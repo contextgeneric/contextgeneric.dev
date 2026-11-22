@@ -1,6 +1,6 @@
 // A match on a sum by value may leave out the `Void` arm, but a match behind a reference may not:
 // Rust does not treat an uninhabited type reached through a reference as unreachable. This is the
-// `Void` page's *Common Mistakes* entry on the closing arm.
+// `Void` page's *Common mistakes* entry on the closing arm.
 
 use cgp::core::field::types::Either;
 use cgp::prelude::*;

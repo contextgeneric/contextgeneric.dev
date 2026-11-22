@@ -45,7 +45,7 @@ leading arguments you write inside it. The macro appends the table parameter for
 above registers `ShowString` as the `DefaultImpls1<ShowImplComponent>` entry for the key `String`, and
 [Under the hood](#under-the-hood) shows the impl it emits. Remember that rule, because the trait's own
 parameter names suggest the opposite arrangement (see
-[`DefaultImpls1`](../traits/namespace/default_impls1.md#the-one-thing-to-get-right)).
+[`DefaultImpls1`](../traits/namespace/default_impls1.md#which-type-is-self)).
 
 **The key is a type or a `@`-path.** A type key, as above, is the usual form for a per-type default:
 the type is the value of the component's dispatch parameter, and the component is named inside the
@@ -144,7 +144,7 @@ check_components! {
 parameter. The loop wires every type with a registered default, only `String` here, and the direct
 `u64` line adds a type the registry does not cover. `ShowWithDisplay` is wired directly
 rather than registered, because its impl is generic over `T`, and a generic impl cannot register a
-default (see [Common Mistakes](#common-mistakes)).
+default (see [Common mistakes](#common-mistakes)).
 
 A path key does not need a loop. With `CanGreet` registered under `@app` and `GreetHello` bound at
 `@app.GreeterComponent` as in [Usage](#usage), a context resolves the component by joining the
@@ -262,7 +262,7 @@ emitted impl's `Self`. A `Path` is [`Path!`](../macros/path.md)'s own production
 arguments written out. The macro appends the table parameter, so do not write it. Each attribute takes
 exactly one such argument, and the attribute may be repeated.
 
-## Common Mistakes
+## Common mistakes
 
 **`Key` becomes `Self`, not a parameter.** Read `#[default_impl(Key in Path)]` as "`Key` becomes `Self`"
 and the trait's positions follow. The parameter names on

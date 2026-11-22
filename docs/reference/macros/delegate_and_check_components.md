@@ -94,7 +94,7 @@ delegate_and_check_components! {
 
 Each listed parameter produces its own check, and the same single-versus-tuple convention as
 `check_components!` applies: one parameter bare, several as a tuple. Leave the attribute off and the
-check tests the component at unit parameters instead, as [Common Mistakes](#common-mistakes)
+check tests the component at unit parameters instead, as [Common mistakes](#common-mistakes)
 describes.
 
 ### Skipping one entry's check
@@ -117,7 +117,7 @@ other attribute with
 ``Expected either `#[skip_check]` or `#[check_params]` attribute for specifying the check generics``,
 and `#[skip_check]` given arguments with `` `#[skip_check]` does not take any arguments ``.
 
-### Attributes on a list key merge
+### Attributes on a list key
 
 A bracketed key may carry a check attribute of its own *and* have attributes on the names inside it, and
 the two are combined per element rather than one winning. An absent attribute defers to the present one,
@@ -147,7 +147,7 @@ error: cannot combine #[skip_check] with #[check_params]
 Merged lists concatenate rather than deduplicate, so a parameter named at both levels is checked twice,
 and the two identical check impls conflict with `E0119`.
 
-### Two forms that quietly check nothing
+### Forms that check nothing
 
 An **empty** `#[check_params()]` has no parameters to iterate over, so it skips the entry exactly as
 `#[skip_check]` would, without saying so. Write `#[skip_check]` to say so directly. A table whose every
@@ -161,7 +161,7 @@ component whose marker carries the trait's own parameter, those unit parameters 
 provider implements, so the check fails with `E0277` on `AnyFoo: IsProviderFor<FooKeyComponent<I>, App>`.
 Name the key's generic as the parameter instead, with `#[check_params(I)]`.
 
-### What is wired, and what is checked
+### What is wired and checked
 
 **The wiring half accepts every form [`delegate_components!`](./delegate_components.md) accepts**: all
 three operators, all three key forms including grouped `@`-paths, per-key generics, nested table values,
@@ -189,7 +189,7 @@ Attributes are accepted only where they mean something. `#[check_params(...)]` a
 to the table's single and list keys of `:` and `->` mappings. On an `@`-path key, on the key of a `=>`
 mapping, or inside a `for` loop they fail with the `unsupported attribute: …` error
 `delegate_components!` raises, rather than being read and ignored. The one place an attribute is dropped
-instead is a key inside a nested table, as [Common Mistakes](#common-mistakes) records.
+instead is a key inside a nested table, as [Common mistakes](#common-mistakes) records.
 
 ## Examples
 
@@ -268,7 +268,7 @@ there are a few things it cannot do, and each is a reason a larger codebase writ
 [aggregate provider](./delegate_components.md#defining-the-target-at-the-same-time).** A `new`-keyword bundle
 is a provider other contexts delegate *to*, never a context itself. It has no fields and never stands in the
 context position, so the derived context-side check asks a question that does not apply to it. Wire a bundle
-with plain `delegate_components!`. The [Common Mistakes](#common-mistakes) show what the failure looks like, and why it is
+with plain `delegate_components!`. The [Common mistakes](#common-mistakes) show what the failure looks like, and why it is
 easy to misread.
 
 The invariant across all of this is that a context's wiring is checked *somehow*. This macro is the
@@ -369,10 +369,10 @@ table accepts. Each mapping may carry at most one `EntryAttr`, and the two are m
 `#[check_params(...)]` supplies the parameters a generic component's check needs, and `#[skip_check]`
 wires the entry with no check at all. An `EntryAttr` is accepted on a single key, on a list key, and on a
 single key inside a list, and only for a `:` or `->` mapping. The grammar is therefore more permissive
-than the derivation, as [What is wired, and what is checked](#what-is-wired-and-what-is-checked)
+than the derivation, as [What is wired and checked](#what-is-wired-and-checked)
 explains.
 
-## Common Mistakes
+## Common mistakes
 
 **Used on an [aggregate provider](/docs/reference/glossary#aggregate-provider), this macro reports a failure that describes nothing real.** A `new`-keyword
 bundle is not a context, so the derived check asks whether the *bundle* satisfies the leaf provider's
@@ -419,7 +419,7 @@ entries are never checked in any case, since only the outer key becomes a check.
 statement, an `@`-path key, and a `=>` redirect are all accepted in the table and all wired, but the
 derivation only produces checks for entries keyed on a component name, so a table using any of them is
 *partly* checked, with no warning about the rest. The
-[coverage table above](#what-is-wired-and-what-is-checked) says which is which; add a standalone
+[coverage table above](#what-is-wired-and-checked) says which is which; add a standalone
 [`check_components!`](./check_components.md) for the rest.
 
 ## Related constructs

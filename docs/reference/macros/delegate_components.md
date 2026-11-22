@@ -229,7 +229,7 @@ exists, and it is legacy.
 
 :::info
 
-### Legacy: read, don't write
+### The legacy form
 
 Older code dispatches per type by nesting a table inside a [`UseDelegate`](../providers/use_delegate.md)
 value instead of using the `open` statement below. **Prefer `open` for anything new**: it needs neither
@@ -280,7 +280,7 @@ dispatch impl the wrapper resolves through. Leave it off and the table still exp
 the check with `E0277`, an unsatisfied `IsProviderFor` on `UseDelegate<…>` that never mentions the
 missing attribute.
 
-### Choosing a provider per type: the `open` statement
+### The `open` statement {#choosing-a-provider-per-type-the-open-statement}
 
 When a component is generic over a type parameter, you usually want a different provider for each
 value of it. The `open` statement folds those per-value entries straight into the context's own table.
@@ -362,7 +362,7 @@ falls through to it. The name is a bare identifier, so import a namespace from a
 mapping per entry, which is how a context adopts per-type defaults wholesale. Its body holds only
 `:` mappings, and an optional `where` clause on the loop constrains the entries it wires.
 
-### Statements come first
+### Statement order
 
 **Every statement must precede every mapping.** Putting one after a mapping is a *parse* error, so the
 message names the unexpected token rather than the ordering rule. Beyond that the order is free:
@@ -739,7 +739,7 @@ and braced list may be empty, and then produces no entries. Every `Statement` pr
 `Mapping`. [`cgp_namespace!`](./cgp_namespace.md) describes `NamespaceStmt` and `ForStmt`. The macro
 does not accept attributes anywhere and rejects any it finds.
 
-## Common Mistakes
+## Common mistakes
 
 **Wiring is lazy.** A table with a missing entry, or one naming a provider whose own dependencies are
 unmet, still compiles. The failure appears later, at the place where code uses the trait, often as a

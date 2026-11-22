@@ -52,7 +52,7 @@ get the class sentence with their count instead:
 
 The compiler's code stays whatever it assigned, which is `E0277` at a check and `E0599` at a method call. To
 fix it, follow the `root cause:` note, which names the missing field, derive, wiring entry, or trait bound.
-[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains the class.
+[Unmet dependencies](/docs/reference/errors#unmet-dependencies) explains the class.
 
 ### CGP-E002
 
@@ -81,7 +81,7 @@ than "the consumer trait":
 ```
 
 To fix it, follow the `root cause:` note to the dependency the trait needs.
-[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains the class.
+[Unmet dependencies](/docs/reference/errors#unmet-dependencies) explains the class.
 
 ### CGP-E004
 
@@ -124,7 +124,7 @@ explains the class.
 
 These five codes rewrite an `E0119` on a wiring entry, and the compiler's two carets point at the entries that
 collide. A `<key>` is worded as what it is, such as `` component `<Marker>` ``, `` type `String` ``, or `` `@a.b` ``.
-[Two entries claim one key](/docs/reference/errors#two-entries-claim-one-key) explains the class.
+[Conflicting entries](/docs/reference/errors#conflicting-entries) explains the class.
 
 ### CGP-E010
 
@@ -205,7 +205,7 @@ A `check_components!` table lists one entry twice.
 
 To fix it, remove one of the two. A `delegate_and_check_components!` table that lists an entry twice also wires it twice,
 so you see that as [CGP-E010](#cgp-e010) alone.
-[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile) covers this family.
+[Structural wiring errors](/docs/reference/errors#structural-wiring-errors) covers this family.
 
 ### CGP-E016
 
@@ -220,7 +220,7 @@ trait name. The message identifies the macro used:
 Merge the tables or give one check a distinct name with `#[check_trait(...)]`. If two attributes
 explicitly choose the same name, the message identifies that conflict instead. For tables from
 different macros, it names both and asks you to rename one check trait.
-[The wiring itself does not compile](/docs/reference/errors#the-wiring-itself-does-not-compile)
+[Structural wiring errors](/docs/reference/errors#structural-wiring-errors)
 covers these cases.
 
 ### CGP-E017
@@ -634,7 +634,7 @@ The chain ends at a field the context does not have.
 
 Add the required field or select a provider that does not read it. The `help` line points to a
 similar existing field when possible; otherwise, it names the field to add.
-[A dependency is not met](/docs/reference/errors#a-dependency-is-not-met) explains this failure.
+[Unmet dependencies](/docs/reference/errors#unmet-dependencies) explains this failure.
 
 ### CGP-E111
 
@@ -666,7 +666,7 @@ The chain ends at a component or path the context wires nothing for.
 ```
 
 To fix it, add the wiring entry the `help` line names.
-[Nothing is wired there](/docs/reference/errors#nothing-is-wired-there) explains the class.
+[Missing wiring](/docs/reference/errors#missing-wiring) explains the class.
 
 ### CGP-E114
 

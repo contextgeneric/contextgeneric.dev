@@ -98,7 +98,7 @@ produce it everywhere else.
   `Void`, and the other lists end in `Nil`. The wrong terminator in an error usually means the product and
   sum families have been mixed up.
 
-## Common Mistakes
+## Common mistakes
 
 **`Nil` is inhabited, and [`Void`](void.md) is not.** `Nil` is the real value of the empty product,
 while `Void` is the uninhabited type of an empty choice. They are not interchangeable: variant

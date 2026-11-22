@@ -1,4 +1,4 @@
-//! `docs/reference/macros/blanket_trait.md`, *Common Mistakes*: a method needs a default body.
+//! `docs/reference/macros/blanket_trait.md`, *Common mistakes*: a method needs a default body.
 
 use cgp::core::macros::blanket_trait;
 

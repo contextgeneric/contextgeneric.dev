@@ -144,7 +144,7 @@ impl FromFields for Shape {
 }
 ```
 
-## Common Mistakes
+## Common mistakes
 
 **It is an associated function, not a method.** Write `T::from_fields(fields)`; there is no
 receiver.

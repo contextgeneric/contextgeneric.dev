@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_provider.md`, *Common Mistakes*: `new` is not part of
+//! `docs/reference/macros/cgp_provider.md`, *Common mistakes*: `new` is not part of
 //! `#[cgp_provider]`'s argument.
 
 use cgp::prelude::*;

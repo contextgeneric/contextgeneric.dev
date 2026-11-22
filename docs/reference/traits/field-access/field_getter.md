@@ -222,7 +222,7 @@ where
 lifetime-safe [`FieldMapper`](./field_mapper.md) is a blanket impl over every `FieldGetter`, which
 `ChainGetters` relies on.
 
-## Common Mistakes
+## Common mistakes
 
 **A `FieldGetter` provider does not answer a getter on its own.** Wiring
 `NameGetterComponent: ReadDisplayName`, without `WithProvider`, names a provider that implements

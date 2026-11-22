@@ -148,7 +148,7 @@ value the primitive returns, which is sound because under `IsNothing` it is `()`
 [`TakeField`](./take_field.md) is the mirror image: the same primitive, with `IsNothing` as the
 target and `Mapper = IsPresent`.
 
-## Common Mistakes
+## Common mistakes
 
 **Building a field twice does not compile.** On the two-field `Person` of the
 [example](#examples), setting `first_name` a second time:

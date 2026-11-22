@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: two dispatch traits in one
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: two dispatch traits in one
 //! module sharing a method name emit the same helper and provider names.
 
 use cgp::prelude::*;

@@ -120,7 +120,7 @@ chain. You need to know the type so that you can decode a field name in a diagno
 - **Use [`Index`](index_type.md) for a tuple-field position,** which encodes a number rather than a
   string.
 
-## Common Mistakes
+## Common mistakes
 
 **A missing field appears in a raw error as a `Chars` chain.** A provider that reads `width` and
 `height`, wired on a context with only `height`, fails its check:

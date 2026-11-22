@@ -224,7 +224,7 @@ choice of macro scales with the wiring's complexity.
   though it were a context.** A `new`-keyword bundle is delegated *to*; it has no fields and never stands in
   the context position, so a context-side check on it asks the wrong question. Verify it through a real
   context that delegates to it, or with `#[check_providers(...)]` against a real context. The
-  [Common Mistakes](#common-mistakes) show what happens if you try.
+  [Common mistakes](#common-mistakes) show what happens if you try.
 
 One limit is worth stating plainly: **not every unsatisfied bound is a component.** A provider may depend on
 an ordinary Rust trait, and there is no component to name in a table for that. The check will still surface
@@ -344,7 +344,7 @@ list, `FooComponent: []`, falls back to the no-parameter check, exactly as omitt
 empty *key* list, `[]: Rectangle`, produces no entries at all, so the line silently checks nothing; there
 is no diagnostic, and it is worth a second look if a table appears to pass without doing anything.
 
-## Common Mistakes
+## Common mistakes
 
 **A check on an [aggregate provider](/docs/reference/glossary#aggregate-provider) asks the wrong question, and how it fails depends on the provider.** A
 `new`-keyword bundle is not a context, so a context-side check demands that the *bundle* satisfy the leaf

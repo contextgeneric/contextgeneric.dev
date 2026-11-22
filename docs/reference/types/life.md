@@ -196,7 +196,7 @@ everywhere else.
   the shape `#[cgp_new_provider]` gives it. A plain [`PhantomData<&'a ()>`](phantom_data.md) also
   compiles, but it is covariant and keeps the struct `Send`.
 
-## Common Mistakes
+## Common mistakes
 
 **A lifetime cannot appear directly in the `IsProviderFor` tuple.** The tuple holds types, so a bare
 `'a` is invalid there, and the macro lifts it into `Life<'a>`. `Life` in an error means that the component

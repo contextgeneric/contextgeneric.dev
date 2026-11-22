@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_impl.md`, *Common Mistakes*: `#[default_impl]` on the explicit
+//! `docs/reference/macros/cgp_impl.md`, *Common mistakes*: `#[default_impl]` on the explicit
 //! `impl<Context> Trait for Context` form copies an unconstrained `Context`.
 
 use cgp::core::component::DefaultImpls1;

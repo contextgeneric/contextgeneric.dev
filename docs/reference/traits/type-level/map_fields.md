@@ -158,7 +158,7 @@ sum still a sum.
 All of it resolves during type checking, so a mapped shape is a name for a type rather than a
 computation that runs.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`, and remember that `IsOptional`
 needs its own import from `cgp::core::field::impls`.

@@ -6,7 +6,7 @@
 //! Each half is pinned separately below, since a page claiming "this compiles, that does not" is
 //! wrong if either half moves.
 
-/// ## A dependency is not met
+/// ## Unmet dependencies
 ///
 /// The page's one program: `GreetHello` needs a `name` field through
 /// [`HasName`](https://contextgeneric.dev/docs/reference/macros/cgp_auto_getter), and `Person` has
@@ -20,7 +20,7 @@
 /// Deliberately **no `check_components!` here**, departing from this crate's usual rule of adding
 /// one per wired context — the check is exactly what the page withholds until the next section, and
 /// adding it would make this module fail.
-pub mod a_dependency_is_not_met {
+pub mod unmet_dependencies {
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

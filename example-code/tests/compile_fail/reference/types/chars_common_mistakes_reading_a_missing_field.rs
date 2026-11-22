@@ -1,6 +1,6 @@
 // A provider reads `width` and `height`, and the context has only `height`. The raw error names the
 // missing tag as a `Symbol` over a `Chars` chain, beside the tag the context does have. This is the
-// `Chars` page's *Common Mistakes* entry on reading the chain.
+// `Chars` page's *Common mistakes* entry on reading the chain.
 
 use cgp::prelude::*;
 

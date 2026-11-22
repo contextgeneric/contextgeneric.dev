@@ -572,12 +572,12 @@ pub mod the_value_forms {
     }
 }
 
-/// ### Choosing a provider per type: the `open` statement
+/// ### The `open` statement
 ///
 /// The generic component, the `open` header with per-value path keys, and the two-parameter
 /// component dispatched on its input alone and on both parameters. The page names the providers
 /// and shapes without declaring them.
-pub mod choosing_a_provider_per_type_the_open_statement {
+pub mod the_open_statement {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
@@ -748,12 +748,12 @@ pub mod choosing_a_provider_per_type_the_open_statement {
     }
 }
 
-/// ### Statements come first
+/// ### Statement order
 ///
 /// The combined block, which is the page's demonstration that the forms mix. It opens the generic
 /// area component while forwarding the plain perimeter component into `GeometryComponents`; the
 /// page names the style components and every provider without declaring them.
-pub mod statements_come_first {
+pub mod statement_order {
     use cgp::prelude::*;
 
     pub use super::defining_the_target_at_the_same_time::{
@@ -1025,7 +1025,7 @@ pub mod examples {
 pub mod under_the_hood {
     use cgp::prelude::*;
 
-    pub use super::choosing_a_provider_per_type_the_open_statement::{
+    pub use super::the_open_statement::{
         AreaCalculatorComponent, Rectangle, RectangleArea,
     };
 
@@ -1072,7 +1072,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The fix the page gives for a bare `N` in a nested table's list: write the parameter with its
 /// kind. The rejected snippets are the trybuild fixtures.

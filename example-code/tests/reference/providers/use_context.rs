@@ -3,7 +3,7 @@
 //! Pins the default-inner-provider use: `EncodeVec` encodes a `Vec` by encoding each element through its
 //! inner provider, which defaults to `UseContext` so the elements route back to the context's own
 //! `CanEncode` wiring for their type. No cycle, because the element lookup is for a different type
-//! (`u32`) than the wired one (`Vec<u32>`). The self-cycle from Common Mistakes is a trybuild fixture.
+//! (`u32`) than the wired one (`Vec<u32>`). The self-cycle from Common mistakes is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {

@@ -47,7 +47,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The `TryComputerComponent` and `AsyncComputerComponent` entries are `TryPromote<P>` and
 /// `PromoteAsync<P>`, one step from the base, so they serve a hand-written `Computer` returning

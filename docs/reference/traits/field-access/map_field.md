@@ -161,7 +161,7 @@ The `'static` bound is on the tag, not on the value, and that is the point: the 
 `'static`, while the value, the intermediate whose lifetime the chained read could not express,
 stays free.
 
-## Common Mistakes
+## Common mistakes
 
 **Two chained reads fail in generic code.** Written as
 `context.get_field(PhantomData::<Symbol!("inner")>).get_field(PhantomData::<Symbol!("name")>)`,

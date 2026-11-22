@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: the macro rejects a `name:`
+//! `docs/reference/macros/cgp_component.md`, *Common mistakes*: the macro rejects a `name:`
 //! parameter the trait does not declare.
 
 use cgp::prelude::*;

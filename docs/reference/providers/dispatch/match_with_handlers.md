@@ -203,7 +203,7 @@ variant ruled out, and only then does it implement
 any type. The `AsyncComputer` impl has the same bounds over `AsyncComputer`, and the borrowed forms
 call `extractor_ref()` or `extractor_mut()` in place of `to_extractor()`.
 
-## Common Mistakes
+## Common mistakes
 
 **A list that misses a variant does not compile.** Leaving out the `Rectangle` arm leaves the
 extractor with a variant still present after the last adapter, so the leftover has no

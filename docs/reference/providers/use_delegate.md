@@ -12,7 +12,7 @@ Superseded by the `open` statement.
 
 :::info
 
-### Legacy — read, don't write
+### The legacy form
 
 `UseDelegate`, the [`#[derive_delegate]`](../attributes/derive_delegate.md) attribute that generates its
 provider impl, and its nested-table wiring are the older way to choose a provider per type. The `open`

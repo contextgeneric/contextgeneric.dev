@@ -199,7 +199,7 @@ every other segment (a capitalized name, a primitive, or any type with a path, g
 other structure) is kept as the type. [`cgp_namespace!`](./cgp_namespace.md) entries and
 `#[prefix(...)]` attributes embed this same grammar, where it appears as the `Path` production.
 
-## Common Mistakes
+## Common mistakes
 
 **The leading `@` is not optional**, and the macro says exactly what it wanted:
 

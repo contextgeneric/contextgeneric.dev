@@ -286,7 +286,7 @@ A bare provider name, or the keyed `name` / `provider` / `context` form. The onl
 derived from the trait name by stripping a leading `Has` and appending `Getter`, so `HasName` yields
 `NameGetter`. Every other key and default behaves as documented there.
 
-## Common Mistakes
+## Common mistakes
 
 **A multi-method trait gets no `UseField` provider.** Both `UseField` and `WithProvider` are emitted only
 for a single-method trait, because each supplies one field. Wiring a two-method getter to
@@ -326,7 +326,7 @@ since the tag tells you which field the mismatch is about.
 
 **A `&mut self` getter cannot return a shared `Option`, and `Option<&[T]>` is unsupported.** Both
 come from the method parsing this macro shares with `#[cgp_auto_getter]`, which documents them under
-[Common Mistakes](./cgp_auto_getter.md#common-mistakes): the first fails with `E0308` in every
+[Common mistakes](./cgp_auto_getter.md#common-mistakes): the first fails with `E0308` in every
 generated provider, and the macro rejects the second.
 
 ## Related constructs

@@ -216,7 +216,7 @@ delegate_components! {
 }
 ```
 
-## Common Mistakes
+## Common mistakes
 
 **The input must be an enum.** The list is built by walking a sum-type field list, so a struct,
 whose field list is a product, has no list and no extractor. Wiring a `Scene` struct fails with:

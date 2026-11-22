@@ -11,7 +11,7 @@ Generate the `UseDelegate` dispatcher impl for a component. Superseded by the `o
 
 :::info
 
-### Legacy: read, don't write
+### The legacy form
 
 `#[derive_delegate]` and the [`UseDelegate`](../providers/use_delegate.md) provider it generates are the
 older way to choose an implementation per type. A component does not need this attribute to be
@@ -267,7 +267,7 @@ non-empty tuple list of identifiers in use_delegate_spec*). A single parameter i
 whether it is written `Shape` or `(Shape)`, and as a one-element tuple only when written with a trailing
 comma, `(Shape,)`. The attribute may be repeated, once per dispatcher.
 
-## Common Mistakes
+## Common mistakes
 
 **The key must be a generic parameter the trait actually declares.** The attribute names it by identifier,
 so a parameter that is not in scope on the trait is reported as an unresolved type rather than as anything

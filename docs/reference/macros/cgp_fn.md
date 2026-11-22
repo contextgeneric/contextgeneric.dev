@@ -77,7 +77,7 @@ options, slices, and the mutable variants, is on the [`#[implicit]`](../attribut
 Because these parameters disappear from the signature, you call `rectangle_area` above without any
 arguments: `rect.rectangle_area()`.
 
-### Generics, and where each bound lands
+### Generics and bounds
 
 A `#[cgp_fn]` splits its generics and its `where` clause deliberately, and knowing which goes where is
 most of what you need to learn about the macro.
@@ -333,7 +333,7 @@ When the argument is omitted, the trait name defaults to the function name conve
 `#[implicit]` markers on parameters and the companion attributes are separate attributes with grammars
 of their own, documented on their own pages.
 
-## Common Mistakes
+## Common mistakes
 
 **A function with implicit arguments must take `self` first.** Without a receiver the macro cannot
 find a context to read a field from, so it reports that rather than emitting a bound that fails later:

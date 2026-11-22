@@ -93,7 +93,7 @@ surface the `Ok`/`Err` outcome as success or failure rather than handing back a 
 The macro recognizes a `Result` by its spelling, not its meaning: only a return type written
 `Result<T, E>`, with `Result` as the whole path and two arguments, is fallible. Any other type is a
 plain value, and a type that starts with `Result` in another form, such as a one-argument alias, is
-rejected. [Common Mistakes](#common-mistakes) shows what each spelling does.
+rejected. [Common mistakes](#common-mistakes) shows what each spelling does.
 
 ## Examples
 
@@ -268,7 +268,7 @@ Omitted, the provider struct takes the function name converted to PascalCase; a 
 verbatim. The annotated function is plain Rust, and the macro reads its parameters, return type,
 `async`-ness, generics, and `where` clause to choose the base trait and promotion bundle as described above.
 
-## Common Mistakes
+## Common mistakes
 
 **The function cannot reach the context.** There is no receiver and no context parameter in scope, so
 `#[implicit]` arguments and `#[uses]` have nothing to attach to. A computation that needs anything from its

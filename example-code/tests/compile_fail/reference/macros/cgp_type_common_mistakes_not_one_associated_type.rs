@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_type.md`, *Common Mistakes*: the trait must contain exactly one
+//! `docs/reference/macros/cgp_type.md`, *Common mistakes*: the trait must contain exactly one
 //! associated type and nothing else.
 
 use cgp::prelude::*;

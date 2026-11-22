@@ -135,7 +135,7 @@ the list. Writing the chain out yourself is longer, harder to change, and identi
 - **Decode a `Cons` chain in an error by counting cells.** The compiler reports a field-list mismatch as
   a mismatch between two `Cons` chains, and the position where they diverge is the field that differs.
 
-## Common Mistakes
+## Common mistakes
 
 **A one-element list is not the element.** `Product![T]` is `Cons<T, Nil>`, a distinct type from
 `T`, so a list of one still carries its cell. A one-field tuple struct is the exception on the

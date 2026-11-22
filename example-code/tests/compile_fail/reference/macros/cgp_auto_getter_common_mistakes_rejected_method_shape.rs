@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: a getter method must be a plain signature.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: a getter method must be a plain signature.
 
 use cgp::prelude::*;
 

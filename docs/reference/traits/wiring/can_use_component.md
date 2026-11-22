@@ -236,7 +236,7 @@ fix:
 The trait is the mirror image of `IsProviderFor`: the same question, indexed on the context
 (`Self = Context`) rather than on the provider (`Self = Provider`).
 
-## Common Mistakes
+## Common mistakes
 
 **It is not the consumer trait.** `App: CanUseComponent<GreeterComponent>` holding is a different
 statement from `App: CanGreet`, though in practice one follows the other. The check exists because

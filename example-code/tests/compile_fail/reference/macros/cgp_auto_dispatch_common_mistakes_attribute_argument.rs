@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: the attribute takes no
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: the attribute takes no
 //! arguments.
 
 use cgp::prelude::*;

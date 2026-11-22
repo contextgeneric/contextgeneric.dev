@@ -141,7 +141,7 @@ Reach for [`Computer`](./computer.md) instead when the value is computed *from* 
 await. A `#[cgp_producer]` function returning a `Result` is not a fallible producer: the fallible
 members wrap the whole `Result` in `Ok`, so an `Err` short-circuits nothing downstream.
 
-## Common Mistakes
+## Common mistakes
 
 **`PromoteProducer<P>` answers the fallible and async members only when `P` is wired to it.** Its
 `ComputerComponent` entry works for any producer, but its other entries reach `P` through `P`'s own

@@ -184,7 +184,7 @@ impl MapType for ToBuildAndMergeHandler {
 the list, so `Product![BuildDatabaseConfig, BuildHttpConfig]` becomes
 `Product![BuildAndMerge<BuildDatabaseConfig>, BuildAndMerge<BuildHttpConfig>]`.
 
-## Common Mistakes
+## Common mistakes
 
 **The `…Ref` entries do not resolve.** The table routes `ComputerRefComponent`,
 `TryComputerRefComponent`, and `HandlerRefComponent`, but `BuildWithHandlers` implements only

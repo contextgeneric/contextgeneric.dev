@@ -277,7 +277,7 @@ value is uninhabited.
 Each generated impl is aimed at the type name the user wrote, so a conflict with a hand-written
 `HasFields` impl underlines the struct or enum rather than the whole `#[derive(HasFields)]`.
 
-## Common Mistakes
+## Common mistakes
 
 **A newtype's `Fields` is the inner type, not a one-element product.** `struct Wrapper(String)` has
 `Fields = String`. Generic code written against `Cons<Field<Index<0>, _>, Nil>` will not match it, and

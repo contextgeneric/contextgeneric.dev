@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_provider.md`, *Common Mistakes*: `Self::LIMIT` in a raw provider
+//! `docs/reference/macros/cgp_provider.md`, *Common mistakes*: `Self::LIMIT` in a raw provider
 //! impl is ambiguous, because the provider struct also gets the consumer trait.
 
 use cgp::prelude::*;

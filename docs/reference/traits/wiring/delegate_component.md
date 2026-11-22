@@ -65,7 +65,7 @@ has no data, so the table exists only in the type system.
 
 The trait is not in the prelude; import it from `cgp::core::component`.
 
-### Setting an entry, and reading one
+### Setting and reading entries
 
 There are two operations, and both are ordinary Rust. **Setting** an entry is writing the impl,
 which in practice means writing a [`delegate_components!`](../../macros/delegate_components.md)
@@ -239,7 +239,7 @@ where
 That is how a context inherits a whole table while still adding direct entries at the keys the
 namespace leaves open.
 
-## Common Mistakes
+## Common mistakes
 
 **A missing entry and an unsatisfied provider are different errors.** A context that never wires the
 component fails a check on the table entry:

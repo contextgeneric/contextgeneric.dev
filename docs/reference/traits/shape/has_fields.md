@@ -197,7 +197,7 @@ impl HasFields for Shape {
 lists](../../types/index.md) page covers reading. Because a shape is a type rather than a value,
 nothing about it costs anything at run time.
 
-## Common Mistakes
+## Common mistakes
 
 **`HasFields` and [`HasField`](../field-access/has_field.md) differ by one letter and do not
 overlap.** The plural is the whole shape and takes structs and enums; the singular is per-field

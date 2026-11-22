@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_provider.md`, *Common Mistakes*: a component argument that does not
+//! `docs/reference/macros/cgp_provider.md`, *Common mistakes*: a component argument that does not
 //! belong to the provider trait registers the provider under the wrong key.
 
 use cgp::prelude::*;

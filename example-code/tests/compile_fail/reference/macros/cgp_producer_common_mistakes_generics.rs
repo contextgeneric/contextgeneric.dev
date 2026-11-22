@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_producer.md`, *Common Mistakes*: a producer takes no generic parameters.
+//! `docs/reference/macros/cgp_producer.md`, *Common mistakes*: a producer takes no generic parameters.
 
 use cgp::prelude::*;
 

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: a const generic parameter on the
+//! `docs/reference/macros/cgp_component.md`, *Common mistakes*: a const generic parameter on the
 //! trait is rejected by the macro.
 
 use cgp::prelude::*;

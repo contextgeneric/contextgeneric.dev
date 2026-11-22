@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: a context whose field has another name does not satisfy the getter.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: a context whose field has another name does not satisfy the getter.
 
 use cgp::prelude::*;
 

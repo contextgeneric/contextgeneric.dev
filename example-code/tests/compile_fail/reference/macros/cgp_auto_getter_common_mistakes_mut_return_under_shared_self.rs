@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: a `&mut` return needs a `&mut self` receiver.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: a `&mut` return needs a `&mut self` receiver.
 
 use cgp::prelude::*;
 

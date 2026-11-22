@@ -11,7 +11,7 @@ Supply a concrete type as the value of an abstract-type component, binding it pu
 
 :::info
 
-### Not the same as `#[use_type]`
+### `UseType` and `#[use_type]`
 
 This page documents the `UseType` **provider**, the struct `UseType<Type>`. It is a different construct
 from the [`#[use_type]` attribute](../attributes/use_type.md), which rewrites bare type names inside a
@@ -60,7 +60,7 @@ the [component marker](/docs/reference/glossary#component-marker) `ScalarTypePro
 wiring that marker to `UseType<f64>` sets the context's `Scalar` to `f64`. Any bound on the
 associated type, such as `type Scalar: Copy`, is checked against the concrete type when the
 component is used or checked, not where the entry is written, since wiring is lazy;
-[Common Mistakes](#common-mistakes) shows the consequence.
+[Common mistakes](#common-mistakes) shows the consequence.
 
 `UseType<Type>` also has an alias, [`WithType<Type>`](with_type.md), the `WithProvider`-adapted form
 imported from `cgp::core::types`. Both bind the same type; prefer the plain `UseType<Type>` form.
@@ -163,7 +163,7 @@ abstract-type component. A bound on the associated type is copied into the gener
 clause, as the `Copy` above shows, so the concrete type must satisfy it wherever the component is
 used or checked.
 
-## Common Mistakes
+## Common mistakes
 
 **A concrete type that breaks the associated type's bound is not reported where it is wired.**
 Wiring `ScalarTypeProviderComponent: UseType<String>` for the `type Scalar: Copy` declaration above

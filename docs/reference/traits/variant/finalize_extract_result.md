@@ -96,7 +96,7 @@ pub fn demo() {
 
 The code needs neither `.unwrap()`, `expect`, nor a wildcard arm. The call compiles only because
 both variants have been tried, which makes it a proof rather than an assertion; the
-[Common Mistakes](#common-mistakes) section shows the call one step early.
+[Common mistakes](#common-mistakes) section shows the call one step early.
 
 ## When to use it
 
@@ -144,7 +144,7 @@ fail.
 `Output` is an associated type rather than a generic, so the call can sit at the end of a method
 chain with nothing to annotate.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import it from `cgp::core::field::traits`. Without the import, a
 complete chain on a one-variant enum:

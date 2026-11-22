@@ -16,7 +16,7 @@ Fill in the handler family from a provider that implements `Producer`.
 **You are not expected to name `PromoteProducer` directly.**
 [`#[cgp_producer]`](../../macros/cgp_producer.md) wires the provider it generates to
 `PromoteProducer<Self>`. A context names the bundle only to route its own components through such a
-provider, or through the one entry that serves any producer, as [Common Mistakes](#common-mistakes)
+provider, or through the one entry that serves any producer, as [Common mistakes](#common-mistakes)
 sets out. This page explains what the bundle emits.
 
 :::
@@ -128,7 +128,7 @@ calls the producer, and forwards every remaining key to [`PromoteComputer`](prom
 own entry, so each is derived from the producer's `Computer` form. Because that computer accepts an
 input of any type, including a borrow, the `…Ref` members work too.
 
-## Common Mistakes
+## Common mistakes
 
 **Only the `ComputerComponent` entry serves a hand-written producer.** Every other entry goes
 through `PromoteComputer<P>`, which looks for a `Computer` on the producer itself. A hand-written

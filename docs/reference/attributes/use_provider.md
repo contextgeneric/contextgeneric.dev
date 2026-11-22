@@ -71,7 +71,7 @@ each satisfy one.
 ```
 
 Stacking is the intended form here rather than a fallback, because the parser does *not* accept a
-comma-separated list of provider-and-trait pairs (see [Common Mistakes](#common-mistakes)). This differs
+comma-separated list of provider-and-trait pairs (see [Common mistakes](#common-mistakes)). This differs
 from [`#[uses]`](uses.md) and [`#[use_type]`](use_type.md), where commas are the preferred way to carry
 several entries, so remember `#[use_provider]` as the exception.
 
@@ -273,9 +273,9 @@ the block's own `where` clause. And **the argument holds exactly one provider**,
 bound list runs to the end of the attribute, so a comma after the first pair lands where a `+` was
 expected. That makes this attribute the one exception to the comma-separated convention its siblings
 follow: bind several inner providers by stacking one attribute each. See
-[Common Mistakes](#common-mistakes).
+[Common mistakes](#common-mistakes).
 
-## Common Mistakes
+## Common mistakes
 
 **A comma-separated list of pairs is not accepted.** Writing two providers in one attribute is a parse
 error, because after the first trait the parser is looking for a `+` to continue that provider's bounds:

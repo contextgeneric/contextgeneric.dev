@@ -143,7 +143,7 @@ whose recursion walks the source's field list, taking each field out with `take_
 it into the target with [`build_field`](./build_field.md), which is why a merge needs
 [`HasFields`](../shape/has_fields.md) on the source as well as a builder.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`. The rest of the core builder
 family comes from there too.

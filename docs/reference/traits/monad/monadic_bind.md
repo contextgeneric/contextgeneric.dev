@@ -171,7 +171,7 @@ The whole fold happens during trait resolution. A monadic pipeline is not a runt
 the provider it resolves to implements the [`Computer`](../../components/handler/computer.md) family
 like any other handler.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

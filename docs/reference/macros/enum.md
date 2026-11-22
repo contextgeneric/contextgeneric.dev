@@ -152,7 +152,7 @@ Variant   -> IDENTIFIER ( `(` TupleFields `)` | `{` NamedFields `}` )?
 [`Struct!` productions](./struct.md#formal-grammar), so a variant's fields follow the rules of a
 `Struct!` body of the same form.
 
-## Common Mistakes
+## Common mistakes
 
 **The variant derives need each variant to hold one positional field or none.** `Enum!` describes
 any variant, as `#[derive(HasFields)]` does, and

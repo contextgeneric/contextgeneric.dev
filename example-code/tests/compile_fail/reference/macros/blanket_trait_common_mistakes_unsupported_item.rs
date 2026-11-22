@@ -1,4 +1,4 @@
-//! `docs/reference/macros/blanket_trait.md`, *Common Mistakes*: only methods, associated types, and constants are accepted.
+//! `docs/reference/macros/blanket_trait.md`, *Common mistakes*: only methods, associated types, and constants are accepted.
 
 use cgp::core::macros::blanket_trait;
 

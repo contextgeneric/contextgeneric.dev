@@ -17,7 +17,7 @@ Fill in the handler family from a `Computer` whose output is a `Result`.
 [`#[cgp_computer]`](../../macros/cgp_computer.md) wires the provider it generates for a function
 returning `Result` to `PromoteTryComputer<Self>`. A context names the bundle only to route its own
 components through such a provider, or through the entries that serve any base, as
-[Common Mistakes](#common-mistakes) sets out. This page explains what the bundle emits.
+[Common mistakes](#common-mistakes) sets out. This page explains what the bundle emits.
 
 :::
 
@@ -127,7 +127,7 @@ output as the failure path, and forwards every remaining key to
 [`PromoteComputer`](promote_computer.md)'s own entry for it, with the `->` operator, so those
 members derive from the computer form.
 
-## Common Mistakes
+## Common mistakes
 
 **The `HandlerComponent` entry does not serve a hand-written base.** `TryComputerComponent` and
 `AsyncComputerComponent` take one step from the base, through `TryPromote<P>` and `PromoteAsync<P>`,

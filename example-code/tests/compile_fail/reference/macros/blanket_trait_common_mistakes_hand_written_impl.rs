@@ -1,4 +1,4 @@
-//! `docs/reference/macros/blanket_trait.md`, *Common Mistakes*: the blanket impl conflicts with a hand-written impl for a type that satisfies its bounds.
+//! `docs/reference/macros/blanket_trait.md`, *Common mistakes*: the blanket impl conflicts with a hand-written impl for a type that satisfies its bounds.
 
 use cgp::core::macros::blanket_trait;
 

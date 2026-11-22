@@ -142,7 +142,7 @@ nothing about the runtime representation changes. The result is at the all-prese
 so it satisfies [`FinalizeBuild`](./finalize_build.md) immediately and
 [`TakeField`](./take_field.md) for every field, the pair a redistribution needs.
 
-## Common Mistakes
+## Common mistakes
 
 **It consumes the value.** It lacks a borrowing form; use [`ToFieldsRef`](../shape/to_fields_ref.md)
 if the original must survive, bearing in mind that gives you a shape rather than a builder.

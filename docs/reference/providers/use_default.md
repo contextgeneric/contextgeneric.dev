@@ -123,7 +123,7 @@ The first `#[cgp_impl]` makes `UseDefault` a `NameGetter` provider whose `name` 
 around `self.name()`. The `Greeter` impl restates its dependency with
 [`#[uses(HasName)]`](../attributes/uses.md), because the default body of `greet` calls `name`;
 [`#[extend(HasName)]`](../attributes/extend.md) on the trait does not give the provider that bound,
-as [Common Mistakes](#common-mistakes) shows. `App` then delegates both components to `UseDefault`
+as [Common mistakes](#common-mistakes) shows. `App` then delegates both components to `UseDefault`
 in one array entry, so `App.greet()` produces `"Hello, John!"` entirely from the two default bodies,
 with no method implemented on `App` or on a dedicated provider.
 
@@ -152,7 +152,7 @@ matching [`IsProviderFor`](../traits/wiring/is_provider_for.md) implementation c
 clause. That is the same pair any `#[cgp_impl]` produces; the only thing special about `UseDefault` is
 the empty body and the shared, conventional name.
 
-## Common Mistakes
+## Common mistakes
 
 **An empty impl still has to state what the default bodies call.** `#[extend(HasName)]` makes
 `HasName` a supertrait of `CanGreet`, which the provider trait `Greeter` carries as a `where`

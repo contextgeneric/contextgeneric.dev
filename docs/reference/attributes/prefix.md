@@ -61,7 +61,7 @@ of the macros built on it, [`#[cgp_type]`](../macros/cgp_type.md) and
 **The path is a prefix, and the macro appends the [component marker](/docs/reference/glossary#component-marker) for you.**
 `#[prefix(@app in DefaultNamespace)]` on `CanGreet` registers `GreeterComponent` at
 `@app.GreeterComponent`. Writing the marker yourself doubles it. See
-[Common Mistakes](#common-mistakes).
+[Common mistakes](#common-mistakes).
 
 Segments follow [`Path!`](../macros/path.md)'s convention. A lowercase identifier that is not a
 primitive type name becomes a [type-level string](/docs/reference/glossary#type-level-string), so `@app` and `@cgp.core.error` are strings. Any
@@ -281,7 +281,7 @@ type path with optional generic arguments, and the macro appends the table argum
 parts are required, the attribute takes exactly one such argument, and it is repeated for several
 namespaces.
 
-## Common Mistakes
+## Common mistakes
 
 **The macro appends the marker, so do not write it.** `#[prefix(@app.GreeterComponent in Ns)]`
 routes the component to `@app.GreeterComponent.GreeterComponent`. On a component without type
@@ -327,7 +327,7 @@ error[E0277]: the trait bound `PathCons<Symbol<3, Chars<'a', ...>>, PathCons<Gre
 The `help:` list names `GreeterComponent` itself, which reads like a contradiction and is in fact the
 diagnosis: the registration worked, and only the binding at the leaf is missing.
 
-The [compile errors](../errors.md#nothing-is-wired-there) page reads this diagnostic in full. The
+The [compile errors](../errors.md#missing-wiring) page reads this diagnostic in full. The
 fix is to bind a provider at the path: a direct entry on the context, a namespace body entry, or a
 `#[default_impl]` on the provider.
 

@@ -265,9 +265,9 @@ that provider's `where` clause. One addition shows only in a multi-method block:
 bounds across *every* method and de-duplicates them, so two methods each taking `#[implicit] name: &str`
 add one `HasField<Symbol!("name"), Value = String>` bound rather than two. The macro still emits the
 `let` bindings per method, because each body needs its own. Two reads of one field at *different*
-field types are not merged, and the conflict they create is under [Common Mistakes](#common-mistakes).
+field types are not merged, and the conflict they create is under [Common mistakes](#common-mistakes).
 
-## Common Mistakes
+## Common mistakes
 
 **The attribute takes no arguments**, and the macro says so rather than ignoring the argument:
 

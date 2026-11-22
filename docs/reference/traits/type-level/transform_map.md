@@ -54,7 +54,7 @@ and exists only to name the set of conversions, exactly as a
 
 **A transform needs an impl for every source marker a field might currently be in.** That rule
 decides how many impls you write, and getting it wrong is the usual failure, shown in
-[Common Mistakes](#common-mistakes).
+[Common mistakes](#common-mistakes).
 
 ## Examples
 
@@ -157,7 +157,7 @@ re-marks exactly the fields the concrete struct declares.
 Nothing here has a runtime representation beyond the field values themselves: the markers are
 zero-sized, and `transform_mapped` is an associated function without a receiver.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 

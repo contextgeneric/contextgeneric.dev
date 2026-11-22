@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_getter.md`, *Common Mistakes*: a trait not named `Has…` gets no default provider name.
+//! `docs/reference/macros/cgp_getter.md`, *Common mistakes*: a trait not named `Has…` gets no default provider name.
 
 use cgp::prelude::*;
 

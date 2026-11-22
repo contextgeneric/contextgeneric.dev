@@ -198,7 +198,7 @@ The second connects field access to wiring: [`UseContext`](../../providers/use_c
 implements [`FieldGetter`](./field_getter.md) for any context that has the field, delegating
 straight through, as that page shows.
 
-## Common Mistakes
+## Common mistakes
 
 **Two spellings of a name are unrelated types.** A context whose field is `firstName` does not meet
 a bound on `Symbol!("first_name")`, and the mismatch reports as a missing `HasField` bound, with

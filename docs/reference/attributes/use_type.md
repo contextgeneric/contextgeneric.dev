@@ -314,7 +314,7 @@ let typed: Marker = todo!();   // becomes <Self as HasMarkerType>::Marker
 the same substitutions and the same bounds. Only the order the bounds are listed in follows the source. A
 chain like `#[use_type(HasC<B>.C in B, HasB<A>.B in A, HasA.A)]` grounds exactly as its front-to-back
 spelling does, and two imports may share one target as readily as chain through it. A **cycle** is the
-only arrangement without a valid order. See [Common Mistakes](#common-mistakes).
+only arrangement without a valid order. See [Common mistakes](#common-mistakes).
 
 ## Formal grammar
 
@@ -343,7 +343,7 @@ signatures, and `= Type` pins it with an equality bound. The pin is accepted on 
 `#[cgp_impl]` and rejected on `#[cgp_component]` and the macros built on it. An empty braced list
 imports no name and adds only the trait's bound.
 
-## Common Mistakes
+## Common mistakes
 
 **Two imports may not share a name or alias.** The substitution could only pick one, so the macro
 rejects a collision rather than resolving it:

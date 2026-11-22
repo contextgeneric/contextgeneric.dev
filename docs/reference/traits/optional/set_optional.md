@@ -141,7 +141,7 @@ exposes it and
 `set` discards it. Under `IsOptional` that old storage is an `Option<Value>`, which is why the returned
 value is optional even though the argument is not.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::field::impls`.
 

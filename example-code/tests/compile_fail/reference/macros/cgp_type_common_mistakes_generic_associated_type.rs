@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_type.md`, *Common Mistakes*: the associated type may not be generic.
+//! `docs/reference/macros/cgp_type.md`, *Common mistakes*: the associated type may not be generic.
 
 use cgp::prelude::*;
 

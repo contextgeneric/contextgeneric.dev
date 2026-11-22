@@ -58,7 +58,7 @@ The derive comes with the prelude, but the traits it implements do not. Code tha
 `FinalizeExtract` from `cgp::core::field::traits`, and the borrowed extractors need
 `HasExtractorRef` or `HasExtractorMut` from the same module.
 
-### Every variant needs one unnamed payload or none
+### Variant payloads
 
 Every variant must contain exactly one unnamed field or no fields at all. The extractor uses the
 field's type as its payload type. A variant with no fields, written `Closed`, `Closed()`, or
@@ -293,7 +293,7 @@ than `self`: Rust considers a reference inhabited even when its target is uninha
 Each generated impl is aimed at the token it came from: a per-variant impl at its variant, a whole-enum impl
 at the enum name. The companion enums are cloned from yours, so their tokens already carry meaningful spans.
 
-## Common Mistakes
+## Common mistakes
 
 **Every variant must carry one unnamed payload or none.** Individual variants cannot opt out. Wrap
 richer payloads in structs.

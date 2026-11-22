@@ -210,7 +210,7 @@ SymbolInput -> STRING_LITERAL
 included, while a byte string or a C string is not. The macro is used in type position, and this single
 literal is the whole of its input: a token after it fails with `unexpected token`.
 
-## Common Mistakes
+## Common mistakes
 
 **The `LEN` in an expanded `Symbol` is bytes, not characters.** For ASCII the two coincide, which is why the
 distinction only shows up on non-ASCII field names, where the number will not match the visible character

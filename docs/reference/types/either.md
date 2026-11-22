@@ -149,7 +149,7 @@ list. Writing the chain out yourself is longer, harder to change, and identical 
   variant name in generic code. A `match` on the `Either` chain, as above, is positional and belongs
   where the enum's order is known.
 
-## Common Mistakes
+## Common mistakes
 
 **A sum holds one branch, not all of them.** `Either<A, Either<B, Void>>` is a value that is
 *either* an `A` or a `B`, not both. This is the opposite of the [product list](cons.md), and a type

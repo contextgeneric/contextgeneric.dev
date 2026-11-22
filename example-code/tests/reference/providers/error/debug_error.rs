@@ -2,7 +2,7 @@
 //!
 //! Pins the Examples program: a `ParseIntError` is formatted with `Debug` and forwarded to the
 //! `String` entry, which `RaiseFrom` converts. The `String` key wired to `DebugError` itself,
-//! from Common Mistakes, is a trybuild fixture.
+//! from Common mistakes, is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {

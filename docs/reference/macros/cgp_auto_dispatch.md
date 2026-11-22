@@ -62,7 +62,7 @@ The macro enforces four restrictions when it expands:
   `self: Box<Self>` is rejected, because the generated code passes the receiver to a matcher that
   takes the enum or a borrow of it.
 - **A method may not have non-lifetime generic parameters.** Lifetimes are fine. The reason is in the
-  [Common Mistakes](#common-mistakes), and it is a real limitation rather than an oversight.
+  [Common mistakes](#common-mistakes), and it is a real limitation rather than an oversight.
 
 The enum also has to be made extensible, with [`#[derive(CgpData)]`](../derives/derive_cgp_data.md) or the
 narrower variant derives, so the machinery can take it apart one variant at a time.
@@ -150,7 +150,7 @@ Use something else in these situations:
   and a unit code, so a context cannot override how one variant is handled. Wiring
   `MatchWithValueHandlers` into a context's own component gives that control.
 - **A method needs to be generic.** Not supported, and not fixable by rearranging: see the
-  [Common Mistakes](#common-mistakes).
+  [Common mistakes](#common-mistakes).
 - **The trait needs an associated type or const.** Also rejected. A trait carrying either is not a dispatch
   trait in this sense; give the enum a component of its own instead.
 
@@ -266,7 +266,7 @@ An `async` method selects the `AsyncComputer` form of the bound and the call ins
 and awaits the result. Every name in the expansion is written as a full path, so it compiles in a
 module that does not import `cgp::prelude::*`.
 
-## Common Mistakes
+## Common mistakes
 
 **A trait method cannot be generic**, and the macro explains why in the message itself:
 

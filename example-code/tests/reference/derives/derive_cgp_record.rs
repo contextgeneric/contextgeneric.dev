@@ -102,7 +102,7 @@ pub mod examples {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// A single-field tuple struct's representation is the inner type, not a one-element product.
 pub mod common_mistakes {

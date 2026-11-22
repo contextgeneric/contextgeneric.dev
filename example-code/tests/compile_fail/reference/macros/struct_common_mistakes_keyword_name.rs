@@ -1,4 +1,4 @@
-// From `docs/reference/macros/struct.md`, *Common Mistakes*: a keyword field name written without
+// From `docs/reference/macros/struct.md`, *Common mistakes*: a keyword field name written without
 // its `r#`, which the macro reads as a positional field.
 
 use cgp::prelude::*;

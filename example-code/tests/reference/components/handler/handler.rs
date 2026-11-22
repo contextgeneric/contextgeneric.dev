@@ -2,7 +2,7 @@
 //!
 //! Pins the page's Examples: a generic consumer bounded by `CanHandle`, and a context whose
 //! `HandlerComponent` is a synchronous `Computer` lifted in two promotion steps. The one-step bundle
-//! wiring from Common Mistakes is a trybuild fixture.
+//! wiring from Common mistakes is a trybuild fixture.
 
 /// ## Examples
 pub mod examples {

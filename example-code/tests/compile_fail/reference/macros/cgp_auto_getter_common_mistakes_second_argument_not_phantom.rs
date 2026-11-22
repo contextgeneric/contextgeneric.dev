@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: the second argument must be a `PhantomData`.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: the second argument must be a `PhantomData`.
 
 use cgp::prelude::*;
 

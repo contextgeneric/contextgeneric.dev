@@ -152,7 +152,7 @@ The transformer forms implement both by delegating to the base monad after handl
 (`ErrMonadicTrans<M>`'s `lift_value` is `M::lift_value(Ok(value))`), which lets a stack lift through
 *n* layers without depth-specific code.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::extra::monad::traits`.
 

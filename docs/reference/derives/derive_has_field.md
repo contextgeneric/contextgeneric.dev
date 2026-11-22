@@ -262,7 +262,7 @@ Each generated impl is also aimed at the field it came from, so a compiler error
 underlines that field rather than the whole `#[derive(HasField)]`. That covers a conflict with a
 hand-written impl, and the "but the trait is implemented for" hint inside a missing-field error.
 
-## Common Mistakes
+## Common mistakes
 
 **A unit struct does not generate field-access implementations.** The derive succeeds, but a later
 field read reports an unsatisfied `HasField` bound.

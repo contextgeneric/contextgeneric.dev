@@ -171,7 +171,7 @@ calls another trait of the context is written as a provider with
 [`#[cgp_impl]`](../../macros/cgp_impl.md), since a `#[cgp_computer]` function cannot reach its
 context.
 
-## Common Mistakes
+## Common mistakes
 
 **Calling `compute` on a concrete context by its bare name is ambiguous.** A context that delegates
 `ComputerComponent` also implements the `Computer` provider trait, so in a module that imports both

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_producer.md`, *Common Mistakes*: `impl Trait` in the return type is
+//! `docs/reference/macros/cgp_producer.md`, *Common mistakes*: `impl Trait` in the return type is
 //! rejected.
 
 use cgp::prelude::*;

@@ -276,7 +276,7 @@ A bare provider name, or the keyed `name` / `provider` / `context` form. The onl
 derived from the **associated type's** name plus `TypeProvider`, so `type Scalar;` yields
 `ScalarTypeProvider`. Every other key and default behaves as documented there.
 
-## Common Mistakes
+## Common mistakes
 
 **The trait must contain exactly one associated type and nothing else.** A method beside the type, a
 second type, or no type at all each report the same thing:

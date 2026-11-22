@@ -293,7 +293,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// Two mistakes that compile: a doubled marker on a component without type parameters, which the
 /// shorter path key still catches, and a prefix on `#[cgp_auto_getter]`, which is dropped.

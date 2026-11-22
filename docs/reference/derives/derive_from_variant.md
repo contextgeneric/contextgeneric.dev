@@ -51,7 +51,7 @@ impl.
 The derive comes with the prelude, but the `FromVariant` trait it implements does not, so code that
 calls `from_variant` imports the trait from `cgp::core::field::traits`.
 
-### Every variant needs one unnamed payload or none
+### Variant payloads
 
 Every variant must contain exactly one unnamed field, whose type becomes the constructor's payload
 type, or no fields at all. A variant with no fields, written `Closed`, `Closed()`, or `Closed {}`,
@@ -196,7 +196,7 @@ The [`FromVariant`](../traits/variant/from_variant.md) trait itself is defined i
 these per-variant impls. Each is aimed at the variant it came from, so a conflict with a hand-written impl
 underlines that variant rather than the whole `#[derive(FromVariant)]`.
 
-## Common Mistakes
+## Common mistakes
 
 **Every variant must carry one unnamed payload or none.** Individual variants cannot opt out.
 [`HasFields`](./derive_has_fields.md) accepts all variant shapes when only a representation is needed.

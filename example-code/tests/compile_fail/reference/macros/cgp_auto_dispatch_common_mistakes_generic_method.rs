@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: a dispatch method cannot take a type parameter.
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: a dispatch method cannot take a type parameter.
 
 use cgp::prelude::*;
 

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_getter.md`, *Common Mistakes*: an associated type allows exactly one getter method.
+//! `docs/reference/macros/cgp_auto_getter.md`, *Common mistakes*: an associated type allows exactly one getter method.
 
 use cgp::prelude::*;
 

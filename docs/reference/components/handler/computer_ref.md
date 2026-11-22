@@ -133,7 +133,7 @@ is the more common case, and for [`AsyncComputerRef`](./async_computer_ref.md) w
 computation must also await. If the computation can fail, use
 [`TryComputerRef`](./try_computer_ref.md).
 
-## Common Mistakes
+## Common mistakes
 
 **An owned-input `Computer` cannot answer `compute_ref`.** Wiring `ComputerRefComponent` to
 `PromoteRef<Double>`, for a `Double` that implements `Computer` for `u64`, fails at the check,

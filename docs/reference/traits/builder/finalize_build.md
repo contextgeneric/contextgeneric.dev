@@ -147,7 +147,7 @@ The optional layer reaches this same impl rather than replacing it:
 [`TransformMapFields`](../type-level/transform_map_fields.md) walk to `IsPresent` first, so **the
 strict, all-present impl remains the only way a partial value becomes a concrete struct.**
 
-## Common Mistakes
+## Common mistakes
 
 **"No method named `finalize_build`" is the expected error for an incomplete build.** Setting only
 `first_name` on the example's `Person` and finalizing:

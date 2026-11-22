@@ -2,7 +2,7 @@
 //!
 //! Pins the `MagicNumber` provider from the page's Examples, wired onto a context and invoked through
 //! `CanProduce`, the `#[cgp_producer]` provider the page's Usage section wires into the input-taking
-//! components, and the pipeline it seeds from When to use it. The hand-written producer behind a bundle, from Common Mistakes, is a
+//! components, and the pipeline it seeds from When to use it. The hand-written producer behind a bundle, from Common mistakes, is a
 //! trybuild fixture.
 
 /// ## Usage
@@ -130,7 +130,7 @@ pub mod when_to_use_it {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The fix the page gives: a hand-written producer wired to `PromoteProducer<Self>`, as
 /// `#[cgp_producer]` does, answers the fallible members. The unwired producer behind the bundle is

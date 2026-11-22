@@ -145,7 +145,7 @@ one operates on an extractor it is handed. That is the entire reason two traits 
 one, and it makes chaining possible: the `Remainder` a `downcast` returns is precisely a
 `downcast_fields` input.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 

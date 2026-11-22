@@ -66,7 +66,7 @@ attribute with a comma-separated list reads as one declaration and is the form t
 parameter on an impl only where the impl determines it, and the only place a `#[cgp_fn]`
 implementation determines one is the field bound an `#[implicit]` argument produces. `&Name` pins
 `Name`, and a nested position such as `&Pool<Db>` pins `Db`. The compiler rejects a parameter that does
-not appear in any implicit argument with `E0207`. See [Common Mistakes](#common-mistakes).
+not appear in any implicit argument with `E0207`. See [Common mistakes](#common-mistakes).
 
 The list accepts a lifetime or a const parameter as well as a type parameter, because the macro reads
 ordinary generic parameters. A const parameter is pinned the same way, by a field type that mentions it:
@@ -206,9 +206,9 @@ ImplGenericsArgs -> GenericParam ( `,` GenericParam )* `,`?
 `GenericParam` is the Rust grammar's own production for one entry of a generic parameter list: a
 lifetime, a type parameter with optional bounds, or a const parameter. The list may be empty, and the
 attribute may be repeated. Because the production is Rust's, a parameter default such as `T = u32`
-parses, and the compiler then rejects it. See [Common Mistakes](#common-mistakes).
+parses, and the compiler then rejects it. See [Common mistakes](#common-mistakes).
 
-## Common Mistakes
+## Common mistakes
 
 **A parameter must be pinned by an implicit argument, or it is unconstrained.** The trait does not
 mention it and neither does the self type, so only a field bound can determine it. Declaring `Name`

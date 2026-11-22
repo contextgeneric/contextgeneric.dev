@@ -189,7 +189,7 @@ impl is absent for an incomplete value. Everything between the two ends reduces 
 [`BuildField`](./build_field.md) and [`TakeField`](./take_field.md) are library blanket impls over
 it in opposite directions.
 
-## Common Mistakes
+## Common mistakes
 
 **"No method named `finalize_build`" is the expected error for an incomplete build.** A missing
 field means the all-present impl does not apply, so the compiler reports a missing method rather

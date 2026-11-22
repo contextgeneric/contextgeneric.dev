@@ -52,7 +52,7 @@ which lets the projection `<Key as Trait<…, Delegate = Provider>>` resolve cle
 
 **The parameter names are misleading about which position holds what.** For this trait and its sibling,
 **`Self` is the instance type and the component name is a leading parameter**, the opposite of
-[`DefaultNamespace`](./default_namespace.md). The [next section](#the-one-thing-to-get-right) works it
+[`DefaultNamespace`](./default_namespace.md). The [next section](#which-type-is-self) works it
 out.
 
 :::
@@ -71,7 +71,7 @@ use cgp::core::component::DefaultImpls1;
 [`#[default_impl(...)]`](../../attributes/default_impl.md) attribute that registers a provider as a default.
 The macros generate the impls and the forwarding.
 
-### The one thing to get right
+### Which type is `Self`
 
 Registering `ShowString` as the `String` default for `ShowImplComponent` emits:
 
@@ -154,7 +154,7 @@ wiring and the shown value is a parameter. The loop wires every type with a regi
 projecting `T: DefaultImpls1<ShowImplComponent, App, Delegate = Provider>`. Only `String` has a
 registered default, so the direct `u64` line adds a type beside it; had `u64` a registered default
 too, the loop's impl and the direct entry would both cover its path, and the compiler would reject
-them, as [Common Mistakes](#common-mistakes) shows.
+them, as [Common mistakes](#common-mistakes) shows.
 
 A whole namespace can also be the loop target. After
 
@@ -234,7 +234,7 @@ own `where` clause. A provider whose bounds come from `#[use_type]`, `#[uses]`, 
 its [`IsProviderFor`](../wiring/is_provider_for.md), and are checked when a real context resolves
 it.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::component`.
 [`DefaultNamespace`](./default_namespace.md) is.

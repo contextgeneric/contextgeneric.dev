@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_computer.md`, *Common Mistakes*: a type parameter used only in the
+//! `docs/reference/macros/cgp_computer.md`, *Common mistakes*: a type parameter used only in the
 //! return type is rejected, since the generated impl cannot determine it.
 
 use cgp::prelude::*;

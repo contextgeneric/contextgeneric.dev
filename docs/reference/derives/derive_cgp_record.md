@@ -170,7 +170,7 @@ yields a `pub` companion. Each generated impl is aimed at the token it came from
 its field, a whole-type impl at the type name), so a conflict with a hand-written impl underlines that
 token rather than the whole derive.
 
-## Common Mistakes
+## Common mistakes
 
 **The companion type does not inherit your attributes.** A `#[derive(Debug, Clone)]` on the record
 does not apply to `__Partial{Name}`, so it does not make partial values printable or cloneable. Read a

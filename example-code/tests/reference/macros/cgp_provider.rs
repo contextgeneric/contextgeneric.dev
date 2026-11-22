@@ -342,7 +342,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The disambiguated associated const, which is the compiling half of the `E0034` entry.
 /// `RateLimiter` and `App` are declared here from the page's inline names.

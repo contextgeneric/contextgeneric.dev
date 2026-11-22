@@ -176,7 +176,7 @@ grammar of the value macro `product!`, used in expression position. `Type` and `
 grammar's productions. Both lists may be empty (`Product![]`, `product![]`) or carry a trailing comma, and
 they line up positionally so a `product!` value has the type the corresponding `Product!` builds.
 
-## Common Mistakes
+## Common mistakes
 
 **`Product!` and `product!` differ only in case, and the compiler's complaint will not say so.** Using the
 type macro in expression position fails inside the macro's own parser, which is expecting a type, so the

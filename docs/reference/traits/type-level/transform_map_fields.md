@@ -67,7 +67,7 @@ there is nothing to implement. What you supply is the `Transform` marker, by wri
 Inside generic code a `where` clause does, and the method is called bare as
 `builder.transform_map_fields()`. At a concrete call site, name both on the trait, as
 `TransformMapFields::<Double, IsPresent>::transform_map_fields(builder)`; a bare call there does not
-compile, as [Common Mistakes](#common-mistakes) shows.
+compile, as [Common mistakes](#common-mistakes) shows.
 
 ## Examples
 
@@ -191,7 +191,7 @@ The intermediate `IsNothing` state is invisible from outside: it exists only bet
 `UpdateField` calls for one field, and no observable value is ever in a half-transformed
 configuration.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::traits`.
 

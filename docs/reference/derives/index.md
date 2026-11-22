@@ -57,7 +57,7 @@ The individual derives provide these operations:
 `BuildField` accepts structs. `ExtractField` and `FromVariant` accept enums and are commonly derived
 together.
 
-## Restrictions to know before you reach for them
+## Restrictions
 
 The enum constructor and extractor derives require every variant to carry one unnamed payload or no
 fields, the latter with the payload `Nil`. This restriction applies to `FromVariant`,

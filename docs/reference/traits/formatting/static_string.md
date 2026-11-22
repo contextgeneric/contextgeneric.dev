@@ -50,7 +50,7 @@ use cgp::core::field::traits::StaticString;
 
 Every [`Symbol!`](../../macros/symbol.md) has it, including the empty one, and so does `Nil`, whose
 value is `""`. A bare [`Chars`](../../types/chars.md) list does not, because the impl needs the byte
-length only `Symbol` carries; [Common Mistakes](#common-mistakes) shows the error.
+length only `Symbol` carries; [Common mistakes](#common-mistakes) shows the error.
 
 ## Examples
 
@@ -132,7 +132,7 @@ generic, so the macro precomputes it. It is a *byte* length, which makes multi-b
 round-trip correctly and makes `LEN` disagree with the visible character count for any non-ASCII
 name.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude, and its module differs from its neighbours'.** Import `StaticString`
 from `cgp::core::field::traits`; [`ConcatPath`](./concat_path.md) and

@@ -187,7 +187,7 @@ bounds over `AsyncComputer`. The convenience aliases are `UseInputDelegate` tabl
 `(Input, Args)`, and on `(&'a Input, Args)` and `(&'a mut Input, Args)` for the borrowed forms, each
 mapping the input to this matcher over a list built from the enum's variants.
 
-## Common Mistakes
+## Common mistakes
 
 **The mistakes of the plain matcher apply unchanged.** A list that misses a variant fails the
 `FinalizeExtract` bound, and the matcher cannot fill a `TryComputer` or `Handler` slot without a

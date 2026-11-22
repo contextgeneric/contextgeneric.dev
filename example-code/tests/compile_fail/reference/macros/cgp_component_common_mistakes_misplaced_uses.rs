@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: `#[uses]` above a component trait
+//! `docs/reference/macros/cgp_component.md`, *Common mistakes*: `#[uses]` above a component trait
 //! is rejected by name.
 
 use cgp::prelude::*;

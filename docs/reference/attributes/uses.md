@@ -216,7 +216,7 @@ repeated, with entries from every occurrence collected into one `Self:` predicat
 separate *bounds*, so `#[uses(A, B)]` and `#[uses(A)] #[uses(B)]` are the same thing, and the
 single-attribute form is the one to write.
 
-## Common Mistakes
+## Common mistakes
 
 **Naming a provider trait instead of a consumer trait does not work**, and it is the most common way to
 write `#[uses]` when you wanted [`#[use_provider]`](use_provider.md). A provider trait carries an

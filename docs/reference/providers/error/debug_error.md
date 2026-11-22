@@ -156,7 +156,7 @@ Both bounds require the context to already handle the `String` case, which is th
 reduces any `Debug` source to the one case the context knows. Each impl is paired with a matching
 [`IsProviderFor`](../../traits/wiring/is_provider_for.md) impl.
 
-## Common Mistakes
+## Common mistakes
 
 **The `String` key itself cannot be wired to `DebugError`.** For a `String` source, `DebugError`
 formats it and raises the result through the context's `CanRaiseError<String>`, which is

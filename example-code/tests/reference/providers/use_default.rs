@@ -2,7 +2,7 @@
 //!
 //! Pins that empty-body `#[cgp_impl(UseDefault)]` blocks make the trait's default method bodies the
 //! implementation, and that both components can be delegated to `UseDefault` in one array entry. The
-//! impl without `#[uses(HasName)]` from Common Mistakes is a trybuild fixture.
+//! impl without `#[uses(HasName)]` from Common mistakes is a trybuild fixture.
 
 /// ## Usage
 ///

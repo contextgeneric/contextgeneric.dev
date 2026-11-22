@@ -208,7 +208,7 @@ The borrowed accessors use a second companion, `__PartialRefShape`, with a lifet
 `ExtractField` impls on it, so a value can be matched without being moved and the narrowing works
 identically.
 
-## Common Mistakes
+## Common mistakes
 
 **`Self` is an extractor, not the enum.** A chain starts with [`to_extractor`](./has_extractor.md) or one
 of its borrowing siblings.

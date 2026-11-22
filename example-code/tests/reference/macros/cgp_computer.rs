@@ -258,7 +258,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// The compiling half of the `Result` detection entry: a fully qualified `Result` is not
 /// recognised, so the value bundle is wired and `try_compute` wraps the whole result in `Ok`.

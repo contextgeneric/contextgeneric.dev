@@ -89,7 +89,7 @@ themselves be records:
 
 Generic code walks the `Sum!` to find which variant a value holds, then walks a nested `Product!` to
 reach that variant's fields. `#[derive(HasFields)]` accepts all four shapes; the variant derives that
-build and take apart values accept only the first, as [Common Mistakes](#common-mistakes) explains.
+build and take apart values accept only the first, as [Common mistakes](#common-mistakes) explains.
 
 A standalone sum can be written directly, which is mostly useful for illustration:
 
@@ -164,7 +164,7 @@ SumInput -> ( Type ( `,` Type )* `,`? )?
 `Type` is the Rust grammar's type production, and the list may be empty (`Sum![]`) or carry a trailing comma.
 The macro is used in type position, and each listed type is one possible variant of the sum.
 
-## Common Mistakes
+## Common mistakes
 
 **The empty sum is uninhabited, not empty-but-usable.** `Sum![]` is `Void`, so a function claiming to return one
 can never return at all. That is deliberate and occasionally useful, but it is not the analogue of an empty

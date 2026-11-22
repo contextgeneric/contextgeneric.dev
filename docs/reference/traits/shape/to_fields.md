@@ -129,7 +129,7 @@ Because the shape is built positionally from declaration order, `to_fields` and
 [`from_fields`](./from_fields.md) are exact inverses by construction: there is no lookup, no
 matching by name at run time, and nothing that can fail.
 
-## Common Mistakes
+## Common mistakes
 
 **It consumes the value.** Reach for [`ToFieldsRef`](./to_fields_ref.md) when you need to keep it.
 This is the commonest surprise in the family, because the two read alike.

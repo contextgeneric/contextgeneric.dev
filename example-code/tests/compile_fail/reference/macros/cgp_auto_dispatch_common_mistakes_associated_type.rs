@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: every trait item must be a method.
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: every trait item must be a method.
 
 use cgp::prelude::*;
 

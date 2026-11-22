@@ -360,7 +360,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// Reads that differ only in how they borrow agree on one field type. The rejected snippets are
 /// trybuild fixtures.

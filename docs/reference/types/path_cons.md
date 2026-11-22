@@ -135,7 +135,7 @@ which is `RedirectLookup<__Table__, PathCons<MyFooComponent, Nil>>`. A single-se
   [`cgp_namespace!`](../macros/cgp_namespace.md) or the `open` statement of
   [`delegate_components!`](../macros/delegate_components.md) produces the paths for you.
 
-## Common Mistakes
+## Common mistakes
 
 **A path names a route, not a provider.** A `PathCons` chain describes which key to look up. The
 provider it resolves to depends on the table that

@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: a hand-written impl collides for a type the blanket impl covers.
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: a hand-written impl collides for a type the blanket impl covers.
 
 use cgp::prelude::*;
 

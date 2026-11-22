@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_fn.md`, *Common Mistakes*: an `#[impl_generics]` parameter named in the
+//! `docs/reference/macros/cgp_fn.md`, *Common mistakes*: an `#[impl_generics]` parameter named in the
 //! trait's own signature is out of scope there, bare (`E0425`) or qualified (`E0433`).
 
 use cgp::prelude::*;

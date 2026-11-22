@@ -357,7 +357,7 @@ segment; given, that `Type` is substituted into the first position of the genera
 `Type` is the Rust type production. The struct declaration that distinguishes `#[cgp_new_provider]`
 is implied by the macro name and is not written in the argument.
 
-## Common Mistakes
+## Common mistakes
 
 **`#[cgp_new_provider]` fails if the struct already exists**, which is the usual result of converting
 one macro to the other and forgetting to delete the declaration:

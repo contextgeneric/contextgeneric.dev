@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_computer.md`, *Common Mistakes*: a `Result` function's error type must
+//! `docs/reference/macros/cgp_computer.md`, *Common mistakes*: a `Result` function's error type must
 //! be the context's error type, since the fallible bundles do not convert it.
 
 use core::marker::PhantomData;

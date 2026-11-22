@@ -121,7 +121,7 @@ so you write it only when you tag a positional field yourself.
 - **Read `Index<N>` in an error as a position.** A missing `HasField<Index<2>>` bound names the third
   field of a tuple struct.
 
-## Common Mistakes
+## Common mistakes
 
 **A position the struct lacks is a type error, not a panic.** Reading `Index<5>` on a three-field
 tuple struct does not compile:

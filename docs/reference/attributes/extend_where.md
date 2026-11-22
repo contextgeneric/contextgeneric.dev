@@ -188,7 +188,7 @@ Those take a *bound* and always attach it to `Self`, whereas a predicate names i
 expressible here and neither is expressible there. The list may be empty and the attribute may be
 repeated.
 
-## Common Mistakes
+## Common mistakes
 
 **A promoted predicate does not reach callers as a guarantee.** This is the mistake the attribute most
 invites: because `#[extend]` gives callers its supertrait, it is natural to assume `#[extend_where]` gives

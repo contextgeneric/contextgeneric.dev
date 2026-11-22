@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common Mistakes*: every method needs a `self` receiver.
+//! `docs/reference/macros/cgp_auto_dispatch.md`, *Common mistakes*: every method needs a `self` receiver.
 
 use cgp::prelude::*;
 

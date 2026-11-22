@@ -205,7 +205,7 @@ rather than the target struct.
 extractor recursion can be named in a bound; both still appear by name in a failed call's notes,
 this one as `cgp::cgp_core::cgp_field::impls::build_from::FieldsBuilder`.
 
-## Common Mistakes
+## Common mistakes
 
 **It is not in the prelude.** Import from `cgp::core::field::impls`.
 

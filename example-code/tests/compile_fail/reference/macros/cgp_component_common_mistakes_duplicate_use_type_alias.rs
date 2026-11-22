@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_component.md`, *Common Mistakes*: two `#[use_type]` imports that
+//! `docs/reference/macros/cgp_component.md`, *Common mistakes*: two `#[use_type]` imports that
 //! resolve to the same bare name are rejected.
 
 use cgp::prelude::*;

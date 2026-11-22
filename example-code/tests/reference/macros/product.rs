@@ -128,7 +128,7 @@ pub mod under_the_hood {
     }
 }
 
-/// ## Common Mistakes
+/// ## Common mistakes
 ///
 /// A one-element list is a distinct type from its element. The misplaced-macro snippets are
 /// trybuild fixtures.

@@ -265,7 +265,7 @@ ContextName      -> IDENTIFIER
 Omitted, the generic context type in the generated impl is the reserved identifier `__Context__`; a given
 `IDENTIFIER` overrides that name.
 
-## Common Mistakes
+## Common mistakes
 
 **The macro is not in the prelude.** `use cgp::prelude::*;` does not bring it into scope, and the failure is
 reported as an unknown attribute rather than as a missing import:

@@ -144,7 +144,7 @@ Because the rewrite is per-entry rather than structural, **a field that is alrea
 another one**: a field of type `&'a Name` appears as `&'__a &'a Name`. That is correct, and it is
 the one thing about this trait that surprises people in an error message.
 
-## Common Mistakes
+## Common mistakes
 
 **A field that is already borrowed gets a second borrow.** `&'a Name` becomes `&'__a &'a Name` in
 `FieldsRef`, which reads oddly in a diagnostic and is not a bug.

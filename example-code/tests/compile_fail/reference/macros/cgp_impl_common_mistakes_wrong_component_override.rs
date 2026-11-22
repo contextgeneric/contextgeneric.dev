@@ -1,4 +1,4 @@
-//! `docs/reference/macros/cgp_impl.md`, *Common Mistakes*: a `: ComponentType` override that does
+//! `docs/reference/macros/cgp_impl.md`, *Common mistakes*: a `: ComponentType` override that does
 //! not belong to the provider trait makes the generated impl fail its `IsProviderFor` supertrait.
 
 use cgp::prelude::*;

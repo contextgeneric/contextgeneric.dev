@@ -29,7 +29,7 @@ header or a `for … in` loop inside [`delegate_components!`](../../macros/deleg
 
 One edge is worth carrying across the group: for the two `DefaultImpls` traits the instance type takes
 the `Self` position and the component name is a leading parameter, which is the opposite of the
-parameter names' suggestion. The [`DefaultImpls1`](default_impls1.md#the-one-thing-to-get-right) page
+parameter names' suggestion. The [`DefaultImpls1`](default_impls1.md#which-type-is-self) page
 works it out.
 
 ## The ideas behind them
