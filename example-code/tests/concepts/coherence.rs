@@ -30,8 +30,8 @@ pub mod traits_as_dependency_injection {
 /// `coherence_every_lookup_finds_the_same_answer_2.rs` (orphan rule).
 pub mod the_coherence_guarantee {}
 
-/// ## The move: make `Self` a type you own
 /// ## Provider traits
+/// ## Selecting one provider for each type
 pub mod provider_traits {
     use core::fmt::Display;
 

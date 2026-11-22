@@ -106,9 +106,9 @@ pub mod impl_side_dependencies {
     }
 }
 
-/// ## Wiring selects implementations for an application
+/// ## Selecting implementations by wiring
 /// ## Checking declared dependencies
-pub mod checking_declared_dependencies {
+pub mod selecting_implementations_by_wiring {
     use cgp::prelude::*;
 
     #[cgp_component(StorageObjectFetcher)]

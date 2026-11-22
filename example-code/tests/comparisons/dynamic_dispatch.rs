@@ -50,9 +50,9 @@ pub mod calls_on_a_generic_receiver {
     }
 }
 
-/// ## Wiring serves the selection role of a vtable
+/// ## Wiring as a vtable
 /// ## Delegation and the original context
-pub mod delegation_and_the_original_context {
+pub mod wiring_as_a_vtable {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]

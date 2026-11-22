@@ -49,8 +49,8 @@ pub mod environment_values_from_fields {
     }
 }
 
-/// ## Raising an error constructs a value
 /// ## Raising errors
+/// ## Checking provider dependencies
 pub mod raising_errors {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
