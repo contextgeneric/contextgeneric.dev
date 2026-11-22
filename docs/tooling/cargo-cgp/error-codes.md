@@ -286,7 +286,7 @@ colliding generated items:
 To fix it, rename the method in one trait, or
 declare the traits in different modules.
 
-## Wiring that never resolves, and the orphan rule
+## Endless lookups and the orphan rule
 
 The next three codes cover wiring that is well formed but cannot work, either because looking it up never ends or because
 Rust's coherence rules forbid it.
@@ -331,7 +331,7 @@ foreign one.
 [Registering into a namespace you do not own](/docs/reference/errors#registering-into-a-namespace-you-do-not-own)
 explains the ownership requirement.
 
-## Mistakes in what a macro was given
+## Macro input mistakes
 
 These codes name a CGP attribute or macro used in a way the generated code cannot compile. Most of them give the fix in a
 `help` line.
@@ -466,7 +466,7 @@ that implementation. `#[cgp_provider]` and `#[cgp_impl]` generate it alongside t
 To fix it, add one of those macros, as the `help` line says.
 [`#[cgp_provider]`](/docs/reference/macros/cgp_provider) describes the macro.
 
-## Wiring keys and values that do not resolve
+## Unresolved wiring names
 
 A wiring name may fail to resolve because it is missing, not imported, or the wrong kind of
 item. These codes replace the compiler's message only when the tool can establish that no such
@@ -557,7 +557,7 @@ set a missing field, supply a compatible variant or payload, or use the derive o
 in `help`. [Extensible variants](/docs/concepts/extensible-variants) and
 [extensible records](/docs/concepts/extensible-records) explain the state each operation requires.
 
-## Mistakes in what a macro was given, continued
+## More macro input mistakes
 
 ### CGP-E070
 

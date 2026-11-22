@@ -152,7 +152,7 @@ an installation, you can query the driver directly with these options:
 | `--help`, `-h` | Prints a short description of the driver. Running it with no arguments does the same. |
 
 With a cargo installation, a direct driver invocation needs the pinned nightly's `lib` directory
-on `LD_LIBRARY_PATH`. [Troubleshooting](./troubleshooting.md#the-driver-cannot-load-the-compiler)
+on `LD_LIBRARY_PATH`. [Troubleshooting](./troubleshooting.md#compiler-loading-failures)
 shows how to supply it.
 
 ---

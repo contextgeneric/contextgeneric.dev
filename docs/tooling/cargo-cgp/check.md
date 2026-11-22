@@ -191,7 +191,7 @@ the command from. A configured `build.target-dir` or `CARGO_TARGET_DIR` therefor
 artifacts too: with `CARGO_TARGET_DIR=/build`, they go in `/build/cgp`. Pass `--target-dir` if you
 want to choose the check's directory exactly.
 
-## Flags are cargo's, not the tool's
+## Forwarded flags
 
 Since cargo receives and validates the forwarded flags, an unknown flag produces cargo's own
 `error: unexpected argument '--nope' found`. Help follows the same division: `cargo cgp check --help`

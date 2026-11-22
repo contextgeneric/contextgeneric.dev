@@ -22,22 +22,22 @@ Find the distinctive part of your error in the left column, then read the sectio
 
 | Error fragment | Cause | Section |
 |---|---|---|
-| `toolchain … is not available` | the pinned nightly is not installed | [The preflight rejects the setup](#the-preflight-rejects-the-setup) |
-| `could not run under toolchain` | the driver was built against another nightly | [The preflight rejects the setup](#the-preflight-rejects-the-setup) |
-| `out of lockstep` | the front end and driver have different versions | [The preflight rejects the setup](#the-preflight-rejects-the-setup) |
-| `was built against` | the pinned nightly changed since the driver was built | [The preflight rejects the setup](#the-preflight-rejects-the-setup) |
-| `could not parse the` … `--version` output | an old or unrelated driver binary | [The preflight rejects the setup](#the-preflight-rejects-the-setup) |
-| `rustup was not found on PATH` | no rustup for the preflight or `setup` | [The preflight rejects the setup](#the-preflight-rejects-the-setup), [Setup fails](#setup-fails) |
-| `error while loading shared libraries: librustc_driver-…` | library path unset, or the wrong toolchain | [The driver cannot load the compiler](#the-driver-cannot-load-the-compiler) |
-| `failed to run the cargo-cgp-driver` | driver missing | [The driver cannot be found](#the-driver-cannot-be-found) |
-| `could not execute process` … `(never executed)` | driver path wrong, with the preflight turned off | [The driver cannot be found](#the-driver-cannot-be-found) |
-| `` no such command: `frobnicate` `` with the four commands listed | wrong command name | [The command itself fails](#the-command-itself-fails) |
-| `` no such command: `cgp` `` | the tool is not installed, or not on `PATH` | [The command itself fails](#the-command-itself-fails) |
-| `could not find Cargo.toml` | run outside a cargo package | [The command itself fails](#the-command-itself-fails) |
-| `unexpected argument` | a flag `cargo check` does not know | [The command itself fails](#the-command-itself-fails) |
-| `is cargo on PATH?` | cargo is not installed, or not on `PATH` | [The command itself fails](#the-command-itself-fails) |
-| `RUSTC_WORKSPACE_WRAPPER is set` | a compiler wrapper of your own will not run | [Your own compiler wrapper stopped running](#your-own-compiler-wrapper-stopped-running) |
-| no error: a check never finishes, or its errors change between runs | a bug under the compiler's parallel front end | [A check hangs or prints different output between runs](#a-check-hangs-or-prints-different-output-between-runs) |
+| `toolchain … is not available` | the pinned nightly is not installed | [Preflight failures](#preflight-failures) |
+| `could not run under toolchain` | the driver was built against another nightly | [Preflight failures](#preflight-failures) |
+| `out of lockstep` | the front end and driver have different versions | [Preflight failures](#preflight-failures) |
+| `was built against` | the pinned nightly changed since the driver was built | [Preflight failures](#preflight-failures) |
+| `could not parse the` … `--version` output | an old or unrelated driver binary | [Preflight failures](#preflight-failures) |
+| `rustup was not found on PATH` | no rustup for the preflight or `setup` | [Preflight failures](#preflight-failures), [Setup failures](#setup-failures) |
+| `error while loading shared libraries: librustc_driver-…` | library path unset, or the wrong toolchain | [Compiler loading failures](#compiler-loading-failures) |
+| `failed to run the cargo-cgp-driver` | driver missing | [A missing driver](#a-missing-driver) |
+| `could not execute process` … `(never executed)` | driver path wrong, with the preflight turned off | [A missing driver](#a-missing-driver) |
+| `` no such command: `frobnicate` `` with the four commands listed | wrong command name | [Command failures](#command-failures) |
+| `` no such command: `cgp` `` | the tool is not installed, or not on `PATH` | [Command failures](#command-failures) |
+| `could not find Cargo.toml` | run outside a cargo package | [Command failures](#command-failures) |
+| `unexpected argument` | a flag `cargo check` does not know | [Command failures](#command-failures) |
+| `is cargo on PATH?` | cargo is not installed, or not on `PATH` | [Command failures](#command-failures) |
+| `RUSTC_WORKSPACE_WRAPPER is set` | a compiler wrapper of your own will not run | [Your own compiler wrapper](#your-own-compiler-wrapper) |
+| no error: a check never finishes, or its errors change between runs | a bug under the compiler's parallel front end | [Hangs and unstable output](#a-check-hangs-or-prints-different-output-between-runs) |
 
 Some problems print no error at all: a check that disagrees with `cargo check`, and a slow first check.
 Each has a section near the end of the page.
@@ -47,7 +47,7 @@ Each has a section near the end of the page.
 When the index does not identify the problem, rerun the check and look at its first message.
 Before checking code, the front end performs a read-only test of the toolchain and driver, called
 the preflight. A message ending in `` help: run `cargo cgp setup` `` comes from that test;
-the [preflight section](#the-preflight-rejects-the-setup) explains its possible results.
+the [preflight section](#preflight-failures) explains its possible results.
 
 If the preflight passes, run the check verbosely:
 
@@ -59,7 +59,7 @@ Once cargo begins compiling crates, the verbose output includes `Running` lines 
 `cargo-cgp-driver … rustc …`. A failure before those invocations points to the front end or setup.
 A failure from an invocation points to the driver or compiler.
 
-## The preflight rejects the setup
+## Preflight failures
 
 Most failures below can be repaired with `cargo cgp setup`, which installs the pinned nightly
 and builds a driver matching both that compiler and the front end. Before rerunning setup,
@@ -136,7 +136,7 @@ For a build from a source checkout, `CARGO_CGP_NO_MANAGE=1` lets you bypass the 
 preflight. You must then supply the matching toolchain yourself. If that environment is wrong,
 the failure usually comes from library loading, as described below.
 
-## The driver cannot load the compiler
+## Compiler loading failures
 
 This failure comes from the operating system's loader, before the driver's own code runs, which is why it looks
 unlike any other message from the tool:
@@ -173,7 +173,7 @@ error: process didn't exit successfully: `…/cargo-cgp-driver …/stable-…/bi
 In that case, unset `CARGO_CGP_NO_MANAGE` so the tool switches to the pinned nightly itself, or make that nightly
 the active toolchain, for example with `RUSTUP_TOOLCHAIN`. Running through the Nix flake also handles it.
 
-## The driver cannot be found
+## A missing driver
 
 An explicit `CARGO_CGP_DRIVER` selects the driver path. Otherwise, the front end first looks
 beside itself and then falls back to `PATH`. If no driver is available, the preflight reports:
@@ -199,7 +199,7 @@ Restore a reachable driver by running `cargo cgp setup`, selecting the actual bi
 that installs both programs together. Keeping the installed binaries side by side avoids the
 fallback to a possibly older driver on `PATH`.
 
-## The command itself fails
+## Command failures
 
 Some failures happen before the driver is involved. An unknown command is reported with the list the tool accepts:
 
@@ -238,7 +238,7 @@ Caused by:
   No such file or directory (os error 2)
 ```
 
-## Setup fails
+## Setup failures
 
 `cargo cgp setup` installs the toolchain through rustup, so without rustup it stops at once:
 
@@ -254,7 +254,7 @@ You can resolve the missing rustup by installing it first or choosing the
 connection for the toolchain and driver source downloads. Errors during those steps come from
 rustup or cargo, whose messages identify the failure.
 
-## The check disagrees with `cargo check`
+## Disagreement with `cargo check`
 
 When the checks disagree, trust your own toolchain's `cargo check` to decide whether the code
 compiles. The tool uses a pinned nightly and the next-generation trait solver, so code relying on
@@ -262,13 +262,13 @@ nightly-only or solver-specific behavior can produce a different result. Mutuall
 namespaces, for example, pass the tool's check but are rejected by stable Rust. Use the tool to
 understand CGP failures while retaining the ordinary check as the build authority.
 
-## The first check is slow
+## A slow first check
 
 A check uses its own toolchain and build artifacts, so its first run recompiles the project's
 dependencies into `target/cgp` within the project target directory. Subsequent runs reuse that
 build wherever inside the project you invoke them.
 
-## Your own compiler wrapper stopped running
+## Your own compiler wrapper
 
 To rewrite workspace diagnostics, the tool assigns its driver to `RUSTC_WORKSPACE_WRAPPER` for
 this run. Any wrapper you selected through that variable is therefore replaced, and the tool
@@ -280,7 +280,7 @@ warning: RUSTC_WORKSPACE_WRAPPER is set to `/usr/local/bin/my-wrapper`; cargo-cg
 
 A wrapper given through `RUSTC_WRAPPER`, such as `sccache`, does keep running alongside the driver.
 
-## A check hangs or prints different output between runs
+## Hangs and unstable output {#a-check-hangs-or-prints-different-output-between-runs}
 
 The pinned nightly checks your code on several threads by default. The Rust project calls this the
 parallel front end and explains it in
@@ -304,7 +304,7 @@ compiler wrote it.
 
 If the problem goes away on one thread, the next question is whether the compiler has it too.
 Run plain `cargo +nightly-YYYY-MM-DD check` without the flags, using the pinned nightly that the
-driver's `--version` names, [run as shown above](#the-driver-cannot-load-the-compiler). If that check also
+driver's `--version` names, [run as shown above](#compiler-loading-failures). If that check also
 hangs or crashes, the bug is in the compiler, and the blog post says where to report it. If it does
 not, please report the problem on the
 [issue tracker](https://github.com/contextgeneric/cargo-cgp/issues) with the output of both runs of
@@ -320,7 +320,7 @@ path, reinstall the profile.
 Failures not covered here are worth reporting on the
 [issue tracker](https://github.com/contextgeneric/cargo-cgp/issues). Include the output of `cargo cgp check -v`,
 `cargo cgp --version`, and the driver's `--version` run as shown
-[above](#the-driver-cannot-load-the-compiler).
+[above](#compiler-loading-failures).
 
 ---
 

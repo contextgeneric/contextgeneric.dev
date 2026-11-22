@@ -778,7 +778,7 @@ rather than anything about wiring. When no type of that name exists anywhere,
 [`cargo cgp check`](/docs/tooling/cargo-cgp/error-codes#cgp-e043) reports it as an undeclared provider,
 `[CGP-E043]`. A key that names a consumer trait, a component that exists but is not imported, a
 component guessed from a consumer trait's name, or a type in an `@`-path nothing declares gets one
-of the [wiring-name codes](/docs/tooling/cargo-cgp/error-codes#wiring-keys-and-values-that-do-not-resolve),
+of the [wiring-name codes](/docs/tooling/cargo-cgp/error-codes#unresolved-wiring-names),
 `[CGP-E040]` to `[CGP-E042]` or `[CGP-E044]`; a key the tool cannot settle, such as a misspelled
 component name, keeps the compiler's `E0425`. A provider or a type declared elsewhere but not
 imported keeps the compiler's message and its import suggestion.

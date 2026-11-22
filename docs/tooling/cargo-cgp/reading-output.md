@@ -104,7 +104,7 @@ Several components can also fail because of one shared dependency. If three prov
 same missing field, the tool reports the mistake once. It marks the first check entry with the
 caret, labels the others “also required here”, and includes a chain for each component.
 
-## A component nothing is wired for
+## Missing wiring
 
 When no provider is selected, the dependency chain ends before reaching a provider implementation.
 To illustrate this, the next examples switch from the shape context `Rectangle` to `App`, a type
@@ -235,7 +235,7 @@ To satisfy this requirement, select a scalar type that implements `Eq`, or relax
 bound if its work does not need equality. The message identifies `f64`, but leaves you to trace
 that choice back to the `UseType<f64>` wiring entry.
 
-## Two entries that claim one key
+## Conflicting entries
 
 When two wiring entries conflict, the error can point directly to them. There is no dependency
 chain to follow: the two carets show the competing implementations. For example, this context

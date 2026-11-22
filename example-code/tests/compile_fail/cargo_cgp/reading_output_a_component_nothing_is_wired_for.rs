@@ -1,4 +1,4 @@
-// From docs/tooling/cargo-cgp/reading-output.md, A component nothing is wired for.
+// From docs/tooling/cargo-cgp/reading-output.md, Missing wiring.
 
 use cgp::prelude::*;
 

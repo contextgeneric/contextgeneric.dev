@@ -1,4 +1,4 @@
-// From docs/tooling/cargo-cgp/reading-output.md, Two entries that claim one key.
+// From docs/tooling/cargo-cgp/reading-output.md, Conflicting entries.
 
 use cgp::prelude::*;
 

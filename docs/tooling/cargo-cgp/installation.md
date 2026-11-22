@@ -48,7 +48,7 @@ and local driver compilation. This step needs rustup and a network connection.
 
 Once setup finishes, ordinary checks only test that the toolchain and driver are present and
 match. They do not download or install anything. If that read-only test fails, the message tells
-you to run `cargo cgp setup` again; [Troubleshooting](./troubleshooting.md#the-preflight-rejects-the-setup)
+you to run `cargo cgp setup` again; [Troubleshooting](./troubleshooting.md#preflight-failures)
 explains the possible failures.
 
 To read what `setup` or `update` will do, pass `--help`. Neither command accepts other options:
@@ -215,7 +215,7 @@ this for you, so it is usually the easier way to run a checkout: from the projec
 `nix run /path/to/cargo-cgp -- check`. The [command reference](./command-reference.md#environment-variables)
 describes both variables.
 
-## A coding assistant can set it up
+## Installing with a coding assistant
 
 If you work with a coding assistant that has [CGP's agent skill](/docs/ai/skills) loaded, it checks
 whether `cargo-cgp` is installed before debugging a CGP error and recommends it when it is missing. The
