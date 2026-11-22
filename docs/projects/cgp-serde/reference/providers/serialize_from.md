@@ -1,5 +1,5 @@
 ---
-title: 'SerializeFrom — encode a value through a converted type in cgp-serde'
+title: 'SerializeFrom — encode through a converted type in cgp-serde'
 sidebar_label: 'SerializeFrom'
 sidebar_position: 7
 description: 'The cgp-serde provider that encodes a value through another type it converts to or from with Into, asking the context for that type.'

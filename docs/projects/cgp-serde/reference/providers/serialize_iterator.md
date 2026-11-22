@@ -1,5 +1,5 @@
 ---
-title: 'SerializeIterator — write a collection as a sequence in cgp-serde'
+title: 'SerializeIterator — write a collection in cgp-serde'
 sidebar_label: 'SerializeIterator'
 sidebar_position: 10
 description: 'The cgp-serde provider that writes any collection iterable by reference as a Serde sequence, asking the context to write each item.'

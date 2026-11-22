@@ -1,5 +1,5 @@
 ---
-title: 'SerializeVariantFields — write an enum with no serialization derive in cgp-serde'
+title: 'SerializeVariantFields — write enum variants in cgp-serde'
 sidebar_label: 'SerializeVariantFields'
 sidebar_position: 14
 description: 'The cgp-serde provider that writes any enum deriving CGP''s variant traits in Serde''s externally tagged form, asking the context to write the payload.'

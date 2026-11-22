@@ -1,5 +1,5 @@
 ---
-title: 'DeserializeVariantFields — read an enum with no serialization derive in cgp-serde'
+title: 'DeserializeVariantFields — read enum variants in cgp-serde'
 sidebar_label: 'DeserializeVariantFields'
 sidebar_position: 15
 description: 'The cgp-serde provider that reads an enum deriving CGP''s variant traits from Serde''s externally tagged form, reading the payload through the context.'

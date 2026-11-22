@@ -1,5 +1,5 @@
 ---
-title: 'DeserializeFromJsonReader — read JSON from any serde_json reader in cgp-serde'
+title: 'DeserializeFromJsonReader — JSON from a reader in cgp-serde'
 sidebar_label: 'DeserializeFromJsonReader'
 sidebar_position: 23
 description: 'The cgp-serde provider that reads a value from a string, bytes, or a stream through serde_json and the context''s wiring, rejecting trailing input.'

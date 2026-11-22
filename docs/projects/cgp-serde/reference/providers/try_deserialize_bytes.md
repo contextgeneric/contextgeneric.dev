@@ -1,5 +1,5 @@
 ---
-title: 'TryDeserializeBytes — read a value from bytes by TryFrom in cgp-serde'
+title: 'TryDeserializeBytes — read bytes by TryFrom in cgp-serde'
 sidebar_label: 'TryDeserializeBytes'
 sidebar_position: 4
 description: 'The cgp-serde provider that reads a byte slice and converts it with TryFrom, such as into a fixed-size array.'

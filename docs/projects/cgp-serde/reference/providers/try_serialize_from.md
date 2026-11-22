@@ -1,5 +1,5 @@
 ---
-title: 'TrySerializeFrom — encode through a fallible conversion in cgp-serde'
+title: 'TrySerializeFrom — a fallible SerializeFrom in cgp-serde'
 sidebar_label: 'TrySerializeFrom'
 sidebar_position: 8
 description: 'The cgp-serde provider that encodes a value through another type with TryInto in either direction, reporting a failed conversion as a Serde error.'

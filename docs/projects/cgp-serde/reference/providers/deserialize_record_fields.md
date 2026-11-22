@@ -1,5 +1,5 @@
 ---
-title: 'DeserializeRecordFields — read a struct with no serialization derive in cgp-serde'
+title: 'DeserializeRecordFields — read struct fields in cgp-serde'
 sidebar_label: 'DeserializeRecordFields'
 sidebar_position: 13
 description: 'The cgp-serde provider that reads a struct deriving CGP''s field traits from a map, reading each field through the context.'

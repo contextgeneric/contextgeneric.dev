@@ -1,4 +1,5 @@
 ---
+title: 'Row polymorphism and structural typing'
 sidebar_label: 'Row polymorphism'
 sidebar_position: 7
 description: "Compare Context-Generic Programming field access, record building, and variant operations with PureScript rows and OCaml polymorphic variants."

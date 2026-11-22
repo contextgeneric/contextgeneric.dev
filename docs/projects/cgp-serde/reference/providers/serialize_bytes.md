@@ -1,5 +1,5 @@
 ---
-title: 'SerializeBytes — write bytes with Serde''s byte method in cgp-serde'
+title: 'SerializeBytes — write with serialize_bytes in cgp-serde'
 sidebar_label: 'SerializeBytes'
 sidebar_position: 3
 description: 'The cgp-serde provider that writes any AsRef<[u8]> value with Serde''s byte method and reads bytes the input can lend, for formats with a byte type.'

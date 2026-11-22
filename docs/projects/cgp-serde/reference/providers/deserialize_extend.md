@@ -1,5 +1,5 @@
 ---
-title: 'DeserializeExtend — read a sequence into a collection in cgp-serde'
+title: 'DeserializeExtend — read into a collection in cgp-serde'
 sidebar_label: 'DeserializeExtend'
 sidebar_position: 11
 description: 'The cgp-serde provider that reads a Serde sequence into any collection with a default that can be extended, asking the context to read each item.'

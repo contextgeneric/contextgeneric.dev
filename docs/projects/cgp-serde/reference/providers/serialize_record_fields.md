@@ -1,5 +1,5 @@
 ---
-title: 'SerializeRecordFields — write a struct with no serialization derive in cgp-serde'
+title: 'SerializeRecordFields — write struct fields in cgp-serde'
 sidebar_label: 'SerializeRecordFields'
 sidebar_position: 12
 description: 'The cgp-serde provider that writes any struct deriving CGP''s field traits as a map from field names to values, asking the context to write each field.'

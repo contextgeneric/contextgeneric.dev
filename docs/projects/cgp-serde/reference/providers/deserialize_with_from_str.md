@@ -1,5 +1,5 @@
 ---
-title: 'DeserializeWithFromStr — read a value by parsing a string in cgp-serde'
+title: 'DeserializeWithFromStr — read through FromStr in cgp-serde'
 sidebar_label: 'DeserializeWithFromStr'
 sidebar_position: 6
 description: 'The cgp-serde provider that reads a string borrowed from the input through the context and parses it with FromStr.'

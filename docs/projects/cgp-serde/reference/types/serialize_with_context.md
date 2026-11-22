@@ -1,5 +1,5 @@
 ---
-title: 'SerializeWithContext — hand a context to any Serde format in cgp-serde'
+title: 'SerializeWithContext — write with a context in cgp-serde'
 sidebar_label: 'SerializeWithContext'
 sidebar_position: 1
 description: 'The cgp-serde adapter that pairs a context with a value as a Serde Serialize value, so any format writes through the context.'

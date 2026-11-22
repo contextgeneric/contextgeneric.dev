@@ -1,5 +1,5 @@
 ---
-title: 'SerializeDeref — write a reference as the value behind it in cgp-serde'
+title: 'SerializeDeref — write a dereferenced value in cgp-serde'
 sidebar_label: 'SerializeDeref'
 sidebar_position: 9
 description: 'The cgp-serde provider that writes a reference or smart pointer as the value it points to, and the generic reference entry a collection needs.'

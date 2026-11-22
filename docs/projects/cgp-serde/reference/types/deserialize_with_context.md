@@ -1,5 +1,5 @@
 ---
-title: 'DeserializeWithContext — read with a context through any Serde format in cgp-serde'
+title: 'DeserializeWithContext — read with a context in cgp-serde'
 sidebar_label: 'DeserializeWithContext'
 sidebar_position: 2
 description: 'The cgp-serde adapter that pairs a context with a target type as a Serde DeserializeSeed, so any format reads through the context.'

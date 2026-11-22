@@ -1,5 +1,5 @@
 ---
-title: 'CanDeserializeJsonString — a deserialize_json_string method in cgp-serde'
+title: 'CanDeserializeJsonString — read JSON strings in cgp-serde'
 sidebar_label: 'CanDeserializeJsonString'
 sidebar_position: 3
 description: 'The cgp-serde trait that gives any suitably wired context a deserialize_json_string method, reading a value from a JSON string with no TryComputer entries.'

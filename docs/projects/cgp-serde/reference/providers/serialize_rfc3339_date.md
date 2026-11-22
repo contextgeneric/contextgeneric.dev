@@ -1,5 +1,5 @@
 ---
-title: 'SerializeRfc3339Date — encode a date as an RFC 3339 string in cgp-serde'
+title: 'SerializeRfc3339Date — write an RFC 3339 date in cgp-serde'
 sidebar_label: 'SerializeRfc3339Date'
 sidebar_position: 20
 description: 'The cgp-serde provider that writes a DateTime<Utc> as an RFC 3339 string and reads one back with any offset.'

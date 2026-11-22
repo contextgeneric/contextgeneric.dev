@@ -1,5 +1,5 @@
 ---
-title: 'SerializeWithDisplay — write a Display value as a string in cgp-serde'
+title: 'SerializeWithDisplay — write through Display in cgp-serde'
 sidebar_label: 'SerializeWithDisplay'
 sidebar_position: 5
 description: 'The cgp-serde provider that writes any Display value as the string it formats to, asking the context to write the String.'
