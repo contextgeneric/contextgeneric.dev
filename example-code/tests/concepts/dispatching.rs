@@ -1,7 +1,7 @@
 //! Code from `docs/concepts/dispatching.md` — *Dispatching*.
 
-/// ## Matching: one handler per variant
-pub mod matching_one_handler_per_variant {
+/// ## Matching variants
+pub mod matching_variants {
     use core::convert::Infallible;
 
     use cgp::core::error::ErrorTypeProviderComponent;

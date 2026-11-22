@@ -83,7 +83,7 @@ continuation decision. For `Result<Result<T, E>, F>`, `OkMonadicTrans<ErrMonadic
 `Err(F)` or an inner `Ok(T)`. Only `Ok(Err(E))` continues, supplying `E` to the next step. The order
 of the nested rules matters because it determines how each result layer is interpreted.
 
-## A pipeline is an ordinary provider
+## Wiring a monadic pipeline
 
 The composed pipeline fits into the same wiring as any other handler provider. This fragment
 assumes an `App` context and imports `ComputerComponent` from `cgp::extra::handler`:

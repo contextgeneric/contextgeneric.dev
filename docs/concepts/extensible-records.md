@@ -74,7 +74,7 @@ while `HasField<Tag>` lets code require just one field, as [implicit arguments](
 do. In either case, generated Rust implementations connect the trait request to the field, so the
 program need not inspect names at runtime.
 
-## Built one field at a time, checked all the way
+## Partial records
 
 A **partial record** stores field values while its type tracks which fields have been supplied.
 The builder can merge several source records before producing the final struct:
@@ -115,7 +115,7 @@ When contributions are independent, their order does not matter. If one provider
 built by another, however, it must run after that field has been supplied. The same types that
 track completeness also enforce this dependency between construction steps.
 
-## The pattern this is for
+## The extensible builder pattern
 
 The **extensible builder pattern** assembles a target from independent providers, each producing a
 small record. A dispatcher runs the providers, merges their outputs, and finalizes the target.

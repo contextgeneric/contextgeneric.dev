@@ -17,7 +17,7 @@ This page builds a scaling wrapper, shows the bound that names its inner provide
 compositions named before any context uses them, the `UseContext` default, and what deeper
 compositions cost.
 
-## Choosing is not the only thing you can do with a provider
+## Wrapping a provider
 
 Scaling an area illustrates what a wrapper can share. Whatever calculation produces the base area,
 the scaling step multiplies it by the scale factor squared. Giving that step a provider parameter
@@ -55,7 +55,7 @@ All of these choices are expressed through types, so the program stores no inner
 and performs no runtime provider lookup. The calculations themselves still run as ordinary method
 calls, with their final machine code depending on inlining and other compiler optimizations.
 
-## The extra `<Self>`, and the attribute that fills it in
+## Inner-provider bounds
 
 An inner-provider bound must identify the context on which the provider operates. The
 [consumer/provider split](./consumer-and-provider-traits.md) gives `AreaCalculator` a leading
@@ -101,7 +101,7 @@ alone. That proof comes only at a use or an explicit check, and here it requires
 by `RectangleArea` and the `scale` field read by both wrappers. Because both layers read the same
 scale, they apply its square twice: a base area of `12` with scale `2` becomes `192`.
 
-## Falling back to what the context already decided
+## Falling back to the context's wiring
 
 [`UseContext`](/docs/reference/providers/use_context) lets an inner step use the context's existing
 consumer-trait implementation. A default type parameter makes that the wrapper's behavior unless
@@ -152,7 +152,7 @@ To give the parameter its `UseContext` default, declare the provider struct expl
 The `#[cgp_impl(SumAreas<Inner>)]` block then implements that existing struct, because the `new`
 form would declare a provider without the default.
 
-## Not every generic provider is one of these
+## Other generic providers
 
 A generic provider is higher-order when its parameter represents a provider used to perform work.
 Other parameters may select data, field names, or configuration. This getter uses `Tag` as a field

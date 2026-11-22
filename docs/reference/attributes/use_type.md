@@ -239,7 +239,7 @@ Prefer an inferred parameter over an abstract type when the type only ever flows
 body reads: [`#[impl_generics]`](./impl_generics.md) on a `#[cgp_fn]` is shorter and does not need
 wiring. Move to an abstract type when the type must be named in the trait's own signature, or when
 two traits have to
-[agree that they mean the same one](/docs/concepts/abstract-types#one-type-agreed-on-by-everything-that-needs-it).
+[agree that they mean the same one](/docs/concepts/abstract-types#sharing-one-type-choice).
 
 ## Under the hood
 

@@ -172,11 +172,11 @@ pub mod composing_without_naming_a_context {
     }
 }
 
-/// ## Falling back to whatever the context already wired
+/// ## Falling back to the context's wiring
 ///
 /// A provider declared with an explicit struct can default its inner parameter to `UseContext`,
 /// which routes the inner step back through the context's own table.
-pub mod falling_back_to_the_context {
+pub mod falling_back_to_the_contexts_wiring {
     use core::marker::PhantomData;
 
     use cgp::core::component::UseContext;
@@ -252,11 +252,11 @@ pub mod falling_back_to_the_context {
     }
 }
 
-/// ## Not every generic provider is a higher-order one
+/// ## Other generic providers
 ///
 /// `GetName<Tag>` is generic, and its parameter is a field name rather than a provider — nothing is
 /// delegated to, so none of the machinery above applies.
-pub mod not_every_generic_provider {
+pub mod other_generic_providers {
     use cgp::core::field::traits::HasField;
     use cgp::prelude::*;
 

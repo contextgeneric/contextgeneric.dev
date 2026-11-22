@@ -17,7 +17,7 @@ This page follows the connection between the two traits, from a method call thro
 forwarding implementations to the chosen provider. It then shows how the macros produce those
 connections, where application state lives, and what the separation costs.
 
-## What an ordinary Rust trait does, and where it stops
+## Ordinary Rust traits
 
 An ordinary Rust trait lets different types expose the same method with different behavior.
 For example, a production application may fetch stored objects from Amazon S3, while a test
@@ -128,7 +128,7 @@ The same split applies to a component with several methods, associated types, or
 items can stay together when one provider choice should determine their implementation; this
 example uses a single method to make the relationship easier to see.
 
-## A provider is a name, not a value
+## Providers as type-level names
 
 The structs `FetchS3Object` and `FetchLocalObject` serve only as names for implementations. They are
 zero-sized, and CGP neither constructs values of them nor stores application data in them. Instead,
@@ -229,7 +229,7 @@ parameters are `__Context__` and `__Provider__`, and the delegate is spelled as
 `<__Provider__ as DelegateComponent<StorageObjectFetcherComponent>>::Delegate`. You can inspect the
 full expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
 
-## Writing it
+## Writing a component
 
 The macros generate these connections while letting you write methods from the context's point
 of view. `#[cgp_component]` produces the trait pair and forwarding implementations, and

@@ -18,7 +18,7 @@ This page develops that separation in ordinary Rust blanket implementations, the
 CGP providers. It covers dependencies on traits, field values, and context-selected types,
 including why types used in public signatures must remain available through the interface.
 
-## What a `where` clause costs the callers above it
+## The cost of a `where` clause
 
 For example, a generic greeting function can obtain a name through a `HasName` bound on the context:
 
@@ -99,7 +99,7 @@ This separation already works in ordinary Rust. CGP extends it with separate pro
 wiring when several implementations need to coexist, including ones with overlapping context
 bounds. [Consumer and provider traits](./consumer-and-provider-traits.md) explains that extension.
 
-## Two providers, two sets of requirements, one interface
+## Providers with different requirements
 
 For object storage, the useful requirements depend on where the objects live. An S3 provider needs
 a client and a bucket, while a local provider needs a folder. Each provider can request its own

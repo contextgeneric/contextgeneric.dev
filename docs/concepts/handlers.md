@@ -17,7 +17,7 @@ its work calls for.
 This page explains the handler interface and its forms, how promotion lets one provider serve
 several of them, and how wiring builds pipelines and selects computations by tag.
 
-## Computation as something a context decides
+## Computation as a component
 
 An application-specific component gives a name to an operation, such as `fetch_storage_object` or
 `get_user`. A handler gives it a uniform computation interface instead, allowing generic combinators
@@ -36,7 +36,7 @@ Not every computation needs the same execution or error behavior. Addition, for 
 return synchronously without an error type or a future. When it needs to join a more general
 pipeline, adapters can expose it through the interface that pipeline uses.
 
-## Three axes, and the names that encode them
+## The handler interfaces
 
 The main input-taking components vary by execution and error handling. Their consumer traits give
 callers the corresponding methods:
@@ -105,7 +105,7 @@ Choose the simplest interface that expresses the computation, then use the adapt
 its signature. The function macros generate suitable promotion wiring; a manually implemented
 provider needs explicit adapters when another interface is required.
 
-## A pipeline is a wiring entry
+## Pipelines
 
 A handler pipeline is a provider that passes each stage's output to the next stage. Because the
 stages share the handler interface, the context can select the whole pipeline through one entry:

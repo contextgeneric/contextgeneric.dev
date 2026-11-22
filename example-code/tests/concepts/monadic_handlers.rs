@@ -75,11 +75,11 @@ pub mod the_identity_monad_recovers_plain_composition {
     }
 }
 
-/// ## A pipeline is still an ordinary provider
+/// ## Wiring a monadic pipeline
 ///
 /// The composed chain is wired like any other computation, so nothing downstream knows a monad was
 /// involved.
-pub mod a_pipeline_is_still_a_provider {
+pub mod wiring_a_monadic_pipeline {
     use cgp::extra::handler::ComputerComponent;
 
     use super::*;

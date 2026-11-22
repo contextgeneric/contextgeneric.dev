@@ -33,7 +33,7 @@ If you would like more background on traits or generic bounds first, the
 [tutorials](/docs/tutorials/hello) show them in working programs, and these explanations will still
 be here when you return.
 
-## The ideas, grouped
+## The concepts by topic
 
 The sidebar offers a reading order from the trait model to its applications. The groups below
 bring related pages together, so you can also follow a particular question across the section.

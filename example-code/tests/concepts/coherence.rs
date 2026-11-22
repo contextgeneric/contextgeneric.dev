@@ -1,7 +1,7 @@
 //! Code from `docs/concepts/coherence.md` — *Bypassing coherence*.
 
-/// ## The trait system is already a dependency-injection mechanism
-pub mod trait_system_as_dependency_injection {
+/// ## Traits as dependency injection
+pub mod traits_as_dependency_injection {
     use core::fmt::{self, Display, Formatter};
 
     pub fn describe<T: Display>(value: &T) -> String {
@@ -23,16 +23,16 @@ pub mod trait_system_as_dependency_injection {
     }
 }
 
-/// ## That only works because every lookup finds the same answer
+/// ## The coherence guarantee
 ///
 /// Rejected snippets are covered by the trybuild fixtures
 /// `coherence_every_lookup_finds_the_same_answer_1.rs` (overlap) and
 /// `coherence_every_lookup_finds_the_same_answer_2.rs` (orphan rule).
-pub mod every_lookup_finds_the_same_answer {}
+pub mod the_coherence_guarantee {}
 
 /// ## The move: make `Self` a type you own
-/// ## Selecting one provider for each type
-pub mod the_move {
+/// ## Provider traits
+pub mod provider_traits {
     use core::fmt::Display;
 
     use cgp::prelude::*;

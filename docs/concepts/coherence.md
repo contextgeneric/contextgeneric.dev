@@ -17,7 +17,7 @@ giving each implementation its own provider type, from which a context selects o
 This page explains why that guarantee matters, how the provider split works within it, and where
 ownership and wiring limit the available choices.
 
-## The trait system is already a dependency-injection mechanism
+## Traits as dependency injection
 
 Consider a function that formats a value. To request the formatting behavior it needs, the
 function only has to name `Display` in a bound:
@@ -56,7 +56,7 @@ That separation keeps implementation details out of generic callers: an implemen
 dependency while its callers keep their existing bounds, provided the concrete types still satisfy
 the full chain.
 
-## That only works because every lookup finds the same answer
+## The coherence guarantee
 
 As Rust follows these dependencies, each lookup must have a consistent answer wherever it occurs
 in the program. Coherence provides that guarantee: for a given trait, its type arguments, and an
@@ -124,7 +124,7 @@ implements a trait parameterized by the data type, so several helpers can accept
 CGP builds on this pattern and adds wiring that connects ordinary method calls to the chosen
 helper.
 
-## The move: make `Self` a type you own
+## Provider traits
 
 The interface callers use can stay `CanEncode`, which CGP calls the **consumer trait**:
 

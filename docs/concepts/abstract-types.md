@@ -16,7 +16,7 @@ that relationship, and CGP lets each context make the choice through wiring.
 This page starts from Rust's associated types, shows how wiring selects one and how providers share
 it, and ends with what an abstract type does not hide.
 
-## Rust already has this
+## Associated types in Rust
 
 Rust's associated types let a trait name a type that each implementer supplies. For example,
 `HasScalarType` can leave the scalar open while two contexts make different choices:
@@ -84,7 +84,7 @@ or `f64` works, while `UseType<String>` produces a `String: Copy` error when che
 other wiring, the table alone does not force that check: its requirements are
 [checked lazily](./check-traits.md).
 
-## One type, agreed on by everything that needs it
+## Sharing one type choice
 
 Providers that refer to the same context's `Scalar` share one type choice. An area-calculation
 component can use this to return a common scalar for several shape types:

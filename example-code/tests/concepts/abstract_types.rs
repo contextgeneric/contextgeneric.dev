@@ -1,7 +1,7 @@
 //! Code from `docs/concepts/abstract-types.md` — *Abstract types*.
 
-/// ## An associated type is already this, in ordinary Rust
-pub mod an_associated_type_is_already_this {
+/// ## Associated types in Rust
+pub mod associated_types_in_rust {
     pub trait HasScalarType {
         type Scalar: Copy;
     }
@@ -72,11 +72,11 @@ pub mod choosing_the_type_by_wiring {
     }
 }
 
-/// ## One type, agreed on by everything that needs it
+/// ## Sharing one type choice
 ///
 /// The shapes carry no scalar type of their own. The context supplies one, and every trait
 /// that mentions it means the same type.
-pub mod one_type_agreed_on_by_everything {
+pub mod sharing_one_type_choice {
     use cgp::prelude::*;
 
     #[cgp_type]

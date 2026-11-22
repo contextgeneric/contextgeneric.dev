@@ -262,7 +262,7 @@ This example shows **serialization as a choice made by the context, one type at 
 component takes the encoded value as a parameter, so the context, not the data type, chooses the
 provider for each value type, and a provider for a struct asks the context about the struct's
 fields. The same move makes the error type the context's choice too. [Modularity
-hierarchy](/docs/concepts/modularity-hierarchy#tier-4-one-provider-per-target-type-per-context)
+hierarchy](/docs/concepts/modularity-hierarchy#tier-4-one-provider-per-target-type)
 places this shape among CGP's options, as the one for a target type whose behavior must vary between
 contexts.
 

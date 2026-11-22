@@ -83,7 +83,7 @@ Its values can then call `rectangle_area()`.
 This form suits an operation with one shared implementation. A component becomes useful when
 contexts need to select among alternative implementations of the same operation.
 
-## The declared type decides how the field is read
+## Owned and borrowed arguments
 
 The argument type determines whether the body receives an owned value or a borrow. These common
 forms follow the same access rules as CGP's automatic getters:

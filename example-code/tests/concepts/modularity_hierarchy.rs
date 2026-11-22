@@ -41,7 +41,7 @@ pub mod tier_2 {
     }
 }
 
-/// ## Tier 3: many implementations, one wired per type
+/// ## Tier 3: one provider per wired type
 ///
 /// The self-targeted component, wired on a value context (`u32`) and on an environmental context
 /// (`App` / `TestApp`). The page shows the two shapes this tier holds.
@@ -120,7 +120,7 @@ pub mod tier_3 {
     }
 }
 
-/// ## Tier 4: many implementations, one per type per context
+/// ## Tier 4: one provider per target type
 ///
 /// The parameter-targeted component: two application contexts encode the same foreign type
 /// (`String`) differently.

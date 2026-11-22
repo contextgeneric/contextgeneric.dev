@@ -20,7 +20,7 @@ providers for the program's parts. This page builds a small arithmetic language,
 compiler resolves and what still runs, and covers extending the language and adding a surface
 syntax.
 
-## A program represented as a type
+## Programs as types
 
 To describe a language this way, give each syntax form a marker type. Its parameters can then
 refer to other forms, allowing expressions to nest. These fragments assume `PhantomData` and CGP's
@@ -47,7 +47,7 @@ As the language grows, its syntax can include type-level collections and strings
 [`Symbol!`](/docs/reference/macros/symbol) places a string in a type position. These types fix the
 program's structure without preventing its handlers from receiving runtime input values.
 
-## Providers give syntax its behavior
+## Interpreting syntax with providers
 
 A provider implements one syntax form and asks the context to interpret its subexpressions.
 This addition provider assumes the `CanCompute` consumer trait, the `Computer` provider trait,
@@ -106,7 +106,7 @@ a `const fn`, so type checking does not evaluate its arithmetic. The optimizer m
 constant example, but the DSL makes no such guarantee. If a provider performs I/O or processes a
 runtime input, that work happens when the program runs.
 
-## Syntax and interpretation can vary independently
+## Alternative interpretations
 
 With the syntax represented independently, another context can interpret the same program by
 pretty-printing it or estimating its cost instead of evaluating it. Each interpretation needs
@@ -120,7 +120,7 @@ syntax-extension side of the [expression problem](./extensible-variants.md).
 
 To reuse the interpreter's wiring, a namespace can package its shared entries and a child can
 add entries for new forms. Replacing an interpretation requires more planning: under the
-[namespace rule](./namespaces.md#a-bound-entry-cannot-be-overridden), a child cannot replace an
+[namespace rule](./namespaces.md#overriding-a-bound-entry), a child cannot replace an
 inherited binding. Any path whose provider should vary must remain open in the shared base.
 
 ## An optional surface syntax

@@ -1,7 +1,7 @@
 //! Code from `docs/concepts/impl-side-dependencies.md` — *Impl-side dependencies*.
 
-/// ## What a `where` clause costs the callers above it
-pub mod what_a_where_clause_costs {
+/// ## The cost of a `where` clause
+pub mod the_cost_of_a_where_clause {
     pub trait HasName {
         fn name(&self) -> &str;
     }
@@ -50,8 +50,8 @@ pub mod moving_the_requirement {
     }
 }
 
-/// ## Two providers, two sets of requirements, one interface
-pub mod two_providers_two_requirements {
+/// ## Providers with different requirements
+pub mod providers_with_different_requirements {
     use cgp::prelude::*;
 
     /// Stand-in for the AWS SDK's S3 client, which the page names as `aws_sdk_s3::Client`.

@@ -20,7 +20,7 @@ the computations that build a record or handle the current variant. This page co
 directions, matching variants and building records, then the shortcut that forwards a trait from an
 enum to its payloads.
 
-## Two directions, one idea
+## Matching and building
 
 The data traits describe how to extract a variant or set a field, but to do useful work with those
 operations, a dispatcher also needs handlers: one can process an extracted payload, while another
@@ -36,7 +36,7 @@ they can participate in ordinary context wiring and computation pipelines. A mat
 delegate a group of variants to another matcher. The interfaces available to the resulting
 composition depend on both the dispatcher and the providers it contains.
 
-## Matching, and why it is exhaustive
+## Matching variants
 
 A matcher selects the handler for an enum's current variant. For a `Shape` enum deriving `CgpData`
 with `Circle(Circle)` and `Rectangle(Rectangle)` variants, wiring keyed on the input type can select
@@ -79,7 +79,7 @@ passes its remainder to the next attempt. In this use of `Result`, `Err` means â
 rather than an application failure. The compiler checks provider selection and exhaustiveness;
 the actual variant tests and handler calls happen when the program runs.
 
-## Building, and why it is complete
+## Building records
 
 Building follows the other direction: handlers supply values until a partial record is complete.
 `BuildWithHandlers` starts the builder, passes it through the handler list, and calls `finalize_build`.
@@ -98,7 +98,7 @@ This supports the [extensible builder pattern](./extensible-records.md): indepen
 produce parts of a result, and a dispatcher assembles them into a target record. The handler order
 must respect any dependencies on fields produced by earlier steps.
 
-## The shortcut for the common case
+## Automatic dispatch
 
 `#[cgp_auto_dispatch]` forwards an enum's trait methods to its payloads. Use it when each payload
 already implements an ordinary trait and the enum should expose that same behavior:

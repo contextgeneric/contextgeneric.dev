@@ -1,10 +1,10 @@
 //! Code from `docs/concepts/check-traits.md` — *Checking your wiring*.
 
-/// ## A context can be wrong and still compile
+/// ## Incomplete wiring
 ///
 /// `FetchLocalObject` needs a `local_dir` field and `BrokenApp` has none. Every line here compiles,
 /// because nothing has asked whether the provider's requirements hold for this context yet.
-pub mod a_context_can_be_wrong_and_still_compile {
+pub mod incomplete_wiring {
     use cgp::prelude::*;
 
     #[cgp_component(StorageObjectFetcher)]
@@ -32,7 +32,7 @@ pub mod a_context_can_be_wrong_and_still_compile {
     delegate_components! { BrokenApp { StorageObjectFetcherComponent: FetchLocalObject } }
 }
 
-/// ## Where the failure surfaces instead
+/// ## Where the failure surfaces
 ///
 /// Calling the trait's method is the first thing that forces the question, so the error arrives at the
 /// call rather than at the wiring — and names a field requirement the caller never wrote.
@@ -45,11 +45,11 @@ pub mod a_context_can_be_wrong_and_still_compile {
 /// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/check_traits_where_the_failure_surfaces_2.rs`.
 pub mod where_the_failure_surfaces {}
 
-/// ## A check is an empty impl of a trait that demands something
+/// ## Writing a check trait
 ///
 /// The hand-written form, so the generated one is not mysterious: a trait whose supertrait is the
 /// requirement, and an impl with nothing in it.
-pub mod a_check_is_an_empty_impl {
+pub mod writing_a_check_trait {
     use cgp::prelude::*;
 
     #[cgp_component(StorageObjectFetcher)]
@@ -92,11 +92,11 @@ pub mod a_check_is_an_empty_impl {
     }
 }
 
-/// ## Checking a stack one layer at a time
+/// ## Checking each provider layer
 ///
 /// `#[check_providers]` asserts against each provider rather than against the context, so a broken
 /// layer of a nested stack errors on its own line.
-pub mod checking_a_stack_one_layer_at_a_time {
+pub mod checking_each_provider_layer {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]

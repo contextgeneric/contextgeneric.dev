@@ -16,7 +16,7 @@ and use its data; the bundle only connects them.
 This page defines a bundle, traces a call through it, explains why a bundle is checked through a
 context that uses it, and compares it with a namespace.
 
-## A table whose target is not a context
+## Wiring a bundle
 
 `delegate_components!` can give a wiring table to a provider type. The `new` keyword declares that
 type alongside its table:
@@ -51,7 +51,7 @@ With these entries, `Rectangle` uses the bundle's choices for both components, p
 their requirements. Another context can delegate the same keys to `GeometryComponents` to share
 those choices, and editing the bundle then changes both contexts together.
 
-## The context stays the context
+## Delegating through a bundle
 
 Delegation through a bundle preserves the original context. The compiler resolves
 `rectangle.area()` through this chain:
@@ -69,7 +69,7 @@ The same delegation can continue through another bundle. At each step, the compi
 next table while keeping the original context argument, until it reaches the provider that performs
 the work. It resolves that chain at compile time, so adding a bundle does not add a runtime lookup.
 
-## Checking a bundle asks the wrong question
+## Checking a bundle as a context
 
 Checking a bundle as a context does not verify that an application can use it. In particular,
 [`delegate_and_check_components!`](/docs/reference/macros/delegate_and_check_components) checks the
@@ -85,7 +85,7 @@ Because neither result answers whether an application can use the bundle, define
 plain [`delegate_components!`](/docs/reference/macros/delegate_components) and check their
 requirements against a context that will actually use them.
 
-## Verifying one properly
+## Verifying a bundle
 
 A check on `Rectangle` follows the bundle's delegation and checks the providers against
 `Rectangle`'s fields and traits:

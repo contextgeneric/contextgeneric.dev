@@ -17,7 +17,7 @@ inspect.
 This page follows one broken context from the unchecked error, through an explicit check, to the
 toolchain's output, then covers checks on provider layers and what a check does not prove.
 
-## A context can be wrong and still compile
+## Incomplete wiring
 
 Consider a provider that reads stored objects from the folder in a `local_dir` field. A context's
 wiring can still select that provider when the context has only a `bucket_id` field, as this
@@ -64,7 +64,7 @@ Deferring that proof is useful for reusable wiring. An [aggregate provider](./ag
 can collect choices before the contexts that use it are even defined. Those contexts must eventually
 meet the providers' requirements, but the bundle itself needs only to record the choices.
 
-## Where the failure surfaces instead
+## Where the failure surfaces
 
 An unchecked wiring error appears when code first requires the trait. A call to
 `app.fetch_storage_object(object_id)` on a `BrokenApp` value produces an error like this abbreviated
@@ -87,7 +87,7 @@ The diagnostic stops at the unsatisfied trait implementations: `BrokenApp` lacks
 field hidden behind the generated implementations. If the first call occurs in another module or
 crate, the error can also appear a long way from the table that selected the provider.
 
-## Asking the question at a line you chose
+## Writing a check trait
 
 A check trait forces the compiler to verify a bound where you write its implementation. The basic
 technique uses an ordinary Rust [supertrait](/docs/reference/glossary#supertrait) and an empty
@@ -135,7 +135,7 @@ implementation. The cause is closer to the surface, but the field tags still app
 character types, leaving `local_dir` and `bucket_id` difficult to recognize. The headline also
 refers to the generated `CanUseComponent` bound rather than the public trait.
 
-## Reading it through the toolchain
+## Reading the errors with cargo-cgp
 
 [`cargo cgp check`](/docs/tooling/cargo-cgp/check) rewrites recognized CGP diagnostics
 with readable field names and dependency chains. For this missing-field case, its abbreviated output
@@ -162,7 +162,7 @@ next-generation trait solver for diagnostic recovery, then translates the recogn
 reshape every class; [Reading the output](/docs/tooling/cargo-cgp/reading-output#errors-that-pass-through-unchanged)
 lists the ones that pass through unchanged. Output details depend on the compiler and tool version.
 
-## Checking a stack one layer at a time
+## Checking each provider layer
 
 Checks on individual providers help distinguish a wrapper's requirements from its inner provider's
 requirements. Suppose `RectangleArea` needs `width` and `height`, while
@@ -185,7 +185,7 @@ work. If it lacks only the scale factor, the rectangle assertion passes and the 
 fails. Giving each layer its own diagnostic location makes this distinction easier to see when
 debugging a [higher-order provider](./higher-order-providers.md).
 
-## What to check, and when to fuse it
+## Choosing what to check
 
 Placing checks beside each context's wiring catches missing entries and dependencies before a caller
 happens to need them, and for basic `Component: Provider` entries the checks can even be part of the

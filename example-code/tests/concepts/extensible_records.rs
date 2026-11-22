@@ -40,8 +40,8 @@ pub mod a_struct_as_a_list_of_named_fields {
     }
 }
 
-/// ## Building one field at a time
-pub mod building_one_field_at_a_time {
+/// ## Partial records
+pub mod partial_records {
     use cgp::core::field::traits::FinalizeBuild;
     use cgp::core::field::traits::HasBuilder;
     use cgp::prelude::*;

@@ -16,7 +16,7 @@ distinction matters: a context can fill an unbound path, but it cannot replace a
 This page starts from repeated wiring, follows a lookup along its path, shows why a bound entry
 cannot be overridden, and ends with presets and per-type dispatch.
 
-## Repeated wiring obscures the differences
+## Repeated wiring
 
 When production and test contexts differ in only a few choices, writing their tables separately
 repeats the choices they share. These fragments assume the named components, providers, and
@@ -44,7 +44,7 @@ Only the greeter changes, yet the farewell and announcer entries must be kept in
 larger shared table would leave more entries to keep synchronized. Giving those entries a namespace
 lets both contexts inherit the common choices and state their differences separately.
 
-## Lookups follow a path
+## Path lookups
 
 For a context to make its own choice, the namespace needs to route a component lookup without
 binding its final provider. Registering the greeter under an application path makes that distinction
@@ -83,7 +83,7 @@ lookups to another prefix, while the rest of each path still identifies the comp
 parameters. The [`cgp_namespace!` reference](/docs/reference/macros/cgp_namespace) gives the syntax
 for these grouped redirections.
 
-## Bind shared choices and leave varying paths open
+## Binding shared choices
 
 A child namespace can inherit routes and bind the choices its contexts share. Assume `Farewell`
 is registered in `AppNamespace` at `@app.FarewellComponent`, just as the greeter is registered above:
@@ -108,7 +108,7 @@ The farewell choice now comes from `AppDefaults`, and only the greeter differs i
 tables. Because the shared configuration refers to components rather than particular application
 types, a library can publish it for contexts that downstream applications define later.
 
-## A bound entry cannot be overridden
+## Overriding a bound entry
 
 A context or child namespace cannot rebind a key supplied by its parent namespace. The following
 separate example deliberately binds the greeter directly, then tries to replace that binding:

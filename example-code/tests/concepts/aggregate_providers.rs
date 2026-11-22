@@ -26,10 +26,10 @@ impl PerimeterCalculator {
     }
 }
 
-/// ## A table whose target is not a context
+/// ## Wiring a bundle
 ///
 /// The `new` keyword declares the struct and gives it a table. Nothing here is a context.
-pub mod a_table_that_is_not_a_context {
+pub mod wiring_a_bundle {
     use cgp::prelude::*;
 
     use super::*;
@@ -140,7 +140,7 @@ pub mod bundles_nest {
     }
 }
 
-/// ## Checking a bundle asks the wrong question
+/// ## Checking a bundle as a context
 ///
 /// A context-side check on a bundle asks whether the *bundle* can use the component as a context,
 /// which is a role it never plays. Which way that goes wrong depends on what is bundled, and one of
@@ -153,7 +153,7 @@ pub mod bundles_nest {
 /// The loud one. `RectangleArea` needs fields, and the check demands them of the bundle:
 ///
 /// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/aggregate_providers_checking_a_bundle_asks_the_wrong_question.rs`.
-pub mod checking_a_bundle_asks_the_wrong_question {
+pub mod checking_a_bundle_as_a_context {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
@@ -177,11 +177,11 @@ pub mod checking_a_bundle_asks_the_wrong_question {
     }
 }
 
-/// ## Checking the bundle on its own, correctly
+/// ## Verifying a bundle
 ///
 /// `#[check_providers]` asserts the provider-side question — is this a provider for that context —
 /// which is the one the bundle's role calls for.
-pub mod checking_the_bundle_correctly {
+pub mod verifying_a_bundle {
     use cgp::prelude::*;
 
     use super::*;

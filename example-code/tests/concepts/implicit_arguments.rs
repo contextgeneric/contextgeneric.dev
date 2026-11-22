@@ -103,8 +103,8 @@ pub mod a_capability_from_a_function_alone {
     }
 }
 
-/// ## The declared type decides how the field is read
-pub mod the_declared_type_decides_the_read {
+/// ## Owned and borrowed arguments
+pub mod owned_and_borrowed_arguments {
     use cgp::prelude::*;
 
     #[cgp_fn]

@@ -84,7 +84,7 @@ compiling. Once coverage is complete, the final operation can eliminate the impo
 without a wildcard arm or `unreachable!()`. Borrowed and mutable extractors track the same cases
 while keeping the original enum in place.
 
-## One handler, many enums
+## Handlers shared across enums
 
 A generic handler can cover several payload types and therefore serve several enums. This handler
 converts any `Display` payload to a string, while `MatchWithFieldHandlers` generates an extraction

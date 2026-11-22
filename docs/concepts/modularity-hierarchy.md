@@ -90,7 +90,7 @@ overlap these implementations or any others.
 This tier fits behavior that varies by type but does not need an independent choice per application.
 Rust's [orphan rules](/docs/reference/glossary#orphan-rule) also determine which crate may supply an implementation.
 
-## Tier 3: reusable providers, one selected per wired type
+## Tier 3: one provider per wired type
 
 A CGP component separates the consumer trait callers use from the provider trait implementations
 supply. Distinct provider types can support the same target without their implementations
@@ -181,7 +181,7 @@ Components may group methods, associated types, and consts, just as ordinary tra
 use one method to isolate provider selection; the appropriate grouping depends on which items a
 provider should implement and reuse together.
 
-## Tier 4: one provider per target type per context
+## Tier 4: one provider per target type
 
 A parameter-targeted component separates the application context from the value it operates on.
 `Self` selects the implementation, while `Value` identifies the target:

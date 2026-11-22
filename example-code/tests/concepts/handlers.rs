@@ -82,8 +82,8 @@ pub mod a_fallible_function {
     }
 }
 
-/// ## A pipeline is a wiring entry
-pub mod a_pipeline_is_a_wiring_entry {
+/// ## Pipelines
+pub mod pipelines {
     use core::marker::PhantomData;
 
     use cgp::core::field::traits::HasField;

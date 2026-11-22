@@ -10,7 +10,7 @@ pub mod aws_sdk_s3 {
     pub struct Client;
 }
 
-/// ## What an ordinary Rust trait does, and where it stops
+/// ## Ordinary Rust traits
 ///
 /// The arrangement the page opens on: two application types, two behaviours, no CGP. It compiles,
 /// which is what the paragraph after it says.
@@ -20,7 +20,7 @@ pub mod aws_sdk_s3 {
 /// the failure would be an unresolved name rather than the overlap it is meant to show:
 ///
 /// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/consumer_and_provider_traits_what_an_ordinary_rust_trait_does.rs`.
-pub mod what_an_ordinary_rust_trait_does {
+pub mod ordinary_rust_traits {
     use super::aws_sdk_s3;
 
     pub trait CanFetchStorageObject {
@@ -187,12 +187,12 @@ pub mod how_a_call_finds_its_provider {
     }
 }
 
-/// ## Writing it
+/// ## Writing a component
 ///
 /// The same component as [`how_a_call_finds_its_provider`], written the way it is actually written:
 /// the two traits, the marker, and both blanket impls come from `#[cgp_component]`, and each
 /// provider is a `#[cgp_impl]` block in consumer-trait shape.
-pub mod writing_it {
+pub mod writing_a_component {
     use cgp::prelude::*;
 
     use super::aws_sdk_s3;

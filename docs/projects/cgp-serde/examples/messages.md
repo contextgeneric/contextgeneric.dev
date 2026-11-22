@@ -285,7 +285,7 @@ and a context's table decides the provider for each value type, including types 
 Because every provider hands nested values back to the context, one entry decides a type's encoding
 everywhere in the value. The idea is CGP's local answer to Rust's coherence rule, explained in
 [Coherence](/docs/concepts/coherence), and [Modularity
-hierarchy](/docs/concepts/modularity-hierarchy#tier-4-one-provider-per-target-type-per-context)
+hierarchy](/docs/concepts/modularity-hierarchy#tier-4-one-provider-per-target-type)
 places it among the alternatives.
 
 The cost is the table each application writes. `AppA` and `AppB` share all but three entries and

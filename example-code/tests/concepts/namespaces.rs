@@ -45,11 +45,11 @@ impl Announcer {
     }
 }
 
-/// ## Repeating a table across contexts
+/// ## Repeated wiring
 ///
 /// The problem the rest of the page is about: two contexts wanting almost the same set of choices,
 /// with nothing in the code to say so.
-pub mod repeating_a_table {
+pub mod repeated_wiring {
     use cgp::prelude::*;
 
     use super::*;
@@ -85,12 +85,12 @@ pub mod repeating_a_table {
     }
 }
 
-/// ## Routing a component through a path
+/// ## Path lookups
 ///
 /// A namespace resolves *paths* rather than bare component names, and a component registers itself
 /// at one. Nothing is decided yet: the path is a route, and something further along supplies the
 /// provider.
-pub mod routing_a_component_through_a_path {
+pub mod path_lookups {
     use cgp::prelude::*;
 
     cgp_namespace! { new AppNamespace {} }
@@ -129,11 +129,11 @@ pub mod routing_a_component_through_a_path {
     }
 }
 
-/// ## Binding what is shared, leaving open what varies
+/// ## Binding shared choices
 ///
 /// The preset shape. `AppDefaults` binds the leaf every context agrees on and leaves the varying
 /// one unbound, so a context supplies one entry and inherits the rest.
-pub mod binding_what_is_shared {
+pub mod binding_shared_choices {
     use cgp::prelude::*;
 
     cgp_namespace! { new AppNamespace {} }
@@ -216,7 +216,7 @@ pub mod binding_what_is_shared {
     }
 }
 
-/// ## A bound entry is not overridable
+/// ## Overriding a bound entry
 ///
 /// The rule that decides how a namespace is designed, and the error it produces when broken. Both
 /// blocks are rejected.
@@ -228,7 +228,7 @@ pub mod binding_what_is_shared {
 /// And a child namespace redefining a key it inherits:
 ///
 /// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/namespaces_a_bound_entry_is_not_overridable_2.rs`.
-pub mod a_bound_entry_is_not_overridable {}
+pub mod overriding_a_bound_entry {}
 
 /// ## One namespace per configuration
 ///
