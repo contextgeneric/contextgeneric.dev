@@ -46,7 +46,7 @@ pages that carry the argument:
   document whole when the page makes a claim its reading-map row does not cover.
 - Name Context-Generic Programming in each page's prose and relate a short form of the tag line to
   its content, following the knowledge base's
-  [naming rule](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/identity.md#the-name-and-the-tag-line-on-every-page);
+  [naming rule](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/identity.md#the-naming-rule);
   the skill pages and the published blog posts are exempt.
 - Never publish an invented benchmark, adoption figure, or quotation.
 - Never disparage another crate, language, or community; say where a simpler tool is the better choice.
@@ -56,7 +56,7 @@ pages that carry the argument:
   `docs/` included; follow a page kind's writing guide where it names another style.
 - Let agents draft the pages, and have the author read in full before publication the pages the
   knowledge base's
-  [AI disclosure policy](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/ai-disclosure.md#the-two-claims-that-are-easiest-to-get-wrong)
+  [AI disclosure policy](https://github.com/contextgeneric/cgp-knowledge-base/blob/main/communication-strategy/ai-disclosure.md#authorship-and-review-claims)
   lists; ship everything else on its guide plus a spot check, and flag a judgement call for the
   author's reading rather than deciding alone.
 - Add one provenance line at the foot of each page written or substantially rewritten, linking the
