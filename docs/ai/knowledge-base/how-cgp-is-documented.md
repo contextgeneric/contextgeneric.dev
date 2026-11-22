@@ -33,7 +33,7 @@ they produce. Knowing that `#[cgp_component]` generates a consumer trait, a prov
 blanket impls that connect them requires mentally running the macro. Every agent that reads the
 source has to repeat that reconstruction, and two agents can reconstruct it differently.
 
-## A written record, kept true
+## Keeping the record accurate
 
 The knowledge base records each reconstruction in prose so that later agents can read the conclusion
 without deriving it again. Each document covers one subject: a construct, a concept that applies
@@ -56,7 +56,7 @@ For that record to remain useful, it must stay accurate. These rules govern ever
   including when each construct was renamed or removed, so an agent that encounters old syntax can
   find what replaced it.
 
-## One construct, five views
+## Consistent views of a construct
 
 The rules require the accounts of a construct to agree wherever it is described. For
 `#[cgp_component]`, that means keeping the following sources in sync:

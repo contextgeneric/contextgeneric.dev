@@ -20,7 +20,7 @@ right.
 We continue from the program the previous tutorial ended with, so the line numbers in the errors below
 refer to that file rather than to yours.
 
-## A mis-wired context still compiles
+## A mis-wired context
 
 Here is the mistake. We wire `PlainCircle` to `RectangleAreaCalculator` — the provider that computes
 `width * height` — instead of to `CircleAreaCalculator`:
@@ -48,7 +48,7 @@ entry records which provider a context uses, and Rust checks whether that provid
 are met only when something actually asks the context to do the work. Until then there is nothing to
 check against. The entry is a promise, and nobody has called it in.
 
-## Where the mistake surfaces instead
+## Where the mistake surfaces
 
 The promise is called in the moment we use the component. Add a line that asks the circle for its
 area:
@@ -84,7 +84,7 @@ The mistake is fifteen lines earlier, in the wiring, and the compiler has no way
 asked whether `PlainCircle` can do the work, found that it cannot, and said so at the place the
 question was asked.
 
-## Asking the question where you wired it
+## Writing a check trait
 
 If the error appears wherever the component is used, then we should ask the question ourselves, at the
 line where the wiring lives. That is what `check_components!` does:
@@ -130,7 +130,7 @@ reason about field names at all. Read character by character it says `width`, an
 `radius` — but you have to read it character by character, in the middle of a paragraph of angle
 brackets, and the compiler abbreviates the display differently depending on how it is invoked.
 
-## Reading it with `cargo cgp check`
+## Reading the error with cargo-cgp
 
 Decoding type-level strings by hand is exactly the job a tool should do, and CGP ships one:
 
@@ -172,7 +172,7 @@ it recognizes, and the tool does not yet reshape every class. When you meet an
 error it has not rewritten, you will be reading the raw compiler output, which is why the previous
 section is worth understanding rather than skipping.
 
-## Fixing it
+## Fixing the wiring
 
 The tree named the provider, so the fix is the line the error pointed at:
 
