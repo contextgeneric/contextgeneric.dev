@@ -117,8 +117,8 @@ pub mod passing_an_impl_explicitly {
     }
 }
 
-/// ## A `with` clause becomes a context field
-pub mod a_capability_is_a_context_field {
+/// ## `with` clauses as context fields
+pub mod with_clauses_as_context_fields {
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

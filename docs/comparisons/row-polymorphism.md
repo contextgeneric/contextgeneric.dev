@@ -30,7 +30,7 @@ The row operations map onto CGP constructs as follows:
 | A row-typed sum | An enum's derived `Fields`, a `Sum!` over `Either` and `Void` |
 | Variant injection and branching | `CanUpcast`, and the extensible visitor's dispatch |
 
-## The idea, briefly
+## The idea
 
 Rust's nominal types are distinct even when they have the same fields. Code that reads a `name`
 field normally names a particular struct. Row polymorphism lets code depend on the field instead;
@@ -238,7 +238,7 @@ without a wildcard arm. `CanUpcast` and `CanDowncast` play roles similar to `inj
 types à la carte*. A projection can fail; exhaustiveness comes from combining handlers that cover
 the whole sum.
 
-### Trait implementations supply the evidence {#providers-are-the-theorys-computational-evidence}
+### Trait implementations as evidence {#providers-are-the-theorys-computational-evidence}
 
 CGP's trait implementations connect constraints to executable code. A generated `HasField` impl both
 proves that a field is available and reads it. `CanBuildFrom` both requires compatible fields and

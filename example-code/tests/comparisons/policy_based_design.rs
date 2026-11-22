@@ -33,8 +33,8 @@ impl Writer {
     }
 }
 
-/// ## Providers are policies; the context is the host
-pub mod providers_are_policies {
+/// ## Providers as policies
+pub mod providers_as_policies {
     use super::*;
 
     #[cgp_fn]
@@ -79,7 +79,7 @@ pub mod providers_are_policies {
     }
 }
 
-/// ## Policies as type parameters are higher-order providers
+/// ## Policies as type parameters
 pub mod policies_as_type_parameters {
     use super::*;
 
@@ -126,8 +126,8 @@ pub mod policies_as_type_parameters {
     }
 }
 
-/// ## Providers access the context without an inheritance cast
-pub mod cgp_impl_is_crtp {
+/// ## Context access without a cast
+pub mod context_access_without_a_cast {
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]

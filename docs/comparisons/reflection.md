@@ -29,7 +29,7 @@ The reflection vocabulary maps onto CGP by role:
 | A registry mapping types to behavior | The **wiring table**, written with `delegate_components!` |
 | Checking that an operation supports a field type | Trait bounds, verified when used or asserted with `check_components!` |
 
-## The idea, briefly
+## The idea
 
 Reflection lets code inspect a type's shape without knowing that type in advance. Serializers,
 editors, and debuggers use it to find fields by name and type. Systems differ in when they inspect
@@ -45,7 +45,7 @@ the shape:
 
 CGP also processes shapes at compile time. Its shape is a type, rather than a compile-time value.
 
-### Runtime reflection: Bevy
+### Runtime reflection in Bevy
 
 Bevy lets code inspect values through a common runtime interface. A type opts in with
 `#[derive(Reflect)]`; code can then access its fields by name or downcast it to a concrete type
@@ -55,7 +55,7 @@ describes the shape, and a
 with metadata and behavior. These facilities support scene serialization and editors that work
 across registered types. A lookup for a missing field or an incorrect downcast can fail at runtime.
 
-### Compile-time metaprogramming: Zig's `comptime`
+### Zig's `comptime`
 
 Zig makes types available as compile-time values. `@typeInfo(T)` decomposes a type into a
 `std.builtin.Type` describing its shape, `inline for` unrolls a loop over a compile-time collection,
@@ -81,7 +81,7 @@ Zig resolves the loop and field accesses at compile time, without runtime lookup
 it is used. Zig can also construct a new nominal type from a `std.builtin.Type` value through
 `@Type`; CGP does not offer that operation.
 
-### Compile-time reflection comes to Rust
+### Compile-time reflection in Rust
 
 Rust libraries can generate either code or metadata from a type declaration. Serde's derives
 generate serialization implementations that are specialized for each type and serializer.
@@ -232,7 +232,7 @@ illustrates traversal and dispatch rather than a complete JSON serializer. `cgp-
 performs the same recursion over a `serde::Serializer`. Its deserialization counterpart reads a
 field name as a runtime string and compares it with each field's compile-time `Tag::VALUE`.
 
-### Against facet and the reflection MVP
+### CGP, facet, and the reflection MVP
 
 These approaches differ in how they represent and process a type's structure:
 

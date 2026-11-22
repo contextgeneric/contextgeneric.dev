@@ -28,7 +28,7 @@ layers of delegation lead to the provider.
 | Shared behavior reached through delegation | An [aggregate provider](/docs/reference/glossary#aggregate-provider) or namespace |
 | Checking that a receiver supports an operation | Trait bounds and `check_components!` |
 
-## The idea, briefly
+## The idea
 
 Dynamic dispatch lets a call site invoke an implementation selected at runtime. Dynamic typing and
 prototypal inheritance address related but separate questions: when operations are type-checked,
@@ -84,7 +84,7 @@ CGP combines generic provider code with statically selected implementations. Its
 a method table in purpose, but the table consists of trait impls and is resolved during compilation.
 The examples below omit supporting declarations where the surrounding prose identifies their roles.
 
-### Provider code calls methods on a generic receiver
+### Calls on a generic receiver
 
 A CGP provider can call a method on a context without naming that context's concrete type.
 The trait dependency makes the required operation explicit:
@@ -123,7 +123,7 @@ A `Person` type with the required field and wiring is a [value context](/docs/re
 It is the value being greeted, rather than an application environment selecting behavior for a
 separate target. [Implicit arguments](/docs/concepts/implicit-arguments) explains the field-based form.
 
-### Implementation choice is deferred to wiring
+### Deferring the choice to wiring
 
 A generic caller can invoke `context.area()` through `CanCalculateArea` without choosing an
 implementation. The context's wiring supplies that choice, and [monomorphization](/docs/reference/glossary#monomorphization) resolves the route
@@ -135,7 +135,7 @@ Generic components can also select providers by their type parameters. The
 parameter types, giving a form of type-directed selection across several inputs. This is a
 compile-time comparison with multiple dispatch; it does not inspect the runtime types of objects.
 
-### Wiring serves the selection role of a vtable
+### Wiring as a vtable
 
 A wiring entry maps a component key to a provider. This resembles the mapping from a vtable slot
 to an implementation, except that both the key and selected provider are Rust types:
@@ -164,7 +164,7 @@ context types and dispatch to their consumer methods dynamically. Each concrete 
 use CGP wiring internally. The [consumer/provider explanation](/docs/concepts/consumer-and-provider-traits)
 traces that internal route.
 
-### Delegation preserves the original context
+### Delegation and the original context
 
 An [aggregate provider](/docs/concepts/aggregate-providers) groups wiring entries for reuse.
 A context can delegate several components to the aggregate:
@@ -190,7 +190,7 @@ as the context at every step. The area provider reads the rectangle's `width` an
 prototypal delegation, with the route resolved statically. [`UseContext`](/docs/reference/providers/use_context)
 allows a provider to call back through the context's consumer-trait implementation.
 
-### Namespaces share bindings and leave paths for contexts to fill
+### Namespaces and inheritance
 
 A CGP [namespace](/docs/concepts/namespaces) shares wiring across contexts. Its inheritance differs
 from JavaScript property shadowing: a bound key cannot be redefined by a conflicting impl.

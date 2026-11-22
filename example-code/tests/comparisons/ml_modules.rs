@@ -1,7 +1,7 @@
 //! Code from `docs/comparisons/ml-modules.md` — *ML modules and modular implicits*.
 
-/// ## Components are signatures; providers are structures
-pub mod components_are_signatures {
+/// ## Signatures and structures
+pub mod signatures_and_structures {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
@@ -54,8 +54,8 @@ pub mod components_are_signatures {
     }
 }
 
-/// ## Abstract-type components are a signature's abstract types
-pub mod abstract_type_components {
+/// ## Abstract types
+pub mod abstract_types {
     use core::fmt::Debug;
 
     use cgp::prelude::*;
@@ -69,8 +69,8 @@ pub mod abstract_type_components {
     }
 }
 
-/// ## `delegate_components!` records the assembly choices
-pub mod delegate_components_replaces_functor_application {
+/// ## Assembling with `delegate_components!`
+pub mod assembling_with_delegate_components {
     use cgp::core::error::ErrorTypeProviderComponent;
     use cgp::prelude::*;
 

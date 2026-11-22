@@ -28,7 +28,7 @@ The proposals' constructs map onto CGP as follows:
 | The `with` block that binds everything | The definition of a context type and its `delegate_components!` table |
 | The root dictionary of a dictionary-passing elaboration | The context itself |
 
-## The idea, briefly
+## The idea
 
 The proposals on this page explore changes to trait selection or how values reach generic code.
 Rust's coherence rules set the starting point. The *[orphan
@@ -142,7 +142,7 @@ names the difficulties that follow: ownership modes for the carried value, the s
 a trait differently in different scopes, and methods that become closures ([*What If Traits Carried
 Values*](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html)).
 
-### Cairo: a Rust-like language that shipped named impls
+### Named impls in Cairo
 
 Cairo provides a working example of named impls in a language with Rust-like syntax. A generic
 function can take an impl as an explicit parameter, named or anonymous:
@@ -262,7 +262,7 @@ Higher-order providers let a wrapper fix or parameterize its inner choice. An in
 also default to [`UseContext`](/docs/reference/providers/use_context), which delegates that step
 back to the context's selected implementation.
 
-### A `with` clause becomes a context field
+### `with` clauses as context fields
 
 Mandry's `with arena: &BasicArena` clause declares a value the function needs from its environment.
 CGP expresses an environmental dependency as an
@@ -304,7 +304,7 @@ the wiring. `App` is an environmental context; the greeter is
 [self-targeted](/docs/reference/glossary#self-targeted-component) because its method acts on
 `self`.
 
-### The context is the dictionary
+### The context as a dictionary
 
 A CGP context serves a role similar to a root dictionary: it connects generic code to its
 dependencies. Each provider receives the context, whose wiring selects other providers. The analogy
@@ -336,7 +336,7 @@ cause for the classes it recognizes, and the tool does not yet reshape every cla
 [Modularity Hierarchy](/docs/concepts/modularity-hierarchy) page weighs these costs
 against simpler approaches.
 
-## Where a proposal, or a smaller tool, is the better choice
+## Where another approach is the better choice
 
 A single specialized fast path may need only manual dispatch on stable Rust. On nightly,
 `min_specialization` supports a restricted set of specialization cases without CGP wiring. Ordinary

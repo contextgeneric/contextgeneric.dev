@@ -11,8 +11,8 @@ pub mod without_a_framework {
     }
 }
 
-/// ## Impl-side dependencies declare what an implementation needs
-pub mod impl_side_dependencies_are_constructor_parameters {
+/// ## Impl-side dependencies
+pub mod impl_side_dependencies {
     use cgp::prelude::*;
 
     // Types the page names without declaring.
@@ -107,8 +107,8 @@ pub mod impl_side_dependencies_are_constructor_parameters {
 }
 
 /// ## Wiring selects implementations for an application
-/// ## Checking validates the declared dependencies
-pub mod wiring_is_the_container_configuration {
+/// ## Checking declared dependencies
+pub mod checking_declared_dependencies {
     use cgp::prelude::*;
 
     #[cgp_component(StorageObjectFetcher)]

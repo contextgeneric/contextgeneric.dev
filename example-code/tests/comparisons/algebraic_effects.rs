@@ -1,7 +1,7 @@
 //! Code from `docs/comparisons/algebraic-effects.md` — *Algebraic effects and handlers*.
 
-/// ## Components declare operations; providers implement them
-pub mod components_are_effect_signatures {
+/// ## Operations and their implementations
+pub mod operations_and_their_implementations {
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]
@@ -26,8 +26,8 @@ pub mod components_are_effect_signatures {
     }
 }
 
-/// ## Context fields supply an environment value
-pub mod reading_from_the_context_is_dynamic_binding {
+/// ## Environment values from fields
+pub mod environment_values_from_fields {
     use cgp::prelude::*;
 
     #[cgp_fn]
@@ -50,8 +50,8 @@ pub mod reading_from_the_context_is_dynamic_binding {
 }
 
 /// ## Raising an error constructs a value
-/// ## Dependency checks verify the selected providers
-pub mod raising_an_error {
+/// ## Raising errors
+pub mod raising_errors {
     use cgp::core::error::{ErrorRaiserComponent, ErrorTypeProviderComponent};
     use cgp::extra::error::RaiseFrom;
     use cgp::prelude::*;

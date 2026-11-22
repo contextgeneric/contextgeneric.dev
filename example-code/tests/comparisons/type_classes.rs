@@ -1,7 +1,7 @@
 //! Code from `docs/comparisons/type-classes.md` — *Type classes*.
 
-/// ## A component is a class; a provider is a first-class instance
-pub mod a_component_is_a_class {
+/// ## Components and providers
+pub mod components_and_providers {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]

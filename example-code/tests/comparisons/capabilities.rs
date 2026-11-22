@@ -1,7 +1,7 @@
 //! Code from `docs/comparisons/capabilities.md` — *Capabilities*.
 
-/// ## Providers declare requirements on a context
-pub mod a_requirement_on_the_context {
+/// ## Provider requirements
+pub mod provider_requirements {
     use cgp::prelude::*;
 
     #[cgp_component(Greeter)]
@@ -38,8 +38,8 @@ pub mod a_requirement_on_the_context {
     }
 }
 
-/// ## An object capability can live in the context
-pub mod an_object_capability_can_live_in_the_context {
+/// ## Object capabilities in a context
+pub mod object_capabilities_in_a_context {
     use cap_std::fs::Dir;
     use cgp::prelude::*;
 

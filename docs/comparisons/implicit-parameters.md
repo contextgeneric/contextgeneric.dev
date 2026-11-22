@@ -29,7 +29,7 @@ provider choices determined by the context's type.
 | Instance selection | **Wiring**, written in a `delegate_components!` table |
 | A functional dependency (`m -> e`) or associated type family | An [abstract type](/docs/reference/glossary#abstract-type) determined by the context |
 
-## The idea, briefly
+## The idea
 
 Implicit parameters let callers omit arguments that the compiler can supply from the surrounding
 scope. Configuration, loggers, and comparison strategies can pass through a call chain without an
@@ -125,7 +125,7 @@ CGP makes a context available to generic implementations through `self`. An `#[i
 reads a value from that context, while component wiring selects an implementation. Both choices are
 checked through Rust traits; neither requires searching the caller's lexical scope for a value.
 
-### Implicit arguments read named context fields
+### Implicit arguments
 
 An `#[implicit]` parameter names a field that the implementation reads from its context:
 
@@ -149,7 +149,7 @@ The generated implementation requires field access with the matching names and t
 refers to a named implicit binding. The
 [Implicit arguments](/docs/concepts/implicit-arguments) page explains CGP's field access and borrowing.
 
-### A shared context carries a common environment
+### A shared environment
 
 Several providers can read the same runtime value from a shared context. For example, a context
 can store configuration once and expose it to each implementation that declares the corresponding
@@ -161,7 +161,7 @@ A context can also determine types shared by its providers. Fallible implementat
 Runtime fields and associated types serve different roles, but both keep related choices attached
 to one context.
 
-### Abstract types are determined by the context
+### Abstract types
 
 A CGP [abstract type](/docs/concepts/abstract-types) is an associated type supplied by the context.
 Haskell's functional dependencies express a related relationship: `m -> e` in `MonadError` says
@@ -192,7 +192,7 @@ component through the same wiring mechanism it uses for operations. See
 [`mtl`'s `MonadError` documentation](https://hackage.haskell.org/package/mtl/docs/Control-Monad-Error-Class.html)
 for the functional-dependency form.
 
-### Components and wiring make instance selection explicit
+### Explicit instance selection
 
 CGP gives each interchangeable implementation its own provider type. Rust therefore treats these
 as distinct impls, even when both providers support the same target. The following fragments define

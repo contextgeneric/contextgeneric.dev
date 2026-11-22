@@ -1,8 +1,8 @@
 //! Code from `docs/comparisons/dynamic-dispatch.md` — *Dynamic dispatch, dynamic typing, and
 //! prototypal inheritance*.
 
-/// ## Provider code calls methods on a generic receiver
-pub mod cgp_code_reads_like_a_duck_typed_program {
+/// ## Calls on a generic receiver
+pub mod calls_on_a_generic_receiver {
     use cgp::prelude::*;
 
     #[cgp_auto_getter]
@@ -51,8 +51,8 @@ pub mod cgp_code_reads_like_a_duck_typed_program {
 }
 
 /// ## Wiring serves the selection role of a vtable
-/// ## Delegation preserves the original context
-pub mod delegate_component_is_a_compile_time_vtable {
+/// ## Delegation and the original context
+pub mod delegation_and_the_original_context {
     use cgp::prelude::*;
 
     #[cgp_component(AreaCalculator)]
@@ -120,8 +120,8 @@ pub mod delegate_component_is_a_compile_time_vtable {
     }
 }
 
-/// ## Namespaces share bindings and leave paths for contexts to fill
-pub mod namespaces_are_shared_prototypes {
+/// ## Namespaces and inheritance
+pub mod namespaces_and_inheritance {
     use cgp::prelude::*;
 
     cgp_namespace! { new AppNamespace {} }

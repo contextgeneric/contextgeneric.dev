@@ -28,7 +28,7 @@ that context.
 | An unforgeable authority-bearing reference | Must be supplied by the field's value type; a trait bound alone does not provide it |
 | Excluding ambient authority | Not enforced by CGP; ordinary Rust APIs and globals remain accessible |
 
-## The idea, briefly
+## The idea
 
 The word capability describes several different mechanisms. Object capabilities concern authority
 over resources; effect capabilities concern operations available in a scope; other uses concern
@@ -163,7 +163,7 @@ A request for capabilities in Rust can therefore mean either a more convenient A
 restriction on what code may do. CGP addresses dependency declaration and selection; its wiring
 alone does not impose the latter restriction.
 
-### The properties that distinguish the models
+### Comparing the models
 
 The following properties help identify which mechanism a program needs:
 
@@ -182,7 +182,7 @@ Those requirements may include authority-bearing values, but CGP does not make e
 an authority token. It also does not restrict access to globals or check the escape of capability
 references beyond Rust's ordinary type and lifetime rules.
 
-### Providers declare requirements on a context
+### Provider requirements
 
 A provider uses `#[uses]` for trait dependencies and `#[implicit]` for field dependencies.
 This fragment assumes a `CanGreet` component whose method returns a `String`:
@@ -218,7 +218,7 @@ Contexts can also determine [abstract types](/docs/concepts/abstract-types), suc
 shared by their providers. Selecting such a type is separate from supplying an authority-bearing
 value of that type. A type choice alone does not grant access to a resource.
 
-### An object capability can live in the context
+### Object capabilities in a context
 
 A context can carry a `cap-std` directory handle to a provider that declares it as a dependency.
 This example reads configuration using that handle:
@@ -260,14 +260,14 @@ The mechanisms compose: the value type supplies resource-access behavior, and CG
 dependency declaration and static wiring check. An allocator or arena can be passed through a context
 field in the same way, as discussed in [Rust's own proposals](./rust-language-proposals.md).
 
-### CGP does not remove ambient authority
+### Ambient authority
 
 A provider can access ordinary Rust APIs beyond its context dependencies. `ReadConfigFromDir`
 could call `std::fs::File::open(...)` directly if the execution environment allows it, and CGP
 would not reject the call. Its declared bounds describe requirements on the context, not a complete
 list of effects or authority exercised by the body.
 
-### A trait bound does not create an authority token
+### Trait bounds and authority
 
 A `HasField` bound establishes access to a field of a particular name and type. It does not
 establish who may create the field's value. When the field contains a capability, the relevant
@@ -275,7 +275,7 @@ construction and access restrictions come from that value's type and execution e
 Rust types with private constructors can implement controlled tokens; CGP can carry those tokens
 without changing their guarantees.
 
-### Wiring is static; capability values can vary at runtime
+### Static wiring and runtime values
 
 A concrete context type fixes its provider selections and field types. Its values can still hold
 different handles: two `App` instances can refer to different directories, including a temporary

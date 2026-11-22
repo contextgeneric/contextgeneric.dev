@@ -30,7 +30,7 @@ Rust type rather than installed on the runtime call stack.
 | Checking that required operations have handlers | `check_components!` verifies declared provider dependencies |
 | A captured continuation | Without a direct counterpart; provider methods use ordinary Rust control flow |
 
-## The idea, briefly
+## The idea
 
 Algebraic effects let a computation request an operation without choosing its implementation.
 A handler supplies the operation's meaning and can control how the computation continues. This lets
@@ -150,7 +150,7 @@ def main(): Unit \ IO =
 resumptions as well as the single resumption shown here. See the
 [Flix documentation](https://doc.flix.dev/effects-and-handlers.html).
 
-### The fragment CGP corresponds to
+### Tail-resumptive handlers
 
 Tail-resumptive handlers provide the closest comparison to CGP. They resume exactly once in tail
 position, so the operation can run in place without capturing the rest of the computation.
@@ -171,7 +171,7 @@ The examples use [environmental contexts](/docs/reference/glossary#environmental
 implementations for [self-targeted](/docs/reference/glossary#self-targeted-component) components. Supporting declarations and imports are omitted
 where they do not affect the comparison.
 
-### Components declare operations; providers implement them
+### Operations and their implementations
 
 A component declares an operation independently of its implementation. A context then selects a
 provider through wiring:
@@ -197,7 +197,7 @@ The provider receives the context rather than a continuation. If the method retu
 its caller continues once at the call site. Like any Rust function, the method can also panic or
 diverge; CGP does not enforce termination or an exactly-once return guarantee.
 
-### Context fields supply an environment value
+### Environment values from fields
 
 CGP's [implicit arguments](/docs/concepts/implicit-arguments) let nested implementations read
 values from a shared context. This resembles a reader effect whose handler supplies an environment
@@ -216,7 +216,7 @@ do not forward the individual value. The difference is selection: a CGP field de
 resolved against a context type, without dynamic handler installation. The
 [implicit parameters](./implicit-parameters.md) comparison develops that distinction.
 
-### Raising an error constructs a value
+### Raising errors
 
 CGP's error components choose how to construct an error, while Rust's `Result` controls propagation.
 This provider can produce an error without fixing the context's concrete error type:
@@ -265,7 +265,7 @@ captured continuation. CGP's wiring supplies error-construction behavior without
 control-flow mechanism. [Modular error handling](/docs/concepts/modular-error-handling) explains
 the error components in detail.
 
-### Dependency checks verify the selected providers
+### Checking provider dependencies
 
 A provider's impl-side dependencies state the traits and fields it needs from a context.
 For example, `LoadOrFail` requires `CanRaiseError<String>`. A check verifies those requirements
@@ -305,7 +305,7 @@ This follows from Rust's associated types and CGP's
 [abstract-type components](/docs/concepts/abstract-types). It is an additional use of the wiring
 mechanism, separate from the comparison with handlers interpreting operations.
 
-### A related theoretical view: coeffects
+### Coeffects
 
 Coeffects offer another way to describe CGP's declared context dependencies. An effect describes
 what a computation does; a coeffect describes what it requires from its environment.

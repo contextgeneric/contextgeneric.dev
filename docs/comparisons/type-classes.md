@@ -29,7 +29,7 @@ The type-class vocabulary maps onto CGP as follows:
 | The dictionary passed as a hidden argument | The context |
 | A class's associated type | An [abstract type](/docs/reference/glossary#abstract-type), chosen by the context |
 
-## The idea, briefly
+## The idea
 
 Type classes let a compiler choose an implementation for a type. A class declares an interface, an
 instance implements it for a type, and a constrained function works for every type with an instance.
@@ -127,7 +127,7 @@ print {{s}} x = Show.show s x
 Resolution succeeds when exactly one instance in scope matches. An ambiguity is an error at that use
 site rather than a violation of a program-wide guarantee.
 
-### Type classes in Lean: search, priorities, and the diamond problem
+### Type classes in Lean
 
 Lean resolves classes with a backtracking, tabled search that respects per-instance priorities:
 
@@ -173,7 +173,7 @@ CGP makes implementation choice explicit per context. A component has a consumer
 and a provider trait for implementations. The consumer trait is an ordinary Rust trait; providers
 and wiring make several implementations selectable.
 
-### Components define interfaces; providers name implementations {#a-component-is-a-class-a-provider-is-a-first-class-instance}
+### Components and providers {#a-component-is-a-class-a-provider-is-a-first-class-instance}
 
 A component declares the interface callers use and generates a provider trait for implementations:
 
@@ -215,7 +215,7 @@ and the component is [self-targeted](/docs/reference/glossary#self-targeted-comp
 choices for the same value type require moving selection to separate contexts, as the next example
 does.
 
-### Providers can accept overlapping sets of types {#overlapping-providers-need-no-specificity-rule}
+### Overlapping providers {#overlapping-providers-need-no-specificity-rule}
 
 CGP gives each encoder its own provider type, so their accepted value types can overlap. These
 providers illustrate distinct choices for display output, raw bytes, and hexadecimal output:
@@ -288,7 +288,7 @@ fixed for the context, component, and value type. This makes the difference expl
 relaxing Rust's coherence rules. The `open` statement and `@` paths are explained in
 [`delegate_components!`](/docs/reference/macros/delegate_components).
 
-### Providers avoid orphan conflicts and newtypes
+### Orphan conflicts and newtypes
 
 A downstream crate can define a provider for a foreign component and value type by owning the
 provider's marker type. This satisfies the orphan rule without wrapping the value in a newtype.

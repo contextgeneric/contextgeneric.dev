@@ -28,7 +28,7 @@ constructs and manages those values.
 | Graph validation at startup or build time | `check_components!`, at compile time |
 | Container-managed instances and lifetimes | Context fields and ordinary Rust construction, ownership, and borrowing |
 
-## The idea, briefly
+## The idea
 
 Dependency injection supplies an object's collaborators from outside the object. A class that
 requires a storage interface can receive a production client or a test fake without changing its
@@ -129,7 +129,7 @@ context supplies the required traits and fields. Every context below is an [envi
 a type representing an application, with [self-targeted](/docs/reference/glossary#self-targeted-component) components that operate through it.
 The snippets omit supporting application types and some implementation bodies.
 
-### Impl-side dependencies declare what an implementation needs
+### Impl-side dependencies
 
 A CGP provider declares trait dependencies with `#[uses]` and field dependencies with `#[implicit]`.
 This user-creation implementation needs a username-censorship operation and a database value:
@@ -159,7 +159,7 @@ the database and censorship bounds. The dependencies remain explicit in the impl
 checked when the concrete context's wiring is checked or used. `Error` is the application's enum;
 the database insertion is omitted here.
 
-### Wiring selects implementations for an application
+### Selecting implementations by wiring
 
 A [`delegate_components!`](/docs/reference/macros/delegate_components) table selects a provider
 for each component. These contexts choose different storage implementations for the same interface:
@@ -189,7 +189,7 @@ does not require separate binaries or guarantee that one implementation is absen
 The providers identify behavior, while the contexts hold values such as client connections and
 bucket names.
 
-### Checking validates the declared dependencies
+### Checking declared dependencies
 
 [`check_components!`](/docs/reference/macros/check_components) verifies that the selected provider's
 transitive requirements are satisfied for a context:
