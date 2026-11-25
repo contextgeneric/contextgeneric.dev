@@ -30,7 +30,7 @@ This section summarizes the discussion as I read it from public writing, so it m
 Nadrieril's first post reads trait solving as building explicit proofs. A trait is like a struct of methods, an impl is like a value of that struct, and a trait bound is how such values are passed along. The Haskell literature calls this way of passing impls dictionary-passing style. The post belongs to his [**Rust via Desugarings**](https://nadrieril.github.io/rust-via-desugarings/) effort to define Rust by translating it into a smaller language, and his later post on [**a formal specification**](https://nadrieril.github.io/blog/2026/06/16/formal-spec-vision.html) places explicit trait proofs inside that plan. In this post, I call the trait-free target of such a translation **Traitless IR (TIR)**, though Nadrieril's plan names its own target PolyMiniRust.
 
 :::note
-Like HIR, THIR, and MIR, TIR would be an internal representation that Rust programmers never write, and it would have no concrete syntax. This post writes it in a Rust-like syntax to illustrate the ideas.
+Like HIR, THIR, and MIR, TIR would be an internal representation that Rust programmers never write, and it would have no concrete syntax. So the examples below borrow a Rust-like syntax to illustrate the ideas.
 :::
 
 His second post lets those dictionaries carry runtime values, which would make Tyler Mandry's [**contexts and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal much easier to express. Boxy's post then explores how the same model could enable **incoherent traits**, which opt out of Rust's coherence rules. I use **Incoherent Rust** for this envisioned version of Rust, broadly covering the features that Nadrieril, Boxy, and Tyler Mandry explore, none of which are settled yet.
@@ -567,80 +567,11 @@ fn main() {
 }
 ```
 
-If we were to lower the CGP code into TIR, we could produce the following translation, which sits much closer to both today's Rust and the CGP code above:
+Set beside Nadrieril's versions, the CGP code shows its `Context` type acting as a type-level dictionary, with `delegate_components!` declaring its entries. Each entry plays the part of one of Nadrieril's dictionaries, and the context holds them all, so CGP already follows the programming model of dictionary-passing style closely. If the CGP code were lowered into TIR, the context would become a value-level dictionary instead, holding the other dictionaries as fields, nearly one for each `delegate_components!` entry.
 
-```rust title="TIR"
-// A dictionary for `Clone` with an additional `Context` parameter
-struct Clone<Context, T> {
-    clone: fn(&Context, &T) -> T,
-}
+Every trait dictionary in that lowering would also take the context as an extra parameter, and each implementation would look up the others through it. The compiler would then need no fixed order for instantiating dictionaries or passing them to each other, because the context would be a single stable root from which every dependency can be reached. Looking implementations up through a context value at runtime would also allow a form of dynamic scoping, in which the implementation of a trait depends on which context value is in scope at the call site.
 
-// A const function for building a `Clone` dictionary for `u32`
-// with any `Context`
-const fn clone_u32<Context>() -> Clone<Context, u32> {
-    Clone {
-        clone: |value| *value,
-    }
-}
-
-// A const function for building a `Clone` dictionary for `Vec<T>`
-// with any `Context`.
-const fn clone_vec<Context, T>(
-    // We require a getter function to get the `Clone` dictionary
-    // of `T` from `Context`.
-    get_clone_value: fn(&Context) -> Clone<Context, T>,
-) -> Clone<Context, Vec<T>> {
-    Clone {
-        clone: |context, values| {
-            // The specific `Clone` dictionary for `T` is retrieved
-            // at runtime from `context`. This means the implementation
-            // can change based on where it is called.
-            let clone_value = get_clone_value(context);
-
-            values
-                .iter()
-                .map(|value| clone_value.clone(context, value))
-                .collect()
-        },
-    }
-}
-
-// The compiler generates a `Context` struct that contains all
-// dictionaries that are required by a particular Rust code.
-struct Context {
-    // All dictionaries have a recursive reference back to the
-    // `Context` type.
-    clone_u32: Clone<Context, u32>,
-    clone_vec_u32: Clone<Context, Vec<u32>>,
-}
-
-// We can define a const dictionary of `Context` that
-// is available at compile time.
-const CONTEXT: Context = Context {
-    clone_u32: clone_u32::<Context>(),
-    // The compiler needs to generate the getter functions
-    // and pass them to dictionary constructors like `clone_vec`.
-    clone_vec_u32: clone_vec::<Context, u32>(
-        |context| context.clone_u32,
-    ),
-};
-
-fn main() {
-    let my_vec: Vec<u32> = vec![0, 1, 2];
-
-    // The `Context` type and the `CONTEXT` constant are generated
-    // for this line of code to work.
-    let cloned_vec = CONTEXT.clone_vec_u32.clone(&CONTEXT, &my_vec);
-}
-```
-
-Side by side, the three versions show that the `Context` type in CGP acts as a type-level dictionary, whose mappings `delegate_components!` declares. Lowered into TIR, the same `Context` type becomes a value-level dictionary that holds the other dictionaries as fields. A `delegate_components!` entry corresponds almost one to one to a field of the TIR context struct, so CGP already closely follows the programming model of dictionary-passing style.
-
-Another important property of this translation is that all trait dictionaries accept both the `Context` type and a `context` value as additional parameters. Because each implementation looks up the others through the context at runtime, the compiler does not need a fixed order for instantiating dictionaries or passing them as arguments to each other. The context acts as a single stable root from which all dependencies can be reached. Whether those dependencies may form cycles is a separate question, and it is the one Nadrieril's cycles post and Niko Matsakis's series study.
-
-This runtime lookup also opens the door to a form of dynamic scoping, where the implementation used for a trait can vary depending on which context value is in scope at the call site.
-
-CGP stops short of that question. Its lookups are trait obligations, so a dependency that leads back to the instance being proved overflows the trait solver with `E0275`. Recursion through a different instance works: the `CloneVec` provider above needs `Clone<T>` for the element type, and that chain ends because the type is finite. A provider for a recursive type is different. A serializer for a linked list that serializes its tail through the context needs the very instance it is defining, and an expression interpreter that dispatches on its own expression type does too.
+Whether those dependencies may form cycles is a separate question, the one that Nadrieril's cycles post and Niko Matsakis's series study, and CGP stops short of it. Its lookups are trait obligations, so a dependency that leads back to the instance being proved overflows the trait solver with `E0275`. Recursion through a different instance works: the `CloneVec` provider above needs `Clone<T>` for the element type, and that chain ends because the type is finite. A provider for a recursive type is different. A serializer for a linked list that serializes its tail through the context needs the very instance it is defining, and an expression interpreter that dispatches on its own expression type does too.
 
 Today's workaround is a provider written for the concrete context, without the bound that leads back to itself, as the [dispatch layers page](/docs/projects/cgp-examples/expression/architecture/dispatch-layers) explains. The compiler accepts it, and experiments suggest that this is because it can check the impl from its header alone, but the workaround costs one hand-written impl per context and per operation. So recursive providers are a concrete use case for the cyclic impls that work studies. The linked list has the shape of perfect derive, the motivating example in Niko Matsakis's series, and sound cyclic impls of that kind could remove the workaround.
 
@@ -750,7 +681,7 @@ Passing the context through `&self` pays off here: the same value that selects t
 
 ## Limitations and open challenges
 
-Passing every dependency through one generic `Context` type has several advantages. The desugaring stays simple, and the TIR code looks much like the CGP code. A single context also makes the semantics of Incoherent Rust code easy to reason about: the context maintains a locally scoped coherence, so all code that uses the same `Context` type receives the same trait implementation.
+Passing every dependency through one generic `Context` type has several advantages. It keeps the desugaring simple, and it makes the semantics of Incoherent Rust code easy to reason about: the context maintains a locally scoped coherence, so all code that uses the same `Context` type receives the same trait implementation.
 
 Because the context serves as a top-level dictionary for the other trait dictionaries, it also simplifies how they are instantiated with their dependencies, though not when those dependencies form cycles, as the [context as dictionary](#context-as-dictionary) section explains.
 
