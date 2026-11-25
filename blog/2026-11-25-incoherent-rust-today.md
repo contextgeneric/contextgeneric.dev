@@ -280,23 +280,22 @@ fn main() {
 In CGP, the same code becomes:
 
 ```rust title="CGP"
+// Needed for `core::any::type_name` in a constant; see below.
+#![feature(const_type_name)]
+
 #[cgp_component(NameImpl)]
 pub trait Name<T> {
-    fn name() -> &'static str;
+    const NAME: &'static str;
 }
 
 #[cgp_impl(new DummyName)]
 impl<T> NameImpl<T> {
-    fn name() -> &'static str {
-        "dummy"
-    }
+    const NAME: &'static str = "dummy";
 }
 
 #[cgp_impl(new RealName)]
 impl<T> NameImpl<T> {
-    fn name() -> &'static str {
-        core::any::type_name::<T>()
-    }
+    const NAME: &'static str = core::any::type_name::<T>();
 }
 
 pub struct Foo<T>(pub T);
@@ -304,7 +303,7 @@ pub struct Foo<T>(pub T);
 #[cgp_fn]
 #[uses(Name<T>)]
 pub fn do_stuff<T>(&self, foo: &Foo<T>) {
-    println!("{}", Self::name());
+    println!("{}", Self::NAME);
 }
 
 fn main() {
@@ -338,7 +337,9 @@ fn main() {
 }
 ```
 
-In the desugared code, the incoherent `Name` trait becomes a CGP component `Name<T>`, with the provider trait `NameImpl`. Its constant becomes an associated function, because `core::any::type_name` is not yet stable as a `const fn`. The generic function `do_stuff` becomes a context-generic CGP function that uses `Name<T>` through the `#[uses]` attribute and accepts `&self` as the implicit context parameter. Each anonymous call site in the original code, such as `MyImpl<_ + DummyName<_>>`, desugars into a locally scoped `Context` struct with a `delegate_components!` block that wires the chosen provider.
+In the desugared code, the incoherent `Name` trait becomes a CGP component `Name<T>`, with the provider trait `NameImpl`. The generic function `do_stuff` becomes a context-generic CGP function that uses `Name<T>` through the `#[uses]` attribute and accepts `&self` as the implicit context parameter. Each anonymous call site in the original code, such as `MyImpl<_ + DummyName<_>>`, desugars into a locally scoped `Context` struct with a `delegate_components!` block that wires the chosen provider.
+
+The constant stays an associated constant, since a CGP component can declare one just as an ordinary trait does. Only `RealName`'s constant needs care: it calls `core::any::type_name`, which is not yet stable as a `const fn`. That is why the snippet opens with `#![feature(const_type_name)]` and needs a nightly compiler, as do the later examples that reuse `Name`. The requirement comes from the standard library, not from CGP.
 
 `do_stuff` takes `&self` because the context type, `Self`, carries the implementation choice at the type level. As we will see later, the same `&self` can also carry runtime values, which makes context-generic functions suitable for implementing context and capabilities.
 
@@ -376,7 +377,7 @@ pub struct Foo<Context: ?Sized, T> {
 #[cgp_fn]
 #[uses(Name<T>)]
 pub fn do_stuff<T>(&self, foo: &Foo<Self, T>) {
-    println!("{}", Self::name());
+    println!("{}", Self::NAME);
 }
 
 struct ContextA;
@@ -427,7 +428,7 @@ pub struct Foo<NameProvider, T> {
 #[cgp_fn]
 #[use_provider(NameProvider: NameImpl<T>)]
 pub fn do_stuff<NameProvider, T>(&self, foo: &Foo<NameProvider, T>) {
-    println!("{}", NameProvider::name());
+    println!("{}", NameProvider::NAME);
 }
 
 fn main() {
@@ -1012,7 +1013,7 @@ Take the `do_stuff` CGP function from earlier:
 #[cgp_fn]
 #[uses(Name<T>)]
 pub fn do_stuff<T>(&self, foo: &Foo<T>) {
-    println!("{}", Self::name());
+    println!("{}", Self::NAME);
 }
 ```
 
@@ -1023,7 +1024,7 @@ pub incoherent fn do_stuff<T>(foo: &Foo<T>)
 where
     impl NameImpl: Name<T>,
 {
-    println!("{}", NameImpl::name());
+    println!("{}", NameImpl::NAME);
 }
 ```
 
@@ -1064,7 +1065,7 @@ where
     Context: Name<T>,
 {
     fn do_stuff(&self, foo: &Foo<T>) {
-        println!("{}", Self::name());
+        println!("{}", Self::NAME);
     }
 }
 

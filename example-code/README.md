@@ -47,7 +47,7 @@ One file per page, at the matching path with the file name in `snake_case`:
 | `docs/tutorials/` | partial — `area-calculation/checking.md`, whose three quoted diagnostics are the reason it is mirrored, and `storage-backend.md`, one module per step assembled from the page's blocks, with its deliberate mistake at `tests/compile_fail/tutorials/`; the rest is filled in lazily |
 | `docs/quickstart.md` | complete — `tests/quickstart.rs`, a standalone binary rather than a section tree |
 | `blog/2026-11-18-v0.8.0-release.md` | complete — `tests/blog/v0_8_0_release.rs` checks each wiring stage, the default-binding alternatives, and the migrated configuration; the deliberate missing-field error is a compile-fail fixture |
-| `blog/2026-11-25-incoherent-rust-today.md` (draft) | complete for the CGP code the post keeps — `tests/blog/incoherent_rust_today.rs` checks each desugaring by heading, the arena deserializer against `cgp-serde`, and the Hypershell program against `hypershell`; the struct-binding type error is a compile-fail fixture; the Cairo translation moves to a comparison page |
+| `blog/2026-11-25-incoherent-rust-today.md` (draft) | complete for the CGP code the post keeps — `tests/blog/incoherent_rust_today.rs` checks each desugaring by heading, the arena deserializer against `cgp-serde`, and the Hypershell program against `hypershell`; the four sections that use the `Name` component need nightly's `const_type_name`, so they and the struct-binding type error are in [`example-code-nightly`](../example-code-nightly/README.md); the Cairo translation moves to a comparison page |
 | front page (`src/pages/index.tsx`) | complete — `tests/front_page.rs`, a standalone binary for the hero's CGP block, with the hero's rejected block at `tests/compile_fail/front_page/`; the text between each `front-page:` marker pair is exactly what the page shows, the rejected block starts at its fixture's first line so the page's quoted `E0119` names the lines the page numbers, and a test compares that quote with the fixture's snapshot |
 | `docs/overview.md` | complete — `tests/overview.rs`, a standalone binary with one module per key feature and stand-ins for the storage clients and the database pool the page names; the type-safe-wiring section's missing-field program is at `tests/compile_fail/overview/` |
 | remaining orientation pages | none yet |
@@ -84,6 +84,13 @@ not show them. Tests are added where a page quotes an output or makes a claim wo
 a wiring line, a provider name, an item that exists on one side and not the other. When they
 disagree, find out which is wrong rather than assuming: the crate is checked by the compiler and the
 page is not, so the page is the likelier culprit, but a stale file here is worse than no file.
+
+## Nightly-only snippets
+
+A snippet that uses an unstable Rust feature cannot compile here, since this crate builds on the pinned
+stable release. It lives in the sibling [`example-code-nightly`](../example-code-nightly/README.md)
+crate instead, which follows the same conventions on a pinned nightly and runs in a CI job of its own.
+Only a snippet the page shows with its feature attribute belongs there.
 
 ## Code a page deliberately rejects
 

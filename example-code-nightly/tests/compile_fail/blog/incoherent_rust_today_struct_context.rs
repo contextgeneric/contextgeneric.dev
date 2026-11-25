@@ -1,25 +1,22 @@
 // `blog/2026-11-25-incoherent-rust-today.md`, "Use of incoherent trait bounds within a struct":
 // a `Foo` built for `ContextA` cannot be passed to `ContextB`'s `do_stuff`.
+#![feature(const_type_name)]
 use cgp::prelude::*;
 use core::marker::PhantomData;
 
 #[cgp_component(NameImpl)]
 pub trait Name<T> {
-    fn name() -> &'static str;
+    const NAME: &'static str;
 }
 
 #[cgp_impl(new DummyName)]
 impl<T> NameImpl<T> {
-    fn name() -> &'static str {
-        "dummy"
-    }
+    const NAME: &'static str = "dummy";
 }
 
 #[cgp_impl(new RealName)]
 impl<T> NameImpl<T> {
-    fn name() -> &'static str {
-        core::any::type_name::<T>()
-    }
+    const NAME: &'static str = core::any::type_name::<T>();
 }
 
 pub struct Foo<Context: ?Sized, T> {
@@ -30,7 +27,7 @@ pub struct Foo<Context: ?Sized, T> {
 #[cgp_fn]
 #[uses(Name<T>)]
 pub fn do_stuff<T>(&self, foo: &Foo<Self, T>) {
-    println!("{}", Self::name());
+    println!("{}", Self::NAME);
 }
 
 struct ContextA;

@@ -1,7 +1,7 @@
 error[E0308]: mismatched types
-  --> tests/compile_fail/blog/incoherent_rust_today_struct_context.rs:61:23
+  --> tests/compile_fail/blog/incoherent_rust_today_struct_context.rs:58:23
    |
-61 |     ContextB.do_stuff(&foo);
+58 |     ContextB.do_stuff(&foo);
    |              -------- ^^^^ expected `&Foo<ContextB, _>`, found `&Foo<ContextA, i32>`
    |              |
    |              arguments to this method are incorrect
@@ -9,15 +9,17 @@ error[E0308]: mismatched types
    = note: expected reference `&Foo<ContextB, _>`
               found reference `&Foo<ContextA, i32>`
 note: method defined here
-  --> tests/compile_fail/blog/incoherent_rust_today_struct_context.rs:32:8
+  --> tests/compile_fail/blog/incoherent_rust_today_struct_context.rs:29:8
    |
-32 | pub fn do_stuff<T>(&self, foo: &Foo<Self, T>) {
+27 | #[cgp_fn]
+28 | #[uses(Name<T>)]
+29 | pub fn do_stuff<T>(&self, foo: &Foo<Self, T>) {
    |        ^^^^^^^^           ---
 
 warning: unused variable: `foo`
-  --> tests/compile_fail/blog/incoherent_rust_today_struct_context.rs:32:27
+  --> tests/compile_fail/blog/incoherent_rust_today_struct_context.rs:29:27
    |
-32 | pub fn do_stuff<T>(&self, foo: &Foo<Self, T>) {
+29 | pub fn do_stuff<T>(&self, foo: &Foo<Self, T>) {
    |                           ^^^ help: if this is intentional, prefix it with an underscore: `_foo`
    |
    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default

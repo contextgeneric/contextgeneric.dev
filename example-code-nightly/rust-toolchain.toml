@@ -1,0 +1,6 @@
+# The nightly these snippets need for their unstable features, the same nightly
+# `cargo-cgp` pins. The `.stderr` snapshots quote this compiler's wording, so
+# bump this file and re-bless them in one change.
+[toolchain]
+channel = "nightly-2026-11-16"
+profile = "minimal"

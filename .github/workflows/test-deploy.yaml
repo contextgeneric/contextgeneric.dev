@@ -23,7 +23,7 @@ permissions:
 # To minimize supply-chain exposure this workflow uses only GitHub's own
 # first-party actions. Each job runs a check the repository's documentation
 # lists: the site build from README.md, and the snippet tests from
-# example-code/README.md.
+# example-code/README.md and example-code-nightly/README.md.
 jobs:
   build:
     name: Build the site
@@ -71,4 +71,26 @@ jobs:
       # here; run them locally with `cargo test`.
       - name: Run the snippet tests
         working-directory: contextgeneric.dev/example-code
+        run: cargo test -- --skip rejected_snippets_do_not_compile
+
+  example-code-nightly:
+    name: Nightly snippet tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Check out the website
+        uses: actions/checkout@v4
+        with:
+          path: contextgeneric.dev
+      # `example-code-nightly/rust-toolchain.toml` pins the nightly whose
+      # unstable features the snippets need; rustup installs it from there.
+      - name: Install the pinned nightly toolchain
+        working-directory: contextgeneric.dev/example-code-nightly
+        run: rustup toolchain install
+      # The snippets that need a nightly feature are compiled here. The
+      # compile-fail snapshots are skipped, as in the stable job.
+      - name: Run the nightly snippet tests
+        working-directory: contextgeneric.dev/example-code-nightly
         run: cargo test -- --skip rejected_snippets_do_not_compile

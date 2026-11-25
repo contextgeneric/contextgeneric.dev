@@ -33,8 +33,9 @@ Each kind of task has a guide in the knowledge base's `website/` section. Read i
 - **Adding or moving a page, or writing a blog post:** `writing-guides/README.md` and
   `information-architecture.md`.
 - **Changing the theme or a page's styles:** `visual-design.md`.
-- **Changing the build, the navigation, or the `example-code` crate:** `site.md` and
-  [example-code/README.md](example-code/README.md).
+- **Changing the build, the navigation, or the `example-code` crates:** `site.md`,
+  [example-code/README.md](example-code/README.md), and
+  [example-code-nightly/README.md](example-code-nightly/README.md).
 
 ## Public prose
 
@@ -79,8 +80,12 @@ Every snippet on a page is verified against current CGP:
 - Put a page's code in the `example-code/` crate, one module per heading, except a Projects page,
   whose code is checked against the project's repository; do not mirror the knowledge base's own
   snippets there.
+- Put a snippet that shows an unstable feature it needs in the `example-code-nightly/` crate
+  instead, on the nightly it pins, as
+  [example-code-nightly/README.md](example-code-nightly/README.md) describes.
 - Run the `example-code` tests after changing a page's code, as
-  [example-code/README.md](example-code/README.md) describes.
+  [example-code/README.md](example-code/README.md) describes, and the `example-code-nightly` tests
+  when the page has nightly snippets.
 - Fill an elided body with a comment saying so, write a rejected snippet as a compile-fail fixture,
   and prefer duplication between files over a shared helper neither page shows.
 - Treat a page without an `example-code` file as unvisited, not unverified, and check generated code
