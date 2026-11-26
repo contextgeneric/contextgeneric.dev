@@ -11,7 +11,7 @@ In March, three blog posts started a discussion about traits and coherence in Ru
 <!--truncate-->
 
 :::note[Author's note]
-I drafted this post in April, as a quick response to the posts Boxy and Nadrieril published in March. Time constraints and the work on CGP v0.8.0 then kept it on hold until now. I have revised it slightly since, but most of its content is still that response.
+I wrote the first draft of this post in April, as a quick response to Boxy's and Nadrieril's posts from March. After that, I had little time to finish it, and the work on CGP v0.8.0 came first, so it waited until now. I have revised it only slightly, and most of what follows is still that quick response.
 :::
 
 ## Outline
