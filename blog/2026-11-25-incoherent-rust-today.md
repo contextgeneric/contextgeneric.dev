@@ -1295,7 +1295,7 @@ CGP converts zero-arity traits into single-arity traits that are bound to the ge
 
 ## Related work
 
-Other languages have already given up global coherence, each in its own way. Cairo infers named impls from those in scope at each call site, Scala resolves `given` instances by scope and priority, OCaml's modular implicits choose module arguments from scope and reject ambiguity, and Haskell offers overlapping and incoherent instances as exceptions to global uniqueness. The website's [traits without coherence](TODO:traits-without-coherence) page compares these designs and Boxy's sketch with CGP, and its [ML modules](/docs/comparisons/ml-modules) and [implicit parameters](/docs/comparisons/implicit-parameters) pages cover OCaml and Scala in more depth.
+Other languages have already given up global coherence, each in its own way. Cairo infers named impls from those in scope at each call site, Scala resolves `given` instances by scope and priority, OCaml's modular implicits choose module arguments from scope and reject ambiguity, and Haskell offers overlapping and incoherent instances as exceptions to global uniqueness. The website's [traits without coherence](/docs/comparisons/traits-without-coherence) page compares these designs and Boxy's sketch with CGP, and its [ML modules](/docs/comparisons/ml-modules) and [implicit parameters](/docs/comparisons/implicit-parameters) pages cover OCaml and Scala in more depth.
 
 ### Lessons for Rust
 
