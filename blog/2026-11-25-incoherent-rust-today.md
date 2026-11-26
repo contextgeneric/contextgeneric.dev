@@ -10,6 +10,10 @@ In March, three blog posts started a discussion about traits and coherence in Ru
 
 <!--truncate-->
 
+:::note[Author's note]
+I drafted this post in April, as a quick response to the posts Boxy and Nadrieril published in March. Time constraints and the work on CGP v0.8.0 then kept it on hold until now. I have revised it slightly since, but most of its content is still that response.
+:::
+
 ## Outline
 
 This post first sets out the background and a short introduction to CGP. It then desugars several features of Incoherent Rust into CGP code, compares CGP's context type with the dictionaries of dictionary-passing style, and states the limitations of that approach. The later sections cover what CGP's providers and contexts can do beyond the current designs, the ideas CGP suggests for Incoherent Rust, and how other languages handle the same trade-offs.
