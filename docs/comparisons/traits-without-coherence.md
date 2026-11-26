@@ -7,11 +7,11 @@ description: 'How Cairo, Scala, OCaml modular implicits, Haskell, and an incoher
 # Traits without coherence
 
 Some trait systems let one type have several implementations of a trait, and each then has to
-decide which implementation a given use gets. [Context-Generic Programming](/docs/) is one answer.
-CGP enables pluggable trait implementations in Rust as a library on stable Rust, whose consumer
-traits are ordinary Rust traits, and each context chooses among the implementations while every impl
-that Rust checks still obeys its coherence rules. This page compares
-that answer with Cairo's named impls, Scala's `given` instances, OCaml's modular implicits, Haskell's
+decide which implementation a given use gets. [Context-Generic Programming](/docs/) is one answer:
+CGP enables pluggable trait implementations in Rust, as a library on the stable toolchain whose
+consumer traits are ordinary traits. Each context chooses among the implementations, while every impl
+that Rust checks still obeys its coherence rules. This page compares that answer with Cairo's named
+impls, Scala's `given` instances, OCaml's modular implicits, Haskell's
 overlapping and incoherent instances, and Boxy's sketch of an incoherent Rust. It covers one
 question only, how each system makes the choice, and links each system's own comparison for the
 rest.
@@ -37,9 +37,9 @@ Once a type can have several implementations, three problems follow. Two call si
 same type differently. Changing an import can change which implementation a call uses. And a
 structure such as a hash table, which needs every operation on one value to agree on one hashing
 implementation, loses that agreement unless something restores it. The systems below fall into three
-families by how they answer: Haskell keeps one answer for the whole program and relaxes it only by
-exception, Cairo, Scala, and modular implicits search what is in scope at the call, and Boxy's
-sketch names the choice at the call or fixes it on a type.
+families by how they answer. Haskell keeps one answer for the whole program and relaxes it only by
+exception. Cairo, Scala, and modular implicits search what is in scope at the call. Boxy's sketch
+names the choice at the call, or fixes it on a type.
 
 ### Haskell
 
@@ -223,7 +223,7 @@ places it among the other designs Rust has considered.
 
 CGP belongs to the family that fixes the choice on a type, and the type it uses is the context. A
 **provider** is a named impl, implemented for a marker type its own crate owns, so two providers of
-one component for one type coexist without overlapping in Rust's eyes. The context's
+one component for one type coexist and Rust's overlap check accepts both. The context's
 `delegate_components!` table then picks one provider for each component and value type, and every use
 through that context gets the same one. The examples wire an
 **[environmental context](/docs/reference/glossary#environmental-context)**, `App`, for a
@@ -231,7 +231,8 @@ through that context gets the same one. The examples wire an
 
 ### Assembling the chain at the call
 
-Cairo's serializer can be written almost directly in CGP. The element's provider becomes a type
+Cairo's `ArrayDescribe`, a generic impl that takes its element's impl as a parameter, can be written
+almost directly in CGP. Here the same shape serializes a list: the element's provider becomes a type
 parameter of a [higher-order provider](/docs/concepts/higher-order-providers), bound with
 `#[use_provider]`, and the caller assembles the chain that Cairo would infer:
 
@@ -339,8 +340,8 @@ approaches.
 
 Each of the other systems fits a setting better than CGP does:
 
-- **Haskell's global instances** give the same answer everywhere with no table, which is what most
-  code wants, and Rust's own coherence does the same for most Rust code.
+- **Haskell's global instances** give the same answer everywhere with no table, which suits code
+  that needs one meaning per type, as Rust's own coherence does for ordinary Rust code.
 - **Cairo's and Scala's inference** keeps a small program free of wiring when it needs only one
   choice per type and its imports are easy to follow.
 - **A language feature,** such as an incoherent Rust, would reach existing traits like
@@ -356,8 +357,8 @@ A reader coming from these systems may expect behavior that CGP does not have:
 - **CGP does not search scope.** A context names every provider it uses, so importing a provider
   never changes a choice. The cost is that the choice must be written down.
 - **CGP keeps Rust's coherence rules.** The provider traits allow several implementations, but every
-  impl Rust checks is coherent, so CGP has none of the soundness hazards of Haskell's `INCOHERENT`
-  instances.
+  impl Rust checks is coherent, so the compiler never picks between two candidates on its own, as it
+  may with Haskell's `INCOHERENT` instances.
 - **Choices belong to types, not blocks.** A different choice needs another context type rather than
   an inner scope.
 - **Generic code names only the consumer trait.** It never names a provider, so the same function
