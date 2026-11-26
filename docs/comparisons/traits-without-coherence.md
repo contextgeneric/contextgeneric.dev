@@ -1,7 +1,7 @@
 ---
 sidebar_label: 'Without coherence'
-sidebar_position: 1.5
-description: 'How Cairo, Scala, OCaml modular implicits, Haskell, and an incoherent Rust choose among several impls of one trait, compared with Context-Generic Programming.'
+sidebar_position: 13
+description: 'How Cairo, Scala, OCaml modular implicits, and Haskell choose among several impls of one trait, compared with Context-Generic Programming.'
 ---
 
 # Traits without coherence
@@ -11,8 +11,8 @@ decide which implementation a given use gets. [Context-Generic Programming](/doc
 CGP enables pluggable trait implementations in Rust, as a library on the stable toolchain whose
 consumer traits are ordinary traits. Each context chooses among the implementations, while every impl
 that Rust checks still obeys its coherence rules. This page compares that answer with Cairo's named
-impls, Scala's `given` instances, OCaml's modular implicits, Haskell's
-overlapping and incoherent instances, and Boxy's sketch of an incoherent Rust. It covers one
+impls, Scala's `given` instances, OCaml's modular implicits, and Haskell's
+overlapping and incoherent instances. It covers one
 question only, how each system makes the choice, and links each system's own comparison for the
 rest.
 
@@ -29,17 +29,16 @@ Each system resolves the choice in its own place, and CGP has a construct that p
 | Cairo | Inferred from the named impls a call site imports | The caller's imports | A provider named in a `delegate_components!` table |
 | Scala 3 | Ranked among the `given` instances in scope | The enclosing scopes | The context's wiring, with no ranking |
 | Modular implicits | Found among the implicit modules in scope, ambiguity rejected | The enclosing scopes | The context's wiring |
-| Boxy's sketch | Named at the call, or fixed on a type such as `HashMap` | The call, or the type | The **context**, which fixes every choice for the code that uses it |
 
 ## The idea
 
 Once a type can have several implementations, three problems follow. Two call sites can resolve the
 same type differently. Changing an import can change which implementation a call uses. And a
 structure such as a hash table, which needs every operation on one value to agree on one hashing
-implementation, loses that agreement unless something restores it. The systems below fall into three
-families by how they answer. Haskell keeps one answer for the whole program and relaxes it only by
-exception. Cairo, Scala, and modular implicits search what is in scope at the call. Boxy's sketch
-names the choice at the call, or fixes it on a type.
+implementation, loses that agreement unless something restores it. The systems below answer in two
+ways. Haskell keeps one answer for the whole program and relaxes it only by exception, while Cairo,
+Scala, and modular implicits search what is in scope at the call. CGP takes a third way, fixing the
+choice on a type, as the section after them shows.
 
 ### Haskell
 
@@ -200,29 +199,9 @@ because the extension exists only as an
 OCaml. The [ML modules](./ml-modules.md#modular-implicits) page covers it with the module system it
 extends.
 
-### Boxy's sketch
-
-Boxy's *An Incoherent Rust* drops Rust's coherence rules for traits declared `incoherent trait`,
-names each impl, and passes the impl wherever a bound needs one:
-
-```rust
-impl Name<T> = Trait<T> for T { /* ... */ }
-
-function::<T + TraitImpl<T>>(/* ... */)
-```
-
-The syntax is a sketch, not a proposal, and does not compile. Naming the impl at each call means an
-import can never change a choice, though every call site has to state it. For the hash-table problem,
-the post moves the bounds onto the type, as `struct HashMap<K: Hash + Eq, V> { ... }`, so that "which
-impl is used is part of the HashMap type itself"
-([Boxy, *An Incoherent Rust*](https://www.boxyuwu.blog/posts/an-incoherent-rust/)). The sketch
-therefore uses two answers: naming at the call in general, and fixing the choice on a type wherever
-every operation must agree. [Rust's own proposals](./rust-language-proposals.md#named-and-incoherent-impls)
-places it among the other designs Rust has considered.
-
 ## How CGP expresses it
 
-CGP belongs to the family that fixes the choice on a type, and the type it uses is the context. A
+CGP fixes the choice on a type, and the type it uses is the context. A
 **provider** is a named impl, implemented for a marker type its own crate owns, so two providers of
 one component for one type coexist and Rust's overlap check accepts both. The context's
 `delegate_components!` table then picks one provider for each component and value type, and every use
@@ -304,9 +283,8 @@ Code that serializes through `App` imports only the consumer trait, `CanSerializ
 `app.serialize(&value, &mut output)`. The `open` statement dispatches the component by value type,
 and the table is the one place a reader looks to learn which provider each type gets. This answers
 all three problems. Every call through `App` agrees, and no import can change a choice. The
-agreement a hash table needs also follows from the context, much as it follows from the type in
-Boxy's `HashMap`, but for every component the context wires rather than for one type. A second
-context with a different provider for `u8` makes a different choice from the same providers.
+agreement a hash table needs also follows from the context, for every component the context wires. A
+second context with a different provider for `u8` makes a different choice from the same providers.
 
 CGP does not relax Rust's coherence to do this. Each provider implements the provider trait for its
 own type, and each table entry is an ordinary impl on the context, so a second entry for the same
@@ -324,8 +302,6 @@ Each system's costs are the ones its own documentation and authors name:
 - **Scala 3:** the ranking rules decide among givens in scope, and they changed between Scala 2 and
   Scala 3; the redesign also renamed Scala 2's overloaded `implicit` keyword to `given` and `using`.
 - **Modular implicits:** the proposal has not shipped in OCaml, so it has no users to report on.
-- **Boxy's sketch:** its post leaves syntax, ergonomics for deriving incoherent traits, migration of
-  the ecosystem, and whether the complexity is worth it as open questions.
 
 CGP's costs are its ordinary ones. The component and its providers need declarations, and the wiring
 is code someone writes and reads. Wiring also adds compile-time work, and its raw errors are trait-solver
@@ -383,7 +359,7 @@ These pages develop the ideas this comparison rests on:
 The Cairo snippet was compiled and run with Cairo 2.21.0 (`cairo-run`), and the errors it quotes come
 from that release. The Haskell snippet was compiled with GHC 9.10 and the Scala snippet with Scala
 3.8.4, as on their own comparison pages. The modular-implicits snippet follows the proposal paper and
-cannot run on released OCaml, and Boxy's syntax is a sketch that does not compile. The CGP snippets
+cannot run on released OCaml. The CGP snippets
 were compiled against `cgp` `0.8.0` with a `check_components!` assertion on `App`.
 
 - [Cairo Book, *Traits in Cairo*](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html) and [*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html): the `impl Name of Trait` form, named and anonymous impl parameters, and inferred impls.
@@ -391,7 +367,6 @@ were compiled against `cgp` `0.8.0` with a `check_components!` assertion on `App
 - [GHC User's Guide, *Instance declarations and resolution*](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/instances.html): the overlap and incoherence pragmas and the manual's warnings.
 - [Scala 3 Reference, *Changes in Implicit Resolution*](https://docs.scala-lang.org/scala3/reference/changed-features/implicit-resolution.html) and [*Importing Givens*](https://docs.scala-lang.org/scala3/reference/contextual/given-imports.html): the nesting rule, propagated ambiguity, and given imports.
 - [White, Bour & Yallop, *Modular implicits*](https://arxiv.org/abs/1512.01895) and the [experimental fork](https://github.com/ocamllabs/ocaml-modular-implicits): implicit module parameters, implicit functors, and rejected ambiguity.
-- [Boxy, *An Incoherent Rust*](https://www.boxyuwu.blog/posts/an-incoherent-rust/): named impls, impls passed in bounds, and the `HashMap` bounds moved onto the type.
 
 ---
 

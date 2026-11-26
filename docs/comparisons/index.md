@@ -18,14 +18,13 @@ other tool.
 
 ## Which page to read
 
-Choose the page that matches your background. Rust's proposals, the comparison of trait systems
-without coherence, and C++ policy-based design come first, followed by type-system concepts, dependency injection, and runtime or security mechanisms.
+Choose the page that matches your background. Rust's own proposals come first, followed by
+type-system concepts, dependency injection, and runtime or security mechanisms, and then C++
+policy-based design and the comparison of trait systems without coherence.
 
 | If you know | Read |
 | --- | --- |
 | Rust's coherence debates: specialization, named impls, contexts and capabilities | [Rust's own proposals](./rust-language-proposals.md) |
-| Cairo's named impls, or how Scala, OCaml, and Haskell choose among overlapping impls | [Traits without coherence](./traits-without-coherence.md) |
-| C++ templates, policy classes, CRTP, and concepts | [Policy-based design](./policy-based-design.md) |
 | Haskell, Agda, or Lean type classes | [Type classes](./type-classes.md) |
 | OCaml or Standard ML signatures, structures, and functors | [ML modules](./ml-modules.md) |
 | Scala `given`/`using`, Haskell `ImplicitParams`, or the `Reader` monad | [Implicit parameters](./implicit-parameters.md) |
@@ -35,6 +34,8 @@ without coherence, and C++ policy-based design come first, followed by type-syst
 | Python, Ruby, JavaScript, Smalltalk, vtables, or prototypes | [Dynamic dispatch](./dynamic-dispatch.md) |
 | Bevy reflection, Zig `comptime`, or Rust's reflection work | [Reflection](./reflection.md) |
 | Object capabilities, `cap-std`, WASI, Effekt, or Scala capture checking | [Capabilities](./capabilities.md) |
+| C++ templates, policy classes, CRTP, and concepts | [Policy-based design](./policy-based-design.md) |
+| Cairo's named impls, or how Scala, OCaml, and Haskell choose among overlapping impls | [Traits without coherence](./traits-without-coherence.md) |
 
 ## What every page shares
 
