@@ -260,6 +260,7 @@ with related approaches:
 - [RustLab 2025 talk](/blog/rustlab-2025-coherence): A longer account of coherence and CGP's approach.
 - [Comparison: Type classes](/docs/comparisons/type-classes): How Haskell, Agda, and Lean handle coherence.
 - [Comparison: Rust's own proposals](/docs/comparisons/rust-language-proposals): Changes Rust has considered for its coherence rules.
+- [Comparison: Traits without coherence](/docs/comparisons/traits-without-coherence): How Cairo, Scala, OCaml, and Haskell choose among several impls of one trait.
 
 ---
 

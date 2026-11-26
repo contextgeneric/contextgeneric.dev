@@ -14,4 +14,5 @@ pub mod policy_based_design;
 pub mod reflection;
 pub mod row_polymorphism;
 pub mod rust_language_proposals;
+pub mod traits_without_coherence;
 pub mod type_classes;

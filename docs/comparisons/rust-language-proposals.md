@@ -152,21 +152,11 @@ Values*](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-valu
 
 ### Named impls in Cairo
 
-Cairo provides a working example of named impls in a language with Rust-like syntax. A generic
-function can take an impl as an explicit parameter, named or anonymous:
-
-```rust
-// Cairo
-fn largest_list<T, impl TDrop: Drop<T>>(l1: Array<T>, l2: Array<T>) -> Array<T> { /* ... */ }
-
-fn smallest_element<T, +PartialOrd<T>, +Copy<T>, +Drop<T>>(list: @Array<T>) -> T { /* ... */ }
-```
-
-A caller can let the compiler infer the impl from those visible at the call site ([Cairo Book,
-*Traits*](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html);
-[*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html)). This
-inference matters for the comparison: because resolution uses what is in scope, a call site's
-imports decide which implementation it uses.
+Cairo provides a working example of named impls in a language with Rust-like syntax. A generic impl
+takes the impls it depends on as parameters, and the compiler infers each one from the impls a call
+site imports, so a call site's imports decide which implementation it uses. The
+[Traits without coherence](./traits-without-coherence.md) page compares Cairo in depth, beside
+Scala's givens, OCaml's modular implicits, and Haskell's overlapping instances.
 
 ## How CGP expresses it
 
@@ -248,8 +238,8 @@ explicit choices at calls, while Cairo can infer them from scope. The
 
 Where the proposals and Cairo let a caller pass an impl as a parameter, CGP uses
 [higher-order providers](/docs/concepts/higher-order-providers). A provider takes another provider
-as a type parameter and binds it with `#[use_provider]`, which corresponds to Cairo's
-`impl TDrop: Drop<T>` written as a Rust generic:
+as a type parameter and binds it with `#[use_provider]`, which corresponds to a Cairo impl parameter
+such as `impl TDrop: Drop<T>` written as a Rust generic:
 
 ```rust
 #[cgp_impl(new ScaledArea<InnerCalculator>)]
@@ -396,7 +386,7 @@ These pages develop the constructs and the neighbouring comparisons:
 
 ## Sources
 
-The Rust snippets from the proposals are quoted from their authors' posts and the Cairo book. The
+The Rust snippets from the proposals are quoted from their authors' posts. The
 specialization snippet was compiled against a stable toolchain to confirm it is rejected with
 `E0658`; the CGP snippets were compiled against `cgp` `0.8.0` with a `check_components!`
 assertion per wired context.
