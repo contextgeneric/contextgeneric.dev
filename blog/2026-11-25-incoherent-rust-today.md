@@ -80,7 +80,7 @@ impl HashImpl {
 }
 ```
 
-The `#[cgp_impl]` macro implements the `HashImpl` provider trait on a new named provider, `HashWithDisplay`, for any context that implements `Display`. In the generated code, `HashWithDisplay` is the `Self` type of that impl, so it cannot conflict with other implementations of `HashImpl`, each of which has its own provider as `Self`.
+The `#[cgp_impl]` macro implements the `HashImpl` provider trait on a new named provider, `HashWithDisplay`, for any context that implements `Display`. In the generated code, `HashWithDisplay` is the `Self` type of that impl, so the impl cannot conflict with other implementations of `HashImpl`, each of which has its own provider as `Self`.
 
 A concrete context then needs one more step, wiring through `delegate_components!`:
 
@@ -103,7 +103,7 @@ delegate_components! {
 }
 ```
 
-The `delegate_components!` macro turns this into a type-level lookup table, written as impls of the `DelegateComponent` trait. The blanket implementations that `#[cgp_component]` generated then look up that table at compile time and implement `Hash` for `Person` through `HashWithDisplay`. Any number of overlapping providers can be defined this way, and each context selects the ones it reuses, one line per trait.
+The `delegate_components!` macro turns this wiring into a type-level lookup table, written as impls of the `DelegateComponent` trait. The blanket implementations that `#[cgp_component]` generated then look up that table at compile time and implement `Hash` for `Person` through `HashWithDisplay`. Any number of overlapping providers can be defined this way, and each context selects the ones it reuses, one line per trait.
 
 ### Bypassing orphan implementations
 
@@ -210,7 +210,7 @@ pub trait Serialize<T> {
 }
 ```
 
-The original `Self` type, which represents the value being serialized, becomes the explicit generic parameter `T`. The new `Self` position is now the context type, which carries the implementation choices, and that allows multiple overlapping implementations to coexist without violating coherence.
+The original `Self` type, which represents the value being serialized, becomes the explicit generic parameter `T`. The new `Self` position is now the context type, which carries the implementation choices and lets multiple overlapping implementations coexist without violating coherence.
 
 ### Named impls
 
@@ -451,7 +451,7 @@ fn main() {
 
 In this version, the struct carries the provider type directly, so the choice of `Name` implementation is locked to `RealName` regardless of which context is used to call `do_stuff`. This provider binding is more flexible than the full-context binding, because any context can interact with the struct without needing to match the exact context type that created it.
 
-The trade-off is that this approach only fixes the binding for one specific trait. If multiple incoherent traits are involved and you want each one to be bound independently, the struct would need a separate provider parameter for each trait. Depending on how many traits are involved, that can become verbose. The full-context approach described earlier handles this more uniformly, at the cost of tying the struct to a single concrete context type.
+The trade-off is that this approach only fixes the binding for one specific trait. If multiple incoherent traits are involved and you want each one to be bound independently, the struct would need a separate provider parameter for each trait. Depending on how many traits are involved, those parameters can become verbose. The full-context approach described earlier handles several traits more uniformly, at the cost of tying the struct to a single concrete context type.
 
 ---
 
@@ -573,9 +573,9 @@ Set beside Nadrieril's versions, the CGP code shows its `Context` type acting as
 
 Every trait dictionary in that lowering would also take the context as an extra parameter, and each implementation would look up the others through it. The compiler would then need no fixed order for instantiating dictionaries or passing them to each other, because the context would be a single stable root from which every dependency can be reached. Looking implementations up through a context value at runtime would also allow a form of dynamic scoping, in which the implementation of a trait depends on which context value is in scope at the call site.
 
-Whether those dependencies may form cycles is a separate question, the one that Nadrieril's cycles post and Niko Matsakis's series study, and CGP stops short of it. Its lookups are trait obligations, so a dependency that leads back to the instance being proved overflows the trait solver with `E0275`. Recursion through a different instance works: the `CloneVec` provider above needs `Clone<T>` for the element type, and that chain ends because the type is finite. A provider for a recursive type is different. A serializer for a linked list that serializes its tail through the context needs the very instance it is defining, and an expression interpreter that dispatches on its own expression type does too.
+Whether those dependencies may form cycles is a separate question, the one that Nadrieril's cycles post and Niko Matsakis's series study, and CGP stops short of it. CGP's lookups are trait obligations, so a dependency that leads back to the instance being proved overflows the trait solver with `E0275`. Recursion through a different instance works: the `CloneVec` provider above needs `Clone<T>` for the element type, and that chain ends because the type is finite. A provider for a recursive type is different. A serializer for a linked list that serializes its tail through the context needs the very instance it is defining, and an expression interpreter that dispatches on its own expression type does too.
 
-Today's workaround is a provider written for the concrete context, without the bound that leads back to itself, as the [dispatch layers page](/docs/projects/cgp-examples/expression/architecture/dispatch-layers) explains. The compiler accepts it, and experiments suggest that this is because it can check the impl from its header alone, but the workaround costs one hand-written impl per context and per operation. So recursive providers are a concrete use case for the cyclic impls that work studies. The linked list has the shape of perfect derive, the motivating example in Niko Matsakis's series, and sound cyclic impls of that kind could remove the workaround.
+Today's workaround is a provider written for the concrete context, without the bound that leads back to itself, as the [dispatch layers page](/docs/projects/cgp-examples/expression/architecture/dispatch-layers) explains. The compiler accepts such a provider, and experiments suggest the reason is that the compiler can check the impl from its header alone. The workaround costs one hand-written impl per context and per operation, though. So recursive providers are a concrete use case for the cyclic impls that work studies. The linked list has the shape of perfect derive, the motivating example in Niko Matsakis's series, and sound cyclic impls of that kind could remove the workaround.
 
 ### Contexts and capabilities
 
@@ -697,7 +697,7 @@ Changing the parameter to `&mut self` or `self` does not help either. The change
 
 Nadrieril's post also notes that capabilities holding `&mut` or owned values would require the Rust compiler to track their ownership through trait implementations, and to prevent multiple instantiations of trait implementations that would violate the ownership rules.
 
-A simple way around this is to disallow `&mut` and owned values as capabilities. After all, `RefCell`, `Arc<Mutex>`, and `Clone` already let code mutate or copy values from a borrowed context.
+A simple way around the problem is to disallow `&mut` and owned values as capabilities. After all, `RefCell`, `Arc<Mutex>`, and `Clone` already let code mutate or copy values from a borrowed context.
 
 But if Rust chooses to support `&mut` or owned values as capabilities too, it may need to pass each of them as a separate parameter, rather than grouping them in a single context.
 
@@ -732,9 +732,9 @@ fn deserialize_and_print_upper_foo(json_string: &str) {
 
 With a single context, changing its bindings according to where it is called would be very hard. The compiler would have to choose one place to define the context, such as inside `deserialize_and_print_foo`. That anonymous context would then be out of reach of `deserialize_and_print_upper_foo`, which could not override the implementation of `Deserialize` for `String`.
 
-Supporting this through a single context type might lead to something that resembles **inheritance** in OOP: to modify the trait bindings at different scopes, the context would need some kind of inheritance relationship with a parent context.
+Supporting such scoped bindings through a single context type might lead to something that resembles **inheritance** in OOP: to modify the trait bindings at different scopes, the context would need some kind of inheritance relationship with a parent context.
 
-I point this out not to advocate OOP-style inheritance in Rust, but to show that supporting this kind of binding may bring inheritance-like behavior into Rust code.
+I point out the resemblance not to advocate OOP-style inheritance in Rust, but to show that supporting this kind of binding may bring inheritance-like behavior into Rust code.
 
 CGP already has a static form of this inheritance for wiring. A [namespace](/docs/concepts/namespaces) lets a context inherit a shared table and fill in the entries it leaves unbound, but a context cannot replace an inherited binding: a direct entry for a key the namespace binds overlaps the namespace's forwarding impl and fails with `E0119`. Scoped impls need exactly that override.
 
@@ -1261,7 +1261,7 @@ where
 }
 ```
 
-Zero-arity traits allow us to define implementations that are not bound to any particular `Self` type or generic parameter. When two value types, such as `Folder` and `File`, both need `touch`, they can share one time implementation through the ambient context instead of each carrying its own.
+With zero-arity traits, implementations need not be bound to any particular `Self` type or generic parameter. When two value types, such as `Folder` and `File`, both need `touch`, they can share one time implementation through the ambient context instead of each carrying its own.
 
 The same example can be expressed in CGP today as:
 
