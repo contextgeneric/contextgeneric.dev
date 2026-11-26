@@ -599,7 +599,7 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-As my [`cgp-serde` blog post](/blog/cgp-serde-release) explains, CGP's incoherent traits already pass runtime values alongside trait implementations through the `Context` type. The **implicit arguments** that CGP added in v0.7.0 make those field values considerably easier to access.
+As my [`cgp-serde` blog post](/blog/cgp-serde-release) explains, CGP's incoherent traits already pass runtime values alongside trait implementations through the `Context` type. CGP's **implicit arguments** make those field values considerably easier to access.
 
 With them, the example above desugars into this CGP code:
 
@@ -734,7 +734,7 @@ Supporting this through a single context type might lead to something that resem
 
 I point this out not to advocate OOP-style inheritance in Rust, but to show that supporting this kind of binding may bring inheritance-like behavior into Rust code.
 
-CGP v0.8.0 already has a static form of this inheritance for wiring. A [namespace](/docs/concepts/namespaces) lets a context inherit a shared table and fill in the entries it leaves unbound, but a context cannot replace an inherited binding: a direct entry for a key the namespace binds overlaps the namespace's forwarding impl and fails with `E0119`. Scoped impls need exactly that override.
+CGP already has a static form of this inheritance for wiring. A [namespace](/docs/concepts/namespaces) lets a context inherit a shared table and fill in the entries it leaves unbound, but a context cannot replace an inherited binding: a direct entry for a key the namespace binds overlaps the namespace's forwarding impl and fails with `E0119`. Scoped impls need exactly that override.
 
 Readers who know Scala may notice that this kind of code strongly resembles Scala's implicit parameters, which Rust might not want to support. CGP's implicit arguments differ from them: every implicit argument must come from one flattened context type.
 
