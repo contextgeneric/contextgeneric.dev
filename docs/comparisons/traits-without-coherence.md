@@ -73,8 +73,8 @@ optimiser "assumes that type-classes are coherent"
 ### Cairo
 
 Cairo, the smart-contract language of Starknet, borrows Rust's syntax but gives every impl a name and
-drops the requirement that an impl be unique; its design discussion says it has "no orphan rules nor
-uniqueness demand" ([discussion #2744](https://github.com/starkware-libs/cairo/discussions/2744)). A
+drops the requirement that an impl be unique. In the words of its design discussion, it has "no
+orphan rules nor uniqueness demand" ([discussion #2744](https://github.com/starkware-libs/cairo/discussions/2744)). A
 trait takes every type as an explicit parameter, an impl is written `impl Name of Trait<…>`, and a
 generic impl takes the impls it depends on as parameters, named as `impl Inner: Describe<T>` or
 anonymous as `+Drop<T>` ([Cairo Book](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html)).
@@ -127,13 +127,14 @@ mod uses_hex {
 }
 ```
 
-The caller never passes an impl. The compiler infers each one from the impls the call site imports,
-including the `Inner` impl that `ArrayDescribe` needs, so the two modules resolve `Describe<u8>`
-differently because they import different impls. A call that can see both fails with `E2313`, "Trait
-`Describe::<u8>` has multiple implementations", and one that can see neither fails with "Trait has no
-implementation in context". A caller must also import each impl in the chain that a generic impl
-needs, such as `U8Decimal` for `ArrayDescribe`. A glob import shortens that list, but it brings in
-every impl in the module, so a module that holds both of them leads to the same `E2313`.
+The caller never passes an impl. Instead, the compiler infers each one from the impls the call site
+imports, including the `Inner` impl that `ArrayDescribe` needs. That is why the two modules resolve
+`Describe<u8>` differently: each imports a different impl. A call that can see both fails with
+`E2313`, "Trait `Describe::<u8>` has multiple implementations", and one that can see neither fails
+with "Trait has no implementation in context". A caller must also import each impl in the chain that
+a generic impl needs, such as `U8Decimal` for `ArrayDescribe`. A glob import shortens that list, but
+it brings in every impl in the module, so a module that holds both of them leads to the same
+`E2313`.
 
 ### Scala
 
@@ -153,8 +154,8 @@ max(1, 2)     // Comparator[Int] resolved and passed implicitly
 ```
 
 Where several givens fit, Scala ranks them instead of requiring one. A given nested more deeply
-wins, where Scala 2 reported an ambiguity, and an ambiguity found in a recursive step of the search
-becomes an error for the caller
+wins, a case Scala 2 reported as ambiguous. An ambiguity found partway through the search is still an
+error, and it is reported to the caller
 ([*Changes in Implicit Resolution*](https://docs.scala-lang.org/scala3/reference/changed-features/implicit-resolution.html)).
 Scala 3 also keeps givens out of ordinary wildcard imports. `import A.*` brings in everything except
 givens, and `import A.given` brings in the givens, so that "it is made clearer where givens in scope
@@ -301,11 +302,11 @@ check_components! {
 
 Code that serializes through `App` imports only the consumer trait, `CanSerializeValue`, and calls
 `app.serialize(&value, &mut output)`. The `open` statement dispatches the component by value type,
-and the table is the one place a reader looks to learn which provider each type gets. Against the
-three problems, every call through `App` agrees, imports do not select providers, and the agreement a
-hash table needs follows from the context, as it does for Boxy's `HashMap`, though for every
-component the context wires rather than for one type. A second context with a different provider for
-`u8` makes a different choice from the same providers.
+and the table is the one place a reader looks to learn which provider each type gets. This answers
+all three problems. Every call through `App` agrees, and no import can change a choice. The
+agreement a hash table needs also follows from the context, much as it follows from the type in
+Boxy's `HashMap`, but for every component the context wires rather than for one type. A second
+context with a different provider for `u8` makes a different choice from the same providers.
 
 CGP does not relax Rust's coherence to do this. Each provider implements the provider trait for its
 own type, and each table entry is an ordinary impl on the context, so a second entry for the same

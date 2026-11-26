@@ -92,10 +92,10 @@ Proofs*](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.ht
 
 The model has since become project work. The types team's 2026 goal, the *Dictionary Passing Style
 Experiment*, has Nadrieril as its contact and a project repository whose reading list includes Boxy's
-post, described below ([goal #630](https://github.com/rust-lang/goals/issues/630)). Later writing asks
-which cycles between impls are sound. Nadrieril's *When can Traits Depend on Themselves?* looks for a
-rule that rejects cycles proving false facts, and Niko Matsakis's posts on cyclic trait impls
-motivate them through perfect derive ([Nadrieril](https://nadrieril.github.io/blog/2026/05/14/when-can-traits-depend-on-themselves.html);
+post, described below ([goal #630](https://github.com/rust-lang/goals/issues/630)). Later writing
+asks which cycles between impls are sound. Nadrieril's *When can Traits Depend on Themselves?* looks
+for a rule that rejects cycles that prove false facts, and Niko Matsakis's posts on cyclic trait impls
+make the case for such impls through perfect derive ([Nadrieril](https://nadrieril.github.io/blog/2026/05/14/when-can-traits-depend-on-themselves.html);
 [Matsakis](https://smallcultfollowing.com/babysteps/series/cyclic-trait-impls/)).
 
 ### Named and incoherent impls
