@@ -87,8 +87,16 @@ const CLONE_U32: Clone<u32> = Clone { clone: |x: &u32| *x };
 Trait resolution supplies the dictionary in this model. Passing dictionaries explicitly would let
 callers choose different implementations, while coherence restricts that choice. Nadrieril uses the
 translation to examine which restrictions belong to Rust's design and which follow from the
-underlying mechanism ([*Dictionary-passing
-style*](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)).
+underlying mechanism ([*Elaborating Rust Traits to Explicit Trait
+Proofs*](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)).
+
+The model has since become project work. The types team's 2026 goal, the *Dictionary Passing Style
+Experiment*, has Nadrieril as its contact and a project repository whose reading list includes Boxy's
+post, described below ([goal #630](https://github.com/rust-lang/goals/issues/630)). Later writing asks
+which cycles between impls are sound. Nadrieril's *When can Traits Depend on Themselves?* looks for a
+rule that rejects cycles proving false facts, and Niko Matsakis's posts on cyclic trait impls
+motivate them through perfect derive ([Nadrieril](https://nadrieril.github.io/blog/2026/05/14/when-can-traits-depend-on-themselves.html);
+[Matsakis](https://smallcultfollowing.com/babysteps/series/cyclic-trait-impls/)).
 
 ### Named and incoherent impls
 
@@ -315,13 +323,24 @@ Providers can refer to each other's operations through the shared context. This 
 order for constructing separate dictionaries. Rust still checks the resulting trait dependencies.
 The [ML modules](./ml-modules.md) page compares this with explicit functor application.
 
+That freedom stops at cycles, because each lookup is a trait obligation that the compiler proves. A
+provider that depends on another instance resolves: an encoder for `Vec<T>` that needs the encoder for
+`T` stops when it reaches the element type. But a provider that needs the instance it is defining,
+such as a serializer for a linked list or an evaluator for a recursive expression type, overflows the
+trait solver with `E0275`. The usual workaround is a provider written for the concrete context, without
+the bound that leads back to itself, as the expression interpreter's
+[dispatch layers](/docs/projects/cgp-examples/expression/architecture/dispatch-layers) explain. These
+providers are one use case for the sound cyclic impls that the posts above study.
+
 ## What each approach costs
 
 These proposals have different levels of maturity and different open questions. Specialization has
 an accepted RFC but remains unstable because of a soundness problem ([tracking issue
-#31844](https://github.com/rust-lang/rust/issues/31844)). Named impls and dictionary passing remain
-design sketches whose authors discuss syntax, ergonomics, migration, and coherence
-([Boxy](https://www.boxyuwu.blog/posts/an-incoherent-rust/);
+#31844](https://github.com/rust-lang/rust/issues/31844)). Named impls remain a design
+sketch whose author discusses syntax, ergonomics, migration, and complexity
+([Boxy](https://www.boxyuwu.blog/posts/an-incoherent-rust/)), and dictionary passing is a types-team
+experiment whose questions include which cycles are sound
+([goal #630](https://github.com/rust-lang/goals/issues/630);
 [Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)). Contexts
 and capabilities has open questions about thread boundaries and scope
 ([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)). Cairo's
@@ -385,7 +404,9 @@ assertion per wired context.
 - [Rust Reference, *Implementations*](https://doc.rust-lang.org/reference/items/implementations.html) and [RFC 2451](https://rust-lang.github.io/rfcs/2451-re-rebalancing-coherence.html): the orphan and overlap rules.
 - [RFC 1210, *impl specialization*](https://rust-lang.github.io/rfcs/1210-impl-specialization.html) and [tracking issue #31844](https://github.com/rust-lang/rust/issues/31844): the strictly-more-specific rule, the `default` keyword, the lifetime soundness hole, and the `min_specialization` subset.
 - [Boxy, *An Incoherent Rust*](https://www.boxyuwu.blog/posts/an-incoherent-rust/): named impls, `incoherent trait`, the ecosystem-evolution motivation, and the `HashMap` and associated-type answers.
-- [Nadrieril, *Elaborating Rust Traits to Dictionary-Passing Style*](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html) and [*What If Traits Carried Values*](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html): traits as structs and impls as values, and the extension that carries values.
+- [Nadrieril, *Elaborating Rust Traits to Explicit Trait Proofs*](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html) and [*What If Traits Carried Values*](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html): traits as structs and impls as values, and the extension that carries values.
+- [Dictionary Passing Style Experiment, goal #630](https://github.com/rust-lang/goals/issues/630): the types-team goal, its contact, and its reading list.
+- [Nadrieril, *When can Traits Depend on Themselves?*](https://nadrieril.github.io/blog/2026/05/14/when-can-traits-depend-on-themselves.html) and [Niko Matsakis, *Cyclic Trait Impls*](https://smallcultfollowing.com/babysteps/series/cyclic-trait-impls/): the search for a rule that rejects unsound cycles, and perfect derive as the motivating case.
 - [Mandry, *Contexts and capabilities in Rust*](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/): the `with` clause and block, context-dependent trait impls, and the open questions.
 - [Cairo Book, *Traits in Cairo*](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html) and [*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html): named and anonymous impl parameters and compiler inference of the impl.
 - [Ixrec, *rust-orphan-rules*](https://github.com/Ixrec/rust-orphan-rules) and [Greyblake, *Alternative blanket implementations for a single Rust trait*](https://www.greyblake.com/blog/alternative-blanket-implementations-for-single-rust-trait/): the orphan rule as a durable frustration and the hand-rolled marker-struct workaround for overlap.
