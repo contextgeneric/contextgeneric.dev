@@ -39,9 +39,7 @@ Since March, the work has become the types team's [**Dictionary Passing Style Ex
 
 These discussions pursue two objectives. The desugaring work began as a way to formalize Rust and improve the correctness of its compiler. Dictionary-passing style then turned out to make higher-level features, such as Incoherent Rust and contexts and capabilities, easier to implement as well.
 
-That said, the two objectives are not necessarily tied together. It might be possible to build TIR without using it to add features like Incoherent Rust, and dictionary-passing style in TIR is not the only way to implement those features either.
-
-This post therefore analyzes the two objectives separately, so that the feasibility of one does not decide how we think about the other.
+The two objectives need not go together, though. TIR might be built without being used for features like Incoherent Rust, and dictionary-passing style in TIR is not the only way to implement those features either. This post therefore treats them separately, so that how feasible one is does not decide how we think about the other.
 
 ---
 
@@ -57,7 +55,7 @@ This section covers only what the rest of the post needs. My RustLab 2025 talk, 
 
 CGP bypasses coherence restrictions at two levels.
 
-The first level makes it possible to define multiple overlapping implementations of a trait through a layer of indirection, a provider trait. For example, the [`Hash` trait](https://doc.rust-lang.org/std/hash/trait.Hash.html) could be redefined with CGP as follows:
+The first level lets a trait have multiple overlapping implementations, through a layer of indirection called a provider trait. For example, the [`Hash` trait](https://doc.rust-lang.org/std/hash/trait.Hash.html) could be redefined with CGP as follows:
 
 ```rust
 #[cgp_component(HashImpl)]
@@ -105,7 +103,7 @@ The `delegate_components!` macro turns this into a type-level lookup table, writ
 
 ### Bypassing orphan implementations
 
-This first level bypasses the overlap rule, but not the orphan rule. To implement a trait like `Hash`, the `delegate_components!` call must still reside in a crate that owns either `Person` or the trait.
+This first level bypasses the overlap rule, but not the orphan rule. To implement a trait like `Hash`, the `delegate_components!` call must still live in a crate that owns either `Person` or the trait.
 
 So this level alone does not solve the ecosystem evolution problem that [**Incoherent Rust**](https://www.boxyuwu.blog/posts/an-incoherent-rust/) addresses. As my [**RustLab presentation**](/blog/rustlab-2025-coherence) explains, though, CGP has a more advanced pattern that handles overlapping and orphan implementations together: a new type parameter becomes the context, in the `Self` position, and the original `Self` type moves into a generic parameter of the consumer trait.
 
@@ -167,15 +165,15 @@ So CGP's approach cannot be applied to existing traits like `serde::Serialize` w
 
 ### CGP as a library or as language sugar
 
-CGP is currently implemented as a library on top of stable Rust. The core concepts behind it are a small set of design patterns, which the website's [Concepts pages](/docs/concepts/) explain. These patterns are deliberately minimal, and they work within the existing rules of the Rust type system rather than requiring any changes to it.
+CGP is currently a library on stable Rust. Behind it is a small set of design patterns, which the website's [Concepts pages](/docs/concepts/) explain. The patterns are deliberately minimal, and they work within the existing rules of Rust's type system rather than requiring changes to it.
 
 When I describe a strategy for desugaring Incoherent Rust into CGP, I am not suggesting that Rust should adopt CGP as a library dependency. Instead, I propose that Rust adopt the design patterns that CGP has developed and promote them into first-class language features. Those features could then serve as the internal mechanism for implementing the syntactic sugar that Incoherent Rust would expose to programmers.
 
-Only a few concrete constructs would need a home in the language or the standard library, such as the `DelegateComponent` trait, which provides the type-level lookup table that the rest of the system depends on. These constructs are deliberately simple, so adding them to the standard library would not introduce meaningful complexity to the language.
+Only a few concrete constructs would need a home in the language or the standard library, such as the `DelegateComponent` trait, which provides the type-level lookup table that the rest of the system depends on. These constructs are deliberately simple, so adding them to the standard library would not add much complexity to the language.
 
 Adopting the patterns would bring their costs into the language as well. CGP's wiring adds compile-time work, readers have to learn the context and provider model, and errors that pass through generated providers are long in their raw form. For those errors, the project ships [`cargo cgp check`](/docs/tooling/cargo-cgp/check), which leads with the root cause for the error classes it recognizes, though it does not yet reshape every class. A compiler that understood incoherent traits natively could report such errors in its own terms.
 
-Most of the CGP library is procedural macros. These macros handle the ergonomics of writing CGP code by performing syntactic transformations, such as moving the `Context` type into the provider trait, generating blanket implementations, and producing component name structs. If Rust were to adopt these features natively, the compiler would perform the same transformations that the proc macros perform today. The desugaring logic would move from a library crate into the compiler itself, but the underlying rules would remain the same.
+Most of the CGP library is procedural macros. These macros make CGP code pleasant to write through syntactic transformations, such as moving the `Context` type into the provider trait, generating blanket implementations, and producing component name structs. If Rust were to adopt these features natively, the compiler would perform the same transformations that the proc macros perform today. The desugaring logic would move from a library crate into the compiler itself, but the underlying rules would remain the same.
 
 In practice, Incoherent Rust would become the surface syntax that programmers use, while CGP would recede into the compiler's implementation details. Rust programmers would learn about incoherent traits, named implementations, and capability bindings as language features, without needing to know that CGP's patterns implement them. The library would have served its purpose by proving out the design, and the language would carry it forward.
 
@@ -415,7 +413,7 @@ This property is especially useful for the hash table problem that incoherence r
 
 ### Impl-specific bindings within a struct
 
-One downside of binding the full `Context` type to a struct is that two contexts with identical provider wirings are still considered different types. This can introduce friction when you want to share a struct value across modules or functions that use different context types.
+One downside of binding the full `Context` type to a struct is that two contexts with identical provider wirings are still different types. That gets in the way when you want to share a struct value across modules or functions that use different contexts.
 
 An alternative is to bind a specific provider type to the struct rather than a full context. This is possible in CGP using higher-order providers, where the provider type itself is a generic parameter of the struct:
 
@@ -697,7 +695,7 @@ Nadrieril's post also notes that capabilities holding `&mut` or owned values wou
 
 A simple way around this is to disallow `&mut` and owned values as capabilities. After all, `RefCell`, `Arc<Mutex>`, and `Clone` already let code mutate or copy values from a borrowed context.
 
-However, if Rust decides to also support `&mut` or owned values as capabilities, then it may be necessary to explicitly pass everything as separate parameters, without grouping them through a single context.
+But if Rust chooses to support `&mut` or owned values as capabilities too, it may need to pass each of them as a separate parameter, rather than grouping them in a single context.
 
 ### Nested dynamically scoped bindings
 
@@ -705,7 +703,7 @@ Another key limitation is that CGP binds every runtime value and trait implement
 
 In **What If Traits Carried Values**, Nadrieril presents **scoped impls**: a trait impl may be defined anywhere, and uses of the trait within its scope take that local impl, overriding any global or outer one.
 
-For example, a user may want to freely introduce new bindings across different function calls, instead of limiting them into one place:
+For example, a user may want to introduce new bindings freely in different functions, rather than in one place:
 
 ```rust title="Incoherent Rust"
 fn deserialize_and_print_foo(json_string: &str) {
@@ -728,7 +726,7 @@ fn deserialize_and_print_upper_foo(json_string: &str) {
 }
 ```
 
-With a single context, changing its bindings depending on where it is called would be very challenging. The compiler would have to choose one place to define the context, such as inside `deserialize_and_print_foo`. That anonymous context would then be out of reach of `deserialize_and_print_upper_foo`, which could not override the implementation of `Deserialize` for `String`.
+With a single context, changing its bindings according to where it is called would be very hard. The compiler would have to choose one place to define the context, such as inside `deserialize_and_print_foo`. That anonymous context would then be out of reach of `deserialize_and_print_upper_foo`, which could not override the implementation of `Deserialize` for `String`.
 
 Supporting this through a single context type might lead to something that resembles **inheritance** in OOP: to modify the trait bindings at different scopes, the context would need some kind of inheritance relationship with a parent context.
 
@@ -738,7 +736,7 @@ CGP already has a static form of this inheritance for wiring. A [namespace](/doc
 
 Readers who know Scala may notice that this kind of code strongly resembles Scala's implicit parameters, which Rust might not want to support. CGP's implicit arguments differ from them: every implicit argument must come from one flattened context type.
 
-Given these limitations, it is worth asking whether Rust should let users bind capabilities or incoherent trait implementations anywhere in the code. Such code might desugar into dictionary-passing style in other ways, but those ways may make Incoherent Rust code significantly harder to reason about.
+These limitations raise the question of whether Rust should let users bind capabilities or incoherent trait implementations anywhere in the code. Such code might desugar into dictionary-passing style in other ways, but those ways may make Incoherent Rust code much harder to reason about.
 
 On the other hand, the restricted Incoherent Rust that CGP provides may encourage more disciplined code. Because every binding is made where a context type is defined, a reader can usually find the implementations a context uses in one place, which keeps the semantics of context-generic code within a specific context relatively simple.
 
@@ -757,7 +755,7 @@ impl Impl1 = Clone for MyType { ... }
 impl Impl2 = Clone for MyType { ... }
 ```
 
-the implementations `Impl1` and `Impl2` are not Rust types, and thus cannot be used as types or passed to generic parameters.
+the implementations `Impl1` and `Impl2` are not Rust types, so they cannot be used as types or passed to generic parameters.
 
 In contrast, CGP's named implementations, called providers, are ordinary Rust types that compose with other Rust types.
 
@@ -926,7 +924,7 @@ impl App {
 }
 ```
 
-Because CGP works directly with concrete Rust types rather than ambient capabilities, it becomes much easier to implement incoherent traits on an explicit context type, compared to the manual bridging that Incoherent Rust's ambient capabilities would require.
+Because CGP works with concrete Rust types rather than ambient capabilities, implementing incoherent traits on an explicit context type is much easier than the manual bridging that Incoherent Rust's ambient capabilities would require.
 
 ---
 
@@ -1014,21 +1012,21 @@ where
 }
 ```
 
-Incoherent functions thus desugar into traits with blanket implementations over a generic context, and impl-side dependencies hide the dependencies on other CGP functions behind each trait's interface. In CGP, the boundary between the incoherent and coherent worlds is determined by where a top-level context type is defined. Once that context type is defined, all incoherent implementation bindings are finalized, and we return to the coherent world that does not require the use of a generic context.
+Incoherent functions thus desugar into traits with blanket implementations over a generic context, and impl-side dependencies hide the dependencies on other CGP functions behind each trait's interface. In CGP, the boundary between the two worlds lies where a top-level context type is defined. Once that type is defined, every incoherent binding is final, and we are back in the coherent world, which needs no generic context.
 
-As mentioned earlier, this clean separation between the incoherent and coherent worlds is only possible in the absence of dynamically scoped impls and capabilities. A full version of Incoherent Rust may not preserve such a clear boundary, which would lead to quite different semantics compared to CGP.
+As noted earlier, this clean separation holds only without dynamically scoped impls and capabilities. A full version of Incoherent Rust may not keep such a clear boundary, and its semantics would then differ considerably from CGP's.
 
 #### Incoherence as coeffect
 
 For readers familiar with monads and algebraic effects, the incoherent world of a generic context can be understood as a form of effect, or more precisely, a [**coeffect**](https://tomasp.net/coeffects/).
 
-In CGP, each incoherent trait definition can be thought of as defining a new kind of effect, and each CGP provider implementation can be thought of as an effect handler for that effect. The definition of concrete contexts and the binding of incoherent implementations through `delegate_components!` play the same role as defining concrete monads and configuring effect handlers in algebraic effects systems found in functional languages like Haskell. The CGP bindings effectively handle the incoherence effects by delegating them to CGP providers, and the result is code that operates coherently within a fixed context, analogous to returning a pure value once all effects have been handled.
+In CGP, each incoherent trait definition can be thought of as defining a new kind of effect, and each provider as a handler for that effect. Defining concrete contexts and binding incoherent implementations through `delegate_components!` plays the same role as defining concrete monads and configuring effect handlers in the algebraic effects systems of functional languages like Haskell. The bindings handle the incoherence effects by delegating them to providers, and the result is code that runs coherently within a fixed context, much as a computation returns a pure value once all its effects are handled.
 
 That said, the effect system implied by CGP is considerably more limited than a full algebraic effects system. CGP does not capture continuations, so the correspondence covers only handlers that resume once, in place, as the [algebraic effects comparison](/docs/comparisons/algebraic-effects) explains.
 
 CGP also departs from algebraic effects in what a handler can supply. Through associated types, a CGP context also chooses *abstract types*, while the effect systems that comparison covers pass operations and values through their handlers, not types.
 
-These observations point toward a better fit in the coeffects framework, which studies how contextual requirements flow through a computation rather than how computational effects flow out of it. Where effects describe what a computation produces or performs, coeffects describe what a computation requires from its environment. The generic context in CGP serves precisely this role: it carries the implementation choices and values that a computation depends on, and those dependencies are resolved all at once when a concrete context is defined. A full introduction to coeffects is beyond the scope of this blog post, but the connection is worth noting for readers interested in the theoretical foundations of what CGP is doing.
+These observations point toward a better fit in the coeffects framework, which studies how contextual requirements flow through a computation rather than how computational effects flow out of it. Where effects describe what a computation produces or performs, coeffects describe what a computation requires from its environment. The generic context in CGP plays exactly this role: it carries the implementation choices and values that a computation depends on, and those dependencies are resolved all at once when a concrete context is defined. A full introduction to coeffects is beyond this post, but readers interested in the theory behind CGP may find the connection useful.
 
 ### Zero-arity traits
 
@@ -1121,7 +1119,7 @@ impl GreetImpl {
 }
 ```
 
-In this updated implementation, the hardcoded `String` type for the `name` parameter is replaced by the abstract type `HasNameType::Name`. This allows the same provider to be reused across different name types, whichever the context chooses to wire in.
+The `name` parameter now has the abstract type `HasNameType::Name` instead of a hardcoded `String`, so the same provider works with whichever name type the context wires in.
 
 For example, we can define a `FullName` type and use it as the concrete `Name`:
 
@@ -1164,7 +1162,7 @@ fn main() {
 }
 ```
 
-The `Context` type wires `FullName` as the concrete `Name` through `NameTypeProviderComponent`, and wires `GreetHello` as the greeting implementation. Because `GreetHello` uses `HasNameType::Name` rather than a hardcoded `String`, it adapts automatically to the `FullName` type without any changes to the provider itself.
+The `Context` type wires `FullName` as the concrete `Name` through `NameTypeProviderComponent`, and wires `GreetHello` as the greeting implementation. Because `GreetHello` uses `HasNameType::Name` rather than a hardcoded `String`, it works with `FullName` without any change to the provider.
 
 #### Abstract types in Incoherent Rust
 
@@ -1259,7 +1257,7 @@ where
 }
 ```
 
-Zero-arity traits allow us to define implementations that are not bound to any particular `Self` type or generic parameter. When two different value types, such as `Folder` and `File`, both need `touch` to be called on them, they can share the same time implementation through the ambient context rather than each carrying their own independent copy.
+Zero-arity traits allow us to define implementations that are not bound to any particular `Self` type or generic parameter. When two value types, such as `Folder` and `File`, both need `touch`, they can share one time implementation through the ambient context instead of each carrying its own.
 
 The same example can be expressed in CGP today as:
 
@@ -1289,7 +1287,7 @@ pub fn touch<T>(&self, value: &mut T) {
 }
 ```
 
-CGP converts zero-arity traits into single-arity traits that are bound to the generic context, while the original `Self` type from the Incoherent Rust version becomes an explicit generic parameter `T`. With this structure, traits like `HasTimeType` and `CurrentTime` are clearly bound to the context rather than to any particular value type. This example makes concrete the benefit of abstract types anchored to the ambient context: they allow multiple value types to share a consistent, interchangeable abstraction without requiring each one to carry its own copy.
+CGP converts zero-arity traits into single-arity traits that are bound to the generic context, while the original `Self` type from the Incoherent Rust version becomes an explicit generic parameter `T`. With this structure, traits like `HasTimeType` and `CurrentTime` are clearly bound to the context rather than to any particular value type. The example shows the benefit of anchoring abstract types to the context: several value types share one interchangeable choice, and none of them carries its own copy.
 
 ---
 
@@ -1315,7 +1313,7 @@ This post has explored how CGP relates to the discussion of dictionary-passing s
 
 The most direct takeaway is that CGP already provides a working implementation strategy for many of the ideas discussed in Boxy's blog post on Incoherent Rust. By making a generic context type the `Self` type of each consumer trait, and an explicit parameter of its provider trait, CGP allows multiple overlapping trait implementations to coexist without violating Rust's coherence rules. Named implementations become regular Rust provider structs, and the wiring of those implementations is deferred to a concrete context type using `delegate_components!`.
 
-This means that a significant subset of what Incoherent Rust proposes can already be expressed today in stable Rust, using CGP as the underlying mechanism. If the Rust project is weighing how to implement Incoherent Rust, CGP's approach of desugaring incoherent traits to coherent provider traits with an explicit context parameter is worth considering as an implementation strategy.
+So a significant subset of what Incoherent Rust proposes can already be expressed in stable Rust today, with CGP as the mechanism. If the Rust project is weighing how to implement Incoherent Rust, CGP's approach of desugaring incoherent traits to coherent provider traits with an explicit context parameter is one strategy worth considering.
 
 #### An implementation strategy for contexts and capabilities
 
@@ -1329,7 +1327,7 @@ As the arena-backed `Deserialize` example shows, this approach handles the core 
 
 Boxy's blog post makes a compelling case that the orphan rules prevent healthy ecosystem evolution, particularly around foundational traits like `Serialize`. CGP partially addresses this problem by allowing incoherent traits to be defined from scratch with an explicit context parameter. What CGP cannot do is retroactively fix existing traits in the ecosystem that were designed without one.
 
-For traits that are already widely used, such as `Serialize` or `Hash`, adopting CGP's approach would require breaking changes to those trait definitions. That is not a realistic path in the short term, which means that CGP provides a good model for how new incoherent traits should be designed in the future, but it does not address the ecosystem fragmentation that already exists today.
+For traits that are already widely used, such as `Serialize` or `Hash`, adopting CGP's approach would require breaking changes to those trait definitions. That is not a realistic path in the short term. CGP offers a good model for designing new incoherent traits, but it does not address the ecosystem fragmentation that already exists.
 
 If CGP were used as the implementation strategy behind Incoherent Rust, the situation would be somewhat better. In that case, programmers would not need to include an explicit context parameter in their traits or in code that uses those traits, because the compiler would handle that transformation internally. However, a trait like `Hash` or `Serialize` would still need to opt into incoherence by some means, such as by adding an `incoherent` keyword, and it is an open question whether that could be done without introducing a breaking change.
 
@@ -1353,4 +1351,4 @@ If features like Incoherent Rust and contexts and capabilities are eventually im
 
 However, the underlying design patterns that CGP promotes, such as writing generic code against a context type, deferring implementation choices to a top-level context, and separating the definition of an interface from its wiring, would remain valuable regardless of how the language evolves. CGP's goal has never been to create a framework that developers depend on indefinitely. The goal is to enable context-generic programming patterns in Rust, and ideally those patterns should eventually become idiomatic Rust that requires no special library support.
 
-In that sense, the discussions happening now around Incoherent Rust and dictionary-passing style are very much aligned with where CGP is headed. The hope is that the design patterns CGP has developed over time can inform how these future language features are designed, and that the two efforts can learn from each other as they move forward.
+In that sense, the current discussions of Incoherent Rust and dictionary-passing style point the same way CGP is headed. I hope the design patterns CGP has developed can inform how these language features are designed, and that the two efforts keep learning from each other.
