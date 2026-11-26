@@ -23,7 +23,7 @@ The proposals' constructs map onto CGP as follows:
 | --- | --- |
 | A named impl (`impl Name<T> = Trait<T> for T`) | A **provider**: a zero-sized type that implements a component's provider trait |
 | An `incoherent trait` bound passed at a call | A consumer-trait bound on the context, resolved by the context's **wiring** |
-| An impl passed where a bound needs one (`function::<T + TraitImpl<T>>`) | A **[higher-order provider](/docs/reference/glossary#higher-order-provider)**, bound with `#[use_provider]` |
+| A generic impl that takes another impl as a parameter | A **[higher-order provider](/docs/reference/glossary#higher-order-provider)**, bound with `#[use_provider]` |
 | A capability in a `with` clause | An `#[implicit]` argument read from a context field |
 | The `with` block that binds everything | The definition of a context type and its `delegate_components!` table |
 | The root dictionary of a dictionary-passing elaboration | The context itself |
@@ -231,8 +231,8 @@ site's imports, as [Traits without coherence](./traits-without-coherence.md) sho
 
 Where the proposals let a caller pass an impl as a parameter, CGP uses
 [higher-order providers](/docs/concepts/higher-order-providers). A provider takes another provider
-as a type parameter and binds it with `#[use_provider]`, so the impl passed to a bound becomes a
-Rust generic:
+as a type parameter and binds it with `#[use_provider]`, which writes the impl it is given as a
+Rust generic parameter:
 
 ```rust
 #[cgp_impl(new ScaledArea<InnerCalculator>)]
