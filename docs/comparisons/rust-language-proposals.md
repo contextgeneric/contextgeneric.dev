@@ -23,7 +23,7 @@ The proposals' constructs map onto CGP as follows:
 | --- | --- |
 | A named impl (`impl Name<T> = Trait<T> for T`) | A **provider**: a zero-sized type that implements a component's provider trait |
 | An `incoherent trait` bound passed at a call | A consumer-trait bound on the context, resolved by the context's **wiring** |
-| An impl passed as a parameter (`impl TDrop: Drop<T>` in Cairo) | A **[higher-order provider](/docs/reference/glossary#higher-order-provider)**, bound with `#[use_provider]` |
+| An impl passed where a bound needs one (`function::<T + TraitImpl<T>>`) | A **[higher-order provider](/docs/reference/glossary#higher-order-provider)**, bound with `#[use_provider]` |
 | A capability in a `with` clause | An `#[implicit]` argument read from a context field |
 | The `with` block that binds everything | The definition of a context type and its `delegate_components!` table |
 | The root dictionary of a dictionary-passing elaboration | The context itself |
@@ -150,14 +150,6 @@ names the difficulties that follow: ownership modes for the carried value, the s
 a trait differently in different scopes, and methods that become closures ([*What If Traits Carried
 Values*](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html)).
 
-### Named impls in Cairo
-
-Cairo provides a working example of named impls in a language with Rust-like syntax. A generic impl
-takes the impls it depends on as parameters, and the compiler infers each one from the impls a call
-site imports, so a call site's imports decide which implementation it uses. The
-[Traits without coherence](./traits-without-coherence.md) page compares Cairo in depth, beside
-Scala's givens, OCaml's modular implicits, and Haskell's overlapping instances.
-
 ## How CGP expresses it
 
 CGP records provider choices on a context. Named-impl designs can instead select an impl at a call
@@ -230,16 +222,17 @@ delegate_components! {
 ```
 
 Every call through `ApiServer` uses its selected provider for `String`; `Firmware` has its own
-choice. This gives consistency per context, component, and dispatch key. Boxy's sketch permits
-explicit choices at calls, while Cairo can infer them from scope. The
+choice. This gives consistency per context, component, and dispatch key. Boxy's sketch makes
+the choice explicitly at each call, and languages that infer impls from scope make it from a call
+site's imports, as [Traits without coherence](./traits-without-coherence.md) shows. The
 [type classes](./type-classes.md) page compares these choices with Haskell's instance resolution.
 
 ### Passing providers as type parameters {#passing-an-impl-explicitly-is-a-higher-order-provider}
 
-Where the proposals and Cairo let a caller pass an impl as a parameter, CGP uses
+Where the proposals let a caller pass an impl as a parameter, CGP uses
 [higher-order providers](/docs/concepts/higher-order-providers). A provider takes another provider
-as a type parameter and binds it with `#[use_provider]`, which corresponds to a Cairo impl parameter
-such as `impl TDrop: Drop<T>` written as a Rust generic:
+as a type parameter and binds it with `#[use_provider]`, so the impl passed to a bound becomes a
+Rust generic:
 
 ```rust
 #[cgp_impl(new ScaledArea<InnerCalculator>)]
@@ -333,9 +326,7 @@ experiment whose questions include which cycles are sound
 ([goal #630](https://github.com/rust-lang/goals/issues/630);
 [Nadrieril](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html)). Contexts
 and capabilities has open questions about thread boundaries and scope
-([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)). Cairo's
-scope-based resolution requires the caller to import the needed impls; two call sites can then
-resolve the same type differently.
+([Mandry](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/)).
 
 CGP requires a component definition and explicit wiring. A provider trait created by
 [`#[cgp_component]`](/docs/reference/macros/cgp_component) cannot retrofit a foreign trait such as
@@ -381,6 +372,8 @@ These pages develop the constructs and the neighbouring comparisons:
   passed impls and `with` clauses.
 - [Type classes](./type-classes.md): the same trade seen from Haskell's side, including the
   `INCOHERENT` and overlapping-instance extensions.
+- [Traits without coherence](./traits-without-coherence.md): how Cairo, Scala, OCaml, and Haskell
+  choose among several impls of one trait, compared with CGP.
 - [RustLab 2025 talk](/blog/rustlab-2025-coherence): why coherence exists and why specialization does
   not remove the overlap problem, argued on a hash-table example.
 
@@ -398,7 +391,6 @@ assertion per wired context.
 - [Dictionary Passing Style Experiment, goal #630](https://github.com/rust-lang/goals/issues/630): the types-team goal, its contact, and its reading list.
 - [Nadrieril, *When can Traits Depend on Themselves?*](https://nadrieril.github.io/blog/2026/05/14/when-can-traits-depend-on-themselves.html) and [Niko Matsakis, *Cyclic Trait Impls*](https://smallcultfollowing.com/babysteps/series/cyclic-trait-impls/): the search for a rule that rejects unsound cycles, and perfect derive as the motivating case.
 - [Mandry, *Contexts and capabilities in Rust*](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/): the `with` clause and block, context-dependent trait impls, and the open questions.
-- [Cairo Book, *Traits in Cairo*](https://www.starknet.io/cairo-book/ch08-02-traits-in-cairo.html) and [*Generic Data Types*](https://www.starknet.io/cairo-book/ch08-01-generic-data-types.html): named and anonymous impl parameters and compiler inference of the impl.
 - [Ixrec, *rust-orphan-rules*](https://github.com/Ixrec/rust-orphan-rules) and [Greyblake, *Alternative blanket implementations for a single Rust trait*](https://www.greyblake.com/blog/alternative-blanket-implementations-for-single-rust-trait/): the orphan rule as a durable frustration and the hand-rolled marker-struct workaround for overlap.
 - [RustLab 2025, *How to stop fighting with coherence*](/blog/rustlab-2025-coherence): why specialization does not solve overlap, and the connection to the contexts-and-capabilities proposal.
 
