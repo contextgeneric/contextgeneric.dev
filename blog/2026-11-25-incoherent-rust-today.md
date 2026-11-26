@@ -31,7 +31,7 @@ In summary, CGP:
 
 This section summarizes the discussion as I read it from public writing, so it may miss context that the participants have. The website's [Rust's own proposals](/docs/comparisons/rust-language-proposals) page summarizes each proposal on its own terms.
 
-Nadrieril's first post reads trait solving as building explicit proofs. A trait is like a struct of methods, an impl is like a value of that struct, and a trait bound is how such values are passed along. The Haskell literature calls this way of passing impls dictionary-passing style. The post belongs to his [**Rust via Desugarings**](https://nadrieril.github.io/rust-via-desugarings/) effort to define Rust by translating it into a smaller language, and his later post on [**a formal specification**](https://nadrieril.github.io/blog/2026/06/16/formal-spec-vision.html) places explicit trait proofs inside that plan. In this post, I call the trait-free target of such a translation **Traitless IR (TIR)**, though Nadrieril's plan names its own target PolyMiniRust.
+Nadrieril's first post reads trait solving as building explicit proofs. A trait is like a struct of methods, an impl is like a value of that struct, and a trait bound is how such values are passed along. This way of passing impls is called dictionary-passing style in the Haskell literature. The post belongs to his [**Rust via Desugarings**](https://nadrieril.github.io/rust-via-desugarings/) effort to define Rust by translating it into a smaller language, and his later post on [**a formal specification**](https://nadrieril.github.io/blog/2026/06/16/formal-spec-vision.html) places explicit trait proofs inside that plan. In this post, I call the trait-free target of such a translation **Traitless IR (TIR)**, though Nadrieril's plan names its own target PolyMiniRust.
 
 :::note
 Like HIR, THIR, and MIR, TIR would be an internal representation that Rust programmers never write, and it would have no concrete syntax. So the examples below borrow a Rust-like syntax to illustrate the ideas.
@@ -163,7 +163,7 @@ With this approach, third-party crates can define their own contexts like `MyApp
 
 #### Does CGP truly solve the orphan rules problem?
 
-CGP bypasses Rust's coherence restrictions by adding a context type in the `Self` position. That only partly solves the orphan rules problem, because every trait involved must adopt CGP and include the context parameter in its definition.
+CGP bypasses Rust's coherence restrictions by adding a context type in the `Self` position. The added context type only partly solves the orphan rules problem, because every trait involved must adopt CGP and include the context parameter in its definition.
 
 So CGP's approach cannot be applied to existing traits like `serde::Serialize` without breaking changes across the entire Rust ecosystem. It suits new traits well, though, since they can take the context parameter from the start without breaking anything.
 
@@ -243,7 +243,7 @@ impl a::SerializeImpl<b::Matrix> {
 }
 ```
 
-Because the `Self` type of each provider trait implementation is the provider struct itself, which is defined in the local crate, there is no coherence conflict even when both implementations target the same value type `b::Matrix`.
+Because the `Self` type of each provider trait implementation is the provider struct itself, which is defined in the local crate, the two implementations do not conflict under coherence even when both target the same value type `b::Matrix`.
 
 ### Using incoherent trait bounds
 
@@ -411,15 +411,15 @@ fn main() {
 }
 ```
 
-Because the `Context` type is part of the struct's type signature, a value of type `Foo<ContextA, i32>` and a value of type `Foo<ContextB, i32>` are distinct types. This is exactly the property Boxy describes: once a struct is created with a particular incoherent implementation bound to it, that binding cannot be silently swapped out at another call site.
+Because the `Context` type is part of the struct's type signature, a value of type `Foo<ContextA, i32>` and a value of type `Foo<ContextB, i32>` are distinct types. This distinction is exactly the property Boxy describes: once a struct is created with a particular incoherent implementation bound to it, that binding cannot be silently swapped out at another call site.
 
 This property is especially useful for the hash table problem that incoherence raises. A hash map can include the `Context` type in its definition, becoming `HashMap<Context, Key, Value>`, to ensure that the same `Hash` implementation is always used when inserting or looking up entries.
 
 ### Impl-specific bindings within a struct
 
-One downside of binding the full `Context` type to a struct is that two contexts with identical provider wirings are still different types. That gets in the way when you want to share a struct value across modules or functions that use different contexts.
+One downside of binding the full `Context` type to a struct is that two contexts with identical provider wirings are still different types. The difference gets in the way when you want to share a struct value across modules or functions that use different contexts.
 
-An alternative is to bind a specific provider type to the struct rather than a full context. This is possible in CGP using higher-order providers, where the provider type itself is a generic parameter of the struct:
+An alternative is to bind a specific provider type to the struct rather than a full context. CGP supports this binding through higher-order providers, where the provider type itself is a generic parameter of the struct:
 
 ```rust title="CGP"
 pub struct Foo<NameProvider, T> {
@@ -449,7 +449,7 @@ fn main() {
 }
 ```
 
-In this version, the struct carries the provider type directly, so the choice of `Name` implementation is locked to `RealName` regardless of which context is used to call `do_stuff`. This is more flexible than the full-context binding, because any context can interact with the struct without needing to match the exact context type that created it.
+In this version, the struct carries the provider type directly, so the choice of `Name` implementation is locked to `RealName` regardless of which context is used to call `do_stuff`. This provider binding is more flexible than the full-context binding, because any context can interact with the struct without needing to match the exact context type that created it.
 
 The trade-off is that this approach only fixes the binding for one specific trait. If multiple incoherent traits are involved and you want each one to be bound independently, the struct would need a separate provider parameter for each trait. Depending on how many traits are involved, that can become verbose. The full-context approach described earlier handles this more uniformly, at the cost of tying the struct to a single concrete context type.
 
@@ -579,7 +579,7 @@ Today's workaround is a provider written for the concrete context, without the b
 
 ### Contexts and capabilities
 
-Nadrieril's follow-up blog post, [**What If Traits Carried Values**](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html), explores how we could implement Tyler Mandry's [**contexts and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal using dictionary-passing style. The motivating example is passing a `BasicArena` value into an implementation of `Deserialize`:
+Nadrieril's follow-up blog post, [**What If Traits Carried Values**](https://nadrieril.github.io/blog/2026/03/22/what-if-traits-carried-values.html), explores how Tyler Mandry's [**contexts and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal could be implemented using dictionary-passing style. The motivating example is passing a `BasicArena` value into an implementation of `Deserialize`:
 
 ```rust title="Incoherent Rust"
 capability arena;
@@ -703,7 +703,7 @@ But if Rust chooses to support `&mut` or owned values as capabilities too, it ma
 
 ### Nested dynamically scoped bindings
 
-Another key limitation is that CGP binds every runtime value and trait implementation in one place, where the concrete context type is defined. This can severely limit where an incoherent trait implementation can be called.
+Another key limitation is that CGP binds every runtime value and trait implementation in one place, where the concrete context type is defined. Binding everything in one place can severely limit where an incoherent trait implementation can be called.
 
 In **What If Traits Carried Values**, Nadrieril presents **scoped impls**: a trait impl may be defined anywhere, and uses of the trait within its scope take that local impl, overriding any global or outer one.
 
@@ -950,7 +950,7 @@ pub fn do_stuff<T>(&self, foo: &Foo<T>) {
 }
 ```
 
-We can read it as equivalent to this Incoherent Rust function:
+It can be read as equivalent to this Incoherent Rust function:
 
 ```rust title="Incoherent Rust"
 pub incoherent fn do_stuff<T>(foo: &Foo<T>)
@@ -982,7 +982,7 @@ pub fn do_more_stuff<T>(&self, foo: &Foo<T>) {
 
 So incoherent functions can call each other without spelling out every transitive incoherent trait bound of the functions they call. All those bounds are gathered and resolved at once, when a coherent function calls into the incoherent world.
 
-This sets up an incoherent world, isolated from the coherent world where all existing Rust code lives. As with async functions, the split colors functions: incoherent traits and functions can freely call coherent or incoherent ones, but coherent code cannot call incoherent code without explicitly binding every incoherent trait implementation it requires.
+Together, incoherent functions set up an incoherent world, isolated from the coherent world where all existing Rust code lives. As with async functions, the split colors functions: incoherent traits and functions can freely call coherent or incoherent ones, but coherent code cannot call incoherent code without explicitly binding every incoherent trait implementation it requires.
 
 This separation between the incoherent and coherent worlds is essential, because it simplifies the semantics and creates a clear boundary for where the bindings for incoherent implementations can be specified.
 
@@ -1070,7 +1070,7 @@ pub incoherent trait Greet
 }
 ```
 
-Incoherence and capabilities together suggest a useful pattern: zero-arity incoherent traits whose implementations work only with the ambient context. For example, we could implement the `Greet` trait with:
+Incoherence and capabilities together suggest a useful pattern: zero-arity incoherent traits whose implementations work only with the ambient context. For example, the `Greet` trait could be implemented with:
 
 ```rust title="Incoherent Rust"
 impl GreetHello = Greet for !
@@ -1108,7 +1108,7 @@ pub trait HasNameType {
 }
 ```
 
-An abstract type is not tied to any particular value type. The ambient context chooses its concrete form. We can modify the earlier `GreetHello` implementation to use the abstract `Name` type:
+An abstract type is not tied to any particular value type. The ambient context chooses its concrete form. The earlier `GreetHello` implementation can use the abstract `Name` type instead:
 
 ```rust title="CGP"
 #[cgp_impl(new GreetHello)]
@@ -1193,7 +1193,7 @@ with
 }
 ```
 
-Here, we require the context to provide an implementation of `HasNameType` and bind it to the local identifier `NameType`. The abstract type is then referenced as `NameType::Name` when specifying the type of the `name` capability.
+Here, `GreetHello` requires the context to provide an implementation of `HasNameType` and binds it to the local identifier `NameType`. The abstract type is then referenced as `NameType::Name` when specifying the type of the `name` capability.
 
 With the implementation in place, we can set up the wiring and call `GreetHello::greet()` as follows:
 
@@ -1216,7 +1216,7 @@ fn main() {
 }
 ```
 
-Here, we choose `UseFullNameType` as the incoherent implementation for `HasNameType`, and then bind the capability `name` with a `FullName` value. When `GreetHello` is called, both the type implementation and the name value are provided through the trait system, and the greeting is printed.
+Here, `UseFullNameType` is chosen as the incoherent implementation for `HasNameType`, and the capability `name` is bound to a `FullName` value. When `GreetHello` is called, both the type implementation and the name value are provided through the trait system, and the greeting is printed.
 
 #### Using abstract types across incoherent traits
 
@@ -1303,7 +1303,7 @@ Other languages have already given up global coherence, each in its own way. Cai
 
 The designs that give up global coherence share three problems. Call sites can resolve the same type differently, a choice can change with what a module imports, and a data structure such as a hash map needs one implementation used consistently. They answer these problems in different ways. Haskell keeps one answer for the whole program and relaxes it only by exception. Cairo, Scala, and modular implicits infer the choice from what is in scope. Boxy's sketch names it explicitly at each call, and CGP centralizes it on a context type that is defined once.
 
-A single global answer needs no wiring at all, but where Haskell's overlap extensions apply, GHC's manual warns that different parts of a program can choose different instances. Inference from scope is convenient in small programs, but it ties the choice to imports. Scala, for one, has reworked its mechanism: Scala 3 separates `given` definitions from `using` parameters, where Scala 2 wrote `implicit` for both. Explicit naming is precise, but it repeats the choice at every call. CGP's centralized context is more verbose up front, yet every call through a context uses the same choice, and a reader finds that choice in one `delegate_components!` block. If Incoherent Rust adopts scoped or inferred impls, it is worth considering whether it should also offer a context-like mechanism that fixes the choices for a whole program, alongside the lower-level machinery.
+A single global answer needs no wiring at all, but where Haskell's overlap extensions apply, GHC's manual warns that different parts of a program can choose different instances. Inference from scope is convenient in small programs, but it ties the choice to imports. Scala, for one, has reworked its mechanism: Scala 3 separates `given` definitions from `using` parameters, where Scala 2 wrote `implicit` for both. Explicit naming is precise, but it repeats the choice at every call. CGP's centralized context is more verbose up front, yet every call through a context uses the same choice, and a reader finds that choice in one `delegate_components!` block. If Incoherent Rust adopts scoped or inferred impls, a context-like mechanism that fixes the choices for a whole program, alongside the lower-level machinery, is worth considering too.
 
 ---
 
@@ -1331,9 +1331,9 @@ As the arena-backed `Deserialize` example shows, this approach handles the core 
 
 Boxy's blog post makes a compelling case that the orphan rules prevent healthy ecosystem evolution, particularly around foundational traits like `Serialize`. CGP partially addresses this problem by allowing incoherent traits to be defined from scratch with an explicit context parameter. What CGP cannot do is retroactively fix existing traits in the ecosystem that were designed without one.
 
-For traits that are already widely used, such as `Serialize` or `Hash`, adopting CGP's approach would require breaking changes to those trait definitions. That is not a realistic path in the short term. CGP offers a good model for designing new incoherent traits, but it does not address the ecosystem fragmentation that already exists.
+For traits that are already widely used, such as `Serialize` or `Hash`, adopting CGP's approach would require breaking changes to those trait definitions. Such breaking changes are not a realistic path in the short term. CGP offers a good model for designing new incoherent traits, but it does not address the ecosystem fragmentation that already exists.
 
-If CGP were used as the implementation strategy behind Incoherent Rust, the situation would be somewhat better. In that case, programmers would not need to include an explicit context parameter in their traits or in code that uses those traits, because the compiler would handle that transformation internally. However, a trait like `Hash` or `Serialize` would still need to opt into incoherence by some means, such as by adding an `incoherent` keyword, and it is an open question whether that could be done without introducing a breaking change.
+If CGP were used as the implementation strategy behind Incoherent Rust, the situation would be somewhat better. In that case, programmers would not need to include an explicit context parameter in their traits or in code that uses those traits, because the compiler would handle that transformation internally. However, a trait like `Hash` or `Serialize` would still need to opt into incoherence by some means, such as by adding an `incoherent` keyword, and whether that opt-in could avoid a breaking change remains an open question.
 
 That question is a separate challenge that applies regardless of whether CGP or dictionary-passing style is used as the underlying implementation strategy. Before committing to either approach, the Rust community would need to decide how existing traits can evolve toward incoherence without fracturing the code that currently depends on them.
 
