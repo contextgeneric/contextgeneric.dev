@@ -33,7 +33,7 @@ This section summarizes the discussion as I read it from public writing, so it m
 
 Nadrieril's first post reads trait solving as building explicit proofs. A trait is like a struct of methods, an impl is like a value of that struct, and a trait bound is how such values are passed along. This way of passing impls is called dictionary-passing style in the Haskell literature. Making the proofs explicit turns each trait choice into a value that can be checked. A footnote connects the idea to his [**Rust via Desugarings**](https://nadrieril.github.io/rust-via-desugarings/) book, which explains Rust by translating it into a simpler subset of the language, and his later post on [**a formal specification**](https://nadrieril.github.io/blog/2026/06/16/formal-spec-vision.html) builds explicit trait proofs into that plan. The specification's target language is **PolyMiniRust**: Ralf Jung's MiniRust, an interpreter for Rust's runtime semantics, extended with generics and trait proofs.
 
-His second post lets those dictionaries carry runtime values, and credits Tyler Mandry with pointing out that the idea resembles his 2021 [**contexts and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal. Boxy's post then explores how the same model could enable **incoherent traits**, which opt out of Rust's coherence rules. That post starts from the problem of ecosystem evolution, with `serde` as its example, and works through what such traits would mean for `HashMap` and associated types. I use **Incoherent Rust** for this envisioned version of Rust, broadly covering the features that Nadrieril, Boxy, and Tyler Mandry explore, none of which are settled yet.
+His second post lets those dictionaries carry runtime values. It credits Tyler Mandry, the author of the 2021 [**contexts and capabilities**](https://tmandry.gitlab.io/blog/posts/2021-12-21-context-capabilities/) proposal, with pointing out that the idea resembles that proposal. Boxy's post then explores how the same model could enable **incoherent traits**, which opt out of Rust's coherence rules. That post starts from the problem of ecosystem evolution, with `serde` as its example, and works through what such traits would mean for `HashMap` and associated types. I use **Incoherent Rust** for this envisioned version of Rust, broadly covering the features that Nadrieril, Boxy, and Tyler Mandry explore, none of which are settled yet.
 
 Since March, the work has become the types team's [**Dictionary Passing Style Experiment**](https://github.com/rust-lang/goals/issues/630), with a [project repository](https://github.com/rust-lang/project-dictionary-passing) whose reading list gives Boxy's post as its entry on incoherence. Nadrieril's [**When can Traits Depend on Themselves?**](https://nadrieril.github.io/blog/2026/05/14/when-can-traits-depend-on-themselves.html) and Niko Matsakis's [**series on cyclic trait impls**](https://smallcultfollowing.com/babysteps/series/cyclic-trait-impls/), which takes perfect derive as its motivating case, study which cycles between trait impls are sound, a question the section on [context as dictionary](#context-as-dictionary) comes back to. Nadrieril's other recent post, [**Capabilities using Plain Traits**](https://nadrieril.github.io/blog/2026/06/07/capabilities-with-plain-traits.html), expresses `cfg` and target features as traits, including *selfless* traits without a `Self` type, which the section on [zero-arity traits](#zero-arity-traits) comes back to.
 
@@ -47,7 +47,7 @@ The three need not go together. The compiler might compute proofs once without e
 
 This section introduces CGP for readers who already know Rust's traits, generics, and coherence rules in depth, such as members of the Rust compiler and types teams.
 
-CGP extends Rust with pluggable trait implementations: code is written generically over a context type, which takes the place of `Self` in trait definitions, and each context chooses which implementation it uses. CGP does this with design patterns that work within Rust's coherence rules, so multiple overlapping implementations can coexist on stable Rust.
+CGP extends Rust with pluggable trait implementations: code is written generically over a context type, which takes the place of `Self` in trait definitions, and each context chooses which implementation it uses. CGP does this with design patterns that work within Rust's coherence rules, so multiple overlapping implementations can coexist on stable Rust, and a consumer trait remains an ordinary trait that can still be implemented directly.
 
 This section covers only what the rest of the post needs. My RustLab 2025 talk, [**How to stop fighting with coherence and start writing context-generic trait impls**](/blog/rustlab-2025-coherence), explains the motivation in more depth. The website's [coherence](/docs/concepts/coherence), [consumer and provider traits](/docs/concepts/consumer-and-provider-traits), and [modularity hierarchy](/docs/concepts/modularity-hierarchy) pages explain the mechanism, and [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) shows the code each macro generates.
 
@@ -171,7 +171,7 @@ When I describe a strategy for desugaring Incoherent Rust into CGP, I am not sug
 
 What CGP offers instead is a place to try these ideas now. Because CGP is a library on stable Rust, the desugarings below compile today, so Rust programmers can write code in the style Incoherent Rust envisions, without waiting for a nightly feature or its stabilization. The experience from real CGP projects can then feed into the design questions that Boxy's post leaves open, such as syntax, ergonomics, and whether the complexity is worth it.
 
-Trying the ideas through CGP has its costs, though. CGP's wiring adds compile-time work, readers have to learn the context and provider model, and errors that pass through generated providers are long in their raw form. For those errors, the project ships [`cargo cgp check`](/docs/tooling/cargo-cgp/check), which leads with the root cause for the error classes it recognizes, though it does not yet reshape every class. A compiler that understood incoherent traits natively could report such errors in its own terms.
+Trying the ideas through CGP has its costs, though. CGP's wiring adds compile-time work, readers have to learn the context and provider model, and errors that pass through generated providers are long in their raw form. For those errors, the project ships an error toolchain, cargo-cgp: [`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause for the classes it recognizes, and the tool does not yet reshape every class. A compiler that understood incoherent traits natively could report such errors in its own terms.
 
 ---
 
@@ -335,7 +335,7 @@ In the desugared code, the incoherent `Name` trait becomes a CGP component `Name
 
 The constant stays an associated constant, since a CGP component can declare one just as an ordinary trait does. Only `RealName`'s constant needs care: it calls `core::any::type_name`, which is not yet stable as a `const fn`. That is why the snippet opens with `#![feature(const_type_name)]` and needs a nightly compiler, as do the later examples that reuse `Name`. The requirement comes from the standard library, not from CGP.
 
-`do_stuff` takes `&self` because the context type, `Self`, carries the implementation choice at the type level. As we will see later, the same `&self` can also carry runtime values, which makes context-generic functions suitable for implementing contexts and capabilities.
+`do_stuff` takes `&self` because the context type, `Self`, carries the implementation choice at the type level. As we will see later, the same `&self` can also carry runtime values, which makes context-generic functions suitable for expressing contexts and capabilities.
 
 ### Use of incoherent trait bounds within a struct
 
@@ -403,7 +403,7 @@ fn main() {
 }
 ```
 
-Because the `Context` type is part of the struct's type signature, a value of type `Foo<ContextA, i32>` and a value of type `Foo<ContextB, i32>` are distinct types. This distinction is exactly the property Boxy describes: once a struct is created with a particular incoherent implementation bound to it, that binding cannot be silently swapped out at another call site.
+Because the `Context` type is part of the struct's type signature, a value of type `Foo<ContextA, i32>` and a value of type `Foo<ContextB, i32>` are distinct types. This distinction is the property Boxy describes: once a struct is created with a particular incoherent implementation bound to it, that binding cannot be silently swapped out at another call site.
 
 This property is especially useful for the hash table problem that Boxy's post raises. A hash map can include the `Context` type in its definition, becoming `HashMap<Context, Key, Value>`, to ensure that the same `Hash` implementation is always used when inserting or looking up entries.
 
@@ -593,7 +593,7 @@ fn main() -> Result<(), Error> {
 }
 ```
 
-As my [`cgp-serde` blog post](/blog/cgp-serde-release) explains, CGP's incoherent traits already pass runtime values alongside trait implementations through the `Context` type. CGP's [**implicit arguments**](/docs/concepts/implicit-arguments) make those field values considerably easier to access.
+As my [`cgp-serde` blog post](/blog/cgp-serde-release) explains, CGP's incoherent traits already pass runtime values alongside trait implementations through the `Context` type. CGP's [**implicit arguments**](/docs/concepts/implicit-arguments) make those field values easier to access.
 
 With them, the example above desugars into this CGP code:
 
@@ -699,7 +699,7 @@ pub trait Greet {
 }
 ```
 
-These traits are what Nadrieril, in [**Capabilities using Plain Traits**](https://nadrieril.github.io/blog/2026/06/07/capabilities-with-plain-traits.html), calls *selfless traits*: traits without a `Self` type, which he writes with a `#[selfless]` attribute. His selfless traits state facts about the environment, such as `Unix`, and he notes that a capability is "just a ZST context". The platform fixes those facts, while an incoherent selfless trait would leave its implementation to the context. In Incoherent Rust, the `Greet` trait above would be such a zero-arity trait:
+These traits are what Nadrieril, in [**Capabilities using Plain Traits**](https://nadrieril.github.io/blog/2026/06/07/capabilities-with-plain-traits.html), calls *selfless traits*: traits without a `Self` type, which he writes with a `#[selfless]` attribute. His selfless traits state facts about the environment, such as `Unix`, and he notes that a capability is "just a ZST context". The platform fixes those facts, while an incoherent selfless trait would leave its implementation to the context. In Incoherent Rust, the `Greet` trait above would be such a zero-arity trait. The Incoherent Rust snippets in this section are my own sketches, combining Boxy's named impls with Nadrieril's `#[selfless]` attribute:
 
 ```rust title="Incoherent Rust"
 #[selfless]
@@ -721,7 +721,7 @@ with
 }
 ```
 
-With CGP, since the context type is explicit, zero-arity incoherent traits become unary CGP traits, which is less awkward to express:
+With CGP, since the context type is explicit, zero-arity incoherent traits become unary CGP traits, which need no new syntax:
 
 ```rust title="CGP"
 #[cgp_impl(new GreetHello)]
@@ -909,7 +909,7 @@ where
 
 #### Type-level DSLs
 
-Since CGP's named implementations are just types, higher-order providers also enable design patterns that go beyond what Incoherent Rust currently supports. [Hypershell](/docs/projects/hypershell/), for example, uses higher-order providers to build a type-level DSL for shell scripting in Rust, a pattern the [type-level DSLs](/docs/concepts/type-level-dsls) page explains.
+Since CGP's named implementations are just types, higher-order providers also enable design patterns that go beyond what the current sketches of Incoherent Rust describe. [Hypershell](/docs/projects/hypershell/), for example, uses higher-order providers to build a type-level DSL for shell scripting in Rust, a pattern the [type-level DSLs](/docs/concepts/type-level-dsls) page explains.
 
 After desugaring, a DSL program is a plain Rust type:
 
@@ -1285,7 +1285,7 @@ pub fn touch<T>(&self, value: &mut T) {
 }
 ```
 
-CGP converts zero-arity traits into single-arity traits that are bound to the generic context, while the original `Self` type from the Incoherent Rust version becomes an explicit generic parameter `T`. With this structure, traits like `HasTimeType` and `CurrentTime` are clearly bound to the context rather than to any particular value type. The example shows the benefit of anchoring abstract types to the context: several value types share one interchangeable choice, and none of them carries its own copy.
+CGP converts zero-arity traits into single-arity traits that are bound to the generic context, while the original `Self` type from the Incoherent Rust version becomes an explicit generic parameter `T`. With this structure, traits like `HasTimeType` and `CurrentTime` are bound to the context rather than to any particular value type. The example shows the benefit of anchoring abstract types to the context: several value types share one interchangeable choice, and none of them carries its own copy.
 
 ---
 
@@ -1311,7 +1311,7 @@ This post has explored how CGP relates to the discussion of dictionary-passing s
 
 The most direct takeaway is that CGP already lets programmers try many of the ideas in Boxy's blog post on stable Rust. By making a generic context type the `Self` type of each consumer trait, and an explicit parameter of its provider trait, CGP lets multiple overlapping trait implementations coexist without violating Rust's coherence rules. Named implementations become regular Rust provider structs, and the choice among them is made once, on a concrete context type, through `delegate_components!`.
 
-This makes CGP a place to experiment with Incoherent Rust before the language supports it. CGP's design has been used across several releases and in projects such as cgp-serde and Hypershell, so its patterns have already met real code. CGP does not show how the compiler should implement these features: with explicit trait proofs, the compiler could desugar named impls into proofs directly, without going through CGP's traits. What CGP can show is how code written in this style feels in practice, and which features real programs come to need.
+This makes CGP a place to experiment with Incoherent Rust before the language supports it. CGP's design has been refined across several releases and used in projects such as cgp-serde and Hypershell, so its patterns have already met real code. CGP does not show how the compiler should implement these features: with explicit trait proofs, the compiler could desugar named impls into proofs directly, without going through CGP's traits. What CGP can show is how code written in this style feels in practice, and which features real programs come to need.
 
 #### Trying contexts and capabilities today
 
@@ -1325,7 +1325,7 @@ As the arena-backed `Deserialize` example shows, this approach covers the core u
 
 Boxy's blog post shows how the orphan rules hold back ecosystem evolution around foundational traits, with serde's `Serialize` as the example. CGP partially addresses this problem by allowing incoherent traits to be defined from scratch with an explicit context parameter. What CGP cannot do is retroactively fix existing traits in the ecosystem that were designed without one.
 
-For traits that are already widely used, such as `Serialize` or `Hash`, adopting CGP's approach would require breaking changes to those trait definitions. Such breaking changes are not a realistic path in the short term. CGP offers a good model for designing new incoherent traits, but it does not address the ecosystem fragmentation that already exists.
+For traits that are already widely used, such as `Serialize` or `Hash`, adopting CGP's approach would require breaking changes to those trait definitions. Such breaking changes are not a realistic path in the short term. CGP offers a model for designing new incoherent traits, but it does not address the ecosystem fragmentation that already exists.
 
 A language feature would do better here. Programmers would not need to add a context parameter to their traits, because the compiler would handle incoherent traits itself. A trait like `Hash` or `Serialize` would still need to opt into incoherence somehow, such as with an `incoherent` keyword, and whether that opt-in could avoid a breaking change remains an open question.
 
