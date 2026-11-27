@@ -214,12 +214,16 @@ delegate_components! {
 
 `ApiServer` encodes a `String` as text, while `Firmware` encodes its bytes as hexadecimal. A crate
 owning either context can supply that wiring even when it owns neither the component nor `String`.
-Ownership of the context satisfies Rust's rules for the wiring implementation.
+Ownership of the context satisfies Rust's rules for the wiring implementation. The `open` statement
+turns the value type into part of the lookup key, as
+[Type-level tables](./type-level-tables.md#paths-as-keys) explains.
 
 Making the value a parameter enables these independent application choices. A self-targeted
 trait cannot gain that separation through wiring alone, because its interface still treats the
 context as the value. With the parameter-targeted interface, each context must cover the target
-types it uses, although generic entries can supply providers for whole families of targets.
+types it uses, although generic entries can supply providers for whole families of targets. The
+parameter also has to be in the trait from the start: it cannot be retrofitted onto an existing
+trait such as `serde::Serialize` without a breaking change.
 
 ## Tier 5: an inner provider chosen locally
 

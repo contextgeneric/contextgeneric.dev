@@ -252,6 +252,58 @@ pub mod falling_back_to_the_contexts_wiring {
     }
 }
 
+/// ## A provider carried by a value
+///
+/// A value type carries its provider as a type parameter, and a `#[cgp_fn]` function binds it with
+/// `#[use_provider]`, so two contexts with no wiring of their own compute the same result.
+pub mod a_provider_carried_by_a_value {
+    use core::marker::PhantomData;
+
+    use cgp::prelude::*;
+
+    #[cgp_component(ShapeAreaCalculator)]
+    pub trait CanCalculateShapeArea<Shape> {
+        fn shape_area(&self, shape: &Shape) -> f64;
+    }
+
+    pub struct Rectangle {
+        pub width: f64,
+        pub height: f64,
+    }
+
+    #[cgp_impl(new RectangleArea)]
+    impl ShapeAreaCalculator<Rectangle> {
+        fn shape_area(&self, shape: &Rectangle) -> f64 {
+            shape.width * shape.height
+        }
+    }
+
+    pub struct Measured<Calculator, Shape> {
+        pub shape: Shape,
+        pub calculator: PhantomData<Calculator>,
+    }
+
+    #[cgp_fn]
+    #[use_provider(Calculator: ShapeAreaCalculator<Shape>)]
+    pub fn measured_area<Calculator, Shape>(&self, measured: &Measured<Calculator, Shape>) -> f64 {
+        Calculator::shape_area(self, &measured.shape)
+    }
+
+    pub struct App;
+    pub struct TestApp;
+
+    #[test]
+    fn the_value_fixes_the_calculation() {
+        let measured: Measured<RectangleArea, Rectangle> = Measured {
+            shape: Rectangle { width: 3.0, height: 4.0 },
+            calculator: PhantomData,
+        };
+
+        assert_eq!(App.measured_area(&measured), 12.0);
+        assert_eq!(TestApp.measured_area(&measured), 12.0);
+    }
+}
+
 /// ## Other generic providers
 ///
 /// `GetName<Tag>` is generic, and its parameter is a field name rather than a provider — nothing is

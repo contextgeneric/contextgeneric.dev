@@ -105,7 +105,8 @@ pub fn describe(
 
 An owned argument calls `.clone()` on the field, leaving the stored value in the context. A `&str`
 argument reads any field implementing `AsRef<str>` with `.as_ref()`, and `&Vec<String>` borrows the
-vector directly. Prefer a borrow when the body only needs to read the value, especially when cloning
+vector directly. The same rule applies to a field whose type is itself a reference: a field of type
+`&'a Config` is read by an argument of type `&&'a Config`, a borrow of the stored reference. Prefer a borrow when the body only needs to read the value, especially when cloning
 would allocate or copy substantial data.
 
 The macro supports specific access forms rather than arbitrary conversions between types. The

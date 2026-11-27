@@ -68,6 +68,8 @@ the provider's requirements.
 The same delegation can continue through another bundle. At each step, the compiler follows the
 next table while keeping the original context argument, until it reaches the provider that performs
 the work. It resolves that chain at compile time, so adding a bundle does not add a runtime lookup.
+[Type-level tables](./type-level-tables.md#nested-tables-and-namespaces) explains the table lookups
+behind each step.
 
 ## Checking a bundle as a context
 
@@ -157,6 +159,7 @@ still need to use the intended context.
 These pages explain related wiring choices and checks:
 
 - [Namespaces](./namespaces.md): Sharing tables through paths and inheritance.
+- [Type-level tables](./type-level-tables.md): The lookups a bundle chains together.
 - [Consumer and provider traits](./consumer-and-provider-traits.md): How delegation preserves the context.
 - [Checking your wiring](./check-traits.md): Context checks and checks on individual providers.
 - [`delegate_components!`](/docs/reference/macros/delegate_components): The `new` and grouped-key forms.

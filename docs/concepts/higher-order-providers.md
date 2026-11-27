@@ -14,8 +14,8 @@ the inner implementation that produces the result. Wiring can then combine the s
 different inner providers, while both operate on the same context.
 
 This page builds a scaling wrapper, shows the bound that names its inner provider, and covers
-compositions named before any context uses them, the `UseContext` default, and what deeper
-compositions cost.
+compositions named before any context uses them, the `UseContext` default, a provider carried by a
+value, and what deeper compositions cost.
 
 ## Wrapping a provider
 
@@ -151,6 +151,35 @@ to pass the original context. The context must therefore meet that provider's re
 To give the parameter its `UseContext` default, declare the provider struct explicitly, as above.
 The `#[cgp_impl(SumAreas<Inner>)]` block then implements that existing struct, because the `new`
 form would declare a provider without the default.
+
+## A provider carried by a value
+
+A provider can also be a type parameter of something other than a provider. A value type can carry
+its calculator in its type, so the value fixes how it is measured wherever it goes:
+
+```rust
+pub struct Measured<Calculator, Shape> {
+    pub shape: Shape,
+    pub calculator: PhantomData<Calculator>,
+}
+
+#[cgp_fn]
+#[use_provider(Calculator: ShapeAreaCalculator<Shape>)]
+pub fn measured_area<Calculator, Shape>(&self, measured: &Measured<Calculator, Shape>) -> f64 {
+    Calculator::shape_area(self, &measured.shape)
+}
+```
+
+A [`#[cgp_fn]`](/docs/reference/macros/cgp_fn) function binds and calls the provider the same way a
+higher-order provider does, though the trait it generates is not itself a provider.
+`#[use_provider]` completes the bound to `Calculator: ShapeAreaCalculator<Self, Shape>`, and the body
+calls the provider explicitly with the context. A `Measured<RectangleArea, Rectangle>` therefore uses
+`RectangleArea` whichever context calls `measured_area` on it, regardless of that context's own
+wiring, while the context must still meet the provider's requirements.
+
+Carrying the choice in a value's type suits data that must keep one implementation across contexts.
+Each choice the value fixes adds a type parameter, though, so a value that fixes several becomes
+harder to write than one that leaves them to its context.
 
 ## Other generic providers
 

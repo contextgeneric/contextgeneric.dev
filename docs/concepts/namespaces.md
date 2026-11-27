@@ -81,7 +81,8 @@ entries no priority.
 The route can also cover a group of components. Redirecting a shared prefix sends the subsystem's
 lookups to another prefix, while the rest of each path still identifies the component and its
 parameters. The [`cgp_namespace!` reference](/docs/reference/macros/cgp_namespace) gives the syntax
-for these grouped redirections.
+for these grouped redirections, and [Type-level tables](./type-level-tables.md#paths-as-keys)
+explains how a path is looked up as a single key.
 
 ## Binding shared choices
 
@@ -198,6 +199,8 @@ structure. An [aggregate provider](/docs/reference/glossary#aggregate-provider) 
 These pages cover simpler grouping and the namespace constructs:
 
 - [Aggregate providers](./aggregate-providers.md): Reusing selected groups of providers.
+- [Type-level tables](./type-level-tables.md): Path keys, and a namespace as a table written from the
+  key's side.
 - [Bypassing coherence](./coherence.md) and [Dispatching](./dispatching.md): Provider selection
   and per-type dispatch.
 - [`cgp_namespace!`](/docs/reference/macros/cgp_namespace): Namespace definitions and inheritance.
