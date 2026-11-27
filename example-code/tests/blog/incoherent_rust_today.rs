@@ -278,6 +278,40 @@ mod context_and_capabilities {
     }
 }
 
+mod zero_arity_traits {
+    use cgp::prelude::*;
+
+    #[cgp_component(GreetImpl)]
+    pub trait Greet {
+        fn greet(&self);
+    }
+
+    #[cgp_impl(new GreetHello)]
+    impl GreetImpl {
+        fn greet(&self, #[implicit] name: &String) {
+            println!("Hello, {}!", name);
+        }
+    }
+
+    // A context for the provider, which the post leaves out.
+    #[derive(HasField)]
+    pub struct Context {
+        pub name: String,
+    }
+
+    delegate_components! {
+        Context {
+            GreetImplComponent: GreetHello,
+        }
+    }
+
+    check_components! {
+        Context {
+            GreetImplComponent,
+        }
+    }
+}
+
 mod multiple_implementations_on_the_same_name {
     use cgp::prelude::*;
 
@@ -431,40 +465,6 @@ mod type_level_dsls {
         >,
         StreamToStdout,
     ]>;
-}
-
-mod zero_arity_traits {
-    use cgp::prelude::*;
-
-    #[cgp_component(GreetImpl)]
-    pub trait Greet {
-        fn greet(&self);
-    }
-
-    #[cgp_impl(new GreetHello)]
-    impl GreetImpl {
-        fn greet(&self, #[implicit] name: &String) {
-            println!("Hello, {}!", name);
-        }
-    }
-
-    // A context for the provider, which the post leaves out.
-    #[derive(HasField)]
-    pub struct Context {
-        pub name: String,
-    }
-
-    delegate_components! {
-        Context {
-            GreetImplComponent: GreetHello,
-        }
-    }
-
-    check_components! {
-        Context {
-            GreetImplComponent,
-        }
-    }
 }
 
 mod abstract_types {
