@@ -1,7 +1,7 @@
 ---
 title: 'Let each context choose a shared type'
 sidebar_label: 'Abstract types'
-sidebar_position: 5
+sidebar_position: 6
 description: 'How a context chooses an associated type through wiring, so providers share one scalar, error type, or runtime without adding a parameter at every call.'
 ---
 

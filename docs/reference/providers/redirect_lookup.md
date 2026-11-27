@@ -235,6 +235,7 @@ Bind the provider at the registered path, `@app.GreeterComponent: GreetHello`, a
 
 The ideas behind it:
 
+- [Type-level tables](/docs/concepts/type-level-tables) — paths as keys, and why a shorter key overlaps a longer one.
 - [Namespaces](/docs/concepts/namespaces) — reusable, inheritable wiring tables, which this provider
   implements.
 

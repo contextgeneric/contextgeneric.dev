@@ -1,7 +1,7 @@
 ---
 title: 'Reuse a group of wiring choices as one provider'
 sidebar_label: 'Aggregate providers'
-sidebar_position: 8
+sidebar_position: 9
 description: 'How a provider bundle records a group of wiring choices once, why a context delegates to it, and why a bundle must be checked through a real context.'
 ---
 

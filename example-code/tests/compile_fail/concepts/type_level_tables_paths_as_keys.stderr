@@ -1,0 +1,18 @@
+error[E0119]: conflicting implementations of trait `IsProviderFor<PathCons<ConverterComponent, PathCons<u8, PathCons<u64, _>>>, _, _>` for type `App`
+  --> tests/compile_fail/concepts/type_level_tables_paths_as_keys.rs:30:32
+   |
+29 |         @ConverterComponent.u8: ConvertFromU8,
+   |                             -- first implementation here
+30 |         @ConverterComponent.u8.u64: ConvertU8ToU64,
+   |                                ^^^ conflicting implementation for `App`
+   |
+   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<cgp::macro_prelude::PathCons<ConverterComponent, cgp::macro_prelude::PathCons<u8, cgp::macro_prelude::PathCons<u64, _>>>, _, _>` for type `ConvertFromU8`
+   = note: downstream crates may implement trait `cgp::macro_prelude::IsProviderFor<cgp::macro_prelude::PathCons<ConverterComponent, cgp::macro_prelude::PathCons<u8, cgp::macro_prelude::PathCons<u64, _>>>, _, _>` for type `ConvertU8ToU64`
+
+error[E0119]: conflicting implementations of trait `DelegateComponent<PathCons<ConverterComponent, PathCons<u8, PathCons<u64, _>>>>` for type `App`
+  --> tests/compile_fail/concepts/type_level_tables_paths_as_keys.rs:30:32
+   |
+29 |         @ConverterComponent.u8: ConvertFromU8,
+   |                             -- first implementation here
+30 |         @ConverterComponent.u8.u64: ConvertU8ToU64,
+   |                                ^^^ conflicting implementation for `App`

@@ -820,6 +820,8 @@ namespace itself binds: see [`cgp_namespace!`](./cgp_namespace.md#common-mistake
 
 The ideas behind it:
 
+- [Type-level tables](/docs/concepts/type-level-tables) — the table each entry becomes, and the path and namespace keys
+  it accepts.
 - [Bypassing coherence](/docs/concepts/coherence) — why a context chooses its providers through a
   table rather than through impls.
 - [Aggregate providers](/docs/concepts/aggregate-providers) — the `new`-keyword bundle, and why it

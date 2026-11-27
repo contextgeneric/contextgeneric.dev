@@ -323,6 +323,8 @@ not it.
 
 The ideas behind it:
 
+- [Type-level tables](/docs/concepts/type-level-tables): how this trait works as a compile-time map, and how a call
+  reaches its provider through it.
 - [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the split this table
   connects.
 - [Bypassing coherence](/docs/concepts/coherence): why the choice is recorded per context at all.

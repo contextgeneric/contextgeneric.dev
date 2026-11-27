@@ -1,7 +1,7 @@
 ---
 title: 'Share and inherit wiring with namespaces'
 sidebar_label: 'Namespaces'
-sidebar_position: 9
+sidebar_position: 10
 description: 'How a namespace names and routes shared wiring, how contexts inherit it while filling unbound paths, and why an inherited binding cannot be overridden.'
 ---
 

@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `HasEntry<Rectangle>` for type `AreaTable`
+  --> tests/compile_fail/concepts/type_level_tables_a_trait_as_a_map.rs:16:1
+   |
+11 | impl HasEntry<Rectangle> for AreaTable {
+   | -------------------------------------- first implementation here
+...
+16 | impl HasEntry<Rectangle> for AreaTable {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `AreaTable`

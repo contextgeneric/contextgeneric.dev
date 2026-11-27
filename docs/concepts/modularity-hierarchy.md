@@ -1,7 +1,7 @@
 ---
 title: 'When to use CGP, and when a plain trait is enough'
 sidebar_label: 'Modularity Hierarchy'
-sidebar_position: 18
+sidebar_position: 19
 description: 'How implementation choice grows from a shared blanket impl to providers selected per context and target, and how to pick the least complex tier your program needs.'
 ---
 

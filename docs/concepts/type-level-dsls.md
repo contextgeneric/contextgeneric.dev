@@ -1,7 +1,7 @@
 ---
 title: 'Represent a program as Rust types'
 sidebar_label: 'Type-level DSLs'
-sidebar_position: 16
+sidebar_position: 17
 description: 'How Rust types can represent a program, how providers give each syntax form meaning, and how the compiler resolves a whole expression through wiring.'
 ---
 
