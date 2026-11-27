@@ -295,8 +295,8 @@ ordinary trait impls used to represent wiring.
 
 These pages explain the static mechanisms and related comparisons:
 
-- [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): how a call reaches
-  its provider.
+- [Type-level tables](/docs/concepts/type-level-tables): how a call reaches its provider through a
+  compile-time table.
 - [Aggregate providers](/docs/concepts/aggregate-providers) and [Namespaces](/docs/concepts/namespaces):
   sharing and following wiring tables.
 - [Row polymorphism](./row-polymorphism.md): structural interfaces and field requirements.

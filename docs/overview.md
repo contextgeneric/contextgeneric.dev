@@ -91,8 +91,8 @@ Code that calls `fetch_storage_object` stays the same in all three contexts. Rus
 still apply to everything the macros generate. CGP only arranges the implementations so that they no
 longer conflict.
 [Bypassing coherence](/docs/concepts/coherence) explains the rules, and
-[Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) shows how a call reaches
-the chosen provider.
+[Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) explains the split behind it,
+and [Type-level tables](/docs/concepts/type-level-tables) shows how a call reaches the chosen provider.
 
 ### Zero-Cost Abstraction
 
