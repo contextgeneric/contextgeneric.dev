@@ -143,11 +143,11 @@ pub struct MyApp;
 
 delegate_components! {
     MyApp {
-        // Specialize SerializeImplComponent based on the generic parameters
+        // Choose a provider per value of the component's generic parameter
         open SerializeImplComponent;
 
-        // New path-based notation to specify the generic parameters as
-        // part of the component path.
+        // Path notation that names the generic parameter as part of the
+        // component path.
         @SerializeImplComponent.Person: SerializeWithDisplay,
     }
 }
@@ -563,7 +563,7 @@ fn main() {
 
 Set beside Nadrieril's versions, the CGP code shows its `Context` type acting as a type-level dictionary, with `delegate_components!` declaring its entries. Each entry plays the part of one of Nadrieril's dictionaries, and the context holds them all, so CGP already follows the programming model of dictionary-passing style closely. If the CGP code were rewritten in dictionary-passing style, the context would become a value-level dictionary instead, holding the other dictionaries as fields, nearly one for each `delegate_components!` entry.
 
-Every trait dictionary in that lowering would also take the context as an extra parameter, and each implementation would look up the others through it. The compiler would then need no fixed order for instantiating dictionaries or passing them to each other, because the context would be a single stable root from which every dependency can be reached. Nadrieril's example fixes its dictionaries at compile time, as the const generic in `CLONE_VEC` shows. Passing the context as a value at runtime instead would be a different design, one that would allow a form of dynamic scoping, in which the implementation of a trait depends on which context value is in scope at the call site.
+Every trait dictionary in that form would also take the context as an extra parameter, and each implementation would look up the others through it. The compiler would then need no fixed order for instantiating dictionaries or passing them to each other, because the context would be a single stable root from which every dependency can be reached. Nadrieril's example fixes its dictionaries at compile time, as the const generic in `CLONE_VEC` shows. Passing the context as a value at runtime instead would be a different design, one that would allow a form of dynamic scoping, in which the implementation of a trait depends on which context value is in scope at the call site.
 
 Whether those dependencies may form cycles is a separate question, the one that Nadrieril's cycles post and Niko Matsakis's series study, and CGP stops short of it. CGP's lookups are trait obligations, so a dependency that leads back to the instance being proved overflows the trait solver with `E0275`. Recursion through a different instance works: the `CloneVec` provider above needs `Clone<T>` for the element type, and that chain ends because the type is finite. A provider for a recursive type is different. A serializer for a linked list that serializes its tail through the context needs the very instance it is defining, and an expression interpreter that dispatches on its own expression type does too.
 
@@ -673,24 +673,7 @@ Passing the context through `&self` pays off here: the same value that selects t
 
 ### Zero-arity traits
 
-As we have seen, CGP desugars an incoherent trait into a CGP trait with an additional `Context` type, moving the original `Self` type into an explicit generic parameter. The incoherent trait:
-
-```rust title="Incoherent Rust"
-pub incoherent trait Serialize {
-    fn serialize(&self) -> String;
-}
-```
-
-becomes the CGP trait:
-
-```rust title="CGP"
-#[cgp_component(SerializeImpl)]
-pub trait Serialize<T> {
-    fn serialize(&self, value: &T) -> String;
-}
-```
-
-CGP code also commonly defines traits with no extra generic parameter, such as:
+As the section on [incoherent traits](#incoherent-traits) showed, CGP desugars an incoherent trait into a CGP trait whose `Self` is the context, moving the original `Self` type into a generic parameter, as `Serialize<T>` does. CGP code also commonly defines traits with no extra generic parameter, such as:
 
 ```rust title="CGP"
 #[cgp_component(GreetImpl)]
@@ -751,9 +734,9 @@ The biggest limitation is that a single context cannot easily supply mutable or 
 
 Changing the parameter to `&mut self` or `self` does not help either. The change would spread to every caller, forcing all methods to take `&mut self` or `self`, and it would significantly limit the order in which methods can be called, especially methods that return references borrowed from other parameters.
 
-Nadrieril's post also notes that capabilities holding `&mut` or owned values would require the Rust compiler to track their ownership through trait implementations, and to prevent multiple instantiations of trait implementations that would violate the ownership rules.
+Nadrieril's post also notes that trait bounds would then need ownership semantics: a dictionary that carries a `&mut` must not be passed to two functions at once, and its methods would implement `FnMut` or `FnOnce` rather than plain function pointers.
 
-A simple way around the problem is to disallow `&mut` and owned values as capabilities. After all, `RefCell`, `Arc<Mutex>`, and `Clone` already let code mutate or copy values from a borrowed context.
+A simple way around the problem, which Nadrieril also proposes, is to limit capabilities to `Copy` values and use interior mutability. After all, `RefCell`, `Arc<Mutex>`, and `Clone` already let code mutate or copy values from a borrowed context.
 
 But if Rust chooses to support `&mut` or owned values as capabilities too, it may need to pass each of them as a separate parameter, rather than grouping them in a single context.
 
@@ -1099,7 +1082,7 @@ pub trait HasNameType {
 }
 ```
 
-An abstract type is not tied to any particular value type. The ambient context chooses its concrete form. The earlier `GreetHello` implementation can use the abstract `Name` type instead:
+An abstract type is not tied to any particular value type. The context chooses its concrete form. The earlier `GreetHello` implementation can use the abstract `Name` type instead:
 
 ```rust title="CGP"
 #[cgp_impl(new GreetHello)]
@@ -1212,7 +1195,7 @@ Here, `UseFullNameType` is chosen as the incoherent implementation for `HasNameT
 
 #### Using abstract types across incoherent traits
 
-The `Name` example leaves open why an associated type on a zero-arity trait is better than one on an ordinary trait. Consider a `touch` function that sets the `last_modified` field of any type that supports it. With plain Rust traits, the time type either becomes an extra generic parameter, which still ties `touch` to `SystemTime::now()`, or becomes an associated type of `UpdateLastModified`, which gives every value type its own time type and clock, so swapping in a mock clock for a test means touching each of them.
+The `Name` example leaves open why an associated type on a zero-arity trait is better than one on an ordinary trait. Consider a `touch` function that sets the `last_modified` field of any type that supports it. With plain Rust traits, the time type either becomes an extra generic parameter, which still ties `touch` to `SystemTime::now()`, or becomes an associated type of `UpdateLastModified`, which gives every value type its own time type and clock, so swapping in a mock clock for a test means changing each of them.
 
 With zero-arity traits and Incoherent Rust, we can write the following instead:
 
