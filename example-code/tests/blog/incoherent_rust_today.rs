@@ -5,66 +5,7 @@
 //! `example-code-nightly`.
 #![allow(dead_code, unused_variables)]
 
-mod bypassing_overlapping_implementations {
-    use cgp::prelude::*;
-    use core::fmt::{Display, Error, Formatter};
-    use core::hash::Hasher;
-    #[cgp_component(HashImpl)]
-    pub trait Hash {
-        fn hash<H: Hasher>(&self, state: &mut H);
-    }
-
-    #[cgp_impl(new HashWithDisplay)]
-    #[uses(Display)]
-    impl HashImpl {
-        fn hash<H: Hasher>(&self, state: &mut H) {
-            core::hash::Hash::hash(&self.to_string(), state)
-        }
-    }
-
-    pub struct Person {
-        pub first_name: String,
-        pub last_name: String,
-    }
-
-    impl Display for Person {
-        fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-            write!(f, "{} {}", self.first_name, self.last_name)
-        }
-    }
-
-    delegate_components! {
-        Person {
-            HashImplComponent: HashWithDisplay,
-        }
-    }
-
-    check_components! {
-        Person {
-            HashImplComponent,
-        }
-    }
-
-    #[test]
-    fn person_hashes_like_its_display_string() {
-        use std::hash::{DefaultHasher, Hash as _, Hasher as _};
-
-        let person = Person {
-            first_name: "John".to_owned(),
-            last_name: "Smith".to_owned(),
-        };
-
-        let mut by_person = DefaultHasher::new();
-        Hash::hash(&person, &mut by_person);
-
-        let mut by_string = DefaultHasher::new();
-        "John Smith".to_owned().hash(&mut by_string);
-
-        assert_eq!(by_person.finish(), by_string.finish());
-    }
-}
-
-mod bypassing_orphan_implementations {
+mod bypassing_coherence {
     use cgp::prelude::*;
     use core::fmt::{Display, Error, Formatter};
     use serde::Serializer;
@@ -89,7 +30,7 @@ mod bypassing_orphan_implementations {
         }
     }
 
-    // `Person` as the post defines it in the previous section.
+    // `Person` as the post describes it: first and last name fields, with `Display`.
     pub struct Person {
         pub first_name: String,
         pub last_name: String,
@@ -348,125 +289,6 @@ mod multiple_implementations_on_the_same_name {
     }
 }
 
-mod grouping_named_impls {
-    use cgp::prelude::*;
-
-    pub struct Matrix;
-    pub struct Scalar;
-
-    #[cgp_component(SerializeImpl)]
-    pub trait Serialize<T> {
-        fn serialize(&self, value: &T) -> String;
-    }
-
-    #[cgp_component(DeserializeImpl)]
-    pub trait Deserialize<T> {
-        fn deserialize(&self, serialized: &str) -> T;
-    }
-
-    // The four providers the post names without defining.
-    #[cgp_impl(new MyMatrixSerialize)]
-    impl SerializeImpl<Matrix> {
-        fn serialize(&self, value: &Matrix) -> String {
-            "matrix".to_owned()
-        }
-    }
-
-    #[cgp_impl(new MyMatrixDeserialize)]
-    impl DeserializeImpl<Matrix> {
-        fn deserialize(&self, serialized: &str) -> Matrix {
-            Matrix
-        }
-    }
-
-    #[cgp_impl(new MyScalarSerialize)]
-    impl SerializeImpl<Scalar> {
-        fn serialize(&self, value: &Scalar) -> String {
-            "scalar".to_owned()
-        }
-    }
-
-    #[cgp_impl(new MyScalarDeserialize)]
-    impl DeserializeImpl<Scalar> {
-        fn deserialize(&self, serialized: &str) -> Scalar {
-            Scalar
-        }
-    }
-
-    delegate_components! {
-        new MyAppSerde {
-            open { SerializeImplComponent, DeserializeImplComponent };
-
-            @SerializeImplComponent.Matrix:
-                MyMatrixSerialize,
-            @DeserializeImplComponent.Matrix:
-                MyMatrixDeserialize,
-            @SerializeImplComponent.Scalar:
-                MyScalarSerialize,
-            @DeserializeImplComponent.Scalar:
-                MyScalarDeserialize,
-        }
-    }
-
-    // A context that delegates to the aggregate provider checks it.
-    pub struct App;
-
-    delegate_components! {
-        App {
-            [SerializeImplComponent, DeserializeImplComponent]: MyAppSerde,
-        }
-    }
-
-    check_components! {
-        App {
-            SerializeImplComponent: [Matrix, Scalar],
-            DeserializeImplComponent: [Matrix, Scalar],
-        }
-    }
-}
-
-mod higher_order_providers {
-    use cgp::prelude::*;
-    use core::marker::PhantomData;
-
-    #[cgp_component(SerializeImpl)]
-    pub trait Serialize<T> {
-        fn serialize(&self, value: &T) -> String;
-    }
-
-    // A higher-order provider is just a struct with phantom generic parameters
-    pub struct SerializeIterator<ItemSerializer>(pub PhantomData<ItemSerializer>);
-
-    #[cgp_impl(SerializeIterator<ItemSerializer>)]
-    // Inner provider import
-    #[use_provider(ItemSerializer: SerializeImpl<T::Item>)]
-    impl<T, ItemSerializer> SerializeImpl<T>
-    where
-        T: IntoIterator,
-    {
-        fn serialize(&self, value: &T) -> String {
-            // The post elides this body.
-            String::new()
-        }
-    }
-}
-
-mod type_level_dsls {
-    use hypershell::prelude::*;
-
-    // A Hypershell program is just a type containing higher order providers
-    pub type Program = Pipe<Product![
-        SimpleExec<
-            StaticArg<Symbol!("echo")>,
-            WithStaticArgs<Product![
-                Symbol!("hello"),
-                Symbol!("world!"),
-            ]>,
-        >,
-        StreamToStdout,
-    ]>;
-}
-
 mod abstract_types {
     use cgp::prelude::*;
     use core::fmt::Display;
@@ -488,50 +310,6 @@ mod abstract_types {
         fn greet(&self, #[implicit] name: &Name) {
             println!("Hello, {}!", name);
         }
-    }
-
-    pub struct FullName {
-        pub first_name: String,
-        pub last_name: String,
-    }
-
-    impl Display for FullName {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            write!(f, "{} {}", self.first_name, self.last_name)
-        }
-    }
-
-    #[derive(HasField)]
-    pub struct Context {
-        pub name: FullName,
-    }
-
-    delegate_components! {
-        Context {
-            NameTypeProviderComponent:
-                UseType<FullName>,
-            GreetImplComponent:
-                GreetHello,
-        }
-    }
-
-    check_components! {
-        Context {
-            GreetImplComponent,
-        }
-    }
-
-    #[test]
-    fn the_context_greets_with_its_full_name() {
-        let context = Context {
-            name: FullName {
-                first_name: "John".to_owned(),
-                last_name: "Smith".to_owned(),
-            },
-        };
-
-        // Prints "Hello, John Smith!"
-        context.greet();
     }
 }
 

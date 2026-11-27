@@ -51,61 +51,13 @@ CGP extends Rust with pluggable trait implementations: code is written generical
 
 This section covers only what the rest of the post needs. My RustLab 2025 talk, [**How to stop fighting with coherence and start writing context-generic trait impls**](/blog/rustlab-2025-coherence), explains the motivation in more depth. The website's [coherence](/docs/concepts/coherence), [consumer and provider traits](/docs/concepts/consumer-and-provider-traits), and [modularity hierarchy](/docs/concepts/modularity-hierarchy) pages explain the mechanism, and [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) shows the code each macro generates.
 
-### Bypassing overlapping implementations
+### Bypassing coherence
 
 CGP bypasses coherence restrictions at two levels.
 
-The first level lets a trait have multiple overlapping implementations, through a layer of indirection called a provider trait. For example, the [`Hash` trait](https://doc.rust-lang.org/std/hash/trait.Hash.html) could be redefined with CGP as follows:
+The first level lets a trait have multiple overlapping implementations, through a layer of indirection called a provider trait. The [`#[cgp_component]`](/docs/reference/macros/cgp_component) macro turns a trait into a component with its own provider trait, and each implementation becomes a named provider: a struct that is the `Self` type of its impl, so the impls cannot conflict with each other. A concrete context then chooses one provider per trait, one line each, through [`delegate_components!`](/docs/reference/macros/delegate_components), which turns the wiring into a type-level lookup table, written as impls of the [`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) trait. The [Bypassing coherence](/docs/concepts/coherence) page walks through this level with an encoder example, and [Type-level tables](/docs/concepts/type-level-tables) explains how the compiler looks the table up.
 
-```rust
-#[cgp_component(HashImpl)]
-pub trait Hash {
-    fn hash<H: Hasher>(&self, state: &mut H);
-}
-```
-
-The main difference from the original definition is the [`#[cgp_component]`](/docs/reference/macros/cgp_component) macro. It generates a provider trait called `HashImpl`, along with the constructs that let overlapping implementations coexist. With it, we can define an implementation that hashes through `Display`:
-
-```rust
-#[cgp_impl(new HashWithDisplay)]
-#[uses(Display)]
-impl HashImpl {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        core::hash::Hash::hash(&self.to_string(), state)
-    }
-}
-```
-
-The [`#[cgp_impl]`](/docs/reference/macros/cgp_impl) macro implements the `HashImpl` provider trait on a new named provider, `HashWithDisplay`, for any context that implements `Display`. In the generated code, `HashWithDisplay` is the `Self` type of that impl, so the impl cannot conflict with other implementations of `HashImpl`, each of which has its own provider as `Self`.
-
-A concrete context then needs one more step, wiring through [`delegate_components!`](/docs/reference/macros/delegate_components):
-
-```rust
-pub struct Person {
-    pub first_name: String,
-    pub last_name: String,
-}
-
-impl Display for Person {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
-        write!(f, "{} {}", self.first_name, self.last_name)
-    }
-}
-
-delegate_components! {
-    Person {
-        HashImplComponent: HashWithDisplay,
-    }
-}
-```
-
-The `delegate_components!` macro turns this wiring into a type-level lookup table, written as impls of the [`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) trait. The blanket implementations that `#[cgp_component]` generated then look up that table at compile time and implement `Hash` for `Person` through `HashWithDisplay`. Any number of overlapping providers can be defined this way, and each context selects the ones it reuses, one line per trait.
-
-### Bypassing orphan implementations
-
-This first level bypasses the overlap rule, but not the orphan rule. To implement a trait like `Hash`, the `delegate_components!` call must still live in a crate that owns either `Person` or the trait.
-
-So this level alone does not solve the ecosystem evolution problem that [**Incoherent Rust**](https://www.boxyuwu.blog/posts/an-incoherent-rust/) addresses. As my [**RustLab presentation**](/blog/rustlab-2025-coherence) explains, though, CGP has a more advanced pattern that handles overlapping and orphan implementations together: a new type parameter becomes the context, in the `Self` position, and the original `Self` type moves into a generic parameter of the consumer trait.
+This first level bypasses the overlap rule, but not the orphan rule: the wiring must still live in a crate that owns either the context or the trait. So this level alone does not solve the ecosystem evolution problem that [**Incoherent Rust**](https://www.boxyuwu.blog/posts/an-incoherent-rust/) addresses. As my [**RustLab presentation**](/blog/rustlab-2025-coherence) explains, though, CGP has a more advanced pattern that handles overlapping and orphan implementations together: a new type parameter becomes the context, in the `Self` position, and the original `Self` type moves into a generic parameter of the consumer trait.
 
 For example, a fully incoherent version of serde's `Serialize` would be defined as follows:
 
@@ -120,7 +72,7 @@ pub trait Serialize<T> {
 }
 ```
 
-Compared to serde's definition, this version uses an additional `Context` type as `Self` and moves the original `Self` type to the generic `T` parameter. A `Display`-based provider then takes the value as an argument:
+Compared to serde's definition, this version uses an additional `Context` type as `Self` and moves the original `Self` type to the generic `T` parameter. A `Display`-based provider, written with [`#[cgp_impl]`](/docs/reference/macros/cgp_impl), then takes the value as an argument:
 
 ```rust
 #[cgp_impl(new SerializeWithDisplay)]
@@ -135,7 +87,7 @@ impl<T: Display> SerializeImpl<T> {
 }
 ```
 
-Implementations of this `Serialize` are wired on a central context type, which does not need to live in the same crate as the value type or the trait:
+Implementations of this `Serialize` are wired on a central context type, which does not need to live in the same crate as the value type or the trait. Here the value type is `Person`, a struct with first and last name fields that implements `Display`:
 
 ```rust
 // inside a third party crate
@@ -157,11 +109,7 @@ The [`open` statement](/docs/reference/macros/delegate_components#choosing-a-pro
 
 With this approach, third-party crates can define their own contexts like `MyApp`, and locally rewire the `Serialize` implementation for a value type without affecting global coherence. The [modularity hierarchy](/docs/concepts/modularity-hierarchy#tier-4-one-provider-per-target-type) page explains this pattern in more depth, as one tier among the ways CGP can arrange contexts and providers.
 
-#### Does CGP truly solve the orphan rules problem?
-
-CGP bypasses Rust's coherence restrictions by adding a context type in the `Self` position. The added context type only partly solves the orphan rules problem, because every trait involved must adopt CGP and include the context parameter in its definition.
-
-So CGP's approach cannot be applied to existing traits like `serde::Serialize` without breaking changes across the entire Rust ecosystem. It suits new traits well, though, since they can take the context parameter from the start without breaking anything.
+The added context type only partly solves the orphan rules problem, though. Every trait involved must adopt CGP and include the context parameter in its definition, so the approach cannot be applied to existing traits like `serde::Serialize` without breaking changes across the entire Rust ecosystem. It suits new traits well, since they can take the context parameter from the start without breaking anything.
 
 ### CGP as a library or as language sugar
 
@@ -335,7 +283,7 @@ The constant stays an associated constant, since a CGP component can declare one
 
 `do_stuff` takes `&self` because the context type, `Self`, carries the implementation choice at the type level. As we will see later, the same `&self` can also carry runtime values, which makes context-generic functions suitable for expressing contexts and capabilities.
 
-### Use of incoherent trait bounds within a struct
+### Binding an implementation to a struct
 
 Boxy's blog post also discusses binding an incoherent trait implementation directly to a struct, so that the same implementation is always used whenever that struct is passed around:
 
@@ -405,11 +353,9 @@ Because the `Context` type is part of the struct's type signature, a value of ty
 
 This property is especially useful for the hash table problem that Boxy's post raises. A hash map can include the `Context` type in its definition, becoming `HashMap<Context, Key, Value>`, to ensure that the same `Hash` implementation is always used when inserting or looking up entries.
 
-### Impl-specific bindings within a struct
-
 One downside of binding the full `Context` type to a struct is that two contexts with identical provider wirings are still different types. The difference gets in the way when you want to share a struct value across modules or functions that use different contexts.
 
-An alternative is to bind a specific provider type to the struct rather than a full context. CGP supports this binding through [higher-order providers](/docs/concepts/higher-order-providers), where the provider type itself is a generic parameter of the struct:
+An alternative is to bind a specific provider type to the struct rather than a full context. The provider type becomes a generic parameter of the struct, and a CGP function binds it the way a [higher-order provider](/docs/concepts/higher-order-providers#a-provider-carried-by-a-value) binds its inner provider:
 
 ```rust title="CGP"
 pub struct Foo<NameProvider, T> {
@@ -449,49 +395,11 @@ The trade-off is that this approach only fixes the binding for one specific trai
 
 In the desugared CGP code of the previous sections, the additional generic `Context` type works in a similar way to the dictionaries described in Nadrieril's post on [**Elaborating Rust Traits to Explicit Trait Proofs**](https://nadrieril.github.io/blog/2026/03/20/dictionary-passing-style.html).
 
-That post rewrites Rust code in dictionary-passing style. For example, given:
-
-```rust title="Rust"
-trait Clone {
-    fn clone(&self) -> Self;
-}
-
-impl Clone for u32 { ... }
-impl<T: Clone> Clone for Vec<T> { ... }
-
-let my_vec: Vec<u32> = vec![0, 1, 2];
-my_vec.clone(); // uses the two impls above together
-```
-
-the post rewrites it as follows:
-
-```rust title="Dictionary-passing style"
-struct Clone<Self> {
-    clone: fn(&Self) -> Self,
-}
-
-const CLONE_U32: Clone<u32> = Clone {
-    clone: |x: &u32| -> u32 { *x },
-}
-
-// I'm imagining generic consts because why not. See how the trait bound becomes a
-// const generic argument.
-const CLONE_VEC<T, const CLONE_T: Clone<T>>: Clone<Vec<T>> = Clone {
-    clone: |vec: &Vec<T>| -> Vec<T> { // Dummy clone impl, it's probably not even that bad
-        vec
-            .iter()
-            .map(|x: &T| CLONE_T.clone(x))
-            .collect()
-    }
-}
-
-let my_vec: Vec<u32> = vec![0, 1, 2];
-(CLONE_VEC::<u32, CLONE_U32>).clone(&my_vec);
-```
+That post rewrites Rust code in dictionary-passing style: a trait becomes a struct of function pointers, each impl becomes a constant of that struct, and a trait bound becomes a const generic argument that passes one of those constants along.
 
 ### Context-aware dictionaries
 
-Suppose that we want to combine the earlier ideas and make `Clone` an incoherent trait. Nadrieril's post also writes the `Clone` example in made-up notation for explicit trait proofs, which names each impl and passes it explicitly:
+Suppose that we want to combine the earlier ideas and make `Clone` an incoherent trait. Nadrieril's post writes a `Clone` example in made-up notation for explicit trait proofs, which names each impl and passes it explicitly:
 
 ```rust title="Explicit trait proofs"
 trait Clone {
@@ -559,13 +467,11 @@ fn main() {
 }
 ```
 
-Set beside Nadrieril's versions, the CGP code shows its `Context` type acting as a type-level dictionary, with `delegate_components!` declaring its entries. Each entry plays the part of one of Nadrieril's dictionaries, and the context holds them all, so CGP already follows the programming model of dictionary-passing style closely. If the CGP code were rewritten in dictionary-passing style, the context would become a value-level dictionary instead, holding the other dictionaries as fields, nearly one for each `delegate_components!` entry.
+Set beside Nadrieril's version, the CGP code shows its `Context` type acting as a type-level dictionary, with `delegate_components!` declaring its entries. Each entry plays the part of one of Nadrieril's dictionaries, and the context holds them all, so CGP already follows the programming model of dictionary-passing style closely. If the CGP code were rewritten in dictionary-passing style, the context would become a value-level dictionary instead, holding the other dictionaries as fields, nearly one for each `delegate_components!` entry.
 
-Every trait dictionary in that form would also take the context as an extra parameter, and each implementation would look up the others through it. The compiler would then need no fixed order for instantiating dictionaries or passing them to each other, because the context would be a single stable root from which every dependency can be reached. Nadrieril's example fixes its dictionaries at compile time, as the const generic in `CLONE_VEC` shows. Passing the context as a value at runtime instead would be a different design, one that would allow a form of dynamic scoping, in which the implementation of a trait depends on which context value is in scope at the call site.
+Every trait dictionary in that form would also take the context as an extra parameter, and each implementation would look up the others through it. The compiler would then need no fixed order for instantiating dictionaries or passing them to each other, because the context would be a single stable root from which every dependency can be reached. Nadrieril's dictionary-passing example fixes its dictionaries at compile time, passing each one as a const generic argument. Passing the context as a value at runtime instead would be a different design, one that would allow a form of dynamic scoping, in which the implementation of a trait depends on which context value is in scope at the call site.
 
-Whether those dependencies may form cycles is a separate question, the one that Nadrieril's cycles post and Niko Matsakis's series study, and CGP stops short of it. CGP's lookups are trait obligations, so a dependency that leads back to the instance being proved overflows the trait solver with `E0275`. Recursion through a different instance works: the `CloneVec` provider above needs `Clone<T>` for the element type, and that chain ends because the type is finite. A provider for a recursive type is different. A serializer for a linked list that serializes its tail through the context needs the very instance it is defining, and an expression interpreter that dispatches on its own expression type does too.
-
-Today's workaround is a provider written for the concrete context, without the bound that leads back to itself, as the [dispatch layers page](/docs/projects/cgp-examples/expression/architecture/dispatch-layers) explains. The compiler accepts such a provider, and experiments suggest the reason is that the compiler can check the impl from its header alone. The workaround costs one hand-written impl per context and per operation, though. So recursive providers are a concrete use case for the cyclic impls that Nadrieril and Niko Matsakis study. The linked list has the shape of perfect derive, the motivating example in Niko Matsakis's series, and sound cyclic impls of that kind could remove the workaround.
+Whether those dependencies may form cycles is a separate question, the one that Nadrieril's cycles post and Niko Matsakis's series study, and CGP stops short of it. CGP's lookups are trait obligations, so a provider that needs the very instance it is defining overflows the trait solver with `E0275`. A serializer for a linked list that serializes its tail through the context needs exactly that, and so does an expression interpreter that dispatches on its own expression type. Today's workaround is a provider written for the concrete context, which costs one hand-written impl per context and per operation; [Rust's own proposals](/docs/comparisons/rust-language-proposals#the-context-as-a-dictionary) explains the limit and the workaround. So recursive providers are a concrete use case for the cyclic impls that Nadrieril and Niko Matsakis study. The linked list has the shape of perfect derive, the motivating example in Niko Matsakis's series, and sound cyclic impls of that kind could remove the workaround.
 
 ### Contexts and capabilities
 
@@ -611,8 +517,7 @@ impl<'de, 'a> ValueDeserializer<'de, &'a Foo> {
     fn deserialize<D>(
         &self,
         // The arena is "passed" as an implicit argument through the context.
-        // The double reference (&&) arises because implicit arguments always
-        // borrow from `&self`, and the field's type is itself already a reference.
+        // Its field already holds a reference, which the argument borrows as `&&`.
         #[implicit] arena: &&'a Arena<Foo>,
         deserializer: D,
     ) -> Result<&'a Foo, D::Error>
@@ -680,7 +585,7 @@ pub trait Greet {
 }
 ```
 
-These traits are what Nadrieril, in [**Capabilities using Plain Traits**](https://nadrieril.github.io/blog/2026/06/07/capabilities-with-plain-traits.html), calls *selfless traits*: traits without a `Self` type, which he writes with a `#[selfless]` attribute. His selfless traits state facts about the environment, such as `Unix`, and he notes that a capability is "just a ZST context". The platform fixes those facts, while an incoherent selfless trait would leave its implementation to the context. In Incoherent Rust, the `Greet` trait above would be such a zero-arity trait. The Incoherent Rust snippets in this section are my own sketches, combining Boxy's named impls with Nadrieril's `#[selfless]` attribute:
+These traits are what Nadrieril, in [**Capabilities using Plain Traits**](https://nadrieril.github.io/blog/2026/06/07/capabilities-with-plain-traits.html), calls *selfless traits*: traits without a `Self` type, which he writes with a `#[selfless]` attribute. His selfless traits state facts about the environment, such as `Unix`, and he notes that a capability is "just a ZST context", calling his capability traits "a bit of an effect system". The platform fixes those facts, while an incoherent selfless trait would leave its implementation to the context. In Incoherent Rust, the `Greet` trait above would be such a zero-arity trait. The Incoherent Rust snippets in this section are my own sketches, combining Boxy's named impls with Nadrieril's `#[selfless]` attribute:
 
 ```rust title="Incoherent Rust"
 #[selfless]
@@ -773,7 +678,7 @@ Supporting such scoped bindings through a single context type might lead to some
 
 I point out the resemblance not to advocate OOP-style inheritance in Rust, but to show that supporting this kind of binding may bring inheritance-like behavior into Rust code.
 
-CGP already has a static form of this inheritance for wiring. A [namespace](/docs/concepts/namespaces) lets a context inherit a shared table and fill in the entries it leaves unbound, but a context cannot replace an inherited binding: a direct entry for a key the namespace binds overlaps the namespace's forwarding impl and fails with `E0119`. Scoped impls need exactly that override.
+CGP already has a static form of this inheritance for wiring: a [namespace](/docs/concepts/namespaces) lets a context inherit a shared table, but a context [cannot replace a binding it inherits](/docs/concepts/namespaces#overriding-a-bound-entry), and scoped impls need exactly that override.
 
 Readers who know Scala may notice that this kind of code strongly resembles Scala's [implicit parameters](/docs/comparisons/implicit-parameters), which Rust might not want to support. CGP's implicit arguments differ from them: every implicit argument must come from one flattened context type.
 
@@ -837,24 +742,7 @@ impl MyAppSerde = Serialize for Scalar = MyScalarSerialize;
 impl MyAppSerde = Deserialize for Scalar = MyScalarDeserialize;
 ```
 
-CGP has dedicated notation for such grouping in `delegate_components!`:
-
-```rust title="CGP"
-delegate_components! {
-    new MyAppSerde {
-        open { SerializeImplComponent, DeserializeImplComponent };
-
-        @SerializeImplComponent.Matrix:
-            MyMatrixSerialize,
-        @DeserializeImplComponent.Matrix:
-            MyMatrixDeserialize,
-        @SerializeImplComponent.Scalar:
-            MyScalarSerialize,
-        @DeserializeImplComponent.Scalar:
-            MyScalarDeserialize,
-    }
-}
-```
+CGP has dedicated notation for such grouping: `delegate_components!` with the `new` keyword declares the aggregate provider and its table in one block, and an `open` statement inside it keys each entry by component and value type, as in `@SerializeImplComponent.Matrix: MyMatrixSerialize`.
 
 #### Higher-order providers
 
@@ -873,42 +761,13 @@ where
 
 Here the named impl `SerializeIterator` takes an inner named impl, `ItemSerializer`, which serializes the `<T as IntoIterator>::Item` type.
 
-In CGP, it becomes:
-
-```rust title="CGP"
-// A higher-order provider is just a struct with phantom generic parameters
-pub struct SerializeIterator<ItemSerializer>(pub PhantomData<ItemSerializer>);
-
-#[cgp_impl(SerializeIterator<ItemSerializer>)]
-// Inner provider import
-#[use_provider(ItemSerializer: SerializeImpl<T::Item>)]
-impl<T, ItemSerializer> SerializeImpl<T>
-where
-    T: IntoIterator,
-{ ... }
-```
+In CGP, `SerializeIterator<ItemSerializer>` is a plain struct with the inner provider as a phantom type parameter, and its implementation binds that parameter with `#[use_provider]`, as the higher-order providers page shows with a scaling wrapper.
 
 #### Type-level DSLs
 
 Since CGP's named implementations are just types, higher-order providers also enable design patterns that go beyond what the current sketches of Incoherent Rust describe. [Hypershell](/docs/projects/hypershell/), for example, uses higher-order providers to build a type-level DSL for shell scripting in Rust, a pattern the [type-level DSLs](/docs/concepts/type-level-dsls) page explains.
 
-After desugaring, a DSL program is a plain Rust type:
-
-```rust title="CGP"
-// A Hypershell program is just a type containing higher-order providers
-pub type Program = Pipe<Product![
-    SimpleExec<
-        StaticArg<Symbol!("echo")>,
-        WithStaticArgs<Product![
-            Symbol!("hello"),
-            Symbol!("world!"),
-        ]>,
-    >,
-    StreamToStdout,
-]>;
-```
-
-This type corresponds to the shell command `echo hello world!`. If Incoherent Rust treats named implementations differently from Rust types, such type-level DSLs would be much more difficult to build from named impls.
+After desugaring, a Hypershell program is a plain Rust type: the shell command `echo hello world!` becomes a `Pipe` of higher-order providers that names the command, its arguments as type-level strings, and where its output goes. If Incoherent Rust treats named implementations differently from Rust types, such type-level DSLs would be much more difficult to build from named impls.
 
 ### Contexts as explicit types
 
@@ -1023,51 +882,11 @@ Together, incoherent functions set up an incoherent world, isolated from the coh
 
 This separation between the incoherent and coherent worlds is essential, because it simplifies the semantics and creates a clear boundary for where the bindings for incoherent implementations can be specified.
 
-In CGP, the incoherent world is any code that works with a generic context. The earlier functions, for instance, desugar into blanket implementations as follows:
-
-```rust title="Rust"
-pub trait DoStuff<T> {
-    fn do_stuff(&self, foo: &Foo<T>);
-}
-
-impl<Context, T> DoStuff<T> for Context
-where
-    Context: Name<T>,
-{
-    fn do_stuff(&self, foo: &Foo<T>) {
-        println!("{}", Self::NAME);
-    }
-}
-
-pub trait DoMoreStuff<T> {
-    fn do_more_stuff(&self, foo: &Foo<T>);
-}
-
-impl<Context, T> DoMoreStuff<T> for Context
-where
-    Context: DoStuff<T>,
-{
-    fn do_more_stuff(&self, foo: &Foo<T>) {
-        self.do_stuff(foo);
-    }
-}
-```
-
-Incoherent functions thus desugar into traits with blanket implementations over a generic context, and impl-side dependencies hide the dependencies on other CGP functions behind each trait's interface. In CGP, the boundary between the two worlds lies where a top-level context type is defined. Once that type is defined, every incoherent binding is final, and we are back in the coherent world, which needs no generic context.
+In CGP, the incoherent world is any code that works with a generic context. Each `#[cgp_fn]` function desugars into a trait with a blanket implementation over the context, as [Impl-side dependencies](/docs/concepts/impl-side-dependencies) explains, and those impl-side dependencies hide each function's use of other CGP functions behind its trait's interface. The boundary between the two worlds lies where a top-level context type is defined. Once that type is defined, every incoherent binding is final, and we are back in the coherent world, which needs no generic context.
 
 As noted earlier, this clean separation holds only without dynamically scoped impls and capabilities. A full version of Incoherent Rust may not keep such a clear boundary, and its semantics would then differ considerably from CGP's.
 
-#### Incoherence as coeffect
-
-For readers familiar with monads and algebraic effects, the incoherent world of a generic context can be understood as a form of effect, or more precisely, a [**coeffect**](https://tomasp.net/coeffects/). Nadrieril makes a similar observation in **Capabilities using Plain Traits**, calling its capability traits "a bit of an effect system".
-
-In CGP, each incoherent trait definition can be thought of as defining a new kind of effect, and each provider as a handler for that effect. Defining concrete contexts and binding incoherent implementations through `delegate_components!` plays the same role as defining concrete monads and configuring effect handlers in the algebraic effects systems of functional languages like Haskell. The bindings handle the incoherence effects by delegating them to providers, and the result is code that runs coherently within a fixed context, much as a computation returns a pure value once all its effects are handled.
-
-That said, the effect system implied by CGP is considerably more limited than a full algebraic effects system. CGP does not capture continuations, so the correspondence covers only handlers that resume once, in place, as the [algebraic effects comparison](/docs/comparisons/algebraic-effects) explains.
-
-CGP also departs from algebraic effects in what a handler can supply. Through associated types, a CGP context also chooses *abstract types*, while the effect systems that comparison covers pass operations and values through their handlers, not types.
-
-These observations point toward a better fit in the coeffects framework, which studies how contextual requirements flow through a computation rather than how computational effects flow out of it. Where effects describe what a computation produces or performs, coeffects describe what a computation requires from its environment. The generic context in CGP plays exactly this role: it carries the implementation choices and values that a computation depends on, and those dependencies are resolved all at once when a concrete context is defined. A full introduction to coeffects is beyond this post, but readers interested in the theory behind CGP may find the connection useful.
+For readers familiar with monads and algebraic effects, the incoherent world of a generic context can be understood as a form of effect, or more precisely as a coeffect, which describes what a computation requires from its environment. The [algebraic effects comparison](/docs/comparisons/algebraic-effects#coeffects) develops that reading.
 
 ### Abstract types
 
@@ -1097,48 +916,7 @@ impl GreetImpl {
 
 The `name` parameter now has the abstract type `HasNameType::Name` instead of a hardcoded `String`, so the same provider works with whichever name type the context wires in.
 
-For example, we can define a `FullName` type and use it as the concrete `Name`:
-
-```rust
-pub struct FullName {
-    pub first_name: String,
-    pub last_name: String,
-}
-
-impl Display for FullName {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{} {}", self.first_name, self.last_name)
-    }
-}
-
-#[derive(HasField)]
-pub struct Context {
-    pub name: FullName,
-}
-
-delegate_components! {
-    Context {
-        NameTypeProviderComponent:
-            UseType<FullName>,
-        GreetImplComponent:
-            GreetHello,
-    }
-}
-
-fn main() {
-    let context = Context {
-        name: FullName {
-            first_name: "John".to_owned(),
-            last_name: "Smith".to_owned(),
-        },
-    };
-
-    // Prints "Hello, John Smith!"
-    context.greet();
-}
-```
-
-The `Context` type wires `FullName` as the concrete `Name` through `NameTypeProviderComponent`, and wires `GreetHello` as the greeting implementation. Because `GreetHello` uses `HasNameType::Name` rather than a hardcoded `String`, it works with `FullName` without any change to the provider.
+A context then chooses the concrete type in its wiring through `UseType`, such as a `FullName` struct with first and last name fields, as the abstract types page shows.
 
 #### Abstract types in Incoherent Rust
 
@@ -1290,15 +1068,11 @@ This post has explored how CGP relates to the discussion of dictionary-passing s
 
 #### A testing ground for Incoherent Rust
 
-The most direct takeaway is that CGP already lets programmers try, on stable Rust, many of the ideas in Boxy's blog post. By making a generic context type the `Self` type of each consumer trait, and an explicit parameter of its provider trait, CGP lets multiple overlapping trait implementations coexist without violating Rust's coherence rules. Named implementations become regular Rust provider structs, and the choice among them is made once, on a concrete context type, through `delegate_components!`.
-
-This makes CGP a place to experiment with Incoherent Rust before the language supports it. CGP's design has been refined across several releases and used in projects such as cgp-serde and Hypershell, so its patterns have already met real code. CGP does not show how the compiler should implement these features: with explicit trait proofs, the compiler could desugar named impls into proofs directly, without going through CGP's traits. What CGP can show is how code written in this style feels in practice, and which features real programs come to need.
+The most direct takeaway is that CGP already lets programmers try, on stable Rust, many of the ideas in Boxy's blog post: overlapping implementations become named providers, and a concrete context chooses among them through `delegate_components!`. CGP's design has been refined across several releases and used in projects such as cgp-serde and Hypershell, so its patterns have already met real code. CGP does not show how the compiler should implement these features: with explicit trait proofs, the compiler could desugar named impls into proofs directly, without going through CGP's traits. What CGP can show is how code written in this style feels in practice, and which features real programs come to need.
 
 #### Trying contexts and capabilities today
 
-CGP's support for implicit arguments and field-carrying context types also provides a way to try Tyler Mandry's contexts and capabilities proposal today. Rather than threading runtime values through an ambient implicit scope, CGP passes them as fields in a concrete context struct, and provider implementations retrieve those values through [`HasField`](/docs/reference/traits/field-access/has_field) and implicit arguments.
-
-As the arena-backed `Deserialize` example shows, this approach covers the core use case of capabilities. The context struct acts as a typed, locally scoped carrier for both trait implementations and runtime values, and provider code can access those values without needing to know the concrete context type in advance.
+CGP's implicit arguments and field-carrying contexts also provide a way to try Tyler Mandry's contexts and capabilities proposal today. Rather than threading runtime values through an ambient implicit scope, CGP passes them as fields of a concrete context, which providers read through [`HasField`](/docs/reference/traits/field-access/has_field) and implicit arguments. As the arena-backed `Deserialize` example shows, this covers the core use case of capabilities.
 
 ### What CGP partially solves
 

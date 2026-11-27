@@ -64,7 +64,7 @@ mod using_incoherent_trait_bounds {
     }
 }
 
-mod use_of_incoherent_trait_bounds_within_a_struct {
+mod binding_an_implementation_to_a_struct {
     use cgp::prelude::*;
     use core::marker::PhantomData;
 
@@ -124,7 +124,8 @@ mod use_of_incoherent_trait_bounds_within_a_struct {
     }
 }
 
-mod impl_specific_bindings_within_a_struct {
+/// The same section's provider binding, the alternative to binding the whole context.
+mod binding_an_implementation_to_a_struct_by_provider {
     use cgp::prelude::*;
     use core::marker::PhantomData;
 
@@ -193,37 +194,6 @@ mod incoherent_functions {
     #[uses(DoStuff<T>)]
     pub fn do_more_stuff<T>(&self, foo: &Foo<T>) {
         self.do_stuff(foo);
-    }
-
-    /// The post's hand-written rendering of what the two functions expand to.
-    mod expansion {
-        use super::{Foo, Name};
-
-        pub trait DoStuff<T> {
-            fn do_stuff(&self, foo: &Foo<T>);
-        }
-
-        impl<Context, T> DoStuff<T> for Context
-        where
-            Context: Name<T>,
-        {
-            fn do_stuff(&self, foo: &Foo<T>) {
-                println!("{}", Self::NAME);
-            }
-        }
-
-        pub trait DoMoreStuff<T> {
-            fn do_more_stuff(&self, foo: &Foo<T>);
-        }
-
-        impl<Context, T> DoMoreStuff<T> for Context
-        where
-            Context: DoStuff<T>,
-        {
-            fn do_more_stuff(&self, foo: &Foo<T>) {
-                self.do_stuff(foo);
-            }
-        }
     }
 
     #[test]
