@@ -54,14 +54,15 @@ visible:
 cgp_namespace! { new AppNamespace {} }
 
 #[cgp_component(Greeter)]
-#[prefix(@app.GreeterComponent in AppNamespace)]
+#[prefix(@app in AppNamespace)]
 pub trait CanGreet {
     fn greet(&self) -> String;
 }
 ```
 
-`AppNamespace` routes requests for the greeter through `@app.GreeterComponent`. A context joins the
-namespace and supplies the provider at that path:
+`AppNamespace` routes requests for the greeter through `@app.GreeterComponent`: the attribute names
+the prefix, and the macro appends the component's marker to it. A context joins the namespace and
+supplies the provider at that path:
 
 ```rust
 delegate_components! {
@@ -81,8 +82,34 @@ entries no priority.
 The route can also cover a group of components. Redirecting a shared prefix sends the subsystem's
 lookups to another prefix, while the rest of each path still identifies the component and its
 parameters. The [`cgp_namespace!` reference](/docs/reference/macros/cgp_namespace) gives the syntax
-for these grouped redirections, and [Type-level tables](./type-level-tables.md#paths-as-keys)
-explains how a path is looked up as a single key.
+for these grouped redirections, and [Presets and per-type dispatch](#presets-and-per-type-dispatch)
+shows how a path is looked up as a single key.
+
+## Registering from the component's side
+
+A namespace is a table written from the other side. In a context's own wiring table, the context is
+the implementing type, so only the crate that owns the context can add an entry for a key it does
+not own. A namespace entry instead implements the namespace trait for the key, with the table left
+as a parameter. The greeter's `#[prefix(@app in AppNamespace)]` produces an implementation like this
+one, shown with a readable name for the table parameter:
+
+```rust
+impl<Table> AppNamespace<Table> for GreeterComponent {
+    type Delegate = RedirectLookup<Table, Path!(@app.GreeterComponent)>;
+}
+```
+
+Because this implementation is for the component marker, the crate that defines the component can
+register its route in a namespace that it does not own, for every context that later joins.
+Registered defaults follow the same [orphan rule](/docs/reference/glossary#orphan-rule) more
+narrowly: [`#[default_impl]`](/docs/reference/attributes/default_impl) needs the crate to own the
+namespace, or a local type before the table parameter, such as the key or a component named in the
+namespace path.
+
+Joining turns the direction around again. `namespace AppNamespace;` adds one blanket entry to the
+context's table that forwards every key the namespace answers, which is why a direct entry for a key
+the namespace binds overlaps it, as [Overriding a bound entry](#overriding-a-bound-entry) shows. A
+`for … in` loop in `delegate_components!` copies registered defaults into a context's table.
 
 ## Binding shared choices
 
@@ -174,6 +201,32 @@ provider for `String`. This uses path routing without requiring a shared namespa
 component has a namespace prefix, however, its lookups already follow that prefixed route. Entries
 must use the full path, because opening its bare name does not reach them.
 
+Each of these keys is a path. The `open` statement routes the component to
+[`RedirectLookup`](/docs/reference/providers/redirect_lookup), a provider that every component
+already has. It appends each of the component's type parameters to the path and looks the whole path
+up in the context's table, in one query. A path entry ends in a generic tail, so a key matches every
+longer path beneath it, and a shorter key beside a longer one gives two answers for the same lookup.
+With a converter component that takes a source and a target type, this table is rejected:
+
+```rust
+delegate_components! {
+    App {
+        open ConverterComponent;
+
+        // The shorter key matches every path beneath it, `@ConverterComponent.u8.u64` included.
+        @ConverterComponent.u8: ConvertFromU8,
+        @ConverterComponent.u8.u64: ConvertU8ToU64,
+    }
+}
+// error[E0119]: conflicting implementations of trait
+//               `DelegateComponent<PathCons<ConverterComponent, PathCons<u8, PathCons<u64, _>>>>`
+//               for type `App`
+```
+
+The table has no rule that the most specific entry wins, so each lookup must have exactly one key that
+matches it. A generic segment, such as `<Target> Target` in a key's last position, likewise matches
+every type there.
+
 ## What it costs
 
 Binding a shared key commits every joining context to that choice. If a later context needs a
@@ -199,8 +252,8 @@ structure. An [aggregate provider](/docs/reference/glossary#aggregate-provider) 
 These pages cover simpler grouping and the namespace constructs:
 
 - [Aggregate providers](./aggregate-providers.md): Reusing selected groups of providers.
-- [Type-level tables](./type-level-tables.md): Path keys, and a namespace as a table written from the
-  key's side.
+- [Type-level tables](./type-level-tables.md): How a trait works as a compile-time table, in plain
+  Rust.
 - [Bypassing coherence](./coherence.md) and [Dispatching](./dispatching.md): Provider selection
   and per-type dispatch.
 - [`cgp_namespace!`](/docs/reference/macros/cgp_namespace): Namespace definitions and inheritance.
