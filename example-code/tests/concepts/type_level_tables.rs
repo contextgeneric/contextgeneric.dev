@@ -2,8 +2,8 @@
 //!
 //! Module names follow the page's headings. Each type-level step has a test, and each value-level
 //! counterpart the page shows, reading a global `static` table, is a test beside it. The page uses no CGP, so neither does this file.
-//! Rejected code lives in trybuild fixtures, except the cross-crate `E0210` and the `E0275` cycle,
-//! which the page states in prose; the campaign's probe captured both messages.
+//! Rejected code lives in trybuild fixtures, except the cross-crate `E0210`, which the page states in
+//! prose from the campaign's two-crate probe.
 
 /// ## A table and its entries
 pub mod a_table_and_its_entries {
@@ -278,3 +278,10 @@ pub mod entry_ownership {
         every_table_reads::<()>();
     }
 }
+
+/// ## What it costs
+///
+/// A table whose entry forwards back to itself overflows the trait solver:
+///
+/// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/type_level_tables_what_it_costs.rs`.
+pub mod what_it_costs {}

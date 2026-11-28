@@ -100,15 +100,15 @@ The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()` reads w
 caller names, as a value-level function would take the key as a second argument.
 
 In CGP, this trait is [`DelegateComponent<Key>`](/docs/reference/traits/wiring/delegate_component),
-with a context as the table and a component as the key, and
+whose associated type is named `Delegate`, with a context as the table and a component as the key.
 [`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
 entry.
 
 ## Duplicate and missing keys
 
 [Coherence](/docs/reference/glossary#coherence), Rust's rule that a trait has at most one
-implementation for a given type and set of parameters, is what makes this trait a map rather than a
-list of pairs. A second entry for the same key would be a second implementation of
+implementation for a given type and set of parameters, makes this trait a map rather than a list of
+pairs. A second entry for the same key would be a second implementation of
 `HasEntry<FooKey>` for `MyTable`, and the compiler rejects it:
 
 ```rust
@@ -206,12 +206,13 @@ assert_eq!(lookup(&MY_TABLE, "BarKey"), "Baz");
 
 In CGP, the legacy [`UseDelegate`](/docs/reference/providers/use_delegate) is such a type: a provider
 that reads the table it is given, keyed by the component's type parameter that `#[derive_delegate]`
-names.
+names. New code uses the `open` statement instead, which the *Composite keys* section returns
+to.
 
 ## Nested tables
 
-An entry's value can itself answer a question, which gives a lookup in two steps. `Forward<Table,
-KeyB>` reads `Table`'s entry for `KeyB`, then asks the type it finds there about `KeyA`:
+An entry's value can itself answer a question, which gives a lookup in two steps.
+`Forward<Table, KeyB>` reads `Table`'s entry for `KeyB`, then asks the type it finds there about `KeyA`:
 
 ```rust
 pub struct Forward<Table, KeyB>(pub PhantomData<(Table, KeyB)>);
@@ -265,9 +266,9 @@ assert_eq!(forward(&OUTER_TABLE, "InnerKey", "FooKey"), "Bar");
 ```
 
 In CGP, the provider blanket implementation that every component generates works as a `Forward`: it
-reads the context's entry for the component and asks the provider it finds there, as
-[Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
-follows. An entry whose value is a `UseDelegate` has the shape of `OuterTable`'s `Lookup` entry,
+reads the context's entry for the component and asks the provider it finds there, as the
+call trace on [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
+shows. An entry whose value is a `UseDelegate` has the shape of `OuterTable`'s `Lookup` entry,
 and an [aggregate provider](./aggregate-providers.md) is an entry whose value is another table,
 asked about the same key.
 
@@ -335,7 +336,7 @@ impl<Key> HasEntry<(FooKey, Key)> for MyTable {
 ```
 
 In CGP, [`RedirectLookup`](/docs/reference/providers/redirect_lookup) works as a `Redirect` whose keys
-are type-level paths, and it is what the `open` statement routes a component to.
+are type-level paths, and the `open` statement routes a component to it.
 [Namespaces](./namespaces.md#presets-and-per-type-dispatch) shows its path entries, which end in a
 generic tail, so a shorter path covers every longer one beneath it.
 
@@ -388,9 +389,21 @@ between a generic entry and a specific one, so a table cannot hold a default bes
 override it.
 
 Each lookup is a trait obligation, which the compiler proves rather than evaluates. A lookup that
-needs its own answer overflows the trait solver. A table whose entry is a `Forward` back to the same
-table and key, for example, fails with `E0275`: "overflow evaluating the requirement
-`Forward<Loop, FooKey>: HasStaticString<FooKey>`". CGP meets the same limit with recursive types, and
+needs its own answer overflows the trait solver, as when a table's entry is a `Forward` back to the
+same table and key:
+
+```rust
+pub struct Loop;
+
+impl HasEntry<FooKey> for Loop {
+    type Value = Forward<Loop, FooKey>;
+}
+
+// error[E0275]: overflow evaluating the requirement `Forward<Loop, FooKey>: HasStaticString<FooKey>`
+<Forward<Loop, FooKey> as HasStaticString<FooKey>>::static_string();
+```
+
+CGP meets the same limit with recursive types, and
 [Rust's own proposals](/docs/comparisons/rust-language-proposals#the-context-as-a-dictionary)
 describes the workaround.
 
