@@ -1,390 +1,271 @@
-//! Code from `docs/concepts/type-level-tables.md` — *Look up a provider in a type-level table*.
+//! Code from `docs/concepts/type-level-tables.md` — *Look up a type in a type-level table*.
 //!
-//! Module names follow the page's headings. The generated-code listings are assembled by hand in
-//! [`the_wiring_table`] (the provider blanket impl with its table bound only) and
-//! [`the_hidden_requirement`] (with the `IsProviderFor` bound as well); that checks their structure,
-//! while `cargo cgp expand` establishes what the library generates. Rejected code lives in trybuild
-//! fixtures.
+//! Module names follow the page's headings. Each type-level step has a test, and each value-level
+//! counterpart the page shows is a test beside it. The page uses no CGP, so neither does this file.
+//! Rejected code lives in trybuild fixtures, except the cross-crate `E0210` and the `E0275` cycle,
+//! which the page states in prose; the campaign's probe captured both messages.
 
-/// ## A trait as a map
-///
-/// A trait with one associated type, implemented once per key, is a compile-time map. A second
-/// entry for the same key is rejected:
-///
-/// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/type_level_tables_a_trait_as_a_map.rs`.
-pub mod a_trait_as_a_map {
-    use core::marker::PhantomData;
+/// ## A table and its entries
+pub mod a_table_and_its_entries {
+    use core::any::type_name;
+    use std::collections::HashMap;
 
     pub trait HasEntry<Key> {
         type Value;
     }
 
-    pub struct AreaTable;
+    pub struct MyTable;
 
-    pub struct Rectangle;
-    pub struct Circle;
-    pub struct RectangleArea;
-    pub struct CircleArea;
+    pub struct FooKey;
+    pub struct BarKey;
 
-    impl HasEntry<Rectangle> for AreaTable {
-        type Value = RectangleArea;
+    pub struct Bar;
+    pub struct Baz;
+
+    impl HasEntry<FooKey> for MyTable {
+        type Value = Bar;
     }
 
-    impl HasEntry<Circle> for AreaTable {
-        type Value = CircleArea;
+    impl HasEntry<BarKey> for MyTable {
+        type Value = Baz;
     }
 
-    pub fn entry<Key>() -> PhantomData<<AreaTable as HasEntry<Key>>::Value>
-    where
-        AreaTable: HasEntry<Key>,
-    {
-        PhantomData
+    pub fn get_foo_value<Table: HasEntry<FooKey>>() -> &'static str {
+        type_name::<Table::Value>()
     }
 
-    /// The bound reads an entry and the projection names its value.
+    pub fn my_table_foo_value() -> &'static str {
+        get_foo_value::<MyTable>()
+    }
+
+    /// The generic-key form the page describes in prose.
+    pub fn get_value<Table: HasEntry<Key>, Key>() -> &'static str {
+        type_name::<Table::Value>()
+    }
+
     #[test]
-    fn each_key_reads_its_entry() {
-        let _: PhantomData<RectangleArea> = entry::<Rectangle>();
-        let _: PhantomData<CircleArea> = entry::<Circle>();
+    fn the_foo_entry_is_bar() {
+        assert_eq!(my_table_foo_value(), type_name::<Bar>());
+        assert_eq!(get_value::<MyTable, BarKey>(), type_name::<Baz>());
+    }
+
+    /// The page's value-level counterpart.
+    pub fn get_foo_value_twin(table: &HashMap<&'static str, &'static str>) -> &'static str {
+        table["FooKey"]
+    }
+
+    pub fn my_table_twin() -> HashMap<&'static str, &'static str> {
+        HashMap::from([("FooKey", "Bar"), ("BarKey", "Baz")])
+    }
+
+    #[test]
+    fn the_value_level_map_answers_the_same_key() {
+        assert_eq!(get_foo_value_twin(&my_table_twin()), "Bar");
     }
 }
 
-/// ## The wiring table
+/// ## Duplicate and missing keys
 ///
-/// The same table written with `delegate_components!`, read through `DelegateComponent`; then the
-/// call trace with the provider blanket impl shown with its table bound only, as the page shows it
-/// before stating the `IsProviderFor` requirement. Its table entry is written by hand, as the page
-/// spells it out.
-pub mod the_wiring_table {
+/// All three snippets are rejected:
+///
+/// Rejected snippets — trybuild fixtures
+/// `tests/compile_fail/concepts/type_level_tables_duplicate_and_missing_keys_1.rs` (a second entry),
+/// `_2.rs` (a missing key), and `_3.rs` (a generic key overlapping a specific one).
+pub mod duplicate_and_missing_keys {
+    use super::a_table_and_its_entries::my_table_twin;
+
+    /// The value-level map finds a missing key only at runtime.
+    #[test]
+    fn the_value_level_map_misses_at_runtime() {
+        assert_eq!(my_table_twin().get("OtherKey"), None);
+    }
+}
+
+/// ## A lookup as a type
+pub mod a_lookup_as_a_type {
+    use core::any::type_name;
     use core::marker::PhantomData;
+    use std::collections::HashMap;
 
-    use cgp::core::component::DelegateComponent;
-    use cgp::prelude::*;
+    use super::a_table_and_its_entries::{my_table_twin, Bar, Baz, BarKey, FooKey, HasEntry, MyTable};
 
-    pub struct Rectangle;
-    pub struct Circle;
-    pub struct RectangleArea;
-    pub struct CircleArea;
-
-    delegate_components! {
-        new AreaTable {
-            Rectangle: RectangleArea,
-            Circle: CircleArea,
-        }
+    pub trait HasStaticString<Key> {
+        fn static_string() -> &'static str;
     }
 
-    pub fn entry<Key>() -> PhantomData<<AreaTable as DelegateComponent<Key>>::Delegate>
+    pub struct Lookup<Table>(pub PhantomData<Table>);
+
+    impl<Table, Key> HasStaticString<Key> for Lookup<Table>
     where
-        AreaTable: DelegateComponent<Key>,
+        Table: HasEntry<Key>,
     {
-        PhantomData
-    }
-
-    #[test]
-    fn delegate_components_writes_the_same_entries() {
-        let _: PhantomData<RectangleArea> = entry::<Rectangle>();
-        let _: PhantomData<CircleArea> = entry::<Circle>();
-    }
-
-    pub trait CanFetchStorageObject {
-        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
-    }
-
-    pub trait StorageObjectFetcher<Context> {
-        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>>;
-    }
-
-    pub struct StorageObjectFetcherComponent;
-
-    pub struct FetchS3Object;
-
-    impl<Context> StorageObjectFetcher<Context> for FetchS3Object {
-        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
-            Ok(b"s3".to_vec())
-        }
-    }
-
-    pub struct App;
-
-    impl DelegateComponent<StorageObjectFetcherComponent> for App {
-        type Delegate = FetchS3Object;
-    }
-
-    impl<Context> CanFetchStorageObject for Context
-    where
-        Context: StorageObjectFetcher<Context>,
-    {
-        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
-            Context::fetch_storage_object(self, object_id)
-        }
-    }
-
-    impl<Context, Table> StorageObjectFetcher<Context> for Table
-    where
-        Table: DelegateComponent<StorageObjectFetcherComponent>,
-        Table::Delegate: StorageObjectFetcher<Context>,
-    {
-        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
-            Table::Delegate::fetch_storage_object(context, object_id)
+        fn static_string() -> &'static str {
+            type_name::<Table::Value>()
         }
     }
 
     #[test]
-    fn a_call_resolves_through_the_entry() {
-        assert_eq!(App.fetch_storage_object("alice.png").unwrap(), b"s3");
+    fn lookup_reads_the_table() {
+        assert_eq!(
+            <Lookup<MyTable> as HasStaticString<FooKey>>::static_string(),
+            type_name::<Bar>(),
+        );
+        assert_eq!(
+            <Lookup<MyTable> as HasStaticString<BarKey>>::static_string(),
+            type_name::<Baz>(),
+        );
+    }
+
+    pub fn lookup(table: &HashMap<&'static str, &'static str>, key: &str) -> &'static str {
+        table[key]
+    }
+
+    #[test]
+    fn the_value_level_lookup_takes_both_arguments() {
+        assert_eq!(lookup(&my_table_twin(), "BarKey"), "Baz");
     }
 }
 
-/// ## The hidden requirement
-///
-/// The complete call trace, with the `IsProviderFor` bound the page states at the end of the lookup:
-/// the wiring table, the consumer blanket impl, and the provider blanket impl, assembled into one
-/// program. Because the last two are what `#[cgp_component]`
-/// *generates*, they are written by hand here rather than derived, which is the point: the page
-/// claims a component is these pieces, and a hand-rolled component built from exactly them resolves
-/// a call and passes a check.
-///
-/// **This proves the listings are structurally sound, not that they are textually current.** The
-/// authority on what the macro emits is `cargo cgp expand --lib --item …`, which is also what the
-/// page's own note about reserved names and the spelled-out delegate refers to. Check the text
-/// against `expand`; check the shape against this module.
-pub mod the_hidden_requirement {
-    use cgp::core::component::DelegateComponent;
-    use cgp::core::component::IsProviderFor;
-    use cgp::prelude::*;
+/// ## Nested tables
+pub mod nested_tables {
+    use core::any::type_name;
+    use core::marker::PhantomData;
+    use std::collections::HashMap;
 
-    pub trait CanFetchStorageObject {
-        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>>;
-    }
+    use super::a_lookup_as_a_type::{HasStaticString, Lookup};
+    use super::a_table_and_its_entries::{my_table_twin, Bar, FooKey, HasEntry, MyTable};
 
-    pub trait StorageObjectFetcher<Context>:
-        IsProviderFor<StorageObjectFetcherComponent, Context, ()>
-    {
-        fn fetch_storage_object(
-            context: &Context,
-            object_id: &str,
-        ) -> anyhow::Result<Vec<u8>>;
-    }
+    pub struct Forward<Table, KeyB>(pub PhantomData<(Table, KeyB)>);
 
-    // The key. The page calls it "a marker generated alongside the two traits".
-    pub struct StorageObjectFetcherComponent;
-
-    pub struct FetchS3Object;
-    pub struct FetchLocalObject;
-
-    impl<Context> StorageObjectFetcher<Context> for FetchS3Object {
-        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
-            Ok(b"s3".to_vec())
-        }
-    }
-
-    impl<Context> StorageObjectFetcher<Context> for FetchLocalObject {
-        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
-            Ok(b"local".to_vec())
-        }
-    }
-
-    // Provider macros generate these checking implementations with the provider's bounds.
-    impl<Context> IsProviderFor<StorageObjectFetcherComponent, Context, ()> for FetchS3Object {}
-    impl<Context> IsProviderFor<StorageObjectFetcherComponent, Context, ()> for FetchLocalObject {}
-
-    pub struct App;
-    pub struct TestApp;
-
-    delegate_components! { App     { StorageObjectFetcherComponent: FetchS3Object } }
-    delegate_components! { TestApp { StorageObjectFetcherComponent: FetchLocalObject } }
-
-    // The first generated implementation: a context that implements the provider trait for itself
-    // gets the consumer trait.
-    impl<Context> CanFetchStorageObject for Context
+    impl<Table, KeyA, KeyB> HasStaticString<KeyA> for Forward<Table, KeyB>
     where
-        Context: StorageObjectFetcher<Context>,
+        Table: HasEntry<KeyB>,
+        Table::Value: HasStaticString<KeyA>,
     {
-        fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
-            Context::fetch_storage_object(self, object_id)
+        fn static_string() -> &'static str {
+            <Table::Value as HasStaticString<KeyA>>::static_string()
         }
     }
 
-    // The second: anything with a table entry inherits the provider trait from what the entry names.
-    impl<Context, Provider> StorageObjectFetcher<Context> for Provider
-    where
-        Provider: DelegateComponent<StorageObjectFetcherComponent>
-            + IsProviderFor<StorageObjectFetcherComponent, Context, ()>,
-        Provider::Delegate: StorageObjectFetcher<Context>,
-    {
-        fn fetch_storage_object(
-            context: &Context,
-            object_id: &str,
-        ) -> anyhow::Result<Vec<u8>> {
-            Provider::Delegate::fetch_storage_object(context, object_id)
-        }
+    pub struct OuterTable;
+    pub struct InnerKey;
+
+    impl HasEntry<InnerKey> for OuterTable {
+        type Value = Lookup<MyTable>;
     }
 
-    /// The three-step resolution the page traces, asserted as a bound rather than described.
     #[test]
-    fn a_call_resolves_through_the_table() {
-        fn resolves<Context: CanFetchStorageObject>() {}
+    fn forward_reads_both_tables() {
+        assert_eq!(
+            <Forward<OuterTable, InnerKey> as HasStaticString<FooKey>>::static_string(),
+            type_name::<Bar>(),
+        );
+    }
 
-        resolves::<App>();
-        resolves::<TestApp>();
+    pub fn forward(
+        outer: &HashMap<&'static str, HashMap<&'static str, &'static str>>,
+        key_b: &str,
+        key_a: &str,
+    ) -> &'static str {
+        outer[key_b][key_a]
+    }
 
-        assert_eq!(App.fetch_storage_object("alice.png").unwrap(), b"s3");
-        assert_eq!(TestApp.fetch_storage_object("alice.png").unwrap(), b"local");
+    #[test]
+    fn the_value_level_map_of_maps() {
+        let my_table = my_table_twin();
+        let outer = HashMap::from([("InnerKey", my_table.clone())]);
+        assert_eq!(forward(&outer, "InnerKey", "FooKey"), "Bar");
     }
 }
 
-/// ## Tables keyed by other types
+/// ## Composite keys
 ///
-/// The legacy nested table read by `UseDelegate`, then the same per-type choice with `open`.
-pub mod tables_keyed_by_other_types {
-    use cgp::prelude::*;
+/// A generic position overlapping a specific pair is rejected:
+///
+/// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/type_level_tables_composite_keys.rs`.
+pub mod composite_keys {
+    use core::any::type_name;
+    use core::marker::PhantomData;
+    use std::collections::HashMap;
 
-    pub struct Rectangle {
-        pub width: f64,
-        pub height: f64,
+    use super::a_lookup_as_a_type::HasStaticString;
+    use super::a_table_and_its_entries::{BarKey, Baz, FooKey, HasEntry, MyTable};
+
+    impl HasEntry<(FooKey, BarKey)> for MyTable {
+        type Value = Baz;
     }
 
-    pub struct Circle {
-        pub radius: f64,
-    }
+    pub struct Redirect<Table, Prefix>(pub PhantomData<(Table, Prefix)>);
 
-    pub mod legacy {
-        use cgp::prelude::*;
-
-        use super::{Circle, Rectangle};
-
-        #[cgp_component(AreaCalculator)]
-        #[derive_delegate(UseDelegate<Shape>)]
-        pub trait CanCalculateArea<Shape> {
-            fn area(&self, shape: &Shape) -> f64;
-        }
-
-        #[cgp_impl(new RectangleArea)]
-        impl AreaCalculator<Rectangle> {
-            fn area(&self, shape: &Rectangle) -> f64 {
-                shape.width * shape.height
-            }
-        }
-
-        #[cgp_impl(new CircleArea)]
-        impl AreaCalculator<Circle> {
-            fn area(&self, shape: &Circle) -> f64 {
-                core::f64::consts::PI * shape.radius * shape.radius
-            }
-        }
-
-        pub struct MyApp;
-
-        delegate_components! {
-            MyApp {
-                AreaCalculatorComponent:
-                    UseDelegate<new AreaCalculatorComponents {
-                        Rectangle: RectangleArea,
-                        Circle: CircleArea,
-                    }>,
-            }
-        }
-
-        check_components! {
-            MyApp {
-                AreaCalculatorComponent: [Rectangle, Circle],
-            }
-        }
-    }
-
-    #[cgp_component(AreaCalculator)]
-    pub trait CanCalculateArea<Shape> {
-        fn area(&self, shape: &Shape) -> f64;
-    }
-
-    #[cgp_impl(new RectangleArea)]
-    impl AreaCalculator<Rectangle> {
-        fn area(&self, shape: &Rectangle) -> f64 {
-            shape.width * shape.height
-        }
-    }
-
-    #[cgp_impl(new CircleArea)]
-    impl AreaCalculator<Circle> {
-        fn area(&self, shape: &Circle) -> f64 {
-            core::f64::consts::PI * shape.radius * shape.radius
-        }
-    }
-
-    pub struct MyApp;
-
-    delegate_components! {
-        MyApp {
-            open AreaCalculatorComponent;
-
-            @AreaCalculatorComponent.Rectangle: RectangleArea,
-            @AreaCalculatorComponent.Circle: CircleArea,
-        }
-    }
-
-    check_components! {
-        MyApp {
-            AreaCalculatorComponent: [Rectangle, Circle],
+    impl<Table, Prefix, Key> HasStaticString<Key> for Redirect<Table, Prefix>
+    where
+        Table: HasEntry<(Prefix, Key)>,
+    {
+        fn static_string() -> &'static str {
+            type_name::<<Table as HasEntry<(Prefix, Key)>>::Value>()
         }
     }
 
     #[test]
-    fn each_shape_reaches_its_provider() {
-        let rectangle = Rectangle { width: 3.0, height: 4.0 };
-        assert_eq!(MyApp.area(&rectangle), 12.0);
-        assert_eq!(legacy::CanCalculateArea::area(&legacy::MyApp, &rectangle), 12.0);
+    fn redirect_reads_the_pair() {
+        assert_eq!(
+            <Redirect<MyTable, FooKey> as HasStaticString<BarKey>>::static_string(),
+            type_name::<Baz>(),
+        );
+    }
+
+    pub fn redirect(
+        table: &HashMap<(&'static str, &'static str), &'static str>,
+        prefix: &'static str,
+        key: &'static str,
+    ) -> &'static str {
+        table[&(prefix, key)]
+    }
+
+    #[test]
+    fn the_value_level_map_keyed_by_pairs() {
+        let pairs = HashMap::from([(("FooKey", "BarKey"), "Baz")]);
+        assert_eq!(redirect(&pairs, "FooKey", "BarKey"), "Baz");
     }
 }
 
-/// ## Paths as keys
+/// ## Entry ownership
 ///
-/// A shorter path key and a longer key beneath it overlap:
-///
-/// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/type_level_tables_paths_as_keys.rs`.
-pub mod paths_as_keys {}
+/// The page's two legal impls. The page places them in a crate other than the one defining
+/// `HasEntry` and `TheirTable`; this file is one crate, so `TheirTable` is declared here, where the
+/// impls are legal too. The rejected `impl<Table> HasEntry<MyKey> for Table` is legal in one crate,
+/// so it has no fixture: the page quotes its `E0210` from the campaign's two-crate probe.
+pub mod entry_ownership {
+    use super::a_table_and_its_entries::HasEntry;
 
-/// ## Nested tables and namespaces
-///
-/// A component registers its route in a namespace from the key's side with `#[prefix]`, and a
-/// context that joins the namespace binds the provider at that path. The page's listing of the
-/// registration impl is generated code; this module checks that the arrangement it describes
-/// resolves.
-pub mod nested_tables_and_namespaces {
-    use cgp::prelude::*;
+    pub struct TheirTable;
 
-    cgp_namespace! { new AppNamespace {} }
+    pub struct MyKey;
+    pub struct MyValue;
 
-    #[cgp_component(Greeter)]
-    #[prefix(@app in AppNamespace)]
-    pub trait CanGreet {
-        fn greet(&self) -> String;
+    impl HasEntry<MyKey> for TheirTable {
+        type Value = MyValue;
     }
 
-    #[cgp_impl(new GreetHello)]
-    impl Greeter {
-        fn greet(&self) -> String {
-            "Hello!".to_owned()
-        }
+    pub trait InTable<Table> {
+        type Value;
     }
 
-    pub struct App;
-
-    delegate_components! {
-        App {
-            namespace AppNamespace;
-
-            @app.GreeterComponent: GreetHello,
-        }
+    impl<Table> InTable<Table> for MyKey {
+        type Value = MyValue;
     }
 
-    check_components! {
-        App {
-            GreeterComponent,
-        }
+    fn reads_entry<Table: HasEntry<MyKey, Value = MyValue>>() {}
+    fn every_table_reads<Table>()
+    where
+        MyKey: InTable<Table, Value = MyValue>,
+    {
     }
 
     #[test]
-    fn the_route_reaches_the_bound_provider() {
-        assert_eq!(App.greet(), "Hello!");
+    fn both_entries_resolve() {
+        reads_entry::<TheirTable>();
+        every_table_reads::<TheirTable>();
+        every_table_reads::<()>();
     }
 }

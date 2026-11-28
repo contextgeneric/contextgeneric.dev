@@ -68,8 +68,8 @@ the provider's requirements.
 The same delegation can continue through another bundle. At each step, the compiler follows the
 next table while keeping the original context argument, until it reaches the provider that performs
 the work. It resolves that chain at compile time, so adding a bundle does not add a runtime lookup.
-[Type-level tables](./type-level-tables.md#nested-tables-and-namespaces) explains the table lookups
-behind each step.
+[Type-level tables](./type-level-tables.md#nested-tables) shows, in plain Rust, how a lookup reads
+one table and then another.
 
 ## Checking a bundle as a context
 

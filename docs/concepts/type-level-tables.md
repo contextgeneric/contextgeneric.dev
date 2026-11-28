@@ -1,364 +1,393 @@
 ---
-title: 'Look up a provider in a type-level table'
+title: 'Look up a type in a type-level table'
 sidebar_label: 'Type-level tables'
 sidebar_position: 3
-description: 'How a trait with an associated type works as a compile-time map, how a CGP call reaches its provider through one, and what such a table cannot do.'
+description: 'How a trait with an associated type works as a compile-time map, shown in plain Rust beside the value-level code it mirrors.'
 ---
 
 # Type-level tables
 
 [Context-Generic Programming](/docs/) (CGP) extends Rust with pluggable trait implementations, and a
-type-level table records which one each context selects. The table is not a data structure in the
-running program. It is a set of trait implementations that the compiler looks up while it checks
-types, so choosing a provider costs nothing at runtime.
+context's wiring records which implementation it selects for each component. That record is a
+table, but not one the running program holds. It is a set of trait implementations that the
+compiler looks up while it checks types.
 
-This page explains how such a table works, starting with plain Rust and no CGP names at all. It then
-shows how a method call reaches its provider through the table, the other lookups CGP builds on the
-same idea, who can write an entry, and what a table cannot do.
+This page shows how a trait can hold such a table, in plain Rust and without any CGP. Each
+type-level step returns a `&'static str`, so you can compare it with the ordinary value-level code it
+mirrors, written with a `HashMap`. The tables here are plain types, not contexts. A short section
+near the end maps the pieces onto the traits CGP uses, and the pages it links show those traits at
+work.
 
-## A trait as a map
+## A table and its entries
 
-A trait whose only item is an associated type already works as a map in ordinary Rust. Each
-implementation is one entry: the implementing type is the table, the trait's type parameter is the
-key, and the associated type is the value. This table maps two shape types to the types that measure
-them:
+A trait whose only item is an associated type already works as a map. Each implementation is one
+entry: the implementing type is the table, the trait's type parameter is the key, and the associated
+type is the value. This table has two entries, which map `FooKey` to `Bar` and `BarKey` to `Baz`:
 
 ```rust
-use core::marker::PhantomData;
+use core::any::type_name;
 
 pub trait HasEntry<Key> {
     type Value;
 }
 
-pub struct AreaTable;
+pub struct MyTable;
 
-pub struct Rectangle;
-pub struct Circle;
-pub struct RectangleArea;
-pub struct CircleArea;
+pub struct FooKey;
+pub struct BarKey;
 
-impl HasEntry<Rectangle> for AreaTable {
-    type Value = RectangleArea;
+pub struct Bar;
+pub struct Baz;
+
+impl HasEntry<FooKey> for MyTable {
+    type Value = Bar;
 }
 
-impl HasEntry<Circle> for AreaTable {
-    type Value = CircleArea;
+impl HasEntry<BarKey> for MyTable {
+    type Value = Baz;
 }
 
-pub fn entry<Key>() -> PhantomData<<AreaTable as HasEntry<Key>>::Value>
+pub fn get_foo_value<Table: HasEntry<FooKey>>() -> &'static str {
+    type_name::<Table::Value>()
+}
+
+pub fn my_table_foo_value() -> &'static str {
+    get_foo_value::<MyTable>()
+}
+
+#[test]
+fn the_foo_entry_is_bar() {
+    assert_eq!(my_table_foo_value(), type_name::<Bar>());
+}
+```
+
+Reading an entry takes two steps. The bound `Table: HasEntry<FooKey>` asks whether the table has an
+entry for `FooKey`, and `Table::Value` names the value stored there. That short form stands for
+`<Table as HasEntry<FooKey>>::Value`, and Rust accepts it because only one bound in scope supplies a
+`Value`. The function then turns the type into a string with
+[`type_name`](https://doc.rust-lang.org/std/any/fn.type_name.html), which returns the type's full path
+rather than the bare name `Bar`. That is why the test compares the result with `type_name::<Bar>()`.
+
+The same lookup at the value level is an ordinary map from strings to strings:
+
+```rust
+use std::collections::HashMap;
+
+fn get_foo_value(table: &HashMap<&'static str, &'static str>) -> &'static str {
+    table["FooKey"]
+}
+
+let my_table = HashMap::from([("FooKey", "Bar"), ("BarKey", "Baz")]);
+assert_eq!(get_foo_value(&my_table), "Bar");
+```
+
+The value-level function receives its table as an argument, while the type-level one receives it as
+the type parameter `Table`. The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()`
+reads whichever entry its caller names, as a value-level function would take the key as a second
+argument.
+
+## Duplicate and missing keys
+
+[Coherence](/docs/reference/glossary#coherence), Rust's rule that a trait has at most one
+implementation for a given type and set of parameters, is what makes this trait a map rather than a
+list of pairs. A second entry for the same key would be a second implementation of
+`HasEntry<FooKey>` for `MyTable`, and the compiler rejects it:
+
+```rust
+impl HasEntry<FooKey> for MyTable {
+    type Value = Bar;
+}
+
+// error[E0119]: conflicting implementations of trait `HasEntry<FooKey>` for type `MyTable`
+impl HasEntry<FooKey> for MyTable {
+    type Value = Baz;
+}
+```
+
+A missing key fails at compile time as well. Asking a table that has no `FooKey` entry for one
+does not compile:
+
+```rust
+pub struct OtherTable;
+
+// error[E0277]: the trait bound `OtherTable: HasEntry<FooKey>` is not satisfied
+get_foo_value::<OtherTable>();
+```
+
+The `HashMap` version finds the same mistake only when the program runs, where `table["FooKey"]`
+panics and `table.get("FooKey")` returns `None`.
+
+Keys can be generic, and a generic key covers every type it matches. An entry for every `Vec<T>`
+therefore overlaps an entry for `Vec<u8>`, and the compiler rejects the pair rather than choosing the
+more specific one:
+
+```rust
+impl<T> HasEntry<Vec<T>> for MyTable {
+    type Value = Bar;
+}
+
+// error[E0119]: conflicting implementations of trait `HasEntry<Vec<u8>>` for type `MyTable`
+impl HasEntry<Vec<u8>> for MyTable {
+    type Value = Baz;
+}
+```
+
+The compiler resolves every lookup while it checks types, so the compiled program contains no table
+and never consults one.
+
+## A lookup as a type
+
+A type can also answer a question by reading a table it is given. The trait `HasStaticString<Key>`
+works as a function from a key to a string, and `Lookup<Table>` implements it by reading `Table`:
+
+```rust
+use core::marker::PhantomData;
+
+pub trait HasStaticString<Key> {
+    fn static_string() -> &'static str;
+}
+
+pub struct Lookup<Table>(pub PhantomData<Table>);
+
+impl<Table, Key> HasStaticString<Key> for Lookup<Table>
 where
-    AreaTable: HasEntry<Key>,
+    Table: HasEntry<Key>,
 {
-    PhantomData
-}
-```
-
-Reading an entry takes two steps. The bound `AreaTable: HasEntry<Key>` asks whether the table has an
-entry for `Key`, and the projection `<AreaTable as HasEntry<Key>>::Value` names its value. So
-`entry::<Rectangle>()` has the type `PhantomData<RectangleArea>`, and `entry::<Circle>()` has the type
-`PhantomData<CircleArea>`. A key without an entry fails the bound, and the program does not compile.
-
-Rust's [coherence](/docs/reference/glossary#coherence) rules make this a map rather than a list of
-pairs. A second entry for the same key would be a second implementation of `HasEntry<Rectangle>`
-for `AreaTable`, and the compiler rejects it:
-
-```rust
-impl HasEntry<Rectangle> for AreaTable {
-    type Value = RectangleArea;
-}
-
-// error[E0119]: conflicting implementations of trait `HasEntry<Rectangle>` for type `AreaTable`
-impl HasEntry<Rectangle> for AreaTable {
-    type Value = SquareArea;
-}
-```
-
-Each key therefore has a single value. The lookup itself happens during type checking, so the
-compiled program contains no table and never consults one.
-
-## The wiring table
-
-CGP's table trait has exactly this shape under another name,
-[`DelegateComponent`](/docs/reference/traits/wiring/delegate_component). Its associated type is called
-`Delegate`, the provider an entry delegates to:
-
-```rust
-pub trait DelegateComponent<Key: ?Sized> {
-    type Delegate;
-}
-```
-
-[`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
-entry. The same `AreaTable` can be written with it, and read through `DelegateComponent` just as
-before:
-
-```rust
-delegate_components! {
-    new AreaTable {
-        Rectangle: RectangleArea,
-        Circle: CircleArea,
+    fn static_string() -> &'static str {
+        type_name::<Table::Value>()
     }
 }
-```
 
-The table that wires a context is the same trait, keyed by component markers instead of shapes. Take
-the storage example from [Consumer and provider traits](./consumer-and-provider-traits.md): `App`
-is an application type, an [environmental context](/docs/reference/glossary#environmental-context),
-whose `CanFetchStorageObject` method fetches a stored object from Amazon S3. Its wiring entry
-`StorageObjectFetcherComponent: FetchS3Object` is this implementation:
-
-```rust
-impl DelegateComponent<StorageObjectFetcherComponent> for App {
-    type Delegate = FetchS3Object;
+#[test]
+fn lookup_reads_the_table() {
+    assert_eq!(
+        <Lookup<MyTable> as HasStaticString<FooKey>>::static_string(),
+        type_name::<Bar>(),
+    );
 }
 ```
 
-A call such as `app.fetch_storage_object("alice.png")` reaches `FetchS3Object` through two
-[blanket implementations](/docs/reference/glossary#blanket-implementation) that
-[`#[cgp_component]`](/docs/reference/macros/cgp_component) generates. The first gives a context the
-consumer trait whenever it implements the provider trait for itself:
+The `where` clause is a precondition that the compiler checks at each use: `Lookup<MyTable>` answers
+`FooKey` because `MyTable` has an entry for it, and it would not compile for a key the table lacks.
+[`PhantomData`](https://doc.rust-lang.org/std/marker/struct.PhantomData.html) lets the struct name
+`Table` without storing a value of it, since the table exists only as a type.
+
+At the value level, the table and the key are both arguments:
 
 ```rust
-impl<Context> CanFetchStorageObject for Context
+fn lookup(table: &HashMap<&'static str, &'static str>, key: &str) -> &'static str {
+    table[key]
+}
+
+assert_eq!(lookup(&my_table, "BarKey"), "Baz");
+```
+
+## Nested tables
+
+An entry's value can itself answer a question, which gives a lookup in two steps. `Forward<Table,
+KeyB>` reads `Table`'s entry for `KeyB`, then asks the type it finds there about `KeyA`:
+
+```rust
+pub struct Forward<Table, KeyB>(pub PhantomData<(Table, KeyB)>);
+
+impl<Table, KeyA, KeyB> HasStaticString<KeyA> for Forward<Table, KeyB>
 where
-    Context: StorageObjectFetcher<Context>,
+    Table: HasEntry<KeyB>,
+    Table::Value: HasStaticString<KeyA>,
 {
-    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
-        Context::fetch_storage_object(self, object_id)
+    fn static_string() -> &'static str {
+        <Table::Value as HasStaticString<KeyA>>::static_string()
     }
+}
+
+pub struct OuterTable;
+pub struct InnerKey;
+
+impl HasEntry<InnerKey> for OuterTable {
+    type Value = Lookup<MyTable>;
+}
+
+#[test]
+fn forward_reads_both_tables() {
+    assert_eq!(
+        <Forward<OuterTable, InnerKey> as HasStaticString<FooKey>>::static_string(),
+        type_name::<Bar>(),
+    );
 }
 ```
 
-The second reads the table. It gives any type with an entry for the component the provider trait of
-whatever that entry names. Here it is with only its table bound, and with readable parameter names:
+The outer table's entry for `InnerKey` is `Lookup<MyTable>`, so `Forward<OuterTable, InnerKey>`
+answers `FooKey` by reading `MyTable`. Each step is its own bound in the `where` clause, and the
+compiler proves both.
+
+At the value level, the same shape is a map of maps:
 
 ```rust
-impl<Context, Table> StorageObjectFetcher<Context> for Table
+fn forward(
+    outer: &HashMap<&'static str, HashMap<&'static str, &'static str>>,
+    key_b: &str,
+    key_a: &str,
+) -> &'static str {
+    outer[key_b][key_a]
+}
+
+let outer = HashMap::from([("InnerKey", my_table.clone())]);
+assert_eq!(forward(&outer, "InnerKey", "FooKey"), "Bar");
+```
+
+## Composite keys
+
+A key can also be made of several types. A tuple of two keys is one key, so a single entry can
+answer a pair:
+
+```rust
+impl HasEntry<(FooKey, BarKey)> for MyTable {
+    type Value = Baz;
+}
+
+pub struct Redirect<Table, Prefix>(pub PhantomData<(Table, Prefix)>);
+
+impl<Table, Prefix, Key> HasStaticString<Key> for Redirect<Table, Prefix>
 where
-    Table: DelegateComponent<StorageObjectFetcherComponent>,
-    Table::Delegate: StorageObjectFetcher<Context>,
+    Table: HasEntry<(Prefix, Key)>,
 {
-    fn fetch_storage_object(
-        context: &Context,
-        object_id: &str,
-    ) -> anyhow::Result<Vec<u8>> {
-        Table::Delegate::fetch_storage_object(context, object_id)
+    fn static_string() -> &'static str {
+        type_name::<<Table as HasEntry<(Prefix, Key)>>::Value>()
     }
 }
+
+#[test]
+fn redirect_reads_the_pair() {
+    assert_eq!(
+        <Redirect<MyTable, FooKey> as HasStaticString<BarKey>>::static_string(),
+        type_name::<Baz>(),
+    );
+}
 ```
 
-Follow the call through both. The first implementation needs `App: StorageObjectFetcher<App>`. The
-second can supply it, with `Table` and `Context` both standing for `App`: it reads `App`'s entry,
-finds `FetchS3Object`, and needs `FetchS3Object: StorageObjectFetcher<App>`, which the provider's own
-implementation provides. So `App` gains the provider trait through its table, and the consumer trait
-through the first implementation. The context stays `App` throughout, which means the provider
-receives the same application value the caller invoked the method on.
+`Redirect<MyTable, FooKey>` fixes the first half of the key and takes the second half as its
+question, so asking it about `BarKey` reads the entry for `(FooKey, BarKey)`. The listing writes the
+projection in full to show which key the bound names, although `Table::Value` would also compile here,
+since one bound supplies it.
 
-In a real expansion, the parameters are named `__Context__` and `__Provider__`, and the delegate is
-spelled out as `<__Provider__ as DelegateComponent<StorageObjectFetcherComponent>>::Delegate`.
-[`cargo cgp expand`](/docs/tooling/cargo-cgp/expand) shows the full expansion of a concrete component.
-
-## The hidden requirement
-
-The listing above leaves out one bound, and the real implementation has it. Beside its table bound,
-the generated implementation requires the table to implement
-[`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for) for the component:
+At the value level, the key is a tuple of strings:
 
 ```rust
-impl<Context, Provider> StorageObjectFetcher<Context> for Provider
-where
-    Provider: DelegateComponent<StorageObjectFetcherComponent>
-        + IsProviderFor<StorageObjectFetcherComponent, Context, ()>,
-    Provider::Delegate: StorageObjectFetcher<Context>,
-{
-    fn fetch_storage_object(
-        context: &Context,
-        object_id: &str,
-    ) -> anyhow::Result<Vec<u8>> {
-        Provider::Delegate::fetch_storage_object(context, object_id)
-    }
+fn redirect(
+    table: &HashMap<(&'static str, &'static str), &'static str>,
+    prefix: &'static str,
+    key: &'static str,
+) -> &'static str {
+    table[&(prefix, key)]
 }
+
+let pairs = HashMap::from([(("FooKey", "BarKey"), "Baz")]);
+assert_eq!(redirect(&pairs, "FooKey", "BarKey"), "Baz");
 ```
 
-`DelegateComponent` itself carries no such bound. Instead, `delegate_components!` writes an
-`IsProviderFor` implementation beside each entry, which passes on the chosen provider's own
-requirements. When one of those requirements is missing, the compiler can then name it, rather than
-reporting only that a trait is not implemented. The same bound means that a `DelegateComponent`
-implementation written by hand, without its `IsProviderFor` companion, does not wire the component.
-[Checking your wiring](./check-traits.md) explains `IsProviderFor` and how a check uses it to find a
-missing requirement.
-
-## Tables keyed by other types
-
-A table can be keyed by any type, so a provider can perform a second lookup of its own. Older CGP
-code does this for a component with a type parameter through
-[`UseDelegate`](/docs/reference/providers/use_delegate). Here `CanCalculateArea<Shape>` measures a
-separate shape value, and `MyApp` is an environmental context with a
-[parameter-targeted](/docs/reference/glossary#parameter-targeted-component) component. Its single
-entry points to a nested table keyed by shape:
+A generic position in a composite key matches every type there, as a generic key did. An entry for
+every pair that starts with `FooKey` therefore overlaps the entry for `(FooKey, BarKey)`:
 
 ```rust
-#[cgp_component(AreaCalculator)]
-#[derive_delegate(UseDelegate<Shape>)]
-pub trait CanCalculateArea<Shape> {
-    fn area(&self, shape: &Shape) -> f64;
-}
-
-delegate_components! {
-    MyApp {
-        AreaCalculatorComponent:
-            UseDelegate<new AreaCalculatorComponents {
-                Rectangle: RectangleArea,
-                Circle: CircleArea,
-            }>,
-    }
+// error[E0119]: conflicting implementations of trait `HasEntry<(FooKey, BarKey)>` for type `MyTable`
+impl<Key> HasEntry<(FooKey, Key)> for MyTable {
+    type Value = Bar;
 }
 ```
 
-The `#[derive_delegate]` attribute gives `UseDelegate` an implementation that looks the shape up in
-`AreaCalculatorComponents` and forwards to the provider it finds, so one wiring entry fans out to a
-provider per shape. The handler family's `UseInputDelegate` performs the same lookup keyed by a
-handler's input. Both are the legacy form, still found in existing code.
+## Entry ownership
 
-The [`open` statement](/docs/reference/macros/delegate_components#choosing-a-provider-per-type-the-open-statement)
-replaces them. It needs no attribute on the component and keeps the per-shape entries in the
-context's own table:
+Rust's [orphan rules](https://doc.rust-lang.org/reference/items/implementations.html#orphan-rules)
+decide which crate may write an entry, because an entry is an implementation. A crate that owns a key
+type can add an entry for it to a table it does not own:
 
 ```rust
-delegate_components! {
-    MyApp {
-        open AreaCalculatorComponent;
+// In a crate that depends on the crate defining `HasEntry` and `TheirTable`.
+pub struct MyKey;
+pub struct MyValue;
 
-        @AreaCalculatorComponent.Rectangle: RectangleArea,
-        @AreaCalculatorComponent.Circle: CircleArea,
-    }
+impl HasEntry<MyKey> for TheirTable {
+    type Value = MyValue;
 }
 ```
 
-## Paths as keys
+That crate cannot, however, add one entry for every table at once. In a crate other than the one
+that defines `HasEntry`, `impl<Table> HasEntry<MyKey> for Table` fails with `E0210`: "type parameter
+`Table` must be covered by another type when it appears before the first local type (`MyKey`)".
 
-The `open` statement works by turning a component's type parameters into a path, and using the path
-as the key. Its entry routes the component to
-[`RedirectLookup`](/docs/reference/providers/redirect_lookup), a provider that every component
-already has. `RedirectLookup` appends each of the component's type parameters to a type-level path
-and looks the whole path up in the table, in one `DelegateComponent` query. The key
-`@AreaCalculatorComponent.Rectangle` is that path, written with [`Path!`](/docs/reference/macros/path)
-notation.
-
-A path entry ends in a generic tail, so a key matches every longer path beneath it. That rule makes a
-shorter key and a longer key under it two answers for the same lookup. With a converter component
-that takes a source and a target type, this table is rejected:
+Turning the trait around removes that limit. When the key implements the trait and the table is its
+parameter, the key's crate can write one entry that every table reads:
 
 ```rust
-delegate_components! {
-    App {
-        open ConverterComponent;
-
-        // The shorter key matches every path beneath it, `@ConverterComponent.u8.u64` included.
-        @ConverterComponent.u8: ConvertFromU8,
-        @ConverterComponent.u8.u64: ConvertU8ToU64,
-    }
+pub trait InTable<Table> {
+    type Value;
 }
-// error[E0119]: conflicting implementations of trait
-//               `DelegateComponent<PathCons<ConverterComponent, PathCons<u8, PathCons<u64, _>>>>`
-//               for type `App`
-```
 
-The table has no rule that the most specific entry wins, so each lookup must have exactly one key that
-matches it. A generic segment, such as `<Target> Target` in a key's last position, likewise matches
-every type there.
-
-## Nested tables and namespaces
-
-An entry's value can be another table. An [aggregate provider](./aggregate-providers.md) is a table
-declared with `new` and used as a provider: a context delegates a group of components to it, and each
-lookup reads the context's entry, then the aggregate's entry for the same component. The context
-stays the same throughout, so the provider at the end still receives the original context. The `->`
-operator in `delegate_components!` similarly forwards one key to the same key's entry in another
-table.
-
-A [namespace](./namespaces.md) is a table written from the other side. In `DelegateComponent<Key>`,
-the table is the implementing type, so only the crate that owns the table, usually the context, can
-add an entry for a foreign key. A namespace entry instead implements the namespace trait for the key,
-with the table left as a parameter. A component registered under a path with
-[`#[prefix]`](/docs/reference/attributes/prefix), here `#[prefix(@app in AppNamespace)]`, produces an
-implementation like this one, shown with a readable name for the table parameter. Its value routes
-the lookup down the component's path:
-
-```rust
-impl<Table> AppNamespace<Table> for GreeterComponent {
-    type Delegate = RedirectLookup<Table, Path!(@app.GreeterComponent)>;
+impl<Table> InTable<Table> for MyKey {
+    type Value = MyValue;
 }
 ```
 
-Because this implementation is for the component marker, the crate that defines the component can
-register its route in a namespace that it does not own, for every context that later joins.
-Registered defaults follow the same orphan rule more narrowly:
-[`#[default_impl]`](/docs/reference/attributes/default_impl) needs the crate to own the namespace, or a
-local type before the table parameter, such as the key or a component named in the namespace path.
+`MyKey` is local and comes first in this implementation, so the orphan rules accept it for every
+`Table`. The table is written from the key's side.
 
-A context joins a namespace with `namespace AppNamespace;`, which adds one blanket entry that forwards
-every key the namespace answers. A direct entry for a key the namespace already binds overlaps that
-blanket entry and fails with `E0119`, which is why a shared namespace leaves open the paths its
-contexts choose differently. A `for … in` loop in `delegate_components!` copies registered defaults
-into a context's table.
+## The tables in CGP
 
-## Other tables
+CGP's wiring is built from these pieces under other names. Each item below links the page that shows
+it at work:
 
-The same shape appears elsewhere in CGP:
-
-- **Fields:** [`HasField<Tag>`](/docs/reference/traits/field-access/has_field) is a table on a struct,
-  keyed by a field's name as a type, whose value is the field's type, together with a method that
-  reads the field.
-- **Abstract types:** [`UseDelegatedType`](/docs/reference/providers/use_delegated_type) answers an
-  abstract type from a `DelegateComponent` table keyed by the type's tag.
-- **Checks:** [`CanUseComponent`](/docs/reference/traits/wiring/can_use_component) requires both an
-  entry and a provider that can serve the context.
+- **`HasEntry<Key>`** is [`DelegateComponent<Key>`](/docs/reference/traits/wiring/delegate_component),
+  with the context as the table and a component as the key.
+  [`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
+  entry.
+- **`Forward<Table, Key>`** is the provider blanket implementation that a component generates: it
+  reads the context's entry for the component and asks the provider it finds there.
+  [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
+  follows a call through it.
+- **`Lookup<Table>`** is the legacy [`UseDelegate`](/docs/reference/providers/use_delegate), so the
+  outer table whose entry is a `Lookup` has the shape of a per-type dispatch table. An
+  [aggregate provider](./aggregate-providers.md) is the case where the entry is another table, asked
+  about the same key.
+- **`Redirect<Table, Prefix>`** is [`RedirectLookup`](/docs/reference/providers/redirect_lookup),
+  behind the `open` statement and [namespaces](./namespaces.md#presets-and-per-type-dispatch). Its
+  keys are type-level paths, whose last position is generic, so a shorter path covers every longer
+  one beneath it.
+- **`InTable<Table>`** is the shape of a [namespace](./namespaces.md#registering-from-the-components-side)
+  entry, which a component's crate writes from the key's side.
 
 ## What it costs
 
-A table cannot express a preference. Every overlap is an error, whether between two entries, a short
-path and a longer one, or a namespace's binding and a context's own entry. A shared table therefore
-has to leave open the entries that contexts choose differently, and changing that design later can
-affect every context that uses it.
+A table cannot express a preference. Every overlap is an error, whether between two entries or
+between a generic entry and a specific one, so a table cannot hold a default beside the cases that
+override it.
 
-Each lookup is a trait obligation, which the compiler proves rather than evaluates. A provider that
-needs the very instance it is defining, such as a serializer for a recursive type that serializes its
-tail through the context, overflows the trait solver with `E0275`. The usual workaround, and its
-relation to the Rust project's work on cyclic impls, is in
-[Rust's own proposals](/docs/comparisons/rust-language-proposals#the-context-as-a-dictionary).
+Each lookup is a trait obligation, which the compiler proves rather than evaluates. A lookup that
+needs its own answer overflows the trait solver. A table whose entry is a `Forward` back to the same
+table and key, for example, fails with `E0275`: "overflow evaluating the requirement
+`Forward<Loop, FooKey>: HasStaticString<FooKey>`". CGP meets the same limit with recursive types, and
+[Rust's own proposals](/docs/comparisons/rust-language-proposals#the-context-as-a-dictionary)
+describes the workaround.
 
-An entry by itself checks nothing about its provider, so a missing requirement surfaces only when code
-uses the component or a check forces it. When a check fails, the error can name path and symbol types
-such as `PathCons<…>` and `Symbol<…>`. `cargo cgp expand` prints them in the `Path!` and `Symbol!`
-notation used here, and [`cargo cgp check`](/docs/tooling/cargo-cgp/check) leads with the root cause
-for the classes it recognizes, though it does not yet reshape every class.
-
-The table is also fixed when the program compiles. It cannot be listed, inspected, or changed while the
-program runs, and each lookup adds work for the compiler.
+The table is also fixed when the program compiles. Unlike its `HashMap` counterpart, it cannot be
+listed, iterated, or changed while the program runs, and each lookup adds work for the compiler.
 
 ## Where to go next
 
-These pages build on the table, explain its checks, and specify its constructs:
+These pages show the same tables in CGP's wiring:
 
-- [Consumer and provider traits](./consumer-and-provider-traits.md): The trait split the wiring table
-  connects.
-- [Checking your wiring](./check-traits.md): How `IsProviderFor` lets a check name a missing requirement.
-- [Aggregate providers](./aggregate-providers.md) and [Namespaces](./namespaces.md): Tables shared
-  between contexts.
+- [Consumer and provider traits](./consumer-and-provider-traits.md): How a call reaches its provider
+  through a context's table.
+- [Aggregate providers](./aggregate-providers.md): A table used as a provider and shared between
+  contexts.
+- [Namespaces](./namespaces.md): Tables written from the key's side, and path keys.
 - [`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) and
   [`delegate_components!`](/docs/reference/macros/delegate_components): The table trait and the macro
   that writes it.
 - [`RedirectLookup`](/docs/reference/providers/redirect_lookup),
   [`UseDelegate`](/docs/reference/providers/use_delegate), [`Path!`](/docs/reference/macros/path), and
-  [`DefaultNamespace`](/docs/reference/traits/namespace/default_namespace): Path, nested, and namespace
-  lookups.
+  [`PathCons`](/docs/reference/types/path_cons): Path keys and nested tables.
 - [Comparison: Rust's own proposals](/docs/comparisons/rust-language-proposals): The context as a
   dictionary of providers, and the cycles it cannot yet express.
-- [Comparison: Dynamic dispatch](/docs/comparisons/dynamic-dispatch): A compile-time table beside a
-  runtime vtable.
-- In practice: [Dispatch layers](/docs/projects/cgp-examples/expression/architecture/dispatch-layers),
-  the expression interpreter's provider written for a concrete context.
 
 ---
 

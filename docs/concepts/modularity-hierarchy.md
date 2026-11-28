@@ -216,7 +216,7 @@ delegate_components! {
 owning either context can supply that wiring even when it owns neither the component nor `String`.
 Ownership of the context satisfies Rust's rules for the wiring implementation. The `open` statement
 turns the value type into part of the lookup key, as
-[Type-level tables](./type-level-tables.md#paths-as-keys) explains.
+[Namespaces](./namespaces.md#presets-and-per-type-dispatch) explains.
 
 Making the value a parameter enables these independent application choices. A self-targeted
 trait cannot gain that separation through wiring alone, because its interface still treats the

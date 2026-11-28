@@ -97,7 +97,8 @@ pub mod writing_a_check_trait {
 /// The provider trait with its `IsProviderFor` supertrait, the generated shape the section shows,
 /// written by hand: a provider must implement the marker to implement the trait, and a check through
 /// `CanUseComponent` reaches the provider's requirements through the table entry. The full trace,
-/// with the table-reading blanket impl, is in `type_level_tables::the_hidden_requirement`.
+/// with the table-reading blanket impl, is in
+/// `consumer_and_provider_traits::how_a_call_finds_its_provider`.
 pub mod the_isproviderfor_marker {
     use cgp::core::component::IsProviderFor;
 
