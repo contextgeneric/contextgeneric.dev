@@ -12,11 +12,11 @@ context's wiring records which implementation it selects for each component. Tha
 table, but not one the running program holds. It is a set of trait implementations that the
 compiler looks up while it checks types.
 
-This page shows how a trait can hold such a table, in plain Rust and without any CGP. Each
-type-level step returns a `&'static str`, so you can compare it with the ordinary value-level code it
-mirrors, written with a global `HashMap`. The tables here are plain types, not contexts. Each
-section ends by naming the CGP construct built on its operation, with a link to the page that shows
-it at work.
+This page shows how a trait can hold such a table, in plain Rust and without any CGP. Its tables
+are plain types rather than contexts, and each lookup returns a `&'static str`, so you can set it
+beside the ordinary value-level code it mirrors, written with a global `HashMap`. Each section then
+ends by naming the CGP construct built on its operation, with a link to the page that shows it at
+work.
 
 ## A table and its entries
 
@@ -92,15 +92,17 @@ assert_eq!(my_table_foo_value(), "Bar");
 
 [`LazyLock`](https://doc.rust-lang.org/std/sync/struct.LazyLock.html) builds the map the first time it
 is read, because a `static` needs a constant initializer and inserting into a `HashMap` is not
-constant. The value-level `get_foo_value` receives its table as an argument, while the type-level one
-receives it as the type parameter `Table`, and in both versions `my_table_foo_value` passes the
-global table.
+constant.
+
+The two versions pass their table the same way. The value-level `get_foo_value` receives it as an
+argument, where the type-level one receives it as the type parameter `Table`, and in both,
+`my_table_foo_value` passes the global table in.
 
 The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()` reads whichever entry its
 caller names, as a value-level function would take the key as a second argument.
 
 In CGP, this trait is [`DelegateComponent<Key>`](/docs/reference/traits/wiring/delegate_component),
-whose associated type is named `Delegate`, with a context as the table and a component as the key.
+with a context as the table and a component as the key. Its associated type is named `Delegate`.
 [`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
 entry.
 
@@ -153,9 +155,9 @@ impl HasEntry<Vec<u8>> for MyTable {
 The compiler resolves every lookup while it checks types, so the compiled program contains no table
 and never consults one.
 
-CGP's wiring tables follow the same rules, and the
+CGP's wiring tables follow the same rules. The
 [common mistakes on `DelegateComponent`](/docs/reference/traits/wiring/delegate_component#common-mistakes)
-show the errors for a missing entry and a duplicate one.
+show the errors that a missing entry and a duplicate entry produce there.
 
 ## A lookup as a type
 
@@ -268,8 +270,9 @@ assert_eq!(forward(&OUTER_TABLE, "InnerKey", "FooKey"), "Bar");
 In CGP, the provider blanket implementation that every component generates works as a `Forward`: it
 reads the context's entry for the component and asks the provider it finds there, as the
 call trace on [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
-shows. An entry whose value is a `UseDelegate` has the shape of `OuterTable`'s `Lookup` entry,
-and an [aggregate provider](./aggregate-providers.md) is an entry whose value is another table,
+shows. Two kinds of CGP entry have the nested shape as well. An entry whose value is a
+`UseDelegate` looks like `OuterTable`'s `Lookup` entry, and an
+[aggregate provider](./aggregate-providers.md) is an entry whose value is another table, which is
 asked about the same key.
 
 ## Composite keys
@@ -377,7 +380,7 @@ impl<Table> InTable<Table> for MyKey {
 ```
 
 `MyKey` is local and comes first in this implementation, so the orphan rules accept it for every
-`Table`. The table is written from the key's side.
+`Table`. In other words, the table is now written from the key's side.
 
 In CGP, a [namespace](./namespaces.md#registering-from-the-components-side) entry has the shape of
 `InTable`, which lets a component's crate register its route in a namespace that it does not own.

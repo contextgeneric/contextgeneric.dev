@@ -87,11 +87,11 @@ shows how a path is looked up as a single key.
 
 ## Registering from the component's side
 
-A namespace is a table written from the other side. In a context's own wiring table, the context is
-the implementing type, so only the crate that owns the context can add an entry for a key it does
-not own. A namespace entry instead implements the namespace trait for the key, with the table left
-as a parameter. The greeter's `#[prefix(@app in AppNamespace)]` produces an implementation like this
-one, shown with a readable name for the table parameter:
+A namespace is a table written from the key's side rather than the table's. In a context's own
+wiring table, the context is the implementing type, so only the crate that owns the context can add
+an entry for a key it does not own. A namespace entry instead implements the namespace trait for the
+key, with the table left as a parameter. The greeter's `#[prefix(@app in AppNamespace)]` produces
+an implementation like this one, shown with a readable name for the table parameter:
 
 ```rust
 impl<Table> AppNamespace<Table> for GreeterComponent {
