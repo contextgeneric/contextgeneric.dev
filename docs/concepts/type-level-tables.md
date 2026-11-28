@@ -13,7 +13,7 @@ table, but not one the running program holds. It is a set of trait implementatio
 compiler looks up while it checks types.
 
 This page shows how a trait can hold such a table, in plain Rust and without any CGP. Its tables
-are plain types rather than contexts, and each lookup returns a `&'static str`, so you can set it
+are plain types rather than contexts, and each lookup returns a `&'static str`, so you can set each one
 beside the ordinary value-level code it mirrors, written with a global `HashMap`. Each section then
 ends by naming the CGP construct built on its operation, with a link to the page that shows it at
 work.
@@ -68,7 +68,7 @@ entry for `FooKey`, and `Table::Value` names the value stored there. That short 
 [`type_name`](https://doc.rust-lang.org/std/any/fn.type_name.html), which returns the type's full path
 rather than the bare name `Bar`. That is why the test compares the result with `type_name::<Bar>()`.
 
-The same lookup at the value level is an ordinary map from strings to strings. A type-level table
+At the value level, the same table is an ordinary map from strings to strings. A type-level table
 is global: the program has one set of its entries, and any function can read them. Its value-level
 counterpart is therefore a `static`:
 
@@ -95,14 +95,14 @@ is read, because a `static` needs a constant initializer and inserting into a `H
 constant.
 
 The two versions pass their table the same way. The value-level `get_foo_value` receives it as an
-argument, where the type-level one receives it as the type parameter `Table`, and in both,
+argument, while the type-level one receives it as the type parameter `Table`, and in both,
 `my_table_foo_value` passes the global table in.
 
 The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()` reads whichever entry its
 caller names, as a value-level function would take the key as a second argument.
 
 In CGP, this trait is [`DelegateComponent<Key>`](/docs/reference/traits/wiring/delegate_component),
-with a context as the table and a component as the key. Its associated type is named `Delegate`.
+with a context as the table and a component as the key. Its associated type is named `Delegate`, and
 [`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
 entry.
 
@@ -124,8 +124,8 @@ impl HasEntry<FooKey> for MyTable {
 }
 ```
 
-A missing key fails at compile time as well. Asking a table that has no `FooKey` entry for one
-does not compile:
+A missing key fails at compile time as well. Asking for `FooKey` in a table without that entry does
+not compile:
 
 ```rust
 pub struct OtherTable;
@@ -249,8 +249,8 @@ The outer table's entry for `InnerKey` is `Lookup<MyTable>`, so `Forward<OuterTa
 answers `FooKey` by reading `MyTable`. Each step is its own bound in the `where` clause, and the
 compiler proves both.
 
-At the value level, the same shape is a global map whose values refer to other global maps, as the
-entry `Lookup<MyTable>` names `MyTable` rather than copying it:
+At the value level, the same shape is a global map whose values refer to other global maps, just as
+the entry `Lookup<MyTable>` names `MyTable` rather than copying it:
 
 ```rust
 static OUTER_TABLE: LazyLock<HashMap<&'static str, &'static HashMap<&'static str, &'static str>>> =
@@ -340,8 +340,8 @@ impl<Key> HasEntry<(FooKey, Key)> for MyTable {
 
 In CGP, [`RedirectLookup`](/docs/reference/providers/redirect_lookup) works as a `Redirect` whose keys
 are type-level paths, and the `open` statement routes a component to it.
-[Namespaces](./namespaces.md#presets-and-per-type-dispatch) shows its path entries, which end in a
-generic tail, so a shorter path covers every longer one beneath it.
+[Namespaces](./namespaces.md#presets-and-per-type-dispatch) shows the path entries it reads, which end
+in a generic tail, so a shorter path covers every longer one beneath it.
 
 ## Entry ownership
 
@@ -406,7 +406,7 @@ impl HasEntry<FooKey> for Loop {
 <Forward<Loop, FooKey> as HasStaticString<FooKey>>::static_string();
 ```
 
-CGP meets the same limit with recursive types, and
+CGP meets the same limit with recursive types.
 [Rust's own proposals](/docs/comparisons/rust-language-proposals#the-context-as-a-dictionary)
 describes the workaround.
 

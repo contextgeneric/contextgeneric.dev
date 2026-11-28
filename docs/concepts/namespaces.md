@@ -107,9 +107,9 @@ namespace, or a local type before the table parameter, such as the key or a comp
 namespace path.
 
 Joining works from the context's side again. `namespace AppNamespace;` adds one blanket entry to the
-context's table that forwards every key the namespace answers, which is why a direct entry for a key
-the namespace binds overlaps it, as [Overriding a bound entry](#overriding-a-bound-entry) shows. A
-`for … in` loop in `delegate_components!` copies registered defaults into a context's table.
+context's table that forwards every key the namespace answers. A direct entry for a key the namespace
+binds therefore overlaps that blanket entry, as [Overriding a bound entry](#overriding-a-bound-entry)
+shows. A `for … in` loop in `delegate_components!` copies registered defaults into a context's table.
 
 ## Binding shared choices
 
