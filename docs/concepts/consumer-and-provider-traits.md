@@ -218,15 +218,19 @@ throughout, so the final provider receives the same application value on which t
 the method.
 
 The other bound, [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), is the checking
-bound omitted from the earlier `StorageObjectFetcher` declaration. Provider macros generate it with each
-provider's bounds, and [Checking your wiring](./check-traits.md#the-isproviderfor-marker) explains how a
-check uses it to name a missing requirement. [Type-level tables](./type-level-tables.md) shows, in plain
-Rust, how a trait with an associated type works as a table the compiler looks up.
+bound omitted from the earlier `StorageObjectFetcher` declaration. Provider macros generate it with
+each provider's bounds, and
+[Checking your wiring](./check-traits.md#the-isproviderfor-marker) explains how a check uses it to
+name a missing requirement.
 
 The listings use shorter names to keep this connection readable. In an actual expansion, the
 parameters are `__Context__` and `__Provider__`, and the delegate is spelled as
 `<__Provider__ as DelegateComponent<StorageObjectFetcherComponent>>::Delegate`. You can inspect the
 full expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
+
+The table these implementations read is an ordinary use of Rust's trait system: a trait whose
+associated type names a value for each key. [Type-level tables](./type-level-tables.md) shows that
+mechanism in plain Rust, beside the value-level map it mirrors.
 
 ## Writing a component
 

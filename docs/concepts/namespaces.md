@@ -13,8 +13,8 @@ contexts can inherit. It organizes component lookups under paths, allowing a sha
 the choices its contexts have in common and leave other destinations for each context to fill. The
 distinction matters: a context can fill an unbound path, but it cannot replace an inherited binding.
 
-This page starts from repeated wiring, follows a lookup along its path, shows why a bound entry
-cannot be overridden, and ends with presets and per-type dispatch.
+This page starts from repeated wiring, follows a lookup along its path and the registration behind
+it, shows why a bound entry cannot be overridden, and ends with presets and per-type dispatch.
 
 ## Repeated wiring
 
@@ -106,15 +106,16 @@ narrowly: [`#[default_impl]`](/docs/reference/attributes/default_impl) needs the
 namespace, or a local type before the table parameter, such as the key or a component named in the
 namespace path.
 
-Joining turns the direction around again. `namespace AppNamespace;` adds one blanket entry to the
+Joining works from the context's side again. `namespace AppNamespace;` adds one blanket entry to the
 context's table that forwards every key the namespace answers, which is why a direct entry for a key
 the namespace binds overlaps it, as [Overriding a bound entry](#overriding-a-bound-entry) shows. A
 `for … in` loop in `delegate_components!` copies registered defaults into a context's table.
 
 ## Binding shared choices
 
-A child namespace can inherit routes and bind the choices its contexts share. Assume `Farewell`
-is registered in `AppNamespace` at `@app.FarewellComponent`, just as the greeter is registered above:
+A child namespace can inherit routes and bind the choices its contexts share. Assume `Farewell` is
+registered with `#[prefix(@app in AppNamespace)]`, as the greeter is above, so its route is
+`@app.FarewellComponent`:
 
 ```rust
 cgp_namespace! {
@@ -201,7 +202,7 @@ provider for `String`. This uses path routing without requiring a shared namespa
 component has a namespace prefix, however, its lookups already follow that prefixed route. Entries
 must use the full path, because opening its bare name does not reach them.
 
-Each of these keys is a path. The `open` statement routes the component to
+Each `@` key in such a table is a path. The `open` statement routes the component to
 [`RedirectLookup`](/docs/reference/providers/redirect_lookup), a provider that every component
 already has. It appends each of the component's type parameters to the path and looks the whole path
 up in the context's table, in one query. A path entry ends in a generic tail, so a key matches every
@@ -223,9 +224,9 @@ delegate_components! {
 //               for type `App`
 ```
 
-The table has no rule that the most specific entry wins, so each lookup must have exactly one key that
-matches it. A generic segment, such as `<Target> Target` in a key's last position, likewise matches
-every type there.
+The table has no rule that the most specific entry wins, so each lookup must have exactly one key
+that matches it. A generic segment, such as `<Target> Target` in a key's last position, likewise
+matches every type there.
 
 ## What it costs
 

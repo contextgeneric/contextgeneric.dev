@@ -94,9 +94,10 @@ assert_eq!(my_table_foo_value(), "Bar");
 is read, because a `static` needs a constant initializer and inserting into a `HashMap` is not
 constant. The value-level `get_foo_value` receives its table as an argument, while the type-level one
 receives it as the type parameter `Table`, and in both versions `my_table_foo_value` passes the
-global table. The key can be a parameter too:
-`get_value<Table: HasEntry<Key>, Key>()` reads whichever entry its caller names, as a value-level
-function would take the key as a second argument.
+global table.
+
+The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()` reads whichever entry its
+caller names, as a value-level function would take the key as a second argument.
 
 ## Duplicate and missing keys
 
@@ -126,8 +127,8 @@ pub struct OtherTable;
 get_foo_value::<OtherTable>();
 ```
 
-The `HashMap` version finds the same mistake only when the program runs, where `table["FooKey"]`
-panics and `table.get("FooKey")` returns `None`.
+The `HashMap` version finds the same mistake only when the program runs: indexing a map that lacks
+the key panics, and `get` returns `None`.
 
 Keys can be generic, and a generic key covers every type it matches. An entry for every `Vec<T>`
 therefore overlaps an entry for `Vec<u8>`, and the compiler rejects the pair rather than choosing the
@@ -286,7 +287,7 @@ projection in full to show which key the bound names, although `Table::Value` wo
 since one bound supplies it.
 
 At the value level, the key is a tuple of strings. A `HashMap` has a single key type, so the pairs
-live in a second global map, where the type-level `MyTable` holds both kinds of key:
+live in a second global map, while the type-level `MyTable` holds both kinds of key:
 
 ```rust
 static MY_PAIR_TABLE: LazyLock<HashMap<(&'static str, &'static str), &'static str>> =
@@ -334,13 +335,16 @@ that defines `HasEntry`, `impl<Table> HasEntry<MyKey> for Table` fails with `E02
 `Table` must be covered by another type when it appears before the first local type (`MyKey`)".
 
 Turning the trait around removes that limit. When the key implements the trait and the table is its
-parameter, the key's crate can write one entry that every table reads:
+parameter, the key's crate can write one entry that every table reads, even though the trait comes
+from the other crate:
 
 ```rust
+// In the crate that defines `HasEntry`:
 pub trait InTable<Table> {
     type Value;
 }
 
+// In the crate that owns `MyKey`:
 impl<Table> InTable<Table> for MyKey {
     type Value = MyValue;
 }
@@ -362,14 +366,15 @@ it at work:
   reads the context's entry for the component and asks the provider it finds there.
   [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
   follows a call through it.
-- **`Lookup<Table>`** is the legacy [`UseDelegate`](/docs/reference/providers/use_delegate), so the
-  outer table whose entry is a `Lookup` has the shape of a per-type dispatch table. An
+- **`Lookup<Table>`** is the legacy [`UseDelegate`](/docs/reference/providers/use_delegate), so
+  *Nested tables*' `OuterTable`, whose entry is a `Lookup`, has the shape of a context wired to a
+  per-type dispatch table. An
   [aggregate provider](./aggregate-providers.md) is the case where the entry is another table, asked
   about the same key.
 - **`Redirect<Table, Prefix>`** is [`RedirectLookup`](/docs/reference/providers/redirect_lookup),
   behind the `open` statement and [namespaces](./namespaces.md#presets-and-per-type-dispatch). Its
-  keys are type-level paths, whose last position is generic, so a shorter path covers every longer
-  one beneath it.
+  table's entries are keyed by type-level paths that end in a generic tail, so a shorter path covers
+  every longer one beneath it.
 - **`InTable<Table>`** is the shape of a [namespace](./namespaces.md#registering-from-the-components-side)
   entry, which a component's crate writes from the key's side.
 
