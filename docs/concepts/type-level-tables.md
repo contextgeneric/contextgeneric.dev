@@ -14,9 +14,9 @@ compiler looks up while it checks types.
 
 This page shows how a trait can hold such a table, in plain Rust and without any CGP. Each
 type-level step returns a `&'static str`, so you can compare it with the ordinary value-level code it
-mirrors, written with a global `HashMap`. The tables here are plain types, not contexts. A short
-section near the end maps the pieces onto the traits CGP uses, and the pages it links show those
-traits at work.
+mirrors, written with a global `HashMap`. The tables here are plain types, not contexts. Each
+section ends by naming the CGP construct built on its operation, with a link to the page that shows
+it at work.
 
 ## A table and its entries
 
@@ -99,6 +99,11 @@ global table.
 The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()` reads whichever entry its
 caller names, as a value-level function would take the key as a second argument.
 
+In CGP, this trait is [`DelegateComponent<Key>`](/docs/reference/traits/wiring/delegate_component),
+with a context as the table and a component as the key, and
+[`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
+entry.
+
 ## Duplicate and missing keys
 
 [Coherence](/docs/reference/glossary#coherence), Rust's rule that a trait has at most one
@@ -148,6 +153,10 @@ impl HasEntry<Vec<u8>> for MyTable {
 The compiler resolves every lookup while it checks types, so the compiled program contains no table
 and never consults one.
 
+CGP's wiring tables follow the same rules, and the
+[common mistakes on `DelegateComponent`](/docs/reference/traits/wiring/delegate_component#common-mistakes)
+show the errors for a missing entry and a duplicate one.
+
 ## A lookup as a type
 
 A type can also answer a question by reading a table it is given. The trait `HasStaticString<Key>`
@@ -194,6 +203,10 @@ fn lookup(table: &HashMap<&'static str, &'static str>, key: &str) -> &'static st
 
 assert_eq!(lookup(&MY_TABLE, "BarKey"), "Baz");
 ```
+
+In CGP, the legacy [`UseDelegate`](/docs/reference/providers/use_delegate) is such a type: a provider
+that reads the table it is given, keyed by the component's type parameter that `#[derive_delegate]`
+names.
 
 ## Nested tables
 
@@ -250,6 +263,13 @@ fn forward(
 
 assert_eq!(forward(&OUTER_TABLE, "InnerKey", "FooKey"), "Bar");
 ```
+
+In CGP, the provider blanket implementation that every component generates works as a `Forward`: it
+reads the context's entry for the component and asks the provider it finds there, as
+[Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
+follows. An entry whose value is a `UseDelegate` has the shape of `OuterTable`'s `Lookup` entry,
+and an [aggregate provider](./aggregate-providers.md) is an entry whose value is another table,
+asked about the same key.
 
 ## Composite keys
 
@@ -314,6 +334,11 @@ impl<Key> HasEntry<(FooKey, Key)> for MyTable {
 }
 ```
 
+In CGP, [`RedirectLookup`](/docs/reference/providers/redirect_lookup) works as a `Redirect` whose keys
+are type-level paths, and it is what the `open` statement routes a component to.
+[Namespaces](./namespaces.md#presets-and-per-type-dispatch) shows its path entries, which end in a
+generic tail, so a shorter path covers every longer one beneath it.
+
 ## Entry ownership
 
 Rust's [orphan rules](https://doc.rust-lang.org/reference/items/implementations.html#orphan-rules)
@@ -353,30 +378,8 @@ impl<Table> InTable<Table> for MyKey {
 `MyKey` is local and comes first in this implementation, so the orphan rules accept it for every
 `Table`. The table is written from the key's side.
 
-## The tables in CGP
-
-CGP's wiring is built from these pieces under other names. Each item below links the page that shows
-it at work:
-
-- **`HasEntry<Key>`** is [`DelegateComponent<Key>`](/docs/reference/traits/wiring/delegate_component),
-  with the context as the table and a component as the key.
-  [`delegate_components!`](/docs/reference/macros/delegate_components) writes one implementation per
-  entry.
-- **`Forward<Table, Key>`** is the provider blanket implementation that a component generates: it
-  reads the context's entry for the component and asks the provider it finds there.
-  [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
-  follows a call through it.
-- **`Lookup<Table>`** is the legacy [`UseDelegate`](/docs/reference/providers/use_delegate), so
-  *Nested tables*' `OuterTable`, whose entry is a `Lookup`, has the shape of a context wired to a
-  per-type dispatch table. An
-  [aggregate provider](./aggregate-providers.md) is the case where the entry is another table, asked
-  about the same key.
-- **`Redirect<Table, Prefix>`** is [`RedirectLookup`](/docs/reference/providers/redirect_lookup),
-  behind the `open` statement and [namespaces](./namespaces.md#presets-and-per-type-dispatch). Its
-  table's entries are keyed by type-level paths that end in a generic tail, so a shorter path covers
-  every longer one beneath it.
-- **`InTable<Table>`** is the shape of a [namespace](./namespaces.md#registering-from-the-components-side)
-  entry, which a component's crate writes from the key's side.
+In CGP, a [namespace](./namespaces.md#registering-from-the-components-side) entry has the shape of
+`InTable`, which lets a component's crate register its route in a namespace that it does not own.
 
 ## What it costs
 
