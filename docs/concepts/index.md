@@ -25,8 +25,7 @@ Choose an entry point for the question you want answered:
 - **Why does CGP exist?** [Bypassing coherence](./coherence.md) explains how Rust keeps trait
   implementations unambiguous and how CGP allows reusable alternatives within those rules.
 - **How does CGP work?** [Consumer and provider traits](./consumer-and-provider-traits.md) explains
-  the split between the trait callers use and the trait providers implement, and
-  [Type-level tables](./type-level-tables.md) follows a method call through the table that connects them.
+  the split between the trait callers use and the trait providers implement, then traces a method call.
 - **Should I use CGP?** [Modularity Hierarchy](./modularity-hierarchy.md) compares ordinary traits,
   blanket implementations, and wired components so you can choose what your problem requires.
 

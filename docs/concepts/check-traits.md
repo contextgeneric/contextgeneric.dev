@@ -162,12 +162,12 @@ pub trait StorageObjectFetcher<Context>:
 
 The wiring passes the marker along as well. `delegate_components!` writes an `IsProviderFor`
 implementation beside each table entry, which holds for the context exactly when it holds for the
-chosen provider, and the generated implementation that reads the table requires it, as
-[Type-level tables](./type-level-tables.md#the-hidden-requirement) shows. So when the check asks
-whether `BrokenApp` can use the component, the compiler follows the entry to `FetchLocalObject` and
-evaluates that provider's requirements, which the marker states explicitly, and it can report the
-`HasField` bound that failed. The macros generate every `IsProviderFor` implementation, so code never
-writes one by hand.
+chosen provider, and the generated implementation that reads the table requires it, as the call
+trace on [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
+shows. So when the check asks whether `BrokenApp` can use the component, the compiler follows the
+entry to `FetchLocalObject` and evaluates that provider's requirements, which the marker states
+explicitly, and it can report the `HasField` bound that failed. The macros generate every
+`IsProviderFor` implementation, so code never writes one by hand.
 
 ## Reading the errors with cargo-cgp
 
@@ -264,7 +264,8 @@ These pages explain the dependencies being checked and the available check forms
 
 - [Impl-side dependencies](./impl-side-dependencies.md): Why provider requirements can be absent from
   the caller's interface.
-- [Type-level tables](./type-level-tables.md): The wiring table a check follows to the chosen provider.
+- [Consumer and provider traits](./consumer-and-provider-traits.md): The wiring table a check follows
+  to the chosen provider.
 - [Higher-order providers](./higher-order-providers.md): Composing providers and checking their layers.
 - [Aggregate providers](./aggregate-providers.md): Verifying shared wiring against a real context.
 - [`check_components!`](/docs/reference/macros/check_components): Component parameters and

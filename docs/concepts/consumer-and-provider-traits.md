@@ -13,9 +13,8 @@ component connects callers to implementations through two related traits. Caller
 the **provider trait** to supply those methods through separate provider types. The context chooses
 a provider through wiring, so implementations can vary while callers keep the same interface.
 
-This page follows the connection between the two traits, from a method call through the wiring
-table to the chosen provider, and leaves the table's own mechanism to
-[Type-level tables](./type-level-tables.md). It then shows how the macros produce those
+This page follows the connection between the two traits, from a method call through the generated
+forwarding implementations to the chosen provider. It then shows how the macros produce those
 connections, where application state lives, and what the separation costs.
 
 ## Ordinary Rust traits
@@ -83,7 +82,7 @@ The provider trait moves the consumer's `Self` into a `Context` parameter. Its m
 the context as an explicit argument, leaving the implementing type free to name the behavior.
 
 The signatures below show the split. They omit a generated checking bound on the provider trait,
-which [Checking your wiring](./check-traits.md) explains:
+which the call trace below names:
 
 ```rust
 // what callers use
@@ -174,12 +173,60 @@ When a caller writes `app.fetch_storage_object("alice.png")`, the compiler follo
 to `FetchS3Object` and checks whether that provider can work with `App`. Because this is static
 dispatch, the running program needs neither a wiring table nor a provider lookup.
 
-The table itself is made of trait implementations. Each entry implements
-[`DelegateComponent`](/docs/reference/traits/wiring/delegate_component) for the context, keyed by the
-component, and the implementations that `#[cgp_component]` generates read that entry, so `App` gains
-`CanFetchStorageObject` through `FetchS3Object` while the context stays `App` throughout.
-[Type-level tables](./type-level-tables.md) explains how a trait works as such a table and follows
-this call through the generated implementations step by step.
+To see how method syntax reaches that selection, consider the two generated blanket
+implementations. The consumer implementation supplies `CanFetchStorageObject` whenever the context
+implements `StorageObjectFetcher` for itself:
+
+```rust
+impl<Context> CanFetchStorageObject for Context
+where
+    Context: StorageObjectFetcher<Context>,
+{
+    fn fetch_storage_object(&self, object_id: &str) -> anyhow::Result<Vec<u8>> {
+        Context::fetch_storage_object(self, object_id)
+    }
+}
+```
+
+Satisfying `Context: StorageObjectFetcher<Context>` leads to the second implementation. It
+gives a delegating type the provider trait of the type selected by its table. Here,
+`DelegateComponent` represents the table entry, and its `Delegate` associated type names the
+selected provider:
+
+```rust
+impl<Context, Provider> StorageObjectFetcher<Context> for Provider
+where
+    Provider: DelegateComponent<StorageObjectFetcherComponent>
+        + IsProviderFor<StorageObjectFetcherComponent, Context, ()>,
+    Provider::Delegate: StorageObjectFetcher<Context>,
+{
+    fn fetch_storage_object(
+        context: &Context,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>> {
+        Provider::Delegate::fetch_storage_object(context, object_id)
+    }
+}
+```
+
+For the call on `App`, both `Context` and `Provider` initially stand for `App`. In this
+implementation, `Provider` names the type whose table is consulted, so its `Delegate` is
+`FetchS3Object`. As long as `FetchS3Object` implements `StorageObjectFetcher<App>`, the delegation
+gives `App` its own `StorageObjectFetcher<App>` implementation, which in turn supplies
+`CanFetchStorageObject` through the first blanket implementation. The context stays `App`
+throughout, so the final provider receives the same application value on which the caller invoked
+the method.
+
+The other bound, [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), is the checking
+bound omitted from the earlier `StorageObjectFetcher` declaration. Provider macros generate it with each
+provider's bounds, and [Checking your wiring](./check-traits.md#the-isproviderfor-marker) explains how a
+check uses it to name a missing requirement. [Type-level tables](./type-level-tables.md) shows, in plain
+Rust, how a trait with an associated type works as a table the compiler looks up.
+
+The listings use shorter names to keep this connection readable. In an actual expansion, the
+parameters are `__Context__` and `__Provider__`, and the delegate is spelled as
+`<__Provider__ as DelegateComponent<StorageObjectFetcherComponent>>::Delegate`. You can inspect the
+full expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
 
 ## Writing a component
 
@@ -296,8 +343,8 @@ and the choices each context must make. These pages develop those ideas and show
 model in practice:
 
 - [Bypassing coherence](./coherence.md): Why distinct provider types permit reusable alternatives.
-- [Type-level tables](./type-level-tables.md): How a call reaches its provider through the wiring
-  table.
+- [Type-level tables](./type-level-tables.md): How a trait works as a compile-time table, in plain
+  Rust.
 - [Checking your wiring](./check-traits.md): The checking bound on the provider trait, and how a check
   uses it.
 - [Impl-side dependencies](./impl-side-dependencies.md): How a provider states requirements without
