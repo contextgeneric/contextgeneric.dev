@@ -1,7 +1,7 @@
 //! Code from `docs/concepts/type-level-tables.md` — *Look up a type in a type-level table*.
 //!
 //! Module names follow the page's headings. Each type-level step has a test, and each value-level
-//! counterpart the page shows is a test beside it. The page uses no CGP, so neither does this file.
+//! counterpart the page shows, reading a global `static` table, is a test beside it. The page uses no CGP, so neither does this file.
 //! Rejected code lives in trybuild fixtures, except the cross-crate `E0210` and the `E0275` cycle,
 //! which the page states in prose; the campaign's probe captured both messages.
 
@@ -9,6 +9,7 @@
 pub mod a_table_and_its_entries {
     use core::any::type_name;
     use std::collections::HashMap;
+    use std::sync::LazyLock;
 
     pub trait HasEntry<Key> {
         type Value;
@@ -54,13 +55,16 @@ pub mod a_table_and_its_entries {
         table["FooKey"]
     }
 
-    pub fn my_table_twin() -> HashMap<&'static str, &'static str> {
-        HashMap::from([("FooKey", "Bar"), ("BarKey", "Baz")])
+    pub static MY_TABLE: LazyLock<HashMap<&'static str, &'static str>> =
+        LazyLock::new(|| HashMap::from([("FooKey", "Bar"), ("BarKey", "Baz")]));
+
+    pub fn my_table_foo_value_twin() -> &'static str {
+        get_foo_value_twin(&MY_TABLE)
     }
 
     #[test]
     fn the_value_level_map_answers_the_same_key() {
-        assert_eq!(get_foo_value_twin(&my_table_twin()), "Bar");
+        assert_eq!(my_table_foo_value_twin(), "Bar");
     }
 }
 
@@ -72,12 +76,12 @@ pub mod a_table_and_its_entries {
 /// `tests/compile_fail/concepts/type_level_tables_duplicate_and_missing_keys_1.rs` (a second entry),
 /// `_2.rs` (a missing key), and `_3.rs` (a generic key overlapping a specific one).
 pub mod duplicate_and_missing_keys {
-    use super::a_table_and_its_entries::my_table_twin;
+    use super::a_table_and_its_entries::MY_TABLE;
 
     /// The value-level map finds a missing key only at runtime.
     #[test]
     fn the_value_level_map_misses_at_runtime() {
-        assert_eq!(my_table_twin().get("OtherKey"), None);
+        assert_eq!(MY_TABLE.get("OtherKey"), None);
     }
 }
 
@@ -87,7 +91,7 @@ pub mod a_lookup_as_a_type {
     use core::marker::PhantomData;
     use std::collections::HashMap;
 
-    use super::a_table_and_its_entries::{my_table_twin, Bar, Baz, BarKey, FooKey, HasEntry, MyTable};
+    use super::a_table_and_its_entries::{Bar, BarKey, Baz, FooKey, HasEntry, MyTable, MY_TABLE};
 
     pub trait HasStaticString<Key> {
         fn static_string() -> &'static str;
@@ -122,7 +126,7 @@ pub mod a_lookup_as_a_type {
 
     #[test]
     fn the_value_level_lookup_takes_both_arguments() {
-        assert_eq!(lookup(&my_table_twin(), "BarKey"), "Baz");
+        assert_eq!(lookup(&MY_TABLE, "BarKey"), "Baz");
     }
 }
 
@@ -131,9 +135,10 @@ pub mod nested_tables {
     use core::any::type_name;
     use core::marker::PhantomData;
     use std::collections::HashMap;
+    use std::sync::LazyLock;
 
     use super::a_lookup_as_a_type::{HasStaticString, Lookup};
-    use super::a_table_and_its_entries::{my_table_twin, Bar, FooKey, HasEntry, MyTable};
+    use super::a_table_and_its_entries::{Bar, FooKey, HasEntry, MyTable, MY_TABLE};
 
     pub struct Forward<Table, KeyB>(pub PhantomData<(Table, KeyB)>);
 
@@ -162,8 +167,11 @@ pub mod nested_tables {
         );
     }
 
+    pub static OUTER_TABLE: LazyLock<HashMap<&'static str, &'static HashMap<&'static str, &'static str>>> =
+        LazyLock::new(|| HashMap::from([("InnerKey", &*MY_TABLE)]));
+
     pub fn forward(
-        outer: &HashMap<&'static str, HashMap<&'static str, &'static str>>,
+        outer: &HashMap<&'static str, &'static HashMap<&'static str, &'static str>>,
         key_b: &str,
         key_a: &str,
     ) -> &'static str {
@@ -172,9 +180,7 @@ pub mod nested_tables {
 
     #[test]
     fn the_value_level_map_of_maps() {
-        let my_table = my_table_twin();
-        let outer = HashMap::from([("InnerKey", my_table.clone())]);
-        assert_eq!(forward(&outer, "InnerKey", "FooKey"), "Bar");
+        assert_eq!(forward(&OUTER_TABLE, "InnerKey", "FooKey"), "Bar");
     }
 }
 
@@ -187,6 +193,7 @@ pub mod composite_keys {
     use core::any::type_name;
     use core::marker::PhantomData;
     use std::collections::HashMap;
+    use std::sync::LazyLock;
 
     use super::a_lookup_as_a_type::HasStaticString;
     use super::a_table_and_its_entries::{BarKey, Baz, FooKey, HasEntry, MyTable};
@@ -214,6 +221,9 @@ pub mod composite_keys {
         );
     }
 
+    pub static MY_PAIR_TABLE: LazyLock<HashMap<(&'static str, &'static str), &'static str>> =
+        LazyLock::new(|| HashMap::from([(("FooKey", "BarKey"), "Baz")]));
+
     pub fn redirect(
         table: &HashMap<(&'static str, &'static str), &'static str>,
         prefix: &'static str,
@@ -224,8 +234,7 @@ pub mod composite_keys {
 
     #[test]
     fn the_value_level_map_keyed_by_pairs() {
-        let pairs = HashMap::from([(("FooKey", "BarKey"), "Baz")]);
-        assert_eq!(redirect(&pairs, "FooKey", "BarKey"), "Baz");
+        assert_eq!(redirect(&MY_PAIR_TABLE, "FooKey", "BarKey"), "Baz");
     }
 }
 

@@ -14,9 +14,9 @@ compiler looks up while it checks types.
 
 This page shows how a trait can hold such a table, in plain Rust and without any CGP. Each
 type-level step returns a `&'static str`, so you can compare it with the ordinary value-level code it
-mirrors, written with a `HashMap`. The tables here are plain types, not contexts. A short section
-near the end maps the pieces onto the traits CGP uses, and the pages it links show those traits at
-work.
+mirrors, written with a global `HashMap`. The tables here are plain types, not contexts. A short
+section near the end maps the pieces onto the traits CGP uses, and the pages it links show those
+traits at work.
 
 ## A table and its entries
 
@@ -68,23 +68,35 @@ entry for `FooKey`, and `Table::Value` names the value stored there. That short 
 [`type_name`](https://doc.rust-lang.org/std/any/fn.type_name.html), which returns the type's full path
 rather than the bare name `Bar`. That is why the test compares the result with `type_name::<Bar>()`.
 
-The same lookup at the value level is an ordinary map from strings to strings:
+The same lookup at the value level is an ordinary map from strings to strings. A type-level table
+is global: the program has one set of its entries, and any function can read them. Its value-level
+counterpart is therefore a `static`:
 
 ```rust
 use std::collections::HashMap;
+use std::sync::LazyLock;
+
+static MY_TABLE: LazyLock<HashMap<&'static str, &'static str>> =
+    LazyLock::new(|| HashMap::from([("FooKey", "Bar"), ("BarKey", "Baz")]));
 
 fn get_foo_value(table: &HashMap<&'static str, &'static str>) -> &'static str {
     table["FooKey"]
 }
 
-let my_table = HashMap::from([("FooKey", "Bar"), ("BarKey", "Baz")]);
-assert_eq!(get_foo_value(&my_table), "Bar");
+fn my_table_foo_value() -> &'static str {
+    get_foo_value(&MY_TABLE)
+}
+
+assert_eq!(my_table_foo_value(), "Bar");
 ```
 
-The value-level function receives its table as an argument, while the type-level one receives it as
-the type parameter `Table`. The key can be a parameter too: `get_value<Table: HasEntry<Key>, Key>()`
-reads whichever entry its caller names, as a value-level function would take the key as a second
-argument.
+[`LazyLock`](https://doc.rust-lang.org/std/sync/struct.LazyLock.html) builds the map the first time it
+is read, because a `static` needs a constant initializer and inserting into a `HashMap` is not
+constant. The value-level `get_foo_value` receives its table as an argument, while the type-level one
+receives it as the type parameter `Table`, and in both versions `my_table_foo_value` passes the
+global table. The key can be a parameter too:
+`get_value<Table: HasEntry<Key>, Key>()` reads whichever entry its caller names, as a value-level
+function would take the key as a second argument.
 
 ## Duplicate and missing keys
 
@@ -179,7 +191,7 @@ fn lookup(table: &HashMap<&'static str, &'static str>, key: &str) -> &'static st
     table[key]
 }
 
-assert_eq!(lookup(&my_table, "BarKey"), "Baz");
+assert_eq!(lookup(&MY_TABLE, "BarKey"), "Baz");
 ```
 
 ## Nested tables
@@ -220,19 +232,22 @@ The outer table's entry for `InnerKey` is `Lookup<MyTable>`, so `Forward<OuterTa
 answers `FooKey` by reading `MyTable`. Each step is its own bound in the `where` clause, and the
 compiler proves both.
 
-At the value level, the same shape is a map of maps:
+At the value level, the same shape is a global map whose values refer to other global maps, as the
+entry `Lookup<MyTable>` names `MyTable` rather than copying it:
 
 ```rust
+static OUTER_TABLE: LazyLock<HashMap<&'static str, &'static HashMap<&'static str, &'static str>>> =
+    LazyLock::new(|| HashMap::from([("InnerKey", &*MY_TABLE)]));
+
 fn forward(
-    outer: &HashMap<&'static str, HashMap<&'static str, &'static str>>,
+    outer: &HashMap<&'static str, &'static HashMap<&'static str, &'static str>>,
     key_b: &str,
     key_a: &str,
 ) -> &'static str {
     outer[key_b][key_a]
 }
 
-let outer = HashMap::from([("InnerKey", my_table.clone())]);
-assert_eq!(forward(&outer, "InnerKey", "FooKey"), "Bar");
+assert_eq!(forward(&OUTER_TABLE, "InnerKey", "FooKey"), "Bar");
 ```
 
 ## Composite keys
@@ -270,9 +285,13 @@ question, so asking it about `BarKey` reads the entry for `(FooKey, BarKey)`. Th
 projection in full to show which key the bound names, although `Table::Value` would also compile here,
 since one bound supplies it.
 
-At the value level, the key is a tuple of strings:
+At the value level, the key is a tuple of strings. A `HashMap` has a single key type, so the pairs
+live in a second global map, where the type-level `MyTable` holds both kinds of key:
 
 ```rust
+static MY_PAIR_TABLE: LazyLock<HashMap<(&'static str, &'static str), &'static str>> =
+    LazyLock::new(|| HashMap::from([(("FooKey", "BarKey"), "Baz")]));
+
 fn redirect(
     table: &HashMap<(&'static str, &'static str), &'static str>,
     prefix: &'static str,
@@ -281,8 +300,7 @@ fn redirect(
     table[&(prefix, key)]
 }
 
-let pairs = HashMap::from([(("FooKey", "BarKey"), "Baz")]);
-assert_eq!(redirect(&pairs, "FooKey", "BarKey"), "Baz");
+assert_eq!(redirect(&MY_PAIR_TABLE, "FooKey", "BarKey"), "Baz");
 ```
 
 A generic position in a composite key matches every type there, as a generic key did. An entry for
