@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `HasEntry<(FooKey, BarKey)>` for type `MyTable`
+  --> tests/compile_fail/concepts/type_level_tables_composite_keys.rs:19:1
+   |
+14 | impl HasEntry<(FooKey, BarKey)> for MyTable {
+   | ------------------------------------------- first implementation here
+...
+19 | impl<Key> HasEntry<(FooKey, Key)> for MyTable {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `MyTable`

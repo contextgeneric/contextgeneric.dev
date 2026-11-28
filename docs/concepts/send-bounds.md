@@ -1,7 +1,7 @@
 ---
 title: 'Recover a Send bound from an async trait method'
 sidebar_label: 'Recovering Send bounds'
-sidebar_position: 17
+sidebar_position: 18
 description: 'How a companion trait exposes a sendable future when an async CGP method leaves Send open, and why the forwarding implementation needs a concrete context.'
 ---
 

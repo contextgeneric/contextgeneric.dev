@@ -1,7 +1,7 @@
 ---
 title: 'When to use CGP, and when a plain trait is enough'
 sidebar_label: 'Modularity Hierarchy'
-sidebar_position: 18
+sidebar_position: 19
 description: 'How implementation choice grows from a shared blanket impl to providers selected per context and target, and how to pick the least complex tier your program needs.'
 ---
 
@@ -214,12 +214,16 @@ delegate_components! {
 
 `ApiServer` encodes a `String` as text, while `Firmware` encodes its bytes as hexadecimal. A crate
 owning either context can supply that wiring even when it owns neither the component nor `String`.
-Ownership of the context satisfies Rust's rules for the wiring implementation.
+Ownership of the context satisfies Rust's rules for the wiring implementation. The `open` statement
+turns the value type into part of the lookup key, as
+[Namespaces](./namespaces.md#presets-and-per-type-dispatch) explains.
 
 Making the value a parameter enables these independent application choices. A self-targeted
 trait cannot gain that separation through wiring alone, because its interface still treats the
 context as the value. With the parameter-targeted interface, each context must cover the target
-types it uses, although generic entries can supply providers for whole families of targets.
+types it uses, although generic entries can supply providers for whole families of targets. The
+parameter also has to be in the trait from the start: it cannot be retrofitted onto an existing
+trait such as `serde::Serialize` without a breaking change.
 
 ## Tier 5: an inner provider chosen locally
 

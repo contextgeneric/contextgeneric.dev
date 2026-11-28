@@ -323,6 +323,8 @@ not it.
 
 The ideas behind it:
 
+- [Type-level tables](/docs/concepts/type-level-tables): the plain-Rust table this trait is, beside the
+  value-level map it mirrors.
 - [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits): the split this table
   connects.
 - [Bypassing coherence](/docs/concepts/coherence): why the choice is recorded per context at all.

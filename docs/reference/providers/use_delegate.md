@@ -209,6 +209,7 @@ differently.
 
 The ideas behind it:
 
+- [Type-level tables](/docs/concepts/type-level-tables) — a nested table read in two steps, in plain Rust.
 - [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) — the delegation table
   this reuses, keyed on a type parameter rather than a component name.
 

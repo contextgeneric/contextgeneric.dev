@@ -1,7 +1,7 @@
 ---
 title: 'Route fields and variants to their handlers'
 sidebar_label: 'Dispatching'
-sidebar_position: 15
+sidebar_position: 16
 description: 'How a dispatcher routes record fields and enum variants to the providers that process them, and how the compiler checks coverage and completeness.'
 ---
 

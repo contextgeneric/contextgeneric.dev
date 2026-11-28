@@ -96,7 +96,7 @@ pub mod path_lookups {
     cgp_namespace! { new AppNamespace {} }
 
     #[cgp_component(Greeter)]
-    #[prefix(@app.GreeterComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanGreet {
         fn greet(&self) -> String;
     }
@@ -129,6 +129,52 @@ pub mod path_lookups {
     }
 }
 
+/// ## Registering from the component's side
+///
+/// A component registers its route in a namespace from the key's side with `#[prefix]`, and a
+/// context that joins the namespace binds the provider at that path. The page's listing of the
+/// registration impl is generated code; `cargo cgp expand` shows it, and this module checks that the
+/// arrangement it describes resolves.
+pub mod registering_from_the_components_side {
+    use cgp::prelude::*;
+
+    cgp_namespace! { new AppNamespace {} }
+
+    #[cgp_component(Greeter)]
+    #[prefix(@app in AppNamespace)]
+    pub trait CanGreet {
+        fn greet(&self) -> String;
+    }
+
+    #[cgp_impl(new GreetHello)]
+    impl Greeter {
+        fn greet(&self) -> String {
+            "Hello!".to_owned()
+        }
+    }
+
+    pub struct App;
+
+    delegate_components! {
+        App {
+            namespace AppNamespace;
+
+            @app.GreeterComponent: GreetHello,
+        }
+    }
+
+    check_components! {
+        App {
+            GreeterComponent,
+        }
+    }
+
+    #[test]
+    fn the_route_reaches_the_bound_provider() {
+        assert_eq!(App.greet(), "Hello!");
+    }
+}
+
 /// ## Binding shared choices
 ///
 /// The preset shape. `AppDefaults` binds the leaf every context agrees on and leaves the varying
@@ -139,13 +185,13 @@ pub mod binding_shared_choices {
     cgp_namespace! { new AppNamespace {} }
 
     #[cgp_component(Greeter)]
-    #[prefix(@app.GreeterComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanGreet {
         fn greet(&self) -> String;
     }
 
     #[cgp_component(Farewell)]
-    #[prefix(@app.FarewellComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanSayGoodbye {
         fn goodbye(&self) -> String;
     }
@@ -240,13 +286,13 @@ pub mod one_namespace_per_configuration {
     cgp_namespace! { new AppNamespace {} }
 
     #[cgp_component(Greeter)]
-    #[prefix(@app.GreeterComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanGreet {
         fn greet(&self) -> String;
     }
 
     #[cgp_component(Farewell)]
-    #[prefix(@app.FarewellComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanSayGoodbye {
         fn goodbye(&self) -> String;
     }
@@ -324,3 +370,10 @@ pub mod one_namespace_per_configuration {
         assert_eq!(App.goodbye(), "Goodbye!");
     }
 }
+
+/// ## Presets and per-type dispatch
+///
+/// A shorter path key and a longer key beneath it overlap:
+///
+/// Rejected snippet — trybuild fixture `tests/compile_fail/concepts/namespaces_presets_and_per_type_dispatch.rs`.
+pub mod presets_and_per_type_dispatch {}

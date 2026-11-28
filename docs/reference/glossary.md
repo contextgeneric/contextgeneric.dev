@@ -104,6 +104,7 @@ a concrete type, so a context selects among them at compile time.
 An entry in a wiring table, mapping one component to the provider that supplies it. Delegating a
 component does not by itself check that the provider's dependencies hold; a check trait does that.
 
+[Type-level tables](/docs/concepts/type-level-tables) ·
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) ·
 [`DelegateComponent`](./traits/wiring/delegate_component.md)
 
@@ -287,6 +288,7 @@ The type-level table on a context recording which provider supplies each compone
 resolves it during type checking, so a wired call compiles to a direct call without a runtime
 lookup.
 
+[Type-level tables](/docs/concepts/type-level-tables) ·
 [Consumer and provider traits](/docs/concepts/consumer-and-provider-traits) ·
 [`delegate_components!`](./macros/delegate_components.md)
 

@@ -82,7 +82,7 @@ The provider trait moves the consumer's `Self` into a `Context` parameter. Its m
 the context as an explicit argument, leaving the implementing type free to name the behavior.
 
 The signatures below show the split. They omit a generated checking bound on the provider trait,
-which the call trace explains later:
+which the call trace below names:
 
 ```rust
 // what callers use
@@ -217,17 +217,20 @@ gives `App` its own `StorageObjectFetcher<App>` implementation, which in turn su
 throughout, so the final provider receives the same application value on which the caller invoked
 the method.
 
-The other bound, [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), helps check
-that the provider's dependencies hold. Provider macros generate an implementation of this trait
-with the provider's bounds, and the provider trait requires it as a
-[supertrait](/docs/reference/glossary#supertrait). This is the checking bound omitted from the
-earlier `StorageObjectFetcher` declaration. Explicit component checks use it to expose missing
-requirements that a consumer-trait error can hide.
+The other bound, [`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), is the checking
+bound omitted from the earlier `StorageObjectFetcher` declaration. Provider macros generate it with
+each provider's bounds, and
+[Checking your wiring](./check-traits.md#the-isproviderfor-marker) explains how a check uses it to
+name a missing requirement.
 
 The listings use shorter names to keep this connection readable. In an actual expansion, the
 parameters are `__Context__` and `__Provider__`, and the delegate is spelled as
 `<__Provider__ as DelegateComponent<StorageObjectFetcherComponent>>::Delegate`. You can inspect the
 full expansion of a concrete component with [`cargo cgp expand`](/docs/tooling/cargo-cgp/expand).
+
+The table these implementations read is an ordinary use of Rust's trait system: a trait whose
+associated type names a value for each key. [Type-level tables](./type-level-tables.md) shows that
+mechanism in plain Rust, beside the value-level map it mirrors.
 
 ## Writing a component
 
@@ -344,6 +347,10 @@ and the choices each context must make. These pages develop those ideas and show
 model in practice:
 
 - [Bypassing coherence](./coherence.md): Why distinct provider types permit reusable alternatives.
+- [Type-level tables](./type-level-tables.md): How a trait works as a compile-time table, in plain
+  Rust.
+- [Checking your wiring](./check-traits.md): The checking bound on the provider trait, and how a check
+  uses it.
 - [Impl-side dependencies](./impl-side-dependencies.md): How a provider states requirements without
   adding them to the caller's interface.
 - [Area calculation tutorial](/docs/tutorials/area-calculation/): Building the same split from plain

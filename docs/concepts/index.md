@@ -47,6 +47,8 @@ on them and where that additional structure is useful:
   separate provider types let alternative implementations coexist.
 - [Consumer and provider traits](./consumer-and-provider-traits.md): How the trait split and wiring
   connect a method call to a provider.
+- [Type-level tables](./type-level-tables.md): How a trait with an associated type works as a
+  compile-time map, in plain Rust.
 - [Modularity Hierarchy](./modularity-hierarchy.md): How to choose how much of CGP a program needs.
 
 ### Dependencies

@@ -1,6 +1,6 @@
 ---
 sidebar_label: 'Policy-based design'
-sidebar_position: 2
+sidebar_position: 12
 description: 'Compare Context-Generic Programming providers and wiring with C++ policy classes, host templates, CRTP, and concepts.'
 ---
 

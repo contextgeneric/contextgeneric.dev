@@ -312,6 +312,17 @@ what a computation does; a coeffect describes what it requires from its environm
 [Petricek's coeffects work](https://tomasp.net/coeffects/) develops that distinction. CGP's field
 and trait requirements suggest such a comparison, but CGP does not implement a coeffect calculus.
 
+CGP's requirements point toward the coeffect side. A provider's trait and field requirements state
+what it needs from its context, rather than operations it performs for an enclosing handler to
+interpret, and the context carries both the implementation choices and the values that satisfy them.
+Those requirements are resolved all at once, when a concrete context is defined: once its wiring is
+complete, the code runs with fixed implementations, much as a computation returns a pure value once
+all its effects are handled. The same wiring also chooses types, as
+[Configuring abstract types through the same wiring](#configuring-abstract-types-through-the-same-wiring)
+shows, while the effect handlers compared on this page pass operations and values rather than types.
+This describes how requirements flow into CGP code, not a formal correspondence with a coeffect
+calculus.
+
 ## What each approach costs
 
 Effect handlers separate operation use from interpretation and support reusable control-flow

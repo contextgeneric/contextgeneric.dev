@@ -1,7 +1,7 @@
 ---
 title: 'Reuse a group of wiring choices as one provider'
 sidebar_label: 'Aggregate providers'
-sidebar_position: 8
+sidebar_position: 9
 description: 'How a provider bundle records a group of wiring choices once, why a context delegates to it, and why a bundle must be checked through a real context.'
 ---
 
@@ -68,6 +68,8 @@ the provider's requirements.
 The same delegation can continue through another bundle. At each step, the compiler follows the
 next table while keeping the original context argument, until it reaches the provider that performs
 the work. It resolves that chain at compile time, so adding a bundle does not add a runtime lookup.
+[Type-level tables](./type-level-tables.md#nested-tables) shows, in plain Rust, how a lookup reads
+one table and then another.
 
 ## Checking a bundle as a context
 
@@ -157,6 +159,7 @@ still need to use the intended context.
 These pages explain related wiring choices and checks:
 
 - [Namespaces](./namespaces.md): Sharing tables through paths and inheritance.
+- [Type-level tables](./type-level-tables.md): The lookups a bundle chains together.
 - [Consumer and provider traits](./consumer-and-provider-traits.md): How delegation preserves the context.
 - [Checking your wiring](./check-traits.md): Context checks and checks on individual providers.
 - [`delegate_components!`](/docs/reference/macros/delegate_components): The `new` and grouped-key forms.

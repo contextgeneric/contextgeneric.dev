@@ -1,0 +1,8 @@
+error[E0119]: conflicting implementations of trait `HasEntry<FooKey>` for type `MyTable`
+  --> tests/compile_fail/concepts/type_level_tables_duplicate_and_missing_keys_1.rs:17:1
+   |
+12 | impl HasEntry<FooKey> for MyTable {
+   | --------------------------------- first implementation here
+...
+17 | impl HasEntry<FooKey> for MyTable {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ conflicting implementation for `MyTable`

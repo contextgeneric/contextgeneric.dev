@@ -1,7 +1,7 @@
 ---
 title: 'Check wiring where the choice is written'
 sidebar_label: 'Checking your wiring'
-sidebar_position: 6
+sidebar_position: 7
 description: 'How check traits and check_components! verify a context wiring beside the table, what the raw and rewritten diagnostics show, and what a check does not prove.'
 ---
 
@@ -135,6 +135,40 @@ implementation. The cause is closer to the surface, but the field tags still app
 character types, leaving `local_dir` and `bucket_id` difficult to recognize. The headline also
 refers to the generated `CanUseComponent` bound rather than the public trait.
 
+## The `IsProviderFor` marker
+
+The note at the end of that error names
+[`IsProviderFor`](/docs/reference/traits/wiring/is_provider_for), the trait that lets a check reach
+the missing field. It is an empty marker trait whose job is to carry each provider's requirements.
+The provider macros implement it for every provider with the same bounds as the provider's own
+implementation. `FetchLocalObject` reads a `local_dir` field through an implicit argument, so it
+implements `IsProviderFor<StorageObjectFetcherComponent, BrokenApp>` only if `BrokenApp` has that
+field.
+
+Every provider trait requires the marker as a [supertrait](/docs/reference/glossary#supertrait). It is
+the checking bound that the trait signatures on
+[Consumer and provider traits](./consumer-and-provider-traits.md) leave out:
+
+```rust
+pub trait StorageObjectFetcher<Context>:
+    IsProviderFor<StorageObjectFetcherComponent, Context, ()>
+{
+    fn fetch_storage_object(
+        context: &Context,
+        object_id: &str,
+    ) -> anyhow::Result<Vec<u8>>;
+}
+```
+
+The wiring passes the marker along as well. `delegate_components!` writes an `IsProviderFor`
+implementation beside each table entry, which holds for the context exactly when it holds for the
+chosen provider, and the generated implementation that reads the table requires it, as the call
+trace on [Consumer and provider traits](./consumer-and-provider-traits.md#how-a-call-finds-its-provider)
+shows. So when the check asks whether `BrokenApp` can use the component, the compiler follows the
+entry to `FetchLocalObject` and evaluates that provider's requirements, which the marker states
+explicitly, and it can report the `HasField` bound that failed. The macros generate every
+`IsProviderFor` implementation, so code never writes one by hand.
+
 ## Reading the errors with cargo-cgp
 
 [`cargo cgp check`](/docs/tooling/cargo-cgp/check) rewrites recognized CGP diagnostics
@@ -230,6 +264,8 @@ These pages explain the dependencies being checked and the available check forms
 
 - [Impl-side dependencies](./impl-side-dependencies.md): Why provider requirements can be absent from
   the caller's interface.
+- [Consumer and provider traits](./consumer-and-provider-traits.md): The wiring table a check follows
+  to the chosen provider.
 - [Higher-order providers](./higher-order-providers.md): Composing providers and checking their layers.
 - [Aggregate providers](./aggregate-providers.md): Verifying shared wiring against a real context.
 - [`check_components!`](/docs/reference/macros/check_components): Component parameters and

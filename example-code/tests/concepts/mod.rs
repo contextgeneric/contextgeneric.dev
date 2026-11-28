@@ -1,6 +1,6 @@
 //! Code from the pages under `docs/concepts/`, one module per page.
 //!
-//! All eighteen pages of that section are written, and the ones that show code have a module here.
+//! All nineteen pages of that section are written, and the ones that show code have a module here.
 //! The section index shows none, so it has no module.
 
 pub mod abstract_types;
@@ -21,3 +21,4 @@ pub mod monadic_handlers;
 pub mod namespaces;
 pub mod send_bounds;
 pub mod type_level_dsls;
+pub mod type_level_tables;

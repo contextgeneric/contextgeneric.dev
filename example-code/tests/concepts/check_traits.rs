@@ -92,6 +92,39 @@ pub mod writing_a_check_trait {
     }
 }
 
+/// ## The `IsProviderFor` marker
+///
+/// The provider trait with its `IsProviderFor` supertrait, the generated shape the section shows,
+/// written by hand: a provider must implement the marker to implement the trait, and a check through
+/// `CanUseComponent` reaches the provider's requirements through the table entry. The full trace,
+/// with the table-reading blanket impl, is in
+/// `consumer_and_provider_traits::how_a_call_finds_its_provider`.
+pub mod the_isproviderfor_marker {
+    use cgp::core::component::IsProviderFor;
+
+    pub struct StorageObjectFetcherComponent;
+
+    pub trait StorageObjectFetcher<Context>:
+        IsProviderFor<StorageObjectFetcherComponent, Context, ()>
+    {
+        fn fetch_storage_object(
+            context: &Context,
+            object_id: &str,
+        ) -> anyhow::Result<Vec<u8>>;
+    }
+
+    pub struct FetchLocalObject;
+
+    // The provider macros generate this with the provider's own bounds; here it has none.
+    impl<Context> IsProviderFor<StorageObjectFetcherComponent, Context, ()> for FetchLocalObject {}
+
+    impl<Context> StorageObjectFetcher<Context> for FetchLocalObject {
+        fn fetch_storage_object(context: &Context, object_id: &str) -> anyhow::Result<Vec<u8>> {
+            Ok(Vec::new())
+        }
+    }
+}
+
 /// ## Checking each provider layer
 ///
 /// `#[check_providers]` asserts against each provider rather than against the context, so a broken

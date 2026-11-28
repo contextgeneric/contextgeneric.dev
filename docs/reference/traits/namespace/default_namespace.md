@@ -245,6 +245,7 @@ type takes the `Self` position instead. The inconsistency is the family's sharpe
 
 The ideas behind it:
 
+- [Type-level tables](/docs/concepts/type-level-tables): a namespace as a table written from the key's side.
 - [Namespaces](/docs/concepts/namespaces): reusable, inheritable wiring tables and preset-style
   configuration.
 

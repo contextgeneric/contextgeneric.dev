@@ -127,13 +127,13 @@ pub mod namespaces_and_inheritance {
     cgp_namespace! { new AppNamespace {} }
 
     #[cgp_component(Greeter)]
-    #[prefix(@app.GreeterComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanGreet {
         fn greet(&self) -> String;
     }
 
     #[cgp_component(Farewell)]
-    #[prefix(@app.FarewellComponent in AppNamespace)]
+    #[prefix(@app in AppNamespace)]
     pub trait CanSayGoodbye {
         fn goodbye(&self) -> String;
     }

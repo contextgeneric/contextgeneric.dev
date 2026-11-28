@@ -198,7 +198,8 @@ delegate_components! { Vec<u8> { EncoderComponent: EncodeAsHex  } }
 ```
 
 Rust's rule still holds, but the choice now lives in the wiring: coherence is scoped to each
-provider type, and each value type names one of them.
+provider type, and each value type names one of them. The table itself is a set of trait
+implementations the compiler looks up, which [Type-level tables](./type-level-tables.md) explains.
 
 ![Diagram: both blanket impls match String, so Rust rejects the second with E0119. CGP gives each encoder its own provider type, so String is wired to EncodeAsText and Vec of bytes to EncodeAsHex, and both impls coexist while each value type names one provider.](/img/coherence-scoped.svg)
 
@@ -252,6 +253,7 @@ with related approaches:
 - [Modularity Hierarchy](./modularity-hierarchy.md): When a plain trait is enough and when further
   provider choices are useful.
 - [Consumer and provider traits](./consumer-and-provider-traits.md): How a method call reaches its provider.
+- [Type-level tables](./type-level-tables.md): How the wiring table works as a compile-time map.
 - [Hello World tutorial](/docs/tutorials/hello) and
   [Area calculation series](/docs/tutorials/area-calculation/): Working examples of the component model.
 - [`#[cgp_component]`](/docs/reference/macros/cgp_component),
@@ -260,6 +262,7 @@ with related approaches:
 - [RustLab 2025 talk](/blog/rustlab-2025-coherence): A longer account of coherence and CGP's approach.
 - [Comparison: Type classes](/docs/comparisons/type-classes): How Haskell, Agda, and Lean handle coherence.
 - [Comparison: Rust's own proposals](/docs/comparisons/rust-language-proposals): Changes Rust has considered for its coherence rules.
+- [Comparison: Traits without coherence](/docs/comparisons/traits-without-coherence): How Cairo, Scala, OCaml, and Haskell choose among several impls of one trait.
 
 ---
 

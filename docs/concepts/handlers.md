@@ -1,7 +1,7 @@
 ---
 title: 'Represent a computation as a selectable component'
 sidebar_label: 'Handlers'
-sidebar_position: 11
+sidebar_position: 12
 description: 'How CGP represents computations as components, the synchronous, async, fallible, and borrowed forms, and how a wiring entry composes them into a pipeline.'
 ---
 

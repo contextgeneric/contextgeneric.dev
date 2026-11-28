@@ -1,0 +1,5 @@
+error[E0275]: overflow evaluating the requirement `Forward<Loop, FooKey>: HasStaticString<FooKey>`
+  --> tests/compile_fail/concepts/type_level_tables_what_it_costs.rs:33:5
+   |
+33 |     <Forward<Loop, FooKey> as HasStaticString<FooKey>>::static_string();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
